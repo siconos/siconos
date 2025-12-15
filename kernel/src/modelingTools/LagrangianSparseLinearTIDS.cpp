@@ -23,13 +23,13 @@
 // #define DEBUG_MESSAGES
 #include <iostream>
 
+#include "StorageTools.hpp"
 #include "siconos_debug.h"
 
 siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> q0,
-    Eigen::Ref<siconos::algebra::SiconosVector> v0,
-    const siconos::algebra::SiconosSparseMatrix& newmass)
-    : LagrangianSparseDS(q0, v0) {
+    const siconos::algebra::SiconosVector& q0, const siconos::algebra::SiconosVector& v0,
+    const siconos::algebra::SiconosSparseMatrix& newmass, siconos::algebra::CopyTag)
+    : LagrangianSparseDS(q0, v0, siconos::algebra::copy_t) {
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
@@ -39,8 +39,8 @@ siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
 siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
     Eigen::Ref<siconos::algebra::SiconosVector> q0,
     Eigen::Ref<siconos::algebra::SiconosVector> v0,
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newmass)
-    : LagrangianSparseDS(q0, v0) {
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newmass, siconos::algebra::AliasTag)
+    : LagrangianSparseDS(q0, v0, siconos::algebra::alias_t) {
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
@@ -83,12 +83,12 @@ void siconos::modeling::LagrangianSparseLinearTIDS::initRhs(double time) {
   // by the OneStepIntegrator, and maybe several times for the same DS
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
 
-  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
-  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                               x0_internal_storage_->size());
-  x0_view_->head(ndof_) = *q0_view_;  // COPY !
-  x0_view_->tail(ndof_) = *velocity0_view_;
+  use_x0([&](auto& xinit) {
+    xinit.head(ndof_) = q0();  // COPY !
+    xinit.tail(ndof_) = velocity0();
+  });
 
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_[0], *state_q_[1];
@@ -225,10 +225,9 @@ void siconos::modeling::LagrangianSparseLinearTIDS::computeTotalForces(
       totalForces_->setZero();
   } else
     return;
-
-  if (fext_view_) {
+  if (hasFext_) {
     computeFext(time);
-    *totalForces_ += *fext_view_;
+    use_fext([&](auto const& fext) { *totalForces_ += fext; });
   }
 
   if (hasStiffnessMatrix()) useStiffness([&](const auto& K) { *totalForces_ -= K * q; });

@@ -21,6 +21,7 @@
 #define LAGRANGIANTIDS_H
 
 #include "LagrangianDS.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 
@@ -99,10 +100,21 @@ class LagrangianLinearTIDS : public LagrangianDS {
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
 
   /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::MapType> stiffnessMatrix_view_{nullptr};
+  siconos::algebra::DenseStorage stiffnessMatrix_storage_{std::monostate{}};
+  template <typename F>
+  decltype(auto) useStiffness(F&& f) const {
+    return siconos::algebra::visitStorage(stiffnessMatrix_storage_, std::forward<F>(f),
+                                          "stiffnessMatrix_storage_");
+  }
 
   /** damping matrix */
-  std::shared_ptr<siconos::algebra::MapType> dampingMatrix_view_{nullptr};
+  siconos::algebra::DenseStorage dampingMatrix_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) useDamping(F&& f) const {
+    return siconos::algebra::visitStorage(dampingMatrix_storage_, std::forward<F>(f),
+                                          "dampingMatrix_storage_");
+  }
 
   /** default constructor */
   LagrangianLinearTIDS() = default;  // Used in FiniteElementLinearTIDS
@@ -113,20 +125,49 @@ class LagrangianLinearTIDS : public LagrangianDS {
    *  \param v0 initial velocity
    */
   LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                       Eigen::Ref<siconos::algebra::SiconosVector> v0)
-      : LagrangianDS{q0, v0} {}
+                       Eigen::Ref<siconos::algebra::SiconosVector> v0,
+                       siconos::algebra::AliasTag)
+      : LagrangianDS{q0, v0, siconos::algebra::alias_t} {}
+  LagrangianLinearTIDS(const siconos::algebra::SiconosVector& q0,
+                       const siconos::algebra::SiconosVector& v0, siconos::algebra::CopyTag)
+      : LagrangianDS{q0, v0, siconos::algebra::copy_t} {}
 
  public:
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
+   *  initial state, velocity and mass attributes will be initialised (copied)
+   *  from the input vectors/matrices
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param[in] M mass matrix
+   *  @param[in] tag pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+
    */
-  LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                       Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                       Eigen::Ref<siconos::algebra::SiconosDenseMatrix> M);
+  LagrangianLinearTIDS(const siconos::algebra::SiconosVector& position,
+                       const siconos::algebra::SiconosVector& velocity,
+                       const siconos::algebra::SiconosDenseMatrix& M,
+                       siconos::algebra::CopyTag tag);
+
+  /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
+   *  = F_{ext}(t) + p \f$ .
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for initial position and velocity
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param[in] M mass matrix
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
+   */
+  LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                       Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                       Eigen::Ref<siconos::algebra::SiconosDenseMatrix> M,
+                       siconos::algebra::AliasTag tag);
 
   /** destructor */
   ~LagrangianLinearTIDS() noexcept = default;
@@ -137,35 +178,84 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   void initRhs(double t) override;
 
-  /** set the stiffness matrix. Warning: shared memory with input
+  /** @brief set a constant stiffness matrix for the system
    *
-   *  \param K new stiffness matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   *
    */
-  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> K);
+  void setStiffnessMatrix(const siconos::algebra::SiconosDenseMatrix& newValue,
+                          siconos::algebra::CopyTag tag);
 
-  /** set the damping matrix. Warning: shared memory with input
+  /** @brief set a constant stiffness matrix for the system
    *
-   *  \param C new damping matrix
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
    */
-  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> C);
+  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                          siconos::algebra::AliasTag tag);
+
+  /** @brief set a constant damping matrix for the system
+   *
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   *
+   */
+  void setDampingMatrix(const siconos::algebra::SiconosDenseMatrix& newValue,
+                        siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant damping matrix for the system
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                        siconos::algebra::AliasTag tag);
 
   /** \return a read-only view on the stiffness matrix */
-  inline auto stiffnessMatrix() const {
-    return siconos::algebra::ConstMapType(stiffnessMatrix_view_->data(),
-                                          stiffnessMatrix_view_->rows(),
-                                          stiffnessMatrix_view_->cols());
+  Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> stiffnessMatrix() const {
+    return useStiffness([](auto const& K) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(K);
+    });
   }
 
   /** True if stiffness matrix is defined */
-  bool hasStiffnessMatrix() const { return stiffnessMatrix_view_ != nullptr; }
+  bool hasStiffnessMatrix() const {
+    return !std::holds_alternative<std::monostate>(stiffnessMatrix_storage_);
+  }
 
   /** True if stiffness matrix is defined */
-  bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
+  bool hasDampingMatrix() const {
+    return !std::holds_alternative<std::monostate>(dampingMatrix_storage_);
+  }
 
   /** \return a read-only view on the damping matrix */
-  inline auto dampingMatrix() const {
-    return siconos::algebra::ConstMapType(
-        dampingMatrix_view_->data(), dampingMatrix_view_->rows(), dampingMatrix_view_->cols());
+  Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> dampingMatrix() const {
+    return useDamping([](auto const& C) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(C);
+    });
   }
 
   /** Compute  \f$ F_{total}(v,q,t) = -Kq - Cv + f_{ext}(t)\f$
@@ -174,8 +264,8 @@ class LagrangianLinearTIDS : public LagrangianDS {
    *  \param q state
    *  \param time the current time
    */
-  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
                           double time) override;
 
   /** \return true if the Dynamical system is linear.
@@ -186,7 +276,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   void display(bool brief = true) const override;
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANTIDS_H

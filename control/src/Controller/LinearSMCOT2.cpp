@@ -23,7 +23,6 @@
 #include "FirstOrderLinearDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "TimeDiscretisation.hpp"
 
@@ -75,7 +74,7 @@ void siconos::control::LinearSMCOT2::initialize(
   bpred_.resize(_B->rows());
   bpred_.setZero();
   bpred_ = *_B * *_u;
-  _DSPred->setConstantbVector(bpred_);
+  _DSPred->setConstantbVector(bpred_, siconos::algebra::alias_t);
 
   //  _Xhat= std::make_shared<siconos::algebra::SiconosVector>(_nDim, 0));
   //  _DSPred->setXPtr(_Xhat);

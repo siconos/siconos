@@ -100,7 +100,9 @@ struct FindType {
   auto visit(const siconos::modeling::LagrangianSparseDS&) const {
     return siconos::modeling::Type::LagrangianSparseDS;
   };
-  auto visit(const siconos::modeling::LDSOrig&) const { return siconos::modeling::Type::LDSOrig; };
+  auto visit(const siconos::modeling::LDSOrig&) const {
+    return siconos::modeling::Type::LDSOrig;
+  };
   auto visit(const siconos::modeling::LDSv3&) const { return siconos::modeling::Type::LDSv3; };
   auto visit(const siconos::modeling::LagrangianFullStorageDS&) const {
     return siconos::modeling::Type::LagrangianFullStorageDS;

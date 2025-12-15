@@ -46,8 +46,8 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
    *  \param velocity initial velocity
    */
 
-  SphereLDS(double, double, Eigen::Ref<siconos::algebra::SiconosVector> position,
-            Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+  SphereLDS(double, double, const siconos::algebra::SiconosVector6& position,
+            const siconos::algebra::SiconosVector6& velocity);
 
   ~SphereLDS() noexcept = default;
 

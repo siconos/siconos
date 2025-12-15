@@ -22,6 +22,7 @@
 #include "LsodarOSI.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -41,7 +42,8 @@ void LsodarTest::setUp() {
 
 void LsodarTest::init(bool initDS) {
   if (initDS) {
-    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                  siconos::algebra::alias_t);
   }
 
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
@@ -64,7 +66,8 @@ void LsodarTest::testCstGradTIDS() {
   (*_x0)(0) = 5.;
   (*_x0)(1) = 10;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
 
   init(false);
 
@@ -87,7 +90,8 @@ void LsodarTest::testCstGradDS() {
   (*_x0)(0) = 5.;
   (*_x0)(1) = 10;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
 
   init(false);
 
@@ -110,7 +114,8 @@ void LsodarTest::testCstGradNLDS() {
   (*_x0)(0) = 5.;
   (*_x0)(1) = 10;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*_x0);
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*_x0,
+                                                                   siconos::algebra::alias_t);
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
 
   DSNL.setComputefVectorFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector>& x,

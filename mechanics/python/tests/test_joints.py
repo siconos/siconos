@@ -74,10 +74,10 @@ def test_joints():
     mass = 2.0
     inertia = np.zeros((3, 3), dtype=np.float64, order="F")
     inertia[0, 0] = inertia[1, 1] = inertia[2, 2] = 1.0
-    neds = sm.NewtonEulerDS(q0, twist0, mass, inertia)
+    neds = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
 
     q1 = neds.q()
     q2 = None
     ck.setBasePositions(q1, q2)
-    neds2 = sm.NewtonEulerDS(q0, twist0, mass, inertia)
+    neds2 = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
     cj.setBasePositions(q1, neds2.q())

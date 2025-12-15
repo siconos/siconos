@@ -36,14 +36,14 @@ static void normalize(Eigen::Ref<siconos::algebra::MapVectorType> q, unsigned in
 }  // namespace
 
 siconos::collision::native::bodies::SphereLDS::SphereLDS(
-    double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> qinit,
-    Eigen::Ref<siconos::algebra::SiconosVector> vinit)
-    : siconos::modeling::LagrangianDS{qinit, vinit}, radius_{radius}, massValue_{mass} {
+    double radius, double mass, const siconos::algebra::SiconosVector6& qinit,
+    const siconos::algebra::SiconosVector6& vinit)
+    : siconos::modeling::LagrangianDS{qinit, vinit, siconos::algebra::copy_t},
+      radius_{radius},
+      massValue_{mass} {
   normalize(*q(), 3);
   normalize(*q(), 4);
   normalize(*q(), 5);
-
-  assert(vinit.size() == 6);
 
   inertia_ = massValue_ * radius_ * radius_ * 2. / 5.;
 
@@ -68,17 +68,16 @@ siconos::collision::native::bodies::SphereLDS::SphereLDS(
 
   //   mass_result(4, 5) = mass_result(5, 4) = inertia_ * cos(theta);
   // });
-  mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
-
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
-                                                           ndof_, ndof_);
-  mass_view_->setZero();
+  mass_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(6, 6);
+  use_mass([&](auto& M) {
+    M.setZero();
+    M(0, 0) = M(1, 1) = M(2, 2) = massValue_;
+    M(3, 3) = M(4, 4) = M(5, 5) = inertia_;
+  });
   hasMass_ = true;
-  hasConstantMass_ = false;
+  hasConstantMass_ = true;
+  computemass_ = nullptr;
 
-  mass_view_->setZero();
-  (*mass_view_)(0, 0) = (*mass_view_)(1, 1) = (*mass_view_)(2, 2) = massValue_;
-  (*mass_view_)(3, 3) = (*mass_view_)(4, 4) = (*mass_view_)(5, 5) = inertia_;
   computeMass(*q());
 
   // Set function to compute gyroscopic forces
@@ -164,6 +163,8 @@ void siconos::collision::native::bodies::SphereLDS::computeMass(
   double theta = (*state_q_[0])(3);
 
   assert(fabs(theta) - std::numeric_limits<double>::epsilon() >= 0.);
-
-  (*mass_view_)(4, 5) = (*mass_view_)(5, 4) = inertia_ * cos(theta);
+  use_mass([&](auto& M) {
+    M.setZero();
+    M(4, 5) = M(5, 4) = inertia_ * cos(theta);
+  });
 }

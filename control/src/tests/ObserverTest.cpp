@@ -21,7 +21,6 @@
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
-#include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "LuenbergerObserver.hpp"
 #include "PID.hpp"
@@ -74,8 +73,9 @@ void ObserverTest::setUp() {
 }
 
 void ObserverTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _pid = std::make_shared<siconos::control::PID>(_sensor);
   _pid->setRef(0.0);

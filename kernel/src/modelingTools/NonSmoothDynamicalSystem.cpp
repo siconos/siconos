@@ -21,7 +21,6 @@
 #include "Interaction.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "SimulationGraphs.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"

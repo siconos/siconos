@@ -19,13 +19,11 @@
 #include <pybind11/eigen.h>
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 
 #include <Eigen/Sparse>
 #include <cstddef>
 #include <sstream>
-// #include <functional>
-// #include <memory>
-// #include <span>
 
 #include "FirstOrderLinearDS.hpp"
 #include "FunctionTypes.hpp"
@@ -37,6 +35,7 @@
 #include "NewtonEulerDS.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "eigen2python_pybind11.hpp"
 
 namespace py = pybind11;
@@ -66,7 +65,7 @@ void wrap_dynamical_systems(py::module_& m) {
              std::ostringstream buffer;
              py::scoped_ostream_redirect redirect(std::cout,
                                                   py::module_::import("sys").attr("stdout"));
-             self.display(true);
+             self.display(false);
              return buffer.str();
            })
       .def("__repr__", [](const siconos::modeling::DynamicalSystem& self) {
@@ -81,28 +80,83 @@ void wrap_dynamical_systems(py::module_& m) {
   py::class_<siconos::modeling::FirstOrderNonLinearDS,
              std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>,
              siconos::modeling::DynamicalSystem>(m, "FirstOrderNonLinearDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>>(),
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
-           py::arg("x0"))
-      .def("setConstantMMatrixAlias",
-           &siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix,
-           py::keep_alive<1, 2>(), "To define a constant mass matrix");
+           py::arg("x0"), py::arg("alias_t"))
+      .def(py::init<const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("x0"), py::arg("copy_t"))
+      .def(
+          "setConstantMMatrix",
+          [](siconos::modeling::FirstOrderNonLinearDS& self,
+             const siconos::algebra::SiconosDenseMatrix& v, siconos::algebra::CopyTag tag) {
+            self.setConstantMMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("M"), py::arg("copy_t"), "To define a constant M matrix (copy).")
+
+      .def(
+          "setConstantMMatrix",
+          [](siconos::modeling::FirstOrderNonLinearDS& self,
+             Eigen::Ref<siconos::algebra::SiconosDenseMatrix> v,
+             siconos::algebra::AliasTag tag) {
+            self.setConstantMMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("M"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant M matrix (alias).")
+      .def_property_readonly("MMatrix", &siconos::modeling::FirstOrderNonLinearDS::MMatrix,
+                             "M matrix");
 
   py::class_<siconos::modeling::FirstOrderLinearDS,
              std::shared_ptr<siconos::modeling::FirstOrderLinearDS>,
              siconos::modeling::FirstOrderNonLinearDS>(m, "FirstOrderLinearDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&>(), py::keep_alive<1, 2>(),
-           py::arg("x0"))
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&,
-                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>&,
-                    Eigen::Ref<siconos::algebra::SiconosVector>&>(),
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
+           py::keep_alive<1, 2>(), py::arg("x0"), py::arg("alias_t"))
+      .def(py::init<const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("x0"), py::arg("copy_t"))
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::keep_alive<1, 4>(),
-           py::arg("x0"), py::arg("A"), py::arg("b"))
-      .def("setConstantA", &siconos::modeling::FirstOrderLinearDS::setConstantA,
-           py::keep_alive<1, 2>(), "To define a constant A operator")
-      .def("setConstantbVector", &siconos::modeling::FirstOrderLinearDS::setConstantbVector,
-           py::keep_alive<1, 2>(), "To define a constant b operator")
+           py::arg("x0"), py::arg("A"), py::arg("b"), py::arg("alias_t"))
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosDenseMatrix&,
+                    const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("x0"), py::arg("A"), py::arg("b"), py::arg("copy_t"))
+      .def(
+          "setConstantA",
+          [](siconos::modeling::FirstOrderLinearDS& self,
+             const siconos::algebra::SiconosDenseMatrix& v, siconos::algebra::CopyTag tag) {
+            self.setConstantA(v, siconos::algebra::copy_t);
+          },
+          py::arg("A"), py::arg("copy_t"), "To define a constant A matrix (copy).")
+
+      .def(
+          "setConstantA",
+          [](siconos::modeling::FirstOrderLinearDS& self,
+             Eigen::Ref<siconos::algebra::SiconosDenseMatrix> v,
+             siconos::algebra::AliasTag tag) {
+            self.setConstantA(v, siconos::algebra::alias_t);
+          },
+          py::arg("A"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant A matrix (alias).")
+      .def_property_readonly("A", &siconos::modeling::FirstOrderLinearDS::A, "A matrix")
+
+      .def(
+          "setConstantbVector",
+          [](siconos::modeling::FirstOrderLinearDS& self,
+             const siconos::algebra::SiconosVector& v, siconos::algebra::CopyTag tag) {
+            self.setConstantbVector(v, siconos::algebra::copy_t);
+          },
+          py::arg("b"), py::arg("copy_t"), "Set constant b (copy).")
+
+      .def(
+          "setConstantbVector",
+          [](siconos::modeling::FirstOrderLinearDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setConstantbVector(v, siconos::algebra::alias_t);
+          },
+          py::arg("b"), py::arg("alias_t"), py::keep_alive<1, 2>(), "Set constant b (alias).")
+
       .def(
           "setComputebVectorFunction",
           [](siconos::modeling::FirstOrderLinearDS& self, py::function f) {
@@ -112,7 +166,9 @@ void wrap_dynamical_systems(py::module_& m) {
                   f(val, result);  // Call python func with a memory view ...
                 });
           },
-          "How to compute b(t)");
+          "How to compute b(t)")
+      .def("computeb", &siconos::modeling::FirstOrderLinearDS::computeb, "compute b(t)")
+      .def_property_readonly("b", &siconos::modeling::FirstOrderLinearDS::bVector, "b");
 
   // ============================== SECOND ORDER DS ==============================
 
@@ -125,17 +181,48 @@ void wrap_dynamical_systems(py::module_& m) {
   py::class_<siconos::modeling::LagrangianSparseDS,
              std::shared_ptr<siconos::modeling::LagrangianSparseDS>,
              siconos::modeling::SecondOrderDS>(m, "LagrangianSparseDS", py::dynamic_attr())
+
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
-           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"))
+                    Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"), py::arg("alias_t"))
+
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("q0"), py::arg("v0"), py::arg("copy_t"))
+
       .def("q", &siconos::modeling::LagrangianSparseDS::q_python,
            py::return_value_policy::reference_internal)
       .def("velocity", &siconos::modeling::LagrangianSparseDS::velocity_python,
            py::return_value_policy::reference_internal)
-      .def("setConstantFext", &siconos::modeling::LagrangianSparseDS::setConstantFext,
-           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+      .def_property_readonly("velocity0", &siconos::modeling::LagrangianSparseDS::velocity0,
+                             "current values of the initial velocity state")
+      .def_property_readonly("q0", &siconos::modeling::LagrangianSparseDS::q0,
+                             "current values of the initial state")
+
+      .def("resetToInitialState", &siconos::modeling::LagrangianSparseDS::resetToInitialState,
+           "reset the system to the current saved initial state")
+
+      .def_property_readonly("fext", &siconos::modeling::LagrangianSparseDS::fext,
+                             "current values of the external forces vector")
+
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::LagrangianSparseDS& self,
+             const siconos::algebra::SiconosVector& v, siconos::algebra::CopyTag tag) {
+            self.setConstantFext(v, siconos::algebra::copy_t);
+          },
+          py::arg("fext"), py::arg("copy_t"), "Set constant external forces (copy).")
+
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::LagrangianSparseDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setConstantFext(v, siconos::algebra::alias_t);
+          },
+          py::arg("fext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "Set constant external forces (alias).")
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::LagrangianSparseDS& self, py::function f) {
@@ -149,9 +236,6 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("computeFext", &siconos::modeling::LagrangianSparseDS::computeFext,
            "compute external forces")
-
-      .def("fext", &siconos::modeling::LagrangianSparseDS::fext,
-           "current values of external forces")
 
       .def("setConstantMassCopy",
            [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
@@ -659,23 +743,24 @@ void wrap_dynamical_systems(py::module_& m) {
   py::class_<siconos::modeling::LagrangianSparseLinearTIDS,
              std::shared_ptr<siconos::modeling::LagrangianSparseLinearTIDS>,
              siconos::modeling::LagrangianSparseDS>(m, "LagrangianSparseLinearTIDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>,
-                    const siconos::algebra::SiconosSparseMatrix&>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
-                                    // alive as long as object is referenced
-           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"), py::arg("mass"),
+
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosSparseMatrix&, siconos::algebra::CopyTag>(),
+           py::arg("q0"), py::arg("v0"), py::arg("mass"), py::arg("copy_t"),
            R"pbdoc(
               constructor from initial state and mass matrix only.
-              warning: M will be copied into mass attribute.
+              warning: q0, v0, M will be copied into class attributes.
          )pbdoc")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+                    Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
-           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"),
-           R"pbdoc(constructor from initial state only.)pbdoc")
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"), py::arg("alias_t"),
+           R"pbdoc(constructor from initial state only.
+           warning: alias (shared memory) between input q0/v0 and internal attributes)pbdoc")
+
       .def("setStiffnessMatrixCopy",
            [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
              py::object py_self = py::cast(self);
@@ -842,10 +927,14 @@ void wrap_dynamical_systems(py::module_& m) {
              siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+                    Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
-           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"))
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"), py::arg("alias_t"))
+
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("q0"), py::arg("v0"), py::arg("copy_t"))
 
       .def("q", &siconos::modeling::LagrangianDS::q_python,
            py::return_value_policy::reference_internal)
@@ -854,11 +943,31 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("velocity", &siconos::modeling::LagrangianDS::velocity_python,
            py::return_value_policy::reference_internal)
-      .def("velocity0", &siconos::modeling::LagrangianDS::velocity0_python,
-           py::return_value_policy::reference_internal)
+      .def_property_readonly("velocity0", &siconos::modeling::LagrangianDS::velocity0,
+                             "current values of the initial velocity state")
+      .def_property_readonly("q0", &siconos::modeling::LagrangianDS::q0,
+                             "current values of the initial state")
+      .def("resetToInitialState", &siconos::modeling::LagrangianDS::resetToInitialState,
+           "reset the system to the current saved initial state")
 
-      .def("setConstantFext", &siconos::modeling::LagrangianDS::setConstantFext,
-           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+      .def_property_readonly("fext", &siconos::modeling::LagrangianDS::fext,
+                             "current values of the external forces vector")
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::LagrangianDS& self, const siconos::algebra::SiconosVector& v,
+             siconos::algebra::CopyTag tag) {
+            self.setConstantFext(v, siconos::algebra::copy_t);
+          },
+          py::arg("fext"), py::arg("copy_t"), "Set constant external forces (copy).")
+
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::LagrangianDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setConstantFext(v, siconos::algebra::alias_t);
+          },
+          py::arg("fext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "Set constant external forces (alias).")
 
       .def(
           "setComputeFextFunction",
@@ -873,8 +982,6 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("computeFext", &siconos::modeling::LagrangianDS::computeFext,
            "compute external forces")
-
-      .def("fext", &siconos::modeling::LagrangianDS::fext, "current values of external forces")
 
       .def(
           "setComputeFintFunction",
@@ -931,9 +1038,23 @@ void wrap_dynamical_systems(py::module_& m) {
           "jacobianTotalForcesOver_velocity",
           &siconos::modeling::LagrangianDS::jacobianTotalForcesOver_velocity,
           "jacobian of the internal forces over velocity")
+      .def(
+          "setConstantMass",
+          [](siconos::modeling::LagrangianDS& self,
+             const siconos::algebra::SiconosDenseMatrix& v, siconos::algebra::CopyTag tag) {
+            self.setConstantMass(v, siconos::algebra::copy_t);
+          },
+          py::arg("mass"), py::arg("copy_t"), "To define a constant mass matrix (copy).")
 
-      .def("setConstantMassAlias", &siconos::modeling::LagrangianDS::setConstantMassAlias,
-           py::keep_alive<1, 2>(), "To define a constant mass matrix")
+      .def(
+          "setConstantMass",
+          [](siconos::modeling::LagrangianDS& self,
+             Eigen::Ref<siconos::algebra::SiconosDenseMatrix> v,
+             siconos::algebra::AliasTag tag) {
+            self.setConstantMass(v, siconos::algebra::alias_t);
+          },
+          py::arg("mass"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant mass matrix (alias).")
 
       .def(
           "setComputeMassFunction",
@@ -955,18 +1076,62 @@ void wrap_dynamical_systems(py::module_& m) {
   py::class_<siconos::modeling::LagrangianLinearTIDS,
              std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
              siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosDenseMatrix&, siconos::algebra::CopyTag>(),
+           py::arg("q0"), py::arg("v0"), py::arg("mass"), py::arg("copy_t"),
+           R"pbdoc(
+              constructor from initial state and mass matrix only.
+              warning: q0, v0, M will be copied into class attributes.
+         )pbdoc")
+
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>>(),
+                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>,
+                    siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
-           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
-           py::arg("M"))
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"), py::arg("mass"),
+           py::arg("alias_t"),
+           R"pbdoc(constructor from initial state only.
+           warning: alias (shared memory) between input q0/v0 and internal attributes)pbdoc")
 
-      .def("setStiffnessMatrix", &siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix,
-           py::keep_alive<1, 2>(), "To define the stiffness matrix (constant)")
-      .def("setDampingMatrix", &siconos::modeling::LagrangianLinearTIDS::setDampingMatrix,
-           py::keep_alive<1, 2>(), "To define the damping matrix (constant)")
+      .def(
+          "setStiffnessMatrix",
+          [](siconos::modeling::LagrangianLinearTIDS& self,
+             const siconos::algebra::SiconosDenseMatrix& v, siconos::algebra::CopyTag tag) {
+            self.setStiffnessMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("stiffness"), py::arg("copy_t"),
+          "To define a constant stiffness matrix (copy).")
+
+      .def(
+          "setStiffnessMatrix",
+          [](siconos::modeling::LagrangianLinearTIDS& self,
+             Eigen::Ref<siconos::algebra::SiconosDenseMatrix> v,
+             siconos::algebra::AliasTag tag) {
+            self.setStiffnessMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("stiffness"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant stiffness matrix (alias).")
+      .def(
+          "setDampingMatrix",
+          [](siconos::modeling::LagrangianLinearTIDS& self,
+             const siconos::algebra::SiconosDenseMatrix& v, siconos::algebra::CopyTag tag) {
+            self.setDampingMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("damping"), py::arg("copy_t"), "To define a constant damping matrix (copy).")
+
+      .def(
+          "setDampingMatrix",
+          [](siconos::modeling::LagrangianLinearTIDS& self,
+             Eigen::Ref<siconos::algebra::SiconosDenseMatrix> v,
+             siconos::algebra::AliasTag tag) {
+            self.setDampingMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("damping"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant damping matrix (alias).")
+
       .def_property_readonly("stiffnessMatrix",
                              &siconos::modeling::LagrangianLinearTIDS::stiffnessMatrix,
                              "stiffness matrix")
@@ -979,21 +1144,76 @@ void wrap_dynamical_systems(py::module_& m) {
              siconos::modeling::LagrangianDS>(m, "LagrangianLinearDiagonalDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+                    Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
-           py::arg("stiffness_diag"))
+           py::arg("stiffness_diag"), py::arg("alias_t"))
+      .def(py::init<const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&,
+                    const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
+           py::arg("q0"), py::arg("v0"), py::arg("stiffness_diag"), py::arg("copy_t"))
 
-      .def_property_readonly("massMatrix",
-                             &siconos::modeling::LagrangianLinearDiagonalDS::massMatrix,
-                             "mass matrix")
+      .def(
+          "setStiffnessMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             const siconos::algebra::SiconosVector& v, siconos::algebra::CopyTag tag) {
+            self.setStiffnessMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("stiffness"), py::arg("copy_t"),
+          "To define a constant stiffness matrix (copy).")
+
+      .def(
+          "setStiffnessMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setStiffnessMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("stiffness"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant stiffness matrix (alias).")
+      .def(
+          "setDampingMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             const siconos::algebra::SiconosVector& v, siconos::algebra::CopyTag tag) {
+            self.setDampingMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("damping"), py::arg("copy_t"), "To define a constant damping matrix (copy).")
+
+      .def(
+          "setDampingMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setDampingMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("damping"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant damping matrix (alias).")
+
+      .def(
+          "setMassMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             const siconos::algebra::SiconosVector& v, siconos::algebra::CopyTag tag) {
+            self.setMassMatrix(v, siconos::algebra::copy_t);
+          },
+          py::arg("mass"), py::arg("copy_t"), "To define a constant damping matrix (copy).")
+
+      .def(
+          "setMassMatrix",
+          [](siconos::modeling::LagrangianLinearDiagonalDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector> v, siconos::algebra::AliasTag tag) {
+            self.setMassMatrix(v, siconos::algebra::alias_t);
+          },
+          py::arg("mass"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "To define a constant damping matrix (alias).")
+
       .def_property_readonly("stiffnessMatrix",
                              &siconos::modeling::LagrangianLinearDiagonalDS::stiffnessMatrix,
                              "stiffness matrix")
       .def_property_readonly("dampingMatrix",
                              &siconos::modeling::LagrangianLinearDiagonalDS::dampingMatrix,
-                             "damping matrix");
+                             "damping matrix")
+      .def_property_readonly("massMatrix",
+                             &siconos::modeling::LagrangianLinearDiagonalDS::massMatrix,
+                             "mass matrix");
 
   py::class_<siconos::modeling::NewtonEulerDS,
              std::shared_ptr<siconos::modeling::NewtonEulerDS>,
@@ -1001,11 +1221,12 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector7>,
                     Eigen::Ref<siconos::algebra::SiconosVector6>, double,
-                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>>(),
+                    Eigen::Ref<siconos::algebra::SiconosMatrix33>,
+                    siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("q0"), py::arg("twist0"),
-           py::arg("mass"), py::arg("inertia"))
+           py::arg("mass"), py::arg("inertia"), py::arg("alias_t"))
 
       .def("q", &siconos::modeling::NewtonEulerDS::q_python,
            py::return_value_policy::reference_internal)
@@ -1044,7 +1265,7 @@ void wrap_dynamical_systems(py::module_& m) {
            &siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_q_byFD)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass)
-      .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_view)
+      .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_read)
       .def("angularVelocityInBodyFrame",
            &siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame)
       .def_property_readonly("totalInertiaMatrix",

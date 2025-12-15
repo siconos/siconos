@@ -21,25 +21,21 @@
 #include <Eigen/LU>
 
 #include "ControlSensor.hpp"
-#include "EigenInclude.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderNonLinearR.hpp"
-#include "FirstOrderType1R.hpp"
-#include "FirstOrderType2R.hpp"
+#include "SolverOptions.h"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NumericsSolversNamespace.h"
 #include "Relay.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosAlgebraAddons.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
-#include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -61,7 +57,6 @@ void siconos::control::CommonSMC::initialize(
         "the Actuator");
   } else {
     if (_Csurface && !_u) {
-
       _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->rows());
       _u->setZero();
     }
@@ -82,7 +77,8 @@ void siconos::control::CommonSMC::initialize(
     bSMC_.resize(_DS_SMC->dimension());
     bSMC_.setZero();
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)
-        ->setConstantbVector(bSMC_);  // Shared memory view, bSMC_ is DS.b
+        ->setConstantbVector(bSMC_,
+                             siconos::algebra::alias_t);  // Shared memory view, bSMC_ is DS.b
   } else if (auto fonlds =
                  std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)) {
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*fonlds);

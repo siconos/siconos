@@ -440,7 +440,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         elif self._dimension == 2:
             weight = [0, -scalar_mass * g, 0.0]
         self.weight.append(np.array(weight, dtype=np.float64))
-        body.setConstantFext(self.weight[-1])
+        body.setConstantFext(self.weight[-1], siconos.modeling.alias_t)
 
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
@@ -918,7 +918,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 self.fext.append(self._input[name].get("allow_self_collide", None))
                 if self.fext[-1] is not None:
-                    body.setConstantFext(self.fext[-1])
+                    body.setConstantFext(self.fext[-1], siconos.modeling.alias_t)
 
                 self_collide = self._input[name].get("allow_self_collide", None)
                 if self_collide is not None:
@@ -1767,7 +1767,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._p0s_data.resize(current_line + p0s.shape[0], 0)
             self._p0s_data[current_line:, :] = p0s
 
-
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -2150,8 +2149,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self.config.backend != "vnative":
             self.log(self.output_solver_infos, with_timer)()
 
-
-        if (self.config.backend == "vnative"):
+        if self.config.backend == "vnative":
             self.log(self.output_radii, with_timer)()
 
         self.log(self._out.flush)()
@@ -2410,7 +2408,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.updateState, with_timer)()
                 if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                     self.log(s.updateOutput, with_timer)()
-                isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)(newtonTolerance)
+                isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)(
+                    newtonTolerance
+                )
                 if s.displayNewtonConvergence():
                     s.displayNewtonConvergenceInTheLoop()
 
@@ -2961,7 +2961,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb.setMStorageType(sn.params.NM_SPARSE)
                 osnspb.setAssemblyType(osnspb_assembly_type)
 
-        else: # With trace
+        else:  # With trace
             pass
             if self.config.backend == "vnative":
                 osnspb = nsf.FrictionContact(self._dimension, solver_options)
@@ -2993,7 +2993,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         msg += str(set(nslaw_type_list))
                         raise RuntimeError(msg)
                 else:
-                    osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
+                    osnspb = FCTrace(
+                        3, solver_options, friction_contact_trace_params, nsds
+                    )
                     osnspb.setMaxSize(osnspb_max_size)
                     osnspb.setMStorageType(sn.params.NM_SPARSE_BLOCK)
 

@@ -21,13 +21,12 @@
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosAlgebraAddons.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
-// #define DEBUG_WHERE_MESSAGES
-//  #define DEBUG_NOCOLOR
-//  #define DEBUG_STDOUT
-//  #define DEBUG_MESSAGES
+//  #define DEBUG_WHERE_MESSAGES
+//   #define DEBUG_NOCOLOR
+//   #define DEBUG_STDOUT
+//   #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
@@ -49,7 +48,7 @@ void siconos::control::LinearSMC::actuate() {
         *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
     bSMC_.resize(_ueq->size());
     bSMC_ = *_B * *_ueq;
-    LinearDS_SMC.setConstantbVector(bSMC_);  // Shared memory view
+    LinearDS_SMC.setConstantbVector(bSMC_, siconos::algebra::alias_t);  // Shared memory view
   }
 
   DEBUG_EXPR(siconos::algebra::print(_DS_SMC->xMemory()););
@@ -74,7 +73,8 @@ void siconos::control::LinearSMC::actuate() {
   *_us = *_lambda;
   *_u = *_us;
   *_u += *_ueq;
-  DEBUG_EXPR(siconos::algebra::print(*_u));;
+  DEBUG_EXPR(siconos::algebra::print(*_u));
+  ;
   _indx++;
   DEBUG_END("void siconos::control::LinearSMC::actuate()\n")
 }

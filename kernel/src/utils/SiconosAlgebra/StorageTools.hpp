@@ -30,9 +30,26 @@
 
 namespace siconos::algebra {
 
-using OwnedDenseVector = std::unique_ptr<std::vector<double>>;
+using OwnedDenseVectorSTL = std::unique_ptr<std::vector<double>>;
+using OwnedDenseVector = std::unique_ptr<siconos::algebra::SiconosVector>;
 using MapDenseVector = std::shared_ptr<siconos::algebra::MapVectorType>;
 using DenseVectorStorage = std::variant<std::monostate, OwnedDenseVector, MapDenseVector>;
+
+using OwnedDenseVector3 = std::unique_ptr<siconos::algebra::SiconosVector3>;
+using MapDenseVector3 = std::shared_ptr<siconos::algebra::MapVector3Type>;
+using DenseVector3Storage = std::variant<std::monostate, OwnedDenseVector3, MapDenseVector3>;
+
+using OwnedDenseVector6 = std::unique_ptr<siconos::algebra::SiconosVector6>;
+using MapDenseVector6 = std::shared_ptr<siconos::algebra::MapVector6Type>;
+using DenseVector6Storage = std::variant<std::monostate, OwnedDenseVector6, MapDenseVector6>;
+
+using OwnedDenseVector7 = std::unique_ptr<siconos::algebra::SiconosVector7>;
+using MapDenseVector7 = std::shared_ptr<siconos::algebra::MapVector7Type>;
+using DenseVector7Storage = std::variant<std::monostate, OwnedDenseVector7, MapDenseVector7>;
+
+using OwnedDense = std::unique_ptr<siconos::algebra::SiconosDenseMatrix>;
+using MapDense = std::shared_ptr<Eigen::Map<siconos::algebra::SiconosDenseMatrix>>;
+using DenseStorage = std::variant<std::monostate, OwnedDense, MapDense>;
 
 using OwnedSparse = std::unique_ptr<siconos::algebra::SiconosSparseMatrix>;
 using MapSparse = std::shared_ptr<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>;
@@ -40,36 +57,47 @@ using SparseStorage = std::variant<std::monostate, OwnedSparse, MapSparse>;
 
 enum class AccessMode { OwnedOnly, Any };
 
+// Helper to detect the Owned type of the variant (for visit functions below)
+template <typename Variant>
+struct VariantOwnedType {
+  using type = std::variant_alternative_t<1, Variant>;
+};
+
+// To be able to avoid ambiguous choice of constructors when dealing
+// with alias or copy case. See example in LagrangianDS.
+struct CopyTag {};
+struct AliasTag {};
+
+inline constexpr CopyTag copy_t{};
+inline constexpr AliasTag alias_t{};
+
 /**
- * @brief Visit and operate on a sparse matrix storage variant
+ * @brief Visit and operate on a storage variant
  *
  * This helper function dispatches a callable `f` to the concrete type
- * currently held by a sparse matrix storage variant. The storage variant
+ * currently held by a storage variant. The storage variant
  * can contain either:
  *   - a `std::monostate` (uninitialized),
- *   - an `OwnedSparse` (unique_ptr to a sparse matrix),
- *   - or a `MapSparse` (shared_ptr to an Eigen::Map of a sparse matrix).
- *
- * The function enforces access rules defined by the template parameter
- * `mode`, which can restrict access to owned matrices only.
+ *   - an `OwnedDense`, `OwnedSparse` or OwnedDenseVector
+ *   - or a MapDense, MapSparse or `MapDenseVector` (shared_ptr to an Eigen::Map of ...)
  *
  * @tparam mode
  *   Access control policy:
  *   - `AccessMode::Any`: allows visiting both owned and mapped storages.
- *   - `AccessMode::OwnedOnly`: restricts access to `OwnedSparse` only.
+ *   - `AccessMode::OwnedOnly`: restricts access to `OwnedDense` only.
  *
  * @tparam Variant
- *   A `std::variant` type compatible with `SparseStorage`.
+ *   A `std::variant` type compatible with `XXXStorage`.
  *
  * @tparam F
- *   A callable type taking a reference to a `SiconosSparseMatrix`
- *   (either mutable or const, depending on the overload).
+ *   A callable type taking a reference to a SiconosVector, SiconosDenseMatrix or
+ *   SiconosSparseMatrix (either mutable or const, depending on the overload).
  *
  * @param[in,out] v
- *   Variant holding the sparse matrix storage.
+ *   Variant holding the storage.
  *
  * @param[in] f
- *   Function or lambda to invoke with the dereferenced matrix.
+ *   Function or lambda to invoke with the dereferenced object.
  *
  * @param[in] name
  *   Optional identifier used in error messages (default: `"storage"`).
@@ -83,10 +111,13 @@ enum class AccessMode { OwnedOnly, Any };
  *
  */
 template <AccessMode mode = AccessMode::Any, typename Variant, typename F>
-inline decltype(auto) visitSparseStorage(Variant& v, F&& f, const char* name = "storage") {
+inline decltype(auto) visitStorage(Variant& v, F&& f, const char* name = "storage") {
+  using OwnedT = typename VariantOwnedType<Variant>::type;
   using ReturnType =
       decltype(f(*std::declval<typename std::add_lvalue_reference_t<
                      typename std::variant_alternative_t<1, std::decay_t<Variant>>>>()));
+  // warning: force type to a lvalue ref (T&) thanks to add_lvalue_reference_t
+  // This is different from the const version
 
   if constexpr (std::is_void_v<ReturnType>) {
     std::visit(
@@ -96,10 +127,10 @@ inline decltype(auto) visitSparseStorage(Variant& v, F&& f, const char* name = "
           if constexpr (std::is_same_v<T, std::monostate>) {
             throw std::runtime_error(std::string(name) + " is not set");
           } else if constexpr (mode == AccessMode::OwnedOnly) {
-            if constexpr (std::is_same_v<T, OwnedSparse>)
+            if constexpr (std::is_same_v<T, OwnedT>)
               f(*s);
             else
-              throw std::runtime_error(std::string(name) + " must contain an OwnedSparse");
+              throw std::runtime_error(std::string(name) + " must contain an Owned type");
           } else {  // AccessMode::Any
             f(*s);
           }
@@ -113,10 +144,10 @@ inline decltype(auto) visitSparseStorage(Variant& v, F&& f, const char* name = "
           if constexpr (std::is_same_v<T, std::monostate>) {
             throw std::runtime_error(std::string(name) + " is not set");
           } else if constexpr (mode == AccessMode::OwnedOnly) {
-            if constexpr (std::is_same_v<T, OwnedSparse>)
+            if constexpr (std::is_same_v<T, OwnedT>)
               return f(*s);
             else
-              throw std::runtime_error(std::string(name) + " must contain an OwnedSparse");
+              throw std::runtime_error(std::string(name) + " must contain an Owned type");
           } else {  // AccessMode::Any
             return f(*s);
           }
@@ -125,9 +156,10 @@ inline decltype(auto) visitSparseStorage(Variant& v, F&& f, const char* name = "
   }
 }
 
+// Same as above but const version
 template <AccessMode mode = AccessMode::Any, typename Variant, typename F>
-inline decltype(auto) visitSparseStorage(const Variant& v, F&& f,
-                                         const char* name = "storage") {
+inline decltype(auto) visitStorage(const Variant& v, F&& f, const char* name = "storage") {
+  using OwnedT = typename VariantOwnedType<Variant>::type;
   using ReturnType = decltype(f(
       *std::declval<const typename std::variant_alternative_t<1, std::decay_t<Variant>>&>()));
 
@@ -139,10 +171,10 @@ inline decltype(auto) visitSparseStorage(const Variant& v, F&& f,
           if constexpr (std::is_same_v<T, std::monostate>) {
             throw std::runtime_error(std::string(name) + " is not set");
           } else if constexpr (mode == AccessMode::OwnedOnly) {
-            if constexpr (std::is_same_v<T, OwnedSparse>)
+            if constexpr (std::is_same_v<T, OwnedT>)
               f(*s);
             else
-              throw std::runtime_error(std::string(name) + " must contain an OwnedSparse");
+              throw std::runtime_error(std::string(name) + " must contain an Owned type");
           } else {
             f(*s);
           }
@@ -156,10 +188,10 @@ inline decltype(auto) visitSparseStorage(const Variant& v, F&& f,
           if constexpr (std::is_same_v<T, std::monostate>) {
             throw std::runtime_error(std::string(name) + " is not set");
           } else if constexpr (mode == AccessMode::OwnedOnly) {
-            if constexpr (std::is_same_v<T, OwnedSparse>)
+            if constexpr (std::is_same_v<T, OwnedT>)
               return f(*s);
             else
-              throw std::runtime_error(std::string(name) + " must contain an OwnedSparse");
+              throw std::runtime_error(std::string(name) + " must contain an Owned type");
           } else {
             return f(*s);
           }
@@ -228,14 +260,12 @@ inline decltype(auto) visitSparseStorage(const Variant& v, F&& f,
 template <typename Storage, typename FuncCpp, typename FuncPy, typename... Args>
 bool computeSparse(Storage& storage, FuncCpp&& func_cpp, FuncPy&& func_py,
                    const char* storage_name, Args&&... args) {
-  using siconos::algebra::AccessMode;
-  using siconos::algebra::visitSparseStorage;
   if (func_cpp) {
-    visitSparseStorage<AccessMode::OwnedOnly>(
+    visitStorage<AccessMode::OwnedOnly>(
         storage, [&](auto& m) { func_cpp(std::forward<Args>(args)..., m); }, storage_name);
     return true;
   } else if (func_py) {
-    visitSparseStorage<AccessMode::OwnedOnly>(
+    visitStorage<AccessMode::OwnedOnly>(
         storage,
         [&](auto& m) {
           storage = std::make_unique<siconos::algebra::SiconosSparseMatrix>(

@@ -24,6 +24,7 @@
 #include "PID.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -49,8 +50,9 @@ void PIDTest::setUp() {
 }
 
 void PIDTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   C->setZero();
   (*C)(0, 0) = 1;

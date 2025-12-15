@@ -65,7 +65,8 @@
 siconos::joints::PrismaticJointR::PrismaticJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& axis, bool absoluteRef,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
+    : PrismaticJointR{} {
   setAbsolute(absoluteRef);
   setAxis(0, axis);
   if (d1) {
@@ -773,7 +774,6 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
     jachq.setValue(0, 13, 0);
   }
 }
-
 
 siconos::algebra::SiconosVector3 siconos::joints::PrismaticJointR::normalDoF(
     const siconos::algebra::SiconosVector& q0,

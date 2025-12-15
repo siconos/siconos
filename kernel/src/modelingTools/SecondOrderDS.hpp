@@ -131,10 +131,6 @@ class SecondOrderDS : public DynamicalSystem {
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> p_ = {nullptr, nullptr,
                                                                       nullptr};
 
-  /** Initial position */
-  std::shared_ptr<siconos::algebra::MapVectorType> q0_view_{nullptr};
-  std::unique_ptr<std::vector<double>> q0_internal_storage_{nullptr};
-
   bool hasLUMass_{false};
 
   /** Boundary condition applied to a dynamical system*/
@@ -198,11 +194,6 @@ class SecondOrderDS : public DynamicalSystem {
 
   // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
   virtual const siconos::algebra::ConstMapVectorType velocity_read() const = 0;
-
-  /** \return a read-only view on the initial state vector */
-  inline const siconos::algebra::ConstMapVectorType q0() const {
-    return siconos::algebra::ConstMapVectorType(q0_view_->data(), q0_view_->size());
-  }
 
   /** \return a read-only view on acceleration vector */
   virtual const siconos::algebra::ConstMapVectorType acceleration_read() const = 0;

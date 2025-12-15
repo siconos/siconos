@@ -20,25 +20,21 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "NewtonEulerDS.hpp"
-#include "RotationQuaternion.hpp"
-#include "SiconosException.hpp"
-
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 class NewtonEulerDSTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(NewtonEulerDSTest);
-
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(NewtonEulerDSTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildNewtonEulerDS1);
+  CPPUNIT_TEST(testBuildNewtonEulerDS1_alias);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildNewtonEulerDS1();
+  void testBuildNewtonEulerDS1_alias();
   // void testcomputeDS();
 
   // Members

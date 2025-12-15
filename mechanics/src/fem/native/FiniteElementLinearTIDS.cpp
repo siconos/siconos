@@ -48,18 +48,14 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _FEModel = std::make_shared<FiniteElementModel>(mesh);
   ndof_ = _FEModel->init();
 
-  q0_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
-  q0_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), ndof_);
-  q0_view_->setZero();
-  velocity0_internal_storage = std::make_unique<std::vector<double>>(ndof_);
-  velocity0_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-      velocity0_internal_storage->data(), ndof_);
-  velocity0_view_->setZero();
+  q0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
+  velocity0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
+  use_q0([&](auto& v) { v.setZero(); });
+  use_velocity0([&](auto& v) { v.setZero(); });
 
   // -- Memory allocation for vector and matrix members --
-  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(*q0_view_);
-  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(*velocity0_view_);
+  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(velocity0());
 
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   p_[1]->setZero();
@@ -72,14 +68,14 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   hasMass_ = hasConstantMass_ = true;
   computemass_ = nullptr;
   // Note FP - todo: evaluate number of nonzeros in mass_mat_ and reserve.
-  siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+  siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
       mass_storage_, [&](auto& matrix) { _FEModel->computeMassMatrix(matrix, _materials); },
       "mass_storage_");
   //  _FEModel->computeMassMatrix(mass_storage_, _materials);
   //
   stiffnessMatrix_storage =
       std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+  siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
       stiffnessMatrix_storage,
       [&](auto& matrix) { _FEModel->computeStiffnessMatrix(matrix, _materials); },
       "stiffnessMatrix_storage");
@@ -107,14 +103,16 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
-  if (!fext_view_) {
-    if (!fext_internal_storage_) {
-      fext_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
-    }
-    fext_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-        fext_internal_storage_->data(), ndof_);  // TODOSAM : what to do here ?
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector>(fext_storage_)) {
+    fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
-  _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, fext_view_);
+  hasFext_ = true;
+  hasConstantFext_ = true;  // set by applyNodalForces -> review this.
+  //  We should probably use something like setComputeFext(applyNodalForce)
+  computefext_ = nullptr;
+  use_fext([&](auto& fext) {
+    _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, fext);
+  });
 };
 
 double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy() const {

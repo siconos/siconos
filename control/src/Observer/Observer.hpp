@@ -27,12 +27,10 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
 
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class DynamicalSystem;
@@ -200,8 +198,8 @@ class Observer {
 
   /** \return the Model used in the Observer
    */
-  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const
-  {
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS()
+      const {
     return _nsds;
   };
 };
@@ -241,21 +239,18 @@ class ObserverFactory {
   */
   std::shared_ptr<Observer> create(std::shared_ptr<ControlSensor> sensor,
                                    const siconos::algebra::SiconosVector& xHat0,
-                                   ObserverType type)
-  {
+                                   ObserverType type) {
     assert(m_factories.contains(type) && "unknown Observer type");
     return m_factories[type](sensor, xHat0);
   }
 
   /** access to the (singleton) factory instance */
-  static ObserverFactory* instance()
-  {
+  static ObserverFactory* instance() {
     static ObserverFactory factory;
     return &factory;
   }
 
-  void registerCreator(ObserverType newtype, ObserverCreator caller)
-  {
+  void registerCreator(ObserverType newtype, ObserverCreator caller) {
     m_factories[newtype] = caller;
   }
 };
@@ -263,8 +258,7 @@ class ObserverFactory {
 template <class T>
 class ObserverRegistration {
  public:
-  ObserverRegistration(ObserverType newtype)
-  {
+  ObserverRegistration(ObserverType newtype) {
     ObserverFactory::instance()->registerCreator(
         newtype, [](std::shared_ptr<ControlSensor> sensor,
                     const siconos::algebra::SiconosVector& xHat0) {

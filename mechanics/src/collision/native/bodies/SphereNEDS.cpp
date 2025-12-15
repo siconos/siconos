@@ -18,20 +18,22 @@
 
 #include "SphereNEDS.hpp"
 
-#include <cmath>
-
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
-    double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix> inertia,
-    Eigen::Ref<siconos::algebra::SiconosVector> qinit,
-    Eigen::Ref<siconos::algebra::SiconosVector> vinit)
-    : siconos::modeling::NewtonEulerDS{qinit, vinit, m, inertia}, radius{r} {
-  // note : ndof_ = 3 in NewtonEuleurDS ? (=> ndof_ = 6 ?)
+    double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+    Eigen::Ref<siconos::algebra::SiconosVector7> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector6> vinit, siconos::algebra::AliasTag)
+    : siconos::modeling::NewtonEulerDS{qinit, vinit, m, inertia, siconos::algebra::alias_t},
+      radius{r} {}
 
-  assert(qinit.size() == qDim_);
-  assert(vinit.size() == 6);  // == ndof_
-}
+siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
+    double r, double m, const siconos::algebra::SiconosMatrix33& inertia,
+    const siconos::algebra::SiconosVector7& qinit,
+    const siconos::algebra::SiconosVector6& vinit, siconos::algebra::CopyTag)
+    : siconos::modeling::NewtonEulerDS{qinit, vinit, m, inertia, siconos::algebra::copy_t},
+      radius{r} {}
 
 double siconos::collision::native::bodies::SphereNEDS::getQ(siconos::algebra::Index pos) {
   assert(pos < 7);

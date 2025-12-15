@@ -23,19 +23,23 @@
 // #define DEBUG_MESSAGES
 #include <iostream>
 
+#include "StorageTools.hpp"
 #include "siconos_debug.h"
 
 siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
     Eigen::Ref<siconos::algebra::SiconosVector> q0,
     Eigen::Ref<siconos::algebra::SiconosVector> v0,
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newmass)
-    : LagrangianDS(q0, v0) {
-  hasConstantMass_ = true;
-  hasMass_ = true;
-  computemass_ = nullptr;
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(newmass.data(), newmass.rows(),
-                                                           newmass.cols());
-};
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newmass, siconos::algebra::AliasTag)
+    : LagrangianDS(q0, v0, siconos::algebra::alias_t) {
+  setConstantMass(newmass, siconos::algebra::alias_t);
+}
+
+siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
+    const siconos::algebra::SiconosVector& q0, const siconos::algebra::SiconosVector& v0,
+    const siconos::algebra::SiconosDenseMatrix& newmass, siconos::algebra::CopyTag tag)
+    : LagrangianDS(q0, v0, siconos::algebra::copy_t) {
+  setConstantMass(newmass, siconos::algebra::copy_t);
+}
 
 void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   // dim
@@ -45,11 +49,12 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
-  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                               x0_internal_storage_->size());
-  x0_view_->head(ndof_) = *q0_view_;  // COPY !
-  x0_view_->tail(ndof_) = *velocity0_view_;
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
+
+  use_x0([&](auto& xinit) {
+    xinit.head(ndof_) = q0();  // COPY !
+    xinit.tail(ndof_) = velocity0();
+  });
 
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_[0], *state_q_[1];
@@ -97,11 +102,11 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 
     if (hasStiffnessMatrix()) {
       // Solve MjacobianX(1,0) = jacobianFL[0]
-      jacq = LUMass_->solve(-1. * *stiffnessMatrix_view_);
+      useStiffness([&](const auto& K) { jacq = LUMass_->solve(-1. * K); });
     }
     if (hasDampingMatrix()) {
       // Solve MjacobianX(1,1) = jacobianFL[1]
-      jacv = LUMass_->solve(-1. * *dampingMatrix_view_);
+      useDamping([&](const auto& C) { jacv = LUMass_->solve(-1. * C); });
     }
     // Now fill in jacobianRhsOver_x_
     for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
@@ -122,14 +127,18 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (hasStiffnessMatrix()) {
-        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_(j * x_size_ + i + ndof_) = -(*stiffnessMatrix_view_)(i, j);
+        useStiffness([&](const auto& K) {
+          for (siconos::algebra::Index i = 0; i < ndof_; ++i)
+
+            jacobianRhsOver_x_(j * x_size_ + i + ndof_) = -K(i, j);
+        });
       }
       // Bottom-right block (jacobian / vel)
       if (hasDampingMatrix()) {
-        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
-              -(*dampingMatrix_view_)(i, j);
+        useDamping([&](const auto& C) {
+          for (siconos::algebra::Index i = 0; i < ndof_; ++i)
+            jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = -C(i, j);
+        });
       }
     }
   }
@@ -137,36 +146,57 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
   assert(newValue.rows() == newValue.cols());
   assert(newValue.rows() == ndof_);
-  stiffnessMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
-      newValue.data(), newValue.rows(), newValue.cols());
+
+  stiffnessMatrix_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasFint_ = true;
+}
+
+void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  assert(newValue.rows() == newValue.cols());
+  assert(newValue.rows() == ndof_);
+
+  stiffnessMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasFint_ = true;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
   assert(newValue.rows() == newValue.cols());
   assert(newValue.rows() == ndof_);
 
-  dampingMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
-      newValue.data(), newValue.rows(), newValue.cols());
+  dampingMatrix_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasFint_ = true;
+}
+
+void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  assert(newValue.rows() == newValue.cols());
+  assert(newValue.rows() == ndof_);
+
+  dampingMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasFint_ = true;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
   LagrangianDS::display(brief);
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== \n";
-
-  if (stiffnessMatrix_view_) {
-    std::cout << "- Stiffness Matrix K:\n";
-    std::cout << *stiffnessMatrix_view_ << "\n";
+  if (hasStiffnessMatrix()) {
+    std::cout << "- Stiffness matrix\n ";
+    useStiffness([&](const auto& M) { siconos::algebra::print(M); });
+    std::cout << "\n";
   }
-
-  if (dampingMatrix_view_) {
-    std::cout << "- Viscosity Matrix C:\n";
-    std::cout << *dampingMatrix_view_ << "\n";
+  if (hasDampingMatrix()) {
+    std::cout << "- Damping matrix\n ";
+    useDamping([&](const auto& M) { siconos::algebra::print(M); });
+    std::cout << "\n";
   }
   std::cout << "=========================================================== \n";
 }
@@ -184,11 +214,11 @@ void siconos::modeling::LagrangianLinearTIDS::computeTotalForces(
   } else
     return;
 
-  if (fext_view_) {
+  if (hasFext_) {
     computeFext(time);
-    *totalForces_ += *fext_view_;
+    use_fext([&](auto const& fext) { *totalForces_ += fext; });
   }
 
-  if (stiffnessMatrix_view_) *totalForces_ -= *stiffnessMatrix_view_ * q;
-  if (dampingMatrix_view_) *totalForces_ -= *dampingMatrix_view_ * velocity;
+  if (hasStiffnessMatrix()) useStiffness([&](auto const& K) { *totalForces_ -= K * q; });
+  if (hasDampingMatrix()) useDamping([&](auto const& C) { *totalForces_ -= C * velocity; });
 }

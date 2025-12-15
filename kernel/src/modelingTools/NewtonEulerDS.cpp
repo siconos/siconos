@@ -23,6 +23,7 @@
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -30,7 +31,7 @@
 siconos::modeling::NewtonEulerDS::NewtonEulerDS(
     Eigen::Ref<siconos::algebra::SiconosVector7> initial_position,
     Eigen::Ref<siconos::algebra::SiconosVector6> initial_twist, double mass,
-    Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia)
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia, siconos::algebra::AliasTag)
     : SecondOrderDS(13, 6), scalarMass_{mass} {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::NewtonEulerDS(...)\n");
 
@@ -38,16 +39,15 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   // q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0)=7)
   // twist0 : contains the initial velocity of center of mass and the omega initial.
   // (dim(VTwist0)=6)
-  q0_view_ = std::make_shared<siconos::algebra::MapVectorType>(initial_position.data(),
-                                                               initial_position.size());
-  twist0_view_ = std::make_shared<siconos::algebra::MapVector6Type>(initial_twist.data(),
-                                                                    initial_twist.size());
-  // warning : q0_view_ and twist0_view_ are views onto initial_position and initial_twist
-  // memory is shared!
+
+  q0_storage_ = std::make_shared<siconos::algebra::MapVector7Type>(initial_position.data(),
+                                                                   initial_position.size());
+  twist0_storage_ = std::make_shared<siconos::algebra::MapVector6Type>(initial_twist.data(),
+                                                                       initial_twist.size());
 
   // --- Current state (q and twist variables) ---
-  state_q_ = std::make_shared<siconos::algebra::SiconosVector>(*q0_view_);
-  twist_ = std::make_shared<siconos::algebra::SiconosVector>(*twist0_view_);
+  state_q_ = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  twist_ = std::make_shared<siconos::algebra::SiconosVector>(twist0());
 
   dotq_ = std::make_shared<siconos::algebra::SiconosVector>();
   dotq_->setZero();
@@ -58,13 +58,13 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
 
   //  -- Total Inertia Matrix --
   //   Remind that inertial matrix is accessed with inertialMatrix() method, a view on
-  //   the bloxk
+  //   the block
   totalInertiaMatrix_ = std::make_shared<siconos::algebra::SiconosMatrix66>();
   totalInertiaMatrix_->setZero();
   (*totalInertiaMatrix_)(0, 0) = scalarMass_;
   (*totalInertiaMatrix_)(1, 1) = scalarMass_;
   (*totalInertiaMatrix_)(2, 2) = scalarMass_;
-  totalInertiaMatrix_->block<3, 3>(3, 3) = inertia;
+  totalInertiaMatrix_->block<3, 3>(3, 3) = inertia;  // COPY
   hasLUMass_ = false;
 
   // --- T(q) matrix ---
@@ -94,25 +94,82 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
 
   DEBUG_END("siconos::modeling::NewtonEulerDS::NewtonEulerDS(...)\n");
 }
+siconos::modeling::NewtonEulerDS::NewtonEulerDS(
+    const siconos::algebra::SiconosVector7& initial_position,
+    const siconos::algebra::SiconosVector6& initial_twist, double mass,
+    const siconos::algebra::SiconosMatrix33& inertia, siconos::algebra::CopyTag)
+    : SecondOrderDS(13, 6), scalarMass_{mass} {  // --- Initial conditions ---
+  // q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0)=7)
+  // twist0 : contains the initial velocity of center of mass and the omega initial.
+  // (dim(VTwist0)=6)
+
+  q0_storage_ = std::make_unique<siconos::algebra::SiconosVector7>(initial_position);
+  twist0_storage_ = std::make_unique<siconos::algebra::SiconosVector6>(initial_twist);
+
+  // --- Current state (q and twist variables) ---
+  state_q_ = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  twist_ = std::make_shared<siconos::algebra::SiconosVector>(twist0());
+
+  dotq_ = std::make_shared<siconos::algebra::SiconosVector>();
+  dotq_->setZero();
+
+  /** \todo lazy Memory allocation */
+  p_.resize(3);
+  p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);  // Needed in NewtonEulerR
+
+  //  -- Total Inertia Matrix --
+  //   Remind that inertial matrix is accessed with inertialMatrix() method, a view on
+  //   the bloxk
+  totalInertiaMatrix_ = std::make_shared<siconos::algebra::SiconosMatrix66>();
+  totalInertiaMatrix_->setZero();
+  (*totalInertiaMatrix_)(0, 0) = scalarMass_;
+  (*totalInertiaMatrix_)(1, 1) = scalarMass_;
+  (*totalInertiaMatrix_)(2, 2) = scalarMass_;
+  totalInertiaMatrix_->block<3, 3>(3, 3) = inertia;  // COPY
+  hasLUMass_ = false;
+
+  // --- T(q) matrix ---
+
+  T_ = std::make_unique<siconos::algebra::SiconosMatrix76>();  // qDim_, ndof_);
+  T_->setZero();
+  (*T_)(0, 0) = 1.0;
+  (*T_)(1, 1) = 1.0;
+  (*T_)(2, 2) = 1.0;
+  siconos::modeling::newton_euler::computeT(*state_q_, *T_);
+
+  // -- Tdot --
+  // lazy init, at first call of computeTdot()
+
+  // --- Wrench ---
+  wrench_ = std::make_shared<siconos::algebra::SiconosVector6>();
+  wrench_->setZero();
+  /** The follwing jacobian are always allocated since we have always
+   * Gyroscopical forces that has non linear forces
+   * This should be remove if the integration is explicit or _nullifyMGyr(false) is set to true
+   */
+
+  jacobianWrenchOver_twist_ =
+      std::make_shared<siconos::algebra::SiconosMatrix66>();  // ndof_, ndof_);
+  // jacobianWrenchOver_q_ will be allocated only if required
+  // (if fint and/or mint are defined or if mext is expressed in the inertial frame.)
+}
 
 void siconos::modeling::NewtonEulerDS::resetToInitialState() {
   // set q and q[1] to q0 and Twist0
-  assert(q0_view_);
-  assert(twist0_view_);
-  *state_q_ = *q0_view_;
-
-  *twist_ = *twist0_view_;
+  *state_q_ = q0();
+  *twist_ = twist0();
 }
 
 void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::initRhs(double time)\n");
   // dim
   x_size_ = qDim_ + 6;
-  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
-  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                               x0_internal_storage_->size());
-  x0_view_->head(ndof_) = *q0_view_;  // COPY !
-  x0_view_->tail(ndof_) = *twist0_view_;
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
+
+  use_x0([&](auto& xinit) {
+    xinit.head(ndof_) = q0();  // COPY !
+    xinit.tail(ndof_) = twist0();
+  });
 
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_, *twist_;
@@ -561,11 +618,14 @@ void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   std::cout << "- q \n";
   siconos::algebra::print(*state_q_);
 
-  std::cout << "- initial state: \n" << q0_view_->transpose() << "\n";
+  std::cout << "- initial state: \n";
+  use_q0([&](const auto& v) { siconos::algebra::print(v); });
+
   std::cout << "- twist \n";
   siconos::algebra::print(*twist_);
 
-  std::cout << "- twist0 \n " << twist0_view_->transpose() << "\n";
+  std::cout << "- twist0 \n ";
+  use_twist0([&](const auto& v) { siconos::algebra::print(v); });
 
   std::cout << "- dotq \n";
   if (dotq_)

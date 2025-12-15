@@ -28,7 +28,7 @@
 #include "DynamicalSystemVisitor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
-#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TypeName.hpp"  // visitor to get ds type
 
 namespace siconos::modeling {
@@ -87,8 +87,16 @@ class DynamicalSystem {
   siconos::algebra::Index x_size_{0};
 
   /** initial state of the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> x0_view_{nullptr};
-  std::unique_ptr<std::vector<double>> x0_internal_storage_{nullptr};
+  siconos::algebra::DenseVectorStorage x0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_x0(F&& f) const {
+    return siconos::algebra::visitStorage(x0_storage_, std::forward<F>(f), "x0_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_x0(F&& f) {
+    return siconos::algebra::visitStorage(x0_storage_, std::forward<F>(f), "x0_storage_");
+  }
 
   /** the input vector due to the non-smooth law \f$ r \in R^{n} \f$
    * (multiplier, force, ...)
@@ -137,21 +145,25 @@ class DynamicalSystem {
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
    */
-  DynamicalSystem(const DynamicalSystem &ds);
+  DynamicalSystem(const DynamicalSystem& ds);
 
   // Rule of five
-  DynamicalSystem &operator=(const DynamicalSystem &) = delete;
-  DynamicalSystem(DynamicalSystem &&) = delete;
-  DynamicalSystem &operator=(DynamicalSystem &&) = delete;
+  DynamicalSystem& operator=(const DynamicalSystem&) = delete;
+  DynamicalSystem(DynamicalSystem&&) = delete;
+  DynamicalSystem& operator=(DynamicalSystem&&) = delete;
 
  public:
   /** destructor */
   virtual ~DynamicalSystem() noexcept = default;
 
   /** \return a read-only view on the initial state vector */
-  inline const siconos::algebra::ConstMapVectorType x0() const {
-    return siconos::algebra::ConstMapVectorType(x0_view_->data(), x0_view_->size());
+  /**  \return a read-only reference on the initial state */
+  Eigen::Ref<const siconos::algebra::SiconosVector> x0() const {
+    return use_x0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
+  /** True if x0 is defined */
+  bool hasX0() const { return !std::holds_alternative<std::monostate>(x0_storage_); }
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -227,13 +239,13 @@ class DynamicalSystem {
   //  *
   //  *  \return pointer on a siconos::algebra::SiconosVector
   //  */
-  inline siconos::algebra::SiconosVector &x_python() const { return *(state_x_[0]); }
+  inline siconos::algebra::SiconosVector& x_python() const { return *(state_x_[0]); }
 
   /** \return r vector (input due to nonsmooth behavior) */
   inline std::shared_ptr<siconos::algebra::SiconosVector> r() const { return rVector_; }
 
   /** \return r vector (input due to nonsmooth behavior) */
-  inline siconos::algebra::SiconosVector &r_python() const { return *rVector_; }
+  inline siconos::algebra::SiconosVector& r_python() const { return *rVector_; }
 
   /** \return the right-hand side vector (i.e. \f$ \dot x \f$) */
   inline std::shared_ptr<siconos::algebra::SiconosVector> rhs() const { return state_x_[1]; }
@@ -245,25 +257,25 @@ class DynamicalSystem {
 
   /** \return a read-only access to \f$ \nabla_x rhs()\f$, as a vector =[col0, col1, ...]
    */
-  const auto &jacobianRhsOver_x() const { return jacobianRhsOver_x_; }
+  const auto& jacobianRhsOver_x() const { return jacobianRhsOver_x_; }
 
   /** \return a writable vector which represents \f$ \nabla_x rhs()\f$, as a vector =[col0,
    * col1, ...]
    */
-  auto &jacobianRhsOver_x_readwrite() { return jacobianRhsOver_x_; }
+  auto& jacobianRhsOver_x_readwrite() { return jacobianRhsOver_x_; }
 
   /** get all the values of the state vector x stored in a SiconosMemory object
    *  (not const due to LinearSMC::actuate)
    *
    *  \return a reference to the SiconosMemory object
    */
-  inline siconos::algebra::SiconosMemory &xMemory() { return xMemory_; }
+  inline siconos::algebra::SiconosMemory& xMemory() { return xMemory_; }
 
   /** get all the values of the state vector x stored in a SiconosMemory object
    *
    *  \return a const reference to the SiconosMemory object
    */
-  inline const siconos::algebra::SiconosMemory &xMemory() const { return xMemory_; }
+  inline const siconos::algebra::SiconosMemory& xMemory() const { return xMemory_; }
 
   /** returns the number of step saved in memory for state vector
    *
@@ -305,14 +317,36 @@ class DynamicalSystem {
     return old_count;
   };
 
-  /** Reset initial state. Warning: shared view between newX0 and internal x0!
+  /** @brief Reset initial state.
    *
-   *  \param newx0 the new x0 vector
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
    */
-  void setX0(Eigen::Ref<siconos::algebra::SiconosVector> newx0);
+  void setX0(const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant external forces vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setX0(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+             siconos::algebra::AliasTag tag);
 
   /** reset the state x() to the initial state x0 */
-  virtual void resetToInitialState() = 0;
+  virtual void resetToInitialState();
 
   /** \return true if the system is linear
    */
@@ -323,18 +357,18 @@ class DynamicalSystem {
   virtual void display(bool brief = true) const = 0;
 
   // accept function used to call visit(shared_ptr<DS>)
-  virtual void acceptSP(dynamical_systems::Visitor &) {
+  virtual void acceptSP(dynamical_systems::Visitor&) {
     throw std::logic_error(
         "this class derived from DynamicalSystem does not accept a visitor for shared "
         "pointers");
   };
 
   // accept function used to call visit(DS)
-  virtual void accept(dynamical_systems::Visitor &) const {
+  virtual void accept(dynamical_systems::Visitor&) const {
     throw std::logic_error("accept: no visitor defined");
   };
 
-  virtual Type acceptType(siconos::types::FindType &ft) const = 0;
+  virtual Type acceptType(siconos::types::FindType& ft) const = 0;
 };
 }  // namespace siconos::modeling
 #endif  // DynamicalSystem_H

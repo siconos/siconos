@@ -26,6 +26,7 @@
 #include <LagrangianLinearTIDS.hpp>
 
 #include "SiconosContactor.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::collision {
 
@@ -45,13 +46,8 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   bool _allowSelfCollide{true};
 
  public:
-  // RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-  //               Eigen::Ref<siconos::algebra::SiconosVector> velocity,
-  //               Eigen::Ref<siconos::algebra::SiconosMatrix> mass);
-
-  RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-                Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
-                double inertia);
+  RigidBody2dDS(const siconos::algebra::SiconosVector3& position,
+                const siconos::algebra::SiconosVector3& velocity, double mass, double inertia);
 
   virtual ~RigidBody2dDS() noexcept = default;
 
@@ -84,7 +80,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 };

@@ -22,6 +22,7 @@
 
 #include "LagrangianSparseDS.hpp"
 #include "SiconosMatrix.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 
@@ -127,8 +128,8 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    */
   template <typename F>
   decltype(auto) useStiffness(F&& f) const {
-    return siconos::algebra::visitSparseStorage(stiffnessMatrix_storage, std::forward<F>(f),
-                                                "stiffnessMatrix_storage");
+    return siconos::algebra::visitStorage(stiffnessMatrix_storage, std::forward<F>(f),
+                                          "stiffnessMatrix_storage");
   }
 
   /**
@@ -150,8 +151,8 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    */
   template <typename F>
   decltype(auto) useDamping(F&& f) const {
-    return siconos::algebra::visitSparseStorage(dampingMatrix_storage, std::forward<F>(f),
-                                                "dampingMatrix_storage");
+    return siconos::algebra::visitStorage(dampingMatrix_storage, std::forward<F>(f),
+                                          "dampingMatrix_storage");
   }
 
   // Non const versions. Not needed but kept for the record ...
@@ -169,45 +170,75 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
   // }
 
  public:
-  /** constructor from initial state only.
-   *  Leads to \f$ M\dot v = F_{ext}(t) + p \f$ .
+  /** constructor from initial state and velocity with memory alias
    *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   */
-  /** constructor from initial state - Used for RigidBodies
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
    *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
+   * This means that for initial position and velocity
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
-  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                             Eigen::Ref<siconos::algebra::SiconosVector> v0)
-      : LagrangianSparseDS{q0, v0} {}
+  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                             Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                             siconos::algebra::AliasTag)
+      : LagrangianSparseDS(position, velocity, siconos::algebra::alias_t) {}
+
+  /** constructor from initial state and velocity with copy
+   *
+   *  initial state and velocity attributes will be initialised (copied)
+   *  from the input vectors
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  LagrangianSparseLinearTIDS(const siconos::algebra::SiconosVector& position,
+                             const siconos::algebra::SiconosVector& velocity,
+                             siconos::algebra::CopyTag)
+      : LagrangianSparseDS(position, velocity, siconos::algebra::copy_t) {}
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
-   * warning: M will be copied into mass attribute.
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
+   *  initial state, velocity and mass attributes will be initialised (copied)
+   *  from the input vectors/matrices
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param[in] M mass matrix
+   *  @param[in] tag pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+
    */
-  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                             Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                             const siconos::algebra::SiconosSparseMatrix& M);
+  LagrangianSparseLinearTIDS(const siconos::algebra::SiconosVector& position,
+                             const siconos::algebra::SiconosVector& velocity,
+                             const siconos::algebra::SiconosSparseMatrix& M,
+                             siconos::algebra::CopyTag tag);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
-   * warning: M will be aliased into mass attribute --> mass memory not owned by the current
-   * object This should be used with care: input M must survive to the current object.
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
    *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
+   * This means that for initial position and velocity
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param[in] M mass matrix
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
-  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                             Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                             Eigen::Map<siconos::algebra::SiconosSparseMatrix>& M);
+  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                             Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                             Eigen::Map<siconos::algebra::SiconosSparseMatrix>& M,
+                             siconos::algebra::AliasTag tag);
 
   /** destructor */
   ~LagrangianSparseLinearTIDS() noexcept = default;
@@ -278,7 +309,7 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& stiffnessMatrix_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         stiffnessMatrix_storage,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "stiffnessMatrix_storage");
@@ -306,7 +337,7 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& dampingMatrix_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         dampingMatrix_storage,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "dampingMatrix_storage");

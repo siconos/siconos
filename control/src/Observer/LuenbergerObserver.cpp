@@ -21,10 +21,8 @@
 #include "ControlSensor.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearDS.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
-#include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 //  #define DEBUG_NOCOLOR
@@ -74,7 +72,7 @@ void siconos::control::LuenbergerObserver::initialize(
   }
 
   // Initialize with the guessed state
-  _DS->setX0(*_xHat);  // Shared memory view!
+  _DS->setX0(*_xHat, siconos::algebra::copy_t);
   _DS->resetToInitialState();
   DEBUG_EXPR(_DS->display(););
   _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());

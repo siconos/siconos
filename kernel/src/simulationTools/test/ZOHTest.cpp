@@ -20,6 +20,7 @@
 #include "EventsManager.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -38,7 +39,8 @@ void ZOHTest::setUp() {
 }
 
 void ZOHTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_model, _TD, 0);
@@ -159,7 +161,8 @@ void ZOHTest::testMatrixIntegration2() {
   D->setZero();
   rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -229,7 +232,8 @@ void ZOHTest::testMatrixIntegration3() {
   D->setZero();
   rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -304,7 +308,8 @@ void ZOHTest::testMatrixIntegration4() {
   D->setZero();
   rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);

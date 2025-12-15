@@ -41,8 +41,8 @@ class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
    *  \param position initial coordinates
    *  \param velocity initial velocity
    */
-  Disk(double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> position,
-       Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+  Disk(double radius, double mass, const siconos::algebra::SiconosVector3& position,
+       const siconos::algebra::SiconosVector3& velocity);
 
   /** destructor */
   virtual ~Disk() noexcept = default;

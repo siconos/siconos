@@ -28,6 +28,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::algebra {
 
@@ -87,11 +88,20 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
 
-  /** M matrix of the system (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> MMatrix_view_{nullptr};
+  /** M matrix of the system */
+  siconos::algebra::DenseStorage MMatrix_storage_{std::monostate{}};
 
-  /** internal storage (optional) for the MMatrix matrix */
-  std::unique_ptr<std::vector<double>> MMatrix_internal_storage_{nullptr};
+  template <typename F>
+  decltype(auto) use_MMatrix(F&& f) {
+    return siconos::algebra::visitStorage(MMatrix_storage_, std::forward<F>(f),
+                                          "MMatrix_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_MMatrix(F&& f) const {
+    return siconos::algebra::visitStorage(MMatrix_storage_, std::forward<F>(f),
+                                          "MMatrix_storage_");
+  }
 
   /** function wrapper used to compute MMatrix */
   siconos::modeling::func_prototypes::FunctionS_M computeMMatrix_{nullptr};
@@ -103,10 +113,13 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   bool hasMMatrix_{false};
 
   /** external forces applied to the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> fVector_view_{nullptr};
+  siconos::algebra::DenseVectorStorage fVector_storage_{std::monostate{}};
 
-  /** internal (optional) storage used for external forces */
-  std::unique_ptr<std::vector<double>> fVector_internal_storage_{nullptr};
+  template <typename F>
+  decltype(auto) use_fVector(F&& f) const {
+    return siconos::algebra::visitStorage(fVector_storage_, std::forward<F>(f),
+                                          "fVector_storage_");
+  }
 
   /** function wrapper used to compute external forces */
   siconos::modeling::func_prototypes::FunctionVS_V computefVector_{nullptr};
@@ -117,11 +130,21 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /** True if external forces are taken into account */
   bool hasfVector_{false};
 
-  /** \f$ \nabla_x f(x,t) \f$ (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> jacobianfOver_x_view_{nullptr};
+  /** \f$ \nabla_x f(x,t) \f$*/
 
-  /** internal storage (optional) for \f$ \nabla_x f(x,t) \f$ matrix */
-  std::unique_ptr<std::vector<double>> jacobianfOver_x_internal_storage_{nullptr};
+  siconos::algebra::DenseStorage jacobianfOver_x_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_jacobianfOver_x(F&& f) {
+    return siconos::algebra::visitStorage(jacobianfOver_x_storage_, std::forward<F>(f),
+                                          "jacobianfOver_x_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_jacobianfOver_x(F&& f) const {
+    return siconos::algebra::visitStorage(jacobianfOver_x_storage_, std::forward<F>(f),
+                                          "jacobianfOver_x_storage_");
+  }
 
   /** function wrapper used to compute \f$ \nabla_x f(x,t) \f$ */
   siconos::modeling::func_prototypes::FunctionVS_M computejacobianfOver_x_{nullptr};
@@ -159,11 +182,32 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   // FirstOrderNonLinearDS() = default;
 
  public:
-  /** constructor from initial state, leads to \f$ \dot x = r \f$
+  /** Constructor from initial state, leads to \f$ \dot x = r \f$
    *
-   *  \param newX0 initial state
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for initial state
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] x0 initial state
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
-  FirstOrderNonLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0);
+  FirstOrderNonLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0,
+                        siconos::algebra::AliasTag);
+
+  /** Constructor from initial state, leads to \f$ \dot x = r \f$
+   *
+   *  initial state will be initialised (copied)
+   *  from the input vectors
+   *
+   *  @param[in] x0 initial state
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  FirstOrderNonLinearDS(const siconos::algebra::SiconosVector& x0, siconos::algebra::CopyTag);
 
   /** Copy constructor
    *
@@ -186,17 +230,40 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   void initializeNonSmoothInput(unsigned int level) override;
 
-  /*  \return a read-only view on the matrix M(t) */
-  inline auto MMatrix() const {
-    return siconos::algebra::ConstMapType(MMatrix_view_->data(), MMatrix_view_->rows(),
-                                          MMatrix_view_->cols());
+  /*  \return a read-only reference on the matrix M(t) */
+  Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> MMatrix() const {
+    return use_MMatrix([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant matrix M for the system
+  /** @brief set a constant M matrix for the system
    *
-   *  \param newValue MMatrix matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   *
    */
-  void setConstantMMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantMMatrix(const siconos::algebra::SiconosDenseMatrix& newValue,
+                          siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant M matrix for the system
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantMMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                          siconos::algebra::AliasTag tag);
 
   /** \return True if matrix M(t) has been set (i.e. different from identity) */
   bool hasMMatrix() const { return hasMMatrix_; }
@@ -214,8 +281,9 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   virtual void computeMMatrix(double time);
 
   /** \return  a read-only view on f(x,t)  */
-  inline auto fVector() const {
-    return siconos::algebra::ConstMapVectorType(fVector_view_->data(), fVector_view_->size());
+  Eigen::Ref<const siconos::algebra::SiconosVector> fVector() const {
+    return use_fVector(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
   /** \return  a read-only view on fbuffer (value of f(x,t) at previous time step)  */
@@ -223,11 +291,34 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
     return siconos::algebra::ConstMapVectorType(fbuffer_->data(), fbuffer_->size());
   }
 
-  /** set a constant f(x,t)  vector
+  /** @brief set a constant f(x,t)  vector
    *
-   *  \param newv f(x,t) vector
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   * version)
+   *
    */
-  void setConstantfVector(Eigen::Ref<siconos::algebra::SiconosVector> newv);
+  void setConstantfVector(const siconos::algebra::SiconosVector& newValue,
+                          siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant f(x,t)  vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantfVector(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                          siconos::algebra::AliasTag tag);
 
   /** True if f(x,t) is taken into account */
   bool hasfVector() const { return hasfVector_; }
@@ -245,18 +336,39 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   void computefVector(const Eigen::Ref<siconos::algebra::SiconosVector>& state, double time);
 
   /** \return a read-only view on \f$ \nabla_xf(x,t) \f$ matrix */
-  inline auto jacobianfOver_x() const {
-    return siconos::algebra::ConstMapType(jacobianfOver_x_view_->data(),
-                                          jacobianfOver_x_view_->rows(),
-                                          jacobianfOver_x_view_->cols());
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> jacobianfOver_x() const {
+    return use_jacobianfOver_x([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant \f$ \nabla_xf(x,t) \f$ matrix
+  /** @brief set a constant \f$ \nabla_xf(x,t) \f$ matrix for the system
    *
-   *  \param newValue jacobianfOver_x matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
-  void setConstantJacobianfOver_x(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantJacobianfOver_x(const siconos::algebra::SiconosDenseMatrix& newValue,
+                                  siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant \f$ \nabla_xf(x,t) \f$ matrix for the system
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantJacobianfOver_x(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                                  siconos::algebra::AliasTag tag);
 
   /** \return True if \f$ \nabla_xf(x,t) \f$ matrix has been set */
   bool hasJacobianfOver_x() const { return hasJacobianfOver_x_; }
@@ -275,27 +387,11 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   void computeJacobianfOver_x(const Eigen::Ref<siconos::algebra::SiconosVector>& state,
                               double time);
 
-  /** reset the state to the initial state */
-  void resetToInitialState() override;
-
   /** Change initial state (x0)
    * \param newX0 the new initial state
    *  warning: shared memory (eigen view) between newX0 and x0 attribute
    */
   void resetInitialState(Eigen::Ref<siconos::algebra::SiconosVector> newX0);
-
-  /** Reset initial state (x0) components to a constant given value
-   * \param val input value such that x0(i) = val
-   * warning: reset also state to x0.
-   */
-  void resetInitialStateToValue(double val);
-
-  /** \return a shared pointer to the initial state.
-   *  This should be used with care (or not used at all ...)
-   *  since the returned object will share memory with the internal value of x0 ...
-   */
-  auto x0_ptr() { return x0_view_; }
-  // FP:  Used only in MatrixIntegrator for ZOH and friends. This should be avoided.
 
   /** update right-hand side for the current state
    *

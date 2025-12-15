@@ -20,12 +20,15 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
-siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                                      Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
-                                      const siconos::algebra::SiconosSparseMatrix &mass,
+siconos::fem::cable::CableDS::CableDS(const siconos::algebra::SiconosVector& q0,
+                                      const siconos::algebra::SiconosVector& velocity0,
+                                      const siconos::algebra::SiconosSparseMatrix& mass,
                                       double a_EA, double a_elem_length)
-    : LagrangianSparseDS(q0, velocity0), EA_{a_EA}, l_e_{a_elem_length} {
+    : LagrangianSparseDS(q0, velocity0, siconos::algebra::copy_t),
+      EA_{a_EA},
+      l_e_{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
   setConstantMassCopy(mass);
 
@@ -73,15 +76,15 @@ siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector
   // We will use jacobianTotalForcesOver_q_ and _jacobianTotalForcesOver_velocity to save
   // tangent stiffness and damping matrices. Those are attributes of LagrangianDS class.
   jacobianTotalForcesOver_q_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+      std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 
   jacobianTotalForcesOver_velocity_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+      std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 }
 
 void siconos::fem::cable::CableDS::computeTotalForces(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
   // Update internal and external forces
   // Here you must:
   //  - compute internal forces and save them somewhere or directly in _forces
@@ -92,13 +95,13 @@ void siconos::fem::cable::CableDS::computeTotalForces(
   //  - compute external forces in fExt (or just get them if they are constant)
 
   computeFext(time);
-  if (fext_view_) *totalForces_ += *fext_view_;
+  if (hasFext_) use_fext([&](auto const& fext) { *totalForces_ += fext; });
 }
 
 // \f$ \nabla_q F \f$
 void siconos::fem::cable::CableDS::computeJacobianTotalForcesOver_q(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
   // Call a local routine which compute tangent stiffness and update a local operator
 
   // tangentStiffnessMatrix();
@@ -106,8 +109,8 @@ void siconos::fem::cable::CableDS::computeJacobianTotalForcesOver_q(
 
 // \f$ \nabla_v F \f$
 void siconos::fem::cable::CableDS::computeJacobianTotalForcesOver_velocity(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
   // Call a local routine to compute damping matrix and update a local operator
   dampingMatrix();
 }

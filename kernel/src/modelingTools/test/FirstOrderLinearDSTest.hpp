@@ -17,29 +17,32 @@
  */
 #ifndef __FirstOrderLinearDSTest__
 #define __FirstOrderLinearDSTest__
-
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "FirstOrderLinearDS.hpp"
-#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 class FirstOrderLinearDSTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(FirstOrderLinearDSTest);
-
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderLinearDSTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderLinearDS0);
-  CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS1_alias);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS1_copy);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS2_alias);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS2_copy);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS_plugins);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderLinearDS0();
-  void testBuildFirstOrderLinearDS1();
+  void testBuildFirstOrderLinearDS1_alias();
+  void testBuildFirstOrderLinearDS1_copy();
+  void testBuildFirstOrderLinearDS2_alias();
+  void testBuildFirstOrderLinearDS2_copy();
+  void testBuildFirstOrderLinearDS_plugins();
 
   // Members
 

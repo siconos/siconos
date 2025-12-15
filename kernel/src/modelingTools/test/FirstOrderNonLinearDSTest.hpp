@@ -20,19 +20,18 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "FirstOrderNonLinearDS.hpp"
-#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(FirstOrderNonLinearDSTest);
-
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderNonLinearDSTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS1);
+  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS_alias);
+  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS_copy);
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
   CPPUNIT_TEST(testInitMemory);
@@ -42,7 +41,8 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
 
   // \todo exception test
 
-  void testBuildFirstOrderNonLinearDS1();
+  void testBuildFirstOrderNonLinearDS_alias();
+  void testBuildFirstOrderNonLinearDS_copy();
   void testBuildFirstOrderNonLinearDS2();
   void testBuildFirstOrderNonLinearDS3();
   void testInitMemory();

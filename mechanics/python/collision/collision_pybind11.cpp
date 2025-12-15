@@ -119,6 +119,7 @@ PYBIND11_MODULE(_collision, m) {
 
   py::class_<siconos::collision::SiconosContactor,
              std::shared_ptr<siconos::collision::SiconosContactor>>(m, "SiconosContactor")
+      .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>>(), py::arg("shape"))
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>,
                     const siconos::algebra::SiconosVector &, int>(),
            py::arg("shape"), py::arg("offset"), py::arg("collision_group") = 0);
@@ -194,13 +195,20 @@ PYBIND11_MODULE(_collision, m) {
 
   py::class_<siconos::collision::RigidBodyDS, std::shared_ptr<siconos::collision::RigidBodyDS>,
              siconos::modeling::NewtonEulerDS>(m, "RigidBodyDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>, double,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
-           py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("position"),
-           py::arg("velocity"), py::arg("mass"), py::arg("inertia"))
+      //       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector7>,
+      //                     Eigen::Ref<siconos::algebra::SiconosVector6>, double,
+      //                     Eigen::Ref<siconos::algebra::SiconosMatrix33>>(),
+      //            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+      //            alive
+      //                                     // as long as object is referenced
+      //            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("position"),
+      //            py::arg("velocity"), py::arg("mass"), py::arg("inertia"))
+      .def(py::init<const siconos::algebra::SiconosVector7 &,
+                    const siconos::algebra::SiconosVector6 &, double,
+                    const siconos::algebra::SiconosMatrix33 &>(),
+           py::arg("q0"), py::arg("twist0"), py::arg("mass"), py::arg("inertia"))
+      //     py::arg("copy_t"))
+
       .def("setUseContactorInertia", &siconos::collision::RigidBodyDS::setUseContactorInertia,
            py::arg("useContactorInertia"))
       .def("setContactors", &siconos::collision::RigidBodyDS::setContactors,
@@ -210,6 +218,7 @@ PYBIND11_MODULE(_collision, m) {
   py::class_<siconos::collision::RigidBody2dDS,
              std::shared_ptr<siconos::collision::RigidBody2dDS>,
              siconos::modeling::LagrangianLinearTIDS>(m, "RigidBody2dDS")
+
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, double, double>(),
            py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"),

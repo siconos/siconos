@@ -24,6 +24,7 @@
 #include "SiconosConst.hpp"  // MACHINE_PREC
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TimeDiscretisation.hpp"
 // #define DEBUG_WHERE_MESSAGES
 
@@ -106,15 +107,15 @@ void siconos::simulation::MatrixIntegrator::integrate() {
   assert(fods && "MatrixIntegrator only available for first order DS.");
 
   auto p = _mat->cols();
-  auto x0 = fods->x0_ptr();  // Shared memory !!
+  siconos::algebra::SiconosVector x0 = fods->x0();
 
   std::shared_ptr<siconos::algebra::SiconosVector> Ecol;
   if (auto linear_ds =
           std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(fods)) {
     for (siconos::algebra::Index i = 0; i < p; i++) {
-      x0->setZero();
+      x0.setZero();
       if (E_buffer_ && !computeEMatrix_) {
-        linear_ds->setConstantbVector(E_buffer_->col(i));
+        linear_ds->setConstantbVector(E_buffer_->col(i), siconos::algebra::copy_t);
       } else if (computeEMatrix_)
         linear_ds->setComputebVectorFunction(
             [this, i](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -122,8 +123,8 @@ void siconos::simulation::MatrixIntegrator::integrate() {
               result = E_buffer_->col(i);
             });
       else
-        (*x0)(i) = 1.;
-
+        x0(i) = 1.;
+      _DS->setX0(x0, siconos::algebra::alias_t);
       // Reset LsodarOSI
       //_OSI->setIsInitialized(false);
       _DS->resetToInitialState();
@@ -138,10 +139,11 @@ void siconos::simulation::MatrixIntegrator::integrate() {
     // So, only Matrix Integrators with first order linear ds can have a computeE.
     assert(!computeEMatrix_);
     for (siconos::algebra::Index i = 0; i < p; i++) {
-      x0->setZero();
-      (*x0)(i) = 1.;
+      x0.setZero();
+      x0(i) = 1.;
       // Reset LsodarOSI
       //_OSI->setIsInitialized(false);
+      _DS->setX0(x0, siconos::algebra::alias_t);
       _DS->resetToInitialState();
       _sim->setIstate(1);
       _sim->advanceToEvent();

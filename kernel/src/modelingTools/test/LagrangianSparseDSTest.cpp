@@ -20,6 +20,7 @@
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TypeName.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -89,7 +90,36 @@ static void checkRhs(siconos::modeling::LagrangianSparseDS& ds,
 // constructor from initial state only
 // No plugins, no mass, nothing optional
 void LagrangianSparseDSTest::testBuildLagrangianSparseDS_basic() {
-  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0);
+  // First check: copy and alias mode for initial state
+  siconos::algebra::SiconosVector q00{3};
+  siconos::algebra::SiconosVector v00{3};
+  q00 << 1, 2, 3;
+  v00 << 4, 5, 6;
+  siconos::modeling::LagrangianSparseDS ds0{q00, v00, siconos::algebra::copy_t};
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", q00.isApprox(ds0.q0()), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", v00.isApprox(ds0.velocity0()),
+                               true);
+
+  q00(0) += 17;
+  v00(1) += 12;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", q00.isApprox(ds0.q0()),
+                               false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", v00.isApprox(ds0.velocity0()),
+                               false);
+
+  siconos::modeling::LagrangianSparseDS ds1{q00, v00, siconos::algebra::alias_t};
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", q00.isApprox(ds1.q0()), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", v00.isApprox(ds1.velocity0()),
+                               true);
+
+  q00(0) += 17;
+  v00(1) += 12;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", q00.isApprox(ds1.q0()), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Basic constructor - 0: ", v00.isApprox(ds1.velocity0()),
+                               true);
+
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0,
+                                                                    siconos::algebra::alias_t);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianSparseDS1: ",
       siconos::types::type_value(*ds) == siconos::modeling::Type::LagrangianSparseDS, true);
@@ -148,7 +178,8 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_basic() {
 // Operators set as constant vectors or matrices, using the "alias" version for sparse matrices
 //  (no copy, shared memory, memory not owned by the DS)
 void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
-  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0,
+                                                                    siconos::algebra::alias_t);
   auto mass_map = std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(
       mass->rows(), mass->cols(), mass->nonZeros(), mass->outerIndexPtr(),
       mass->innerIndexPtr(), mass->valuePtr());
@@ -157,7 +188,7 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
-  ds->setConstantFext(fext);
+  ds->setConstantFext(fext, siconos::algebra::alias_t);
   auto oldvalue = mass_map->coeff(0, 0);
   // Modify ref mass --> this should update ds.mass
   mass_map->coeffRef(0, 0) = 99.;
@@ -248,12 +279,13 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
 // A DS with all operators (mass, fext, fint, fgyr)
 // Operators set as constant vectors or matrices, using the "copy" version for sparse matrices
 void LagrangianSparseDSTest::testBuildLagrangianSparseDS_copy() {
-  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0,
+                                                                    siconos::algebra::copy_t);
   ds->setConstantMassCopy(*mass);
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
-  ds->setConstantFext(fext);
+  ds->setConstantFext(fext, siconos::algebra::alias_t);
 
   siconos::algebra::SiconosVector3 ref;
   ref << 1, 2, 3;
@@ -331,7 +363,8 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_copy() {
 
 // A DS with all operators (mass, fext, fint, fgyr and jacobians) as user-defined functions
 void LagrangianSparseDSTest::testBuildLagrangianSparseDS_compute() {
-  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0,
+                                                                    siconos::algebra::copy_t);
 
   auto mass_func = [](const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
                       siconos::algebra::SiconosSparseMatrix& result) {

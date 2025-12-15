@@ -19,14 +19,12 @@
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
-#include "EventsManager.hpp"
 #include "ExplicitLinearSMC.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Simulation.hpp"
 #include "Twisting.hpp"
 #include "io.hpp"
 
@@ -61,16 +59,18 @@ void SMCTest::setUp() {
 }
 
 void SMCTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _iSMC = std::make_shared<siconos::control::LinearSMC>(_sensor, _B);
   _iSMC->setCsurface(_Csurface);
 }
 
 void SMCTest::init2() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _eSMC = std::make_shared<siconos::control::ExplicitLinearSMC>(_sensor, _B);
   _eSMC->setCsurface(_Csurface);
@@ -79,8 +79,9 @@ void SMCTest::init2() {
 
 #ifdef HAS_EXTREME_POINT_ALGO
 void SMCTest::initTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);

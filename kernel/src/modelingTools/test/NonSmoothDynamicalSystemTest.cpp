@@ -22,6 +22,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "Topology.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -41,7 +42,8 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem() {
 
   siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+  auto ds =
+      std::make_shared<siconos::modeling::LagrangianDS>(q0, v0, siconos::algebra::alias_t);
   ds->setNumber(23);
 
   try {
@@ -79,7 +81,8 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
   siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+  auto ds =
+      std::make_shared<siconos::modeling::LagrangianDS>(q0, v0, siconos::algebra::alias_t);
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
@@ -108,10 +111,12 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
   siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+  auto ds1 =
+      std::make_shared<siconos::modeling::LagrangianDS>(q0, v0, siconos::algebra::alias_t);
 
   ds1->setNumber(23);
-  auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+  auto ds2 =
+      std::make_shared<siconos::modeling::LagrangianDS>(q0, v0, siconos::algebra::alias_t);
 
   ds2->setNumber(32);
 
@@ -179,7 +184,8 @@ void NonSmoothDynamicalSystemTest::testremoveInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
   siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+  auto ds =
+      std::make_shared<siconos::modeling::LagrangianDS>(q0, v0, siconos::algebra::alias_t);
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);

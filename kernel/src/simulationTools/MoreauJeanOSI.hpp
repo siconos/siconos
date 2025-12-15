@@ -490,7 +490,7 @@ namespace moreau_jean {
  */
 void computeIterationMatrix_NewtonEuler(
     double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+    Eigen::Ref<siconos::algebra::SiconosMatrix66> W,
     std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &LUW);
 
 /** Update the state vector of a given dynamical system

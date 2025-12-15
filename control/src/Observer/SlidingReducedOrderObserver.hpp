@@ -24,6 +24,7 @@
 #define SlidingReducedOrderObserver_H
 
 #include "Observer.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::control {
 class SlidingReducedOrderObserver : public Observer {
@@ -50,9 +51,7 @@ class SlidingReducedOrderObserver : public Observer {
    */
   SlidingReducedOrderObserver(std::shared_ptr<ControlSensor> sensor,
                               const siconos::algebra::SiconosVector& xHat0)
-      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0)
-  {
-  }
+      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0) {}
 
   /** Constructor with all the data
    *
@@ -65,9 +64,7 @@ class SlidingReducedOrderObserver : public Observer {
                               const siconos::algebra::SiconosVector& xHat0,
                               std::shared_ptr<siconos::algebra::SiconosMatrix> C,
                               std::shared_ptr<siconos::algebra::SiconosMatrix> L)
-      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0), _C(C), _L(L)
-  {
-  }
+      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0), _C(C), _L(L) {}
 
   ~SlidingReducedOrderObserver() noexcept = default;
 

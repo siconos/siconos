@@ -21,6 +21,7 @@
 #include "SiconosContactor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 // siconos::collision::RigidBody2dDS::RigidBody2dDS(
 //     Eigen::Ref<siconos::algebra::SiconosVector> position,
@@ -38,22 +39,19 @@
 // }
 
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> position,
-    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass, double inertia)
-    : LagrangianLinearTIDS(position, velocity),
+    const siconos::algebra::SiconosVector3& position,
+    const siconos::algebra::SiconosVector3& velocity, double mass, double inertia)
+    : LagrangianLinearTIDS(position, velocity, siconos::algebra::copy_t),
       scalarMass_(mass),
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
-  assert(position.size() == 3 && velocity.size() == 3);
-  if (!mass_internal_storage_) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
-  }
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
-                                                           ndof_, ndof_);
-  mass_view_->setZero();
+  mass_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
+  use_mass([&](auto& M) {
+    M.setZero();
+    M(0, 0) = mass;
+    M(1, 1) = mass;
+    M(2, 2) = inertia;
+  });
   hasMass_ = true;
   hasConstantMass_ = true;
   computemass_ = nullptr;
-  (*mass_view_)(0, 0) = mass;
-  (*mass_view_)(1, 1) = mass;
-  (*mass_view_)(2, 2) = inertia;
 }

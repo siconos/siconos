@@ -23,11 +23,11 @@
 #include "Interaction.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-
+#include "StorageTools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 //  constructor
 siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(
@@ -37,9 +37,9 @@ siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystem
     Eigen::Ref<siconos::algebra::SiconosMatrix> C,
     Eigen::Ref<siconos::algebra::SiconosMatrix> D,
     Eigen::Ref<siconos::algebra::SiconosVector> b,
-    Eigen::Ref<siconos::algebra::SiconosVector> e)
+    Eigen::Ref<siconos::algebra::SiconosVector> e, siconos::algebra::AliasTag)
     : NonSmoothDynamicalSystem(t0, T) {
-  _ds = std::make_shared<FirstOrderLinearDS>(x0, A, b);
+  _ds = std::make_shared<FirstOrderLinearDS>(x0, A, b, siconos::algebra::alias_t);
   _relation = std::make_shared<FirstOrderLinearTIR>(C, B);
 
   // todo: check sizes --> done during rel->initialize()
@@ -53,3 +53,26 @@ siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystem
 
   display();
 };
+
+// siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(
+//     double t0, double T, const siconos::algebra::SiconosVector& x0,
+//     const siconos::algebra::SiconosDenseMatrix& A,
+//     const siconos::algebra::SiconosDenseMatrix& B,
+//     const siconos::algebra::SiconosDenseMatrix& C,
+//     const siconos::algebra::SiconosDenseMatrix& D, const siconos::algebra::SiconosVector& b,
+//     const siconos::algebra::SiconosVector& e, siconos::algebra::CopyTag tag)
+//     : NonSmoothDynamicalSystem(t0, T) {
+//   _ds = std::make_shared<FirstOrderLinearDS>(x0, A, b, siconos::algebra::copy_t);
+//   _relation = std::make_shared<FirstOrderLinearTIR>(C, B);
+
+//   // todo: check sizes --> done during rel->initialize()
+//   _relation->setConstantD(D);
+//   _relation->setConstanteVector(e);
+
+//   _nslaw = std::make_shared<ComplementarityConditionNSL>(C.rows());
+//   _interaction = std::make_shared<Interaction>(_nslaw, _relation);
+
+//   link(_interaction, _ds);
+
+//   display();
+// };

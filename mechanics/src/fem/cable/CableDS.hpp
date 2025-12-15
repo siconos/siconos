@@ -56,15 +56,15 @@ class CableDS : public siconos::modeling::LagrangianSparseDS {
   std::shared_ptr<siconos::algebra::SiconosSparseMatrix> TRNp_Np{nullptr};
 
   CableDS() = delete;
-  CableDS(const CableDS &) = delete;
-  CableDS(CableDS &&) = delete;
-  CableDS &operator=(const CableDS &) = delete;
-  CableDS &operator=(CableDS &&) = delete;
+  CableDS(const CableDS&) = delete;
+  CableDS(CableDS&&) = delete;
+  CableDS& operator=(const CableDS&) = delete;
+  CableDS& operator=(CableDS&&) = delete;
 
  public:
-  CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-          Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
-          const siconos::algebra::SiconosSparseMatrix &mass, double a_EA,
+  CableDS(const siconos::algebra::SiconosVector& q0,
+          const siconos::algebra::SiconosVector& velocity0,
+          const siconos::algebra::SiconosSparseMatrix& mass, double a_EA,
           double a_elem_length);
 
   ~CableDS() noexcept = default;
@@ -74,25 +74,25 @@ class CableDS : public siconos::modeling::LagrangianSparseDS {
   // This function will be called by the integrator at each time
   // step to update  \f$ F(v, q, t, z) \f$
   // --> takes into account fInt and fext
-  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
                           double time) override;
 
   // \f$ \nabla_q F \f$
   void computeJacobianTotalForcesOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) override;
 
   // \f$ \nabla_v F \f$
   void computeJacobianTotalForcesOver_velocity(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) override;
 
   void tangentStiffnessMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
 
-  virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 };

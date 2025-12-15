@@ -17,6 +17,7 @@
 #include "SiconosShape.hpp"
 #include "SiconosVector.hpp"
 #include "StaticBody.hpp"
+#include "StorageTools.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "test-utils.hpp"
@@ -40,7 +41,7 @@ void Contact2dTest::setUp() {}
 void Contact2dTest::tearDown() {}
 
 static BounceResult bounceTest(std::string moving, std::string ground,
-                               const BounceParams &params) {
+                               const BounceParams& params) {
   params.dump();
   // User-defined main parameters
   double t0 = 0;                           // initial computation time
@@ -163,7 +164,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   siconos::algebra::SiconosVector FExt{3};
   FExt.setZero();
   FExt(1) = -params.mass * g;
-  body->setConstantFext(FExt);
+  body->setConstantFext(FExt, siconos::algebra::copy_t);
 
   // -- Add the dynamical systems into the non smooth dynamical system
   nsds->insertDynamicalSystem(body);

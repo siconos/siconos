@@ -41,8 +41,8 @@ class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
    *  \param position initial coordinates
    *  \param velocity initial velocity
    */
-  Circle(double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> position,
-         Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+  Circle(double radius, double mass, const siconos::algebra::SiconosVector3& qinit,
+         const siconos::algebra::SiconosVector3& vinit);
 
   /** destructor */
   virtual ~Circle() noexcept = default;

@@ -33,20 +33,22 @@ class LagrangianLinearTIDSTest : public CppUnit::TestFixture {
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianLinearTIDS1);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIDS_alias);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIDS_copy);
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS2);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianLinearTIDS1();
+  void testBuildLagrangianLinearTIDS_alias();
+  void testBuildLagrangianLinearTIDS_copy();
   void testBuildLagrangianLinearTIDS2();
 
   // Members
 
   siconos::algebra::SiconosVector3 q0, velocity0;
-  siconos::algebra::SiconosMatrix mass{3, 3}, minus_inv_M{3,3};
-  siconos::algebra::SiconosMatrix K{3, 3}, C{3, 3}, rhsK{3,3}, rhsC{3,3};
+  siconos::algebra::SiconosMatrix mass{3, 3}, minus_inv_M{3, 3};
+  siconos::algebra::SiconosMatrix K{3, 3}, C{3, 3}, rhsK{3, 3}, rhsC{3, 3};
 
  public:
   void setUp();

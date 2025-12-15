@@ -32,23 +32,60 @@ rng = np.random.default_rng(seed=42)
 
 
 # -- Dense storage Lagrangian DS --
-def test_lagrangianDS():
-    print("start test_lagrangianDS")
+def test_LagrangianDS_alias():
+    print("start test_LagrangianDS")
     q0 = np.array([1, 0, 0], dtype=np.float64)
     v0 = np.zeros_like(q0)
-    ball = sm.LagrangianDS(q0, v0)
+    ball = sm.LagrangianDS(q0, v0, sm.alias_t)
+
+    assert np.allclose(q0, ball.q0)
+    assert np.allclose(v0, ball.velocity0)
+
+    q0[...] += 3
+    v0[...] += 1.2
+
+    assert np.allclose(q0, ball.q0)
+    assert np.allclose(v0, ball.velocity0)
 
     fext = np.zeros_like(q0)
     fext[:] = 122
-    ball.setConstantFext(fext)
-    assert np.allclose(ball.fext()[:], fext[:])
+    ball.setConstantFext(fext, sm.alias_t)
+    assert np.allclose(ball.fext[:], fext[:])
     fext[1] = 12
-    assert np.allclose(ball.fext()[:], fext[:])
+    assert np.allclose(ball.fext[:], fext[:])
 
     fext = 453
-    assert ball.fext()[0] == ball.fext()[2] == 122
-    assert ball.fext()[1] == 12
-    print("end test_lagrangianDS")
+    assert ball.fext[0] == ball.fext[2] == 122
+    assert ball.fext[1] == 12
+    print("end test_LagrangianDS")
+
+
+def test_LagrangianDS_copy():
+    print("start test_LagrangianDS")
+    q0 = np.array([1, 0, 0], dtype=np.float64)
+    v0 = np.zeros_like(q0)
+    ball = sm.LagrangianDS(q0, v0, sm.copy_t)
+
+    assert np.allclose(q0, ball.q0)
+    assert np.allclose(v0, ball.velocity0)
+
+    q0[...] += 3
+    v0[...] += 1.2
+
+    assert not np.allclose(q0, ball.q0)
+    assert not np.allclose(v0, ball.velocity0)
+
+    fext = np.zeros_like(q0)
+    fext[:] = 122
+    ball.setConstantFext(fext, sm.alias_t)
+    assert np.allclose(ball.fext[:], fext[:])
+    fext[1] = 12
+    assert np.allclose(ball.fext[:], fext[:])
+
+    fext = 453
+    assert ball.fext[0] == ball.fext[2] == 122
+    assert ball.fext[1] == 12
+    print("end test_LagrangianDS")
 
 
 def fint_func(vel, pos, time, result):
@@ -61,14 +98,14 @@ def mass_func(pos, result):
         result[:, i] = i * pos
 
 
-def test_lagrangianDS_compute_mass():
-    print("start test_lagrangianDS_compute_mass")
+def test_LagrangianDS_compute_mass():
+    print("start test_LagrangianDS_compute_mass")
     ndof = 3
     q0 = np.zeros(ndof, dtype=np.float64)
     v0 = np.zeros_like(q0)
     q0[:] = np.arange(1, ndof + 1)
     v0[:] = np.arange(4, ndof + 4)
-    ball = sm.LagrangianDS(q0, v0)
+    ball = sm.LagrangianDS(q0, v0, sm.alias_t)
     ball.setComputeMassFunction(mass_func)
 
     q = ball.q()
@@ -87,15 +124,15 @@ def test_lagrangianDS_compute_mass():
     assert np.allclose(ball.mass, ref)
 
 
-def test_lagrangianDS_compute():
-    print("start test_lagrangianDS_compute")
+def test_LagrangianDS_compute():
+    print("start test_LagrangianDS_compute")
 
     ndof = 3
     q0 = np.zeros(ndof, dtype=np.float64)
     v0 = np.zeros_like(q0)
     q0[:] = np.arange(1, ndof + 1)
     v0[:] = np.arange(4, ndof + 4)
-    ball = sm.LagrangianDS(q0, v0)
+    ball = sm.LagrangianDS(q0, v0, sm.alias_t)
     ball.setComputeFintFunction(fint_func)
 
     q = ball.q()
@@ -113,8 +150,8 @@ def test_lagrangianDS_compute():
     assert np.allclose(ball.fint, ref)
 
 
-def test_lagrangianLinearTIDS():
-    print("start test_lagrangianLinearTIDS")
+def test_lagrangianLinearTIDS_alias():
+    print("start test_lagrangianLinearTIDS_alias")
     q0 = np.array([1, 0, 0], dtype=np.float64)
     v0 = np.zeros_like(q0)
     mass = np.empty((3, 3), dtype=np.float64, order="F")
@@ -123,26 +160,78 @@ def test_lagrangianLinearTIDS():
     rng.random(mass.shape, out=mass)
     rng.random(mass.shape, out=stiff)
     rng.random(mass.shape, out=damp)
-    ball = sm.LagrangianLinearTIDS(q0, v0, mass)
-    ball.setStiffnessMatrix(stiff)
-    ball.setDampingMatrix(damp)
+    ball = sm.LagrangianLinearTIDS(q0, v0, mass, sm.alias_t)
+    assert np.allclose(ball.q0, q0)
+    assert np.allclose(ball.velocity0, v0)
+    assert np.allclose(ball.mass, mass)
+    q0 *= 3.0
+    v0 += 1
+    mass *= 2.1
+    assert np.allclose(ball.q0, q0)
+    assert np.allclose(ball.velocity0, v0)
+    assert np.allclose(ball.mass, mass)
+
+    ball.setStiffnessMatrix(stiff, sm.alias_t)
+    ball.setDampingMatrix(damp, sm.alias_t)
+
+    assert np.allclose(ball.stiffnessMatrix, stiff)
+    assert np.allclose(ball.dampingMatrix, damp)
+    damp *= 1.2
+    stiff += 14.0
+    assert np.allclose(ball.stiffnessMatrix, stiff)
+    assert np.allclose(ball.dampingMatrix, damp)
+
     fext = np.zeros_like(q0)
     fext[:] = 122
-    ball.setConstantFext(fext)
-    assert np.allclose(ball.fext()[:], fext[:])
+    ball.setConstantFext(fext, sm.alias_t)
+    assert np.allclose(ball.fext[:], fext[:])
     fext[1] = 12
-    assert np.allclose(ball.fext()[:], fext[:])
+    assert np.allclose(ball.fext[:], fext[:])
 
     fext = 453
-    assert ball.fext()[0] == ball.fext()[2] == 122
-    assert ball.fext()[1] == 12
+    assert ball.fext[0] == ball.fext[2] == 122
+    assert ball.fext[1] == 12
+    print("end test_lagrangianLinearTIDS_alias")
 
-    assert np.allclose(mass, ball.mass)
-    assert np.allclose(stiff, ball.stiffnessMatrix)
-    assert np.allclose(damp, ball.dampingMatrix)
-    stiff[1, 1] = 128
-    assert np.allclose(stiff, ball.stiffnessMatrix)
-    print("end test_lagrangianLinearTIDS")
+
+def test_lagrangianLinearTIDS_copy():
+    print("start test_lagrangianLinearTIDS_copy")
+    q0 = np.array([1, 0, 0], dtype=np.float64)
+    v0 = np.zeros_like(q0)
+    mass = np.empty((3, 3), dtype=np.float64, order="F")
+    stiff = np.empty((3, 3), dtype=np.float64, order="F")
+    damp = np.empty((3, 3), dtype=np.float64, order="F")
+    rng.random(mass.shape, out=mass)
+    rng.random(mass.shape, out=stiff)
+    rng.random(mass.shape, out=damp)
+    ball = sm.LagrangianLinearTIDS(q0, v0, mass, sm.copy_t)
+    assert np.allclose(ball.q0, q0)
+    assert np.allclose(ball.velocity0, v0)
+    assert np.allclose(ball.mass, mass)
+    q0 *= 3.0
+    v0 += 1
+    mass *= 2.1
+    assert not np.allclose(ball.q0, q0)
+    assert not np.allclose(ball.velocity0, v0)
+    assert not np.allclose(ball.mass, mass)
+
+    ball.setStiffnessMatrix(stiff, sm.copy_t)
+    ball.setDampingMatrix(damp, sm.copy_t)
+
+    assert np.allclose(ball.stiffnessMatrix, stiff)
+    assert np.allclose(ball.dampingMatrix, damp)
+    damp *= 1.2
+    stiff += 14.0
+    assert not np.allclose(ball.stiffnessMatrix, stiff)
+    assert not np.allclose(ball.dampingMatrix, damp)
+
+    fext = np.zeros_like(q0)
+    fext[:] = 122
+    ball.setConstantFext(fext, sm.copy_t)
+    assert np.allclose(ball.fext[:], fext[:])
+    fext[1] = 12
+    assert not np.allclose(ball.fext[:], fext[:])
+    print("end test_lagrangianLinearTIDS_copy")
 
 
 def test_NewtonEulerDS():
@@ -151,7 +240,7 @@ def test_NewtonEulerDS():
     mass = 2.0
     inertia = np.zeros((3, 3), dtype=np.float64, order="F")
     inertia[0, 0] = inertia[1, 1] = inertia[2, 2] = 1.0
-    neds = sm.NewtonEulerDS(q0, twist0, mass, inertia)
+    neds = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
     assert np.allclose(neds.q(), q0)
     assert np.allclose(neds.twist(), twist0)
 
@@ -162,7 +251,7 @@ def call_ds_compute(dstype, ndof):
     initial_position = rng.random(ndof)
     initial_velocity = rng.random(ndof)
 
-    ds = dstype(initial_position, initial_velocity)
+    ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
     def ref_func(q):
         diag_coeffs = np.array(1.0 + 0.1 * q)
@@ -211,7 +300,7 @@ def call_ds_alias(dstype, ndof):
 
     data = rng.random(ndof)
     mass = sp.diags_array(data, format="csc")
-    ds = dstype(initial_position, initial_velocity)
+    ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
     ds.setConstantMassAlias(mass)
     try:
@@ -239,7 +328,7 @@ def call_ds_copy(dstype, ndof):
 
     data = rng.random(ndof)
     mass = sp.diags_array(data, format="csc")
-    ds = dstype(initial_position, initial_velocity)
+    ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
     ds.setConstantMassCopy(mass)
     try:
@@ -285,20 +374,20 @@ def test_lagrangianSparseLinearTIDS_copy():
     data_c = rng.random(3)
     damp = sp.diags_array(data_c, format="csc")
 
-    ball = sm.LagrangianSparseLinearTIDS(q0, v0, mass)
+    ball = sm.LagrangianSparseLinearTIDS(q0, v0, mass, sm.copy_t)
 
     ball.setStiffnessMatrixCopy(stiff)
     ball.setDampingMatrixCopy(damp)
     fext = np.zeros_like(q0)
     fext[:] = 122
-    ball.setConstantFext(fext)
-    assert np.allclose(ball.fext()[:], fext[:])
+    ball.setConstantFext(fext, sm.alias_t)
+    assert np.allclose(ball.fext[:], fext[:])
     fext[1] = 12
-    assert np.allclose(ball.fext()[:], fext[:])
+    assert np.allclose(ball.fext[:], fext[:])
 
     fext = 453
-    assert ball.fext()[0] == ball.fext()[2] == 122
-    assert ball.fext()[1] == 12
+    assert ball.fext[0] == ball.fext[2] == 122
+    assert ball.fext[1] == 12
 
     assert np.allclose(mass.toarray(), ball.mass_view.toarray())
     assert np.allclose(stiff.toarray(), ball.stiffness_view.toarray())
@@ -318,20 +407,20 @@ def test_lagrangianSparseLinearTIDS_alias():
     stiff = sp.diags_array(data_k, format="csc")
     data_c = rng.random(3)
     damp = sp.diags_array(data_c, format="csc")
-    ball = sm.LagrangianSparseLinearTIDS(q0, v0)
+    ball = sm.LagrangianSparseLinearTIDS(q0, v0, sm.alias_t)
     ball.setConstantMassAlias(mass)
     ball.setStiffnessMatrixAlias(stiff)
     ball.setDampingMatrixAlias(damp)
     fext = np.zeros_like(q0)
     fext[:] = 122
-    ball.setConstantFext(fext)
-    assert np.allclose(ball.fext()[:], fext[:])
+    ball.setConstantFext(fext, sm.alias_t)
+    assert np.allclose(ball.fext[:], fext[:])
     fext[1] = 12
-    assert np.allclose(ball.fext()[:], fext[:])
+    assert np.allclose(ball.fext[:], fext[:])
 
     fext = 453
-    assert ball.fext()[0] == ball.fext()[2] == 122
-    assert ball.fext()[1] == 12
+    assert ball.fext[0] == ball.fext[2] == 122
+    assert ball.fext[1] == 12
 
     assert np.allclose(mass.toarray(), ball.mass_alias.toarray())
     assert np.allclose(stiff.toarray(), ball.stiffness_alias.toarray())
@@ -342,10 +431,12 @@ def test_lagrangianSparseLinearTIDS_alias():
 
 
 if __name__ == "__main__":
-    test_lagrangianDS()
-    test_lagrangianDS_compute()
-    test_lagrangianDS_compute_mass()
-    test_lagrangianLinearTIDS()
+    test_LagrangianDS_alias()
+    test_LagrangianDS_copy()
+    test_LagrangianDS_compute()
+    test_LagrangianDS_compute_mass()
+    test_lagrangianLinearTIDS_alias()
+    test_lagrangianLinearTIDS_copy()
     test_LagrangianSparseDS_copy()
     test_LagrangianSparseDS_alias()
     test_LagrangianSparseDS_compute()

@@ -25,8 +25,8 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TimeStepping.hpp"
-#include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
 // #define DEBUG_BEGIN_END_ONLY
@@ -80,7 +80,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   }
 
   // Initialize with the guessed state
-  _DS->setX0(*_xHat);  // Shared memory view
+  _DS->setX0(*_xHat, siconos::algebra::alias_t);  // Shared memory view
   _DS->resetToInitialState();
   _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
   _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());

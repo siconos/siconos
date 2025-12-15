@@ -30,6 +30,7 @@
 #include "Rope.h"  // IWYU pragma: keep
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "Support.h"  // IWYU pragma: keep
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -130,7 +131,10 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
       Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.v0), *m_results.mass,
       model_->mechanicalProperties().crossSectionRigidity(), m_results.elementLength);
 
-  cable->setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.fext));
+  cable->setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.fext),
+                         siconos::algebra::alias_t);
+  // Warning: shared mem with m_results.fext.
+  // Todo: check if everything is ok regarding this shared mem.
 
   // contact conditions
   auto collisions =

@@ -23,6 +23,7 @@
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -30,18 +31,38 @@
 #include "siconos_debug.h"
 
 // Build from initial state only
-siconos::modeling::LagrangianDS::LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                                              Eigen::Ref<siconos::algebra::SiconosVector> v0)
-    : SecondOrderDS(2 * q0.size(), v0.size()) {
+siconos::modeling::LagrangianDS::LagrangianDS(
+    Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector> vinit, siconos::algebra::AliasTag)
+    : SecondOrderDS(2 * qinit.size(), vinit.size()) {
   assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
-  q0_view_ = std::make_shared<siconos::algebra::MapVectorType>(q0.data(), ndof_);
-  velocity0_view_ = std::make_shared<siconos::algebra::MapVectorType>(v0.data(), ndof_);
+
+  q0_storage_ = std::make_shared<siconos::algebra::MapVectorType>(qinit.data(), ndof_);
+  velocity0_storage_ = std::make_shared<siconos::algebra::MapVectorType>(vinit.data(), ndof_);
 
   // -- Memory allocation for vector and matrix members --
-  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(*q0_view_);
-  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(*velocity0_view_);
+  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(velocity0());
+
+  /** \todo lazy Memory allocation */
+  p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  p_[1]->setZero();
+}
+
+siconos::modeling::LagrangianDS::LagrangianDS(const siconos::algebra::SiconosVector& qinit,
+                                              const siconos::algebra::SiconosVector& vinit,
+                                              siconos::algebra::CopyTag)
+    : SecondOrderDS(2 * qinit.size(), vinit.size()) {
+  assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+
+  q0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(qinit);
+  velocity0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(vinit);
+
+  // -- Memory allocation for vector and matrix members --
+  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(velocity0());
 
   /** \todo lazy Memory allocation */
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
@@ -56,19 +77,8 @@ void siconos::modeling::LagrangianDS::initializeNonSmoothInput(unsigned int leve
 }
 
 void siconos::modeling::LagrangianDS::resetToInitialState() {
-  if (q0_view_) {
-    *(state_q_[0]) = *q0_view_;
-  } else
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianDS::resetToInitialState - initial "
-        "position q0_view_ is null");
-  if (velocity0_view_) {
-    *(state_q_[1]) = *velocity0_view_;
-  } else
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianDS::resetToInitialState - initial "
-        "velocity velocity0_view_ "
-        "is null");
+  *(state_q_[0]) = q0();
+  *(state_q_[1]) = velocity0();
 }
 
 void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsigned int level) {
@@ -79,14 +89,12 @@ void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsign
 
 void siconos::modeling::LagrangianDS::init_lu_mass() {
   if (!hasMass_) return;
-
-  // Update mass if required
-  computeMass(*state_q_[0]);
-  // Line above does nothing if computemass_ = null (which is the case if mass
-  // is not set or constant)
-  if (mass_view_ && !hasLUMass_) {
+  if (!hasConstantMass_) computeMass(*state_q_[0]);
+  if (!hasLUMass_) {
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
+    use_mass([&](const auto& M) {
+      LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(M);
+    });
     hasLUMass_ = true;
   }
 }
@@ -108,11 +116,12 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
-  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                               x0_internal_storage_->size());
-  x0_view_->head(ndof_) = *q0_view_;  // COPY !
-  x0_view_->tail(ndof_) = *velocity0_view_;
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
+
+  use_x0([&](auto& xinit) {
+    xinit.head(ndof_) = q0();  // COPY !
+    xinit.tail(ndof_) = velocity0();
+  });
 
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_[0], *state_q_[1];
@@ -132,15 +141,17 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     p_[2]->setZero();
   }
 
-  if (fint_ || fext_view_ || fgyr_) {
+  if (fint_ || hasFext_ || fgyr_) {
     if (!totalForces_) totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
 
   // Compute mass and LU factorization
-  if (mass_view_) {
+  if (hasMass_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
+    use_mass([&](const auto& M) {
+      LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(M);
+    });
     hasLUMass_ = true;
   }
 
@@ -230,32 +241,29 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 }
 
 ////  MASS ////
-
-void siconos::modeling::LagrangianDS::setConstantMassAlias(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
-  /**  Must:
-
-   - create the Map (view onto memory handled by newValue) for mass
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
-
-  mass_internal_storage_ = nullptr;
-
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
+void siconos::modeling::LagrangianDS::setConstantMass(
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  mass_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
   hasMass_ = true;
   hasConstantMass_ = true;
   computemass_ = nullptr;
 }
+
+void siconos::modeling::LagrangianDS::setConstantMass(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  mass_storage_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
+  hasMass_ = true;
+  hasConstantMass_ = true;
+  computemass_ = nullptr;
+}
+
 void siconos::modeling::LagrangianDS::setComputeMassFunction(
     const siconos::modeling::func_prototypes::FunctionV_M& new_func) {
   // Ensure that memory is properly allocated for mass_
-  if (!mass_internal_storage_) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(mass_storage_)) {
+    mass_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
   }
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
-                                                           ndof_, ndof_);
-  mass_view_->setZero();
   hasMass_ = true;
   hasConstantMass_ = false;
   computemass_ = new_func;
@@ -264,7 +272,7 @@ void siconos::modeling::LagrangianDS::setComputeMassFunction(
 void siconos::modeling::LagrangianDS::computeMass(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& position) {
   if (computemass_) {
-    computemass_(position, *mass_view_);
+    use_mass([&](auto& mass) { computemass_(position, mass); });
     hasLUMass_ = false;  // LU factorisation needs update
     is_jacobianRhsOver_x_uptodate_ = false;
   }
@@ -276,7 +284,7 @@ void siconos::modeling::LagrangianDS::setComputeFintFunction(
     const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func) {
   // Ensure that memory is properly allocated for fint_
   if (!fint_) {
-    fint_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    fint_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
   hasFint_ = true;
   computefint_ = fint_func;
@@ -292,17 +300,19 @@ void siconos::modeling::LagrangianDS::computeFint(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  jacobianFintOver_q_storage_ =
+      std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasJacobianFintOver_q_ = true;
+  hasConstantJacobianFintOver_q_ = true;
+  computejacobianFintOver_q_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
 
-   - create the Map (view onto memory handled by newValue) for jacobianFintOver_q
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
-
-  jacobianFintOver_q_internal_storage_ = nullptr;
-
-  jacobianFintOver_q_view_ =
+void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  jacobianFintOver_q_storage_ =
       std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = true;
@@ -313,13 +323,11 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_qFunction(
     const siconos::modeling::func_prototypes::FunctionVVS_M& new_func) {
   // Ensure that memory is properly allocated for jacobianFintOver_q_
-  if (!jacobianFintOver_q_internal_storage_) {
-    jacobianFintOver_q_internal_storage_ =
-        std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(jacobianFintOver_q_storage_)) {
+    jacobianFintOver_q_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
   }
-  jacobianFintOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianFintOver_q_internal_storage_->data(), ndof_, ndof_);
-  jacobianFintOver_q_view_->setZero();
+
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = false;
   computejacobianFintOver_q_ = new_func;
@@ -329,23 +337,26 @@ void siconos::modeling::LagrangianDS::computeJacobianFintOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time) {
   if (computejacobianFintOver_q_) {
-    computejacobianFintOver_q_(velocity, position, time, *jacobianFintOver_q_view_);
+    useJacobianFintOver_q(
+        [&](auto& jac) { computejacobianFintOver_q_(velocity, position, time, jac); });
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  jacobianFintOver_velocity_storage_ =
+      std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasJacobianFintOver_velocity_ = true;
+  hasConstantJacobianFintOver_velocity_ = true;
+  computejacobianFintOver_velocity_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
 
-   - create the Map (view onto memory handled by newValue) for jacobianFintOver_velocity
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
-
-  jacobianFintOver_velocity_internal_storage_ = nullptr;
-
-  jacobianFintOver_velocity_view_ =
+void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  jacobianFintOver_velocity_storage_ =
       std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = true;
@@ -356,13 +367,12 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_velocityFunction(
     const siconos::modeling::func_prototypes::FunctionVVS_M& new_func) {
   // Ensure that memory is properly allocated for jacobianFintOver_velocity_
-  if (!jacobianFintOver_velocity_internal_storage_) {
-    jacobianFintOver_velocity_internal_storage_ =
-        std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(
+          jacobianFintOver_velocity_storage_)) {
+    jacobianFintOver_velocity_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
   }
-  jacobianFintOver_velocity_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianFintOver_velocity_internal_storage_->data(), ndof_, ndof_);
-  jacobianFintOver_velocity_view_->setZero();
+
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = false;
   computejacobianFintOver_velocity_ = new_func;
@@ -372,8 +382,8 @@ void siconos::modeling::LagrangianDS::computeJacobianFintOver_velocity(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time) {
   if (computejacobianFintOver_velocity_) {
-    computejacobianFintOver_velocity_(velocity, position, time,
-                                      *jacobianFintOver_velocity_view_);
+    useJacobianFintOver_velocity(
+        [&](auto& jac) { computejacobianFintOver_velocity_(velocity, position, time, jac); });
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
@@ -382,7 +392,7 @@ void siconos::modeling::LagrangianDS::setComputeFgyrFunction(
     const siconos::modeling::func_prototypes::FunctionVV_V& fgyr_func) {
   // Ensure that memory is properly allocated for fgyr_
   if (!fgyr_) {
-    fgyr_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    fgyr_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
 
   hasFgyr_ = true;
@@ -396,17 +406,19 @@ void siconos::modeling::LagrangianDS::computeFgyr(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  jacobianFgyrOver_q_storage_ =
+      std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasJacobianFgyrOver_q_ = true;
+  hasConstantJacobianFgyrOver_q_ = true;
+  computejacobianFgyrOver_q_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
 
-   - create the Map (view onto memory handled by newValue) for jacobianFgyrOver_q
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
-
-  jacobianFgyrOver_q_internal_storage_ = nullptr;
-
-  jacobianFgyrOver_q_view_ =
+void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  jacobianFgyrOver_q_storage_ =
       std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = true;
@@ -417,13 +429,11 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_qFunction(
     const siconos::modeling::func_prototypes::FunctionVV_M& new_func) {
   // Ensure that memory is properly allocated for jacobianFgyrOver_q_
-  if (!jacobianFgyrOver_q_internal_storage_) {
-    jacobianFgyrOver_q_internal_storage_ =
-        std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(jacobianFgyrOver_q_storage_)) {
+    jacobianFgyrOver_q_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
   }
-  jacobianFgyrOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianFgyrOver_q_internal_storage_->data(), ndof_, ndof_);
-  jacobianFgyrOver_q_view_->setZero();
+
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = false;
   computejacobianFgyrOver_q_ = new_func;
@@ -433,23 +443,26 @@ void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
   if (computejacobianFgyrOver_q_) {
-    computejacobianFgyrOver_q_(velocity, position, *jacobianFgyrOver_q_view_);
+    useJacobianFgyrOver_q(
+        [&](auto& jac) { computejacobianFgyrOver_q_(velocity, position, jac); });
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
-    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  jacobianFgyrOver_velocity_storage_ =
+      std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasJacobianFgyrOver_velocity_ = true;
+  hasConstantJacobianFgyrOver_velocity_ = true;
+  computejacobianFgyrOver_velocity_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
 
-   - create the Map (view onto memory handled by newValue) for jacobianFgyrOver_velocity
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
-
-  jacobianFgyrOver_velocity_internal_storage_ = nullptr;
-
-  jacobianFgyrOver_velocity_view_ =
+void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  jacobianFgyrOver_velocity_storage_ =
       std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = true;
@@ -460,13 +473,12 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_velocityFunction(
     const siconos::modeling::func_prototypes::FunctionVV_M& new_func) {
   // Ensure that memory is properly allocated for jacobianFgyrOver_velocity_
-  if (!jacobianFgyrOver_velocity_internal_storage_) {
-    jacobianFgyrOver_velocity_internal_storage_ =
-        std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(
+          jacobianFgyrOver_velocity_storage_)) {
+    jacobianFgyrOver_velocity_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
   }
-  jacobianFgyrOver_velocity_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianFgyrOver_velocity_internal_storage_->data(), ndof_, ndof_);
-  jacobianFgyrOver_velocity_view_->setZero();
+
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = false;
   computejacobianFgyrOver_velocity_ = new_func;
@@ -476,23 +488,31 @@ void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_velocity(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
   if (computejacobianFgyrOver_velocity_) {
-    computejacobianFgyrOver_velocity_(velocity, position, *jacobianFgyrOver_velocity_view_);
+    useJacobianFgyrOver_velocity(
+        [&](auto& jac) { computejacobianFgyrOver_velocity_(velocity, position, jac); });
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
 void siconos::modeling::LagrangianDS::setConstantFext(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("setConstantFext(copy): input vector has wrong size");
 
-   - create the Map (view onto memory handled by newValue) for Fext_
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
+  // Deep copy into Owned storage
+  fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasFext_ = true;
+  hasConstantFext_ = true;
+  computefext_ = nullptr;
+}
 
-  fext_internal_storage_ = nullptr;
+void siconos::modeling::LagrangianDS::setConstantFext(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("setConstantFext(alias): input vector has wrong size");
 
-  fext_view_ =
+  // Aliasing: shared_ptr to a Map (view over external memory)
+  fext_storage_ =
       std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
   hasFext_ = true;
   hasConstantFext_ = true;
@@ -502,12 +522,9 @@ void siconos::modeling::LagrangianDS::setConstantFext(
 void siconos::modeling::LagrangianDS::setComputeFextFunction(
     const siconos::modeling::func_prototypes::FunctionS_V& fext_func) {
   // Ensure that memory is properly allocated for fext_
-  if (!fext_internal_storage_) {
-    fext_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector>(fext_storage_)) {
+    fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
-  fext_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(fext_internal_storage_->data(), ndof_);
-
   hasFext_ = true;
   hasConstantFext_ = false;
   computefext_ = fext_func;
@@ -517,7 +534,10 @@ void siconos::modeling::LagrangianDS::computeFext(double time) {
   if (computefext_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    computefext_(time, *fext_view_);
+    // siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    //     fext_storage_, [&](auto& fext) { computefext_(time, fext); }, "fext_storage_");
+
+    use_fext([&](auto& fext) { computefext_(time, fext); });
 }
 
 void siconos::modeling::LagrangianDS::computeRhs(double time) {
@@ -634,7 +654,7 @@ void siconos::modeling::LagrangianDS::computeTotalForces(
 
   if (fint_) *totalForces_ -= *fint_;
 
-  if (fext_view_) *totalForces_ += *fext_view_;
+  if (hasFext_) use_fext([&](auto const& fext) { *totalForces_ += fext; });
 
   if (fgyr_) *totalForces_ -= *fgyr_;
 }
@@ -645,7 +665,7 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_q(
   if (hasJacobianFintOver_q_ or hasJacobianFgyrOver_q_) {
     if (!jacobianTotalForcesOver_q_) {
       jacobianTotalForcesOver_q_ =
-          std::make_shared<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
+          std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_q_->setZero();
     }
   } else {
@@ -655,8 +675,11 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_q(
   computeJacobianFintOver_q(*state_q_[1], *state_q_[0], time);
   computeJacobianFgyrOver_q(*state_q_[1], *state_q_[0]);
   jacobianTotalForcesOver_q_->setZero();
-  if (hasJacobianFintOver_q_) *jacobianTotalForcesOver_q_ -= *jacobianFintOver_q_view_;
-  if (hasJacobianFgyrOver_q_) *jacobianTotalForcesOver_q_ -= *jacobianFgyrOver_q_view_;
+  if (hasJacobianFintOver_q_)
+    useJacobianFintOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
+
+  if (hasJacobianFgyrOver_q_)
+    useJacobianFgyrOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
@@ -665,7 +688,7 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
   if (hasJacobianFintOver_velocity_ or hasJacobianFgyrOver_velocity_) {
     if (!jacobianTotalForcesOver_velocity_) {
       jacobianTotalForcesOver_velocity_ =
-          std::make_shared<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
+          std::make_unique<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_velocity_->setZero();
     }
   } else
@@ -675,9 +698,11 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
   computeJacobianFgyrOver_velocity(*state_q_[1], *state_q_[0]);
   jacobianTotalForcesOver_velocity_->setZero();
   if (hasJacobianFintOver_velocity_)
-    *jacobianTotalForcesOver_velocity_ -= *jacobianFintOver_velocity_view_;
+    useJacobianFintOver_velocity(
+        [&](const auto& M) { *jacobianTotalForcesOver_velocity_ -= M; });
   if (hasJacobianFgyrOver_q_)
-    *jacobianTotalForcesOver_velocity_ -= *jacobianFgyrOver_velocity_view_;
+    useJacobianFgyrOver_velocity(
+        [&](const auto& M) { *jacobianTotalForcesOver_velocity_ -= M; });
 }
 
 void siconos::modeling::LagrangianDS::display(bool brief) const {
@@ -685,7 +710,9 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q \n";
   siconos::algebra::print(*state_q_[0]);
-  std::cout << "- q0 \n" << q0_view_->transpose() << "\n";
+  std::cout << "- q0 \n";
+  use_q0([&](const auto& v) { siconos::algebra::print(v); });
+
   std::cout << "- velocity\n ";
   siconos::algebra::print(*state_q_[1]);
   std::cout << "- acceleration \n";
@@ -694,7 +721,8 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
   else
     std::cout << "-> nullptr\n";
 
-  std::cout << "- v0 " << velocity0_view_->transpose() << "\n";
+  std::cout << "- v0 \n";
+  use_velocity0([&](const auto& v) { siconos::algebra::print(v); });
 
   std::cout << "- p[0] \n";
   if (p_[0])
@@ -703,47 +731,60 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
     std::cout << "-> nullptr\n";
   std::cout << "- p[1]\n";
   siconos::algebra::print(*p_[1]);
+  std::cout << "- p[2]\n";
   if (p_[2])
     siconos::algebra::print(*p_[2]);
   else
     std::cout << "-> nullptr\n";
 
   if (!brief) {
-    if (mass_view_) std::cout << "- Mass\n " << *mass_view_ << "\n";
+    if (hasMass_) {
+      std::cout << "- Mass\n ";
+      use_mass([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
 
     std::cout << "- Forces \n";
     if (totalForces_)
-      std::cout << *totalForces_ << "\n";
+      siconos::algebra::print(*totalForces_);
     else
       std::cout << "-> nullptr\n";
 
     std::cout << "- jacobian of TotalForces over q \n";
     if (jacobianTotalForcesOver_q_)
-      std::cout << *jacobianTotalForcesOver_q_ << "\n";
+      siconos::algebra::print(*jacobianTotalForcesOver_q_);
     else
       std::cout << "-> nullptr\n";
 
     std::cout << "- jacobian of TotalForces over velocity \n";
     if (jacobianTotalForcesOver_velocity_)
-      std::cout << *jacobianTotalForcesOver_velocity_ << "\n";
+      siconos::algebra::print(*jacobianTotalForcesOver_velocity_);
     else
       std::cout << "-> nullptr\n";
 
     if (fint_) std::cout << "- FInt \n" << *fint_ << "\n";
-
-    if (hasJacobianFintOver_q_)
-      std::cout << "- jacobian of fint over q\n" << *jacobianFintOver_q_view_ << "\n";
-    if (hasJacobianFintOver_velocity_)
-      std::cout << "- jacobian of fint over velocity\n"
-                << *jacobianFintOver_velocity_view_ << "\n";
+    if (hasJacobianFintOver_q_) {
+      std::cout << "- jacobian of fint over q\n";
+      useJacobianFintOver_q([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
+    if (hasJacobianFintOver_velocity_) {
+      std::cout << "- jacobian of fint over velocity\n";
+      useJacobianFintOver_velocity([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
 
     if (fgyr_) std::cout << "- FGyr \n" << *fgyr_ << "\n";
-
-    if (hasJacobianFgyrOver_q_)
-      std::cout << "- jacobian of fgyr over q\n" << *jacobianFgyrOver_q_view_ << "\n";
-    if (hasJacobianFgyrOver_velocity_)
-      std::cout << "- jacobian of fgyr over velocity\n " << *jacobianFgyrOver_velocity_view_
-                << "\n";
+    if (hasJacobianFgyrOver_q_) {
+      std::cout << "- jacobian of fgyr over q\n";
+      useJacobianFgyrOver_q([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
+    if (hasJacobianFgyrOver_velocity_) {
+      std::cout << "- jacobian of fgyr over velocity\n";
+      useJacobianFgyrOver_velocity([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
   }
 
   std::cout << "===================================== \n";
@@ -809,8 +850,8 @@ void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
 double siconos::modeling::LagrangianDS::computeKineticEnergy() {
   DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
   double K;
-  if (mass_view_)
-    K = 0.5 * state_q_[1]->dot(*mass_view_ * *state_q_[1]);
+  if (hasMass_)
+    use_mass([&](const auto& M) { K = 0.5 * (M * *state_q_[1]).dot(*state_q_[1]); });
   else
     K = 0.5 * state_q_[1]->dot(*state_q_[1]);
 

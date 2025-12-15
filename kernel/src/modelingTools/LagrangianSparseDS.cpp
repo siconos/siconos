@@ -23,27 +23,46 @@
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
-#include "StorageTools.hpp"
 #include "siconos_debug.h"
 
 // Build from initial state only
 siconos::modeling::LagrangianSparseDS::LagrangianSparseDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> q0,
-    Eigen::Ref<siconos::algebra::SiconosVector> v0)
-    : SecondOrderDS(2 * q0.size(), v0.size()) {
+    Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector> vinit, siconos::algebra::AliasTag)
+    : SecondOrderDS(2 * qinit.size(), vinit.size()) {
   assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
-  q0_view_ = std::make_shared<siconos::algebra::MapVectorType>(q0.data(), ndof_);
-  velocity0_view_ = std::make_shared<siconos::algebra::MapVectorType>(v0.data(), ndof_);
+
+  q0_storage_ = std::make_shared<siconos::algebra::MapVectorType>(qinit.data(), ndof_);
+  velocity0_storage_ = std::make_shared<siconos::algebra::MapVectorType>(vinit.data(), ndof_);
 
   // -- Memory allocation for vector and matrix members --
-  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(*q0_view_);
-  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(*velocity0_view_);
+  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(velocity0());
+
+  /** \todo lazy Memory allocation */
+  p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  p_[1]->setZero();
+}
+
+siconos::modeling::LagrangianSparseDS::LagrangianSparseDS(
+    const siconos::algebra::SiconosVector& qinit, const siconos::algebra::SiconosVector& vinit,
+    siconos::algebra::CopyTag)
+    : SecondOrderDS(2 * qinit.size(), vinit.size()) {
+  assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+
+  q0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(qinit);
+  velocity0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(vinit);
+
+  // -- Memory allocation for vector and matrix members --
+  state_q_[0] = std::make_shared<siconos::algebra::SiconosVector>(q0());
+  state_q_[1] = std::make_shared<siconos::algebra::SiconosVector>(velocity0());
 
   /** \todo lazy Memory allocation */
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
@@ -58,19 +77,8 @@ void siconos::modeling::LagrangianSparseDS::initializeNonSmoothInput(unsigned in
 }
 
 void siconos::modeling::LagrangianSparseDS::resetToInitialState() {
-  if (q0_view_) {
-    *(state_q_[0]) = *q0_view_;
-  } else
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianSparseDS::resetToInitialState - initial "
-        "position q0_view_ is null");
-  if (velocity0_view_) {
-    *(state_q_[1]) = *velocity0_view_;
-  } else
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianSparseDS::resetToInitialState - initial "
-        "velocity velocity0_view_ "
-        "is null");
+  *(state_q_[0]) = q0();
+  *(state_q_[1]) = velocity0();
 }
 
 void siconos::modeling::LagrangianSparseDS::initMemoryForGeneralizedCoordinates(
@@ -86,7 +94,7 @@ void siconos::modeling::LagrangianSparseDS::init_lu_mass() {
   if (!hasConstantMass_) computeMass(*state_q_[0]);
   if (!hasLUMass_) {
     // LU factorization
-    useMass([&](const auto& M) {
+    use_mass([&](const auto& M) {
       LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(M);
     });
     hasLUMass_ = true;
@@ -109,12 +117,12 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   // by the OneStepIntegrator, and maybe several times for the same DS
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
 
-  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
-  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                               x0_internal_storage_->size());
-  x0_view_->head(ndof_) = *q0_view_;  // COPY !
-  x0_view_->tail(ndof_) = *velocity0_view_;
+  use_x0([&](auto& xinit) {
+    xinit.head(ndof_) = q0();  // COPY !
+    xinit.tail(ndof_) = velocity0();
+  });
 
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_[0], *state_q_[1];
@@ -134,7 +142,7 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
     p_[2]->setZero();
   }
 
-  if (fint_ || fext_view_ || fgyr_) {
+  if (fint_ || hasFext_ || fgyr_) {
     if (!totalForces_) totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
 
@@ -142,7 +150,7 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   if (hasMass_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    useMass([&](const auto& M) {
+    use_mass([&](const auto& M) {
       LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(M);
     });
     hasLUMass_ = true;
@@ -285,7 +293,7 @@ void siconos::modeling::LagrangianSparseDS::setComputeFintFunction(
     const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func) {
   // Ensure that memory is properly allocated for fint_
   if (!fint_) {
-    fint_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    fint_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
   hasFint_ = true;
   computefint_ = fint_func;
@@ -362,7 +370,7 @@ void siconos::modeling::LagrangianSparseDS::setComputeFgyrFunction(
     const siconos::modeling::func_prototypes::FunctionVV_V& fgyr_func) {
   // Ensure that memory is properly allocated for fgyr_
   if (!fgyr_) {
-    fgyr_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    fgyr_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
 
   hasFgyr_ = true;
@@ -433,17 +441,24 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianFgyrOver_velocity(
 }
 
 void siconos::modeling::LagrangianSparseDS::setConstantFext(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  /**  Must:
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("setConstantFext(copy): input vector has wrong size");
 
-   - create the Map (view onto memory handled by newValue) for Fext_
-   - set the corresponding booleans
-   - reset internal storage (should already be null but who knows ...)
-   */
+  // Deep copy into Owned storage
+  fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasFext_ = true;
+  hasConstantFext_ = true;
+  computefext_ = nullptr;
+}
 
-  fext_internal_storage_ = nullptr;
+void siconos::modeling::LagrangianSparseDS::setConstantFext(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("setConstantFext(alias): input vector has wrong size");
 
-  fext_view_ =
+  // Aliasing: shared_ptr to a Map (view over external memory)
+  fext_storage_ =
       std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
   hasFext_ = true;
   hasConstantFext_ = true;
@@ -453,12 +468,9 @@ void siconos::modeling::LagrangianSparseDS::setConstantFext(
 void siconos::modeling::LagrangianSparseDS::setComputeFextFunction(
     const siconos::modeling::func_prototypes::FunctionS_V& fext_func) {
   // Ensure that memory is properly allocated for fext_
-  if (!fext_internal_storage_) {
-    fext_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector>(fext_storage_)) {
+    fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
-  fext_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(fext_internal_storage_->data(), ndof_);
-
   hasFext_ = true;
   hasConstantFext_ = false;
   computefext_ = fext_func;
@@ -468,7 +480,10 @@ void siconos::modeling::LagrangianSparseDS::computeFext(double time) {
   if (computefext_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    computefext_(time, *fext_view_);
+    // siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    //     fext_storage_, [&](auto& fext) { computefext_(time, fext); }, "fext_storage_");
+
+    use_fext([&](auto& fext) { computefext_(time, fext); });
 }
 
 void siconos::modeling::LagrangianSparseDS::computeRhs(double time) {
@@ -600,7 +615,7 @@ void siconos::modeling::LagrangianSparseDS::computeTotalForces(
 
   if (fint_) *totalForces_ -= *fint_;
 
-  if (fext_view_) *totalForces_ += *fext_view_;
+  if (hasFext_) use_fext([&](auto const& fext) { *totalForces_ += fext; });
 
   if (fgyr_) *totalForces_ -= *fgyr_;
 }
@@ -611,7 +626,7 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_q(
   if (hasJacobianFintOver_q_ or hasJacobianFgyrOver_q_) {
     if (!jacobianTotalForcesOver_q_) {
       jacobianTotalForcesOver_q_ =
-          std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_q_->setZero();
     }
   } else {
@@ -623,6 +638,7 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_q(
   jacobianTotalForcesOver_q_->setZero();
   if (hasJacobianFintOver_q_)
     useJacobianFintOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
+
   if (hasJacobianFgyrOver_q_)
     useJacobianFgyrOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
 }
@@ -633,7 +649,7 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_veloc
   if (hasJacobianFintOver_velocity_ or hasJacobianFgyrOver_velocity_) {
     if (!jacobianTotalForcesOver_velocity_) {
       jacobianTotalForcesOver_velocity_ =
-          std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_velocity_->setZero();
     }
   } else
@@ -656,7 +672,9 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q \n";
   siconos::algebra::print(*state_q_[0]);
-  std::cout << "- q0 \n" << q0_view_->transpose() << "\n";
+  std::cout << "- q0 \n";
+  use_q0([&](const auto& v) { siconos::algebra::print(v); });
+
   std::cout << "- velocity\n ";
   siconos::algebra::print(*state_q_[1]);
   std::cout << "- acceleration \n";
@@ -665,7 +683,8 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
   else
     std::cout << "-> nullptr\n";
 
-  std::cout << "- v0 " << velocity0_view_->transpose() << "\n";
+  std::cout << "- v0 \n";
+  use_velocity0([&](const auto& v) { siconos::algebra::print(v); });
 
   std::cout << "- p[0] \n";
   if (p_[0])
@@ -679,33 +698,33 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
     siconos::algebra::print(*p_[2]);
   else
     std::cout << "-> nullptr\n";
+
   if (!brief) {
     if (hasMass_) {
       std::cout << "- Mass\n ";
-      useMass([&](const auto& M) { siconos::algebra::print(M); });
+      use_mass([&](const auto& M) { siconos::algebra::print(M); });
       std::cout << "\n";
     }
 
     std::cout << "- Forces \n";
     if (totalForces_)
-      std::cout << *totalForces_ << "\n";
+      siconos::algebra::print(*totalForces_);
     else
       std::cout << "-> nullptr\n";
 
     std::cout << "- jacobian of TotalForces over q \n";
     if (jacobianTotalForcesOver_q_)
-      std::cout << *jacobianTotalForcesOver_q_ << "\n";
+      siconos::algebra::print(*jacobianTotalForcesOver_q_);
     else
       std::cout << "-> nullptr\n";
 
     std::cout << "- jacobian of TotalForces over velocity \n";
     if (jacobianTotalForcesOver_velocity_)
-      std::cout << *jacobianTotalForcesOver_velocity_ << "\n";
+      siconos::algebra::print(*jacobianTotalForcesOver_velocity_);
     else
       std::cout << "-> nullptr\n";
 
     if (fint_) std::cout << "- FInt \n" << *fint_ << "\n";
-
     if (hasJacobianFintOver_q_) {
       std::cout << "- jacobian of fint over q\n";
       useJacobianFintOver_q([&](const auto& M) { siconos::algebra::print(M); });
@@ -716,8 +735,8 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
       useJacobianFintOver_velocity([&](const auto& M) { siconos::algebra::print(M); });
       std::cout << "\n";
     }
-    if (fgyr_) std::cout << "- FGyr \n" << *fgyr_ << "\n";
 
+    if (fgyr_) std::cout << "- FGyr \n" << *fgyr_ << "\n";
     if (hasJacobianFgyrOver_q_) {
       std::cout << "- jacobian of fgyr over q\n";
       useJacobianFgyrOver_q([&](const auto& M) { siconos::algebra::print(M); });
@@ -794,7 +813,7 @@ double siconos::modeling::LagrangianSparseDS::computeKineticEnergy() {
   DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
   double K;
   if (hasMass_)
-    useMass([&](const auto& M) { K = 0.5 * (M * *state_q_[1]).dot(*state_q_[1]); });
+    use_mass([&](const auto& M) { K = 0.5 * (M * *state_q_[1]).dot(*state_q_[1]); });
   // warning: sparse*dense --> dense, a temp. vector is allocated.
   else
     K = 0.5 * state_q_[1]->dot(*state_q_[1]);

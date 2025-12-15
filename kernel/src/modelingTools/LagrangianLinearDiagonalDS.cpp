@@ -24,16 +24,23 @@
 // #define DEBUG_MESSAGES
 #include <iostream>
 
+#include "StorageTools.hpp"
 #include "siconos_debug.h"
 
 // --- Constructor for the undamped system with identity mass matrix
 siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     Eigen::Ref<siconos::algebra::SiconosVector> q0,
     Eigen::Ref<siconos::algebra::SiconosVector> v0,
-    Eigen::Ref<siconos::algebra::SiconosVector> stiffness_diag)
-    : LagrangianDS(q0, v0) {
-  stiffnessMatrix_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-      stiffness_diag.data(), stiffness_diag.size());
+    Eigen::Ref<siconos::algebra::SiconosVector> stiffness_diag, siconos::algebra::AliasTag)
+    : LagrangianDS(q0, v0, siconos::algebra::alias_t) {
+  setStiffnessMatrix(stiffness_diag, siconos::algebra::alias_t);
+}
+
+siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
+    const siconos::algebra::SiconosVector& q0, const siconos::algebra::SiconosVector& v0,
+    const siconos::algebra::SiconosVector& stiffness_diag, siconos::algebra::CopyTag tag)
+    : LagrangianDS(q0, v0, siconos::algebra::copy_t) {
+  setStiffnessMatrix(stiffness_diag, siconos::algebra::copy_t);
 }
 
 void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {
@@ -42,33 +49,73 @@ void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {
       "LagrangianLinearDiagonalDS.");
 }
 
+void siconos::modeling::LagrangianLinearDiagonalDS::setStiffnessMatrix(
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  assert(newValue.size() == ndof_);
+
+  stiffnessMatrix_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasFint_ = true;
+}
+
+void siconos::modeling::LagrangianLinearDiagonalDS::setStiffnessMatrix(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  assert(newValue.size() == ndof_);
+
+  stiffnessMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), ndof_);
+  hasFint_ = true;
+}
+
 void siconos::modeling::LagrangianLinearDiagonalDS::setDampingMatrix(
-    Eigen::Ref<siconos::algebra::SiconosVector> damping) {
-  dampingMatrix_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(damping.data(), damping.size());
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  assert(newValue.size() == ndof_);
+
+  dampingMatrix_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasFint_ = true;
+}
+
+void siconos::modeling::LagrangianLinearDiagonalDS::setDampingMatrix(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  assert(newValue.size() == ndof_);
+
+  dampingMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), ndof_);
+  hasFint_ = true;
 }
 
 void siconos::modeling::LagrangianLinearDiagonalDS::setMassMatrix(
-    Eigen::Ref<siconos::algebra::SiconosVector> mass) {
-  massMatrix_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(mass.data(), mass.size());
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  assert(newValue.size() == ndof_);
+
+  massMatrix_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasMass_ = true;
+}
+
+void siconos::modeling::LagrangianLinearDiagonalDS::setMassMatrix(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  assert(newValue.size() == ndof_);
+
+  massMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), ndof_);
+  hasMass_ = true;
 }
 
 void siconos::modeling::LagrangianLinearDiagonalDS::computeTotalForces(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
   DEBUG_PRINT("LagrangianLinearTIDS::computeTotalForces(v,q,t) \n");
 
   if (!totalForces_) {
     totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
 
-  *totalForces_ = -1. * stiffnessMatrix_view_->cwiseProduct(q);
-  if (dampingMatrix_view_) *totalForces_ -= dampingMatrix_view_->cwiseProduct(velocity);
+  use_stiffnessMatrix([&](auto const& K) { *totalForces_ -= K.cwiseProduct(q); });
+  if (hasDampingMatrix())
+    use_dampingMatrix([&](auto const& C) { *totalForces_ -= C.cwiseProduct(velocity); });
 
-  if (fext_view_) {
+  if (hasFext_) {
     computeFext(time);
-    *totalForces_ += *fext_view_;
+    use_fext([&](auto const& fext) { *totalForces_ += fext; });
   }
 }
 
@@ -76,16 +123,21 @@ void siconos::modeling::LagrangianLinearDiagonalDS::display(bool brief) const {
   LagrangianDS::display();
   std::cout << "===== Lagrangian Linear Diagonal System display ===== \n ";
   std::cout << "- Mass Matrix M : \n";
-  if (massMatrix_view_)
-    std::cout << *massMatrix_view_ << "\n";
-  else
-    std::cout << "-> nullptr \n";
-  std::cout << "- Stiffness Matrix K : " << *stiffnessMatrix_view_ << "\n";
+  if (hasStiffnessMatrix()) {
+    std::cout << "- Stiffness matrix\n ";
+    use_stiffnessMatrix([&](const auto& M) { siconos::algebra::print(M); });
+    std::cout << "\n";
+  }
+  if (hasDampingMatrix()) {
+    std::cout << "- Damping matrix\n ";
+    use_dampingMatrix([&](const auto& M) { siconos::algebra::print(M); });
+    std::cout << "\n";
+  }
+  if (hasMassMatrix()) {
+    std::cout << "- Mass matrix\n ";
+    use_massMatrix([&](const auto& M) { siconos::algebra::print(M); });
+    std::cout << "\n";
+  }
 
-  std::cout << "- Damping Matrix C : \n";
-  if (dampingMatrix_view_)
-    std::cout << *dampingMatrix_view_ << "\n";
-  else
-    std::cout << "-> nullptr\n";
   std::cout << "=========================================================== \n";
 }

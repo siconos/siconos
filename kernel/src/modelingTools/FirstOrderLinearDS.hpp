@@ -22,6 +22,7 @@
 #define FirstOrderLinearDS_H
 
 #include "FirstOrderNonLinearDS.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 
@@ -66,10 +67,13 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   siconos::modeling::func_prototypes::FunctionS_M computeA_{nullptr};
 
   /** b(t) operator */
-  std::shared_ptr<siconos::algebra::MapVectorType> bVector_view_{nullptr};
+  siconos::algebra::DenseVectorStorage bVector_storage_{std::monostate{}};
 
-  /** internal (optional) storage used for b(t) */
-  std::unique_ptr<std::vector<double>> bVector_internal_storage_{nullptr};
+  template <typename F>
+  decltype(auto) use_bVector(F&& f) const {
+    return siconos::algebra::visitStorage(bVector_storage_, std::forward<F>(f),
+                                          "bVector_storage_");
+  }
 
   /** function wrapper used to compute b(t) */
   siconos::modeling::func_prototypes::FunctionS_V computebVector_{nullptr};
@@ -84,34 +88,56 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   // FirstOrderLinearDS() = default;
 
  public:
-  /** constructor from initial state
-   *
-   *  \param newX0 the initial state of this DynamicalSystem
-   */
-  FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0)
-      : FirstOrderNonLinearDS(x0) {};
+  using FirstOrderNonLinearDS::FirstOrderNonLinearDS;
 
-  /** Build a time-invariant coeff. linear DS
+  /** Constructor from initial state
    *
-   *  \param newX0 the initial state of this DynamicalSystem
-   *  \param A matrix coeff A (in \f$ M\dot x = Ax+b \f$)
-   *  \param b vector coeff b
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for initial and A
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] x0 initial state
+   *  @param[in] A matrix coeff A (in \f$ M\dot x = Ax+b \f$)
+   *  @param[in] b vector coeff b (in \f$ M\dot x = Ax+b \f$)
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
   FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0,
                      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> A,
-                     Eigen::Ref<siconos::algebra::SiconosVector> b);
+                     Eigen::Ref<siconos::algebra::SiconosVector> b,
+                     siconos::algebra::AliasTag);
+
+  /** Constructor from initial state
+   *
+   *  initial state and A attributes will be initialised (copied)
+   *  from the input vectors/matrices
+   *
+   *  @param[in] x0 initial state
+   *  @param[in] A matrix coeff A (in \f$ M\dot x = Ax+b \f$)
+   *  @param[in] b vector coeff b (in \f$ M\dot x = Ax+b \f$)
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  FirstOrderLinearDS(const siconos::algebra::SiconosVector& x0,
+                     const siconos::algebra::SiconosDenseMatrix& A,
+                     const siconos::algebra::SiconosVector& b, siconos::algebra::CopyTag);
 
   /** Copy constructor
    *
    *  \param FOLDS the original FirstOrderLinearDS we want to copy
    */
-  FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
+  FirstOrderLinearDS(const FirstOrderLinearDS& FOLDS);
 
   /** destructor */
   virtual ~FirstOrderLinearDS() noexcept = default;
 
   /** \return a read-only view on A(t) matrix */
-  inline auto A() const { return jacobianfOver_x(); }
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> A() const {
+    return jacobianfOver_x();
+  }
 
   /** \return true if A is taken into account */
   auto hasA() const { return hasJacobianfOver_x_; }
@@ -119,34 +145,79 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   /** \return true if A is taken into account and is time independant */
   auto hasConstantA() const { return hasConstantJacobianfOver_x_; }
 
-  /** Set a constant A matrix for the system
+  /** @brief set a constant A matrix for the system
    *
-   *  \param newValue A matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
-  void setConstantA(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantA(const siconos::algebra::SiconosDenseMatrix& newValue,
+                    siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant A matrix for the system
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantA(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                    siconos::algebra::AliasTag tag);
 
   /** set a user-defined function to compute A(t)
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_M& fct);
 
   /** Computes A(t)
    *  \param time current time value
    */
   void computeA(double time);
 
-  /** \return  a read-only view on b(t) */
-  inline auto bVector() const {
-    return siconos::algebra::ConstMapVectorType(bVector_view_->data(), bVector_view_->size());
+  /** \return  a read-only view on f(x,t)  */
+  Eigen::Ref<const siconos::algebra::SiconosVector> bVector() const {
+    return use_bVector(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** set a constant e vector
+  /** @brief set a constant b(t)  vector
    *
-   *  \param newbVector e vector
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   * version)
+   *
    */
-  void setConstantbVector(Eigen::Ref<siconos::algebra::SiconosVector> newbVector);
+  void setConstantbVector(const siconos::algebra::SiconosVector& newValue,
+                          siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant b(t) vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantbVector(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                          siconos::algebra::AliasTag tag);
 
   /** True if b(t) is taken into account */
   bool hasbVector() const { return hasbVector_; }
@@ -155,7 +226,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputebVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+  void setComputebVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Remove any plugin connection for b(t)
    * Seems to be useful only for MatrixIntegrator and control stuff. Use it with care ...

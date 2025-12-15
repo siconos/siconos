@@ -47,9 +47,38 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
   std::shared_ptr<siconos::algebra::SiconosVector> _qExtrapolated{nullptr};
 
  public:
-  RigidBodyDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-              Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
-              Eigen::Ref<siconos::algebra::SiconosMatrix> inertia);
+  // /** constructor from initial state and velocity with memory alias
+  //  *
+  //  * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+  //  * pointing directly to the memory provided by the argument.
+  //  *
+  //  * This means that for initial position and velocity
+  //  *  - ownership stays external
+  //  *  - modifications to the original vector are reflected inside the class
+  //  *
+  //  *  @param[in] position initial coordinates
+  //  *  @param[in] twist initial twist
+  //  *  @param[in] mass scalar mass value
+  //  *  @param[in] inertia matrix of inertia
+  //  *  @param tag Pass siconos::algebra::alias_t to select this overload
+  //  * (rather than copy version)
+  //  */
+  // RigidBodyDS(Eigen::Ref<siconos::algebra::SiconosVector7> position,
+  //             Eigen::Ref<siconos::algebra::SiconosVector6> twist, double mass,
+  //             Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+  //             siconos::algebra::AliasTag);
+  /** constructor from initial state and velocity with copy
+   *
+   *  all attributes will be initialised (deep copy)
+   *  from the input vectors/matrices
+   *  @param[in] position initial coordinates
+   *  @param[in] twist initial twist
+   *  @param[in] mass scalar mass value
+   *  @param[in] inertia matrix of inertia
+   */
+  RigidBodyDS(const siconos::algebra::SiconosVector7& position,
+              const siconos::algebra::SiconosVector6& twist, double mass,
+              const siconos::algebra::SiconosMatrix33& inertia);
 
   virtual ~RigidBodyDS() noexcept = default;
 

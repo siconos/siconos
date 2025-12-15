@@ -38,7 +38,8 @@ void EulerMoreauTest::setUp() {
 
 void EulerMoreauTest::init(bool initDS) {
   if (initDS) {
-    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                  siconos::algebra::alias_t);
   }
 
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
@@ -63,7 +64,8 @@ void EulerMoreauTest::testCstGradTIDS() {
   (*_x0)(0) = 5.;
   (*_x0)(1) = 10;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
 
   init(false);
 
@@ -85,7 +87,8 @@ void EulerMoreauTest::testCstGradDS() {
 
   *_x0 << 5, 10;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
   auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS);
   folds->setComputeAFunction(
       [](double time, Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); });
@@ -125,7 +128,8 @@ void EulerMoreauTest::testCstGradNLDS() {
   (*_b)(0) = -1.;
   siconos::algebra::SiconosVector x0{2};
   x0 << 5, 10;
-  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0,
+                                                                   siconos::algebra::alias_t);
 
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
 

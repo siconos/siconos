@@ -21,6 +21,7 @@
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TypeName.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -89,8 +90,9 @@ static void checkRhs(siconos::modeling::LagrangianSparseLinearTIDS& ds,
 // Basic constructor from mass (copy) and initial state only
 //
 void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_basic() {
-  auto ds =
-      std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(q0, velocity0, *mass);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(
+      q0, velocity0, *mass, siconos::algebra::copy_t);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianSparseLinearTIDS1: ",
       siconos::types::type_value(*ds) == siconos::modeling::Type::LagrangianSparseLinearTIDS,
@@ -145,8 +147,8 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_alias()
   Eigen::Map<siconos::algebra::SiconosSparseMatrix> mass_map(
       mass->rows(), mass->cols(), mass->nonZeros(), mass->outerIndexPtr(),
       mass->innerIndexPtr(), mass->valuePtr());
-  auto ds =
-      std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(q0, velocity0, mass_map);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(
+      q0, velocity0, mass_map, siconos::algebra::alias_t);
 
   auto stiffness = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
   auto damping = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
@@ -189,7 +191,7 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_alias()
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
-  ds->setConstantFext(fext);
+  ds->setConstantFext(fext, siconos::algebra::alias_t);
 
   siconos::algebra::SiconosVector3 ref;
   ref << 1, 2, 3;
@@ -238,8 +240,8 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_alias()
 // A DS with all operators (mass, K, C
 // Operators set as constant vectors or matrices, using the "copy" version for sparse matrices
 void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_copy() {
-  auto ds =
-      std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(q0, velocity0, *mass);
+  auto ds = std::make_shared<siconos::modeling::LagrangianSparseLinearTIDS>(
+      q0, velocity0, *mass, siconos::algebra::copy_t);
 
   auto stiffness = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
   auto damping = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
@@ -271,7 +273,7 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_copy() 
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
-  ds->setConstantFext(fext);
+  ds->setConstantFext(fext, siconos::algebra::alias_t);
 
   siconos::algebra::SiconosVector3 ref;
   ref << 1, 2, 3;

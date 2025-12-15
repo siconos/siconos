@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
+ * Copyright 2025 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@
   LagrangianDS class - Second Order Non Linear Dynamical Systems.
 */
 
-#ifndef LAGRANGIANDS_H
-#define LAGRANGIANDS_H
+#ifndef LagrangianDS_H
+#define LagrangianDS_H
 
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 
@@ -130,9 +132,22 @@ class LagrangianDS : public SecondOrderDS {
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_q_ = {nullptr, nullptr,
                                                                             nullptr};
 
+  /** Initial position of the system */
+  siconos::algebra::DenseVectorStorage q0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_q0(F&& f) const {
+    return siconos::algebra::visitStorage(q0_storage_, std::forward<F>(f), "q0_storage_");
+  }
+
   /** initial velocity of the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> velocity0_view_{nullptr};
-  std::unique_ptr<std::vector<double>> velocity0_internal_storage{nullptr};
+  siconos::algebra::DenseVectorStorage velocity0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_velocity0(F&& f) const {
+    return siconos::algebra::visitStorage(velocity0_storage_, std::forward<F>(f),
+                                          "v0_storage_");
+  }
 
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory qMemory_;
@@ -141,10 +156,7 @@ class LagrangianDS : public SecondOrderDS {
   siconos::algebra::SiconosMemory velocityMemory_;
 
   /** mass matrix of the system (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> mass_view_{nullptr};
-
-  /** internal storage (optional) for the mass matrix */
-  std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
+  siconos::algebra::DenseStorage mass_storage_{std::monostate{}};
 
   /** function wrapper used to compute mass */
   siconos::modeling::func_prototypes::FunctionV_M computemass_{nullptr};
@@ -159,7 +171,7 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUMass_{nullptr};
 
   /** internal forces (\f$ F_{int}(v , q , t) \f$) applied to the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
 
   /** function wrapper used to compute internal forces */
   siconos::modeling::func_prototypes::FunctionVVS_V computefint_{nullptr};
@@ -167,11 +179,8 @@ class LagrangianDS : public SecondOrderDS {
   /** True if internal forces are  taken into account */
   bool hasFint_{false};
 
-  /** jacobianFintOver_q matrix (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_q_view_{nullptr};
-
-  /** internal storage (optional) for the jacobianFintOver_q matrix */
-  std::unique_ptr<std::vector<double>> jacobianFintOver_q_internal_storage_{nullptr};
+  /** jacobianFintOver_q matrix */
+  siconos::algebra::DenseStorage jacobianFintOver_q_storage_{std::monostate{}};
 
   /** function wrapper used to compute jacobianFintOver_q */
   siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_q_{nullptr};
@@ -182,11 +191,8 @@ class LagrangianDS : public SecondOrderDS {
   /** True if jacobianFintOver_q is required */
   bool hasJacobianFintOver_q_{false};
 
-  /** jacobianFintOver_velocity matrix (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_velocity_view_{nullptr};
-
-  /** internal storage (optional) for the jacobianFintOver_velocity matrix */
-  std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
+  /** jacobianFintOver_velocity matrix */
+  siconos::algebra::DenseStorage jacobianFintOver_velocity_storage_{std::monostate{}};
 
   /** function wrapper used to compute jacobianFintOver_velocity */
   siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_velocity_{nullptr};
@@ -198,10 +204,12 @@ class LagrangianDS : public SecondOrderDS {
   bool hasJacobianFintOver_velocity_{false};
 
   /** external forces applied to the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
+  siconos::algebra::DenseVectorStorage fext_storage_{std::monostate{}};
 
-  /** internal (optional) storage used for external forces */
-  std::unique_ptr<std::vector<double>> fext_internal_storage_{nullptr};
+  template <typename F>
+  decltype(auto) use_fext(F&& f) const {
+    return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
+  }
 
   /** function wrapper used to compute external forces */
   siconos::modeling::func_prototypes::FunctionS_V computefext_{nullptr};
@@ -213,7 +221,7 @@ class LagrangianDS : public SecondOrderDS {
   bool hasFext_{false};
 
   /** non-linear inertia term (\f$ F_{gyr}(v, q) \f$ ) applied to the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
 
   /** function wrapper used to compute non-linear inertia term */
   siconos::modeling::func_prototypes::FunctionVV_V computefgyr_{nullptr};
@@ -221,11 +229,8 @@ class LagrangianDS : public SecondOrderDS {
   /** True if non-linear inertia terms are  taken into account */
   bool hasFgyr_{false};
 
-  /** jacobianFgyrOver_q matrix (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_q_view_{nullptr};
-
-  /** internal storage (optional) for the jacobianFgyrOver_q matrix */
-  std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
+  /** jacobianFgyrOver_q matrix */
+  siconos::algebra::DenseStorage jacobianFgyrOver_q_storage_{std::monostate{}};
 
   /** function wrapper used to compute jacobianFgyrOver_q */
   siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_q_{nullptr};
@@ -236,11 +241,8 @@ class LagrangianDS : public SecondOrderDS {
   /** True if jacobianFgyrOver_q is required */
   bool hasJacobianFgyrOver_q_{false};
 
-  /** jacobianFgyrOver_velocity matrix (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_velocity_view_{nullptr};
-
-  /** internal storage (optional) for the jacobianFgyrOver_velocity matrix */
-  std::unique_ptr<std::vector<double>> jacobianFgyrOver_velocity_internal_storage_{nullptr};
+  /** jacobianFgyrOver_velocity matrix */
+  siconos::algebra::DenseStorage jacobianFgyrOver_velocity_storage_{std::monostate{}};
 
   /** function wrapper used to compute jacobianFgyrOver_velocity */
   siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_velocity_{nullptr};
@@ -255,10 +257,10 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> totalForces_{nullptr};
 
   /** jacobian_q forces*/
-  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_q_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_q_{nullptr};
 
   /** jacobian_{velocity} forces*/
-  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_velocity_{
+  std::unique_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_velocity_{
       nullptr};
 
   /** memory of previous forces of the system */
@@ -270,22 +272,157 @@ class LagrangianDS : public SecondOrderDS {
   /** Default constructor */
   LagrangianDS() = default;
 
- public:
-  // /** constructor from initial state and velocity
-  //  *
-  //  *  \param position initial coordinates
-  //  *  \param velocity initial velocity
-  //  */
-  // LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-  //              std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** constructor from initial state and velocity
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{int} \f$ matrix.
    *
-   *  \param position initial coordinates
-   *  \param velocity initial velocity
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFintOver_q(F&& f) const {
+    return siconos::algebra::visitStorage(jacobianFintOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFintOver_q_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFintOver_q(F&& f) {
+    return siconos::algebra::visitStorage(jacobianFintOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFintOver_q_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_vF_{int} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFintOver_velocity(F&& f) const {
+    return siconos::algebra::visitStorage(jacobianFintOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFintOver_velocity_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFintOver_velocity(F&& f) {
+    return siconos::algebra::visitStorage(jacobianFintOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFintOver_velocity_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{gyr} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_q(F&& f) const {
+    return siconos::algebra::visitStorage(jacobianFgyrOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFgyrOver_q_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_q(F&& f) {
+    return siconos::algebra::visitStorage(jacobianFgyrOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFgyrOver_q_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{gyr} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_velocity(F&& f) const {
+    return siconos::algebra::visitStorage(jacobianFgyrOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFgyrOver_velocity_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_velocity(F&& f) {
+    return siconos::algebra::visitStorage(jacobianFgyrOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFgyrOver_velocity_storage_");
+  }
+
+ public:
+  /** constructor from initial state and velocity with memory alias
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for initial position and velocity
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
   LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-               Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+               Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+               siconos::algebra::AliasTag);
+
+  /** constructor from initial state and velocity with copy
+   *
+   *  all attributes will be initialised (deep copy)
+   *  from the input vectors/matrices
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  LagrangianDS(const siconos::algebra::SiconosVector& position,
+               const siconos::algebra::SiconosVector& velocity, siconos::algebra::CopyTag);
 
   /** destructor */
   virtual ~LagrangianDS() noexcept = default;
@@ -333,8 +470,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeTotalForces(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$
    *
@@ -343,8 +480,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeJacobianTotalForcesOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$
    *
@@ -353,8 +490,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeJacobianTotalForcesOver_velocity(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** \return a read-only view on the generalized coordinates vector (size=dimension()) */
   inline const siconos::algebra::ConstMapVectorType q_read() const override {
@@ -368,7 +505,7 @@ class LagrangianDS : public SecondOrderDS {
   //  *
   //  *  \return pointer on a siconos::algebra::SiconosVector
   //  */
-  inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_[0]); }
+  inline siconos::algebra::SiconosVector& q_python() const { return *(state_q_[0]); }
 
   /** \return  a view on initial position vector q0 */
   inline const siconos::algebra::MapVectorType q0_python()  {
@@ -384,12 +521,18 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> velocity() const { return state_q_[1]; }
 
   // /** \return  a read-only view on velocity vector */
-  inline siconos::algebra::SiconosVector &velocity_python() const { return *(state_q_[1]); }
+  inline siconos::algebra::SiconosVector& velocity_python() const { return *(state_q_[1]); }
 
-  /** \return a read-only view on the initial velocity vector */
-  inline const siconos::algebra::ConstMapVectorType velocity0() const {
-    return siconos::algebra::ConstMapVectorType(velocity0_view_->data(),
-                                                velocity0_view_->size());
+  /**   \return a read - only reference on the initial state vector */
+  Eigen::Ref<const siconos::algebra::SiconosVector> q0() const {
+    return use_q0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
+  }
+
+  /** \return a read - only reference on the initial velocity */
+  Eigen::Ref<const siconos::algebra::SiconosVector> velocity0() const {
+    return use_velocity0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
   /** \return a  view on the initial velocity vector */  
@@ -407,25 +550,73 @@ class LagrangianDS : public SecondOrderDS {
     return state_q_[2];
   }
 
-  /*  \return a read-only view on the mass matrix */
-  inline auto mass() const {
-    return siconos::algebra::ConstMapType(mass_view_->data(), mass_view_->rows(),
-                                          mass_view_->cols());
+  /**
+   * @brief Utility function providing uniform access to the mass matrix.
+   *
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the mass matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no mass matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+
+  template <typename F>
+  decltype(auto) use_mass(F&& f) {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
   }
-  // /** \return mass matrix operator (view onto memory) */
-  // inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
+
+  template <typename F>
+  decltype(auto) use_mass(F&& f) const {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
+  }
+
+  /*  \return a read-only reference on the mass matrix */
+  Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> mass() const {
+    return use_mass([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
+  }
 
   /** \return LU-factorization of the mass (pointer link) */
   inline std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUMass() const {
     return LUMass_;
   }
 
-  /** Set a constant mass matrix for the system
+  /** @brief set a constant mass matrix for the system
    *
-   *  \param newValue mass matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
-  void setConstantMassAlias(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantMass(const siconos::algebra::SiconosDenseMatrix& newValue,
+                       siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant mass matrix for the system
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                       siconos::algebra::AliasTag tag);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
@@ -438,13 +629,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_M &fct);
+  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_M& fct);
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
    *  \param position q vector
    */
-  virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+  virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
 
   /** \return  a read-only view on \f$ F_{int}(\dot q, q, t) \f$  */
   inline auto fint() const {
@@ -458,31 +649,51 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V &fct);
+  void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V& fct);
 
   /** Update \f$ F_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
-  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector>& position,
                    double time);
 
-  /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
-  inline auto jacobianFintOver_q_view() const {
-    return siconos::algebra::ConstMapType(jacobianFintOver_q_view_->data(),
-                                          jacobianFintOver_q_view_->rows(),
-                                          jacobianFintOver_q_view_->cols());
+  /*  \return a read-only reference on \f$ \nabla_qF_{int} \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> jacobianFintOver_q() const {
+    return useJacobianFintOver_q([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
+  /** @brief set a constant \f$ \nabla_qF_{int} \f$
    *
-   *  \param newValue jacobianFintOver_q matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
-  void setConstantJacobianFintOver_q(
-      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantJacobianFintOver_q(const siconos::algebra::SiconosDenseMatrix& newValue,
+                                     siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant \f$ \nabla_qF_{int} \f$
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantJacobianFintOver_q(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                                     siconos::algebra::AliasTag tag);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
@@ -492,31 +703,53 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_M& fct);
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
-  void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position,
+  void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector>& position,
                                  double time);
 
-  /** \return \f$ \nabla_{\dot q}F_{int} \f$ (view onto memory) */
-  inline auto jacobianFintOver_velocity_view() const {
-    return siconos::algebra::ConstMapType(jacobianFintOver_velocity_view_->data(),
-                                          jacobianFintOver_velocity_view_->rows(),
-                                          jacobianFintOver_velocity_view_->cols());
+  /*  \return a read-only reference on \f$ \nabla_{\dot q}F_{int} \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> jacobianFintOver_velocity()
+      const {
+    return useJacobianFintOver_velocity([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
+  /** @brief set a constant \f$ \nabla_{\dot q}F_{int} \f$
    *
-   *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   void setConstantJacobianFintOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+      const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant \f$ \nabla_{\dot q}F_{int} \f$
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantJacobianFintOver_velocity(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+      siconos::algebra::AliasTag tag);
 
   /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
@@ -526,7 +759,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_M& fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{int} \f$
    *
@@ -535,19 +768,20 @@ class LagrangianDS : public SecondOrderDS {
    *  \param time the current time
    */
   void computeJacobianFintOver_velocity(
-      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<siconos::algebra::SiconosVector> &position, double time);
+      const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time);
 
   /** \return  a read-only view on \f$ F_{gyr}(\dot q, q) \f$ */
   inline auto fgyr() const {
     return siconos::algebra::ConstMapVectorType(fgyr_->data(), fgyr_->size());
   }
 
-  /** set a constant \f$ F_{gyr}\f$ vector
-   *
-   *  \param newFgyr gyroscopic forces vector
-   */
-  void setConstantFgyr(Eigen::Ref<siconos::algebra::SiconosVector> newFgyr);
+  // No need to add this method: to set a constant fgyr, just use fext
+  //  /** set a constant \f$ F_{gyr}\f$ vector
+  //  *
+  //  *  \param newFgyr gyroscopic forces vector
+  //  */
+  // void setConstantFgyr(Eigen::Ref<siconos::algebra::SiconosVector> newFgyr);
 
   /** True if gyroscopic forces are taken into account */
   bool hasGyroscopicForces() const { return hasFgyr_; }
@@ -556,29 +790,49 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V &fct);
+  void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V& fct);
 
   /** Update \f$ F_{gyr}(\dot q, q) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    */
-  void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+  void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
 
-  /** \return  \f$ \nabla_qF_{gyr} \f$ matrix (view onto memory) */
-  inline auto jacobianFgyrOver_q_view() const {
-    return siconos::algebra::ConstMapType(jacobianFgyrOver_q_view_->data(),
-                                          jacobianFgyrOver_q_view_->rows(),
-                                          jacobianFgyrOver_q_view_->cols());
+  /*  \return a read-only reference on  \f$ \nabla_qF_{gyr} \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> jacobianFgyrOver_q() const {
+    return useJacobianFgyrOver_q([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant \f$ \nabla_qF_{gyr} \f$
+  /** @brief set a constant \f$ \nabla_qF_{gyr} \f$
    *
-   *  \param newValue jacobianFgyrOver_q matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
-  void setConstantJacobianFgyrOver_q(
-      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantJacobianFgyrOver_q(const siconos::algebra::SiconosDenseMatrix& newValue,
+                                     siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant  \f$ \nabla_qF_{gyr} \f$
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantJacobianFgyrOver_q(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+                                     siconos::algebra::AliasTag tag);
 
   /** \return True if  \f$ \nabla_qF_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
@@ -588,29 +842,51 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_M& fct);
 
   /** to compute  \f$ \nabla_qF_{gyr}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    */
-  void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+  void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector>& position);
 
-  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ (view onto memory) */
-  inline auto jacobianFgyrOver_velocity_view() const {
-    return siconos::algebra::ConstMapType(jacobianFgyrOver_velocity_view_->data(),
-                                          jacobianFgyrOver_velocity_view_->rows(),
-                                          jacobianFgyrOver_velocity_view_->cols());
+  /*  \return a read-only reference on \f$ \nabla_{\dot q}F_{gyr} \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> jacobianFgyrOver_velocity()
+      const {
+    return useJacobianFgyrOver_velocity([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosDenseMatrix>(M);
+    });
   }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
+  /** @brief set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
    *
-   *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   * @param newValue matrix to be copied. Its shape must match dimension() x dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   void setConstantJacobianFgyrOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+      const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant  \f$ \nabla_{\dot q}F_{gyr} \f$
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantJacobianFgyrOver_velocity(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+      siconos::algebra::AliasTag tag);
 
   /** \return True if \f$ \nabla_{\dot q}F_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }
@@ -620,7 +896,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_M& fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{gyr} \f$
    *
@@ -628,19 +904,43 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position q vector
    */
   void computeJacobianFgyrOver_velocity(
-      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+      const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector>& position);
 
-  /** \return  a read-only view on \f$ F_{ext}(t) \f$ */
-  inline auto fext() const {
-    return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
+  /*  \return a read-only reference on the mass matrix */
+  Eigen::Ref<const siconos::algebra::SiconosVector> fext() const {
+    return use_fext(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** set a constant external forces vector
+  /** @brief set a constant external forces vector
    *
-   *  \param newFext external forces vector
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
    */
-  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newFext);
+  void setConstantFext(const siconos::algebra::SiconosVector& newValue,
+                       siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant external forces vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                       siconos::algebra::AliasTag tag);
 
   /** True if external forces are taken into account */
   bool hasExternalForces() const { return hasFext_; }
@@ -649,7 +949,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+  void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Update external forces values
    *
@@ -703,20 +1003,20 @@ class LagrangianDS : public SecondOrderDS {
   }
 
   /** \return last saved (memory) values of the state vector*/
-  inline const siconos::algebra::SiconosMemory &qMemory() override { return qMemory_; }
+  inline const siconos::algebra::SiconosMemory& qMemory() override { return qMemory_; }
 
   /** \return last saved (memory) values of the velocity vector*/
-  inline const siconos::algebra::SiconosMemory &velocityMemory() { return velocityMemory_; }
+  inline const siconos::algebra::SiconosMemory& velocityMemory() { return velocityMemory_; }
 
   /** \return last saved (memory) values of p[level] vector
    * \param level required index for p
    */
-  inline const siconos::algebra::SiconosMemory &pMemory(unsigned int level) {
+  inline const siconos::algebra::SiconosMemory& pMemory(unsigned int level) {
     return pMemory_[level];
   }
 
   /** \return last saved (memory) values of the total forces vector*/
-  inline const siconos::algebra::SiconosMemory &forcesMemory() override {
+  inline const siconos::algebra::SiconosMemory& forcesMemory() override {
     return totalForcesMemory_;
   }
 
@@ -761,11 +1061,11 @@ class LagrangianDS : public SecondOrderDS {
   void init_lu_mass() override;
 
   // visitors hook
-  virtual void accept(dynamical_systems::Visitor &tourist) const override {
+  virtual void accept(dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 
 }  // namespace siconos::modeling
-#endif  // LAGRANGIANDS_H
+#endif  // LagrangianDS_H

@@ -27,6 +27,7 @@
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 
@@ -92,11 +93,22 @@ class NewtonEulerDS : public SecondOrderDS {
   /** the twist  \f$= \left[\begin{array}{c} v_g \\ \Omega \end{array}\right] \in \RR^6\f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> twist_{nullptr};
 
-  /** Initial value for the twist (view)*/
-  std::shared_ptr<siconos::algebra::MapVector6Type> twist0_view_{nullptr};
+  /** Initial value for the state */
+  siconos::algebra::DenseVector7Storage q0_storage_{std::monostate{}};
 
-  /** Internal storage for twist0_view_ */
-  std::unique_ptr<std::vector<double>> twist0_internal_storage{nullptr};
+  template <typename F>
+  decltype(auto) use_q0(F&& f) const {
+    return siconos::algebra::visitStorage(q0_storage_, std::forward<F>(f), "q0_storage_");
+  }
+
+  /** Initial value for the twist */
+  siconos::algebra::DenseVector6Storage twist0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_twist0(F&& f) const {
+    return siconos::algebra::visitStorage(twist0_storage_, std::forward<F>(f),
+                                          "twist0_storage_");
+  }
 
   /** vector of coordinates of positions and orientations of the body */
   std::shared_ptr<siconos::algebra::SiconosVector> state_q_{nullptr};
@@ -161,7 +173,7 @@ class NewtonEulerDS : public SecondOrderDS {
    This map is used only when fext is set as a constant external provided memory.
    In any other cases 'fext' is appended to wrench_.
    */
-  std::shared_ptr<siconos::algebra::MapVector3Type> fext_view_{nullptr};
+  siconos::algebra::MapDenseVector3 fext_view_{nullptr};
 
   /** function wrapper used to compute external forces \f$f_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computefext_{nullptr};
@@ -200,7 +212,7 @@ class NewtonEulerDS : public SecondOrderDS {
    This map is used only when mext is set as a constant external provided memory.
    In any other cases 'mext' is appended to wrench_.
    */
-  std::shared_ptr<siconos::algebra::MapVector3Type> mext_view_{nullptr};
+  siconos::algebra::MapDenseVector3 mext_view_{nullptr};
 
   /** function wrapper used to compute external moment \f$m_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computemext_{nullptr};
@@ -245,14 +257,40 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** constructor from a minimum set of data
    *
-   *  \param position initial coordinates of this DynamicalSystem
-   *  \param twist initial twist of this DynamicalSystem
-   *  \param mass the mass
-   *  \param inertia the inertia matrix
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for postion and twist (not inertia: always copied!!)
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] twist initial velocity
+   *  @param[in] mass the mass (scalar value)
+   *  @param[in] inertia the inertia matrix
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
   NewtonEulerDS(Eigen::Ref<siconos::algebra::SiconosVector7> position,
                 Eigen::Ref<siconos::algebra::SiconosVector6> twist, double mass,
-                Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia);
+                Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+                siconos::algebra::AliasTag tag);
+  /** constructor from initial state and velocity with copy
+   *
+   *  all attributes will be initialised (deep copy)
+   *  from the input vectors/matrices
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] twist initial velocity
+   *  @param[in] mass the mass (scalar value)
+   *  @param[in] inertia the inertia matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  NewtonEulerDS(const siconos::algebra::SiconosVector7& position,
+                const siconos::algebra::SiconosVector6& twist, double mass,
+                const siconos::algebra::SiconosMatrix33& inertia,
+                siconos::algebra::CopyTag tag);
 
   /** destructor */
   virtual ~NewtonEulerDS() noexcept = default;
@@ -355,18 +393,25 @@ class NewtonEulerDS : public SecondOrderDS {
   }
 
   /** \return a read-only view onto linear velocity (twist(0:2))*/
-  inline auto linearVelocity_view() const {
+  inline auto linearVelocity_read() const {
     return siconos::algebra::ConstMapVector3Type(twist_->data(), 3);
   }
 
   /** \return a read-only view onto angular velocity (twist(3:6))*/
-  inline auto angularVelocity_view() const {
+  inline auto angularVelocity_read() const {
     return siconos::algebra::ConstMapVector3Type(twist_->data() + 3, 3);
   }
 
-  /** \return a read-only view on initial values of the twist */
-  inline const siconos::algebra::ConstMapVector6Type twist0() const {
-    return siconos::algebra::ConstMapVector6Type(twist0_view_->data(), twist0_view_->size());
+  /**   \return a read - only reference on the initial state vector */
+  Eigen::Ref<const siconos::algebra::SiconosVector7> q0() const {
+    return use_q0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector7>(v); });
+  }
+
+  /** \return a read - only reference on the initial twist vector */
+  Eigen::Ref<const siconos::algebra::SiconosVector6> twist0() const {
+    return use_twist0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector6>(v); });
   }
 
   /** \return a read-only view on acceleration vector */

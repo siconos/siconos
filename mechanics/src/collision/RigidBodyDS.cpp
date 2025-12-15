@@ -20,12 +20,22 @@
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
-siconos::collision::RigidBodyDS::RigidBodyDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> position,
-    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
-    : siconos::modeling::NewtonEulerDS{position, velocity, mass, inertia},
+// siconos::collision::RigidBodyDS::RigidBodyDS(
+//     Eigen::Ref<siconos::algebra::SiconosVector7> position,
+//     Eigen::Ref<siconos::algebra::SiconosVector6> twist, double mass,
+//     Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia, siconos::algebra::AliasTag)
+//     : siconos::modeling::NewtonEulerDS{position, twist, mass, inertia,
+//                                        siconos::algebra::alias_t},
+//       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
+
+siconos::collision::RigidBodyDS::RigidBodyDS(const siconos::algebra::SiconosVector7& position,
+                                             const siconos::algebra::SiconosVector6& twist,
+                                             double mass,
+                                             const siconos::algebra::SiconosMatrix33& inertia)
+    : siconos::modeling::NewtonEulerDS{position, twist, mass, inertia,
+                                       siconos::algebra::copy_t},
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
 void siconos::collision::RigidBodyDS::compute_extrapolated_position(
@@ -40,6 +50,6 @@ void siconos::collision::RigidBodyDS::compute_extrapolated_position(
   (*_qExtrapolated)(1) = (*velocityIncrement)(1);
   (*_qExtrapolated)(2) = (*velocityIncrement)(2);
   siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
-  const siconos::algebra::SiconosVector7 &qold = qMemory().getSiconosVector(0);
+  const siconos::algebra::SiconosVector7& qold = qMemory().getSiconosVector(0);
   siconos::geometry::compositionLawLieGroup(qold, *_qExtrapolated);
 }

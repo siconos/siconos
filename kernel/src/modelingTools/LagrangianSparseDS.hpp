@@ -133,9 +133,22 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_q_ = {nullptr, nullptr,
                                                                             nullptr};
 
+  /** Initial position of the system */
+  siconos::algebra::DenseVectorStorage q0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_q0(F&& f) const {
+    return siconos::algebra::visitStorage(q0_storage_, std::forward<F>(f), "q0_storage_");
+  }
+
   /** initial velocity of the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> velocity0_view_{nullptr};
-  std::unique_ptr<std::vector<double>> velocity0_internal_storage{nullptr};
+  siconos::algebra::DenseVectorStorage velocity0_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_velocity0(F&& f) const {
+    return siconos::algebra::visitStorage(velocity0_storage_, std::forward<F>(f),
+                                          "v0_storage_");
+  }
 
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory qMemory_;
@@ -160,7 +173,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosSparseLUMatrix> LUMass_{nullptr};
 
   /** internal forces (\f$ F_{int}(v , q , t) \f$) applied to the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
 
   /** function wrapper used to compute internal forces */
   siconos::modeling::func_prototypes::FunctionVVS_V computefint_{nullptr};
@@ -198,10 +211,12 @@ class LagrangianSparseDS : public SecondOrderDS {
   bool hasJacobianFintOver_velocity_{false};
 
   /** external forces applied to the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
+  siconos::algebra::DenseVectorStorage fext_storage_{std::monostate{}};
 
-  /** internal (optional) storage used for external forces */
-  std::unique_ptr<std::vector<double>> fext_internal_storage_{nullptr};
+  template <typename F>
+  decltype(auto) use_fext(F&& f) const {
+    return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
+  }
 
   /** function wrapper used to compute external forces */
   siconos::modeling::func_prototypes::FunctionS_V computefext_{nullptr};
@@ -213,7 +228,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   bool hasFext_{false};
 
   /** non-linear inertia term (\f$ F_{gyr}(v, q) \f$ ) applied to the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
 
   /** function wrapper used to compute non-linear inertia term */
   siconos::modeling::func_prototypes::FunctionVV_V computefgyr_{nullptr};
@@ -253,10 +268,10 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> totalForces_{nullptr};
 
   /** jacobian_q forces*/
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianTotalForcesOver_q_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosSparseMatrix> jacobianTotalForcesOver_q_{nullptr};
 
   /** jacobian_{velocity} forces*/
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianTotalForcesOver_velocity_{
+  std::unique_ptr<siconos::algebra::SiconosSparseMatrix> jacobianTotalForcesOver_velocity_{
       nullptr};
 
   /** memory of previous forces of the system */
@@ -287,14 +302,14 @@ class LagrangianSparseDS : public SecondOrderDS {
    */
   template <typename F>
   decltype(auto) useJacobianFintOver_q(F&& f) const {
-    return siconos::algebra::visitSparseStorage(
-        jacobianFintOver_q_storage_, std::forward<F>(f), "jacobianFintOver_q_storage_");
+    return siconos::algebra::visitStorage(jacobianFintOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFintOver_q_storage_");
   }
 
   template <typename F>
   decltype(auto) useJacobianFintOver_q(F&& f) {
-    return siconos::algebra::visitSparseStorage(
-        jacobianFintOver_q_storage_, std::forward<F>(f), "jacobianFintOver_q_storage_");
+    return siconos::algebra::visitStorage(jacobianFintOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFintOver_q_storage_");
   }
 
   /**
@@ -316,16 +331,16 @@ class LagrangianSparseDS : public SecondOrderDS {
    */
   template <typename F>
   decltype(auto) useJacobianFintOver_velocity(F&& f) const {
-    return siconos::algebra::visitSparseStorage(jacobianFintOver_velocity_storage_,
-                                                std::forward<F>(f),
-                                                "jacobianFintOver_velocity_storage_");
+    return siconos::algebra::visitStorage(jacobianFintOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFintOver_velocity_storage_");
   }
 
   template <typename F>
   decltype(auto) useJacobianFintOver_velocity(F&& f) {
-    return siconos::algebra::visitSparseStorage(jacobianFintOver_velocity_storage_,
-                                                std::forward<F>(f),
-                                                "jacobianFintOver_velocity_storage_");
+    return siconos::algebra::visitStorage(jacobianFintOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFintOver_velocity_storage_");
   }
 
   /**
@@ -347,14 +362,14 @@ class LagrangianSparseDS : public SecondOrderDS {
    */
   template <typename F>
   decltype(auto) useJacobianFgyrOver_q(F&& f) const {
-    return siconos::algebra::visitSparseStorage(
-        jacobianFgyrOver_q_storage_, std::forward<F>(f), "jacobianFgyrOver_q_storage_");
+    return siconos::algebra::visitStorage(jacobianFgyrOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFgyrOver_q_storage_");
   }
 
   template <typename F>
   decltype(auto) useJacobianFgyrOver_q(F&& f) {
-    return siconos::algebra::visitSparseStorage(
-        jacobianFgyrOver_q_storage_, std::forward<F>(f), "jacobianFgyrOver_q_storage_");
+    return siconos::algebra::visitStorage(jacobianFgyrOver_q_storage_, std::forward<F>(f),
+                                          "jacobianFgyrOver_q_storage_");
   }
 
   /**
@@ -376,34 +391,50 @@ class LagrangianSparseDS : public SecondOrderDS {
    */
   template <typename F>
   decltype(auto) useJacobianFgyrOver_velocity(F&& f) const {
-    return siconos::algebra::visitSparseStorage(jacobianFgyrOver_velocity_storage_,
-                                                std::forward<F>(f),
-                                                "jacobianFgyrOver_velocity_storage_");
+    return siconos::algebra::visitStorage(jacobianFgyrOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFgyrOver_velocity_storage_");
   }
 
   template <typename F>
   decltype(auto) useJacobianFgyrOver_velocity(F&& f) {
-    return siconos::algebra::visitSparseStorage(jacobianFgyrOver_velocity_storage_,
-                                                std::forward<F>(f),
-                                                "jacobianFgyrOver_velocity_storage_");
+    return siconos::algebra::visitStorage(jacobianFgyrOver_velocity_storage_,
+                                          std::forward<F>(f),
+                                          "jacobianFgyrOver_velocity_storage_");
   }
 
  public:
-  // /** constructor from initial state and velocity
-  //  *
-  //  *  \param position initial coordinates
-  //  *  \param velocity initial velocity
-  //  */
-  // LagrangianSparseDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-  //              std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** constructor from initial state and velocity
+  /** constructor from initial state and velocity with memory alias
    *
-   *  \param position initial coordinates
-   *  \param velocity initial velocity
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means that for initial position and velocity
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   * (rather than copy version)
    */
   LagrangianSparseDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-                     Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+                     Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                     siconos::algebra::AliasTag);
+
+  /** constructor from initial state and velocity with copy
+   *
+   *  initial state and velocity attributes will be initialised (copied)
+   *  from the input vectors
+   *
+   *  @param[in] position initial coordinates
+   *  @param[in] velocity initial velocity
+   *  @param tag Pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  LagrangianSparseDS(const siconos::algebra::SiconosVector& position,
+                     const siconos::algebra::SiconosVector& velocity,
+                     siconos::algebra::CopyTag);
 
   /** destructor */
   virtual ~LagrangianSparseDS() noexcept = default;
@@ -499,10 +530,16 @@ class LagrangianSparseDS : public SecondOrderDS {
   // /** \return  a read-only view on velocity vector */
   inline siconos::algebra::SiconosVector& velocity_python() const { return *(state_q_[1]); }
 
-  /** \return a read-only view on the initial velocity vector */
-  inline const siconos::algebra::ConstMapVectorType velocity0() const {
-    return siconos::algebra::ConstMapVectorType(velocity0_view_->data(),
-                                                velocity0_view_->size());
+  /*  \return a read-only reference on the initial state vector */
+  Eigen::Ref<const siconos::algebra::SiconosVector> q0() const {
+    return use_q0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
+  }
+
+  /*  \return a read-only reference on the initial state */
+  Eigen::Ref<const siconos::algebra::SiconosVector> velocity0() const {
+    return use_velocity0(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
   /** \return a read-only view on acceleration vector */
@@ -514,6 +551,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
     return state_q_[2];
   }
+
   /**
    * @brief Utility function providing uniform access to the mass matrix.
    *
@@ -531,21 +569,20 @@ class LagrangianSparseDS : public SecondOrderDS {
    * @note This function does not copy the matrix; it forwards a reference
    *       to the actual internal or external object.
    */
+
   template <typename F>
-  decltype(auto) useMass(F&& f) {
-    return siconos::algebra::visitSparseStorage(mass_storage_, std::forward<F>(f),
-                                                "mass_storage_");
+  decltype(auto) use_mass(F&& f) {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
   }
 
   template <typename F>
-  decltype(auto) useMass(F&& f) const {
-    return siconos::algebra::visitSparseStorage(mass_storage_, std::forward<F>(f),
-                                                "mass_storage_");
+  decltype(auto) use_mass(F&& f) const {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
   }
 
   /*  \return a read-only reference on the mass matrix */
   Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> mass() const {
-    return useMass([](auto const& M) {
+    return use_mass([](auto const& M) {
       return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
     });
   }
@@ -555,7 +592,7 @@ class LagrangianSparseDS : public SecondOrderDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& mass_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         mass_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "mass_storage_");
@@ -608,10 +645,6 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  // void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_Ms& fct);
-  // void setComputeMassFunction2(const siconos::modeling::func_prototypes::RFunction_V_Ms&
-  // fct);
-
   template <typename Func>
   void setComputeMassFunction(Func&& f) {
     using Ret =
@@ -665,7 +698,7 @@ class LagrangianSparseDS : public SecondOrderDS {
                    const Eigen::Ref<const siconos::algebra::SiconosVector>& position,
                    double time);
 
-  /*  \return a read-only reference on the jacobian matrix */
+  /*  \return a read-only reference on \f$ \nabla_qF_{int} \f$ matrix */
   inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianFintOver_q() const {
     return useJacobianFintOver_q([](auto const& M) {
       return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
@@ -677,7 +710,7 @@ class LagrangianSparseDS : public SecondOrderDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& jacobianFintOver_q_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         jacobianFintOver_q_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "jacobianFintOver_q_storage_");
@@ -768,7 +801,7 @@ class LagrangianSparseDS : public SecondOrderDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& jacobianFintOver_velocity_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         jacobianFintOver_velocity_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "jacobianFintOver_velocity_storage_");
@@ -887,7 +920,7 @@ class LagrangianSparseDS : public SecondOrderDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& jacobianFgyrOver_q_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         jacobianFgyrOver_q_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "jacobianFgyrOver_q_storage_");
@@ -975,7 +1008,7 @@ class LagrangianSparseDS : public SecondOrderDS {
     pybind11 use only!
   */
   const siconos::algebra::SiconosSparseMatrix& jacobianFgyrOver_velocity_py() const {
-    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+    return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
         jacobianFgyrOver_velocity_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
         "jacobianFgyrOver_velocity_storage_");
@@ -1051,16 +1084,40 @@ class LagrangianSparseDS : public SecondOrderDS {
       const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
       const Eigen::Ref<siconos::algebra::SiconosVector>& position);
 
-  /** \return  a read-only view on \f$ F_{ext}(t) \f$ */
-  inline auto fext() const {
-    return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
+  /*  \return a read-only reference on the mass matrix */
+  Eigen::Ref<const siconos::algebra::SiconosVector> fext() const {
+    return use_fext(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** set a constant external forces vector
+  /** @brief set a constant external forces vector
    *
-   *  \param newFext external forces vector
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
    */
-  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newFext);
+  void setConstantFext(const siconos::algebra::SiconosVector& newValue,
+                       siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant external forces vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external force vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                       siconos::algebra::AliasTag tag);
 
   /** True if external forces are taken into account */
   bool hasExternalForces() const { return hasFext_; }

@@ -219,7 +219,7 @@ void Disks::init(std::string disks_input) {
 
       // -- Set external forces (weight) --
       fext_(NDOF * i + 1) = -m * g;
-      body->setConstantFext(fext_.segment(NDOF * i, NDOF));
+      body->setConstantFext(fext_.segment(NDOF * i, NDOF), siconos::algebra::copy_t);
 
       // add the dynamical system in the non smooth dynamical system
       nsds->insertDynamicalSystem(body);

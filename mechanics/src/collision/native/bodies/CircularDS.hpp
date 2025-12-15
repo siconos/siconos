@@ -44,8 +44,8 @@ class CircularDS : public siconos::modeling::LagrangianDS {
    *  \param position initial coordinates
    *  \param velocity initial velocity
    */
-  CircularDS(double, double, Eigen::Ref<siconos::algebra::SiconosVector> position,
-             Eigen::Ref<siconos::algebra::SiconosVector> velocity);
+  CircularDS(double, double, const siconos::algebra::SiconosVector3& position,
+             const siconos::algebra::SiconosVector3& velocity);
 
   virtual ~CircularDS() noexcept = default;
 

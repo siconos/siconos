@@ -17,6 +17,7 @@
  */
 #include "NewtonEulerDSTest.hpp"
 
+#include "NewtonEulerDS.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
@@ -39,17 +40,17 @@ void NewtonEulerDSTest::setUp() {
 void NewtonEulerDSTest::tearDown() {}
 
 // constructor from data
-void NewtonEulerDSTest::testBuildNewtonEulerDS1() {
-  std::cout << "--> Test: constructor" << std::endl;
+void NewtonEulerDSTest::testBuildNewtonEulerDS1_alias() {
+  std::cout << "--> Test: constructor1 (alias)" << std::endl;
 
-  siconos::modeling::NewtonEulerDS neds{q0, twist0, mass, inertia};
+  siconos::modeling::NewtonEulerDS neds{q0, twist0, mass, inertia, siconos::algebra::alias_t};
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildNewtonEulerDS1A : ", Type::value(*ds) == Type::NewtonEulerDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1 : ", neds.number() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS2 : ", neds.dimension() == 6, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS3 : ", neds.getqDim() == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS4 : ", neds.scalarMass() == mass, true);
+  //     "test constr 1 (alias)A : ", Type::value(*ds) == Type::NewtonEulerDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias) : ", neds.number() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias)  : ", neds.dimension() == 6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias)  : ", neds.getqDim() == 7, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias)  : ", neds.scalarMass() == mass, true);
 
   siconos::algebra::SiconosMatrix massMatrix{6, 6};
   massMatrix(0, 0) = mass;
@@ -134,7 +135,6 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1() {
       [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
          const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
-
 
   neds.computeWrench(twist, q, time);
   neds.computeJacobianWrenchOver_twist(twist, q, time);

@@ -30,7 +30,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Relation.hpp"
-#include "SiconosMatrix.hpp"
+#include "StorageTools.hpp"
 
 namespace py = pybind11;
 
@@ -54,6 +54,14 @@ std::vector<std::shared_ptr<siconos::modeling::Interaction>> interactions(
 PYBIND11_MODULE(modeling, m) {
   // Optional docstring
   m.doc() = "Siconos modeling library";
+
+  // Wrap tag helpers (required to select the proper overloaded constructors or methods when
+  // dealing with copy or alias choices).
+  py::class_<siconos::algebra::CopyTag>(m, "copy_t").def(py::init<>());
+  py::class_<siconos::algebra::AliasTag>(m, "alias_t").def(py::init<>());
+  m.attr("copy_t") = siconos::algebra::CopyTag{};
+  m.attr("alias_t") = siconos::algebra::AliasTag{};
+
   wrap_dynamical_systems(m);
   wrap_nonsmoothlaws(m);
   wrap_relations(m);

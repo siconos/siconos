@@ -784,7 +784,7 @@ void siconos::mechanics::fem::FiniteElementModel::applyDirichletBoundaryConditio
 
 void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces,
-    std::shared_ptr<siconos::algebra::MapVectorType> forces) {
+    Eigen::Ref<siconos::algebra::SiconosVector> forces) {
   auto f_index = std::make_shared<std::vector<int>>(0);
   for (auto& e : _mesh->elements()) {
     if (e->tags(0) == physical_entity_tag) {
@@ -797,7 +797,7 @@ void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
           f_index->push_back(n->num());
           auto n_dof_index = n->dofIndex();
           for (siconos::algebra::Index i = 0; i < nodal_forces->size(); i++) {
-            (*forces)((*n_dof_index)[i]) = (*nodal_forces)(i);
+            forces((*n_dof_index)[i]) = (*nodal_forces)(i);
           }
         }
       }

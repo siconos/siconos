@@ -24,7 +24,7 @@
 #define LuenbergerObserver_H
 
 #include "Observer.hpp"
-
+#include "SiconosMatrix.hpp"
 
 namespace siconos::control {
 
@@ -56,9 +56,7 @@ class LuenbergerObserver : public Observer {
    */
   LuenbergerObserver(std::shared_ptr<ControlSensor> sensor,
                      const siconos::algebra::SiconosVector& xHat0)
-      : Observer(ObserverType::Luenberger, sensor, xHat0), _pass(false)
-  {
-  }
+      : Observer(ObserverType::Luenberger, sensor, xHat0), _pass(false) {}
 
   /** Constructor with all the data
    *
@@ -71,9 +69,7 @@ class LuenbergerObserver : public Observer {
                      const siconos::algebra::SiconosVector& xHat0,
                      std::shared_ptr<siconos::algebra::SiconosMatrix> C,
                      std::shared_ptr<siconos::algebra::SiconosMatrix> L)
-      : Observer(ObserverType::Luenberger, sensor, xHat0), _C(C), _L(L), _pass(false)
-  {
-  }
+      : Observer(ObserverType::Luenberger, sensor, xHat0), _C(C), _L(L), _pass(false) {}
 
   ~LuenbergerObserver() noexcept = default;
 

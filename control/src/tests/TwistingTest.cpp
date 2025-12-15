@@ -63,8 +63,9 @@ void TwistingTest::setUp() {
 #ifdef HAS_EXTREME_POINT_ALGO
 
 void TwistingTest::initTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -73,8 +74,9 @@ void TwistingTest::initTwisting() {
 }
 
 void TwistingTest::initRegularTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -84,8 +86,9 @@ void TwistingTest::initRegularTwisting() {
 #endif
 
 void TwistingTest::initExplicitTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
-  _DS->setConstantA(*_A);
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);

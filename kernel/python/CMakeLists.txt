@@ -41,10 +41,6 @@ SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nonsmooth_formulations/nonsmooth_formulation
 DEPENDENCIES kernel numerics
 )
 
-create_pybind11_module(MODULE_NAME input
-SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io/io_pybind11.cpp
-DEPENDENCIES kernel numerics
-)
 
 add_custom_target(py${COMPONENT}
     DEPENDS pb11_template
@@ -53,7 +49,6 @@ add_custom_target(py${COMPONENT}
     integrators
     simulation
     nonsmooth_formulations
-    input
   ) 
 
  
@@ -65,7 +60,6 @@ install(TARGETS
   integrators
   simulation
   nonsmooth_formulations
-  input
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
   )

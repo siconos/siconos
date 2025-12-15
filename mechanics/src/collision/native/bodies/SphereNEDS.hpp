@@ -36,9 +36,13 @@ class SphereNEDS : public siconos::modeling::NewtonEulerDS,
   double radius{0.};
 
  public:
-  SphereNEDS(double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix> inertia,
-             Eigen::Ref<siconos::algebra::SiconosVector> qinit,
-             Eigen::Ref<siconos::algebra::SiconosVector> vinit);
+  SphereNEDS(double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+             Eigen::Ref<siconos::algebra::SiconosVector7> position,
+             Eigen::Ref<siconos::algebra::SiconosVector6> twist, siconos::algebra::AliasTag);
+
+  SphereNEDS(double r, double m, const siconos::algebra::SiconosMatrix33& inertia,
+             const siconos::algebra::SiconosVector7& position,
+             const siconos::algebra::SiconosVector6& twist, siconos::algebra::CopyTag);
 
   ~SphereNEDS() noexcept = default;
 

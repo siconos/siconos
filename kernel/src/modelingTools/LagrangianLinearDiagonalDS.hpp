@@ -20,7 +20,10 @@
 #ifndef LAGRANGIANLINEARDIAGONALDS_H
 #define LAGRANGIANLINEARDIAGONALDS_H
 
+#include <variant>
+
 #include "LagrangianDS.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 /**
@@ -54,28 +57,79 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
  protected:
   ACCEPT_SERIALIZATION(LagrangianLinearDiagonalDS);
 
-  /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> stiffnessMatrix_view_{nullptr};
+  /** stiffness */
+  siconos::algebra::DenseVectorStorage stiffnessMatrix_storage_{std::monostate{}};
 
-  /** damping matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> dampingMatrix_view_{nullptr};
+  /** damping  */
+  siconos::algebra::DenseVectorStorage dampingMatrix_storage_{std::monostate{}};
 
-  /** mass matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> massMatrix_view_{nullptr};
+  /** mass  */
+  siconos::algebra::DenseVectorStorage massMatrix_storage_{std::monostate{}};
 
   /** default constructor */
   LagrangianLinearDiagonalDS() = delete;
+  template <typename F>
+  decltype(auto) use_stiffnessMatrix(F&& f) {
+    return siconos::algebra::visitStorage(stiffnessMatrix_storage_, std::forward<F>(f),
+                                          "stiffnessMatrix_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_stiffnessMatrix(F&& f) const {
+    return siconos::algebra::visitStorage(stiffnessMatrix_storage_, std::forward<F>(f),
+                                          "stiffnessMatrix_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_dampingMatrix(F&& f) {
+    return siconos::algebra::visitStorage(dampingMatrix_storage_, std::forward<F>(f),
+                                          "dampingMatrix_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_dampingMatrix(F&& f) const {
+    return siconos::algebra::visitStorage(dampingMatrix_storage_, std::forward<F>(f),
+                                          "dampingMatrix_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_massMatrix(F&& f) {
+    return siconos::algebra::visitStorage(massMatrix_storage_, std::forward<F>(f),
+                                          "massMatrix_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_massMatrix(F&& f) const {
+    return siconos::algebra::visitStorage(massMatrix_storage_, std::forward<F>(f),
+                                          "massMatrix_storage_");
+  }
 
  public:
-  /** constructor from initial state and all operators.
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param stiffness diagonal of the stiffness matrix
+  /** constructor from initial state and stiffness matrix only.
+   *  initial state, velocity and mass attributes will be initialised (copied)
+   *  from the input vectors/matrices
+   *  @param[in] q0 initial coordinates
+   *  @param[in] v0 initial velocity
+   *  @param[in] stiffness diagonal of the stiffness matrix
+   *  @param[in] tag pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
    */
   LagrangianLinearDiagonalDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
                              Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                             Eigen::Ref<siconos::algebra::SiconosVector> stiffness_diag);
+                             Eigen::Ref<siconos::algebra::SiconosVector> stiffness_diag,
+                             siconos::algebra::AliasTag tag);
+
+  /** constructor from initial state and stiffness matrix only.
+   *  initial state, velocity and mass attributes will be initialised (copied)
+   *  from the input vectors/matrices
+   *  @param[in] q0 initial coordinates
+   *  @param[in] v0 initial velocity
+   *  @param[in] stiffness diagonal of the stiffness matrix
+   *  @param[in] tag pass siconos::algebra::copy_t to select this overload
+   * (rather than alias version)
+   */
+  LagrangianLinearDiagonalDS(const siconos::algebra::SiconosVector& q0,
+                             const siconos::algebra::SiconosVector& v0,
+                             const siconos::algebra::SiconosVector& stiffness_diag,
+                             siconos::algebra::CopyTag tag);
 
   /* destructor */
   ~LagrangianLinearDiagonalDS() noexcept = default;
@@ -93,22 +147,109 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   void setMassMatrix(Eigen::Ref<siconos::algebra::SiconosVector> M);
 
   /** \return a read-only view on the stiffness matrix */
-  inline auto stiffnessMatrix() const {
-    return siconos::algebra::ConstMapVectorType(stiffnessMatrix_view_->data(),
-                                                stiffnessMatrix_view_->size());
+  Eigen::Ref<const siconos::algebra::SiconosVector> stiffnessMatrix() const {
+    return use_stiffnessMatrix(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** \return a read-only view on the damping matrix */
-  inline auto dampingMatrix() const {
-    return siconos::algebra::ConstMapVectorType(dampingMatrix_view_->data(),
-                                                dampingMatrix_view_->size());
+  /** @brief set a constant stiffness
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
+   */
+  void setStiffnessMatrix(const siconos::algebra::SiconosVector& newValue,
+                          siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant stiffness
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                          siconos::algebra::AliasTag tag);
+
+  /** \return a read-only view on the stiffness matrix */
+  Eigen::Ref<const siconos::algebra::SiconosVector> dampingMatrix() const {
+    return use_dampingMatrix(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** \return a read-only view on the damping matrix */
-  inline auto massMatrix() const {
-    return siconos::algebra::ConstMapVectorType(massMatrix_view_->data(),
-                                                massMatrix_view_->size());
+  /** @brief set a constant damping
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
+   */
+  void setDampingMatrix(const siconos::algebra::SiconosVector& newValue,
+                        siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant damping
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                        siconos::algebra::AliasTag tag);
+
+  /** \return a read-only view on the mass */
+  Eigen::Ref<const siconos::algebra::SiconosVector> massMatrix() const {
+    return use_massMatrix(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
+
+  /** @brief set a constant mass
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
+   */
+  void setMassMatrix(const siconos::algebra::SiconosVector& newValue,
+                     siconos::algebra::CopyTag tag);
+
+  /** @brief set a constant mass
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue external vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   */
+  void setMassMatrix(Eigen::Ref<siconos::algebra::SiconosVector> newValue,
+                     siconos::algebra::AliasTag tag);
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -122,8 +263,8 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *  \param q state
    *  \param time the current time
    */
-  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
                           double time) override;
 
   /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$. Nothing done for this kind of system.
@@ -133,8 +274,8 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *  \param time the current time
    */
   void computeJacobianTotalForcesOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) override {
     THROW_EXCEPTION("diagonal DS, missing implementation ...");
   };
 
@@ -145,19 +286,25 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *  \param time the current time
    */
   void computeJacobianTotalForcesOver_velocity(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) override {
     THROW_EXCEPTION("diagonal DS, missing implementation ...");
   };
 
   /** True if stiffness matrix is defined */
-  bool hasStiffnessMatrix() const { return stiffnessMatrix_view_ != nullptr; }
+  bool hasStiffnessMatrix() const {
+    return !std::holds_alternative<std::monostate>(stiffnessMatrix_storage_);
+  }
 
   /** True if stiffness matrix is defined */
-  bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
+  bool hasDampingMatrix() const {
+    return !std::holds_alternative<std::monostate>(dampingMatrix_storage_);
+  }
 
   /** True if mass matrix is defined */
-  bool hasMassMatrix() const { return massMatrix_view_ != nullptr; }
+  bool hasMassMatrix() const {
+    return !std::holds_alternative<std::monostate>(massMatrix_storage_);
+  }
 
   /**\return true if the Dynamical system is linear. */
   bool isLinear() const override { return true; }
@@ -166,7 +313,7 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    */
   void display(bool brief = true) const override;
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANLINEARDIAGONALDS_H

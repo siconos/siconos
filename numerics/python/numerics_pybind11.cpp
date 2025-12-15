@@ -38,22 +38,13 @@ void wrap_relay(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
 void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
-// Getter pour iparam qui retourne un tableau numpy lié directement au pointeur C++
 py::array_t<int> get_iparam(SolverOptions &options) {
-  return py::array_t<int>(
-      {options.iSize},      // Dimension du tableau (taille de iparam)
-      {sizeof(int)},        // Stride (décalage entre éléments)
-      options.iparam,       // Pointeur vers les données C++ (iparam)
-      py::cast(&options));  // Lier le cycle de vie de l'objet Python à l'objet C++
+  return py::array_t<int>({options.iSize}, {sizeof(int)}, options.iparam, py::cast(&options));
 }
 
-// Getter pour dparam qui retourne un tableau numpy lié directement au pointeur C++
 py::array_t<double> get_dparam(SolverOptions &options) {
-  return py::array_t<double>(
-      {options.dSize},      // Dimension du tableau (taille de dparam)
-      {sizeof(double)},     // Stride (décalage entre éléments)
-      options.dparam,       // Pointeur vers les données C++ (dparam)
-      py::cast(&options));  // Lier le cycle de vie de l'objet Python à l'objet C++
+  return py::array_t<double>({options.dSize}, {sizeof(double)}, options.dparam,
+                             py::cast(&options));
 }
 
 PYBIND11_MODULE(_numerics, m) {
@@ -81,9 +72,8 @@ PYBIND11_MODULE(_numerics, m) {
   m.def("solver_options_get_internal_solver", &solver_options_get_internal_solver,
         py::return_value_policy::take_ownership, py::arg("options"), py::arg("id"));
   m.def("numerics_set_verbose", &numerics_set_verbose);
-  m.def("solver_options_update_internal",
-        &solver_options_update_internal, py::arg("options"), py::arg("internal_solver_number"),
-        py::arg("solver_id"));
+  m.def("solver_options_update_internal", &solver_options_update_internal, py::arg("options"),
+        py::arg("internal_solver_number"), py::arg("solver_id"));
 
   py::module_ params = m.def_submodule(
       "params", "Parameter names in numerics (storage types, param for solvers ...)");

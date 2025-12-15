@@ -18,7 +18,6 @@
 #include "DynamicalSystem.hpp"
 
 #include "SiconosException.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
@@ -30,14 +29,11 @@
 
 size_t siconos::modeling::DynamicalSystem::__count = 0;
 
-siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
+siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem& ds)
     : x_size_(ds.x_size_), stepsInMemory_(ds.stepsInMemory_) {
   // The following data should always be initialize
-  if (ds.x0_view_) {
-    x0_internal_storage_ = std::make_unique<std::vector<double>>(ds.x0_view_->size());
-    x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
-                                                                 x0_internal_storage_->size());
-    *x0_view_ = *ds.x0_view_;  // copy
+  if (ds.hasX0()) {
+    x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ds.x0());
   }
   if (ds.r()) rVector_ = std::make_shared<siconos::algebra::SiconosVector>(*(ds.r()));
 
@@ -51,12 +47,12 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
 }
 
 void siconos::modeling::DynamicalSystem::resetToInitialState() {
-  if (x0_view_) {
-    *(state_x_[0]) = *x0_view_;
+  if (hasX0()) {
+    *(state_x_[0]) = x0();  // Copy
   } else
     THROW_EXCEPTION(
-        "siconos::modeling::DynamicalSystem::resetToInitialState() - initial state x0_view_ "
-        "is null");
+        "siconos::modeling::DynamicalSystem::resetToInitialState() - initial state is not "
+        "set");
 }
 
 void siconos::modeling::DynamicalSystem::update(double time) {
@@ -64,11 +60,22 @@ void siconos::modeling::DynamicalSystem::update(double time) {
   computeJacobianRhsOver_x(time);
 }
 
-void siconos::modeling::DynamicalSystem::setX0(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  x0_internal_storage_ = nullptr;
+void siconos::modeling::DynamicalSystem::setX0(const siconos::algebra::SiconosVector& newValue,
+                                               siconos::algebra::CopyTag tag) {
+  if (newValue.size() != x_size_)
+    throw std::invalid_argument("setX0(copy): input vector has wrong size");
 
-  x0_view_ =
+  // Deep copy into Owned storage
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+}
+
+void siconos::modeling::DynamicalSystem::setX0(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  if (newValue.size() != x_size_)
+    throw std::invalid_argument("setX0(alias): input vector has wrong size");
+
+  // Aliasing: shared_ptr to a Map (view over external memory)
+  x0_storage_ =
       std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
 }
 

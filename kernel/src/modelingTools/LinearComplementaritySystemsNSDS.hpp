@@ -24,6 +24,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::algebra {}  // namespace siconos::algebra
 
@@ -51,10 +52,26 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
   std::shared_ptr<Interaction> _interaction{nullptr};
 
  public:
-  /** constructor with t0 and T
+  /** @brief constructor with t0 and T
    *
-   *  \param t0 initial time
-   *  \param T final time
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param t0 initial time
+   *  @param T final time
+   *  @param x0 initial state
+   *  @param A ds matrix
+   *  @param B relation matrix
+   *  @param C relation matrix
+   *  @param D relation matrix
+   *  @param b ds vector
+   *  @param e relation vector
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   *       (rather than copy version)
    */
   LinearComplementaritySystemsNSDS(double t0, double T,
                                    Eigen::Ref<siconos::algebra::SiconosVector> x0,
@@ -63,8 +80,40 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
                                    Eigen::Ref<siconos::algebra::SiconosMatrix> C,
                                    Eigen::Ref<siconos::algebra::SiconosMatrix> D,
                                    Eigen::Ref<siconos::algebra::SiconosVector> b,
-                                   Eigen::Ref<siconos::algebra::SiconosVector> e);
+                                   Eigen::Ref<siconos::algebra::SiconosVector> e,
+                                   siconos::algebra::AliasTag tag);
 
+  //   /** @brief constructor with t0 and T
+  //    *
+  //    * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+  //    * pointing directly to the memory provided by the argument.
+  //    *
+  //    * This means:
+  //    *  - ownership stays external (!! only implemented for DS op.)
+  //    *  - modifications to the original vector are reflected inside the class
+  //    *
+  //    *  @param t0 initial time
+  //    *  @param T final time
+  //    *  @param x0 initial state
+  //    *  @param A ds matrix
+  //    *  @param B relation matrix
+  //    *  @param C relation matrix
+  //    *  @param D relation matrix
+  //    *  @param b ds vector
+  //    *  @param e relation vector
+  //    *  @param tag Pass siconos::algebra::alias_t to select this overload
+  //    *       (rather than copy version)
+
+  //    */
+  //   LinearComplementaritySystemsNSDS(double t0, double T,
+  //                                    const siconos::algebra::SiconosVector& x0,
+  //                                    const siconos::algebra::SiconosDenseMatrix& A,
+  //                                    const siconos::algebra::SiconosDenseMatrix& B,
+  //                                    const siconos::algebra::SiconosDenseMatrix& C,
+  //                                    const siconos::algebra::SiconosDenseMatrix& D,
+  //                                    const siconos::algebra::SiconosVector& b,
+  //                                    const siconos::algebra::SiconosVector& e,
+  //                                    siconos::algebra::CopyTag tag);
   /** destructor
    */
   ~LinearComplementaritySystemsNSDS() noexcept = default;

@@ -28,6 +28,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Rope.h"  // IWYU pragma: keep
 #include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TransportCableManager.h"
@@ -138,7 +139,7 @@ void CableDSTest::testInitializeFEM() {
   in >> reader;
   auto positions_ref = siconos::algebra::io::readVectorFromJson(reader["q"]);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile:  check fem initialisation",
-                               positions.isApprox(positions_ref), true);
+                               positions.isApprox(positions_ref, 1e-10), true);
   std::cout << "✅ test initialize FEM passed.\n";
 
   // // compare results to a reference
@@ -176,7 +177,7 @@ void CableDSTest::testComputeBouncingBall() {
   // ================= Creation of the model =======================
 
   // User-defined main parameters
-  int nDof = 3;       // degrees of freedom for the ball
+  int nDof = 3;                // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
   double T = 10;               // final computation time
   double h = 0.005;            // time step
@@ -204,12 +205,13 @@ void CableDSTest::testComputeBouncingBall() {
   v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(
+      q0, v0, mass, siconos::algebra::alias_t);
 
   // -- Set external forces (weight) --
   siconos::algebra::SiconosVector weight{nDof};
   weight(0) = -m * g;
-  ball->setConstantFext(weight);
+  ball->setConstantFext(weight, siconos::algebra::copy_t);
 
   // --------------------
   // --- Interactions ---

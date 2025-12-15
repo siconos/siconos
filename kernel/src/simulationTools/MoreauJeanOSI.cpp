@@ -1901,7 +1901,7 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS& neds,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
+    Eigen::Ref<siconos::algebra::SiconosMatrix66> iterationMatrix,
     std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.

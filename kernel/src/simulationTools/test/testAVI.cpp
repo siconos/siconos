@@ -72,7 +72,8 @@ void AVITest::testAVI() {
   (*K)(2) = -1.0;
   (*K)(3) = -1.0;
   auto nslaw = std::make_shared<siconos::modeling::NormalConeNSL>(_n, H, K);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b,
+                                                                siconos::algebra::alias_t);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);

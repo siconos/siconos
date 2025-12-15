@@ -20,12 +20,11 @@
 
 #include <SiconosConfig.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "LinearSMC.hpp"
+#include <FirstOrderLinearDS.hpp>
+
+#include "ExplicitTwisting.hpp"
 #include "LinearSensor.hpp"
 #include "RegularTwisting.hpp"
-#include "ExplicitTwisting.hpp"
-
-#include <FirstOrderLinearDS.hpp>
 
 class TwistingTest : public CppUnit::TestFixture {
  private:
