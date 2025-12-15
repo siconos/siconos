@@ -2121,7 +2121,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 "          to remove this message set output_contact_info options to False"
             )
 
-        if self._output_contact_work and self.config.backend == "bullet":
+        if self._output_contact_work:
             self.log(self.output_contact_work, with_timer)()
             if (
                 self._run_options["skip_last_update_output"]
