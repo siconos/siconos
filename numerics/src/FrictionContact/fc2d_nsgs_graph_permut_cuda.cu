@@ -487,6 +487,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
      supposed to be called from lcp_driver_global().
   */
 
+  // double time = omp_get_wtime();
+
   // Get solver parameters
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -496,398 +498,20 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
 
+  // time = omp_get_wtime() - time;
+  // printf("time getting parameters: %es\n", time);
+  // time = omp_get_wtime();
+
   // Initialize cusparse
   cusparseHandle_t handle;
   CHECK_CUSPARSE( cusparseCreate(&handle) );
-  int cusparse_version = -1;
+  /* int cusparse_version = -1;
   CHECK_CUSPARSE( cusparseGetVersion(handle, &cusparse_version) )
-  printf("cusparse version: %d\n", cusparse_version);
+  printf("cusparse version: %d\n", cusparse_version); */
 
-  /* *********** */
-  /* vecAdd code */
-  /* *********** */
-
-  /*
-  int N = 1024;
-  size_t size = N * sizeof(float);
-
-  // Host input vectors
-  float *h_A, *h_B;
-  // Host output vector
-  float* h_C;
-  // Device input vectors
-  float *d_A, *d_B;
-  // Device output vector
-  float* d_C;
-
-  // Allocate memory for each vector on host
-  h_A = (float*)malloc(size);
-  h_B = (float*)malloc(size);
-  h_C = (float*)malloc(size);
-
-  // Allocate memory for each vector on GPU
-  cudaMalloc(&d_A, size);
-  cudaMalloc(&d_B, size);
-  cudaMalloc(&d_C, size);
-
-  // Initialize vectors on host
-  for (int i = 0; i < N; i++) {
-    h_A[i] = sin(i) * sin(i);
-    h_B[i] = cos(i) * cos(i);
-  }
-
-  // Copy host vectors to device
-  cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
-
-  // Execute the kernel
-  int threadsPerBlock = 256;
-  int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
-  vecAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, N);
-
-  // Copy array back to host
-  cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
-
-  // Sum up vector c and print result divided by N, this should equal 1 within error
-  float sum = 0;
-  for (int i = 0; i < N; i++) {
-    sum += h_C[i];
-  }
-
-  printf("Final result: %e\n", sum / N);
-
-  // Release device memory
-  cudaFree(d_A);
-  cudaFree(d_B);
-  cudaFree(d_C);
-
-  // Release host memory
-  free(h_A);
-  free(h_B);
-  free(h_C); */
-
-  /* ********************* */
-  /* END OF VECADD EXAMPLE */
-  /* ********************* */
-
-  /* Example of matrix vector product to test stuff */
-  /* double alpha = 1.0;
-  double beta = 0.0;
-  double* h_res = (double*)calloc(nc * 2, sizeof(double));
-  NM_gemv(alpha, problem->M, problem->q, beta, h_res);
-  for (int i = 0; i < 10; i++) {
-    printf(" %e ", h_res[i]);
-  }
-  printf("\n"); */
-
-  /* SpMV with coloring example */
-
-  /* const int64_t A_num_rows      = 4;
-  const int64_t A_num_cols      = 4;
-  const int64_t A_nnz           = 9;
-  int64_t       hA_csrOffsets[] = { 0, 3, 4, 7, 9 };
-  int64_t       hA_columns[]    = { 0, 2, 3, 1, 0, 2, 3, 1, 3 };
-  double     hA_values[]     = { 1.0, 2.0, 3.0, 4.0, 5.0,
-                                6.0, 7.0, 8.0, 9.0 };
-  double     hX[]            = { 1.0, 2.0, 3.0, 4.0 };
-  double     hY[]            = { 0.0, 0.0, 0.0, 0.0 };
-  double     hY_result[]     = { 19.0, 8.0, 51.0, 52.0 };
-  int64_t       nb_of_colors    = 2;
-  int64_t        partitions[]    = {0, 1, 2};
-  //--------------------------------------------------------------------------
-  // Device memory management
-  cusparseHandle_t     handle = NULL;
-  CHECK_CUSPARSE( cusparseCreate(&handle) )
-  int64_t   *dA_csrOffsets, *dA_columns;
-  double *dA_values, *dX, *dY;
-  CHECK_CUDA( cudaMalloc((void**) &dA_csrOffsets,
-                          (A_num_rows + 1) * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc((void**) &dA_columns, A_nnz * sizeof(int64_t))        )
-  CHECK_CUDA( cudaMalloc((void**) &dA_values,  A_nnz * sizeof(double))      )
-  CHECK_CUDA( cudaMalloc((void**) &dX,         A_num_cols * sizeof(double)) )
-  CHECK_CUDA( cudaMalloc((void**) &dY,         A_num_rows * sizeof(double)) )
-
-  CHECK_CUDA( cudaMemcpy(dA_csrOffsets, hA_csrOffsets,
-                          (A_num_rows + 1) * sizeof(int64_t),
-                          cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(dA_columns, hA_columns, A_nnz * sizeof(int64_t),
-                          cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(dA_values, hA_values, A_nnz * sizeof(double),
-                          cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(dX, hX, A_num_cols * sizeof(double),
-                          cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(dY, hY, A_num_rows * sizeof(double),
-                          cudaMemcpyHostToDevice) )
-
-  // Create dense vector X
-  cusparseDnVecDescr_t vecX;
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecX, A_num_cols, dX, CUDA_R_64F) )
-
-  int64_t *h_all_RowOffsets = (int64_t *)malloc((A_num_rows + nb_of_colors) * sizeof(int64_t));
-  unsigned int k = 0;
-  size_t start_line;
-  size_t end_line;
-  for (unsigned int color = 0; color < nb_of_colors; color++) {
-    start_line = 2 * partitions[color];
-    end_line = 2 * partitions[color + 1];
-
-    for (unsigned int row = start_line; row < end_line + 1; row++) {
-      h_all_RowOffsets[k] = hA_csrOffsets[row] - hA_csrOffsets[start_line];
-      k++;
-    }
-  }
-
-  for (int i = 0; i < A_num_rows + nb_of_colors; i++) printf(" %d ", h_all_RowOffsets[i]);
-  printf("\n");
-
-  int64_t *d_all_RowOffsets = NULL;
-  CHECK_CUDA( cudaMalloc(&d_all_RowOffsets, (A_num_rows + nb_of_colors) * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMemcpy(d_all_RowOffsets, h_all_RowOffsets, (A_num_rows + nb_of_colors) * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-
-  int64_t* d_all_ColIndices = NULL;
-  double* d_all_Values = NULL;
-
-  CHECK_CUDA( cudaMalloc(&d_all_ColIndices, A_nnz * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc(&d_all_Values, A_nnz * sizeof(double)) )
-
-  CHECK_CUDA( cudaMemcpy(d_all_ColIndices, hA_columns, A_nnz * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(d_all_Values, hA_values, A_nnz * sizeof(double),
-             cudaMemcpyHostToDevice) )
-
-  cusparseConstSpMatDescr_t *all_cusparse_csrmat = (cusparseConstSpMatDescr_t *)malloc(nb_of_colors * sizeof(cusparseConstSpMatDescr_t));
-  
-  size_t n_rows;
-  size_t current_nnz;
-  size_t cumul_nnz = 0;
-  size_t cumul_n_rows = 0;
-  for (unsigned int color = 0; color < nb_of_colors; color++) {
-    start_line = 2 * partitions[color];
-    end_line = 2 * partitions[color + 1];
-    n_rows = end_line - start_line;
-    cumul_n_rows += n_rows;
-    current_nnz = hA_csrOffsets[end_line] - hA_csrOffsets[start_line];
-
-    printf("%d\n", h_all_RowOffsets[start_line + color]);
-
-    CHECK_CUSPARSE( cusparseCreateConstCsr(&all_cusparse_csrmat[color], n_rows, A_num_cols, current_nnz, 
-                                           &d_all_RowOffsets[start_line + color], &d_all_ColIndices[cumul_nnz], &d_all_Values[cumul_nnz], 
-                                          CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F) )
-
-    cumul_nnz += current_nnz;
-  }
-
-  printf("cumul_n_rows = %d, n_rows = %d\n", cumul_n_rows, A_num_rows);
-  printf("cumul_nnz = %d, nnz = %d\n", cumul_nnz, A_nnz);
-
-  printf("matrices created\n");
-  fflush(stdout);
-
-  // Create a res vector for each color
-  double *h_all_res = (double *)calloc(A_num_rows, sizeof(double));
-  double *d_all_res = NULL;
-  CHECK_CUDA( cudaMalloc(&d_all_res, (A_num_rows) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_all_res, h_all_res, (A_num_rows) * sizeof(double), cudaMemcpyHostToDevice) )
-
-  cusparseDnVecDescr_t *all_vec_res = (cusparseDnVecDescr_t *)malloc(nb_of_colors * sizeof(cusparseDnVecDescr_t));
-  for (unsigned int color = 0; color < nb_of_colors; color++) {
-    CHECK_CUSPARSE( cusparseCreateDnVec(&all_vec_res[color], 2 * (partitions[color + 1] - partitions[color]), &d_all_res[2 * partitions[color]], CUDA_R_64F) )
-  }
-
-  printf("vectors created\n");
-  fflush(stdout);
-  
-  void **d_all_Buffer = (void **)malloc(nb_of_colors * sizeof(void *));
-  size_t *all_Buffer_Size = (size_t *)malloc(nb_of_colors * sizeof(size_t));
-
-  for (unsigned int color = 0; color < nb_of_colors; color++) {
-    CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color],
-                                          vecX, &beta, all_vec_res[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, &all_Buffer_Size[color]) )
-    CHECK_CUDA( cudaMalloc(&d_all_Buffer[color], all_Buffer_Size[color]) )
-
-    CHECK_CUSPARSE( cusparseSpMV_preprocess(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, all_cusparse_csrmat[color], vecX, &beta, all_vec_res[color], CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]) )
-
-    CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color],
-                                 vecX, &beta, all_vec_res[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]) )
-  }
-  
-
-  CHECK_CUDA( cudaMemcpy(h_all_res, d_all_res, A_num_rows * sizeof(double), cudaMemcpyDeviceToHost) )
-
-  int correct = 1;
-  for (int i = 0; i < A_num_rows; i++) {
-    printf("%e %e\n", h_all_res[i], hY_result[i]);
-      if (fabs(h_all_res[i] - hY_result[i]) / fabs(hY_result[i]) > 1e-15) { // direct floating point comparison is not
-        correct = 0;             // reliable
-        break;
-      }
-  }
-  if (correct)
-      printf("Dummy multicolor test PASSED\n");
-  else
-      printf("Dummy multicolor test FAILED\n"); */
-  //--------------------------------------------------------------------------
-  // CUSPARSE APIs
-  
-  /* cusparseSpMatDescr_t matA;
-  cusparseDnVecDescr_t vecX, vecY;
-  void*                dBuffer    = NULL;
-  size_t               bufferSize = 0;
-  CHECK_CUSPARSE( cusparseCreate(&handle) )
-  // Create sparse matrix A in CSR format
-  CHECK_CUSPARSE( cusparseCreateCsr(&matA, A_num_rows, A_num_cols, A_nnz,
-                                    dA_csrOffsets, dA_columns, dA_values,
-                                    CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
-                                    CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F) )
-  // Create dense vector X
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecX, A_num_cols, dX, CUDA_R_64F) )
-  // Create dense vector y
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecY, A_num_rows, dY, CUDA_R_64F) )
-  // allocate an external buffer if needed
-  CHECK_CUSPARSE( cusparseSpMV_bufferSize(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize) )
-  CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) )
-
-  // execute preprocess (optional)
-  CHECK_CUSPARSE( cusparseSpMV_preprocess(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, dBuffer) )
-
-  // execute SpMV
-  CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, dBuffer) )
-
-  // destroy matrix/vector descriptors
-  CHECK_CUSPARSE( cusparseDestroySpMat(matA) )
-  CHECK_CUSPARSE( cusparseDestroyDnVec(vecX) )
-  CHECK_CUSPARSE( cusparseDestroyDnVec(vecY) )
-
-  //--------------------------------------------------------------------------
-  // device result check
-  CHECK_CUDA( cudaMemcpy(hY, dY, A_num_rows * sizeof(double),
-                          cudaMemcpyDeviceToHost) )
-  int correct = 1;
-  for (int i = 0; i < A_num_rows; i++) {
-      printf("%e %e\n", hY[i], hY_result[i]);
-      if (hY[i] != hY_result[i]) { // direct floating point comparison is not
-          correct = 0;             // reliable
-          break;
-      }
-  }
-  if (correct)
-      printf("spmv_csr_example test PASSED\n");
-  else
-      printf("spmv_csr_example test FAILED: wrong result\n");
-  //--------------------------------------------------------------------------
-  // device memory deallocation
-  CHECK_CUDA( cudaFree(dBuffer) )
-  CHECK_CUDA( cudaFree(dA_csrOffsets) )
-  CHECK_CUDA( cudaFree(dA_columns) )
-  CHECK_CUDA( cudaFree(dA_values) )
-  CHECK_CUDA( cudaFree(dX) )
-  CHECK_CUDA( cudaFree(dY) ) */
-
-  /* *********************** */
-  /* END OF SMPV CSR EXAMPLE */
-  /* *********************** */
-
-  /* ******** */
-  /* CUSPARSE */
-  /* ******** */
-
-  /* CSparseMatrix *csparse_mat = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
-  int res = SBM_to_sparse_init_memory(problem->M->matrix1, csparse_mat);
-  res = SBM_to_sparse(problem->M->matrix1, csparse_mat);
-  if (res != 0) {
-    printf("Error converting SBM to CSparse.\n");
-    return;
-  }
-  else {
-    printf("Conversion SBM->CSparse done\n");
-  }
-
-  int64_t* d_RowOffsets = NULL;
-  int64_t* d_ColIndices = NULL;
-  double* d_Values = NULL;
-  size_t nnz = csparse_mat->p[2 * nc];
-  printf("nnz = %d, nbblocks * 4 = %d\n", nnz, problem->M->matrix1->nbblocks * 4);
-
-  CHECK_CUDA( cudaMalloc(&d_RowOffsets, (2 * nc + 1) * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc(&d_ColIndices, nnz * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc(&d_Values, nnz * sizeof(double)) )
-
-  CHECK_CUDA( cudaMemcpy(d_RowOffsets, csparse_mat->p, (2 * nc + 1) * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(d_ColIndices, csparse_mat->i, nnz * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(d_Values, csparse_mat->x, nnz * sizeof(double),
-             cudaMemcpyHostToDevice) )
-
-  cusparseConstSpMatDescr_t cusparse_csrmat;
-  CHECK_CUSPARSE( cusparseCreateConstCsr(&cusparse_csrmat, 2 * nc, 2 * nc, nnz, d_RowOffsets, d_ColIndices, d_Values, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F) )
-  printf("cusparse CSR matrix created.\n");
-
-  double* d_q = NULL;
-  CHECK_CUDA( cudaMalloc(&d_q, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_q, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
-  cusparseDnVecDescr_t vecq;
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecq, 2 * nc, d_q, CUDA_R_64F) )
-
-  double *h_res_2 = (double *)calloc(2 * nc, sizeof(double));
-  double *d_res = NULL;
-  CHECK_CUDA( cudaMalloc(&d_res, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_res, h_res_2, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
-  cusparseDnVecDescr_t vecres;
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecres, 2 * nc, d_res, CUDA_R_64F) )
-
-  void *dBuffer_2 = NULL;
-  size_t bufferSize_2 = 0;
-
-  CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, cusparse_csrmat,
-                                          vecq, &beta, vecres, CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize_2) )
-  CHECK_CUDA( cudaMalloc(&dBuffer_2, bufferSize_2) )
-
-  CHECK_CUSPARSE( cusparseSpMV_preprocess(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, cusparse_csrmat, vecq, &beta, vecres, CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, dBuffer_2) )
-
-  CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, cusparse_csrmat,
-                               vecq, &beta, vecres, CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer_2) )
-
-  // CHECK_CUSPARSE( cusparseDestroySpMat(cusparse_csrmat) )
-  // CHECK_CUSPARSE( cusparseDestroyDnVec(vecq) )
-  // CHECK_CUSPARSE( cusparseDestroyDnVec(vecres) )
-
-  // CHECK_CUSPARSE( cusparseDnVecGetValues(vecq, d_res) );
-  CHECK_CUDA( cudaMemcpy(h_res_2, d_res, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost) )
-
-  for (int i = 0; i < 10; i++) printf(" %e ", h_res_2[i]);
-  printf("\n");
-
-  printf("DBL_EPSILON = %e\n", DBL_EPSILON);
-  correct = 1;
-  for (int i = 0; i < 2 * nc; i++) {
-      if (fabs(h_res[i] - h_res_2[i]) / fabs(h_res[i]) > 1e-10) { // direct floating point comparison is not
-          printf("%d %e %e %e\n", i, h_res[i], h_res_2[i], fabs(h_res[i] - h_res_2[i]) / fabs(h_res[i]));
-          correct = 0;             // reliable
-          break;
-      }
-  }
-  if (correct)
-      printf("Conversion test PASSED\n");
-  else
-      printf("Conversion test FAILED\n"); */
-  
-  // TEST WITH COLORING + PERMUTATION
+  // time = omp_get_wtime() - time;
+  // printf("time initializing cusparse handle: %es\n", time);
+  //time = omp_get_wtime();
 
   // Start coloring and permutation 
   size_t n_colors = 0;
@@ -896,7 +520,12 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
+  // time = omp_get_wtime() - time;
+  // printf("time coloring: %es\n", time);
+
   numerics_printf("-- FC2D NSGS CUDA - Graph colored with %zu colors\n", n_colors);
+
+  // time = omp_get_wtime();
 
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
@@ -910,6 +539,11 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   SparseBlockStructuredMatrix* old_matrix1 = problem->M->matrix1;
   problem->M->matrix1 = SBM_permuted;
+
+  // time = omp_get_wtime() - time;
+  // printf("time permutating: %e\n", time);
+
+  // time = omp_get_wtime();
 
   /* Get diagonal blocks and determinants */
   double* diagonal_blocks = fc2d_extract_diagonal_blocks(problem);
@@ -929,142 +563,12 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   problem->mu = mu_permuted;
   // Permutation done
 
-  /* double alpha = 1.0;
-  double beta = 0.0;
-  double* h_res_permuted = (double*)calloc(nc * 2, sizeof(double));
-  NM_gemv(alpha, problem->M, problem->q, beta, h_res_permuted);
-  for (int i = 0; i < 10; i++) {
-    printf(" %e ", h_res_permuted[i]);
-  }
-  printf("\n");
+  // time = omp_get_wtime() - time;
+  // printf("time extracting diagonal + determinants: %e\n", time);
 
-  // Conversion to CSR
-  CSparseMatrix *SBM_permuted_csr = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
-  int res = SBM_to_sparse_init_memory(SBM_permuted, SBM_permuted_csr);
-  res = SBM_to_sparse(SBM_permuted, SBM_permuted_csr);
-  if (res != 0) {
-    printf("Error converting SBM to CSparse.\n");
-    return;
-  }
-  else {
-    printf("Conversion SBM->CSparse done\n");
-  }
-  // Conversion done
+  // Now initialize cusparse data
 
-  // Create an array storing, for each color, the row offsets of the corresponding CSR submatrix 
-  int64_t *h_all_RowOffsets_ = (int64_t *)malloc((2 * nc + n_colors) * sizeof(int64_t));
-  int k = 0;
-  for (unsigned int color = 0; color < n_colors; color++) {
-    size_t start_line = 2 * sum_sizes[color];
-    size_t end_line = 2 * sum_sizes[color + 1];
-
-    for (unsigned int row = start_line; row < end_line + 1; row++) {
-      h_all_RowOffsets_[k] = SBM_permuted_csr->p[row] - SBM_permuted_csr->p[start_line];
-      k++;
-    }
-  }
-
-  // Copy this array to device
-  int64_t *d_all_RowOffsets_ = NULL;
-  CHECK_CUDA( cudaMalloc(&d_all_RowOffsets_, (2 * nc + n_colors) * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMemcpy(d_all_RowOffsets_, h_all_RowOffsets_, (2 * nc + n_colors) * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-
-  int64_t* d_all_ColIndices_ = NULL;
-  double* d_all_Values_ = NULL;
-  size_t nnz = SBM_permuted_csr->p[2 * nc];
-  printf("nnz = %d, nbblocks * 4 = %d\n", nnz, SBM_permuted->nbblocks * 4);
-
-  CHECK_CUDA( cudaMalloc(&d_all_ColIndices_, nnz * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc(&d_all_Values_, nnz * sizeof(double)) )
-
-  CHECK_CUDA( cudaMemcpy(d_all_ColIndices_, SBM_permuted_csr->i, nnz * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(d_all_Values_, SBM_permuted_csr->x, nnz * sizeof(double),
-             cudaMemcpyHostToDevice) )
-
-  cusparseConstSpMatDescr_t *all_cusparse_csrmat_ = (cusparseConstSpMatDescr_t *)malloc(n_colors * sizeof(cusparseConstSpMatDescr_t));
-  
-  size_t n_rows_;
-  size_t current_nnz_;
-  size_t cumul_nnz_ = 0;
-  size_t cumul_n_rows_ = 0;
-  for (unsigned int color = 0; color < n_colors; color++) {
-    size_t start_line = 2 * sum_sizes[color];
-    size_t end_line = 2 * sum_sizes[color + 1];
-    n_rows_ = end_line - start_line;
-    cumul_n_rows_ += n_rows_;
-    current_nnz_ = SBM_permuted_csr->p[end_line] - SBM_permuted_csr->p[start_line];
-
-    printf("%d\n", h_all_RowOffsets_[start_line + color]);
-
-    CHECK_CUSPARSE( cusparseCreateConstCsr(&all_cusparse_csrmat_[color], n_rows_, 2 * nc, current_nnz_, 
-                                           &d_all_RowOffsets_[start_line + color], &d_all_ColIndices_[cumul_nnz_], &d_all_Values_[cumul_nnz_], 
-                                          CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F) )
-
-    cumul_nnz_ += current_nnz_;
-  }
-
-  printf("cumul_n_rows = %d, n_rows = %d\n", cumul_n_rows_, 2 * nc);
-  printf("cumul_nnz = %d, nnz = %d\n", cumul_nnz_, SBM_permuted_csr->p[2 * sum_sizes[n_colors]]);
-
-  printf("matrices created\n");
-  fflush(stdout);
-
-  // Create a res vector for each color
-  double *h_all_res_ = (double *)calloc(2 * nc, sizeof(double));
-  double *d_all_res_ = NULL;
-  CHECK_CUDA( cudaMalloc(&d_all_res_, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_all_res_, h_all_res_, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
-
-  cusparseDnVecDescr_t *all_vec_res_ = (cusparseDnVecDescr_t *)malloc(n_colors * sizeof(cusparseDnVecDescr_t));
-  for (unsigned int color = 0; color < n_colors; color++) {
-    CHECK_CUSPARSE( cusparseCreateDnVec(&all_vec_res_[color], 2 * (sum_sizes[color + 1] - sum_sizes[color]), &d_all_res_[2 * sum_sizes[color]], CUDA_R_64F) )
-  }
-
-  double* d_q = NULL;
-  CHECK_CUDA( cudaMalloc(&d_q, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_q, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
-  cusparseDnVecDescr_t vecq;
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vecq, 2 * nc, d_q, CUDA_R_64F) )
-
-  printf("vectors created\n");
-  fflush(stdout);
-  
-  void **d_all_Buffer_ = (void **)malloc(n_colors * sizeof(void *));
-  size_t *all_Buffer_Size_ = (size_t *)malloc(n_colors * sizeof(size_t));
-
-  for (unsigned int color = 0; color < n_colors; color++) {
-    CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat_[color],
-                                          vecq, &beta, all_vec_res_[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, &all_Buffer_Size_[color]) )
-    CHECK_CUDA( cudaMalloc(&d_all_Buffer_[color], all_Buffer_Size_[color]) )
-
-    CHECK_CUSPARSE( cusparseSpMV_preprocess(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, all_cusparse_csrmat_[color], vecq, &beta, all_vec_res_[color], CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer_[color]) )
-
-    CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat_[color],
-                                 vecq, &beta, all_vec_res_[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer_[color]) )
-  }
-  
-
-  CHECK_CUDA( cudaMemcpy(h_all_res_, d_all_res_, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost) )
-
-  int correct = 1;
-  for (int i = 0; i < 2 * nc; i++) {
-      if (fabs(h_res_permuted[i] - h_all_res_[i]) / fabs(h_res_permuted[i]) > 1e-10) { // direct floating point comparison is not
-        printf("%d %e %e %e\n", i, h_res_permuted[i], h_all_res_[i], fabs(h_res_permuted[i] - h_all_res_[i]) / fabs(h_res_permuted[i]));  
-        correct = 0;             // reliable
-          break;
-      }
-  }
-  if (correct)
-      printf("multicolor test PASSED\n");
-  else
-      printf("multicolor test FAILED\n"); */
-
-  // Now initialize the right stuff
+  // time = omp_get_wtime();
 
   // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR conversion,
   // unless the conversion function checks for 0 elements
@@ -1187,43 +691,26 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   CHECK_CUDA( cudaMalloc(&d_mu, nc * sizeof(double)) )
   CHECK_CUDA( cudaMemcpy(d_mu, problem->mu, nc * sizeof(double), cudaMemcpyHostToDevice) )
 
+  // Constant q on device
+  double *d_q_const = NULL;
+  CHECK_CUDA( cudaMalloc(&d_q_const, (2 * nc) * sizeof(double)) )
+  CHECK_CUDA( cudaMemcpy(d_q_const, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
 
-  int threadsPerBlock = 256;
-  int blocks = (nc + threadsPerBlock - 1) / threadsPerBlock;
-
-  // REST 
-
-  unsigned int nbblocks = problem->M->matrix1->nbblocks;
-  double* blocks_contiguous = (double*)malloc(nbblocks * 4 * sizeof(double));
-  double* current_block;
-  for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++) {
-    current_block = problem->M->matrix1->block[blockNum];
-    for (unsigned int j = 0; j < 4; j++) {
-      blocks_contiguous[blockNum * 4 + j] = current_block[j];
-    }
-  }
-
-  /* Local problem initialization */
-  LinearComplementarityProblem* local_problem =
-      (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
-  local_problem->M = NM_new();
-  local_problem->M->storageType = NM_DENSE;
-  local_problem->M->size0 = 2;
-  local_problem->M->size1 = 2;
-  local_problem->q = (double*)malloc(2 * sizeof(double));
+  // time = omp_get_wtime() - time;
+  // printf("time initializing cusparse stuff: %es\n", time);
 
   /*****  Gauss-Seidel iterations *****/
   int iter = 0;            /* Current iteration number */
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
-  size_t* index1_data;
-  size_t* index2_data;
+  double time = omp_get_wtime();
 
-  unsigned int* freeze_contacts = NULL;
   // FREEZING CONTACTS
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
-    unsigned int contact;
+    printf("freezing contacts not supported yet\n");
+    return;
+    /* unsigned int contact;
     unsigned int pos;
     double light_error_sum;
     double light_error_2;
@@ -1252,8 +739,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
       while ((iter < itermax) && has_not_converged) {
         // light_error_sum = 0.0;
         light_error_2 = 0.0;
-        /* Loop over the rows of blocks in blmat */
-        /* contact: current row (of blocks) number */
 
 #pragma omp single
         {
@@ -1276,7 +761,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
           for (unsigned int permuted_contact = sum_sizes[color];
                permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
             if (freeze_contacts[permuted_contact] > 0) {
-              /* we skip freeze contacts */
               freeze_contacts[permuted_contact] -= 1;
               continue;
             }
@@ -1285,12 +769,10 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
             localreaction[0] = z[pos];
             localreaction[1] = z[pos + 1];
 
-            /* Local problem formalization */
             fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, blocks_contiguous,
                                                  diagonal_blocks, index1_data, index2_data,
                                                  local_problem, z);
 
-            /* Solve local problem */
             fc2d_nsgs_local_solve(
                 local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
@@ -1304,7 +786,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
                 light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
             int small_reaction_criteria = squared_norm(localreaction) <= tmp_criteria2;
             if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
-              /* we  freeze the contact for n iterations*/
               freeze_contacts[permuted_contact] =
                   iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
               DEBUG_EXPR(
@@ -1320,7 +801,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
                   printf("Contact % i is freezed for %i steps\n", permuted_contact,
                          iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
             }
-            /* reaction update */
             z[pos] = localreaction[0];
             z[pos + 1] = localreaction[1];
           }
@@ -1334,7 +814,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
                      numerics_printf_verbose(1, "number of frozen contacts %i at iter : %i",
                                              frozen_contact, iter););
 
-          /* error evaluation */
           if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
               SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
             error = calculateLightError(light_error_sum, nc, z, &norm_r);
@@ -1352,7 +831,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
       free(local_problem->q);
       free(local_problem->M);
       free(local_problem);
-    }  // end parallel region
+    }  // end parallel region */
 
     /***********************/
     /* NO FREEZING CONTACT */
@@ -1377,8 +856,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
     while ((iter < itermax) && has_not_converged) {
 
       // Set local problems q to q
-      // maybe we can create a const q on device so that copy is faster?
-      CHECK_CUDA( cudaMemcpy(d_q_new, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
+      CHECK_CUDA( cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double), cudaMemcpyDeviceToDevice) )
       CHECK_CUDA( cudaMemset(d_sumP2,   0, sizeof(double)) )
       CHECK_CUDA( cudaMemset(d_sumErr2, 0, sizeof(double)) )
 
@@ -1392,41 +870,15 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
         CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color],
                                      vec_z, &beta, all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]) )
 
-        // Copy local problem q's back to host
-        // Can I copy only the part that was modified? 
-        // Like: CHECK_CUDA( cudaMemcpy(&h_q_new[...], &d_q_new[...], ... cudaMemcpyDeviceToHost) )
         fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize>>>(
           d_diagonal_blocks, d_determinants, d_q_new, d_mu, d_z,
           d_sumP2, d_sumErr2,
           sum_sizes[color], sum_sizes[color + 1]);
-        // fc2d_nsgs_local_solve_kernel<<<blocks, threadsPerBlock>>>(d_diagonal_blocks, d_determinants, d_q_new, d_mu, d_z, sum_sizes[color], sum_sizes[color + 1]);
-
-
-        /* CHECK_CUDA( cudaMemcpy(h_q_new, d_q_new, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost) )
-
-        // Solve local problems (sequential for now)
-        for (unsigned int permuted_contact = sum_sizes[color]; permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
-          pos = 2 * permuted_contact;
-          localreaction[0] = z[pos];
-          localreaction[1] = z[pos + 1];
-
-          fc2d_nsgs_local_solve(&diagonal_blocks[4 * permuted_contact], diagonal_block_determinant[permuted_contact],
-                                &h_q_new[pos], problem->mu[permuted_contact], localreaction);
-
-          light_error_sum += light_error_squared(localreaction, &z[pos]);
-          norm_r += squared_norm(localreaction);
-
-          z[pos] = localreaction[0];
-          z[pos + 1] = localreaction[1];
-        } */
-
-        CHECK_CUDA( cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost) )
-        CHECK_CUDA( cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost) )
-
-        // Update z vector (same as above, can we only copy what was modified?)
-        // CHECK_CUDA( cudaMemcpy(d_z, z, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
 
       }
+
+      CHECK_CUDA( cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost) )
+      CHECK_CUDA( cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost) )
 
       error = sqrt(light_error_sum);
       norm_r = sqrt(norm_r);
@@ -1444,6 +896,9 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
       ++iter;
     }
   }
+
+  time = omp_get_wtime() - time;
+  printf("time in loop: %es\n", time);
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -1481,12 +936,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   /* Resulting error */
   dparam[SICONOS_DPARAM_RESIDU] = error;
 
-  if (freeze_contacts) free(freeze_contacts);
   fc2d_free_diagonal_blocks(diagonal_blocks);
   free(diagonal_block_determinant);
-  free(local_problem->q);
-  free(local_problem->M);
-  free(local_problem);
 
   free(sum_sizes);
   free(inv_permutation);
