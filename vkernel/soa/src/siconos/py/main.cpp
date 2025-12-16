@@ -40,26 +40,31 @@ PYBIND11_MODULE(_nonos, m)
   // ground::type_trace<std::decay_t<decltype(named_disks_items)>>();
 
   auto disks_handles = ground::transform(
-      // only named items
-      named_disks_items, []<match::item I>(I item) {
-        // get handle
-        return storage::add<I>(siconos::python::disks::idata_t{});
+      named_disks_items, []<match::item I>(I item) constexpr {
+        using indice_t = typename storage::get_info_t<
+            siconos::python::disks::idata_t>::env::indice;
+        using handle_t = storage::handle<storage::handle_base, I, indice_t,
+                                         siconos::python::disks::idata_t>;
+        return ground::type_c<handle_t>;
       });
 
   // add corresponding py::class_
   auto pyhandles = ground::transform(disks_handles, [&disks]<typename H>(
-                                                        H handle) {
-    using item_t = typename H::type;
-    using index_t = typename H::index_t;
+                                                        H handle_type_c) {
+    using handle_t =
+        typename decltype(handle_type_c)::type;  // Extract actual type
+    using item_t = typename handle_t::type;
+    using index_t = typename handle_t::index_t;
     auto base_index = py::class_<index_t>(
         disks, fmt::format("index_{}",
                            storage::bind_name<item_t, disks_properties_t>())
                    .c_str());
     return ground::make_tuple(
         base_index,
-        py::class_<H>(disks, storage::bind_name<item_t, disks_properties_t>(),
-                      base_index),
-        ground::type_c<H>);
+        py::class_<handle_t>(disks,
+                             storage::bind_name<item_t, disks_properties_t>(),
+                             base_index),
+        ground::type_c<handle_t>);
   });
 
   // attached storage
@@ -70,8 +75,11 @@ PYBIND11_MODULE(_nonos, m)
     if constexpr (!match::without_attached_storages_bindings<item_t>) {
       ground::fold_left(
           decltype(storage::attached_storages(
-              item_t{}, handle_t{}.data())){},  // all attached storages
-          std::ref(pyhandle[1_c]),              // initial state
+              item_t{},
+              std::declval<
+                  siconos::python::disks::idata_t&>())){},  // all attached
+                                                            // storages
+          std::ref(pyhandle[1_c]),                          // initial state
           []<match::attached_storage<item_t> S>(py::class_<handle_t> dc,
                                                 S s) {
             constexpr auto astor_name = storage::attached_storage_name(s);
@@ -108,7 +116,9 @@ PYBIND11_MODULE(_nonos, m)
           []<match::attribute A>(py::class_<handle_t> dc, A a) {
             using attr_value_t = std::decay_t<decltype(out_formatter(
                 handle_t{},
-                storage::get<A>(handle_t{}.data(), 0, handle_t{})))>;
+                storage::get<A>(
+                    std::declval<siconos::python::disks::idata_t&>(), 0,
+                    handle_t{})))>;
             return dc
                 .def(
                     fmt::format("{}", pattern::attribute_name(a)).c_str(),
