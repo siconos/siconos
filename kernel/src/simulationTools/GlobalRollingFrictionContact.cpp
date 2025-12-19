@@ -21,6 +21,7 @@
 
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
@@ -177,7 +178,8 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
       if (std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(Osi)) {
         auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
 
-        if (std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        if (std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds) ||
+            std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
           _q->segment(offset, dss) = vfree;
         } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {

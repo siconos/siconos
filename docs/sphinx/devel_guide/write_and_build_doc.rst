@@ -37,15 +37,9 @@ It consists in
 
   .. code-block:: python
 
-   >>> import siconos.kernel as sk
-   >>> help(sk.SimpleMatrix)
-   Help on class SimpleMatrix in module siconos.kernel:
-
-   class SimpleMatrix(SiconosMatrix)
-   |  Matrix (embedded various types of Boost matrices of double)
-   |
-   |  SimpleMatrix is used in the platform to store matrices (mathematical object) of
-   |  double.
+   >>> import siconos.modeling as sm
+   >>> help(sm.LagrangianDS)
+   Help on ...
     ...
 
     
@@ -428,7 +422,7 @@ But, if required (devel), use:
 
   .. code-block:: python
 
-     import siconos.kernel as sk
+     import siconos.modeling as sm
      help(sk.DynamicalSystem)
    
      Help on class LCP in module siconos.kernel:

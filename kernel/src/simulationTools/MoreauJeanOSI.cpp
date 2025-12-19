@@ -399,10 +399,10 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     else
       iterationMat->setIdentity();
 
-    if (lstids->hasDampingMatrix()) *iterationMat += htheta * ltids->dampingMatrix();
-    if (lstids->hasStiffnessMatrix()) *iterationMat += h2theta2 * ltids->stiffnessMatrix();
+    if (lstids->hasDampingMatrix()) *iterationMat += htheta * lstids->dampingMatrix();
+    if (lstids->hasStiffnessMatrix()) *iterationMat += h2theta2 * lstids->stiffnessMatrix();
     if (lstids->boundaryConditions())
-      _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
+      _initializeIterationMatrixBoundaryConditions(*lstids, dsv);
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
         std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);

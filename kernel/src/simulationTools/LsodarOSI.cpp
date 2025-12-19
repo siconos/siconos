@@ -25,10 +25,12 @@
 #include "LagrangianR.hpp"  // for LagrangianR::p2
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NewtonImpactNSL.hpp"  // For the visitor
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for lsodar
@@ -179,7 +181,19 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
         free = lds->LUMass()->solve(free);
       }
       DEBUG_EXPR(siconos::algebra::print(free););
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      auto& free = *workVectors[siconos::integrators::LsodarOSI::FREE];
+      // we assume that inverseMass and forces are updated after call of
+      // ds->computeRhs(t);
+      free = lds->totalForces();
+      if (lds->LUMass()) {
+        // lds->init_lu_mass();
+        free = lds->LUMass()->solve(free);
+      }
+      DEBUG_EXPR(siconos::algebra::print(free););
     }
+
     if (_extraAdditionalTerms) {
       auto dsgVD = _dynamicalSystemsGraph->descriptor(ds);
       _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t, *ds->rhs());
@@ -232,17 +246,22 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
   ds->initRhs(t);  // This will create p[2] and other required vectors/buffers
+  // TODO FP: use buffer in graph for xWork?
+  if (!_xWork) _xWork = std::make_shared<siconos::algebra::BlockVector>();
 
   if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    // TODO FP: use buffer in graph for xWork?
-    if (!_xWork) _xWork = std::make_shared<siconos::algebra::BlockVector>();
+    _xWork->insertPtr(lds->q());
+    _xWork->insertPtr(lds->velocity());
+    ds_work_vectors.resize(siconos::integrators::LsodarOSI::WORK_LENGTH);
+    ds_work_vectors[siconos::integrators::LsodarOSI::FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+  } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
     _xWork->insertPtr(lds->q());
     _xWork->insertPtr(lds->velocity());
     ds_work_vectors.resize(siconos::integrators::LsodarOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::LsodarOSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
   } else {
-    if (!_xWork) _xWork = std::make_shared<siconos::algebra::BlockVector>();
     _xWork->insertPtr(ds->x());
   }
   ds->swapInMemory();
@@ -340,7 +359,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
 
   auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
+    auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
     inter_work_block[siconos::integrators::LsodarOSI::xfree] =
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::LsodarOSI::xfree]->insertPtr(
@@ -363,7 +382,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
   if (ds1 != ds2) {
     auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
+      auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
       inter_work_block[siconos::integrators::LsodarOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::LsodarOSI::FREE]);
       DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
@@ -549,9 +568,13 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
   {
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
-      auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(
-          _dynamicalSystemsGraph->bundle(*dsi));
-      lds->computePostImpactVelocity();
+      if (auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(
+              _dynamicalSystemsGraph->bundle(*dsi)))
+
+        lds->computePostImpactVelocity();
+      else if (auto lds = std::static_pointer_cast<siconos::modeling::LagrangianSparseDS>(
+                   _dynamicalSystemsGraph->bundle(*dsi)))
+        lds->computePostImpactVelocity();
     }
   } else if (level == 2) {
     auto time = _simulation->nextTime();

@@ -184,7 +184,7 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
       mass->rows(), mass->cols(), mass->nonZeros(), mass->outerIndexPtr(),
       mass->innerIndexPtr(), mass->valuePtr());
 
-  ds->setConstantMassAlias(*mass_map);
+  ds->setConstantMass(*mass_map, siconos::algebra::alias_t);
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
@@ -241,8 +241,8 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
       jacvel.rows(), jacvel.cols(), jacvel.nonZeros(), jacvel.outerIndexPtr(),
       jacvel.innerIndexPtr(), jacvel.valuePtr());
 
-  ds->setConstantJacobianFintOver_qAlias(jacq_map);
-  ds->setConstantJacobianFintOver_velocityAlias(jacvel_map);
+  ds->setConstantJacobianFintOver_q(jacq_map, siconos::algebra::alias_t);
+  ds->setConstantJacobianFintOver_velocity(jacvel_map, siconos::algebra::alias_t);
 
   siconos::algebra::SiconosVector3 reffint;
   reffint << 9, 12, 15;
@@ -281,7 +281,7 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_alias() {
 void LagrangianSparseDSTest::testBuildLagrangianSparseDS_copy() {
   auto ds = std::make_shared<siconos::modeling::LagrangianSparseDS>(q0, velocity0,
                                                                     siconos::algebra::copy_t);
-  ds->setConstantMassCopy(*mass);
+  ds->setConstantMass(*mass, siconos::algebra::copy_t);
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;
@@ -326,8 +326,8 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS_copy() {
   auto jacq = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
   auto jacvel = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
 
-  ds->setConstantJacobianFintOver_qCopy(jacq);
-  ds->setConstantJacobianFintOver_velocityCopy(jacvel);
+  ds->setConstantJacobianFintOver_q(jacq, siconos::algebra::copy_t);
+  ds->setConstantJacobianFintOver_velocity(jacvel, siconos::algebra::copy_t);
 
   siconos::algebra::SiconosVector3 reffint;
   reffint << 9, 12, 15;

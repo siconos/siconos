@@ -357,5 +357,34 @@ class D1MinusLinearOSI : public OneStepIntegrator {
     THROW_EXCEPTION("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 };
+
+namespace d1_minus_linear {
+// Free functions
+
+template <typename DS>
+concept LDS = requires(DS ds) { ds.velocity(); };
+
+template <typename DS>
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+void compute_residufree_lagrangian(double time_step, double time, DS &lagds,
+                                   siconos::algebra::SiconosVector &free_tdg,
+                                   siconos::algebra::SiconosVector &residufree) {
+  residufree = -0.5 * time_step * free_tdg;
+  lagds.computeTotalForces(lagds.velocity_read(), lagds.q_read(), time);
+  free_tdg = lagds.totalForces();
+  if (lagds.LUMass()) {
+    lagds.init_lu_mass();
+    free_tdg = lagds.LUMass()->solve(free_tdg);
+    // contains right (left limit) acceleration without contact force
+  }
+  residufree -= 0.5 * time_step * free_tdg;
+}
+
+void compute_residufree_newtoneuler(double time_step, double time,
+                                    siconos::modeling::NewtonEulerDS &neds,
+                                    siconos::algebra::SiconosVector &free_tdg,
+                                    siconos::algebra::SiconosVector &residufree);
+}  // namespace d1_minus_linear
+
 }  // namespace siconos::integrators
 #endif  // D1MINUSLINEAR_H

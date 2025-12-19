@@ -169,11 +169,17 @@ class NewtonEulerDS : public SecondOrderDS {
   /** \nabla_{q} wrench(twist, q, t) */
   std::shared_ptr<siconos::algebra::SiconosMatrix67> jacobianWrenchOver_q_{nullptr};
 
-  /** external forces applied to the system
-   This map is used only when fext is set as a constant external provided memory.
-   In any other cases 'fext' is appended to wrench_.
-   */
-  siconos::algebra::MapDenseVector3 fext_view_{nullptr};
+  /** external forces applied to the system */
+  siconos::algebra::DenseVector3Storage fext_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_fext(F&& f) const {
+    return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_fext(F&& f) {
+    return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
+  }
 
   /** function wrapper used to compute external forces \f$f_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computefext_{nullptr};
@@ -208,11 +214,17 @@ class NewtonEulerDS : public SecondOrderDS {
   /** True to compute \f$\nabla_{twist}(f_{int}) with forward finite differences */
   bool computeJacobianFintOver_twist_byFD_{true};
 
-  /** external forces applied to the system
-   This map is used only when mext is set as a constant external provided memory.
-   In any other cases 'mext' is appended to wrench_.
-   */
-  siconos::algebra::MapDenseVector3 mext_view_{nullptr};
+  /** external moments applied to the system */
+  siconos::algebra::DenseVector3Storage mext_storage_{std::monostate{}};
+
+  template <typename F>
+  decltype(auto) use_mext(F&& f) const {
+    return siconos::algebra::visitStorage(mext_storage_, std::forward<F>(f), "mext_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_mext(F&& f) {
+    return siconos::algebra::visitStorage(mext_storage_, std::forward<F>(f), "mext_storage_");
+  }
 
   /** function wrapper used to compute external moment \f$m_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computemext_{nullptr};
@@ -222,9 +234,6 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** True if internal forces are  taken into account */
   bool hasMext_{false};
-
-  /** external forces storage. Used only if hasConstantMext_ is true */
-  std::unique_ptr<siconos::algebra::SiconosVector3> mext_{nullptr};
 
   /** if true, we assume that mExt is given in inertial frame (default false) */
   bool isMextExpressedInInertialFrame_{false};
@@ -526,11 +535,31 @@ class NewtonEulerDS : public SecondOrderDS {
   */
   void init_lu_mass() override;
 
+  /** @brief set a constant external forces vector
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
+   */
+  void setConstantFext(const siconos::algebra::SiconosVector3& newValue,
+                       siconos::algebra::CopyTag tag);
+
   /** set a constant external forces vector
+   *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    *
    *  \param newFext external forces vector
    */
-  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newFext);
+  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector3> newFext,
+                       siconos::algebra::AliasTag tag);
 
   /** True if external forces are taken into account */
   bool hasExternalForces() const { return hasFext_; }
@@ -541,11 +570,31 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void setComputeFextFunction(const func_prototypes::FunctionS_V& fct);
 
+  /** @brief set a constant external moment vector
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+  version)
+   *
+   */
+  void setConstantMext(const siconos::algebra::SiconosVector3& newValue,
+                       siconos::algebra::CopyTag tag);
+
   /** set a constant external moment vector
    *
-   *  \param newMext external moment vector
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
+   *
+   *  \param newFext external forces vector
    */
-  void setConstantMext(Eigen::Ref<siconos::algebra::SiconosVector> newMext);
+  void setConstantMext(Eigen::Ref<siconos::algebra::SiconosVector3> newFext,
+                       siconos::algebra::AliasTag tag);
 
   /** True if external moments are taken into account */
   bool hasExternalMoment() const { return hasMext_; }

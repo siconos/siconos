@@ -171,7 +171,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   siconos::algebra::SiconosVector FExt{3};
   FExt.setZero();
   FExt(2) = -g * params.mass;
-  body->setConstantFext(FExt);
+  body->setConstantFext(FExt, siconos::algebra::alias_t);
 
   // -- Add the dynamical systems into the non smooth dynamical system
   nsds->insertDynamicalSystem(body);

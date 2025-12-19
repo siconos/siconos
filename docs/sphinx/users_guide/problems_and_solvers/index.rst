@@ -42,7 +42,7 @@ The simplest way to create and use a solver is to select the corresponding id (c
 .. code-block:: python
 
    // -- Python API --
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    lcp = sk.LCP(sk.SICONOS_LCP_LEMKE)
    
 **Numerics (low-level) interface:**

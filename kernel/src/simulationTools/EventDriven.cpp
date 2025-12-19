@@ -21,6 +21,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "NonSmoothLaw.hpp"
@@ -445,6 +446,17 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
 
     auto ds = osiDSGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      auto qdot = lds->velocity_read();
+      auto acc = lds->acceleration_read();
+      assert((pos + acc.size() + qdot.size()) <=
+                 static_cast<siconos::algebra::Index>(*sizeOfX) &&
+             "Destination buffer too small!");
+      std::copy(qdot.data(), qdot.data() + qdot.size(), &xdot[pos]);
+      pos += qdot.size();
+      std::copy(acc.data(), acc.data() + acc.size(), &xdot[pos]);
+      pos += acc.size();
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       auto qdot = lds->velocity_read();
       auto acc = lds->acceleration_read();
       assert((pos + acc.size() + qdot.size()) <=

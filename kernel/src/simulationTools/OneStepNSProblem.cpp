@@ -20,6 +20,7 @@
 #include "EulerMoreauOSI.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "LsodarOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -367,7 +368,10 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   if (osiType == siconos::integrators::IntegratorType::LSODAROSI) {
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       luIterationMatrix = lds->LUMass();
-    } else
+    }  // else if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds))
+    // {
+    //   luIterationMatrix = lds->LUMass();
+    else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented for "
           "LsodarOSI "

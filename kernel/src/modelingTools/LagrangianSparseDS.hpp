@@ -444,25 +444,25 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
-   *  \param time of initialization
+   *  @param time of initialization
    */
   void initRhs(double time) override;
 
   /** set nonsmooth input to zero
    *
-   *  \param level input-level to be initialized.
+   *  @param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) override;
 
   /** update right-hand side for the current state
    *
-   *  \param time of interest
+   *  @param time of interest
    */
   void computeRhs(double time) override;
 
   /** update  \f$ \nabla_x rhs \f$  for the current state
    *
-   *  \param time of interest
+   *  @param time of interest
    */
   void computeJacobianRhsOver_x(double time) override;
 
@@ -471,15 +471,15 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set nonsmooth part of the rhs (i.e. p) to zero for a given level
    *
-   *  \param level
+   *  @param level
    */
   void resetNonSmoothPart(unsigned int level) override;
 
   /** Compute  \f$ F_{total}(v,q,t) \f$
    *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
+   *  @param velocity vector
+   *  @param q state
+   *  @param time the current time
    */
   virtual void computeTotalForces(
       const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
@@ -487,9 +487,9 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$
    *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
+   *  @param velocity vector
+   *  @param q state
+   *  @param time the current time
    */
   virtual void computeJacobianTotalForcesOver_q(
       const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
@@ -497,9 +497,9 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$
    *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
+   *  @param velocity vector
+   *  @param q state
+   *  @param time the current time
    */
   virtual void computeJacobianTotalForcesOver_velocity(
       const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
@@ -601,14 +601,15 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** \return LU-factorization of the mass (pointer link) */
   inline auto LUMass() const { return LUMass_; }
 
-  /** Set a constant mass matrix for the system
-   *  The input matrix is copied into the internal mass.
+  /** @brief Set a constant mass matrix for the system
    *
-   *  \param newValue mass matrix
    *
+   * Warning : deep copy of the provided object into internal attribute
+   *  @param newValue mass matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    */
   template <typename T>
-  void setConstantMassCopy(T&& newValue) {
+  void setConstantMass(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -625,14 +626,22 @@ class LagrangianSparseDS : public SecondOrderDS {
     computemass_python_ = nullptr;
   }
 
-  /** Set a constant mass matrix for the system
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or be subject to a structure change!
+  /** @brief set a constant mass matrix for the system
    *
-   *  \param newValue mass matrix
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param newValue mass matrix
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    *
    */
-  void setConstantMassAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+  void setConstantMass(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue,
+                       siconos::algebra::AliasTag);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
@@ -643,7 +652,7 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set a user-defined function to compute the mass matrix
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
   void setComputeMassFunction(Func&& f) {
@@ -671,7 +680,7 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
-   *  \param position q vector
+   *  @param position q vector
    */
   virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
 
@@ -685,14 +694,14 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set a user-defined function to compute \f$ F_{int}(\dot q, q, t) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V& fct);
 
   /** Update \f$ F_{int}(\dot q, q, t) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
-   *  \param time the current time
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
+   *  @param time the current time
    */
   void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
                    const Eigen::Ref<const siconos::algebra::SiconosVector>& position,
@@ -716,14 +725,16 @@ class LagrangianSparseDS : public SecondOrderDS {
         "jacobianFintOver_q_storage_");
   }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
+  /** @brief Set a constant \f$ \nabla_qF_{int} \f$
    *  The input matrix is copied.
    *
-   *  \param newValue jacobianFintOver_q matrix
+   *  @param newValue jacobianFintOver_q matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   *
    *
    */
   template <typename T>
-  void setConstantJacobianFintOver_qCopy(T&& newValue) {
+  void setConstantJacobianFintOver_q(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -738,23 +749,29 @@ class LagrangianSparseDS : public SecondOrderDS {
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
-   *  Warning: no copy! Shared memory between internal matrix and newValue
-   *  newValue must not be resized, deleted or be subject to a structure change!
+  /** @brief Set a constant \f$ \nabla_qF_{int} \f$
    *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
    *
-   *  \param newValue jacobianFintOver_q matrix
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   *  @param newValue jacobianFintOver_q matrix
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    *
    */
-  void setConstantJacobianFintOver_qAlias(
-      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+  void setConstantJacobianFintOver_q(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
 
   /** set a user-defined function to compute \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
   void setComputeJacobianFintOver_qFunction(Func&& f) {
@@ -780,9 +797,9 @@ class LagrangianSparseDS : public SecondOrderDS {
   }
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
-   *  \param time the current time
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
+   *  @param time the current time
    */
   void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
                                  const Eigen::Ref<siconos::algebra::SiconosVector>& position,
@@ -807,14 +824,16 @@ class LagrangianSparseDS : public SecondOrderDS {
         "jacobianFintOver_velocity_storage_");
   }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
+  /** @brief Set a constant \f$ \nabla_qF_{int} \f$
    *  The input matrix is copied.
    *
-   *  \param newValue jacobianFintOver_velocity matrix
+   *  @param newValue jacobianFintOver_velocity matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
+   *
    *
    */
   template <typename T>
-  void setConstantJacobianFintOver_velocityCopy(T&& newValue) {
+  void setConstantJacobianFintOver_velocity(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -829,23 +848,23 @@ class LagrangianSparseDS : public SecondOrderDS {
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
+  /** @brief Set a constant \f$ \nabla_qF_{int} \f$
    *  Warning: no copy! Shared memory between internal matrix and newValue
    *  newValue must not be resized, deleted or be subject to a structure change!
    *
    *
-   *  \param newValue jacobianFintOver_velocity matrix
+   *  @param newValue jacobianFintOver_velocity matrix
    *
    */
-  void setConstantJacobianFintOver_velocityAlias(
-      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+  void setConstantJacobianFintOver_velocity(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
 
   /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{int} \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
   void setComputeJacobianFintOver_velocityFunction(Func&& f) {
@@ -873,9 +892,9 @@ class LagrangianSparseDS : public SecondOrderDS {
   }
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
-   *  \param time the current time
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
+   *  @param time the current time
    */
   void computeJacobianFintOver_velocity(
       const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
@@ -888,7 +907,7 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set a constant \f$ F_{gyr}\f$ vector
    *
-   *  \param newFgyr gyroscopic forces vector
+   *  @param newFgyr gyroscopic forces vector
    */
   void setConstantFgyr(Eigen::Ref<siconos::algebra::SiconosVector> newFgyr);
 
@@ -897,13 +916,13 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set a user-defined function to compute \f$ F_{gyr}(\dot q, q) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V& fct);
 
   /** Update \f$ F_{gyr}(\dot q, q) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
    */
   void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
                    const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
@@ -926,14 +945,15 @@ class LagrangianSparseDS : public SecondOrderDS {
         "jacobianFgyrOver_q_storage_");
   }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
+  /** @brief Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
    *  The input matrix is copied.
    *
-   *  \param newValue jacobianFgyrOver_q matrix
+   * @param newValue jacobianFgyrOver_q matrix
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   template <typename T>
-  void setConstantJacobianFgyrOver_qCopy(T&& newValue) {
+  void setConstantJacobianFgyrOver_q(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -948,23 +968,26 @@ class LagrangianSparseDS : public SecondOrderDS {
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
-   *  Warning: no copy! Shared memory between internal matrix and newValue
-   *  newValue must not be resized, deleted or be subject to a structure change!
+  /** @brief Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
    *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
    *
-   *  \param newValue jacobianFgyrOver_q matrix
+   *  @param newValue jacobianFgyrOver_q matrix
+   *  @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    *
    */
-  void setConstantJacobianFgyrOver_qAlias(
-      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+  void setConstantJacobianFgyrOver_q(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag);
 
   /** \return True if  \f$ \nabla_{\dot q}F_{gyr} \f$  matrix has been set */
   bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
 
   /** set a user-defined function to compute \f$ \nabla_qF_{gyr}(\dot q, q) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
   void setComputeJacobianFgyrOver_qFunction(Func&& f) {
@@ -989,8 +1012,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   }
 
   /** to compute  \f$ \nabla_vF_{gyr}(\dot q, q) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
    */
   void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
                                  const Eigen::Ref<siconos::algebra::SiconosVector>& position);
@@ -1014,14 +1037,15 @@ class LagrangianSparseDS : public SecondOrderDS {
         "jacobianFgyrOver_velocity_storage_");
   }
 
-  /** Set a constant \f$ \nabla_qF_{gyr} \f$
-   *  The input matrix is copied.
+  /** @brief Set a constant \f$ \nabla_qF_{gyr} \f$
    *
-   *  \param newValue jacobianFgyrOver_velocity matrix
+   * Warning : deep copy of the provided object into internal attribute
    *
+   * @param newValue newValue jacobianFgyrOver_velocity matrix
+   * @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    */
   template <typename T>
-  void setConstantJacobianFgyrOver_velocityCopy(T&& newValue) {
+  void setConstantJacobianFgyrOver_velocity(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -1036,23 +1060,28 @@ class LagrangianSparseDS : public SecondOrderDS {
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 
-  /** Set a constant \f$ \nabla_qF_{gyr} \f$
-   *  Warning: no copy! Shared memory between internal matrix and newValue
-   *  newValue must not be resized, deleted or be subject to a structure change!
+  /** @brief Set a constant \f$ \nabla_qF_{gyr} \f$
    *
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
    *
-   *  \param newValue jacobianFgyrOver_velocity matrix
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
    *
+   * @param newValue jacobianFgyrOver_velocity matrix
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    */
-  void setConstantJacobianFgyrOver_velocityAlias(
-      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+  void setConstantJacobianFgyrOver_velocity(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag);
 
   /** \return True if  \f$ \nabla_qF_{gyr}(\dot q, q) \f$matrix has been set */
   bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }
 
   /** set a user-defined function to compute \f$ \nabla_qF_{gyr}(\dot q, q) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
   void setComputeJacobianFgyrOver_velocityFunction(Func&& f) {
@@ -1077,8 +1106,8 @@ class LagrangianSparseDS : public SecondOrderDS {
     }
   }
   /** to compute  \f$ \nabla_{velocity}F_{gyr}(\dot q, q) \f$
-   *  \param velocity \f$ \dot q \f$ vector
-   *  \param position q vector
+   *  @param velocity \f$ \dot q \f$ vector
+   *  @param position q vector
    */
   void computeJacobianFgyrOver_velocity(
       const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
@@ -1124,13 +1153,13 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** set a user-defined function to compute external forces
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Update external forces values
    *
-   *  \param time the current time
+   *  @param time the current time
    */
   void computeFext(double time);
 
@@ -1182,7 +1211,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   inline const siconos::algebra::SiconosMemory& velocityMemory() { return velocityMemory_; }
 
   /** \return last saved (memory) values of p[level] vector
-   * \param level required index for p
+   * @param level required index for p
    */
   inline const siconos::algebra::SiconosMemory& pMemory(unsigned int level) {
     return pMemory_[level];
@@ -1196,7 +1225,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** initialize the siconos::algebra::SiconosMemory objects with a positive
    * size.
    *
-   *  \param size the size of the siconos::algebra::SiconosMemory. must be >= 0
+   *  @param size the size of the siconos::algebra::SiconosMemory. must be >= 0
    */
   void initMemory(unsigned int size) override;
 
@@ -1223,7 +1252,7 @@ class LagrangianSparseDS : public SecondOrderDS {
      Useful for some integrators that need
      q[2] or other coordinates vectors.
 
-     \param level the required level
+     @param level the required level
    */
   void initMemoryForGeneralizedCoordinates(unsigned int level);
 

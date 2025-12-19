@@ -19,6 +19,7 @@
 
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
@@ -327,6 +328,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
       } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+        *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
       } else
         THROW_EXCEPTION(
             "siconos::simulation::TimeSteppingCombinedProjection::"
@@ -386,6 +390,22 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
           neds->display();
 #endif
         } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+          auto q = d->q();
+          auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+          if (d->p(0)) {
+            //*q = * qtmp +  *d->p(0);
+            *q += *d->p(0);
+          }
+#ifdef TSPROJ_DEBUG_LEVEL1
+          std::cout << " q=\n";
+          siconos::algebra::print(*q);
+          std::cout << " p(0)=\n";
+          siconos::algebra::print(*d->p(0));
+          std::cout << " p(1)=\n";
+          siconos::algebra::print(*d->p(1));
+#endif
+        } else if (auto d =
+                       std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
           auto q = d->q();
           auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (d->p(0)) {
@@ -475,6 +495,12 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(
                      ds)) {  // nothing ...
       } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        auto time = nextTime();
+        d->computeTotalForces(d->velocity_read(), d->q_read(), time);
+      } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
+                     ds)) {  // nothing ...
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
         auto time = nextTime();
         d->computeTotalForces(d->velocity_read(), d->q_read(), time);
       } else

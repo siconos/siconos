@@ -262,8 +262,8 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
 
 // ////  MASS ////
 
-void siconos::modeling::LagrangianSparseDS::setConstantMassAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseDS::setConstantMass(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for mass
@@ -308,8 +308,8 @@ void siconos::modeling::LagrangianSparseDS::computeFint(
     computefint_(velocity, position, time, *fint_);
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_qAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_q(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for the jacobian
@@ -337,8 +337,8 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianFintOver_q(
   if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_velocityAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_velocity(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for the jacobian
@@ -383,8 +383,8 @@ void siconos::modeling::LagrangianSparseDS::computeFgyr(
   if (computefgyr_) computefgyr_(velocity, position, *fgyr_);
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_qAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_q(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for the jacobian
@@ -411,8 +411,8 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianFgyrOver_q(
   if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_velocityAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_velocity(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for the jacobian

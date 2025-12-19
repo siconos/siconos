@@ -176,7 +176,7 @@ struct Visitor {
 
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::DiskPlanR>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: DiskPlanR "
+        "you must define a visit function for shared ptr to DiskPlanR "
         "in a derived class of relations::Visitor");
   }
   virtual void visit(siconos::collision::native::bodies::DiskPlanR &) {

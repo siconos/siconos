@@ -20,6 +20,7 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "OneStepNSProblem.hpp"
@@ -34,6 +35,93 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
+
+namespace siconos::integrators::d1_minus_linear {
+
+template <typename DS>
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+void compute_vfree_lagrangian(double told, double time_step, DS& lagds,
+                              siconos::algebra::SiconosVector& vfree,
+                              siconos::algebra::SiconosVector& free_tdg) {
+  /* POINTER CONSTRUCTOR : vFree will contain the velocity without contact force */
+
+  // get left state from memory
+  auto qold = lagds.qMemory().getSiconosVector(0);
+  auto vold = lagds.velocityMemory().getSiconosVector(0);  // right limit
+
+  DEBUG_EXPR(siconos::algebra::print(*qold));
+  DEBUG_EXPR(siconos::algebra::print(*vold));
+
+  /* compute the force and store in vFree */
+  lagds.computeTotalForces(vold, qold, told);
+  vfree = lagds.totalForces();
+
+  /* Compute the acceleration due to the external force */
+  /* vFree contains left (right limit) acceleration without contact force */
+  if (lagds.LUMass()) {
+    lagds.init_lu_mass();
+    vfree = lagds.LUMass()->solve(vfree);
+  }
+
+  free_tdg = vfree;  // copy
+  /*Compute the right limit of the (free) velocity at  t^+_k with contact force :  */
+  vfree *= time_step;
+  vfree += vold;
+
+  /* Compute a prediction for q  that will serve for computing new values
+     of the Jacobian of the constraints */
+
+  *lagds.q() = qold + time_step * vold;
+  DEBUG_PRINT(
+      "vFree contains the right limit of the (free) velocity at  t^+_k with contact force "
+      ":\n");
+  DEBUG_EXPR(siconos::algebra::print(vfree));
+  DEBUG_PRINT(
+      "work_tdg contains left (right limit) acceleration without contact forcework :\n");
+  DEBUG_EXPR(siconos::algebra::print(free_tdg));
+}
+
+template <typename DS>
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+siconos::algebra::SiconosVector compute_residu_lagrangian(
+    double time_step, DS& lagds, const siconos::algebra::SiconosVector& vfree,
+    const siconos::algebra::SiconosVector& free_tdg) {
+  // initialize *it->residuFree and predicted right velocity (left limit)
+
+  siconos::algebra::SiconosVector residufree{vfree.size()};
+  auto v = lagds.velocity();  // contains velocity v_{k+1}^- and not free velocity
+  v->setZero();
+
+  auto& p2 = *lagds.p(2);
+  siconos::algebra::SiconosVector dummy = lagds.p_read(2);  // value = contact force
+  DEBUG_EXPR(siconos::algebra::print(p2));
+  /* we homogenize p(2) to a force for the user output   */
+  p2 /= time_step;
+  if (lagds.LUMass()) {
+    dummy = lagds.LUMass()->solve(dummy);
+    DEBUG_EXPR(siconos::algebra::print(lagds.LUMass()););
+  }
+  DEBUG_EXPR(siconos::algebra::print(vFree));
+  DEBUG_EXPR(siconos::algebra::print(dummy));
+
+  *v = vfree + dummy;
+  DEBUG_EXPR(siconos::algebra::print(v));
+
+  // get left state from memory
+  const auto& qold = lagds.qMemory().getSiconosVector(0);
+  const auto& vold = lagds.velocityMemory().getSiconosVector(0);
+  auto q = lagds.q();  // POINTER CONSTRUCTOR : contains position q_{k+1}
+  *q = qold;
+  *q += 0.5 * time_step * (vold + *v);
+  DEBUG_EXPR(siconos::algebra::print(*q));
+
+  residufree.setZero();
+  residufree -= 0.5 * (time_step * free_tdg) + 0.5 * dummy;
+  DEBUG_EXPR(siconos::algebra::print(residufree));
+  return residufree;  // RVO;
+}
+
+}  // namespace siconos::integrators::d1_minus_linear
 
 double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel() {
   DEBUG_BEGIN(
@@ -65,53 +153,15 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-
-    std::shared_ptr<siconos::algebra::SiconosVector> work_tdg;
-
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
-      /* POINTER CONSTRUCTOR : vFree will contain the velocity without contact force */
-      vFree.setZero();
-
-      // get left state from memory
-      auto qold = d->qMemory().getSiconosVector(0);
-      auto vold = d->velocityMemory().getSiconosVector(0);  // right limit
-
-      DEBUG_EXPR(siconos::algebra::print(*qold));
-      DEBUG_EXPR(siconos::algebra::print(*vold));
-
-      /* compute the force and store in vFree */
-      d->computeTotalForces(vold, qold, told);
-      vFree += d->totalForces();
-
-      /* Compute the acceleration due to the external force */
-      /* vFree contains left (right limit) acceleration without contact force */
-      if (d->LUMass()) {
-        d->init_lu_mass();
-        vFree = d->LUMass()->solve(vFree);
-      }
-
-      work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-      *work_tdg = vFree;
-      /*Compute the right limit of the (free) velocity at  t^+_k with contact force :  */
-      vFree *= h;
-      vFree += vold;
-
-      /* Compute a prediction for q  that will serve for computing new values
-         of the Jacobian of the constraints */
-
-      *d->q() = qold + h * vold;
-      DEBUG_PRINT(
-          "vFree contains the right limit of the (free) velocity at  t^+_k with contact force "
-          ":\n");
-      DEBUG_EXPR(siconos::algebra::print(vFree));
-      DEBUG_PRINT(
-          "work_tdg contains left (right limit) acceleration without contact forcework :\n");
-      DEBUG_EXPR(siconos::algebra::print(*work_tdg));
+    auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
+    auto& work_tdg = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      d1_minus_linear::compute_vfree_lagrangian(told, h, *lds, vFree, work_tdg);
+    } else if (auto lsds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      d1_minus_linear::compute_vfree_lagrangian(told, h, *lsds, vFree, work_tdg);
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
       vFree.setZero();
-
       // get left state from memory
       auto qold = neds->qMemory().getSiconosVector(0);
       auto vold = neds->wrenchMemory().getSiconosVector(0);  // right limit
@@ -127,12 +177,9 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
         vFree = neds->LUMass()->solve(vFree);
         // contains left (right limit) acceleration without contact force
       }
-
-      work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-      ;
-      work_tdg->setZero();
+      work_tdg.setZero();
       DEBUG_EXPR(siconos::algebra::print(*work_tdg));
-      *work_tdg = vFree;
+      work_tdg = vFree;  // copy
 
       /*Compute the right limit of the (free) velocity at  t^+_k with contact force :  */
       vFree *= h;
@@ -202,53 +249,23 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     /* \warning the following conditional statement should be removed with a MechanicalDS class
      */
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    auto& residuFree =
+        *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];  // contains
+                                                                            // residu without
+                                                                            // nonsmooth
+                                                                            // effect
+    auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
+    auto& work_tdg = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       // contains residu without nonsmooth effect
-      auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
-      auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
-      auto work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-
-      // initialize *it->residuFree and predicted right velocity (left limit)
-      auto& v = *d->velocity();  // contains velocity v_{k+1}^- and not free velocity
-      v.setZero();
-
-      auto& p2 = *d->p(2);
-      siconos::algebra::SiconosVector dummy = d->p_read(2);  // value = contact force
-      DEBUG_EXPR(siconos::algebra::print(p2));
-      /* we homogenize p(2) to a force for the user output   */
-      p2 /= h;
-      if (d->LUMass()) {
-        dummy = d->LUMass()->solve(dummy);
-        DEBUG_EXPR(siconos::algebra::print(*d->LUMass()););
-      }
-      DEBUG_EXPR(siconos::algebra::print(vFree));
-      DEBUG_EXPR(siconos::algebra::print(dummy));
-
-      v = vFree + dummy;
-      DEBUG_EXPR(siconos::algebra::print(v));
-
-      // get left state from memory
-      const auto& qold = d->qMemory().getSiconosVector(0);
-      const auto& vold = d->velocityMemory().getSiconosVector(0);
-      auto& q = *d->q();  // POINTER CONSTRUCTOR : contains position q_{k+1}
-      q = qold;
-      q += 0.5 * h * (vold + v);
-      DEBUG_EXPR(siconos::algebra::print(*q));
-
-      residuFree.setZero();
-      residuFree -= 0.5 * (h * *work_tdg) + 0.5 * dummy;
-      DEBUG_EXPR(siconos::algebra::print(residuFree));
+      residuFree = d1_minus_linear::compute_residu_lagrangian(h, *lds, vFree, work_tdg);
+    } else if (auto lsds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      residuFree = d1_minus_linear::compute_residu_lagrangian(h, *lsds, vFree, work_tdg);
     } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
-      auto& residuFree =
-          *workVectors[siconos::integrators::D1MinusLinearOSI::
-                           RESIDU_FREE];  // contains residu without nonsmooth effect
-      auto work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-
       // get left state from memory
       const auto& qold = d->qMemory().getSiconosVector(0);
       DEBUG_EXPR(const auto& vold = d->twistMemory().getSiconosVector(0););
-
       // initialize *it->residuFree and predicted right velocity (left limit)
       auto& v = *d->twist();  // contains velocity v_{k+1}^- and not free velocity
       v.setZero();
@@ -291,7 +308,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       DEBUG_EXPR(siconos::algebra::print(q));
 
       residuFree.setZero();
-      residuFree -= 0.5 * (h * *work_tdg) + 0.5 * dummy;
+      residuFree -= 0.5 * (h * work_tdg) + 0.5 * dummy;
       DEBUG_EXPR(siconos::algebra::print(residuFree));
     } else
       THROW_EXCEPTION(
@@ -357,43 +374,16 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       // type of the current DS
       /* \warning the following conditional statement should be removed with a MechanicalDS
        * class */
-      if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
-        auto work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-        assert(work_tdg);
-        DEBUG_EXPR(siconos::algebra::print(*work_tdg));
-        residuFree = -0.5 * h * *work_tdg;
-        d->computeTotalForces(d->velocity_read(), d->q_read(), t);
-        DEBUG_EXPR(siconos::algebra::print(*d->totalForces()););
-        *work_tdg = d->totalForces();
-
-        if (d->LUMass()) {
-          d->init_lu_mass();
-          *work_tdg = d->LUMass()->solve(*work_tdg);
-          // contains right (left limit) acceleration without contact force
-        }
-
-        DEBUG_EXPR(siconos::algebra::print(*work_tdg));
-        residuFree -= 0.5 * h * *work_tdg;
-        DEBUG_EXPR(siconos::algebra::print(residuFree));
-      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-        auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
-        d->twist()->setZero();  // why?
-        auto work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-        assert(work_tdg);
-        residuFree = 0.5 * h * *work_tdg;
-        work_tdg->setZero();
-
-        d->computeWrench(d->twist_read(), d->q_read(), t);
-        *work_tdg += d->wrench();
-
-        if (d->LUMass()) {
-          *work_tdg = d->LUMass()->solve(*work_tdg);
-          // contains right (left limit) acceleration without contact force
-        }
-
-        residuFree -= 0.5 * h * *work_tdg;
-        DEBUG_EXPR(siconos::algebra::print(residuFree));
+      auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+      auto& work_tdg = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
+      DEBUG_EXPR(siconos::algebra::print(*work_tdg));
+      if (auto lagds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        d1_minus_linear::compute_residufree_lagrangian(h, t, *lagds, work_tdg, residuFree);
+      } else if (auto lsds =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+        d1_minus_linear::compute_residufree_lagrangian(h, t, *lsds, work_tdg, residuFree);
+      } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+        d1_minus_linear::compute_residufree_newtoneuler(h, t, *neds, work_tdg, residuFree);
       } else
         THROW_EXCEPTION(
             "siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel "
@@ -410,26 +400,46 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       if (!checkOSI(dsi)) continue;
       auto ds = _dynamicalSystemsGraph->bundle(*dsi);
       auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-
-      // type of the current DS
-      /* \warning the following conditional statement should be removed with a MechanicalDS
-       * class */
+      auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+      auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
       if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
-        vFree.setZero();
         // get right state from memory
         // d->q();         // contains position q_{k+1}
         // d->velocity();  // contains velocity v_{k+1}^- and not free velocity
         d->computeTotalForces(d->velocity_read(), d->q_read(), t);
-        DEBUG_EXPR(siconos::algebra::print(*d->totalForces()));
-        vFree += d->totalForces();
+        vFree = d->totalForces();
 
         if (d->LUMass()) {
           d->init_lu_mass();
           vFree = d->LUMass()->solve(vFree);
         }
         /* vFree contains right (left limit) acceleration without contact force */
-        auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+        residuFree += -0.5 * h * vFree;
+        DEBUG_EXPR(siconos::algebra::print(residuFree));
+        /* Compute the right limit of the (free) velocity at  t^+_k with contact force : */
+        const auto& vold = d->velocityMemory().getSiconosVector(0);
+        DEBUG_EXPR(siconos::algebra::print(vold));
+
+        vFree = vold - residuFree;
+
+        DEBUG_PRINT(
+            "vFree contains the right  limit of the (free) velocity at  t^-_{k+1} without "
+            "contact force :\n");
+        DEBUG_EXPR(siconos::algebra::print(vFree));
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+        // get right state from memory
+        // d->q();         // contains position q_{k+1}
+        // d->velocity();  // contains velocity v_{k+1}^- and not free velocity
+        d->computeTotalForces(d->velocity_read(), d->q_read(), t);
+        DEBUG_EXPR(siconos::algebra::print(*d->totalForces()));
+        vFree = d->totalForces();
+
+        if (d->LUMass()) {
+          d->init_lu_mass();
+          vFree = d->LUMass()->solve(vFree);
+        }
+        /* vFree contains right (left limit) acceleration without contact force */
         residuFree += -0.5 * h * vFree;
         DEBUG_EXPR(siconos::algebra::print(residuFree));
         /* Compute the right limit of the (free) velocity at  t^+_k with contact force : */
@@ -443,8 +453,6 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
             "contact force :\n");
         DEBUG_EXPR(siconos::algebra::print(vFree));
       } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-        auto& vFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
-        vFree.setZero();
         // get right state from memory
         auto q = d->q();      // contains position q_{k+1}
         auto v = d->twist();  // contains velocity v_{k+1}^- and not free velocity
@@ -453,14 +461,12 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
         DEBUG_EXPR(siconos::algebra::print(*v));
 
         d->computeWrench(d->twist_read(), d->q_read(), t);
-        vFree += d->wrench();
+        vFree = d->wrench();
 
         if (d->LUMass()) {
           vFree = d->LUMass()->solve(vFree);
         }
         /* work_tdg contains right (left limit) acceleration without contact force */
-        auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
-
         residuFree += -0.5 * h * vFree;
 
         /*  Compute the right limit of the (free) velocity at  t^+_k with contact force : */
@@ -513,6 +519,26 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       /* \warning the following conditional statement should be removed with a MechanicalDS
        * class */
       if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+        DEBUG_EXPR(siconos::algebra::print(residuFree););
+
+        if (d->p(2)) {
+          // get right state from memory
+          auto& p2 = *d->p(2);
+          siconos::algebra::SiconosVector dummy = d->p_read(2);
+          DEBUG_EXPR(siconos::algebra::print(p2));
+          /* we homogenize p(2) to a force for the user output   */
+          p2 *= 2.0 / h;
+
+          if (d->LUMass()) {
+            d->init_lu_mass();
+            dummy = d->LUMass()->solve(dummy);
+          }
+          residuFree -= dummy;
+        }
+        DEBUG_EXPR(siconos::algebra::print(residuFree));
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
         auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
         DEBUG_EXPR(siconos::algebra::print(residuFree););
 

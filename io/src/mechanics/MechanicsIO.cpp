@@ -49,6 +49,7 @@
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NSLVisitor.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"
@@ -580,6 +581,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::positions(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter = siconos::internal::DSVisitor<
       siconos::internal::Classes<siconos::modeling::LagrangianDS,
+                                 siconos::modeling::LagrangianSparseDS,
                                  siconos::modeling::NewtonEulerDS>,
       GetPosition>::Make;
 
@@ -590,6 +592,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter = siconos::internal::DSVisitor<
       siconos::internal::Classes<siconos::modeling::LagrangianDS,
+                                 siconos::modeling::LagrangianSparseDS,
                                  siconos::modeling::NewtonEulerDS>,
       GetVelocity>::Make;
 
@@ -1055,9 +1058,14 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     /* create a visitor for specified classes */
     using ContactContactWorkInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
-            siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
+            siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
+            siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
+            siconos::modeling::Lagrangian2d3DR, siconos::collision::ContactR,
             siconos::collision::Contact5DR, siconos::collision::Contact2dR,
-            siconos::collision::Contact2d3DR>,
+            siconos::collision::Contact2d3DR,
+            siconos::collision::native::bodies::CircleCircleR,
+            siconos::collision::native::bodies::DiskDiskR,
+            siconos::collision::native::bodies::DiskPlanR>,
         ContactContactWorkVisitor>::Make;
     ContactContactWorkInspector inspector;
     inspector.inter = graph.bundle(*vi);

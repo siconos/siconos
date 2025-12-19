@@ -245,24 +245,35 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
-   *  \param t time of initialization
+   *  @param t time of initialization
    */
   void initRhs(double t) override;
 
-  /** set the stiffness matrix. Warning: shared memory with input
+  /** @brief set the stiffness matrix.
    *
-   *  \param K new stiffness matrix
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   * @param K new stiffness matrix
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    */
-  void setStiffnessMatrixAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& K);
+  void setStiffnessMatrix(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& K,
+                          siconos::algebra::AliasTag);
 
-  /** Set a constant stiffness matrix for the system
-   *  The input matrix is copied into the internal stiffness.
+  /** @brief Set a constant stiffness matrix for the system
    *
-   *  \param newValue stiffness matrix
+   *  Warning : deep copy of the provided object into internal attribute
+   *
+   *  @param newValue stiffness matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   template <typename T>
-  void setStiffnessMatrixCopy(T&& newValue) {
+  void setStiffnessMatrix(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -273,20 +284,32 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
         std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
   }
 
-  /** set the damping matrix. Warning: shared memory with input
+  /** @brief set the damping matrix.
    *
-   *  \param C new damping matrix
+   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+   * pointing directly to the memory provided by the argument.
+   *
+   * This means:
+   *  - ownership stays external
+   *  - modifications to the original vector are reflected inside the class
+   *
+   * @param V new damping matrix
+   * @param tag Pass siconos::algebra::alias_t to select this overload
+   *        (rather than copy version)
    */
-  void setDampingMatrixAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& C);
+  void setDampingMatrix(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& C,
+                        siconos::algebra::AliasTag);
 
-  /** Set a constant damping matrix for the system
-   *  The input matrix is copied into the internal damping.
+  /** @brief Set a constant damping matrix for the system
    *
-   *  \param newValue damping matrix
+   * Warning : deep copy of the provided object into internal attribute
+   *
+   *  @param newValue damping matrix
+   *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   template <typename T>
-  void setDampingMatrixCopy(T&& newValue) {
+  void setDampingMatrix(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
@@ -345,9 +368,9 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
 
   /** Compute  \f$ F_{total}(v,q,t) = -Kq - Cv + f_{ext}(t)\f$
    *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
+   *  @param velocity vector
+   *  @param q state
+   *  @param time the current time
    */
   void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
                           const Eigen::Ref<const siconos::algebra::SiconosVector>& q,

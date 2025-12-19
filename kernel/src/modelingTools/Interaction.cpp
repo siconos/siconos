@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include <iostream>
+#include <stdexcept>
 
 // #define DEBUG_BEGIN_END_ONLY
 //  #define DEBUG_STDOUT
@@ -49,6 +50,38 @@
 #include "siconos_debug.h"
 
 size_t siconos::modeling::Interaction::count_ = 0;
+
+namespace siconos::modeling::interactions_tools {
+
+template <typename DS>
+concept LDS = requires(DS ds) { ds.velocity(); };
+
+template <typename DS>
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+void initialize_lagrangian_ds_link(
+    DS& ds, std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) {
+  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(ds.q());
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(ds.velocity());
+
+  if (ds.acceleration()) {
+    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
+          std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(ds.acceleration());
+  }
+
+  for (unsigned int k = 0; k < 3; k++) {
+    if (ds.p(k)) {
+      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
+        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
+            std::make_shared<siconos::algebra::BlockVector>();
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(ds.p(k));
+    }
+  }
+}
+}  // namespace siconos::modeling::interactions_tools
 
 struct siconos::modeling::Interaction::SetLevels
     : public siconos::modeling::nonsmooth_laws::Visitor {
@@ -413,37 +446,20 @@ void siconos::modeling::Interaction::__initDataLagrangian(
   //   //we need extra continuous memory vector
   //   //todo
   // }
+  if (auto lds = dynamic_cast<siconos::modeling::LagrangianDS*>(&ds1)) {
+    interactions_tools::initialize_lagrangian_ds_link(*lds, DSlink);
+  } else if (auto lds = dynamic_cast<siconos::modeling::LagrangianSparseDS*>(&ds1)) {
+    interactions_tools::initialize_lagrangian_ds_link(*lds, DSlink);
+  } else
+    throw std::logic_error("Wrong dynamical system type (not lagrangian)");
 
-  __initDSDataLagrangian(ds1, DSlink);
-  if (&ds1 != &ds2) __initDSDataLagrangian(ds2, DSlink);
-}
-
-void siconos::modeling::Interaction::__initDSDataLagrangian(
-    DynamicalSystem& ds, std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) {
-  // check dynamical system type
-  assert(dynamic_cast<LagrangianDS*>(&ds) || dynamic_cast<LagrangianSparseDS*>(&ds));
-
-  auto& lds = static_cast<LagrangianDS&>(ds);
-
-  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(lds.q());
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(lds.velocity());
-
-  if (lds.acceleration()) {
-    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
-      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
-          std::make_shared<siconos::algebra::BlockVector>();  // acceleration
-
-    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
-  }
-
-  for (unsigned int k = 0; k < 3; k++) {
-    if (lds.p(k)) {
-      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
-        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
-            std::make_shared<siconos::algebra::BlockVector>();
-      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(lds.p(k));
-    }
+  if (&ds1 != &ds2) {
+    if (auto lds = dynamic_cast<siconos::modeling::LagrangianDS*>(&ds2)) {
+      interactions_tools::initialize_lagrangian_ds_link(*lds, DSlink);
+    } else if (auto lds = dynamic_cast<siconos::modeling::LagrangianSparseDS*>(&ds1)) {
+      interactions_tools::initialize_lagrangian_ds_link(*lds, DSlink);
+    } else
+      throw std::logic_error("Wrong dynamical system type (not lagrangian)");
   }
 }
 

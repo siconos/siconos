@@ -20,6 +20,7 @@
 
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEuler1DR.hpp"
@@ -167,6 +168,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
       *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
     } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
     } else
       THROW_EXCEPTION(
           "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() "
@@ -246,6 +249,14 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
           //*q = * qtmp +  *d->p(0);
           *d->q() += d->p_read(0);
         }
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+        auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+
+        if (d->p(0)) {
+          //*q = * qtmp +  *d->p(0);
+          *d->q() += d->p_read(0);
+        }
       } else
         THROW_EXCEPTION(
             "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent("
@@ -303,10 +314,14 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto time = nextTime();
       neds->computeWrench(neds->twist_read(), neds->q_read(), time);
+    } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
     } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto time = nextTime();
       d->computeTotalForces(d->velocity_read(), d->q_read(), time);
-    } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      auto time = nextTime();
+      d->computeTotalForces(d->velocity_read(), d->q_read(), time);
     } else
       THROW_EXCEPTION(
           "TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from "

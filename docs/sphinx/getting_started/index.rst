@@ -79,7 +79,7 @@ system (See :class:`FirstOrderLinearDS`).
 .. code-block:: python
 
    # import siconos package
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    # import numpy package
    import numpy as np
 

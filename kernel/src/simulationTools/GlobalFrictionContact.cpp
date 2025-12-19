@@ -19,6 +19,7 @@
 
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -227,6 +228,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       if (mjgosi) {
         auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
         if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
+            (std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) ||
             (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
           _q->segment(offset, ds_size) = vfree.head(ds_size);
@@ -392,6 +394,15 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
     auto ds = DSG0.bundle(*dsi);
 
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      auto sizeDS = d->dimension();
+      auto velocity = d->velocity();
+      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
+      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
+      pos = DSG0.properties(*dsi).absolute_position;
+      velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       auto sizeDS = d->dimension();
       auto velocity = d->velocity();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());

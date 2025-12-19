@@ -94,6 +94,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
 
   DEBUG_END("siconos::modeling::NewtonEulerDS::NewtonEulerDS(...)\n");
 }
+
 siconos::modeling::NewtonEulerDS::NewtonEulerDS(
     const siconos::algebra::SiconosVector7& initial_position,
     const siconos::algebra::SiconosVector6& initial_twist, double mass,
@@ -336,11 +337,21 @@ void siconos::modeling::NewtonEulerDS::init_lu_mass() {
 }
 
 /////////////////// FEXT  ////////////////////
+
 void siconos::modeling::NewtonEulerDS::setConstantFext(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  assert(newValue.size() == 3);
-  fext_view_ =
+    const siconos::algebra::SiconosVector3& newValue, siconos::algebra::CopyTag tag) {
+  // Deep copy into Owned storage
+  fext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>(newValue);
+  hasFext_ = true;
+  hasConstantFext_ = true;
+  computefext_ = nullptr;
+}
+
+void siconos::modeling::NewtonEulerDS::setConstantFext(
+    Eigen::Ref<siconos::algebra::SiconosVector3> newValue, siconos::algebra::AliasTag tag) {
+  fext_storage_ =
       std::make_shared<siconos::algebra::MapVector3Type>(newValue.data(), newValue.size());
+
   hasFext_ = true;
   hasConstantFext_ = true;
   computefext_ = nullptr;
@@ -348,19 +359,29 @@ void siconos::modeling::NewtonEulerDS::setConstantFext(
 
 void siconos::modeling::NewtonEulerDS::setComputeFextFunction(
     const func_prototypes::FunctionS_V& fext_func) {
-  // No need to ensure memory alloc -> computed directly into wrench_
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector3>(fext_storage_)) {
+    fext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>();
+  }
   hasFext_ = true;
   hasConstantFext_ = false;
-  fext_view_ = nullptr;
   computefext_ = fext_func;
 }
 
 /////////////////// MEXT  ////////////////////
 
 void siconos::modeling::NewtonEulerDS::setConstantMext(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  assert(newValue.size() == 3);
-  mext_view_ =
+    const siconos::algebra::SiconosVector3& newValue, siconos::algebra::CopyTag tag) {
+  // Deep copy into Owned storage
+  mext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>(newValue);
+
+  hasMext_ = true;
+  hasConstantMext_ = true;
+  computemext_ = nullptr;
+}
+
+void siconos::modeling::NewtonEulerDS::setConstantMext(
+    Eigen::Ref<siconos::algebra::SiconosVector3> newValue, siconos::algebra::AliasTag tag) {
+  mext_storage_ =
       std::make_shared<siconos::algebra::MapVector3Type>(newValue.data(), newValue.size());
 
   hasMext_ = true;
@@ -370,10 +391,11 @@ void siconos::modeling::NewtonEulerDS::setConstantMext(
 
 void siconos::modeling::NewtonEulerDS::setComputeMextFunction(
     const func_prototypes::FunctionS_V& mext_func) {
-  // No need to ensure memory alloc -> computed directly into wrench_
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector3>(mext_storage_)) {
+    mext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>();
+  }
   hasMext_ = true;
   hasConstantMext_ = false;
-  mext_view_ = nullptr;
   computemext_ = mext_func;
 }
 
@@ -470,12 +492,12 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
   siconos::algebra::SiconosVector3 buffer;
   if (hasFext_) {
     if (computefext_) {
-      computefext_(time, buffer);
-      wrench_->head(3) += buffer;
+      use_fext([&](auto& fext) {
+        computefext_(time, fext);
+        wrench_->head(3) += fext;
+      });
     } else  // if (hasConstantFext_)
-      wrench_->head(3) += *fext_view_;
-
-    // wrench[0:2] += fext
+      use_fext([&](auto& fext) { wrench_->head(3) += fext; });
   }
 
   if (hasFint_) {
@@ -485,21 +507,13 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
   }
 
   if (hasMext_) {
-    if (!computemext_ && !isMextExpressedInInertialFrame_)
-      // mext is constant (and so has been allocated and set) and not expressed in the inertial
-      // frame
-      wrench_->tail(3) += *mext_view_;
-    else {
-      // In all other cases, we need to use the buffer
-      if (computemext_)  // mext not constant --> we need to use the buffer
-        computemext_(time, buffer);
-      else  // mext constant but not expressed in the inertial frame --> we need the buffer
-        buffer = *mext_view_;
-
-      if (isMextExpressedInInertialFrame_) {
-        siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, buffer);
-      }
-      wrench_->tail(3) += buffer;
+    if (computemext_)  // mext not constant --> we need to use the buffer
+      use_mext([&](auto& mext) { computemext_(time, mext); });
+    if (isMextExpressedInInertialFrame_) {
+      use_mext([&](auto& mext) {
+        siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext);
+      });
+      use_mext([&](auto& mext) { wrench_->tail(3) += mext; });
       // wrench[3:6] += mext
     }
   }
@@ -561,7 +575,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
       if (computemext_)
         computemext_(time, mext);
       else
-        mext = *mext_view_;
+        use_mext([&](auto& val) { mext = val; });
       newton_euler::computeJacobianMExtqExpressedInInertialFrame(*state_q_, time, mext,
                                                                  matrix_buffer);
       jacobianWrenchOver_q_->bottomRows(3) += matrix_buffer;
@@ -755,9 +769,13 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
 void siconos::modeling::NewtonEulerDS::addExtForceAtPos(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& force, bool forceAbsRef,
     const Eigen::Ref<siconos::algebra::SiconosVector3>& pos, bool posAbsRef) {
-  newton_euler::computeFextForceAtPos(*state_q_, force, forceAbsRef, *fext_view_, true);
-  newton_euler::computeMextForceAtPos(*state_q_, isMextExpressedInInertialFrame_, force,
-                                      forceAbsRef, pos, posAbsRef, *mext_view_, true);
+  use_fext([&](auto& fext) {
+    newton_euler::computeFextForceAtPos(*state_q_, force, forceAbsRef, fext, true);
+  });
+  use_mext([&](auto& mext) {
+    newton_euler::computeMextForceAtPos(*state_q_, isMextExpressedInInertialFrame_, force,
+                                        forceAbsRef, pos, posAbsRef, mext, true);
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

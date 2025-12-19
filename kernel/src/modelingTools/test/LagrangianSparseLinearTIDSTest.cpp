@@ -159,8 +159,8 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_alias()
       damping.rows(), damping.cols(), damping.nonZeros(), damping.outerIndexPtr(),
       damping.innerIndexPtr(), damping.valuePtr());
 
-  ds->setStiffnessMatrixAlias(stiffness_map);
-  ds->setDampingMatrixAlias(damping_map);
+  ds->setStiffnessMatrix(stiffness_map, siconos::algebra::alias_t);
+  ds->setDampingMatrix(damping_map, siconos::algebra::alias_t);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - LagrangianSparseTIDS - Alias case: ", ds->dimension() == 3, true);
@@ -245,8 +245,8 @@ void LagrangianSparseLinearTIDSTest::testBuildLagrangianSparseLinearTIDS_copy() 
 
   auto stiffness = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
   auto damping = siconos::algebra::generateRandomSparseMatrix(3, 3, 4);
-  ds->setStiffnessMatrixCopy(stiffness);
-  ds->setDampingMatrixCopy(damping);
+  ds->setStiffnessMatrix(stiffness, siconos::algebra::copy_t);
+  ds->setDampingMatrix(damping, siconos::algebra::copy_t);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - LagrangianSparseTIDS - Copy case: ", ds->dimension() == 3, true);

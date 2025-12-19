@@ -30,7 +30,7 @@ siconos::fem::cable::CableDS::CableDS(const siconos::algebra::SiconosVector& q0,
       EA_{a_EA},
       l_e_{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
-  setConstantMassCopy(mass);
+  setConstantMass(mass, siconos::algebra::copy_t);
 
   TRNp_Np = std::make_shared<siconos::algebra::SiconosSparseMatrix>(6, 6);
   std::vector<siconos::algebra::Triplet> triplets;

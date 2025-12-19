@@ -188,15 +188,6 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
       std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
       DynamicalSystem& ds1, DynamicalSystem& ds2);
 
-  /** Initialize the link with the DynamicalSystem, LagrangianDS variant
-   *
-   *  \param ds a DynamicalSystem concerned by this Interaction
-   *  \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void __initDSDataLagrangian(
-      DynamicalSystem& ds,
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
-
   /**
      update DSlink property content with dynamical systems members, NewtonEuler relations case.
 
@@ -620,6 +611,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   void getExtraInteractionBlock(
       std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const;
 };
+
 }  // namespace siconos::modeling
 
 #endif  // INTERACTION_H

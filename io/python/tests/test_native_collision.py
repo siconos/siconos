@@ -201,3 +201,7 @@ def test_native_collision():
     make_input()
     run()
     check()
+
+
+if __name__ == "__main__":
+    test_native_collision()

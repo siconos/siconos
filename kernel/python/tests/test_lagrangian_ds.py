@@ -302,7 +302,7 @@ def call_ds_alias(dstype, ndof):
     mass = sp.diags_array(data, format="csc")
     ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
-    ds.setConstantMassAlias(mass)
+    ds.setConstantMass(mass, sm.alias_t)
     try:
         M = ds.mass_view
         assert False
@@ -330,7 +330,7 @@ def call_ds_copy(dstype, ndof):
     mass = sp.diags_array(data, format="csc")
     ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
-    ds.setConstantMassCopy(mass)
+    ds.setConstantMass(mass, sm.copy_t)
     try:
         M = ds.mass_alias
         assert False
@@ -376,8 +376,8 @@ def test_lagrangianSparseLinearTIDS_copy():
 
     ball = sm.LagrangianSparseLinearTIDS(q0, v0, mass, sm.copy_t)
 
-    ball.setStiffnessMatrixCopy(stiff)
-    ball.setDampingMatrixCopy(damp)
+    ball.setStiffnessMatrix(stiff, sm.copy_t)
+    ball.setDampingMatrix(damp, sm.copy_t)
     fext = np.zeros_like(q0)
     fext[:] = 122
     ball.setConstantFext(fext, sm.alias_t)
@@ -408,9 +408,9 @@ def test_lagrangianSparseLinearTIDS_alias():
     data_c = rng.random(3)
     damp = sp.diags_array(data_c, format="csc")
     ball = sm.LagrangianSparseLinearTIDS(q0, v0, sm.alias_t)
-    ball.setConstantMassAlias(mass)
-    ball.setStiffnessMatrixAlias(stiff)
-    ball.setDampingMatrixAlias(damp)
+    ball.setConstantMass(mass, sm.alias_t)
+    ball.setStiffnessMatrix(stiff, sm.alias_t)
+    ball.setDampingMatrix(damp, sm.alias_t)
     fext = np.zeros_like(q0)
     fext[:] = 122
     ball.setConstantFext(fext, sm.alias_t)

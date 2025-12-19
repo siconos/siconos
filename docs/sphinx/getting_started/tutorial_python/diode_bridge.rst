@@ -154,7 +154,7 @@ which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to 
 ::
 
    # import siconos package
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    # numpy for vectors and matrices
    import numpy as np
    

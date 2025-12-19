@@ -41,6 +41,8 @@ PYBIND11_MODULE(_joints, m) {
            "To set the absolute reference frame for the joint")
       .def("setBasePositions", &siconos::joints::NewtonEulerJointR::setBasePositions,
            "To define the base position of the joint")
+      .def("numberOfConstraints", &siconos::joints::NewtonEulerJointR::numberOfConstraints,
+           "To get the number of constraints in the joint")
       .def("setPoint",
            py::overload_cast<size_t, const Eigen::Ref<siconos::algebra::SiconosVector3>&>(
                &siconos::joints::NewtonEulerJointR::setPoint),
@@ -64,8 +66,6 @@ PYBIND11_MODULE(_joints, m) {
              std::shared_ptr<siconos::joints::CylindricalJointR>,
              siconos::joints::NewtonEulerJointR>(m, "CylindricalJointR")
       .def(py::init<>(), "Default constructor for CylindricalJointR")
-      .def("numberOfConstraints", &siconos::joints::CylindricalJointR::numberOfConstraints,
-           "To get the number of constraints in the joint")
       .def("computeh",
            py::overload_cast<
                const Eigen::Ref<const siconos::algebra::SiconosVector>&,

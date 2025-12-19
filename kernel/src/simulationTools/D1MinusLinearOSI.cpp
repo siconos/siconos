@@ -22,10 +22,12 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SecondOrderDS.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
@@ -92,6 +94,22 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
     // Update dynamical system components (for memory swap).
     lds->computeTotalForces(*lds->velocity(), *lds->q(), t);
     lds->swapInMemory();
+  }
+
+  else if (auto lsds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+    lsds->initMemoryForGeneralizedCoordinates(2);  // acceleration is required for the ds
+    lsds->init_lu_mass();  // invMass required to update post-impact velocity
+
+    ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    // Update dynamical system components (for memory swap).
+    lsds->computeTotalForces(*lsds->velocity(), *lsds->q(), t);
+    lsds->swapInMemory();
   }
 
   else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
@@ -253,7 +271,9 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
   DEBUG_EXPR(siconos::algebra::print(*inter_work_block[xfree]););
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
+    // Must take both Lagrangian and LagrangianSparse DS into account
+    // --> Second Order
+    auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
         std::make_shared<siconos::algebra::BlockVector>();
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
@@ -261,17 +281,18 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
         std::make_shared<siconos::algebra::BlockVector>();
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
         lds.acceleration());
-  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-  }
+  }  // else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+  //}
 
   if (ds1 != ds2) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
+      auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
       DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
       DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
           lds.acceleration());
-    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     }
+    //  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    // }
   }
 
   DEBUG_END(
@@ -301,14 +322,16 @@ double siconos::integrators::D1MinusLinearOSI::computeResidu() {
     case Type::halfexplicit_acceleration_level_full:
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
       THROW_EXCEPTION(
-          "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type "
+          "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for "
+          "type "
           "of "
           "D1MinusLinearOSI: " +
           siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
       // return computeResiduHalfExplicitAccelerationLevelFull(); // obsolete
   }
   THROW_EXCEPTION(
-      "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type of "
+      "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type "
+      "of "
       "D1MinusLinearOSI: " +
       siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
@@ -322,11 +345,24 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    /* \warning the following conditional statement should be removed with a MechanicalDS class
+    /* \warning the following conditional statement should be removed with a MechanicalDS
+     * class
      */
 
     auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      // get left state from memory
+      const auto& vold = d->velocityMemory().getSiconosVector(0);  // right limit
+      // POINTER CONSTRUCTOR : contains free velocity
+      auto& vfree = *d->velocity();
+      // get right information
+      vfree = -residuFree + vold;
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+      // d->computeMass();
+      // M->resetFactorizationFlags();
+      // M->Solve(vfree);
+      // DEBUG_EXPR(siconos::algebra::print(*M));
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       // get left state from memory
       const auto& vold = d->velocityMemory().getSiconosVector(0);  // right limit
       // POINTER CONSTRUCTOR : contains free velocity
@@ -344,8 +380,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
       DEBUG_EXPR(siconos::algebra::print(vold));
 
       // get right information
-      // auto M = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()))); // we copy
-      // the mass matrix to avoid its factorization;
+      // auto M = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()))); // we
+      // copy the mass matrix to avoid its factorization;
       auto& vfree = *d->twist();  // POINTER CONSTRUCTOR : contains free velocity
 
       vfree = -residuFree + vold;
@@ -395,7 +431,32 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
       DEBUG_PRINT("Position and velocity after update\n");
       DEBUG_EXPR(siconos::algebra::print(*d->q()));
       DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      auto v = d->velocity();
+
+      DEBUG_PRINT("Position and velocity before update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+
+      /* Add the contribution of the impulse if any */
+      if (d->p(1)) {
+        DEBUG_EXPR(siconos::algebra::print(*d->p(1)));
+        /* copy the value of the impulse */
+        auto dummy = *d->p(1);
+        /* Compute the velocity jump due to the impulse */
+        if (d->hasLUMass()) {
+          d->init_lu_mass();
+          dummy = d->LUMass()->solve(dummy);
+        }
+        /* Add the velocity jump to the free velocity */
+        *v += dummy;
+      }
+
+      DEBUG_PRINT("Position and velocity after update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
     }
+
     /*  NewtonEuler Systems */
     else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       if (d->p(1)) {

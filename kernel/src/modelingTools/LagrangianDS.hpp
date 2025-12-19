@@ -158,6 +158,33 @@ class LagrangianDS : public SecondOrderDS {
   /** mass matrix of the system (as a view onto memory)*/
   siconos::algebra::DenseStorage mass_storage_{std::monostate{}};
 
+  /**
+   * @brief Utility function providing uniform access to the mass matrix.
+   *
+   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
+   *
+   * @param f the functor to apply to the mass matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no mass matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) use_mass(F&& f) {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) use_mass(F&& f) const {
+    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
+  }
+
   /** function wrapper used to compute mass */
   siconos::modeling::func_prototypes::FunctionV_M computemass_{nullptr};
 
@@ -208,6 +235,10 @@ class LagrangianDS : public SecondOrderDS {
 
   template <typename F>
   decltype(auto) use_fext(F&& f) const {
+    return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
+  }
+  template <typename F>
+  decltype(auto) use_fext(F&& f) {
     return siconos::algebra::visitStorage(fext_storage_, std::forward<F>(f), "fext_storage_");
   }
 
@@ -507,11 +538,6 @@ class LagrangianDS : public SecondOrderDS {
   //  */
   inline siconos::algebra::SiconosVector& q_python() const { return *(state_q_[0]); }
 
-  /** \return  a view on initial position vector q0 */
-  inline const siconos::algebra::MapVectorType q0_python()  {
-    return *(q0_view_);
-  }
-
   /** \return  a read-only view on velocity vector */
   inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
     return siconos::algebra::ConstMapVectorType(state_q_[1]->data(), state_q_[1]->size());
@@ -535,11 +561,6 @@ class LagrangianDS : public SecondOrderDS {
         [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector>(v); });
   }
 
-  /** \return a  view on the initial velocity vector */  
-  inline const siconos::algebra::MapVectorType velocity0_python()  {
-    return *(velocity0_view_);
-  }
-
   /** \return a read-only view on acceleration vector */
   inline const siconos::algebra::ConstMapVectorType acceleration_read() const override {
     return siconos::algebra::ConstMapVectorType(state_q_[2]->data(), state_q_[2]->size());
@@ -548,34 +569,6 @@ class LagrangianDS : public SecondOrderDS {
   /** \return the acceleration vector (pointer link) */
   std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
     return state_q_[2];
-  }
-
-  /**
-   * @brief Utility function providing uniform access to the mass matrix.
-   *
-   * generic and efficient access to the underlying `SiconosDenseMatrix` object, avoiding any
-   * copy.
-   *
-   * @tparam F a callable type (e.g., lambda) taking a reference to
-   *           `SiconosDenseMatrix` or `const SiconosDenseMatrix&`.
-   *
-   * @param f the functor to apply to the mass matrix.
-   * @return whatever is returned by @p f.
-   *
-   * @throws std::runtime_error if no mass matrix (owned or external) is set.
-   *
-   * @note This function does not copy the matrix; it forwards a reference
-   *       to the actual internal or external object.
-   */
-
-  template <typename F>
-  decltype(auto) use_mass(F&& f) {
-    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
-  }
-
-  template <typename F>
-  decltype(auto) use_mass(F&& f) const {
-    return siconos::algebra::visitStorage(mass_storage_, std::forward<F>(f), "mass_storage_");
   }
 
   /*  \return a read-only reference on the mass matrix */

@@ -237,18 +237,22 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("computeFext", &siconos::modeling::LagrangianSparseDS::computeFext,
            "compute external forces")
 
-      .def("setConstantMassCopy",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantMass",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::CopyTag tag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_mass_ref")) py_self.attr("_mass_ref") = py::none();
              siconos::algebra::SiconosSparseMatrix M =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setConstantMassCopy(std::move(M));  // move => one allocation, no second copy
+             self.setConstantMass(
+                 std::move(M),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
-      .def("setConstantMassAlias",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantMass",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setConstantMassAlias(*map_ptr);
+             self.setConstantMass(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_mass_ref") = csc;
            })
@@ -326,21 +330,25 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("computeMass", &siconos::modeling::LagrangianSparseDS::computeMass)
       .def("hasMass", &siconos::modeling::LagrangianSparseDS::hasMass)
       .def("hasConstantMass", &siconos::modeling::LagrangianSparseDS::hasConstantMass)
-      .def("setConstantJacobianFintOver_qCopy",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFintOver_q",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_jacobianFintOver_q_ref"))
                py_self.attr("_jacobianFintOver_q_ref") = py::none();
 
              siconos::algebra::SiconosSparseMatrix M =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setConstantJacobianFintOver_qCopy(
-                 std::move(M));  // move => one allocation, no second copy
+             self.setConstantJacobianFintOver_q(
+                 std::move(M),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
-      .def("setConstantJacobianFintOver_qAlias",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+
+      .def("setConstantJacobianFintOver_q",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setConstantJacobianFintOver_qAlias(*map_ptr);
+             self.setConstantJacobianFintOver_q(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_jacobianFintOver_q_ref") = csc;
            })
@@ -430,21 +438,24 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("hasConstantJacobianTotalForcesOver_velocity",
            &siconos::modeling::LagrangianSparseDS::hasConstantJacobianTotalForcesOver_velocity)
 
-      .def("setConstantJacobianFintOver_velocityCopy",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFintOver_velocity",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_jacobianFintOver_velocity_ref"))
                py_self.attr("_jacobianFintOver_velocity_ref") = py::none();
 
              siconos::algebra::SiconosSparseMatrix M =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setConstantJacobianFintOver_velocityCopy(
-                 std::move(M));  // move => one allocation, no second copy
+             self.setConstantJacobianFintOver_velocity(
+                 std::move(M),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
-      .def("setConstantJacobianFintOver_velocityAlias",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFintOver_velocity",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setConstantJacobianFintOver_velocityAlias(*map_ptr);
+             self.setConstantJacobianFintOver_velocity(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_jacobianFintOver_velocity_ref") = csc;
            })
@@ -535,21 +546,24 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("hasJacobianFintOver_velocity",
            &siconos::modeling::LagrangianSparseDS::hasJacobianFintOver_velocity)
 
-      .def("setConstantJacobianFgyrOver_qCopy",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFgyrOver_q",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_jacobianFgyrOver_q_ref"))
                py_self.attr("_jacobianFgyrOver_q_ref") = py::none();
 
              siconos::algebra::SiconosSparseMatrix M =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setConstantJacobianFgyrOver_qCopy(
-                 std::move(M));  // move => one allocation, no second copy
+             self.setConstantJacobianFgyrOver_q(
+                 std::move(M),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
-      .def("setConstantJacobianFgyrOver_qAlias",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFgyrOver_q",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setConstantJacobianFgyrOver_qAlias(*map_ptr);
+             self.setConstantJacobianFgyrOver_q(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_jacobianFgyrOver_q_ref") = csc;
            })
@@ -635,21 +649,24 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("hasJacobianFgyrOver_q",
            &siconos::modeling::LagrangianSparseDS::hasJacobianFgyrOver_q)
 
-      .def("setConstantJacobianFgyrOver_velocityCopy",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFgyrOver_velocity",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_jacobianFgyrOver_velocity_ref"))
                py_self.attr("_jacobianFgyrOver_velocity_ref") = py::none();
 
              siconos::algebra::SiconosSparseMatrix M =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setConstantJacobianFgyrOver_velocityCopy(
-                 std::move(M));  // move => one allocation, no second copy
+             self.setConstantJacobianFgyrOver_velocity(
+                 std::move(M),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
-      .def("setConstantJacobianFgyrOver_velocityAlias",
-           [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
+      .def("setConstantJacobianFgyrOver_velocity",
+           [](siconos::modeling::LagrangianSparseDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setConstantJacobianFgyrOver_velocityAlias(*map_ptr);
+             self.setConstantJacobianFgyrOver_velocity(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_jacobianFgyrOver_velocity_ref") = csc;
            })
@@ -761,42 +778,48 @@ void wrap_dynamical_systems(py::module_& m) {
            R"pbdoc(constructor from initial state only.
            warning: alias (shared memory) between input q0/v0 and internal attributes)pbdoc")
 
-      .def("setStiffnessMatrixCopy",
-           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
+      .def("setStiffnessMatrix",
+           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
              py::object py_self = py::cast(self);
              if (py::hasattr(py_self, "_stiffness_ref"))
                py_self.attr("_stiffness_ref") = py::none();
 
              siconos::algebra::SiconosSparseMatrix K =
                  siconos::pybind11_utils::csc_to_eigen(csc);
-             self.setStiffnessMatrixCopy(
-                 std::move(K));  // move => one allocation, no second copy
+             self.setStiffnessMatrix(
+                 std::move(K),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
            })
 
-      .def("setStiffnessMatrixAlias",
-           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
+      .def("setStiffnessMatrix",
+           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setStiffnessMatrixAlias(*map_ptr);
+             self.setStiffnessMatrix(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_stiffness_ref") = csc;
            })
 
-      .def(
-          "setDampingMatrixCopy",
-          [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
-            py::object py_self = py::cast(self);
-            if (py::hasattr(py_self, "_damping_ref"))
-              py_self.attr("_damping_ref") = py::none();
+      .def("setDampingMatrix",
+           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc,
+              siconos::algebra::CopyTag) {
+             py::object py_self = py::cast(self);
+             if (py::hasattr(py_self, "_damping_ref"))
+               py_self.attr("_damping_ref") = py::none();
 
-            siconos::algebra::SiconosSparseMatrix C =
-                siconos::pybind11_utils::csc_to_eigen(csc);
-            self.setDampingMatrixCopy(std::move(C));  // move => one allocation, no second copy
-          })
+             siconos::algebra::SiconosSparseMatrix C =
+                 siconos::pybind11_utils::csc_to_eigen(csc);
+             self.setDampingMatrix(
+                 std::move(C),
+                 siconos::algebra::copy_t);  // move => one allocation, no second copy
+           })
 
-      .def("setDampingMatrixAlias",
-           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
+      .def("setDampingMatrix",
+           [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc,
+              siconos::algebra::AliasTag) {
              auto map_ptr = siconos::pybind11_utils::csc_to_eigen_map(csc);
-             self.setDampingMatrixAlias(*map_ptr);
+             self.setDampingMatrix(*map_ptr, siconos::algebra::alias_t);
              py::object py_self = py::cast(self, py::return_value_policy::reference);
              py_self.attr("_damping_ref") = csc;
            })
@@ -937,8 +960,6 @@ void wrap_dynamical_systems(py::module_& m) {
            py::arg("q0"), py::arg("v0"), py::arg("copy_t"))
 
       .def("q", &siconos::modeling::LagrangianDS::q_python,
-           py::return_value_policy::reference_internal)
-      .def("q0", &siconos::modeling::LagrangianDS::q0_python,
            py::return_value_policy::reference_internal)
 
       .def("velocity", &siconos::modeling::LagrangianDS::velocity_python,
@@ -1234,9 +1255,23 @@ void wrap_dynamical_systems(py::module_& m) {
       //       py::return_value_policy::reference_internal)
       .def("twist", &siconos::modeling::NewtonEulerDS::twist_python,
            py::return_value_policy::reference_internal)
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::NewtonEulerDS& self, const siconos::algebra::SiconosVector3& v,
+             siconos::algebra::CopyTag tag) {
+            self.setConstantFext(v, siconos::algebra::copy_t);
+          },
+          py::arg("fext"), py::arg("copy_t"), "Set constant external forces (copy).")
 
-      .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
-           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+      .def(
+          "setConstantFext",
+          [](siconos::modeling::NewtonEulerDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector3> v, siconos::algebra::AliasTag tag) {
+            self.setConstantFext(v, siconos::algebra::alias_t);
+          },
+          py::arg("fext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "Set constant external forces (alias).")
+
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {
@@ -1247,8 +1282,22 @@ void wrap_dynamical_systems(py::module_& m) {
                 });
           },
           "How to compute external forces")
-      .def("setConstantMext", &siconos::modeling::NewtonEulerDS::setConstantMext,
-           py::keep_alive<1, 2>(), "To define a constant external torques vector")
+      .def(
+          "setConstantMext",
+          [](siconos::modeling::NewtonEulerDS& self, const siconos::algebra::SiconosVector3& v,
+             siconos::algebra::CopyTag tag) {
+            self.setConstantMext(v, siconos::algebra::copy_t);
+          },
+          py::arg("mext"), py::arg("copy_t"), "Set constant external moment (copy).")
+
+      .def(
+          "setConstantMext",
+          [](siconos::modeling::NewtonEulerDS& self,
+             Eigen::Ref<siconos::algebra::SiconosVector3> v, siconos::algebra::AliasTag tag) {
+            self.setConstantMext(v, siconos::algebra::alias_t);
+          },
+          py::arg("mext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
+          "Set constant external moment (alias).")
       .def(
           "setComputeMextFunction",
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {

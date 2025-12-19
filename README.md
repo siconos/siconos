@@ -152,9 +152,7 @@ Siconos is currently distributed under Apache Licenses (v2).
 
 ### The archetypal example: "The bouncing ball"
 ```python
-from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem, MoreauJeanOSI,\
-TimeDiscretisation, LCP, TimeStepping
+import siconos.modeling as sm
 from numpy import eye, empty
 
 t0 = 0       # start time
@@ -173,7 +171,7 @@ mass = eye(3)  # mass matrix
 mass[2, 2] = 2. / 5 * r * r
 ball = LagrangianLinearTIDS(x, v, mass)
 weight_np = np.asarray([-m * g, 0, 0] )
-ball.setConstantFext(weight_np)
+ball.setConstantFext(weight_np, sm.alias_t)
 # Interaction ball-floor
 H = [[1, 0, 0]]
 nslaw = NewtonImpactNSL(e)

@@ -33,7 +33,7 @@ siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
-  setConstantMassCopy(newmass);
+  setConstantMass(newmass, siconos::algebra::copy_t);
 };
 
 siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
@@ -44,11 +44,11 @@ siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
-  setConstantMassAlias(newmass);
+  setConstantMass(newmass, siconos::algebra::alias_t);
 };
 
-void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrixAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrix(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for mass
@@ -60,8 +60,8 @@ void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrixAlias(
       std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
 }
 
-void siconos::modeling::LagrangianSparseLinearTIDS::setDampingMatrixAlias(
-    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+void siconos::modeling::LagrangianSparseLinearTIDS::setDampingMatrix(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for mass
