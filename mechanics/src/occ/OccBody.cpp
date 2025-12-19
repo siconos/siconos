@@ -30,7 +30,7 @@ siconos::mechanics::occ::OccBody::OccBody(Eigen::Ref<siconos::algebra::SiconosVe
                                           Eigen::Ref<siconos::algebra::SiconosVector> velocity,
                                           double mass,
                                           Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
-    : NewtonEulerDS(position, velocity, mass, inertia),
+    : NewtonEulerDS(position, velocity, mass, inertia, siconos::algebra::copy_t),
       _contactShapes(std::make_shared<ContactShape_vector>()),
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}
 

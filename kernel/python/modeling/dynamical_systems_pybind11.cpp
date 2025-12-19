@@ -1319,6 +1319,7 @@ void wrap_dynamical_systems(py::module_& m) {
            &siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame)
       .def_property_readonly("totalInertiaMatrix",
                              &siconos::modeling::NewtonEulerDS::totalInertiaMatrix,
-                             "total Inertia matrix");
-  ;
+                             "total Inertia matrix")
+      .def_property_readonly("fint", &siconos::modeling::NewtonEulerDS::wrench,
+                             "wrench vector");
 }
