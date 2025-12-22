@@ -327,7 +327,7 @@ class Body(Stored):
     def getMassValue(self):
         return self.handle().mass_matrix()[0]
 
-    def setConstantFext(self, fext):
+    def setConstantFext(self, fext, nargument=None):
         self.handle().set_fext(array(fext))
 
     def setFExtPtr(self, fext):
