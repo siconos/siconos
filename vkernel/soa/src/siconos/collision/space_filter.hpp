@@ -471,11 +471,9 @@ struct space_filter : item<> {
         }
         else {
           auto dl = storage::add<diskfsegment_r>(data);
-          auto segment = dl.segment();
-          segment.x1() = x1;
-          segment.x2() = x2;
-          segment.y1() = y1;
-          segment.y2() = y2;
+
+          // set segment pointer toward body2
+          dl.segment() = segment;
 
           inter.relation() = dl;
           relmap[{x1, x2, y1, y2}] = dl;
@@ -516,8 +514,9 @@ struct space_filter : item<> {
         }
         else {
           auto dfd = storage::add<diskfdisk_r>(data);
-          auto tds = dfd.translated_disk_shape();
-          tds.translation() = translat;
+
+          // set disk pointer toward body2
+          dfd.translated_disk_shape() = fdisk;
 
           inter.relation() = dfd;
           diskfdisks[coefs] = dfd;

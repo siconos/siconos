@@ -91,12 +91,8 @@ struct point<Item> {
 
     void update(auto step)
     {
-      if constexpr (std::derived_from<Item, translated<shape::disk>>) {
-        coord() = item().translated().point_coord(point_index());
-      }
-      else {
-        coord() = item().point_coord(point_index());
-      };
+      // associated to static shapes for the moment
+      // coord() = item().point_coord(point_index());
     }
   };
 };
