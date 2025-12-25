@@ -10,6 +10,25 @@ PYBIND11_MODULE(_nonos, m)
   // sub module disks
   auto disks = m.def_submodule("disks");
 
+  disks.doc() = R"pbdoc(
+        Nonos m
+        -----------
+
+        .. currentmodule:: nonos
+
+        .. autosummary::
+           :toctree: _generate
+
+           add
+           subtract
+    )pbdoc";
+
+  disks.def("make_storage", &siconos::python::disks::make_storage,
+            py::return_value_policy::reference,
+            R"pbdoc(
+        Create a new data object for 2D disks simulation
+    )pbdoc");
+
   auto data_class =
       py::class_<siconos::python::disks::data_t>(disks, "data_t");
 
@@ -68,7 +87,7 @@ PYBIND11_MODULE(_nonos, m)
   });
 
   // attached storage
-  ground::for_each(pyhandles, [](auto pyhandle) {
+  ground::for_each(pyhandles, [&disks](auto pyhandle) {
     using handle_t = typename decltype(+pyhandle[2_c])::type;
     using item_t = typename handle_t::type;
 
@@ -101,12 +120,6 @@ PYBIND11_MODULE(_nonos, m)
                      });
           });
     }
-  });
-
-  // attributes
-  ground::for_each(pyhandles, [](auto pyhandle) {
-    using handle_t = typename decltype(+pyhandle[2_c])::type;
-    //    using item_t = typename handle_t::type;
 
     if constexpr (!match::without_attributes_bindings<
                       typename handle_t::type>) {
@@ -149,11 +162,7 @@ PYBIND11_MODULE(_nonos, m)
                      });
           });
     }
-  });
 
-  // methods
-  ground::for_each(pyhandles, [](auto pyhandle) {
-    using handle_t = typename decltype(+pyhandle[2_c])::type;
     //    using item_t = typename handle_t::type;
     ground::fold_left(storage::methods(pyhandle[2_c]),  // all methods
                       std::ref(pyhandle[1_c]),          // initial state
@@ -162,30 +171,7 @@ PYBIND11_MODULE(_nonos, m)
                                       pattern::method_def(m),
                                       py::return_value_policy::reference);
                       });
-  });
 
-  disks.doc() = R"pbdoc(
-        Nonos m
-        -----------
-
-        .. currentmodule:: nonos
-
-        .. autosummary::
-           :toctree: _generate
-
-           add
-           subtract
-    )pbdoc";
-
-  disks.def("make_storage", &siconos::python::disks::make_storage,
-            py::return_value_policy::reference,
-            R"pbdoc(
-        Create a new data object for 2D disks simulation
-    )pbdoc");
-
-  ground::for_each(pyhandles, [&disks](auto pyhandle) {
-    using handle_t = typename decltype(+pyhandle[2_c])::type;
-    using item_t = typename handle_t::type;
     auto item_name = storage::bind_name<item_t, disks_properties_t>();
 
     disks.def(
