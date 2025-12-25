@@ -10,7 +10,7 @@ timer_args=""
 python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
 python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:4], "site-packages"))'`
 venv=${VRUN_VENV:-venv}
-VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain@18}
+VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain@21.1}
 VRUN_GUIX_BASE_DIR=${VRUN_GUIX_BASE_DIR:-`pwd`}
 case $VRUN_SETX in 1) set -x;; esac
 while [ $# -gt 0 ]; do
@@ -64,7 +64,6 @@ while [ $# -gt 0 ]; do
       cat>${VRUN_GUIX_BASE_DIR}/.siconos-disks-manifest.scm<<EOF
 (specifications->manifest
  '(
- "$VRUN_GUIX_CXX_TOOLCHAIN"
  "bash"
  "cuda-toolkit"
  "fclib"
@@ -166,6 +165,7 @@ EOF
            --root=${VRUN_GUIX_BASE_DIR}/.siconos-guix-profile \
            -m ${VRUN_GUIX_BASE_DIR}/.siconos-disks-manifest.scm \
            -D siconos \
+           ${VRUN_GUIX_CXX_TOOLCHAIN} \
            --with-git-url=fclib=https://github.com/FrictionalContactLibrary/fclib \
            ${VRUN_PACKAGES} \
            -- $0 "$@"
