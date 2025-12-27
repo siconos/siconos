@@ -46,7 +46,7 @@ using pattern::wrap;
 // composite view of attributes and interfaces of 2 items
 // properties attached to items are lost
 template <typename Item1, typename Item2>
-struct composite_item : item<> {
+struct composite_item : item {
   using items = gather<Item1, Item2>;
 
   using attributes =

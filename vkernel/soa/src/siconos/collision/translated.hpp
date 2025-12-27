@@ -7,7 +7,7 @@
 namespace siconos::collision {
 
 template <match::item Item>
-struct translated : item<> {
+struct translated : item {
   using item_t = Item;
 
   using attributes =

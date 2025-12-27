@@ -6,7 +6,7 @@
 
 namespace siconos::collision {
 
-struct diskline_r : item<>, model::relation1, model::any_lagrangian_relation {
+struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
   using attributes = gather<attribute<"line", some::item_ref<shape::line>>>;
 
   template <typename Handle>

@@ -11,7 +11,7 @@ namespace siconos::model {
  * to its configuration, velocity, mass matrix, and external forces.
  */
 struct lagrangian_ds
-    : item<description<"A lagrangian dynamical system [...]">> {
+    : item {
   using dof =
       some::indice_parameter<"dof">; /**< Degree of freedom parameter. */
 
@@ -80,7 +80,7 @@ struct lagrangian_ds
  * This struct provides an alternative representation of a Lagrangian
  * dynamical system with unbounded attributes.
  */
-struct rt_lagrangian_ds : item<> {
+struct rt_lagrangian_ds : item {
   using without_attached_storages_bindings =
       void; /**< No attached storage bindings. */
 

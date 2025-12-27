@@ -99,7 +99,7 @@ struct nonsmooth_problem : storage::data_holder<Formulation> {
   };
 };
 
-struct trace_params : item<> {
+struct trace_params : item {
   using attributes =
       gather<attribute<"maxiter", some::indice>,
              attribute<"counter", some::indice>,
@@ -123,7 +123,7 @@ struct trace_params : item<> {
 };
 
 template <typename NonsmoothProblem>
-struct one_step_nonsmooth_problem : item<> {
+struct one_step_nonsmooth_problem : item {
   using problem_t = NonsmoothProblem;
   using attributes =
       gather<attribute<"level", some::indice>,

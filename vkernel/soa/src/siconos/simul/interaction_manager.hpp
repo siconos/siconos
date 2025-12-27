@@ -5,7 +5,7 @@
 namespace siconos::simul {
 
 template <typename SpaceFilter>
-struct interaction_manager : item<> {
+struct interaction_manager : item {
   using space_filter = SpaceFilter;
   using nslaw = typename space_filter::nslaw;
 

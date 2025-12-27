@@ -6,7 +6,7 @@
 
 namespace siconos::collision::shape {
 
-struct line : item<> {
+struct line : item {
   // a*x + b*y + c = 0
   using attributes = gather<
       attribute<"a", some::scalar>, attribute<"b", some::scalar>,

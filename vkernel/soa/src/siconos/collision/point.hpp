@@ -15,7 +15,7 @@ namespace siconos::collision {
 // A point linked to an item (a dynamical system or a shape),
 // by default is not defined.
 template <match::item Item>
-struct point : item<> {
+struct point : item {
   static_assert(always_false<Item>, "point is not defined for this type");
 };
 
@@ -23,7 +23,7 @@ struct point : item<> {
 // the coordinates of the system.
 template <match::item Item>
   requires std::derived_from<Item, model::lagrangian_ds>
-struct point<Item> : item<> {
+struct point<Item> : item {
   using items = gather<Item>;
 
   using item_t = Item;

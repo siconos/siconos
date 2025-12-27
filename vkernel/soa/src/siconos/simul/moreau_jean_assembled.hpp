@@ -5,7 +5,7 @@
 
 namespace siconos::simul {
 
-struct moreau_jean_assembled : item<> {
+struct moreau_jean_assembled : item {
   using size_1_t = some::indice_value<1>;
 
   using attributes = gather<

@@ -33,7 +33,7 @@ using namespace storage::pattern;
 struct aaa {
   int v = 1;
 };
-struct bbb : item<> {
+struct bbb : item {
   struct attr : some::specific<pointer<aaa>>, siconos::access<attr> {};
   using attributes = gather<attr>;
   template <typename H>
@@ -64,7 +64,7 @@ static_assert(
         attribute<"attr0", some::matrix<some::scalar, some::indice_value<1>,
                                         some::indice_value<1>>>>);
 
-struct item0 : item<> {
+struct item0 : item {
   using attributes = gather<
       attribute<"attr0", some::matrix<some::scalar, some::indice_value<1>,
                                       some::indice_value<1>>>>;

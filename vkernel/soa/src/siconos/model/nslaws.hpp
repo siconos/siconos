@@ -6,7 +6,7 @@ namespace siconos::model {
 struct equality_condition {};
 struct relay {};
 
-struct newton_impact_friction : item<> {
+struct newton_impact_friction : item {
 
   static constexpr auto size = 2;
 
@@ -21,7 +21,7 @@ struct newton_impact_friction : item<> {
   };
 };
 
-struct newton_impact : item<> {
+struct newton_impact : item {
   static constexpr auto size = 1;
   using attributes = gather<attribute<"e", some::scalar>>;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace siconos::collision::shape {
-struct disk : item<> {
+struct disk : item {
 
   using attributes = gather<attribute<"radius", some::scalar>,
                             attribute<"maxpoints", some::indice>>;

@@ -57,7 +57,7 @@ struct hash<siconos::storage::ground::pair<First, Second>> {
 namespace siconos::collision {
 
 template <typename Topology, typename Neighborhood>
-struct space_filter : item<> {
+struct space_filter : item {
   using items = gather<Topology, Neighborhood>;
   using topology = Topology;
   using dynamical_system = typename topology::fixed_dof_system;

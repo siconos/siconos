@@ -22,7 +22,7 @@ struct one_step_integrator {
   using ct_system = typename Topology::fixed_dof_system;
   using rt_system = typename Topology::dynamic_dof_system;
 
-  struct moreau_jean : item<> {
+  struct moreau_jean : item {
     using topology = Topology;
 
     using systems_t = gather<ct_system, rt_system>;

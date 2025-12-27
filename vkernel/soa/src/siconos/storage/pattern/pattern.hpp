@@ -275,13 +275,11 @@ struct frame {
           })
           .value;
 };
-template <typename... Args>
+
 struct item {
   using item_t = void;
 
-  using args = gather<Args...>;
-  using attributes = decltype(ground::filter(
-      args{}, ground::derive_from<some::attribute<>>));
+  using attributes = gather<>;
 
   template <typename H>
   struct interface {
@@ -294,8 +292,6 @@ struct item {
   template <typename T>
   using methods = gather<>;
 
-  friend auto operator<=>(const item<Args...>&,
-                          const item<Args...>&) = default;
 };
 
 struct any_wrapper {};
@@ -638,6 +634,6 @@ concept without_attached_storages_bindings =
 
 }  // namespace match
 
-struct empty_item : item<> {};
+struct empty_item : item {};
 
 }  // namespace siconos::storage::pattern

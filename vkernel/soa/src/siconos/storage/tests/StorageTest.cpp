@@ -19,11 +19,11 @@ namespace siconos::config {
 using namespace siconos::storage;
 using namespace siconos::storage::pattern;
 
-struct item_a : item<> {
+struct item_a : item {
   using attributes = gather<attribute<"value", some::scalar>>;
 };
 
-struct item_b : item<> {
+struct item_b : item {
   using attributes = gather<attribute<"ref", some::item_ref<item_a>>>;
 
   template <typename Handle>

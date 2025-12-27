@@ -9,7 +9,7 @@ namespace siconos::collision {
 
 // disk fixed disk
 
-struct diskfdisk_r : item<>,
+struct diskfdisk_r : item,
                      model::relation1,
                      model::any_lagrangian_relation {
   using attributes =

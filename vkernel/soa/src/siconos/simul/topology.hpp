@@ -9,7 +9,7 @@ namespace siconos::simul {
 template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
           typename DynamicDofInteraction = empty_item>
-struct topology : item<> {
+struct topology : item {
   using items = gather<FixedDofDynamicalSystem, FixedDofInteraction,
                        DynamicDofDynamicalSystem, DynamicDofInteraction>;
 

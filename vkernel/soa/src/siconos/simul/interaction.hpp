@@ -5,7 +5,7 @@
 namespace siconos::simul {
 
 template <match::item Nslaw, match::item... Relations>
-struct interaction : item<> {
+struct interaction : item {
   using nslaw = Nslaw;
   using relations = gather<Relations...>;
 
@@ -40,7 +40,7 @@ struct interaction : item<> {
 
 /* runtime interaction */
 template <match::item Nslaw, match::item... Relations>
-struct rt_interaction : item<> {
+struct rt_interaction : item {
   using nslaw = Nslaw;
   using relations = gather<Relations...>;
 

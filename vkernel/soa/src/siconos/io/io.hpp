@@ -19,7 +19,7 @@ using namespace storage;
 using namespace storage::pattern;
 
 template <typename Osi, typename... ContactShapes>
-struct io : item<> {
+struct io : item {
   using osi = Osi;
   /* /!\ only system sizes defined at compile time and 2D for the moment */
   using system = nth_t<0, typename osi::systems_t>;

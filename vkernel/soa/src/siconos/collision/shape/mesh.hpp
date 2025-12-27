@@ -6,7 +6,7 @@
 
 namespace siconos::collision::shape {
 
-struct mesh : item<> {
+struct mesh : item {
 
   using items = gather<chained_segment>;
 

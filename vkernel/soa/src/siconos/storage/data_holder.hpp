@@ -7,7 +7,7 @@ namespace siconos::storage {
 
 
 template <typename Struct>
-struct data_holder : item<> {
+struct data_holder : item {
   using attributes =
       gather<attribute<"instance", some::specific<pointer<Struct>>>>;
 

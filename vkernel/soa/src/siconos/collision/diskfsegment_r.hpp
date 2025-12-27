@@ -8,7 +8,7 @@ namespace siconos::collision {
 
 // disk fixed segment
 
-struct diskfsegment_r : item<>,
+struct diskfsegment_r : item,
                         model::relation1,
                         model::any_lagrangian_relation {
   using attributes =

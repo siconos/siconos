@@ -5,7 +5,7 @@
 namespace siconos::simul {
 
 template <typename... Params>
-struct time_discretization : item<> {
+struct time_discretization : item {
   using attributes =
       gather<attribute<"h", some::scalar>, attribute<"t0", some::scalar>,
              attribute<"tmax", some::scalar>,

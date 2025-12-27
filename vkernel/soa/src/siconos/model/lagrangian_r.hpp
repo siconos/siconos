@@ -20,7 +20,7 @@ concept relation2 = match::handle<T, model::relation2>;
 namespace siconos::model {
 
 template <auto NSLSize>
-struct lagrangian_r : item<>,
+struct lagrangian_r : item,
                       linear,
                       relation1,
                       relation2,

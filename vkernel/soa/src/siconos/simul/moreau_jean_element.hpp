@@ -8,7 +8,7 @@
 
 namespace siconos::simul {
 template <typename System, typename Inter, typename OsiAssembled>
-struct moreau_jean_element : item<> {
+struct moreau_jean_element : item {
   using system = System;
   using interaction = Inter;
   using osi_assembled_t = OsiAssembled;

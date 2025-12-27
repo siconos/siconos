@@ -64,7 +64,7 @@ struct refine_with_type : A {
 };
 
 template <match::property... Parts>
-struct with_properties : item<> {
+struct with_properties : item {
   using properties = gather<Parts...>;
 };
 

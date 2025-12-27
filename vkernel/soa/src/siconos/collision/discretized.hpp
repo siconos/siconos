@@ -7,7 +7,7 @@
 
 namespace siconos::collision {
 
-struct discretization : item<> {
+struct discretization : item {
   using attributes = gather<attribute<"maxpoints", some::scalar>>;
 
   template <typename Handle>

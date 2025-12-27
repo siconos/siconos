@@ -6,7 +6,7 @@
 
 namespace siconos::collision::shape {
 
-struct segment_base : item<> {
+struct segment_base : item {
   using indice_t = std::size_t;
   template <typename T>
   using vector_t = algebra::vector<T, 6>;
