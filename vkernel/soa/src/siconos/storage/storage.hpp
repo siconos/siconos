@@ -34,11 +34,11 @@ static auto apply_fun = []<typename Item, typename SomeFun>(
   }
 };
 
-template <match::item T>
-static constexpr void for_each_attribute(T)
-{
-  return ground::compose(ground::for_each, attributes)(T{});
-};
+// template <match::item T>
+// static constexpr void for_each_attribute(T)
+// {
+//   return ground::compose(ground::for_each, attributes)(T{});
+// };
 
 using pattern::attr_t;
 using pattern::wrap;
