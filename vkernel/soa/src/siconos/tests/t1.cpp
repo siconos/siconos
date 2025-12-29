@@ -13,9 +13,9 @@ using namespace siconos;
 
 using env = standard_environment<config::params>;
 
+#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
-#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/storage/ground/ground.hpp"
@@ -282,8 +282,9 @@ struct is_polymorhic : std::integral_constant<bool, []() {
   return match::polymorphic_type<T>;
 }()> {};
 
-static_assert(match::relation1<storage::handle<storage::handle_base,
-                  relation, int, decltype(storage::make<env, relation>())>>);
+static_assert(match::relation1<
+              storage::handle<storage::handle_base, relation, int,
+                              decltype(storage::make<env, relation>())>>);
 
 //  {
 static_assert(std::is_same_v<decltype(all_items(nslaw{})),
@@ -291,7 +292,8 @@ static_assert(std::is_same_v<decltype(all_items(nslaw{})),
 
 static_assert(
     std::derived_from<std::decay_t<decltype(ground::filter(
-                          typename interaction::attributes{},
+                          storage::pattern::struct_to_gather<
+                              typename interaction::attributes>{},
                           ground::compose(ground::trait<is_polymorhic>,
                                           ground::typeid_))[0_c])>,
                       some::polymorphic_attribute<some::item_ref<relation>>>);

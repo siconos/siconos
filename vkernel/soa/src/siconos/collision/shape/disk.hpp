@@ -3,8 +3,10 @@
 namespace siconos::collision::shape {
 struct disk : item {
 
-  using attributes = gather<attribute<"radius", some::scalar>,
-                            attribute<"maxpoints", some::indice>>;
+  struct attributes {
+    some::scalar radius;
+    some::indice maxpoints;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

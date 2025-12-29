@@ -12,15 +12,15 @@ struct interaction : item {
   using dof = some::indice_parameter<"dof">;
   using nslaw_size = some::indice_value<nslaw::size>;
 
-  using attributes = gather<
-      attribute<"relation",
-                some::polymorphic_attribute<some::item_ref<Relations>...>>,
-      attribute<"nslaw", some::item_ref<nslaw>>,
-      attribute<"h_matrix1", some::matrix<some::scalar, nslaw_size, dof>>,
-      attribute<"h_matrix2", some::matrix<some::scalar, nslaw_size, dof>>,
-      attribute<"lambda", some::vector<some::scalar, nslaw_size>>,
-      attribute<"y", some::vector<some::scalar, nslaw_size>>,
-      attribute<"ydot", some::vector<some::scalar, nslaw_size>>>;
+  struct attributes {
+    some::polymorphic_attribute<some::item_ref<Relations>...> relation;
+    some::item_ref<nslaw> nslaw;
+    some::matrix<some::scalar, nslaw_size, dof> h_matrix1;
+    some::matrix<some::scalar, nslaw_size, dof> h_matrix2;
+    some::vector<some::scalar, nslaw_size> lambda;
+    some::vector<some::scalar, nslaw_size> y;
+    some::vector<some::scalar, nslaw_size> ydot;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

@@ -6,6 +6,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "boost/pfr.hpp"
+#include "boost/pfr/core_name.hpp"
 #include "siconos/storage/ground/ground.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
@@ -291,7 +293,6 @@ struct item {
 
   template <typename T>
   using methods = gather<>;
-
 };
 
 struct any_wrapper {};
@@ -327,9 +328,61 @@ concept vertex_item_t = requires(T t) {
 };
 }  // namespace concepts
 
+// Helper to build compile-time string from string_view
+template <std::size_t N>
+consteval auto string_view_to_fixed_string(std::string_view sv)
+{
+  string_literal<N> fs{""};
+  for (std::size_t i = 0; i < N; ++i) {
+    fs.value[i] = sv[i];
+  }
+  fs.value[N - 1] = '\0';
+  return fs;
+}
+
+// Symbol type that stores PFR field name
+template <typename T, std::size_t I>
+struct pfr_symbol {
+  static constexpr std::string_view name = boost::pfr::get_name<I, T>();
+  // Convert to string_literal for compatibility
+  static constexpr auto literal = [] {
+    constexpr auto sv = name;
+    constexpr std::size_t len = sv.size();
+    // Build string_literal from constituent chars
+    char arr[len + 1];
+    for (std::size_t idx = 0; idx < len; ++idx) {
+      arr[idx] = sv[idx];
+    }
+    arr[len] = '\0';
+    return string_literal<len + 1>(arr);
+  }();
+  using symbol_type = text<literal>;
+};
+
 // rename to attr_name ? (cf with_name)
 template <string_literal Name, match::attribute A>
 struct attribute : A, symbol<Name> {};
+
+// Generate attribute from PFR field
+namespace detail {
+template <typename AttrStruct, std::size_t I>
+struct pfr_field_attr {
+  using field_type = boost::pfr::tuple_element_t<I, AttrStruct>;
+  using symbol_info = pfr_symbol<AttrStruct, I>;
+
+  // Create attribute with compile-time name from PFR
+  using attribute_type =
+      attribute<symbol_info::literal, field_type>;
+};
+}  // namespace detail
+
+// Convert entire struct to gather<>
+template <typename AttrStruct>
+using struct_to_gather =
+    decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+      return gather<
+        typename detail::pfr_field_attr<AttrStruct, Is>::attribute_type...>{};
+    }(std::make_index_sequence<boost::pfr::tuple_size_v<AttrStruct>>{}));
 
 // association for non nested type (should be the default now)
 template <match::item Item, match::attribute A>
@@ -390,15 +443,19 @@ static constexpr decltype(auto) named_attribute_maybe(Item, A)
   }
 }
 
+// Modified attributes function with dual support
 static auto attributes =
     []<match::item Item>(Item) constexpr -> decltype(auto) {
-  if constexpr (match::attributes<Item>) {
+  if constexpr (std::is_aggregate_v<typename Item::attributes>) {
+    // New way: reflect from struct
+    return struct_to_gather<typename Item::attributes>{};
+  } else if constexpr (match::attributes<Item>) {
+    // Old way: explicit tuple
     return ground::transform(typename Item::attributes{},
                              []<match::attribute A>(A) {
                                return named_attribute_maybe(Item{}, A{});
                              });
-  }
-  else {
+  } else {
     return gather<>{};
   }
 };
