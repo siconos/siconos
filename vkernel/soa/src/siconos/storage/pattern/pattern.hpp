@@ -8,18 +8,18 @@
 
 #include "boost/pfr.hpp"
 #include "boost/pfr/core_name.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/some/some.hpp"
 
 namespace siconos::storage::pattern {
 
-using ground::append;
-using ground::concat;
-using ground::flatten;
+using mp::append;
+using mp::concat;
+using mp::flatten;
 // namespace some = storage::some;
-// namespace ground = storage::ground;
+// namespace ground = storage::mp;
 
 // let rec
 // https://stackoverflow.com/questions/2067988/recursive-lambda-functions-in-c11
@@ -62,7 +62,7 @@ static auto compose = [](auto&& f, auto&& g) constexpr -> decltype(auto) {
 };
 
 static auto car = []<typename Tpl>(Tpl tpl) constexpr {
-  static_assert(ground::size(Tpl{}) > ground::size_c<0_c>);
+  static_assert(mp::size(Tpl{}) > mp::size_c<0_c>);
   return tpl[0_c];
 };
 
@@ -70,16 +70,16 @@ static auto car = []<typename Tpl>(Tpl tpl) constexpr {
 // int>);
 
 static auto cdr =
-    []<typename A0, typename... As>(ground::tuple<A0, As...> tpl) constexpr {
-      return ground::drop_front(tpl, ground::size_c<1_c>);
+    []<typename A0, typename... As>(mp::tuple<A0, As...> tpl) constexpr {
+      return mp::drop_front(tpl, mp::size_c<1_c>);
     };
 
 // static_assert(std::is_same_v<decltype(cdr(gather<int, float, char>{})),
 //                              gather<float, char>>);
 
 static auto cons = []<typename A, typename... As>(
-                       A a, ground::tuple<As...> tpl) constexpr {
-  return ground::insert(tpl, 0_c, a);
+                       A a, mp::tuple<As...> tpl) constexpr {
+  return mp::insert(tpl, 0_c, a);
 };
 
 template <typename T, typename Tpl>
@@ -108,7 +108,7 @@ using cons_x = decltype(cons(T{}, Tpl{}));
 //   }
 // };
 
-using ground::transform;
+using mp::transform;
 
 // template <typename F>
 // static auto filter = []<typename Tpl>(const Tpl tpl) constexpr {
@@ -238,7 +238,7 @@ template <typename T, typename K>
 concept property_of = property<T> && property<K> && std::derived_from<T, K>;
 
 template <typename T, typename Ks>
-concept any_of_property = ground::any_of(
+concept any_of_property = mp::any_of(
     Ks{}, []<match::property K>(K) { return std::derived_from<T, K>; });
 
 }  // namespace match
@@ -270,7 +270,7 @@ struct frame {
   using args = gather<Args...>;
 
   static constexpr std::size_t dof =
-      ground::find_if(args{},
+      mp::find_if(args{},
                       []<typename T>(T) { return degrees_of_freedom_p<T>{}; })
           .value_or([]<bool flag = false>() {
             static_assert(flag, "need some dof");
@@ -405,7 +405,7 @@ namespace must {
 
 template <typename T, typename Tpl>
 concept contains_similar_attribute =
-    ground::any_of(Tpl{}, []<match::attribute A>(A) -> bool {
+    mp::any_of(Tpl{}, []<match::attribute A>(A) -> bool {
       if constexpr (match::paired<A> && match::paired<T>) {
         return std::derived_from<typename T::item, typename A::item> ||
                std::derived_from<typename A::item, typename T::item>;
@@ -451,7 +451,7 @@ static auto attributes =
     return struct_to_gather<typename Item::attributes>{};
   } else if constexpr (match::attributes<Item>) {
     // Old way: explicit tuple
-    return ground::transform(typename Item::attributes{},
+    return mp::transform(typename Item::attributes{},
                              []<match::attribute A>(A) {
                                return named_attribute_maybe(Item{}, A{});
                              });
@@ -461,12 +461,12 @@ static auto attributes =
 };
 
 template <typename Attrs, string_literal S>
-using get_attr_t = std::decay_t<decltype(ground::filter(
-    Attrs{}, ground::derive_from<symbol<S>>)[0_c])>;
+using get_attr_t = std::decay_t<decltype(mp::filter(
+    Attrs{}, mp::derive_from<symbol<S>>)[0_c])>;
 
 template <match::item Item, string_literal S>
-using attr_t = std::decay_t<decltype(ground::filter(
-    attributes(Item{}), ground::derive_from<symbol<S>>)[0_c])>;
+using attr_t = std::decay_t<decltype(mp::filter(
+    attributes(Item{}), mp::derive_from<symbol<S>>)[0_c])>;
 
 static auto properties =
     []<match::item Item>(Item) constexpr -> decltype(auto) {
@@ -478,11 +478,11 @@ static auto properties =
   }
 };
 
-static auto is_a_ref = ground::is_a_model<[]<typename T>() consteval {
+static auto is_a_ref = mp::is_a_model<[]<typename T>() consteval {
   return match::item_ref<T>;
 }>;
 
-static auto is_a_poly_ref = ground::is_a_model<[]<typename T>() consteval {
+static auto is_a_poly_ref = mp::is_a_model<[]<typename T>() consteval {
   return match::polymorphic_type<T>;
 }>;
 
@@ -491,7 +491,7 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
 
   auto items_ref = [&root_item]() {
     if constexpr (match::attributes<type_t>) {
-      return transform(ground::filter(attributes(root_item), is_a_ref),
+      return transform(mp::filter(attributes(root_item), is_a_ref),
                        []<typename T>(T) { return typename T::type{}; });
     }
     else {
@@ -503,7 +503,7 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
     if constexpr (match::attributes<type_t>) {
       return transform(
           flatten(
-              transform(ground::filter(attributes(root_item), is_a_poly_ref),
+              transform(mp::filter(attributes(root_item), is_a_poly_ref),
                         []<typename T>(T) { return typename T::type{}; })),
           []<typename T>(T) { return typename T::type{}; });
     }
@@ -525,13 +525,13 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
 });
 
 static auto all_attributes = []<match::item Item>(Item) constexpr {
-  return ground::tuple_unique(
-      ground::concat_all(transform(all_items(Item{}), attributes)));
+  return mp::tuple_unique(
+      mp::concat_all(transform(all_items(Item{}), attributes)));
 };
 
 static auto all_properties = []<match::item Item>(Item) constexpr {
-  return ground::tuple_unique(
-      ground::concat_all(transform(all_items(Item{}), properties)));
+  return mp::tuple_unique(
+      mp::concat_all(transform(all_items(Item{}), properties)));
 };
 
 //  template<typename K>
@@ -577,12 +577,12 @@ using attributes = gather<Attrs...>;
 
 template <match::item... Items>
 using properties_of_items =
-    decltype(ground::concat_all(typename Items::properties{}...));
+    decltype(mp::concat_all(typename Items::properties{}...));
 
 }  // namespace types
 
 template <match::item... Items>
-using attributes_of_items = decltype(ground::concat_all(
+using attributes_of_items = decltype(mp::concat_all(
     siconos::storage::pattern::attributes(Items{})...));
 
 template <string_literal S>
@@ -617,7 +617,7 @@ static auto item_attribute = [](auto items) constexpr {
     else if constexpr (match::attached_storage<Attr, item_t>) {
       return item_t{};
     }
-    else if constexpr (ground::size(tpl_t{}) > ground::size_c<1>) {
+    else if constexpr (mp::size(tpl_t{}) > mp::size_c<1>) {
       return loop(cdr(tpl));
     }
     else {

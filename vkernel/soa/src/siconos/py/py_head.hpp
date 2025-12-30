@@ -21,7 +21,7 @@
 #include "siconos/collision/translated.hpp"
 #include "siconos/io/io.hpp"
 #include "siconos/siconos.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
 
@@ -166,7 +166,7 @@ struct data_t {
 
 }  // namespace siconos::python::disks
 
-namespace ground = siconos::storage::ground;
+namespace ground = siconos::storage::mp;
 namespace match = siconos::storage::pattern::match;
 template <typename H, typename T>
 static decltype(auto) out_formatter(H h, T&& out_value)

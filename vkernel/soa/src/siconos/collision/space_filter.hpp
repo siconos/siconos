@@ -43,12 +43,12 @@ struct hash<std::array<T, 4>> {
 };
 
 template <typename First, typename Second>
-struct hash<siconos::storage::ground::pair<First, Second>> {
+struct hash<siconos::storage::mp::pair<First, Second>> {
   size_t operator()(
-      const siconos::storage::ground::pair<First, Second>& p) const noexcept
+      const siconos::storage::mp::pair<First, Second>& p) const noexcept
   {
-    size_t h1 = std::hash<First>{}(siconos::storage::ground::first(p));
-    size_t h2 = std::hash<Second>{}(siconos::storage::ground::second(p));
+    size_t h1 = std::hash<First>{}(siconos::storage::mp::first(p));
+    size_t h2 = std::hash<Second>{}(siconos::storage::mp::second(p));
     return h1 ^ (h2 << 1);
   }
 };
@@ -128,7 +128,7 @@ struct space_filter : item {
 
     //   auto& data = self()->data();
 
-    //   ground::for_each(points_t{}, []<typename Point>(Point) {
+    //   mp::for_each(points_t{}, []<typename Point>(Point) {
     //     using item_t = typename Point::item_t;
     //     auto& item_handles = storage::handles<item_t>(data);
 
@@ -176,11 +176,11 @@ struct space_filter : item {
       auto& points_coords =
           storage::attr_values<point_t, "coord">(data, step);
 
-      auto ps_indx = ground::index_of<point_t>(ground::std_tuple(points_t{}));
+      auto ps_indx = mp::index_of<point_t>(mp::std_tuple(points_t{}));
 
-      // ground::index_if(
+      // mp::index_if(
       //   points_t{},
-      //   ground::equal.to(collision::point<item_t>));
+      //   mp::equal.to(collision::point<item_t>));
 
       // first remove item
       storage::remove(data, item_handle);
@@ -250,7 +250,7 @@ struct space_filter : item {
 
       using points_t = typename neighborhood::points_t;
 
-      ground::for_each(points_t{}, [&]<typename Point>(Point) {
+      mp::for_each(points_t{}, [&]<typename Point>(Point) {
         using item_t = typename Point::item_t;
 
         if constexpr (std::derived_from<item_t, model::lagrangian_ds>) {
@@ -319,10 +319,10 @@ struct space_filter : item {
       auto i1 = ids1.value();
       auto i2 = ids2.value();
       if (i1 < i2) {
-        return ground::make_pair(i1, i2);
+        return mp::make_pair(i1, i2);
       }
       else {
-        return ground::make_pair(i2, i1);
+        return mp::make_pair(i2, i1);
       }
     }
 
@@ -340,7 +340,7 @@ struct space_filter : item {
         else {
           siconos::variant::visit(
               data, inter.relation(),
-              ground::overload(
+              mp::overload(
                   // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
                   // capture by value ok with handles
                   [&, ds1 = ds1,
@@ -349,7 +349,7 @@ struct space_filter : item {
                     auto segment = rel.segment();
                     auto coefs = std::array{segment.x1(), segment.x2(),
                                             segment.y1(), segment.y2()};
-                    ds_segment_prox[ground::make_pair(ds1.value(), coefs)] =
+                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] =
                         inter;
                   },
                   [&, ds1 = ds1,
@@ -358,7 +358,7 @@ struct space_filter : item {
                     auto fdisk = rel.translated_disk_shape();
                     auto& translat = fdisk.translation();
                     auto coefs = std::array{translat[0], translat[1]};
-                    ds_fdisk_prox[ground::make_pair(ds1.value(), coefs)] =
+                    ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] =
                         inter;
                   },
                   []<bool flag = false>(auto) {
@@ -446,7 +446,7 @@ struct space_filter : item {
       auto& ds1 = body1;
 
       auto find_inter = intermap.find(
-          ground::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
+          mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
 
       if (find_inter != intermap.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
@@ -479,7 +479,7 @@ struct space_filter : item {
           relmap[{x1, x2, y1, y2}] = dl;
         }
         storage::prop<"activation">(inter) = true;
-        intermap[ground::make_pair(ds1.index().value(),
+        intermap[mp::make_pair(ds1.index().value(),
                                    std::array{x1, x2, y1, y2})] = inter;
       }
     }
@@ -498,7 +498,7 @@ struct space_filter : item {
       auto& ds1 = body1;
 
       auto find_inter =
-          ds_fdisk_prox.find(ground::make_pair(ds1.index().value(), coefs));
+          ds_fdisk_prox.find(mp::make_pair(ds1.index().value(), coefs));
 
       if (find_inter != ds_fdisk_prox.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
@@ -522,7 +522,7 @@ struct space_filter : item {
           diskfdisks[coefs] = dfd;
         }
         storage::prop<"activation">(inter) = true;
-        ds_fdisk_prox[ground::make_pair(ds1.index().value(), coefs)] = inter;
+        ds_fdisk_prox[mp::make_pair(ds1.index().value(), coefs)] = inter;
       }
     }
 
@@ -560,13 +560,13 @@ struct space_filter : item {
           else {
             siconos::variant::visit(
                 data, inter.relation(),
-                ground::overload(
+                mp::overload(
                     [&]<match::handle<diskfsegment_r> DiskSegmentR>(
                         DiskSegmentR rel) {
                       auto segment = rel.segment();
                       auto coefs = std::array{segment.x1(), segment.x2(),
                                               segment.y1(), segment.y2()};
-                      auto finter = ds_segment_prox.find(ground::make_pair(
+                      auto finter = ds_segment_prox.find(mp::make_pair(
                           storage::prop<"ds1">(inter).value(), coefs));
                       ds_segment_prox.erase(finter);
                     },
@@ -575,7 +575,7 @@ struct space_filter : item {
                       auto& translat =
                           rel.translated_disk_shape().translation();
                       auto coefs = std::array{translat[0], translat[1]};
-                      auto finter = ds_fdisk_prox.find(ground::make_pair(
+                      auto finter = ds_fdisk_prox.find(mp::make_pair(
                           storage::prop<"ds1">(inter).value(), coefs));
                       ds_fdisk_prox.erase(finter);
                     },
@@ -641,15 +641,15 @@ struct space_filter : item {
       using scalar = typename env::scalar;
 
       using map_ds_ds_prox_t =
-          typename env::template map<ground::pair<indice, indice>,
+          typename env::template map<mp::pair<indice, indice>,
                                      storage::index<interaction, indice>>;
 
       using map_ds_segment_prox_t = typename env::template map<
-          ground::pair<indice, std::array<scalar, 4>>,
+          mp::pair<indice, std::array<scalar, 4>>,
           storage::index<interaction, indice>>;
 
       using map_ds_fdisk_prox_t = typename env::template map<
-          ground::pair<indice, std::array<scalar, 2>>,
+          mp::pair<indice, std::array<scalar, 2>>,
           storage::index<interaction, indice>>;
 
       auto& data = self()->data();
@@ -682,16 +682,16 @@ struct space_filter : item {
         }
       }
 
-      constexpr auto npointsets = ground::size(points_t{});
-      ground::for_each(
-          ground::range<npointsets - ground::size_c<1_c>>, [&](auto ip1) {
-            auto p1 = points_t{}[ground::size_c<ip1>];
+      constexpr auto npointsets = mp::size(points_t{});
+      mp::for_each(
+          mp::range<npointsets - mp::size_c<1_c>>, [&](auto ip1) {
+            auto p1 = points_t{}[mp::size_c<ip1>];
             using p1_t = decltype(p1);
             auto psid1 = ngbh.point_set_id()[ip1];
 
-            ground::for_each(
-                ground::range_c<std::size_t, ip1, npointsets>, [&](auto ip2) {
-                  auto p2 = points_t{}[ground::size_c<ip2>];
+            mp::for_each(
+                mp::range_c<std::size_t, ip1, npointsets>, [&](auto ip2) {
+                  auto p2 = points_t{}[mp::size_c<ip2>];
                   using p2_t = decltype(p2);
                   auto psid2 = ngbh.point_set_id()[ip2];
 
@@ -720,11 +720,11 @@ struct space_filter : item {
                         using system2_t = typename p2_t::item_t;
 
                         // print("point1 {},{},{}\n",
-                        //       ground::type_name<system1_t>().c_str(),
+                        //       mp::type_name<system1_t>().c_str(),
                         //       handle_point1.coord()(0),
                         //       handle_point1.coord()(1));
                         // print("point2 {},{},{}\n",
-                        //       ground::type_name<system2_t>().c_str(),
+                        //       mp::type_name<system2_t>().c_str(),
                         //       handle_point2.coord()(0),
                         //       handle_point2.coord()(1));
 

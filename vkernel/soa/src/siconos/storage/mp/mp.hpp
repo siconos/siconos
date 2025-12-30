@@ -33,7 +33,7 @@
 
 using namespace boost::hana::literals;
 
-namespace siconos::storage::ground {
+namespace siconos::storage::mp {
 
 template <typename Y>
 constexpr decltype(auto) debug_type(Y)
@@ -76,6 +76,7 @@ using inner_type = typename std::remove_reference<T>::type;
 
 using hana::append;
 using hana::at;
+using hana::bool_c;
 using hana::equal;
 using hana::eval;
 using hana::flatten;
@@ -84,7 +85,6 @@ using hana::integral_constant;
 using hana::is_valid;
 using hana::make_lazy;
 using hana::not_;
-using hana::bool_c;
 using hana::pair;
 using hana::prepend;
 using hana::set;
@@ -184,7 +184,7 @@ using hana::zip;
 
 // f(T{}, ...) -> f<T>(...)
 template <typename T>
-static auto t_arg = []<typename F>(F &&f) { return ground::partial(f, T{}); };
+static auto t_arg = []<typename F>(F &&f) { return mp::partial(f, T{}); };
 
 // using hana::pair;
 
@@ -299,14 +299,13 @@ static constexpr auto &get_internal(tuple<Pairs...> &data)
 };
 
 template <typename T, typename... HPairs>
-decltype(auto) get(ground::database<HPairs...> &&data)
+decltype(auto) get(mp::database<HPairs...> &&data)
 {
-  return get_internal<T>(
-      static_cast<ground::database<HPairs...> &&>(data).store);
+  return get_internal<T>(static_cast<mp::database<HPairs...> &&>(data).store);
 };
 
 template <typename T, typename... HPairs>
-decltype(auto) get(ground::database<HPairs...> &data)
+decltype(auto) get(mp::database<HPairs...> &data)
 {
   return get_internal<T>(data.store);
 };
@@ -449,11 +448,10 @@ static constexpr auto derive_from = is_a_model<[]<typename T>() consteval {
 }>;
 
 template <typename B>
-static constexpr auto not_derive_from = is_a_model<[]<typename T>() consteval {
-  return !std::derived_from<T, B>;
-}>;
-
-
+static constexpr auto not_derive_from =
+    is_a_model<[]<typename T>() consteval {
+      return !std::derived_from<T, B>;
+    }>;
 
 template <typename B>
 static constexpr auto is_parent = is_a_model<[]<typename T>() consteval {
@@ -495,7 +493,7 @@ inline constexpr ReturnType call_with_index(auto index, ReturnType &&def_val,
 {
   constexpr auto fun_tab = []<std::size_t... I>(std::index_sequence<I...>) {
     return std::array{
-        siconos::storage::ground::call_with_integral_constant_if_valid<
+        siconos::storage::mp::call_with_integral_constant_if_valid<
             I, ReturnType, F>...};
   }(std::make_index_sequence<NumOfCases>{});
 
@@ -520,4 +518,4 @@ constexpr std::size_t index_of(const std::tuple<Ts...> &)
   return found ? count - 1 : count;
 }
 
-}  // namespace siconos::storage::ground
+}  // namespace siconos::storage::mp

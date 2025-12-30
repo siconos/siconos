@@ -5,10 +5,10 @@
 namespace siconos::config
 {
   template<typename ...Cfs>
-  using map = storage::ground::map<Cfs...>;
+  using map = storage::mp::map<Cfs...>;
 
   template<typename K, typename V>
-  using assoc = storage::ground::key_value<K, V>;
+  using assoc = storage::mp::key_value<K, V>;
 
   using storage::pattern::param;
   using storage::pattern::param_val;

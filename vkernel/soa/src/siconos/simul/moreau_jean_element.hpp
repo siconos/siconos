@@ -244,7 +244,7 @@ struct moreau_jean_element : item {
 
         siconos::variant::visit(
             data, rel,
-            ground::overload(
+            mp::overload(
                 [&step, &hhm1, &hhm2, &hds1, &hds2,
                  &rnds](match::linear_relation auto &&rrel) {
                   if (rnds == 1) {
@@ -339,7 +339,7 @@ struct moreau_jean_element : item {
                      inters)) {
         bool linear_case = siconos::variant::visit(
             data, inter.relation(),
-            ground::overload(
+            mp::overload(
                 [&](match::linear_relation auto rrel) { return true; },
                 [&](auto) { return false; }));
 
@@ -358,7 +358,7 @@ struct moreau_jean_element : item {
 
           y[0] = siconos::variant::visit(
               data, inter.relation(),
-              ground::overload(
+              mp::overload(
                   [&](match::linear_relation auto rrel) {
                     assert(false);
                     return 0.;
@@ -481,7 +481,7 @@ struct moreau_jean_element : item {
            view::zip(ys, ydots, activations, ids1s, ids2s, interactions)) {
         auto b = siconos::variant::visit(
             data, inter.relation(),
-            ground::overload(
+            mp::overload(
                 [](match::linear_relation auto &real_relation) {
                   return real_relation.b();
                 },

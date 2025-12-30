@@ -10,7 +10,7 @@
 #include "siconos/simul/one_step_nonsmooth_problem.hpp"
 #include "siconos/simul/time_discretization.hpp"
 #include "siconos/simul/time_stepping.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/environment.hpp"
 
 namespace siconos::config {
@@ -45,7 +45,7 @@ struct make
 
 namespace config = siconos::config;
 namespace store = siconos::storage;
-namespace ct = store::ground;
+namespace mp = store::mp;
 using siconos::algebra::vector;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RtOsiTest);
@@ -63,14 +63,14 @@ void RtOsiTest::testOsi0()
 
   std::size_t i = 0;
   std::size_t j = 0;
-  ct::for_each(osi.elements(), [&](auto elem) {
+  mp::for_each(osi.elements(), [&](auto elem) {
     elem.ds_offset() = i++;
     elem.inter_offset() = j++;
   });
 
   i = 0;
   j = 0;
-  ct::for_each(osi.elements(), [&](auto elem) {
+  mp::for_each(osi.elements(), [&](auto elem) {
     CPPUNIT_ASSERT((elem.ds_offset() == i++));
     CPPUNIT_ASSERT((elem.inter_offset() == j++));
   });

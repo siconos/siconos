@@ -24,7 +24,7 @@ struct neighborhood
   using attributes = storage::pattern::cons_x<
       attribute<"point_set_id",
                 some::array<some::indice,
-                            some::indice_value<ground::size(points_t{})>>>,
+                            some::indice_value<mp::size(points_t{})>>>,
       typename storage::data_holder<
           CompactNSearch::NeighborhoodSearch>::attributes>;
 
@@ -56,7 +56,7 @@ struct neighborhood
 
       auto& psid = storage::attr<"point_set_id">(*self());
       auto& instance = self()->instance();
-      ground::for_each(points_t{}, [&data, &step, &i, &psid,
+      mp::for_each(points_t{}, [&data, &step, &i, &psid,
                                     &instance]<typename Point>(Point) {
         auto& coords = storage::attr_values<Point, "coord">(data, step);
 
@@ -80,7 +80,7 @@ struct neighborhood
     void update(auto step)
     {
       auto& data = self()->data();
-      ground::for_each(points_t{}, [&data, &step]<typename Point>(Point) {
+      mp::for_each(points_t{}, [&data, &step]<typename Point>(Point) {
         for (auto point : storage::handles<Point>(data, step)) {
           point.update(step);
         }
@@ -100,7 +100,7 @@ struct neighborhood
       instance->z_sort();
 
       indice i = 0;
-      ground::for_each(
+      mp::for_each(
           points_t{}, [&instance, &data, &i]<typename Point>(Point p) {
             auto&& ps = instance->point_set(i++);
             // apply function only if some points exist

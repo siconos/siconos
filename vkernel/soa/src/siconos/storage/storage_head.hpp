@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"

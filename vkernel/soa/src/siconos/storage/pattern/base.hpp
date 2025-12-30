@@ -5,7 +5,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 
 namespace siconos::storage::pattern {
 using size_t = std::size_t;
@@ -14,10 +14,10 @@ template <typename... Ts>
 using pointer = std::shared_ptr<Ts...>;
 
 template <size_t N, typename tpl>
-using nth_t = std::decay_t<decltype(tpl{}[ground::size_c<N>])>;
+using nth_t = std::decay_t<decltype(tpl{}[mp::size_c<N>])>;
 
 template <typename... Args>
-using gather = ground::tuple<Args...>;
+using gather = mp::tuple<Args...>;
 
 // template <typename T, typename Tpl>
 // using cons_t = std::decay_t<decltype(std::tuple_cat<std::tuple<T>, Tpl>)>;

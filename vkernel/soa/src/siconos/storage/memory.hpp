@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 
 namespace siconos::storage {
@@ -21,11 +21,11 @@ static constexpr auto memory = []<typename T>(
 template <match::attribute Attr, typename keeps_t>
 static constexpr std::size_t memory_size()
 {
-  auto tpl = ground::filter(keeps_t{},
-                            ground::is_a_model<[]<typename T>() consteval {
+  auto tpl = mp::filter(keeps_t{},
+                            mp::is_a_model<[]<typename T>() consteval {
                               return std::is_same_v<Attr, typename T::type>;
                             }>);
-  if constexpr (ground::size(tpl) > ground::size_c<0>) {
+  if constexpr (mp::size(tpl) > mp::size_c<0>) {
     return tpl[0_c].size;
   }
   else {

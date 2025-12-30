@@ -18,7 +18,7 @@ using env = standard_environment<config::params>;
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/model/lagrangian_r.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
 #include "siconos/utils/environment.hpp"
@@ -27,7 +27,7 @@ namespace siconos {
 
 namespace some = storage::some;
 namespace traits = storage::traits;
-namespace ground = storage::ground;
+namespace ground = storage::mp;
 using namespace storage::pattern;
 
 struct aaa {
@@ -98,7 +98,7 @@ static_assert(
 
 static_assert(
     std::is_same_v<
-        typename std::decay_t<decltype(ground::get<storage::info>(
+    typename std::decay_t<decltype(storage::mp::get<storage::info>(
             storage::make<standard_environment<int>, item0,
                           storage::with_properties<
                               storage::diagonal<attr_t<item0, "attr0">>>>()
@@ -111,14 +111,14 @@ static_assert(
                              siconos::storage::some::indice_value<1>,
                              siconos::storage::some::indice_value<1>>>>>>>);
 
-// static_assert(ground::filter(
-//     ground::transform(
-//         typename std::decay_t<decltype(ground::get<storage::info>(
+// static_assert(mp::filter(
+//     mp::transform(
+//         typename std::decay_t<decltype(mp::get<storage::info>(
 //             storage::make<standard_environment<int>, item0,
 //                           storage::with_properties<storage::diagonal<attr_t<
 //                               item0, "attr0">>>>()))>::all_properties_t{},
 //         []<typename P>(P) { return typename P::type{}; }),
-//     ground::is_parent<siconos::storage::pattern::paired<
+//     mp::is_parent<siconos::storage::pattern::paired<
 //         siconos::item0,
 //         siconos::storage::pattern::attribute<
 //             "attr0", siconos::storage::some::matrix<
@@ -126,23 +126,23 @@ static_assert(
 //                          siconos::storage::some::indice_value<1>,
 //                          siconos::storage::some::indice_value<1>>>>>));
 
-// ground::filter(typename info_t::all_properties_t{},
-//                      ground::is_a_model<[]<typename T>() constexpr {
+// mp::filter(typename info_t::all_properties_t{},
+//                      mp::is_a_model<[]<typename T>() constexpr {
 //                        return match::attached_storage<T, Item>;
 //                      }>);
 
 static_assert(
     std::is_same_v<
-        decltype(ground::filter(
-            typename std::decay_t<decltype(ground::get<storage::info>(
+        decltype(storage::mp::filter(
+            typename std::decay_t<decltype(storage::mp::get<storage::info>(
                 storage::make<standard_environment<int>, item0,
                               storage::with_properties<storage::attached<
                                   item0, symbol<"zz">, some::scalar>>>()
                     .store()))>::all_properties_t{},
-            ground::is_a_model<[]<typename T>() constexpr {
+            storage::mp::is_a_model<[]<typename T>() constexpr {
               return match::attached_storage<T, item0>;
             }>)),
-        ground::tuple<siconos::storage::attached<
+        storage::mp::tuple<siconos::storage::attached<
             siconos::item0, siconos::storage::pattern::symbol<"zz">,
             siconos::storage::some::scalar>>>);
 
@@ -291,14 +291,14 @@ static_assert(std::is_same_v<decltype(all_items(nslaw{})),
                              gather<siconos::model::newton_impact>>);
 
 static_assert(
-    std::derived_from<std::decay_t<decltype(ground::filter(
+    std::derived_from<std::decay_t<decltype(storage::mp::filter(
                           storage::pattern::struct_to_gather<
                               typename interaction::attributes>{},
-                          ground::compose(ground::trait<is_polymorhic>,
-                                          ground::typeid_))[0_c])>,
+                          storage::mp::compose(storage::mp::trait<is_polymorhic>,
+                                          storage::mp::typeid_))[0_c])>,
                       some::polymorphic_attribute<some::item_ref<relation>>>);
 
-// ground::type_trace<decltype(all_items(interaction{}))>();
+// storage::mp::type_trace<decltype(all_items(interaction{}))>();
 static_assert(std::is_same_v<decltype(all_items(interaction{})),
                              gather<interaction, nslaw, relation>>);
 
@@ -364,14 +364,14 @@ static_assert(
     traits::translatable<siconos::some::unbounded_collection<char[3]>, env>);
 
 static_assert(
-    ground::filter(gather<char, int, double>{},
-                   ground::compose(ground::trait<std::is_floating_point>,
-                                   ground::typeid_)) == gather<double>{});
+    storage::mp::filter(gather<char, int, double>{},
+                   storage::mp::compose(storage::mp::trait<std::is_floating_point>,
+                                   storage::mp::typeid_)) == gather<double>{});
 
 static_assert(std::is_same_v<
-              decltype(ground::filter(
+              decltype(storage::mp::filter(
                   std::tuple<attr_t<nslaw, "e">, attr_t<ball, "velocity">>{},
-                  ground::derive_from<some::scalar>)),
+                  storage::mp::derive_from<some::scalar>)),
               std::tuple<attr_t<nslaw, "e">>>);
 
 static_assert(
@@ -417,7 +417,7 @@ using params = map<iparam<"dof", 3>>;
 }  // namespace siconos::config
 
 // static_assert(
-//     typename std::decay_t<decltype(ground::get<storage::info>(
+//     typename std::decay_t<decltype(storage::mp::get<storage::info>(
 //         storage::make<
 //             standard_environment<config::params>, config::simulation,
 //             wrap<some::unbounded_collection, config::disk>,

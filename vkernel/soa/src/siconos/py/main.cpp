@@ -5,6 +5,8 @@ data_t make_storage() { return data_t(); };
 }  // namespace siconos::python::disks
 
 using namespace boost::hana::literals;
+namespace mp = siconos::storage::mp;
+
 PYBIND11_MODULE(_nonos, m)
 {
   // sub module disks
@@ -39,7 +41,7 @@ PYBIND11_MODULE(_nonos, m)
 
   using disks_properties_t = typename disks_info_t::all_properties_t;
 
-  using disks_items_t = decltype(ground::transform(
+  using disks_items_t = decltype(mp::transform(
       typename disks_info_t::all_items_t{}, []<match::item I>(I) {
         if constexpr (match::wrap<I>) {
           return typename I::type{};
@@ -49,26 +51,26 @@ PYBIND11_MODULE(_nonos, m)
         }
       }));
 
-  // ground::type_trace<disks_items_t>();
-  auto named_disks_items = ground::tuple_unique(ground::filter(
-      disks_items_t{}, ground::is_a_model<[]<typename T>() {
+  // mp::type_trace<disks_items_t>();
+  auto named_disks_items = mp::tuple_unique(mp::filter(
+      disks_items_t{}, mp::is_a_model<[]<typename T>() {
         return storage::has_property_from<T, storage::property::bind,
                                           disks_properties_t>();
       }>));
 
-  // ground::type_trace<std::decay_t<decltype(named_disks_items)>>();
+  // mp::type_trace<std::decay_t<decltype(named_disks_items)>>();
 
-  auto disks_handles = ground::transform(
+  auto disks_handles = mp::transform(
       named_disks_items, []<match::item I>(I item) constexpr {
         using indice_t = typename storage::get_info_t<
             siconos::python::disks::idata_t>::env::indice;
         using handle_t = storage::handle<storage::handle_base, I, indice_t,
                                          siconos::python::disks::idata_t>;
-        return ground::type_c<handle_t>;
+        return mp::type_c<handle_t>;
       });
 
   // add corresponding py::class_
-  auto pyhandles = ground::transform(disks_handles, [&disks]<typename H>(
+  auto pyhandles = mp::transform(disks_handles, [&disks]<typename H>(
                                                         H handle_type_c) {
     using handle_t =
         typename decltype(handle_type_c)::type;  // Extract actual type
@@ -78,21 +80,21 @@ PYBIND11_MODULE(_nonos, m)
         disks, fmt::format("index_{}",
                            storage::bind_name<item_t, disks_properties_t>())
                    .c_str());
-    return ground::make_tuple(
+    return mp::make_tuple(
         base_index,
         py::class_<handle_t>(disks,
                              storage::bind_name<item_t, disks_properties_t>(),
                              base_index),
-        ground::type_c<handle_t>);
+        mp::type_c<handle_t>);
   });
 
   // attached storage
-  ground::for_each(pyhandles, [&disks](auto pyhandle) {
+  mp::for_each(pyhandles, [&disks](auto pyhandle) {
     using handle_t = typename decltype(+pyhandle[2_c])::type;
     using item_t = typename handle_t::type;
 
     if constexpr (!match::without_attached_storages_bindings<item_t>) {
-      ground::fold_left(
+      mp::fold_left(
           decltype(storage::attached_storages(
               item_t{},
               std::declval<
@@ -123,7 +125,7 @@ PYBIND11_MODULE(_nonos, m)
 
     if constexpr (!match::without_attributes_bindings<
                       typename handle_t::type>) {
-      ground::fold_left(
+      mp::fold_left(
           pattern::attributes(typename handle_t::type{}),  // all attributes
           std::ref(pyhandle[1_c]),                         // initial state
           []<match::attribute A>(py::class_<handle_t> dc, A a) {
@@ -164,7 +166,7 @@ PYBIND11_MODULE(_nonos, m)
     }
 
     //    using item_t = typename handle_t::type;
-    ground::fold_left(storage::methods(pyhandle[2_c]),  // all methods
+    mp::fold_left(storage::methods(pyhandle[2_c]),  // all methods
                       std::ref(pyhandle[1_c]),          // initial state
                       []<typename M>(py::class_<handle_t> dc, M m) {
                         return dc.def(pattern::method_name(m),

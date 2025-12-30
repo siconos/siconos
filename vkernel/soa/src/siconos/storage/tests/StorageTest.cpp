@@ -5,7 +5,7 @@
 
 #include "siconos/storage/add.hpp"
 #include "siconos/storage/default_interface.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/make.hpp"
 #include "siconos/storage/memory.hpp"
@@ -69,7 +69,7 @@ struct make
 
 namespace config = siconos::config;
 namespace store = siconos::storage;
-namespace ct = store::ground;
+namespace ct = store::mp;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(StorageTest);
 

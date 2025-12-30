@@ -5,7 +5,7 @@
 #include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/simul/moreau_jean_element.hpp"
 #include "siconos/simul/simul_head.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
 #include "siconos/utils/variant.hpp"
@@ -34,14 +34,14 @@ struct one_step_integrator {
         moreau_jean_element<rt_system, rt_interaction, moreau_jean_assembled>;
 
     using raw_elements =
-        ground::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_osi_t>>;
+        mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_osi_t>>;
 
-    using elements = decltype(ground::unpack(
-        ground::filter(
+    using elements = decltype(mp::unpack(
+        mp::filter(
             raw_elements{},
             [](const auto& h) constexpr {
               using t = typename std::decay_t<decltype(h)>::type;
-              return ground::bool_c<!std::derived_from<t, empty_item>>;
+              return mp::bool_c<!std::derived_from<t, empty_item>>;
             }),
         []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
 
@@ -67,7 +67,7 @@ struct one_step_integrator {
         auto osi = storage::add<assembled_osi_t>(self()->data());
         assembled_osi() = osi;
 
-        ground::for_each(elements(), [&]<typename Elem>(Elem) {
+        mp::for_each(elements(), [&]<typename Elem>(Elem) {
           auto elem = storage::add<typename Elem::type>(self()->data());
           elem.assembled_osi() = osi;
         });
@@ -79,14 +79,14 @@ struct one_step_integrator {
         throw std::runtime_error("Stable pointers need to be implemented");
         storage::remove(assembled_osi());
 
-        ground::for_each(elements(), [&]<typename Elem>(Elem elem) {
+        mp::for_each(elements(), [&]<typename Elem>(Elem elem) {
           storage::remove(elem);
         });
       }
 
       void initialize(auto step)
       {
-        ground::for_each(elements(),
+        mp::for_each(elements(),
                          [&](auto elem) { elem.initialize(step); });
       }
 
@@ -101,7 +101,7 @@ struct one_step_integrator {
 
       decltype(auto) elements()
       {
-        return ground::transform(
+        return mp::transform(
             storage::attr<"elements">(*self()), [&](auto elem) {
               return storage::make_handle(self()->data(), elem);
             });
@@ -173,7 +173,7 @@ struct one_step_integrator {
         indice_t num_fric =
             0;  // total number of friction nslaws for mu vector size.
 
-        ground::for_each(elements(), [&ods, &ointer, &num_fric](auto elem) {
+        mp::for_each(elements(), [&ods, &ointer, &num_fric](auto elem) {
           elem.ds_offset() = ods;
           elem.inter_offset() = ointer;
 

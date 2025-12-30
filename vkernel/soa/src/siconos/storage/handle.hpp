@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -71,8 +71,8 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   using data_t = D;
   using indice = typename info_t::env::indice;
   using attached_storages_t =
-      decltype(ground::filter(typename info_t::all_properties_t{},
-                              ground::is_a_model<[]<typename X>() {
+      decltype(mp::filter(typename info_t::all_properties_t{},
+                              mp::is_a_model<[]<typename X>() {
                                 return match::attached_storage<X, T>;
                               }>));
 
@@ -93,17 +93,17 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   constexpr decltype(auto) property(A, indice step = 0)
   {
     using item_t = T;
-    constexpr auto tpl = ground::filter(
+    constexpr auto tpl = mp::filter(
         typename info_t::all_properties_t{},
-        ground::is_a_model<[]<typename X>() {
+        mp::is_a_model<[]<typename X>() {
           return (match::attached_storage<X, item_t> && (match::tag<X, A>));
         }>);
 
-    static_assert(ground::size(tpl) >= ground::size_c<1>,
+    static_assert(mp::size(tpl) >= mp::size_c<1>,
                   "attached storage not found");
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-    return memory(step, ground::get<attached_storage_t>(
+    return memory(step, mp::get<attached_storage_t>(
                             data().store()))[this->index().value()];
   }
 
@@ -209,21 +209,21 @@ static auto handles =
 
 // Check if a  __init__ member function is present.
 static constexpr auto has_init =
-    ground::is_valid([](auto&& x) -> decltype(x.__init__()) {});
+    mp::is_valid([](auto&& x) -> decltype(x.__init__()) {});
 
 // Check if a  __del__ member function is present.
 static constexpr auto has_del =
-    ground::is_valid([](auto&& x) -> decltype(x.__del__()) {});
+    mp::is_valid([](auto&& x) -> decltype(x.__del__()) {});
 
 template <typename B>
 static constexpr auto handle_derive_from =
-    ground::is_a_model<[]<typename T>() consteval {
+    mp::is_a_model<[]<typename T>() consteval {
       return std::derived_from<typename T::type, B>;
     }>;
 
 template <typename B>
 static constexpr auto not_handle_derive_from =
-    ground::is_a_model<[]<typename T>() consteval {
+    mp::is_a_model<[]<typename T>() consteval {
       return std::derived_from<typename T::type, B>;
     }>;
 

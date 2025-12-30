@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -138,7 +138,7 @@ static auto pre_map_all_properties_as =
   using info_t = get_info_t<D>;
   using all_properties_t = typename info_t::all_properties_t;
 
-  return ground::filter(all_properties_t{}, ground::derive_from<K>);
+  return mp::filter(all_properties_t{}, mp::derive_from<K>);
 };
 
 template <match::property K>
@@ -146,7 +146,7 @@ static auto all_properties_as = []<typename D>(D& data) constexpr -> auto {
   using info_t = get_info_t<D>;
   using all_properties_t = typename info_t::all_properties_t;
 
-  return ground::filter(all_properties_t{}, ground::derive_from<K>);
+  return mp::filter(all_properties_t{}, mp::derive_from<K>);
 };
 
 template <match::attribute Attr>
@@ -162,8 +162,8 @@ static auto attribute_properties = [](auto& data) constexpr -> auto {
 template <match::item Item, typename properties>
 static constexpr auto item_properties_from()
 {
-  return ground::filter(properties{},
-                        ground::is_a_model<[]<typename T>() consteval {
+  return mp::filter(properties{},
+                        mp::is_a_model<[]<typename T>() consteval {
                           if constexpr (match::item_property<T>) {
                             return std::derived_from<Item, typename T::item>;
                           }
@@ -185,7 +185,7 @@ static constexpr auto item_properties(Data&& data)
 template <match::attribute Attr, match::property K>
 static constexpr bool has_property(auto& data)
 {
-  return ground::any_of(all_properties_as<K>(data), []<match::property P>(P) {
+  return mp::any_of(all_properties_as<K>(data), []<match::property P>(P) {
     return std::derived_from<Attr, typename P::type>;
   });
 }
@@ -193,7 +193,7 @@ static constexpr bool has_property(auto& data)
 template <match::item Item, match::property K, typename properties>
 static constexpr bool has_property_from()
 {
-  return ground::any_of(
+  return mp::any_of(
       item_properties_from<Item, properties>(),
       []<match::property P>(P) { return std::derived_from<P, K>; });
 };
@@ -201,7 +201,7 @@ static constexpr bool has_property_from()
 template <match::item Item, match::property K>
 static constexpr bool has_property(auto&& data)
 {
-  return ground::any_of(
+  return mp::any_of(
       item_properties<Item>(data),
       []<match::property P>(P) { return std::derived_from<P, K>; });
 };
@@ -209,8 +209,8 @@ static constexpr bool has_property(auto&& data)
 template <match::item Item, typename Properties>
 static constexpr auto bind_name()
 {
-  return ground::find_if(item_properties_from<Item, Properties>(),
-                         ground::is_a_model<[]<match::property P>() {
+  return mp::find_if(item_properties_from<Item, Properties>(),
+                         mp::is_a_model<[]<match::property P>() {
                            return std::derived_from<P, property::bind>;
                          }>)
       .value_or([]<bool flag = false>() {
@@ -225,11 +225,11 @@ using has_property_t = std::decay_t<decltype(has_property<A, K>(D{}))>;
 static auto refine_attribute = []<match::attribute Attr, typename D>(
                                    const D& data,
                                    Attr) constexpr -> decltype(auto) {
-  using refines = decltype(ground::filter(
+  using refines = decltype(mp::filter(
       pre_map_all_properties_as<property::refine>(data),
-      ground::is_inside_type_parent<Attr>));
+      mp::is_inside_type_parent<Attr>));
 
-  if constexpr (ground::size(refines{}) > ground::size_c<0_c>) {
+  if constexpr (mp::size(refines{}) > mp::size_c<0_c>) {
     return typename nth_t<0, refines>::template refine<Attr>{};
   }
   else {
@@ -274,8 +274,8 @@ constexpr decltype(auto) attached_storages(Item, auto& data)
   using info_t = get_info_t<decltype(data)>;
   using item_t = Item;
 
-  return ground::filter(typename info_t::all_properties_t{},
-                        ground::is_a_model<[]<typename T>() {
+  return mp::filter(typename info_t::all_properties_t{},
+                        mp::is_a_model<[]<typename T>() {
                           return match::attached_storage<T, item_t>;
                         }>);
 };
@@ -284,14 +284,14 @@ template <typename Item>
 constexpr decltype(auto) all_storages(Item, auto& data)
 {
   using item_t = Item;
-  return ground::tuple_unique(
+  return mp::tuple_unique(
       concat(attributes(item_t{}), attached_storages(item_t{}, data)));
 }
 
 // use storage::attached_storages(...) instead
 template <typename Item>
 static constexpr auto is_attached_storage =
-    ground::is_a_model<[]<typename T>() constexpr {
+    mp::is_a_model<[]<typename T>() constexpr {
       return match::attached_storage<T, Item>;
     }>;
 

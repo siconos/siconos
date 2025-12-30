@@ -1,7 +1,7 @@
-#include <siconos/storage/ground/ground.hpp>
+#include <siconos/storage/mp/mp.hpp>
 
 using namespace siconos::storage;
-using namespace siconos::storage::ground;
+using namespace siconos::storage::mp;
 
 struct A {
   using a_t = void;
@@ -48,7 +48,7 @@ static_assert(transform(make_tuple(1, 2, 3), [](auto x) { return x + 1; }) ==
               make_tuple(2, 3, 4));
 
 static_assert(filter(all_type_c(make_tuple(A{}, B{}, C{}, D{})),
-                     ground::derive_from<A>) ==
+                     mp::derive_from<A>) ==
               all_type_c(make_tuple(A{}, B{}, C{})));
 
 static_assert((make_tuple(make_tuple(type_c<A>, type_c<A>, type_c<B>,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -26,7 +26,7 @@ static auto remove = [](auto& data, auto&& h) {
 
   using indice = typename info_t::env::indice;
 
-  auto attrs = ground::tuple_unique(
+  auto attrs = mp::tuple_unique(
       concat(attributes(item_t{}), attached_storages(h.item_type(), data)));
 
   // call handle delete function if present
@@ -35,13 +35,13 @@ static auto remove = [](auto& data, auto&& h) {
     h1.__del__();
   }
 
-  if constexpr (ground::size(attrs) > ground::size_c<0>) {
-    ground::for_each(attrs, [&data, &h]<match::attribute A>(A) {
-      return ground::for_each(
-          ground::range<memory_size<A, all_keeps_t>()>,
+  if constexpr (mp::size(attrs) > mp::size_c<0>) {
+    mp::for_each(attrs, [&data, &h]<match::attribute A>(A) {
+      return mp::for_each(
+          mp::range<memory_size<A, all_keeps_t>()>,
           [&data, &h](indice step) {
             move_back(h.index().value(),
-                      memory(step, ground::get<A>(data.store())));
+                      memory(step, mp::get<A>(data.store())));
           });
     });
   }

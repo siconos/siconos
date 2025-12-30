@@ -26,7 +26,7 @@ struct default_interface {
   template <string_literal S>
   constexpr auto env_param()
   {
-    return ground::get<pattern::param<S>>(self()->params()).value;
+    return mp::get<pattern::param<S>>(self()->params()).value;
   }
 
   auto make_handle(auto& index)

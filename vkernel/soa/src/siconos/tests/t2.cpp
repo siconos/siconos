@@ -1,7 +1,7 @@
 #include "siconos/utils/check.hpp"
 #include "siconos/utils/environment.hpp"
 #include "siconos/siconos.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
@@ -84,14 +84,14 @@ int main()
 //   add<simulation>(data);
   print("v={}\n", siconos::get_memory<ball::velocity>(data));
   print("---\n");
-  ground::for_each(data,
+  mp::for_each(data,
     [](auto& pair)
     {
-      using value_t = std::decay_t<decltype(ground::second(pair))>;
+      using value_t = std::decay_t<decltype(mp::second(pair))>;
 
       if constexpr (match::size<value_t>)
       {
-        print("->{}\n", ground::second(pair).size());
+        print("->{}\n", mp::second(pair).size());
       }
     });
 
@@ -100,7 +100,7 @@ int main()
 
    auto ds0 = add<ball>(data);
 
-//   ground::type_trace<decltype(ball::fext::at(ds0))>();
+//   mp::type_trace<decltype(ball::fext::at(ds0))>();
    ball::fext::at(ds0) = { 10., 0., 0.};
    ball::q::at(ds0) = { 0., 0., 1.};
 
@@ -112,14 +112,14 @@ int main()
    print("--->{}\n", velocityp);
 
    print("---\n");
-   ground::for_each(data,
+   mp::for_each(data,
     [](auto& pair)
     {
-      using value_t = std::decay_t<decltype(ground::second(pair))>;
+      using value_t = std::decay_t<decltype(mp::second(pair))>;
 
       if constexpr (match::size<value_t>)
       {
-        print("->{}\n", ground::second(pair).size());
+        print("->{}\n", mp::second(pair).size());
       }
     });
    print("---\n");
@@ -202,10 +202,10 @@ int main()
    print("ball1.index = {}\n", ball1.property(symbol<"index">{}));
    print("ball2.index = {}\n", ball2.property(symbol<"index">{}));
 
-   print("htopo.index : {}\n", ground::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
+   print("htopo.index : {}\n", mp::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
    print("make_index\n");
    htopo.make_index();
-   print("htopo.index : {}\n", ground::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
+   print("htopo.index : {}\n", mp::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
 
    hosi.assemble_h_matrix_for_involved_ds(0);
    hosi.assemble_mass_matrix_for_involved_ds(0);
@@ -246,22 +246,22 @@ int main()
 
    auto ustore1 = unit_storage<env, some::scalar, some::vector<some::scalar, some::indice_value<3>>, some::graph<some::indice, some::indice>>::type {};
 
-//   ground::find(ustore1, boost::hana::type_c<some::scalar>) = 1.0;
-//   ground::find(ustore1, boost::hana::type_c<some::vector<3>>).value() = { 1.0, 2.0, 3.0 };
+//   mp::find(ustore1, boost::hana::type_c<some::scalar>) = 1.0;
+//   mp::find(ustore1, boost::hana::type_c<some::vector<3>>).value() = { 1.0, 2.0, 3.0 };
 
-   ground::get<some::scalar>(ustore1) = 2.0;
-   ground::get<some::vector<some::scalar, some::indice_value<3>>>(ustore1) =  {1.0, 2.0, 3.0};
+   mp::get<some::scalar>(ustore1) = 2.0;
+   mp::get<some::vector<some::scalar, some::indice_value<3>>>(ustore1) =  {1.0, 2.0, 3.0};
 
-   print("ustore1 scalar={}\n", ground::get<some::scalar>(ustore1));
+   print("ustore1 scalar={}\n", mp::get<some::scalar>(ustore1));
 
-   print("ustore1 vector={}\n", ground::get<some::vector<some::scalar, some::indice_value<3>>>(ustore1));
+   print("ustore1 vector={}\n", mp::get<some::vector<some::scalar, some::indice_value<3>>>(ustore1));
 
    auto ustore2 = typename item_storage<env, simulation, ball>::type {};
 
-   ground::get<ball::q>(ustore2) = { 2.0, 3.0, 4.0 };
-   print("ustore2 ball::q ={}\n", ground::get<ball::q>(ustore2));
+   mp::get<ball::q>(ustore2) = { 2.0, 3.0, 4.0 };
+   print("ustore2 ball::q ={}\n", mp::get<ball::q>(ustore2));
 
-   //ground::transform(iget<ball>(ustore2), [&ustore2]<typename A>(A){ return iget<A>(ustore2); });
+   //mp::transform(iget<ball>(ustore2), [&ustore2]<typename A>(A){ return iget<A>(ustore2); });
 
    auto ustore5 = make_storage<env, simulation,
                                wrap<some::unbounded_collection, ball>,
@@ -271,8 +271,8 @@ int main()
                                                attached_storage<ball, zz , some::scalar>>>();
 
 
-   //ground::get<ball::q>(ustore5)[0].push_back({7.,8.,9.});
-   print("ustore5 ball::q ={}\n", ground::get<ball::q>(ustore5));
+   //mp::get<ball::q>(ustore5)[0].push_back({7.,8.,9.});
+   print("ustore5 ball::q ={}\n", mp::get<ball::q>(ustore5));
 
    auto some_iball=add<ball>(ustore5);
    get<ball::velocity>(some_iball, ustore5) = {3., 3., 3.};
@@ -328,7 +328,7 @@ int main()
    auto [new_edge, ig_new_ve] = dsg0.add_edge(dsgv, dsgv, inter, ig0);
    auto rel = add<relation>(ustore5);
 
-   auto yyv = ground::get<interaction::h_matrix>(ustore5);
+   auto yyv = mp::get<interaction::h_matrix>(ustore5);
    interaction::h_matrix::at(inter)(0, 0) = 1;
 
    interaction::relation::at(inter) = rel;
@@ -341,7 +341,7 @@ int main()
    auto hsim = make_full_handle<simulation>(0, data);
 //   hsim.compute_output(1_c);
 
-   ground::get<attached_storage<ball, zz, some::scalar>>(ustore5)[0][0] = 1.0;
+   mp::get<attached_storage<ball, zz, some::scalar>>(ustore5)[0][0] = 1.0;
    get<zz>(0, some_iball, ustore5) = 1.0;
    some_iball.property(zz{}) = 1.0;
 //   for_each(ustore5,
@@ -352,7 +352,7 @@ int main()
 
 
 #ifdef __clang__
-//   print("-->{}\n", boost::hana::experimental::type_name<ground::pair<ball, zz>>().c_str());
+//   print("-->{}\n", boost::hana::experimental::type_name<mp::pair<ball, zz>>().c_str());
 #endif
    auto dd = make_storage<env, wrap<some::unbounded_collection, ball>,
                           with_properties<diagonal<ball::mass_matrix>, keep<ball::q, 10>,
@@ -367,10 +367,10 @@ int main()
   xball1.velocity() = {1, 1, 1};
   xball2.velocity() = {2, 2, 2};
   xball3.velocity() = {3, 3, 3};
-  print("{}\n", ground::get<ball::velocity>(dd));
+  print("{}\n", mp::get<ball::velocity>(dd));
   siconos::remove(xball1, dd);
   print("{},{},{}\n", xball1.get(), xball2.get(), xball3.get());
-  print("{}\n", ground::get<ball::velocity>(dd));
+  print("{}\n", mp::get<ball::velocity>(dd));
 
   static_assert(match::tag<attached_storage<ball, zz, some::scalar>, zz>);
   auto xball4 = add<ball>(dd);
@@ -385,9 +385,9 @@ int main()
 
    for_each(dd, []<typename Key, typename Value>(Key k, Value v)
             {
-              print("Key: [{}]\n", ground::type_name<Key>());
-              print("Value: [{}]\n\n", ground::type_name<Value>());
+              print("Key: [{}]\n", mp::type_name<Key>());
+              print("Value: [{}]\n\n", mp::type_name<Value>());
             });
-//   assert((ground::get<attached_storage<some::unbounded_collection<ball>, internal_index, some::indice>>(dd)[0][1] == 1));
+//   assert((mp::get<attached_storage<some::unbounded_collection<ball>, internal_index, some::indice>>(dd)[0][1] == 1));
 
 }

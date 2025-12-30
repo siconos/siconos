@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/memory.hpp"
 #include "siconos/storage/pattern/base.hpp"
@@ -22,25 +22,25 @@ static auto add = [](auto&& data) constexpr -> decltype(auto) {
   using indice = typename info_t::env::indice;
 
   // get attached storages from all properties
-  constexpr auto attached_storages = ground::filter(
+  constexpr auto attached_storages = mp::filter(
       typename info_t::all_properties_t{}, is_attached_storage<Item>);
 
   // attrs = attributes + attached_storages
   constexpr auto attrs =
-      ground::tuple_unique(concat(attributes(Item{}), attached_storages));
+      mp::tuple_unique(concat(attributes(Item{}), attached_storages));
 
   using attrs_t = std::decay_t<decltype(attrs)>;
 
-  if constexpr (ground::size(attrs_t{}) > ground::size_c<0>) {
+  if constexpr (mp::size(attrs_t{}) > mp::size_c<0>) {
     // there is some attributes or attached_storages
     indice index = 0;
-    ground::for_each(attrs, [&data, &index]<match::attribute A>(A) {
-      ground::for_each(
-          ground::range<memory_size<A, all_keeps_t>()>,
+    mp::for_each(attrs, [&data, &index]<match::attribute A>(A) {
+      mp::for_each(
+          mp::range<memory_size<A, all_keeps_t>()>,
           // memory keep is taken into account
           [&data, &index](auto step) {
             auto&& storage = memory(
-                step, ground::get<A>(static_cast<data_t&&>(data).store()));
+                step, mp::get<A>(static_cast<data_t&&>(data).store()));
 
             using storage_t = std::decay_t<decltype(storage)>;
 

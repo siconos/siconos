@@ -1,7 +1,7 @@
 #include "siconos/utils/check.hpp"
 #include "siconos/utils/environment.hpp"
 #include "siconos/siconos.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
@@ -141,10 +141,10 @@ int main()
    print("ball1.index = {}\n", ball1.property(symbol<"index">{}));
    print("ball2.index = {}\n", ball2.property(symbol<"index">{}));
 
-   print("htopo.index : {}\n", ground::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
+   print("htopo.index : {}\n", mp::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
    print("make_index\n");
    htopo.make_index();
-   print("htopo.index : {}\n", ground::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
+   print("htopo.index : {}\n", mp::get<attached_storage<ball, symbol<"index">, some::indice>>(data));
 
    hosi.assemble_h_matrix_for_involved_ds(0);
    hosi.assemble_mass_matrix_for_involved_ds(0);

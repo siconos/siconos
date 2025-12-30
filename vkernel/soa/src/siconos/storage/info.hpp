@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 
 namespace siconos::storage {
@@ -14,11 +14,11 @@ auto get_info(D&& data)
 {
   if constexpr (match::store<std::decay_t<D>>) {
     // database case
-    return ground::get<info>(data.store());
+    return mp::get<info>(data.store());
   }
   else {
     // pre-map case
-    return ground::second(ground::at(data, ground::size_c<0>));
+    return mp::second(mp::at(data, mp::size_c<0>));
   }
 }
 

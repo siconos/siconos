@@ -87,7 +87,7 @@ struct time_stepping : item {
       indice_t total_number_of_involved_ds = 0;
 
       // loop over different kind of dynamic systems
-      ground::for_each(osi.elements(), [&](auto elem) {
+      mp::for_each(osi.elements(), [&](auto elem) {
         // udpate M^-1 * fext
         // do nothing if fext is time_invariant
         elem.update_iteration_matrix(step);
@@ -117,7 +117,7 @@ struct time_stepping : item {
         // resize assembled matrices and vectors
         osi.assemble_setup();
 
-        ground::for_each(osi.elements(), [&](auto elem) {
+        mp::for_each(osi.elements(), [&](auto elem) {
           // a least one activated interaction
           elem.compute_h_matrices(step + 1);
 
@@ -136,7 +136,7 @@ struct time_stepping : item {
         // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)
         osi.compute_input();
 
-        ground::for_each(osi.elements(), [&](auto elem) {
+        mp::for_each(osi.elements(), [&](auto elem) {
           // lambda_vector_assembled -> lambdas
           elem.keep_lambdas(step);
 

@@ -20,15 +20,15 @@ static auto apply_fun = []<typename Item, typename SomeFun>(
 
   using indice = typename info_t::env::indice;
 
-  auto attrs = ground::tuple_unique(
+  auto attrs = mp::tuple_unique(
       concat(attributes(item_t{}), attached_storages(item_t{}, data)));
 
-  if constexpr (ground::size(attrs) > ground::size_c<0>) {
-    ground::for_each(attrs, [&data, &some_fun]<match::attribute A>(A) {
-      return ground::for_each(ground::range<memory_size<A, all_keeps_t>()>,
+  if constexpr (mp::size(attrs) > mp::size_c<0>) {
+    mp::for_each(attrs, [&data, &some_fun]<match::attribute A>(A) {
+      return mp::for_each(mp::range<memory_size<A, all_keeps_t>()>,
                               [&data, &some_fun](indice step) {
                                 static_cast<SomeFun&&>(some_fun)(memory(
-                                    step, ground::get<A>(data.store())));
+                                    step, mp::get<A>(data.store())));
                               });
     });
   }
@@ -37,7 +37,7 @@ static auto apply_fun = []<typename Item, typename SomeFun>(
 // template <match::item T>
 // static constexpr void for_each_attribute(T)
 // {
-//   return ground::compose(ground::for_each, attributes)(T{});
+//   return mp::compose(mp::for_each, attributes)(T{});
 // };
 
 using pattern::attr_t;
@@ -74,11 +74,11 @@ struct composite_item : item {
           Item1 item1{};
           auto storages_to_copy = flatten(all_attributes(item1));
 
-          ground::for_each(
+          mp::for_each(
               storages_to_copy,
               [this, &other, &data]<match::attribute Storage>(Storage) {
-                ground::get<Storage>(data.store())[(*handlep).get()] =
-                  ground::get<Storage>(data.store())[other.index().value()];
+                mp::get<Storage>(data.store())[(*handlep).get()] =
+                  mp::get<Storage>(data.store())[other.index().value()];
               });
           return *this;
         }

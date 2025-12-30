@@ -1,6 +1,6 @@
 #pragma once
 
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -15,11 +15,11 @@ namespace match = siconos::storage::pattern::match;
 template <match::item Item, typename Wrappers, typename Storage>
 static constexpr auto apply_wrapper(Storage storage)
 {
-  auto tpl = ground::filter(Wrappers{},
-                            ground::is_a_model<[]<typename T>() consteval {
+  auto tpl = mp::filter(Wrappers{},
+                            mp::is_a_model<[]<typename T>() consteval {
                               return std::is_same_v<Item, typename T::type>;
                             }>);
-  if constexpr (ground::size(tpl) > ground::size_c<0>) {
+  if constexpr (mp::size(tpl) > mp::size_c<0>) {
     return typename std::decay_t<decltype(tpl[0_c])>::template wrapper<
         Storage>{};
   }
@@ -33,48 +33,48 @@ template <typename Env, match::attribute... Attributes>
 struct unit_storage {
   using env = Env;
 
-  using type = ground::pre_map<ground::key_value<
+  using type = mp::pre_map<mp::key_value<
       Attributes,
       typename traits::config<env>::template convert<Attributes>::type>...>;
 };
 
 template <typename Info, typename M>
 using with_info_t =
-    decltype(ground::prepend(M{}, ground::key_value<info, Info>{}));
+    decltype(mp::prepend(M{}, mp::key_value<info, Info>{}));
 
 template <typename Env, match::item... Items>
 struct item_storage {
   struct iinfo {
     using env = Env;
     using items = gather<Items...>;
-    using all_items_t = decltype(ground::fold_left(
+    using all_items_t = decltype(mp::fold_left(
         // take last defined items
-        ground::reverse(ground::concat_all(all_items(Items{})...)),
-        ground::make_tuple(),
+        mp::reverse(mp::concat_all(all_items(Items{})...)),
+        mp::make_tuple(),
         []<typename Acc, typename Elem>(Acc acc, Elem elem) {
-          if constexpr (ground::contains(acc, elem)) {
+          if constexpr (mp::contains(acc, elem)) {
             return acc;
           }
           else {
-            return ground::append(acc, elem);
+            return mp::append(acc, elem);
           };
         }));
-    using all_attributes_t = decltype(ground::flatten(
-        ground::concat_all(all_attributes(Items{})...)));
-    using all_properties_t = decltype(ground::flatten(
-        ground::concat_all(all_properties(Items{})...)));
+    using all_attributes_t = decltype(mp::flatten(
+        mp::concat_all(all_attributes(Items{})...)));
+    using all_properties_t = decltype(mp::flatten(
+        mp::concat_all(all_properties(Items{})...)));
 
     // subset of all_properties_t
-    using all_attached_storages_t = decltype(ground::filter(
-        all_properties_t{}, ground::derive_from<some::attached_storage>));
+    using all_attached_storages_t = decltype(mp::filter(
+        all_properties_t{}, mp::derive_from<some::attached_storage>));
   };
 
   constexpr static auto a =
-      ground::concat(typename iinfo::all_attributes_t{},
+      mp::concat(typename iinfo::all_attributes_t{},
                      typename iinfo::all_attached_storages_t{});
   // base map with declared attributes
-  using map_t = decltype(ground::unpack(
-      ground::concat(typename iinfo::all_attributes_t{},
+  using map_t = decltype(mp::unpack(
+      mp::concat(typename iinfo::all_attributes_t{},
                      typename iinfo::all_attached_storages_t{}),
       []<typename... Attributes>(Attributes...) {
         return
@@ -90,9 +90,9 @@ static constexpr auto item_storage_transform =
     []<typename D>(D&& d, auto&& f) constexpr -> decltype(auto) {
   using info_t = Info;
 
-  return ground::transform(d, [&f]<typename P>(P&& key_value) {
-    auto&& key = ground::first(key_value);
-    auto&& value = ground::second(key_value);
+  return mp::transform(d, [&f]<typename P>(P&& key_value) {
+    auto&& key = mp::first(key_value);
+    auto&& value = mp::second(key_value);
     using key_t = std::decay_t<decltype(key)>;
     using value_t = std::decay_t<decltype(value)>;
 
@@ -109,7 +109,7 @@ static constexpr auto item_storage_transform =
 
 static constexpr auto attribute_storage_transform =
     []<typename D, typename F>(D&& d, F&& f) constexpr -> decltype(auto) {
-  return ground::pre_map_value_transform(
+  return mp::pre_map_value_transform(
       std::forward<D>(d), [&f]<typename K, typename S>(K, S&& s) {
         if constexpr (match::attribute<typename K::type>) {
           return std::forward<F>(f)(typename K::type{}, std::forward<S>(s));
@@ -127,7 +127,7 @@ struct make {
     using item_storage_t = item_storage<Env, Items...>;
     using info_t = typename item_storage_t::iinfo;
     auto base_storage = typename item_storage_t::type{};
-    return ground::to_database(attribute_storage_transform(
+    return mp::to_database(attribute_storage_transform(
         item_storage_transform<info_t>(
             attribute_storage_transform(
                 base_storage,
@@ -146,7 +146,7 @@ struct make {
               using storage_t = std::decay_t<decltype(s)>;
 
               if constexpr (match::wrap<Item>) {
-                return ground::key_value<
+                return mp::key_value<
                     Attr,
                     typename traits::config<Env>::template convert<
                         typename Item::template wrapper<storage_t>>::type>{};
@@ -165,11 +165,11 @@ struct make {
                       typename traits::config<typename info_t::env>::
                           template convert<storage_wrapped>::type;
 
-                  return ground::key_value<Attr,
+                  return mp::key_value<Attr,
                                            storage_wrapped_and_converted>{};
                 }
                 else {
-                  return ground::key_value<
+                  return mp::key_value<
                       Attr,
                       typename Env::template default_storage<storage_t>>{};
                 }

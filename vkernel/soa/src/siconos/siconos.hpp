@@ -25,7 +25,7 @@
 #include "siconos/simul/time_discretization.hpp"
 #include "siconos/simul/time_stepping.hpp"
 #include "siconos/simul/topology.hpp"
-#include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
 #include "siconos/utils/environment.hpp"
