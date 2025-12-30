@@ -10,10 +10,10 @@ template <match::item Item>
 struct translated : item {
   using item_t = Item;
 
-  using attributes =
-      gather<attribute<"translated", some::item_ref<item_t>>,
-             attribute<"translation",
-                       some::vector<some::scalar, some::indice_value<3>>>>;
+  struct attributes {
+    some::item_ref<item_t> translated;
+    some::vector<some::scalar, some::indice_value<3>> translation;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

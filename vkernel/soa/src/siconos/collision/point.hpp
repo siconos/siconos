@@ -25,13 +25,13 @@ template <match::item Item>
   requires std::derived_from<Item, model::lagrangian_ds>
 struct point<Item> : item {
   using items = gather<Item>;
-
   using item_t = Item;
-  using attributes = gather<
-      // 3D coordinates, 2D => last value = 0.
-      attribute<"flag", some::boolean>,
-      attribute<"coord", some::vector<some::scalar, some::indice_value<3>>>,
-      attribute<"item", some::item_ref<item_t>>>;  // reverse link
+
+  struct attributes {
+    some::boolean flag;
+    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::item_ref<item_t> item;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -65,13 +65,12 @@ struct point<Item> {
   using items = gather<Item>;
   using item_t = Item;
 
-  using attributes = gather<
-      // 3D coordinates, 2D => last value = 0.
-      attribute<"flag", some::boolean>,
-      attribute<"coord", some::vector<some::scalar, some::indice_value<3>>>,
-      attribute<"item", some::item_ref<item_t>>,  // reverse link
-      attribute<"point_index", some::indice>>;    // index of the point on the
-                                                  // disk
+  struct attributes {
+    some::boolean flag;
+    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::item_ref<item_t> item;
+    some::indice point_index;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -104,13 +103,14 @@ struct point<Item> {
   using items = gather<Item>;
   using item_t = Item;
 
-  using attributes = gather<
-      // 3D coordinates, 2D => last value = 0.
-      attribute<"flag", some::boolean>,
-      attribute<"coord", some::vector<some::scalar, some::indice_value<3>>>,
-      attribute<"item", some::item_ref<item_t>>,  // reverse link
-      attribute<"point_index", some::indice>,
-      attribute<"seg_index", some::indice>>;  // index of segment in the mesh
+  struct attributes {
+    some::boolean flag;
+    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::item_ref<item_t> item;
+    some::indice point_index;
+    some::indice seg_index;
+  };
+
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

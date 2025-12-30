@@ -135,18 +135,18 @@ struct segment_base : item {
 
 struct segment : segment_base {
   using without_attributes_bindings = void;
-  using attributes = gather<
-      attribute<
-          "points",
-          // fixed vector of size 1 => same interface for an unbounded vector
-          // in the case of chained segment
-          some::vector<some::vector<some::scalar, some::indice_value<3>>,
-                       some::indice_value<2>>>,
-      attribute<"dp2p1", some::vector<some::vector<some::scalar,
-                                                   some::indice_value<3>>,
-                                      some::indice_value<1>>>,
-      attribute<"maxpoints", some::scalar>,
-      attribute<"length_sq",
-                some::vector<some::scalar, some::indice_value<1>>>>;
+
+  struct attributes {
+    // fixed vector of size 1 => same interface for an unbounded vector
+    // in the case of chained segment
+    some::vector<some::vector<some::scalar, some::indice_value<3>>,
+                 some::indice_value<2>>
+        points;
+    some::vector<some::vector<some::scalar, some::indice_value<3>>,
+                 some::indice_value<1>>
+        dp2p1;
+    some::scalar maxpoints;
+    some::vector<some::scalar, some::indice_value<1>> length_sq;
+  };
 };
 }  // namespace siconos::collision::shape

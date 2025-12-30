@@ -9,12 +9,11 @@ namespace siconos::collision {
 
 // disk fixed disk
 
-struct diskfdisk_r : item,
-                     model::relation1,
-                     model::any_lagrangian_relation {
-  using attributes =
-      gather<attribute<"translated_disk_shape",
-                       some::item_ref<collision::translated<shape::disk>>>>;
+struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
+
+  struct attributes {
+    some::item_ref<collision::translated<shape::disk>> translated_disk_shape;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

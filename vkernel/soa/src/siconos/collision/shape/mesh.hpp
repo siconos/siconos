@@ -7,12 +7,11 @@
 namespace siconos::collision::shape {
 
 struct mesh : item {
-
   using items = gather<chained_segment>;
 
-  using attributes =
-      // segments
-      gather<attribute<"segments", some::item_ref<chained_segment>>>;
+  struct attributes {
+    some::item_ref<chained_segment> segments;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

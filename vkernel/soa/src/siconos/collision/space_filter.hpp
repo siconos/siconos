@@ -63,23 +63,23 @@ struct space_filter : item {
   using dynamical_system = typename topology::fixed_dof_system;
   using interaction = typename topology::finteraction;
   using nslaw = typename interaction::nslaw;
-
   using neighborhood = Neighborhood;
 
-  using attributes = gather<
-      attribute<"topology", some::item_ref<topology>>,
-      attribute<"neighborhood", some::item_ref<neighborhood>>,
-      attribute<"nslaw", some::item_ref<nslaw>>,
-      attribute<"diskdisk_r", some::item_ref<diskdisk_r>>,
-      attribute<"diskmeshes",
-                some::map<some::array<some::indice, some::indice_value<2>>,
-                          some::item_ref<diskmesh_r>>>,
-      attribute<"diskfsegments",
-                some::map<some::array<some::scalar, some::indice_value<4>>,
-                          some::item_ref<diskfsegment_r>>>,
-      attribute<"diskfdisks",
-                some::map<some::array<some::scalar, some::indice_value<2>>,
-                          some::item_ref<diskfdisk_r>>>>;
+  struct attributes {
+    some::item_ref<topology> topology;
+    some::item_ref<neighborhood> neighborhood;
+    some::item_ref<nslaw> nslaw;
+    some::item_ref<diskdisk_r> diskdisk_r;
+    some::map<some::array<some::indice, some::indice_value<2>>,
+              some::item_ref<diskmesh_r>>
+        diskmeshes;
+    some::map<some::array<some::scalar, some::indice_value<4>>,
+              some::item_ref<diskfsegment_r>>
+        diskfsegments;
+    some::map<some::array<some::scalar, some::indice_value<2>>,
+              some::item_ref<diskfdisk_r>>
+        diskfdisks;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -307,7 +307,7 @@ struct space_filter : item {
               auto new_point = storage::add<Point>(data);
               new_point.item() = fdisk;
               new_point.coord() = point_coord;
-              new_point.point_index() = (indice) i;
+              new_point.point_index() = (indice)i;
             }
           }
         };

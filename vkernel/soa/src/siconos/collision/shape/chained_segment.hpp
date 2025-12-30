@@ -14,12 +14,13 @@ struct chained_segment : segment_base {
   using without_attributes_bindings = void;
   using without_attached_storages_bindings = void;
 
-  using attributes =
-      gather<attribute<"points", some::unbounded_vector<some::vector<
-                                     some::scalar, some::indice_value<3>>>>,
-             attribute<"dp2p1", some::unbounded_vector<some::vector<
-                                    some::scalar, some::indice_value<3>>>>,
-             attribute<"maxpoints", some::scalar>,
-             attribute<"length_sq", some::unbounded_vector<some::scalar>>>;
+  struct attributes {
+    some::unbounded_vector<some::vector<some::scalar, some::indice_value<3>>>
+        points;
+    some::unbounded_vector<some::vector<some::scalar, some::indice_value<3>>>
+        dp2p1;
+    some::scalar maxpoints;
+    some::unbounded_vector<some::scalar> length_sq;
+  };
 };
 }  // namespace siconos::collision::shape

@@ -7,7 +7,9 @@
 namespace siconos::collision {
 
 struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
-  using attributes = gather<attribute<"line", some::item_ref<shape::line>>>;
+  struct attributes {
+    some::item_ref<shape::line> line;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -32,7 +34,8 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
       auto& data = self()->data();
 
       auto& q = storage::attr<"q">(ds);
-      auto& r = storage::make_handle(data, storage::prop<"shape">(ds)).radius();
+      auto& r =
+          storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 
       auto& x = q(0);
       auto& y = q(1);

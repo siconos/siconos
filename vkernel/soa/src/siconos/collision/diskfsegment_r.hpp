@@ -11,8 +11,10 @@ namespace siconos::collision {
 struct diskfsegment_r : item,
                         model::relation1,
                         model::any_lagrangian_relation {
-  using attributes =
-      gather<attribute<"segment", some::item_ref<shape::segment>>>;
+
+  struct attributes {
+    some::item_ref<shape::segment> segment;
+  };
 
   using properties =
       gather<storage::attached<shape::segment, symbol<"relation">,

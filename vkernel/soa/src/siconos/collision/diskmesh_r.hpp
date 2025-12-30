@@ -6,9 +6,11 @@
 namespace siconos::collision {
 
 struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
-  using attributes =
-      gather<attribute<"mesh", some::item_ref<shape::chained_segment>>,
-             attribute<"contact_index", some::indice>>;
+
+  struct attributes {
+    some::item_ref<shape::chained_segment> mesh;
+    some::indice contact_index;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

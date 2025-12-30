@@ -10,7 +10,7 @@ namespace siconos::collision {
 struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   using dof = some::indice_parameter<"dof">;
 
-  using attributes = gather<>;  // ! empty
+  struct attributes {}; // empty
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
