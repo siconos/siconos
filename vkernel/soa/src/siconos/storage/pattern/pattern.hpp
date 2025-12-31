@@ -332,13 +332,12 @@ concept vertex_item_t = requires(T t) {
 template <std::size_t N>
 consteval auto string_view_to_fixed_string(std::string_view sv)
 {
-  string_literal<N> fs{""};
-  for (std::size_t i = 0; i < N; ++i) {
-    fs.value[i] = sv[i];
-  }
-  fs.value[N - 1] = '\0';
-  return fs;
+  return [&sv]<std::size_t... Is>(std::index_sequence<Is...>) {
+    const char arr[N] = { (Is < sv.size() ? sv[Is] : '\0')... };
+    return string_literal<N>{arr};
+  }(std::make_index_sequence<N>());
 }
+
 
 // Symbol type that stores PFR field name
 template <typename T, std::size_t I>
@@ -358,6 +357,7 @@ struct pfr_symbol {
   }();
   using symbol_type = text<literal>;
 };
+
 
 // rename to attr_name ? (cf with_name)
 template <string_literal Name, match::attribute A>

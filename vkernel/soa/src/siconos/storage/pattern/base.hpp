@@ -35,12 +35,6 @@ struct string_literal {
   char value[N];
 };
 
-template <string_literal a>
-decltype(auto) operator""_x()
-{
-  return a;
-};
-
 template <typename T>
 constexpr auto make_string_literal(T&& t)
 {

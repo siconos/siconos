@@ -90,6 +90,7 @@ using hana::prepend;
 using hana::set;
 using hana::size;
 using hana::size_c;
+using hana::to;
 using hana::to_map;
 using hana::to_set;
 using hana::tuple;
@@ -148,7 +149,7 @@ using hana::find_if;
 
 using hana::for_each;
 
-static auto insert = hana::insert;
+using hana::insert;
 
 static auto partial = hana::partial;
 

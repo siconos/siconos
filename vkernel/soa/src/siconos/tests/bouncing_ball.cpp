@@ -1,4 +1,5 @@
 
+#include "siconos/config/config_builder.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/utils/print.hpp"
 
@@ -13,25 +14,25 @@ struct topo : simul::topology<ball, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
-
-using params = map<iparam<"dof", 3>>;
-
-struct make
-    : storage::make<
-          standard_environment<params>, simulation,
-          storage::with_properties<
-              storage::time_invariant<storage::attr_t<config::ball, "fext">>,
-              storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::attr_t<typename config::osi::assembled_osi_t,
-                                  "mass_matrix_assembled">>>> {};
-
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
 {
-  using namespace siconos;
-  auto data = config::make();
+  namespace storage = siconos::storage;
+  namespace config = siconos::config;
+  using siconos::print;
+  using siconos::storage::handle;
+  using siconos::storage::make;
+  using siconos::storage::pattern::param_val;
+
+  make data =
+      config::storage()
+          .with_param<"dof", 3>()
+          .with_items<config::simulation>()
+          .with_time_invariant<config::ball, "fext">()
+          .with_diagonal<config::ball, "mass_matrix">()
+          .with_assembled_diagonal<config::osi, "mass_matrix_assembled">()
+          .build();
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
@@ -49,7 +50,7 @@ int main(int argc, char* argv[])
   // --------------------------
   // -- The dynamical_system --
   // --------------------------
-  auto ball = storage::add<config::ball>(data);
+  handle ball = storage::add<config::ball>(data);
 
   ball.q() = {position_init, 0, 0};
   ball.velocity() = {velocity_init, 0, 0};
@@ -63,21 +64,21 @@ int main(int argc, char* argv[])
   // ------------------
 
   // -- Lagrangian relation --
-  auto relation = storage::add<config::relation>(data);
+  handle relation = storage::add<config::relation>(data);
   relation.h_matrix() = {-1.0, 0., 0.};
 
   // -- nslaw --
   double e = 0.9;
-  auto nslaw = storage::add<config::nslaw>(data);
+  handle nslaw = storage::add<config::nslaw>(data);
   nslaw.e() = e;
 
-  auto lcp = storage::add<config::lcp>(data);
+  handle lcp = storage::add<config::lcp>(data);
   lcp.create(SICONOS_LCP_LEMKE);
 
   // ------------------
   // --- Simulation ---
   // ------------------
-  auto simulation = storage::add<config::simulation>(data);
+  handle simulation = storage::add<config::simulation>(data);
 
   simulation.one_step_integrator().theta() = theta;
   simulation.one_step_integrator().constraint_activation_threshold() = 0.;
@@ -86,16 +87,16 @@ int main(int argc, char* argv[])
 
   simulation.time_discretization().tmax() = tmax;
   // -- set the formulation for the one step nonsmooth problem --
-  auto osnspb = simulation.one_step_nonsmooth_problem();
+  handle osnspb = simulation.one_step_nonsmooth_problem();
   osnspb.problem() = lcp;
 
   // -- set the options --
-  auto so = storage::add<simul::solver_options>(data);
+  handle so = storage::add<siconos::simul::solver_options>(data);
   so.create();
   osnspb.options() = so;
 
   // Interaction ball-floor
-  auto interaction = simulation.topology().link(ball);
+  handle interaction = simulation.topology().link(ball);
   // interaction.h_matrix1() = {1., 0., 0.};
 
   interaction.relation() = relation;
@@ -111,7 +112,7 @@ int main(int argc, char* argv[])
   // fix this for constant fext
   simulation.initialize();
 
-  auto out = fmt::output_file("result.dat");
+  fmt::ostream out = fmt::output_file("result.dat");
 
   out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
             simulation.current_step() * simulation.time_step(),
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
             0.);
 
   while (simulation.has_next_event()) {
-    auto ninvds = simulation.compute_one_step();
+    uint ninvds = simulation.compute_one_step();
 
     double p0, lambda;
     if (ninvds > 0) {
