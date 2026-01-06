@@ -70,11 +70,10 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   using info_t = get_info_t<D>;
   using data_t = D;
   using indice = typename info_t::env::indice;
-  using attached_storages_t =
-      decltype(mp::filter(typename info_t::all_properties_t{},
-                              mp::is_a_model<[]<typename X>() {
-                                return match::attached_storage<X, T>;
-                              }>));
+  using attached_storages_t = decltype(mp::filter(
+      typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
+        return match::attached_storage<X, T>;
+      }>));
 
   auto item_type() { return type{}; }
 
@@ -94,8 +93,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   {
     using item_t = T;
     constexpr auto tpl = mp::filter(
-        typename info_t::all_properties_t{},
-        mp::is_a_model<[]<typename X>() {
+        typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
           return (match::attached_storage<X, item_t> && (match::tag<X, A>));
         }>);
 
@@ -121,8 +119,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
 
   explicit handle(D& data, index_t& indx) : base_t{data, indx} {};
 
-  explicit handle(D& data, index_t&& indx)
-      : base_t{data, indx} {};
+  explicit handle(D& data, index_t&& indx) : base_t{data, indx} {};
 
   handle() : base_t{} {};
 
@@ -132,14 +129,14 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   template <template <typename...> typename OtherBase>
   handle& operator=(const handle<OtherBase, T, R, D>& other)
   {
-    this->index() = other.index();
+    this->_index = other.index();
     return *this;
   }
 
   // Fixed existing assignment operator
   handle& operator=(const handle& h)
   {
-    this->index() = h.index();
+    this->_index = h.index();
     return *this;
   };
 
@@ -197,8 +194,8 @@ static auto handles =
   using indice = typename env::indice;
 
   using attributes_t = std::decay_t<decltype(attributes(I{}))>;
-  // need at least one attributes
-  // empty items aX1re not supposed to exist
+  // Warning! need at least one attributes!
+  // This won't work for items without attributes such as some relations.
   indice num = std::size(attr_values<nth_t<0, attributes_t>>(data, step));
   return view::iota((indice)0, num) | view::transform([&data](indice i) {
            return handle<handle_base, I, indice,

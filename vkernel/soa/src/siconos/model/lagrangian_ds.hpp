@@ -3,108 +3,95 @@
 #include "siconos/model/model_head.hpp"
 
 namespace siconos::model {
-
 /**
- * @brief Represents a Lagrangian dynamical system.
+ * @brief Represents a Lagrangian dynamical system with fixed-size attributes
  *
  * This struct defines a Lagrangian dynamical system with attributes related
- * to its configuration, velocity, mass matrix, and external forces.
+ * to its configuration, velocity, mass matrix, and external forces. The
+ * size of vectors and matrices is fixed at compile time through the "dof"
+ * parameter.
  */
-struct lagrangian_ds
-    : item {
-  using dof =
-      some::indice_parameter<"dof">; /**< Degree of freedom parameter. */
+struct lagrangian_ds : item {
+  /// @brief Degree of freedom parameter specifying system dimension
+  using dof = some::indice_parameter<"dof">;
 
   /**
-   * @brief Defines the attributes of the Lagrangian dynamical system.
+   * @brief Attributes defining the state and properties of the system
    *
-   * The attributes include:
-   * - q: position vector
-   * - velocity: velocity vector
-   * - mass_matrix: mass matrix of the system
-   * - fext: external forces vector
+   * Contains:
+   * - q: Position vector (size = dof)
+   * - velocity: Velocity vector (size = dof)
+   * - mass_matrix: Mass matrix (size = dof x dof)
+   * - fext: External forces vector (size = dof)
    */
-  using attributes =
-      gather<attribute<"q", some::vector<some::scalar, dof>>,
-             attribute<"velocity", some::vector<some::scalar, dof>>,
-             attribute<"mass_matrix", some::matrix<some::scalar, dof, dof>>,
-             attribute<"fext", some::vector<some::scalar, dof>>>;
+  struct attributes {
+    some::vector<some::scalar, dof> q;                 ///< Position vector
+    some::vector<some::scalar, dof> velocity;          ///< Velocity vector
+    some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
+    some::vector<some::scalar, dof> fext;  ///< External forces vector
+  };
 
   /**
-   * @brief Interface for interacting with the Lagrangian dynamical system.
-   *
-   * This nested template struct provides methods to access the system's
-   * attributes.
-   *
-   * @tparam Handle Type of the handle for accessing the interface.
+   * @brief Interface for accessing system attributes
+   * @tparam Handle Type providing access to the system instance
    */
   template <typename Handle>
   struct interface : default_interface<Handle> {
-    using default_interface<Handle>::self; /**< Inherit the `self` pointer
-                                              from the parent. */
+    using default_interface<Handle>::self;  ///< Inherited self pointer
 
-    /**
-     * @brief Access the mass matrix attribute.
-     *
-     * @return Reference to the mass matrix.
-     */
+    /// @brief Access mass matrix attribute
     decltype(auto) mass_matrix() { return attr<"mass_matrix">(*self()); }
 
-    /**
-     * @brief Access the velocity attribute.
-     *
-     * @return Reference to the velocity vector.
-     */
+    /// @brief Access velocity attribute
     decltype(auto) velocity() { return attr<"velocity">(*self()); }
 
-    /**
-     * @brief Access the position attribute.
-     *
-     * @return Reference to the position vector.
-     */
+    /// @brief Access position attribute
     decltype(auto) q() { return attr<"q">(*self()); }
 
-    /**
-     * @brief Access the external forces attribute.
-     *
-     * @return Reference to the external forces vector.
-     */
+    /// @brief Access external forces attribute
     decltype(auto) fext() { return attr<"fext">(*self()); }
   };
 };
 
 /**
- * @brief Represents a Lagrangian dynamical system with the number of
- *        degrees of freedom specified at runtime.
+ * @brief Represents a Lagrangian dynamical system with runtime-sized
+ * attributes
  *
- * This struct provides an alternative representation of a Lagrangian
- * dynamical system with unbounded attributes.
+ * Similar to lagrangian_ds but with unbounded vectors and matrices whose
+ * sizes are determined at runtime. Includes an additional "dof" attribute
+ * to specify the current system dimension.
  */
 struct rt_lagrangian_ds : item {
-  using without_attached_storages_bindings =
-      void; /**< No attached storage bindings. */
+  /// @brief Indicates no attached storage bindings (optimization hint)
+  using without_attached_storages_bindings = void;
 
   /**
-   * @brief Defines the unbounded attributes of the Lagrangian
-   * dynamical system.
+   * @brief Attributes defining the state and properties of the system
    *
-   * The attributes include:
-   * - q: position vector (unbounded)
-   * - velocity: velocity vector (unbounded)
-   * - mass_matrix: mass matrix of the system (unbounded)
-   * - fext: external forces vector (unbounded)
+   * Contains:
+   * - dof: Current degree of freedom (system dimension)
+   * - q: Position vector (unbounded size)
+   * - velocity: Velocity vector (unbounded size)
+   * - mass_matrix: Mass matrix (unbounded size)
+   * - fext: External forces vector (unbounded size)
    */
-  using attributes =
-      gather<attribute<"dof", some::scalar>,
-             attribute<"q", some::unbounded_vector<some::scalar>>,
-             attribute<"velocity", some::unbounded_vector<some::scalar>>,
-             attribute<"mass_matrix", some::unbounded_matrix<some::scalar>>,
-             attribute<"fext", some::unbounded_vector<some::scalar>>>;
+  struct attributes {
+    some::scalar dof;                        ///< Current degree of freedom
+    some::unbounded_vector<some::scalar> q;  ///< Position vector
+    some::unbounded_vector<some::scalar> velocity;     ///< Velocity vector
+    some::unbounded_matrix<some::scalar> mass_matrix;  ///< Mass matrix
+    some::unbounded_vector<some::scalar> fext;  ///< External forces vector
+  };
 
+  /**
+   * @brief Interface for accessing system attributes
+   * @tparam Handle Type providing access to the system instance
+   */
   template <typename Handle>
   struct interface : lagrangian_ds::interface<Handle> {
-    using lagrangian_ds::interface<Handle>::self;
+    using lagrangian_ds::interface<Handle>::self;  ///< Inherited self pointer
 
+    /// @brief Access degree of freedom attribute
     decltype(auto) dof() { return attr<"dof">(*self()); }
   };
 };

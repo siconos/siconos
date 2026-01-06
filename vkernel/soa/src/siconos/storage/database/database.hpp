@@ -7,6 +7,6 @@ namespace siconos::storage::database {
     using info = Info;
 
     UnderlyingDb _data;
-  }
+  };
 
 }
