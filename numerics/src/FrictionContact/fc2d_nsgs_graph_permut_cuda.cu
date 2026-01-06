@@ -69,7 +69,9 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-/* Only support SBM format for now */
+/* Extract diagonal blocks from a 2D problem, as a contiguous array.
+ * Only works on SBM matrices.
+ */
 static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
   unsigned int nc = problem->numberOfContacts;
   double* sbcm = (double*)calloc(4 * nc, sizeof(double));
@@ -84,71 +86,13 @@ static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
 
   return sbcm;
 }
+
+/* Free diagonal blocks array */
 static void* fc2d_free_diagonal_blocks(double* sbcm) {
   free(sbcm);
   return NULL;
 }
 
-static void fc2d_nsgs_buildLocalProblem_parallel(
-    unsigned int contact, FrictionContactProblem* problem, double* blocks_contiguous,
-    double* diagonal_blocks, size_t* index1_data, size_t* index2_data,
-    LinearComplementarityProblem* local_problem, double* reaction) {
-  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
-  local_problem->M->matrix0 = &diagonal_blocks[4 * contact];
-
-  local_problem->M->size0 = 2;  // Necessary ?
-  local_problem->M->size1 = 2;
-
-  local_problem->q[0] = problem->q[contact * 2];
-  local_problem->q[1] = problem->q[contact * 2 + 1];
-
-  size_t colNumber;
-
-  for (size_t blockNum = index1_data[contact]; blockNum < index1_data[contact + 1];
-       ++blockNum) {
-    colNumber = index2_data[blockNum];
-    if (colNumber != contact) {
-      mvp2x2(&blocks_contiguous[blockNum * 4], &reaction[2 * colNumber], local_problem->q);
-    }
-  }
-
-  /* NM_row_prod_no_diag2_parallel(2 * problem->numberOfContacts, contact, 2 * contact,
-     problem->M, reaction, local_problem->q, false); */
-}
-
-static void shuffle(unsigned int size, unsigned int* randnum)  // size is the given range
-{
-  unsigned int swap, randindex;
-  for (unsigned i = 0; i < size; ++i) {
-    swap = randnum[i];
-    randindex = rand() % size;
-    randnum[i] = randnum[randindex];
-    randnum[randindex] = swap;
-  }
-}
-
-static inline double light_error_squared(double localreaction[2], double* oldreaction) {
-  double x0 = oldreaction[0] - localreaction[0];
-  double x1 = oldreaction[1] - localreaction[1];
-  return x0 * x0 + x1 * x1;
-}
-static inline double squared_norm(double localreaction[2]) {
-  return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
-}
-
-static inline void accumulateLightErrorSum(double* light_error_sum, double localreaction[2],
-                                           double* oldreaction) {
-  double x0 = oldreaction[0] - localreaction[0];
-  double x1 = oldreaction[1] - localreaction[1];
-  *light_error_sum += x0 * x0 + x1 * x1;
-}
-static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
-                                  double* norm_r) {
-  double error = sqrt(light_error_sum);
-  *norm_r = cblas_dnrm2(nc * 2, reaction, 1);
-  if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
-  return error;
-}
 static int determine_convergence(double error, double tolerance, unsigned int iter,
                                  SolverOptions* options) {
   int has_not_converged = 1;
@@ -252,232 +196,108 @@ static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
   return diagonal_block_determinant;
 }
 
-static inline void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu,
-                                         double* P) {
-  /* | Wnn Wnt |
-     | Wtn Wtt | */
+/* Set diagonal blocks to 0.
+ * We could also try to completely remove them.
+ */
+static void remove_diagonal_blocks(FrictionContactProblem* problem) {
+  unsigned int nc = problem->numberOfContacts;
+  double* block;
+  int diagPos;
 
-#define Wnn W[0]
-#define Wtn W[1]
-#define Wnt W[2]
-#define Wtt W[3]
+  for (unsigned int i = 0; i < nc; ++i) {
+    diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
+    block = problem->M->matrix1->block[diagPos];
+    for (int j = 0; j < 4; j++) block[j] = 0.0;
+  }
+}
 
-  if (q[0] > 0) {
-    P[0] = 0;
-    P[1] = 0;
-  } else {
-    /* solve WP + q = 0  */
+/* CUDA kernel to solve local problems,
+ * compute and aggregate the errors.
+ */
+__global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
+    const double* W,   // 4*n
+    const double* D,   // size: n
+    const double* q,   // 2*n
+    const double* mu,  // size: n
+    double* P,         // 2*n (updated in place)
+    double* sumP2,     // scalar (device pointer)
+    double* sumErr2,   // scalar (device pointer)
+    const int k1, const int k2) {
+  extern __shared__ double shmem[];
+  double* shP2 = shmem;                 // blockDim.x
+  double* shErr2 = shmem + blockDim.x;  // blockDim.x
 
-    P[0] = -(Wtt * q[0] - Wnt * q[1]) / D;
-    P[1] = -(-Wtn * q[0] + Wnn * q[1]) / D;
+  int tid = threadIdx.x;
+  int local = blockIdx.x * blockDim.x + tid;
+  int i = k1 + local;
 
-    double muPn = mu * P[0];
+  double localP2 = 0.0;
+  double localErr2 = 0.0;
 
-    if (fabs(P[1]) > muPn)
-    /* outside cone */
-    {
-      if (P[1] + muPn < 0) {
-        P[0] = -q[0] / (Wnn - mu * Wnt);
-        P[1] = -mu * P[0];
-      } else {
-        P[0] = -q[0] / (Wnn + mu * Wnt);
-        P[1] = mu * P[0];
+  if (i < k2) {
+    const double Di = D[i];
+    const double mui = mu[i];
+    const double* Wi = &W[4 * i];
+    const double* qi = &q[2 * i];
+    double* Pi = &P[2 * i];
+
+    // Save old P
+    double Pold0 = Pi[0];
+    double Pold1 = Pi[1];
+
+    const double Wnn = Wi[0];
+    const double Wtn = Wi[1];
+    const double Wnt = Wi[2];
+    const double Wtt = Wi[3];
+
+    if (qi[0] > 0.0) {
+      Pi[0] = 0.0;
+      Pi[1] = 0.0;
+    } else {
+      Pi[0] = -(Wtt * qi[0] - Wnt * qi[1]) / Di;
+      Pi[1] = -(-Wtn * qi[0] + Wnn * qi[1]) / Di;
+
+      double muPn = mui * Pi[0];
+
+      if (fabs(Pi[1]) > muPn) {
+        if (Pi[1] + muPn < 0.0) {
+          Pi[0] = -qi[0] / (Wnn - mui * Wnt);
+          Pi[1] = -mui * Pi[0];
+        } else {
+          Pi[0] = -qi[0] / (Wnn + mui * Wnt);
+          Pi[1] = mui * Pi[0];
+        }
       }
     }
+
+    // Accumulate local contributions
+    double dP0 = Pi[0] - Pold0;
+    double dP1 = Pi[1] - Pold1;
+
+    localP2 = Pi[0] * Pi[0] + Pi[1] * Pi[1];
+    localErr2 = dP0 * dP0 + dP1 * dP1;
   }
-#undef Wnn
-#undef Wnt
-#undef Wtn
-#undef Wtt
-}
 
-static unsigned int* f2d_nsgs_allocate_freezing_contacts(FrictionContactProblem* problem,
-                                                         SolverOptions* options) {
-  unsigned int* fcontacts = 0;
-  unsigned int nc = problem->numberOfContacts;
-  if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
-    fcontacts = (unsigned int*)malloc(nc * sizeof(unsigned int));
-    for (unsigned int i = 0; i < nc; ++i) {
-      fcontacts[i] = 0;
+  // Store into shared memory
+  shP2[tid] = localP2;
+  shErr2[tid] = localErr2;
+  __syncthreads();
+
+  // Block reduction
+  for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+    if (tid < s) {
+      shP2[tid] += shP2[tid + s];
+      shErr2[tid] += shErr2[tid + s];
     }
-  }
-  return fcontacts;
-}
-
-static void remove_diagonal_blocks(FrictionContactProblem *problem)
-{
-    unsigned int nc = problem->numberOfContacts;
-    double *block;
-    int diagPos;
-
-    for (unsigned int i = 0; i < nc; ++i)
-    {
-        diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
-        block = problem->M->matrix1->block[diagPos];
-        for (int j = 0; j < 4; j++)
-            block[j] = 0.0;
-    }
-}
-
-// CUDA kernel for vector addition
-__global__ void vecAdd(float* A, float* B, float* C, int N) {
-  int i = threadIdx.x + blockDim.x * blockIdx.x;
-  if (i < N) {
-    C[i] = A[i] + B[i];
-  }
-}
-
-// Device function to solve local problem
-__device__ __forceinline__ void fc2d_nsgs_local_solve_device(
-    const double* W,
-    double D,
-    const double* q,
-    double mu,
-    double* P)
-{
-    // | Wnn Wnt |
-    // | Wtn Wtt |
-
-    const double Wnn = W[0];
-    const double Wtn = W[1];
-    const double Wnt = W[2];
-    const double Wtt = W[3];
-
-    if (q[0] > 0.0) {
-        P[0] = 0.0;
-        P[1] = 0.0;
-    } else {
-        // solve W P + q = 0
-        P[0] = -(Wtt * q[0] - Wnt * q[1]) / D;
-        P[1] = -(-Wtn * q[0] + Wnn * q[1]) / D;
-
-        const double muPn = mu * P[0];
-
-        // outside cone
-        if (fabs(P[1]) > muPn) {
-            if (P[1] + muPn < 0.0) {
-                P[0] = -q[0] / (Wnn - mu * Wnt);
-                P[1] = -mu * P[0];
-            } else {
-                P[0] = -q[0] / (Wnn + mu * Wnt);
-                P[1] =  mu * P[0];
-            }
-        }
-    }
-}
-
-// CUDA kernel to solve local problem
-__global__ void fc2d_nsgs_local_solve_kernel(
-    const double* W,   // size: 4 * n
-    const double* D,   // size: n
-    const double* q,   // size: 2 * n
-    const double* mu,  // size: n
-    double* P,         // size: 2 * n
-    int k1,
-    int k2)
-{
-    int local = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = k1 + local;
-    if (i >= k2) return;
-
-    fc2d_nsgs_local_solve_device(
-        &W[4 * i],
-        D[i],
-        &q[2 * i],
-        mu[i],
-        &P[2 * i]
-    );
-}
-
-
-__global__
-void fc2d_nsgs_local_solve_kernel_range_reduce(
-    const double* W,      // 4*n
-    const double* D,      // size: n
-    const double* q,      // 2*n
-    const double* mu,     // size: n
-    double* P,            // 2*n (updated in place)
-    double* sumP2,        // scalar (device pointer)
-    double* sumErr2,      // scalar (device pointer)
-    int k1,
-    int k2)
-{
-    extern __shared__ double shmem[];
-    double* shP2   = shmem;                 // blockDim.x
-    double* shErr2 = shmem + blockDim.x;    // blockDim.x
-
-    int tid   = threadIdx.x;
-    int local = blockIdx.x * blockDim.x + tid;
-    int i     = k1 + local;
-
-    double localP2   = 0.0;
-    double localErr2 = 0.0;
-
-    if (i < k2) {
-        const double Di = D[i];
-        const double mui = mu[i];
-        const double* Wi = &W[4 * i];
-        const double* qi = &q[2 * i];
-        double* Pi       = &P[2 * i];
-
-        // Save old P
-        double Pold0 = Pi[0];
-        double Pold1 = Pi[1];
-
-        const double Wnn = Wi[0];
-        const double Wtn = Wi[1];
-        const double Wnt = Wi[2];
-        const double Wtt = Wi[3];
-
-        if (qi[0] > 0.0) {
-            Pi[0] = 0.0;
-            Pi[1] = 0.0;
-        } else {
-            Pi[0] = -(Wtt * qi[0] - Wnt * qi[1]) / Di;
-            Pi[1] = -(-Wtn * qi[0] + Wnn * qi[1]) / Di;
-
-            double muPn = mui * Pi[0];
-
-            if (fabs(Pi[1]) > muPn) {
-                if (Pi[1] + muPn < 0.0) {
-                    Pi[0] = -qi[0] / (Wnn - mui * Wnt);
-                    Pi[1] = -mui * Pi[0];
-                } else {
-                    Pi[0] = -qi[0] / (Wnn + mui * Wnt);
-                    Pi[1] =  mui * Pi[0];
-                }
-            }
-        }
-
-        // Accumulate local contributions
-        double dP0 = Pi[0] - Pold0;
-        double dP1 = Pi[1] - Pold1;
-
-        localP2   = Pi[0] * Pi[0] + Pi[1] * Pi[1];
-        localErr2 = dP0 * dP0 + dP1 * dP1;
-    }
-
-    // Store into shared memory
-    shP2[tid]   = localP2;
-    shErr2[tid] = localErr2;
     __syncthreads();
+  }
 
-    // Block reduction
-    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
-        if (tid < s) {
-            shP2[tid]   += shP2[tid + s];
-            shErr2[tid] += shErr2[tid + s];
-        }
-        __syncthreads();
-    }
-
-    // One atomic per block
-    if (tid == 0) {
-        atomicAdd(sumP2,   shP2[0]);
-        atomicAdd(sumErr2, shErr2[0]);
-    }
+  // One atomic per block
+  if (tid == 0) {
+    atomicAdd(sumP2, shP2[0]);
+    atomicAdd(sumErr2, shErr2[0]);
+  }
 }
-
 
 void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, double* w,
                                  int* info, SolverOptions* options) {
@@ -503,17 +323,17 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // time = omp_get_wtime();
 
   // Initialize cusparse
-  cusparseHandle_t handle;
-  CHECK_CUSPARSE( cusparseCreate(&handle) );
-  /* int cusparse_version = -1;
-  CHECK_CUSPARSE( cusparseGetVersion(handle, &cusparse_version) )
-  printf("cusparse version: %d\n", cusparse_version); */
+  cusparseHandle_t handle = NULL;
+  CHECK_CUSPARSE(cusparseCreate(&handle))
+  // int cusparse_version = -1;
+  // CHECK_CUSPARSE( cusparseGetVersion(handle, &cusparse_version) )
+  // printf("cusparse version: %d\n", cusparse_version);
 
   // time = omp_get_wtime() - time;
   // printf("time initializing cusparse handle: %es\n", time);
-  //time = omp_get_wtime();
+  // time = omp_get_wtime();
 
-  // Start coloring and permutation 
+  // Start coloring and permutation
   size_t n_colors = 0;
   size_t* sum_sizes = NULL;
   size_t* inv_permutation = (size_t*)malloc(nc * sizeof(size_t));
@@ -523,7 +343,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // time = omp_get_wtime() - time;
   // printf("time coloring: %es\n", time);
 
-  numerics_printf("-- FC2D NSGS CUDA - Graph colored with %zu colors\n", n_colors);
+  // printf("Number of colors = %d\n", n_colors);
 
   // time = omp_get_wtime();
 
@@ -547,7 +367,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   /* Get diagonal blocks and determinants */
   double* diagonal_blocks = fc2d_extract_diagonal_blocks(problem);
-  double* diagonal_block_determinant = fc2d_nsgs_compute_local_problem_determinant(nc, diagonal_blocks);
+  double* diagonal_block_determinant =
+      fc2d_nsgs_compute_local_problem_determinant(nc, diagonal_blocks);
 
   double* mu_permuted = (double*)malloc(nc * sizeof(double));
   double* q_permuted = (double*)malloc(nc * 2 * sizeof(double));
@@ -565,58 +386,106 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   // time = omp_get_wtime() - time;
   // printf("time extracting diagonal + determinants: %e\n", time);
-
-  // Now initialize cusparse data
-
   // time = omp_get_wtime();
 
-  // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR conversion,
-  // unless the conversion function checks for 0 elements
-  remove_diagonal_blocks(problem); // set diagonal blocks of problem->M->matrix1 to 0
+  // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR
+  // conversion, unless the conversion function checks for 0 elements
+  remove_diagonal_blocks(problem);  // set diagonal blocks of problem->M->matrix1 to 0
 
-  CSparseMatrix *SBM_permuted_csr_nodiag = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
+  CSparseMatrix* SBM_permuted_csr_nodiag = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
   size_t res = SBM_to_sparse_init_memory(problem->M->matrix1, SBM_permuted_csr_nodiag);
   res = SBM_to_sparse(problem->M->matrix1, SBM_permuted_csr_nodiag);
-  if (res != 0) {
+  /* if (res != 0) {
     printf("Error converting SBM to CSparse.\n");
     return;
-  }
-  else {
+  } else {
     printf("Conversion SBM->CSparse done\n");
-  }
+  } */
 
-  // Create an array storing, for each color, the row offsets of the corresponding CSR submatrix 
-  int64_t *h_all_RowOffsets = (int64_t *)malloc((2 * nc + n_colors) * sizeof(int64_t));
+  /*
+    // Maximum number of elements in a line
+    size_t max_nnz_row = 0;
+    size_t nnz_row;
+    for (size_t row = 0; row < 2 * nc; row++) {
+      nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
+      if (nnz_row > max_nnz_row) max_nnz_row = nnz_row;
+    }
+    printf("maximum number of elements in a row = %d\n", max_nnz_row);
+
+    // Create sliced ELLpack matrices
+    int64_t sliceSize = 8; // number of lines in a slice
+    int64_t n_full_slices = (2 * nc) / sliceSize;
+    int64_t last_slice_size = (2 * nc) % sliceSize;
+    int64_t n_slices = n_full_slices + ((last_slice_size == 0) ? 0 : 1);
+
+    int64_t nnz_sliced = 0;
+    int64_t sellValuesSize = 0;
+
+
+    for (unsigned int slice = 0; slice < n_full_slices; slice++) {
+      // Get maximum number of elements in the slice
+      size_t max = 0;
+      size_t n_el;
+
+      // Find max number of nonzero elements in a row for this slice
+      for (unsigned int row = sliceSize * slice; row < sliceSize * (slice + 1); row++) {
+        nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
+        nnz_sliced += nnz_row;
+        if (max < nnz_row) max = nnz_row;
+      }
+
+      sellValuesSize += max * sliceSize
+    }
+
+    // Last slice, possibly
+    size_t max = 0;
+    size_t n_el;
+
+    for (unsigned int row = sliceSize * slice; row < sliceSize * (slice + 1); row++) {
+        nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
+        nnz_sliced += nnz_row;
+        if (max < nnz_row) max = nnz_row;
+      }
+
+      sellValuesSize += max * sliceSize */
+
+  // Create an array storing, for each color, the row offsets of the corresponding CSR
+  // submatrix
+  int64_t* h_all_RowOffsets = (int64_t*)malloc((2 * nc + n_colors) * sizeof(int64_t));
   size_t k = 0;
   for (unsigned int color = 0; color < n_colors; color++) {
     size_t start_line = 2 * sum_sizes[color];
     size_t end_line = 2 * sum_sizes[color + 1];
 
     for (unsigned int row = start_line; row < end_line + 1; row++) {
-      h_all_RowOffsets[k] = SBM_permuted_csr_nodiag->p[row] - SBM_permuted_csr_nodiag->p[start_line];
+      h_all_RowOffsets[k] =
+          SBM_permuted_csr_nodiag->p[row] - SBM_permuted_csr_nodiag->p[start_line];
       k++;
     }
   }
 
   // Copy this array to device
-  int64_t *d_all_RowOffsets = NULL;
-  CHECK_CUDA( cudaMalloc(&d_all_RowOffsets, (2 * nc + n_colors) * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMemcpy(d_all_RowOffsets, h_all_RowOffsets, (2 * nc + n_colors) * sizeof(int64_t), cudaMemcpyHostToDevice) )
+  int64_t* d_all_RowOffsets = NULL;
+  CHECK_CUDA(cudaMalloc(&d_all_RowOffsets, (2 * nc + n_colors) * sizeof(int64_t)))
+  CHECK_CUDA(cudaMemcpy(d_all_RowOffsets, h_all_RowOffsets,
+                        (2 * nc + n_colors) * sizeof(int64_t), cudaMemcpyHostToDevice))
+  free(h_all_RowOffsets);
 
   int64_t* d_all_ColIndices = NULL;
   double* d_all_Values = NULL;
   size_t nnz = SBM_permuted_csr_nodiag->p[2 * nc];
 
-  CHECK_CUDA( cudaMalloc(&d_all_ColIndices, nnz * sizeof(int64_t)) )
-  CHECK_CUDA( cudaMalloc(&d_all_Values, nnz * sizeof(double)) )
+  CHECK_CUDA(cudaMalloc(&d_all_ColIndices, nnz * sizeof(int64_t)))
+  CHECK_CUDA(cudaMalloc(&d_all_Values, nnz * sizeof(double)))
 
-  CHECK_CUDA( cudaMemcpy(d_all_ColIndices, SBM_permuted_csr_nodiag->i, nnz * sizeof(int64_t),
-             cudaMemcpyHostToDevice) )
-  CHECK_CUDA( cudaMemcpy(d_all_Values, SBM_permuted_csr_nodiag->x, nnz * sizeof(double),
-             cudaMemcpyHostToDevice) )
+  CHECK_CUDA(cudaMemcpy(d_all_ColIndices, SBM_permuted_csr_nodiag->i, nnz * sizeof(int64_t),
+                        cudaMemcpyHostToDevice))
+  CHECK_CUDA(cudaMemcpy(d_all_Values, SBM_permuted_csr_nodiag->x, nnz * sizeof(double),
+                        cudaMemcpyHostToDevice))
 
-  cusparseConstSpMatDescr_t *all_cusparse_csrmat = (cusparseConstSpMatDescr_t *)malloc(n_colors * sizeof(cusparseConstSpMatDescr_t));
-  
+  cusparseConstSpMatDescr_t* all_cusparse_csrmat =
+      (cusparseConstSpMatDescr_t*)malloc(n_colors * sizeof(cusparseConstSpMatDescr_t));
+
   double alpha = 1.0;
   double beta = 1.0;
   size_t n_rows;
@@ -629,72 +498,88 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
     end_line = 2 * sum_sizes[color + 1];
     n_rows = end_line - start_line;
     cumul_n_rows += n_rows;
-    current_nnz = SBM_permuted_csr_nodiag->p[end_line] - SBM_permuted_csr_nodiag->p[start_line];
+    current_nnz =
+        SBM_permuted_csr_nodiag->p[end_line] - SBM_permuted_csr_nodiag->p[start_line];
 
     // printf("%d\n", h_all_RowOffsets[start_line + color]);
 
-    CHECK_CUSPARSE( cusparseCreateConstCsr(&all_cusparse_csrmat[color], n_rows, 2 * nc, current_nnz, 
-                                           &d_all_RowOffsets[start_line + color], &d_all_ColIndices[cumul_nnz], &d_all_Values[cumul_nnz], 
-                                          CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F) )
+    CHECK_CUSPARSE(cusparseCreateConstCsr(
+        &all_cusparse_csrmat[color], n_rows, 2 * nc, current_nnz,
+        &d_all_RowOffsets[start_line + color], &d_all_ColIndices[cumul_nnz],
+        &d_all_Values[cumul_nnz], CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I,
+        CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F))
 
     cumul_nnz += current_nnz;
   }
 
   // Create vector for z, the reaction, which is the input of the product
-  double *d_z = NULL;
-  CHECK_CUDA( cudaMalloc(&d_z, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_z, z, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_z = NULL;
+  CHECK_CUDA(cudaMalloc(&d_z, (2 * nc) * sizeof(double)))
+  CHECK_CUDA(cudaMemcpy(d_z, z, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice))
   cusparseDnVecDescr_t vec_z;
-  CHECK_CUSPARSE( cusparseCreateDnVec(&vec_z, 2 * nc, d_z, CUDA_R_64F) )
+  CHECK_CUSPARSE(cusparseCreateDnVec(&vec_z, 2 * nc, d_z, CUDA_R_64F))
   // z vector created
-  
 
   // Create the res vectors, which are the q's of the local problems
-  double *h_q_new = (double *)malloc((2 * nc) * sizeof(double));
-  double *d_q_new = NULL;
-  CHECK_CUDA( cudaMalloc(&d_q_new, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_q_new, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_q_new = NULL;
+  CHECK_CUDA(cudaMalloc(&d_q_new, (2 * nc) * sizeof(double)))
+  CHECK_CUDA(
+      cudaMemcpy(d_q_new, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice))
 
-  cusparseDnVecDescr_t *all_q_new = (cusparseDnVecDescr_t *)malloc(n_colors * sizeof(cusparseDnVecDescr_t));
+  cusparseDnVecDescr_t* all_q_new =
+      (cusparseDnVecDescr_t*)malloc(n_colors * sizeof(cusparseDnVecDescr_t));
+
   for (unsigned int color = 0; color < n_colors; color++) {
-    CHECK_CUSPARSE( cusparseCreateDnVec(&all_q_new[color], 2 * (sum_sizes[color + 1] - sum_sizes[color]), &d_q_new[2 * sum_sizes[color]], CUDA_R_64F) )
+    CHECK_CUSPARSE(cusparseCreateDnVec(&all_q_new[color],
+                                       2 * (sum_sizes[color + 1] - sum_sizes[color]),
+                                       &d_q_new[2 * sum_sizes[color]], CUDA_R_64F))
   }
-  
-  void **d_all_Buffer = (void **)malloc(n_colors * sizeof(void *));
-  size_t *all_Buffer_Size = (size_t *)malloc(n_colors * sizeof(size_t));
+
+  void** d_all_Buffer = (void**)malloc(n_colors * sizeof(void*));
+  size_t* all_Buffer_Size = (size_t*)malloc(n_colors * sizeof(size_t));
 
   alpha = 1.0;
   beta = 1.0;
   for (unsigned int color = 0; color < n_colors; color++) {
-    CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color],
-                                          vec_z, &beta, all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, &all_Buffer_Size[color]) )
-    CHECK_CUDA( cudaMalloc(&d_all_Buffer[color], all_Buffer_Size[color]) )
+    CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
+                                           all_cusparse_csrmat[color], vec_z, &beta,
+                                           all_q_new[color], CUDA_R_64F,
+                                           CUSPARSE_SPMV_ALG_DEFAULT, &all_Buffer_Size[color]))
+    CHECK_CUDA(cudaMalloc(&d_all_Buffer[color], all_Buffer_Size[color]))
 
-    CHECK_CUSPARSE( cusparseSpMV_preprocess(
-                                handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, all_cusparse_csrmat[color], vec_z, &beta, all_q_new[color], CUDA_R_64F,
-                                CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]) )
+    CHECK_CUSPARSE(cusparseSpMV_preprocess(
+        handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color], vec_z,
+        &beta, all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]))
   }
 
   // Copy diagonal blocks to device
-  double *d_diagonal_blocks = NULL;
-  CHECK_CUDA( cudaMalloc(&d_diagonal_blocks, (4 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_diagonal_blocks, diagonal_blocks, (4 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_diagonal_blocks = NULL;
+  CHECK_CUDA(cudaMalloc(&d_diagonal_blocks, (4 * nc) * sizeof(double)))
+  CHECK_CUDA(cudaMemcpy(d_diagonal_blocks, diagonal_blocks, (4 * nc) * sizeof(double),
+                        cudaMemcpyHostToDevice))
+
+  // We don't need diagonal blocks anymore
+  fc2d_free_diagonal_blocks(diagonal_blocks);
 
   // Copy determinants of diagonal blocks to device
-  double *d_determinants = NULL;
-  CHECK_CUDA( cudaMalloc(&d_determinants, nc * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_determinants, diagonal_block_determinant, nc * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_determinants = NULL;
+  CHECK_CUDA(cudaMalloc(&d_determinants, nc * sizeof(double)))
+  CHECK_CUDA(cudaMemcpy(d_determinants, diagonal_block_determinant, nc * sizeof(double),
+                        cudaMemcpyHostToDevice))
+
+  // We don't need diagonal block determinants anymore
+  free(diagonal_block_determinant);
 
   // Copy mu to device
-  double *d_mu = NULL;
-  CHECK_CUDA( cudaMalloc(&d_mu, nc * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_mu, problem->mu, nc * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_mu = NULL;
+  CHECK_CUDA(cudaMalloc(&d_mu, nc * sizeof(double)))
+  CHECK_CUDA(cudaMemcpy(d_mu, problem->mu, nc * sizeof(double), cudaMemcpyHostToDevice))
 
   // Constant q on device
-  double *d_q_const = NULL;
-  CHECK_CUDA( cudaMalloc(&d_q_const, (2 * nc) * sizeof(double)) )
-  CHECK_CUDA( cudaMemcpy(d_q_const, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice) )
+  double* d_q_const = NULL;
+  CHECK_CUDA(cudaMalloc(&d_q_const, (2 * nc) * sizeof(double)))
+  CHECK_CUDA(
+      cudaMemcpy(d_q_const, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice))
 
   // time = omp_get_wtime() - time;
   // printf("time initializing cusparse stuff: %es\n", time);
@@ -704,7 +589,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
-  double time = omp_get_wtime();
+  // double time = omp_get_wtime();
 
   // FREEZING CONTACTS
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
@@ -837,28 +722,22 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
     /* NO FREEZING CONTACT */
     /***********************/
   } else {
-    unsigned int contact;
-    unsigned int pos;
     double light_error_sum = 0.;
-    double localreaction[2];
-
-
     double* d_sumP2 = NULL;
     double* d_sumErr2 = NULL;
 
-    CHECK_CUDA( cudaMalloc(&d_sumP2,   sizeof(double)) )
-    CHECK_CUDA( cudaMalloc(&d_sumErr2, sizeof(double)) )
+    CHECK_CUDA(cudaMalloc(&d_sumP2, sizeof(double)))
+    CHECK_CUDA(cudaMalloc(&d_sumErr2, sizeof(double)))
 
-    CHECK_CUDA( cudaMemset(d_sumP2,   0, sizeof(double)) )
-    CHECK_CUDA( cudaMemset(d_sumErr2, 0, sizeof(double)) )
-
+    CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
+    CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
 
     while ((iter < itermax) && has_not_converged) {
-
       // Set local problems q to q
-      CHECK_CUDA( cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double), cudaMemcpyDeviceToDevice) )
-      CHECK_CUDA( cudaMemset(d_sumP2,   0, sizeof(double)) )
-      CHECK_CUDA( cudaMemset(d_sumErr2, 0, sizeof(double)) )
+      CHECK_CUDA(
+          cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double), cudaMemcpyDeviceToDevice))
+      CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
+      CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
 
       for (size_t color = 0; color < n_colors; color++) {
         int rangeSize = sum_sizes[color + 1] - sum_sizes[color];
@@ -867,18 +746,19 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
         size_t shmemSize = 2 * threadsPerBlock * sizeof(double);
 
         // Build local problems in parallel
-        CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, all_cusparse_csrmat[color],
-                                     vec_z, &beta, all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, d_all_Buffer[color]) )
+        CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
+                                    all_cusparse_csrmat[color], vec_z, &beta, all_q_new[color],
+                                    CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT,
+                                    d_all_Buffer[color]))
 
         fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize>>>(
-          d_diagonal_blocks, d_determinants, d_q_new, d_mu, d_z,
-          d_sumP2, d_sumErr2,
-          sum_sizes[color], sum_sizes[color + 1]);
-
+            d_diagonal_blocks, d_determinants, d_q_new, d_mu, d_z, d_sumP2, d_sumErr2,
+            sum_sizes[color], sum_sizes[color + 1]);
       }
 
-      CHECK_CUDA( cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost) )
-      CHECK_CUDA( cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost) )
+      CHECK_CUDA(
+          cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
+      CHECK_CUDA(cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost))
 
       error = sqrt(light_error_sum);
       norm_r = sqrt(norm_r);
@@ -888,17 +768,20 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
         has_not_converged = determine_convergence(error, tolerance, iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, iter);
       }
 
       ++iter;
     }
+
+    CHECK_CUDA(cudaFree(d_sumP2))
+    CHECK_CUDA(cudaFree(d_sumErr2))
   }
 
-  time = omp_get_wtime() - time;
-  printf("time in loop: %es\n", time);
+  /* time = omp_get_wtime() - time;
+  printf("time in loop: %es\n", time); */
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -936,11 +819,22 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   /* Resulting error */
   dparam[SICONOS_DPARAM_RESIDU] = error;
 
-  fc2d_free_diagonal_blocks(diagonal_blocks);
-  free(diagonal_block_determinant);
-
   free(sum_sizes);
   free(inv_permutation);
+
+  // Destroy matrix/vector descriptors
+  for (unsigned int color = 0; color < n_colors; color++) {
+    CHECK_CUSPARSE(cusparseDestroySpMat(all_cusparse_csrmat[color]))
+    CHECK_CUSPARSE(cusparseDestroyDnVec(all_q_new[color]))
+    CHECK_CUDA(cudaFree(d_all_Buffer[color]))
+  }
+  free(all_cusparse_csrmat);
+  free(all_q_new);
+  free(d_all_Buffer);
+  free(all_Buffer_Size);
+
+  CHECK_CUSPARSE(cusparseDestroyDnVec(vec_z))
+  CHECK_CUSPARSE(cusparseDestroy(handle))
 
   /* Restore problem before permutation */
   problem->M->matrix1 = old_matrix1;
@@ -952,5 +846,14 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   free(q_permuted);
   free(mu_permuted);
 
-  /* DO NOT FORGET TO FREE THE REST */
+  // Device memory deallocation
+  CHECK_CUDA(cudaFree(d_all_RowOffsets))
+  CHECK_CUDA(cudaFree(d_all_ColIndices))
+  CHECK_CUDA(cudaFree(d_all_Values))
+  CHECK_CUDA(cudaFree(d_q_new))
+  CHECK_CUDA(cudaFree(d_z))
+  CHECK_CUDA(cudaFree(d_diagonal_blocks))
+  CHECK_CUDA(cudaFree(d_determinants))
+  CHECK_CUDA(cudaFree(d_mu))
+  CHECK_CUDA(cudaFree(d_q_const))
 }

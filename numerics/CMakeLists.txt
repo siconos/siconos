@@ -286,19 +286,21 @@ endif()
 
 # -- CUDA --
 if(WITH_CUDA)
+
+  # CUDA architectures (adjust based on target GPU)
+  # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
+  # if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  #   set(CMAKE_CUDA_ARCHITECTURES 80 90)
+  # endif()
+
+
   enable_language(CUDA)
   
   # Required for cuSPARSE
   find_package(CUDAToolkit REQUIRED)
 
-  # CUDA architectures (adjust based on target GPU)
-  # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
-  # if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  #   set(CMAKE_CUDA_ARCHITECTURES "60;70;75;80;86" CACHE STRING
-  #       "CUDA architectures to compile for")
-  # endif()
-
-  set_property(TARGET ${COMPONENT} PROPERTY CUDA_ARCHITECTURES "80;86")
+  set_target_properties(${COMPONENT} PROPERTIES CUDA_ARCHITECTURES "80;90")
+  # set_property(TARGET ${COMPONENT} PROPERTY CUDA_ARCHITECTURES "80;90")
 
   # CUDA compilation options
   target_compile_options(${COMPONENT} PRIVATE
