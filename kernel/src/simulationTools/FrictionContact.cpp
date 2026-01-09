@@ -20,15 +20,8 @@
 #include "Interaction.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
-#include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-
-// #include "NonSmoothDrivers.h" // from numerics, for fcX_driver
-// #include <fc2d_Solvers.h>
-// #include <fc3d_Solvers.h>
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb,
                                                                   int numericsSolverId)
@@ -113,11 +106,12 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem() {
   return numerics_problem;
 }
 
-int siconos::nonsmooth_formulations::FrictionContact::solve(
-    std::shared_ptr<FrictionContactProblem> problem) {
-  if (!problem) {
-    problem = frictionContactProblem();
-  }
+int siconos::nonsmooth_formulations::FrictionContact::solve()
+// std::shared_ptr<FrictionContactProblem> problem) {
+{
+  //  if (!problem) {
+  auto problem = frictionContactProblem();
+  //}
 
   return (*_frictionContact_driver)(&*problem, &*_z->data(), &*_w->data(),
                                     &*_numerics_solver_options);

@@ -170,7 +170,8 @@ class FrictionContact : public LinearOSNS {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(std::shared_ptr<FrictionContactProblem> problem = nullptr);
+  // int solve(std::shared_ptr<FrictionContactProblem> problem = nullptr);
+  int solve();
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
    *  and lambda )
