@@ -346,6 +346,18 @@ void add(const vec<T>& a, vec<T>& b)
   }
 }
 
+// c = alpha * A + beta * B
+template <match::scalar scalar, match::any_matrix M>
+mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
+{
+  NumericsMatrix* nm = NM_add(alpha, A._m, beta, B._m);
+  mat<M> rm;
+  rm._m = nm;
+  return rm;
+}
+
+
+
 // b <- a
 template <typename V>
 void copy(const vec<V>& a, vec<V>& b)

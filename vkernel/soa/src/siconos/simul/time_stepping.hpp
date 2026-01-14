@@ -129,8 +129,8 @@ struct time_stepping : item {
           elem.compute_q_nsp_vector_assembled(step);
         });
 
-        // H M^-1 H^t
-        osi.compute_w_matrix(step);
+        // H M^-1 H^t or H (M^-1 + h^2 * theta^2 * K) H^t
+        osi.compute_w_matrix(step, time_step());
         self()->template solve_nonsmooth_problem<formulation_t>(step);
 
         // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)

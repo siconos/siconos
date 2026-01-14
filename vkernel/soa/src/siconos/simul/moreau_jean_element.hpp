@@ -5,6 +5,7 @@
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/simul/topology.hpp"
 #include "siconos/utils/variant.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
 
 namespace siconos::simul {
 template <typename System, typename Inter, typename OsiAssembled>
@@ -61,6 +62,11 @@ struct moreau_jean_element : item {
     static constexpr auto nslaw_with_friction()
     {
       return std::derived_from<nslaw, model::newton_impact_friction>;
+    }
+
+    static constexpr auto system_with_k_matrix()
+    {
+      return model::has_k_matrix(system{});
     }
 
     decltype(auto) dof()

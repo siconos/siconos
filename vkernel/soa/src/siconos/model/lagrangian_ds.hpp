@@ -80,6 +80,7 @@ struct rt_lagrangian_ds : item {
     some::unbounded_vector<some::scalar> q;  ///< Position vector
     some::unbounded_vector<some::scalar> velocity;     ///< Velocity vector
     some::unbounded_matrix<some::scalar> mass_matrix;  ///< Mass matrix
+    some::unbounded_matrix<some::scalar> k_matrix;     // Rigidity matrix
     some::unbounded_vector<some::scalar> fext;  ///< External forces vector
   };
 
@@ -91,9 +92,16 @@ struct rt_lagrangian_ds : item {
   struct interface : lagrangian_ds::interface<Handle> {
     using lagrangian_ds::interface<Handle>::self;  ///< Inherited self pointer
 
+    /// @brief Access k_matrix
+    decltype(auto) k_matrix() { return attr<"k_matrix">(*self()); }
+
     /// @brief Access degree of freedom attribute
     decltype(auto) dof() { return attr<"dof">(*self()); }
   };
 };
+
+// Check if a k_matrix member function is present.
+static constexpr auto has_k_matrix =
+    mp::is_valid([](auto &&x) -> decltype(x.k_matrix()) {});
 
 }  // namespace siconos::model

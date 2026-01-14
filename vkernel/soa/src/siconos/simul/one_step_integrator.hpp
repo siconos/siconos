@@ -33,16 +33,15 @@ struct one_step_integrator {
     using rt_osi_t =
         moreau_jean_element<rt_system, rt_interaction, moreau_jean_assembled>;
 
-    using raw_elements =
+    using all_elements_t =
         mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_osi_t>>;
 
-    using elements = decltype(mp::unpack(
-        mp::filter(
-            raw_elements{},
-            [](const auto& h) constexpr {
-              using t = typename std::decay_t<decltype(h)>::type;
-              return mp::bool_c<!std::derived_from<t, empty_item>>;
-            }),
+    using elements_t = decltype(mp::unpack(
+        mp::filter(all_elements_t{},
+                   [](const auto& h) constexpr {
+                     using t = typename std::decay_t<decltype(h)>::type;
+                     return mp::bool_c<!std::derived_from<t, empty_item>>;
+                   }),
         []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
 
     using assembled_osi_t = moreau_jean_assembled;
@@ -50,7 +49,7 @@ struct one_step_integrator {
     using items = gather<topology, ct_osi_t, rt_osi_t, moreau_jean_assembled>;
 
     using attributes =
-        gather<attribute<"elements", elements>,
+        gather<attribute<"elements", elements_t>,
                attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
 
     template <typename Handle>
@@ -67,8 +66,8 @@ struct one_step_integrator {
         auto osi = storage::add<assembled_osi_t>(self()->data());
         assembled_osi() = osi;
 
-        mp::for_each(elements(), [&]<typename Elem>(Elem) {
-          auto elem = storage::add<typename Elem::type>(self()->data());
+        mp::for_each(elements(), [&]<typename Elem>(Elem elem) {
+          elem = storage::add<typename Elem::type>(self()->data());
           elem.assembled_osi() = osi;
         });
       }
@@ -86,8 +85,7 @@ struct one_step_integrator {
 
       void initialize(auto step)
       {
-        mp::for_each(elements(),
-                         [&](auto elem) { elem.initialize(step); });
+        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }
@@ -98,6 +96,8 @@ struct one_step_integrator {
       {
         return assembled_osi().constraint_activation_threshold();
       }
+
+      static constexpr auto index_elements() { return elements_t{}; }
 
       decltype(auto) elements()
       {
@@ -116,6 +116,11 @@ struct one_step_integrator {
       decltype(auto) mass_matrix_assembled()
       {
         return assembled_osi().mass_matrix_assembled();
+      };
+
+      decltype(auto) k_matrix_assembled()
+      {
+        return assembled_osi().k_matrix_assembled();
       };
 
       decltype(auto) h_matrix_assembled()
@@ -163,6 +168,24 @@ struct one_step_integrator {
         return assembled_osi().mu_vector_assembled();
       };
 
+      static constexpr auto with_k_matrix()
+      {
+        return mp::any_of(
+            typename elements_t::types{}, []<typename Elem>(Elem) {
+              return typename Elem::type::template interface<Handle>{}
+                  .system_with_k_matrix();
+            });
+      }
+
+      static constexpr auto with_friction()
+      {
+        return mp::any_of(
+            typename elements_t::types{}, []<typename Elem>(Elem) {
+              return typename Elem::type::template interface<Handle>{}
+                  .nslaw_with_friction();
+            });
+      }
+
       void assemble_setup()
       {
         using env_t = decltype(self()->env());
@@ -185,10 +208,30 @@ struct one_step_integrator {
           }
         });
 
-        assembled_osi().assemble_setup(ods, ointer, num_fric);
+        indice_t raw_ds_size = ods;
+        indice_t raw_inter_size = ointer;
+
+        if constexpr (with_k_matrix()) {
+          algebra::resize(k_matrix_assembled(), raw_ds_size, raw_ds_size);
+        }
+        algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
+        algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
+        algebra::resize(w_matrix_assembled(), raw_inter_size, raw_inter_size);
+        algebra::resize(lambda_vector_assembled(), raw_inter_size);
+        algebra::resize(velocity_vector_assembled(), raw_ds_size);
+        algebra::resize(y_vector_assembled(), raw_inter_size);
+        algebra::resize(ydot_vector_assembled(), raw_inter_size);
+        algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
+        algebra::resize(p0_vector_assembled(), raw_ds_size);
+
+        if constexpr (with_friction()) {
+          if (num_fric > 0) {
+            algebra::resize(mu_vector_assembled(), num_fric);
+          }
+        }
       }
 
-      void compute_w_matrix(auto step)
+      void compute_w_matrix(auto step, auto time_step)
       {
         auto& data = self()->data();
 
@@ -197,9 +240,19 @@ struct one_step_integrator {
         auto runtime_inters =
             storage::prop_values<rt_interaction, "nds">(data, step);
 
-        if (std::size(runtime_inters) > 0) {
-          // general case: mass matrix is not diagonal
-          assembled_osi().compute_w_matrix(step);
+        if constexpr (with_k_matrix()) {
+          // only simulation with fem contains runtime inter
+
+          if (std::size(runtime_inters) > 0) {
+            // general case: mass matrix is not diagonal
+            auto m_matrix =
+                algebra::add(1., mass_matrix_assembled(),
+                             time_step * time_step * theta() * theta(),
+                             k_matrix_assembled());
+
+            compute_kkt_matrix(h_matrix_assembled(), m_matrix,
+                               w_matrix_assembled());
+          }
         }
         else {
           // mass matrix is assumed to be diagonal
@@ -231,11 +284,12 @@ struct one_step_integrator {
       {
         using env_t = decltype(self()->env());
         using indice = typename env_t::indice;
+        using scalar = typename env_t::scalar;
 
         return collect(
             method("compute_input", &interface<Handle>::compute_input),
             method("compute_w_matrix",
-                   &interface<Handle>::compute_w_matrix<indice>));
+                   &interface<Handle>::compute_w_matrix<indice, scalar>));
       }
     };
   };
