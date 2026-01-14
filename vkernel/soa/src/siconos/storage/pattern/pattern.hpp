@@ -271,7 +271,7 @@ struct frame {
 
   static constexpr std::size_t dof =
       mp::find_if(args{},
-                      []<typename T>(T) { return degrees_of_freedom_p<T>{}; })
+                  []<typename T>(T) { return degrees_of_freedom_p<T>{}; })
           .value_or([]<bool flag = false>() {
             static_assert(flag, "need some dof");
           })
@@ -333,11 +333,10 @@ template <std::size_t N>
 consteval auto string_view_to_fixed_string(std::string_view sv)
 {
   return [&sv]<std::size_t... Is>(std::index_sequence<Is...>) {
-    const char arr[N] = { (Is < sv.size() ? sv[Is] : '\0')... };
+    const char arr[N] = {(Is < sv.size() ? sv[Is] : '\0')...};
     return string_literal<N>{arr};
   }(std::make_index_sequence<N>());
 }
-
 
 // Symbol type that stores PFR field name
 template <typename T, std::size_t I>
@@ -358,7 +357,6 @@ struct pfr_symbol {
   using symbol_type = text<literal>;
 };
 
-
 // rename to attr_name ? (cf with_name)
 template <string_literal Name, match::attribute A>
 struct attribute : A, symbol<Name> {};
@@ -371,18 +369,17 @@ struct pfr_field_attr {
   using symbol_info = pfr_symbol<AttrStruct, I>;
 
   // Create attribute with compile-time name from PFR
-  using attribute_type =
-      attribute<symbol_info::literal, field_type>;
+  using attribute_type = attribute<symbol_info::literal, field_type>;
 };
 }  // namespace detail
 
 // Convert entire struct to gather<>
 template <typename AttrStruct>
-using struct_to_gather =
-    decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
-      return gather<
-        typename detail::pfr_field_attr<AttrStruct, Is>::attribute_type...>{};
-    }(std::make_index_sequence<boost::pfr::tuple_size_v<AttrStruct>>{}));
+using struct_to_gather = decltype([]<std::size_t... Is>(
+                                      std::index_sequence<Is...>) {
+  return gather<
+      typename detail::pfr_field_attr<AttrStruct, Is>::attribute_type...>{};
+}(std::make_index_sequence<boost::pfr::tuple_size_v<AttrStruct>>{}));
 
 // association for non nested type (should be the default now)
 template <match::item Item, match::attribute A>
@@ -425,37 +422,33 @@ concept named_item = item<T> && std::derived_from<T, any_symbol>;
 template <match::item Item, match::attribute A>
 static constexpr decltype(auto) named_attribute_maybe(Item, A)
 {
-  if constexpr (std::derived_from<A, any_symbol>) {
-    // for an attribute declared inline inside attributes type, attach
-    // Item
-    if constexpr (match::wrap<Item>) {
-      return paired<typename Item::type, A>{};
-    }
-    //    else if constexpr (match::named_item<Item>) {
-    //      return paired<typename Item::item, A>{};
-    //    }
-    else {
-      return paired<Item, A>{};
-    }
+  // Always attach Item (or its underlying type) to make attributes unique per
+  // item
+  if constexpr (match::wrap<Item>) {
+    return paired<typename Item::type, A>{};
+  }
+  else if constexpr (match::named_item<Item>) {
+    return paired<typename Item::item, A>{};
   }
   else {
-    return A{};
+    return paired<Item, A>{};  // Always pair, never return A{}
   }
 }
 
-// Modified attributes function with dual support
 static auto attributes =
     []<match::item Item>(Item) constexpr -> decltype(auto) {
   if constexpr (std::is_aggregate_v<typename Item::attributes>) {
-    // New way: reflect from struct
-    return struct_to_gather<typename Item::attributes>{};
-  } else if constexpr (match::attributes<Item>) {
-    // Old way: explicit tuple
+    auto unpaired_attrs = struct_to_gather<typename Item::attributes>{};
+    return mp::transform(unpaired_attrs,
+                         [&]<typename A>(A) { return paired<Item, A>{}; });
+  }
+  else if constexpr (match::attributes<Item>) {
     return mp::transform(typename Item::attributes{},
-                             []<match::attribute A>(A) {
-                               return named_attribute_maybe(Item{}, A{});
-                             });
-  } else {
+                         [&]<match::attribute A>(A) {
+                           return named_attribute_maybe(Item{}, A{});
+                         });
+  }
+  else {
     return gather<>{};
   }
 };
@@ -478,9 +471,8 @@ static auto properties =
   }
 };
 
-static auto is_a_ref = mp::is_a_model<[]<typename T>() consteval {
-  return match::item_ref<T>;
-}>;
+static auto is_a_ref =
+    mp::is_a_model<[]<typename T>() consteval { return match::item_ref<T>; }>;
 
 static auto is_a_poly_ref = mp::is_a_model<[]<typename T>() consteval {
   return match::polymorphic_type<T>;
@@ -501,11 +493,10 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
 
   auto poly_ref = [&root_item]() {
     if constexpr (match::attributes<type_t>) {
-      return transform(
-          flatten(
-              transform(mp::filter(attributes(root_item), is_a_poly_ref),
-                        []<typename T>(T) { return typename T::type{}; })),
-          []<typename T>(T) { return typename T::type{}; });
+      return transform(flatten(transform(
+                           mp::filter(attributes(root_item), is_a_poly_ref),
+                           []<typename T>(T) { return typename T::type{}; })),
+                       []<typename T>(T) { return typename T::type{}; });
     }
     else {
       return gather<>{};
