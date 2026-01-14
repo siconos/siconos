@@ -130,11 +130,10 @@ template <typename Hc>
 static auto constexpr methods(Hc hc)
 {
   using handle_t = typename decltype(+hc)::type;
-  auto data = typename handle_t::data_t{};
-  auto h = add<typename handle_t::type>(data);
+  using data_t = typename handle_t::data_t;
 
   if constexpr (match::methods<handle_t>) {
-    return h.methods();
+    return handle_t{data_t{},0UL}.methods();
   }
   else {
     return gather<>{};

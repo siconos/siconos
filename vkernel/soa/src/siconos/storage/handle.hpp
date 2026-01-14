@@ -113,6 +113,8 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
     return property(symbol<S>{}, step);
   }
 
+  explicit handle(D&& data, R&& ref) : base_t{data, ref} {};
+
   explicit handle(D& data, R& ref) : base_t{data, ref} {};
 
   explicit handle(D& data, const R& ref) : base_t{data, ref} {};
