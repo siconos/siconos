@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "FETypes.hpp"
+#include "SiconosMatrix.hpp"
 namespace siconos::mechanics::fem {
 
 class FENode;
@@ -50,23 +51,18 @@ static const GaussPointsTab GaussPointsEmpty = {};
 /** A Finite Element */
 class FElement {
  private:
-  /** element number */
-  size_t _num = 0;
-
-  /** Element type */
-  FiniteElementType _type{FiniteElementType::T3};
-
   /** Element Family */
-  FiniteElementFamily _family{FiniteElementFamily::isoparametric};
+  FiniteElementFamily family_{FiniteElementFamily::isoparametric};
 
   /** number of dof by Element  */
-  unsigned ndof_{6};
+  siconos::algebra::Index ndof_{6};
 
   /** nodes */
-  std::vector<std::shared_ptr<FENode>> _nodes = {};
+  std::vector<std::shared_ptr<FENode>> nodes_ = {};
 
   /* associated Mesh element */
-  std::shared_ptr<MElement> _mElement{nullptr};
+  std::shared_ptr<MElement> mElement_{nullptr};
+
   /** Rule of five */
   FElement() = delete;
   FElement(FElement&) = delete;
@@ -80,24 +76,25 @@ class FElement {
       \param ndof dof number
       \param e mesh element
    */
-  FElement(FiniteElementType type, unsigned int ndof, std::shared_ptr<MElement> e);
+  FElement(FiniteElementType type, siconos::algebra::Index ndof, std::shared_ptr<MElement> e);
 
   ~FElement() noexcept = default;
 
-  auto ndof() { return ndof_; }
-  auto num() { return _num; }
+  siconos::algebra::Index ndof() const { return ndof_; }
 
-  auto mElement() { return _mElement; }
+  int num() const;
+  
+  std::shared_ptr<MElement> mElement() { return mElement_; }
 
-  auto family() { return _family; }
+  FiniteElementFamily family() const { return family_; }
 
-  int order();
+  int order() const;
 
-  int ndofPerNode();
+  int ndofPerNode() const;
 
   const GaussPointsTab& GaussPoints(int order);
 
-  std::vector<std::shared_ptr<FENode>>& nodes() { return _nodes; }
+  std::vector<std::shared_ptr<FENode>>& nodes() { return nodes_; }
 
   void shapeFunctionIso2D(double ksi, double eta, std::vector<double>& N,
                           std::vector<double>& Nksi, std::vector<double>& Neta);

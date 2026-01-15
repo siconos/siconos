@@ -26,13 +26,14 @@
 #include <string>
 
 #include "FENode.hpp"
+#include "FETypes.hpp"
 #include "FiniteElementModel.hpp"  // FENode
 #include "Mesh.hpp"                // For MVertex, MElement ...
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 
 template <class Container>
-void split(const std::string &str, Container &cont, const std::string &delims = " ") {
+void split(const std::string& str, Container& cont, const std::string& delims = " ") {
   std::size_t current, previous = 0;
   current = str.find_first_of(delims);
   while (current != std::string::npos) {
@@ -103,8 +104,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
     std::string gmsh_filename) {
   std::ifstream in(gmsh_filename);
   if (!in.is_open()) {
-    std::cout << "failed to open " << gmsh_filename << '\n';
-    return nullptr;
+    throw std::runtime_error("Cannot open file: " + gmsh_filename);
   }
 
   // char str[500];
@@ -205,16 +205,15 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         if (line.compare("$EndElements") == 0) break;
         std::vector<std::string> words;
         split(line, words);
-        // std::copy(words.begin(), words.end(),
-        //           std::ostream_iterator<std::string>(std::cout, "\n"));
         std::stringstream token(words[0]);
         int element_number;
         token >> element_number;
         std::stringstream t_type(words[1]);
         int tempvalue;
         t_type >> tempvalue;
-        FiniteElementType element_type =
-            (FiniteElementType)tempvalue;  // This has to be checked carefully ...
+        // assert(siconos::mechanics::fem::is_valid_element(tempvalue) &&
+        //        "Unknown element type."); // --> check done in FiniteElementModel->init()
+        FiniteElementType element_type = static_cast<FiniteElementType>(tempvalue);
 
         std::stringstream t_nt(words[2]);
         decltype(words.size()) number_of_tags;
@@ -228,7 +227,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         }
 
         std::vector<std::shared_ptr<MVertex>> vertices_e;
-        for (auto k = 3 + number_of_tags; k < words.size(); k++) {
+        for (decltype(words.size()) k = 3 + number_of_tags; k < words.size(); k++) {
           decltype(vertices.size()) node_number;
           std::stringstream token(words[k]);
           token >> node_number;
@@ -259,82 +258,95 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
   return std::make_shared<Mesh>(m, vertices, elements, physical_entities);
 }
 
-void siconos::mechanics::fem::writeMeshforPython(std::shared_ptr<Mesh> mesh) {
-  FILE *foutput = fopen("mesh.py", "w");
-  fprintf(foutput, "coord=[]\n");
-  for (auto v : mesh->vertices()) {
-    fprintf(foutput, "coord.append([%e, %e])\n", v->x(), v->y());
+void siconos::mechanics::fem::writeMeshforPython(const Mesh& mesh,
+                                                 std::string output_file_name) {
+  std::filesystem::create_directories("outputs");
+  std::filesystem::path filepath =
+      std::filesystem::path("outputs") / ("mesh_" + output_file_name + ".py");
+
+  std::ofstream outfile(filepath);
+  if (!outfile.is_open())
+    throw std::runtime_error("Cannot open file mesh_" + output_file_name + ".py");
+
+  outfile << "coord = []\n";
+  for (const auto& v : mesh.vertices()) {
+    outfile << "coord.append([" << v->x() << "," << v->y() << "])\n";
   }
-  fprintf(foutput, "triangle=[]\n");
-  for (auto e : mesh->elements()) {
-    fprintf(foutput, "triangle.append([");
+
+  outfile << "triangle = []\n";
+  for (auto e : mesh.elements()) {
+    outfile << "triangle.append([";
     for (auto v : e->vertices()) {
-      fprintf(foutput, "%zu, ", v->num());
+      outfile << v->num() << ",";
     }
-    fprintf(foutput, "])\n");
+    outfile << "])\n";
   }
-  fclose(foutput);
+  outfile.close();
 }
+
 std::string siconos::mechanics::fem::prepareWriteDisplacementforPython(std::string basename) {
   std::string filename = basename + "_displacement.py";
+  std::filesystem::create_directories("outputs");
 
-  std::cout << "Output displacement for python post-processing in " << filename << std::endl;
+  std::filesystem::path filepath = std::filesystem::path("outputs") / filename;
 
-  FILE *foutput = fopen(filename.c_str(), "w");
-  fprintf(foutput, "import numpy as np\nx=[]\n");
-  fprintf(foutput, "y=[]\n");
-  fprintf(foutput, "z=[]\n");
-  fclose(foutput);
+  std::cout << "Output displacement for python post-processing in ./outputs/" << filename
+            << std::endl;
+  std::ofstream outfile(filepath);
+  if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
+  outfile << "import numpy as np\nx=[]\n" << "y=[]\n" << "z=[]\n";
+  outfile.close();
   return filename;
 }
 
 void siconos::mechanics::fem::writeDisplacementforPython(
-    std::shared_ptr<Mesh> mesh, std::shared_ptr<FiniteElementModel> femodel,
-    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename) {
-  FILE *foutput = fopen(filename.c_str(), "a");
-  fprintf(foutput, "x.append(np.array([");
+    const Mesh& mesh, const FiniteElementModel& femodel,
+    const siconos::algebra::SiconosVector& x, std::string filename) {
+  std::filesystem::create_directories("outputs");
 
-  for (auto v : mesh->vertices()) {
-    auto n = femodel->vertexToNode(v);
+  std::filesystem::path filepath = std::filesystem::path("outputs") / filename;
+  std::ofstream outfile(filepath, std::ios::app);
+  if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
+  outfile.precision(15);
+  outfile.setf(std::ios::scientific);
+
+  outfile << "x.append(np.array([";
+  for (auto v : mesh.vertices()) {
+    auto node = femodel.vertexToNode(v);
     double value = 0.0;
-    if (n) {
-      unsigned int idx = (*n->dofIndex())[0];
-      value = (*x)(idx);
+    if (node) {
+      auto idx = node->global_dof_index()[0];
+      value = x(idx);
     }
-    fprintf(foutput, "%e,", value);
+    outfile << value << ", ";
   }
-  fprintf(foutput, "]))\n");
+  outfile << "]))\n\n";
 
-  fprintf(foutput, "\n");
-
-  fprintf(foutput, "y.append(np.array([");
-  for (auto v : mesh->vertices()) {
-    auto n = femodel->vertexToNode(v);
+  outfile << "y.append(np.array([";
+  for (auto v : mesh.vertices()) {
+    auto node = femodel.vertexToNode(v);
     double value = 0.0;
-    if (n) {
-      auto idx = (*n->dofIndex())[1];
-      value = (*x)(idx);
+    if (node) {
+      auto idy = node->global_dof_index()[1];
+      value = x(idy);
     }
-    fprintf(foutput, "%e,", value);
+    outfile << value << ", ";
   }
-  fprintf(foutput, "]))\n");
-  fprintf(foutput, "\n");
+  outfile << "]))\n\n";
 
-  fprintf(foutput, "z.append(np.array([");
-  for (auto v : mesh->vertices()) {
-    std::shared_ptr<FENode> n = femodel->vertexToNode(v);
+  outfile << "z.append(np.array([";
+  for (auto v : mesh.vertices()) {
+    auto node = femodel.vertexToNode(v);
     double value = 0.0;
-    if (n) {
-      if (mesh->dim() > 2) {
-        auto idx = (*n->dofIndex())[2];
-        value = (*x)(idx);
-      } else
-        value = 0.0;
+    if (node) {
+      if (mesh.dim() > 2) {
+        auto idz = node->global_dof_index()[2];
+        value = x(idz);
+      }
     }
-    fprintf(foutput, "%e,", value);
+    outfile << value << ", ";
   }
-  fprintf(foutput, "]))\n");
-  fprintf(foutput, "\n");
+  outfile << "]))\n\n";
 
-  fclose(foutput);
+  outfile.close();
 }

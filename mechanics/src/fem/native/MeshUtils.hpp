@@ -22,10 +22,9 @@
 #ifndef MESHUTILS_H
 #define MESHUTILS_H
 
-#include "SiconosVector.hpp"
-#include <memory>
 #include <string>
 
+#include "SiconosVector.hpp"
 
 namespace siconos::mechanics::fem {
 
@@ -36,15 +35,23 @@ std::shared_ptr<Mesh> create2dMesh2x1();
 
 std::shared_ptr<Mesh> create2dMeshnxm(int n, int m, double Lx, double Ly);
 
-std::shared_ptr<Mesh> createMeshFromGMSH2(std::string gmsh_filename);
+/** @brief read a mesh from a gmsh file and convert it into a siconos mesh
+ *  @param fname gmsh file name
+ *  @return a Siconos Mesh
+ *
+ */
+std::shared_ptr<Mesh> createMeshFromGMSH2(std::string fname);
 
-void writeMeshforPython(std::shared_ptr<Mesh> mesh);
+/** @brief write a python file describing the mesh
+ *  @param[in] mesh input mesh
+ *  @param[in] fname outputfile name (.py)
+ */
+void writeMeshforPython(const Mesh& mesh, std::string);
 
 std::string prepareWriteDisplacementforPython(std::string basename);
 
-void writeDisplacementforPython(std::shared_ptr<Mesh> mesh,
-                                std::shared_ptr<FiniteElementModel> femodel,
-                                std::shared_ptr<siconos::algebra::SiconosVector> x,
+void writeDisplacementforPython(const Mesh& mesh, const FiniteElementModel& femodel,
+                                const siconos::algebra::SiconosVector& x,
                                 std::string filename);
 
 }  // namespace siconos::mechanics::fem

@@ -28,6 +28,7 @@
 #include "DynamicalSystemVisitor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
+#include "SiconosVector.hpp"
 #include "StorageTools.hpp"
 #include "TypeName.hpp"  // visitor to get ds type
 
@@ -257,12 +258,14 @@ class DynamicalSystem {
 
   /** \return a read-only access to \f$ \nabla_x rhs()\f$, as a vector =[col0, col1, ...]
    */
-  const auto& jacobianRhsOver_x() const { return jacobianRhsOver_x_; }
+  const siconos::algebra::SiconosVector& jacobianRhsOver_x() const {
+    return jacobianRhsOver_x_;
+  }
 
   /** \return a writable vector which represents \f$ \nabla_x rhs()\f$, as a vector =[col0,
    * col1, ...]
    */
-  auto& jacobianRhsOver_x_readwrite() { return jacobianRhsOver_x_; }
+  siconos::algebra::SiconosVector& jacobianRhsOver_x_readwrite() { return jacobianRhsOver_x_; }
 
   /** get all the values of the state vector x stored in a SiconosMemory object
    *  (not const due to LinearSMC::actuate)

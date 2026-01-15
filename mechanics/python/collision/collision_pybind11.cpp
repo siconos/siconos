@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2025 INRIA.
+ * Copyright 2026 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,21 +134,16 @@ PYBIND11_MODULE(_collision, m) {
            py::arg("contactor"));
 
   py::class_<siconos::collision::SiconosMesh, std::shared_ptr<siconos::collision::SiconosMesh>,
-             siconos::collision::SiconosShape>(m, "SiconosMesh");  
-      // .def(py::init <
-      //      std::shared_ptr<std::vector<unsigned int>>,
-      // 	   Eigen::Ref<siconos::algebra::SiconosMatrix>>());
-      //      py::keep_alive<1, 1>(), py::keep_alive<1, 2>(),
-      //      py::arg("indexes"),
-      //      py::arg("vertices"));
-  
+             siconos::collision::SiconosShape>(m, "SiconosMesh")
+      .def(py::init<std::vector<unsigned int>, Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+           py::keep_alive<1, 2>(), py::arg("indices"), py::arg("vertices"));
+
   py::class_<siconos::collision::SiconosHeightMap,
              std::shared_ptr<siconos::collision::SiconosHeightMap>,
              siconos::collision::SiconosShape>(m, "SiconosHeightMap")
-      .def(py::init < Eigen::Ref<siconos::algebra::SiconosMatrix>,
-           double, double>(),
-           py::keep_alive<1, 1>(),
-           py::arg("height_data"), py::arg("length_x"), py::arg("length_y"));
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>, double, double>(),
+           py::keep_alive<1, 1>(), py::arg("height_data"), py::arg("length_x"),
+           py::arg("length_y"));
 
   py::class_<siconos::collision::native::SpaceFilter,
              std::shared_ptr<siconos::collision::native::SpaceFilter>,
@@ -162,7 +157,7 @@ PYBIND11_MODULE(_collision, m) {
              std::shared_ptr<siconos::collision::native::bodies::CircularDS>,
              siconos::modeling::LagrangianDS>(m, "CircularDS")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
-	   Eigen::Ref<siconos::algebra::SiconosVector>>(),
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
            py::arg("q0"), py::arg("v0"))
       .def("getMassValue", &siconos::collision::native::bodies::CircularDS::getMassValue);

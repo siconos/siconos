@@ -21,7 +21,7 @@
 #define FINITEELEMENTLAGRANGIANTIDS_H
 
 #include "LagrangianSparseLinearTIDS.hpp"
-#include "SiconosMatrix.hpp"  // For Sparse mat
+
 /** Finite Element discretization of elastic solids that inherits from
  * Lagrangian Linear Systems with time invariant coefficients
  * - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
@@ -35,38 +35,42 @@ class Material;
 class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
  protected:
   /** a mesh */
-  std::shared_ptr<Mesh> _mesh{nullptr};
+  std::shared_ptr<Mesh> mesh_{nullptr};
 
-  /** a material */
-  std::map<unsigned int, std::shared_ptr<Material>> _materials;
+  /** materials */
+  std::map<unsigned int, const Material> materials_;
 
   /** a finite element model */
-  std::shared_ptr<FiniteElementModel> _FEModel{nullptr};
-
-  /* Storage type for the matrices - Default = sparse*/
-  siconos::algebra::StorageType _storageType{siconos::algebra::StorageType::sparse};
+  std::shared_ptr<FiniteElementModel> FEModel_{nullptr};
 
  public:
   /** constructor from initial state and all matrix operators.
    * \param mesh the mesh that defined the spatial discretization
    * \param material
    */
-  FiniteElementLinearTIDS(
-      std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
-      siconos::algebra::StorageType storageType = siconos::algebra::StorageType::sparse);
+  FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh,
+                          const std::map<unsigned int, const Material>& materials);
 
   /** destructor */
   ~FiniteElementLinearTIDS() noexcept = default;
 
-  void setStorageType(siconos::algebra::StorageType type) { _storageType = type; }
+  std::shared_ptr<FiniteElementModel> FEModel() { return FEModel_; };
 
-  std::shared_ptr<FiniteElementModel> FEModel() { return _FEModel; };
-
+  /** @brief Apply Dirichlet Boundary conditions for all nodes of all elements matching a tag
+   *
+   * @param[in] physical_entity_tag the tag to be matched
+   * @param[in] node_dof_index list of dof to be constrained (local index in the node)
+   **/
   void applyDirichletBoundaryConditions(int physical_entity_tag,
-                                        std::shared_ptr<std::vector<int>> node_dof_index);
+                                        const std::vector<int>& node_dof_index);
 
+  /** @brief Apply Neuman Boundary conditions (nodal forces) for all elements matching a tag
+   *
+   * @param[in] physical_entity_tag the tag to be matched
+   * @param[in] nodal forces input vector (contains only the values to be set to tagged elem)
+   **/
   void applyNodalForces(int physical_entity_tag,
-                        std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces);
+                        const siconos::algebra::SiconosVector& nodal_forces);
 
   double elasticPotentialEnergy() const;
 

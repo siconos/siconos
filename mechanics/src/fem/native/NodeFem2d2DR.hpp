@@ -40,7 +40,7 @@ class FENode;
 class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
  protected:
   /** index of the node of the Fem cable involved in this relation */
-  std::shared_ptr<FENode> _node{nullptr};
+  std::shared_ptr<FENode> node_{nullptr};
 
   /** Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
@@ -60,7 +60,7 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
    */
   NodeFem2d2DR(std::shared_ptr<FENode> node)
       : LagrangianScleronomousR(),
-        _node(node),
+        node_(node),
         _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Normal{std::make_shared<siconos::algebra::SiconosVector>(2)},
@@ -73,7 +73,7 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
                std::shared_ptr<siconos::algebra::SiconosVector> normal,
                std::shared_ptr<siconos::algebra::SiconosVector> tangent)
       : LagrangianScleronomousR(),
-        _node(node),
+        node_(node),
         _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Pc2(pc2),
         _Normal(normal),
@@ -98,7 +98,7 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline std::shared_ptr<FENode> node() const { return _node; }
+  inline std::shared_ptr<FENode> node() const { return node_; }
   inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
   inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
   inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return _Normal; }

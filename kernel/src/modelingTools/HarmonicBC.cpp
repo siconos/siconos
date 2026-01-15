@@ -28,12 +28,12 @@
 // #define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-siconos::modeling::HarmonicBC::HarmonicBC(Indices&& newVelocityIndices,
+siconos::modeling::HarmonicBC::HarmonicBC(const Indices& newVelocityIndices,
                                           Eigen::Ref<siconos::algebra::SiconosVector> newa,
                                           Eigen::Ref<siconos::algebra::SiconosVector> newb,
                                           Eigen::Ref<siconos::algebra::SiconosVector> omega,
                                           Eigen::Ref<siconos::algebra::SiconosVector> phi)
-    : BoundaryCondition(std::move(newVelocityIndices)) {
+    : BoundaryCondition(newVelocityIndices) {
   siconos::algebra::SiconosVector::Index bc_size = newVelocityIndices.size();
   assert(newa.size() == bc_size);
   assert(newb.size() == bc_size);

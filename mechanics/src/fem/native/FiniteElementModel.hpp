@@ -22,9 +22,9 @@
 #ifndef FINITEELEMENTMODEL_H
 #define FINITEELEMENTMODEL_H
 
-#include <list>
 #include <map>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "SiconosMatrix.hpp"
@@ -58,19 +58,19 @@ constexpr double I_TET2_W[] = {0.04166666666666666, 0.04166666666666666, 0.04166
 class FiniteElementModel {
  protected:
   /** a mesh */
-  std::shared_ptr<Mesh> _mesh{nullptr};
+  std::shared_ptr<Mesh> mesh_{nullptr};
 
   /** nodes */
-  std::vector<std::shared_ptr<FENode>> _nodes = {};
+  std::vector<std::shared_ptr<FENode>> nodes_ = {};
 
   /** elements */
-  std::vector<std::shared_ptr<FElement>> _elements = {};
+  std::vector<std::shared_ptr<FElement>> elements_ = {};
 
   /** vertex to node map **/
-  std::map<std::shared_ptr<MVertex>, std::shared_ptr<FENode>> _vertexToNode;
+  std::map<std::shared_ptr<MVertex>, std::shared_ptr<FENode>> vertexToNode_;
 
   /** MElement to FElement map **/
-  std::map<std::shared_ptr<MElement>, std::shared_ptr<FElement>> _mElementTOFElement;
+  std::map<std::shared_ptr<MElement>, std::shared_ptr<FElement>> mElementTOFElement_;
 
   /** Rule of five */
   FiniteElementModel() = delete;
@@ -85,19 +85,20 @@ class FiniteElementModel {
       \param ndof dof number
       \param e mesh element
    */
-  FiniteElementModel(std::shared_ptr<Mesh> m) : _mesh(m) {};
+  FiniteElementModel(std::shared_ptr<Mesh> m) : mesh_(m) {};
 
   ~FiniteElementModel() noexcept = default;
 
-  auto mesh() { return _mesh; }
+  auto mesh() { return mesh_; }
 
-  auto& elements() { return _elements; }
+  const std::span<const std::shared_ptr<FElement>> elements() { return elements_; }
 
-  auto& nodes() { return _nodes; }
+  const std::span<const std::shared_ptr<FENode>> nodes() { return nodes_; }
 
-  std::shared_ptr<FENode> vertexToNode(std::shared_ptr<MVertex> v);
+  std::shared_ptr<FENode> vertexToNode(std::shared_ptr<MVertex> v) const;
 
-  /* create the FEM model from the mesh and the element type
+  /** @brief creates the FEM model from the mesh and the element type
+   *
    * \return the number of dof */
   siconos::algebra::Index init();
 
@@ -109,7 +110,7 @@ class FiniteElementModel {
   /** compute Mass Matrix
    **/
   void computeMassMatrix(siconos::algebra::SiconosSparseMatrix& mass,
-                         std::map<unsigned int, std::shared_ptr<Material>>& mat);
+                         const std::map<unsigned int, const Material>& mat);
 
   /** compute elementary Mass Matrix
    **/
@@ -120,7 +121,7 @@ class FiniteElementModel {
    * should be computeMass of LagrangianDS ?
    **/
   void computeStiffnessMatrix(siconos::algebra::SiconosSparseMatrix&,
-                              std::map<unsigned int, std::shared_ptr<Material>>& mat);
+                              const std::map<unsigned int, const Material>& mat);
 
   /** compute elementary Stiffness Matrix
    * should be computeMass of LagrangianDS ?
@@ -137,20 +138,32 @@ class FiniteElementModel {
                                                const siconos::algebra::SiconosDenseMatrix& D,
                                                double thickness);
 
-  /** apply Dirichlet Boundary conditions for a given tag on element.
+  /** @brief Apply Dirichlet Boundary conditions for all nodes of all elements matching a tag
+   *
+   * @param[in] physical_entity_tag the tag to be matched
+   * @param[in] node_dof_index list of dof to be constrained (local index in the node)
+   * @param[in,out] bc boundary conditions to be updated (global indices will be appended if
+   *not already present)
    **/
   void applyDirichletBoundaryConditions(
-      int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index,
-      std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryCondition);
-  /** apply Neuman Boundary conditions (nodal forces) for a given tag on
-   *element.
+      int physical_entity_tag, const std::vector<int>& node_dof_index,
+      std::shared_ptr<siconos::modeling::BoundaryCondition> bc);
+
+  /** @brief Apply Neuman Boundary conditions (nodal forces) for all elements matching a tag
+   *
+   * @param[in] physical_entity_tag the tag to be matched
+   * @param[in] nodal forces input vector (contains only the values to be set to tagged elem)
+   * @param[in,out] forces output vector (all elements/nodes)
    **/
   void applyNodalForces(int physical_entity_tag,
-                        std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces,
+                        const siconos::algebra::SiconosVector& nodal_forces,
                         Eigen::Ref<siconos::algebra::SiconosVector> forces);
-  /** get the list of possible contacting nodes for a given tag on element.
-   **/
-  std::shared_ptr<std::list<std::shared_ptr<FENode>>> contactingNodes(int contact_entity_tag);
+
+  /** @brief get the list of possible contacting nodes for a given tag on element.
+   *  @param[in] contact_entity_tag tag to be matched
+   *  @return a list of FENodes (shared ptr)
+   */
+  std::vector<std::shared_ptr<FENode>> contactingNodes(int contact_entity_tag);
 
   void display(bool brief) const;
 };

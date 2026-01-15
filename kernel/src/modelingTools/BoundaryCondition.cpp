@@ -94,7 +94,8 @@ void siconos::modeling::BoundaryCondition::display() const {
   std::cout << "=========================================================== " << std::endl;
 }
 
-void siconos::modeling::BoundaryCondition::appendIndex(unsigned int ind) {
+void siconos::modeling::BoundaryCondition::appendIndex(
+    siconos::algebra::SiconosVector::Index ind) {
   if (find(velocityIndices_.begin(), velocityIndices_.end(), ind) == velocityIndices_.end()) {
     velocityIndices_.push_back(ind);
     prescribedVelocity_->resize(size());

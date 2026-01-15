@@ -29,14 +29,12 @@
 #include "OneStepNSProblem.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "SolverOptions.h"
 #include "Tools.hpp"  // for enum_to_string
-#include "Topology.hpp"
-// #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_NOCOLOR
-// #define DEBUG_MESSAGES
+//  #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_STDOUT
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 namespace siconos::simulation {

@@ -18,7 +18,6 @@
 
 #include "OneStepIntegrator.hpp"
 
-#include "BlockVector.hpp"
 #include "DynamicalSystem.hpp"
 #include "EventsManager.hpp"
 #include "Interaction.hpp"
@@ -27,7 +26,6 @@
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
-#include "Topology.hpp"
 
 std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
 siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(

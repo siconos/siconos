@@ -17,17 +17,12 @@
  */
 #include "TimeSteppingCombinedProjection.hpp"
 
-#include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NonSmoothLaw.hpp"
-#include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
-#include "SiconosVector.hpp"
-#include "Topology.hpp"
 // #define TSPROJ_DEBUG_LEVEL1
 // #define TSPROJ_WITHOUT_PROJECTION
 // #define DEBUG_STDOUT

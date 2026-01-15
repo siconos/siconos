@@ -51,9 +51,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter) const {
   auto sizeY = inter.dimension();
 
-  if (!(jacobianhOver_q_view_) ||
-      jacobianhOver_q_view_->cols() !=
-          inter.getSizeOfDS() ||
+  if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
       jacobianhOver_q_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
@@ -81,6 +79,7 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
   }
+
   DEBUG_END(
       "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, "
       "Interaction& inter, "
@@ -103,6 +102,7 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
   siconos::algebra::transposeMatrixVector_prod_toBlock(
       lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
       false);
+
   DEBUG_END(
       "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
       "Interaction& "

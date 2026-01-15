@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 /*! \file
-  Primal Fricton-Contact Non-Smooth Problem
+  Primal Friction-Contact Non-Smooth Problem
 */
 #ifndef GlobalRollingFrictionContact_H
 #define GlobalRollingFrictionContact_H
 
-#include "GlobalFrictionContact.hpp"
 #include "Friction_cst.h"  // contains only enum. Ok.
+#include "GlobalFrictionContact.hpp"
 
 struct GlobalRollingFrictionContactProblem;
 struct SolverOptions;
@@ -56,8 +56,8 @@ namespace siconos::nonsmooth_formulations {
    right Numerics driver will be called according to this value.
 
     \b Construction:
-    - Constructor from data (inputs = Simulations*, id, std::shared_ptr<NonSmoothSolver>) - The solver is
-   optional. Main functions:
+    - Constructor from data (inputs = Simulations*, id, std::shared_ptr<NonSmoothSolver>) - The
+   solver is optional. Main functions:
 
     \b Main functions:
     - formalization of the problem: computes M,q using the set of "active" Interactions from
@@ -76,13 +76,10 @@ namespace siconos::nonsmooth_formulations {
 */
 class GlobalRollingFrictionContact : public GlobalFrictionContact {
  private:
-  // /** default constructor */
-  // GlobalRollingFrictionContact() = default;
-
   /** Pointer to function of the type used for drivers for GlobalRollingFrictionContact
    * problems in Numerics */
-  typedef int (*GRFC3D_Driver)(GlobalRollingFrictionContactProblem*,
-                               double*, double*, double*, SolverOptions*);
+  typedef int (*GRFC3D_Driver)(GlobalRollingFrictionContactProblem*, double*, double*, double*,
+                               SolverOptions*);
 
  protected:
   ACCEPT_SERIALIZATION(GlobalRollingFrictionContact);
@@ -105,21 +102,17 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
    *  default : SICONOS_GLOBAL_FRICTION_3D_NSGS
    */
   GlobalRollingFrictionContact(
-      int dimPb,
-      int numericsSolverId = SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
+      int dimPb = 5, int numericsSolverId = SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  GlobalRollingFrictionContact(int dimPb,
-                               std::shared_ptr<SolverOptions> options);
+  GlobalRollingFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
   virtual ~GlobalRollingFrictionContact() noexcept = default;
-
-  // GETTERS/SETTERS
 
   /** get the type of GlobalRollingFrictionContact problem (2D or 3D)
    *
@@ -149,14 +142,13 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
 
   /** initialize the GlobalRollingFrictionContact problem(compute topology ...)
    *
-   *  \param sim the simulation, owner of this OSNSPB
+   *  \param simulation the simulation, owner of this OSNSPB
    */
-  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   /** \return the friction contact problem from Numerics
    */
-  std::shared_ptr<GlobalRollingFrictionContactProblem>
-  globalRollingFrictionContactProblem();
+  std::shared_ptr<GlobalRollingFrictionContactProblem> globalRollingFrictionContactProblem();
 
   // /** \return the friction contact problem from Numerics (raw ptr, do not free)
   //  */
@@ -167,27 +159,26 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(std::shared_ptr<GlobalRollingFrictionContactProblem> problem =
-                nullptr);
+  int solve(std::shared_ptr<GlobalRollingFrictionContactProblem> problem = nullptr);
 
   /** Construction of the problem
    *
    *  \param time current time
    */
-  virtual bool preCompute(double time);
+  virtual bool preCompute(double time) override;
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *
    *  \param time current time
    */
-  virtual int compute(double time);
+  virtual int compute(double time) override;
 
   /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw);
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 
   void updateMu();
   void updateMur();
-  void display() const;
+  void display() const override;
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // GlobalRollingFrictionContact_H

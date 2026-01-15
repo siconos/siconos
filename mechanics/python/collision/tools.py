@@ -31,9 +31,8 @@ Classes
 - Contactor : A Shape belonging to a collision group, with contact metadata.
 """
 from dataclasses import dataclass, field
-from typing import Optional, Union, Tuple, List
+from typing import Optional, Union, Tuple
 from math import cos, sin
-from numpy.linalg import norm
 import numpy as np
 
 
@@ -91,14 +90,15 @@ class MovedShape:
         # and easier to use in mechanics_run
         self.translation = np.array(self.relative_translation, dtype=np.float64)
 
-
         ori = self.relative_orientation
 
-        #print(ori)
+        # print(ori)
 
-        if isinstance(ori, np.ndarray) or \
-           (isinstance(ori, list) and len(ori) == 4) or \
-           (isinstance(ori, tuple) and len(ori) == 4):
+        if (
+            isinstance(ori, np.ndarray)
+            or (isinstance(ori, list) and len(ori) == 4)
+            or (isinstance(ori, tuple) and len(ori) == 4)
+        ):
             ori = np.asarray(ori, dtype=np.float64)
 
             if ori.shape[0] != 4:
@@ -119,15 +119,15 @@ class MovedShape:
             if axis_norm == 0:
                 raise ValueError("Axis vector cannot be the zero vector.")
             n = sin(angle / 2.0) / axis_norm
-            self.orientation = np.array([cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n])
+            self.orientation = np.array(
+                [cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n]
+            )
             return
         else:
             raise ValueError(
                 "Orientation must be either an axis-angle pair (3D vector + float)"
                 + " or a quaternion."
             )
-
-
 
 
 @dataclass

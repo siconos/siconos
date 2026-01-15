@@ -21,13 +21,7 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
-// #include "SolverOptions.h"
-// #include "ComplementarityConditionNSL.hpp"
-// // --- numerics headers ---
-// #include "NonSmoothDrivers.h"
-// #include "LCP_Solvers.h"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

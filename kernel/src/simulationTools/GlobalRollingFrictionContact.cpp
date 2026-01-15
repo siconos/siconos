@@ -15,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// #include "SiconosPointers.hpp"
-// #include "NumericsMatrix.h"
 #include "GlobalRollingFrictionContact.hpp"
 
 #include "Interaction.hpp"
@@ -27,12 +25,12 @@
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
-#include "SiconosVector.hpp"
+// #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #include "Topology.hpp"
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // Constructor from solver id - Uses delegated constructor

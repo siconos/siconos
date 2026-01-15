@@ -27,12 +27,12 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"  // for enum_to_string
-#include "Topology.hpp"
-// for Debug
-// #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #include "Topology.hpp"
+//  for Debug
+//  #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::simulation::Simulation::Simulation(

@@ -19,41 +19,34 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "SiconosVector.hpp"
-
-// #include <functional>
-// #include <memory>
-// #include <span>
 
 #include "BoundaryCondition.hpp"
 #include "FixedBC.hpp"
 #include "HarmonicBC.hpp"
 
-// #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
-// Python comme les listes
-
 namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-//using Indices = std::vector<siconos::algebra::SiconosVector::Index>;
-
-using Indices = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1> ;
+using Indices = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1>;
 void wrap_boundaryconditions(py::module_ &m) {
   py::class_<siconos::modeling::BoundaryCondition,
              std::shared_ptr<siconos::modeling::BoundaryCondition>>(m, "BoundaryCondition")
       .def_property_readonly("size", &siconos::modeling::BoundaryCondition::size);
 
-  py::class_ < siconos::modeling::FixedBC,
-      std::shared_ptr<siconos::modeling::FixedBC>,
-      siconos::modeling::BoundaryCondition>
-    (m, "FixedBC")
-    .def(py::init<std::vector<int>>(), py::arg("Indices"));
+  py::class_<siconos::modeling::FixedBC, std::shared_ptr<siconos::modeling::FixedBC>,
+             siconos::modeling::BoundaryCondition>(m, "FixedBC")
+      .def(py::init<std::vector<int>>(), py::arg("Indices"));
 
-  py::class_ < siconos::modeling::HarmonicBC,
-      std::shared_ptr < siconos::modeling::HarmonicBC>,
-      siconos::modeling::BoundaryCondition>(
-      m, "HarmonicBC")
-    .def(py::init<std::vector<int>, double, double, double, double>(),
-	 py::arg("Indices"),py::arg("a"),py::arg("b"),py::arg("omega"), py::arg("phi"));
-    }
+  py::class_<siconos::modeling::HarmonicBC, std::shared_ptr<siconos::modeling::HarmonicBC>,
+             siconos::modeling::BoundaryCondition>(m, "HarmonicBC")
+      .def(py::init<std::vector<int>, double, double, double, double>(), py::arg("Indices"),
+           py::arg("a"), py::arg("b"), py::arg("omega"), py::arg("phi"))
+      .def(py::init<std::vector<int>, Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::keep_alive<1, 5>(),
+           py::keep_alive<1, 6>(), py::arg("Indices"), py::arg("a"), py::arg("b"),
+           py::arg("omega"), py::arg("phi"));
+}

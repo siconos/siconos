@@ -130,8 +130,6 @@ struct FrictionContactProblemWrapper {
 
   py::array_t<double> q() const { return q_array; }
   py::array_t<double> mu() const { return mu_array; }
-
-  FrictionContactProblem* problem(){return problem_;};
   
   int solve(py::array_t<double> r, py::array_t<double> w, SolverOptions *solver_options) {
     int info = -1;

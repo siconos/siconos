@@ -496,7 +496,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-    int columnindex = 0;
+    siconos::algebra::Index columnindex = 0;
 
     auto& d = static_cast<siconos::modeling::SecondOrderDS&>(ds);
 
@@ -1049,11 +1049,12 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     // Current dynamical system
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
 
+    vfree = residuFree;  // initialize vfree with the content of residuFree
+                         // W is diagonal and contains the inverse of the iteration matrix!
+
     // ========= Lagrangian Systems ===========
     if (auto lldds =
             std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
-      vfree = residuFree;  // initialize vfree with the content of residuFree
-                           // W is diagonal and contains the inverse of the iteration matrix!
       vfree -= iterationMatrix->asDiagonal() * vfree;
       vfree += lldds->velocityMemory().getSiconosVector(0);
     } else if (auto lltids =
@@ -1069,7 +1070,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     } else if (auto llstids =
                    std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
                        ds)) {
-      vfree = residuFree;  // initialize vfree with the content of residuFree
       // -- vfree =  vold - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve in place WX = vfree
@@ -1081,7 +1081,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - time_step*[theta*forces(t) + (1-theta)*forces(told)]
       //
-      vfree = residuFree;  // initialize vfree with the content of residuFree
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
       moreau_jean::computeIterationMatrix_Lagrangian_T(
@@ -1100,7 +1099,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - time_step*[theta*forces(t) + (1-theta)*forces(told)]
       //
-      vfree = residuFree;  // initialize vfree with the content of residuFree
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
       moreau_jean::computeIterationMatrix_Lagrangian_T(
@@ -1117,7 +1115,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     }
     // ========= NewtonEuler Systems ===========
     else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      vfree = residuFree;
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
       moreau_jean::computeIterationMatrix_NewtonEuler(
@@ -1770,9 +1767,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
 
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
-    }
-    if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
-        dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
+    } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
+               dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
       // -- Convert the DS into a Lagrangian one.
       auto lds = static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds);
       siconos::algebra::SiconosVector f_k_theta{lds->dimension()};

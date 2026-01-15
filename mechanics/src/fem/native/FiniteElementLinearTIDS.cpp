@@ -19,25 +19,17 @@
 
 #include "BoundaryCondition.hpp"
 #include "FiniteElementModel.hpp"
+#include "Material.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
-    std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
-    siconos::algebra::StorageType storageType)
-    : LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(),
-      _mesh(mesh),
-      _materials(materials),
-      _storageType(storageType) {
-  DEBUG_BEGIN(
-      "FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> "
-      "mesh, "
-      "std::shared_ptr<Material> material\n");
-
+    std::shared_ptr<Mesh> mesh, const std::map<unsigned int, const Material>& materials)
+    : LagrangianSparseLinearTIDS(), mesh_(mesh), materials_(materials) {
   // Warning FP: the DS is built from default empty constructor in an unusual
   // way. Care must be taken to properly set all attributes in DS, SecondOrder,
   // Lagrangian ... It may be better to :
@@ -45,8 +37,8 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   // - compute ndof
   // - build ds from ndof or q0, v0
 
-  _FEModel = std::make_shared<FiniteElementModel>(mesh);
-  ndof_ = _FEModel->init();
+  FEModel_ = std::make_shared<FiniteElementModel>(mesh);
+  ndof_ = FEModel_->init();
 
   q0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   velocity0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
@@ -59,42 +51,37 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   p_[1]->setZero();
-  //   _zeroPlugin();
+
   x_size_ = 2 * ndof_;
 
   // Mass ...
   // Deal with 'plugged' mass later
   mass_storage_ = std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  hasMass_ = hasConstantMass_ = true;
+  hasConstantMass_ = true;
+  hasMass_ = true;
   computemass_ = nullptr;
-  // Note FP - todo: evaluate number of nonzeros in mass_mat_ and reserve.
+  hasLUMass_ = false;
   siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
-      mass_storage_, [&](auto& matrix) { _FEModel->computeMassMatrix(matrix, _materials); },
+      mass_storage_, [&](auto& matrix) { FEModel_->computeMassMatrix(matrix, materials_); },
       "mass_storage_");
-  //  _FEModel->computeMassMatrix(mass_storage_, _materials);
-  //
+
   stiffnessMatrix_storage =
       std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
   siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
       stiffnessMatrix_storage,
-      [&](auto& matrix) { _FEModel->computeStiffnessMatrix(matrix, _materials); },
+      [&](auto& matrix) { FEModel_->computeStiffnessMatrix(matrix, materials_); },
       "stiffnessMatrix_storage");
 
   // dampingMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-
-  DEBUG_END(
-      "FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> "
-      "mesh, "
-      "std::shared_ptr<Material> material\n");
 }
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryConditions(
-    int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index) {
+    int physical_entity_tag, const std::vector<int>& node_dof_index) {
   if (!boundaryConditions_)
     boundaryConditions_ = std::make_shared<siconos::modeling::BoundaryCondition>(
         siconos::modeling::BoundaryCondition::Indices{});
 
-  _FEModel->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
+  FEModel_->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
                                              boundaryConditions_);
 
   reactionToBoundaryConditions_ = std::make_shared<siconos::algebra::SiconosVector>(
@@ -102,16 +89,18 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
 };
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
-    int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
+    int physical_entity_tag, const siconos::algebra::SiconosVector& nodal_forces) {
   if (!std::holds_alternative<siconos::algebra::OwnedDenseVector>(fext_storage_)) {
     fext_storage_ = std::make_unique<siconos::algebra::SiconosVector>(ndof_);
   }
   hasFext_ = true;
-  hasConstantFext_ = true;  // set by applyNodalForces -> review this.
+  hasConstantFext_ = true;  // set later by applyNodalForces
   //  We should probably use something like setComputeFext(applyNodalForce)
   computefext_ = nullptr;
+
   use_fext([&](auto& fext) {
-    _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, fext);
+    fext.setZero();
+    FEModel_->applyNodalForces(physical_entity_tag, nodal_forces, fext);
   });
 };
 
@@ -124,5 +113,5 @@ double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy(
 void siconos::mechanics::fem::FiniteElementLinearTIDS::display(bool brief) const {
   std::cout << "===== FiniteElementLinearTIDS display ===== " << std::endl;
   LagrangianSparseLinearTIDS::display();
-  _FEModel->display(brief);
+  FEModel_->display(brief);
 }

@@ -27,7 +27,7 @@
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
+// #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -350,11 +350,11 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time)
   return info;
 }
 
-int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
-    std::shared_ptr<GlobalFrictionContactProblem> problem) {
-  if (!problem) {
-    problem = globalFrictionContactProblem();
-  }
+int siconos::nonsmooth_formulations::GlobalFrictionContact::solve() {
+  //   std::shared_ptr<GlobalFrictionContactProblem> problem) {
+  // if (!problem) {
+  auto problem = globalFrictionContactProblem();
+
   return (*_gfc_driver)(&*problem, _z->data(), _w->data(), _globalVelocities->data(),
                         &*_numerics_solver_options);
 }

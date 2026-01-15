@@ -17,26 +17,16 @@
  */
 #include "OneStepNSProblem.hpp"
 
-#include "EulerMoreauOSI.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
-#include "LagrangianSparseDS.hpp"
-#include "LsodarOSI.hpp"
-#include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NonSmoothLaw.hpp"
-#include "NumericsSolversNamespace.h"  // for SolverOptions tools
-#include "NumericsToolsNamespace.h"    // for verbose mode
+#include "NumericsVerbose.h"
 #include "OneStepIntegrator.hpp"
-#include "SchatzmanPaoliOSI.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Tools.hpp"  // enum_to_string
-#include "Topology.hpp"
-#include "ZeroOrderHoldOSI.hpp"
+#include "SolverOptions.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"

@@ -51,13 +51,16 @@ class NativeCircleShape(NativeShape):
     def __init__(self, radius):
         self.radius = radius
 
+
 class NativeLineShape(NativeShape):
     def __init__(self, a, b, c):
         self.params = [a, b, c]
 
+
 class NativeSegmentShape(NativeShape):
     def __init__(self, x1, y1, x2, y2):
         self.params = [x1, y1, x2, y2]
+
 
 class NativeBox2dShape(NativeShape):
     def __init__(self, a, b):
@@ -105,7 +108,9 @@ def load_heightmap(hm_data):
     if len(r) != 2:
         raise AssertionError("len(r) != 2")
     # assert(len(r) == 2)
-    hm = siconos.mechanics.collision.SiconosHeightMap(np.array(hm_data, dtype=np.float64, order="F"), r[0], r[1])
+    hm = siconos.mechanics.collision.SiconosHeightMap(
+        np.array(hm_data, dtype=np.float64, order="F"), r[0], r[1]
+    )
     # dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
     # hm.setInsideMargin(
     #    hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))
@@ -189,7 +194,7 @@ class ShapeCollection:
                 "Cone": siconos.mechanics.collision.SiconosCone,
                 "Plane": siconos.mechanics.collision.SiconosPlane,
                 "Disk": siconos.mechanics.collision.SiconosDisk,
-                "Segment": NativeSegmentShape, # transformed into Box2d
+                "Segment": NativeSegmentShape,  # transformed into Box2d
                 "Box2d": siconos.mechanics.collision.SiconosBox2d,
             }
 

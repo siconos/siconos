@@ -22,15 +22,12 @@
 #include <functional>
 
 #include "EventsManager.hpp"
-#include "Interaction.hpp"
-#include "LagrangianDS.hpp"
 #include "OneStepIntegrator.hpp"
-#include "Topology.hpp"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #include "Topology.hpp"
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "OneStepNSProblem.hpp"
-#include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
 void siconos::simulation::TimeSteppingD1Minus::initializeOneStepNSProblem() {

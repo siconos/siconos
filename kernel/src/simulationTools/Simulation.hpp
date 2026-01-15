@@ -31,11 +31,6 @@
 #include "SiconosSerialization.hpp"
 #include "SiconosVector.hpp"
 #include "SimulationTypes.hpp"  // SICONOS_OSNSP_DEFAULT
-// #include "InteractionManager.hpp"
-
-namespace siconos::algebra {
-// class SiconosVector;
-}
 
 namespace siconos::integrators {
 

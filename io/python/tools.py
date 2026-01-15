@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -162,7 +161,7 @@ def load_siconos_mesh(shape_filename, scale=None):
     shape = None
 
     if polydata.GetCellType(0) == 5:
-        apoints = np.empty((3, num_points), dtype="f8")
+        apoints = np.empty((3, num_points), dtype=np.float64, order="F")
         for i in range(0, points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[0, i] = p[0]

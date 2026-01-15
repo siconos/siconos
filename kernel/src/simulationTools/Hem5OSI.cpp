@@ -32,7 +32,7 @@
 #include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
-#include "Topology.hpp"
+// #include "Topology.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

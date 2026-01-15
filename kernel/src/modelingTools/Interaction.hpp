@@ -34,9 +34,6 @@
 
 namespace siconos::algebra {
 class SiconosMemory;
-// class SiconosVector;
-// class SiconosMatrix;
-// class SiconosMatrix;
 class BlockVector;
 }  // namespace siconos::algebra
 

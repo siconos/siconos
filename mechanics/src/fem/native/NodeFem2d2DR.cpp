@@ -49,11 +49,11 @@ void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& in
     DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
     DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
 
-    result.setValue(0, (*_node->dofIndex())[0], Nx);
-    result.setValue(0, (*_node->dofIndex())[1], Ny);
+    result.setValue(0, node_->global_dof_index()[0], Nx);
+    result.setValue(0, node_->global_dof_index()[1], Ny);
 
-    result.setValue(1, (*_node->dofIndex())[0], Tx);
-    result.setValue(1, (*_node->dofIndex())[1], Ty);
+    result.setValue(1, node_->global_dof_index()[0], Tx);
+    result.setValue(1, node_->global_dof_index()[1], Ty);
 
     if (q.size() == 6) {
       DEBUG_PRINT("take into account second ds\n");
@@ -83,8 +83,8 @@ void siconos::mechanics::fem::NodeFem2d2DR::computeh(
 
   LagrangianScleronomousR::computeh(q, y);
   auto& displacement = *((q.getAllVect())[0]);
-  (*_Pc1)(0) = displacement((*_node->dofIndex())[0]) + _node->x();
-  (*_Pc1)(1) = displacement((*_node->dofIndex())[1]) + _node->y();
+  (*_Pc1)(0) = displacement(node_->global_dof_index()[0]) + node_->x();
+  (*_Pc1)(1) = displacement(node_->global_dof_index()[1]) + node_->y();
   y(0) = distance();
   DEBUG_PRINTF("distance = %e\n", distance());
   DEBUG_EXPR(siconos::algebra::print(y););
@@ -114,9 +114,9 @@ void siconos::mechanics::fem::NodeFem2d2DR::updateContactPoint(double pc2[2], do
 void siconos::mechanics::fem::NodeFem2d2DR::display() const {
   LagrangianR::display();
 
-  std::cout << " _node :\n";
-  if (_node)
-    _node->display();
+  std::cout << " Node:\n";
+  if (node_)
+    node_->display();
   else
     std::cout << " nullptr :\n";
 

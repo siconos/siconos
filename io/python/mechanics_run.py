@@ -1781,7 +1781,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # is the ds number.
         positions = self.get_io_array(self._io.positions(self._nsds))
 
-        if positions.shape[0] > 0 :
+        if positions.shape[0] > 0:
             number_of_ds = positions.shape[0]
             self._dynamic_data.resize(current_line + number_of_ds, 0)
 
@@ -1816,7 +1816,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         velocities = self.get_io_array(self._io.velocities(self._nsds))
 
-        if velocities.shape[0] > 0 :
+        if velocities.shape[0] > 0:
             number_of_ds = velocities.shape[0]
             self._velocities_data.resize(current_line + number_of_ds, 0)
 

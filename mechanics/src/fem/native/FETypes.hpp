@@ -17,11 +17,12 @@
  */
 #ifndef FETypesH
 #define FETypesH
+#include <unordered_set>
 
 namespace siconos::mechanics::fem {
 
 /** Ids for element types, following gmsh numbering convention */
-enum class FiniteElementType  // we follow the gmsh numbering convention.
+enum class FiniteElementType : int  // we follow the gmsh numbering convention.
 {
   L2 = 1,  /** 2-node line */
   T3 = 2,  /** 3-node triangle */
@@ -38,6 +39,12 @@ enum class FiniteElementType  // we follow the gmsh numbering convention.
 
 /** Ids for element families */
 enum class FiniteElementFamily { isoparametric };
+
+// Helper function to check if an int is a valid Color
+inline bool is_valid_element(int value) {
+  static const std::unordered_set<int> valid_values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  return valid_values.count(value) > 0;
+}
 
 }  // namespace siconos::mechanics::fem
 

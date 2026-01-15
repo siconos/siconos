@@ -18,23 +18,18 @@
 
 #include "TimeSteppingDirectProjection.hpp"
 
-#include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "NewtonEuler1DR.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NewtonEulerR.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NonSmoothLaw.hpp"
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
+#include "Relation.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
 #include "Tools.hpp"
-#include "Topology.hpp"
 
 static siconos::simulation::CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 // #define DEBUG_NOCOLOR

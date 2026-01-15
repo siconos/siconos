@@ -22,15 +22,15 @@
 
 #include "Mesh.hpp"
 
-double siconos::mechanics::fem::FENode::x() { return _mVertex->x(); }
+double siconos::mechanics::fem::FENode::x() const { return mVertex_->x(); }
 
-double siconos::mechanics::fem::FENode::y() { return _mVertex->y(); }
+double siconos::mechanics::fem::FENode::y() const { return mVertex_->y(); }
 
-double siconos::mechanics::fem::FENode::z() { return _mVertex->z(); }
+double siconos::mechanics::fem::FENode::z() const { return mVertex_->z(); }
 
 void siconos::mechanics::fem::FENode::display() {
-  std::cout << "     - Fe Node - number: " << _num
-            << "               - ndof:" << _dofIndex->size()
-            << "               - dofIndex: " << _dofIndex->front() << ":" << _dofIndex->back()
-            << "\n";
+  std::cout << "     - Fe Node - number: " << num_ << "/ " << mVertex_->num()
+            << "               - ndof:" << global_dof_index_.size()
+            << "               - dofIndex (first/last): " << global_dof_index_.front() << ":"
+            << global_dof_index_.back() << "\n";
 };

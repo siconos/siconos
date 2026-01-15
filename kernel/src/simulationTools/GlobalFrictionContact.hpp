@@ -176,47 +176,48 @@ class GlobalFrictionContact : public LinearOSNS {
    *
    *  \param sim the simulation, owner of this OSNSPB
    */
-  virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
+  virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
   /** \return the friction contact problem from Numerics
    */
   std::shared_ptr<GlobalFrictionContactProblem> globalFrictionContactProblem();
 
-  // /** \return the friction contact problem from Numerics (raw ptr, do not free)
+  // /** \return the friction contact problem from Numerics (raw ptr, do not f
+  // ree)
   //  */
   // GlobalFrictionContactProblem* globalFrictionContactProblemPtr();
 
   /** solve a friction contact problem
    *
-   *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
+  int solve();
+  //  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
 
   /** Construction of the problem
    *
    *  \param time current time
    */
-  virtual bool preCompute(double time);
+  virtual bool preCompute(double time) override;
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *
    *  \param time current time
    */
-  virtual int compute(double time);
+  virtual int compute(double time) override;
 
   /** post-treatment of output from Numerics solver:
    *  set values of the unknowns of Interactions using (velocity,reaction)
    */
-  virtual void postCompute();
+  virtual void postCompute() override;
 
   /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw);
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 
   void updateMu();
 
   /** print the data to the screen */
-  void display() const;
+  void display() const override;
 };
 }  // namespace siconos::nonsmooth_formulations
 

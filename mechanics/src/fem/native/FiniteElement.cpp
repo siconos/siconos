@@ -21,16 +21,21 @@
 #include <iostream>
 
 #include "FENode.hpp"
+#include "FETypes.hpp"
 #include "Mesh.hpp"  // MElement
 #include "SiconosException.hpp"
 #include "Tools.hpp"  // enum_to_string
 
-siconos::mechanics::fem::FElement::FElement(FiniteElementType type, unsigned int ndof,
+siconos::mechanics::fem::FElement::FElement(FiniteElementType type,
+                                            siconos::algebra::Index ndof,
                                             std::shared_ptr<MElement> e)
-    : _num(e->num()), _type(type), ndof_(ndof), _mElement(e) {}
+    : ndof_(ndof), mElement_(e) {}
 
-int siconos::mechanics::fem::FElement::order() {
-  switch (_type) {
+int siconos::mechanics::fem::FElement::num() const { return mElement_->num(); }
+
+int siconos::mechanics::fem::FElement::order() const {
+  FiniteElementType type = mElement_->type();
+  switch (type) {
     case FiniteElementType::T3:
     case FiniteElementType::TH4:
       return 1;
@@ -41,8 +46,9 @@ int siconos::mechanics::fem::FElement::order() {
   return 0;
 }
 
-int siconos::mechanics::fem::FElement::ndofPerNode() {
-  switch (_type) {
+int siconos::mechanics::fem::FElement::ndofPerNode() const {
+  FiniteElementType type = mElement_->type();
+  switch (type) {
     case FiniteElementType::T3:
     case FiniteElementType::Q4:
       return 2;
@@ -56,7 +62,8 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
 
 const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
     int order) {
-  switch (_type) {
+  FiniteElementType type = mElement_->type();
+  switch (type) {
     case FiniteElementType::T3:
       if (order == 1)
         return GaussPointsT3_1;
@@ -81,7 +88,8 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso2D(double ksi, double et
                                                            std::vector<double>& N,
                                                            std::vector<double>& Nksi,
                                                            std::vector<double>& Neta) {
-  switch (_type) {
+  FiniteElementType type = mElement_->type();
+  switch (type) {
     case FiniteElementType::T3: {
       N[0] = 1.0 - ksi - eta;
       N[1] = ksi;
@@ -104,7 +112,8 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double et
                                                            std::vector<double>& Nksi,
                                                            std::vector<double>& Neta,
                                                            std::vector<double>& Nzeta) {
-  switch (_type) {
+  FiniteElementType type = mElement_->type();
+  switch (type) {
     case FiniteElementType::TH4: {
       N[0] = 1.0 - ksi - eta - zeta;
       N[1] = ksi;
@@ -134,12 +143,12 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double et
 }
 
 void siconos::mechanics::fem::FElement::display() {
-  std::cout << " - FElement - number: " << _num
-            << "            - type: " << siconos::tools::enum_to_string(_type)
+  std::cout << " - FElement - number: " << mElement_->num()
+            << "            - type: " << siconos::tools::enum_to_string(mElement_->type())
             << "            - ndof: " << ndof_
-            << "            - number of nodes: " << _nodes.size();
+            << "            - number of nodes: " << nodes_.size();
   std::cout << std::endl;
-  for (std::shared_ptr<FENode> n : _nodes) {
+  for (std::shared_ptr<FENode> n : nodes_) {
     n->display();
   }
 };

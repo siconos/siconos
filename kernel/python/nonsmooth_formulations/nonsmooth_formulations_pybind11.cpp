@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "FrictionContact.hpp"
-#include "FrictionContactProblem.h"
+// #include "FrictionContactProblem.h"
 #include "GenericMechanical.hpp"
 #include "GlobalFrictionContact.hpp"
 #include "GlobalFrictionContactProblem.h"
@@ -19,7 +19,7 @@
 #include "RollingFrictionContact.hpp"
 #include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
-#include "relay_cst.h"
+// #include "relay_cst.h"
 
 namespace py = pybind11;
 
@@ -115,8 +115,7 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
       .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
            py::arg("options"))
       .def("updateMu", &siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu)
-      .def("solve", &siconos::nonsmooth_formulations::GlobalFrictionContact::solve,
-           py::arg("problem") = nullptr);
+      .def("solve", &siconos::nonsmooth_formulations::GlobalFrictionContact::solve);
 
   py::class_<siconos::nonsmooth_formulations::GenericMechanical,
              std::shared_ptr<siconos::nonsmooth_formulations::GenericMechanical>,
@@ -145,9 +144,11 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
              std::shared_ptr<siconos::nonsmooth_formulations::GlobalRollingFrictionContact>,
              siconos::nonsmooth_formulations::GlobalFrictionContact>(
       m, "GlobalRollingFrictionContact")
-      .def(py::init<int, int>(), py::arg("dimPb"),
+      .def(py::init<int, int>(), py::arg("dimPb") = 5,
            py::arg("numericsSolverId") =
                solver_ids.attr("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR"))
+      .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
+           py::arg("options"))
       .def("updateMu",
            &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu)
       .def("solve", &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve);

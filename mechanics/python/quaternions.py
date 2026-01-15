@@ -28,6 +28,7 @@ usage example:
 import numpy as np
 from math import cos, sin
 
+
 def euler_from_quaternion(q0, q1, q2, q3):
     """
     Convert a quaternion into Euler angles (phi, theta, psi).
@@ -67,8 +68,9 @@ def quaternion_get(orientation):
         - Quaternion: [w, x, y, z] where w, x, y, z are the quaternion components.
     """
 
-    if isinstance(orientation, np.ndarray) or \
-       (isinstance(orientation, list) and len(orientation) == 4) :
+    if isinstance(orientation, np.ndarray) or (
+        isinstance(orientation, list) and len(orientation) == 4
+    ):
         orientation = np.asarray(orientation, dtype=np.float64)
 
         if orientation.shape[0] != 4:

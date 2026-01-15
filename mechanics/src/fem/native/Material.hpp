@@ -16,63 +16,67 @@
  * limitations under the License.
  */
 
-/*! \file Material.hpp
-
- */
+/*! \file Material.hpp */
 #ifndef MATERIAL_H
 #define MATERIAL_H
-
-#include <iostream>
-#include <vector>
 
 namespace siconos::mechanics::fem {
 
 /** Tag analysis types */
 enum class AnalysisType2D { plane_strain, plane_stress, axysymmetric };
 
-/** A simple class for material
-
+/** To describe the properties of a material (FE framework)
     Default = steel
  */
 class Material {
  protected:
   /** mass density */
-  double _massDensity{7850.};
+  double massDensity_{7850.};
 
   /** Young Modulus */
-  double _elasticYoungModulus{2.1e11};
+  double elasticYoungModulus_{2.1e11};
 
-  /** Poison coefficient */
-  double _poissonCoefficient{0.3};
+  /** Poisson coefficient */
+  double poisson_sRatio_{0.3};
 
   /** Analysis type in 2D */
-  AnalysisType2D _analysisType2D{AnalysisType2D::plane_strain};
+  AnalysisType2D analysisType2D_{AnalysisType2D::plane_strain};
 
   /** thickness in 2D plane stress analysis */
-  double _thickness{1.0};
+  double thickness_{1.0};
 
-  /** default constructor */
-  Material() = default;
+  // Rule of five
+  Material() = default;  // --> steel
+  Material& operator=(Material&&) = delete;
 
  public:
-  /** constructor */
-  Material(double massDensity, double ElasticYoungModulus, double poissonCoefficient)
-      : _massDensity(massDensity),
-        _elasticYoungModulus(ElasticYoungModulus),
-        _poissonCoefficient(poissonCoefficient) {}
+  Material(const Material&) = default;
+  Material(Material&&) = default;
+  Material& operator=(const Material&) = default;
+
+  /** @brief constructor
+   * @param massDensity
+   * @param E elastic Young modulus
+   * @param nu Poisson ratio
+   */
+  constexpr Material(double massDensity, double E, double nu)
+      : massDensity_(massDensity), elasticYoungModulus_(E), poisson_sRatio_(nu) {}
 
   /** destructor */
   ~Material() noexcept = default;
 
-  auto massDensity() { return _massDensity; }
+  auto massDensity() const { return massDensity_; }
 
-  auto elasticYoungModulus() { return _elasticYoungModulus; }
+  auto elasticYoungModulus() const { return elasticYoungModulus_; }
 
-  auto poissonCoefficient() { return _poissonCoefficient; }
+  auto poissonCoefficient() const { return poisson_sRatio_; }
 
-  auto analysisType2D() { return _analysisType2D; }
+  auto analysisType2D() const { return analysisType2D_; }
 
-  auto thickness() { return _thickness; }
+  auto thickness() const { return thickness_; }
 };
+
+inline constexpr Material Steel{7850, 2.1e11, 0.3};
+
 }  // namespace siconos::mechanics::fem
 #endif

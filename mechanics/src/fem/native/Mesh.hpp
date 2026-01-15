@@ -24,6 +24,7 @@
 
 // #include <iostream>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -37,7 +38,7 @@ class MElement;
 class MVertex {
  private:
   /** Vertex Number */
-  size_t _num = 0;
+  size_t num_ = 0;
 
   /* Vextex Coordinate */
   double _x = 0.;
@@ -45,95 +46,96 @@ class MVertex {
   double _z = 0.;
 
   /** elements to which the node belongs **/
-  std::vector<std::shared_ptr<MElement>> _elements = {};
+  std::vector<std::shared_ptr<MElement>> elements_ = {};
 
   // Rule of five
   MVertex() = delete;
-  MVertex(MVertex &) = delete;
-  MVertex &operator=(const MVertex &) = delete;
-  MVertex(MVertex &&) = delete;
-  MVertex &operator=(MVertex &&) = delete;
+  MVertex(MVertex&) = delete;
+  MVertex& operator=(const MVertex&) = delete;
+  MVertex(MVertex&&) = delete;
+  MVertex& operator=(MVertex&&) = delete;
 
  public:
   /* Constructor from data */
-  MVertex(size_t num, double x, double y, double z) : _num{num}, _x{x}, _y{y}, _z{z} {};
+  MVertex(size_t num, double x, double y, double z) : num_{num}, _x{x}, _y{y}, _z{z} {};
 
   ~MVertex() noexcept = default;
 
-  auto x() { return _x; };
-  auto y() { return _y; };
-  auto z() { return _z; };
+  double x() const { return _x; };
+  double y() const { return _y; };
+  double z() const { return _z; };
 
-  auto num() { return _num; }
+  size_t num() const { return num_; }
 
-  auto &elements() { return _elements; };
+  void link_element(std::shared_ptr<MElement> elem) { elements_.push_back(elem); }
+  const std::span<const std::shared_ptr<MElement>> elements() const { return elements_; }
 
-  void display();
+  void display() const;
 };
 
 /** a mesh element */
 class MElement {
  protected:
   /** Element number */
-  size_t _num{0};
+  size_t num_{0};
 
   /** type (following gmsh convention), default = 2, 3-node triangle */
-  FiniteElementType _type{FiniteElementType::T3};
+  FiniteElementType type_{FiniteElementType::T3};
 
   /** vertices **/
-  std::vector<std::shared_ptr<MVertex>> _vertices = {};
+  std::vector<std::shared_ptr<MVertex>> vertices_ = {};
 
   /** tags **/
-  std::vector<int> _tags = {};
+  std::vector<int> tags_ = {};
 
   /** Rule of five */
   MElement() = delete;
-  MElement(MElement &) = delete;
-  MElement &operator=(const MElement &) = delete;
-  MElement(MElement &&) = delete;
-  MElement &operator=(MElement &&) = delete;
+  MElement(MElement&) = delete;
+  MElement& operator=(const MElement&) = delete;
+  MElement(MElement&&) = delete;
+  MElement& operator=(MElement&&) = delete;
 
  public:
-  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> &vertices,
-           std::vector<int> tags)
-      : _num{num}, _type{type}, _vertices{vertices}, _tags{tags} {};
+  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>>& vertices,
+           const std::vector<int>& tags)
+      : num_{num}, type_{type}, vertices_{vertices}, tags_{tags} {};
 
-  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> vertices)
+  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>>& vertices)
       : MElement(num, type, vertices, {0}) {};
 
   ~MElement() noexcept = default;
 
-  auto type() { return _type; }
-  auto num() { return _num; }
-  auto &vertices() { return _vertices; }
-  auto tags(int n) { return _tags[n]; }
-  void display();
+  FiniteElementType type() const { return type_; }
+  size_t num() const { return num_; }
+  const std::span<const std::shared_ptr<MVertex>> vertices() const { return vertices_; }
+  int tags(int n) const { return tags_[n]; }
+  void display() const;
 };
 
 /** a Mesh container */
 class Mesh {
  protected:
   /** Space dimension */
-  int _dim = 2;
+  int dimension_ = 2;
 
   /** vertices */
-  std::vector<std::shared_ptr<MVertex>> _vertices = {};
+  std::vector<std::shared_ptr<MVertex>> vertices_ = {};
 
   /** elements */
-  std::vector<std::shared_ptr<MElement>> _elements = {};
+  std::vector<std::shared_ptr<MElement>> elements_ = {};
 
   /** Physical entities
       Connection between the tag and the name of the corresponding physical entity
       (like Dirichlet BC, Applied force ...)
    */
-  std::vector<std::tuple<int, std::string>> _physical_entities = {};
+  std::vector<std::tuple<int, std::string>> physical_entities_ = {};
 
   /** Rule of five */
   Mesh() = delete;
-  Mesh(Mesh &) = delete;
-  Mesh &operator=(const Mesh &) = delete;
-  Mesh(Mesh &&) = delete;
-  Mesh &operator=(Mesh &&) = delete;
+  Mesh(Mesh&) = delete;
+  Mesh& operator=(const Mesh&) = delete;
+  Mesh(Mesh&&) = delete;
+  Mesh& operator=(Mesh&&) = delete;
 
  public:
   /** constructor
@@ -159,13 +161,13 @@ class Mesh {
   /** destructor */
   ~Mesh() noexcept = default;
 
-  auto dim() { return _dim; };
+  int dim() const { return dimension_; };
 
-  auto &vertices() { return _vertices; }
+  const std::span<const std::shared_ptr<MVertex>> vertices() const { return vertices_; }
 
-  auto &elements() { return _elements; }
+  const std::span<const std::shared_ptr<MElement>> elements() const { return elements_; }
 
-  auto physical_entities() { return _physical_entities; }
+  std::vector<std::tuple<int, std::string>> physical_entities() { return physical_entities_; }
 
   /** print the data of the Mesh
 

@@ -668,7 +668,7 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_veloc
 
 void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
   brief = false;  // Full display always.
-  std::cout << "=====> LDS2  System display (number: " << number_ << ").\n";
+  std::cout << "=====> LagrangianSparseDS  System display (number: " << number_ << ").\n";
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q \n";
   siconos::algebra::print(*state_q_[0]);

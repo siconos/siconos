@@ -252,18 +252,18 @@ class MechanicsHdf5(object):
 
         try:
             self._radii_data = data(
-                self._data, "radii", 2, use_compression=self._use_compression)
+                self._data, "radii", 2, use_compression=self._use_compression
+            )
         except Exception as e:
             print("Warning -  group(self._data, radii ) : ", e)
 
-
         try:
             self._p0s_data = data(
-                self._data, "p0s", 4, use_compression=self._use_compression)
+                self._data, "p0s", 4, use_compression=self._use_compression
+            )
         except Exception as e:
             print("Warning -  group(self._data, p0s ) : ", e)
             self._p0s_data = None
-
 
         self._static_data = data(
             self._data, "static", 9, use_compression=self._use_compression

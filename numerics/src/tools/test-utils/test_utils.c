@@ -22,7 +22,7 @@
 #include <time.h>
 
 #include "SolverOptions.h"  // for solver_options_id_to_name, SolverOptions
-#include "numerics_verbose.h"
+// #include "numerics_verbose.h"
 /* Auxiliary routine: printing a matrix */
 void print_matrix(const char* desc, int m, int n, double* a, int lda) {
   int i, j;

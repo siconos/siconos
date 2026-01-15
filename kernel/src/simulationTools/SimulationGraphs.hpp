@@ -23,7 +23,6 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
-// #include "BlockVector.hpp"
 #include "FunctionTypes.hpp"
 #include "Interaction.hpp"
 #include "SiconosGraph.hpp"

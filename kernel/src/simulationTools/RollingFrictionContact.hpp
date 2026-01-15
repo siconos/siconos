@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /*! \file
-  Fricton-Contact Non-Smooth Problem
+  Friction-Contact Non-Smooth Problem
 */
 #ifndef RollingFrictionContact_H
 #define RollingFrictionContact_H

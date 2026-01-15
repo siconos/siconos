@@ -24,6 +24,7 @@
 
 #include <cstddef>  //size_t
 #include <memory>
+#include <span>
 #include <vector>
 
 namespace siconos::mechanics::fem {
@@ -33,13 +34,13 @@ class MVertex;
 class FENode {
  private:
   /* node number */
-  std::size_t _num = 0;
+  std::size_t num_ = 0;
 
-  /* associated Mvertex */
-  std::shared_ptr<MVertex> _mVertex{nullptr};
+  /* associated mesh vertex */
+  std::shared_ptr<MVertex> mVertex_{nullptr};
 
-  /* associated dof number  in the global dof vector*/
-  std::shared_ptr<std::vector<size_t>> _dofIndex{nullptr};
+  /* associated dof numbers in the global dof vector*/
+  std::vector<size_t> global_dof_index_ = {};
 
   /** Rule of five */
   FENode() = delete;
@@ -54,23 +55,23 @@ class FENode {
       \param v vertex associated to the node
       \param dofIndex global dof index
    */
-  FENode(size_t num, std::shared_ptr<MVertex> v, std::shared_ptr<std::vector<size_t>> dofIndex)
-      : _num(num), _mVertex(v), _dofIndex(dofIndex) {};
+  FENode(size_t num, std::shared_ptr<MVertex> v, const std::vector<size_t>& dofIndex)
+      : num_(num), mVertex_(v), global_dof_index_(dofIndex) {};
 
   ~FENode() noexcept = default;
-  auto num() { return _num; }
+  auto num() { return num_; }
 
-  /** \returns associated dof number in the global dof vector*/
-  auto dofIndex() { return _dofIndex; };
+  /** \returns associated dof numbers in the global dof vector*/
+  std::span<const size_t> global_dof_index() const { return global_dof_index_; };
 
   /** \returns x coordinate */
-  double x();
+  double x() const;
 
   /** \returns y coordinate */
-  double y();
+  double y() const;
 
   /** \returns z coordinate */
-  double z();
+  double z() const;
 
   /** Print node parameters and information */
   void display();

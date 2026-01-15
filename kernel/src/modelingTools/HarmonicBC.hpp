@@ -46,7 +46,8 @@ class HarmonicBC : public BoundaryCondition {
         omega_(omega),
         phi_(phi) {};
 
-  HarmonicBC(Indices&& newVelocityIndices, Eigen::Ref<siconos::algebra::SiconosVector> newa,
+  HarmonicBC(const Indices& newVelocityIndices,
+             Eigen::Ref<siconos::algebra::SiconosVector> newa,
              Eigen::Ref<siconos::algebra::SiconosVector> newb,
              Eigen::Ref<siconos::algebra::SiconosVector> omega,
              Eigen::Ref<siconos::algebra::SiconosVector> phi);

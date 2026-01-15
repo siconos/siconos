@@ -126,7 +126,7 @@ class BoundaryCondition {
    *
    * \param ind new index value
    */
-  void appendIndex(unsigned int ind);
+  void appendIndex(siconos::algebra::SiconosVector::Index ind);
 };
 }  // namespace siconos::modeling
 

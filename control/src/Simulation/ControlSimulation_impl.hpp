@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file ControlSimulation_impl.hpp
  * \brief functions related to the simulation involving control
@@ -23,18 +23,18 @@
 #ifndef ControlSimulation_impl_hpp
 #define ControlSimulation_impl_hpp
 
-#include <utility>
 #include <SiconosConfig.h>
+
+#include <utility>
 #define TO_STR(x) std::to_string(x)
 
-static inline std::pair<unsigned, std::string> getNumberOfStates(siconos::graphs::DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0)
-{
+static inline std::pair<unsigned, std::string> getNumberOfStates(
+    siconos::graphs::DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0) {
   std::string legend;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned nb = 0;
   unsigned counter = 0;
-  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
-  {
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
 
@@ -69,29 +69,23 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(siconos::graphs
 
   InteractionsGraph::VIterator ivi, ivdend;
   counter = 0;
-  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
-  {
+  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi) {
     std::string nameInter;
-    if (IG0.name.hasKey(*ivi))
-    {
+    if (IG0.name.hasKey(*ivi)) {
       nameInter = IG0.name[*ivi];
-    }
-    else
-    {
+    } else {
       nameInter = "unknownInteraction" + TO_STR(counter);
       ++counter;
     }
     auto& y = *IG0.bundle(*ivi)->y(0);
     nb += y.size();
-    for (unsigned i = 0; i < y.size(); ++i)
-    {
+    for (unsigned i = 0; i < y.size(); ++i) {
       legend.append(" " + nameInter + "_y_" + TO_STR(i));
     }
 
     auto& lambda = *IG0.bundle(*ivi)->lambda(0);
     nb += lambda.size();
-    for (unsigned i = 0; i < lambda.size(); ++i)
-    {
+    for (unsigned i = 0; i < lambda.size(); ++i) {
       legend.append(" " + nameInter + "_lambda_" + TO_STR(i));
     }
   }
@@ -107,56 +101,48 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(siconos::graphs
  * \param data the matrix where to save the data
  * \return the last written column
  */
-static inline unsigned storeAllStates(unsigned indx, unsigned startColumn, siconos::graphs::DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0, siconos::algebra::SiconosMatrix& data)
-{
+static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
+                                      siconos::graphs::DynamicalSystemsGraph& DSG0,
+                                      InteractionsGraph& IG0,
+                                      siconos::algebra::SiconosMatrix& data) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned column = startColumn;
-  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
-  {
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     unsigned i = column;
     auto& x = *DSG0.bundle(*dsvi)->x();
-    for (unsigned j = 0; j < x.size(); ++i, ++j)
-    {
+    for (unsigned j = 0; j < x.size(); ++i, ++j) {
       data(indx, i) = x(j);
     }
     column += x.size();
 
-    if (DSG0.u.hasKey(*dsvi))
-    {
+    if (DSG0.u.hasKey(*dsvi)) {
       auto& u = *DSG0.u[*dsvi];
-      for (unsigned j = 0; j < u.size(); ++i, ++j)
-      {
+      for (unsigned j = 0; j < u.size(); ++i, ++j) {
         data(indx, i) = u(j);
       }
       column += u.size();
     }
 
-    if (DSG0.e.hasKey(*dsvi))
-    {
+    if (DSG0.e.hasKey(*dsvi)) {
       auto& e = *DSG0.e[*dsvi];
-      for (unsigned j = 0; j < e.size(); ++i, ++j)
-      {
+      for (unsigned j = 0; j < e.size(); ++i, ++j) {
         data(indx, i) = e(j);
       }
       column += e.size();
     }
-
   }
 
   InteractionsGraph::VIterator ivi, ivdend;
-  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
-  {
+  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi) {
     unsigned i = column;
     auto& y = *IG0.bundle(*ivi)->y(0);
-    for (unsigned j = 0; j < y.size(); ++i, ++j)
-    {
+    for (unsigned j = 0; j < y.size(); ++i, ++j) {
       data(indx, i) = y(j);
     }
     column += y.size();
 
     auto& lambda = *IG0.bundle(*ivi)->lambda(0);
-    for (unsigned j = 0; j < lambda.size(); ++i, ++j)
-    {
+    for (unsigned j = 0; j < lambda.size(); ++i, ++j) {
       data(indx, i) = lambda(j);
     }
     column += lambda.size();
