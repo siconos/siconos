@@ -20,6 +20,7 @@
 
 #include <cmath>  // fabs
 #include <deque>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>  // stringstream
