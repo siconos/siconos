@@ -72,6 +72,7 @@ PYBIND11_MODULE(_numerics, m) {
   m.def("solver_options_get_internal_solver", &solver_options_get_internal_solver,
         py::return_value_policy::take_ownership, py::arg("options"), py::arg("id"));
   m.def("numerics_set_verbose", &numerics_set_verbose);
+  m.def("solver_options_id_to_name", &solver_options_id_to_name);
   m.def("solver_options_update_internal", &solver_options_update_internal, py::arg("options"),
         py::arg("internal_solver_number"), py::arg("solver_id"));
 
