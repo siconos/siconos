@@ -1273,7 +1273,8 @@ void wrap_dynamical_systems(py::module_& m) {
           },
           py::arg("fext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
           "Set constant external forces (alias).")
-      .def("fext", &siconos::modeling::NewtonEulerDS::fext, "current values of external forces")
+      .def("fext", &siconos::modeling::NewtonEulerDS::fext,
+           "current values of external forces")
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {
@@ -1314,6 +1315,7 @@ void wrap_dynamical_systems(py::module_& m) {
            &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
       .def("setComputeJacobianMintOver_q_byFD",
            &siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_q_byFD)
+      .def("computeKineticEnergy",    &siconos::modeling::NewtonEulerDS::computeKineticEnergy)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass)
       .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_read)
