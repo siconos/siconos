@@ -1709,7 +1709,7 @@ bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
   return !(addInteractionInIndexSet(inter, i));
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix>
+siconos::algebra::SiconosMatrix
 siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   DEBUG_BEGIN("MoreauJeanOSI::computeWorkForces()\n");
 
@@ -1727,7 +1727,7 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   //
 
   auto number_of_ds = _simulation->nonSmoothDynamicalSystem()->getNumberOfDS();
-  auto workForces = std::make_shared<siconos::algebra::SiconosMatrix>(number_of_ds, 2);
+  auto workForces = siconos::algebra::SiconosMatrix(number_of_ds, 2);
 
   size_t cnt_ds = 0;
 
@@ -1762,8 +1762,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        (*workForces)(ds->number(), 0) = ds->number();
-        (*workForces)(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
+        workForces(ds->number(), 0) = ds->number();
+        workForces(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
 
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
@@ -1791,8 +1791,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        (*workForces)(ds->number(), 0) = ds->number();
-        (*workForces)(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
+        workForces(ds->number(), 0) = ds->number();
+        workForces(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
 
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
@@ -1817,18 +1817,22 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
       // computes forces(ti,v,q)
       neds->computeWrench(neds->twist_read(), neds->q_read(), t);
       f_k_theta += _theta * neds->wrench();
-      v_k_theta = _theta * neds->twist_read();
+      v_k_theta += _theta * neds->twist_read();
 
       DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
       DEBUG_EXPR(siconos::algebra::print(*neds->totalForces()););
       DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
       // scalar product
-      (*workForces)(cnt_ds, 0) = ds->number();
-      (*workForces)(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
+      workForces(cnt_ds, 0) = ds->number();
+      workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
 
       cnt_ds++;
-
+      // std::cout << "v_k_theta"; siconos::algebra::print(v_k_theta);
+      // std::cout << "f_k_theta"; siconos::algebra::print(f_k_theta);
+      // std::cout << "workForce"; siconos::algebra::print(workForces);
+      // getchar(); 
+      
       DEBUG_PRINT("MoreauJeanOSI::computeWorkForces :\n");
     } else
       THROW_EXCEPTION(

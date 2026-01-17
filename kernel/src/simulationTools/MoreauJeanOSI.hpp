@@ -469,7 +469,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** \return the  work of forces by ds
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> computeWorkForces();
+  siconos::algebra::SiconosMatrix computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */
