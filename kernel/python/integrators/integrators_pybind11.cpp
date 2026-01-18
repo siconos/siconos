@@ -14,7 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */#include <pybind11/numpy.h>
+ */
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -45,6 +47,8 @@ PYBIND11_MODULE(integrators, m) {
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       .def("setConstraintActivationThreshold",
            &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
+      .def("computeWorkForces", &siconos::integrators::MoreauJeanOSI::computeWorkForces,
+	   py::return_value_policy::move)      
       .def_property("theta",
                     &siconos::integrators::MoreauJeanOSI::theta,    // getter
                     &siconos::integrators::MoreauJeanOSI::setTheta  // setter
