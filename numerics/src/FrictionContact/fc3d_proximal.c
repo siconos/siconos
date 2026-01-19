@@ -21,20 +21,20 @@
 #include <stdio.h>   // for printf, fprintf
 #include <stdlib.h>  // for exit, free, malloc
 
-#include "FrictionContactProblem.h"                   // for FrictionContact...
-#include "Friction_cst.h"                             // for SICONOS_FRICTIO...
+#include "FrictionContactProblem.h"  // for FrictionContact...
+#include "Friction_cst.h"            // for SICONOS_FRICTIO...
 #include "Friction_tools.h"          // for ComputeErrorPtr, FreeSolverPtr
-#include "NumericsFwd.h"                              // for SolverOptions
-#include "NumericsMatrix.h"                           // for NM_add_to_diag3
-#include "SiconosBlas.h"                              // for cblas_daxpy
-#include "SolverOptions.h"                            // for SolverOptions
+#include "NumericsFwd.h"             // for SolverOptions
+#include "NumericsMatrix.h"          // for NM_add_to_diag3
+#include "SiconosBlas.h"             // for cblas_daxpy
+#include "SolverOptions.h"           // for SolverOptions
+#include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"                       // for fc3d_compute_error
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"       // for fc3d_nonsmooth_...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_nonsmooth_...
-#include "numerics_verbose.h"                         // for numerics_error
-#include "fc3d_Solvers.h"
-#include "hdf5_logger.h"  // for SN_logh5_scalar_double, SN_logh5_vec_d...
-#include "sn_logger.h"    // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
+#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
+#include "numerics_verbose.h"  // for numerics_error
+#include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -70,8 +70,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   SolverOptions* internalsolver_options = options->internalSolvers[0];
 
   /*****  PROXIMAL Iterations *****/
-  int iter = 0;                      /* Current iteration number */
-  double error = 1., errorold = 1.0; /* Current error */
+  int iter = 0;       /* Current iteration number */
+  double error = 1.;  //, errorold = 1.0; /* Current error */
   int hasNotConverged = 1;
 
   int isVariable = 1;
@@ -298,7 +298,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
           iter, error, alpha);
 
       cblas_dcopy(n, reaction, 1, reactionold, 1);
-      errorold = error;
+      //      errorold = error;
 
       /* add proximal regularization on q */
 

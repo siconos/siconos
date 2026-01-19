@@ -19,12 +19,13 @@
 #include "JordanAlgebra.h"
 
 #include <assert.h>
+#include <limits.h>  // For INT_MAX
 #include <stdlib.h>  // for exit
 
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
 #include "math.h"
-
+#include "numerics_verbose.h"  // for. numerics_error
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 #define EPS 1e-40
@@ -68,13 +69,14 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
   return Arw_mat;
 }
 
-void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec,
-                        const unsigned int vecSize, const size_t varsCount) {
+void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
+                        const size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
-    fprintf(stderr,
-            "Arrow_repr_replace: %zu variables can not be extracted from vector of size %d.\n",
-            varsCount, vecSize);
+    fprintf(
+        stderr,
+        "Arrow_repr_replace: %zu variables can not be extracted from vector of size %zu.\n",
+        varsCount, vecSize);
     exit(EXIT_FAILURE);
   }
 
@@ -94,7 +96,11 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec,
     exit(EXIT_FAILURE);
   }
 
-  if (Arw_mat->size0 != vecSize && Arw_mat->size1 != vecSize) {
+  // Note FP: convert from or compare size_t to/with int --> need to be careful
+  // Anyway the best option is to use size_t in NumericsMatrix ...
+  if (!(vecSize <= INT_MAX))
+    numerics_error("Arrow_repr_replace", "value too large for an int");
+  if (Arw_mat->size0 != (int)vecSize && Arw_mat->size1 != (int)vecSize) {
     fprintf(stderr,
             "Arrow_repr_replace: Size of the input Arw_mat does not match size of vector.\n");
     exit(EXIT_FAILURE);
@@ -104,7 +110,11 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec,
   size_t pos;
   CSparseMatrix* cs = Arw_mat->matrix2->triplet;
 
-  if (cs->nz != ((dimension * 3 - 2) * varsCount)) {
+  size_t memSize = (dimension * 3 - 2) * varsCount;  // same pb as above, size_t to int ...
+  if (!(memSize <= LLONG_MAX))
+    numerics_error("Arrow_repr_replace", "value too large for an int64_t");
+
+  if (cs->nz != (int64_t)memSize) {
     fprintf(stderr,
             "Arrow_repr_replace: Size of allocated triplet memory is not sufficient.\n");
     exit(EXIT_FAILURE);

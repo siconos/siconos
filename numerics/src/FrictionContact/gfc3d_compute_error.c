@@ -27,10 +27,10 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
+#include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
 #include "numerics_verbose.h"              // for numerics_error, numerics_w...
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
-#include "gfc3d_ipm.h" // for gfc3d_compute_error_r
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -266,9 +266,9 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
   int m = nc * 3;
-  size_t n = problem->M->size0;
+  // size_t n = problem->M->size0;
   double* mu = problem->mu;
-  double* q = problem->q;
+  // double* q = problem->q;
   double error_unitary = 0.;
 
   /* we re-compute local velocity */

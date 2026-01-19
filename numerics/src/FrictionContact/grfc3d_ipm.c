@@ -162,8 +162,9 @@ static double grfc3d_complemResidualNorm(const double *const velocity,
  * so do from i-th to j-th elements,
  * starting index is 1
  */
-static void extract_vector(const double *const vec, const size_t vecSize, const int varsCount,
-                           const size_t i, const size_t j, double *out) {
+static void extract_vector(const double *const vec, const size_t vecSize,
+                           const size_t varsCount, const size_t i, const size_t j,
+                           double *out) {
   assert(vec);
   assert(i >= 1);
   assert(i <= j);
@@ -219,7 +220,7 @@ static NumericsMatrix *compute_J_matrix(const size_t varsCount) {
 
   long J_nzmax = 3 * 2 * varsCount;
   long J_1_nzmax = 3;
-  long J_2_nzmax = 3;
+  //  long J_2_nzmax = 3;
 
   NM_triplet_alloc(J, J_nzmax);
   NM_triplet_alloc(J_1, J_1_nzmax);
@@ -602,7 +603,7 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
 
   double *othor = (double *)calloc(2, sizeof(double));
 
-  float_type p0inv = 0., data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
+  float_type p0inv = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
   float_type nxb = 0., nzb = 0., nx = 0., nz = 0., nx2 = 0., nz2 = 0.;
 
   int id3, id5;
@@ -709,7 +710,7 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
 
   double *othor = (double *)calloc(2, sizeof(double));
 
-  float_type p0inv = 0., data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
+  float_type p0inv = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
   float_type nxb = 0., nzb = 0., nx = 0., nz = 0., nx2 = 0., nz2 = 0.;
 
   int id3, id5;
@@ -794,379 +795,385 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
   free(othor);
 }
 
-/* Return the matrix P^-1*H where P is the matrix satisfying Jac = P*P'. Using the formula Qp.
- */
-static NumericsMatrix *multiply_PinvH(const double *u1, const double *r1, const double *u2,
-                                      const double *r2, const size_t vecSize,
-                                      const size_t varsCount, NumericsMatrix *H) {
-  size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
-  assert(d3 == 3);
-  size_t d5 = d3 + 2;  // d5 = 5
-  size_t id3 = 0, id5 = 0;
+// /* Return the matrix P^-1*H where P is the matrix satisfying Jac = P*P'. Using the formula
+// Qp.
+//  */
+// static NumericsMatrix *multiply_PinvH(const double *u1, const double *r1, const double *u2,
+//                                       const double *r2, const size_t vecSize,
+//                                       const size_t varsCount, NumericsMatrix *H) {
+//   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
+//   assert(d3 == 3);
+//   size_t d5 = d3 + 2;  // d5 = 5
+//   size_t id3 = 0;
+//   int64_t id5 = 0;
+//   double *x = (double *)calloc(vecSize, sizeof(double));
+//   double *z = (double *)calloc(vecSize, sizeof(double));
+//   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
+//   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
-  Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
-  Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
+//   double *othor1 = (double *)calloc(2, sizeof(double));
+//   double *othor2 = (double *)calloc(2, sizeof(double));
 
-  double *othor1 = (double *)calloc(2, sizeof(double));
-  double *othor2 = (double *)calloc(2, sizeof(double));
+//   float_type p0inv = 0.;
+//   float_type nub = 0., nrb = 0., det_u1 = 0., det_r1 = 0., det_u2 = 0., det_r2 = 0.;
+//   float_type nxb = 0., nzb = 0.;
 
-  float_type p0inv = 0., data = 0.;
-  float_type nub = 0., nrb = 0., det_u1 = 0., det_r1 = 0., det_u2 = 0., det_r2 = 0.;
-  float_type nxb = 0., nzb = 0.;
+//   NumericsMatrix *out = NM_new();
 
-  NumericsMatrix *out = NM_new();
+//   if (H->storageType != NM_SPARSE) {
+//     fprintf(stderr,
+//             "Numerics, GRFC3D IPM, multiply_PinvH failed, only accept for NM_SPARSE of
+//             H.\n");
+//     exit(EXIT_FAILURE);
+//   }
 
-  if (H->storageType != NM_SPARSE) {
-    fprintf(stderr,
-            "Numerics, GRFC3D IPM, multiply_PinvH failed, only accept for NM_SPARSE of H.\n");
-    exit(EXIT_FAILURE);
-  }
+//   CSparseMatrix *H_csc = NM_csc(H);
+//   CSparseMatrix *out_csc =
+//       cs_spalloc(H->size0, H->size1, H_csc->nzmax, 1, 0); /* allocate result */
 
-  CSparseMatrix *H_csc = NM_csc(H);
-  CSparseMatrix *out_csc =
-      cs_spalloc(H->size0, H->size1, H_csc->nzmax, 1, 0); /* allocate result */
+//   CS_INT *Hp, *Hi;
+//   Hp = H_csc->p;
+//   Hi = H_csc->i;
 
-  CS_INT *Hp, *Hi;
-  Hp = H_csc->p;
-  Hi = H_csc->i;
+//   CS_INT *outp, *outi;
+//   outp = out_csc->p;
 
-  CS_INT *outp, *outi;
-  outp = out_csc->p;
+//   CS_ENTRY *Hx, *outx;
+//   Hx = H_csc->x;
 
-  CS_ENTRY *Hx, *outx;
-  Hx = H_csc->x;
+//   CS_INT nz = 0;
 
-  CS_INT nz = 0;
+//   bool multiplied = 0;
+//   for (CS_INT k = 0; k < H->size1; k++)  // traverse all cols of H
+//   {
+//     outp[k] = nz; /* column k of out starts here */
 
-  bool multiplied = 0;
-  for (CS_INT k = 0; k < H->size1; k++)  // traverse all cols of H
-  {
-    outp[k] = nz; /* column k of out starts here */
+//     /* reallocate if needed */
+//     if (nz + H->size1 > out_csc->nzmax &&
+//         !cs_sprealloc(out_csc, 2 * (out_csc->nzmax) + H->size1)) {
+//       return NULL; /* out of memory */
+//     }
+//     outi = out_csc->i;
+//     outx = out_csc->x; /* out->i and out->x may be reallocated */
 
-    /* reallocate if needed */
-    if (nz + H->size1 > out_csc->nzmax &&
-        !cs_sprealloc(out_csc, 2 * (out_csc->nzmax) + H->size1)) {
-      return NULL; /* out of memory */
-    }
-    outi = out_csc->i;
-    outx = out_csc->x; /* out->i and out->x may be reallocated */
+//     for (size_t i = 0; i < varsCount; i++)  // traverse all blocks[5x5] of Pinv
+//     {
+//       id3 = i * d3;
+//       if (!((i * d5) <= LLONG_MAX))
+//         numerics_error("multiply_PinvH", "value too large for an int64_t");
 
-    for (size_t i = 0; i < varsCount; i++)  // traverse all blocks[5x5] of Pinv
-    {
-      id3 = i * d3;
-      id5 = i * d5;
+//       id5 = (int64_t)(i * d5);
 
-      // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3)
-      // - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3)
-      // - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) ); p0inv =
-      // dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3)
-      // +
-      // (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
-      nxb = dnrm2l(d3 - 1, x + id3 + 1);
-      nzb = dnrm2l(d3 - 1, z + id3 + 1);
-      p0inv = dnrm2l(d3, x + id3) * dnrm2l(d3, z + id3) /
-              sqrtl((x[id3] - nxb) * (x[id3] - nxb) * (x[id3] + nxb) * (x[id3] + nxb) *
-                        dnrm2sqrl(d3, z + id3) +
-                    (z[id3] - nzb) * (z[id3] - nzb) * (z[id3] + nzb) * (z[id3] + nzb) *
-                        dnrm2sqrl(d3, x + id3));
+//       // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3)
+//       // - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3)
+//       // - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) ); p0inv =
+//       //
+//       dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3)
+//       // +
+//       //
+//       (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+//       nxb = dnrm2l(d3 - 1, x + id3 + 1);
+//       nzb = dnrm2l(d3 - 1, z + id3 + 1);
+//       p0inv = dnrm2l(d3, x + id3) * dnrm2l(d3, z + id3) /
+//               sqrtl((x[id3] - nxb) * (x[id3] - nxb) * (x[id3] + nxb) * (x[id3] + nxb) *
+//                         dnrm2sqrl(d3, z + id3) +
+//                     (z[id3] - nzb) * (z[id3] - nzb) * (z[id3] + nzb) * (z[id3] + nzb) *
+//                         dnrm2sqrl(d3, x + id3));
 
-      othor1[0] = -x[id3 + 2];
-      othor1[1] = x[id3 + 1];
-      // Compute det(r1), det(u1)
-      nrb = dnrm2l(d3 - 1, r1 + id3 + 1);
-      nub = dnrm2l(d3 - 1, u1 + id3 + 1);
-      // det_r1 = (r1[id3]+nrb)*(r1[id3]-nrb);
-      det_r1 = r1[id3] - nrb;
-      if (det_r1 < 0.)
-        det_r1 = (r1[id3] + nrb) * DBL_EPSILON;
-      else
-        det_r1 = (r1[id3] + nrb) * (r1[id3] - nrb);
+//       othor1[0] = -x[id3 + 2];
+//       othor1[1] = x[id3 + 1];
+//       // Compute det(r1), det(u1)
+//       nrb = dnrm2l(d3 - 1, r1 + id3 + 1);
+//       nub = dnrm2l(d3 - 1, u1 + id3 + 1);
+//       // det_r1 = (r1[id3]+nrb)*(r1[id3]-nrb);
+//       det_r1 = r1[id3] - nrb;
+//       if (det_r1 < 0.)
+//         det_r1 = (r1[id3] + nrb) * DBL_EPSILON;
+//       else
+//         det_r1 = (r1[id3] + nrb) * (r1[id3] - nrb);
 
-      // det_u1 = (u1[id3]+nub)*(u1[id3]-nub);
-      det_u1 = u1[id3] - nub;
-      if (det_u1 <= 0.)
-        det_u1 = (u1[id3] + nub) * DBL_EPSILON;
-      else
-        det_u1 = (u1[id3] + nub) * (u1[id3] - nub);
+//       // det_u1 = (u1[id3]+nub)*(u1[id3]-nub);
+//       det_u1 = u1[id3] - nub;
+//       if (det_u1 <= 0.)
+//         det_u1 = (u1[id3] + nub) * DBL_EPSILON;
+//       else
+//         det_u1 = (u1[id3] + nub) * (u1[id3] - nub);
 
-      othor2[0] = -z[id3 + 2];
-      othor2[1] = z[id3 + 1];
-      // Compute det(r2), det(u2)
-      nrb = dnrm2l(d3 - 1, r2 + id3 + 1);
-      nub = dnrm2l(d3 - 1, u2 + id3 + 1);
-      // det_r2 = (r2[id3]+nrb)*(r2[id3]-nrb);
-      det_r2 = r2[id3] - nrb;
-      if (det_r2 < 0.)
-        det_r2 = (r2[id3] + nrb) * DBL_EPSILON;
-      else
-        det_r2 = (r2[id3] + nrb) * (r2[id3] - nrb);
+//       othor2[0] = -z[id3 + 2];
+//       othor2[1] = z[id3 + 1];
+//       // Compute det(r2), det(u2)
+//       nrb = dnrm2l(d3 - 1, r2 + id3 + 1);
+//       nub = dnrm2l(d3 - 1, u2 + id3 + 1);
+//       // det_r2 = (r2[id3]+nrb)*(r2[id3]-nrb);
+//       det_r2 = r2[id3] - nrb;
+//       if (det_r2 < 0.)
+//         det_r2 = (r2[id3] + nrb) * DBL_EPSILON;
+//       else
+//         det_r2 = (r2[id3] + nrb) * (r2[id3] - nrb);
 
-      // det_u2 = (u2[id3]+nub)*(u2[id3]-nub);
-      det_u2 = u2[id3] - nub;
-      if (det_u2 <= 0.)
-        det_u2 = (u2[id3] + nub) * DBL_EPSILON;
-      else
-        det_u2 = (u2[id3] + nub) * (u2[id3] - nub);
+//       // det_u2 = (u2[id3]+nub)*(u2[id3]-nub);
+//       det_u2 = u2[id3] - nub;
+//       if (det_u2 <= 0.)
+//         det_u2 = (u2[id3] + nub) * DBL_EPSILON;
+//       else
+//         det_u2 = (u2[id3] + nub) * (u2[id3] - nub);
 
-      for (size_t j = 0; j < d5; j++)  // traverse all rows-block of Pinv
-      {
-        /* multiplication and storage */
-        if (j == 0)  // 1st row of P^-1
-        {
-          outx[nz] = 0.;
-          for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
-          {
-            // rows of H such that they belongs to each block of P^-1
-            if (Hi[p] == id5) {
-              outx[nz] += Hx[p];
-              multiplied = 1;
-            }
+//       for (size_t j = 0; j < d5; j++)  // traverse all rows-block of Pinv
+//       {
+//         /* multiplication and storage */
+//         if (j == 0)  // 1st row of P^-1
+//         {
+//           outx[nz] = 0.;
+//           for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
+//           {
+//             // rows of H such that they belongs to each block of P^-1
+//             if (Hi[p] == id5) {
+//               outx[nz] += Hx[p];
+//               multiplied = 1;
+//             }
 
-            if (Hi[p] == id5 + 1) {
-              outx[nz] += -2. * x[id3] * x[id3 + 1] * Hx[p] / dnrm2sqrl(d3, x + id3);
-              multiplied = 1;
-            }
-            if (Hi[p] == id5 + 2) {
-              outx[nz] += -2. * x[id3] * x[id3 + 2] * Hx[p] / dnrm2sqrl(d3, x + id3);
-              multiplied = 1;
-            }
+//             if (Hi[p] == id5 + 1) {
+//               outx[nz] += -2. * x[id3] * x[id3 + 1] * Hx[p] / dnrm2sqrl(d3, x + id3);
+//               multiplied = 1;
+//             }
+//             if (Hi[p] == id5 + 2) {
+//               outx[nz] += -2. * x[id3] * x[id3 + 2] * Hx[p] / dnrm2sqrl(d3, x + id3);
+//               multiplied = 1;
+//             }
 
-            if (Hi[p] == id5 + 3) {
-              outx[nz] += -2. * z[id3] * z[id3 + 1] * Hx[p] / dnrm2sqrl(d3, z + id3);
-              multiplied = 1;
-            }
-            if (Hi[p] == id5 + 4) {
-              outx[nz] += -2. * z[id3] * z[id3 + 2] * Hx[p] / dnrm2sqrl(d3, z + id3);
-              multiplied = 1;
-            }
+//             if (Hi[p] == id5 + 3) {
+//               outx[nz] += -2. * z[id3] * z[id3 + 1] * Hx[p] / dnrm2sqrl(d3, z + id3);
+//               multiplied = 1;
+//             }
+//             if (Hi[p] == id5 + 4) {
+//               outx[nz] += -2. * z[id3] * z[id3 + 2] * Hx[p] / dnrm2sqrl(d3, z + id3);
+//               multiplied = 1;
+//             }
 
-          }  // end rows of H
-          outx[nz] *= p0inv;
-          if (multiplied) {
-            outi[nz++] = j + id5;
-            multiplied = 0;
-          }
-        }  // end 1st row of P^-1
+//           }  // end rows of H
+//           outx[nz] *= p0inv;
+//           if (multiplied) {
+//             outi[nz++] = j + id5;
+//             multiplied = 0;
+//           }
+//         }  // end 1st row of P^-1
 
-        else if (j == 1 || j == 2)  // A^-1/2 of P^-1
-        {
-          outx[nz] = 0.;
-          for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
-          {
-            // get the rows of H that belongs to A^-1/2 for each block
-            if (Hi[p] == id5 + 1) {
-              multiplied = 1;
-              if (j == 1)
-                outx[nz] += (x[id3 + 1] * x[id3 + 1] / dnrm2l(d3, x + id3) +
-                             powl(det_r1 / det_u1, 0.25) * othor1[0] * othor1[0]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 1st row of A^-1/2
-              if (j == 2)
-                outx[nz] += (x[id3 + 2] * x[id3 + 1] / dnrm2l(d3, x + id3) +
-                             powl(det_r1 / det_u1, 0.25) * othor1[1] * othor1[0]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 2nd row
-            }
+//         else if (j == 1 || j == 2)  // A^-1/2 of P^-1
+//         {
+//           outx[nz] = 0.;
+//           for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
+//           {
+//             // get the rows of H that belongs to A^-1/2 for each block
+//             if (Hi[p] == id5 + 1) {
+//               multiplied = 1;
+//               if (j == 1)
+//                 outx[nz] += (x[id3 + 1] * x[id3 + 1] / dnrm2l(d3, x + id3) +
+//                              powl(det_r1 / det_u1, 0.25) * othor1[0] * othor1[0]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 1st row of A^-1/2
+//               if (j == 2)
+//                 outx[nz] += (x[id3 + 2] * x[id3 + 1] / dnrm2l(d3, x + id3) +
+//                              powl(det_r1 / det_u1, 0.25) * othor1[1] * othor1[0]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 2nd row
+//             }
 
-            if (Hi[p] == id5 + 2) {
-              multiplied = 1;
-              if (j == 1)
-                outx[nz] += (x[id3 + 1] * x[id3 + 2] / dnrm2l(d3, x + id3) +
-                             powl(det_r1 / det_u1, 0.25) * othor1[0] * othor1[1]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 1st row of A^-1/2
-              if (j == 2)
-                outx[nz] += (x[id3 + 2] * x[id3 + 2] / dnrm2l(d3, x + id3) +
-                             powl(det_r1 / det_u1, 0.25) * othor1[1] * othor1[1]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 2nd row
-            }
-          }  // end rows of H
-          if (multiplied) {
-            outi[nz++] = j + id5;
-            multiplied = 0;
-          }
-        }  // end A^-1/2
+//             if (Hi[p] == id5 + 2) {
+//               multiplied = 1;
+//               if (j == 1)
+//                 outx[nz] += (x[id3 + 1] * x[id3 + 2] / dnrm2l(d3, x + id3) +
+//                              powl(det_r1 / det_u1, 0.25) * othor1[0] * othor1[1]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 1st row of A^-1/2
+//               if (j == 2)
+//                 outx[nz] += (x[id3 + 2] * x[id3 + 2] / dnrm2l(d3, x + id3) +
+//                              powl(det_r1 / det_u1, 0.25) * othor1[1] * othor1[1]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, x + id3 + 1);  // 2nd row
+//             }
+//           }  // end rows of H
+//           if (multiplied) {
+//             outi[nz++] = j + id5;
+//             multiplied = 0;
+//           }
+//         }  // end A^-1/2
 
-        else if (j == 3 || j == 4)  // C^-1/2 of P^-1
-        {
-          outx[nz] = 0.;
-          for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
-          {
-            // get the rows of H that belongs to C^-1/2 for each block
-            if (Hi[p] == id5 + 3) {
-              multiplied = 1;
-              if (j == 3)
-                outx[nz] += (z[id3 + 1] * z[id3 + 1] / dnrm2l(d3, z + id3) +
-                             powl(det_r2 / det_u2, 0.25) * othor2[0] * othor2[0]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 1st row of C^-1/2
-              if (j == 4)
-                outx[nz] += (z[id3 + 2] * z[id3 + 1] / dnrm2l(d3, z + id3) +
-                             powl(det_r2 / det_u2, 0.25) * othor2[1] * othor2[0]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 2nd row
-            }
+//         else if (j == 3 || j == 4)  // C^-1/2 of P^-1
+//         {
+//           outx[nz] = 0.;
+//           for (CS_INT p = Hp[k]; p < Hp[k + 1]; p++)  // traverse all existential rows of H
+//           {
+//             // get the rows of H that belongs to C^-1/2 for each block
+//             if (Hi[p] == id5 + 3) {
+//               multiplied = 1;
+//               if (j == 3)
+//                 outx[nz] += (z[id3 + 1] * z[id3 + 1] / dnrm2l(d3, z + id3) +
+//                              powl(det_r2 / det_u2, 0.25) * othor2[0] * othor2[0]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 1st row of C^-1/2
+//               if (j == 4)
+//                 outx[nz] += (z[id3 + 2] * z[id3 + 1] / dnrm2l(d3, z + id3) +
+//                              powl(det_r2 / det_u2, 0.25) * othor2[1] * othor2[0]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 2nd row
+//             }
 
-            if (Hi[p] == id5 + 4) {
-              multiplied = 1;
-              if (j == 3)
-                outx[nz] += (z[id3 + 1] * z[id3 + 2] / dnrm2l(d3, z + id3) +
-                             powl(det_r2 / det_u2, 0.25) * othor2[0] * othor2[1]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 1st row of C^-1/2
-              if (j == 4)
-                outx[nz] += (z[id3 + 2] * z[id3 + 2] / dnrm2l(d3, z + id3) +
-                             powl(det_r2 / det_u2, 0.25) * othor2[1] * othor2[1]) *
-                            Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 2nd row
-            }
-          }  // end rows of H
-          if (multiplied) {
-            outi[nz++] = j + id5;
-            multiplied = 0;
-          }
-        }  // end C^-1/2
-      }  // end traverse all rows-block[5x5] of Pinv
-    }  // end traverse all blocks[5x5] of Pinv
-  }  // end traverse all cols of H
+//             if (Hi[p] == id5 + 4) {
+//               multiplied = 1;
+//               if (j == 3)
+//                 outx[nz] += (z[id3 + 1] * z[id3 + 2] / dnrm2l(d3, z + id3) +
+//                              powl(det_r2 / det_u2, 0.25) * othor2[0] * othor2[1]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 1st row of C^-1/2
+//               if (j == 4)
+//                 outx[nz] += (z[id3 + 2] * z[id3 + 2] / dnrm2l(d3, z + id3) +
+//                              powl(det_r2 / det_u2, 0.25) * othor2[1] * othor2[1]) *
+//                             Hx[p] / dnrm2sqrl(d3 - 1, z + id3 + 1);  // 2nd row
+//             }
+//           }  // end rows of H
+//           if (multiplied) {
+//             outi[nz++] = j + id5;
+//             multiplied = 0;
+//           }
+//         }  // end C^-1/2
+//       }  // end traverse all rows-block[5x5] of Pinv
+//     }  // end traverse all blocks[5x5] of Pinv
+//   }  // end traverse all cols of H
 
-  outp[H->size1] = nz;
-  cs_sprealloc(out_csc, 0);
+//   outp[H->size1] = nz;
+//   cs_sprealloc(out_csc, 0);
 
-  /*   out->storageType = H->storageType; */
-  /*   numericsSparseMatrix(out)->csc = out_csc; */
-  /*   out->size0 = (int)out->matrix2->csc->m; */
-  /*   out->size1 = (int)out->matrix2->csc->n; */
-  /*   numericsSparseMatrix(out)->origin = NSM_CSC; */
+//   /*   out->storageType = H->storageType; */
+//   /*   numericsSparseMatrix(out)->csc = out_csc; */
+//   /*   out->size0 = (int)out->matrix2->csc->m; */
+//   /*   out->size1 = (int)out->matrix2->csc->n; */
+//   /*   numericsSparseMatrix(out)->origin = NSM_CSC; */
 
-  free(x);
-  free(z);
-  free(othor1);
-  free(othor2);
-  return out;
-}
+//   free(x);
+//   free(z);
+//   free(othor1);
+//   free(othor2);
+//   return out;
+// }
 
-#include "cs.h"
 /* remove duplicate entries and zero entries from A */
-static CS_INT cs_dupl_zeros(cs *A) {
-  CS_INT i, j, p, q, nz = 0, n, m, *Ap, *Ai, *w;
-  CS_ENTRY *Ax;
-  if (!CS_CSC(A)) return (0); /* check inputs */
-  m = A->m;
-  n = A->n;
-  Ap = A->p;
-  Ai = A->i;
-  Ax = A->x;
-  w = cs_malloc(m, sizeof(CS_INT));  /* get workspace */
-  if (!w) return (0);                /* out of memory */
-  for (i = 0; i < m; i++) w[i] = -1; /* row i not yet seen */
-  for (j = 0; j < n; j++) {
-    q = nz; /* column j will start at q */
-    for (p = Ap[j]; p < Ap[j + 1]; p++) {
-      i = Ai[p]; /* A(i,j) is nonzero */
-      // printf("p=%ld, Ai[p]=%ld, nz=%ld, i=%ld, q=%ld, w[i]=%ld, Ax[nz]=%f,
-      // ",p,Ai[p],nz,i,q,w[i],Ax[p]);
-      if (w[i] >= q || Ax[p] == 0) {
-        Ax[w[i]] += Ax[p]; /* A(i,j) is a duplicate */
-      } else {
-        w[i] = nz;  /* record where row i occurs */
-        Ai[nz] = i; /* keep A(i,j) */
-        Ax[nz++] = Ax[p];
-      }
-      // printf("Ai[nz]=%ld\n", Ai [nz-1]);
-    }
-    Ap[j] = q; /* record start of column j */
-  }
-  Ap[n] = nz;                  /* finalize A */
-  cs_free(w);                  /* free workspace */
-  return (cs_sprealloc(A, 0)); /* remove extra space from A */
-}
+// static CS_INT cs_dupl_zeros(cs *A) {
+//   CS_INT i, j, p, q, nz = 0, n, m, *Ap, *Ai, *w;
+//   CS_ENTRY *Ax;
+//   if (!CS_CSC(A)) return (0); /* check inputs */
+//   m = A->m;
+//   n = A->n;
+//   Ap = A->p;
+//   Ai = A->i;
+//   Ax = A->x;
+//   w = cs_malloc(m, sizeof(CS_INT));  /* get workspace */
+//   if (!w) return (0);                /* out of memory */
+//   for (i = 0; i < m; i++) w[i] = -1; /* row i not yet seen */
+//   for (j = 0; j < n; j++) {
+//     q = nz; /* column j will start at q */
+//     for (p = Ap[j]; p < Ap[j + 1]; p++) {
+//       i = Ai[p]; /* A(i,j) is nonzero */
+//       // printf("p=%ld, Ai[p]=%ld, nz=%ld, i=%ld, q=%ld, w[i]=%ld, Ax[nz]=%f,
+//       // ",p,Ai[p],nz,i,q,w[i],Ax[p]);
+//       if (w[i] >= q || Ax[p] == 0) {
+//         Ax[w[i]] += Ax[p]; /* A(i,j) is a duplicate */
+//       } else {
+//         w[i] = nz;  /* record where row i occurs */
+//         Ai[nz] = i; /* keep A(i,j) */
+//         Ax[nz++] = Ax[p];
+//       }
+//       // printf("Ai[nz]=%ld\n", Ai [nz-1]);
+//     }
+//     Ap[j] = q; /* record start of column j */
+//   }
+//   Ap[n] = nz;                  /* finalize A */
+//   cs_free(w);                  /* free workspace */
+//   return (cs_sprealloc(A, 0)); /* remove extra space from A */
+// }
 
 /* L = chol (A, [pinv parent cp]), pinv is optional */
 
-static csn *cs_chol_2(const cs *A, const css *S, size_t iteration) {
-  // CS_ENTRY d, lki, *Lx, *x, *Cx ;
-  CS_ENTRY *Lx, *Cx;
-  float_type d, lki, *x;
-  CS_INT top, i, p, k, n, *Li, *Lp, *cp, *pinv, *s, *c, *parent, *Cp, *Ci;
-  cs *L, *C, *E;
-  csn *N;
-  if (!CS_CSC(A) || !S || !S->cp || !S->parent) return (NULL);
-  n = A->n;
-  N = cs_calloc(1, sizeof(csn));        /* allocate result */
-  c = cs_malloc(2 * n, sizeof(CS_INT)); /* get CS_INT workspace */
-  // x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get CS_ENTRY workspace */
-  x = cs_malloc(n, sizeof(float_type)); /* get float_type workspace */
-  cp = S->cp;
-  pinv = S->pinv;
-  parent = S->parent;
-  C = pinv ? cs_symperm(A, pinv, 1) : ((cs *)A);
-  // C = (cs *)A;
-  E = pinv ? C : NULL; /* E is alias for A, or a copy E=A(p,p) */
-  if (!N || !c || !x || !C) return (cs_ndone(N, E, c, x, 0));
-  s = c + n;
-  Cp = C->p;
-  Ci = C->i;
-  Cx = C->x;
-  N->L = L = cs_spalloc(n, n, cp[n], 1, 0); /* allocate result */
-  if (!L) return (cs_ndone(N, E, c, x, 0));
-  Lp = L->p;
-  Li = L->i;
-  Lx = L->x;
-  for (k = 0; k < n; k++) Lp[k] = c[k] = cp[k];
-  for (k = 0; k < n; k++) /* compute L(k,:) for L*L' = C */
-  {
-    /* --- Nonzero pattern of L(k,:) ------------------------------------ */
-    top = cs_ereach(C, k, parent, s, c); /* find pattern of L(k,:) */
-    if (iteration == 8) printf("top = %lld\n", top);
-    x[k] = 0.;                          /* x (0:k) is now zero */
-    for (p = Cp[k]; p < Cp[k + 1]; p++) /* x = full(triu(C(:,k))) */
-    {
-      if (Ci[p] <= k) x[Ci[p]] = Cx[p];
-      // if (Ci [p] <= k) x [Ci [p]] = (float_type)Cx [p] ;
-    }
-    d = x[k]; /* d = C(k,k) */
-    if (iteration == 8) printf("d = C(k,k) = %5.40Le\n", d);
-    x[k] = 0.; /* clear x for k+1st iteration */
-    /* --- Triangular solve --------------------------------------------- */
-    for (; top < n; top++) /* solve L(0:k-1,0:k-1) * x = C(:,k) */
-    {
-      i = s[top];             /* s [top..n-1] is pattern of L(k,:) */
-      lki = x[i] / Lx[Lp[i]]; /* L(k,i) = x (i) / L(i,i) */
-      x[i] = 0.;              /* clear x for k+1st iteration */
-      for (p = Lp[i] + 1; p < c[i]; p++) {
-        x[Li[p]] -= Lx[p] * lki;
-      }
-      // d -= lki * CS_CONJ (lki) ;            /* d = d - L(k,i)*L(k,i) */
-      d -= lki * lki; /* d = d - L(k,i)*L(k,i) */
-      p = c[i]++;
-      Li[p] = k; /* store L(k,i) in column i */
-      // Lx [p] = CS_CONJ (lki) ;
-      Lx[p] = lki;
-      if (iteration == 8) {
-        printf(
-            "k=%lld, i=%lld, p=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e, lki=%5.40Le, "
-            "d=%5.40Le\n",
-            k, i, p, Li[p], Lp[p], Lx[p], lki, d);
-      }
-    }
-    /* --- Compute L(k,k) ----------------------------------------------- */
-    // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
-    //   return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
-    // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
-    if (creall(d) <= 0 || cimagl(d) != 0) {
-      printf("\n\n Factorized matrix has a negative eigenvalue at the cone i = %lld. \n\n",
-             k / 5 + 1);
-      return (cs_ndone(N, E, c, x, 0)); /* not pos def */
-    }
-    // if (d < 0.) d = 1e-40;
-    p = c[k]++;
-    Li[p] = k; /* store L(k,k) = sqrt (d) in column k */
-    // Lx [p] = sqrt (d) ;
-    Lx[p] = sqrtl(d);
-    if (iteration == 8)
-      printf("k=%lld, p2=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e\n", k, p, Li[p], Lp[p],
-             Lx[p]);
-  }
-  Lp[n] = cp[n]; /* finalize L */
-  // if(iteration==16) printf("\n\n cs_chol_2 001  \n\n");
-  return (cs_ndone(N, E, c, x, 1)); /* success: free E,s,x; return N */
-}
+// static csn *cs_chol_2(const cs *A, const css *S, size_t iteration) {
+//   // CS_ENTRY d, lki, *Lx, *x, *Cx ;
+//   CS_ENTRY *Lx, *Cx;
+//   float_type d, lki, *x;
+//   CS_INT top, i, p, k, n, *Li, *Lp, *cp, *pinv, *s, *c, *parent, *Cp, *Ci;
+//   cs *L, *C, *E;
+//   csn *N;
+//   if (!CS_CSC(A) || !S || !S->cp || !S->parent) return (NULL);
+//   n = A->n;
+//   N = cs_calloc(1, sizeof(csn));        /* allocate result */
+//   c = cs_malloc(2 * n, sizeof(CS_INT)); /* get CS_INT workspace */
+//   // x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get CS_ENTRY workspace */
+//   x = cs_malloc(n, sizeof(float_type)); /* get float_type workspace */
+//   cp = S->cp;
+//   pinv = S->pinv;
+//   parent = S->parent;
+//   C = pinv ? cs_symperm(A, pinv, 1) : ((cs *)A);
+//   // C = (cs *)A;
+//   E = pinv ? C : NULL; /* E is alias for A, or a copy E=A(p,p) */
+//   if (!N || !c || !x || !C) return (cs_ndone(N, E, c, x, 0));
+//   s = c + n;
+//   Cp = C->p;
+//   Ci = C->i;
+//   Cx = C->x;
+//   N->L = L = cs_spalloc(n, n, cp[n], 1, 0); /* allocate result */
+//   if (!L) return (cs_ndone(N, E, c, x, 0));
+//   Lp = L->p;
+//   Li = L->i;
+//   Lx = L->x;
+//   for (k = 0; k < n; k++) Lp[k] = c[k] = cp[k];
+//   for (k = 0; k < n; k++) /* compute L(k,:) for L*L' = C */
+//   {
+//     /* --- Nonzero pattern of L(k,:) ------------------------------------ */
+//     top = cs_ereach(C, k, parent, s, c); /* find pattern of L(k,:) */
+//     if (iteration == 8) printf("top = %lld\n", top);
+//     x[k] = 0.;                          /* x (0:k) is now zero */
+//     for (p = Cp[k]; p < Cp[k + 1]; p++) /* x = full(triu(C(:,k))) */
+//     {
+//       if (Ci[p] <= k) x[Ci[p]] = Cx[p];
+//       // if (Ci [p] <= k) x [Ci [p]] = (float_type)Cx [p] ;
+//     }
+//     d = x[k]; /* d = C(k,k) */
+//     if (iteration == 8) printf("d = C(k,k) = %5.40Le\n", d);
+//     x[k] = 0.; /* clear x for k+1st iteration */
+//     /* --- Triangular solve --------------------------------------------- */
+//     for (; top < n; top++) /* solve L(0:k-1,0:k-1) * x = C(:,k) */
+//     {
+//       i = s[top];             /* s [top..n-1] is pattern of L(k,:) */
+//       lki = x[i] / Lx[Lp[i]]; /* L(k,i) = x (i) / L(i,i) */
+//       x[i] = 0.;              /* clear x for k+1st iteration */
+//       for (p = Lp[i] + 1; p < c[i]; p++) {
+//         x[Li[p]] -= Lx[p] * lki;
+//       }
+//       // d -= lki * CS_CONJ (lki) ;            /* d = d - L(k,i)*L(k,i) */
+//       d -= lki * lki; /* d = d - L(k,i)*L(k,i) */
+//       p = c[i]++;
+//       Li[p] = k; /* store L(k,i) in column i */
+//       // Lx [p] = CS_CONJ (lki) ;
+//       Lx[p] = lki;
+//       if (iteration == 8) {
+//         printf(
+//             "k=%lld, i=%lld, p=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e, lki=%5.40Le, "
+//             "d=%5.40Le\n",
+//             k, i, p, Li[p], Lp[p], Lx[p], lki, d);
+//       }
+//     }
+//     /* --- Compute L(k,k) ----------------------------------------------- */
+//     // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
+//     //   return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
+//     // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
+//     if (creall(d) <= 0 || cimagl(d) != 0) {
+//       printf("\n\n Factorized matrix has a negative eigenvalue at the cone i = %lld. \n\n",
+//              k / 5 + 1);
+//       return (cs_ndone(N, E, c, x, 0)); /* not pos def */
+//     }
+//     // if (d < 0.) d = 1e-40;
+//     p = c[k]++;
+//     Li[p] = k; /* store L(k,k) = sqrt (d) in column k */
+//     // Lx [p] = sqrt (d) ;
+//     Lx[p] = sqrtl(d);
+//     if (iteration == 8)
+//       printf("k=%lld, p2=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e\n", k, p, Li[p], Lp[p],
+//              Lx[p]);
+//   }
+//   Lp[n] = cp[n]; /* finalize L */
+//   // if(iteration==16) printf("\n\n cs_chol_2 001  \n\n");
+//   return (cs_ndone(N, E, c, x, 1)); /* success: free E,s,x; return N */
+// }
 
 static NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, const double *u2,
                                         const double *r2, const size_t vecSize,
@@ -1275,151 +1282,151 @@ static NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, cons
 // static  NumericsMatrix *  multiply_LinvH(const double *u1, const double *r1, const double
 // *u2, const double *r2, const size_t vecSize, const size_t varsCount, NumericsMatrix *H,
 // CSparseMatrix **chol_L, FILE *file)
-static NumericsMatrix *multiply_LinvH(const double *u1, const double *r1, const double *u2,
-                                      const double *r2, const size_t vecSize,
-                                      const size_t varsCount, NumericsMatrix *H,
-                                      CSparseMatrix **chol_L, size_t iteration) {
-  NumericsMatrix *LinvH = NM_new();
-  NM_types storage = H->storageType;
+// static NumericsMatrix *multiply_LinvH(const double *u1, const double *r1, const double *u2,
+//                                       const double *r2, const size_t vecSize,
+//                                       const size_t varsCount, NumericsMatrix *H,
+//                                       CSparseMatrix **chol_L, size_t iteration) {
+//   NumericsMatrix *LinvH = NM_new();
+//   NM_types storage = H->storageType;
 
-  switch (storage) {
-      /* case NM_DENSE: */
-      /*   break; */
-    case NM_SPARSE: {
-      NumericsMatrix *JQJ =
-          compute_JQinv2Jt(u1, r1, u2, r2, vecSize, varsCount);  // JQJ = J*Q^-2*J'
-      assert(JQJ);
+//   switch (storage) {
+//       /* case NM_DENSE: */
+//       /*   break; */
+//     case NM_SPARSE: {
+//       NumericsMatrix *JQJ =
+//           compute_JQinv2Jt(u1, r1, u2, r2, vecSize, varsCount);  // JQJ = J*Q^-2*J'
+//       assert(JQJ);
 
-      CSparseMatrix *JQJ_csc = NM_csc(JQJ);
+//       CSparseMatrix *JQJ_csc = NM_csc(JQJ);
 
-      CSparseMatrix *B = NM_csc(H);
+//       CSparseMatrix *B = NM_csc(H);
 
-      // Cholesky factor
-      // css* S = cs_schol(1, JQJ_csc);
-      CS_INT n = JQJ_csc->n;
+//       // Cholesky factor
+//       // css* S = cs_schol(1, JQJ_csc);
+//       CS_INT n = JQJ_csc->n;
 
-      CS_INT cumsum = n;
+//       CS_INT cumsum = n;
 
-      css *S = cs_calloc(1, sizeof(css));
-      S->pinv = cs_malloc(n, sizeof(CS_INT));
-      S->parent = cs_malloc(n, sizeof(CS_INT));
-      S->cp = cs_malloc(n + 1, sizeof(CS_INT));
+//       css *S = cs_calloc(1, sizeof(css));
+//       S->pinv = cs_malloc(n, sizeof(CS_INT));
+//       S->parent = cs_malloc(n, sizeof(CS_INT));
+//       S->cp = cs_malloc(n + 1, sizeof(CS_INT));
 
-      cumsum = 5;
-      for (int i = 0; i < n; i++) {
-        if (cumsum <= 0) cumsum = 5;
-        S->pinv[i] = i;
-        S->parent[i] = i + 1;
-        if (i == 0)
-          S->cp[i] = 0;
-        else {
-          S->cp[i] = S->cp[i - 1] + cumsum;
-          cumsum--;
-        }
-      }
-      S->parent[n - 1] = -1;
-      S->cp[n] = S->cp[n - 1] + 1;
-      S->unz = S->lnz = S->cp[n];
+//       cumsum = 5;
+//       for (int i = 0; i < n; i++) {
+//         if (cumsum <= 0) cumsum = 5;
+//         S->pinv[i] = i;
+//         S->parent[i] = i + 1;
+//         if (i == 0)
+//           S->cp[i] = 0;
+//         else {
+//           S->cp[i] = S->cp[i - 1] + cumsum;
+//           cumsum--;
+//         }
+//       }
+//       S->parent[n - 1] = -1;
+//       S->cp[n] = S->cp[n - 1] + 1;
+//       S->unz = S->lnz = S->cp[n];
 
-      csn *N = cs_chol_2(JQJ_csc, S, iteration);  // L = N->L
-      if (!N) {
-        if (JQJ) NM_free(JQJ);
-        if (S) cs_sfree(S);
-        return NULL;
-      }
+//       csn *N = cs_chol_2(JQJ_csc, S, iteration);  // L = N->L
+//       if (!N) {
+//         if (JQJ) NM_free(JQJ);
+//         if (S) cs_sfree(S);
+//         return NULL;
+//       }
 
-      // X = L\B
-      CSparseMatrix *X = cs_spalloc(B->m, B->n, B->nzmax, 1, 0); /* allocate result */
+//       // X = L\B
+//       CSparseMatrix *X = cs_spalloc(B->m, B->n, B->nzmax, 1, 0); /* allocate result */
 
-      CS_ENTRY *x, *b, *Xx, *Bx;
-      CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
+//       CS_ENTRY *x, *b, *Xx, *Bx;
+//       CS_INT *xi, *pinv, top, k, i, p, *Bi, *Xp, *Xi;
 
-      x = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
-      b = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
-      xi = cs_malloc(2 * n, sizeof(CS_INT)); /* get CS_INT workspace */
+//       x = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
+//       b = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
+//       xi = cs_malloc(2 * n, sizeof(CS_INT)); /* get CS_INT workspace */
 
-      CS_INT xnz = 0;
-      Xp = X->p;
-      Xi = X->i;
-      Xx = X->x;
-      Xp[0] = 0;
-      pinv = S->pinv;
+//       CS_INT xnz = 0;
+//       Xp = X->p;
+//       Xi = X->i;
+//       Xx = X->x;
+//       Xp[0] = 0;
+//       pinv = S->pinv;
 
-      /* ---  X = L\B ---------------------------------------------- */
-      for (k = 0; k < B->n; k++) {
-        // printf("\n\n OK 001 c \n\n");
-        /* permutation of the rows  of B(:,k) */
-        // for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
-        // for(p = B->p [k] ; p < B->p [k+1] ; p++)
-        // {
-        //   CS_INT i_old= B->i[p];
-        //   B->i[p] = pinv[i_old]; /* permute row indices with S->pinv */
-        //   B->x[p] = x[i_old];
-        // }
-        /* call spsolve */
-        // if(iteration==16) printf("\n\n multiply_LinvH 005 A \n\n");
-        top = cs_spsolve(N->L, B, k, xi, x, NULL, 1); /* x = L\B(:,col) */
-        // if(iteration==16) printf("\n\n multiply_LinvH 005 B \n\n");
-        // printf("\n\n OK 001 d \n\n");
-        // printf("\n x[:,%zu] = [", k);
-        // for (int j=0; j<n; j++) printf("%f, ", x[j]);
-        // printf("]; \n");
-        /* store the result in X */
-        if (Xp[k] + n - top > X->nzmax &&
-            !cs_sprealloc(X, 2 * (X->nzmax) + n - top)) /* realloc X if need */
-        {
-          printf("\n\n multiply_LinvH, X = L\\B,  NULL!!! \n\n");
-          if (x) free(x);
-          if (b) free(b);
-          if (xi) free(xi);
-          if (JQJ) NM_free(JQJ);
-          if (S) cs_sfree(S);
-          if (N->U) cs_spfree(N->U);
-          if (N->pinv) cs_free(N->pinv);
-          if (N->B) cs_free(N->B);
-          return NULL; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
-        }
+//       /* ---  X = L\B ---------------------------------------------- */
+//       for (k = 0; k < B->n; k++) {
+//         // printf("\n\n OK 001 c \n\n");
+//         /* permutation of the rows  of B(:,k) */
+//         // for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B */
+//         // for(p = B->p [k] ; p < B->p [k+1] ; p++)
+//         // {
+//         //   CS_INT i_old= B->i[p];
+//         //   B->i[p] = pinv[i_old]; /* permute row indices with S->pinv */
+//         //   B->x[p] = x[i_old];
+//         // }
+//         /* call spsolve */
+//         // if(iteration==16) printf("\n\n multiply_LinvH 005 A \n\n");
+//         top = cs_spsolve(N->L, B, k, xi, x, NULL, 1); /* x = L\B(:,col) */
+//         // if(iteration==16) printf("\n\n multiply_LinvH 005 B \n\n");
+//         // printf("\n\n OK 001 d \n\n");
+//         // printf("\n x[:,%zu] = [", k);
+//         // for (int j=0; j<n; j++) printf("%f, ", x[j]);
+//         // printf("]; \n");
+//         /* store the result in X */
+//         if (Xp[k] + n - top > X->nzmax &&
+//             !cs_sprealloc(X, 2 * (X->nzmax) + n - top)) /* realloc X if need */
+//         {
+//           printf("\n\n multiply_LinvH, X = L\\B,  NULL!!! \n\n");
+//           if (x) free(x);
+//           if (b) free(b);
+//           if (xi) free(xi);
+//           if (JQJ) NM_free(JQJ);
+//           if (S) cs_sfree(S);
+//           if (N->U) cs_spfree(N->U);
+//           if (N->pinv) cs_free(N->pinv);
+//           if (N->B) cs_free(N->B);
+//           return NULL; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
+//         }
 
-        Xp = X->p;
-        Xi = X->i;
-        Xx = X->x;
-        for (p = top; p < n; p++) {
-          i = xi[p];   /* x(i) is nonzero */
-          Xi[xnz] = i; /* store the result in X */
-          Xx[xnz++] = x[i];
-        }
-        Xp[k + 1] = Xp[k] + n - top;
-      }
+//         Xp = X->p;
+//         Xi = X->i;
+//         Xx = X->x;
+//         for (p = top; p < n; p++) {
+//           i = xi[p];   /* x(i) is nonzero */
+//           Xi[xnz] = i; /* store the result in X */
+//           Xx[xnz++] = x[i];
+//         }
+//         Xp[k + 1] = Xp[k] + n - top;
+//       }
 
-      cs_sprealloc(X, 0);
+//       cs_sprealloc(X, 0);
 
-      LinvH->storageType = H->storageType;
-      numericsSparseMatrix(LinvH)->csc = X;
-      LinvH->size0 = (int)LinvH->matrix2->csc->m;
-      LinvH->size1 = (int)LinvH->matrix2->csc->n;
-      numericsSparseMatrix(LinvH)->origin = NSM_CSC;
+//       LinvH->storageType = H->storageType;
+//       numericsSparseMatrix(LinvH)->csc = X;
+//       LinvH->size0 = (int)LinvH->matrix2->csc->m;
+//       LinvH->size1 = (int)LinvH->matrix2->csc->n;
+//       numericsSparseMatrix(LinvH)->origin = NSM_CSC;
 
-      *chol_L = N->L;  // for storage Cholesky factor
+//       *chol_L = N->L;  // for storage Cholesky factor
 
-      if (x) free(x);
-      if (b) free(b);
-      if (xi) free(xi);
-      if (JQJ) NM_free(JQJ);
-      if (S) cs_sfree(S);
-      if (N->U) cs_spfree(N->U);
-      if (N->pinv) cs_free(N->pinv);
-      if (N->B) cs_free(N->B);
+//       if (x) free(x);
+//       if (b) free(b);
+//       if (xi) free(xi);
+//       if (JQJ) NM_free(JQJ);
+//       if (S) cs_sfree(S);
+//       if (N->U) cs_spfree(N->U);
+//       if (N->pinv) cs_free(N->pinv);
+//       if (N->B) cs_free(N->B);
 
-      break;
-    }
+//       break;
+//     }
 
-    default:
-      fprintf(stderr,
-              "Numerics, GRFC3D IPM, multiply_LinvH failed, unknown storage type for H.\n");
-      exit(EXIT_FAILURE);
-  }
-  return LinvH;
-}
+//     default:
+//       fprintf(stderr,
+//               "Numerics, GRFC3D IPM, multiply_LinvH failed, unknown storage type for H.\n");
+//       exit(EXIT_FAILURE);
+//   }
+//   return LinvH;
+// }
 
 /* Return the matrix L^-1*H where L is Cholesky factor satisfying J*Q^-2*J' = L*L'. Using the
  * formula Qp. */
@@ -1441,8 +1448,8 @@ static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) 
       // X = U\B
       CSparseMatrix *X = cs_spalloc(B->m, B->n, B->nzmax, 1, 0); /* allocate result */
 
-      CS_ENTRY *x, *b, *Xx, *Bx;
-      CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
+      CS_ENTRY *x, *b, *Xx;
+      CS_INT *xi, top, k, i, p, *Xp, *Xi;
 
       x = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
       b = cs_malloc(n, sizeof(CS_ENTRY));    /* get CS_ENTRY workspace */
@@ -1780,14 +1787,14 @@ static void printInteresProbPythonFile(int iteration, double *v, double *u, doub
   return;
 }
 
-static void printVectorMatlabFile(int iteration, double *vec, int vecSize, FILE *file) {
-  fprintf(file, "vector(%4i,:) = [", iteration + 1);
-  for (int i = 0; i < vecSize; i++) {
-    fprintf(file, "%24.16e, ", vec[i]);
-  }
-  fprintf(file, "];\n");
-  return;
-}
+// static void printVectorMatlabFile(int iteration, double *vec, int vecSize, FILE *file) {
+//   fprintf(file, "vector(%4i,:) = [", iteration + 1);
+//   for (int i = 0; i < vecSize; i++) {
+//     fprintf(file, "%24.16e, ", vec[i]);
+//   }
+//   fprintf(file, "];\n");
+//   return;
+// }
 
 /* This function replaces for grfc3d_compute_error */
 /* Compute:
@@ -1871,119 +1878,119 @@ static void compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w
   *full_error = *dinfeas + *pinfeas + *proj_error;
 }
 
-static void print_NAN_in_matrix(const NumericsMatrix *const m) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
-  // printf("========== Numerics Matrix\n");
-  // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+// static void print_NAN_in_matrix(const NumericsMatrix *const m) {
+//   if (!m) {
+//     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+//     exit(EXIT_FAILURE);
+//   }
+//   // printf("========== Numerics Matrix\n");
+//   // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
 
-  switch (m->storageType) {
-    case NM_DENSE: {
-      // printf("========== storageType = NM_DENSE\n");
-      break;
-    }
-    case NM_SPARSE_BLOCK: {
-      assert(m->matrix1);
-      // printf("========== storageType =  NM_SPARSE_BLOCK\n");
-      break;
-    }
-    case NM_SPARSE: {
-      assert(m->matrix2);
-      // printf("========== storageType = NM_SPARSE\n");
-      switch (m->matrix2->origin) {
-        case NSM_TRIPLET: {
-          // printf("========== origin =  NSM_TRIPLET\n");
-          break;
-        }
-        case NSM_HALF_TRIPLET: {
-          // printf("========== origin =  NSM_HALF_TRIPLET\n");
-          break;
-        }
-        case NSM_CSC: {
-          // printf("========== origin =  NSM_CSC\n");
-          break;
-        }
-        case NSM_CSR: {
-          // printf("========== origin =  NSM_CSR\n");
-          break;
-        }
-        default: {
-          // fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n",
-          // m->matrix2->origin);
-        }
-      }
+//   switch (m->storageType) {
+//     case NM_DENSE: {
+//       // printf("========== storageType = NM_DENSE\n");
+//       break;
+//     }
+//     case NM_SPARSE_BLOCK: {
+//       assert(m->matrix1);
+//       // printf("========== storageType =  NM_SPARSE_BLOCK\n");
+//       break;
+//     }
+//     case NM_SPARSE: {
+//       assert(m->matrix2);
+//       // printf("========== storageType = NM_SPARSE\n");
+//       switch (m->matrix2->origin) {
+//         case NSM_TRIPLET: {
+//           // printf("========== origin =  NSM_TRIPLET\n");
+//           break;
+//         }
+//         case NSM_HALF_TRIPLET: {
+//           // printf("========== origin =  NSM_HALF_TRIPLET\n");
+//           break;
+//         }
+//         case NSM_CSC: {
+//           // printf("========== origin =  NSM_CSC\n");
+//           break;
+//         }
+//         case NSM_CSR: {
+//           // printf("========== origin =  NSM_CSR\n");
+//           break;
+//         }
+//         default: {
+//           // fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n",
+//           // m->matrix2->origin);
+//         }
+//       }
 
-      // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
-      CSparseMatrix *A;
-      if (m->matrix2->triplet) {
-        // printf("========== a matrix in format triplet is stored\n");
-        A = m->matrix2->triplet;
-      } else if (m->matrix2->csc) {
-        // printf("========== a matrix in format csc is stored\n");
-        A = m->matrix2->csc;
-      } else if (m->matrix2->trans_csc) {
-        // printf("========== a matrix in format trans_csc is stored\n");
-        A = m->matrix2->trans_csc;
-      }
+//       // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+//       CSparseMatrix *A = NULL;
+//       if (m->matrix2->triplet) {
+//         // printf("========== a matrix in format triplet is stored\n");
+//         A = m->matrix2->triplet;
+//       } else if (m->matrix2->csc) {
+//         // printf("========== a matrix in format csc is stored\n");
+//         A = m->matrix2->csc;
+//       } else if (m->matrix2->trans_csc) {
+//         // printf("========== a matrix in format trans_csc is stored\n");
+//         A = m->matrix2->trans_csc;
+//       }
+//       assert(A);
+//       CS_INT p, nz, *Ap, *Ai;
+//       CS_ENTRY *Ax;
 
-      CS_INT p, nz, *Ap, *Ai;
-      CS_ENTRY *Ax;
+//       Ap = A->p;
+//       Ai = A->i;
+//       Ax = A->x;
+//       nz = A->nz;
 
-      Ap = A->p;
-      Ai = A->i;
-      Ax = A->x;
-      nz = A->nz;
+//       for (p = 0; p < nz; p++) {
+//         if (Ax)
+//           if (isnan(Ax[p])) {
+//             printf("    %g %g : ", (double)(Ai[p]), (double)(Ap[p]));
+//             printf("%g\n", Ax[p]);
+//           }
+//       }
+//       break;
+//     }
+//     default: {
+//       fprintf(stderr, "display for NumericsMatrix: matrix type %d not supported!\n",
+//               m->storageType);
+//     }
+//   }
+// }
 
-      for (p = 0; p < nz; p++) {
-        if (Ax)
-          if (isnan(Ax[p])) {
-            printf("    %g %g : ", (double)(Ai[p]), (double)(Ap[p]));
-            printf("%g\n", Ax[p]);
-          }
-      }
-      break;
-    }
-    default: {
-      fprintf(stderr, "display for NumericsMatrix: matrix type %d not supported!\n",
-              m->storageType);
-    }
-  }
-}
+// static void is_in_int_of_Lcone(const double *const x, const size_t vecSize,
+//                                const size_t varsCount) {
+//   size_t dim = vecSize / varsCount, id3 = 0;
+//   assert(dim == 3);
+//   float_type diffL = 0.;
+//   double diff = 0.;
+//   for (size_t i = 0; i < varsCount; i++) {
+//     id3 = i * dim;
+//     // diff = (float_type)x[id3]-dnrm2l(dim-1, x+id3+1);
+//     diff = x[id3] - cblas_dnrm2(dim - 1, x + id3 + 1, 1);
+//     if (diff <= 0.) {
+//       printf("\n(double)     x0 = %9.65e", x[id3]);
+//       printf("\n(l doub)     x0 = %9.65Le", (float_type)x[id3]);
+//       printf("\n(double) x0+eps = %9.65e", x[id3] + DBL_EPSILON);
+//       printf("\n(double)|x_bar| = %9.65e", cblas_dnrm2(dim - 1, x + id3 + 1, 1));
+//       printf("\n(l doub)|x_bar| = %9.65Le\n", dnrm2l(dim - 1, x + id3 + 1));
 
-static void is_in_int_of_Lcone(const double *const x, const size_t vecSize,
-                               const size_t varsCount) {
-  size_t dim = vecSize / varsCount, id3 = 0;
-  assert(dim == 3);
-  float_type diffL = 0.;
-  double diff = 0.;
-  for (size_t i = 0; i < varsCount; i++) {
-    id3 = i * dim;
-    // diff = (float_type)x[id3]-dnrm2l(dim-1, x+id3+1);
-    diff = x[id3] - cblas_dnrm2(dim - 1, x + id3 + 1, 1);
-    if (diff <= 0.) {
-      printf("\n(double)     x0 = %9.65e", x[id3]);
-      printf("\n(l doub)     x0 = %9.65Le", (float_type)x[id3]);
-      printf("\n(double) x0+eps = %9.65e", x[id3] + DBL_EPSILON);
-      printf("\n(double)|x_bar| = %9.65e", cblas_dnrm2(dim - 1, x + id3 + 1, 1));
-      printf("\n(l doub)|x_bar| = %9.65Le\n", dnrm2l(dim - 1, x + id3 + 1));
+//       /*       printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.65e\n",
+//        * i, */
+//       /*              diff); */
 
-      /*       printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.65e\n",
-       * i, */
-      /*              diff); */
+//       diffL = (float_type)(x[id3] - cblas_dnrm2(dim - 1, x + id3 + 1, 1));
+//       printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.65Le\n", i, diffL);
 
-      diffL = (float_type)(x[id3] - cblas_dnrm2(dim - 1, x + id3 + 1, 1));
-      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.65Le\n", i, diffL);
+//       diff = (double)(x[id3] - dnrm2l(dim - 1, x + id3 + 1));
+//       printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (double) %9.65e\n", i, diff);
 
-      diff = (double)(x[id3] - dnrm2l(dim - 1, x + id3 + 1));
-      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (double) %9.65e\n", i, diff);
-
-      diffL = x[id3] - dnrm2l(dim - 1, x + id3 + 1);
-      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (l doub) %9.65Le\n", i, diffL);
-    }
-  }
-}
+//       diffL = x[id3] - dnrm2l(dim - 1, x + id3 + 1);
+//       printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (l doub) %9.65Le\n", i, diffL);
+//     }
+//   }
+// }
 
 static void update_w(double *w, double *w_origin, const double *velocity, const size_t vecSize,
                      const size_t varsCount, int update) {
@@ -1999,18 +2006,18 @@ static void update_w(double *w, double *w_origin, const double *velocity, const 
   }
 }
 
-static double compute_min_steplenght_of4(const double *x, const double *dx, const double *y,
-                                         const double *dy, const double *z, const double *dz,
-                                         const double *t, const double *dt,
-                                         const size_t vecSize, const size_t varsCount,
-                                         double gamma) {
-  double alpha_primal_1 = grfc3d_getStepLength(x, dx, vecSize, varsCount, gamma);
-  double alpha_primal_2 = grfc3d_getStepLength(y, dy, vecSize, varsCount, gamma);
-  double alpha_dual_1 = grfc3d_getStepLength(z, dz, vecSize, varsCount, gamma);
-  double alpha_dual_2 = grfc3d_getStepLength(t, dt, vecSize, varsCount, gamma);
+// static double compute_min_steplenght_of4(const double *x, const double *dx, const double *y,
+//                                          const double *dy, const double *z, const double
+//                                          *dz, const double *t, const double *dt, const
+//                                          size_t vecSize, const size_t varsCount, double
+//                                          gamma) {
+//   double alpha_primal_1 = grfc3d_getStepLength(x, dx, vecSize, varsCount, gamma);
+//   double alpha_primal_2 = grfc3d_getStepLength(y, dy, vecSize, varsCount, gamma);
+//   double alpha_dual_1 = grfc3d_getStepLength(z, dz, vecSize, varsCount, gamma);
+//   double alpha_dual_2 = grfc3d_getStepLength(t, dt, vecSize, varsCount, gamma);
 
-  return fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
-}
+//   return fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
+// }
 
 /** Compute a block matrix J of form
  *      |  a0    b1    b2                c0    d1    d2                   ...  |
@@ -2143,61 +2150,62 @@ static NumericsMatrix *compute_JQinv(const double *u1, const double *r1, const d
   return out;
 }
 
-static void print_neg_eigval(const double *x, const size_t vecSize, const size_t varsCount) {
-  size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
-  assert(d3 == 3);
+// static void print_neg_eigval(const double *x, const size_t vecSize, const size_t varsCount)
+// {
+//   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
+//   assert(d3 == 3);
 
-  size_t id3 = 0;
-  double min_eigval = 0.;
-  for (size_t i = 0; i < varsCount; i++) {
-    id3 = i * d3;
-    min_eigval = x[id3] - cblas_dnrm2(d3 - 1, x + id3 + 1, 1);
-    if (min_eigval < 0.) printf("Cone %zu: min_eigval = %e\n", i, min_eigval);
-  }
-}
+//   size_t id3 = 0;
+//   double min_eigval = 0.;
+//   for (size_t i = 0; i < varsCount; i++) {
+//     id3 = i * d3;
+//     min_eigval = x[id3] - cblas_dnrm2(d3 - 1, x + id3 + 1, 1);
+//     if (min_eigval < 0.) printf("Cone %zu: min_eigval = %e\n", i, min_eigval);
+//   }
+// }
 
-static double detMat(NumericsMatrix *A) {
-  double det = 1.;
+// static double detMat(NumericsMatrix *A) {
+//   double det = 1.;
 
-  CSparseMatrix *A_csc = NM_csc(A);
+//   CSparseMatrix *A_csc = NM_csc(A);
 
-  css *S;
-  csn *N;
-  CS_INT n;
-  if (!CS_CSC(A_csc)) return (0); /* check inputs */
-  n = A_csc->n;
-  S = cs_sqr(1, A_csc, 0);          /* ordering and symbolic analysis */
-  N = cs_lu(A_csc, S, DBL_EPSILON); /* numeric LU factorization */
+//   css *S;
+//   csn *N;
+//   CS_INT n;
+//   if (!CS_CSC(A_csc)) return (0); /* check inputs */
+//   n = A_csc->n;
+//   S = cs_sqr(1, A_csc, 0);          /* ordering and symbolic analysis */
+//   N = cs_lu(A_csc, S, DBL_EPSILON); /* numeric LU factorization */
 
-  cs *L = N->L;
-  CS_INT p, j, *Lp, *Li;
-  CS_ENTRY *Lx;
-  if (!CS_CSC(L)) return (0); /* check inputs */
-  n = L->n;
-  Lp = L->p;
-  Li = L->i;
-  Lx = L->x;
-  for (j = 0; j < n; j++) {
-    det *= Lx[Lp[j]];
-  }
+//   cs *L = N->L;
+//   CS_INT j, *Lp;
+//   CS_ENTRY *Lx;
+//   if (!CS_CSC(L)) return (0); /* check inputs */
+//   n = L->n;
+//   Lp = L->p;
+//   Li = L->i;
+//   Lx = L->x;
+//   for (j = 0; j < n; j++) {
+//     det *= Lx[Lp[j]];
+//   }
 
-  cs *U = N->U;
-  CS_INT *Up, *Ui;
-  CS_ENTRY *Ux;
-  if (!CS_CSC(U)) return (0); /* check inputs */
-  n = U->n;
-  Up = U->p;
-  Ui = U->i;
-  Ux = U->x;
-  for (j = n - 1; j >= 0; j--) {
-    det *= Ux[Up[j + 1] - 1];
-  }
+//   cs *U = N->U;
+//   CS_INT *Up;
+//   CS_ENTRY *Ux;
+//   if (!CS_CSC(U)) return (0); /* check inputs */
+//   n = U->n;
+//   Up = U->p;
+//   Ui = U->i;
+//   Ux = U->x;
+//   for (j = n - 1; j >= 0; j--) {
+//     det *= Ux[Up[j + 1] - 1];
+//   }
 
-  cs_sfree(S);
-  cs_nfree(N);
+//   cs_sfree(S);
+//   cs_nfree(N);
 
-  return det;
-}
+//   return det;
+// }
 
 /* --------------------------- Interior-point method implementation
  * ------------------------------ */
@@ -2216,7 +2224,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
                 double *restrict reaction, double *restrict velocity,
                 double *restrict globalVelocity, int *restrict info,
                 SolverOptions *restrict options) {
-  clock_t t1 = clock();
+  //  clock_t t1 = clock();
 
   printf("\n\n#################### grfc3d_IPM is starting ####################\n\n");
 
@@ -2232,7 +2240,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   size_t d_plus_1 = d + 1;
   size_t n_dminus2 = n * d_minus_2;
   size_t n_dplus1 = n * d_plus_1;
-  size_t pos_t = 0;
+  // size_t pos_t = 0;
 
   size_t id3 = 0;  // id3 = i*d_minus_2 used for the loop of cones
   size_t id5 = 0;  // id5 = i*d         used for the loop of cones
@@ -2340,13 +2348,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
 
   double *rhs = options->dWork;
 
-  double *rhs_tmp = NULL, *rhs_tmp2 = NULL;
-
-  double *velocity_tmp1 = NULL, *velocity_tmp2 = NULL, *reaction_tmp1 = NULL,
-         *reaction_tmp2 = NULL;
-  double *d_velocity_tmp1 = NULL, *d_velocity_tmp2 = NULL, *d_reaction_tmp1 = NULL,
-         *d_reaction_tmp2 = NULL;
-
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   size_t max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double sgmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1];
@@ -2359,15 +2360,15 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   int hasNotConverged = 1;
   size_t iteration = 0;
   double pinfeas = 1e300;
-  double pinfeas_new = 1e300;
+  //  double pinfeas_new = 1e300;
   double dinfeas = 1e300;
   double complem_1 = 1e300;
   double complem_2 = 1e300;
   double gapVal = 1e300;
   double relgap = 1e300;
 
-  double u1dotr1 = 1e300;  // u1 = velecity_1, r1 = reaction_1
-  double u2dotr2 = 1e300;  // u2 = velecity_2, r2 = reaction_2
+  // double u1dotr1 = 1e300;  // u1 = velecity_1, r1 = reaction_1
+  // double u2dotr2 = 1e300;  // u2 = velecity_2, r2 = reaction_2
 
   double udotr = 1e300;
   double proj_error = 1e300;  // projection error
@@ -2376,9 +2377,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   double residu_LS1_nd = 0.0, residu_LS2_nd = 0.0;
   double residu_LS1_ndplus1 = 0.0, residu_LS2_ndplus1 = 0.0;
 
-  long blocks_nzmax = 3 * 2 * n;  // for 3x3 no scaling
+  // long blocks_nzmax = 3 * 2 * n;  // for 3x3 no scaling
 
-  NumericsMatrix *Jac = NULL, *Jactmp = NULL; /* Jacobian matrix */
+  NumericsMatrix *Jac = NULL; /* Jacobian matrix */
 
   long Jac_nzmax;
   int jacobian_is_nan = 0;
@@ -2433,8 +2434,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   NumericsMatrix *chol_U = NULL;
   CSparseMatrix *chol_L = NULL, *chol_U_csc = NULL, *chol_UT_csc = NULL;
 
-  double *p_bar = NULL, *p_tilde = NULL, *pinv_tilde = NULL, *pinv2_bar = NULL;
-  double *p2_bar = NULL, *p2_tilde = NULL, *pinv_bar = NULL, *pinv2_tilde = NULL;
+  double *p_bar = NULL, *p_tilde = NULL;
+  double *p2_bar = NULL, *p2_tilde = NULL;
 
   double *d_velocity_1_hat = NULL, *d_velocity_2_hat = NULL;
   double *d_reaction_1_check = NULL, *d_reaction_2_check = NULL;
@@ -2445,7 +2446,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
          *velocity_2_hat_inv_dvhat_drcheck_2 = NULL;
   double *velocity_hat_inv_dvhat_drcheck = NULL;
 
-  double *tmp_n_dplus1 = NULL, *tmp_nd = NULL, *tmp_nd2 = NULL;
+  double *tmp_nd = NULL;
 
   double *Qinv2x_bar = NULL, *Qinv2x_tilde = NULL;
 
@@ -2693,7 +2694,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
 
   /* -------------------------- Print into matlab file -------------------------- */
   FILE *iterates, *iterates_python;
-  FILE *matrixH;
   char matlab_name[100];
   sprintf(matlab_name, "iteratesNC%zu.m", n);
 
@@ -5616,9 +5616,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   options->dparam[SICONOS_DPARAM_RESIDU] =
       fmax(pinfeas, fmax(dinfeas, fmin(udotr, proj_error)));
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
-
-  clock_t t2 = clock();
-  long clk_tck = CLOCKS_PER_SEC;
 
   /* writing data in a Matlab file */
   // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])

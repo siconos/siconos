@@ -134,7 +134,7 @@ def main():
     # Python code.
     # Warning: case-sensitive only on Linux systems
     has_addons = False
-    addons_path = Path("addons")
+    addons_path = Path(args.driver_dir, "addons")
     # True if "addons" exists and contains at least one file
     has_addons = addons_path.is_dir() and any(
         f.is_file() for f in addons_path.iterdir()
