@@ -149,6 +149,10 @@ PYBIND11_MODULE(simulation, m) {
 	   &siconos::simulation::TimeStepping::newtonCheckConvergence)
       .def("displayNewtonConvergence",
 	   &siconos::simulation::TimeStepping::displayNewtonConvergence)
+      .def("displayNewtonConvergenceInTheLoop",
+	   &siconos::simulation::TimeStepping::displayNewtonConvergenceInTheLoop)
+      .def("displayNewtonConvergenceAtTheEnd",
+	   &siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd)
       .def("computeFreeState", &siconos::simulation::TimeStepping::computeFreeState)
       .def("DefaultCheckSolverOutput",
            &siconos::simulation::TimeStepping::DefaultCheckSolverOutput)
