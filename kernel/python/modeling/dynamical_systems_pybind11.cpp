@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <sstream>
 
+#include "BoundaryCondition.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FunctionTypes.hpp"
 #include "LagrangianDS.hpp"
@@ -33,7 +34,6 @@
 #include "LagrangianSparseDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
-#include "BoundaryCondition.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
@@ -1315,7 +1315,7 @@ void wrap_dynamical_systems(py::module_& m) {
            &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
       .def("setComputeJacobianMintOver_q_byFD",
            &siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_q_byFD)
-      .def("computeKineticEnergy",    &siconos::modeling::NewtonEulerDS::computeKineticEnergy)
+      .def("computeKineticEnergy", &siconos::modeling::NewtonEulerDS::computeKineticEnergy)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass)
       .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_read)

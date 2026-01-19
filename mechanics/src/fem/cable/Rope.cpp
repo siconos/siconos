@@ -67,8 +67,8 @@ siconos::fem::cable::Rope::Rope(const Pylon &start_pylon, const Pylon &end_pylon
 
     // Determines nature of the roller battery (compression or support) according
     // to the sign of the reaction (Ch. Bertrand phd, p169)
-    auto drk = nodes_coords_.segment<3>(3) - nodes_coords_.head<3>();
-    double dot = drk.dot(internal_forces_.head<3>());
+    double dot = (nodes_coords_.segment<3>(3) - nodes_coords_.head<3>())
+                     .dot(internal_forces_.head<3>());
 
     if (dot < 0) {
       internal_forces_ *= -1.;
@@ -215,7 +215,7 @@ siconos::algebra::SiconosVector3 siconos::fem::cable::computeAdmissibilityCondit
                  ((1 + etaY2) * L) / ((1 + etaZ2 + etaY2) * sqL));
 
     // Solve admissibility conditions for the catenary
-    auto delta = jac.partialPivLu().solve(residu);
+    siconos::algebra::SiconosVector delta = jac.partialPivLu().solve(residu);
 
     // Update stop criteria
     test = (current_iteration < max_iter) && (residu.norm() > tol) && (delta.norm() > tol);

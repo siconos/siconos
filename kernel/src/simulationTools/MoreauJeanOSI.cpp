@@ -1709,8 +1709,7 @@ bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
   return !(addInteractionInIndexSet(inter, i));
 }
 
-siconos::algebra::SiconosMatrix
-siconos::integrators::MoreauJeanOSI::computeWorkForces() {
+siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   DEBUG_BEGIN("MoreauJeanOSI::computeWorkForces()\n");
 
   double t = _simulation->nextTime();         // End of the time step
@@ -1727,7 +1726,7 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   //
 
   auto number_of_ds = _simulation->nonSmoothDynamicalSystem()->getNumberOfDS();
-  auto workForces = siconos::algebra::SiconosMatrix(number_of_ds, 2);
+  siconos::algebra::SiconosMatrix workForces{number_of_ds, 2};
 
   size_t cnt_ds = 0;
 
@@ -1831,8 +1830,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
       // std::cout << "v_k_theta"; siconos::algebra::print(v_k_theta);
       // std::cout << "f_k_theta"; siconos::algebra::print(f_k_theta);
       // std::cout << "workForce"; siconos::algebra::print(workForces);
-      // getchar(); 
-      
+      // getchar();
+
       DEBUG_PRINT("MoreauJeanOSI::computeWorkForces :\n");
     } else
       THROW_EXCEPTION(
@@ -1840,7 +1839,7 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
           "system.");
   }
   DEBUG_END("MoreauJeanOSI::computeWorkForces()\n");
-  return workForces;
+  return workForces;  // RVO
 }
 
 void siconos::integrators::MoreauJeanOSI::display() const {

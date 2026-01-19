@@ -65,7 +65,6 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine HAVE_MLCPSIMPLEX
 // LP solver
 #cmakedefine HAS_ONE_LP_SOLVER
-#cmakedefine HAS_EXTREME_POINT_ALGO
 // Gams stuff
 #cmakedefine GAMS_MODELS_SOURCE_DIR "@GAMS_MODELS_SOURCE_DIR@"
 #cmakedefine GAMS_MODELS_SHARE_DIR "@GAMS_MODELS_SHARE_DIR@"

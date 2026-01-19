@@ -735,9 +735,7 @@ double siconos::modeling::NewtonEulerDS::computeKineticEnergy() {
   assert(totalInertiaMatrix_);
   DEBUG_EXPR(siconos::algebra::print(*twist_));
 
-  auto tmp = *totalInertiaMatrix_ * *twist_;
-
-  double K = 0.5 * tmp.dot(*twist_);
+  double K = 0.5 * (*totalInertiaMatrix_ * *twist_).dot(*twist_);
 
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::NewtonEulerDS::computeKineticEnergy()\n");

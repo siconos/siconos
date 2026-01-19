@@ -143,7 +143,7 @@ endmacro()
 # ========================================
 function(new_test)
   set(oneValueArgs NAME HDF5)
-  set(multiValueArgs SOURCES DATA DEPS)
+  set(multiValueArgs SOURCES DATA DEPS COMPILE_DEFINITIONS)
   cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   # -- set test name --
@@ -192,6 +192,10 @@ function(new_test)
     target_compile_definitions(${TEST_NAME} PRIVATE "TEST_HDF5")
   endif()
   
+  # Add def. options in compile command (-D ...)
+  foreach(comp_def IN LISTS TEST_COMPILE_DEFINITIONS)
+    target_compile_definitions(${TEST_NAME} PRIVATE ${comp_def})
+  endforeach()
   
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)

@@ -139,7 +139,6 @@ if(LPSOLVE_FOUND)
   # to add more tests in numerics
   set(HAS_ONE_LP_SOLVER TRUE CACHE INTERNAL "True if a LP Solver has been found and is activated.")
   # to add more tests in kernel and control
-  set(HAS_EXTREME_POINT_ALGO TRUE CACHE INTERNAL "True if lpsolve has been found and is activated.")
   target_link_libraries(numerics PRIVATE LPSOLVE::LPSOLVE)
 endif()
 

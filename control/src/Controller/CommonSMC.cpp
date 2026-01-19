@@ -26,13 +26,13 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderNonLinearR.hpp"
-#include "SolverOptions.h"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relay.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "SolverOptions.h"
 #include "StorageTools.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -199,8 +199,7 @@ void siconos::control::CommonSMC::initialize(
 
   if (_Csurface) {
     _invCB = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->rows(), _B->cols());
-    auto tmpM = *_Csurface * *_B;
-    *_invCB = tmpM.inverse();
+    *_invCB = (*_Csurface * *_B).inverse();
   }
   DEBUG_END(
       "siconos::control::CommonSMC::initialize(const "
@@ -225,18 +224,19 @@ void siconos::control::CommonSMC::computeUeq() {
     auto zoh =
         std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
 
-    auto tmpM1 = *_Csurface * LinearDS_SMC->A();
     // compute (CB)^{-1}CA
-    auto quasiProjB_A = *_invCB * tmpM1;
+    siconos::algebra::SiconosDenseMatrix quasiProjB_A =
+        *_invCB * *_Csurface * LinearDS_SMC->A();
     *_ueq = (_thetaSMC - 1) * quasiProjB_A * *xTk;
 
     // equivalent part, explicit contribution
     // tmpN = B^{*}(CB)^{-1}CA
-    auto tmpN = zoh->Bd(_DS_SMC) * quasiProjB_A;
+    siconos::algebra::SiconosDenseMatrix tmpN = zoh->Bd(_DS_SMC) * quasiProjB_A;
 
     // W = I + \theta B^{*})CB)^{-1}CA
 
-    auto tmpW = siconos::algebra::SiconosMatrix::Identity(n, n) + _thetaSMC * tmpN;
+    siconos::algebra::SiconosMatrix tmpW =
+        siconos::algebra::SiconosMatrix::Identity(n, n) + _thetaSMC * tmpN;
     siconos::algebra::SiconosDenseLUMatrix luW(tmpW);
 
     // compute e^{Ah}x_k

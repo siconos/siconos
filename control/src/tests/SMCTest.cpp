@@ -90,8 +90,6 @@ void SMCTest::initTwisting() {
 }
 #endif
 
-void SMCTest::tearDown() {}
-
 void SMCTest::test_iSMC_ZOH() {
   init();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
@@ -110,6 +108,7 @@ void SMCTest::test_iSMC_ZOH() {
   bool test =
       !((error = siconos::algebra::io::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0 &&
         error > _tol);
+  std::cout << error << "\n";
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }

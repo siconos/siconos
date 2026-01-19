@@ -58,7 +58,12 @@ if(WITH_TESTING)
   new_test(SOURCES LsodarTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES EulerMoreauTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
-  new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
+  if(LPSOLVE_FOUND)
+    # HAS_EXTREME_POINT_ALGO must be added to compile def if lpsolve has been found.
+    list(APPEND compile_defs HAS_EXTREME_POINT_ALGO)
+  endif()
+
+  new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK COMPILE_DEFINITIONS ${compile_defs})
   if(HAS_FORTRAN)
     new_test(SOURCES ZOHTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   endif()

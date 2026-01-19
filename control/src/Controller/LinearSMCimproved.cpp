@@ -116,14 +116,10 @@ void siconos::control::LinearSMCimproved::actuate() {
   auto& zoh =
       *std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
 
-  // equivalent part
-  auto tmpM1 = -*_Csurface * zoh.Ad(_DS_SMC) + *_Csurface;
-  auto CBstar = *_Csurface * zoh.Bd(_DS_SMC);
-
   // compute C(I-e^{Ah})x_k
-  *_ueq = tmpM1 * *xTk;
+  *_ueq = (-*_Csurface * zoh.Ad(_DS_SMC) + *_Csurface) * *xTk;
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  siconos::algebra::SiconosDenseLUMatrix luCBstar(CBstar);
+  siconos::algebra::SiconosDenseLUMatrix luCBstar(*_Csurface * zoh.Bd(_DS_SMC));
   *_ueq = luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
 

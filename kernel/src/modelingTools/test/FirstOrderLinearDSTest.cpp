@@ -111,9 +111,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1_alias() {
   // Rhs stuff
   ds->initRhs(time);  // Call computeRhs and computeJacobianRhsOver_x
   siconos::algebra::SiconosDenseLUMatrix LUM{Mref};
-  auto tmp = *A0 * *x0 + *b0;
 
-  auto ref_rhs = LUM.solve(tmp).eval();
+  auto ref_rhs = LUM.solve(*A0 * *x0 + *b0).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test constr 1 (alias) : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
@@ -218,8 +217,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2_alias() {
   ds->updatePlugins(time);
 
   auto LUM = Mref.lu();
-  auto tmp = *A0 * *x0 + *b0;
-  auto ref_rhs = LUM.solve(tmp).eval();
+  auto ref_rhs = LUM.solve(*A0 * *x0 + *b0).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test const 2 (alias) : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
