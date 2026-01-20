@@ -61,11 +61,11 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
       printf("Call to the fc3d solver ...\n");
     }
     // call nsgs solver for the local problem
-    long clk_tck = CLOCKS_PER_SEC;
-    clock_t t1 = clock();
+    // long clk_tck = CLOCKS_PER_SEC;
+    // clock_t t1 = clock();
     fc3d_nsgs(localproblem, reaction, velocity, info, options);
-    clock_t t2 = clock();
-    printf("\nTIME = %10.4f\n", (double)(t2 - t1) / (double)clk_tck);
+    // clock_t t2 = clock();
+    // printf("\nTIME = %10.4f\n", (double)(t2 - t1) / (double)clk_tck);
 
     // // printf("\n\n Compute v of NSGS: \n");
     // FILE *sol_file = fopen("sol_data.res", "r");
