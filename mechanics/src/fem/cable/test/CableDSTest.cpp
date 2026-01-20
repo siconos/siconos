@@ -138,6 +138,7 @@ void CableDSTest::testInitializeFEM() {
   json reader;
   in >> reader;
   auto positions_ref = siconos::algebra::io::readVectorFromJson(reader["q"]);
+  std::cout << "norm diff " << (positions - positions_ref).norm() << "\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile:  check fem initialisation",
                                positions.isApprox(positions_ref, 1e-10), true);
   std::cout << "✅ test initialize FEM passed.\n";
