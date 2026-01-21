@@ -572,7 +572,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       // if (d->boundaryConditions())
       // {
-      //   for (const auto itindex : d->boundaryConditions()->velocityIndices()){
+      //   for ( auto itindex : d->boundaryConditions()->velocityIndices()){
       //   {
       //     _IterationMatrixBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
       //     /*\warning we assume that W is symmetric in the Lagrangian case*/

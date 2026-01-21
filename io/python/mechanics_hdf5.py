@@ -1338,8 +1338,6 @@ class MechanicsHdf5(object):
                 boundary_condition.attrs["omega"] = omega
                 boundary_condition.attrs["phi"] = phi
             elif bc_class == "BoundaryCondition":
-                boundary_condition.attrs["v"] = v
-            elif bc_class == "FixedBC":
-                pass  # nothing to do
+                boundary_condition.attrs["v"] = v  # Might be None for "fixed"(val=0) BC
             else:
                 raise NotImplementedError

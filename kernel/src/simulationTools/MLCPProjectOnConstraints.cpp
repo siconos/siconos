@@ -469,7 +469,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 
       if (lds->boundaryConditions())  // V.A. Should we do that ?
       {
-        for (const auto itindex : lds->boundaryConditions()->velocityIndices()) {
+        for (auto itindex : lds->boundaryConditions()->velocityIndices()) {
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
           coltmp->setZero();
           leftInteractionBlock->col(itindex) = *coltmp;
@@ -745,7 +745,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       if (d->boundaryConditions())  // V.A. Should we do that ?
       {
-        for (const auto itindex : d->boundaryConditions()->velocityIndices()) {
+        for (auto itindex : d->boundaryConditions()->velocityIndices()) {
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(sizeY1);
           coltmp->setZero();
           leftInteractionBlock->col(itindex) = *coltmp;

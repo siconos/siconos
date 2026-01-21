@@ -52,6 +52,7 @@ if(WITH_TESTING)
   new_test(SOURCES NewtonEulerDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NonSmoothDynamicalSystemTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES SiconosVisitorTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES BoundaryConditionTest.cpp  ${SIMPLE_TEST_MAIN})
   
   # # ---- Simulation tools ---
   begin_tests(src/simulationTools/test DEPS "externals;numerics;CPPUNIT::CPPUNIT")

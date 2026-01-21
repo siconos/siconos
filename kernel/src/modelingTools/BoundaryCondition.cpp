@@ -24,48 +24,13 @@
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 
-siconos::modeling::BoundaryCondition::BoundaryCondition(const Indices& newVelocityIndices)
-    : velocityIndices_{newVelocityIndices},
-      prescribedVelocity_{
-          std::make_shared<siconos::algebra::SiconosVector>(velocityIndices_.size())},
-      prescribedVelocityOld_{
-          std::make_shared<siconos::algebra::SiconosVector>(velocityIndices_.size())} {
-  prescribedVelocity_->setZero();
-  prescribedVelocityOld_->setZero();
-}
-
-siconos::modeling::BoundaryCondition::BoundaryCondition(Indices&& newVelocityIndices)
-    : velocityIndices_{std::move(newVelocityIndices)},
-      prescribedVelocity_{
-          std::make_shared<siconos::algebra::SiconosVector>(velocityIndices_.size())},
-      prescribedVelocityOld_{
-          std::make_shared<siconos::algebra::SiconosVector>(velocityIndices_.size())} {
-  prescribedVelocity_->setZero();
-  prescribedVelocityOld_->setZero();
-}
-
 siconos::modeling::BoundaryCondition::BoundaryCondition(
-    Indices&& newVelocityIndices,
-    std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues)
+    Indices newVelocityIndices,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& newVelocityValues)
     : velocityIndices_{std::move(newVelocityIndices)},
       prescribedVelocity_(newVelocityValues),
-      prescribedVelocityOld_{
-          std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues)} {
-  if (newVelocityIndices.size() != (size_t)newVelocityValues->size())
-    THROW_EXCEPTION(
-        "siconos::modeling::BoundaryCondition::BoundaryCondition  "
-        "constructor. "
-        "velocityIndices and prescribedVelocity must have the same size");
-}
-
-siconos::modeling::BoundaryCondition::BoundaryCondition(
-    const Indices& newVelocityIndices,
-    std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues)
-    : velocityIndices_{newVelocityIndices},
-      prescribedVelocity_(newVelocityValues),
-      prescribedVelocityOld_{
-          std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues)} {
-  if (newVelocityIndices.size() != (size_t)newVelocityValues->size())
+      prescribedVelocityOld_{newVelocityValues} {
+  if (velocityIndices_.size() != prescribedVelocity_.size())
     THROW_EXCEPTION(
         "siconos::modeling::BoundaryCondition::BoundaryCondition  "
         "constructor. "
@@ -74,31 +39,30 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
 
 void siconos::modeling::BoundaryCondition::setComputePrescribedVelocityFunction(
     const siconos::modeling::func_prototypes::FunctionS_V& func) {
-  if (!prescribedVelocity_) {
-    prescribedVelocity_ = std::make_shared<siconos::algebra::SiconosVector>(size());
-  }
+  assert(prescribedVelocity_.size() == velocityIndices_.size());
   computePrescribedVelocity_ = func;
 }
 
 void siconos::modeling::BoundaryCondition::computePrescribedVelocity(double time) {
-  if (computePrescribedVelocity_) computePrescribedVelocity_(time, *prescribedVelocity_);
+  if (computePrescribedVelocity_) computePrescribedVelocity_(time, prescribedVelocity_);
 }
 
 void siconos::modeling::BoundaryCondition::display() const {
-  std::cout << "=====  BoundaryCondition display ===== " << std::endl;
-
+  std::cout << "=====  BoundaryCondition display ===== \n";
   tools::print("- Indices on which boundary conditions are applied:\n ", velocityIndices_);
 
-  std::cout << "- velocities : " << std::endl;
-  if (prescribedVelocity_) siconos::algebra::print(*prescribedVelocity_);
-  std::cout << "=========================================================== " << std::endl;
+  std::cout << "- velocities : \n";
+  siconos::algebra::print(prescribedVelocity_);
+  std::cout << "=========================================================== \n";
 }
 
 void siconos::modeling::BoundaryCondition::appendIndex(
-    siconos::algebra::SiconosVector::Index ind) {
+    siconos::algebra::SiconosVector::Index ind, double imposedVelocity) {
   if (find(velocityIndices_.begin(), velocityIndices_.end(), ind) == velocityIndices_.end()) {
     velocityIndices_.push_back(ind);
-    prescribedVelocity_->resize(size());
-    prescribedVelocityOld_->resize(size());
+    prescribedVelocity_.conservativeResize(size());
+    prescribedVelocity_(size() - 1) = imposedVelocity;
+    prescribedVelocityOld_.conservativeResize(size());
+    prescribedVelocity_(size() - 1) = imposedVelocity;
   }
 }

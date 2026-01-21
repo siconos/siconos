@@ -21,46 +21,39 @@
 #include <math.h>  // for cos
 
 #include "BoundaryCondition.hpp"
-#include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
-siconos::modeling::HarmonicBC::HarmonicBC(const Indices& newVelocityIndices,
-                                          Eigen::Ref<siconos::algebra::SiconosVector> newa,
-                                          Eigen::Ref<siconos::algebra::SiconosVector> newb,
-                                          Eigen::Ref<siconos::algebra::SiconosVector> omega,
-                                          Eigen::Ref<siconos::algebra::SiconosVector> phi)
-    : BoundaryCondition(newVelocityIndices) {
+siconos::modeling::HarmonicBC::HarmonicBC(
+    Indices newVelocityIndices, const Eigen::Ref<const siconos::algebra::SiconosVector>& newa,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& newb,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& omega,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& phi)
+    : BoundaryCondition(newVelocityIndices),
+      a_vec_{newa},
+      b_vec_{newb},
+      omega_vec_{omega},
+      phi_vec_{phi},
+      has_vector_coeffs_{true} {
   siconos::algebra::SiconosVector::Index bc_size = newVelocityIndices.size();
   assert(newa.size() == bc_size);
   assert(newb.size() == bc_size);
   assert(omega.size() == bc_size);
   assert(phi.size() == bc_size);
-
-  a_view_ = std::make_unique<siconos::algebra::MapVectorType>(newa.data(), bc_size);
-  b_view_ = std::make_unique<siconos::algebra::MapVectorType>(newb.data(), bc_size);
-  omega_view_ = std::make_unique<siconos::algebra::MapVectorType>(omega.data(), bc_size);
-  phi_view_ = std::make_unique<siconos::algebra::MapVectorType>(phi.data(), bc_size);
 };
 
 void siconos::modeling::HarmonicBC::computePrescribedVelocity(double time) {
-  assert(prescribedVelocity_);  // Allocation must have been done during construction.
-
-  if (!a_view_) {
+  if (!has_vector_coeffs_) {
     auto val = aCoeff_ + bCoeff_ * cos(omega_ * time + phi_);
-    prescribedVelocity_->setConstant(val);
+    prescribedVelocity_.setConstant(val);
   }
 
   else {
-    auto a = *a_view_;
-    auto b = *b_view_;
-    auto omega = *omega_view_;
-    auto phi = *phi_view_;
-
-    // Calculer le résultat de manière optimale
-    *prescribedVelocity_ = a.array() + b.array() * (omega.array() * time + phi.array()).cos();
+    // .array() --> component wise operations
+    prescribedVelocity_ =
+        a_vec_.array() + b_vec_.array() * (omega_vec_.array() * time + phi_vec_.array()).cos();
   }
 }

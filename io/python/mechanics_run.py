@@ -1193,14 +1193,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.boundary_conditions()[name].attrs["phi"],
                 )
 
-            elif bc_type == "FixedBC":
-                bc = bc_class(self.boundary_conditions()[name].attrs["indices"])
-
             elif bc_type == "BoundaryCondition":
-                bc = bc_class(
+                if self.boundary_conditions()[name].attrs["v"] is None:
+                    # fixed bc
+                    bc = bc_class(
+                    self.boundary_conditions()[name].attrs["indices"])
+                else:
+                    bc = bc_class(
                     self.boundary_conditions()[name].attrs["indices"],
-                    self.boundary_conditions()[name].attrs["v"],
-                )
+                    self.boundary_conditions()[name].attrs["v"])
 
             # set bc to the ds1
 

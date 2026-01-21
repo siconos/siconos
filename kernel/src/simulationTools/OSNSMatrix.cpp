@@ -490,7 +490,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                 // array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
                 // memcpy(array_with_bc, array ,sizeY*sizeDS,sizeof(double));
                 // NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
-                // for(const auto itindex: bc->velocityIndices())
+                // for(auto itindex: bc->velocityIndices())
                 // {
 
                 //   for (siconos::algebra::Index row; row < sizeY; row++  )

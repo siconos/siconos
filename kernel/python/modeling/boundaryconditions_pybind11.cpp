@@ -21,8 +21,8 @@
 #include <pybind11/stl.h>
 
 #include "BoundaryCondition.hpp"
-#include "FixedBC.hpp"
 #include "HarmonicBC.hpp"
+#include "SiconosVector.hpp"
 
 namespace py = pybind11;
 
@@ -32,21 +32,42 @@ using Indices = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1>;
 void wrap_boundaryconditions(py::module_ &m) {
   py::class_<siconos::modeling::BoundaryCondition,
              std::shared_ptr<siconos::modeling::BoundaryCondition>>(m, "BoundaryCondition")
-      .def_property_readonly("size", &siconos::modeling::BoundaryCondition::size);
+      .def(py::init<std::vector<siconos::algebra::Index>>(), py::arg("Indices"))
+      .def(py::init<std::vector<siconos::algebra::Index>,
+                    const Eigen::Ref<const siconos::algebra::SiconosVector> &>(),
+           py::arg("Indices"),
+           py::arg("prescribedVelocities").noconvert())  // failing rather than copying
 
-  py::class_<siconos::modeling::FixedBC, std::shared_ptr<siconos::modeling::FixedBC>,
-             siconos::modeling::BoundaryCondition>(m, "FixedBC")
-      .def(py::init<std::vector<int>>(), py::arg("Indices"));
+      .def_property_readonly("size", &siconos::modeling::BoundaryCondition::size)
+      .def_property_readonly(
+          "velocityIndices",
+          [](const siconos::modeling::BoundaryCondition &self) {
+            auto span = self.velocityIndices();
+            return py::array_t<siconos::algebra::Index>(span.size(),     // shape
+                                                        span.data(),     // data pointer
+                                                        py::cast(&self)  // to keep self alive
+            );
+          },
+          "indices where conditions apply")
+
+      .def_property_readonly("prescribedVelocity",
+                             &siconos::modeling::BoundaryCondition::prescribedVelocity,
+                             "values applied on constrained indices")
+      .def("computePrescribedVelocity",
+           &siconos::modeling::BoundaryCondition::computePrescribedVelocity,
+           "Compute velocity values on prescribed indices");
 
   py::class_<siconos::modeling::HarmonicBC, std::shared_ptr<siconos::modeling::HarmonicBC>,
              siconos::modeling::BoundaryCondition>(m, "HarmonicBC")
       .def(py::init<std::vector<int>, double, double, double, double>(), py::arg("Indices"),
            py::arg("a"), py::arg("b"), py::arg("omega"), py::arg("phi"))
-      .def(py::init<std::vector<int>, Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
-           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::keep_alive<1, 5>(),
-           py::keep_alive<1, 6>(), py::arg("Indices"), py::arg("a"), py::arg("b"),
-           py::arg("omega"), py::arg("phi"));
+      .def(
+          py::init<std::vector<int>, const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &>(),
+          //     py::keep_alive<1, 3>(), py::keep_alive<1, 4>(),
+          //     py::keep_alive<1, 5>(), py::keep_alive<1, 6>(),
+          py::arg("Indices"), py::arg("a").noconvert(), py::arg("b").noconvert(),
+          py::arg("omega").noconvert(), py::arg("phi").noconvert());
 }

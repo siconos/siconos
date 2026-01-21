@@ -27,7 +27,6 @@ SICONOS_IO_REGISTER_WITH_BASES(InteractionsGraph, (_InteractionsGraph),
 SICONOS_IO_REGISTER(Topology, (_DSG)(_IG)(_hasChanged)(_numberOfConstraints)(_symmetric))
 SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw), (_ElasCof)(_ResCof)(_Stiff))
 SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL, (NonSmoothLaw), )
-SICONOS_IO_REGISTER_WITH_BASES(FixedBC, (BoundaryCondition), )
 SICONOS_IO_REGISTER_WITH_BASES(HarmonicBC, (BoundaryCondition),
                                (_a)(aVector_)(_b)(bVector_)(_omega)(omega_)(_phi)(phi_))
 SICONOS_IO_REGISTER(NSLawMatrix, )
@@ -498,7 +497,6 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<Topology*>(nullptr));
   ar.register_type(static_cast<MultipleImpactNSL*>(nullptr));
   ar.register_type(static_cast<ComplementarityConditionNSL*>(nullptr));
-  ar.register_type(static_cast<FixedBC*>(nullptr));
   ar.register_type(static_cast<HarmonicBC*>(nullptr));
   ar.register_type(static_cast<NSLawMatrix*>(nullptr));
   ar.register_type(static_cast<EqualityConditionNSL*>(nullptr));

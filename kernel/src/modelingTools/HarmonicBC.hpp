@@ -39,18 +39,18 @@ class HarmonicBC : public BoundaryCondition {
    * \param omega frequency
    * \param phi phase
    */
-  HarmonicBC(Indices&& newVelocityIndices, double a, double b, double omega, double phi)
-      : BoundaryCondition(std::move(newVelocityIndices)),
+  HarmonicBC(Indices newVelocityIndices, double a, double b, double omega, double phi)
+      : BoundaryCondition(newVelocityIndices),
         aCoeff_(a),
         bCoeff_(b),
         omega_(omega),
         phi_(phi) {};
 
-  HarmonicBC(const Indices& newVelocityIndices,
-             Eigen::Ref<siconos::algebra::SiconosVector> newa,
-             Eigen::Ref<siconos::algebra::SiconosVector> newb,
-             Eigen::Ref<siconos::algebra::SiconosVector> omega,
-             Eigen::Ref<siconos::algebra::SiconosVector> phi);
+  HarmonicBC(Indices newVelocityIndices,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& newa,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& newb,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& omega,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& phi);
 
   /** destructor */
   virtual ~HarmonicBC() noexcept = default;
@@ -74,16 +74,18 @@ class HarmonicBC : public BoundaryCondition {
   ;
   /** Constant phase  */
   double phi_ = 0;
-  ;
+
+  /** True if vectors (same size as indices list) are used for coefficients */
+  bool has_vector_coeffs_{false};
 
   /** Constant additive term of the prescribed velocity  */
-  std::unique_ptr<siconos::algebra::MapVectorType> a_view_{nullptr};
+  siconos::algebra::SiconosVector a_vec_{};
   /** Constant multiplicative term of the prescribed velocity  */
-  std::unique_ptr<siconos::algebra::MapVectorType> b_view_{nullptr};
+  siconos::algebra::SiconosVector b_vec_{};
   /** Constant frequency  */
-  std::unique_ptr<siconos::algebra::MapVectorType> omega_view_{nullptr};
+  siconos::algebra::SiconosVector omega_vec_{};
   /** Constant phase  */
-  std::unique_ptr<siconos::algebra::MapVectorType> phi_view_{nullptr};
+  siconos::algebra::SiconosVector phi_vec_{};
 };
 }  // namespace siconos::modeling
 #endif  // HARMONICBC_HPP

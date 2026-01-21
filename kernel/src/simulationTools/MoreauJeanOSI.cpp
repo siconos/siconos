@@ -508,7 +508,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
       std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
     }
 
-    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
       *columntmp = iteration_matrix.col(itindex);
       /*\warning we assume that W is symmetric
         we store only the column and not the row */
@@ -517,7 +517,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
     }
 
     columnindex = 0;
-    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
       double diag = iteration_matrix(itindex, itindex);
       columntmp->setZero();
       (*columntmp)(itindex) = diag;
@@ -605,7 +605,7 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
 
     auto prescribedVelocity = d.boundaryConditions()->prescribedVelocity();
-    for (const auto& itindex : d.boundaryConditions()->velocityIndices()) {
+    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
       double DeltaPrescribedVelocity = prescribedVelocity(columnindex) - v(itindex);
       DEBUG_PRINTF("index  = %i, value = %e\n", *itindex, prescribedVelocity(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
@@ -1412,7 +1412,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
                "== nullptr.");
         *d.velocity() = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
-          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+          for (auto itindex : d.boundaryConditions()->velocityIndices()) {
             (*d.velocity())(itindex) = 0.0;
           }
         }
@@ -1434,7 +1434,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         int bc = 0;
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+        for (auto itindex : d.boundaryConditions()->velocityIndices()) {
           *columntmp =
               _dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions->col(
                   bc);
@@ -1488,7 +1488,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
                "== nullptr.");
         *d.velocity() = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
-          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+          for (auto itindex : d.boundaryConditions()->velocityIndices()) {
             (*d.velocity())(itindex) = 0.0;
           }
         }
@@ -1505,7 +1505,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         int bc = 0;
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+        for (auto itindex : d.boundaryConditions()->velocityIndices()) {
           *columntmp =
               _dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions->col(
                   bc);
@@ -1562,7 +1562,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           B \lambda _{k+1}*/
         *d.twist() = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions())
-          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+          for (auto itindex : d.boundaryConditions()->velocityIndices()) {
             (*d.twist())(itindex) = 0.;
           }
         *d.twist() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d.twist());
@@ -1583,7 +1583,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         int bc = 0;
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+        for (auto itindex : d.boundaryConditions()->velocityIndices()) {
           *columntmp =
               _dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions->col(
                   bc);

@@ -438,7 +438,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
       // Applying boundary conditions
       auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
       if (auto bc = d->boundaryConditions()) {
-        for (const auto& itindex : bc->velocityIndices()) {
+        for (auto itindex : bc->velocityIndices()) {
           leftInteractionBlock->col(itindex).setZero();
         }
       }
@@ -632,7 +632,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
     if (d->boundaryConditions()) bc = d->boundaryConditions();
     if (bc) {
-      for (const auto itindex : bc->velocityIndices()) {
+      for (auto itindex : bc->velocityIndices()) {
         // (nslawSize,sizeDS));
         std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
             std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);

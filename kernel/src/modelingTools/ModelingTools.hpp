@@ -26,7 +26,6 @@ Include files related to modeling part of Siconos.
 #include "EqualityConditionNSL.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderType1R.hpp"
-#include "FixedBC.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "HarmonicBC.hpp"
 #include "Interaction.hpp"
