@@ -1253,6 +1253,7 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("q", &siconos::modeling::NewtonEulerDS::q_python,
            py::return_value_policy::reference_internal)
+      .def("linearVelocity", &siconos::modeling::NewtonEulerDS::linearVelocity_read)
       //  .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
       //       py::return_value_policy::reference_internal)
       .def("twist", &siconos::modeling::NewtonEulerDS::twist_python,

@@ -172,6 +172,23 @@ void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector&
   y(4) = axis2_.dot(rot221) - _initial_AscalA2;
 }
 
+void siconos::joints::PivotJointR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  KneeJointR::computeh(q1, q2, y);
+
+  siconos::algebra::SiconosVector3 rot221;
+  if (q2) {
+    pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
+  } else {
+    pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
+  }
+
+  y(3) = axis1_.dot(rot221) - _initial_AscalA1;
+  y(4) = axis2_.dot(rot221) - _initial_AscalA2;
+}
+
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::PivotJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
@@ -209,26 +226,26 @@ void siconos::joints::PivotJointR::computehDoF(
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PivotJointR::computeJachqDoF(
-    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    siconos::modeling::Interaction& inter,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
 
-  auto q1 = (q0.getAllVect())[0];
-  double q10 = (*q1)(3);
-  double q11 = (*q1)(4);
-  double q12 = (*q1)(5);
-  double q13 = (*q1)(6);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
 
   double q20 = 1;
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
+  if (q2) {
     q20 = (*q2)(3);
     q21 = (*q2)(4);
     q22 = (*q2)(5);
@@ -325,7 +342,9 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   jachq.setValue(0, 6,
                  x22 * (axes_[0](0) * x9 + axes_[0](1) * x25 + axes_[0](2) * x18) + x23 * x26);
 
-  if (q0.numberOfBlocks() < 2) return;
+  if (!q2) {
+    return;
+  }
 
   /*
    * sympy expression:

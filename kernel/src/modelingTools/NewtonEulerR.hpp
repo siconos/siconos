@@ -24,6 +24,7 @@
 #include <cassert>
 
 #include "Relation.hpp"
+#include <optional>
 
 namespace siconos::modeling {
 
@@ -232,8 +233,21 @@ class NewtonEulerR : public Relation {
       \param[in] q generalized coordinates vector of the concerned dynamical systems
       \param[in,out] y the resulting vector
   */
-  virtual void computeh(const siconos::algebra::BlockVector &q,
+  virtual void computeh(const siconos::algebra::BlockVector& q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
+
+  /**
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+                Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** default implementation consists in multiplying jachq and T
    *  in this implementation we use T_buffer_ which is consitent which directly

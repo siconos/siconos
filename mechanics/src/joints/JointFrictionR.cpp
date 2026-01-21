@@ -70,6 +70,14 @@ void siconos::joints::JointFrictionR::computeh(const siconos::algebra::BlockVect
   y.setZero();
 }
 
+void siconos::joints::JointFrictionR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  // Velocity-level constraint, no position-level h
+  y.setZero();
+}
+
 void siconos::joints::JointFrictionR::computeH_NE_(double time,
                                                    siconos::modeling::Interaction& inter,
                                                    const siconos::algebra::BlockVector& q0) {
@@ -82,7 +90,13 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(inter, q0, *jacobianhOver_q_Tmp, _axisMin);
+  if (q0.numberOfBlocks() > 1) {
+    _joint->computeJachqDoF(inter, *q0.vector(0), *q0.vector(1),
+                           *jacobianhOver_q_Tmp, _axisMin);
+  } else {
+    _joint->computeJachqDoF(inter, *q0.vector(0), std::nullopt,
+                           *jacobianhOver_q_Tmp, _axisMin);
+  }
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation

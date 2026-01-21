@@ -689,27 +689,27 @@ void siconos::joints::PrismaticJointR::computehDoF(
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PrismaticJointR::computeJachqDoF(
-    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    siconos::modeling::Interaction& inter,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
 
-  auto q1 = (q0.getAllVect())[0];
-  double X1 = (*q1)(0);
-  double Y1 = (*q1)(1);
-  double Z1 = (*q1)(2);
-  double q10 = (*q1)(3);
-  double q11 = (*q1)(4);
-  double q12 = (*q1)(5);
-  double q13 = (*q1)(6);
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
 
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
+  if (q2) {
     X2 = (*q2)(0);
     Y2 = (*q2)(1);
     Z2 = (*q2)(2);
@@ -755,7 +755,7 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
                      axes_[0](2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
                                     q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
 
-  if (q0.numberOfBlocks() > 1) {
+  if (q2) {
     jachq.setValue(0, 7,
                    axes_[0](0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
                        axes_[0](1) * (-2 * q10 * q13 + 2 * q11 * q12) +

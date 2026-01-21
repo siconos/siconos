@@ -166,6 +166,17 @@ void siconos::joints::KneeJointR::computeh(const siconos::algebra::BlockVector& 
   }
 }
 
+void siconos::joints::KneeJointR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  if (q2) {
+    knee::hfunction(q1, G1P0_, q2, G2P0_, y);
+  } else {
+    knee::hfunction(q1, G1P0_, std::nullopt, G2P0_, y);
+  }
+}
+
 // Stand-alone functions
 void siconos::joints::knee::hfunction(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,

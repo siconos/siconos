@@ -187,11 +187,19 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) {}
 
+  // /** Compute the jacobian of linear and angular DoF with respect to some q */
+  // virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
+  //                              const siconos::algebra::BlockVector& q0,
+  //                              Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+  //                              unsigned int axis = 0) {}
+  
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                               const siconos::algebra::BlockVector& q0,
+                               const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) {}
+
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
   }

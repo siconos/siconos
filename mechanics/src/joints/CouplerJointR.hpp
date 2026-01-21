@@ -50,10 +50,13 @@ class CouplerJointR : public NewtonEulerJointR {
 
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
-  void makeBlockVectors(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      siconos::algebra::BlockVector& q01, siconos::algebra::BlockVector& q02);
+  void resolveVectors(
+      const siconos::algebra::SiconosVector* q1,
+      const siconos::algebra::SiconosVector* q2,
+      const siconos::algebra::SiconosVector*& v1_1,
+      const siconos::algebra::SiconosVector*& v1_2,
+      const siconos::algebra::SiconosVector*& v2_1,
+      const siconos::algebra::SiconosVector*& v2_2) const;
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -93,6 +96,19 @@ class CouplerJointR : public NewtonEulerJointR {
       \param[in,out] y the resulting vector
   */
   void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+  /**
+    to compute the output y = h(q) of the Relation
+
+    \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+    in the relation
+    \param[in] q2 generalized coordinates vector of the second dynamical system
+    involved in the relation
+    \param[in,out] y the resulting vector
+*/
+
+  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* Return the joint DoF index assigned to the first DoF. */
@@ -221,7 +237,8 @@ class CouplerJointR : public NewtonEulerJointR {
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                               const siconos::algebra::BlockVector& q0,
+                               const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) override;
 

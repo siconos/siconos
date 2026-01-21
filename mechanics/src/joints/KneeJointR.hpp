@@ -132,6 +132,20 @@ class KneeJointR : public NewtonEulerJointR {
   */
   void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+
+  /**
+    to compute the output y = h(q) of the Relation
+
+   \param[in] q1 generalized coordinates vector of the first dynamical system involved
+   in the relation
+   \param[in] q2 generalized coordinates vector of the second dynamical system
+   involved in the relation
+   \param[in,out] y the resulting vector
+ */
+  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
   }

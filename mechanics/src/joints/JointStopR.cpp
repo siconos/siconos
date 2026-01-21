@@ -125,6 +125,37 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
   }
 }
 
+void siconos::joints::JointStopR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  // Common cases optimisation
+  bool case_onestop = y.size() == 1;
+  bool case_posneg = y.size() == 2 && (*_axis)[0] == (*_axis)[1];
+  if (case_onestop || case_posneg) {
+    if (q2)
+      _joint->computehDoF(q1, q2, y, (*_axis)[0]);
+    else
+      _joint->computehDoF(q1, std::nullopt, y, (*_axis)[0]);
+    y(0) = (y(0) - (*_pos)(0)) * (*_dir)(0);
+    if (case_posneg) y(1) = (y(0) - (*_pos)(1)) * (*_dir)(1);
+    return;
+  }
+
+  // Get h for each relevant axis
+  siconos::algebra::SiconosVector tmp_y(_axisMax - _axisMin + 1);
+
+  if (q2)
+    _joint->computehDoF(q1, q2, tmp_y, _axisMin);
+  else
+    _joint->computehDoF(q1, std::nullopt, tmp_y, _axisMin);
+
+  // Copy and scale each stop for its axis/position/direction
+  for (siconos::algebra::Index i = 0; i < y.size(); i++) {
+    y(i) = (tmp_y((*_axis)[i]) - (*_pos)(i)) * (*_dir)(i);
+  }
+}
+
 void siconos::joints::JointStopR::computeH_NE_(double time,
                                                siconos::modeling::Interaction& inter,
                                                const siconos::algebra::BlockVector& q0) {
@@ -136,7 +167,13 @@ void siconos::joints::JointStopR::computeH_NE_(double time,
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(inter, q0, *jacobianhOver_q_Tmp, _axisMin);
+  if (q0.numberOfBlocks() > 1) {
+    _joint->computeJachqDoF(inter, *q0.vector(0), *q0.vector(1),
+                           *jacobianhOver_q_Tmp, _axisMin);
+  } else {
+    _joint->computeJachqDoF(inter, *q0.vector(0), std::nullopt,
+                           *jacobianhOver_q_Tmp, _axisMin);
+  }
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
   for (siconos::algebra::Index i = 0; i < H_NE_view_->rows(); i++)

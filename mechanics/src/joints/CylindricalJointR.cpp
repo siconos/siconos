@@ -320,8 +320,6 @@ void siconos::joints::CylindricalJointR::computeh(
   y(1) = x13 * x24 - x15 * x25 - x17 * x26 - x19 * x27;
   y(2) = -x14 * x32 - x16 * x33 - x18 * x34 + x35 * x4;
   y(3) = x24 * x35 - x25 * x32 - x26 * x33 - x27 * x34;
-  std::cout << "y : ";
-  std::cout << y << std::endl;
 }
 
 void siconos::joints::CylindricalJointR::computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
@@ -845,11 +843,12 @@ void siconos::joints::CylindricalJointR::computehDoF(
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::CylindricalJointR::computeJachqDoF(
-    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    siconos::modeling::Interaction& inter,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   if (axis > 1) return;
 
-  auto& q1 = *(q0.vector(0));
   double X1 = q1(0);
   double Y1 = q1(1);
   double Z1 = q1(2);
@@ -865,8 +864,7 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
+  if (q2) {
     X2 = (*q2)(0);
     Y2 = (*q2)(1);
     Z2 = (*q2)(2);
@@ -1001,15 +999,15 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
                    -2 * x0 * x28 - 2 * x16 * x21 + 2 * x17 * x20 - 2 * x19 * x22 +
                        2 * x2 * x27 - 2 * x29 * x4);
 
-    if (q0.numberOfBlocks() >= 2) {
-      jachq.setValue(i, 7, x17);
-      jachq.setValue(i, 8, x21);
-      jachq.setValue(i, 9, x19);
-      jachq.setValue(i, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
-      jachq.setValue(i, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
-      jachq.setValue(i, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
-      jachq.setValue(i, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
-    }
+    // if (q0.numberOfBlocks() >= 2) {
+    //   jachq.setValue(i, 7, x17);
+    //   jachq.setValue(i, 8, x21);
+    //   jachq.setValue(i, 9, x19);
+    //   jachq.setValue(i, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
+    //   jachq.setValue(i, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
+    //   jachq.setValue(i, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
+    //   jachq.setValue(i, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
+    // }
 
     i++;
   }
@@ -1034,25 +1032,25 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
                    x77 * (x53 * x76 + x78 * (-x17 * x47 + x19 * x51 + x21 * x49 + x53 * x66 +
                                              x55 * x75 - x60 * x79 - x65 * x73)));
 
-    if (q0.numberOfBlocks() >= 2) {
-      /*
-       * sympy expression:
-       *
-       * for i in range(4): print('jachq.setValue(i, {}, {});'.format(i+10,e[i+4]))
-       */
+    // if (q0.numberOfBlocks() >= 2) {
+    //   /*
+    //    * sympy expression:
+    //    *
+    //    * for i in range(4): print('jachq.setValue(i, {}, {});'.format(i+10,e[i+4]))
+    //    */
 
-      jachq.setValue(i, 7, 0);
-      jachq.setValue(i, 8, 0);
-      jachq.setValue(i, 9, 0);
-      jachq.setValue(
-          i, 10, x77 * (x76 * x80 - x78 * (x17 * x81 + x19 * x83 + x21 * x82 - x66 * x80)));
-      jachq.setValue(
-          i, 11, x77 * (x76 * x81 + x78 * (x17 * x80 - x19 * x82 + x21 * x83 + x66 * x81)));
-      jachq.setValue(
-          i, 12, x77 * (x76 * x82 + x78 * (-x17 * x83 + x19 * x81 + x21 * x80 + x66 * x82)));
-      jachq.setValue(
-          i, 13, x77 * (x76 * x83 + x78 * (x17 * x82 + x19 * x80 - x21 * x81 + x66 * x83)));
-    }
+    //   jachq.setValue(i, 7, 0);
+    //   jachq.setValue(i, 8, 0);
+    //   jachq.setValue(i, 9, 0);
+    //   jachq.setValue(
+    //       i, 10, x77 * (x76 * x80 - x78 * (x17 * x81 + x19 * x83 + x21 * x82 - x66 * x80)));
+    //   jachq.setValue(
+    //       i, 11, x77 * (x76 * x81 + x78 * (x17 * x80 - x19 * x82 + x21 * x83 + x66 * x81)));
+    //   jachq.setValue(
+    //       i, 12, x77 * (x76 * x82 + x78 * (-x17 * x83 + x19 * x81 + x21 * x80 + x66 * x82)));
+    //   jachq.setValue(
+    //       i, 13, x77 * (x76 * x83 + x78 * (x17 * x82 + x19 * x80 - x21 * x81 + x66 * x83)));
+    // }
 
     i++;
   }

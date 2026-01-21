@@ -154,6 +154,70 @@ void siconos::joints::FixedJointR::computeh(const siconos::algebra::BlockVector&
          q13 * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
 }
 
+void siconos::joints::FixedJointR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
+
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q2) {
+    X2 = (*q2)(0);
+    Y2 = (*q2)(1);
+    Z2 = (*q2)(2);
+    q20 = (*q2)(3);
+    q21 = (*q2)(4);
+    q22 = (*q2)(5);
+    q23 = (*q2)(6);
+  }
+
+  /* sympy expression:
+   *
+   * G1G2d1 = unrot(G2-G1, q1) - G10G20d1
+   * q2to1 = qmul(q1,qinv(qmul(q2,cq2q10)))
+   *
+   * H = list(G1G2d1[1:]) + list(q2to1[1:])
+   */
+
+  y(0) = -_G10G20d1x + q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+         q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+         q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
+         q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2));
+  y(1) = -_G10G20d1y + q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+         q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+         q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+         q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2));
+  y(2) = -_G10G20d1z + q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+         q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+         q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+         q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2));
+  y(3) = q10 * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
+         q11 * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
+         q12 * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) -
+         q13 * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  y(4) = q10 * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) -
+         q11 * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
+         q12 * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
+         q13 * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  y(5) = q10 * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
+         q11 * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) -
+         q12 * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
+         q13 * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+}
+
 void siconos::joints::FixedJointR::computeH_NE_(double time,
                                                 siconos::modeling::Interaction& inter,
                                                 const siconos::algebra::BlockVector& q0) {

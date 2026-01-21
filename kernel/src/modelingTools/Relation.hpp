@@ -31,10 +31,11 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
+#include "Interaction.hpp"
 
 namespace siconos::modeling {
 
-class Interaction;
+// class Interaction;
 
 /** List of possible Relations types*/
 enum class RelationType {

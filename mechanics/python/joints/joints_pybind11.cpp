@@ -24,6 +24,7 @@
 #include <pybind11/stl_bind.h>
 
 #include "NewtonEulerDS.hpp"
+#include "NewtonEulerJointR.hpp"
 #include "SiconosJoints.hpp"
 
 namespace py = pybind11;
@@ -59,21 +60,26 @@ PYBIND11_MODULE(_joints, m) {
            py::arg("q1") = std::nullopt, py::arg("axis") = 0, py::arg("absoluteRef") = true,
            "Return the axis of rotation as a SiconosVector3 (q passed directly)")
       .def("computehDoF", &siconos::joints::NewtonEulerJointR::computehDoF,
-           "To compute the DoF of the joint");
-  ;
-
-  py::class_<siconos::joints::CylindricalJointR,
-             std::shared_ptr<siconos::joints::CylindricalJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "CylindricalJointR")
-      .def(py::init<>(), "Default constructor for CylindricalJointR")
+           py::arg("q1"), py::arg("q2") = std::nullopt, py::arg("y"), py::arg("axis") = 0,
+           "To compute the DoF of the joint")
+      .def("computeJachqDoF", &siconos::joints::NewtonEulerJointR::computeJachqDoF,
+           py::arg("inter"), py::arg("q1"), py::arg("q2") = std::nullopt,
+           py::arg("jachq"), py::arg("axis") = 0)
+      .def("numberOfConstraints", &siconos::joints::NewtonEulerJointR::numberOfConstraints,
+           "To get the number of constraints in the joint")
       .def("computeh",
            py::overload_cast<
                const Eigen::Ref<const siconos::algebra::SiconosVector>&,
                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
                Eigen::Ref<siconos::algebra::SiconosVector>>(
-               &siconos::joints::CylindricalJointR::computeh),
+               &siconos::joints::NewtonEulerJointR::computeh),
            py::arg("q1"), py::arg("q2") = std::nullopt, py::arg("y"),
            "to compute the output y = h(q) of the Relation");
+
+  py::class_<siconos::joints::CylindricalJointR,
+             std::shared_ptr<siconos::joints::CylindricalJointR>,
+             siconos::joints::NewtonEulerJointR>(m, "CylindricalJointR")
+      .def(py::init<>(), "Default constructor for CylindricalJointR");
 
   py::class_<siconos::joints::PrismaticJointR,
              std::shared_ptr<siconos::joints::PrismaticJointR>,
@@ -92,9 +98,7 @@ PYBIND11_MODULE(_joints, m) {
 
   py::class_<siconos::joints::PivotJointR, std::shared_ptr<siconos::joints::PivotJointR>,
              siconos::joints::KneeJointR>(m, "PivotJointR")
-      .def(py::init<>(), "Default constructor for PivotJointR")
-      .def("numberOfConstraints", &siconos::joints::PivotJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+      .def(py::init<>(), "Default constructor for PivotJointR");
 
   py::class_<siconos::joints::CouplerJointR, std::shared_ptr<siconos::joints::CouplerJointR>,
              siconos::joints::NewtonEulerJointR>(m, "CouplerJointR")
@@ -111,9 +115,7 @@ PYBIND11_MODULE(_joints, m) {
                     std::shared_ptr<siconos::modeling::NewtonEulerDS>, unsigned int>(),
            py::arg("joint1"), py::arg("dof1"), py::arg("joint2"), py::arg("dof2"),
            py::arg("ratio"), py::arg("refds1"), py::arg("ref1_index") = 0, py::arg("refds2"),
-           py::arg("ref2_index") = 0)
-      .def("numberOfConstraints", &siconos::joints::CouplerJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+           py::arg("ref2_index") = 0);
 
   py::class_<siconos::joints::JointStopR, std::shared_ptr<siconos::joints::JointStopR>,
              siconos::modeling::NewtonEulerR>(m, "JointStopR")

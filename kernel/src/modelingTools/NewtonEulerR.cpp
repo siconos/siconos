@@ -153,6 +153,19 @@ void siconos::modeling::NewtonEulerR::computeh(const siconos::algebra::BlockVect
   if (haseVector_) y += *eVector_view_;
 }
 
+void siconos::modeling::NewtonEulerR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  // Default implementation: convert to BlockVector and call existing method
+  siconos::algebra::BlockVector q0;
+  q0.insertPtr(std::make_shared<siconos::algebra::SiconosVector>(q1));
+  if (q2) {
+    q0.insertPtr(std::make_shared<siconos::algebra::SiconosVector>(*q2));
+  }
+  computeh(q0, y);
+}
+
 void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& inter,
                                                     unsigned int derivativeNumber) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeOutput(...)\n");
