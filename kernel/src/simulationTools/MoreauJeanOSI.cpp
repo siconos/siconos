@@ -240,16 +240,11 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
 void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
     siconos::graphs::DynamicalSystemsGraph& DSG) {
-  DEBUG_BEGIN(
-      "siconos::integrators::MoreauJeanOSI::"
-      "initializeWorkVectorsForInteraction(Interaction "
-      "&inter, siconos::graphs::InteractionProperties& interProp, "
-      "siconos::graphs::DynamicalSystemsGraph & DSG)\n");
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 = interProp.source;
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 = interProp.target;
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction()\n");
+  auto ds1 = interProp.source;
+  auto ds2 = interProp.target;
   assert(ds1);
   assert(ds2);
-
   DEBUG_PRINTF("interaction number %i\n", inter.number());
 
   if (!interProp.workVectors) {

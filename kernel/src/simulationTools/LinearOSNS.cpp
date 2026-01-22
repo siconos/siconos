@@ -909,19 +909,17 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  // y and lambda vectors
+  // lambda vector
   std::shared_ptr<siconos::algebra::SiconosVector> lambda;
 
   // === Loop through "active" Interactions (ie present in
   // indexSets[1]) ===
 
-  unsigned int pos = 0;
-
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet.bundle(*ui);
     // Get the  position of inter-interactionBlock in the vector w or z
-    pos = indexSet.properties(*ui).absolute_position;
+    auto pos = indexSet.properties(*ui).absolute_position;
 
     // Get lambda for the current Interaction
     // y = inter.y(inputOutputLevel());

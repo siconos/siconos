@@ -41,8 +41,7 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
                                         bool absoluteRef,
                                         std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
                                         std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
-
-  points_.emplace_back(P);                                          
+  points_.emplace_back(P);
   setAbsolute(absoluteRef);
   if (d1) {
     if (d2) {
@@ -69,8 +68,7 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
   });
 }
 
-siconos::joints::KneeJointR::KneeJointR()
-{
+siconos::joints::KneeJointR::KneeJointR() {
   points_.resize(1);
   points_[0].setZero();
 }
@@ -109,8 +107,7 @@ void siconos::joints::KneeJointR::checkInitPos(
 void siconos::joints::KneeJointR::setBasePositions(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
-
-  // Assumes that points_[0] is properly set 
+  // Assumes that points_[0] is properly set
   boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff, quatP0_abs;
 
   /** Computation of G1P0_ and G2P0_ */
@@ -126,8 +123,8 @@ void siconos::joints::KneeJointR::setBasePositions(
     G1P0_ = points_[0];
 
     /* Move to abs frame by applying q1 frame rotation/translation */
-    quatP0_abs =
-        (rot1 * siconos::geometry::posquat(points_[0]) / rot1) + siconos::geometry::posquat(q1);
+    quatP0_abs = (rot1 * siconos::geometry::posquat(points_[0]) / rot1) +
+                 siconos::geometry::posquat(q1);
   }
 
   /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */
@@ -218,13 +215,13 @@ void siconos::joints::knee::hfunction(
   } else {
     result(0) = q1(0) + (t1 + t2 - t3 - t4) * coords1(0) +
                 (q1(4) * 2.0 * q1(5) - q1(3) * 2.0 * q1(6)) * coords1(1) +
-                (q1(4) * 2.0 * q1(6) + q1(3) * 2.0 * q1(5)) * coords1(2);
+                (q1(4) * 2.0 * q1(6) + q1(3) * 2.0 * q1(5)) * coords1(2) - coords2(0);
     result(1) = q1(1) + (q1(4) * 2.0 * q1(5) + q1(3) * 2.0 * q1(6)) * coords1(0) +
                 (t4 - t3 + t2 - t1) * coords1(1) +
-                (q1(5) * 2.0 * q1(6) - q1(3) * 2.0 * q1(4)) * coords1(2);
+                (q1(5) * 2.0 * q1(6) - q1(3) * 2.0 * q1(4)) * coords1(2) - coords2(1);
     result(2) = q1(2) + (q1(4) * 2.0 * q1(6) - q1(3) * 2.0 * q1(5)) * coords1(0) +
                 (q1(5) * 2.0 * q1(6) + q1(3) * 2.0 * q1(4)) * coords1(1) +
-                (t3 - t4 - t1 + t2) * coords1(2);
+                (t3 - t4 - t1 + t2) * coords1(2) - coords2(2);
   }
 }
 
