@@ -146,6 +146,10 @@ class MechanicsHdf5Runner_run_options(dict):
     def __init__(self):
         d = {}
         d["with_timer"] = False
+        # when with_timer_output_at_the_end is True, we store te timers
+        # into a dict ans we output it in hdf5 at the end
+        # fastest method but need to complete the simulation
+        d["with_timer_output_at_the_end"] = True
         d["time_stepping"] = None
         d["interaction_manager"] = None
         d["bullet_options"] = None
@@ -343,6 +347,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._v0 = []
         self.fext = []
         self.weight = []
+        self._timing = {}
 
         if self.config.backend == "vnative":
             self.get_io_array = lambda array: array
@@ -376,46 +381,50 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         )
         return self
 
-    def log(self, fun, with_timer=False, before=True):
+    def log(self, fun, with_timer=False, after=True):
         if with_timer:
             t = siconos.io.tools.Timer()
-
             def logged(*args):
                 t.update()
-                if before:
+                if not after:
                     print(
-                        "[io.mechanics]| {0:50s} ...".format(fun.__name__),
-                        end="",
+                        "[io.mechanics] |-->start {0:42s} ...".format(fun.__name__),
+                        flush=True)
+
+                output = fun(*args)
+                endt = t.elapsed()
+
+                if not after:
+                    print(
+                        "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(fun.__name__,endt),
                         flush=True,
                     )
                 else:
-                    print(
-                        "[io.mechanics]|-->start {0:42s} ...".format(fun.__name__),
-                        flush=True,
-                    )
-                output = fun(*args)
-                endt = t.elapsed()
-                if not before:
-                    print(
-                        "[io.mechanics]|-->end {0:44s} ...".format(fun.__name__),
-                        end="",
-                        flush=True,
-                    )
-                print("..... {0:6.2e} s".format(endt))
-                siconos.io.mechanics_hdf5.group(self.log_data(), fun.__name__)
-                siconos.io.mechanics_hdf5.add_line(
-                    siconos.io.mechanics_hdf5.data(
-                        self.log_data()[fun.__name__], "timing", 1
-                    ),
-                    endt,
-                )
-                if isinstance(output, numbers.Number):
+                    print("[io.mechanics] | {0:50s} .... {1:6.2e} s".format(fun.__name__,endt))
+
+                ## timing in hdf5
+                if self._run_options['with_timer_output_at_the_end']:
+                    # we store timing in a dictionnary
+                    if self._timing.get(fun.__name__) is None:
+                        self._timing[fun.__name__] = [endt]
+                    else:
+                        self._timing[fun.__name__].append(endt)
+                else:
+                     # we store timing in hdf5
+                    siconos.io.mechanics_hdf5.group(self.log_data(), fun.__name__)
                     siconos.io.mechanics_hdf5.add_line(
                         siconos.io.mechanics_hdf5.data(
-                            self.log_data()[fun.__name__], "value", 1
+                            self.log_data()[fun.__name__], "timing", 1
                         ),
-                        float(output),
+                        endt,
                     )
+                    if isinstance(output, numbers.Number):
+                        siconos.io.mechanics_hdf5.add_line(
+                            siconos.io.mechanics_hdf5.data(
+                                self.log_data()[fun.__name__], "value", 1
+                            ),
+                            float(output),
+                        )
                 return output
 
             return logged
@@ -2129,8 +2138,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             ):
                 self.print_verbose(
                     "[warning] output_contact_work with "
-                    "the options skip_last_update_output=True"
-                    " or skip_last_update_output=True could result in wrong output"
+                    "the options skip_last_update_output=True\n"
+                    "                         or skip_last_update_input=True could result in wrong output"
                 )
         else:
             self.print_verbose(
@@ -2152,6 +2161,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self.config.backend == "vnative":
             self.log(self.output_radii, with_timer)()
+
+
 
         self.log(self._out.flush)()
 
@@ -2313,7 +2324,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
                 ds.setBoundaryConditions(bc)
 
-    def explode_Newton_solve(self, with_timer):
+    def computeOneStep_python(self, with_timer):
         s = self._simulation
 
         # 1 - s.initialize:
@@ -2365,7 +2376,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if explode_computeOneStep:
                     fc = self._osnspb
                     # self.log(fc.updateInteractionBlocks, with_timer)()
-                    self.log(fc.preCompute, with_timer, before=False)(s.nextTime())
+                    self.log(fc.preCompute, with_timer, after=False)(s.nextTime())
                     self.log(fc.updateMu, with_timer)()
                     if self._run_options.get("osi") == integrators.MoreauJeanOSI:
                         if fc.getSizeOutput != 0:
@@ -3097,6 +3108,112 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.print_verbose("start simulation ...")
         self._initializing = False
 
+    def solver_verbose(self,  number_of_contacts):
+
+        so = self._simulation.oneStepNSProblem(0).numericsSolverOptions()
+        iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
+        precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
+
+        solver_output={}
+        mask = '|      '
+        solver_output['solver iter']= [iterations, mask + '{:<10d}']
+        solver_output['solver error']= [precision, mask + '{:8.4e}']
+
+        print_violation = None
+
+        if self._run_options.get("violation_verbose") and  number_of_contacts > 0:
+            print_violation = {}
+            if len(self._simulation.y_output(0, 0)) > 0:
+                y = self._simulation.y_output(0, 0)
+                yplus = np.zeros((2, len(y)))
+                yplus[0, :] = y
+                y = np.min(yplus, axis=1)
+                violation_max = np.max(-y)
+                if self._collision_margin is not None:
+                    if violation_max >= self._collision_margin:
+                        self.print_verbose(
+                            "  violation max is larger than the collision_margin"
+                        )
+                lam = self._simulation.lambda_input(1, 0)
+                print_violation['violation max'] =  [violation_max,  mask + '{:8.4e}']
+                print_violation['reaction max'] =  [np.max(lam),  mask + '{:8.4e}']
+
+
+            if len(self._simulation.y_output(1, 0)) > 0:
+                v = self._simulation.y_output(1, 0)
+                vplus = np.zeros((2, len(v)))
+                vplus[0, :] = v
+                v = np.max(vplus, axis=1)
+                print_violation['velocity max'] =  [np.max(v),  mask + '{:8.4e}']
+                print_violation['velocity min'] =  [np.min(v),  mask + '{:8.4e}']
+
+        if print_violation is not None:
+            print_solver_verbose= {**solver_output, **print_violation }
+        else:
+            print_solver_verbose = solver_output
+
+        # print banner
+        ll = ['| {:<14} '.format(k) for k in  print_solver_verbose.keys()]
+        ll.append('|')
+        self.print_verbose(' '.join(ll))
+
+        # print results
+        ll =[]
+        for k in print_solver_verbose.keys():
+            fmt = print_solver_verbose  [k][1]
+            value = print_solver_verbose  [k][0]
+            ll.append(fmt.format(value))
+        ll.append('|')
+        self.print_verbose(' '.join(ll))
+
+
+    def contact_statistics_verbose(self):
+        # Note these are not the same and neither is correct.
+        # "_interman.statistics" gives the number of contacts
+        # collected by the collision engine, but it's possible some
+        # are not in indexset1.  Meanwhile checking the size of
+        # the non-smooth problem is wrong when there are joints.
+        if self.config.use_bullet:
+            number_of_contacts = (
+                self._interman.statistics().new_interactions_created
+            )
+            number_of_contacts += (
+                self._interman.statistics().existing_interactions_processed
+            )
+            if self._verbose and number_of_contacts > 0:
+                bullet_statistics = self._interman.statistics()
+                self.print_verbose(
+                    "bullet_statistics:",
+                    "new_interactions_created :",
+                    bullet_statistics.new_interactions_created,
+                    "existing_interactions_processed :",
+                    bullet_statistics.existing_interactions_processed,
+                    "interaction_warnings :",
+                    bullet_statistics.interaction_warnings,
+                )
+                self.print_verbose(
+                    "number of contacts",
+                    number_of_contacts,
+                    "(detected)",
+                    self._osnspb.getSizeOutput // self._dimension,
+                    "(active at velocity level. approx)",
+                )
+                #self.print_solver_infos()
+
+        else:
+            if self.config.backend != "vnative":
+                number_of_contacts = self._osnspb.getSizeOutput // self._dimension
+            else:
+                number_of_contacts = self._osnspb.getSizeOutput() // self._dimension
+
+            if verbose and number_of_contacts > 0:
+                msg = "number of active contacts at the velocity level (approx)"
+                self.print_verbose(msg, number_of_contacts)
+                self.print_solver_infos()
+
+        return number_of_contacts
+
+
     def run_loop(self):
         verbose = self._run_options.get("verbose")
         self._verbose = verbose
@@ -3113,6 +3230,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         t0 = self._run_options.get("t0")
         T = self._run_options.get("T")
         h = self._run_options.get("h")
+
+
         while self._simulation.hasNextEvent():
             if self._run_options.get("verbose_progress"):
                 self.print_verbose(
@@ -3122,7 +3241,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if self._start_run_iteration_hook is not None:
                 if (
                     self.log(
-                        self._start_run_iteration_hook.call, with_timer, before=False
+                        self._start_run_iteration_hook.call, with_timer, after=False
                     )(self._k)
                     is False
                 ):
@@ -3142,7 +3261,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if self._run_options.get("explode_Newton_solve"):
                 if self._time_stepping_class == simu.TimeStepping:
-                    self.log(self.explode_Newton_solve, with_timer, before=False)(
+                    self.log(self.computeOneStep_python, with_timer, after=False)(
                         with_timer
                     )
                 else:
@@ -3157,14 +3276,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.log(self._simulation.updateInteractions, with_timer)()
                 self.log(self._simulation.computeOneStep, with_timer)()
 
+
+            number_of_contacts = self.log(self.contact_statistics_verbose,with_timer)()
+
+            self.log(self.solver_verbose,with_timer)(number_of_contacts)
+
             cond = self._output_frequency and (self._k % self._output_frequency == 0)
             if cond or self._k == 1:
                 if verbose:
                     self.print_verbose(
-                        "output in hdf5 file at step ",
+                        "output results in hdf5 file at step ",
                         self._k,
-                        " time =",
-                        self.current_time(),
+                        'time = {:.8f}'.format(self.current_time())
                     )
 
                 self.log(self.output_results, with_timer)()
@@ -3183,75 +3306,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             self.log(self._simulation.clearNSDSChangeLog, with_timer)()
 
-            # Note these are not the same and neither is correct.
-            # "_interman.statistics" gives the number of contacts
-            # collected by the collision engine, but it's possible some
-            # are not in indexset1.  Meanwhile checking the size of
-            # the non-smooth problem is wrong when there are joints.
-            if self.config.use_bullet:
-                number_of_contacts = (
-                    self._interman.statistics().new_interactions_created
-                )
-                number_of_contacts += (
-                    self._interman.statistics().existing_interactions_processed
-                )
-                if verbose and number_of_contacts > 0:
-                    bullet_statistics = self._interman.statistics()
-                    self.print_verbose(
-                        "bullet_statistics:",
-                        "new_interactions_created :",
-                        bullet_statistics.new_interactions_created,
-                        "existing_interactions_processed :",
-                        bullet_statistics.existing_interactions_processed,
-                        "interaction_warnings :",
-                        bullet_statistics.interaction_warnings,
-                    )
-                    self.print_verbose(
-                        "number of contacts",
-                        number_of_contacts,
-                        "(detected)",
-                        self._osnspb.getSizeOutput // self._dimension,
-                        "(active at velocity level. approx)",
-                    )
-                    self.print_solver_infos()
-
-            else:
-                if self.config.backend != "vnative":
-                    number_of_contacts = self._osnspb.getSizeOutput // self._dimension
-                else:
-                    number_of_contacts = self._osnspb.getSizeOutput() // self._dimension
-
-                if verbose and number_of_contacts > 0:
-                    msg = "number of active contacts at the velocity level (approx)"
-                    self.print_verbose(msg, number_of_contacts)
-                    self.print_solver_infos()
-
-            if self._run_options.get("violation_verbose") and number_of_contacts > 0:
-                if len(self._simulation.y_output(0, 0)) > 0:
-                    self.print_verbose("violation info")
-                    y = self._simulation.y_output(0, 0)
-                    yplus = np.zeros((2, len(y)))
-                    yplus[0, :] = y
-                    y = np.min(yplus, axis=1)
-                    violation_max = np.max(-y)
-                    self.print_verbose("  violation max :", violation_max)
-                    if self._collision_margin is not None:
-                        if violation_max >= self._collision_margin:
-                            self.print_verbose(
-                                "  violation max is larger than the collision_margin"
-                            )
-                    lam = self._simulation.lambda_input(1, 0)
-                    self.print_verbose("  lambda max :", np.max(lam))
-                    # print(' lambda : ',lam)
-
-                if len(self._simulation.y_output(1, 0)) > 0:
-                    v = self._simulation.y_output(1, 0)
-                    vplus = np.zeros((2, len(v)))
-                    vplus[0, :] = v
-                    v = np.max(vplus, axis=1)
-                    self.print_verbose("  velocity max :", np.max(v))
-                    self.print_verbose("  velocity min :", np.min(v))
-                #     #print(self._simulation.output(1,0))
 
             if exit_tolerance is not None:
                 solver_options = self._osnspb.numericsSolverOptions()
@@ -3280,8 +3334,41 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             self.print_verbose("")
             self._k += 1
+
+
+
         return True
 
+    def output_timer_at_the_end(self):
+        if (len(self._timing) >0):
+            for k in self._timing.keys():
+                siconos.io.mechanics_hdf5.group(self.log_data(), k)
+                timing_data = np.array(self._timing[k])
+                data_set = siconos.io.mechanics_hdf5.data(self.log_data()[k], "timing", 1)
+                current_line = data_set.shape[0]
+                data_set.resize(current_line + timing_data.shape[0] , 0)
+                data_set[current_line: current_line + timing_data.shape[0]] = timing_data[:].reshape(timing_data.shape[0],1)
+
+
     def run(self, *args, **kwargs):
-        self.run_initialize(*args, **kwargs)
-        return self.run_loop()
+
+        # try to search for with_timer argument
+        if len(args)>0:
+            # we assume that run_options is passed as the first positional positional argument
+            run_options=  args[0]
+            with_timer=run_options.get("with_timer")
+        if len(kwargs)>0:
+            with_timer=kwargs.get('with_timer')
+
+
+        self.log(self.run_initialize,with_timer)(*args, **kwargs)
+
+        with_timer = self._run_options.get("with_timer")
+        info = self.log(self.run_loop, with_timer)()
+
+        print('self._run_options.get( with_timer )',self._run_options.get("with_timer"))
+        print('self._run_options[ with_timer_output_at_the_end ]', self._run_options['with_timer_output_at_the_end'])
+        if with_timer and  self._run_options['with_timer_output_at_the_end']:
+            self.output_timer_at_the_end()
+
+        return info
