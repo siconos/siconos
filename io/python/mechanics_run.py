@@ -3235,7 +3235,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         while self._simulation.hasNextEvent():
             if self._run_options.get("verbose_progress"):
                 self.print_verbose(
-                    "step", self._k, "of", self._k0 + int((T - t0) / h) - 1
+                    "step", self._k, "of", self._k0 + int((T - t0) / h) - 1, " time : {0:12.8f}".format(self.current_time())
                 )
 
             if self._start_run_iteration_hook is not None:
@@ -3287,7 +3287,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose(
                         "output results in hdf5 file at step ",
                         self._k,
-                        'time = {:.8f}'.format(self.current_time())
                     )
 
                 self.log(self.output_results, with_timer)()
