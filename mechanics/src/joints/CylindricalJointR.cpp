@@ -999,15 +999,15 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
                    -2 * x0 * x28 - 2 * x16 * x21 + 2 * x17 * x20 - 2 * x19 * x22 +
                        2 * x2 * x27 - 2 * x29 * x4);
 
-    // if (q0.numberOfBlocks() >= 2) {
-    //   jachq.setValue(i, 7, x17);
-    //   jachq.setValue(i, 8, x21);
-    //   jachq.setValue(i, 9, x19);
-    //   jachq.setValue(i, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
-    //   jachq.setValue(i, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
-    //   jachq.setValue(i, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
-    //   jachq.setValue(i, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
-    // }
+    if (q2) {
+      jachq.setValue(i, 7, x17);
+      jachq.setValue(i, 8, x21);
+      jachq.setValue(i, 9, x19);
+      jachq.setValue(i, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
+      jachq.setValue(i, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
+      jachq.setValue(i, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
+      jachq.setValue(i, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
+    }
 
     i++;
   }
@@ -1032,25 +1032,25 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
                    x77 * (x53 * x76 + x78 * (-x17 * x47 + x19 * x51 + x21 * x49 + x53 * x66 +
                                              x55 * x75 - x60 * x79 - x65 * x73)));
 
-    // if (q0.numberOfBlocks() >= 2) {
-    //   /*
-    //    * sympy expression:
-    //    *
-    //    * for i in range(4): print('jachq.setValue(i, {}, {});'.format(i+10,e[i+4]))
-    //    */
+    if (q2) {
+      /*
+       * sympy expression:
+       *
+       * for i in range(4): print('jachq.setValue(i, {}, {});'.format(i+10,e[i+4]))
+       */
 
-    //   jachq.setValue(i, 7, 0);
-    //   jachq.setValue(i, 8, 0);
-    //   jachq.setValue(i, 9, 0);
-    //   jachq.setValue(
-    //       i, 10, x77 * (x76 * x80 - x78 * (x17 * x81 + x19 * x83 + x21 * x82 - x66 * x80)));
-    //   jachq.setValue(
-    //       i, 11, x77 * (x76 * x81 + x78 * (x17 * x80 - x19 * x82 + x21 * x83 + x66 * x81)));
-    //   jachq.setValue(
-    //       i, 12, x77 * (x76 * x82 + x78 * (-x17 * x83 + x19 * x81 + x21 * x80 + x66 * x82)));
-    //   jachq.setValue(
-    //       i, 13, x77 * (x76 * x83 + x78 * (x17 * x82 + x19 * x80 - x21 * x81 + x66 * x83)));
-    // }
+      jachq.setValue(i, 7, 0);
+      jachq.setValue(i, 8, 0);
+      jachq.setValue(i, 9, 0);
+      jachq.setValue(
+          i, 10, x77 * (x76 * x80 - x78 * (x17 * x81 + x19 * x83 + x21 * x82 - x66 * x80)));
+      jachq.setValue(
+          i, 11, x77 * (x76 * x81 + x78 * (x17 * x80 - x19 * x82 + x21 * x83 + x66 * x81)));
+      jachq.setValue(
+          i, 12, x77 * (x76 * x82 + x78 * (-x17 * x83 + x19 * x81 + x21 * x80 + x66 * x82)));
+      jachq.setValue(
+          i, 13, x77 * (x76 * x83 + x78 * (x17 * x82 + x19 * x80 - x21 * x81 + x66 * x83)));
+    }
 
     i++;
   }
