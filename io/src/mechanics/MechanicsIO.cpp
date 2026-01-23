@@ -817,8 +817,11 @@ static void compute_contact_work_and_status(
   auto vn_plus = (*inter->y(1))(0);
   auto pn = (*inter->lambda(1))(0);
 
-  // double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
-  auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
+  //  auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
+
+  double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
+  auto normal_contact_work = vn_average * pn;
+
   answer(1) = normal_contact_work;
 
   // Compute tangent contact work of impulse
@@ -881,26 +884,26 @@ static void compute_contact_work_and_status(
     // 		<< std::endl;
     answer(5) = normal_contact_work;
   }
-  // double id = inter->number();
-  // std::cout << "\nid "<< id << " 3D" << std::endl;
-  // std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
-  // std::cout << "vn_plus "<< vn_plus << std::endl;
-  // std::cout << "vn_minus "<< vn_minus << std::endl;
-  // std::cout << "pn "<< pn << std::endl;
-  // std::cout << "normal_contact_work  "<< normal_contact_work  << std::endl;
+  //   double id = inter->number();
+  //   std::cout << "\nid "<< id << " 3D" << std::endl;
+  //   std::cout << " e "<< e  << " mu "<< mu << std::endl;
+  //   std::cout << " tol "<< tol << " omega " << omega << std::endl;
+  //   std::cout << "vn_plus "<< vn_plus << std::endl;
+  //   std::cout << "vn_minus "<< vn_minus << std::endl;
+  //   std::cout << "pn "<< pn << std::endl;
+  //   std::cout << "normal_contact_work  "<< normal_contact_work  << std::endl;
 
-  // std::cout << "vt_plus "<< vt_1_plus << " " << vt_2_plus <<  std::endl;
-  // std::cout << "vt_minus "<< vt_1_minus << " " << vt_2_minus <<  std::endl;
-  // std::cout << "pt "<< pt_1 << " "  << pt_2 << std::endl;
-  // std::cout << "tangent_contact_work  "<< tangent_contact_work  << std::endl;
+  //   std::cout << "vt_plus "<< vt_1_plus << " " << vt_2_plus <<  std::endl;
+  //   std::cout << "vt_minus "<< vt_1_minus << " " << vt_2_minus <<  std::endl;
+  //   std::cout << "pt "<< pt_1 << " "  << pt_2 << std::endl;
+  //   std::cout << "tangent_contact_work  "<< tangent_contact_work  << std::endl;
 
-  // std::cout << "friction_dissipation  "<< friction_dissipation << std::endl;
+  //   std::cout << "friction_dissipation  "<< friction_dissipation << std::endl;
 
-  // std::cout << "norm_pt  "<< norm_pt  << std::endl;
-  // std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
-  // std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
-  // std::cout << "status   "<<   answer(4) << std::endl;
+  //   std::cout << "norm_pt  "<< norm_pt  << std::endl;
+  //   std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
+  //   std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
+  //   std::cout << "status   "<<   answer(4) << std::endl;
 }
 
 static void compute_contact_work_and_status_2d(

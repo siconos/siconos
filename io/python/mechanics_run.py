@@ -3351,22 +3351,29 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def run(self, *args, **kwargs):
 
-        # try to search for with_timer argument
-        if len(args)>0:
-            # we assume that run_options is passed as the first positional positional argument
-            run_options=  args[0]
-            with_timer=run_options.get("with_timer")
-        if len(kwargs)>0:
-            with_timer=kwargs.get('with_timer')
+        # # try to search for with_timer in arguments
+        # if len(args)>0:
+        #     # we assume that run_options is passed as the first positional positional argument
+        #     run_options=args[0]
+        #     with_timer_t=run_options.get("with_timer")
+        # if len(kwargs)>0:
+        #     with_timer_t=kwargs.get('with_timer')
 
 
-        self.log(self.run_initialize,with_timer)(*args, **kwargs)
+        # print('with_timer_t', with_timer_t)
+
+        # self.log(self.run_initialize, with_timer=with_timer_t)(*args, **kwargs)
+
+        # print('self._run_options.get( with_timer )',self._run_options.get("with_timer"))
+        # print('self._run_options[ with_timer_output_at_the_end ]', self._run_options['with_timer_output_at_the_end'])
+        # input()
+
+        self.run_initialize(*args, **kwargs)
 
         with_timer = self._run_options.get("with_timer")
         info = self.log(self.run_loop, with_timer)()
 
-        print('self._run_options.get( with_timer )',self._run_options.get("with_timer"))
-        print('self._run_options[ with_timer_output_at_the_end ]', self._run_options['with_timer_output_at_the_end'])
+
         if with_timer and  self._run_options['with_timer_output_at_the_end']:
             self.output_timer_at_the_end()
 
