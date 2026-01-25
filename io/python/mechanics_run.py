@@ -147,19 +147,16 @@ class MechanicsHdf5Runner_run_options(dict):
         d = {}
         self._d_comment = {}
 
-        self._valid_options_keys=[]
+        self._valid_options_keys = []
 
-
-
-        def create_option(d, key, type_t, default,info):
+        def create_option(d, key, type_t, default, info):
             self._valid_options_keys.append(key)
 
             d[key] = default
             self._d_comment[key] = {}
-            self._d_comment[key]["type"] =  type_t
-            self._d_comment[key]["default"] =  default
+            self._d_comment[key]["type"] = type_t
+            self._d_comment[key]["default"] = default
             self._d_comment[key]["info"] = info
-
 
         create_option(d,
                       "t0",
@@ -220,8 +217,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       None,
                       """if true use bullet "multipoint iterations (Obsolete)""")
 
-
-
         create_option(d,
                       "time_stepping",
                       "siconos.kernel.Simulation, optional",
@@ -254,7 +249,7 @@ class MechanicsHdf5Runner_run_options(dict):
                       '',
                       None,
                       """ """
-                             )
+                      )
         create_option(d,
                       "controller",
                       '',
@@ -282,9 +277,6 @@ class MechanicsHdf5Runner_run_options(dict):
         #                      "?, optional",
         #                      None,
         #                      """ class used for edge definition (e.g. occ.OccContactEdge) occ only?""")
-
-
-
 
         # default osi options
         create_option(d,
@@ -329,7 +321,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       1e-8,
                       """ tolerance for the violation of the unilateral constraints at the  position level
                       (only for TimeSteppingDirectProjection) """)
-
 
         # default Newton solve options
         create_option(d,
@@ -422,7 +413,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       None,
                       """  """)
 
-
         # default output options
         create_option(d,
                       "output_frequency",
@@ -471,7 +461,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       False,
                       """if True, the kinetic and work for each bodies are computed and written in the hdf5 file""")
 
-
         # default verbose and debug  options
         create_option(d,
                       "verbose",
@@ -499,7 +488,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       False,
                       """if true, print info about contact violation """)
 
-
         create_option(d,
                       "with_timer",
                       'boolean, optional',
@@ -519,7 +507,6 @@ class MechanicsHdf5Runner_run_options(dict):
                       """ if True, the ComputeOneStep function of siconos.TimeStepping is exploded in a python version
                       in order to add more log/trace during Newton loop. """)
 
-
         create_option(d,
                       "explode_computeOneStepNSProblem_in_python",
                       'boolean, optional',
@@ -532,13 +519,12 @@ class MechanicsHdf5Runner_run_options(dict):
                       False,
                       """ if True, the simulation run exits if the tolerance is not reached """)
 
-
         super(self.__class__, self).__init__(d)
 
     def display(self):
         def print_comment(d_comment_item):
             if d_comment_item is None:
-                print('  | no info on this option ' )
+                print('  | no info on this option ')
             else:
                 for k in d_comment_item.keys():
                     print('  |   {0}: {1}'.format(k, d_comment_item[k]))
@@ -550,7 +536,6 @@ class MechanicsHdf5Runner_run_options(dict):
 
     def check_valid_run_options(self):
 
-
         if self.get("explode_Newton_solve") is not None:
             msg = 'run_options.check_valid_run_options() :  explode_Newton_solve option is obsolete. Use instead explode_computeOneStep_in_python'
             raise RuntimeError(msg)
@@ -559,10 +544,10 @@ class MechanicsHdf5Runner_run_options(dict):
             msg = 'run_options.check_valid_run_options() :  explode_computeOneStep option is obsolete. Use instead explode_computeOneStepNSProblem_in_python'
             raise RuntimeError(msg)
 
-
         for k in self.keys():
-            if  not  k in  self._valid_options_keys:
-                msg = "run_options.check_valid_run_options() : the key " +  str(k) + " in run_options dictionnary is not a valid key"
+            if not k in self._valid_options_keys:
+                msg = "run_options.check_valid_run_options() : the key " + str(k) + \
+                    " in run_options dictionnary is not a valid key"
                 raise RuntimeError(msg)
 
 
@@ -721,6 +706,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def log(self, fun, with_timer=False, after=True):
         if with_timer:
             t = siconos.io.tools.Timer()
+
             def logged(*args):
                 t.update()
                 if not after:
@@ -733,13 +719,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 if not after:
                     print(
-                        "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(fun.__name__,endt),
+                        "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(
+                            fun.__name__, endt),
                         flush=True,
                     )
                 else:
-                    print("[io.mechanics] | {0:50s} .... {1:6.2e} s".format(fun.__name__,endt))
+                    print("[io.mechanics] | {0:50s} .... {1:6.2e} s".format(
+                        fun.__name__, endt))
 
-                ## timing in hdf5
+                # timing in hdf5
                 if self._run_options['with_timer_output_at_the_end']:
                     # we store timing in a dictionnary
                     if self._timing.get(fun.__name__) is None:
@@ -747,7 +735,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     else:
                         self._timing[fun.__name__].append(endt)
                 else:
-                     # we store timing in hdf5
+                    # we store timing in hdf5
                     siconos.io.mechanics_hdf5.group(self.log_data(), fun.__name__)
                     siconos.io.mechanics_hdf5.add_line(
                         siconos.io.mechanics_hdf5.data(
@@ -1543,11 +1531,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if self.boundary_conditions()[name].attrs["v"] is None:
                     # fixed bc
                     bc = bc_class(
-                    self.boundary_conditions()[name].attrs["indices"])
+                        self.boundary_conditions()[name].attrs["indices"])
                 else:
                     bc = bc_class(
-                    self.boundary_conditions()[name].attrs["indices"],
-                    self.boundary_conditions()[name].attrs["v"])
+                        self.boundary_conditions()[name].attrs["indices"],
+                        self.boundary_conditions()[name].attrs["v"])
 
             # set bc to the ds1
 
@@ -2341,7 +2329,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             cf_work = self._io.contactContactWork(
                 self._nsds, self._output_contact_index_set
             )
-            #print('cf_work', cf_work)
+            # print('cf_work', cf_work)
 
             if cf_work.shape[0] > 0:
                 # print('cf_work', cf_work)
@@ -2498,8 +2486,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self.config.backend == "vnative":
             self.log(self.output_radii, with_timer)()
-
-
 
         self.log(self._out.flush)()
 
@@ -2694,7 +2680,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         newtonNbIterations = 0
         isNewtonConverge = False
-        explode_computeOneStepNSProblem_in_python = self._run_options.get("explode_computeOneStepNSProblem_in_python")
+        explode_computeOneStepNSProblem_in_python = self._run_options.get(
+            "explode_computeOneStepNSProblem_in_python")
 
         # self.log(s.initializeNewtonSolve, with_timer)()
         # explode version
@@ -2766,9 +2753,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 
-
-
-
     def build_run_options_from_old_arguments_in_kwargs(
         self,
         run_options=None,
@@ -2813,6 +2797,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         constraint_activation_threshold=0.0,
         explode_Newton_solve=False,
         explode_computeOneStep=False,
+        explode_computeOneStep_in_python=False,
+        explode_computeOneStepNSProblem_in_python=False,
         display_Newton_convergence=False,
         start_run_iteration_hook=None,
         end_run_iteration_hook=None,
@@ -2821,15 +2807,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     ):
         """Run a simulation from a set of parameters described in a hdf5 file.
         """
-
+        build_from_kwargs = False
         if run_options is None:
-            self.print_verbose("\nWarning: no run_options given.\n")
+            self.print_verbose("\nWARNING: no run_options given.")
             self.print_verbose("Please, consider to use a run options dictionnary.")
-            self.print_verbose("Otherwise, some new options may not be available,\n")
-            self.print_verbose("or becomes obsolete.\n")
-
+            self.print_verbose("Otherwise, some new options may not be available,")
+            self.print_verbose("or becomes obsolete.")
+            self.print_verbose("for instance:\n")
 
             run_options = MechanicsHdf5Runner_run_options()
+
             run_options["with_timer"] = with_timer
             run_options["time_stepping"] = time_stepping
             run_options["interaction_manager"] = interaction_manager
@@ -2870,7 +2857,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 constraint_activation_threshold
             )
             run_options["explode_computeOneStep_in_python"] = explode_Newton_solve
-            run_options["explode_computeOneStepNSProblem_in_python"] = (False,)
+            run_options["explode_computeOneStepNSProblem_in_python"] = explode_computeOneStepNSProblem_in_python
             run_options["display_Newton_convergence"] = display_Newton_convergence
             run_options["start_run_iteration_hook"] = start_run_iteration_hook
             run_options["before_next_step_iteration_hook"] = (
@@ -2883,15 +2870,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options["output_contact_work"] = output_contact_work
             run_options["output_energy_work"] = output_energy_work
 
+            build_from_kwargs = True
+
         self._run_options = run_options
 
-        self.print_verbose("run with run_options ...")
-
+        return build_from_kwargs
 
     def run_initialize(self):
 
         run_options = self._run_options
-
 
         run_options.check_valid_run_options()
 
@@ -3226,7 +3213,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     sn.solver_ids.SICONOS_MLCP_ENUM, 1.0
                 )
             else:
-                osnspb_pos = nsf.MLCPProjectOnConstraints(run_options["solver_options_pos"], 1.0)
+                osnspb_pos = nsf.MLCPProjectOnConstraints(
+                    run_options["solver_options_pos"], 1.0)
 
             osnspb_pos.setMaxSize(osnspb_max_size)
             osnspb_pos.setMStorageType(sn.params.NM_DENSE)
@@ -3237,7 +3225,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 nsds, timedisc, self._osi, osnspb, osnspb_pos
             )
             simulation.setProjectionMaxIteration(run_options["projection_itermax"])
-            simulation.setConstraintTolUnilateral(run_options["projection_tolerance_unilateral"])
+            simulation.setConstraintTolUnilateral(
+                run_options["projection_tolerance_unilateral"])
             simulation.setConstraintTol(run_options["projection_tolerance"])
         else:
             simulation = self._time_stepping_class(nsds, timedisc)
@@ -3306,20 +3295,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.print_verbose("start simulation ...")
         self._initializing = False
 
-    def solver_verbose(self,  number_of_contacts):
+    def solver_verbose(self, number_of_contacts):
 
         so = self._simulation.oneStepNSProblem(0).numericsSolverOptions()
         iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
         precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
 
-        solver_output={}
+        solver_output = {}
         mask = '|      '
-        solver_output['solver iter']= [iterations, mask + '{:<10d}']
-        solver_output['solver error']= [precision, mask + '{:8.4e}']
+        solver_output['solver iter'] = [iterations, mask + '{:<10d}']
+        solver_output['solver error'] = [precision, mask + '{:8.4e}']
 
         print_violation = None
 
-        if self._run_options.get("violation_verbose") and  number_of_contacts > 0:
+        if self._run_options.get("violation_verbose") and number_of_contacts > 0:
             print_violation = {}
             if len(self._simulation.y_output(0, 0)) > 0:
                 y = self._simulation.y_output(0, 0)
@@ -3333,37 +3322,35 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             "  violation max is larger than the collision_margin"
                         )
                 lam = self._simulation.lambda_input(1, 0)
-                print_violation['violation max'] =  [violation_max,  mask + '{:8.4e}']
-                print_violation['reaction max'] =  [np.max(lam),  mask + '{:8.4e}']
-
+                print_violation['violation max'] = [violation_max, mask + '{:8.4e}']
+                print_violation['reaction max'] = [np.max(lam), mask + '{:8.4e}']
 
             if len(self._simulation.y_output(1, 0)) > 0:
                 v = self._simulation.y_output(1, 0)
                 vplus = np.zeros((2, len(v)))
                 vplus[0, :] = v
                 v = np.max(vplus, axis=1)
-                print_violation['velocity max'] =  [np.max(v),  mask + '{:8.4e}']
-                print_violation['velocity min'] =  [np.min(v),  mask + '{:8.4e}']
+                print_violation['velocity max'] = [np.max(v), mask + '{:8.4e}']
+                print_violation['velocity min'] = [np.min(v), mask + '{:8.4e}']
 
         if print_violation is not None:
-            print_solver_verbose= {**solver_output, **print_violation }
+            print_solver_verbose = {**solver_output, **print_violation}
         else:
             print_solver_verbose = solver_output
 
         # print banner
-        ll = ['| {:<14} '.format(k) for k in  print_solver_verbose.keys()]
+        ll = ['| {:<14} '.format(k) for k in print_solver_verbose.keys()]
         ll.append('|')
         self.print_verbose(' '.join(ll))
 
         # print results
-        ll =[]
+        ll = []
         for k in print_solver_verbose.keys():
-            fmt = print_solver_verbose  [k][1]
-            value = print_solver_verbose  [k][0]
+            fmt = print_solver_verbose[k][1]
+            value = print_solver_verbose[k][0]
             ll.append(fmt.format(value))
         ll.append('|')
         self.print_verbose(' '.join(ll))
-
 
     def contact_statistics_verbose(self):
         # Note these are not the same and neither is correct.
@@ -3396,7 +3383,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self._osnspb.getSizeOutput // self._dimension,
                     "(active at velocity level. approx)",
                 )
-                #self.print_solver_infos()
+                # self.print_solver_infos()
 
         else:
             if self.config.backend != "vnative":
@@ -3410,7 +3397,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.print_solver_infos()
 
         return number_of_contacts
-
 
     def run_loop(self):
         verbose = self._run_options.get("verbose")
@@ -3429,11 +3415,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         T = self._run_options.get("T")
         h = self._run_options.get("h")
 
-
         while self._simulation.hasNextEvent():
             if self._run_options.get("verbose_progress"):
                 self.print_verbose(
-                    "step", self._k, "of", self._k0 + int((T - t0) / h) - 1, " time : {0:12.8f}".format(self.current_time())
+                    "step", self._k, "of", self._k0
+                    + int((T - t0) / h) - 1, " time : {0:12.8f}".format(self.current_time())
                 )
 
             if self._start_run_iteration_hook is not None:
@@ -3457,7 +3443,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if friction_contact_trace_params is not None:
                 self._osnspb._stepcounter = self._k
 
-
             if self._run_options.get("explode_computeOneStep_in_python"):
                 if self._time_stepping_class == simu.TimeStepping:
                     self.log(self.computeOneStep_python, with_timer, after=False)(
@@ -3475,10 +3460,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.log(self._simulation.updateInteractions, with_timer)()
                 self.log(self._simulation.computeOneStep, with_timer)()
 
+            number_of_contacts = self.log(self.contact_statistics_verbose, with_timer)()
 
-            number_of_contacts = self.log(self.contact_statistics_verbose,with_timer)()
-
-            self.log(self.solver_verbose,with_timer)(number_of_contacts)
+            self.log(self.solver_verbose, with_timer)(number_of_contacts)
 
             cond = self._output_frequency and (self._k % self._output_frequency == 0)
             if cond or self._k == 1:
@@ -3503,7 +3487,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         self.__enter__()
 
             self.log(self._simulation.clearNSDSChangeLog, with_timer)()
-
 
             if exit_tolerance:
                 solver_options = self._osnspb.numericsSolverOptions()
@@ -3533,31 +3516,43 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose("")
             self._k += 1
 
-
-
         return True
 
     def output_timer_at_the_end(self):
-        if (len(self._timing) >0):
+        if (len(self._timing) > 0):
             for k in self._timing.keys():
                 siconos.io.mechanics_hdf5.group(self.log_data(), k)
                 timing_data = np.array(self._timing[k])
                 data_set = siconos.io.mechanics_hdf5.data(self.log_data()[k], "timing", 1)
                 current_line = data_set.shape[0]
                 data_set.resize(current_line + timing_data.shape[0] , 0)
-                data_set[current_line: current_line + timing_data.shape[0]] = timing_data[:].reshape(timing_data.shape[0],1)
-
+                data_set[current_line: current_line + timing_data.shape[0]
+                         ] = timing_data[:].reshape(timing_data.shape[0], 1)
 
     def run(self, *args, **kwargs):
 
-        self.build_run_options_from_old_arguments_in_kwargs(*args, **kwargs)
+        build_from_kwargs = self.build_run_options_from_old_arguments_in_kwargs(
+            *args, **kwargs)
+
+        if build_from_kwargs:
+            run_options_default = MechanicsHdf5Runner_run_options()
+            print("run_options = MechanicsHdf5Runner_run_options()")
+            for k in self._run_options.keys():
+                if k in kwargs.keys():
+
+                    # print('arg', kwargs[k],run_options_default[k] )
+                    if kwargs[k] is not run_options_default[k]:
+                        # print('diff', kwargs[k],run_options_default[k] )
+                        print('run_options["{0}"]={1}'.format(k, kwargs[k]))
+
+            #input('Enter a key to continue')
+
         with_timer = self._run_options.get("with_timer")
 
         info = self.log(self.run_initialize, with_timer)()
         info = self.log(self.run_loop, with_timer)()
 
-
-        if with_timer and  self._run_options['with_timer_output_at_the_end']:
+        if with_timer and self._run_options['with_timer_output_at_the_end']:
             self.output_timer_at_the_end()
 
         return info
