@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include "SiconosMatrix.hpp"
+#include "BlockVector.hpp"
 #include "Tools.hpp"
 
 void siconos::modeling::LagrangianR::display() const {
@@ -30,4 +30,15 @@ void siconos::modeling::LagrangianR::display() const {
             << " and subtype " << tools::enum_to_string(_subType) << "\n";
   if (jacobianhOver_q_view_)
     std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
+}
+
+void siconos::modeling::LagrangianR::allocate_dslink_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
+  DSlink.resize(tools::enum_to_index(LagrangianR::WorkDS::DSlinkSize));
+
+  // Default DSlink
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)] =
+      std::make_shared<siconos::algebra::BlockVector>();
 }

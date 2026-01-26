@@ -25,12 +25,17 @@
 #include <memory>
 #include <vector>
 
+#include "BlockVector.hpp"
 #include "DynamicalSystemVisitor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
 #include "TypeName.hpp"  // visitor to get ds type
+
+namespace siconos::algebra {
+class BlockVector;
+}
 
 namespace siconos::modeling {
 
@@ -370,6 +375,14 @@ class DynamicalSystem {
   virtual void accept(dynamical_systems::Visitor&) const {
     throw std::logic_error("accept: no visitor defined");
   };
+
+  /** @brief add (pointer links) of state variable of interest into dslink
+   *      Warning: internal use only (called from Topology)
+   *      dslink is used in relations to compute output and inputs
+   *  @param dslink a container of vectors (pointers)
+   */
+  virtual void initialize_ds_link_for_relations(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const = 0;
 
   virtual Type acceptType(siconos::types::FindType& ft) const = 0;
 };

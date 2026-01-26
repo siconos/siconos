@@ -26,12 +26,12 @@
 #include <string>
 
 #include "FunctionTypes.hpp"
+#include "Interaction.hpp"
 #include "RelationVisitor.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
-#include "Interaction.hpp"
 
 namespace siconos::modeling {
 
@@ -199,6 +199,13 @@ class Relation {
     // static const siconos::algebra::ConstMapType empty_map(empty_matrix.data(), 0, 0);
     // return empty_map;
   }
+
+  /** @brief allocation of memory space for relations in the graph
+   *      Warning: internal use only (called from Topology)
+   *  @param dslink a container of vectors (pointers), from the parent interaction
+   */
+  virtual void allocate_dslink_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const = 0;
 
   virtual void accept(relations::Visitor&) const {
     throw std::logic_error("accept (relation): no visitor defined");

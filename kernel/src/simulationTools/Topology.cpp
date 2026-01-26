@@ -21,9 +21,9 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+// #include "SiconosVector.hpp"
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
 // default

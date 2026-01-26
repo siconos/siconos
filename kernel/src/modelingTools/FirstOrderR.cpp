@@ -17,6 +17,7 @@
  */
 #include "FirstOrderR.hpp"
 
+#include "BlockVector.hpp"
 #include "Interaction.hpp"
 
 void siconos::modeling::FirstOrderR::initialize(Interaction& inter) {
@@ -49,4 +50,11 @@ void siconos::modeling::FirstOrderR::display() const {
     if (hasConstantJacobiangOver_lambda_) std::cout << "(constant matrix) \n";
     std::cout << *jacobiangOver_lambda_view_ << "\n";
   }
+}
+
+void siconos::modeling::FirstOrderR::allocate_dslink_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
+  DSlink.resize(FirstOrderR::DSlinkSize);
+  DSlink[FirstOrderR::Xxx] = std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[FirstOrderR::Rrr] = std::make_shared<siconos::algebra::BlockVector>();
 }

@@ -51,9 +51,6 @@
 
 */
 
-#include <memory>
-
-#include "SiconosConfig.h"  // For HAVE_SICONOS ...
 #include "SiconosException.hpp"
 
 // We have to declare all the classes that might be visited.
@@ -78,35 +75,34 @@ struct Visitor {
   // Pros: less virtual functions (no more class hierarchy in nslaws), can use std::visit
   // Cons: must use std::visit. Won't change anything at user level, but it will be a bit
   // more difficult to call functions at low level.
-
-  virtual void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::EqualityConditionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::EqualityConditionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::MixedComplementarityConditionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::MultipleImpactNSL &nslaw) {
+  virtual void visit(const siconos::modeling::MultipleImpactNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactNSL &nslaw) {
+  virtual void visit(const siconos::modeling::NewtonImpactNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::NormalConeNSL &nslaw) {
+  virtual void visit(const siconos::modeling::NormalConeNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::RelayNSL &nslaw) {
+  virtual void visit(const siconos::modeling::RelayNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
-  virtual void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) {
+  virtual void visit(const siconos::modeling::FremondImpactFrictionNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
 };

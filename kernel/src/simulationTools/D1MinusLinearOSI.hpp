@@ -142,15 +142,15 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   struct _NSLEffectOnFreeOutput : public siconos::modeling::nonsmooth_laws::Visitor {
     using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
-    siconos::nonsmooth_formulations::OneStepNSProblem *_osnsp{nullptr};
+    siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
     std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
-    siconos::graphs::InteractionProperties &_interProp;
+    siconos::graphs::InteractionProperties& _interProp;
 
-    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem *p,
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                            std::shared_ptr<siconos::modeling::Interaction> inter,
-                           siconos::graphs::InteractionProperties &interProp);
+                           siconos::graphs::InteractionProperties& interProp);
 
-    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) override;
+    void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
   };
 
   bool _isThereImpactInTheTimeStep{false};
@@ -214,8 +214,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position,
@@ -247,15 +247,15 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
   };
 
@@ -265,23 +265,23 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * siconos::simulation::siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitAccelerationLevel(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem* osnsp);
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitVelocityLevel(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem* osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    * stop at tout (->iout=false) \param ti initial time \param tf end time
    *  \param t real end time
    *  \param flag useless flag (for D1MinusLinearOSI, used in LsodarOSI)
    */
-  void integrate(double &ti, double &tf, double &t, int &flag) override {
+  void integrate(double& ti, double& tf, double& t, int& flag) override {
     THROW_EXCEPTION("D1MinusLinearOSI::integrate - not implemented!");
   }
 
@@ -366,9 +366,9 @@ concept LDS = requires(DS ds) { ds.velocity(); };
 
 template <typename DS>
   requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
-void compute_residufree_lagrangian(double time_step, double time, DS &lagds,
-                                   siconos::algebra::SiconosVector &free_tdg,
-                                   siconos::algebra::SiconosVector &residufree) {
+void compute_residufree_lagrangian(double time_step, double time, DS& lagds,
+                                   siconos::algebra::SiconosVector& free_tdg,
+                                   siconos::algebra::SiconosVector& residufree) {
   residufree = -0.5 * time_step * free_tdg;
   lagds.computeTotalForces(lagds.velocity_read(), lagds.q_read(), time);
   free_tdg = lagds.totalForces();
@@ -381,9 +381,9 @@ void compute_residufree_lagrangian(double time_step, double time, DS &lagds,
 }
 
 void compute_residufree_newtoneuler(double time_step, double time,
-                                    siconos::modeling::NewtonEulerDS &neds,
-                                    siconos::algebra::SiconosVector &free_tdg,
-                                    siconos::algebra::SiconosVector &residufree);
+                                    siconos::modeling::NewtonEulerDS& neds,
+                                    siconos::algebra::SiconosVector& free_tdg,
+                                    siconos::algebra::SiconosVector& residufree);
 }  // namespace d1_minus_linear
 
 }  // namespace siconos::integrators
