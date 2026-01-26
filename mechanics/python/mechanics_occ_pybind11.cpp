@@ -30,6 +30,10 @@
 #include "OccContactShape.hpp"
 #include "OccSpaceFilter.hpp"
 #include "OccTimeStepping.hpp"
+#include "OccR.hpp"
+#include "NewtonEuler3DR.hpp"
+#include "Geometer.hpp"
+#include "ContactPoint.hpp"
 #include "OccUtils.hpp"
 #include "TimeDiscretisation.hpp"
 
@@ -79,7 +83,9 @@ PYBIND11_MODULE(_occ, m) {
            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("q0"), py::arg("twist0"),
            py::arg("mass"), py::arg("inertia"))
       .def("addContactShape", &siconos::mechanics::occ::OccBody::addContactShape,
-           "associate the body with a contact shape");
+           "associate the body with a contact shape")
+      .def("addShape", &siconos::mechanics::occ::OccBody::addShape,
+           "associate the body with a shape");
 
   m.def("occ_move", &py_occ_move, "Move a TopoDS_Shape using a translation and rotation array",
         py::arg("shape"), py::arg("q"));
@@ -111,7 +117,8 @@ PYBIND11_MODULE(_occ, m) {
 
              return std::make_shared<siconos::mechanics::occ::OccContactShape>(*native);
            }),
-           py::arg("shape"));
+           py::arg("shape"))
+    .def("shape", &siconos::mechanics::occ::OccContactShape::shape);
 
   py::class_<siconos::mechanics::occ::OccContactFace,
              std::shared_ptr<siconos::mechanics::occ::OccContactFace>,
@@ -124,4 +131,25 @@ PYBIND11_MODULE(_occ, m) {
              siconos::mechanics::occ::OccContactShape>(m, "OccContactEdge")
       .def(py::init<const siconos::mechanics::occ::OccContactShape&, int>(), py::arg("shape"),
            py::arg("index"));
-}
+
+
+  py::class_<siconos::mechanics::occ::CadmbtbDistanceType>(m, "CadmbtbDistanceType")
+    .def(py::init<>());
+
+  py::class_<siconos::mechanics::occ::OccDistanceType>(m, "OccDistanceType")
+    .def(py::init<>());
+
+  py::class_<siconos::mechanics::occ::ContactPoint>(m, "ContactPoint")
+    .def(py::init< const siconos::mechanics::occ::OccContactShapeV& >(), py::arg("shape"));
+
+
+  py::class_<siconos::mechanics::occ::OccR, std::shared_ptr<siconos::mechanics::occ::OccR>,
+             siconos::modeling::NewtonEulerR>(m, "OccR")
+      .def(py::init<const siconos::mechanics::occ::ContactPoint&,
+                    const siconos::mechanics::occ::ContactPoint&,
+                    const siconos::mechanics::occ::DistanceCalculator&>(),
+           py::arg("contact1"), py::arg("contact2"), py::arg("indistance_calculator"))
+      .def("setOffset1", &siconos::mechanics::occ::OccR::setOffset1)
+      .def("setOffset2", &siconos::mechanics::occ::OccR::setOffset2);
+
+  }

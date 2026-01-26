@@ -1043,7 +1043,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         for contactor in contactors:
             contact_shape = None
             reference_shape = ref_shape[contactor.instance_name]
-
             self._keep.append(reference_shape)
 
             if hasattr(contactor, "contact_type"):
@@ -1074,13 +1073,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if reference_shape not in ref_added:
                 if body is not None:
                     body.addShape(
-                        reference_shape.shape(),
+                        reference_shape,
                         contactor.translation,
                         contactor.orientation,
                     )
                 else:
+
                     self.config.occ.occ_move(
-                        reference_shape.shape(),
+                        reference_shape,
                         list(contactor.translation) + list(contactor.orientation),
                     )
                 ref_added[reference_shape] = True
@@ -1626,7 +1626,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             )
                         )
                         self.config.occ.occ_move(
-                            cocs2.data(),
+                            cocs2,
                             list(
                                 np.array(body2.attrs["translation"])
                                 + np.array(ctr2.attrs["translation"])
@@ -1641,6 +1641,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     cp1 = self.config.occ.ContactPoint(cocs1)
                     cp2 = self.config.occ.ContactPoint(cocs2)
+
 
                     relation = self.config.occ.OccR(
                         cp1, cp2, real_dist_calc[distance_calculator]()
