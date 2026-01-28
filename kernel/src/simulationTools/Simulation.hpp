@@ -417,6 +417,10 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   /** update state of each dynamical system
    */
   virtual void updateState(unsigned int level = 0);
+  
+ /** update state of each dynamical system
+   */
+  virtual void computeIteration();
 
   /** update output
    *

@@ -83,7 +83,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \param ds the DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  const siconos::algebra::SiconosMatrix &Ad(
+  const siconos::algebra::SiconosMatrix& Ad(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   /** get \f$ B_d \f$ corresponding to DynamicalSystem ds
@@ -91,7 +91,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \param ds the DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  const siconos::algebra::SiconosMatrix &Bd(
+  const siconos::algebra::SiconosMatrix& Bd(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   // --- OTHER FUNCTIONS ---
@@ -116,8 +116,8 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -143,15 +143,15 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
       \param vertex_inter of the interaction graph
       \param osnsp a pointer to the siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
   };
 
@@ -189,13 +189,18 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \param tout real end time
    *  \param notUsed useless flag (for ZeroOrderHoldOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
+  void integrate(double& tinit, double& tend, double& tout, int& notUsed) override;
 
   /** updates the state of the Dynamical Systems
    *
    *  \param level  level of interest for the dynamics: not used at this moment
    */
   void updateState(const unsigned int level) override;
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
 
   /** Displays the data of the ZeroOrderHoldOSI's integrator
    */

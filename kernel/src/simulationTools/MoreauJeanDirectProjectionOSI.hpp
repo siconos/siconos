@@ -79,15 +79,13 @@ class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
 
   inline double deactivateYPosThreshold() { return _deactivateYPosThreshold; };
 
-  inline void setDeactivateYPosThreshold(double newValue)
-  {
+  inline void setDeactivateYPosThreshold(double newValue) {
     _deactivateYPosThreshold = newValue;
   };
 
   inline double deactivateYVelThreshold() { return _deactivateYVelThreshold; };
 
-  inline void setDeactivateYVelThreshold(double newValue)
-  {
+  inline void setDeactivateYVelThreshold(double newValue) {
     _deactivateYVelThreshold = newValue;
   };
 
@@ -116,8 +114,8 @@ class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *

@@ -22,8 +22,10 @@
 #define MoreauJeanGOSI_H
 
 #include <limits>
+#include <memory>
 
 #include "MoreauJeanOSI.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::integrators {
 
@@ -37,7 +39,7 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
 
  public:
   // Warning: enum could be mixed up with those of MoreauJeanOSI
-  enum MoreauJeanGOSI_ds_workVector_id { RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH };
+  enum MoreauJeanGOSI_ds_workVector_id { RESIDU_FREE, FREE, LOCAL_BUFFER, VITER, WORK_LENGTH };
 
   // enum MoreauJeanGOSI_interaction_workVector_id{OSNSP_RHS,
   // WORK_INTERACTION_LENGTH};
@@ -49,7 +51,7 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    *  used).
    */
   MoreauJeanGOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN())
-      : MoreauJeanOSI(theta, gamma){};
+      : MoreauJeanOSI(theta, gamma) {};
 
   /** destructor */
   virtual ~MoreauJeanGOSI() noexcept = default;
@@ -63,6 +65,11 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
   void initializeWorkVectorsForDS(
       double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
+  siconos::algebra::SiconosVector& get_v_iter(
+      std::vector<std::shared_ptr<algebra::SiconosVector>> ds_works) {
+    return *ds_works[siconos::integrators::MoreauJeanGOSI::VITER];
+  };
+
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
    *
@@ -71,8 +78,12 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
+
+  /** compute the initial state of the Newton loop.
+   */
+  void computeInitialNewtonState() override;
 
   /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */
@@ -91,7 +102,11 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    *  \param tout the real end time
    *  \param notUsed useless flag (for MoreauJeanGOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
+  void integrate(double& tinit, double& tend, double& tout, int& notUsed) override;
+
+  /** compute the current iteration
+   */
+  void computeIteration() override;
 
   /** update the state of the dynamical systems
    *
@@ -106,7 +121,7 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    */
   void NonSmoothLawContributionToOutput(
       std::shared_ptr<siconos::modeling::Interaction> inter,
-      siconos::nonsmooth_formulations::OneStepNSProblem &osnsp);
+      siconos::nonsmooth_formulations::OneStepNSProblem& osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */

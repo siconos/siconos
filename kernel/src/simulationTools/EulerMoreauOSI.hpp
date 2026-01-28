@@ -284,8 +284,8 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -308,19 +308,20 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    *  \param W the matrix to compute
    */
-  void computeIterationMatrix(double time, siconos::modeling::DynamicalSystem &ds,
-                const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv,
-                siconos::algebra::SiconosMatrix &W);
+  void computeIterationMatrix(double time, siconos::modeling::DynamicalSystem& ds,
+                              const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv,
+                              siconos::algebra::SiconosMatrix& W);
 
-  void computeKhat(siconos::modeling::Interaction &inter, siconos::algebra::SiconosMatrix &m,
-                   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> &workM,
+  void computeKhat(siconos::modeling::Interaction& inter, siconos::algebra::SiconosMatrix& m,
+                   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& workM,
                    double h) const;
 
   /** compute IterationMatrixBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *
    *  \param ds a pointer to DynamicalSystem
    */
-  void computeIterationMatrixBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  void computeIterationMatrixBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] EulerMoreauOSI
    *
@@ -374,15 +375,15 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param vertex_inter of the interaction graph
    *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
   };
 
@@ -401,13 +402,18 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param tout real end time
    *  \param useless flag (for EulerMoreauOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout, int &useless) override;
+  void integrate(double& tinit, double& tend, double& tout, int& useless) override;
 
   /** updates the state of the Dynamical Systems
    *
    *  \param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override;
+  void updateState(const unsigned int level) override {};
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
 
   /** Displays the data of the EulerMoreauOSI's integrator
    */

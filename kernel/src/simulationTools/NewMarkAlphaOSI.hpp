@@ -52,9 +52,9 @@ constexpr int Alpha_f = 3;
  *  \param[in,out] LUW the LU factorisation of W (updated)
  */
 void computeIterationMatrix_Lagrangian(
-    double time, double h, const std::array<double, 4> &params,
-    siconos::modeling::LagrangianDS &ds, Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &LUW);
+    double time, double h, const std::array<double, 4>& params,
+    siconos::modeling::LagrangianDS& ds, Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& LUW);
 
 }  // namespace newmark_alpha
 
@@ -219,15 +219,15 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
   };
 
@@ -249,8 +249,8 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    * \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -276,13 +276,17 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    *  \param tout double: tout, real end time
    *  \param flag useless for NewMarkAlphaOSI
    */
-  void integrate(double &tinit, double &tend, double &tout, int &flag) override;
+  void integrate(double& tinit, double& tend, double& tout, int& flag) override;
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level) override;
 
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
   /** Compute coefficients of the polynomial of the dense output for a given DS
    *  \param ds std::shared_ptr<siconos::modeling::DynamicalSystem>, ds concerned
    */

@@ -192,8 +192,8 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -223,15 +223,15 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  non-smooth effects into account \param vertex_inter of the interaction
    *  graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
   };
 
@@ -243,13 +243,18 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  \param tout real end time
    *  \param idid useless flag (for SchatzmanPaoliOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout, int &idid) override;
+  void integrate(double& tinit, double& tend, double& tout, int& idid) override;
 
   /** updates the state of the Dynamical Systems
    *
    *  \param level level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override;
+  void updateState(const unsigned int level) override {};
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
 
   /** Displays the data of the SchatzmanPaoliOSI's integrator
    */

@@ -535,9 +535,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
                                   // should be only for globalOSI
       updateAllInput();
 
-    updateState();
-
-    if (!_skip_last_updateOutput) updateOutput();
+    computeIteration();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
@@ -579,7 +577,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       }
 
       updateAllInput();
-      updateState();
+      computeIteration();
 
       // -- VA 01/07/2021
       // The fact that we compute _isNewtonConverge after is a bit curious,
@@ -608,8 +606,6 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       displayNewtonConvergenceInTheLoop();
     }  // End of the Newton Loop
 
-    if (!_skip_last_updateOutput) updateOutput();
-
     _newtonCumulativeNbIterations += _newtonNbIterations;
 
     displayNewtonConvergenceAtTheEnd(info, maxStep);
@@ -618,6 +614,10 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         "siconos::simulation::TimeStepping::NewtonSolve failed. Unknown "
         "newtonOptions: " +
         siconos::tools::enum_to_string(_newtonOptions));
+
+  updateState();
+  if (!_skip_last_updateOutput) updateOutput();
+
   DEBUG_END("siconos::simulation::TimeStepping::newtonSolve\n");
 }
 

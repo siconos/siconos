@@ -26,7 +26,7 @@
 namespace siconos::simulation {
 
 /** type of function used to post-treat output info from solver. */
-typedef void (*CheckSolverFPtr)(int, Simulation *);
+typedef void (*CheckSolverFPtr)(int, Simulation*);
 
 /** \brief Event-capturing Time-Stepping simulation
  *

@@ -198,7 +198,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
   };
 
  public:
-  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH };
+  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, VITER, BUFFER, QTMP, WORK_LENGTH };
 
   enum MoreauJeanOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
@@ -393,7 +393,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** compute the initial state of the Newton loop.
    */
-  void computeInitialNewtonState() override;
+  virtual void computeInitialNewtonState() override;
 
   /**
      return the maximum of all norms for the "MoreauJeanOSI-discretized"
@@ -465,7 +465,12 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override;
+  virtual void updateState(const unsigned int level) override;
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
 
   /** \return the  work of forces by ds
    */
@@ -499,6 +504,14 @@ void computeIterationMatrix_NewtonEuler(
  *  \param ds the dynamical system to update
  */
 void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem& ds);
+
+/** Update the state vector of a given dynamical system
+ *  \param time_step current time step
+ *  \param theta integrator theta parameter
+ *  \param ds the dynamical system to update
+ */
+void updateVelocity(double time_step, double theta, siconos::modeling::DynamicalSystem& ds,
+                    siconos::algebra::SiconosVector& v_iter);
 
 }  // namespace moreau_jean
 }  // namespace siconos::integrators

@@ -392,35 +392,50 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
     auto ds = DSG0.bundle(*dsi);
+    auto& ds_work_vectors = *DSG0.properties(*dsi).workVectors;
+    auto dsType = siconos::types::type_value(*ds);  // Its type
 
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto sizeDS = d->dimension();
-      auto velocity = d->velocity();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
+    auto & osi =  static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi);
+    
+    
+    //auto& v_iter = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VITER];
+    auto& v_iter = osi.get_v_iter(ds_work_vectors);
+
+    if (dsType == siconos::modeling::Type::LagrangianDS ||
+        dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
+        dsType == siconos::modeling::Type::NewtonEulerDS ) {
+      auto sizeDS = ds->dimension();
       pos = DSG0.properties(*dsi).absolute_position;
-      velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-      auto sizeDS = d->dimension();
-      auto velocity = d->velocity();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
-      pos = DSG0.properties(*dsi).absolute_position;
-      velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-    } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      auto sizeDS = neds->dimension();
-      auto twist = neds->twist();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*twist););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
-      pos = DSG0.properties(*dsi).absolute_position;
-      twist->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*twist););
-    } else
+      v_iter.segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+      }      
+      
+    // if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    //   auto sizeDS = d->dimension();
+    //   auto velocity = d->velocity();
+    //   DEBUG_PRINTF("ds.number() : %i \n", ds.number());
+    //   DEBUG_EXPR(siconos::algebra::print(*velocity););
+    //   DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
+
+    //   DEBUG_EXPR(siconos::algebra::print(*velocity););
+    // } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+    //   auto sizeDS = d->dimension();
+    //   auto velocity = d->velocity();
+    //   DEBUG_PRINTF("ds.number() : %i \n", ds.number());
+    //   DEBUG_EXPR(siconos::algebra::print(*velocity););
+    //   DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
+    //   pos = DSG0.properties(*dsi).absolute_position;
+    //   v_iter.segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+    //   DEBUG_EXPR(siconos::algebra::print(*velocity););
+    // } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+    //   auto sizeDS = neds->dimension();
+    //   auto twist = neds->twist();
+    //   DEBUG_PRINTF("ds.number() : %i \n", ds.number());
+    //   DEBUG_EXPR(siconos::algebra::print(*twist););
+    //   DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
+    //   pos = DSG0.properties(*dsi).absolute_position;
+    //   v_iter.segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+    //   DEBUG_EXPR(siconos::algebra::print(*twist););
+    else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() - Only "
           "implemented for "

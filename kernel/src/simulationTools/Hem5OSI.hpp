@@ -263,6 +263,15 @@ class Hem5OSI : public OneStepIntegrator {
    */
   void updateState(const unsigned int level) override;
 
+  /** update the state of the DynamicalSystems attached to this Integrator
+   *  \param level level of interest for the dynamics
+   */
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
+
   void prepareNewtonIteration(double time) override { assert(0); };
 
   /** integrates the Interaction linked to this integrator, without taking
