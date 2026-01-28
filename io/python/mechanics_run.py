@@ -974,13 +974,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 alpha = orientation[0]  # 2D
 
                 x1a = xa0
-                y1a = ya0
+                y1a = ya0   # bottom left
                 x2a = xa0
-                y2a = yb0
+                y2a = yb0   # top left
                 x3a = xb0
-                y3a = yb0
+                y3a = yb0   # top right
                 x4a = xb0
-                y4a = yb0
+                y4a = ya0   # bottom right
 
                 x1r, y1r = rotate_point(x1a, y1a, alpha)
                 x2r, y2r = rotate_point(x2a, y2a, alpha)

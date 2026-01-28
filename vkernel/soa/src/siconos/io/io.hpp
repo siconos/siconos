@@ -477,6 +477,11 @@ struct io : item {
                                               answer_3, answer_4, answer_5,
                                               answer_6});
       }
+
+      return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 7>>(
+          attr<"work_info">(*self()).data()->data(),
+          attr<"work_info">(*self()).size(),
+          attr<"work_info">(*self()).data()->size());
     }
 
     auto methods()
