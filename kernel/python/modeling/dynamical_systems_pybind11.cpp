@@ -1093,6 +1093,8 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("computeMass", &siconos::modeling::LagrangianDS::computeMass,
            "compute total forces")
+      .def("computeKineticEnergy", &siconos::modeling::LagrangianDS::computeKineticEnergy)
+
 
       .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 
