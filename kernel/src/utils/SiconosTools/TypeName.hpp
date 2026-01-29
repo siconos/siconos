@@ -49,6 +49,7 @@ class MultipleImpactNSL;
 class MixedComplementarityConditionNSL;
 class EqualityConditionNSL;
 class ComplementarityConditionNSL;
+class MohrCoulombPlasticityNSL;
 
 enum class Type {
   FirstOrderNonLinearDS,
@@ -73,6 +74,7 @@ enum class Type {
   MixedComplementarityConditionNSL,
   EqualityConditionNSL,
   ComplementarityConditionNSL,
+  MohrCoulombPlasticityNSL,
 };
 
 }  // namespace siconos::modeling
@@ -148,6 +150,9 @@ struct FindType {
   auto visit(const siconos::modeling::ComplementarityConditionNSL&) const {
     return siconos::modeling::Type::ComplementarityConditionNSL;
   };
+  auto visit(const siconos::modeling::MohrCoulombPlasticityNSL&) const {
+    return siconos::modeling::Type::MohrCoulombPlasticityNSL;
+  };
 };
 
 // auto type_value = []( auto& obj) { return obj.name(); };
@@ -213,6 +218,10 @@ constexpr auto str(const T& X) {
     case T::ComplementarityConditionNSL:
       return "siconos::modeling::ComplementarityConditionNSL";
       break;
+    case T::MohrCoulombPlasticityNSL:
+      return "siconos::modeling::MohrCoulombPlasticityNSL";
+      break;
+
     default:
       assert(0);
       return "unknown";

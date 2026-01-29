@@ -26,7 +26,6 @@
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
-#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
 #include "gfc3d_balancing.h"
@@ -94,6 +93,7 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                  double* globalVelocity, SolverOptions* options) {
+  // verbose = 1;
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity, problem_ori->M->size0););
   if (verbose > 0) solver_options_print(options);

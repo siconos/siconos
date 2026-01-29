@@ -221,6 +221,13 @@ class DynamicalSystem {
   /** returns the size of the vector state x */
   inline auto x_size() const { return x_size_; }
 
+  /** Fake function to access the dimension used to allocate iteration matrix
+   *  in the integrators
+   * Usually equal to x_size or ndof but might be larger (see fem).
+   * \return number of degrees of freedom of the system
+   */
+  inline virtual siconos::algebra::Index real_size() const { return x_size_; }
+
   /**
       returns the dimension of the system
       (depends on system type, e.g. n for first order,

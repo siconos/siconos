@@ -151,61 +151,6 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
  protected:
   Interaction() = default; /* for serialization only */
 
- private:
-  /*! @name DSlink graph property management */
-  //@{
-
-  /**
-     update DSlink property content with dynamical systems members, FirstOrder relations case.
-
-     \param DSlink the container of the link to DynamicalSystem attributes
-     \param ds1 first ds linked to this Interaction
-     \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
-  */
-  void __initDataFirstOrder(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
-      DynamicalSystem& ds1, DynamicalSystem& ds2);
-
-  /** Initialize the link with the DynamicalSystem, FirstOrderDS variant
-   *
-   * \param ds a DynamicalSystem concerned by this Interaction
-   *  \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void __initDSDataFirstOrder(
-      DynamicalSystem& ds,
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
-
-  /**
-     update DSlink property content with dynamical systems members, Lagrangian relations case.
-     \param DSlink the container of the link to DynamicalSystem attributes
-     \param ds1 first ds linked to this Interaction
-     \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
-  */
-  void __initDataLagrangian(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
-      DynamicalSystem& ds1, DynamicalSystem& ds2);
-
-  /**
-     update DSlink property content with dynamical systems members, NewtonEuler relations case.
-
-     \param DSlink the container of the link to DynamicalSystem attributes
-     \param ds1 first ds linked to this Interaction
-     \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
-  */
-  void __initDataNewtonEuler(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
-      DynamicalSystem& ds1, DynamicalSystem& ds2);
-
-  /** Initialize the link with the DynamicalSystem, NewtonEulerDS variant
-   *
-   *  \param ds a DynamicalSystem concerned by this Interaction
-   *  \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void __initDSDataNewtonEuler(
-      DynamicalSystem& ds,
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
-  ///@}
-
  public:
   /**
      Interaction constructor
@@ -224,19 +169,6 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
      Must be called when levels have been modified.
   */
   void reset();
-
-  /**
-      set the links to the DynamicalSystem(s) and allocate the required workspaces
-
-      \param interProp the InteractionProperties of this Interaction
-      \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
-      \param workV1 work vectors of ds1
-      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is
-     allowed. \param workV2 work vectors of ds2
-   */
-  // void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1,
-  // std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& workV1, DynamicalSystem&
-  // ds2, std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& workV2);
 
   /**
       set the links  between the interaction and the DynamicalSystem(s) members.

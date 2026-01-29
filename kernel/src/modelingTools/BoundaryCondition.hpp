@@ -135,7 +135,7 @@ class BoundaryCondition {
   virtual void computePrescribedVelocity(double time);
 
   /** @return the number of boundary conditions */
-  auto size() { return velocityIndices_.size(); }
+  auto size() const { return velocityIndices_.size(); }
 
   /** display */
   void display() const;

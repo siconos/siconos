@@ -17,13 +17,13 @@
  */
 #ifndef FETypesH
 #define FETypesH
-#include <unordered_set>
 
 namespace siconos::mechanics::fem {
 
-/** Ids for element types, following gmsh numbering convention */
-enum class FiniteElementType : int  // we follow the gmsh numbering convention.
+/** Ids for element types in Siconos */
+enum class FiniteElementType : int  // we (try to) follow the gmsh numbering convention.
 {
+  Unknown = 0,
   L2 = 1,  /** 2-node line */
   T3 = 2,  /** 3-node triangle */
   Q4 = 3,  /** 4-node quadrangle */
@@ -35,16 +35,51 @@ enum class FiniteElementType : int  // we follow the gmsh numbering convention.
               edge) */
   T6 = 9, /** 6-node second order triangle (3 nodes associated with the vertices and 3 with the
              edges) */
+  B2 = 10, /** 2D beam (2 nodes) --> warning, not gmsh convention*/
+  B3 = 11, /** 3D beam  (2 nodes) --> warning, not gmsh convention*/
+
 };
+
+/** @return the number of dof per node of a given element type
+ *
+ *  If 0 is returned, it means the element is unknown or not properly implemented in Siconos
+ *
+ * @param type element type
+ */
+inline constexpr int number_of_dof_per_node(FiniteElementType type) {
+  switch (type) {
+    case FiniteElementType::T3:
+    case FiniteElementType::Q4:
+      return 2;
+    case FiniteElementType::TH4:
+      return 3;
+    case FiniteElementType::B2:
+      return 3;
+    case FiniteElementType::B3:
+      return 6;
+    default:  // i.e. elem not properly implemented in Siconos
+      return 0;
+  }
+}
+
+/** @return the order of an element, from its type
+ *
+ *  If 0 is returned, it means the element is unknown or not properly implemented in Siconos
+ *
+ * @param type element type
+ */
+inline constexpr int element_order(FiniteElementType type) {
+  switch (type) {
+    case FiniteElementType::T3:
+    case FiniteElementType::TH4:
+      return 1;
+    default:  // i.e. elem not properly implemented in Siconos
+      return 0;
+  }
+}
 
 /** Ids for element families */
 enum class FiniteElementFamily { isoparametric };
-
-// Helper function to check if an int is a valid Color
-inline bool is_valid_element(int value) {
-  static const std::unordered_set<int> valid_values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  return valid_values.count(value) > 0;
-}
 
 }  // namespace siconos::mechanics::fem
 

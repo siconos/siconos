@@ -51,7 +51,7 @@ siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double rho_infty, bool fl
 }
 
 void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(
-    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   assert(ds);
 
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))

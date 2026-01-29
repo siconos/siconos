@@ -15,16 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file SiconosFEM.h
-Include header files required for the FEM toolbox in Siconos
-*/
+#include "MohrCoulombPlasticityNSL.hpp"
+#include "SiconosException.hpp"
+#include <iostream>
 
-#include "FENode.hpp"
-#include "FiniteElementLinearTIDS.hpp"
-#include "FiniteElementModel.hpp"
-#include "Material.hpp"
-#include "SolidLinearTIDS.hpp"
-#include "Mesh.hpp"
-#include "MeshUtils.hpp"
-#include "NodeFem1d2DR.hpp"
-#include "NodeFem2d2DR.hpp"
+bool siconos::modeling::MohrCoulombPlasticityNSL::isVerified() const
+{
+  bool res = false;
+  // to do
+  THROW_EXCEPTION("MohrCoulombPlasticityNSL:: isVerified, not yet implemented!");
+  return res;
+}
+
+void siconos::modeling::MohrCoulombPlasticityNSL::display() const
+{
+  std::cout << "=== Mohr Coulomb Plasticity non-smooth law data display ===" << std::endl;
+  std::cout << " Cohesion: " << _c << std::endl;
+  std::cout << " Friction Angle: " << _phi << std::endl;
+  std::cout << "==========================================================" << std::endl;
+}

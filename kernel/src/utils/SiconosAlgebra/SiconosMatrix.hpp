@@ -70,6 +70,11 @@ using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
 using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
 using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
 using Index = Eigen::Index;
+using SiconosMatrix33Diagonal = Eigen::DiagonalMatrix<double_t, 3, Eigen::ColMajor>;
+using SiconosMatrix66Diagonal = Eigen::DiagonalMatrix<double_t, 6, Eigen::ColMajor>;
+
+inline const SiconosMatrix33 identity33 = SiconosMatrix33::Identity();
+
 /** Sparse matrix storage */
 using SparseIndex = SICONOS_SPARSE_STORAGE_INDEX_TYPE;
 using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, SparseIndex>;
@@ -128,13 +133,9 @@ inline void print(const SiconosSparseMatrix& mat) {
 //   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 // }
 template <typename Derived>
-requires (Derived::ColsAtCompileTime == 1 || Derived::RowsAtCompileTime == 1)
-void print(const Eigen::MatrixBase<Derived>& vec)
-{
-    std::cout << std::scientific
-              << std::setprecision(6)
-              << vec.transpose() 
-              << "\n";
+  requires(Derived::ColsAtCompileTime == 1 || Derived::RowsAtCompileTime == 1)
+void print(const Eigen::MatrixBase<Derived>& vec) {
+  std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 }
 
 /** \return inf. norm of the matrix
@@ -161,11 +162,6 @@ inline double normInf(const SiconosSparseMatrix& mat) {
     maxNorm = std::max(maxNorm, rowSum);
   }
   return maxNorm;
-}
-
-template <typename Derived>
-void normInf(const Eigen::EigenBase<Derived>& mat) {
-  return mat->cwiseAbs().rowwise().sum().maxCoeff();
 }
 
 /** Set a sub-block of a matrix

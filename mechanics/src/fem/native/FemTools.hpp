@@ -132,12 +132,5 @@ class ContactDetection : public siconos::simulation::InteractionManager {
    * the Newton loop. */
   void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation);
 };
-
-// Run simulation, work for all examples with T3 FEM
-int run_T3_simulation(
-    std::shared_ptr<siconos::simulation::TimeStepping> simulation,
-    std::shared_ptr<siconos::mechanics::fem::FiniteElementLinearTIDS> FEsolid,
-    std::string basename, std::string reference_file_name);
-
 }  // namespace siconos::mechanics::fem
 #endif

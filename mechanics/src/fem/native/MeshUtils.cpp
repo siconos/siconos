@@ -28,10 +28,13 @@
 
 #include "FENode.hpp"
 #include "FETypes.hpp"
-#include "FiniteElementModel.hpp"  // FENode
-#include "Mesh.hpp"                // For MVertex, MElement ...
+#include "FemTools.hpp"
+#include "FiniteElementModel.hpp"
+#include "Mesh.hpp"  // For MVertex, MElement ...
+#include "RotationQuaternion.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
+#include "Tools.hpp"
 
 template <class Container>
 void split(const std::string& str, Container& cont, const std::string& delims = " ") {
@@ -99,6 +102,55 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2d
     }
   }
   return std::make_shared<Mesh>(2, vertices, elements);
+}
+
+std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBeamMesh(
+    const siconos::algebra::SiconosVector3& coords_start,
+    const siconos::algebra::SiconosVector3& coords_end, size_t nb_elements, int dim) {
+  // 1. Computes the list of vertices
+  siconos::algebra::SiconosVector3 step = (coords_end - coords_start) / nb_elements;
+
+  siconos::mechanics::fem::FiniteElementType FEtype;
+  if (dim == 2) {
+    FEtype = FiniteElementType::B2;
+    step(2) = 0;
+  }
+  if (dim == 3)
+    FEtype = FiniteElementType::B3;
+  else
+    THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
+
+  std::vector<std::shared_ptr<MVertex>> vertices(nb_elements + 1);
+
+  for (int i = 0; i < nb_elements + 1; i++) {
+    vertices[i] = std::make_shared<MBeamVertex>(i, coords_start[0] + i * step(0),
+                                                coords_start[1] + i * step(1),
+                                                coords_start[2] + i * step(2), 0, 0, 0);
+  }
+
+  // 2. Computes the list of mesh elements
+  // We assume:
+  // - boundary condition tag for the first vertex/element
+  // - applied force tag for the last element
+  // - default tag for the others
+  std::vector<std::shared_ptr<MElement>> elements;
+
+  // First element
+  std::vector<std::shared_ptr<MVertex>> vertices_in_elem = {vertices[0], vertices[1]};
+  std::vector<int> tag = {tools::enum_to_index(MeshTags::boundary_conditions)};
+
+  elements.push_back(std::make_shared<MElement>(0, FEtype, vertices_in_elem, tag));
+  for (int i = 1; i < nb_elements - 1; i++) {
+    std::vector<std::shared_ptr<MVertex>> vertices_in_elem = {vertices[i], vertices[i + 1]};
+    tag = {tools::enum_to_index(MeshTags::bulk_material)};
+    elements.push_back(std::make_shared<MElement>(i, FEtype, vertices_in_elem, tag));
+  }
+  tag = {tools::enum_to_index(MeshTags::applied_forces)};
+  std::vector<std::shared_ptr<MVertex>> vertices_in_last_elem = {vertices[nb_elements - 1],
+                                                                 vertices[nb_elements]};
+  elements.push_back(std::make_shared<MElement>(0, FEtype, vertices_in_last_elem, tag));
+
+  return std::make_shared<Mesh>(dim, vertices, elements);
 }
 
 std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMeshFromGMSH2(
@@ -285,19 +337,39 @@ void siconos::mechanics::fem::writeMeshforPython(const Mesh& mesh,
   outfile.close();
 }
 
-std::string siconos::mechanics::fem::prepareWriteDisplacementforPython(std::string basename) {
-  std::string filename = basename + "_displacement.py";
+std::string siconos::mechanics::fem::prepareWriteForPython(
+    std::string basename, std::string fieldname, const std::vector<std::string>& fields) {
+  std::string filename = basename + "_" + fieldname + ".py";
   std::filesystem::create_directories("outputs");
 
   std::filesystem::path filepath = std::filesystem::path("outputs") / filename;
 
-  std::cout << "Output displacement for python post-processing in ./outputs/" << filename
-            << std::endl;
+  std::cout << "Output " << fieldname << " for python post-processing in ./outputs/"
+            << filename << std::endl;
   std::ofstream outfile(filepath);
   if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
-  outfile << "import numpy as np\nx=[]\n" << "y=[]\n" << "z=[]\n";
+  outfile << "import numpy as np\n";
+  for (auto& str : fields):
+    outfile << str+"=[]\n";
   outfile.close();
   return filename;
+}
+
+std::string siconos::mechanics::fem::prepareWriteDisplacementforPython(std::string basename) {
+  return prepareWriteForPython(basename, "displacement", {"x", "y", "z"});
+}
+
+std::string siconos::mechanics::fem::prepareWriteTensorforPython(std::string basename,
+                                                                 std::string tensorName) {
+  return prepareWriteForPython(basename, "tensor",
+                               {tensorName + "_xx", tensorName + "_yy", tensorName + "_xy"});
+}
+
+std::string siconos::mechanics::fem::prepareWriteBeamTensorforPython(std::string basename,
+                                                                     std::string tensorName) {
+  return prepareWriteForPython(
+      basename, "tensor",
+      {tensorName + "_tension", tensorName + "_bending1", tensorName + "_bending2"});
 }
 
 void siconos::mechanics::fem::writeDisplacementforPython(
@@ -311,43 +383,154 @@ void siconos::mechanics::fem::writeDisplacementforPython(
   outfile.precision(15);
   outfile.setf(std::ios::scientific);
 
-  outfile << "x.append(np.array([";
-  for (auto v : mesh.vertices()) {
-    auto node = femodel.vertexToNode(v);
-    double value = 0.0;
-    if (node) {
-      auto idx = node->global_dof_index()[0];
-      value = x(idx);
+  std::vector<std::string> fields = {"x", "y", "z"};
+  int pos = 0;
+  for (auto& str : fields) {
+    outfile << str + ".append(np.array([";
+    for (auto v : mesh.vertices()) {
+      auto node = femodel.vertexToNode(v);
+      double value = 0.0;
+      if (node) {
+        auto idx = node->global_dof_index()[pos];
+        value = x(idx);
+      }
+      outfile << value << ", ";
     }
-    outfile << value << ", ";
+    outfile << "]))\n\n";
+    pos += 1;
   }
-  outfile << "]))\n\n";
+  outfile.close();
+}
 
-  outfile << "y.append(np.array([";
-  for (auto v : mesh.vertices()) {
-    auto node = femodel.vertexToNode(v);
-    double value = 0.0;
-    if (node) {
-      auto idy = node->global_dof_index()[1];
-      value = x(idy);
+void siconos::mechanics::fem::writeTensorforPython(const FiniteElementModel& femodel,
+                                                   const siconos::algebra::SiconosVector& x,
+                                                   std::string filename,
+                                                   std::string tensorName) {
+  std::filesystem::path filepath = std::filesystem::path("outputs") / filename;
+  std::ofstream outfile(filepath, std::ios::app);
+  if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
+  outfile.precision(15);
+  outfile.setf(std::ios::scientific);
+
+  std::vector<std::string> fields = {tensorName + "_xx", tensorName + "_yy",
+                                     tensorName + "_xy"};
+  int pos = 0;
+  for (auto& str : fields) {
+    size_t elem_cnt = 0;
+    outfile << str + ".append(np.array([";
+    for (const auto& fe : femodel->elements()) {
+      outfile << x(elem_cnt * 3 + pos) << ", ";
+      elem_cnt++;
     }
-    outfile << value << ", ";
+    std::cout << " elem_cnt:" << elem_cnt << std::endl;
+    outfile << "]))\n\n";
+    pos += 1;
   }
-  outfile << "]))\n\n";
+  outfile.close();
+}
 
-  outfile << "z.append(np.array([";
-  for (auto v : mesh.vertices()) {
-    auto node = femodel.vertexToNode(v);
-    double value = 0.0;
-    if (node) {
-      if (mesh.dim() > 2) {
-        auto idz = node->global_dof_index()[2];
-        value = x(idz);
+void siconos::mechanics::fem::prepareWriteBeamPositionforSOFA(std::string filename) {
+  std::cout << "Output displacement for SOFA post-processing in " << filename << std::endl;
+
+  FILE* foutput = fopen(filename.c_str(), "w");
+  fclose(foutput);
+}
+
+void siconos::mechanics::fem::prepareWriteBlockPositionforSOFA(std::string filename) {
+  std::cout << "Output displacement for SOFA post-processing in " << filename << std::endl;
+
+  FILE* foutput = fopen(filename.c_str(), "w");
+  fclose(foutput);
+}
+
+void siconos::mechanics::fem::writeBeamPositionforSOFA(
+    std::shared_ptr<Mesh> mesh, std::shared_ptr<FiniteElementModel> femodel,
+    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t) {
+  FILE* foutput = fopen(filename.c_str(), "a");
+  fprintf(foutput, "T= %f\n", t);
+  auto vertices = mesh->vertices();
+  fprintf(foutput, "X=");
+  for (auto v : mesh->vertices()) {
+    std::shared_ptr<FENode> n = femodel->vertexToNode(v);
+    double value = 0.0, valueqx, valueqy, valueqz;
+    if (n) {
+      auto idx = n->global_dof_index()[0];
+      auto idy = n->global_dof_index()[1];
+
+      value = (*x)(idx);
+      fprintf(foutput, " %e", value + v->x());
+
+      value = (*x)(idy);
+      fprintf(foutput, " %e", value + v->y());
+
+      if (n->global_dof_index().size() == 3) {
+        // 2D case
+        fprintf(foutput, " %e", 0.0);
+
+        auto idtheta = n->global_dof_index()[2];
+        // idqx= (*n->global_dof_index())[3];
+        valueqx = (*x)(idtheta);
+        // idqy= (*n->global_dof_index())[4];
+        // valueqy =(*x)(idqy);
+        // idqz= (*n->global_dof_index())[5];
+        // valueqz =(*x)(idqz);
+
+        double quat[4];
+
+        double c3 = cos((valueqx + v->z()) / 2);
+        double c1 = cos(0);
+        double c2 = cos(0);
+
+        double s3 = sin((valueqx + v->z()) / 2);
+        double s1 = sin(0);
+        double s2 = sin(0);
+
+        quat[0] = s1 * c2 * c3 - c1 * s2 * s3;
+        quat[1] = c1 * s2 * c3 + s1 * c2 * s3;
+        quat[2] = c1 * c2 * s3 - s1 * s2 * c3;
+        quat[3] = c1 * c2 * c3 + s1 * s2 * s3;
+
+        fprintf(foutput, " %e", quat[0]);
+        fprintf(foutput, " %e", quat[1]);
+        fprintf(foutput, " %e", quat[2]);
+        fprintf(foutput, " %e", quat[3]);
+      } else {
+        auto idz = n->global_dof_index()[2];
+        value = (*x)(idz);
+        fprintf(foutput, " %e", value + v->z());
+
+        auto idqx = n->global_dof_index()[3];
+        valueqx = (*x)(idqx);
+        auto idqy = n->global_dof_index()[4];
+        valueqy = (*x)(idqy);
+        auto idqz = n->global_dof_index()[5];
+        valueqz = (*x)(idqz);
+
+        siconos::algebra::SiconosVector3 angle;
+        angle << valueqx, valueqy, valueqz;
+        auto quat = siconos::geometry::quaternionFromRotationVector(angle);
+
+        fprintf(foutput, " %e", quat(4));
+        fprintf(foutput, " %e", quat(5));
+        fprintf(foutput, " %e", quat(6));
+        fprintf(foutput, " %e", quat(3));
       }
     }
-    outfile << value << ", ";
   }
-  outfile << "]))\n\n";
+  fprintf(foutput, "\n");
+  fclose(foutput);
+}
 
-  outfile.close();
+void siconos::mechanics::fem::writeBlockPositionforSOFA(
+    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t) {
+  FILE* foutput = fopen(filename.c_str(), "a");
+  fprintf(foutput, "T= %f\n", t);
+  fprintf(foutput, "X=");
+  fprintf(foutput, " %e", (*x)(0));
+  fprintf(foutput, " %e", (*x)(1));
+  // 2D case
+  fprintf(foutput, " %e", 0.0);
+
+  fprintf(foutput, "\n");
+  fclose(foutput);
 }

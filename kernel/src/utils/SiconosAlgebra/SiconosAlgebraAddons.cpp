@@ -40,9 +40,9 @@ siconos::algebra::SiconosVector siconos::algebra::normInfByColumn(
   return v;  // RVO
 }
 
-bool siconos::algebra::isSymmetric(SiconosDenseMatrix& mat, double tol) {
+bool siconos::algebra::isSymmetric(const SiconosDenseMatrix& mat, double tol) {
   // works with sparse and dense
-  // Warning: might be quite expensive, especially for sparse matrices
+  // Warning: might be quite expensive
   if (mat.rows() != mat.cols()) return false;
   return mat.isApprox(mat.transpose(), tol);
 }

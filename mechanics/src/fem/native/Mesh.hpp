@@ -70,7 +70,31 @@ class MVertex {
   void link_element(std::shared_ptr<MElement> elem) { elements_.push_back(elem); }
   const std::span<const std::shared_ptr<MElement>> elements() const { return elements_; }
 
-  void display() const;
+  virtual void display() const;
+};
+
+class MBeamVertex : public MVertex {
+ private:
+  /* Vextex Rotation Coordinate */
+  double _qx = 0.;
+  double _qy = 0.;
+  double _qz = 0.;
+
+ public:
+  /* Constructor from data */
+  MBeamVertex(size_t num, double x, double y, double z, double qx, double qy, double qz)
+      : MVertex(num, x, y, z) {
+    _qx = qx;
+    _qy = qy;
+    _qz = qz;
+  };
+
+  ~MBeamVertex() noexcept = default;
+
+  auto qx() { return _qx; };
+  auto qy() { return _qy; };
+  auto qz() { return _qz; };
+  void display() const override;
 };
 
 /** a mesh element */
@@ -96,8 +120,8 @@ class MElement {
   MElement& operator=(MElement&&) = delete;
 
  public:
-  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>>& vertices,
-           const std::vector<int>& tags)
+  MElement(size_t num, FiniteElementType type,
+           const std::vector<std::shared_ptr<MVertex>>& vertices, const std::vector<int>& tags)
       : num_{num}, type_{type}, vertices_{vertices}, tags_{tags} {};
 
   MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>>& vertices)

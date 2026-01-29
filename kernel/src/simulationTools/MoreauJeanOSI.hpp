@@ -177,25 +177,46 @@ class MoreauJeanOSI : public OneStepIntegrator {
   struct _NSLEffectOnFreeOutput : public siconos::modeling::nonsmooth_laws::Visitor {
     using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
-    siconos::nonsmooth_formulations::OneStepNSProblem &_osnsp;
-    siconos::modeling::Interaction &_inter;
-    siconos::graphs::InteractionProperties &_interProp;
+    siconos::nonsmooth_formulations::OneStepNSProblem& _osnsp;
+    siconos::modeling::Interaction& _inter;
+    siconos::graphs::InteractionProperties& _interProp;
     double _theta{0.};
 
-    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem &p,
-                           siconos::modeling::Interaction &inter,
-                           siconos::graphs::InteractionProperties &interProp, double theta);
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
+                           siconos::modeling::Interaction& inter,
+                           siconos::graphs::InteractionProperties& interProp, double theta);
 
-    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) override;
+    void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
 
-    void visit(const siconos::modeling::RelayNSL &nslaw) override {};
-    void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) override;
-    void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) override;
-    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) override;
-    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) override {};
-    void visit(const siconos::modeling::MixedComplementarityConditionNSL &nslaw) override {};
-    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) override {};
+    void visit(const siconos::modeling::RelayNSL& nslaw) override {};
+    void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::FremondImpactFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
   };
+
+  /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI
+   *
+   *  @param ds a pointer to DynamicalSystem
+   *  @param dsv a descriptor of the ds on the graph (redundant)
+   */
+  virtual void initializeIterationMatrixBoundaryConditions(
+      const siconos::modeling::SecondOrderDS& ds,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const;
+
+  /** compute IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
+   *
+   *  @param[in] ds a pointer to DynamicalSystem
+   *  @param[in,out] IterationMatrixBoundaryConditions
+   *  @param[in,out] iteration_matrix
+   */
+  void computeIterationMatrixBoundaryConditions(
+      const siconos::modeling::SecondOrderDS& ds,
+      siconos::algebra::SiconosMatrix& IterationMatrixBoundaryConditions,
+      siconos::algebra::SiconosMatrix& iteration_matrix) const;
 
  public:
   enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH };
@@ -206,8 +227,8 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** constructor from theta value only
    *
-   *  \param theta value for all linked DS (default = 0.5).
-   *  \param gamma value for all linked DS (default = NaN and gamma is not
+   *  @param theta value for all linked DS (default = 0.5).
+   *  @param gamma value for all linked DS (default = NaN and gamma is not
    *  used).
    */
   MoreauJeanOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
@@ -225,7 +246,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the value of theta
    *
-   *  \param newTheta a double
+   *  @param newTheta a double
    */
   inline void setTheta(double newTheta) { _theta = newTheta; };
 
@@ -234,7 +255,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the value of gamma
    *
-   *  \param newGamma a double
+   *  @param newGamma a double
    */
   inline void setGamma(double newGamma) {
     _gamma = newGamma;
@@ -246,7 +267,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the Boolean to indicate that we use gamma
    *
-   *  \param newUseGamma  a  Boolean variable
+   *  @param newUseGamma  a  Boolean variable
    */
   inline void setUseGamma(bool newUseGamma) { _useGamma = newUseGamma; };
 
@@ -255,7 +276,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the boolean to indicate that we use gamma for the relation
    *
-   *  \param newUseGammaForRelation a Boolean
+   *  @param newUseGammaForRelation a Boolean
    */
   inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
@@ -287,7 +308,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the boolean to indicate that we use gamma for the relation
    *
-   *  \param newExplicitNewtonEulerDSOperators a Boolean
+   *  @param newExplicitNewtonEulerDSOperators a Boolean
    */
   inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators) {
     _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
@@ -303,7 +324,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** set the boolean to perform activation with negative relative velocity
    *
-   *  \param newActivateWithNegativeRealtiveVelocity a Boolean
+   *  @param newActivateWithNegativeRealtiveVelocity a Boolean
    */
   inline void setActivateWithNegativeRelativeVelocity(
       bool newActivateWithNegativeRelativeVelocity) {
@@ -327,22 +348,22 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    *
-   *  \param t time of initialization
-   *  \param ds the dynamical system
+   *  @param t time of initialization
+   *  @param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(
+  virtual void initializeWorkVectorsForDS(
       double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
    *
-   *  \param inter the interaction
-   *  \param interProp the properties on the graph
-   *  \param DSG the dynamical systems graph
+   *  @param inter the interaction
+   *  @param interProp the properties on the graph
+   *  @param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -352,44 +373,24 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *
-   *  \param time
-   *  \param ds a pointer to DynamicalSystem
+   *  @param time
+   *  @param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrix(double time,
-                                 std::shared_ptr<siconos::modeling::SecondOrderDS> ds);
+  virtual void initializeIterationMatrix(
+      double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const;
 
   /** \return the inverse of the iteration matrix
-   *  \param ds the concerned dynamical system
-   *  \param LUW the LU-factorisation of W
+   *  @param ds the concerned dynamical system
+   *  @param LUW the LU-factorisation of W
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse(
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
-      const siconos::algebra::SiconosDenseLUMatrix &LUW);
+      const siconos::algebra::SiconosDenseLUMatrix& LUW);
 
-  /** compute IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
-   *
-   *  \param ds a pointer to DynamicalSystem
-   *  \param IterationMatrixBoundaryConditions write the result in
-   * IterationMatrixBoundaryConditions \param iteration_matrix the OSI iteration matrix (W)
-   */
-  void _computeIterationMatrixBoundaryConditions(
-      siconos::modeling::SecondOrderDS &ds,
-      siconos::algebra::SiconosMatrix &IterationMatrixBoundaryConditions,
-      siconos::algebra::SiconosMatrix &iteration_matrix);
-
-  /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI
-   *
-   *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant)
-   */
-  void _initializeIterationMatrixBoundaryConditions(
-      siconos::modeling::SecondOrderDS &ds,
-      const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
-
-  void applyBoundaryConditions(siconos::modeling::SecondOrderDS &d,
-                               siconos::algebra::SiconosVector &residu,
-                               siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t,
-                               const siconos::algebra::SiconosVector &v);
+  virtual void applyBoundaryConditions(siconos::modeling::SecondOrderDS& d,
+                                       siconos::algebra::SiconosVector& residu,
+                                       siconos::graphs::DynamicalSystemsGraph::VIterator dsi,
+                                       double t, const siconos::algebra::SiconosVector& v);
 
   /** compute the initial state of the Newton loop.
    */
@@ -406,66 +407,66 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)
    */
-  void computeFreeState() override;
+  virtual void computeFreeState() override;
 
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account
    *
-   *  \param vertex_inter vertex of the interaction graph
-   *  \param osnsp pointer to OneStepNSProblem
+   *  @param vertex_inter vertex of the interaction graph
+   *  @param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** \return the workVector corresponding to the right hand side of the OneStepNonsmooth
    *  problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
   };
 
   /** Apply the rule to one Interaction to know if it should be included in the
    *  IndexSet of level i
    *
-   *  \param inter the Interaction to test
-   *  \param i level of the IndexSet
+   *  @param inter the Interaction to test
+   *  @param i level of the IndexSet
    *  \return Boolean
    */
-  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+  virtual bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                        unsigned int i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
    *  IndexSet of level i
    *
-   *  \param inter the Interaction to test
-   *  \param i level of the IndexSet
+   *  @param inter the Interaction to test
+   *  @param i level of the IndexSet
    *  \return Boolean
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
                                      unsigned int i) override;
 
   /** method to prepare the fist Newton iteration
-   *  \param time
+   *  @param time
    */
   void prepareNewtonIteration(double time) override;
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    *  stop at tout (->iout=false)
    *
-   *  \param tinit the initial time
-   *  \param tend the end time
-   *  \param tout the real end time
-   *  \param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
+   *  @param tinit the initial time
+   *  @param tend the end time
+   *  @param tout the real end time
+   *  @param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
+  virtual void integrate(double& tinit, double& tend, double& tout, int& notUsed) override;
 
   /** update the state of the dynamical systems
    *
-   *  \param level the level of interest for the dynamics: not used at the time
+   *  @param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override;
+  virtual void updateState(const unsigned int level) override;
 
   /** \return the  work of forces by ds
    */
@@ -481,24 +482,24 @@ namespace moreau_jean {
 
 /** compute Moreau-Jean W iteration matrix for Newton-Euler systems
  *
- *  \param time current time
- *  \param h current time-step
- *  \param theta theta parameter of the integrator
- *  \param ds a Lagrangian dynamical system
- *  \param[in,out] W the result in W
- *  \param[in,out] LUW the LU factorisation of W (updated)
+ *  @param time current time
+ *  @param h current time-step
+ *  @param theta theta parameter of the integrator
+ *  @param ds a Lagrangian dynamical system
+ *  @param[in,out] W the result in W
+ *  @param[in,out] LUW the LU factorisation of W (updated)
  */
 void computeIterationMatrix_NewtonEuler(
-    double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
+    double time, double h, double theta, siconos::modeling::NewtonEulerDS& ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix66> W,
-    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &LUW);
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& LUW);
 
 /** Update the state vector of a given dynamical system
- *  \param time_step current time step
- *  \param theta integrator theta parameter
- *  \param ds the dynamical system to update
+ *  @param time_step current time step
+ *  @param theta integrator theta parameter
+ *  @param ds the dynamical system to update
  */
-void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem &ds);
+void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem& ds);
 
 }  // namespace moreau_jean
 }  // namespace siconos::integrators

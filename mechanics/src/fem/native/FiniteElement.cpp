@@ -26,42 +26,36 @@
 #include "SiconosException.hpp"
 #include "Tools.hpp"  // enum_to_string
 
-siconos::mechanics::fem::FElement::FElement(FiniteElementType type,
-                                            siconos::algebra::Index ndof,
-                                            std::shared_ptr<MElement> e)
-    : ndof_(ndof), mElement_(e) {}
+siconos::mechanics::fem::FElement::FElement(std::shared_ptr<MElement> mesh_elem,
+                                            const std::vector<std::shared_ptr<FENode>>& nodes)
+    : num_{mesh_elem->num()}, type_{mesh_elem->type()}, mElement_{mesh_elem} {
+  for (auto node : nodes) nodes_.push_back(node);
+  ndof_ = nodes_.size() * number_of_dof_per_node(type_);
 
-int siconos::mechanics::fem::FElement::num() const { return mElement_->num(); }
-
-int siconos::mechanics::fem::FElement::order() const {
-  FiniteElementType type = mElement_->type();
-  switch (type) {
+  switch (type_) {
     case FiniteElementType::T3:
+    case FiniteElementType::B2:
+      dimStress_ =
+          3;  // T3: sigma_xx, sigma_yy, sigma_xy // B2: axial, curvature GP1, curvature GP2
+      break;
     case FiniteElementType::TH4:
-      return 1;
+    case FiniteElementType::B3:
+      dimStress_ = 6;  // TH4: sigma_xx, sigma_yy, sigma_zz, sigma_xy, sigma_xz, sigma_yz //
+                       // B2: axial, curvature_x GP1, curvature_x GP2, twisting, ,
+                       // curvature_y GP1, curvature_y GP2
       break;
     default:
-      throw("FElement::order(). element type not recognized");
+      dimStress_ = 0;
   }
-  return 0;
+
+  if (is_valid_beam_element(type_)) {
+    // Compute Te, length ...
+    initialize_beam_element();
+  }
 }
 
-int siconos::mechanics::fem::FElement::ndofPerNode() const {
-  FiniteElementType type = mElement_->type();
-  switch (type) {
-    case FiniteElementType::T3:
-    case FiniteElementType::Q4:
-      return 2;
-    case FiniteElementType::TH4:
-      return 3;
-    default:
-      throw("FElement::ndorPernode(). element type not recognized");
-  }
-  return 0;
-}
-
-const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
-    int order) {
+std::span<const std::vector<double>> siconos::mechanics::fem::FElement::GaussPoints(
+    int order) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
     case FiniteElementType::T3:
@@ -76,6 +70,11 @@ const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement
       else if (order == 2)
         return GaussPointsTH4_2;
       break;
+    case FiniteElementType::B2:
+    case FiniteElementType::B3:
+      assert(order == 3);
+      return GaussPointsB2_3;
+      break;
 
     default:
       throw("FElement::GaussPoints(). element type not recognized");
@@ -87,7 +86,7 @@ const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement
 void siconos::mechanics::fem::FElement::shapeFunctionIso2D(double ksi, double eta,
                                                            std::vector<double>& N,
                                                            std::vector<double>& Nksi,
-                                                           std::vector<double>& Neta) {
+                                                           std::vector<double>& Neta) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
     case FiniteElementType::T3: {
@@ -111,7 +110,7 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double et
                                                            std::vector<double>& N,
                                                            std::vector<double>& Nksi,
                                                            std::vector<double>& Neta,
-                                                           std::vector<double>& Nzeta) {
+                                                           std::vector<double>& Nzeta) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
     case FiniteElementType::TH4: {
@@ -152,3 +151,57 @@ void siconos::mechanics::fem::FElement::display() {
     n->display();
   }
 };
+
+void siconos::mechanics::fem::FElement::initialize_beam_element() {
+  assert(is_valid_beam_element(type_));
+
+  length_ =
+      sqrt(pow(nodes_[0]->x() - nodes_[1]->x(), 2) + pow(nodes_[0]->y() - nodes_[1]->y(), 2) +
+           pow(nodes_[0]->z() - nodes_[1]->z(), 2));
+
+  Te_.resize(ndof_, ndof_);
+  Te_.setZero();
+  if (type_ == FiniteElementType::B2) {
+    double c = (nodes_[1]->x() - nodes_[0]->x()) / length();
+    double s = (nodes_[1]->y() - nodes_[0]->y()) / length();
+    Te_(0, 0) = c;
+    Te_(0, 1) = s;
+    Te_(1, 0) = -s;
+    Te_(1, 1) = c;
+    Te_(2, 2) = 1;
+    Te_(3, 3) = c;
+    Te_(3, 4) = s;
+    Te_(4, 3) = -s;
+    Te_(4, 4) = c;
+    Te_(5, 5) = 1;
+  } else if (type_ == FiniteElementType::B3) {
+    siconos::algebra::SiconosMatrix33 vx;
+    vx.setZero();
+    double lx = (nodes_[1]->x() - nodes_[0]->x()) / length();
+    double ly = (nodes_[1]->y() - nodes_[0]->y()) / length();
+    double lz = (nodes_[1]->z() - nodes_[0]->z()) / length();
+    double s = sqrt(lz * lz + ly * ly);
+    vx(0, 1) = ly;
+    vx(0, 2) = lz;
+    vx(1, 0) = -ly;
+    vx(2, 0) = -lz;
+
+    double coeff = 1.0 / (1.0 + lx);
+    siconos::algebra::SiconosMatrix33 R = siconos::algebra::identity33 + vx + coeff * vx * vx;
+
+    for (int a = 0; a < 2; a++) {
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          Te_(6 * a + i, 6 * a + j) = R(i, j);
+        }
+      }
+    }
+    for (int a = 0; a < 2; a++) {
+      for (int i = 0; i < 3; i++) {
+        Te_(3 + 6 * a + i, 3 + 6 * a + i) = 1.;
+      }
+    }
+  }
+
+  Te_transpose_ = Te_.transpose();
+}

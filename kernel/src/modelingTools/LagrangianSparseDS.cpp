@@ -20,10 +20,12 @@
 #include <iostream>
 #include <memory>
 
+#include "LagrangianR.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
+#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -754,24 +756,18 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
 
 // --- Functions for memory handling ---
 void siconos::modeling::LagrangianSparseDS::initMemory(unsigned int steps) {
-  DEBUG_PRINTF(
-      "siconos::modeling::LagrangianSparseDS::initMemory(unsigned int steps) with "
-      "steps = %i\n",
-      steps);
-  if (steps == 0)
+  if (steps == 0) {
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero\n";
-  else {
-    qMemory_.setMemorySize(steps, ndof_);
-    velocityMemory_.setMemorySize(steps, ndof_);
-    totalForcesMemory_.setMemorySize(steps, ndof_);
-    pMemory_.resize(3);
+    return;
+  }
+  qMemory_.setMemorySize(steps, ndof_);
+  velocityMemory_.setMemorySize(steps, ndof_);
+  totalForcesMemory_.setMemorySize(steps, ndof_);
+  pMemory_.resize(3);
 
-    // TODO : initMemory in graph + f(OSI/level)
-    for (unsigned int level = 0; level < 3; ++level) {
-      if (pMemory_[level].size() == 0) pMemory_[level].setMemorySize(steps, ndof_);
-    }
-
-    // swapInMemory();
+  // TODO : initMemory in graph + f(OSI/level)
+  for (unsigned int level = 0; level < 3; ++level) {
+    if (pMemory_[level].size() == 0) pMemory_[level].setMemorySize(steps, ndof_);
   }
 }
 
@@ -821,4 +817,28 @@ double siconos::modeling::LagrangianSparseDS::computeKineticEnergy() {
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::LagrangianSparseDS::computeKineticEnergy()\n");
   return K;
+}
+
+void siconos::modeling::LagrangianSparseDS::initialize_ds_link_for_relations(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
+  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(q());
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(velocity());
+
+  if (acceleration()) {
+    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
+          std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(acceleration());
+  }
+
+  for (unsigned int k = 0; k < 3; k++) {
+    if (p(k)) {
+      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
+        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
+            std::make_shared<siconos::algebra::BlockVector>();
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(p(k));
+    }
+  }
 }

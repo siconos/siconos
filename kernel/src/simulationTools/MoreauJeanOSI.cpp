@@ -17,6 +17,8 @@
  */
 #include "MoreauJeanOSI.hpp"
 
+#include <memory>
+
 #include "BlockVector.hpp"
 #include "BoundaryCondition.hpp"
 #include "DynamicalSystem.hpp"
@@ -29,6 +31,7 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
@@ -37,6 +40,7 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
+#include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
@@ -120,6 +124,16 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
     }
   }
 }
+void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
+    const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) {
+  auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
+
+  // The normal part is multiplied depends on en
+  int dimension = 2;  // 2D ou 3D ???
+  if (nslaw.c() > 0.0) {
+    osnsp_rhs(0) += nslaw.c() / (tan(nslaw.phi()) * dimension);
+  }
+}
 
 namespace siconos::integrators::moreau_jean {
 template <typename MatrixType, typename LUMatrixType, typename LagrangianType>
@@ -186,24 +200,20 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
   // Check dynamical system type
   auto dsType = siconos::types::type_value(*ds);
 
-  assert(dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-         dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
-         dsType == siconos::modeling::Type::LagrangianDS ||
-         dsType == siconos::modeling::Type::LagrangianSparseDS ||
-         dsType == siconos::modeling::Type::NewtonEulerDS ||
-         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS);
-
   // Compute W (iteration matrix)
-  auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+  auto sods = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+
+  // Ensure the DS is a second-order.
+  assert(sods);
   initializeIterationMatrix(t, sods);
 
   // Initialize work vectors
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
-  ds_work_vectors.resize(siconos::integrators::MoreauJeanOSI::WORK_LENGTH);
+  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
-  ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE] =
+  ds_work_vectors[MoreauJeanOSI::RESIDU_FREE] =
       std::make_shared<siconos::algebra::SiconosVector>(sods->dimension());
-  ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE] =
+  ds_work_vectors[MoreauJeanOSI::VFREE] =
       std::make_shared<siconos::algebra::SiconosVector>(sods->dimension());
 
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
@@ -211,7 +221,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     // buffers allocation (inside the graph)
     auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds);
-    ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER] =
+    ds_work_vectors[MoreauJeanOSI::BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     // Update dynamical system components (for memory swap).
     lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
@@ -221,7 +231,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
              dsType == siconos::modeling::Type::LagrangianSparseDS) {
     // buffers allocation (inside the graph)
     auto lds = std::static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds);
-    ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER] =
+    ds_work_vectors[MoreauJeanOSI::BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     // Update dynamical system components (for memory swap).
     lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
@@ -293,8 +303,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    inter_work_block[xfree]->setVectorPtr(
-        0, workVds1[siconos::integrators::MoreauJeanOSI::VFREE]);
+    inter_work_block[xfree]->setVectorPtr(0, workVds1[MoreauJeanOSI::VFREE]);
   }
 
   if (ds1 != ds2) {
@@ -303,8 +312,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
       DEBUG_PRINTF("ds2->number() %i is taken into account\n", ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      inter_work_block[xfree]->setVectorPtr(
-          1, workVds2[siconos::integrators::MoreauJeanOSI::VFREE]);
+      inter_work_block[xfree]->setVectorPtr(1, workVds2[MoreauJeanOSI::VFREE]);
     }
   }
 
@@ -324,7 +332,7 @@ void siconos::integrators::MoreauJeanOSI::initialize_nonsmooth_problems() {
 }
 
 void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
-    double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) {
+    double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical
@@ -366,7 +374,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     if (lldds->hasStiffnessMatrix()) {
       iterationMat->diagonal() += h2theta2 * lldds->stiffnessMatrix();
     }
-    if (lldds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lldds, dsv);
+    if (lldds->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*lldds, dsv);
 
     // W inverse in place
     iterationMat->diagonal() = iterationMat->diagonal().array().inverse();
@@ -382,7 +390,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
 
     if (ltids->hasDampingMatrix()) *iterationMat += htheta * ltids->dampingMatrix();
     if (ltids->hasStiffnessMatrix()) *iterationMat += h2theta2 * ltids->stiffnessMatrix();
-    if (ltids->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
+    if (ltids->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*ltids, dsv);
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
         std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
@@ -397,7 +405,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     if (lstids->hasDampingMatrix()) *iterationMat += htheta * lstids->dampingMatrix();
     if (lstids->hasStiffnessMatrix()) *iterationMat += h2theta2 * lstids->stiffnessMatrix();
     if (lstids->boundaryConditions())
-      _initializeIterationMatrixBoundaryConditions(*lstids, dsv);
+      initializeIterationMatrixBoundaryConditions(*lstids, dsv);
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
         std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
@@ -407,21 +415,21 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian_T(
         time, _simulation->timeStep(), _theta, *lds, *iterationMat,
         _dynamicalSystemsGraph->properties(dsv).LUW);
-    if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lds, dsv);
+    if (lds->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*lds, dsv);
   }
 
   else if (auto lsds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
     siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian_T(
         time, _simulation->timeStep(), _theta, *lsds, *iterationMat,
         _dynamicalSystemsGraph->properties(dsv).LUW);
-    if (lsds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lsds, dsv);
+    if (lsds->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*lsds, dsv);
   }
 
   else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
     siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
         time, _simulation->timeStep(), _theta, *neds, *iterationMat,
         _dynamicalSystemsGraph->properties(dsv).LUW);
-    if (neds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*neds, dsv);
+    if (neds->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*neds, dsv);
   } else
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanOSI::initializeIterationMatrix - not "
@@ -436,100 +444,71 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
   //   // W.setIsPositiveDefinite(true); // TODO : make sure it is not needed!
 }
 
-void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixBoundaryConditions(
-    siconos::modeling::SecondOrderDS& ds,
-    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) {
+void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixBoundaryConditions(
+    const siconos::modeling::SecondOrderDS& ds,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const {
   // This function:
   // - allocate memory for a matrix IterationMatrixBoundaryConditions
   // - insert this matrix into IterationMatrixBoundaryConditionsMap with ds as a key
 
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions);
-  auto dsType = siconos::types::type_value(ds);
-  if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianDS ||
-      dsType == siconos::modeling::Type::LagrangianSparseDS ||
-      dsType == siconos::modeling::Type::NewtonEulerDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
-    // Memory allocation for IterationMatrixBoundaryConditions
-    auto sizeIterationMatrixBoundaryConditions =
-        ds.dimension();  // n for first order systems, ndof for lagrangian.
+  // Memory allocation for IterationMatrixBoundaryConditions
+  auto sizeIterationMatrix = _dynamicalSystemsGraph->properties(dsv).iterationMatrix->cols();
 
-    auto& d = static_cast<siconos::modeling::SecondOrderDS&>(ds);
-    _dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions =
-        std::make_shared<siconos::algebra::SiconosMatrix>(
-            sizeIterationMatrixBoundaryConditions, d.boundaryConditions()->size());
-    _computeIterationMatrixBoundaryConditions(
-        ds, *_dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions,
-        *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
-  } else
-    THROW_EXCEPTION(
-        "siconos::integrators::MoreauJeanOSI::initializeIterationMatrixBoundaryConditions - "
-        "not yet implemented for Dynamical system of type :" +
-        siconos::types::type_name(ds));
+  // auto& d = static_cast<siconos::modeling::SecondOrderDS&>(ds);
+  _dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions =
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeIterationMatrix,
+                                                        ds.boundaryConditions()->size());
+  computeIterationMatrixBoundaryConditions(
+      ds, *_dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions,
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 }
 
-void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditions(
-    siconos::modeling::SecondOrderDS& ds,
+void siconos::integrators::MoreauJeanOSI::computeIterationMatrixBoundaryConditions(
+    const siconos::modeling::SecondOrderDS& ds,
     siconos::algebra::SiconosMatrix& IterationMatrixBoundaryConditions,
-    siconos::algebra::SiconosMatrix& iteration_matrix) {
+    siconos::algebra::SiconosMatrix& iteration_matrix) const {
   DEBUG_BEGIN(
-      "siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditions\n");
+      "siconos::integrators::MoreauJeanOSI::computeIterationMatrixBoundaryConditions\n");
   // Compute IterationMatrixBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
 
   // When this function is called, IterationMatrixBoundaryConditionsMap[ds] is
   // supposed to exist and not to be null Memory allocation has been
   // done during initializeIterationMatrixBoundaryConditions.
-  auto dsType = siconos::types::type_value(ds);
+  auto sizeIterationMatrix = ds.real_size();
 
-  if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianDS ||
-      dsType == siconos::modeling::Type::LagrangianSparseDS ||
-      dsType == siconos::modeling::Type::NewtonEulerDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
-    auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
+  auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(sizeIterationMatrix);
 
-    siconos::algebra::Index columnindex = 0;
+  siconos::algebra::Index columnindex = 0;
 
-    auto& d = static_cast<siconos::modeling::SecondOrderDS&>(ds);
+  if (!siconos::algebra::isSymmetric(
+          iteration_matrix,
+          1e-10))  // Warning this operation could be quite expensive
+  {
+    // siconos::algebra::print(iteration_matrix);
+    std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+  }
 
-    if (!siconos::algebra::isSymmetric(
-            iteration_matrix,
-            1e-10))  // Warning this operation could be quite expensive
-    {
-      // siconos::algebra::print(iteration_matrix);
-      std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
-    }
+  for (auto itindex : ds.boundaryConditions()->velocityIndices()) {
+    *columntmp = iteration_matrix.col(itindex);
+    /*\warning we assume that W is symmetric
+      we store only the column and not the row */
+    IterationMatrixBoundaryConditions.col(columnindex) = *columntmp;
+    columnindex++;
+  }
 
-    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
-      *columntmp = iteration_matrix.col(itindex);
-      /*\warning we assume that W is symmetric
-        we store only the column and not the row */
-      IterationMatrixBoundaryConditions.col(columnindex) = *columntmp;
-      columnindex++;
-    }
-
-    columnindex = 0;
-    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
-      double diag = iteration_matrix(itindex, itindex);
-      columntmp->setZero();
-      (*columntmp)(itindex) = diag;
-      iteration_matrix.col(itindex) = *columntmp;
-      iteration_matrix.row(itindex) = *columntmp;
-      columnindex++;
-    }
-    DEBUG_EXPR(siconos::algebra::print(iteration_matrix););
-    DEBUG_EXPR(siconos::algebra::print(IterationMatrixBoundaryConditions););
-  } else
-    THROW_EXCEPTION(
-        "siconos::integrators::MoreauJeanOSI::computeIterationMatrixBoundaryConditions - not "
-        "yet "
-        "implemented for Dynamical system type : " +
-        siconos::types::type_name(ds));
-  DEBUG_END(
-      "siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditions\n");
+  columnindex = 0;
+  for (auto itindex : ds.boundaryConditions()->velocityIndices()) {
+    double diag = iteration_matrix(itindex, itindex);
+    columntmp->setZero();
+    (*columntmp)(itindex) = diag;
+    iteration_matrix.col(itindex) = *columntmp;
+    iteration_matrix.row(itindex) = *columntmp;
+    columnindex++;
+  }
+  DEBUG_EXPR(siconos::algebra::print(iteration_matrix););
+  DEBUG_EXPR(siconos::algebra::print(IterationMatrixBoundaryConditions););
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
@@ -587,20 +566,22 @@ void siconos::integrators::MoreauJeanOSI::computeInitialNewtonState() {
 }
 
 void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
-    siconos::modeling::SecondOrderDS& d, siconos::algebra::SiconosVector& residu,
+    const siconos::modeling::SecondOrderDS& sds, siconos::algebra::SiconosVector& residu,
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t,
     const siconos::algebra::SiconosVector& v) {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
-  if (d.boundaryConditions()) {
-    d.boundaryConditions()->computePrescribedVelocity(t);
+  if (sds.boundaryConditions()) {
+    sds.boundaryConditions()->computePrescribedVelocity(t);
 
     unsigned int columnindex = 0;
     auto& IterationMatrixBoundaryConditions =
         *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions;
-    auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
+    auto sizeIterationMatrix =
+        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->size();
+    auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(sizeIterationMatrix);
 
-    auto prescribedVelocity = d.boundaryConditions()->prescribedVelocity();
-    for (auto itindex : d.boundaryConditions()->velocityIndices()) {
+    auto prescribedVelocity = sds.boundaryConditions()->prescribedVelocity();
+    for (auto itindex : sds.boundaryConditions()->velocityIndices()) {
       double DeltaPrescribedVelocity = prescribedVelocity(columnindex) - v(itindex);
       DEBUG_PRINTF("index  = %i, value = %e\n", *itindex, prescribedVelocity(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
@@ -661,8 +642,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
           "siconos::modeling::Type::LagrangianDS\n");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1)
       // - h*(1-theta)*forces(ti,vi,qi) - p_i+1
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // -- Convert the DS into a Lagrangian one.
       auto& d = static_cast<siconos::modeling::LagrangianDS&>(ds);
@@ -723,8 +704,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
     } else if (dsType == siconos::modeling::Type::LagrangianSparseDS) {
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1)
       // - h*(1-theta)*forces(ti,vi,qi) - p_i+1
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // -- Convert the DS into a Lagrangian one.
       auto& d = static_cast<siconos::modeling::LagrangianSparseDS&>(ds);
@@ -782,8 +763,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // -- Convert the DS into a Lagrangian one.
       auto& lltids = static_cast<siconos::modeling::LagrangianLinearTIDS&>(ds);
 
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // --- ResiduFree computation Equation (1) ---
       residuFree.setZero();
@@ -837,8 +818,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // -- Convert the DS into a Lagrangian one.
       auto& lltids = static_cast<siconos::modeling::LagrangianSparseLinearTIDS&>(ds);
 
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // --- ResiduFree computation Equation (1) ---
       residuFree.setZero();
@@ -889,8 +870,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // -- Convert the DS into a Lagrangian one.
       auto& d = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(ds);
 
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // Get state i (previous time step) from Memories -> var. indexed with
       // "Old"
@@ -934,8 +915,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // residu = M (v_k,i+1 - v_i) - time_step*_theta*forces(t,v_k,i+1, q_k,i+1) -
       // time_step*(1-_theta)*forces(ti,vi,qi) - pi+1
 
-      auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-      auto& free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+      auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       // -- Convert the DS into a Lagrangian one.
       auto& d = static_cast<siconos::modeling::NewtonEulerDS&>(ds);
@@ -1038,8 +1019,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     auto iterationMatrix = _dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     // Get workVectors (rfree, vfree ...) from the graph
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    auto& residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
-    auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+    auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+    auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
     // Current dynamical system
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -1082,7 +1063,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
           nextTime, timeStep, _theta, *lds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (lds->boundaryConditions()) {
-        _computeIterationMatrixBoundaryConditions(
+        computeIterationMatrixBoundaryConditions(
             *lds, *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions,
             *iterationMatrix);
       }
@@ -1100,7 +1081,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
           nextTime, timeStep, _theta, *lds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (lds->boundaryConditions()) {
-        _computeIterationMatrixBoundaryConditions(
+        computeIterationMatrixBoundaryConditions(
             *lds, *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions,
             *iterationMatrix);
       }
@@ -1116,7 +1097,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
           nextTime, timeStep, _theta, *neds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (neds->boundaryConditions()) {
-        _computeIterationMatrixBoundaryConditions(
+        computeIterationMatrixBoundaryConditions(
             *neds, *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions,
             *iterationMatrix);
       }
@@ -1392,7 +1373,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           "siconos::modeling::Type::LagrangianLinearTIDS \n");
       // get dynamical system
       auto& d = static_cast<siconos::modeling::LagrangianDS&>(ds);
-      auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       //    auto *vfree = d.velocityFree();
       // auto &v = *d.velocity();
@@ -1447,7 +1428,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         }
       }
 
-      auto& local_buffer = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER];
+      auto& local_buffer = *ds_work_vectors[MoreauJeanOSI::BUFFER];
       // Save value of q in stateTmp for future convergence computation
       if (baux) local_buffer = d.q_read();
 
@@ -1468,7 +1449,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           "siconos::modeling::Type::LagrangianSparseLinearTIDS \n");
       // get dynamical system
       auto& d = static_cast<siconos::modeling::LagrangianSparseDS&>(ds);
-      auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       //    auto *vfree = d.velocityFree();
       // auto &v = *d.velocity();
@@ -1518,7 +1499,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         }
       }
 
-      auto& local_buffer = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER];
+      auto& local_buffer = *ds_work_vectors[MoreauJeanOSI::BUFFER];
       // Save value of q in stateTmp for future convergence computation
       if (baux) local_buffer = d.q_read();
 
@@ -1550,7 +1531,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       //       *d.p(_levelMaxForInput)
       //       == nullptr.");
 
-      auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+      auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
       if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
         /*d.p has been fill by the Relation->computeInput, it contains

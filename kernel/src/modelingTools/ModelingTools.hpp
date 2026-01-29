@@ -33,6 +33,7 @@ Include files related to modeling part of Siconos.
 #include "LagrangianLinearTIDS.hpp"
 #include "LinearComplementaritySystemsNSDS.hpp"
 #include "MixedComplementarityConditionNSL.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"

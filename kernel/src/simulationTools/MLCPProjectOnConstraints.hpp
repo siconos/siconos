@@ -63,16 +63,14 @@ class MLCPProjectOnConstraints : public MLCP {
    *  \param numericsSolverId solver id
    *  \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM,
-                           double alpha = 1.0);
+  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
 
   /**  constructor from a pre-defined solver options set.
    *
    *   \param options the options set,
    *   \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(std::shared_ptr<SolverOptions> options,
-                           double alpha = 1.0);
+  MLCPProjectOnConstraints(std::shared_ptr<SolverOptions> options, double alpha = 1.0);
 
   /** destructor
    */
@@ -110,26 +108,26 @@ class MLCPProjectOnConstraints : public MLCP {
       \param vd a vertex (interaction) descriptor
   */
   void computeDiagonalInteractionBlock(
-      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) override;
 
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */
   void computeInteractionBlock(
-      const siconos::graphs::InteractionsGraph::EDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::EDescriptor& vd) override;
 
   /** To compute a part of the "q" vector of the OSNS
       \param vd vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor &vd,
+  void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor& vd,
                      unsigned int pos) override;
 
   /** compute vector q
    *
    *  \param time the current time
    */
-  void computeq(double time) override;
+  void compute_q() override;
 
   /** post-treatment for  MLCPProjectOnConstraints
    */

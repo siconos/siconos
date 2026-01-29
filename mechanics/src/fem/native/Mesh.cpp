@@ -46,6 +46,11 @@ void siconos::mechanics::fem::MElement::display() const {
   std::cout << "\n";
 };
 
+void siconos::mechanics::fem::MBeamVertex::display() const {
+  siconos::mechanics::fem::MVertex::display();
+  std::cout << " (qx,qy,qz): " << _qx << ", " << _qy << ", " << _qz << "\n";
+};
+
 siconos::mechanics::fem::Mesh::Mesh(
     int dim, std::vector<std::shared_ptr<MVertex>> vertices,
     std::vector<std::shared_ptr<MElement>> elements,

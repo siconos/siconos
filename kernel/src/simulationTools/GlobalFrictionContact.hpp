@@ -194,6 +194,9 @@ class GlobalFrictionContact : public LinearOSNS {
   int solve();
   //  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
 
+  /** compute vector q */
+  virtual void compute_q() override;
+
   /** Construction of the problem
    *
    *  \param time current time
@@ -205,6 +208,9 @@ class GlobalFrictionContact : public LinearOSNS {
    *  \param time current time
    */
   virtual int compute(double time) override;
+
+  /** update dynamical systems state with the current global velocity values */
+  virtual void update_dynamicalsystems_state();
 
   /** post-treatment of output from Numerics solver:
    *  set values of the unknowns of Interactions using (velocity,reaction)

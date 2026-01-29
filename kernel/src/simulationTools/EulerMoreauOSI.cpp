@@ -241,7 +241,7 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
 }
 
 void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
-    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending on
@@ -304,7 +304,7 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
 }
 
 void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   // This function:
   // - allocate memory for a matrix IterationMatrixBoundaryConditions
   // - insert this matrix into IterationMatrixBoundaryConditionsMap with ds as a key
@@ -324,27 +324,6 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryCond
   THROW_EXCEPTION(
       "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions - "
       "not yet implemented.");
-}
-
-void siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  // Compute IterationMatrixBoundaryConditions matrix of the Dynamical System ds, at
-  // time t and for the current ds state.
-
-  // When this function is called, IterationMatrixBoundaryConditionsMap[ds] is
-  // supposed to exist and not to be null Memory allocation has been
-  // done during initializeIterationMatrixBoundaryConditions.
-
-  assert(ds &&
-         "siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions(t,ds)"
-         " - ds == "
-         "nullptr");
-
-  // unsigned int dsN = ds->number();
-  THROW_EXCEPTION(
-      "siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions - not "
-      "yet "
-      "implemented.");
 }
 
 void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(

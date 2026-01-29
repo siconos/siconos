@@ -186,6 +186,13 @@ class SecondOrderDS : public DynamicalSystem {
   /** \return the number of degrees of freedom of the system */
   inline siconos::algebra::Index dimension() const override { return ndof_; }
 
+  /** Fake function to access the dimension used to allocate iteration matrix
+   *  in the integrators
+   * Usually equal to ndof but might be larger (see fem).
+   * \return number of degrees of freedom of the system
+   */
+  inline virtual siconos::algebra::Index real_size() const override { return ndof_; }
+
   /** \return a read-only view on the generalized coordinates of the system */
   virtual const siconos::algebra::ConstMapVectorType q_read() const = 0;
 
@@ -232,7 +239,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return std::shared_ptr<siconos::modeling::BoundaryCondition> pointer on a
    * BoundaryConditions
    */
-  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions() {
+  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions() const {
     return boundaryConditions_;
   };
 

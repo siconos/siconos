@@ -60,9 +60,11 @@ class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
    *
    * @param[in] physical_entity_tag the tag to be matched
    * @param[in] node_dof_index list of dof to be constrained (local index in the node)
+   * @param[in, optional] imposedVelocity velocity value for the given index
    **/
   void applyDirichletBoundaryConditions(int physical_entity_tag,
-                                        const std::vector<int>& node_dof_index);
+                                        const std::vector<int>& node_dof_index,
+                                        double imposedVelocity = 0);
 
   /** @brief Apply Neuman Boundary conditions (nodal forces) for all elements matching a tag
    *

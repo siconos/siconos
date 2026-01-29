@@ -44,7 +44,8 @@
 
 void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options) {
-  /* verbose=1; */
+  /* verbose = 1; */
+
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;
   // We compute only if the local problem has contacts

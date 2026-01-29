@@ -25,8 +25,11 @@
 #include <map>
 #include <memory>
 #include <span>
+#include <unordered_set>
 #include <vector>
 
+#include "FETypes.hpp"
+#include "FiniteElement.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
@@ -79,6 +82,15 @@ class FiniteElementModel {
   FiniteElementModel(FiniteElementModel&&) = delete;
   FiniteElementModel& operator=(FiniteElementModel&&) = delete;
 
+  // Helper function to check if the element type is valid (i.e. properly implemented in
+  // siconos in the current FiniteElementModel
+  inline bool is_valid_element(FiniteElementType value) {
+    static const std::unordered_set<FiniteElementType> valid_values = {
+        FiniteElementType::T3, FiniteElementType::TH4, FiniteElementType::B2,
+        FiniteElementType::B3};
+    return valid_values.count(value) > 0;
+  }
+
  public:
   /** Constructor
       \param m the mesh
@@ -91,7 +103,7 @@ class FiniteElementModel {
 
   auto mesh() { return mesh_; }
 
-  const std::span<const std::shared_ptr<FElement>> elements() { return elements_; }
+  const std::span<const std::shared_ptr<FElement>> elements() const { return elements_; }
 
   const std::span<const std::shared_ptr<FENode>> nodes() { return nodes_; }
 
@@ -102,11 +114,22 @@ class FiniteElementModel {
    * \return the number of dof */
   siconos::algebra::Index init();
 
-  /* Assembly method for elemetary matrix */
-  void AssembleElementaryMatrix(siconos::algebra::SiconosSparseMatrix& M,
-                                siconos::algebra::SiconosDenseMatrix& Me, FElement& fe);
+  /* Assembly method for elementary matrix */
+  void assembleElementaryMatrix(siconos::algebra::SiconosSparseMatrix& M,
+                                const siconos::algebra::SiconosDenseMatrix& Me,
+                                const FElement& fe);
 
   // should be computeMass of LagrangianDS ?
+
+  /* Assembly method specific for elementary fem B matrix */
+  void assembleElementary_B_Matrix(siconos::algebra::SiconosSparseMatrix& M,
+                                   const siconos::algebra::SiconosDenseMatrix& Be,
+                                   const FElement& fe, size_t elemCnt);
+
+  void assembleElementary_S_Matrix(siconos::algebra::SiconosSparseMatrix& S,
+                                   const siconos::algebra::SiconosDenseMatrix& Se,
+                                   const FElement& fe, size_t elem_cnt);
+
   /** compute Mass Matrix
    **/
   void computeMassMatrix(siconos::algebra::SiconosSparseMatrix& mass,
@@ -114,8 +137,12 @@ class FiniteElementModel {
 
   /** compute elementary Mass Matrix
    **/
-  void computeElementaryMassMatrix(siconos::algebra::SiconosDenseMatrix&, FElement& fe,
+  void computeElementaryMassMatrix(siconos::algebra::SiconosDenseMatrix&, const FElement& fe,
                                    double massDensity);
+
+  void computeBeamElementaryMassMatrix_direct(
+      siconos::algebra::SiconosDenseMatrix& Me, FElement& fe,
+      const std::map<unsigned int, const Material>& materials);
 
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
@@ -138,16 +165,37 @@ class FiniteElementModel {
                                                const siconos::algebra::SiconosDenseMatrix& D,
                                                double thickness);
 
+  void computeBeamElementaryStiffnessMatrix_direct(
+      siconos::algebra::SiconosDenseMatrix& Ke, FElement& fe,
+      const std::map<unsigned int, const Material>& materials);
+
+  void computeElementary_B_Matrix(FElement& fe, siconos::algebra::SiconosDenseMatrix& B,
+                                  double length);
+
+  void computeBeamElementaryBMatrix_direct(
+      FElement& fe, siconos::algebra::SiconosDenseMatrix& Be,
+      const std::map<unsigned int, const Material>& materials);
+
+  void computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SiconosDenseMatrix& Be,
+                                       double thickness);
+
+  void computeBMatrix(siconos::algebra::SiconosSparseMatrix& B,
+                      const std::map<unsigned int, const Material>& mat);
+
+  void computeElasticityMatrix(siconos::algebra::SiconosSparseMatrix& S,
+                               const std::map<unsigned int, const Material>& mat);
+
   /** @brief Apply Dirichlet Boundary conditions for all nodes of all elements matching a tag
    *
    * @param[in] physical_entity_tag the tag to be matched
    * @param[in] node_dof_index list of dof to be constrained (local index in the node)
    * @param[in,out] bc boundary conditions to be updated (global indices will be appended if
+   * @param[in, optional] imposedVelocity, default = 0. Value chosen for the constrained dofs
    *not already present)
    **/
   void applyDirichletBoundaryConditions(
       int physical_entity_tag, const std::vector<int>& node_dof_index,
-      std::shared_ptr<siconos::modeling::BoundaryCondition> bc);
+      std::shared_ptr<siconos::modeling::BoundaryCondition> bc, double imposedVelocity = 0);
 
   /** @brief Apply Neuman Boundary conditions (nodal forces) for all elements matching a tag
    *

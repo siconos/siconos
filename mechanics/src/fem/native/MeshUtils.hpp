@@ -42,17 +42,41 @@ std::shared_ptr<Mesh> create2dMeshnxm(int n, int m, double Lx, double Ly);
  */
 std::shared_ptr<Mesh> createMeshFromGMSH2(std::string fname);
 
+std::shared_ptr<Mesh> createBeamMesh(const siconos::algebra::SiconosVector3& coords_start,
+                                     const siconos::algebra::SiconosVector3& coords_end,
+                                     size_t nb_elements, int dim);
+
 /** @brief write a python file describing the mesh
  *  @param[in] mesh input mesh
  *  @param[in] fname outputfile name (.py)
  */
 void writeMeshforPython(const Mesh& mesh, std::string);
 
+std::string prepareWriteForPython(std::string basename, std::string fieldname,
+                                  const std::vector<std::string>& fields);
+
 std::string prepareWriteDisplacementforPython(std::string basename);
 
 void writeDisplacementforPython(const Mesh& mesh, const FiniteElementModel& femodel,
                                 const siconos::algebra::SiconosVector& x,
                                 std::string filename);
+
+std::string prepareWriteTensorforPython(std::string basename, std::string tensorName);
+std::string prepareWriteBeamTensorforPython(std::string basename, std::string tensorName);
+
+void writeTensorforPython(const FiniteElementModel& femodel,
+                          const siconos::algebra::SiconosVector& x, std::string filename,
+                          std::string tensorName);
+
+void prepareWriteBeamPositionforSOFA(std::string filename);
+void prepareWriteBlockPositionforSOFA(std::string filename);
+
+void writeBeamPositionforSOFA(std::shared_ptr<Mesh> mesh,
+                              std::shared_ptr<FiniteElementModel> femodel,
+                              std::shared_ptr<siconos::algebra::SiconosVector> x,
+                              std::string filename, double t);
+void writeBlockPositionforSOFA(std::shared_ptr<siconos::algebra::SiconosVector> x,
+                               std::string filename, double t);
 
 }  // namespace siconos::mechanics::fem
 #endif

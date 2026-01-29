@@ -20,5 +20,10 @@ if(WITH_TESTING)
   # --- FEM tests ----
   begin_tests(src/fem/cable/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES CableDSTest.cpp ${SIMPLE_TEST_MAIN})
+
+  # --- Plasticity Components tests ----
+  begin_tests(src/fem/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+  new_test(SOURCES SolidLinearTIDSTest.cpp ${SIMPLE_TEST_MAIN})
+
   
 endif()

@@ -100,7 +100,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   fclose(foutput);
 #endif
 
-  /* verbose=1; */
+  //  verbose=1;
 
   if (verbose > 0) solver_options_print(options);
 
@@ -126,11 +126,12 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
     case SICONOS_FRICTION_2D_NSGS: {
+      printf("SICONOS_FRICTION_2D_NSGS");
       numerics_printf_verbose(
           1,
           " ========================== Call NSGS solver with reformulation into "
           "Friction-Contact 3D problem ==========================\n");
-      /* verbose=1; */
+      verbose = 1;
       // We compute only if the local problem has contacts
       DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
       if (problem->H->size1 > 0) {

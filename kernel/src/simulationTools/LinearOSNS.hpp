@@ -22,15 +22,14 @@
 #ifndef LinearOSNS_H
 #define LinearOSNS_H
 
-#include "SiconosVector.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosVector.hpp"
 
 // namespace siconos::numerics {
 
 #include "NM_types.h"  // For NM_DENSE, NM_types ...
 // enum NM_types : int;  // explicit type specification is required
 //}  // namespace siconos::numerics
-
 
 namespace siconos::modeling {
 class NonSmoothLaw;
@@ -227,14 +226,14 @@ class LinearOSNS : public OneStepNSProblem {
    *  \param ed an edge descriptor
    */
   void computeInteractionBlock(
-      const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
+      const siconos::graphs::InteractionsGraph::EDescriptor& ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) override;
 
   /** compute matrix M */
   virtual void computeM();
@@ -244,14 +243,11 @@ class LinearOSNS : public OneStepNSProblem {
    *  \param vertex vertex (interaction) which corresponds to the considered block
    *  \param pos the position of the first element of yOut to be set
    */
-  virtual void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor &vertex,
+  virtual void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor& vertex,
                              unsigned int pos);
 
-  /** compute vector q
-   *
-   *  \param time the current time
-   */
-  virtual void computeq(double time);
+  /** compute vector q */
+  virtual void compute_q();
 
   /**
      build problem coefficients (if required)
@@ -278,7 +274,7 @@ class LinearOSNS : public OneStepNSProblem {
   */
   void setKeepLambdaAndYState(bool val) { _keepLambdaAndYState = val; }
 
-  virtual bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) = 0;
+  virtual bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) = 0;
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // LinearOSNS_H

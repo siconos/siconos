@@ -70,7 +70,7 @@ siconos::algebra::SiconosVector normInfByColumn(const SiconosSparseMatrix& m);
     \param mat input matrix
     \param tol tolerance value
  */
-bool isSymmetric(SiconosDenseMatrix& mat, double tol = 1e-12);
+bool isSymmetric(const SiconosDenseMatrix& mat, double tol = 1e-12);
 bool isSymmetric(const SiconosSparseMatrix& mat, double tol = 1e-12);
 
 // Concept : any eigen matrix complient with middleCols * vec, which means for us dense, sparse

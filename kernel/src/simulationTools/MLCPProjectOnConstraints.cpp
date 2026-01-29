@@ -830,7 +830,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeqBlock(
       "VDescriptor& vertex_inter, unsigned int pos)\n");
 }
 
-void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeq(double time) {
+void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::compute_q() {
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
   _q->setZero();
 

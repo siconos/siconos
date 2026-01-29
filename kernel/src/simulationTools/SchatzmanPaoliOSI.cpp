@@ -184,7 +184,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
 }
 
 void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
-    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending

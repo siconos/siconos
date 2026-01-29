@@ -76,13 +76,13 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 }
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryConditions(
-    int physical_entity_tag, const std::vector<int>& node_dof_index) {
+    int physical_entity_tag, const std::vector<int>& node_dof_index, double imposedVelocity) {
   if (!boundaryConditions_)
     boundaryConditions_ = std::make_shared<siconos::modeling::BoundaryCondition>(
         siconos::modeling::BoundaryCondition::Indices{});
 
   FEModel_->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
-                                             boundaryConditions_);
+                                             boundaryConditions_, imposedVelocity);
 
   reactionToBoundaryConditions_ = std::make_shared<siconos::algebra::SiconosVector>(
       boundaryConditions_->velocityIndices().size());

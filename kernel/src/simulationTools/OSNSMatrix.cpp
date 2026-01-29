@@ -21,15 +21,13 @@
 // #include <assert.h>
 
 #include "BlockCSRMatrix.hpp"
+#include "BoundaryCondition.hpp"
 #include "Interaction.hpp"
-// #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
-// #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-// #include "SiconosVector.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -141,7 +139,7 @@ siconos::algebra::Index siconos::nonsmooth_formulations::OSNSMatrix::updateSizeA
   for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
     DSG.properties(*dsi).absolute_position = dim;
-    dim += ds->dimension();
+    dim += ds->real_size();
   }
 
   return dim;
@@ -478,45 +476,29 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
           for (auto ds = ds1; !endl; ds = ds2, posBlock = pos_ds2) {
             endl = (ds == ds2);
-            size_t sizeDS = ds->dimension();
+            size_t sizeDS = ds->real_size();
 
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
-
-            if (sods) {
-              // std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
-              if (sods->boundaryConditions()) {
-                // bc = sods->boundaryConditions();
-                // NM_dense_display(array,sizeY,sizeDS,sizeY);
-                // array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
-                // memcpy(array_with_bc, array ,sizeY*sizeDS,sizeof(double));
-                // NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
-                // for(auto itindex: bc->velocityIndices())
-                // {
-
-                //   for (siconos::algebra::Index row; row < sizeY; row++  )
-                //   {
-                //     array_with_bc[row + (sizeY) * (posBlock + itindex)] = 0.0
-                //   }
-                //     // (nslawSize,sizeDS));
-                //   //std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
-                //   std::make_shared<siconos::algebra::SiconosVector>(nslawSize));
-                //   //coltmp->setZero();
-                //   std::cout <<  "bc indx "<< itindex << std::endl;
-                // }
-
-                // //getchar();
-                THROW_EXCEPTION(
-                    "siconos:simulation::OSNSMatrix::fillHtrans boundary conditions not yet "
-                    "implemented.");
-              }
-            }
-
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
-            auto leftInteractionBlock = inter.getLeftInteractionBlock();
-            const double* raw_array = leftInteractionBlock.data();
-            CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
-                                             raw_array + posBlock * sizeY, sizeY, sizeDS,
-                                             DBL_EPSILON);
+
+            if (sods && sods->boundaryConditions()) {
+              auto bc = sods->boundaryConditions();
+
+              siconos::algebra::SiconosDenseMatrix inter_block =
+                  inter.getLeftInteractionBlock();
+              for (auto idcol : bc->velocityIndices()) {
+                inter_block.col(posBlock + idcol).setZero();
+              }
+              const double* raw_array = inter_block.data();
+              CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
+                                               raw_array + posBlock * sizeY, sizeY, sizeDS,
+                                               DBL_EPSILON);
+            } else {
+              const double* raw_array = inter.getLeftInteractionBlock().data();
+              CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
+                                               raw_array + posBlock * sizeY, sizeY, sizeDS,
+                                               DBL_EPSILON);
+            }
           }
         }
         _triplet_nzmax = NM_nnz(&H_NM);

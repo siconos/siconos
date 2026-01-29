@@ -20,30 +20,22 @@
 #include <Eigen/src/Core/util/Constants.h>
 
 #include "BoundaryCondition.hpp"
-#include "D1MinusLinearOSI.hpp"
 #include "DynamicalSystem.hpp"
 #include "EulerMoreauOSI.hpp"
-#include "FremondImpactFrictionNSL.hpp"  // For the nslaw visitor
 #include "Interaction.hpp"
 #include "LagrangianCompliantLinearTIR.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
-#include "LsodarOSI.hpp"
-#include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "NewMarkAlphaOSI.hpp"
-#include "NonSmoothLaw.hpp"
 #include "NumericsMatrix.h"  // NM_scal
 #include "OSNSMatrix.hpp"
 #include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
-#include "SchatzmanPaoliOSI.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -394,7 +386,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
 
     auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
     auto osiType = osi.getType();
-    auto sizeDS = ds->dimension();
+    auto sizeDS = ds->real_size();
 
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
@@ -601,7 +593,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   //  currentInteractionBlock->setZero();
 
   // loop over the common DS
-  auto sizeDS = ds->dimension();
+  auto sizeDS = ds->real_size();
 
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
@@ -633,7 +625,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     if (d->boundaryConditions()) bc = d->boundaryConditions();
     if (bc) {
       for (auto itindex : bc->velocityIndices()) {
-        // (nslawSize,sizeDS));
         std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
             std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);
         coltmp->setZero();
@@ -711,8 +702,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
       "Interaction> inter, unsigned int pos)\n");
 }
 
-void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
-  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
+void siconos::nonsmooth_formulations::LinearOSNS::compute_q() {
+  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::compute_q()\n");
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
   _q->setZero();
 
@@ -729,7 +720,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
     pos = indexSet->properties(*ui).absolute_position;
     computeqBlock(*ui, pos);  // free output is saved in y
   }
-  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
+  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::compute_q()\n");
 }
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
@@ -890,7 +881,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
   std::cout << "LinearOSNS: init w and z " << elapsed << " ms" << std::endl;
 #endif
   // Computes q of LinearOSNS
-  computeq(time);
+  compute_q();
 #ifdef WITH_TIMER
   end_old = end;
   end = std::chrono::system_clock::now();
