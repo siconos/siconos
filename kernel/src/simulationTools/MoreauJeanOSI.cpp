@@ -1816,9 +1816,9 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        workForces(ds->number(), 0) = ds->number();
-        workForces(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
-
+        workForces(cnt_ds, 0) = ds->number();
+        workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
+	cnt_ds++;
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
     } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
@@ -1845,9 +1845,9 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        workForces(ds->number(), 0) = ds->number();
-        workForces(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
-
+        workForces(cnt_ds, 0) = ds->number();
+        workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
+	cnt_ds++
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
