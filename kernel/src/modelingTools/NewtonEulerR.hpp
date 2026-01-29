@@ -22,9 +22,9 @@
 #define NEWTONEULERRELATION_H
 
 #include <cassert>
+#include <optional>
 
 #include "Relation.hpp"
-#include <optional>
 
 namespace siconos::modeling {
 
@@ -129,8 +129,8 @@ class NewtonEulerR : public Relation {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeH_NE_(double time, Interaction &inter,
-                            const siconos::algebra::BlockVector &q0) {}
+  virtual void computeH_NE_(double time, Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) {}
 
  public:
   /** Default and only constructor */
@@ -143,13 +143,13 @@ class NewtonEulerR : public Relation {
    *
    *  \param inter  Interaction associated with the Relation
    */
-  virtual void initialize(Interaction &inter) override;
+  virtual void initialize(Interaction& inter) override;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(const Interaction &inter) const override;
+  virtual void checkSize(const Interaction& inter) const override;
 
   /** \return a read-only view on \f$ H(q, \ldots) \f$ matrix */
   inline auto H_NE() const {
@@ -190,14 +190,14 @@ class NewtonEulerR : public Relation {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeH_NE_dotFunction(
-      const siconos::modeling::func_prototypes::FunctionBVBV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBVBV_M& fct);
 
   /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
    *  \param q 'list' of state vectors (for all ds involved in the interaction)
    *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
    */
-  virtual void computeH_NE_dot(const siconos::algebra::BlockVector &q,
-                               const siconos::algebra::BlockVector &qdot);
+  virtual void computeH_NE_dot(const siconos::algebra::BlockVector& q,
+                               const siconos::algebra::BlockVector& qdot);
 
   /** \return  a read-only view on additional  terms of the second order time derivative of y
    *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
@@ -217,7 +217,7 @@ class NewtonEulerR : public Relation {
        \param ds2 second ds linked to this interaction (target). If there is
        only one ds in the inter, call this function with ..., ds, ds)
     */
-  void computeSecondOrderTimeDerivativeTerms(double time, Interaction &inter,
+  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter,
                                              std::shared_ptr<DynamicalSystem> ds1,
                                              std::shared_ptr<DynamicalSystem> ds2);
 
@@ -245,9 +245,10 @@ class NewtonEulerR : public Relation {
       involved in the relation
       \param[in,out] y the resulting vector
   */
-  virtual void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                Eigen::Ref<siconos::algebra::SiconosVector> y);
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** default implementation consists in multiplying jachq and T
    *  in this implementation we use T_buffer_ which is consitent which directly
@@ -257,15 +258,15 @@ class NewtonEulerR : public Relation {
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  virtual void computeH_NE_prod_T(const Interaction &inter,
-                                  const siconos::algebra::BlockVector &q0);
+  virtual void computeH_NE_prod_T(const Interaction& inter,
+                                  const siconos::algebra::BlockVector& q0);
 
   /** Update H_NE and \f$ H_NE. T \f$
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    */
-  virtual void computeJach(double time, Interaction &inter) override;
+  virtual void computeJach(double time, Interaction& inter) override;
 
   /** to compute output
    *
@@ -274,7 +275,7 @@ class NewtonEulerR : public Relation {
    *  \param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
-  virtual void computeOutput(double time, Interaction &inter,
+  virtual void computeOutput(double time, Interaction& inter,
                              unsigned int derivativeNumber = 0) override;
 
   /** to compute the input
@@ -283,10 +284,18 @@ class NewtonEulerR : public Relation {
    *  \param inter the interaction using this relation
    *  \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
 
   void display() const override {}
-  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+
+  /** @brief allocation of memory space for relations in the graph
+   *      Warning: internal use only (called from Topology)
+   *  @param dslink a container of vectors (pointers), from the parent interaction
+   */
+  virtual void allocate_dslink_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
+
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATION_H

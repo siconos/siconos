@@ -90,13 +90,13 @@ class LagrangianR : public Relation {
    *
    *  \param inter the interaction using this relation
    */
-  inline void initialize(Interaction &inter) override {};
+  inline void initialize(Interaction& inter) override {};
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(const Interaction &inter) const override {};
+  virtual void checkSize(const Interaction& inter) const override {};
   // Does nothing by default. Reimplement if required.
 
   /** \return a read-only view on \f$ \nabla^\top_q h(q, \ldots) \f$ matrix */
@@ -109,7 +109,14 @@ class LagrangianR : public Relation {
   /** main relation members display */
   void display() const override;
 
-  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+  /** @brief allocation of memory space for relations in the graph
+   *      Warning: internal use only (called from Topology)
+   *  @param dslink a container of vectors (pointers), from the parent interaction
+   */
+  virtual void allocate_dslink_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
+
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 
 }  // namespace siconos::modeling

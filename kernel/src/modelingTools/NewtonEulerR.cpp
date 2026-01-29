@@ -337,3 +337,20 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
   DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 }
+
+void siconos::modeling::NewtonEulerR::allocate_dslink_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
+  DSlink.resize(siconos::tools::enum_to_index(NewtonEulerR::WorkDS::DSlinkSize));
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::q0)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // displacement
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::velocity)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // velocity
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::dotq)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // qdot
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p0)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p1)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p2)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+}

@@ -119,7 +119,7 @@ class FirstOrderR : public Relation {
    *
    *  \param inter the interaction using this relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobianhOver_state() const { return jacobianhOver_state_view_ != nullptr; }
@@ -165,6 +165,13 @@ class FirstOrderR : public Relation {
                                           jacobiangOver_lambda_view_->rows(),
                                           jacobiangOver_lambda_view_->cols());
   }
+
+  /** @brief allocation of memory space for relations in the graph
+   *      Warning: internal use only (called from Topology)
+   *  @param dslink a container of vectors (pointers), from the parent interaction
+   */
+  virtual void allocate_dslink_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
 
   virtual void display() const override;
 };

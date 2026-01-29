@@ -30,14 +30,14 @@ void SiconosVisitorTest::setUp() {}
 void SiconosVisitorTest::tearDown() {}
 
 struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl)  override {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
-  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl)  override {
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
 
-  void visit(const siconos::modeling::ComplementarityConditionNSL& nsl)  override {
+  void visit(const siconos::modeling::ComplementarityConditionNSL& nsl) override {
     answer = 0.;
   }
 };
@@ -54,5 +54,5 @@ void SiconosVisitorTest::testVisitNSL() {
   auto muVal2 = siconos::modeling::nonsmooth_laws::ask<ForMu>(*nslaw3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - visit a nonsmooth law:", muVal2 == mu, true);
   auto muVal3 = siconos::modeling::nonsmooth_laws::ask<ForMu>(*nslaw3);
-//  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - visit a nonsmooth law:", muVal2 == mu, true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - visit a nonsmooth law:", muVal2 == mu, true);
 }

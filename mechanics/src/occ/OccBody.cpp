@@ -60,8 +60,9 @@ void siconos::mechanics::occ::OccBody::addContactShape(
   std::visit(computeUVBounds, shape);
 }
 
+
 void siconos::mechanics::occ::OccBody::addShape(
-    std::shared_ptr<TopoDS_Shape> shape,
+						OccContactShape& shape,
     std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> pos,
     std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> ori) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
@@ -77,10 +78,11 @@ void siconos::mechanics::occ::OccBody::addShape(
     offset[6] = (*ori)(3);
   }
 
-  _shapes->push_back(std::make_tuple(shape, offset));
+  _shapes->push_back(std::make_tuple(shape.shape(), offset));
 
   updateShapes();
 }
+
 
 void siconos::mechanics::occ::OccBody::updateContactShapes() {
   boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5),

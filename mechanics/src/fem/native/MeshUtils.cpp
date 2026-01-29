@@ -418,7 +418,7 @@ void siconos::mechanics::fem::writeTensorforPython(const FiniteElementModel& fem
   for (auto& str : fields) {
     size_t elem_cnt = 0;
     outfile << str + ".append(np.array([";
-    for (const auto& fe : femodel->elements()) {
+    for (const auto& fe : femodel.elements()) {
       outfile << x(elem_cnt * 3 + pos) << ", ";
       elem_cnt++;
     }

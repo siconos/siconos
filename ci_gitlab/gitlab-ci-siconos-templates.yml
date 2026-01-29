@@ -276,6 +276,7 @@ workflow:
     - /kaniko/executor
       --build-arg BUILD_DIR=$BUILD_DIR
       --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
+      --build-arg EXAMPLES_BRANCH_NAME=$CI_COMMIT_REF_NAME
       --context $CI_PROJECT_DIR
       --dockerfile  $DOCKERFILE_PATH/Dockerfile
       --target=$SICONOS_DOCKER_TARGET

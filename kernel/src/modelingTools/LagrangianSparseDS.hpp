@@ -1262,6 +1262,14 @@ class LagrangianSparseDS : public SecondOrderDS {
   */
   void init_lu_mass() override;
 
+  /** @brief add (pointer links) of state variable of interest into dslink
+   *      Warning: internal use only (called from Topology)
+   *      dslink is used in relations to compute output and inputs
+   *  @param dslink a container of vectors (pointers)
+   */
+  virtual void initialize_ds_link_for_relations(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
+
   // visitors hook
   virtual void accept(dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);

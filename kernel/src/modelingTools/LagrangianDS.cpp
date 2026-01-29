@@ -20,10 +20,14 @@
 #include <iostream>
 #include <memory>
 
+// #include "Interaction.hpp"
+#include "BlockVector.hpp"
+#include "LagrangianR.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
+#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -858,4 +862,28 @@ double siconos::modeling::LagrangianDS::computeKineticEnergy() {
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::LagrangianDS::computeKineticEnergy()\n");
   return K;
+}
+
+void siconos::modeling::LagrangianDS::initialize_ds_link_for_relations(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
+  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(q());
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(velocity());
+
+  if (acceleration()) {
+    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
+          std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(acceleration());
+  }
+
+  for (unsigned int k = 0; k < 3; k++) {
+    if (p(k)) {
+      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
+        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
+            std::make_shared<siconos::algebra::BlockVector>();
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(p(k));
+    }
+  }
 }

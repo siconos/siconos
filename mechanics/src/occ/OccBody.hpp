@@ -91,11 +91,13 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param orientation relative orientation quaternion w, x, y, z
   */
   void addShape(
-      std::shared_ptr<TopoDS_Shape> shape,
+      OccContactShape& shape,
       std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
           std::nullopt,
       std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
           std::nullopt);
+
+
 
   /** Update positions and orientations of contact shapes.
    */
