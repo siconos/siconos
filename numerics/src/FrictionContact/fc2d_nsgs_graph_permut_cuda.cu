@@ -492,12 +492,10 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   size_t start_line, end_line;
   size_t current_nnz;
   size_t cumul_nnz = 0;
-  size_t cumul_n_rows = 0;
   for (unsigned int color = 0; color < n_colors; color++) {
     start_line = 2 * sum_sizes[color];
     end_line = 2 * sum_sizes[color + 1];
     n_rows = end_line - start_line;
-    cumul_n_rows += n_rows;
     current_nnz =
         SBM_permuted_csr_nodiag->p[end_line] - SBM_permuted_csr_nodiag->p[start_line];
 
@@ -605,12 +603,13 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
-#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2, \
-                                               index1_data, index2_data)                     \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)         \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,         \
-               has_not_converged, norm_q, w, itermax)                                        \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,         \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2,
+\
+                                               index1_data, index2_data) \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter) \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
+               has_not_converged, norm_q, w, itermax) \
+    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact, \
                blocks_contiguous)
     {
       local_problem =
@@ -654,9 +653,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
             localreaction[0] = z[pos];
             localreaction[1] = z[pos + 1];
 
-            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, blocks_contiguous,
-                                                 diagonal_blocks, index1_data, index2_data,
-                                                 local_problem, z);
+            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem,
+blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
 
             fc2d_nsgs_local_solve(
                 local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
@@ -782,6 +780,9 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   /* time = omp_get_wtime() - time;
   printf("time in loop: %es\n", time); */
+
+  // Copy z back to host
+  CHECK_CUDA(cudaMemcpy(z, d_z, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost))
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
