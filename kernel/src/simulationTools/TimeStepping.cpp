@@ -592,6 +592,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         // the interactions in the loop for SICONOS_TS_NONLINEAR for a good
         // Newton loop, we must have access the Hessian of constraints.
         if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
+          updateState();
           updateInteractions();
           initializeNSDSChangelog();
         }
