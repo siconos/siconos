@@ -594,8 +594,6 @@ void siconos::integrators::MoreauJeanOSI::computeInitialNewtonState() {
 
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       auto& d = static_cast<siconos::modeling::NewtonEulerDS&>(ds);
-      siconos::algebra::print(d.twist_read());
-      siconos::algebra::print(v_iter);
       v_iter = d.twist_read();
     }
   }
