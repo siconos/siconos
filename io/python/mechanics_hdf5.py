@@ -332,7 +332,7 @@ class MechanicsHdf5(object):
             self.print_io_mechanics("        -  group(self._cf_info, log ) : ", e)
         try:
             self._cf_work = data(
-                self._data, "cf_work", 7, use_compression=self._use_compression
+                self._data, "cf_work", 8, use_compression=self._use_compression
             )
 
             if self._mode == "w":
@@ -342,13 +342,16 @@ class MechanicsHdf5(object):
                 ] += " [2] : normal contact work,\n [3] : tangent contact work,\n"
                 self._cf_work.attrs[
                     "info"
-                ] += " [4] : friction dissipation,\n [5] : contact status"
+                ] += " [4] : normal contact work theta average,\n [5] : tangent contact work theta average,\n"
+                self._cf_work.attrs[
+                    "info"
+                ] += " [6] : contact status,\n [7] : positive norma contact work,\n"
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
         try:
             self._energy_work = data(
-                self._data, "energy_work", 8, use_compression=self._use_compression
+                self._data, "energy_work", 9, use_compression=self._use_compression
             )
 
             if self._mode == "w":
@@ -361,7 +364,10 @@ class MechanicsHdf5(object):
                 ] += " [3] : normal contact work,\n [4] : tangent contact work,\n"
                 self._energy_work.attrs[
                     "info"
-                ] += " [5] : friction dissipation,\n [6,7] only negative part "
+                ] += " [5] : normal contact work theta average,\n [6] tangent contact work theta average \n"
+                self._energy_work.attrs[
+                    "info"
+                ] += "[7,8] only negative part "
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
