@@ -61,7 +61,7 @@ siconos::algebra::Index siconos::mechanics::fem::FiniteElementModel::init() {
   for (auto elem : mesh_->elements()) {
     DEBUG_PRINTF("MeshElement->num() : %zu\n", elem->num());
 
-    if (is_valid_element(elem->type())) {
+    if (is_valid_element(elem->type(), mesh_->dim())) {
       // Add nodes of the current element into the global vector of nodes
       auto ndofPerNode = number_of_dof_per_node(elem->type());
       std::vector<std::shared_ptr<FENode>> fenodes;
@@ -383,6 +383,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
         fe->mElement()->type() == FiniteElementType::B3) {
       computeBeamElementaryMassMatrix_direct(Me, *fe, mat);
     } else {
+      std::cout << "TATATATATA GGS " << fe->mElement()->tags(0) << "\n";
       double massDensity = mat.at(fe->mElement()->tags(0)).massDensity();
       computeElementaryMassMatrix(Me, *fe, massDensity);
     }

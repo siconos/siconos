@@ -73,7 +73,8 @@ class FiniteElementModel {
   std::map<std::shared_ptr<MeshVertex>, std::shared_ptr<FENode>> vertexToNode_;
 
   /** MeshElement to FiniteElement map **/
-  std::map<std::shared_ptr<MeshElement>, std::shared_ptr<FiniteElement>> mElementTOFiniteElement_;
+  std::map<std::shared_ptr<MeshElement>, std::shared_ptr<FiniteElement>>
+      mElementTOFiniteElement_;
 
   /** Rule of five */
   FiniteElementModel() = delete;
@@ -83,12 +84,18 @@ class FiniteElementModel {
   FiniteElementModel& operator=(FiniteElementModel&&) = delete;
 
   // Helper function to check if the element type is valid (i.e. properly implemented in
-  // siconos in the current FiniteElementModel
-  inline bool is_valid_element(FiniteElementType value) {
-    static const std::unordered_set<FiniteElementType> valid_values = {
-        FiniteElementType::T3, FiniteElementType::TH4, FiniteElementType::B2,
-        FiniteElementType::B3};
-    return valid_values.count(value) > 0;
+  // siconos in the current FiniteElementModel and for the given mesh dimension
+  inline bool is_valid_element(FiniteElementType value, int mesh_dimension) {
+    static const std::unordered_set<FiniteElementType> valid_2d_values = {
+        FiniteElementType::T3, FiniteElementType::B2};
+    static const std::unordered_set<FiniteElementType> valid_3d_values = {
+        FiniteElementType::TH4, FiniteElementType::B3};
+    if (mesh_dimension == 2)
+      return valid_2d_values.count(value) > 0;
+    else if (mesh_dimension == 3)
+      return valid_3d_values.count(value) > 0;
+    else
+      return 0;
   }
 
  public:
@@ -137,12 +144,12 @@ class FiniteElementModel {
 
   /** compute elementary Mass Matrix
    **/
-  void computeElementaryMassMatrix(siconos::algebra::SiconosDenseMatrix&, const FiniteElement& fe,
-                                   double massDensity);
+  void computeElementaryMassMatrix(siconos::algebra::SiconosDenseMatrix&,
+                                   const FiniteElement& fe, double massDensity);
 
-  void computeBeamElementaryMassMatrix_direct(
-      siconos::algebra::SiconosDenseMatrix& Me, FiniteElement& fe,
-      const std::map<int, const Material>& materials);
+  void computeBeamElementaryMassMatrix_direct(siconos::algebra::SiconosDenseMatrix& Me,
+                                              FiniteElement& fe,
+                                              const std::map<int, const Material>& materials);
 
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
@@ -153,7 +160,8 @@ class FiniteElementModel {
   /** compute elementary Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryStiffnessMatrix(siconos::algebra::SiconosDenseMatrix& Me, FiniteElement& fe,
+  void computeElementaryStiffnessMatrix(siconos::algebra::SiconosDenseMatrix& Me,
+                                        FiniteElement& fe,
                                         const siconos::algebra::SiconosDenseMatrix& D,
                                         double thickness);
 
@@ -172,11 +180,12 @@ class FiniteElementModel {
   void computeElementary_B_Matrix(FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& B,
                                   double length);
 
-  void computeBeamElementaryBMatrix_direct(
-      FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& Be,
-      const std::map<int, const Material>& materials);
+  void computeBeamElementaryBMatrix_direct(FiniteElement& fe,
+                                           siconos::algebra::SiconosDenseMatrix& Be,
+                                           const std::map<int, const Material>& materials);
 
-  void computeElementaryBMatrix_direct(FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& Be,
+  void computeElementaryBMatrix_direct(FiniteElement& fe,
+                                       siconos::algebra::SiconosDenseMatrix& Be,
                                        double thickness);
 
   void computeBMatrix(siconos::algebra::SiconosSparseMatrix& B,
