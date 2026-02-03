@@ -215,17 +215,18 @@ static void remove_diagonal_blocks(FrictionContactProblem* problem) {
  * compute and aggregate the errors.
  */
 __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
-    const double* W,   // 4*n
-    const double* D,   // size: n
-    const double* q,   // 2*n
-    const double* mu,  // size: n
-    double* P,         // 2*n (updated in place)
-    double* sumP2,     // scalar (device pointer)
-    double* sumErr2,   // scalar (device pointer)
+    const double* W,        // Matrix blocks
+    const double* D,        // Determinants
+    const double* q_ax,     // Result from cuSPARSE (Ax)
+    const double* q_const,  // The constant vector B
+    const double* mu,       // Friction coefficients
+    double* P,              // The solution vector z
+    double* sumP2,          // Reduction: squared norm
+    double* sumErr2,        // Reduction: squared error
     const int k1, const int k2) {
   extern __shared__ double shmem[];
-  double* shP2 = shmem;                 // blockDim.x
-  double* shErr2 = shmem + blockDim.x;  // blockDim.x
+  double* shP2 = shmem;
+  double* shErr2 = shmem + blockDim.x;
 
   int tid = threadIdx.x;
   int local = blockIdx.x * blockDim.x + tid;
@@ -235,13 +236,17 @@ __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
   double localErr2 = 0.0;
 
   if (i < k2) {
+    // 1. FUSED READ: Compute q = Ax + B in registers
+    // This replaces the cudaMemcpy(D2D)
+    double qi0 = q_ax[2 * i] + q_const[2 * i];
+    double qi1 = q_ax[2 * i + 1] + q_const[2 * i + 1];
+
     const double Di = D[i];
     const double mui = mu[i];
     const double* Wi = &W[4 * i];
-    const double* qi = &q[2 * i];
     double* Pi = &P[2 * i];
 
-    // Save old P
+    // Save old P for error calculation
     double Pold0 = Pi[0];
     double Pold1 = Pi[1];
 
@@ -250,27 +255,29 @@ __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
     const double Wnt = Wi[2];
     const double Wtt = Wi[3];
 
-    if (qi[0] > 0.0) {
+    // 2. SOLVER LOGIC: Using our register-cached qi0 and qi1
+    if (qi0 > 0.0) {
       Pi[0] = 0.0;
       Pi[1] = 0.0;
     } else {
-      Pi[0] = -(Wtt * qi[0] - Wnt * qi[1]) / Di;
-      Pi[1] = -(-Wtn * qi[0] + Wnn * qi[1]) / Di;
+      // Using the fused values here
+      Pi[0] = -(Wtt * qi0 - Wnt * qi1) / Di;
+      Pi[1] = -(-Wtn * qi0 + Wnn * qi1) / Di;
 
       double muPn = mui * Pi[0];
 
       if (fabs(Pi[1]) > muPn) {
         if (Pi[1] + muPn < 0.0) {
-          Pi[0] = -qi[0] / (Wnn - mui * Wnt);
+          Pi[0] = -qi0 / (Wnn - mui * Wnt);
           Pi[1] = -mui * Pi[0];
         } else {
-          Pi[0] = -qi[0] / (Wnn + mui * Wnt);
+          Pi[0] = -qi0 / (Wnn + mui * Wnt);
           Pi[1] = mui * Pi[0];
         }
       }
     }
 
-    // Accumulate local contributions
+    // 3. ACCUMULATION
     double dP0 = Pi[0] - Pold0;
     double dP1 = Pi[1] - Pold1;
 
@@ -278,12 +285,11 @@ __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
     localErr2 = dP0 * dP0 + dP1 * dP1;
   }
 
-  // Store into shared memory
+  // --- Reduction Logic remains the same ---
   shP2[tid] = localP2;
   shErr2[tid] = localErr2;
   __syncthreads();
 
-  // Block reduction
   for (int s = blockDim.x / 2; s > 0; s >>= 1) {
     if (tid < s) {
       shP2[tid] += shP2[tid + s];
@@ -292,7 +298,6 @@ __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
     __syncthreads();
   }
 
-  // One atomic per block
   if (tid == 0) {
     atomicAdd(sumP2, shP2[0]);
     atomicAdd(sumErr2, shErr2[0]);
@@ -537,7 +542,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   size_t* all_Buffer_Size = (size_t*)malloc(n_colors * sizeof(size_t));
 
   alpha = 1.0;
-  beta = 1.0;
+  beta = 0.0;
   for (unsigned int color = 0; color < n_colors; color++) {
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
                                            all_cusparse_csrmat[color], vec_z, &beta,
@@ -732,8 +737,9 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
 
     while ((iter < itermax) && has_not_converged) {
       // Set local problems q to q
-      CHECK_CUDA(
-          cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double), cudaMemcpyDeviceToDevice))
+      // CHECK_CUDA(
+      //    cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double),
+      //    cudaMemcpyDeviceToDevice))
       CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
       CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
 
@@ -750,25 +756,27 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
                                     d_all_Buffer[color]))
 
         fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize>>>(
-            d_diagonal_blocks, d_determinants, d_q_new, d_mu, d_z, d_sumP2, d_sumErr2,
-            sum_sizes[color], sum_sizes[color + 1]);
+            d_diagonal_blocks, d_determinants, d_q_new, d_q_const, d_mu, d_z, d_sumP2,
+            d_sumErr2, sum_sizes[color], sum_sizes[color + 1]);
       }
 
-      CHECK_CUDA(
-          cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
-      CHECK_CUDA(cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost))
+      if (iter % 100 == 0 || iter == itermax - 1) {
+        CHECK_CUDA(
+            cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
+        CHECK_CUDA(cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost))
 
-      error = sqrt(light_error_sum);
-      norm_r = sqrt(norm_r);
-      if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
+        error = sqrt(light_error_sum);
+        norm_r = sqrt(norm_r);
+        if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
 
-      if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        has_not_converged = determine_convergence(error, tolerance, iter, options);
-      } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        has_not_converged = determine_convergence_with_full_final(
-            problem, options, z, w, &tolerance, norm_q, error, iter);
+        if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+            SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
+          has_not_converged = determine_convergence(error, tolerance, iter, options);
+        } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+                   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+          has_not_converged = determine_convergence_with_full_final(
+              problem, options, z, w, &tolerance, norm_q, error, iter);
+        }
       }
 
       ++iter;
