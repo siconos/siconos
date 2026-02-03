@@ -26,8 +26,6 @@
 #include "FiniteElementModel.hpp"
 #include "Mesh.hpp"
 #include "SiconosVector.hpp"
-#include "StressLinearTIR.hpp"
-#include "Tools.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES

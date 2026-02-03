@@ -47,9 +47,12 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
   enum class wk_ds : std::size_t {
     residu_free,
     vfree,
+    v_iter,
     residu_sigma_free,
     sigma_free,
+    sigma_iter,
     q_sigma_free,
+    buffer,
     size
   };
 
@@ -81,6 +84,9 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
       const siconos::algebra::SiconosDenseLUMatrix& LUW);
 
+  /** compute the initial state of the Newton loop */
+  virtual void computeInitialNewtonState() override;
+
   /**
       return the maximum of all norms for the "MoreauJeanOSI-discretized"
       residus of DS
@@ -109,6 +115,11 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    *  @param level the level of interest for the dynamics: not used at the time
    */
   virtual void updateState(const unsigned int level) override;
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
 
   /** Apply the rule to one Interaction to know if it should be included in the
    *  IndexSet of level i

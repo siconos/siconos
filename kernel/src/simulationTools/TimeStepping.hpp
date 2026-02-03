@@ -26,7 +26,7 @@
 namespace siconos::simulation {
 
 /** type of function used to post-treat output info from solver. */
-typedef void (*CheckSolverFPtr)(int, Simulation *);
+typedef void (*CheckSolverFPtr)(int, Simulation*);
 
 /** \brief Event-capturing Time-Stepping simulation
  *
@@ -239,6 +239,7 @@ class TimeStepping : public Simulation {
    *  to start the newton algorithm.
    */
   void initializeNewtonSolve();
+  void updateAndSwapAllOutput  ()  override;
   void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 

@@ -249,7 +249,12 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *
    *  \param level level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override;
+  void updateState(const unsigned int level) override {};
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
 
   /** Displays the data of the SchatzmanPaoliOSI's integrator
    */

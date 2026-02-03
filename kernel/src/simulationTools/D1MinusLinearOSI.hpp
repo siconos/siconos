@@ -291,6 +291,11 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    */
   void updateState(const unsigned int level) override;
 
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
+
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
    * \param inter the involved interaction

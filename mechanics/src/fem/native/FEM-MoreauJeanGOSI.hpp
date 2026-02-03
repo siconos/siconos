@@ -22,31 +22,18 @@
 #ifndef FEMMoreauJeanGOSI_H
 #define FEMMoreauJeanGOSI_H
 
-#include "MoreauJeanGOSI.hpp"
+#include "FEM-MoreauJeanOSI.hpp"
 
 namespace siconos::mechanics::fem::integrators {
 
 /** A specific implementation of MoreauJeanGOSI for SolidLinearTIDS */
 
-class MoreauJeanGOSI : public siconos::integrators::MoreauJeanGOSI {
+class MoreauJeanGOSI : public MoreauJeanOSI {
  protected:
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
  public:
-  /** Names and positions of variables that might be used as buffers during osi operations.
-   * Last param, size, gives the size of the BlockVector to be allocated.
-   */
-  enum class wk_ds : std::size_t {
-    residu_free,
-    free,
-    residu_sigma_free,
-    // sigma_free,
-    q_sigma_free,
-    buffer,
-    size
-  };
-
-  using siconos::integrators::MoreauJeanGOSI::MoreauJeanGOSI;
+  using MoreauJeanOSI::MoreauJeanOSI;
 
   /** destructor */
   virtual ~MoreauJeanGOSI() noexcept = default;
@@ -60,6 +47,15 @@ class MoreauJeanGOSI : public siconos::integrators::MoreauJeanGOSI {
   virtual void initializeWorkVectorsForDS(
       double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
+  siconos::algebra::SiconosVector& get_v_iter(
+      std::vector<std::shared_ptr<algebra::SiconosVector>> ds_works) {
+    return *ds_works[tools::enum_to_index(wk_ds::v_iter)];
+  }
+  siconos::algebra::SiconosVector& get_sigma_iter(
+      std::vector<std::shared_ptr<algebra::SiconosVector>> ds_works) {
+    return *ds_works[tools::enum_to_index(wk_ds::sigma_iter)];
+  }
+
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
    *
@@ -71,15 +67,41 @@ class MoreauJeanGOSI : public siconos::integrators::MoreauJeanGOSI {
       siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
       siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
+  /** compute the initial state of the Newton loop.
+   */
+  void computeInitialNewtonState() override;
+
   /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */
   virtual double computeResidu() override;
 
-  /** update the state of the dynamical systems
-   *
-   *  \param level the level of interest for the dynamics: not used at the time
+  /** Perform the integration of the dynamical systems linked to this integrator
+   *  without taking into account the nonsmooth input (_r or _p)
    */
-  void updateState(const unsigned int level) override;
+  void computeFreeState() override {};
+
+  /** integrate the system, between tinit and tend (->iout=true), with possible
+   *  stop at tout (->iout=false)
+   *
+   *  \param tinit the initial time
+   *  \param tend the end time
+   *  \param tout the real end time
+   *  \param notUsed useless flag (for MoreauJeanGOSI, used in LsodarOSI)
+   */
+  void integrate(double& tinit, double& tend, double& tout, int& notUsed) override;
+
+  /** compute the current iteration
+   */
+  void computeIteration() override;
+
+  /** Compute the nonsmooth law contribution to the output
+   *
+   *  \param inter the interaction (for y_k)
+   *  \param osnsp the non-smooth integrator
+   */
+  void NonSmoothLawContributionToOutput(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem& osnsp);
 };
 }  // namespace siconos::mechanics::fem::integrators
 #endif  // MoreauJeanGOSI_H

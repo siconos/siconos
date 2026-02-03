@@ -358,6 +358,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   virtual void computeInitialStateOfTheStep() {};
 
+  virtual void updateAndSwapAllOutput() {};
+
   /**
       update all index sets of the topology, using current y and lambda values of Interactions
    */
@@ -417,6 +419,10 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   /** update state of each dynamical system
    */
   virtual void updateState(unsigned int level = 0);
+
+ /** update state of each dynamical system
+   */
+  virtual void computeIteration();
 
   /** update output
    *

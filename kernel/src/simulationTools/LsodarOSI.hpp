@@ -120,22 +120,22 @@ class LsodarOSI : public OneStepIntegrator {
   inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
   /** \return relative tolerance parameter for lsodar */
-  inline const std::vector<double> &getRtol() const { return rtol; }
+  inline const std::vector<double>& getRtol() const { return rtol; }
 
   /** \return absolute tolerance parameter for lsodar*/
-  inline const std::vector<double> &getAtol() const { return atol; }
+  inline const std::vector<double>& getAtol() const { return atol; }
 
   /** \return the maximum number of steps for one call */
   inline int getMaxNstep() const { return iwork[5]; }
 
   /** \return real work vector parameter for lsodar */
-  inline const std::vector<double> &getRwork() const { return rwork; }
+  inline const std::vector<double>& getRwork() const { return rwork; }
 
   /** \return iwork */
-  inline const std::vector<int> &getIwork() const { return iwork; }
+  inline const std::vector<int>& getIwork() const { return iwork; }
 
   /** \return root information */
-  inline const std::vector<int> &getJroot() const { return jroot; }
+  inline const std::vector<int>& getJroot() const { return jroot; }
 
   /** set Jt value, Jacobian type indicator. Excerpts from the lsodar
    *  documentation. 1 means a user-supplied full (neq by neq) jacobian. 2 means
@@ -156,7 +156,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(int newItol, std::vector<double> &&newRtol, std::vector<double> &&newAtol);
+  void setTol(int newItol, std::vector<double>&& newRtol, std::vector<double>&& newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
    *
@@ -195,7 +195,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param size size of x array
    *  \param array x array of double
    */
-  void fillXWork(std::size_t size, double *array);
+  void fillXWork(std::size_t size, double* array);
 
   /** compute rhs(t) for all dynamical systems in the set
    *
@@ -208,13 +208,13 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param t current time of simulation
    *  \param DSG0 the graph of DynamicalSystem
    */
-  void computeJacobianRhs(double t, siconos::graphs::DynamicalSystemsGraph &DSG0);
+  void computeJacobianRhs(double t, siconos::graphs::DynamicalSystemsGraph& DSG0);
 
-  void f(int *sizeOfX, double *time, double *x, double *xdot);
+  void f(int* sizeOfX, double* time, double* x, double* xdot);
 
-  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
+  void g(int* nEq, double* time, double* x, int* ng, double* gOut);
 
-  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
+  void jacobianfx(int*, double*, double*, int*, int*, double*, int*);
 
   /** initialization of the integrator
    */
@@ -237,8 +237,8 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -255,13 +255,18 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param ioparam in-out parameter, input: 1 for first call, else 2. Output:
    *  2 if no root was found, else 3.
    */
-  void integrate(double &tinit, double &tend, double &tout, int &ioparam) override;
+  void integrate(double& tinit, double& tend, double& tout, int& ioparam) override;
 
   /** update the state of the DynamicalSystems attached to this Integrator
    *
    *  \param level level of interest for the dynamics
    */
   void updateState(const unsigned int level) override;
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
 
   void prepareNewtonIteration(double time) override { assert(0); };
 
@@ -271,14 +276,14 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param vertex_descr descriptor vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_descr,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_descr,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
   };
 

@@ -80,8 +80,8 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   void _initialize_iteration_matrix(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
@@ -99,8 +99,8 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    */
   unsigned int numberOfIndexSets() const override { return 2; };
 
-  void compute_parameters(double time_step, double omega, double sigma, double &theta,
-                          double &sigma_star);
+  void compute_parameters(double time_step, double omega, double sigma, double& theta,
+                          double& sigma_star);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    *  stop at tout (->iout=false)
@@ -110,7 +110,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param tout real end time
    *  \param idid flag used in EventDriven schemes
    */
-  void integrate(double &tinit, double &tend, double &tout, int &idid) override;
+  void integrate(double& tinit, double& tend, double& tout, int& idid) override;
 
   /** return the maximum of all norms for the "MoreauJeanOSI-discretized"
       residus of DS
@@ -130,22 +130,22 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param vertex_inter vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the
    * OneStepNonsmooth problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
   };
 
   /** update the state of the dynamical systems
       \param ds the dynamical to update
    */
-  void updatePosition(siconos::modeling::DynamicalSystem &ds);
+  void updatePosition(siconos::modeling::DynamicalSystem& ds);
 
   /** update the state of the DynamicalSystem attached to this Integrator
    *

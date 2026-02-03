@@ -365,6 +365,11 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   virtual std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUiterationMatrix(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
+  /** Compute the current iteration of the state
+   *
+   */
+  virtual void computeIteration() = 0;
+  
   /** update the state of the DynamicalSystem attached to this Integrator
    *
    *  \param level level of interest for the dynamics

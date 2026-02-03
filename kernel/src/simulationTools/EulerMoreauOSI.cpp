@@ -860,8 +860,8 @@ void siconos::integrators::EulerMoreauOSI::integrate(double& tinit, double& tend
   }
 }
 
-void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
-  DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState\n");
+void siconos::integrators::EulerMoreauOSI::computeIteration() {
+  DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration\n");
 
   double h = _simulation->timeStep();
 
@@ -880,9 +880,9 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
 
     auto fods = std::static_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
     auto& x = *ds->x();
-    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState Old value of x\n");
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration Old value of x\n");
     DEBUG_EXPR(siconos::algebra::print(x));
-    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState residu value\n");
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration residu value\n");
     DEBUG_EXPR(siconos::algebra::print(*d->r()));
 
     // TODO ???
@@ -914,7 +914,7 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
           (ds_norm_ref);
       if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
     }
-    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState New value of x\n");
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration New value of x\n");
     DEBUG_EXPR(siconos::algebra::print(x));
   }
 }

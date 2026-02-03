@@ -21,10 +21,10 @@
 #include "OSNSMatrix.hpp"
 #include "Simulation.hpp"
 #include "SolidLinearTIDS.hpp"
+#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "Tools.hpp"
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
@@ -46,7 +46,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::com
       assert(solid);
       auto dss = ds->real_size();
       auto& vfree = *ds_work_vectors[tools::enum_to_index(
-          siconos::mechanics::fem::integrators::MoreauJeanGOSI::wk_ds::free)];
+          siconos::mechanics::fem::integrators::MoreauJeanGOSI::wk_ds::vfree)];
       auto& sigmafree = *ds_work_vectors[tools::enum_to_index(
           siconos::mechanics::fem::integrators::MoreauJeanGOSI::wk_ds::residu_sigma_free)];
 
@@ -82,7 +82,13 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
     auto pos = DSG0.properties(*dsi).absolute_position;
     // std::cout << "_globalVelocities in postCompute:" << std::endl;
     // _globalVelocities->display();
-    *velocity = _globalVelocities->segment(pos, solid->dimension());
-    *stress = _globalVelocities->segment(pos + solid->dimension(), solid->stressDimension());
+    auto& osi = static_cast<siconos::mechanics::fem::integrators::MoreauJeanGOSI&>(
+        *DSG0.properties(*dsi).osi);
+    auto& ds_work_vectors = *DSG0.properties(*dsi).workVectors;
+    auto& v_iter = osi.get_v_iter(ds_work_vectors);
+    auto& stress_iter = osi.get_sigma_iter(ds_work_vectors);
+    v_iter = _globalVelocities->segment(pos, solid->dimension());
+    stress_iter =
+        _globalVelocities->segment(pos + solid->dimension(), solid->stressDimension());
   }
 }

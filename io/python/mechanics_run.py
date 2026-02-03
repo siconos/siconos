@@ -2278,7 +2278,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
             contact_work = self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set
+                self._nsds, self._output_contact_index_set, omega=self._run_options.get("theta")
             )
 
             # print(contact_work)
@@ -2310,7 +2310,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             kinetic_sum = 0.0
             # external_forces_work_sum_old = 0.0
             external_forces_work_sum = 0.0
-            energy_contact_work = np.zeros(7)
+            energy_contact_work = np.zeros(8)
 
             positions = self.get_io_array(self._io.positions(self._nsds))
             nsds = self._nsds
@@ -2328,7 +2328,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 external_forces_work_sum = np.sum(work_forces[:, 1])
 
             cf_work = self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set
+                self._nsds, self._output_contact_index_set, omega=self._run_options.get("theta")
             )
             # print('cf_work', cf_work)
 
@@ -2348,11 +2348,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 normal_work_sum = np.sum(normal_work)
                 tangent_work_sum = np.sum(tangent_work)
-                friction_work_sum = np.sum(cf_work[:, 3])
 
-                # print('normal_work_sum', normal_work_sum)
-                # print('tangent_work_sum', tangent_work_sum)
-                # print('friction_work_sum', friction_work_sum)
+
+
+                normal_work_sum_theta = np.sum(cf_work[:, 3])
+                tangent_work_sum_theta = np.sum(cf_work[:, 4])
+
 
             else:
                 normal_work_negative_sum = 0.0
@@ -2360,17 +2361,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 normal_work_sum = 0.0
                 tangent_work_sum = 0.0
-                friction_work_sum = 0.0
+                normal_work_sum_theta = 0.0
+                tangent_work_sum_theta =0.0
 
             energy_contact_work[0] = kinetic_sum
             energy_contact_work[1] = external_forces_work_sum
 
             energy_contact_work[2] = normal_work_sum
             energy_contact_work[3] = tangent_work_sum
-            energy_contact_work[4] = friction_work_sum
 
-            energy_contact_work[5] = normal_work_negative_sum
-            energy_contact_work[6] = tangent_work_negative_sum
+            energy_contact_work[4] = normal_work_sum_theta
+            energy_contact_work[5] = tangent_work_sum_theta
+
+            energy_contact_work[6] = normal_work_negative_sum
+            energy_contact_work[7] = tangent_work_negative_sum
 
             current_line = self._energy_work.shape[0]
             self._energy_work.resize(current_line + 1, 0)
@@ -2656,13 +2660,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initializeOSIAssociations, with_timer)()
         self.log(s.initializeIndexSets, with_timer)()
         self.log(s.applyNSDSChangelogForDS, with_timer)()
-        self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
         self.log(s.initializeNSDSChangelog, with_timer)()
-        self.log(s.updateOutput, with_timer)()
-        self.log(s.updateIndexSets, with_timer)()
-        self.log(s.initializeOneStepNSProblem, with_timer)()
 
         self.log(s.firstInitialize, with_timer)()
 
@@ -2686,9 +2686,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # self.log(s.initializeNewtonSolve, with_timer)()
         # explode version
+
+
+        self.log(s.updateAndSwapAllOutput, with_timer)()
+        self.log(s.updateIndexSets, with_timer)()
+        self.log(s.initializeOneStepNSProblem, with_timer)()
+        self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
-        self.log(s.updateAllInput, with_timer)()  # ??
+
+
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()
 
@@ -2717,9 +2724,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 if not s.skipLastUpdateInput():
                     self.log(s.updateAllInput, with_timer)()
-                self.log(s.updateState, with_timer)()
-                if not s.skipLastUpdateOutput():
-                    self.log(s.updateOutput, with_timer)()
+                self.log(s.computeIteration, with_timer)()
+
 
         else:
             while (not isNewtonConverge) and newtonNbIterations < newtonMaxIteration:
@@ -2742,7 +2748,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         )
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 self.log(s.updateAllInput, with_timer)()
-                self.log(s.updateState, with_timer)()
+                self.log(s.computeIteration, with_timer)()
                 if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                     self.log(s.updateOutput, with_timer)()
                 isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)(
@@ -2753,6 +2759,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
+
+
+        self.log(s.updateState, with_timer)()
+        if not s.skipLastUpdateOutput():
+            self.log(s.updateOutput, with_timer)()
+
 
     def build_run_options_from_old_arguments_in_kwargs(
         self,

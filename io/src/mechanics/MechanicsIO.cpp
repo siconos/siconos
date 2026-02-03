@@ -807,7 +807,7 @@ void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3
 }
 
 static void compute_contact_work_and_status(
-    std::shared_ptr<siconos::modeling::Interaction> inter, double omega, double tol,
+    std::shared_ptr<siconos::modeling::Interaction> inter, double theta, double tol,
     siconos::algebra::SiconosVector& answer) {
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::modeling::nonsmooth_laws::ask<ForE>(*inter->nonSmoothLaw());
@@ -817,22 +817,22 @@ static void compute_contact_work_and_status(
   auto vn_plus = (*inter->y(1))(0);
   auto pn = (*inter->lambda(1))(0);
 
-  //  auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
-
-  double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
-  auto normal_contact_work = vn_average * pn;
-
+  auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
   answer(1) = normal_contact_work;
 
-  // Compute tangent contact work of impulse
+  double vn_average_theta = theta * vn_plus + (1. - theta) * vn_minus;
+  double normal_contact_work_theta = vn_average_theta * pn;
+  answer(3) = normal_contact_work_theta;
 
+
+  // Compute tangent contact work of impulse
   auto vt_1_minus = (inter->y_k(1))(1);
   auto vt_2_minus = (inter->y_k(1))(2);
   auto vt_1_plus = (*inter->y(1))(1);
   auto vt_2_plus = (*inter->y(1))(2);
 
-  double vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
-  double vt_2_average = omega * vt_2_plus + (1. - omega) * vt_2_minus;
+  double vt_1_average = 1/2.*( vt_1_plus + vt_1_minus);
+  double vt_2_average = 1/2.*( vt_2_plus + vt_2_minus);
 
   double pt_1 = (*inter->lambda(1))(1);
   double pt_2 = (*inter->lambda(1))(2);
@@ -840,10 +840,17 @@ static void compute_contact_work_and_status(
   double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer(2) = tangent_contact_work;
 
-  // Compute directly work dissipated by friction impulse
-  double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
-  double friction_dissipation = mu * norm_vt_average * pn;
-  answer(3) = friction_dissipation;
+  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  double vt_2_average_theta = theta * vt_2_plus + (1. - theta) * vt_2_minus;
+
+  double tangent_contact_work_theta = vt_1_average * pt_1 + vt_2_average * pt_2;
+  answer(4) = tangent_contact_work_theta;
+
+
+  // // Compute directly work dissipated by friction impulse
+  // double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
+  // double friction_dissipation = mu * norm_vt_average * pn;
+  // answer(3) = friction_dissipation;
 
   /* Compute contact status
    * Warning the status are consistent for the sticking and sliding
@@ -855,26 +862,26 @@ static void compute_contact_work_and_status(
   double norm_vt_plus = sqrt(vt_1_plus * vt_1_plus + vt_2_plus * vt_2_plus);
   // double norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
   if ((pn < tol) and (vn_plus + e * vn_minus > tol))
-    answer(4) = 0;  // take-off = 0
+    answer(5) = 0;  // take-off = 0
   else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
     if ((norm_pt - mu * pn > tol)) {
       // std::cout << "WARNING: the impulse is outside the Coulomb cone  " << std::endl;
-      answer(4) = -3;  // outside the cone = -3
+      answer(5) = -3;  // outside the cone = -3
     } else if ((norm_pt - mu * pn < -tol)) {
       // std::cout << "the impulse is in the *interior* of  the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
       if (norm_vt_plus > tol) {
         // std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
-        answer(4) = -2;  // sticking with a non zero slifing velocity = -2
+        answer(5) = -2;  // sticking with a non zero slifing velocity = -2
       }
-      answer(4) = 1;  // sticking = 1
+      answer(5) = 1;  // sticking = 1
     } else {
       // std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
       answer(4) = 2;  // sliding = 2
     }
   } else
-    answer(4) = -1;  // undetermined = -1
+    answer(5) = -1;  // undetermined = -1
 
   if ((pn > tol) and (vn_minus > tol)) {
     // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
@@ -882,12 +889,12 @@ static void compute_contact_work_and_status(
     // 		<< " normal_contact_work " << normal_contact_work
     // 		<< " -e * vn_minus   " << -e*vn_minus
     // 		<< std::endl;
-    answer(5) = normal_contact_work;
+    answer(6) = normal_contact_work;
   }
   //   double id = inter->number();
   //   std::cout << "\nid "<< id << " 3D" << std::endl;
   //   std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  //   std::cout << " tol "<< tol << " omega " << omega << std::endl;
+  //   std::cout << " tol "<< tol << " theta " << theta << std::endl;
   //   std::cout << "vn_plus "<< vn_plus << std::endl;
   //   std::cout << "vn_minus "<< vn_minus << std::endl;
   //   std::cout << "pn "<< pn << std::endl;
@@ -907,7 +914,7 @@ static void compute_contact_work_and_status(
 }
 
 static void compute_contact_work_and_status_2d(
-    std::shared_ptr<siconos::modeling::Interaction> inter, double omega, double tol,
+    std::shared_ptr<siconos::modeling::Interaction> inter, double theta, double tol,
     siconos::algebra::SiconosVector& answer) {
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::modeling::nonsmooth_laws::ask<ForE>(*inter->nonSmoothLaw());
@@ -917,26 +924,31 @@ static void compute_contact_work_and_status_2d(
   double vn_plus = (*inter->y(1))(0);
   double pn = (*inter->lambda(1))(0);
 
-  double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
+  double vn_average = 1/2. * (vn_plus * vn_minus) ;
   double normal_contact_work = vn_average * pn;
   answer(1) = normal_contact_work;
 
-  // Compute tangent contact work of impulse
+  double vn_average_theta = theta * vn_plus + (1. - theta) * vn_minus;
+  double normal_contact_work_theta = vn_average_theta * pn;
+  answer(3) = normal_contact_work_theta;
 
+  // Compute tangent contact work of impulse
   double vt_1_minus = inter->y_k(1)(1);
   double vt_1_plus = (*inter->y(1))(1);
-
-  double vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
-
   double pt_1 = (*inter->lambda(1))(1);
 
+  double vt_1_average = 1/2. *( vt_1_plus + vt_1_minus);
   double tangent_contact_work = vt_1_average * pt_1;
   answer(2) = tangent_contact_work;
 
-  // Compute directly work dissipated by friction impulse
-  double norm_vt_average = sqrt(vt_1_average * vt_1_average);
-  double friction_dissipation = mu * norm_vt_average * pn;
-  answer(3) = friction_dissipation;
+  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  double tangent_contact_work_theta = vt_1_average * pt_1;
+  answer(4) = tangent_contact_work_theta;
+
+  // // Compute directly work dissipated by friction impulse
+  // double norm_vt_average = sqrt(vt_1_average * vt_1_average);
+  // double friction_dissipation = mu * norm_vt_average * pn;
+  // answer(3) = friction_dissipation;
 
   /* Compute contact status
    * Warning the status are consistent for the sticking and sliding
@@ -948,39 +960,39 @@ static void compute_contact_work_and_status_2d(
   double norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
   // double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus);
   if ((pn < tol) and (vn_plus + e * vn_minus > tol))
-    answer(4) = 0;  // take-off = 0
+    answer(5) = 0;  // take-off = 0
   else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
     if ((norm_pt - mu * pn > tol)) {
       // std::cout << "WARNING: the impulse is outside the Coulomb cone  " << std::endl;
-      answer(4) = -3;  // outside the cone = -3
+      answer(5) = -3;  // outside the cone = -3
     } else if ((norm_pt - mu * pn < -tol)) {
       // std::cout << "the impulse is in the *interior* of  the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
       if (norm_vt_plus > tol) {
         // std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
-        answer(4) = -2;  // sticking with a non zero slifing velocity = -2
+        answer(5) = -2;  // sticking with a non zero slifing velocity = -2
       }
       // ?? answer(4) = -2 is always overwritten
-      answer(4) = 1;  // sticking = 1
+      answer(5) = 1;  // sticking = 1
     } else {
       // std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
-      answer(4) = 2;  // sliding = 2
+      answer(5) = 2;  // sliding = 2
     }
   } else
-    answer(4) = -1;  // undetermined = -1
+    answer(5) = -1;  // undetermined = -1
   if ((pn > tol) and (vn_minus > tol)) {
     // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
     // std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
     // 		<< " normal_contact_work " << normal_contact_work
     // 		<< " -e * vn_minus   " << -e*vn_minus
     // 		<< std::endl;
-    answer(5) = normal_contact_work;
+    answer(6) = normal_contact_work;
   }
   // double id = inter->number();
   // std::cout << "\nid "<< id << " 2D" << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
+  // std::cout << " tol "<< tol << " theta " << theta << std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
   // std::cout << "vn_minus "<< vn_minus << std::endl;
   // std::cout << "pn "<< pn << std::endl;
@@ -1005,7 +1017,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::ContactR& rel) {
   auto id = inter->number();
-  answer.resize(6);
+  answer.resize(7);
   answer(0) = id;
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
@@ -1014,7 +1026,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact5DR& rel) {
   auto id = inter->number();
-  answer.resize(6);
+  answer.resize(7);
   answer(0) = id;
 
   compute_contact_work_and_status(inter, omega, tol, answer);
@@ -1024,7 +1036,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2dR& rel) {
   auto id = inter->number();
-  answer.resize(6);
+  answer.resize(7);
   answer(0) = id;
 
   compute_contact_work_and_status_2d(inter, omega, tol, answer);
@@ -1034,7 +1046,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2d3DR& rel) {
   auto id = inter->number();
-  answer.resize(6);
+  answer.resize(7);
   answer(0) = id;
 
   compute_contact_work_and_status_2d(inter, omega, tol, answer);
@@ -1044,6 +1056,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
   DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
+
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
 

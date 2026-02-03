@@ -313,9 +313,8 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
             "implemented for "
             "the given Integrator type ");
       }
-      auto& osnsp_rhs = *(*indexSet.properties(*ui)
-                               .workVectors)[tools::enum_to_index(
-            siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
+      auto& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
+          siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
       auto pos = indexSet.properties(*ui).absolute_position;
       auto sizeY = inter->dimension();
       _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);
@@ -388,38 +387,14 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::update_dynamicalsys
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
     auto ds = DSG0.bundle(*dsi);
 
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto sizeDS = d->dimension();
-      auto velocity = d->velocity();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
-      auto pos = DSG0.properties(*dsi).absolute_position;
-      *velocity = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-      auto sizeDS = d->dimension();
-      auto velocity = d->velocity();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
-      auto pos = DSG0.properties(*dsi).absolute_position;
-      *velocity = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*velocity););
-    } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      auto sizeDS = neds->dimension();
-      auto twist = neds->twist();
-      DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(siconos::algebra::print(*twist););
-      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
-      auto pos = DSG0.properties(*dsi).absolute_position;
-      *twist = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(siconos::algebra::print(*twist););
-    } else
-      THROW_EXCEPTION(
-          "siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() - Only "
-          "implemented for "
-          "Lagrangian or NewtonEuler systems.");
+    auto& osi = static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi);
+    auto& ds_work_vectors = *DSG0.properties(*dsi).workVectors;
+    auto& v_iter = osi.get_v_iter(ds_work_vectors);
+    auto lds = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+    assert(lds);
+    auto sizeDS = lds->dimension();
+    auto pos = DSG0.properties(*dsi).absolute_position;
+    v_iter = _globalVelocities->segment(pos, sizeDS);
   }
 }
 
@@ -428,8 +403,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
       "siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute(double time)\n");
 
   // This function is used to set y/lambda values using output from
-  // primalfrictioncontact_driver Only Interactions (ie Interactions) of indexSet(leveMin) are
-  // concerned.
+  // primalfrictioncontact_driver Only Interactions (ie Interactions) of indexSet(leveMin)
+  // are concerned.
 
   // === Get index set from Topology ===
   auto& indexSet =

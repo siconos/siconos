@@ -515,8 +515,8 @@ void siconos::integrators::SchatzmanPaoliOSI::integrate(double& tinit, double& t
       "siconos::integrators::SchatzmanPaoliOSI::integrate - not yet implemented :");
 }
 
-void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
-  DEBUG_BEGIN("siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int )\n");
+void siconos::integrators::SchatzmanPaoliOSI::computeIteration() {
+  DEBUG_BEGIN("siconos::integrators::SchatzmanPaoliOSI::computeIteration()\n");
 
   double h = _simulation->timeStep();
 
@@ -552,15 +552,15 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       const auto& q_k_1 = d->qMemory().getSiconosVector(1);  // q_{k-1}
 
-      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - q_k_1 ="
+      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::computeIteration - q_k_1 ="
       //  <<std::endl;
       // siconos::algebra::print(*q_k_1);
-      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - q ="
+      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::computeIteration - q ="
       //  <<std::endl;
       // siconos::algebra::print(*q);
 
       *d->velocity() = 1.0 / (2.0 * h) * (d->q_read() - q_k_1);
-      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - v ="
+      //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::computeIteration - v ="
       //  <<std::endl;
       // siconos::algebra::print(*v);
 
@@ -624,9 +624,10 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       auto T = d->T();
       //       auto dotq = d->dotq();
       //       dotq->noalias() = *T **v;
-      //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState v"<<endl;
+      //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::computeIteration
+      //       v"<<endl;
       //       // siconos::algebra::print(*v);
-      //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState
+      //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::computeIteration
       //       dotq"<<endl;
       //       // siconos::algebra::print(*dotq);
 
@@ -656,11 +657,11 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       (*dotq)(6) = ((*q)(6)-(*qold)(6))/h;
       //       d->updateT();
       THROW_EXCEPTION(
-          "siconos::integrators::SchatzmanPaoliOSI::updateState - only implemented for "
+          "siconos::integrators::SchatzmanPaoliOSI::computeIteration - only implemented for "
           "LagrangianLinearTIDS");
     }
   }
-  DEBUG_END("siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int)\n");
+  DEBUG_END("siconos::integrators::SchatzmanPaoliOSI::computeIteration(\n");
 }
 
 void siconos::integrators::SchatzmanPaoliOSI::display() const {

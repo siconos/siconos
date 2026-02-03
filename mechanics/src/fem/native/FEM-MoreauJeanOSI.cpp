@@ -48,6 +48,13 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
   ds_work_vectors[tools::enum_to_index(wk_ds::vfree)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
+      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)] =
+      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::sigma_iter)] =
+      std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
+
   ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
   ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)] =
@@ -120,6 +127,27 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
 
   // Apply BC
   if (solid->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*solid, dsv);
+}
+
+void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeInitialNewtonState() {
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeInitialNewtonState()\n");
+  // Compute the position value giving the initial velocity.
+  // The goal is to save one newton iteration for nearly linear system
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+    // Copy current velocity in V_ITER
+    auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    auto& v_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)];
+    auto& sigma_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::sigma_iter)];
+
+    auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+    assert(solid);
+    v_iter = solid->velocity_read();
+    sigma_iter = solid->stress_read();
+  }
 }
 
 double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
@@ -450,6 +478,98 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
     siconos::integrators::moreau_jean::updatePosition(_simulation->timeStep(), _theta, *solid);
   }
   DEBUG_END("MoreauJeanOSI::updateState(const unsigned int)\n");
+}
+
+void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeIteration() {
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIteration()\n");
+
+  double RelativeTol = _simulation->relativeConvergenceTol();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
+  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+    // auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
+    // Get the DS type
+
+    auto dsType = siconos::types::type_value(*ds);
+
+    auto& v_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)];
+    // auto& sigma_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::sigma_iter)];
+
+    auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+    assert(solid);
+    // get dynamical system
+    auto& vfree = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
+
+    //    auto *vfree = solid->velocityFree();
+    // auto &v = *solid->velocity();
+
+    auto baux = dsType == siconos::modeling::Type::LagrangianSparseDS && useRCC &&
+                _simulation->relativeConvergenceCriterionHeld();
+
+    if (solid->p(_levelMaxForInput) && solid->p(_levelMaxForInput)->size() > 0) {
+      assert(((solid->p(_levelMaxForInput)).get()) &&
+             " siconos::integrators::MoreauJeanOSI::ComputeIteration() "
+             "*solid->p(_levelMaxForInput) "
+             "== nullptr.");
+      v_iter = solid->p_read(_levelMaxForInput);  // v = p
+      if (solid->boundaryConditions()) {
+        for (auto itindex : solid->boundaryConditions()->velocityIndices()) {
+          (v_iter)(itindex) = 0.0;
+        }
+      }
+
+      v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(v_iter);
+      v_iter += vfree;
+
+    } else {
+      v_iter = vfree;
+    }
+    DEBUG_EXPR(siconos::algebra::print(v));
+
+    if (solid->boundaryConditions()) {
+      int bc = 0;
+      auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+
+      for (auto itindex : solid->boundaryConditions()->velocityIndices()) {
+        *columntmp =
+            _dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions->col(
+                bc);
+        /*\warning we assume that W is symmetric in the Lagrangian case*/
+
+        double value = -1. * columntmp->dot(v_iter);
+        if (solid->p(_levelMaxForInput) && solid->p(_levelMaxForInput)->size() > 0) {
+          value += (solid->p_read(_levelMaxForInput))(itindex);
+        }
+        /* \warning the computation of reactionToBoundaryConditions take into
+           account the contact impulse but not the external and internal
+           forces. A complete computation of the residu should be better */
+        (*solid->reactionToBoundaryConditions())(bc) = value;
+        bc++;
+      }
+    }
+
+    auto& local_buffer = *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
+    // Save value of q in stateTmp for future convergence computation
+    if (baux) local_buffer = solid->q_read();
+
+    // moreau_jean::updatePosition(_simulation->timeStep(), _theta, ds);
+
+    if (baux) {
+      double ds_norm_ref = 1. + solid->x0().norm();  // Should we save this in the graph?
+      local_buffer -= solid->q_read();
+      double aux = (local_buffer.norm()) / ds_norm_ref;
+      if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+    }
+  }
+
+  DEBUG_END("siconos::integrators::MoreauJeanOSI::computeIteration(const unsigned int)\n");
 }
 
 bool siconos::mechanics::fem::integrators::MoreauJeanOSI::addInteractionInIndexSet(

@@ -283,6 +283,10 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    */
   void updateState(const unsigned int level) override;
 
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override { assert(0); };
   /** Compute coefficients of the polynomial of the dense output for a given DS
    *  \param ds std::shared_ptr<siconos::modeling::DynamicalSystem>, ds concerned
    */

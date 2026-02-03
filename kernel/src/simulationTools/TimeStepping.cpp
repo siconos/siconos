@@ -470,8 +470,9 @@ void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
   DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
 }
 
-void siconos::simulation::TimeStepping::initializeNewtonSolve() {
-  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonSolve()\n");
+void siconos::simulation::TimeStepping::updateAndSwapAllOutput() {
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
+
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
@@ -482,6 +483,17 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   for (auto& osi : *_allOSI) {
     osi->updateAndSwapAllOutput(tkp1);
   }
+
+
+  DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
+}
+
+void siconos::simulation::TimeStepping::initializeNewtonSolve() {
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonSolve()\n");
+  double tkp1 = getTkp1();
+  assert(!std::isnan(tkp1));
+
+  updateAndSwapAllOutput();
 
   updateIndexSets();
 
@@ -535,9 +547,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
                                   // should be only for globalOSI
       updateAllInput();
 
-    updateState();
-
-    if (!_skip_last_updateOutput) updateOutput();
+    computeIteration();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
@@ -579,7 +589,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       }
 
       updateAllInput();
-      updateState();
+      computeIteration();
 
       // -- VA 01/07/2021
       // The fact that we compute _isNewtonConverge after is a bit curious,
@@ -594,6 +604,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         // the interactions in the loop for SICONOS_TS_NONLINEAR for a good
         // Newton loop, we must have access the Hessian of constraints.
         if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
+          updateState();
           updateInteractions();
           initializeNSDSChangelog();
         }
@@ -608,8 +619,6 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       displayNewtonConvergenceInTheLoop();
     }  // End of the Newton Loop
 
-    if (!_skip_last_updateOutput) updateOutput();
-
     _newtonCumulativeNbIterations += _newtonNbIterations;
 
     displayNewtonConvergenceAtTheEnd(info, maxStep);
@@ -618,6 +627,10 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         "siconos::simulation::TimeStepping::NewtonSolve failed. Unknown "
         "newtonOptions: " +
         siconos::tools::enum_to_string(_newtonOptions));
+
+  updateState();
+  if (!_skip_last_updateOutput) updateOutput();
+
   DEBUG_END("siconos::simulation::TimeStepping::newtonSolve\n");
 }
 

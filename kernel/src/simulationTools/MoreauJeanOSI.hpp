@@ -224,7 +224,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  - a container saved in the graph of ds
    *  - a container associated to a specific ds
    */
-  enum class wk_ds : std::size_t { residu_free, vfree, buffer, size };
+  enum class wk_ds : std::size_t { residu_free, vfree, v_iter, buffer, size };
 
   /** This enum is used to get access to work vectors relared to an Interaction
    *  It corresponds to:
@@ -410,7 +410,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** compute the initial state of the Newton loop.
    */
-  void computeInitialNewtonState() override;
+  virtual void computeInitialNewtonState() override;
 
   /**
      return the maximum of all norms for the "MoreauJeanOSI-discretized"
@@ -485,6 +485,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   virtual void updateState(const unsigned int level) override;
 
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
+
   /** \return the  work of forces by ds
    */
   siconos::algebra::SiconosMatrix computeWorkForces();
@@ -517,6 +522,14 @@ void computeIterationMatrix_NewtonEuler(
  *  @param ds the dynamical system to update
  */
 void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem& ds);
+
+/** Update the state vector of a given dynamical system
+ *  \param time_step current time step
+ *  \param theta integrator theta parameter
+ *  \param ds the dynamical system to update
+ */
+void updateVelocity(double time_step, double theta, siconos::modeling::DynamicalSystem& ds,
+                    siconos::algebra::SiconosVector& v_iter);
 
 }  // namespace moreau_jean
 }  // namespace siconos::integrators

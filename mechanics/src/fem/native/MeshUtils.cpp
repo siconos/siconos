@@ -34,7 +34,6 @@
 #include "RotationQuaternion.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "Tools.hpp"
 
 template <class Container>
 void split(const std::string& str, Container& cont, const std::string& delims = " ") {
