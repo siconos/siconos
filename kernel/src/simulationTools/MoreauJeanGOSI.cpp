@@ -17,12 +17,10 @@
  */
 #include "MoreauJeanGOSI.hpp"
 
-#include <siconos/kernel/LagrangianSparseLinearTIDS.hpp>
-#include <siconos/kernel/TypeName.hpp>
-
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
@@ -31,6 +29,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
+#include "TypeName.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -615,7 +614,6 @@ void siconos::integrators::MoreauJeanGOSI::computeIteration() {
   }
   DEBUG_END("siconos::integrators::MoreauJeanGOSI::computeIteration(const unsigned int )\n");
 }
-
 
 void siconos::integrators::MoreauJeanGOSI::display() const {
   OneStepIntegrator::display();
