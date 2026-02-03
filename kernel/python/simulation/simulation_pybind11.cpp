@@ -77,6 +77,8 @@ PYBIND11_MODULE(simulation, m) {
            " initialize objects (DSs and Interations) found in the NSDS")
       .def("updateOutput", &siconos::simulation::Simulation::updateOutput,
            py::arg("level") = 0)
+      .def("updateAndSwapAllOutput", &siconos::simulation::Simulation::updateAndSwapAllOutput)
+      .def("updateWorldFromDS", &siconos::simulation::Simulation::updateWorldFromDS)
       .def("updateIndexSets", &siconos::simulation::Simulation::updateIndexSets,
            " update all index sets of the topology, using current states of the"
            "Interactions")
@@ -91,6 +93,7 @@ PYBIND11_MODULE(simulation, m) {
            "Compute the residu for all integrators")
       .def("updateAllInput", &siconos::simulation::Simulation::updateAllInput)
       .def("updateState", &siconos::simulation::Simulation::updateState, py::arg("level") = 0)
+      .def("computeIteration", &siconos::simulation::Simulation::computeIteration)
       .def("y_output", &siconos::simulation::Simulation::y_output,
            py::return_value_policy::move)
       .def("lambda_input", &siconos::simulation::Simulation::lambda_input,

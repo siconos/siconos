@@ -239,6 +239,7 @@ class TimeStepping : public Simulation {
    *  to start the newton algorithm.
    */
   void initializeNewtonSolve();
+  void updateAndSwapAllOutput  ()  override;
   void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 

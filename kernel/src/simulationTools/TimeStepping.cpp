@@ -470,8 +470,9 @@ void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
   DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
 }
 
-void siconos::simulation::TimeStepping::initializeNewtonSolve() {
-  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonSolve()\n");
+void siconos::simulation::TimeStepping::updateAndSwapAllOutput() {
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
+
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
@@ -482,6 +483,17 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   for (auto& osi : *_allOSI) {
     osi->updateAndSwapAllOutput(tkp1);
   }
+
+
+  DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
+}
+
+void siconos::simulation::TimeStepping::initializeNewtonSolve() {
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonSolve()\n");
+  double tkp1 = getTkp1();
+  assert(!std::isnan(tkp1));
+
+  updateAndSwapAllOutput();
 
   updateIndexSets();
 

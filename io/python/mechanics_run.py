@@ -2660,13 +2660,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initializeOSIAssociations, with_timer)()
         self.log(s.initializeIndexSets, with_timer)()
         self.log(s.applyNSDSChangelogForDS, with_timer)()
-        self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
         self.log(s.initializeNSDSChangelog, with_timer)()
-        self.log(s.updateOutput, with_timer)()
-        self.log(s.updateIndexSets, with_timer)()
-        self.log(s.initializeOneStepNSProblem, with_timer)()
 
         self.log(s.firstInitialize, with_timer)()
 
@@ -2690,9 +2686,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # self.log(s.initializeNewtonSolve, with_timer)()
         # explode version
+
+
+        self.log(s.updateAndSwapAllOutput, with_timer)()
+        self.log(s.updateIndexSets, with_timer)()
+        self.log(s.initializeOneStepNSProblem, with_timer)()
+        self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
-        self.log(s.updateAllInput, with_timer)()  # ??
+
+
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()
 
@@ -2721,9 +2724,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 if not s.skipLastUpdateInput():
                     self.log(s.updateAllInput, with_timer)()
-                self.log(s.updateState, with_timer)()
-                if not s.skipLastUpdateOutput():
-                    self.log(s.updateOutput, with_timer)()
+                self.log(s.computeIteration, with_timer)()
+
 
         else:
             while (not isNewtonConverge) and newtonNbIterations < newtonMaxIteration:
@@ -2746,7 +2748,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         )
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 self.log(s.updateAllInput, with_timer)()
-                self.log(s.updateState, with_timer)()
+                self.log(s.computeIteration, with_timer)()
                 if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                     self.log(s.updateOutput, with_timer)()
                 isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)(
@@ -2757,6 +2759,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
+
+
+        self.log(s.updateState, with_timer)()
+        if not s.skipLastUpdateOutput():
+            self.log(s.updateOutput, with_timer)()
+
 
     def build_run_options_from_old_arguments_in_kwargs(
         self,
