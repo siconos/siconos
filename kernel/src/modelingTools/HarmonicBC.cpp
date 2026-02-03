@@ -33,11 +33,11 @@ siconos::modeling::HarmonicBC::HarmonicBC(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& omega,
     const Eigen::Ref<const siconos::algebra::SiconosVector>& phi)
     : BoundaryCondition(newVelocityIndices),
+      has_vector_coeffs_{true},
       a_vec_{newa},
       b_vec_{newb},
       omega_vec_{omega},
-      phi_vec_{phi},
-      has_vector_coeffs_{true} {
+      phi_vec_{phi} {
   siconos::algebra::SiconosVector::Index bc_size = newVelocityIndices.size();
   assert(newa.size() == bc_size);
   assert(newb.size() == bc_size);

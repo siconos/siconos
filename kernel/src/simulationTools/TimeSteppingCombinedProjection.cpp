@@ -315,23 +315,25 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
     // Store the q vector of each DS.
 
-    for (auto aVi2 : *dsGraph) {  // = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
-      auto ds = dsGraph->bundle(aVi2);
-      auto& workVectors = *dsGraph->properties(aVi2).workVectors;
+    // for (auto aVi2 : *dsGraph) {  // = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
+    //  auto ds = dsGraph->bundle(aVi2);
+    //   auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
-      if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-        *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-      } else if (auto d =
-                     std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-        *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-      } else
-        THROW_EXCEPTION(
-            "siconos::simulation::TimeSteppingCombinedProjection::"
-            "advanceToEvent() :: - Ds is "
-            "not from NewtonEulerDS neither from LagrangianDS.");
-    }
+    //   if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
+    //   } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds))
+    //   {
+    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+    //   } else if (auto d =
+    //                  std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds))
+    //                  {
+    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+    //   } else
+    //     THROW_EXCEPTION(
+    //         "siconos::simulation::TimeSteppingCombinedProjection::"
+    //         "advanceToEvent() :: - Ds is "
+    //         "not from NewtonEulerDS neither from LagrangianDS.");
+    //}
 
     _nbProjectionIteration = 0;
 
@@ -369,11 +371,11 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
       for (auto aVi2 : *dsGraph) {
         auto ds = dsGraph->bundle(aVi2);
-        auto& workVectors = *dsGraph->properties(aVi2).workVectors;
+        // auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
         if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
           auto q = neds->q();
-          auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (neds->p(0)) {
             //*q = * qtmp +  *neds->p(0);
             *q += *neds->p(0);
@@ -386,7 +388,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #endif
         } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
           auto q = d->q();
-          auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (d->p(0)) {
             //*q = * qtmp +  *d->p(0);
             *q += *d->p(0);
@@ -402,7 +404,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
         } else if (auto d =
                        std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
           auto q = d->q();
-          auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (d->p(0)) {
             //*q = * qtmp +  *d->p(0);
             *q += *d->p(0);

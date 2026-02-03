@@ -141,10 +141,10 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
   // We get y and lambda of the interaction (pointers)
   siconos::algebra::SiconosVector& y = *inter.y(level);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   if (jacobianhOver_state_view_) {
     siconos::algebra::matrixBlockVector_prod(*jacobianhOver_state_view_,
-                                             *DSlink[FirstOrderR::Xxx], y, true);
+                                             *ds_vars[FirstOrderR::Xxx], y, true);
   } else
     y.setZero();
 
@@ -167,8 +167,8 @@ void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interacti
       "inter, unsigned int level)\n")
   DEBUG_EXPR(siconos::algebra::print(*inter.lambda(level)););
   if (jacobiangOver_lambda_view_) {
-    auto& DSlink = inter.linkToDSVariables();
-    *DSlink[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
+    *ds_vars[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
   }
   DEBUG_END(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "

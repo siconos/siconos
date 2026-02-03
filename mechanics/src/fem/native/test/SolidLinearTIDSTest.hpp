@@ -14,25 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __SolidLinearTIDSTest__
 #define __SolidLinearTIDSTest__
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "Material.hpp"
 #include "Mesh.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosSerialization.hpp"
 
-class SolidLinearTIDSTest : public CppUnit::TestFixture
-{
-
-private:
-  
-  ACCEPT_SERIALIZATION(SolidLinearTIDSTest);
-
-
+class SolidLinearTIDSTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SolidLinearTIDSTest);
 
@@ -48,17 +42,12 @@ private:
   // Members
 
   std::shared_ptr<siconos::mechanics::fem::Mesh> mesh;
-  std::map<unsigned int, std::shared_ptr<siconos::mechanics::fem::Material>> materials;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> S,B;
+  siconos::algebra::SiconosSparseMatrix S{}, B{};
+  siconos::mechanics::fem::Material mat{7800, 210e9, 1. / 3};
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

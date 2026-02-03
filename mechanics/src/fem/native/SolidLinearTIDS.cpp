@@ -35,7 +35,7 @@
 #include "siconos_debug.h"
 
 siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(
-    std::shared_ptr<Mesh> mesh, const std::map<unsigned int, const Material>& materials)
+    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials)
     : FiniteElementLinearTIDS(mesh, materials) {
   DEBUG_BEGIN("SolidLinearTIDS::SolidLinearTIDS(...)\n");
 
@@ -103,20 +103,4 @@ void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
 void siconos::mechanics::fem::SolidLinearTIDS::display(bool brief) const {
   std::cout << "===== SolidLinearTIDS display ===== " << std::endl;
   FiniteElementLinearTIDS::display();
-}
-
-void siconos::modeling::LagrangianSparseDS::initialize_ds_link_for_relations(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
-  std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[StressLinearTIR::WorkDS::sigma]->insertPtr(stress());
-
-  DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearTIDS::sigma1]->insertPtr(
-      stressRate());
-
-  DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearTIDS::epsilonp]->insertPtr(
-      plasticDeformation());
-
-  DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearTIDS::epsilonp1]->insertPtr(
-      plasticRate());
 }

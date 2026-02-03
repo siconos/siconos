@@ -75,3 +75,23 @@ inline auto name2() const {
 
 
 
+## Work vectors in integrators
+
+#### related to DS
+
+Each osi has usually access to work_ds: a container of vectors, saved in the graph of ds.
+
+```c++
+// For a given graph node (ds) dsi:
+work_ds = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+```
+
+- Access to its elements (SiconosVector) is defined thanks to an enum. 
+- Each integrator has its own enum
+
+Example:
+```c++
+auto vfree = work_ds[tools::enum_to_index(work::ds::vfree)];
+```
+- enum must be a class enum
+- if a derived class has its own enum, any method that uses this work_ds must be re-implemented in derived classes

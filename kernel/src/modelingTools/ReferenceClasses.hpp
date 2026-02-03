@@ -88,7 +88,7 @@ class ClassA {
   //
   //  -> shared_ptr to SiconosVector
   //  -> a getter/setter returning a shared_ptr (--> write access)
-  //     a Map would probably be enough, but because of DSlink
+  //     a Map would probably be enough, but because of ds_vars
   //     in OSI, we keep shared_ptr for the time being
   //  -> a read-only getter (ConstMap)
   std::shared_ptr<siconos::algebra::SiconosVector> var_{nullptr};

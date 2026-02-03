@@ -36,6 +36,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "Tools.hpp"
 #include "siconos_debug.h"
 
 // Constructor from solver id - Uses delegated constructor
@@ -167,7 +168,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
       if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
           (std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) ||
           (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
-        auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+        auto& vfree = *ds_work_vectors[tools::enum_to_index(
+            siconos::integrators::MoreauJeanGOSI::wk_ds::vfree)];
         _q->segment(offset, ds_size) = vfree.head(ds_size);
       }
     } else
@@ -312,7 +314,8 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
             "the given Integrator type ");
       }
       auto& osnsp_rhs = *(*indexSet.properties(*ui)
-                               .workVectors)[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS];
+                               .workVectors)[tools::enum_to_index(
+            siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
       auto pos = indexSet.properties(*ui).absolute_position;
       auto sizeY = inter->dimension();
       _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);

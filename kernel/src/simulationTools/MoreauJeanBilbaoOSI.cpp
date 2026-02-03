@@ -325,7 +325,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   assert(indexSet.bundle(vertex_inter));
   // current interaction
   auto& inter = *indexSet.bundle(vertex_inter);
-  // auto& DSlink = inter.linkToDSVariables();
+  // const auto& ds_vars = inter.read_dynamical_systems_variables();
   assert(inter.relation());
   auto& inter_work_block = *indexSet.properties(vertex_inter).workBlockVectors;
   // Get relation and non smooth law types

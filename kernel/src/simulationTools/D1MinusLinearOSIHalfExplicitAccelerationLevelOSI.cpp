@@ -643,7 +643,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
   auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
-  auto& DSlink = inter->linkToDSVariables();
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
   auto& inter_work_block = *indexSet->properties(vertex_inter).workBlockVectors;
 
   // get relation and non smooth law information
@@ -664,11 +664,11 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     // Xfree = inter->dataX();
     /* get the current velocity  of the aggregated ds */
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
-      DEBUG_PRINT("Xfree = DSlink[siconos::modeling::LagrangianR::q1];\n");
+      Xfree = ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q1)];
+      DEBUG_PRINT("Xfree = ds_vars[siconos::modeling::LagrangianR::q1];\n");
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      Xfree = DSlink[siconos::tools::enum_to_index(modeling::NewtonEulerR::WorkDS::velocity)];
-      DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::WorkDS::velocity];\n");
+      Xfree = ds_vars[siconos::tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)];
+      DEBUG_PRINT("Xfree = ds_vars[NewtonEulerR::ds_var::velocity];\n");
     } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
@@ -686,7 +686,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
           "type.");
-    DEBUG_PRINT("Xfree = DSlink[siconos::integrators::D1MinusLinearOSI::FREE];\n");
+    DEBUG_PRINT("Xfree = ds_vars[siconos::integrators::D1MinusLinearOSI::FREE];\n");
     DEBUG_EXPR(siconos::algebra::print(*Xfree));
     assert(Xfree);
   } else
@@ -723,11 +723,11 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       // if (relationSubType == RheonomousR) // explicit time dependence -> partial time
       // derivative has to be added
       // {
-      //   auto  q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
-      //   auto  z = *DSlink[siconos::modeling::LagrangianR::z];
+      //   auto  q = *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)];
+      //   auto  z = *ds_vars[siconos::modeling::LagrangianR::z];
 
       //   std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(),
-      //   q, z); *DSlink[siconos::modeling::LagrangianR::z] = z;
+      //   q, z); *ds_vars[siconos::modeling::LagrangianR::z] = z;
       // }
 
       if (relationSubType == siconos::modeling::RelationSubType::RheonomousR)

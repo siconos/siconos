@@ -36,11 +36,6 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
  public:
-  // Warning: enum could be mixed up with those of MoreauJeanOSI
-  enum MoreauJeanGOSI_ds_workVector_id { RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH };
-
-  // enum MoreauJeanGOSI_interaction_workVector_id{OSNSP_RHS,
-  // WORK_INTERACTION_LENGTH};
 
   /** constructor from theta value only
    *

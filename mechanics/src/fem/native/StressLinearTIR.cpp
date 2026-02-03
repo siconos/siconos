@@ -17,10 +17,17 @@
  */
 #include "StressLinearTIR.hpp"
 
+#include <condition_variable>
 #include <iostream>
+#include <memory>
 
+#include "BlockVector.hpp"
+#include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
-#include "Tools.hpp"
+#include "SecondOrderDS.hpp"
+#include "SiconosAlgebraAddons.hpp"  // matrixBlockVector_prod
+#include "SolidLinearTIDS.hpp"
+#include "Tools.hpp"  // enum_to_index
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -29,12 +36,10 @@
 void siconos::mechanics::fem::StressLinearTIR::checkSize(
     const siconos::modeling::Interaction& inter) const {
   auto sizeY = inter.dimension();
-  const auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
 
-  DSlink[LagrangianR::DSlinkSize + SolidLinearTIDS::sigma]->size();
   if (!(jacobianhOver_q_view_) ||
-      jacobianhOver_q_view_->cols() !=
-          DSlink[LagrangianR::DSlinkSize + SolidLinearTIDS::sigma]->size() ||
+      jacobianhOver_q_view_->cols() != ds_vars[tools::enum_to_index(ds_var::sigma)]->size() ||
       jacobianhOver_q_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::mechanics::fem::StressLinearTIR::checkSize inconsistent sizes between H "
@@ -51,13 +56,14 @@ void siconos::mechanics::fem::StressLinearTIR::computeOutput(
   DEBUG_BEGIN("siconos::mechanics::fem::StressLinearTIR::computeOutput(...)\n");
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
+
+  // y[i] = C * sigma_i (i=0 or 1)
   siconos::algebra::matrixBlockVector_prod(
-      *jacobianhOver_q_view_,
-      *DSlink[tools::enum_to_index(LagrangianR::DSlinkSize + SolidLinearTIDS::sigma) +
-              derivativeNumber],
+      *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::sigma) + derivativeNumber],
       y);
 
+  // y[0] = C * sigma_0 + e
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
   }
@@ -69,45 +75,61 @@ void siconos::mechanics::fem::StressLinearTIR::computeInput(
   // Here lambda = plastic Rate
 
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   // computation of p = Ht lambda
-  DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR(_jachq->display(););
-  DEBUG_EXPR(DSlink[SolidLinearTIDS::dotEpsilon]->display(););
-
   siconos::algebra::transposeMatrixVector_prod_toBlock(
       lambda, *jacobianhOver_q_view_,
-      *DSlink[tools::enum_to_index(LagrangianR::DSlinkSize + SolidLinearTIDS::epsilonp) + level],
-      false);
+      *ds_vars[tools::enum_to_index(ds_var::epsilon_p) + level], false);
 }
 
 void siconos::mechanics::fem::StressLinearTIR::display() const {
-  LagrangianR::display();
-  std::cout << "===== Lagrangian Linear Relation display ===== \n";
-  std::cout << " C: " << std::endl;
-  std::cout << jacobianhOver_q_view_ << "•n";
-
-  std::cout << " e: \n";
-  if (eVector_view_)
-    std::cout << eVector_view_ << "\n";
-  else
-    std::cout << " -> nullptr " << std::endl;
-  std::cout << "===================================== " << std::endl;
+  std::cout << "======= StressLinearTIR display ======= \n";
+  LagrangianLinearTIR::display();
 }
 
-void siconos::mechanics::fem::StressLinearTIR::allocate_dslink_vectors(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  DSlink.resize(tools::enum_to_index(StressLinearTIR::WorkDS::DSlinkSize));
+void siconos::mechanics::fem::StressLinearTIR::allocate_read_dynamical_systems_var_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+    modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const {
+  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+  if (ds_vars.empty()) ds_vars.resize(tools::enum_to_index(StressLinearTIR::ds_var::size));
 
-  // Default DSlink
-  DSlink[tools::enum_to_index(StressLinearTIR::WorkDS::sigma)] =
+  // Default ds_vars.
+  // We need:
+  // - sigma, sigma1 to compute output (y)
+  // - epsilon_p, epsilon_p1 to compute input (lambda)
+  bool has_two_ds = &ds1 != &ds2;
+
+  // if (!ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma)])
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma)] =
       std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[tools::enum_to_index(StressLinearTIR::WorkDS::sigma1)] =
+  // if (!ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma1)])
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma1)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  // if (!ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p)])
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  // if (!ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p1)])
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p1)] =
       std::make_shared<siconos::algebra::BlockVector>();
 
-  DSlink[tools::enum_to_index(StressLinearTIR::WorkDS::epsilonp)] =
-      std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[tools::enum_to_index(StressLinearTIR::WorkDS::epsilonp)] =
-      std::make_shared<siconos::algebra::BlockVector>();
+  auto* solid1 = dynamic_cast<SolidLinearTIDS*>(&ds1);
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma)]->insertPtr(solid1->stress());
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma1)]->insertPtr(
+      solid1->stressRate());
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p)]->insertPtr(
+      solid1->plasticDeformation());
+  ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p1)]->insertPtr(
+      solid1->plasticRate());
+
+  if (has_two_ds) {
+    auto* solid2 = dynamic_cast<SolidLinearTIDS*>(&ds2);
+    ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma)]->insertPtr(solid2->stress());
+    ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::sigma1)]->insertPtr(
+        solid2->stressRate());
+    ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p)]->insertPtr(
+        solid2->plasticDeformation());
+    ds_vars[tools::enum_to_index(StressLinearTIR::ds_var::epsilon_p1)]->insertPtr(
+        solid2->plasticRate());
+  }
 }

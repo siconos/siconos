@@ -19,39 +19,13 @@
 
 #include <memory>
 
+#include "BoundaryCondition.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SolidLinearTIDS.hpp"
-
-// #include "BlockVector.hpp"
-#include "BoundaryCondition.hpp"
-// #include "DynamicalSystem.hpp"
-// #include "FremondImpactFrictionNSL.hpp"
-// #include "Interaction.hpp"
-// #include "LagrangianCompliantLinearTIR.hpp"
-// #include "LagrangianDS.hpp"
-// #include "LagrangianLinearDiagonalDS.hpp"
-// #include "LagrangianLinearTIDS.hpp"
-// #include "LagrangianRheonomousR.hpp"
-// #include "LagrangianSparseDS.hpp"
-// #include "LagrangianSparseLinearTIDS.hpp"
-// #include "MohrCoulombPlasticityNSL.hpp"
-// #include "NewtonEulerDS.hpp"
-// #include "NewtonEulerR.hpp"
-// #include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
-// #include "NewtonImpactNSL.hpp"                 // for nslaw visitor
-// #include "NewtonImpactRollingFrictionNSL.hpp"  // for nslaw visitor
-// #include "OneStepNSProblem.hpp"
-// #include "Relation.hpp"
-// #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and
-// compositionLawLieGroup #include "SiconosAlgebraAddons.hpp" #include "SiconosException.hpp"
-// #include "SiconosMatrix.hpp"
-// #include "SiconosVector.hpp"
 #include "Simulation.hpp"
+#include "SolidLinearTIDS.hpp"
 #include "StressLinearTIR.hpp"
-// #include "Tools.hpp"
-
 // // #define DEBUG_NOCOLOR
 // // #define DEBUG_STDOUT
 // // #define DEBUG_MESSAGES
@@ -68,22 +42,19 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
 
   // Initialize work vectors
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
-  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
+  ds_work_vectors.resize(tools::enum_to_index(wk_ds::size));
 
-  ds_work_vectors[MoreauJeanOSI::RESIDU_FREE] =
+  ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
-  ds_work_vectors[MoreauJeanOSI::VFREE] =
+  ds_work_vectors[tools::enum_to_index(wk_ds::vfree)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
-  ds_work_vectors[MoreauJeanOSI::RESIDU_SIGMAFREE] =
+  ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
-  ds_work_vectors[MoreauJeanOSI::SIGMAFREE] =
+  ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
-  ds_work_vectors[MoreauJeanOSI::Q_SIGMAFREE] =
+  ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension() +
                                                         solid->stressDimension());
-
-  ds_work_vectors[MoreauJeanOSI::BUFFER] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
   // Update dynamical system components (for memory swap).
 
   solid->computeTotalForces(solid->velocity_read(), solid->q_read(), t);
@@ -174,10 +145,6 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
   // Operators computed at told have index i, and (i+1) at t.
 
   // Iteration through the set of Dynamical Systems.
-  //
-  // std::shared_ptr<siconos::modeling::DynamicalSystem> ds; // Current
-  // Dynamical System.
-  siconos::modeling::Type dsType;  // Type of the current DS.
 
   // double maxResidu = 0;
   // double normResidu = maxResidu;
@@ -200,7 +167,7 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
     auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
     assert(solid);
 
-    auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+    auto& residuFree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
     residuFree.setZero();
     if (solid->hasBMatrix()) {
       const auto& sigmaold = solid->stressMemory().getSiconosVector(0);  // sigmai
@@ -223,19 +190,19 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
       residuFree += coeff * solid->fext();
     }
 
-    auto& residuSigfreed = *ds_work_vectors[MoreauJeanOSI::RESIDU_SIGMAFREE];
+    auto& residuSigfreed = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
     const auto& vold = solid->velocityMemory().getSiconosVector(0);  // vi
     residuSigfreed = -time_step * solid->BMatrix() * vold;
 
     applyBoundaryConditions(*solid, residuFree, dsi, t, vold);
 
-    auto& free = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    auto& free = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
     free = residuFree;  // copy residuFree into free
 
     //      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
     if (solid->p(1)) free += solid->p_read(1);  // Compute Residu in Workfree Notation !!
 
-    auto& sigfreed = *ds_work_vectors[MoreauJeanOSI::SIGMAFREE];
+    auto& sigfreed = *ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)];
     sigfreed = residuSigfreed;
 
     sigfreed -= solid->epsilon_p(1) * time_step;
@@ -255,9 +222,6 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeFreeState() {
   DEBUG_BEGIN("MoreauJeanOSI::computeFreeState()\n");
   // This function computes "free" states of the DS belonging to this
   // Integrator. "Free" means without taking non-smooth effects into account.
-
-  double nextTime = _simulation->nextTime();  // End of the time step
-  double timeStep = _simulation->timeStep();
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -292,8 +256,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeFreeState() {
     // Get storage for W from the graph
     // Get workVectors (rfree, vfree ...) from the graph
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    auto& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
-    auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    auto& residuFree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
+    auto& vfree = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
 
     // Current dynamical system
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -306,11 +270,11 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeFreeState() {
 
     const auto& sigmaold = solid->stressMemory().getSiconosVector(0);
     //        auto &residuFree =
-    //            *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
-    //        auto &vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
-    auto& residusigmafree = *ds_work_vectors[MoreauJeanOSI::RESIDU_SIGMAFREE];
-    auto& sigmafree = *ds_work_vectors[MoreauJeanOSI::SIGMAFREE];
-    auto& qSigmafree = *ds_work_vectors[MoreauJeanOSI::Q_SIGMAFREE];
+    //            *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
+    //        auto &vfree = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
+    auto& residusigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
+    auto& sigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)];
+    auto& qSigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)];
     qSigmafree.head(solid->dimension()) = residuFree;
     qSigmafree.tail(solid->stressDimension()) = residusigmafree;
     // q_sigma_free = [residuFree; residuSigmaFree]
@@ -319,7 +283,6 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeFreeState() {
 
     // -> Solve WX = sigmafree and set sigmafree = X
     qSigmafree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qSigmafree);
-    const auto& vold = solid->velocityMemory().getSiconosVector(0);  // vi (vold)
 
     vfree = solid->velocityMemory().getSiconosVector(0);
     sigmafree = sigmaold;
@@ -360,7 +323,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::integrate(double& tini
     auto sigma = solid->stress();
 
     *v = solid->p_read(1);
-    *sigma = -time_step * solid->plasticRate();
+    *sigma = -time_step * solid->plasticRate_read();
     const auto& vold = solid->velocityMemory().getSiconosVector(0);
     const auto& sigmaOld = solid->stressMemory().getSiconosVector(0);
 
@@ -401,7 +364,6 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
       "MoreauJeanOSI::updateState(const unsigned int "
       ")\n");
 
-  double RelativeTol = _simulation->relativeConvergenceTol();
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
 
@@ -454,10 +416,10 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
       *sigma = qSigma.tail(solid->stressDimension());
     }
 
-    auto& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    auto& vfree = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
     *v += vfree;
 
-    auto& sigmafree = *ds_work_vectors[MoreauJeanOSI::SIGMAFREE];
+    auto& sigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)];
     *sigma += sigmafree;
 
     if (solid->boundaryConditions()) {

@@ -26,12 +26,12 @@
 
 #include "Tools.hpp"
 
-void siconos::mechanics::fem::MVertex::display() const {
+void siconos::mechanics::fem::MeshVertex::display() const {
   std::cout << " - Vertex - number: " << num_ << " ; (x,y,z): " << _x << ", " << _y << ", "
             << _z << "\n";
 };
 
-void siconos::mechanics::fem::MElement::display() const {
+void siconos::mechanics::fem::MeshElement::display() const {
   std::cout << " - Element - number: " << num_
             << " ; type: " << siconos::tools::enum_to_string(type_) << " ; vertices: ";
 
@@ -46,14 +46,14 @@ void siconos::mechanics::fem::MElement::display() const {
   std::cout << "\n";
 };
 
-void siconos::mechanics::fem::MBeamVertex::display() const {
-  siconos::mechanics::fem::MVertex::display();
+void siconos::mechanics::fem::MeshBeamVertex::display() const {
+  siconos::mechanics::fem::MeshVertex::display();
   std::cout << " (qx,qy,qz): " << _qx << ", " << _qy << ", " << _qz << "\n";
 };
 
 siconos::mechanics::fem::Mesh::Mesh(
-    int dim, std::vector<std::shared_ptr<MVertex>> vertices,
-    std::vector<std::shared_ptr<MElement>> elements,
+    int dim, std::vector<std::shared_ptr<MeshVertex>> vertices,
+    std::vector<std::shared_ptr<MeshElement>> elements,
     std::vector<std::tuple<int, std::string>> physical_entities)
     : dimension_{dim},
       vertices_{vertices},
@@ -93,17 +93,14 @@ void siconos::mechanics::fem::Mesh::display(bool brief) const {
     cnt++;
   }
 
-  int k = 0;
-  std::cout << "Physical entities : (number, tag,  type, name)\n";
-  for (auto& physical_entry : physical_entities_) {
-    std::cout << k << " " << k + 1 << " " << std::get<0>(physical_entry) << " "
-              << std::get<1>(physical_entry) << "\n";
-    k++;
+  if (physical_entities_.size()) {
+    std::cout << "Physical entities : (number, tag,  type, name)\n";
+    int k = 0;
+    for (auto& physical_entry : physical_entities_) {
+      std::cout << k << " " << k + 1 << " " << std::get<0>(physical_entry) << " "
+                << std::get<1>(physical_entry) << "\n";
+      k++;
+    }
   }
-
-  // for(std::vector<MElement *>::iterator it = elements_.begin();
-  //     it != elements_.end(); ++it) {
-  //   std::cout << *it << std::endl;
-  // }
   std::cout << "=========================================================== \n";
 }

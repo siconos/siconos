@@ -29,8 +29,8 @@
 namespace siconos::mechanics::fem {
 
 class FENode;
-class MElement;
-class MVertex;
+class MeshElement;
+class MeshVertex;
 
 using GaussPointsTab = std::vector<std::vector<double>>;
 
@@ -45,7 +45,7 @@ static const GaussPointsTab GaussPointsT3_1 = {
 static const GaussPointsTab GaussPointsT3_2 = {
     {0.66666666666666667, 0.16666666666666667, 0.1666666666666666},
     {0.16666666666666667, 0.66666666666666667, 0.1666666666666666},
-    {0.16666666666666667, 0.16666666666666667, 0.66666666666666667}};
+    {0.16666666666666667, 0.16666666666666667, 0.1666666666666666}};
 
 // TH4 order 1
 static const GaussPointsTab GaussPointsTH4_1 = {{0.25, 0.25, 0.25, 1.0}};
@@ -60,7 +60,7 @@ static const GaussPointsTab GaussPointsTH4_2 = {
 static const GaussPointsTab GaussPointsEmpty = {};
 
 /** A Finite Element */
-class FElement {
+class FiniteElement {
  protected:
   /** element number */
   size_t num_ = 0;
@@ -87,7 +87,7 @@ class FElement {
   siconos::algebra::SiconosDenseMatrix Te_transpose_{};  // 6x6 (dim=2) or 12x12(dim=3)
 
   /* associated Mesh element */
-  std::shared_ptr<MElement> mElement_{nullptr};
+  std::shared_ptr<MeshElement> mElement_{nullptr};
 
   /** number of dof per node */
   int ndofPernode_{0};
@@ -96,11 +96,11 @@ class FElement {
   double length_{0};
 
   /** Rule of five */
-  FElement() = delete;
-  FElement(FElement&) = delete;
-  FElement& operator=(const FElement&) = delete;
-  FElement(FElement&&) = delete;
-  FElement& operator=(FElement&&) = delete;
+  FiniteElement() = delete;
+  FiniteElement(FiniteElement&) = delete;
+  FiniteElement& operator=(const FiniteElement&) = delete;
+  FiniteElement(FiniteElement&&) = delete;
+  FiniteElement& operator=(FiniteElement&&) = delete;
 
   /** Build Te, Te^t and compute length - Only for B2 and B3 */
   void initialize_beam_element();
@@ -114,13 +114,14 @@ class FElement {
 
  public:
   /** Constructor
-   *  @param elem mesh element used as source of this finite element
+   *  @param mesh_elem mesh element used as source of this finite element
    *  @param nodes list of FENode of the current element (built from vertices of the
    *    mesh_element)
    */
-  FElement(std::shared_ptr<MElement> e, const std::vector<std::shared_ptr<FENode>>& nodes);
+  FiniteElement(std::shared_ptr<MeshElement> mesh_elem,
+                const std::vector<std::shared_ptr<FENode>>& nodes);
 
-  ~FElement() noexcept = default;
+  ~FiniteElement() noexcept = default;
 
   siconos::algebra::Index ndof() const { return ndof_; }
 
@@ -130,13 +131,13 @@ class FElement {
 
   auto type() const { return (type_); }
 
-  void add_node(std::shared_ptr<MVertex> vertex);
+  void add_node(std::shared_ptr<MeshVertex> vertex);
 
-  std::shared_ptr<MElement> mElement() { return mElement_; }
+  std::shared_ptr<MeshElement> mElement() { return mElement_; }
 
   FiniteElementFamily family() const { return family_; }
 
-  int order() const;
+  int order() const { return element_order(type_); };
 
   int ndofPerNode() const { return number_of_dof_per_node(type_); };
 

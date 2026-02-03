@@ -17,15 +17,12 @@
  */
 #include "SolidLinearTIDSTest.hpp"
 
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include "MeshUtils.hpp"
+#include "FemTools.hpp"
 #include "FiniteElementModel.hpp"
 #include "Material.hpp"
+#include "MeshUtils.hpp"
 #include "SolidLinearTIDS.hpp"
-
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -34,34 +31,11 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SolidLinearTIDSTest);
 
 void SolidLinearTIDSTest::setUp() {
-
   mesh = siconos::mechanics::fem::createMeshFromGMSH2("square_6.msh");
-  int bulk_material_tag = 1;
-  double density = 7800.;
-  auto mat1 = std::make_shared<siconos::mechanics::fem::Material>(density, 210e9, 1 / 3.);
-  materials = {{bulk_material_tag, mat1}};
-
-  std::shared_ptr<siconos::algebra::SiconosMatrix> denseS;
-  denseS = std::make_shared<siconos::algebra::SimpleMatrix>("S.dat", true);
-  S = std::make_shared<siconos::algebra::SimpleMatrix>(12,12,siconos::algebra::UblasType::SPARSE);
-  for (int i = 0; i< 4; i++){
-    for (int j = 0; j< 3; j++){
-      for (int k = 0; k< 3; k++){
-        S->setValue(3*i+j,3*i+k,denseS->getValue(3*i+j,3*i+k));
-      }
-    }
-  }
-
-  std::shared_ptr<siconos::algebra::SiconosMatrix> denseB;
-  denseB = std::make_shared<siconos::algebra::SimpleMatrix>("B.dat", true);
-  B = std::make_shared<siconos::algebra::SimpleMatrix>(12,10,siconos::algebra::UblasType::SPARSE);
-  for (int i = 0; i< 12; i++){
-    for (int j = 0; j< 10; j++){
-      B->setValue(i,j,denseB->getValue(i,j));
-    }
-  }
-
-
+  auto sd = siconos::algebra::io::readDenseMatrix("S.dat");
+  double tol = 1e-14;
+  S = sd.sparseView(tol);
+  B = siconos::algebra::io::readSparseMatrix("B.dat");
 }
 
 void SolidLinearTIDSTest::tearDown() {}
@@ -69,21 +43,22 @@ void SolidLinearTIDSTest::tearDown() {}
 // Mass, K, C
 void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
-  auto FEsolid = std::make_shared<siconos::mechanics::fem::SolidLinearTIDS>(
-      mesh, materials, siconos::algebra::UblasType::SPARSE);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->dimension() == 10,
+  std::map<int, const siconos::mechanics::fem::Material> materials = {{1, mat}};
+  siconos::mechanics::fem::SolidLinearTIDS solid{mesh, materials};
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", solid.dimension() == 10, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", solid.dimension() == 10, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", solid.stressDimension() == 12,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->dimension() == 10,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildSolidLinearTIDS1 : ", solid.FEModel()->elements().size() == 4, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", solid.stress_read()(0) == 0.0,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->stressDimension() == 12,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->FEModel()->elements().size() == 4,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", (*FEsolid->stress())(0) == 0.0,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testS : ",((*FEsolid->elasticity_matrix())-*S).normInf() < 1.0e-16,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testB: ",((*FEsolid->B())-*B).normInf() < 1.0e-16,
-                               true);
-  std::cout << "--> Constructor 1 test ended with success." << std::endl;
+  auto norm = (solid.elasticityMatrix() - S).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testS : ", norm < 1.0e-16, true);
+  norm = (solid.BMatrix() - B).norm();
+  siconos::algebra::print(solid.BMatrix().toDense() - B.toDense());
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testB: ", norm < 1.0e-16, true);
+  std::cout << "✅ Basic constructor test ended with success." << std::endl;
 }

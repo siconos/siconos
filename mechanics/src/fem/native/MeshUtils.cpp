@@ -30,7 +30,7 @@
 #include "FETypes.hpp"
 #include "FemTools.hpp"
 #include "FiniteElementModel.hpp"
-#include "Mesh.hpp"  // For MVertex, MElement ...
+#include "Mesh.hpp"  // For MeshVertex, MeshElement ...
 #include "RotationQuaternion.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
@@ -49,20 +49,20 @@ void split(const std::string& str, Container& cont, const std::string& delims = 
 }
 
 std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2dMesh2x1() {
-  auto v1 = std::make_shared<MVertex>(1, 0., 0., 0.);
-  auto v2 = std::make_shared<MVertex>(2, 1., 0., 0.);
-  auto v3 = std::make_shared<MVertex>(3, 0., 1., 0.);
-  auto v4 = std::make_shared<MVertex>(4, 1., 1., 0.);
+  auto v1 = std::make_shared<MeshVertex>(1, 0., 0., 0.);
+  auto v2 = std::make_shared<MeshVertex>(2, 1., 0., 0.);
+  auto v3 = std::make_shared<MeshVertex>(3, 0., 1., 0.);
+  auto v4 = std::make_shared<MeshVertex>(4, 1., 1., 0.);
 
-  std::vector<std::shared_ptr<MVertex>> vertices = {v1, v2, v3, v4};
+  std::vector<std::shared_ptr<MeshVertex>> vertices = {v1, v2, v3, v4};
 
-  std::vector<std::shared_ptr<MVertex>> vertices1 = {v1, v2, v3};
-  auto e1 = std::make_shared<MElement>(1, FiniteElementType::T3, vertices1);
+  std::vector<std::shared_ptr<MeshVertex>> vertices1 = {v1, v2, v3};
+  auto e1 = std::make_shared<MeshElement>(1, FiniteElementType::T3, vertices1);
 
-  std::vector<std::shared_ptr<MVertex>> vertices2 = {v2, v4, v3};
-  auto e2 = std::make_shared<MElement>(2, FiniteElementType::T3, vertices2);
+  std::vector<std::shared_ptr<MeshVertex>> vertices2 = {v2, v4, v3};
+  auto e2 = std::make_shared<MeshElement>(2, FiniteElementType::T3, vertices2);
 
-  std::vector<std::shared_ptr<MElement>> elements = {e1, e2};
+  std::vector<std::shared_ptr<MeshElement>> elements = {e1, e2};
 
   return std::make_shared<Mesh>(2, vertices, elements);
 }
@@ -72,33 +72,34 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2d
   double lx = Lx / n;
   double ly = Ly / m;
 
-  std::vector<std::shared_ptr<MVertex>> vertices;
+  std::vector<std::shared_ptr<MeshVertex>> vertices;
 
   vertices.resize((n + 1) * (m + 1));
 
   for (int i = 0; i < n + 1; i++) {
     for (int j = 0; j < m + 1; j++) {
       vertices[i + j * (n + 1)] =
-          std::make_shared<MVertex>(i + j * (n + 1), i * lx, j * ly, 0.);
+          std::make_shared<MeshVertex>(i + j * (n + 1), i * lx, j * ly, 0.);
     }
   }
-  std::vector<std::shared_ptr<MElement>> elements;
+  std::vector<std::shared_ptr<MeshElement>> elements;
   // elements.resize(2*n*m);
   int element_cnt = 0;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      std::vector<std::shared_ptr<MVertex>> vertices_e_1 = {vertices[i + j * (n + 1)],
-                                                            vertices[i + 1 + (j) * (n + 1)],
-                                                            vertices[i + (j + 1) * (n + 1)]};
-      auto e = std::make_shared<MElement>(element_cnt++, FiniteElementType::T3, vertices_e_1);
+      std::vector<std::shared_ptr<MeshVertex>> vertices_e_1 = {
+          vertices[i + j * (n + 1)], vertices[i + 1 + (j) * (n + 1)],
+          vertices[i + (j + 1) * (n + 1)]};
+      auto e =
+          std::make_shared<MeshElement>(element_cnt++, FiniteElementType::T3, vertices_e_1);
       elements.push_back(e);
 
-      std::vector<std::shared_ptr<MVertex>> vertices_e_2 = {
+      std::vector<std::shared_ptr<MeshVertex>> vertices_e_2 = {
           vertices[i + 1 + (j) * (n + 1)], vertices[i + 1 + (j + 1) * (n + 1)],
           vertices[i + (j + 1) * (n + 1)]};
 
       elements.push_back(
-          std::make_shared<MElement>(element_cnt++, FiniteElementType::T3, vertices_e_2));
+          std::make_shared<MeshElement>(element_cnt++, FiniteElementType::T3, vertices_e_2));
     }
   }
   return std::make_shared<Mesh>(2, vertices, elements);
@@ -114,18 +115,17 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
   if (dim == 2) {
     FEtype = FiniteElementType::B2;
     step(2) = 0;
-  }
-  if (dim == 3)
+  } else if (dim == 3)
     FEtype = FiniteElementType::B3;
   else
-    THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
+    THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3!");
 
-  std::vector<std::shared_ptr<MVertex>> vertices(nb_elements + 1);
+  std::vector<std::shared_ptr<MeshVertex>> vertices(nb_elements + 1);
 
-  for (int i = 0; i < nb_elements + 1; i++) {
-    vertices[i] = std::make_shared<MBeamVertex>(i, coords_start[0] + i * step(0),
-                                                coords_start[1] + i * step(1),
-                                                coords_start[2] + i * step(2), 0, 0, 0);
+  for (size_t i = 0; i < nb_elements + 1; i++) {
+    vertices[i] = std::make_shared<MeshBeamVertex>(i, coords_start[0] + i * step(0),
+                                                   coords_start[1] + i * step(1),
+                                                   coords_start[2] + i * step(2), 0, 0, 0);
   }
 
   // 2. Computes the list of mesh elements
@@ -133,23 +133,26 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
   // - boundary condition tag for the first vertex/element
   // - applied force tag for the last element
   // - default tag for the others
-  std::vector<std::shared_ptr<MElement>> elements;
+  std::vector<std::shared_ptr<MeshElement>> elements;
 
   // First element
-  std::vector<std::shared_ptr<MVertex>> vertices_in_elem = {vertices[0], vertices[1]};
-  std::vector<int> tag = {tools::enum_to_index(MeshTags::boundary_conditions)};
+  std::vector<std::shared_ptr<MeshVertex>> vertices_in_elem = {vertices[0], vertices[1]};
 
-  elements.push_back(std::make_shared<MElement>(0, FEtype, vertices_in_elem, tag));
-  for (int i = 1; i < nb_elements - 1; i++) {
-    std::vector<std::shared_ptr<MVertex>> vertices_in_elem = {vertices[i], vertices[i + 1]};
-    tag = {tools::enum_to_index(MeshTags::bulk_material)};
-    elements.push_back(std::make_shared<MElement>(i, FEtype, vertices_in_elem, tag));
+  std::vector<std::shared_ptr<MeshVertex>> vertices_start = {vertices[0], vertices[1]};
+  std::vector<int> tags = {
+      default_tags.at(siconos::mechanics::fem::MeshTags::boundary_conditions)};
+  elements.push_back(std::make_shared<MeshElement>(0, FEtype, vertices_start, tags));
+  for (size_t i = 1; i < nb_elements - 1; i++) {
+    tags = {default_tags.at(siconos::mechanics::fem::MeshTags::bulk_material)};
+    std::vector<std::shared_ptr<MeshVertex>> vertices_in_elem = {vertices[i], vertices[i + 1]};
+    elements.push_back(std::make_shared<MeshElement>(i, FEtype, vertices_in_elem, tags));
   }
-  tag = {tools::enum_to_index(MeshTags::applied_forces)};
-  std::vector<std::shared_ptr<MVertex>> vertices_in_last_elem = {vertices[nb_elements - 1],
-                                                                 vertices[nb_elements]};
-  elements.push_back(std::make_shared<MElement>(0, FEtype, vertices_in_last_elem, tag));
-
+  tags = {default_tags.at(siconos::mechanics::fem::MeshTags::applied_forces)};
+  std::vector<std::shared_ptr<MeshVertex>> vertices_in_last_elem = {vertices[nb_elements - 1],
+                                                                    vertices[nb_elements]};
+  elements.push_back(
+      std::make_shared<MeshElement>(nb_elements - 1, FEtype, vertices_in_last_elem, tags));
+  elements.back()->display();
   return std::make_shared<Mesh>(dim, vertices, elements);
 }
 
@@ -166,9 +169,9 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
   unsigned int number_of_physical_names = 0;
   std::vector<std::tuple<int, std::string>> physical_entities;
   unsigned int number_of_vertices;
-  std::vector<std::shared_ptr<MVertex>> vertices;
+  std::vector<std::shared_ptr<MeshVertex>> vertices;
   unsigned int number_of_elements;
-  std::vector<std::shared_ptr<MElement>> elements;
+  std::vector<std::shared_ptr<MeshElement>> elements;
   double min_z = 1e+64, max_z = -1e+64;
   std::string toto;
 
@@ -241,7 +244,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         t_z >> z;
         max_z = std::max(max_z, z);
         min_z = std::min(min_z, z);
-        vertices.push_back(std::make_shared<MVertex>(vertex_number, x, y, z));
+        vertices.push_back(std::make_shared<MeshVertex>(vertex_number, x, y, z));
         // vertices.back()->display();
       }
     }
@@ -279,7 +282,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
           tags.push_back(tag);
         }
 
-        std::vector<std::shared_ptr<MVertex>> vertices_e;
+        std::vector<std::shared_ptr<MeshVertex>> vertices_e;
         for (decltype(words.size()) k = 3 + number_of_tags; k < words.size(); k++) {
           decltype(vertices.size()) node_number;
           std::stringstream token(words[k]);
@@ -300,7 +303,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
           }
         }
         elements.push_back(
-            std::make_shared<MElement>(element_number, element_type, vertices_e, tags));
+            std::make_shared<MeshElement>(element_number, element_type, vertices_e, tags));
         // elements.back()->display();
       }
     }
@@ -349,8 +352,7 @@ std::string siconos::mechanics::fem::prepareWriteForPython(
   std::ofstream outfile(filepath);
   if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
   outfile << "import numpy as np\n";
-  for (auto& str : fields):
-    outfile << str+"=[]\n";
+  for (auto& str : fields) outfile << str + "=[]\n";
   outfile.close();
   return filename;
 }
@@ -387,14 +389,20 @@ void siconos::mechanics::fem::writeDisplacementforPython(
   int pos = 0;
   for (auto& str : fields) {
     outfile << str + ".append(np.array([";
-    for (auto v : mesh.vertices()) {
-      auto node = femodel.vertexToNode(v);
-      double value = 0.0;
-      if (node) {
-        auto idx = node->global_dof_index()[pos];
-        value = x(idx);
+    if (pos == 2 && mesh.dim() < 3) {
+      for (auto v : mesh.vertices()) {
+        outfile << 0.0 << ", ";
       }
-      outfile << value << ", ";
+    } else {
+      for (auto v : mesh.vertices()) {
+        auto node = femodel.vertexToNode(v);
+        double value = 0.0;
+        if (node) {
+          auto idx = node->global_dof_index()[pos];
+          value = x(idx);
+        }
+        outfile << value << ", ";
+      }
     }
     outfile << "]))\n\n";
     pos += 1;
@@ -418,9 +426,8 @@ void siconos::mechanics::fem::writeTensorforPython(const FiniteElementModel& fem
   for (auto& str : fields) {
     size_t elem_cnt = 0;
     outfile << str + ".append(np.array([";
-    for (const auto& fe : femodel.elements()) {
+    for (size_t elem_cnt = 0; elem_cnt < femodel.elements().size(); elem_cnt++) {
       outfile << x(elem_cnt * 3 + pos) << ", ";
-      elem_cnt++;
     }
     std::cout << " elem_cnt:" << elem_cnt << std::endl;
     outfile << "]))\n\n";
@@ -444,23 +451,22 @@ void siconos::mechanics::fem::prepareWriteBlockPositionforSOFA(std::string filen
 }
 
 void siconos::mechanics::fem::writeBeamPositionforSOFA(
-    std::shared_ptr<Mesh> mesh, std::shared_ptr<FiniteElementModel> femodel,
-    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t) {
+    const Mesh& mesh, const FiniteElementModel& femodel,
+    const siconos::algebra::SiconosVector& positions, std::string filename, double t) {
   FILE* foutput = fopen(filename.c_str(), "a");
   fprintf(foutput, "T= %f\n", t);
-  auto vertices = mesh->vertices();
   fprintf(foutput, "X=");
-  for (auto v : mesh->vertices()) {
-    std::shared_ptr<FENode> n = femodel->vertexToNode(v);
+  for (const auto& v : mesh.vertices()) {
+    std::shared_ptr<FENode> n = femodel.vertexToNode(v);
     double value = 0.0, valueqx, valueqy, valueqz;
     if (n) {
       auto idx = n->global_dof_index()[0];
       auto idy = n->global_dof_index()[1];
 
-      value = (*x)(idx);
+      value = positions(idx);
       fprintf(foutput, " %e", value + v->x());
 
-      value = (*x)(idy);
+      value = positions(idy);
       fprintf(foutput, " %e", value + v->y());
 
       if (n->global_dof_index().size() == 3) {
@@ -469,11 +475,11 @@ void siconos::mechanics::fem::writeBeamPositionforSOFA(
 
         auto idtheta = n->global_dof_index()[2];
         // idqx= (*n->global_dof_index())[3];
-        valueqx = (*x)(idtheta);
+        valueqx = positions(idtheta);
         // idqy= (*n->global_dof_index())[4];
-        // valueqy =(*x)(idqy);
+        // valueqy =positions(idqy);
         // idqz= (*n->global_dof_index())[5];
-        // valueqz =(*x)(idqz);
+        // valueqz =positions(idqz);
 
         double quat[4];
 
@@ -496,15 +502,15 @@ void siconos::mechanics::fem::writeBeamPositionforSOFA(
         fprintf(foutput, " %e", quat[3]);
       } else {
         auto idz = n->global_dof_index()[2];
-        value = (*x)(idz);
+        value = positions(idz);
         fprintf(foutput, " %e", value + v->z());
 
         auto idqx = n->global_dof_index()[3];
-        valueqx = (*x)(idqx);
+        valueqx = positions(idqx);
         auto idqy = n->global_dof_index()[4];
-        valueqy = (*x)(idqy);
+        valueqy = positions(idqy);
         auto idqz = n->global_dof_index()[5];
-        valueqz = (*x)(idqz);
+        valueqz = positions(idqz);
 
         siconos::algebra::SiconosVector3 angle;
         angle << valueqx, valueqy, valueqz;
@@ -522,12 +528,12 @@ void siconos::mechanics::fem::writeBeamPositionforSOFA(
 }
 
 void siconos::mechanics::fem::writeBlockPositionforSOFA(
-    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t) {
+    const siconos::algebra::SiconosVector& positions, std::string filename, double t) {
   FILE* foutput = fopen(filename.c_str(), "a");
   fprintf(foutput, "T= %f\n", t);
   fprintf(foutput, "X=");
-  fprintf(foutput, " %e", (*x)(0));
-  fprintf(foutput, " %e", (*x)(1));
+  fprintf(foutput, " %e", positions(0));
+  fprintf(foutput, " %e", positions(1));
   // 2D case
   fprintf(foutput, " %e", 0.0);
 

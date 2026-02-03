@@ -47,7 +47,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   // WARNING : this function is supposed to be called
   // by the OneStepIntegrator, and maybe several times for the same DS
   // if the system is involved in more than one interaction. So, we must check
-  // if p2 and q2 already exist to be sure that DSlink won't be lost.
+  // if p2 and q2 already exist to be sure that ds_vars won't be lost.
 
   x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
 

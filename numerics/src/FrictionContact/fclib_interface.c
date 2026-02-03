@@ -275,8 +275,8 @@ int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title
   return info;
 }
 int frictionContact_fclib_write(FrictionContactProblem* problem, const char* title,
-                                const char* description, const char* mathInfo, const char* path,
-                                int ndof) {
+                                const char* description, const char* mathInfo,
+                                const char* path, int ndof) {
   int info = 0;
 
   fclib_local* fclib_problem;
@@ -290,9 +290,9 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, const char* tit
   fclib_problem->s = NULL;
 
   fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info));
-  fclib_problem->info->title = title;
-  fclib_problem->info->description = description;
-  fclib_problem->info->math_info = mathInfo;
+  fclib_problem->info->title = strdup(title);
+  fclib_problem->info->description = strdup(description);
+  fclib_problem->info->math_info = strdup(mathInfo);
 
   fclib_problem->R = NULL;
   fclib_problem->V = NULL;

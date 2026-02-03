@@ -71,11 +71,10 @@ void writeTensorforPython(const FiniteElementModel& femodel,
 void prepareWriteBeamPositionforSOFA(std::string filename);
 void prepareWriteBlockPositionforSOFA(std::string filename);
 
-void writeBeamPositionforSOFA(std::shared_ptr<Mesh> mesh,
-                              std::shared_ptr<FiniteElementModel> femodel,
-                              std::shared_ptr<siconos::algebra::SiconosVector> x,
+void writeBeamPositionforSOFA(const Mesh& mesh, const FiniteElementModel& femodel,
+                              const siconos::algebra::SiconosVector& positions,
                               std::string filename, double t);
-void writeBlockPositionforSOFA(std::shared_ptr<siconos::algebra::SiconosVector> x,
+void writeBlockPositionforSOFA(const siconos::algebra::SiconosVector& positions,
                                std::string filename, double t);
 
 }  // namespace siconos::mechanics::fem

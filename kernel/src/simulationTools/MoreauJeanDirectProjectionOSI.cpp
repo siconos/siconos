@@ -17,15 +17,14 @@
  */
 #include "MoreauJeanDirectProjectionOSI.hpp"
 
-#include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
+#include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Tools.hpp"
 // #define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION
 // #define SECONDWAY_ACTIVATION
@@ -57,19 +56,19 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
       "siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS( "
       "double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) \n");
   MoreauJeanOSI::initializeWorkVectorsForDS(t, ds);
-  const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  auto& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    workVectors[MoreauJeanOSI::QTMP] =
-        std::make_shared<siconos::algebra::SiconosVector>(d->dimension());
-  } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-    workVectors[MoreauJeanOSI::QTMP] =
-        std::make_shared<siconos::algebra::SiconosVector>(d->getqDim());
-  } else {
-    THROW_EXCEPTION(
-        "siconos::integrators::MoreauJeanDirectProjectionOSI::initialize() - DS not of the "
-        "right type");
-  }
+  // const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  //  auto& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  //  if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+  //    workVectors[MoreauJeanOSI::QTMP] =
+  //        std::make_shared<siconos::algebra::SiconosVector>(d->dimension());
+  //  } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+  //    workVectors[MoreauJeanOSI::QTMP] =
+  //        std::make_shared<siconos::algebra::SiconosVector>(d->getqDim());
+  //  } else {
+  //    THROW_EXCEPTION(
+  //        "siconos::integrators::MoreauJeanDirectProjectionOSI::initialize() - DS not of the
+  //        " "right type");
+  //  }
   for (unsigned int k = _levelMinForInput; k < _levelMaxForInput + 1; k++) {
     DEBUG_PRINTF("ds->initializeNonSmoothInput(%i)\n", k);
     ds->initializeNonSmoothInput(k);
@@ -92,59 +91,46 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
   MoreauJeanOSI::initializeWorkVectorsForInteraction(inter, interProp, DSG);
 
   auto ds1 = interProp.source;
-  auto ds2 = interProp.target;
   assert(ds1);
+  auto is_ds1_integrated_by_this_osi = checkOSI(DSG.descriptor(ds1));
+
+  auto ds2 = interProp.target;
   assert(ds2);
+  auto use_two_ds = ds1 != ds2;
+  bool is_ds2_integrated_by_this_osi = use_two_ds && checkOSI(DSG.descriptor(ds2));
 
-  auto& DSlink = inter.linkToDSVariables();
-  auto& relation = *inter.relation();
-  auto relationType = relation.getType();
+  auto relationType = inter.relation()->getType();
 
-  unsigned int p0 = 0;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    p0 = siconos::tools::enum_to_index(siconos::modeling::LagrangianR::WorkDS::p0);
-  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    p0 = siconos::tools::enum_to_index(siconos::modeling::NewtonEulerR::WorkDS::p0);
-  }
-
-  if (ds1 != ds2) {
-    DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() != 2))
-      DSlink[p0] = std::make_shared<siconos::algebra::BlockVector>(2);
-  } else {
-    if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() != 1))
-      DSlink[p0] = std::make_shared<siconos::algebra::BlockVector>(1);
-  }
-
-  if (checkOSI(DSG.descriptor(ds1))) {
-    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
-    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-    if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
-      DSlink[p0]->setVectorPtr(0, lds.p(0));
-    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      auto& neds = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds1);
-      DSlink[p0]->setVectorPtr(0, neds.p(0));
+    if (is_ds1_integrated_by_this_osi) {
+      // SecondOrderDS to include Lagrangian and LagrangianSparse
+      auto& lds1 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
+      // inter.link[p0][0] = ds1->p[0]
+      inter.append_to_dynamical_systems_variables(siconos::modeling::LagrangianR::ds_var::p0,
+                                                  0, lds1.p(0));
     }
-  }
-  DEBUG_PRINTF("ds1->number() %i\n", ds1->number());
-  DEBUG_PRINTF("ds2->number() %i\n", ds2->number());
-
-  if (ds1 != ds2) {
-    DEBUG_PRINT("ds1 != ds2\n");
-    if (checkOSI(DSG.descriptor(ds2))) {
-      DEBUG_PRINTF("ds2->number() %i is taken into account\n", ds2->number());
-      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
-      if (relationType == siconos::modeling::RelationType::Lagrangian) {
-        auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-        DSlink[p0]->setVectorPtr(1, lds.p(0));
-      } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-        auto& neds = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds2);
-        DSlink[p0]->setVectorPtr(1, neds.p(0));
-      }
+    if (is_ds2_integrated_by_this_osi) {
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
+      // inter.link[p0][1] = ds2->p[0]
+      inter.append_to_dynamical_systems_variables(siconos::modeling::LagrangianR::ds_var::p0,
+                                                  1, lds2.p(0));
     }
   }
 
+  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    if (is_ds1_integrated_by_this_osi) {
+      auto& lds1 = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds1);
+      // inter.link[p0][0] = ds1->p[0]
+      inter.append_to_dynamical_systems_variables(siconos::modeling::NewtonEulerR::ds_var::p0,
+                                                  0, lds1.p(0));
+    }
+    if (is_ds2_integrated_by_this_osi) {
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds2);
+      // inter.link[p0][1] = ds2->p[0]
+      inter.append_to_dynamical_systems_variables(siconos::modeling::NewtonEulerR::ds_var::p0,
+                                                  1, lds2.p(0));
+    }
+  }
   DEBUG_END(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::"
       "initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, "
@@ -172,8 +158,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexS
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   auto h = _simulation->timeStep();
-  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
-  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -213,8 +199,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 {
   assert(i == 1);
   auto h = _simulation->timeStep();
-  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
-  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -278,7 +264,7 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 {
   assert(i == 1);
-  auto y = (*inter->y(i - 1))(0);        // for i=1 y(i-1) is the position
+  auto y = (*inter->y(i - 1))(0);          // for i=1 y(i-1) is the position
   auto yDot = (*(inter->y(i)))(0);         // for i=1 y(i) is the velocity
   auto lambda = (*(inter->lambda(i)))(0);  // for i=1 y(i) is the velocity
 
@@ -334,8 +320,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 {
   assert(i == 1);
-  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
-  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet "

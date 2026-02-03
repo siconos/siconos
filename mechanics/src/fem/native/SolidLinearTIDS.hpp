@@ -80,10 +80,9 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
  public:
   /** @brief Standard constructor from FE mesh and material description
    *  @param[in] mesh the mesh that defined the spatial discretization
-   *  @param[in] materials map describing the material properties
+   *  @param[in] materials map describing the different material properties
    */
-  SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
-                  const std::map<unsigned int, const Material>& materials);
+  SolidLinearTIDS(std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials);
 
   /** destructor */
   ~SolidLinearTIDS() noexcept = default;
@@ -107,6 +106,9 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
 
   /** @return the stress (pointer link) */
   std::shared_ptr<siconos::algebra::SiconosVector> stress() const { return stress_[0]; }
+
+  /** @return the stress (pointer link) */
+  std::shared_ptr<siconos::algebra::SiconosVector> stressRate() const { return stress_[1]; }
 
   // To be used only for pybind11 !
   inline siconos::algebra::SiconosVector& stress_python() const { return *(stress_[0]); }
@@ -136,14 +138,24 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
   }
 
   /** @return  a read-only view on the plastic deformation */
-  inline auto plasticDeformation() const {
+  inline auto plasticDeformation_read() const {
     return siconos::algebra::ConstMapVectorType(epsilon_p_[0]->data(), epsilon_p_[0]->size());
   }
 
-  /** @return  a read-only view on the plastic rate */
+  /** @return the plastic deformation (pointer link) */
+  std::shared_ptr<siconos::algebra::SiconosVector> plasticDeformation() const {
+    return epsilon_p_[0];
+  }
 
-  inline auto plasticRate() const {
+  /** @return  a read-only view on the plastic deformation rate */
+
+  inline auto plasticRate_read() const {
     return siconos::algebra::ConstMapVectorType(epsilon_p_[1]->data(), epsilon_p_[1]->size());
+  }
+
+  /** @return the plastic deformation rate (pointer link) */
+  std::shared_ptr<siconos::algebra::SiconosVector> plasticRate() const {
+    return epsilon_p_[1];
   }
 
   /** @brief set the elasticity matrix.
@@ -278,14 +290,6 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
    *  \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory() override;
-
-  /** @brief add (pointer links) of state variable of interest into dslink
-   *      Warning: internal use only (called from Topology)
-   *      dslink is used in relations to compute output and inputs
-   *  @param dslink a container of vectors (pointers)
-   */
-  virtual void initialize_ds_link_for_relations(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
 
   modeling::Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };

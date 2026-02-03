@@ -234,43 +234,43 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacobiangOver_lambda(
 
 void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interaction& inter,
                                                             unsigned int level) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
-  if (computeh_) computeh_(*DSlink[FirstOrderR::Xxx], time, lambda, y);
+  if (computeh_) computeh_(*ds_vars[FirstOrderR::Xxx], time, lambda, y);
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeInput(double time, Interaction& inter,
                                                            unsigned int level) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(level);
-  if (computeg_) computeg_(*DSlink[FirstOrderR::Xxx], time, lambda, *DSlink[FirstOrderR::Rrr]);
+  if (computeg_) computeg_(*ds_vars[FirstOrderR::Xxx], time, lambda, *ds_vars[FirstOrderR::Rrr]);
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJach(double time, Interaction& inter) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(0);
 
   if (computejacobianhOver_state_) {
-    computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], time, lambda,
+    computejacobianhOver_state_(*ds_vars[FirstOrderR::Xxx], time, lambda,
                                 *jacobianhOver_state_view_);
   }
   if (computejacobianhOver_lambda_) {
-    computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], time, lambda,
+    computejacobianhOver_lambda_(*ds_vars[FirstOrderR::Xxx], time, lambda,
                                  *jacobianhOver_lambda_view_);
   }
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJacg(double time, Interaction& inter) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   auto& lambda = *inter.lambda(0);
   if (computejacobiangOver_lambda_) {
-    computejacobiangOver_lambda_(*DSlink[FirstOrderR::Xxx], time, lambda,
+    computejacobiangOver_lambda_(*ds_vars[FirstOrderR::Xxx], time, lambda,
                                  *jacobiangOver_lambda_view_);
   }
   if (computejacobiangOver_state_) {
-    computejacobiangOver_state_(*DSlink[FirstOrderR::Xxx], time, lambda,
+    computejacobiangOver_state_(*ds_vars[FirstOrderR::Xxx], time, lambda,
                                 *jacobiangOver_state_view_);
   }
 }

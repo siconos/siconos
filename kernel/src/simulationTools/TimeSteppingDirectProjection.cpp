@@ -156,21 +156,22 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
 
   // Store the q vector of each DS.
 
-  for (auto aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
-    auto ds = dsGraph->bundle(*aVi2);
-    auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
-    if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-      *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-    } else
-      THROW_EXCEPTION(
-          "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() "
-          ":: - Ds is not "
-          "from NewtonEulerDS neither from LagrangianDS.");
-  }
+  // for (auto aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
+  // auto ds = dsGraph->bundle(*aVi2);
+  //  auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
+  //  if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+  //    *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
+  //  } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+  //    *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+  //  } else if (auto d =
+  //  std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+  //    *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
+  //  } else
+  //    THROW_EXCEPTION(
+  //        "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() "
+  //        ":: - Ds is not "
+  //        "from NewtonEulerDS neither from LagrangianDS.");
+  //}
 
   while (runningProjection && _nbProjectionIteration < _projectionMaxIteration) {
     _nbProjectionIteration++;
@@ -218,14 +219,15 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     // MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
     for (auto aVi2 : *dsGraph) {
       auto ds = dsGraph->bundle(aVi2);
-      auto& workVectors = *dsGraph->properties(aVi2).workVectors;
+      // auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
       if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-        auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+        // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
 
-        DEBUG_EXPR_WE(std ::cout << "qtmp before  update \n"; siconos::algebra::print(*qtmp);
-                      std ::cout << "p(0) before  update \n";
-                      siconos::algebra::print(*neds->p(0)););
+        // DEBUG_EXPR_WE(std ::cout << "qtmp before  update \n";
+        // siconos::algebra::print(*qtmp);
+        //               std ::cout << "p(0) before  update \n";
+        //               siconos::algebra::print(*neds->p(0)););
 
         if (neds->p(0)) {
           //*q = * qtmp +  *neds->p(0);
@@ -238,7 +240,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
         neds->normalizeq();
         neds->computeT(neds->q_read());
       } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+        // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
 
         if (d->p(0)) {
           //*q = * qtmp +  *d->p(0);
@@ -246,7 +248,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
         }
       } else if (auto d =
                      std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-        auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
+        // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
 
         if (d->p(0)) {
           //*q = * qtmp +  *d->p(0);

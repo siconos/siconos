@@ -227,12 +227,12 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
   DEBUG_BEGIN("siconos::modeling::FirstOrderLinearR::computeOutput \n");
   siconos::algebra::SiconosVector& y = *inter.y(0);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(0);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   if (jacobianhOver_state_view_) {
     if (!hasConstantJacobianhOver_state_)  // C not constant
       computeC_(time, *jacobianhOver_state_view_);
     siconos::algebra::matrixBlockVector_prod(*jacobianhOver_state_view_,
-                                             *DSlink[FirstOrderR::Xxx], y, true);
+                                             *ds_vars[FirstOrderR::Xxx], y, true);
   } else
     y.setZero();
 
@@ -259,10 +259,10 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
 void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction& inter,
                                                         unsigned int) {
   if (jacobiangOver_lambda_view_) {
-    auto& DSlink = inter.linkToDSVariables();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
     if (!hasConstantJacobiangOver_lambda_)  // B not constant
       computeB_(time, *jacobiangOver_lambda_view_);
-    *DSlink[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
+    *ds_vars[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
   }
 }
 

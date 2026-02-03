@@ -219,11 +219,26 @@ class MoreauJeanOSI : public OneStepIntegrator {
       siconos::algebra::SiconosMatrix& iteration_matrix) const;
 
  public:
-  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH };
+  /** This enum is used to get access to work vectors relared to DS
+   *  It corresponds to:
+   *  - a container saved in the graph of ds
+   *  - a container associated to a specific ds
+   */
+  enum class wk_ds : std::size_t { residu_free, vfree, buffer, size };
 
-  enum MoreauJeanOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
+  /** This enum is used to get access to work vectors relared to an Interaction
+   *  It corresponds to:
+   *  - a container saved in the graph of interactions
+   *  - a container associated to a specific interaction
+   */
+  enum class wk_inter : std::size_t { osnsp_rhs, size };
 
-  enum MoreauJeanOSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
+  /** This enum is used to get access to work block vectors relared to an Interaction
+   *  It corresponds to:
+   *  - a container saved in the graph of interactions
+   *  - a container associated to a specific interaction
+   */
+  enum class wkb_inter : std::size_t { xfree, size };
 
   /** constructor from theta value only
    *
@@ -387,10 +402,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
       const siconos::algebra::SiconosDenseLUMatrix& LUW);
 
-  virtual void applyBoundaryConditions(siconos::modeling::SecondOrderDS& d,
+  virtual void applyBoundaryConditions(const siconos::modeling::SecondOrderDS& d,
                                        siconos::algebra::SiconosVector& residu,
                                        siconos::graphs::DynamicalSystemsGraph::VIterator dsi,
-                                       double t, const siconos::algebra::SiconosVector& v);
+                                       double t,
+                                       const siconos::algebra::SiconosVector& v) const;
 
   /** compute the initial state of the Newton loop.
    */
@@ -424,7 +440,8 @@ class MoreauJeanOSI : public OneStepIntegrator {
   siconos::algebra::SiconosVector& osnsp_rhs(
       siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
       siconos::graphs::InteractionsGraph& indexSet) override {
-    return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+    return *(*indexSet.properties(vertex_inter)
+                  .workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
   };
 
   /** Apply the rule to one Interaction to know if it should be included in the

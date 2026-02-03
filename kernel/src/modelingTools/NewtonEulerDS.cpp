@@ -778,19 +778,6 @@ void siconos::modeling::NewtonEulerDS::addExtForceAtPos(
   });
 }
 
-void siconos::modeling::NewtonEulerDS::initialize_ds_link_for_relations(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::q0)]->insertPtr(q());
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::velocity)]->insertPtr(twist());
-  //  DSlink[NewtonEulerR::WorkDS::deltaq]->insertPtr(deltaq());
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::dotq)]->insertPtr(dotq());
-  //    data[NewtonEulerR::WorkDS::q2]->insertPtr( acceleration());
-  if (p(0)) DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p0)]->insertPtr(p(0));
-  if (p(1)) DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p1)]->insertPtr(p(1));
-  if (p(2)) DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p2)]->insertPtr(p(2));
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////// Free functions in the namespace siconos::modeling::newton_euler ///////////
 ///////////////////////////////////////////////////////////////////////////////////////

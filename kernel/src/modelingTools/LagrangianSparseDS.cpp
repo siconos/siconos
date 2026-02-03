@@ -118,7 +118,7 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   // WARNING : this function is supposed to be called
   // by the OneStepIntegrator, and maybe several times for the same DS
   // if the system is involved in more than one interaction. So, we must check
-  // if p2 and q2 already exist to be sure that DSlink won't be lost.
+  // if p2 and q2 already exist to be sure that ds_vars won't be lost.
   x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
 
   use_x0([&](auto& xinit) {
@@ -817,28 +817,4 @@ double siconos::modeling::LagrangianSparseDS::computeKineticEnergy() {
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::LagrangianSparseDS::computeKineticEnergy()\n");
   return K;
-}
-
-void siconos::modeling::LagrangianSparseDS::initialize_ds_link_for_relations(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(q());
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(velocity());
-
-  if (acceleration()) {
-    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
-      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
-          std::make_shared<siconos::algebra::BlockVector>();  // acceleration
-
-    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(acceleration());
-  }
-
-  for (unsigned int k = 0; k < 3; k++) {
-    if (p(k)) {
-      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
-        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
-            std::make_shared<siconos::algebra::BlockVector>();
-      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(p(k));
-    }
-  }
 }

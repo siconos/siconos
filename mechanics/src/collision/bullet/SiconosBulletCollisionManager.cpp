@@ -38,6 +38,7 @@
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h>
 
+#include <FremondImpactFrictionNSL.hpp>
 #include <algorithm>
 #include <map>
 
@@ -50,7 +51,6 @@
 #include "IterateContactPoint.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include <FremondImpactFrictionNSL.hpp>
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
@@ -107,8 +107,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
   _impl->_collisionWorld.reset(new btCollisionWorld(&*_impl->_dispatcher, &*_impl->_broadphase,
                                                     &*_impl->_collisionConfiguration));
 
-  btOverlapFilterCallback *filterCallback = new internal::SiconosBulletFilterCallback();
-  reinterpret_cast<internal::SiconosBulletFilterCallback *>(filterCallback)
+  btOverlapFilterCallback* filterCallback = new internal::SiconosBulletFilterCallback();
+  reinterpret_cast<internal::SiconosBulletFilterCallback*>(filterCallback)
       ->interactionManager = this;
   _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(filterCallback);
 
@@ -116,12 +116,12 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
 
   // 2D specific
   if (_options->dimension == SiconosBulletDimension::TwoD) {
-    btVoronoiSimplexSolver *m_simplexSolver = new btVoronoiSimplexSolver();
-    btMinkowskiPenetrationDepthSolver *m_pdSolver = new btMinkowskiPenetrationDepthSolver();
+    btVoronoiSimplexSolver* m_simplexSolver = new btVoronoiSimplexSolver();
+    btMinkowskiPenetrationDepthSolver* m_pdSolver = new btMinkowskiPenetrationDepthSolver();
 
-    btConvex2dConvex2dAlgorithm::CreateFunc *m_convexAlgo2d =
+    btConvex2dConvex2dAlgorithm::CreateFunc* m_convexAlgo2d =
         new btConvex2dConvex2dAlgorithm::CreateFunc(m_simplexSolver, m_pdSolver);
-    btBox2dBox2dCollisionAlgorithm::CreateFunc *m_box2dbox2dAlgo =
+    btBox2dBox2dCollisionAlgorithm::CreateFunc* m_box2dbox2dAlgo =
         new btBox2dBox2dCollisionAlgorithm::CreateFunc();
 
     _impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,
@@ -151,7 +151,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::
 std::shared_ptr<siconos::collision::StaticBody>
 siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody(
     std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>> &position,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position,
     int number) {
   auto rec = std::make_shared<siconos::collision::StaticBody>();
   rec->contactorSet = cs;
@@ -170,23 +170,23 @@ siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody(
 }
 
 void siconos::collision::bullet::SiconosBulletCollisionManager::removeStaticBody(
-    const std::shared_ptr<siconos::collision::StaticBody> &body) {
+    const std::shared_ptr<siconos::collision::StaticBody>& body) {
   auto it = _impl->staticBodyShapeMap.find(&*body);
   if (it == _impl->staticBodyShapeMap.end()) return;
 
-  for (auto &it2 : it->second)
+  for (auto& it2 : it->second)
     _impl->_collisionWorld->removeCollisionObject(&*(it2)->btobject);
 
   _impl->staticBodyShapeMap.erase(it);
 }
 
 void siconos::collision::bullet::SiconosBulletCollisionManager::removeBody(
-    const std::shared_ptr<siconos::modeling::SecondOrderDS> &body) {
+    const std::shared_ptr<siconos::modeling::SecondOrderDS>& body) {
   auto it = _impl->bodyShapeMap.find(&*body);
   if (it == _impl->bodyShapeMap.end()) return;
 
   // For the given body, loop through records in the bodyShapeMap
-  for (auto &records : it->second) {
+  for (auto& records : it->second) {
     std::visit(
         [this](auto rec) { _impl->_collisionWorld->removeCollisionObject(&*(rec)->btobject); },
         records);
@@ -195,14 +195,14 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::removeBody(
 }
 
 // called once for each contact point as it is destroyed
-siconos::simulation::Simulation
-    *siconos::collision::bullet::SiconosBulletCollisionManager::gSimulation;
+siconos::simulation::Simulation*
+    siconos::collision::bullet::SiconosBulletCollisionManager::gSimulation;
 
 bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactClear(
-    void *userPersistentData) {
+    void* userPersistentData) {
   /* note: stored pointer to shared_ptr! */
-  std::shared_ptr<siconos::modeling::Interaction> *p_inter =
-      (std::shared_ptr<siconos::modeling::Interaction> *)userPersistentData;
+  std::shared_ptr<siconos::modeling::Interaction>* p_inter =
+      (std::shared_ptr<siconos::modeling::Interaction>*)userPersistentData;
   assert(p_inter && "Contact point's stored (Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p, number %zu \n", &**p_inter, (*p_inter)->number());
 
@@ -228,9 +228,9 @@ bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactCle
 }
 
 namespace {
-void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
-                                             const btCollisionObjectWrapper *colObj0Wrap,
-                                             const btCollisionObjectWrapper *colObj1Wrap,
+void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp,
+                                             const btCollisionObjectWrapper* colObj0Wrap,
+                                             const btCollisionObjectWrapper* colObj1Wrap,
                                              int partId0, int index0) {
   DEBUG_BEGIN("siconosBulletAdjustInternalEdgeContacts \n");
 
@@ -244,9 +244,9 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
   if (colObj0Wrap->getCollisionObject()->getCollisionShape()->getShapeType() ==
       CONVEX_2D_SHAPE_PROXYTYPE) {
     // printf("CONVEX_2D_SHAPE_PROXYTYPE  : %i\n",  CONVEX_2D_SHAPE_PROXYTYPE );
-    const btCollisionObject *objectA = colObj0Wrap->getCollisionObject();
-    const auto *pairA =
-        reinterpret_cast<const siconos::collision::bullet::BodyBulletShapeRecord *>(
+    const btCollisionObject* objectA = colObj0Wrap->getCollisionObject();
+    const auto* pairA =
+        reinterpret_cast<const siconos::collision::bullet::BodyBulletShapeRecord*>(
             objectA->getUserPointer());
     auto sshape = pairA->sshape;
 
@@ -262,13 +262,13 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
 
       // Retrieve the first two points assuming that it corresponds to the edge of interest
 
-      btConvex2dShape *btConvex2d =
-          (btConvex2dShape *)colObj0Wrap->getCollisionObject()->getCollisionShape();
-      btConvexShape *btconvex = (btConvexShape *)(btConvex2d->getChildShape());
-      btConvexHullShape *btch = (btConvexHullShape *)btconvex;
+      btConvex2dShape* btConvex2d =
+          (btConvex2dShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
+      btConvexShape* btconvex = (btConvexShape*)(btConvex2d->getChildShape());
+      btConvexHullShape* btch = (btConvexHullShape*)btconvex;
 
       // printf("number of points in convex hull : %i\n ", numPoints);
-      const btVector3 *points = btch->getPoints();
+      const btVector3* points = btch->getPoints();
       // if (numPoints  > 4)
       // {
       //   printf("Warning: number of points in convex hull is more than 2\n     We consider
@@ -316,8 +316,8 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
 
     btVector3 newNormal = btVector3(0, 0, 1);
 
-    const btTriangleShape *tri_shape =
-        static_cast<const btTriangleShape *>(colObj0Wrap->getCollisionShape());
+    const btTriangleShape* tri_shape =
+        static_cast<const btTriangleShape*>(colObj0Wrap->getCollisionShape());
     btVector3 tri_normal;
     tri_shape->calcNormal(tri_normal);
 
@@ -365,8 +365,8 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
 }
 }  // namespace
 bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactAddedCallback(
-    btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
-    const btCollisionObjectWrapper *colObj1Wrap, int partId1, int index1) {
+    btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+    const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
   // printf("--------- bulletContactAddedCallback start\n");
   // btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
   siconosBulletAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
@@ -380,7 +380,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::makeBulletR(
     std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
     std::shared_ptr<siconos::collision::SiconosShape> shape1,
     std::shared_ptr<siconos::collision::RigidBodyDS> ds2,
-    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint &p) {
+    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint& p) {
   return std::make_shared<BulletR>();
 }
 
@@ -389,7 +389,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::makeBullet5DR(
     std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
     std::shared_ptr<siconos::collision::SiconosShape> shape1,
     std::shared_ptr<siconos::collision::RigidBodyDS> ds2,
-    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint &p) {
+    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint& p) {
   return std::make_shared<Bullet5DR>();
 }
 
@@ -398,7 +398,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::makeBullet2dR(
     std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
     std::shared_ptr<siconos::collision::SiconosShape> shape1,
     std::shared_ptr<siconos::collision::RigidBody2dDS> ds2,
-    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint &p) {
+    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint& p) {
   return std::make_shared<Bullet2dR>();
 }
 
@@ -407,7 +407,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::makeBullet2d3DR(
     std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
     std::shared_ptr<siconos::collision::SiconosShape> shape1,
     std::shared_ptr<siconos::collision::RigidBody2dDS> ds2,
-    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint &p) {
+    std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint& p) {
   return std::make_shared<Bullet2d3DR>();
 }
 
@@ -461,7 +461,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
   if (!_impl->_queuedCollisionObjects.empty()) {
     int collisionFilterMask = 1;
 
-    for (auto &it : _impl->_queuedCollisionObjects) {
+    for (auto& it : _impl->_queuedCollisionObjects) {
       // std::pair<std::shared_ptr<btCollisionObject>, int> p = *it;
       int collisionFilterGroup = it.second;
       auto collisionObject = it.first;
@@ -523,10 +523,10 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
     // Get the RigidBodyDS and SiconosShape pointers
 
-    auto const *pairA =
-        reinterpret_cast<const BodyBulletShapeRecord *>(it->objectA->getUserPointer());
-    auto const *pairB =
-        reinterpret_cast<const BodyBulletShapeRecord *>(it->objectB->getUserPointer());
+    auto const* pairA =
+        reinterpret_cast<const BodyBulletShapeRecord*>(it->objectA->getUserPointer());
+    auto const* pairB =
+        reinterpret_cast<const BodyBulletShapeRecord*>(it->objectB->getUserPointer());
     assert(pairA && pairB && "btCollisionObject had a null user pointer!");
 
     // The first pair will always be the non-static object
@@ -534,8 +534,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
     // pairB
     bool flip = false;
     if (pairB->ds && !pairA->ds) {
-      pairA = reinterpret_cast<const BodyBulletShapeRecord *>(it->objectB->getUserPointer());
-      pairB = reinterpret_cast<const BodyBulletShapeRecord *>(it->objectA->getUserPointer());
+      pairA = reinterpret_cast<const BodyBulletShapeRecord*>(it->objectB->getUserPointer());
+      pairB = reinterpret_cast<const BodyBulletShapeRecord*>(it->objectA->getUserPointer());
       flip = true;
     }
     DEBUG_PRINTF("SiconosBulletCollisionManager :: flip = %i \n", flip);
@@ -601,8 +601,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
     if (it->point->m_userPersistentData) {
       /* interaction already exists */
       DEBUG_PRINT("SiconosBulletCollisionManager :: interaction already exists \n");
-      std::shared_ptr<siconos::modeling::Interaction> *p_inter =
-          (std::shared_ptr<siconos::modeling::Interaction> *)it->point->m_userPersistentData;
+      std::shared_ptr<siconos::modeling::Interaction>* p_inter =
+          (std::shared_ptr<siconos::modeling::Interaction>*)it->point->m_userPersistentData;
 
       auto rel_bulletR = std::dynamic_pointer_cast<BulletR>((*p_inter)->relation());
       auto rel_bullet5DR = std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation());
@@ -669,7 +669,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if (nslaw && nslaw_NewtonImpactFrictionNSL  || nslaw_FremondImpactFrictionNSL) {
+      if (nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL)) {
         if (nslaw->size() == 3) {
           DEBUG_PRINT("Creation of a relation for 3D frictional contact\n");
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
@@ -681,9 +681,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
           // Fill in extra contact information
           rel->bodyShapeRecordA =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairA));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairA));
           rel->bodyShapeRecordB =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairB));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -720,9 +720,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
           // Fill in extra contact information
           rel->bodyShapeRecordA =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairA));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairA));
           rel->bodyShapeRecordB =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairB));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -762,9 +762,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
           // Fill in extra contact information
           rel->bodyShapeRecordA =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairA));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairA));
           rel->bodyShapeRecordB =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairB));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -801,9 +801,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
           // Fill in extra contact information
           rel->bodyShapeRecordA =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairA));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairA));
           rel->bodyShapeRecordB =
-              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord *>(pairB));
+              siconos::pointers::createSPtr(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -846,7 +846,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
          * Bullet callback gContactDestroyedCallback */
         /* note: storing pointer to shared_ptr! */
         it->point->m_userPersistentData =
-            (void *)(new std::shared_ptr<siconos::modeling::Interaction>(inter));
+            (void*)(new std::shared_ptr<siconos::modeling::Interaction>(inter));
 
         DEBUG_PRINT("SiconosBulletCollisionManager :: link the interaction\n");
         /* link bodies by the new interaction */
@@ -871,11 +871,11 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 void siconos::collision::bullet::SiconosBulletCollisionManager::clearOverlappingPairCache() {
   if (!_impl->_collisionWorld) return;
 
-  btOverlappingPairCache *pairCache =
+  btOverlappingPairCache* pairCache =
       _impl->_collisionWorld->getBroadphase()->getOverlappingPairCache();
 
   for (auto it = _impl->bodyShapeMap.begin(); it != _impl->bodyShapeMap.end(); it++) {
-    for (auto &recV : it->second) {
+    for (auto& recV : it->second) {
       std::visit(
           [this, pairCache](auto rec) {
             if (rec->btobject)
@@ -899,7 +899,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::clearOverlapping
 
 std::vector<std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>>
 siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery(
-    const siconos::algebra::SiconosVector &start, const siconos::algebra::SiconosVector &end,
+    const siconos::algebra::SiconosVector& start, const siconos::algebra::SiconosVector& end,
     bool closestOnly, bool sorted) {
   std::vector<std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>> result_list;
 
@@ -912,7 +912,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
     _impl->_collisionWorld->rayTest(btstart, btend, rayResult);
 
     if (rayResult.hasHit()) {
-      const BodyShapeRecord *rec = reinterpret_cast<const BodyShapeRecord *>(
+      const BodyShapeRecord* rec = reinterpret_cast<const BodyShapeRecord*>(
           rayResult.m_collisionObject->getUserPointer());
 
       if (rec) {
@@ -942,7 +942,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
 
     if (rayResult.hasHit()) {
       for (int i = 0; i < rayResult.m_collisionObjects.size(); i++) {
-        const BodyShapeRecord *rec = reinterpret_cast<const BodyShapeRecord *>(
+        const BodyShapeRecord* rec = reinterpret_cast<const BodyShapeRecord*>(
             rayResult.m_collisionObjects[i]->getUserPointer());
 
         if (rec) {
@@ -966,8 +966,8 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
 
   if (sorted && result_list.size() > 1)
     std::sort(result_list.begin(), result_list.end(),
-              [](const std::shared_ptr<siconos::collision::SiconosCollisionQueryResult> &a,
-                 const std::shared_ptr<siconos::collision::SiconosCollisionQueryResult> &b) {
+              [](const std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>& a,
+                 const std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>& b) {
                 return a->distance < b->distance;
               });
 

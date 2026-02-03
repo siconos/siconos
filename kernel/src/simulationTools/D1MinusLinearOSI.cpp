@@ -28,7 +28,6 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SecondOrderDS.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
@@ -198,7 +197,6 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
   assert(ds1);
   assert(ds2);
   DEBUG_PRINTF("interaction number %i\n", inter.number());
-  auto& DSlink = inter.linkToDSVariables();
 
   if (!interProp.workVectors) {
     interProp.workVectors =
@@ -274,27 +272,19 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
     // Must take both Lagrangian and LagrangianSparse DS into account
     // --> Second Order
     auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
-        std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
-        std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-        lds.acceleration());
-  }  // else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-  //}
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 0,
+                                                lds.p(2));
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 0,
+                                                lds.acceleration());
 
-  if (ds1 != ds2) {
-    if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-          lds.acceleration());
+    if (ds1 != ds2) {
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 1,
+                                                  lds2.p(2));
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 1,
+                                                  lds2.acceleration());
     }
-    //  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    // }
   }
-
   DEBUG_END(
       "siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::"
       "modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, "

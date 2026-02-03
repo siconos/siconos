@@ -26,6 +26,7 @@
 #include "LagrangianCompliantLinearTIR.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "NonSmoothLaw.hpp"
 #include "NumericsMatrix.h"  // NM_scal
 #include "OSNSMatrix.hpp"
 #include "OneStepIntegrator.hpp"

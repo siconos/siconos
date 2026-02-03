@@ -76,9 +76,9 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   }
 
   if (!contactForce_) {
-    auto& DSlink = inter.linkToDSVariables();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
     contactForce_ = std::make_shared<siconos::algebra::SiconosVector>(
-        DSlink[siconos::tools::enum_to_index(WorkDS::p1)]->size());
+        ds_vars[siconos::tools::enum_to_index(ds_var::p1)]->size());
     contactForce_->setZero();
   }
 
@@ -171,25 +171,25 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeOutput(...)\n");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(derivativeNumber);
-  auto& q = *DSlink[siconos::tools::enum_to_index(WorkDS::q0)];
+  auto& q = *ds_vars[siconos::tools::enum_to_index(ds_var::q0)];
   if (derivativeNumber == 0) {
     computeh(q, y);
   } else {
     if (derivativeNumber == 1) {
       assert(H_NE_prod_T_);
-      assert(DSlink[siconos::tools::enum_to_index(WorkDS::velocity)]);
+      assert(ds_vars[siconos::tools::enum_to_index(ds_var::velocity)]);
       DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
-      DEBUG_EXPR(
-          siconos::algebra::print((*DSlink[siconos::tools::enum_to_index(WorkDS::velocity)])));
+      DEBUG_EXPR(siconos::algebra::print(
+          (*ds_vars[siconos::tools::enum_to_index(ds_var::velocity)])));
       ;
       /* \warning  V.A. 15/04/2016
        * We decide finally not to update the Jacobian there. To be discussed
        */
       //      if (!hasConstantH_NE_) computeH_NE_(time, inter, q);
       //      computeH_NE_prod_T(inter, q);
-      auto& vel = *DSlink[siconos::tools::enum_to_index(WorkDS::velocity)];
+      auto& vel = *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)];
       siconos::algebra::matrixBlockVector_prod(*H_NE_prod_T_, vel, y);
       DEBUG_EXPR(siconos::algebra::print(y););
     } else if (derivativeNumber == 2) {
@@ -210,15 +210,14 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n", &inter););
   DEBUG_EXPR(siconos::algebra::print(inter););
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
 
   DEBUG_EXPR(siconos::algebra::print(lambda););
   DEBUG_EXPR(
-      siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]););
-
+      siconos::algebra::print(*ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level]););
   if (level == 1 ||
       level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
@@ -226,15 +225,15 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
     DEBUG_EXPR(siconos::algebra::print(*contactForce_););
 
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *H_NE_prod_T_, *DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level],
+        lambda, *H_NE_prod_T_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level],
         false);
 
     DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
     DEBUG_EXPR(
-        siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]););
+        siconos::algebra::print(*ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level]););
   } else if (level == 0) {
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *H_NE_view_, *DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level],
+        lambda, *H_NE_view_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level],
         false);
   } else
     THROW_EXCEPTION(
@@ -270,11 +269,11 @@ void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inte
   DEBUG_PRINTF("with time =  %f\n", time);
   DEBUG_PRINTF("with inter =  %p\n", &inter);
 
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   if (!hasConstantH_NE_)
-    computeH_NE_(time, inter, *DSlink[siconos::tools::enum_to_index(WorkDS::q0)]);
-  computeH_NE_prod_T(inter, *DSlink[siconos::tools::enum_to_index(WorkDS::q0)]);
+    computeH_NE_(time, inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
+  computeH_NE_prod_T(inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
 
   // computeJachqDot(time, inter); // This is not needed here
   // computeDotJachq(time, inter);
@@ -287,14 +286,14 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   DEBUG_PRINT(
       "siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
 
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   // Compute the time derivative of the Jacobian
   // and the product of the time derivative of the Jacobian with dotq
   // we assume that dotq is up to date !
-  DEBUG_EXPR(siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::dotq)]);)
+  DEBUG_EXPR(siconos::algebra::print(*ds_vars[siconos::tools::enum_to_index(ds_var::dotq)]);)
   assert(computeH_NE_dot_);
-  computeH_NE_dot_(*DSlink[siconos::tools::enum_to_index(WorkDS::q0)],
-                   *DSlink[siconos::tools::enum_to_index(WorkDS::dotq)], *H_NE_dot_);
+  computeH_NE_dot_(*ds_vars[siconos::tools::enum_to_index(ds_var::q0)],
+                   *ds_vars[siconos::tools::enum_to_index(ds_var::dotq)], *H_NE_dot_);
 
   if (!secondOrderTimeDerivativeTerms_)
     secondOrderTimeDerivativeTerms_ =
@@ -303,7 +302,7 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   DEBUG_EXPR(siconos::algebra::print(*H_NE_dot_););
 
   siconos::algebra::matrixBlockVector_prod(
-      *H_NE_dot_, *DSlink[siconos::tools::enum_to_index(WorkDS::dotq)],
+      *H_NE_dot_, *ds_vars[siconos::tools::enum_to_index(ds_var::dotq)],
       *secondOrderTimeDerivativeTerms_, true);
 
   DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
@@ -331,26 +330,58 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
 
   // compute the product of jachqTdot and v
   siconos::algebra::matrixBlockVector_prod(
-      jacobianhOver_q_prod_Tdot, *DSlink[siconos::tools::enum_to_index(WorkDS::velocity)],
+      jacobianhOver_q_prod_Tdot, *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)],
       *secondOrderTimeDerivativeTerms_, false);
 
   DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
   DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 }
 
-void siconos::modeling::NewtonEulerR::allocate_dslink_vectors(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  DSlink.resize(siconos::tools::enum_to_index(NewtonEulerR::WorkDS::DSlinkSize));
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::q0)] =
+void siconos::modeling::NewtonEulerR::allocate_read_dynamical_systems_var_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+    modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const {
+  ds_vars.resize(siconos::tools::enum_to_index(NewtonEulerR::ds_var::size));
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::q0)] =
       std::make_shared<siconos::algebra::BlockVector>();  // displacement
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::velocity)] =
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::velocity)] =
       std::make_shared<siconos::algebra::BlockVector>();  // velocity
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::dotq)] =
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::dotq)] =
       std::make_shared<siconos::algebra::BlockVector>();  // qdot
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p0)] =
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p0)] =
       std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p1)] =
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p1)] =
       std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p2)] =
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p2)] =
       std::make_shared<siconos::algebra::BlockVector>();
+  bool has_two_ds = &ds1 != &ds2;
+  auto* neds1 = dynamic_cast<NewtonEulerDS*>(&ds1);
+
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::q0)]->insertPtr(neds1->q());
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::velocity)]->insertPtr(
+      neds1->twist());
+  //  ds_vars[NewtonEulerR::ds_var::deltaq]->insertPtr(deltaq());
+  ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::dotq)]->insertPtr(neds1->dotq());
+  if (neds1->p(0))
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p0)]->insertPtr(neds1->p(0));
+  if (neds1->p(1))
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p1)]->insertPtr(neds1->p(1));
+  if (neds1->p(2))
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p2)]->insertPtr(neds1->p(2));
+
+  if (has_two_ds) {
+    auto* neds2 = dynamic_cast<NewtonEulerDS*>(&ds2);
+
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::q0)]->insertPtr(neds2->q());
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::velocity)]->insertPtr(
+        neds2->twist());
+    //  ds_vars[NewtonEulerR::ds_var::deltaq]->insertPtr(deltaq());
+    ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::dotq)]->insertPtr(
+        neds2->dotq());
+    if (neds2->p(0))
+      ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p0)]->insertPtr(neds2->p(0));
+    if (neds2->p(1))
+      ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p1)]->insertPtr(neds2->p(1));
+    if (neds2->p(2))
+      ds_vars[siconos::tools::enum_to_index(NewtonEulerR::ds_var::p2)]->insertPtr(neds2->p(2));
+  }
 }

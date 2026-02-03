@@ -144,23 +144,23 @@ void siconos::modeling::FirstOrderType1R::computeJacobiangOver_lambda(
 void siconos::modeling::FirstOrderType1R::computeOutput(double time, Interaction& inter,
                                                         unsigned int level) {
   siconos::algebra::SiconosVector& y = *inter.y(0);
-  auto& DSlink = inter.linkToDSVariables();
-  computeh_(*DSlink[FirstOrderR::Xxx], y);
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
+  computeh_(*ds_vars[FirstOrderR::Xxx], y);
 }
 
 void siconos::modeling::FirstOrderType1R::computeInput(double time, Interaction& inter,
                                                        unsigned int level) {
   auto lambda = inter.lambda(level);
 
-  auto& DSlink = inter.linkToDSVariables();
-  computeg_(*lambda, *DSlink[FirstOrderR::Rrr]);
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
+  computeg_(*lambda, *ds_vars[FirstOrderR::Rrr]);
 }
 
 void siconos::modeling::FirstOrderType1R::computeJach(double time, Interaction& inter) {
   if (!hasConstantJacobianhOver_state_) {
-    auto& DSlink = inter.linkToDSVariables();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
     if (computejacobianhOver_state_)
-      computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], *jacobianhOver_state_view_);
+      computejacobianhOver_state_(*ds_vars[FirstOrderR::Xxx], *jacobianhOver_state_view_);
   }
 }
 

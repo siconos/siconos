@@ -53,7 +53,7 @@ namespace siconos::modeling {
 */
 class FirstOrderR : public Relation {
  public:
-  enum FirstOrderRDS { Xxx, Rrr, DSlinkSize };
+  enum FirstOrderRDS { Xxx, Rrr, size };
   enum FirstOrderRVec { e, relationVectorsSize };
 
  protected:
@@ -169,9 +169,12 @@ class FirstOrderR : public Relation {
   /** @brief allocation of memory space for relations in the graph
    *      Warning: internal use only (called from Topology)
    *  @param dslink a container of vectors (pointers), from the parent interaction
+   *  @param ds1 first ds concerned by the relation
+   *  @param ds2 second ds concerned by the relation
    */
-  virtual void allocate_dslink_vectors(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
+  virtual void allocate_read_dynamical_systems_var_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+      modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const override;
 
   virtual void display() const override;
 };

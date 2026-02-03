@@ -22,15 +22,12 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderNonLinearR.hpp"
-#include "FirstOrderType1R.hpp"
 #include "FirstOrderType2R.hpp"
 #include "Interaction.hpp"
-#include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -329,7 +326,7 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryCond
 void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
     double time, siconos::modeling::DynamicalSystem& ds,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv,
-    siconos::algebra::SiconosMatrix& iterationMatrix) {
+    siconos::algebra::SiconosMatrix& iterationMatrix) const {
   DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
@@ -970,7 +967,7 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
     assert(inter.lowerLevelForOutput() <= level);
     assert(inter.upperLevelForOutput() >= level);
 
-    auto& DSlink = inter.linkToDSVariables();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
 
     auto& interProp = indexSet0->properties(*ui);
     auto& inter_work = *interProp.workVectors;
@@ -1027,7 +1024,7 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
 
       auto& hAlpha = *inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA];
 
-      rel.computeh(*DSlink[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
+      rel.computeh(*ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
                    hAlpha);
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(siconos::algebra::print(hAlpha));
@@ -1054,7 +1051,7 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
     assert(inter.lowerLevelForInput() <= level);
     assert(inter.upperLevelForInput() >= level);
 
-    auto& DSlink = inter.linkToDSVariables();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
 
     auto& interProp = indexSet0.properties(*ui);
     auto& inter_work = *interProp.workVectors;
@@ -1070,9 +1067,9 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
       if (relation.hasJacobiangOver_lambda())
         *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->vector(0) +=
             relation.jacobiangOver_lambda() * lambda;
-      *DSlink[siconos::modeling::FirstOrderR::Rrr] +=
+      *ds_vars[siconos::modeling::FirstOrderR::Rrr] +=
           *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
-      DEBUG_EXPR(siconos::algebra::print(*DSlink[siconos::modeling::FirstOrderR::Rrr]););
+      DEBUG_EXPR(siconos::algebra::print(*ds_vars[siconos::modeling::FirstOrderR::Rrr]););
       // compute the new g_alpha
 
       relation.computeg(*inter.lambda(level),
@@ -1108,10 +1105,10 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
       g_alpha += *inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KHAT] *
                  *inter.lambda(level);
 
-      *DSlink[siconos::modeling::FirstOrderR::Rrr] += g_alpha;
+      *ds_vars[siconos::modeling::FirstOrderR::Rrr] += g_alpha;
 
       // compute the new g_alpha
-      forel->computeg(*DSlink[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
+      forel->computeg(*ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
                       *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]);
     } else {
       inter.computeInput(time, level);
@@ -1141,10 +1138,10 @@ double siconos::integrators::EulerMoreauOSI::computeResiduInput(
     auto& inter_work = *interProp.workVectors;
     auto& inter_work_block = *interProp.workBlockVectors;
     auto inter = indexSet->bundle(*ui);
-    auto& DSlink = inter->linkToDSVariables();
+    const auto& ds_vars = inter->read_dynamical_systems_variables();
     auto& residuR = *inter_work[siconos::integrators::EulerMoreauOSI::WORK_DS];
     // Residu_r = r_alpha_k+1 - g_alpha;
-    auto rVec = DSlink[siconos::modeling::FirstOrderR::Rrr];
+    auto rVec = ds_vars[siconos::modeling::FirstOrderR::Rrr];
     auto s1 = rVec->vector(0)->size();
     auto galpha = inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
     residuR.head(s1) = *rVec->vector(0);

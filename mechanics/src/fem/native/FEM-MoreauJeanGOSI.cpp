@@ -20,25 +20,18 @@
 #include <memory>
 
 #include "BlockVector.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "MoreauJeanGOSI.hpp"
 #include "SiconosVector.hpp"
-#include "SolidLinearTIDS.hpp"
-// #include "Interaction.hpp"
-// #include "LagrangianLinearTIDS.hpp"
-// #include "NewtonEulerDS.hpp"
-// #include "NonSmoothLaw.hpp"
-// #include "OneStepNSProblem.hpp"
-// #include "Relation.hpp"
-// #include "SiconosException.hpp"
-// #include "SiconosMatrix.hpp"
-// #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-// #include "StressLinearTIR.hpp"
+#include "SolidLinearTIDS.hpp"
+#include "StressLinearTIR.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
-#include "StressLinearTIR.hpp"
+#include "Tools.hpp"
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
@@ -47,27 +40,31 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectors
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
   // Check dynamical system type
-  auto solid = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
-  assert(solid);
-  // Compute W (iteration matrix)
-  initializeIterationMatrix(t, solid);
-  ds_work_vectors.resize(MoreauJeanGOSI::WORK_LENGTH);
-  ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
-  ds_work_vectors[MoreauJeanGOSI::FREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
-  ds_work_vectors[MoreauJeanGOSI::LOCAL_BUFFER] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
-  ds_work_vectors[MoreauJeanGOSI::RESIDU_SIGMAFREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
-  ds_work_vectors[MoreauJeanGOSI::SIGMAFREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
-  ds_work_vectors[MoreauJeanGOSI::Q_SIGMAFREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(solid->dimension() +
-                                                        solid->stressDimension());
-  solid->computeTotalForces(solid->velocity_read(), solid->q_read(), t);
+  if (auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds)) {
+    // Compute W (iteration matrix)
+    initializeIterationMatrix(t, solid);
+    ds_work_vectors.resize(tools::enum_to_index(wk_ds::size));
+    ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)] =
+        std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+    ds_work_vectors[tools::enum_to_index(wk_ds::free)] =
+        std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+    ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)] =
+        std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
+    // ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)] =
+    //     std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
+    //   // Not   used
+    ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
+        std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
 
-  solid->swapInMemory();
+    ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)] =
+        std::make_shared<siconos::algebra::SiconosVector>(solid->dimension() +
+                                                          solid->stressDimension());
+    solid->computeTotalForces(solid->velocity_read(), solid->q_read(), t);
+
+    solid->swapInMemory();
+  } else {
+    siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(t, ds);
+  }
 }
 
 void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
@@ -81,20 +78,22 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectors
   if (!interProp.workVectors) {
     interProp.workVectors =
         std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-            siconos::integrators::MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+            tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wk_inter::size));
   }
 
   if (!interProp.workBlockVectors) {
     interProp.workBlockVectors =
         std::make_shared<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>(
-            siconos::integrators::MoreauJeanGOSI::BLOCK_WORK_LENGTH);
+            tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wkb_inter::size));
   }
 
   auto& inter_work = *interProp.workVectors;
   auto& inter_block_work = *interProp.workBlockVectors;
 
-  if (!inter_work[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS])
-    inter_work[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS] =
+  if (!inter_work[tools::enum_to_index(
+          siconos::integrators::MoreauJeanOSI::wk_inter::osnsp_rhs)])
+    inter_work[tools::enum_to_index(
+        siconos::integrators::MoreauJeanOSI::wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current
@@ -104,15 +103,18 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectors
   inter.initializeMemory(_steps);
 
   /* allocate and set work vectors for the osi */
-  auto xfree = siconos::integrators::MoreauJeanGOSI::xfree;
+  auto label_xfree =
+      tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wkb_inter::xfree);
 
   if (ds1 != ds2) {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 2))
-      inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
+    if ((!inter_block_work[label_xfree]) ||
+        (inter_block_work[label_xfree]->numberOfBlocks() != 2))
+      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
   } else {
-    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 1))
-      inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
+    if ((!inter_block_work[label_xfree]) ||
+        (inter_block_work[label_xfree]->numberOfBlocks() != 1))
+      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
   }
 
   if (checkOSI(DSG.descriptor(ds1))) {
@@ -125,10 +127,12 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectors
       // Notice: this is the only place in this method where there is a difference with kernel
       // MJGOSI
       std::cout << "StressLinearTIR !!! " << std::endl;
-      inter_block_work[xfree]->setVectorPtr(0, workVds1[MoreauJeanGOSI::Q_SIGMAFREE]);
+      inter_block_work[label_xfree]->setVectorPtr(
+          0, workVds1[tools::enum_to_index(wk_ds::q_sigma_free)]);
 
     } else {
-      inter_block_work[xfree]->setVectorPtr(0, workVds1[MoreauJeanGOSI::FREE]);
+      inter_block_work[label_xfree]->setVectorPtr(0,
+                                                  workVds1[tools::enum_to_index(wk_ds::free)]);
     }
   }
   DEBUG_PRINTF("ds1->number() %i\n", ds1->number());
@@ -140,7 +144,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::initializeWorkVectors
       DEBUG_PRINTF("ds2->number() %i is taken into account\n", ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      inter_block_work[xfree]->setVectorPtr(1, workVds2[MoreauJeanGOSI::FREE]);
+      inter_block_work[label_xfree]->setVectorPtr(1,
+                                                  workVds2[tools::enum_to_index(wk_ds::free)]);
     }
   }
 }
@@ -191,8 +196,7 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
 
     // Get state i (previous time step) from Memories -> var. indexed with "Old"
 
-    const auto& qold = solid->qMemory().getSiconosVector(0);  // qi
-    const auto& sigma = solid->stress();                      // sigmaf
+    const auto& sigma = solid->stress();  // sigmaf
 
     DEBUG_EXPR(qold.display(););
     DEBUG_EXPR(vold.display(););
@@ -200,11 +204,10 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     DEBUG_EXPR(d->velocity()->display(););
 
     // --- ResiduFree computation Equation (1) ---
-    auto& residu = *ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE];
+    auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
     residu.setZero();
 
-    auto& residusigmafree = *ds_work_vectors[MoreauJeanGOSI::RESIDU_SIGMAFREE];
-    auto& sigmafree = *ds_work_vectors[MoreauJeanGOSI::SIGMAFREE];
+    auto& residusigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
 
     siconos::algebra::SiconosVector qSigmaold{solid->dimension() + solid->stressDimension()};
     auto start = std::chrono::high_resolution_clock::now();
@@ -215,8 +218,8 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     qSigmaold.tail(solid->stressDimension()) = sigmaold;
 
     // Get buffer and compute full-free rhs
-    auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
-    auto& full_free_rhs = *ds_work_vectors[MoreauJeanGOSI::Q_SIGMAFREE];
+    auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::free)];
+    auto& full_free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)];
     auto& iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     full_free_rhs.noalias() = iteration_matrix * qSigmaold;
     free_rhs.noalias() = full_free_rhs.head(solid->dimension());
@@ -266,4 +269,45 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     // if (normResidu > maxResidu) maxResidu = normResidu;
   }
   return 0.;  // maxResidu;
+}
+
+void siconos::mechanics::fem::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
+
+  auto RelativeTol = _simulation->relativeConvergenceTol();
+  auto useRCC = _simulation->useRelativeConvergenceCriteron();
+  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+
+    auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+    if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(
+            _dynamicalSystemsGraph->bundle(*dsi))) {
+      siconos::integrators::moreau_jean::updatePosition(_simulation->timeStep(), _theta,
+                                                        *lltids);
+    } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(
+                   _dynamicalSystemsGraph->bundle(*dsi))) {
+      bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
+
+      auto& local_buffer = *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
+
+      // Save value of q in stateTmp for future convergence computation
+      if (baux) local_buffer = lds->q_read();
+
+      siconos::integrators::moreau_jean::updatePosition(_simulation->timeStep(), _theta, *lds);
+      if (baux) {
+        double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
+        local_buffer -= lds->q_read();
+        double aux = (local_buffer.norm()) / ds_norm_ref;
+        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+      }
+    } else
+      THROW_EXCEPTION(
+          "siconos::integrators::MoreauJeanGOSI::updateState - not yet implemented for this "
+          "kind of ds.")
+  }
+  DEBUG_END("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
 }

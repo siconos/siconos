@@ -118,7 +118,7 @@ Main changes:
         This hacks is done to avoid multiple memory resetting if multiple simulations shared the same memory
         In the latter case, this has to be done more carefully in the future.
 
-	* [kernel] separate initialization of DSlink and work vectors and matrices in Relation.
+	* [kernel] separate initialization of ds_vars and work vectors and matrices in Relation.
         rename initialize --> initializeDSLink
         rename initcomponents --> initializeWorkVectorsAndMatrices
 
@@ -244,7 +244,7 @@ Main changes:
 	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
 
 	* [kernel] cleaning and rewriting of methods in NewtonEulerDS and NewtonEulerR
-	to be more explicit(avoid the use of DSlink in particular)
+	to be more explicit(avoid the use of ds_vars in particular)
 
 	* [kernel] move some methods in Simulation to NonSmoothDynamicalSystem
 	(reset, swapInMemory,  updateOutput, updateInput) and change the initialization

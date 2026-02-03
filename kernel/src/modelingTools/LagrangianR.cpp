@@ -23,6 +23,9 @@
 #include <iostream>
 
 #include "BlockVector.hpp"
+#include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
+#include "SecondOrderDS.hpp"
 #include "Tools.hpp"
 
 void siconos::modeling::LagrangianR::display() const {
@@ -32,13 +35,108 @@ void siconos::modeling::LagrangianR::display() const {
     std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }
 
-void siconos::modeling::LagrangianR::allocate_dslink_vectors(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  DSlink.resize(tools::enum_to_index(LagrangianR::WorkDS::DSlinkSize));
+void siconos::modeling::LagrangianR::allocate_read_dynamical_systems_var_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+    modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const {
+  ds_vars.resize(tools::enum_to_index(LagrangianR::ds_var::size));
 
-  // Default DSlink
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)] =
+  // Default ds_vars
+  ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)] =
       std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)] =
+  ds_vars[tools::enum_to_index(LagrangianR::ds_var::q1)] =
       std::make_shared<siconos::algebra::BlockVector>();
+
+  bool has_two_ds = &ds1 != &ds2;
+
+  if (auto* lag1 = dynamic_cast<LagrangianDS*>(&ds1)) {
+    // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+    ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)]->insertPtr(lag1->q());
+    ds_vars[tools::enum_to_index(LagrangianR::ds_var::q1)]->insertPtr(lag1->velocity());
+
+    if (lag1->acceleration()) {
+      if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)])
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)] =
+            std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)]->insertPtr(lag1->acceleration());
+    }
+
+    for (unsigned int k = 0; k < 3; k++) {
+      if (lag1->p(k)) {
+        if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k])
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k] =
+              std::make_shared<siconos::algebra::BlockVector>();
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k]->insertPtr(lag1->p(k));
+      }
+    }
+  } else if (auto* lag1 = dynamic_cast<LagrangianSparseDS*>(&ds1)) {
+    // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+    ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)]->insertPtr(lag1->q());
+    ds_vars[tools::enum_to_index(LagrangianR::ds_var::q1)]->insertPtr(lag1->velocity());
+
+    if (lag1->acceleration()) {
+      if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)])
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)] =
+            std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)]->insertPtr(lag1->acceleration());
+    }
+
+    for (unsigned int k = 0; k < 3; k++) {
+      if (lag1->p(k)) {
+        if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k])
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k] =
+              std::make_shared<siconos::algebra::BlockVector>();
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k]->insertPtr(lag1->p(k));
+      }
+    }
+  }
+
+  if (has_two_ds) {
+    if (auto* lag2 = dynamic_cast<LagrangianDS*>(&ds2)) {
+      // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)]->insertPtr(lag2->q());
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q1)]->insertPtr(lag2->velocity());
+
+      if (lag2->acceleration()) {
+        if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)])
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)] =
+              std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)]->insertPtr(
+            lag2->acceleration());
+      }
+
+      for (unsigned int k = 0; k < 3; k++) {
+        if (lag2->p(k)) {
+          if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k])
+            ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k] =
+                std::make_shared<siconos::algebra::BlockVector>();
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k]->insertPtr(lag2->p(k));
+        }
+      }
+    } else if (auto* lag2 = dynamic_cast<LagrangianSparseDS*>(&ds2)) {
+      // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)]->insertPtr(lag2->q());
+      ds_vars[tools::enum_to_index(LagrangianR::ds_var::q1)]->insertPtr(lag2->velocity());
+
+      if (lag2->acceleration()) {
+        if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)])
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)] =
+              std::make_shared<siconos::algebra::BlockVector>();  // acceleration
+
+        ds_vars[tools::enum_to_index(LagrangianR::ds_var::q2)]->insertPtr(
+            lag2->acceleration());
+      }
+
+      for (unsigned int k = 0; k < 3; k++) {
+        if (lag2->p(k)) {
+          if (!ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k])
+            ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k] =
+                std::make_shared<siconos::algebra::BlockVector>();
+          ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + k]->insertPtr(lag2->p(k));
+        }
+      }
+    }
+  }
 }

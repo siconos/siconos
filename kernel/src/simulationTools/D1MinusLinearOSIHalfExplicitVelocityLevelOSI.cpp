@@ -610,7 +610,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
-  auto& DSlink = inter->linkToDSVariables();
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
   auto& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // get relation and non smooth law information
   auto relationType = inter->relation()->getType();  // relation
@@ -628,11 +628,11 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
     /* get the current velocity  of the aggregated ds */
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
-      DEBUG_PRINT("Xfree = DSlink[siconos::modeling::LagrangianR::q1];\n");
+      Xfree = ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q1)];
+      DEBUG_PRINT("Xfree = ds_vars[siconos::modeling::LagrangianR::q1];\n");
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      Xfree = DSlink[tools::enum_to_index(modeling::NewtonEulerR::WorkDS::velocity)];
-      DEBUG_PRINT("Xfree = DSlink[siconos::modeling::NewtonEulerR::velocity];\n");
+      Xfree = ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)];
+      DEBUG_PRINT("Xfree = ds_vars[siconos::modeling::NewtonEulerR::velocity];\n");
     } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
@@ -650,7 +650,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
           "type.");
     assert(Xfree);
-    DEBUG_PRINT("Xfree = DSlink[Lagrangian/NewtonEulerR::xfree];\n");
+    DEBUG_PRINT("Xfree = ds_vars[Lagrangian/NewtonEulerR::xfree];\n");
     DEBUG_PRINT("Xfree contains the free velocity of the aggregated ds];\n");
     DEBUG_EXPR(siconos::algebra::print(*Xfree));
   } else

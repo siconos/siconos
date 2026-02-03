@@ -231,8 +231,8 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::DiskDiskR& rel) {
-  auto& DSlink = inter->linkToDSVariables();
-  auto& q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
+  auto& q = *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)];
 
   auto x1 = q(0);
   auto y1 = q(1);
@@ -286,8 +286,8 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::CircleCircleR& rel) {
-  auto& DSlink = inter->linkToDSVariables();
-  auto& q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
+  auto& q = *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)];
 
   auto x1 = q(0);
   auto y1 = q(1);
@@ -350,8 +350,8 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::DiskPlanR& rel) {
-  auto& DSlink = inter->linkToDSVariables();
-  const auto& q0 = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
+  const auto& q0 = *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)];
 
   auto x1 = q0(0);
   auto y1 = q0(1);

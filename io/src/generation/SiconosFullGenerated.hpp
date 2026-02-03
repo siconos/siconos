@@ -239,7 +239,7 @@ SICONOS_IO_REGISTER(Interaction,
   (_lambda)
   (_lambdaMemory)
   (_lambdaOld)
-  (_linkToDSVariables)
+  (read_access_to_ds_variables_)
   (_lowerLevelForInput)
   (_lowerLevelForOutput)
   (_nslaw)

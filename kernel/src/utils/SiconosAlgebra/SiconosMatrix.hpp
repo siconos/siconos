@@ -70,8 +70,8 @@ using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
 using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
 using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
 using Index = Eigen::Index;
-using SiconosMatrix33Diagonal = Eigen::DiagonalMatrix<double_t, 3, Eigen::ColMajor>;
-using SiconosMatrix66Diagonal = Eigen::DiagonalMatrix<double_t, 6, Eigen::ColMajor>;
+using SiconosMatrix33Diagonal = Eigen::DiagonalMatrix<double_t, 3>;
+using SiconosMatrix66Diagonal = Eigen::DiagonalMatrix<double_t, 6>;
 
 inline const SiconosMatrix33 identity33 = SiconosMatrix33::Identity();
 

@@ -307,14 +307,13 @@ siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
   reset();
 }
 
-void siconos::modeling::Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
-                                                                 DynamicalSystem& ds2) {
-  std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink = _linkToDSVariables;
+void siconos::modeling::Interaction::initialize_read_access_to_ds_variables(
+    DynamicalSystem& ds1, DynamicalSystem& ds2) {
+  std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars =
+      read_access_to_ds_variables_;
 
   // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
-  _relation->allocate_dslink_vectors(DSlink);
-  ds1.initialize_ds_link_for_relations(DSlink);
-  if (&ds1 != &ds2) ds2.initialize_ds_link_for_relations(DSlink);
+  _relation->allocate_read_dynamical_systems_var_vectors(ds_vars, ds1, ds2);
   _relation->initialize(*this);
 }
 

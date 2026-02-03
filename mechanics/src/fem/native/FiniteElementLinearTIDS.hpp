@@ -21,6 +21,7 @@
 #define FINITEELEMENTLAGRANGIANTIDS_H
 
 #include "LagrangianSparseLinearTIDS.hpp"
+#include "Material.hpp"
 
 /** Finite Element discretization of elastic solids that inherits from
  * Lagrangian Linear Systems with time invariant coefficients
@@ -37,19 +38,20 @@ class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
   /** a mesh */
   std::shared_ptr<Mesh> mesh_{nullptr};
 
-  /** materials */
-  std::map<unsigned int, const Material> materials_;
+  /** materials associated with the system. One material per known tag, materials_[tag] */
+  std::map<int, const Material> materials_ = {};
 
   /** a finite element model */
   std::shared_ptr<FiniteElementModel> FEModel_{nullptr};
 
  public:
-  /** constructor from initial state and all matrix operators.
+  /** Constructor
    * \param mesh the mesh that defined the spatial discretization
-   * \param material
+   * \param materials a list of all materials associated with the system
+   *  (map between some tags and single material)
    */
   FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh,
-                          const std::map<unsigned int, const Material>& materials);
+                          const std::map<int, const Material>& materials);
 
   /** destructor */
   ~FiniteElementLinearTIDS() noexcept = default;

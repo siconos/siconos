@@ -21,7 +21,6 @@
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
@@ -43,57 +42,54 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
   auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
   // Compute W (iteration matrix)
   initializeIterationMatrix(t, sods);
-  //  )dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
-  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    ds_work_vectors.resize(siconos::integrators::MoreauJeanGOSI::WORK_LENGTH);
-    ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE] =
-        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-    ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE] =
-        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-    ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER] =
-        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+  ds_work_vectors.resize(tools::enum_to_index(wk_ds::size));
+  ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)] =
+      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::vfree)] =
+      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
 
+  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
-    lds->swapInMemory();
   } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-    ds_work_vectors.resize(siconos::integrators::MoreauJeanGOSI::WORK_LENGTH);
-    ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE] =
-        std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
-    ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE] =
-        std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
     // Compute a first value of the dotq  to store it in  _dotqMemory
     *neds->dotq() = neds->T() * neds->twist_read();
     // Compute a first value of the forces to store it in totalForcesMemory
     neds->computeWrench(neds->twist_read(), neds->q_read(), t);
-    neds->swapInMemory();
   }
+  ds->swapInMemory();
 }
 
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
     siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
-  auto ds2 = interProp.target;
   assert(ds1);
+  auto is_ds1_integrated_by_this_osi = checkOSI(DSG.descriptor(ds1));
+
+  auto ds2 = interProp.target;
   assert(ds2);
+  auto use_two_ds = ds1 != ds2;
+  bool is_ds2_integrated_by_this_osi = use_two_ds && checkOSI(DSG.descriptor(ds2));
 
   if (!interProp.workVectors) {
     interProp.workVectors =
         std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-            MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+            tools::enum_to_index(wk_inter::size));
   }
 
   if (!interProp.workBlockVectors) {
     interProp.workBlockVectors =
         std::make_shared<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>(
-            MoreauJeanGOSI::BLOCK_WORK_LENGTH);
+            tools::enum_to_index(wkb_inter::size));
   }
 
   auto& inter_work = *interProp.workVectors;
   auto& inter_block_work = *interProp.workBlockVectors;
 
-  if (!inter_work[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS])
-    inter_work[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS] =
+  if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)])
+    inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current
@@ -103,36 +99,29 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
   inter.initializeMemory(_steps);
 
   /* allocate and set work vectors for the osi */
-  auto xfree = siconos::integrators::MoreauJeanGOSI::xfree;
+  auto label_xfree = tools::enum_to_index(wkb_inter::xfree);
 
-  if (ds1 != ds2) {
-    DEBUG_PRINT("ds1 != ds2\n");
-    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 2))
-      inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
+  if (use_two_ds) {
+    if ((!inter_block_work[label_xfree]) ||
+        (inter_block_work[label_xfree]->numberOfBlocks() != 2))
+      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
   } else {
-    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 1))
-      inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
+    if ((!inter_block_work[label_xfree]) ||
+        (inter_block_work[label_xfree]->numberOfBlocks() != 1))
+      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
   }
 
-  if (checkOSI(DSG.descriptor(ds1))) {
-    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
+  if (is_ds1_integrated_by_this_osi) {
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    inter_block_work[xfree]->setVectorPtr(
-        0, workVds1[siconos::integrators::MoreauJeanGOSI::FREE]);
+    inter_block_work[label_xfree]->setVectorPtr(0,
+                                                workVds1[tools::enum_to_index(wk_ds::vfree)]);
   }
-  DEBUG_PRINTF("ds1->number() %i\n", ds1->number());
-  DEBUG_PRINTF("ds2->number() %i\n", ds2->number());
-
-  if (ds1 != ds2) {
-    DEBUG_PRINT("ds1 != ds2\n");
-    if (checkOSI(DSG.descriptor(ds2))) {
-      DEBUG_PRINTF("ds2->number() %i is taken into account\n", ds2->number());
-      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
-      auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      inter_block_work[xfree]->setVectorPtr(
-          1, workVds2[siconos::integrators::MoreauJeanGOSI::FREE]);
-    }
+  if (is_ds2_integrated_by_this_osi) {
+    assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+    auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    inter_block_work[label_xfree]->setVectorPtr(1,
+                                                workVds2[tools::enum_to_index(wk_ds::vfree)]);
   }
 }
 
@@ -180,8 +169,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // for v != vi, the formulae (1) is wrong.
       // in the sequel, only the equation (1) is implemented
 
-      auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
-      auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+      auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
+      auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
       // --- ResiduFree computation Equation (1) ---
       residu.setZero();
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
@@ -237,8 +226,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
           "Type::LagrangianDS\n");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1) -
       // h*(1-theta)*forces(ti,vi,qi) - p_i+1
-      auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
-      auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+      auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
+      auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
 
       // -- Convert the DS into a Lagrangian one.
 
@@ -298,8 +287,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       // -- Convert the DS into a Lagrangian one.
       DEBUG_EXPR(d->display());
-      auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
-      auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+      auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
+      auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
       // Get the state  (previous time step) from memory vector
       // -> var. indexed with "Old"
 
@@ -373,7 +362,8 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     auto ivd = indexSet.descriptor(inter);
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
         _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta);
-    auto& osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+    auto& osnsp_rhs =
+        *(*indexSet.properties(ivd).workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
     osnsp_rhs.setZero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
@@ -403,7 +393,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
 
       // auto &q = *d.q();
       // auto& local_buffer =
-      // *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER];
+      // *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
 
       // // Save value of q in stateTmp for future convergence computation
       // if(baux)
@@ -422,8 +412,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
                    _dynamicalSystemsGraph->bundle(*dsi))) {
       bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
 
-      auto& local_buffer =
-          *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER];
+      auto& local_buffer = *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
 
       // Save value of q in stateTmp for future convergence computation
       if (baux) local_buffer = lds->q_read();
@@ -453,7 +442,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
 void siconos::integrators::MoreauJeanGOSI::display() const {
   OneStepIntegrator::display();
 
-  std::cout << "====== MoreauJeanOSI OSI display ======\n";
+  std::cout << "====== MoreauJeanGOSI OSI display ======\n";
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   if (_dynamicalSystemsGraph) {
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {

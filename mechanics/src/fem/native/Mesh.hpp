@@ -32,10 +32,10 @@
 
 namespace siconos::mechanics::fem {
 
-class MElement;
+class MeshElement;
 
 /** a Mesh vertex */
-class MVertex {
+class MeshVertex {
  private:
   /** Vertex Number */
   size_t num_ = 0;
@@ -46,20 +46,20 @@ class MVertex {
   double _z = 0.;
 
   /** elements to which the node belongs **/
-  std::vector<std::shared_ptr<MElement>> elements_ = {};
+  std::vector<std::shared_ptr<MeshElement>> elements_ = {};
 
   // Rule of five
-  MVertex() = delete;
-  MVertex(MVertex&) = delete;
-  MVertex& operator=(const MVertex&) = delete;
-  MVertex(MVertex&&) = delete;
-  MVertex& operator=(MVertex&&) = delete;
+  MeshVertex() = delete;
+  MeshVertex(MeshVertex&) = delete;
+  MeshVertex& operator=(const MeshVertex&) = delete;
+  MeshVertex(MeshVertex&&) = delete;
+  MeshVertex& operator=(MeshVertex&&) = delete;
 
  public:
   /* Constructor from data */
-  MVertex(size_t num, double x, double y, double z) : num_{num}, _x{x}, _y{y}, _z{z} {};
+  MeshVertex(size_t num, double x, double y, double z) : num_{num}, _x{x}, _y{y}, _z{z} {};
 
-  ~MVertex() noexcept = default;
+  virtual ~MeshVertex() noexcept = default;
 
   double x() const { return _x; };
   double y() const { return _y; };
@@ -67,13 +67,13 @@ class MVertex {
 
   size_t num() const { return num_; }
 
-  void link_element(std::shared_ptr<MElement> elem) { elements_.push_back(elem); }
-  const std::span<const std::shared_ptr<MElement>> elements() const { return elements_; }
+  void link_element(std::shared_ptr<MeshElement> elem) { elements_.push_back(elem); }
+  const std::span<const std::shared_ptr<MeshElement>> elements() const { return elements_; }
 
   virtual void display() const;
 };
 
-class MBeamVertex : public MVertex {
+class MeshBeamVertex : public MeshVertex {
  private:
   /* Vextex Rotation Coordinate */
   double _qx = 0.;
@@ -82,14 +82,14 @@ class MBeamVertex : public MVertex {
 
  public:
   /* Constructor from data */
-  MBeamVertex(size_t num, double x, double y, double z, double qx, double qy, double qz)
-      : MVertex(num, x, y, z) {
+  MeshBeamVertex(size_t num, double x, double y, double z, double qx, double qy, double qz)
+      : MeshVertex(num, x, y, z) {
     _qx = qx;
     _qy = qy;
     _qz = qz;
   };
 
-  ~MBeamVertex() noexcept = default;
+  virtual ~MeshBeamVertex() noexcept = default;
 
   auto qx() { return _qx; };
   auto qy() { return _qy; };
@@ -98,7 +98,7 @@ class MBeamVertex : public MVertex {
 };
 
 /** a mesh element */
-class MElement {
+class MeshElement {
  protected:
   /** Element number */
   size_t num_{0};
@@ -107,32 +107,34 @@ class MElement {
   FiniteElementType type_{FiniteElementType::T3};
 
   /** vertices **/
-  std::vector<std::shared_ptr<MVertex>> vertices_ = {};
+  std::vector<std::shared_ptr<MeshVertex>> vertices_ = {};
 
   /** tags **/
   std::vector<int> tags_ = {};
 
   /** Rule of five */
-  MElement() = delete;
-  MElement(MElement&) = delete;
-  MElement& operator=(const MElement&) = delete;
-  MElement(MElement&&) = delete;
-  MElement& operator=(MElement&&) = delete;
+  MeshElement() = delete;
+  MeshElement(MeshElement&) = delete;
+  MeshElement& operator=(const MeshElement&) = delete;
+  MeshElement(MeshElement&&) = delete;
+  MeshElement& operator=(MeshElement&&) = delete;
 
  public:
-  MElement(size_t num, FiniteElementType type,
-           const std::vector<std::shared_ptr<MVertex>>& vertices, const std::vector<int>& tags)
-      : num_{num}, type_{type}, vertices_{vertices}, tags_{tags} {};
+  MeshElement(size_t num) {};
+  MeshElement(size_t num, FiniteElementType type,
+              std::vector<std::shared_ptr<MeshVertex>> vertices, std::vector<int> tags = {})
+      : num_{num}, type_{type}, vertices_{std::move(vertices)}, tags_{std::move(tags)} {};
 
-  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>>& vertices)
-      : MElement(num, type, vertices, {0}) {};
+  //   MeshElement(size_t num, FiniteElementType type,
+  //               std::vector<std::shared_ptr<MeshVertex>> vertices)
+  //       : MeshElement(num, type, vertices, {0}) {};
 
-  ~MElement() noexcept = default;
+  ~MeshElement() noexcept = default;
 
   FiniteElementType type() const { return type_; }
   size_t num() const { return num_; }
-  const std::span<const std::shared_ptr<MVertex>> vertices() const { return vertices_; }
-  int tags(int n) const { return tags_[n]; }
+  const std::span<const std::shared_ptr<MeshVertex>> vertices() const { return vertices_; }
+  auto tags(size_t n) const { return tags_[n]; }
   void display() const;
 };
 
@@ -143,10 +145,10 @@ class Mesh {
   int dimension_ = 2;
 
   /** vertices */
-  std::vector<std::shared_ptr<MVertex>> vertices_ = {};
+  std::vector<std::shared_ptr<MeshVertex>> vertices_ = {};
 
   /** elements */
-  std::vector<std::shared_ptr<MElement>> elements_ = {};
+  std::vector<std::shared_ptr<MeshElement>> elements_ = {};
 
   /** Physical entities
       Connection between the tag and the name of the corresponding physical entity
@@ -168,8 +170,8 @@ class Mesh {
       \param elements a vector of elements
       \param physical_entities connection between tags and entities
   */
-  Mesh(int dim, std::vector<std::shared_ptr<MVertex>> vertices,
-       std::vector<std::shared_ptr<MElement>> elements,
+  Mesh(int dim, std::vector<std::shared_ptr<MeshVertex>> vertices,
+       std::vector<std::shared_ptr<MeshElement>> elements,
        std::vector<std::tuple<int, std::string>> physical_entities);
 
   /** constructor
@@ -177,8 +179,8 @@ class Mesh {
       \param vertices a vector of vertices
       \param elements a vector of elements
    */
-  Mesh(int dim, std::vector<std::shared_ptr<MVertex>> vertices,
-       std::vector<std::shared_ptr<MElement>> elements)
+  Mesh(int dim, std::vector<std::shared_ptr<MeshVertex>> vertices,
+       std::vector<std::shared_ptr<MeshElement>> elements)
       : Mesh(dim, vertices, elements, {}) {};
   ;
 
@@ -187,9 +189,9 @@ class Mesh {
 
   int dim() const { return dimension_; };
 
-  const std::span<const std::shared_ptr<MVertex>> vertices() const { return vertices_; }
+  const std::span<const std::shared_ptr<MeshVertex>> vertices() const { return vertices_; }
 
-  const std::span<const std::shared_ptr<MElement>> elements() const { return elements_; }
+  const std::span<const std::shared_ptr<MeshElement>> elements() const { return elements_; }
 
   std::vector<std::tuple<int, std::string>> physical_entities() { return physical_entities_; }
 

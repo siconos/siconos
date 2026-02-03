@@ -684,10 +684,10 @@ bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion)
     // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     // {
     //   inter = indexSet0->bundle(*ui);
-    //   auto& DSlink = *indexSet0->properties(*ui).DSlink;
+    //   const auto& ds_vars = *indexSet0->properties(*ui).ds_vars;
     //   auto& workV = *indexSet0->properties(*ui).workVectors;
 
-    //   inter->computeResiduR(getTkp1(), DSlink, workV);
+    //   inter->computeResiduR(getTkp1(), ds_vars, workV);
     //   // TODO support other DS
     if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
     if (residu > criterion) {

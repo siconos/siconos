@@ -45,7 +45,7 @@ siconos::mechanics::fem::build_dynamicalsystem_from_gmsh(
   auto basename = fname.stem();
   siconos::mechanics::fem::writeMeshforPython(*mesh, basename);
 
-  std::map<unsigned int, const siconos::mechanics::fem::Material> materials = {
+  std::map<int, const siconos::mechanics::fem::Material> materials = {
       {tags[MeshTags::bulk_material], material}};
 
   auto start = std::chrono::system_clock::now();
@@ -78,8 +78,8 @@ siconos::mechanics::fem::ContactDetection::ContactDetection(
     const std::optional<int>& contact_condition_tag)
     : InteractionManager(),
       initial_gap_{initial_gap},
-      nslaw_{nslaw},
       normal_{normal},
+      nslaw_{nslaw},
       fesolid_(fesolid),
       contact_condition_{func} {
   femodel_ = fesolid_->FEModel();

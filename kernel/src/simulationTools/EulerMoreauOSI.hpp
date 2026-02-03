@@ -310,7 +310,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
    */
   void computeIterationMatrix(double time, siconos::modeling::DynamicalSystem& ds,
                               const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv,
-                              siconos::algebra::SiconosMatrix& W);
+                              siconos::algebra::SiconosMatrix& W) const;
 
   void computeKhat(siconos::modeling::Interaction& inter, siconos::algebra::SiconosMatrix& m,
                    std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& workM,

@@ -80,24 +80,24 @@ void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_lambda(
 
 void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interaction& inter,
                                                             unsigned int derivativeNumber) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   if (derivativeNumber == 0) {
     auto& y = *inter.y(0);
     auto& lambda = *inter.lambda(0);
-    computeh(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda, y);
+    computeh(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda, y);
   } else {
     auto& y = *inter.y(derivativeNumber);
     auto& lambda = *inter.lambda(derivativeNumber);
-    computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
-    computeJacobianhOver_lambda(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
+    computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+    computeJacobianhOver_lambda(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
     if (derivativeNumber == 1) {
       // y = Jach[0] q1 + Jach[1] lambda
       siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                               *DSlink[tools::enum_to_index(WorkDS::q1)], y);
+                                               *ds_vars[tools::enum_to_index(ds_var::q1)], y);
       y += *jacobianhOver_lambda_ * lambda;
     } else if (derivativeNumber == 2)
       siconos::algebra::matrixBlockVector_prod(
-          *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q2)],
+          *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::q2)],
           y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       THROW_EXCEPTION(
@@ -111,17 +111,17 @@ void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interact
   // get lambda of the concerned interaction
 
   auto& lambda = *inter.lambda(level);
-  auto& DSlink = inter.linkToDSVariables();
-  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
+  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      lambda, *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level],
       false);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter) {
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(0);
-  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
-  computeJacobianhOver_lambda(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
+  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+  computeJacobianhOver_lambda(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
 }

@@ -63,12 +63,12 @@ class Material {
 
   // Rule of five
   Material() = default;  // --> steel
-  Material& operator=(Material&&) = delete;
 
  public:
   Material(const Material&) = default;
   Material(Material&&) = default;
   Material& operator=(const Material&) = default;
+  Material& operator=(Material&&) = default;
 
   /** @brief constructor
    * @param massDensity

@@ -29,7 +29,7 @@
 
 namespace siconos::mechanics::fem {
 
-class MVertex;
+class MeshVertex;
 
 class FENode {
  private:
@@ -37,7 +37,7 @@ class FENode {
   std::size_t num_ = 0;
 
   /* associated mesh vertex */
-  std::shared_ptr<MVertex> mVertex_{nullptr};
+  std::shared_ptr<MeshVertex> mVertex_{nullptr};
 
   /* associated dof numbers in the global dof vector*/
   std::vector<size_t> global_dof_index_ = {};
@@ -55,7 +55,7 @@ class FENode {
       \param v vertex associated to the node
       \param dofIndex global dof index
    */
-  FENode(size_t num, std::shared_ptr<MVertex> v, const std::vector<size_t>& dofIndex)
+  FENode(size_t num, std::shared_ptr<MeshVertex> v, const std::vector<size_t>& dofIndex)
       : num_(num), mVertex_(v), global_dof_index_(dofIndex) {};
 
   ~FENode() noexcept = default;

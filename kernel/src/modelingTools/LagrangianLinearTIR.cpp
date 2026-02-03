@@ -72,9 +72,13 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
       "unsigned int derivativeNumber)\n");
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
+
+
+  
   siconos::algebra::matrixBlockVector_prod(
-      *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
+      *jacobianhOver_q_view_,
+      *ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0) + derivativeNumber], y);
 
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
@@ -94,14 +98,16 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
       "inter, unsigned int level)\n")
   // get lambda of the concerned interaction
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
-  auto& DSlink = inter.linkToDSVariables();
+  const auto& ds_vars = inter.read_dynamical_systems_variables();
   // computation of p = Ht lambda
   DEBUG_EXPR(siconos::algebra::print(lambda););
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
-  DEBUG_EXPR(siconos::algebra::print(*DSlink[tools::enum_to_index(WorkDS::p0) + level]););
+  DEBUG_EXPR(siconos::algebra::print(
+                 *ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + level]););
+
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
-      false);
+      lambda, *jacobianhOver_q_view_,
+      *ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + level], false);
 
   DEBUG_END(
       "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "

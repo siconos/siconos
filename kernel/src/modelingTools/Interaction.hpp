@@ -26,12 +26,13 @@
 #include <assert.h>
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 #include "SiconosVector.hpp"
-
+#include "Tools.hpp"
 namespace siconos::algebra {
 class SiconosMemory;
 class BlockVector;
@@ -132,9 +133,15 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   std::shared_ptr<Relation> _relation{nullptr};
 
   /** pointer links to DS variables needed for computation,
-   *  mostly used in Relations (computeOutput and computeInput)
-   * and OneStepIntegrator classes. */
-  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables = {};
+   *  They are used in Relations for computeOutput and computeInput methods and
+   *  sometimes in the integrators
+   *  Must be initialized in relations with a call to
+   * allocate_read_dynamical_systems_var_vectors. Might be updated (resized or allocated) in
+   * some OSI. Positions in the current object are determined with ds_var enum of each kind of
+   * relations.
+   */
+  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> read_access_to_ds_variables_ =
+      {};
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors = {};
 
@@ -177,7 +184,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is
      allowed
   */
-  void initializeLinkToDsVariables(DynamicalSystem& ds1, DynamicalSystem& ds2);
+  void initialize_read_access_to_ds_variables(DynamicalSystem& ds1, DynamicalSystem& ds2);
 
   /** set all lambda to zero */
   void resetAllLambda();
@@ -436,9 +443,51 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   inline std::shared_ptr<NonSmoothLaw> nonSmoothLaw() const { return _nslaw; }
 
-  inline std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& linkToDSVariables() {
-    return _linkToDSVariables;
+  inline std::span<const std::shared_ptr<siconos::algebra::BlockVector>>
+  read_dynamical_systems_variables() const {
+    return read_access_to_ds_variables_;
   };
+
+  /**
+   * @brief Append a new variable to the vector of variables used for the connection between ds
+   *  and relations.
+   *
+   *  Result: read_access_to_ds_variables_[position][ds_position] = pointer
+   *  This function allocate or resize the BlockVector (at [position]) if required.
+   *  See examples of use in D1MinusLinearOSI.cpp
+   *
+   * @tparam T enum class to determine the position in the ds_var vector
+   * @tparam V type of the pointer to be inserted
+   * @param index position in the container (depends on relations enum)
+   * @param ds_number position in the block vector (0 or 1)
+   * @param ptr pointer to be inserted (depends on the DS class type)
+   */
+  template <typename T, typename V>
+  void append_to_dynamical_systems_variables(T index, int ds_position, V ptr) {
+    // Allocates the BlockVector to be filled, if required
+    if (!read_access_to_ds_variables_[tools::enum_to_index(index)]) {
+      read_access_to_ds_variables_[tools::enum_to_index(index)] =
+          std::make_shared<siconos::algebra::BlockVector>();
+    }
+    auto nbblocks =
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->numberOfBlocks();
+    if (ds_position == 0) {  // insert or replace according to the current size
+      if (nbblocks == 0)
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->insertPtr(ptr);
+      else
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->setVectorPtr(0, ptr);
+    } else  // ds_position == 1, it's the only allowed other possibility
+    {
+      if (nbblocks == 0) {
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->insertPtr(
+            nullptr);  // pos 0
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->insertPtr(ptr);
+      } else if (nbblocks == 1) {
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->insertPtr(ptr);
+      } else if (nbblocks == 2)
+        read_access_to_ds_variables_[tools::enum_to_index(index)]->setVectorPtr(1, ptr);
+    }
+  }
 
   inline std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& relationVectors() {
     return _relationVectors;
@@ -447,7 +496,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
-   *  by the current interaction. This must be done by topology during call to link(inter, ds,
+   *  by the current interaction. This must be done by topology during call to link(inter,
+   * ds,
    * ...).
    *
    *  \param s1 int sum of ds sizes

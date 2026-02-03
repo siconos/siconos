@@ -31,6 +31,32 @@ namespace siconos::modeling {
  *
  */
 class HarmonicBC : public BoundaryCondition {
+ protected:
+  ACCEPT_SERIALIZATION(HarmonicBC);
+
+  /** Constant additive term of the prescribed velocity  */
+  double aCoeff_ = 0.;
+  /** Constant multiplicative term of the prescribed velocity  */
+  double bCoeff_ = 0;
+  ;
+  /** Constant frequency  */
+  double omega_ = 0;
+  ;
+  /** Constant phase  */
+  double phi_ = 0;
+
+  /** True if vectors (same size as indices list) are used for coefficients */
+  bool has_vector_coeffs_{false};
+
+  /** Constant additive term of the prescribed velocity  */
+  siconos::algebra::SiconosVector a_vec_{};
+  /** Constant multiplicative term of the prescribed velocity  */
+  siconos::algebra::SiconosVector b_vec_{};
+  /** Constant frequency  */
+  siconos::algebra::SiconosVector omega_vec_{};
+  /** Constant phase  */
+  siconos::algebra::SiconosVector phi_vec_{};
+
  public:
   /** Constructor
    * \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
@@ -60,32 +86,6 @@ class HarmonicBC : public BoundaryCondition {
    *  \param  time : the current time
    */
   virtual void computePrescribedVelocity(double time);
-
- protected:
-  ACCEPT_SERIALIZATION(HarmonicBC);
-
-  /** Constant additive term of the prescribed velocity  */
-  double aCoeff_ = 0.;
-  /** Constant multiplicative term of the prescribed velocity  */
-  double bCoeff_ = 0;
-  ;
-  /** Constant frequency  */
-  double omega_ = 0;
-  ;
-  /** Constant phase  */
-  double phi_ = 0;
-
-  /** True if vectors (same size as indices list) are used for coefficients */
-  bool has_vector_coeffs_{false};
-
-  /** Constant additive term of the prescribed velocity  */
-  siconos::algebra::SiconosVector a_vec_{};
-  /** Constant multiplicative term of the prescribed velocity  */
-  siconos::algebra::SiconosVector b_vec_{};
-  /** Constant frequency  */
-  siconos::algebra::SiconosVector omega_vec_{};
-  /** Constant phase  */
-  siconos::algebra::SiconosVector phi_vec_{};
 };
 }  // namespace siconos::modeling
 #endif  // HARMONICBC_HPP

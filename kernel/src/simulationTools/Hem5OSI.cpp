@@ -26,13 +26,13 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for Fortran to C api, fprobpointer ...
 #include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
-// #include "Topology.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -477,38 +477,23 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
   }
 
   auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  auto& DSlink = inter.linkToDSVariables();
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     inter_work_block[siconos::integrators::Hem5OSI::xfree] =
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::Hem5OSI::xfree]->insertPtr(
         workVds1[siconos::integrators::Hem5OSI::FREE]);
-    auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
-        std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-        lds.acceleration());
-  }
-  // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
-  // {
-  //   inter_work_block[::xfree] = std::make_shared<siconos::algebra::BlockVector>();
-  //   inter_work_block[::xfree]->insertPtr(workVds1[siconos::integrators::Hem5OSI::FREE]);
-  // }
-
-  if (ds1 != ds2) {
-    auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 0,
+                                                lds.acceleration());
+    if (ds1 != ds2) {
+      auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       inter_work_block[siconos::integrators::Hem5OSI::xfree]->insertPtr(
           workVds2[siconos::integrators::Hem5OSI::FREE]);
-      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-          lds.acceleration());
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 1,
+                                                  lds2.acceleration());
     }
-    // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
-    // {
-    //   inter_work_block[::xfree]->insertPtr(workVds2[siconos::integrators::Hem5OSI::FREE]);
-    // }
   }
 }
 
@@ -816,7 +801,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
 
-  auto& DSlink = inter->linkToDSVariables();
+  const auto& ds_vars = inter->read_dynamical_systems_variables();
   // Get relation and non smooth law types
   auto relationType = inter->relation()->getType();
   auto relationSubType = inter->relation()->getSubType();
@@ -839,7 +824,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   // auto  allOSNS  = _simulation->oneStepNSProblems();
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      Xfree = DSlink[siconos::integrators::Hem5OSI::xfree];
+      Xfree = ds_vars[siconos::integrators::Hem5OSI::xfree];
     }
     // else if  (relationType == siconos::modeling::RelationType::NewtonEuler)
     // {
@@ -849,7 +834,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     //        std::cout << "Computeqblock Xfree (Gamma)========" << "\n";
     //       siconos::algebra::print(*Xfree);
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
-    Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
+    Xfree = ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q1)];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << "\n";
     //       siconos::algebra::print(*Xfree);
   } else
@@ -874,7 +859,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
             inter->relation());
-        rheoR->computehdot(*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)],
+        rheoR->computehdot(*ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
                            simulation()->getTkp1());
         osnsp_rhs += *ID * rheoR->hdot();
       } else

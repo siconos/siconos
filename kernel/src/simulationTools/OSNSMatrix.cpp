@@ -18,7 +18,6 @@
 #include "OSNSMatrix.hpp"
 
 #include <iostream>
-// #include <assert.h>
 
 #include "BlockCSRMatrix.hpp"
 #include "BoundaryCondition.hpp"

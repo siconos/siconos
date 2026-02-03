@@ -415,8 +415,6 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
   assert(ds1);
   assert(ds2);
 
-  auto& DSlink = inter.linkToDSVariables();
-
   if (!interProp.workVectors) {
     interProp.workVectors =
         std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
@@ -486,35 +484,20 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
         workVds1[siconos::integrators::NewMarkAlphaOSI::FREE]);
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
-        std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
-        std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-        lds.acceleration());
-  }
-  // else if (relationType == NewtonEuler)
-  // {
-  //   inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree] =
-  //   std::make_shared<siconos::algebra::BlockVector>();
-  //   inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(workVds1[siconos::integrators::NewMarkAlphaOSI::FREE]);
-  // }
-
-  if (ds1 != ds2) {
-    auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 0,
+                                                lds.p(2));
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 0,
+                                                lds.acceleration());
+    if (ds1 != ds2) {
+      auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::NewMarkAlphaOSI::FREE]);
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
-          lds.acceleration());
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 1,
+                                                  lds2.p(2));
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 1,
+                                                  lds2.acceleration());
     }
-    // else if (relationType == NewtonEuler)
-    // {
-    //   inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(workVds2[siconos::integrators::NewMarkAlphaOSI::FREE]);
-    // }
   }
 
   DEBUG_END(

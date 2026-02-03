@@ -22,12 +22,12 @@
 
 #include "FENode.hpp"
 #include "FETypes.hpp"
-#include "Mesh.hpp"  // MElement
+#include "Mesh.hpp"  // MeshElement
 #include "SiconosException.hpp"
 #include "Tools.hpp"  // enum_to_string
 
-siconos::mechanics::fem::FElement::FElement(std::shared_ptr<MElement> mesh_elem,
-                                            const std::vector<std::shared_ptr<FENode>>& nodes)
+siconos::mechanics::fem::FiniteElement::FiniteElement(
+    std::shared_ptr<MeshElement> mesh_elem, const std::vector<std::shared_ptr<FENode>>& nodes)
     : num_{mesh_elem->num()}, type_{mesh_elem->type()}, mElement_{mesh_elem} {
   for (auto node : nodes) nodes_.push_back(node);
   ndof_ = nodes_.size() * number_of_dof_per_node(type_);
@@ -54,7 +54,7 @@ siconos::mechanics::fem::FElement::FElement(std::shared_ptr<MElement> mesh_elem,
   }
 }
 
-std::span<const std::vector<double>> siconos::mechanics::fem::FElement::GaussPoints(
+std::span<const std::vector<double>> siconos::mechanics::fem::FiniteElement::GaussPoints(
     int order) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
@@ -77,16 +77,15 @@ std::span<const std::vector<double>> siconos::mechanics::fem::FElement::GaussPoi
       break;
 
     default:
-      throw("FElement::GaussPoints(). element type not recognized");
+      throw("FiniteElement::GaussPoints(). element type not recognized");
   }
   return GaussPointsEmpty;
 }
 
 // Note FP : todo, template this class with number of nodes in the element ?
-void siconos::mechanics::fem::FElement::shapeFunctionIso2D(double ksi, double eta,
-                                                           std::vector<double>& N,
-                                                           std::vector<double>& Nksi,
-                                                           std::vector<double>& Neta) const {
+void siconos::mechanics::fem::FiniteElement::shapeFunctionIso2D(
+    double ksi, double eta, std::vector<double>& N, std::vector<double>& Nksi,
+    std::vector<double>& Neta) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
     case FiniteElementType::T3: {
@@ -102,15 +101,13 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso2D(double ksi, double et
       break;
     }
     default:
-      THROW_EXCEPTION("FElement::shapeFunctionIso2D(). element type not recognized");
+      THROW_EXCEPTION("FiniteElement::shapeFunctionIso2D(). element type not recognized");
   }
 }
 
-void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double eta, double zeta,
-                                                           std::vector<double>& N,
-                                                           std::vector<double>& Nksi,
-                                                           std::vector<double>& Neta,
-                                                           std::vector<double>& Nzeta) const {
+void siconos::mechanics::fem::FiniteElement::shapeFunctionIso3D(
+    double ksi, double eta, double zeta, std::vector<double>& N, std::vector<double>& Nksi,
+    std::vector<double>& Neta, std::vector<double>& Nzeta) const {
   FiniteElementType type = mElement_->type();
   switch (type) {
     case FiniteElementType::TH4: {
@@ -137,12 +134,12 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double et
       break;
     }
     default:
-      throw("FElement::shapeFunctionIso3D(). element type not recognized");
+      throw("FiniteElement::shapeFunctionIso3D(). element type not recognized");
   }
 }
 
-void siconos::mechanics::fem::FElement::display() {
-  std::cout << " - FElement - number: " << mElement_->num()
+void siconos::mechanics::fem::FiniteElement::display() {
+  std::cout << " - FiniteElement - number: " << mElement_->num()
             << "            - type: " << siconos::tools::enum_to_string(mElement_->type())
             << "            - ndof: " << ndof_
             << "            - number of nodes: " << nodes_.size();
@@ -152,7 +149,7 @@ void siconos::mechanics::fem::FElement::display() {
   }
 };
 
-void siconos::mechanics::fem::FElement::initialize_beam_element() {
+void siconos::mechanics::fem::FiniteElement::initialize_beam_element() {
   assert(is_valid_beam_element(type_));
 
   length_ =
@@ -180,7 +177,7 @@ void siconos::mechanics::fem::FElement::initialize_beam_element() {
     double lx = (nodes_[1]->x() - nodes_[0]->x()) / length();
     double ly = (nodes_[1]->y() - nodes_[0]->y()) / length();
     double lz = (nodes_[1]->z() - nodes_[0]->z()) / length();
-    double s = sqrt(lz * lz + ly * ly);
+    // double s = sqrt(lz * lz + ly * ly);
     vx(0, 1) = ly;
     vx(0, 2) = lz;
     vx(1, 0) = -ly;

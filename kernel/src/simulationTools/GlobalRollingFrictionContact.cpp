@@ -178,10 +178,12 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
 
         if (std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds) ||
             std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-          auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+          auto& vfree = *ds_work_vectors[tools::enum_to_index(
+              siconos::integrators::MoreauJeanGOSI::wk_ds::vfree)];
           _q->segment(offset, dss) = vfree;
         } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-          auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+          auto& vfree = *ds_work_vectors[tools::enum_to_index(
+              siconos::integrators::MoreauJeanGOSI::wk_ds::vfree)];
           _q->segment(offset, dss) = vfree;
         }
       } else {
@@ -235,8 +237,8 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
             "implemented "
             "for MoreauJeanGOSI integrator.");
       }
-      auto& osnsp_rhs = *(*indexSet.properties(*ui)
-                               .workVectors)[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS];
+      auto& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
+          siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
       auto pos = indexSet.properties(*ui).absolute_position;
       auto sizeY = inter->dimension();
       _b->segment(pos, sizeY) = osnsp_rhs;

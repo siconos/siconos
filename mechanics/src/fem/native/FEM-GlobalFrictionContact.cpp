@@ -17,25 +17,17 @@
  */
 #include "FEM-GlobalFrictionContact.hpp"
 
-// #include "Interaction.hpp"
-// #include "LagrangianDS.hpp"
-// #include "LagrangianSparseDS.hpp"
-// #include "MohrCoulombPlasticityNSL.hpp"
 #include "FEM-MoreauJeanGOSI.hpp"
-#include "SolidLinearTIDS.hpp"
-// #include "NewtonEulerDS.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
-// #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
-// #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-// #include "Topology.hpp"
+#include "SolidLinearTIDS.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "Tools.hpp"
 #include "siconos_debug.h"
 
-void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
+void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
   if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
 
   size_t offset = 0;
@@ -53,11 +45,11 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
       auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
       assert(solid);
       auto dss = ds->real_size();
-      auto& vfree =
-          *ds_work_vectors[siconos::mechanics::fem::integrators::MoreauJeanGOSI::FREE];
-      auto& sigmafree =
-          *ds_work_vectors
-              [siconos::mechanics::fem::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE];
+      auto& vfree = *ds_work_vectors[tools::enum_to_index(
+          siconos::mechanics::fem::integrators::MoreauJeanGOSI::wk_ds::free)];
+      auto& sigmafree = *ds_work_vectors[tools::enum_to_index(
+          siconos::mechanics::fem::integrators::MoreauJeanGOSI::wk_ds::residu_sigma_free)];
+
       // q_sigma = [v; sigma]
       siconos::algebra::SiconosVector qSigmafree{vfree.size() + sigmafree.size()};
       qSigmafree.head(solid->dimension()) = vfree;
@@ -81,7 +73,6 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
     auto ds = DSG0.bundle(*dsi);
     auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
     assert(solid);
-    auto sizeDS = solid->dimension();
     auto velocity = solid->velocity();
     auto stress = solid->stress();
     DEBUG_PRINTF("ds.number() : %i \n", ds.number());

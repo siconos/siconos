@@ -1007,7 +1007,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangianR "
       "updated\n");
 
-  auto& DSlink = *(indexSet->properties(ui)).DSlink;
+  const auto& ds_vars = *(indexSet->properties(ui)).ds_vars;
 #endif
 
   // THROW_EXCEPTION("siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangianR()

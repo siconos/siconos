@@ -51,7 +51,7 @@ siconos::simulation::Topology::__addInteractionInIndexSet0(
   //
   // This function must
   // - insert interaction and ds into IG/DSG
-  // - update graph properties related to modeling (DSlink ...)
+  // - update graph properties related to modeling (ds_vars ...)
   //
   // Expected result : all interaction methods can be safely called after a call
   // to this function (whatever the simulation is, if it exists or not).
@@ -86,7 +86,7 @@ siconos::simulation::Topology::__addInteractionInIndexSet0(
   siconos::graphs::DynamicalSystemsGraph::EDescriptor new_ed;
   std::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
 
-  inter->initializeLinkToDsVariables(*ds1, *ds2_);
+  inter->initialize_read_access_to_ds_variables(*ds1, *ds2_);
 
   // add self branches in vertex properties
   // note : boost graph SEGFAULT on self branch removal

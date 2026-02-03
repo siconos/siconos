@@ -198,24 +198,24 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //   DEBUG_PRINTF("siconos::modeling::Lagrangian2d2DR::computeOutput(double time, Interaction&
 //   inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and
 //   derivativeNumber = %i\n", time, derivativeNumber);
-//   std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink =
-//   inter.linkToDSVariables(); siconos::algebra::SiconosVector& y =
+//   std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars =
+//   inter.read_dynamical_systems_variables(); siconos::algebra::SiconosVector& y =
 //   *inter.y(derivativeNumber); if(derivativeNumber == 0)
 //   {
-//     computeh(*DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)], *DSlink[LagrangianR::z], y);
+//     computeh(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)], *ds_vars[LagrangianR::z], y);
 //   }
 //   else
 //   {
-//     computeJacobianhOver_q(*DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)], *DSlink[LagrangianR::z]);
+//     computeJacobianhOver_q(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)], *ds_vars[LagrangianR::z]);
 //     if(derivativeNumber == 1)
 //     {
 //       assert(jacobianhOver_q_);
 
 //       // direct prod to save time
-//       //siconos::algebra::prod(*jacobianhOver_q_, *DSlink[tools::enum_to_index(WorkDS::q1)], y);
+//       //siconos::algebra::prod(*jacobianhOver_q_, *ds_vars[tools::enum_to_index(ds_var::q1)], y);
 
 //       double * A = &*jacobianhOver_q_->data();
-//       std::shared_ptr<siconos::algebra::BlockVector> v = DSlink[tools::enum_to_index(WorkDS::q1)];
+//       std::shared_ptr<siconos::algebra::BlockVector> v = ds_vars[tools::enum_to_index(ds_var::q1)];
 //       double *  v_ds_1 = v->vector(0)->data();
 
 //       y(0)= A[0]* v_ds_1[0] + A[2]* v_ds_1[1]  + A[4]* v_ds_1[2];
@@ -261,18 +261,18 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //   InteractionProperties& interProp, unsigned int level) \n");
 
 //   DEBUG_PRINTF("level = %i\n", level);
-//   auto& DSlink = inter.linkToDSVariables();
-//   computeJacobianhOver_q(*DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)], *DSlink[LagrangianR::z]);
+//   const auto& ds_vars = inter.read_dynamical_systems_variables();
+//   computeJacobianhOver_q(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)], *ds_vars[LagrangianR::z]);
 //   // get lambda of the concerned interaction
 //   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
 //   DEBUG_EXPR(siconos::algebra::print(lambda););
 //   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
 //   // data[name] += trans(G) * lambda
-//   //siconos::algebra::prod(lambda, *jacobianhOver_q_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+//   //siconos::algebra::prod(lambda, *jacobianhOver_q_, *ds_vars[tools::enum_to_index(ds_var::p0) + level],
 //   false);
 
 //   double * A = &*jacobianhOver_q_->data();
-//   std::shared_ptr<siconos::algebra::BlockVector> v = DSlink[tools::enum_to_index(WorkDS::q1)];
+//   std::shared_ptr<siconos::algebra::BlockVector> v = ds_vars[tools::enum_to_index(ds_var::q1)];
 //   int v_size= v->size();
 //   for (unsigned int i =0; i < 2; i++)
 //   {

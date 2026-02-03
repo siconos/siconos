@@ -18,6 +18,7 @@
 #include "FirstOrderR.hpp"
 
 #include "BlockVector.hpp"
+#include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
 
 void siconos::modeling::FirstOrderR::initialize(Interaction& inter) {
@@ -52,9 +53,22 @@ void siconos::modeling::FirstOrderR::display() const {
   }
 }
 
-void siconos::modeling::FirstOrderR::allocate_dslink_vectors(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  DSlink.resize(FirstOrderR::DSlinkSize);
-  DSlink[FirstOrderR::Xxx] = std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[FirstOrderR::Rrr] = std::make_shared<siconos::algebra::BlockVector>();
+void siconos::modeling::FirstOrderR::allocate_read_dynamical_systems_var_vectors(
+    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+    modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const {
+  if (ds_vars.empty()) ds_vars.resize(FirstOrderR::size);
+
+  bool has_two_ds = &ds1 != &ds2;
+
+  ds_vars[FirstOrderR::Xxx] = std::make_shared<siconos::algebra::BlockVector>();
+  ds_vars[FirstOrderR::Rrr] = std::make_shared<siconos::algebra::BlockVector>();
+  auto* fods1 = dynamic_cast<FirstOrderNonLinearDS*>(&ds1);
+  ds_vars[FirstOrderR::Xxx]->insertPtr(fods1->x());
+  ds_vars[FirstOrderR::Rrr]->insertPtr(fods1->r());
+
+  if (has_two_ds) {
+    auto* fods2 = dynamic_cast<FirstOrderNonLinearDS*>(&ds2);
+    ds_vars[FirstOrderR::Xxx]->insertPtr(fods2->x());
+    ds_vars[FirstOrderR::Rrr]->insertPtr(fods2->r());
+  }
 }

@@ -21,7 +21,8 @@
 #include <boost/circular_buffer.hpp>
 
 #include "ControlSensor.hpp"
-#include "FirstOrderLinearDS.hpp"
+#include "FirstOrderNonLinearDS.hpp"
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"

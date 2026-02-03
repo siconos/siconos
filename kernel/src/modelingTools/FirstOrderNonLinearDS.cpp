@@ -400,9 +400,3 @@ void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int l
   // assert(0);
   rVector_->setZero();
 }
-
-void siconos::modeling::FirstOrderNonLinearDS::initialize_ds_link_for_relations(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const {
-  DSlink[FirstOrderR::Xxx]->insertPtr(x());
-  DSlink[FirstOrderR::Rrr]->insertPtr(r());
-}

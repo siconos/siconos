@@ -21,8 +21,6 @@
 #ifndef FEMMoreauJeanOSI_H
 #define FEMMoreauJeanOSI_H
 
-#include <limits>
-
 #include "MoreauJeanOSI.hpp"
 
 namespace siconos::mechanics::fem::integrators {
@@ -41,16 +39,20 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
  public:
   using siconos::integrators::MoreauJeanOSI::MoreauJeanOSI;
 
-  enum MoreauJeanOSI_ds_workVector_id {
-    RESIDU_FREE,
-    VFREE,
-    RESIDU_SIGMAFREE,
-    SIGMAFREE,
-    Q_SIGMAFREE,
-    BUFFER,
-    QTMP,
-    WORK_LENGTH
+  /** This enum is used to get access to work vectors relared to DS
+   *  It corresponds to:
+   *  - a container saved in the graph of ds
+   *  - a container associated to a specific ds
+   */
+  enum class wk_ds : std::size_t {
+    residu_free,
+    vfree,
+    residu_sigma_free,
+    sigma_free,
+    q_sigma_free,
+    size
   };
+
   /** destructor */
   virtual ~MoreauJeanOSI() noexcept = default;
 

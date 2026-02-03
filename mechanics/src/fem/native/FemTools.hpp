@@ -40,6 +40,11 @@ enum class MeshTags : int {
 /** Map between explicit names (enum) and gmsh tag value (ing)*/
 using Tags = std::map<MeshTags, int>;
 
+/** A default conf for tags and their associated values*/
+const inline Tags default_tags = {{siconos::mechanics::fem::MeshTags::bulk_material, 1},
+                                  {siconos::mechanics::fem::MeshTags::boundary_conditions, 2},
+                                  {siconos::mechanics::fem::MeshTags::applied_forces, 3}};
+
 /** Function type used to activate (or not) contact at a given node */
 using ContactConditionFunction = std::function<bool(const siconos::mechanics::fem::FENode&)>;
 

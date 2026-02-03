@@ -28,7 +28,7 @@
 // #include "siconos_debug.h"
 
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
-    std::shared_ptr<Mesh> mesh, const std::map<unsigned int, const Material>& materials)
+    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials)
     : LagrangianSparseLinearTIDS(), mesh_(mesh), materials_(materials) {
   // Warning FP: the DS is built from default empty constructor in an unusual
   // way. Care must be taken to properly set all attributes in DS, SecondOrder,

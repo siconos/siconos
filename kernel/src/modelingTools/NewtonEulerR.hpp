@@ -65,7 +65,11 @@ class DynamicalSystem;
 class NewtonEulerR : public Relation {
  public:
   // add deltaq ??? -- xhub 30/03/2014
-  enum class WorkDS : std::size_t { q0, velocity, dotq, p0, p1, p2, DSlinkSize };
+  /** Names and positions of ds variables that might be used (read only) in compute input and
+   * output.
+   * Last param, size, gives the size of the BlockVector to be allocated.
+   */
+  enum class ds_var : std::size_t { q0, velocity, dotq, p0, p1, p2, size };
 
  protected:
   ACCEPT_SERIALIZATION(NewtonEulerR);
@@ -291,9 +295,12 @@ class NewtonEulerR : public Relation {
   /** @brief allocation of memory space for relations in the graph
    *      Warning: internal use only (called from Topology)
    *  @param dslink a container of vectors (pointers), from the parent interaction
+   *  @param ds1 first ds concerned by the relation
+   *  @param ds2 second ds concerned by the relation
    */
-  virtual void allocate_dslink_vectors(
-      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) const override;
+  virtual void allocate_read_dynamical_systems_var_vectors(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars,
+      modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };

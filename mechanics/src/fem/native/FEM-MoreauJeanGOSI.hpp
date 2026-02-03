@@ -20,7 +20,7 @@
  * @brief specific implementation of the integrator for SolidLinearTIDS */
 
 #ifndef FEMMoreauJeanGOSI_H
-#define GEMMoreauJeanGOSI_H
+#define FEMMoreauJeanGOSI_H
 
 #include "MoreauJeanGOSI.hpp"
 
@@ -33,15 +33,17 @@ class MoreauJeanGOSI : public siconos::integrators::MoreauJeanGOSI {
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
  public:
-  // Warning: enum could be mixed up with those of MoreauJeanOSI
-  enum MoreauJeanGOSI_ds_workVector_id {
-    RESIDU_FREE,
-    FREE,
-    RESIDU_SIGMAFREE,
-    SIGMAFREE,
-    Q_SIGMAFREE,
-    LOCAL_BUFFER,
-    WORK_LENGTH
+  /** Names and positions of variables that might be used as buffers during osi operations.
+   * Last param, size, gives the size of the BlockVector to be allocated.
+   */
+  enum class wk_ds : std::size_t {
+    residu_free,
+    free,
+    residu_sigma_free,
+    // sigma_free,
+    q_sigma_free,
+    buffer,
+    size
   };
 
   using siconos::integrators::MoreauJeanGOSI::MoreauJeanGOSI;
@@ -72,6 +74,12 @@ class MoreauJeanGOSI : public siconos::integrators::MoreauJeanGOSI {
   /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */
   virtual double computeResidu() override;
+
+  /** update the state of the dynamical systems
+   *
+   *  \param level the level of interest for the dynamics: not used at the time
+   */
+  void updateState(const unsigned int level) override;
 };
 }  // namespace siconos::mechanics::fem::integrators
 #endif  // MoreauJeanGOSI_H

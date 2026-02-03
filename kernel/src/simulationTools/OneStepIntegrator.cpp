@@ -194,7 +194,6 @@ void siconos::integrators::OneStepIntegrator::updateInput(double time) {
 }
 
 void siconos::integrators::OneStepIntegrator::updateInput(double time, unsigned int level) {
-  std::cout << "In OneStepIntegrator::updateInput" << std::endl;
   // resetNonSmoothPart(level);
   // We compute input using lambda(level).
   //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
@@ -208,7 +207,6 @@ void siconos::integrators::OneStepIntegrator::updateInput(double time, unsigned 
     assert(inter.upperLevelForInput() >= level);
     inter.computeInput(time, level);
   }
-  std::cout << "Out OneStepIntegrator::updateInput" << std::endl;
 }
 
 double siconos::integrators::OneStepIntegrator::computeResiduOutput(

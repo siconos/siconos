@@ -77,8 +77,8 @@ class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    *
