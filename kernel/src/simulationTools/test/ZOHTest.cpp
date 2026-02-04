@@ -129,7 +129,7 @@ void ZOHTest::testMatrixIntegration1() {
     _sim->nextStep();
     //_sim->eventsManager()->display();
   }
-  siconos::algebra::print(dataPlot);
+  //siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration1.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
@@ -196,7 +196,7 @@ void ZOHTest::testMatrixIntegration2() {
     dataPlot(k, 4) = lambda(1);
     _sim->nextStep();
   }
-  siconos::algebra::print(dataPlot);
+  //ssiconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration2.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
@@ -272,7 +272,7 @@ void ZOHTest::testMatrixIntegration3() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  siconos::algebra::print(dataPlot);
+  //siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration3.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
@@ -348,7 +348,7 @@ void ZOHTest::testMatrixIntegration4() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  siconos::algebra::print(dataPlot);
+  //siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration4.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,

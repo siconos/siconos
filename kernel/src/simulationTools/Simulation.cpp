@@ -672,22 +672,17 @@ void siconos::simulation::Simulation::updateInput(unsigned int level) {
 }
 
 void siconos::simulation::Simulation::computeIteration() {
-  DEBUG_BEGIN("siconos::simulation::Simulation::updateState()\n");
-  // 2 - compute state for each dynamical system
+  DEBUG_BEGIN("siconos::simulation::Simulation::computeIteration()\n");
+  // 2 - compute current iteration for each dynamical system
   for (auto osi : *_allOSI) {
     osi->computeIteration();
   }
-
-  /*Because the dof of DS have been updated,
-    the world (CAO for example) must be updated.*/
-  updateWorldFromDS();
-
-  DEBUG_END("siconos::simulation::Simulation::updateState()\n");
+  DEBUG_END("siconos::simulation::Simulation::computeIteration()\n");
 }
 
 void siconos::simulation::Simulation::updateState(unsigned int) {
   DEBUG_BEGIN("siconos::simulation::Simulation::updateState()\n");
-  // 2 - compute state for each dynamical system
+  // 2 - update state for each dynamical system from the current iteration
   for (auto osi : *_allOSI) {
     osi->updateState();
   }

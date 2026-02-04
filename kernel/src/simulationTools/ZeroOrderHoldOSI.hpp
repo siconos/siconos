@@ -200,7 +200,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
   /** compute the current iteration
    *
    */
-  void computeIteration() override { assert(0); };
+  void computeIteration() override { updateState(0); };
 
   /** Displays the data of the ZeroOrderHoldOSI's integrator
    */
