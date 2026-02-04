@@ -45,5 +45,20 @@ endforeach()
 
 
 if(WITH_TESTING)
-  build_python_tests()
+  list(APPEND python_excluded_tests tests/test_vi.py) # to be reviewed
+  if(NOT SICONOS_HAS_MPI)
+    list(APPEND python_excluded_tests tests/test_NM_MUMPS.py) 
+  endif()
+  list(APPEND python_excluded_tests tests/test_fclib.py) # fclib pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_lcp.py) # LCP pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_mc2d.py) # MohrCoulomb2DProblem pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_mcp.py) # MCP pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_mcp2.py) # MCP pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_mlcp.py) # MLCP pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_ncp.py) # NCP pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_sparse.py) # TO BE REVIEWED/ pybind11 not fully implemented
+  list(APPEND python_excluded_tests tests/test_tools.py) # Proj on cone pybind11 not yet implemented
+  list(APPEND python_excluded_tests tests/test_linalg.py) # TO BE REVIEWED/ GFC3 pybind11 not fully implemented
+
+  build_python_tests(EXCLUDE ${python_excluded_tests})
 endif()

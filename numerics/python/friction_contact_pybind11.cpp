@@ -21,6 +21,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <stdint.h>
+
 #include <cstddef>
 
 // #include <cassert>
@@ -36,15 +37,13 @@
 #include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
 
-#include "NonSmoothDrivers.h"
-
 namespace py = pybind11;
 
-void display_csc_matrix(const CSparseMatrix *csc) {
+void display_csc_matrix(const CSparseMatrix* csc) {
   std::cout << "START ... " << csc->nzmax << " " << csc->n << "\n";
-  std::cout << "Adress csc->p : " << static_cast<void *>(csc->p) << std::endl;
-  std::cout << "Adress  csc->i : " << static_cast<void *>(csc->i) << std::endl;
-  std::cout << "Adresd csc->x : " << static_cast<void *>(csc->x) << std::endl;
+  std::cout << "Adress csc->p : " << static_cast<void*>(csc->p) << std::endl;
+  std::cout << "Adress  csc->i : " << static_cast<void*>(csc->i) << std::endl;
+  std::cout << "Adresd csc->x : " << static_cast<void*>(csc->x) << std::endl;
   std::cout << "p:" << std::endl;
   for (int j = 0; j < csc->n + 1; ++j) {
     std::cout << csc->p[j] << " ";
@@ -66,7 +65,7 @@ void display_csc_matrix(const CSparseMatrix *csc) {
 }
 
 struct FrictionContactProblemWrapper {
-  FrictionContactProblem *problem_{nullptr};
+  FrictionContactProblem* problem_{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Msparse{nullptr};
   std::shared_ptr<DenseMatrixMemoryOwner> mem_for_Mdense{nullptr};
   py::array_t<double> q_array;
@@ -84,7 +83,7 @@ struct FrictionContactProblemWrapper {
     q_array = q;
     mu_array = mu;
 
-    NumericsMatrix *nm;
+    NumericsMatrix* nm;
     if (py::hasattr(matrix, "data") && py::hasattr(matrix, "indices") &&
         py::hasattr(matrix, "indptr")) {
       nm = set_matrix_sparse_new(*this, matrix, mem_for_Msparse);
@@ -97,8 +96,8 @@ struct FrictionContactProblemWrapper {
     problem_->dimension = dimension;
     problem_->numberOfContacts = nc;
     problem_->M = nm;
-    problem_->q = static_cast<double *>(q_array.mutable_data());
-    problem_->mu = static_cast<double *>(mu_array.mutable_data());
+    problem_->q = static_cast<double*>(q_array.mutable_data());
+    problem_->mu = static_cast<double*>(mu_array.mutable_data());
     assert(problem_->M->size0 == problem_->M->size1);
     assert(problem_->M->size0 == dimension * nc);
   }
@@ -130,45 +129,45 @@ struct FrictionContactProblemWrapper {
 
   py::array_t<double> q() const { return q_array; }
   py::array_t<double> mu() const { return mu_array; }
-  
-  int solve(py::array_t<double> r, py::array_t<double> w, SolverOptions *solver_options) {
+
+  int solve(py::array_t<double> r, py::array_t<double> w, SolverOptions* solver_options) {
     int info = -1;
     int default_solver_options = 0;
     if (problem_->dimension == 2) {
       if (solver_options == nullptr) {
         solver_options = solver_options_create(SICONOS_FRICTION_2D_NSGS);
-	default_solver_options = 1;
+        default_solver_options = 1;
       }
       info = fc2d_driver(problem_, r.mutable_data(), w.mutable_data(), solver_options);
       if (default_solver_options) {
         solver_options_delete(solver_options);
-	solver_options = nullptr;
-        }
+        solver_options = nullptr;
+      }
     } else if (problem_->dimension == 3) {
       if (solver_options == nullptr) {
         solver_options = solver_options_create(SICONOS_FRICTION_3D_NSGS);
-	default_solver_options = 1;        
+        default_solver_options = 1;
       }
       info = fc3d_driver(problem_, r.mutable_data(), w.mutable_data(), solver_options);
       if (default_solver_options) {
         solver_options_delete(solver_options);
-	solver_options = nullptr;
-        }      
+        solver_options = nullptr;
+      }
     } else {
       std::cout << "FrictionContactProblem solve: wrong dimension" << std::endl;
     }
     return info;
   };
-  
+
   void somefunc() {
     // test function ...
     if (problem_->M->storageType == NM_SPARSE) {
-      CSparseMatrix *mat = problem_->M->matrix2->csc;
+      CSparseMatrix* mat = problem_->M->matrix2->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double *mat = problem_->M->matrix0;
+      double* mat = problem_->M->matrix0;
       int size = problem_->M->size0 * problem_->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -181,7 +180,7 @@ struct FrictionContactProblemWrapper {
 };
 
 struct RollingFrictionContactProblemWrapper {
-  RollingFrictionContactProblem *problem{nullptr};
+  RollingFrictionContactProblem* problem{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Msparse{nullptr};
   std::shared_ptr<DenseMatrixMemoryOwner> mem_for_Mdense{nullptr};
   py::array_t<double> q_array;
@@ -205,7 +204,7 @@ struct RollingFrictionContactProblemWrapper {
     mu_array = mu;
     mu_r_array = mu_r;
 
-    NumericsMatrix *nm;
+    NumericsMatrix* nm;
     if (py::hasattr(matrix, "data") && py::hasattr(matrix, "indices") &&
         py::hasattr(matrix, "indptr")) {
       nm = set_matrix_sparse_new(*this, matrix, mem_for_Msparse);
@@ -219,9 +218,9 @@ struct RollingFrictionContactProblemWrapper {
     problem->dimension = dimension;
     problem->numberOfContacts = nc;
     problem->M = nm;
-    problem->q = static_cast<double *>(q_array.mutable_data());
-    problem->mu = static_cast<double *>(mu_array.mutable_data());
-    problem->mu_r = static_cast<double *>(mu_r_array.mutable_data());
+    problem->q = static_cast<double*>(q_array.mutable_data());
+    problem->mu = static_cast<double*>(mu_array.mutable_data());
+    problem->mu_r = static_cast<double*>(mu_r_array.mutable_data());
     assert(problem->M->size0 == problem->M->size1);
     assert(problem->M->size0 == dimension * nc);
   }
@@ -257,7 +256,7 @@ struct RollingFrictionContactProblemWrapper {
 };
 
 struct GlobalFrictionContactProblemWrapper {
-  GlobalFrictionContactProblem *problem{nullptr};
+  GlobalFrictionContactProblem* problem{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Msparse{nullptr};
   std::shared_ptr<DenseMatrixMemoryOwner> mem_for_Mdense{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Hsparse{nullptr};
@@ -277,7 +276,7 @@ struct GlobalFrictionContactProblemWrapper {
     q_array = q;
     mu_array = mu;
 
-    NumericsMatrix *nm;
+    NumericsMatrix* nm;
     if (py::hasattr(matrixM, "data") && py::hasattr(matrixM, "indices") &&
         py::hasattr(matrixM, "indptr")) {
       nm = set_matrix_sparse_new(*this, matrixM, mem_for_Msparse);
@@ -287,7 +286,7 @@ struct GlobalFrictionContactProblemWrapper {
       throw std::runtime_error("Unsupported matrix type");
     }
 
-    NumericsMatrix *nH;
+    NumericsMatrix* nH;
     if (py::hasattr(matrixH, "data") && py::hasattr(matrixH, "indices") &&
         py::hasattr(matrixH, "indptr")) {
       nH = set_matrix_sparse_new(*this, matrixH, mem_for_Hsparse);
@@ -302,12 +301,16 @@ struct GlobalFrictionContactProblemWrapper {
     problem->numberOfContacts = nc;
     problem->M = nm;
     problem->H = nH;
-    problem->q = static_cast<double *>(q_array.mutable_data());
-    problem->mu = static_cast<double *>(mu_array.mutable_data());
+    problem->q = static_cast<double*>(q_array.mutable_data());
+    problem->mu = static_cast<double*>(mu_array.mutable_data());
     assert(problem->M->size0 == problem->M->size1);
     assert(problem->H->size0 == problem->M->size0);
     assert(problem->H->size1 == dimension * nc);
     assert(q.shape(0) == problem->M->size0);
+  }
+
+  GlobalFrictionContactProblemWrapper(std::string fname) {
+    problem = globalFrictionContact_new_from_filename(fname.c_str());
   }
 
   ~GlobalFrictionContactProblemWrapper() {
@@ -356,16 +359,15 @@ struct GlobalFrictionContactProblemWrapper {
   py::array_t<double> q() const { return q_array; }
   py::array_t<double> mu() const { return mu_array; }
 
-
   void somefunc() {
     // test function ...
     if (problem->M->storageType == NM_SPARSE) {
-      CSparseMatrix *mat = problem->M->matrix2->csc;
+      CSparseMatrix* mat = problem->M->matrix2->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double *mat = problem->M->matrix0;
+      double* mat = problem->M->matrix0;
       int size = problem->M->size0 * problem->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -378,7 +380,7 @@ struct GlobalFrictionContactProblemWrapper {
 };
 
 struct GlobalRollingFrictionContactProblemWrapper {
-  GlobalRollingFrictionContactProblem *problem{nullptr};
+  GlobalRollingFrictionContactProblem* problem{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Msparse{nullptr};
   std::shared_ptr<DenseMatrixMemoryOwner> mem_for_Mdense{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Hsparse{nullptr};
@@ -404,7 +406,7 @@ struct GlobalRollingFrictionContactProblemWrapper {
     mu_array = mu;
     mu_r_array = mu_r;
 
-    NumericsMatrix *nm;
+    NumericsMatrix* nm;
     if (py::hasattr(matrixM, "data") && py::hasattr(matrixM, "indices") &&
         py::hasattr(matrixM, "indptr")) {
       nm = set_matrix_sparse_new(*this, matrixM, mem_for_Msparse);
@@ -414,7 +416,7 @@ struct GlobalRollingFrictionContactProblemWrapper {
       throw std::runtime_error("Unsupported matrix type");
     }
 
-    NumericsMatrix *nH;
+    NumericsMatrix* nH;
     if (py::hasattr(matrixH, "data") && py::hasattr(matrixH, "indices") &&
         py::hasattr(matrixH, "indptr")) {
       nH = set_matrix_sparse_new(*this, matrixH, mem_for_Hsparse);
@@ -429,9 +431,9 @@ struct GlobalRollingFrictionContactProblemWrapper {
     problem->numberOfContacts = nc;
     problem->M = nm;
     problem->H = nH;
-    problem->q = static_cast<double *>(q_array.mutable_data());
-    problem->mu = static_cast<double *>(mu_array.mutable_data());
-    problem->mu_r = static_cast<double *>(mu_r_array.mutable_data());
+    problem->q = static_cast<double*>(q_array.mutable_data());
+    problem->mu = static_cast<double*>(mu_array.mutable_data());
+    problem->mu_r = static_cast<double*>(mu_r_array.mutable_data());
     assert(problem->M->size0 == problem->M->size1);
     assert(problem->H->size0 == problem->M->size0);
     assert(problem->H->size1 == dimension * nc);
@@ -488,12 +490,12 @@ struct GlobalRollingFrictionContactProblemWrapper {
   void somefunc() {
     // test function ...
     if (problem->M->storageType == NM_SPARSE) {
-      CSparseMatrix *mat = problem->M->matrix2->csc;
+      CSparseMatrix* mat = problem->M->matrix2->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double *mat = problem->M->matrix0;
+      double* mat = problem->M->matrix0;
       int size = problem->M->size0 * problem->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -505,7 +507,7 @@ struct GlobalRollingFrictionContactProblemWrapper {
   }
 };
 
-void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
+void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& solver_ids) {
   py::class_<FrictionContactProblemWrapper>(m, "FrictionContactProblem")
       .def(py::init<int, int, py::object, py::array_t<double>, py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("matrix"),
@@ -515,13 +517,13 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .def("mu", &FrictionContactProblemWrapper::mu)
       .def_property_readonly(
           "dimension",
-          [](const FrictionContactProblemWrapper &self) { return self.problem_->dimension; })
+          [](const FrictionContactProblemWrapper& self) { return self.problem_->dimension; })
       .def_property_readonly("numberOfContacts",
-                             [](const FrictionContactProblemWrapper &self) {
+                             [](const FrictionContactProblemWrapper& self) {
                                return self.problem_->numberOfContacts;
                              })
       .def("__repr__",
-           [](const FrictionContactProblemWrapper &self) {
+           [](const FrictionContactProblemWrapper& self) {
              std::stringstream ss;
              ss << "<FrictionContactProblemWrapper>\n";
              ss << "  dimension: " << self.problem_->dimension << "\n";
@@ -530,7 +532,7 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
              if (self.problem_->M->matrix2 != nullptr) {
-               CSparseMatrix *csc = self.problem_->M->matrix2->csc;
+               CSparseMatrix* csc = self.problem_->M->matrix2->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
@@ -545,8 +547,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              return ss.str();
            })
       .def("somefunc", &FrictionContactProblemWrapper::somefunc)
-      .def("solve", &FrictionContactProblemWrapper::solve,
-           py::arg("reactions"), py::arg("velocities"), py::arg("solver_options") = nullptr);
+      .def("solve", &FrictionContactProblemWrapper::solve, py::arg("reactions"),
+           py::arg("velocities"), py::arg("solver_options") = nullptr);
 
   py::class_<RollingFrictionContactProblemWrapper>(m, "RollingFrictionContactProblem")
       .def(py::init<int, int, py::object, py::array_t<double>, py::array_t<double>,
@@ -558,14 +560,14 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .def("mu", &RollingFrictionContactProblemWrapper::mu)
       .def("mu_r", &RollingFrictionContactProblemWrapper::mu_r)
       .def_property_readonly("dimension",
-                             [](const RollingFrictionContactProblemWrapper &self) {
+                             [](const RollingFrictionContactProblemWrapper& self) {
                                return self.problem->dimension;
                              })
       .def_property_readonly("numberOfContacts",
-                             [](const RollingFrictionContactProblemWrapper &self) {
+                             [](const RollingFrictionContactProblemWrapper& self) {
                                return self.problem->numberOfContacts;
                              })
-      .def("__repr__", [](const RollingFrictionContactProblemWrapper &self) {
+      .def("__repr__", [](const RollingFrictionContactProblemWrapper& self) {
         std::stringstream ss;
         ss << "<RollingFrictionContactProblemWrapper>\n";
         ss << "  dimension: " << self.problem->dimension << "\n";
@@ -574,7 +576,7 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
         ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
         ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
         if (self.problem->M->matrix2 != nullptr) {
-          CSparseMatrix *csc = self.problem->M->matrix2->csc;
+          CSparseMatrix* csc = self.problem->M->matrix2->csc;
           display_csc_matrix(csc);
         } else {
           ss << "  Dense matrix (matrix0):\n";
@@ -593,21 +595,22 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .def(py::init<int, int, py::object, py::object, py::array_t<double>,
                     py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
-           py::arg("q"), py::arg("mu"))
+           py::arg("q"), py::arg("mu"),"Build with all operators/parameters (H, M, ...)")
+      .def(py::init<std::string>(), py::arg("fname"), "Build from hdf5 file")
       .def("M", &GlobalFrictionContactProblemWrapper::M)
       .def("H", &GlobalFrictionContactProblemWrapper::H)
       .def("q", &GlobalFrictionContactProblemWrapper::q)
-      .def("mu", &GlobalFrictionContactProblemWrapper::mu)
+      .def("mu", &GlobalFrictionContactProblemWrapper::mu, "Friction coefficient")
       .def_property_readonly("dimension",
-                             [](const GlobalFrictionContactProblemWrapper &self) {
+                             [](const GlobalFrictionContactProblemWrapper& self) {
                                return self.problem->dimension;
                              })
       .def_property_readonly("numberOfContacts",
-                             [](const GlobalFrictionContactProblemWrapper &self) {
+                             [](const GlobalFrictionContactProblemWrapper& self) {
                                return self.problem->numberOfContacts;
                              })
       .def("__repr__",
-           [](const GlobalFrictionContactProblemWrapper &self) {
+           [](const GlobalFrictionContactProblemWrapper& self) {
              std::stringstream ss;
              ss << "<GlobalFrictionContactProblemWrapper>\n";
              ss << "  dimension: " << self.problem->dimension << "\n";
@@ -617,7 +620,7 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
              if (self.problem->M->matrix2 != nullptr) {
-               CSparseMatrix *csc = self.problem->M->matrix2->csc;
+               CSparseMatrix* csc = self.problem->M->matrix2->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
@@ -645,15 +648,15 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .def("mu", &GlobalRollingFrictionContactProblemWrapper::mu)
       .def("mu_r", &GlobalRollingFrictionContactProblemWrapper::mu_r)
       .def_property_readonly("dimension",
-                             [](const GlobalRollingFrictionContactProblemWrapper &self) {
+                             [](const GlobalRollingFrictionContactProblemWrapper& self) {
                                return self.problem->dimension;
                              })
       .def_property_readonly("numberOfContacts",
-                             [](const GlobalRollingFrictionContactProblemWrapper &self) {
+                             [](const GlobalRollingFrictionContactProblemWrapper& self) {
                                return self.problem->numberOfContacts;
                              })
       .def("__repr__",
-           [](const GlobalRollingFrictionContactProblemWrapper &self) {
+           [](const GlobalRollingFrictionContactProblemWrapper& self) {
              std::stringstream ss;
              ss << "<GlobalFrictionContactProblemWrapper>\n";
              ss << "  dimension: " << self.problem->dimension << "\n";
@@ -664,7 +667,7 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
              ss << "  mu_r: " << py::str(self.mu_r()).cast<std::string>() << "\n";
              if (self.problem->M->matrix2 != nullptr) {
-               CSparseMatrix *csc = self.problem->M->matrix2->csc;
+               CSparseMatrix* csc = self.problem->M->matrix2->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
@@ -772,8 +775,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              "VI formulation, GAMS/PATH (Ferris) LCP, local formulation")
       .value("SICONOS_FRICTION_3D_NSN_NM", FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_NM,
              "Non-smooth Newton, natural map, local formulation")
-      .value("SICONOS_FRICTION_3D_NSN_AC_NEW",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_NEW, "NSN AC Test solver")
+      .value("SICONOS_FRICTION_3D_NSN_AC_NEW", FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_NEW,
+             "NSN AC Test solver")
       .value("SICONOS_FRICTION_3D_PFP", FRICTION_SOLVER::SICONOS_FRICTION_3D_PFP,
              "Panagiotopoulos, fixed point, local formulation")
       .value("SICONOS_FRICTION_3D_ADMM", FRICTION_SOLVER::SICONOS_FRICTION_3D_ADMM,
@@ -1328,7 +1331,4 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .value("SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_YES",
              SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_YES)
       .export_values();
-
-
-
 }
