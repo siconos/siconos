@@ -229,7 +229,6 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     auto& residusigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
 
     siconos::algebra::SiconosVector qSigmaold{solid->dimension() + solid->stressDimension()};
-    auto start = std::chrono::high_resolution_clock::now();
     const auto& vold = solid->velocityMemory().getSiconosVector(0);    // vi
     const auto& sigmaold = solid->stressMemory().getSiconosVector(0);  // sigmai
     // q_sigma = [v; sigma] at the beginning of the time step
@@ -243,9 +242,6 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     full_free_rhs.noalias() = iteration_matrix * qSigmaold;
     free_rhs.noalias() = full_free_rhs.head(solid->dimension());
     residusigmafree.noalias() = full_free_rhs.tail(solid->stressDimension());
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> float_ms = end - start;
-    std::cout << "W*[v;sigma] time:" << float_ms.count() << " ms" << std::endl;
 
     if (solid->hasBMatrix()) {
       // residufree += -h*B^T sigma_i

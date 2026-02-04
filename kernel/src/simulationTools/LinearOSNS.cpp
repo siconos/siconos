@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
-
+#ifdef WITH_TIMER
+#include <chrono>
+#endif
 #include <Eigen/src/Core/util/Constants.h>
 
 #include "BoundaryCondition.hpp"

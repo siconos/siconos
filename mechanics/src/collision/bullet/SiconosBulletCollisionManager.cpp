@@ -28,6 +28,9 @@
 // point on the convex hull.  (For convex shapes.)
 
 #include "SiconosBulletCollisionManager.hpp"
+#ifdef BULLET_TIMER
+#include <chrono>
+#endif
 
 #include <BulletCollision/BroadphaseCollision/btAxisSweep3.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>

@@ -18,6 +18,8 @@
 
 #include "CableDSTest.hpp"
 
+#include <chrono>
+
 #include "CableTools.h"
 #include "Interaction.hpp"
 #include "LCP.hpp"

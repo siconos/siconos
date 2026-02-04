@@ -18,7 +18,9 @@
 #include "GlobalFrictionContact.hpp"
 
 #include <cstddef>
-
+#ifdef WITH_TIMER
+#include <chrono>
+#endif
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianSparseDS.hpp"
