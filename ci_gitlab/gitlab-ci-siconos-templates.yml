@@ -85,7 +85,7 @@ stages:
 # Based on Kaniko stuff. For details, see https://docs.gitlab.com/ee/ci/docker/using_kaniko.html.
 .docker-create-image:
   # Created if the commit message starts with [docker-build] or
-  # when the master branch is updated.
+  # when the main branch is updated.
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]

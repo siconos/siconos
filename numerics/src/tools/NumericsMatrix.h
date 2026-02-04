@@ -1007,14 +1007,6 @@ double NM_norm_inf(NumericsMatrix* const A);
 int NM_is_symmetric(NumericsMatrix* A);
 double NM_symmetry_discrepancy(NumericsMatrix* A);
 
-/** Pass a NumericsMatrix through swig typemaps.
- *  This is only useful in python.
- *
- *  \param A the matrix
- *  \return a NumericsMatrix
- */
-static inline NumericsMatrix* NM_convert(NumericsMatrix* A) { return A; }
-
 /** Compute the  maximum eigenvalue with the iterated power method
  *
  *  \param A the matrix

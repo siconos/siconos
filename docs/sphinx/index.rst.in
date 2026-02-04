@@ -57,8 +57,8 @@ Siconos : nonsmooth numerical simulation |licence|
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
-   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/master
+.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/main
    :alt: Build status
 	 
 

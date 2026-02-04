@@ -3,4 +3,5 @@ breathe
 sphinx-book-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport
-ytsphinx
+sphinxcontrib-youtube
+

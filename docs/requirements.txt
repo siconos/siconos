@@ -9,6 +9,7 @@ sphinxcontrib-bibtex
 sphinxcontrib-websupport
 sphinx-bootstrap-theme
 sphinxcontrib-napoleon
+sphinxcontrib-youtube
 numpydoc
 breathe
 

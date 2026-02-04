@@ -40,7 +40,7 @@ For example, start a jupyter container including siconos, all running examples a
 .. code-block:: bash
 
 
-   docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
+   docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main
 
    # Then, access in your browser at http://localhost:8888/...
    # The exact address will be printed on your screen as a result of the command above.

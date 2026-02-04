@@ -59,13 +59,13 @@ Below, you can find a short git refresher:
 
     git rm filename
 
-* see diff between your branch (here master) and another one (here the remote origin)::
+* see diff between your branch (here main) and another one (here the remote origin)::
 
-    git diff origin master
+    git diff origin main
 
 * see the list of files which differ::
 
-    git diff origin master --stat
+    git diff origin main --stat
 
 * propagate your changes to the main repository::
 

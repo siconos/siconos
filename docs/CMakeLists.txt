@@ -5,6 +5,7 @@
 # - sphinx documentation for manuals
 # 
 # ============================================================
+
 include(FindPythonModule)
 include(FindSphinxModule)
 
@@ -15,11 +16,15 @@ option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. D
 # -- Doc config --
 # Name and create build path for documentation
 set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to generated documentation.")
+
+# Build path for html outputs
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
+
 # -- Gendoctools install --
 # gendoctools is installed in binary dir as a python package
 # used to generate docstrings, rst files and so on.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/__init__.py.in ${CMAKE_BINARY_DIR}/share/gendoctools/__init__.py @ONLY)
+
 file(GLOB files_py RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/*.py)
 
 foreach(fname IN LISTS files_py)
@@ -70,6 +75,9 @@ if(USE_DOXYGEN)
       DEPENDS ${last_component} # No warnings if siconos has not been compiled. Should we remove this dep ? 
       )
   endif()
+
+  # Notice: the main part of the doxygen configuration is done later
+  # from a call to the macro finalize_doc, in doc_tools.cmake
 endif()
 
   
@@ -84,6 +92,7 @@ if(WITH_DOCUMENTATION)
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
+  find_sphinx_module(sphinxcontrib youtube REQUIRED)
   find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
   find_python_module(sphinx_book_theme REQUIRED)
@@ -164,7 +173,7 @@ if(WITH_DOCUMENTATION)
     COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
   
   add_custom_command(TARGET html POST_BUILD
-    COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
   
   # -- To build latex doc : make latex --
   # Outdated ... 

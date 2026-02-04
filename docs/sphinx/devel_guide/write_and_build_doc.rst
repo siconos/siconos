@@ -14,7 +14,7 @@
 Documentation overview
 ======================
 
-The whole Siconos documentation is gathered on Siconos webpage, https://siconos.gforge.inria.fr.
+The whole Siconos documentation is gathered on Siconos webpage, https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/.
 It consists in
 
 * Different **"textbooks"** : details on algorithms, how to install, use the platform, ... everything user and developers should know concerning Siconos software.
@@ -87,9 +87,6 @@ one has to be very careful when writing those comments and follow the rules belo
 .. rubric:: General rules
 
 * Document all header files using doxygen comments, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
-* Do not comment doxygen comments --> breaks doxy2swig outputs.
-    e.g. commenting a function and its doc will append the doc to the next function in the file
-    and so break doxy2swig outputs
 * Try to follow numpydoc (https://numpydoc.readthedocs.io/en/latest/) requirements.
     
   
@@ -316,16 +313,10 @@ How does it work?
 How does it work?
 
 Doxygen generates xml from comments in headers. Some python scripts are
-used to postprocess those xml files and produce .i files (swig), ending in
-docstrings in generated swig python modules.
-
-Update: we now use "-doxygen" option of swig to generate docstrings in python files from c++ doxygen comments.
-doxy2swig interface is outdated.
+used to postprocess those xml files and produce rst files for sphinx
 
 *Config and sources:*
 
-* cmake/swig_python_tools.cmake : python functions used to drive docstrings
-  generation
 * docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
   at build time.
 
@@ -335,7 +326,7 @@ doxy2swig interface is outdated.
 .. figure:: /figures/doc_process/build_doxy2swig.*
    :figclass: align-center
 
-   Generation of rst files for Python API. Warning: doxy2swig part is outdated and has been replaced by swig -doxygen.
+   Generation of rst files for Python API.
 
 Remark : during generation process, siconos python packages are imported and only
 objects with non-empty docstrings are documented. 
@@ -476,5 +467,3 @@ Existing tools (as far as we know ...):
 .. _Sphinx : http://www.sphinx-doc.org/en/master/
 
 .. _Breathe : https://github.com/michaeljones/breathe
-
-.. _Doxy2swig : https://github.com/m7thon/doxy2swig

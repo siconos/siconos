@@ -419,7 +419,7 @@ release_job:
 # Start CI in siconos-tutorials, when required
 # How? Use [with examples] in your commit message.
 # Based on the specific docker image build and saved during siconos:install step.
-# Examples will be executed using imag $LAB_NAME-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-master
+# Examples will be executed using imag $LAB_NAME-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-main
 bridge:examples:
   stage: examples
   variables:

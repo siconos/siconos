@@ -1,6 +1,6 @@
 # Siconos
 
-[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master)  [![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)
+[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main)  [![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/main/COPYING)
 
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
@@ -39,7 +39,7 @@ Prerequisite: Docker installed and usable on your computer.
 
 To use last Siconos release, run the command line
 ```bash
-docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master:latest
+docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
 ```
 You will get something like
 ```
@@ -54,7 +54,7 @@ Copy this last line into your browser, and there you will be able to start a ter
 You can also start a simple terminal to use Siconos through the command line with
 
 ```bash
-docker run --rm --entrypoint /bin/bash  -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master:latest
+docker run --rm --entrypoint /bin/bash  -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
 ```
 
 
@@ -82,7 +82,7 @@ More details in [Siconos download and install guide](https://nonsmooth.gricad-pa
 <!-- * latest version (development) -->
 
 <!-- ``` -->
-<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest -->
+<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-main:latest -->
 <!-- ``` -->
 
 <!-- * A specific (release) version X.Y: -->
@@ -96,7 +96,7 @@ More details in [Siconos download and install guide](https://nonsmooth.gricad-pa
 <!-- * latest version (development) -->
 
 <!-- ``` -->
-<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master -->
+<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main -->
 <!-- ``` -->
 
 

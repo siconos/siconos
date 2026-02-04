@@ -5,7 +5,7 @@ Siconos required and optional dependencies
 
 .. note::
 
-   Dockerfiles available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/ci_gitlab/dockerfiles?ref_type=heads>`_ of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them
+   Dockerfiles available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_ of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them
 
    
 
@@ -66,7 +66,7 @@ Installation:
    pip install -U -r requirements.txt
 
 
-A requirements.txt file for Siconos is available in the source directory in `ci_gitlab/dockerfiles <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/ci_gitlab/dockerfiles?ref_type=heads>`_
+A requirements.txt file for Siconos is available in the source directory in `ci_gitlab/dockerfiles <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
 
 Activation:
 
@@ -78,7 +78,7 @@ Activation:
 Siconos micromamba env example
 """"""""""""""""""""""""""""""
 
-Download the file `siconoslabenv.yml <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/master/ci_gitlab/sicolabenv.yml?ref_type=heads>`_ in Siconos source dir.
+Download the file `siconoslabenv.yml <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/ci_gitlab/sicolabenv.yml?ref_type=heads>`_ in Siconos source dir.
 
 Change the name "base" to sicoenv in this file.
 

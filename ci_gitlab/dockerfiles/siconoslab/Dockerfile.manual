@@ -49,7 +49,7 @@ RUN cmake -S $WORK/siconos -B $BUILD_DIR  -DUSER_OPTIONS_FILE=$CONF_FILE && cmak
 
 
 # - Prepare a jupyter notebook, based on a Docker image with a complete Siconos install. Add (clone) the siconos-tutorials repository
-ARG EXAMPLES_BRANCH_NAME=master
+ARG EXAMPLES_BRANCH_NAME=main
 FROM siconos-build AS siconoslab
 ENV WORK=/home/siconos-user
 WORKDIR $WORK

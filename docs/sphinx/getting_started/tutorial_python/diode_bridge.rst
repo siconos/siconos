@@ -7,7 +7,7 @@ Tutorial: A 4-diodes bridge wave rectifier
 
 .. highlight:: python
 
-.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/master/siconos-notebooks/st01_diode_bridge.ipynb>`_.
+.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/siconos-notebooks/st01_diode_bridge.ipynb>`_.
 
 Preamble
 --------

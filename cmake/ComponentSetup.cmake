@@ -107,7 +107,7 @@ function(configure_component_documentation COMPONENT)
   include(doxygen_warnings)
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)
+  if(WITH_DOCUMENTATION  OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT} HEADERS ${component_HEADERS})
   endif()

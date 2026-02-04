@@ -41,7 +41,7 @@ IF(SOURCE_IS_GIT_REPO MATCHES "^true\n")
 
       message("    GIT_BRANCH :: ${SOURCE_GIT_BRANCH}")
 
-      IF(NOT SOURCE_GIT_BRANCH MATCHES "^master$")
+      IF(NOT SOURCE_GIT_BRANCH MATCHES "^main$")
         SET(BUILDNAME "${BUILDNAME}-${SOURCE_GIT_BRANCH}")
       ENDIF()
     ENDIF()

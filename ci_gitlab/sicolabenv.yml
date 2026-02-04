@@ -31,4 +31,5 @@ dependencies:
   - autopep8
   - eigen
   - cppimport
+  - sphinxcontrib-youtube
 
