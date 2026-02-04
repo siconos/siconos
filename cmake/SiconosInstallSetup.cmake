@@ -150,8 +150,6 @@ Since make/pip install must be run as root, possibly outside this env., this mig
   # Move vars SICONOS_PYTHON_INSTALL_DIR and PIP_INSTALL_OPTIONS to cache
   string(STRIP "${PY_INSTALL_DIR}" PY_INSTALL_DIR)
   set(SICONOS_PYTHON_INSTALL_DIR ${PY_INSTALL_DIR} CACHE PATH "Install directory for python bindings." FORCE)
-  # Warning: this SICONOS_PYTHON_INSTALL_DIR will be used during swig setup to choose the place where dynamic libraries generated
-  # by swig and required by python will be installed.
   list(APPEND PIP_INSTALL_OPTIONS_LOCAL --no-build-isolation) # To allow siconos install when network is not available
   set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS_LOCAL} CACHE STRING "Options passed to pip during installation." FORCE)
 

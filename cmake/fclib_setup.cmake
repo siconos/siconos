@@ -34,12 +34,5 @@ if(WITH_FCLIB)
     add_library(fclib::fclib ALIAS fclib)
   endif()
 
-  if(WITH_PYTHON_WRAPPER)
-    include(swig_python_tools)
-    set(COMPONENT fclib)
-    #add_siconos_swig_sub_module("./fclib")
-    set_property(SOURCE fclib.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
-  endif()
-
 endif()
 

@@ -12,7 +12,6 @@ RUN yum update -y && yum install -y -qq \
         gmp-devel \
         gcc-c++ \
         gcc-gfortran \
-        swig3 \
         lpsolve-devel \
         cppunit-devel \
         suitesparse-devel \

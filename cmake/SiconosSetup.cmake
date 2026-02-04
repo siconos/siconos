@@ -66,10 +66,7 @@ string(TIMESTAMP BUILD_TIMESTAMP)
 # --> look for python framework when all other possibilities failed.
 include(FindPythonModule)
 set(CMAKE_FIND_FRAMEWORK LAST)
-
-if(WITH_PYTHON_WRAPPER)
-  find_package(Python COMPONENTS Development Interpreter NumPy REQUIRED)
-elseif(WITH_PYB11_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   include(pybind11_setup)
 else()
   find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -81,10 +78,11 @@ endif()
 find_python_module(packaging REQUIRED) # for siconos runtime
 find_python_module(wheel REQUIRED) # for siconos runtime
 
-if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
+if(WITH_DOCUMENTATION)
 #-- - xml schema.Used in tests.-- -
+# Obsolete?
   if(WITH_XML)
-    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
+    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/xmlschema/SiconosModelSchema-V3.7.xsd")
     if(NOT NO_RUNTIME_BUILD_DEP)
       find_python_module(lxml REQUIRED)
     endif()
@@ -162,19 +160,19 @@ endif()
 
 #init all common options for enabled components
 set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_WRAPPER
-  DOXYGEN_WARNINGS DOXY2SWIG)
+  DOXYGEN_WARNINGS)
 foreach(opt ${common_options})
   init_to_default_option(${opt})
 endforeach()
 
 #== == == == = Documentation == == == == =
-if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERATION)
+if(WITH_DOCUMENTATION OR WITH_DOXYGEN_WARNINGS OR WITH_GENERATION)
   set(USE_DOXYGEN TRUE)
 endif()
 
 #-- -- - Required dependencies(whatever Siconos components are) -- -- -
 #-- Python bindings --
-if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
+if(WITH_PYB11_WRAPPER)
 
   # Name of the generated Python package
   set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python package.")
@@ -182,11 +180,7 @@ if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
   # Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
   # and get pip install options (PIP_INSTALL_OPTIONS).
 
-  if(WITH_PYTHON_WRAPPER)
-    set(PYSRC_DIR wrap)
-    # -- swig stuff --
-    include(swig_setup)
-  elseif(WITH_PYB11_WRAPPER)
+  if(WITH_PYB11_WRAPPER)
     set(PYSRC_DIR python)
   endif()
 
@@ -278,7 +272,7 @@ if(WITH_TESTING)
     #File used as main driver for cppunit tests
     set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
   endif()
-  if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
+  if(WITH_PYB11_WRAPPER)
     find_python_module(pytest REQUIRED)
     if(WITH_AGGRESSIVE_PYTHON_TESTS)
       set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")

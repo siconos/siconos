@@ -28,8 +28,6 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine WITH_OPENMP
 // Use c++ to build externals and numerics
 #cmakedefine BUILD_AS_CPP
-// Which version of C++ was used to compile siconos, needed for swig
-//#define SICONOS_CXXVERSION @CXXVERSION@
 #cmakedefine SICONOS_USE_MAP_FOR_HASH
 // -- Blas Lapack config --
 // Where does cblas comes from? 

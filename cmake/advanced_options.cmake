@@ -27,7 +27,6 @@ option(BUILD_SHARED_LIBS "Building of shared libraries" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details." OFF)
 
 # --- Documentation setup ---
-cmake_dependent_option(WITH_DOXY2SWIG  "Build swig docstrings from doxygen xml output if doc is ON." ON "WITH_DOCUMENTATION" OFF)
 cmake_dependent_option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings if doc is ON" ON "WITH_DOCUMENTATION" OFF)
 
 # --- List of external libraries/dependencies to be searched (or not) ---

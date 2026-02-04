@@ -9,6 +9,5 @@ wheel
 vtk
 packaging
 bullet
-swig>=3,<4.3
 setuptools
 cppimport

@@ -34,7 +34,7 @@ BuildRequires: MUMPS-devel
 BuildRequires:  suitesparse-devel
 BuildRequires:  python-devel
 BuildRequires:  numpy
-BuildRequires:  swig
+BuildRequires:  pybind11
 BuildRequires:  lpsolve-devel
 BuildRequires:  bullet-devel
 

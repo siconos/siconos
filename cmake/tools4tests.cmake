@@ -377,7 +377,7 @@ function(build_plugin)
   foreach(dep IN LISTS plug_DEPS)
     target_link_libraries(${plug_name} PRIVATE ${dep})
   endforeach()
-  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
+  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS__BINARY_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   if(NOT WITH_CXX)
     set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
@@ -433,9 +433,6 @@ endmacro()
 #
 # path_to_tests is relative to the current source dir.
 # Most of the time, path_to_tests = 'tests'.
-# For instance, in mechanics, tests are called in CMakeLists.txt
-# in swig, current source dir is thus source_dir/mechanics/swig
-# and source_dir/mechanics/swig/tests contains all the python files for tests.
 #
 # This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
 # 

@@ -30,7 +30,7 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
     : velocityIndices_{std::move(newVelocityIndices)},
       prescribedVelocity_(newVelocityValues),
       prescribedVelocityOld_{newVelocityValues} {
-  if (velocityIndices_.size() != prescribedVelocity_.size())
+  if (velocityIndices_.size() != (size_t)prescribedVelocity_.size())
     THROW_EXCEPTION(
         "siconos::modeling::BoundaryCondition::BoundaryCondition  "
         "constructor. "
@@ -39,7 +39,7 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
 
 void siconos::modeling::BoundaryCondition::setComputePrescribedVelocityFunction(
     const siconos::modeling::func_prototypes::FunctionS_V& func) {
-  assert(prescribedVelocity_.size() == velocityIndices_.size());
+  assert((size_t)prescribedVelocity_.size() == velocityIndices_.size());
   computePrescribedVelocity_ = func;
 }
 

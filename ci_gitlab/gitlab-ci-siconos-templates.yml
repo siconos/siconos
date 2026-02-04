@@ -19,8 +19,7 @@ variables:
   # Default option file
   CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_ci_default.cmake
   # By default we allow builds to run in parallel, but certain
-  # configurations may require non-parallel builds (cf. swig +
-  # serialization requires too much memory)
+  # configurations may require non-parallel builds (cf. serialization that requires too much memory)
   PARALLEL_BUILD: 1
   GIT_DEPTH: 1
   #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME

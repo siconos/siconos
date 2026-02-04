@@ -11,7 +11,6 @@ RUN pacman -Sy && pacman --noconfirm -S \
         make \
         gcc \
         gcc-fortran \
-        swig \
         openblas \
         lapacke \
         cblas \

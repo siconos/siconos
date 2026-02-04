@@ -59,8 +59,8 @@ target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCAS
 target_compile_options(${COMPONENT} PRIVATE "-Wno-zero-as-null-pointer-constant")
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----

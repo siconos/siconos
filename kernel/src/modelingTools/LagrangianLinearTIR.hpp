@@ -68,7 +68,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(const Interaction &inter) const override;
+  void checkSize(const Interaction& inter) const override;
   ;
 
   /** \return a read-only view on the C matrix */
@@ -88,7 +88,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param derivativeNumber the derivative of y we want to compute
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      unsigned int derivativeNumber = 0) override;
 
   /** default function to compute r
@@ -97,7 +97,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param level the derivative of lambda we want to compute
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
 
   /** compute all the H Jacobian
    *
@@ -105,7 +105,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction &inter) override {}
+  void computeJach(double time, Interaction& inter) override {}
 
   /** print the data to the screen
    */
@@ -114,10 +114,7 @@ class LagrangianLinearTIR : public LagrangianR {
   /** \return true if the relation is linear.
    */
 
-  bool isLinear() const override  // final would be better but swig does not like it
-  {
-    return true;
-  }
+  bool isLinear() const final { return true; }
 };
 
 }  // namespace siconos::modeling

@@ -181,9 +181,6 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   include(${COMPONENT}_tests.cmake)
 
   # --- python bindings ---
-  if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-    add_subdirectory(swig)
-  endif()
   if(WITH_PYB11_WRAPPER)
     add_subdirectory(python)
   endif()

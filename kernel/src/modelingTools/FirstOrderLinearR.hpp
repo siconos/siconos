@@ -233,8 +233,7 @@ class FirstOrderLinearR : public FirstOrderR {
   bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  // Note FP: final would be better than override but swig cannot handle it.
-  void computeJach(double time, Interaction &inter) override {};
+  void computeJach(double time, Interaction &inter) final {};
 };
 }  // namespace siconos::modeling
 

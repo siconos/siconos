@@ -184,7 +184,7 @@ function(docstrings2rst)
 
   cmake_parse_arguments(module "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  set(pymodule_fullname ${SICONOS_SWIG_ROOT_DIR}/${module_PATH}/${module_NAME}.py)
+  set(pymodule_fullname ${SICONOS_PYTHON_INSTALL_DIR}/${module_PATH}/${module_NAME}.py)
   
   message("Start setup for generation of rst files from python docstrings for ${pymodule_fullname}")
   

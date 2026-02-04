@@ -71,8 +71,8 @@ target_link_libraries(control PUBLIC kernel)
 include(${COMPONENT}_tests.cmake)
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----

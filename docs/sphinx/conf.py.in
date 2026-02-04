@@ -58,7 +58,7 @@ extensions = [
     #'sphinxcontrib.youtube',
 ]
 
-with_python_wrapper = '@WITH_PYTHON_WRAPPER@' == 'ON'
+with_python_wrapper = '@WITH_PYB11_WRAPPER@' == 'ON'
 if with_python_wrapper:
     extensions += [
         'sphinx.ext.autodoc',

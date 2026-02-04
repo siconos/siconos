@@ -279,9 +279,6 @@ if(WITH_MPI AND WITH_TESTING)
 endif()
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
-endif()
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
 endif()

@@ -67,7 +67,7 @@ There are two ways to use Siconos
   and then run siconos to build and execute your program.
 * As a Python package.
 
-Python API is generated (swig) from C++ and thus both API are quite equivalent although C++ might be more complete. 
+Python API is generated (pybind11) from C++ and thus both API are quite equivalent although C++ might be more complete. 
  
 Anyway, for new users we recommend the Python API which is easier to understand.
 

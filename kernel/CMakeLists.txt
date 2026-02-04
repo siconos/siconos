@@ -35,9 +35,7 @@ set(${COMPONENT}_DIRS
 # -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
-set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools
-  # if included, it breaks swig process for mechanics
-  )
+set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools)
 
 # ---- Final setup for the library ----
 
@@ -115,9 +113,6 @@ include(${COMPONENT}_tests.cmake)
 
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
-endif()
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
 endif()

@@ -30,7 +30,7 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
   IMMEDIATE @ONLY)
 
-if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   # deal with files installed for python 
   add_custom_target(uninstall
     echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt

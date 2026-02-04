@@ -200,11 +200,6 @@ foreach(COMPONENT IN LISTS COMPONENTS)
   add_subdirectory(${COMPONENT})
 endforeach()
 
-# ========= Python bindings =========
-if(WITH_PYTHON_WRAPPER)
-  add_subdirectory(wrap)
-endif()
-
 # ========= Documentation setup =========
 # Finalize documentation setups.
 # Must be called AFTER each component config.
@@ -265,7 +260,7 @@ message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
 message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
 message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
 message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
-if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   message(STATUS "Python libraries are ${Python_LIBRARIES}")
 else()
   message("Siconos Python API is off\n")
@@ -283,7 +278,7 @@ if(SICONOS_CUSTOM_INSTALL AND ISOLATED_INSTALL)
   message(WARNING "You asked for a fully isolated installation in ${SICONOS_CUSTOM_INSTALL} at your own risks.\n")
 endif()
 message("    - The binaries, libraries and headers will be installed in ${CMAKE_INSTALL_PREFIX} \n")
-if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR}\n")
   message("    with the command ${Python_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
   message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")

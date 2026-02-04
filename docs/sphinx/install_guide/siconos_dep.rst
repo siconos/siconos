@@ -41,11 +41,7 @@ For the python bindings:
   See details in :ref:`about_python`
   
  
-  
-  
-* swig (>= 3.0)
-
-To run tests:
+  To run tests:
 
 * cppunit
 

@@ -53,13 +53,13 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *
    *  \param inter the interaction that owns this relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(const Interaction &inter) const override;
+  void checkSize(const Interaction& inter) const override;
 
  public:
   /** minimal constuctor. Use setXXX functions to fix B,C, D ... */
@@ -145,7 +145,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeOutput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeOutput(double time, Interaction& inter, unsigned int level = 0) override;
 
   /** default function to compute r
    *
@@ -153,7 +153,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
 
   /** print the data to the screen
    */
@@ -166,8 +166,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   inline bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  // Note FP: final would be better than override but swig cannot handle it.
-  void computeJach(double time, Interaction &inter) override {};
+  void computeJach(double time, Interaction& inter) final {};
 };
 }  // namespace siconos::modeling
 
