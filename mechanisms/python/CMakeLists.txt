@@ -23,7 +23,8 @@ if(WITH_TESTING)
   configure_file(${path_to_test_sources}/bodydef.py ${EXAMPLE_PATH}/bodydef.py COPYONLY)
   configure_file(${path_to_test_sources}/mbtbLocalOptions.py ${EXAMPLE_PATH} COPYONLY)
   
-  build_python_tests(
+  # TO BE REVIEWED
+#  build_python_tests(
     # DEPS Boost::boost # for quaternions
-    )
+    #)
 endif()

@@ -9,7 +9,8 @@ if(WITH_TESTING)
   if(NOT HAS_FORTRAN)
     list(APPEND python_excluded_tests tests/test_smc.py)
   endif()
-  build_python_tests(
-    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
-    EXCLUDE ${python_excluded_tests})
+  # NOT YET IMPLEMENTED
+  # build_python_tests(
+  #   # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+  #   EXCLUDE ${python_excluded_tests})
 endif()

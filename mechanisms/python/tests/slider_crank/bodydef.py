@@ -76,8 +76,8 @@ afile = ['./CAD/body1.step',
          './CAD/Slider.step']
 """CAD files """
 
-plugin = "SliderCrankPlugin.so"
-"""plugins library name"""
+#plugin = "SliderCrankPlugin.so"
+#"""plugins library name"""
 
 fctfext = np.array(['externalForcesB1', 'externalForcesB2', 'externalForcesS'])
 """external forces"""

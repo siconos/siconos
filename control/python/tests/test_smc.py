@@ -1,39 +1,55 @@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2026 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
+
+import siconos.modeling as sm
+import numpy as np
+from math import ceil, sin
+import siconos.integrators
+import siconos.simulation
+import scipy.linalg as la
+
+
 def test_smc1():
-
-    from siconos.kernel import FirstOrderLinearDS, NonSmoothDynamicalSystem, \
-     TimeDiscretisation, TimeStepping, ZeroOrderHoldOSI, TD_EVENT
-    from siconos.control.simulation import ControlManager
-    from siconos.control.sensor import LinearSensor
-    from siconos.control.controller import LinearSMCOT2
-    from numpy import eye, empty, zeros
-    import numpy as np
-    from math import ceil, sin
-
     # Derive our own version of FirstOrderLinearDS
-    class MyFOLDS(FirstOrderLinearDS):
+    class MyFOLDS(sm.FirstOrderLinearDS):
         def computeb(self, time):
-            t = sin(50*time)
+            t = sin(50 * time)
             # XXX fix this !
             u = [t, -t]
             self.setbPtr(u)
 
     # variable declaration
-    ndof = 2   # Number of degrees of freedom of your system
-    t0 = 0.0   # start time
-    T = 1    # end time
+    ndof = 2  # Number of degrees of freedom of your system
+    t0 = 0.0  # start time
+    T = 1  # end time
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
-    N = int(ceil((T-t0)/h + 10))  # number of time steps
+    N = int(ceil((T - t0) / h + 10))  # number of time steps
     outputSize = 4  # number of variable to store at each time step
 
     # Matrix declaration
-    A = zeros((ndof, ndof))
+    A = np.zeros((ndof, ndof))
     x0 = [Xinit, -Xinit]
     Brel = np.array([[0], [1]])
-    sensorC = eye(ndof)
-    sensorD = zeros((ndof, ndof))
+    sensorC = np.eye(ndof)
+    sensorD = np.zeros((ndof, ndof))
     Csurface = [[0, 1.0]]
 
     # Simple check
@@ -44,27 +60,27 @@ def test_smc1():
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
-#    processDS.setb([0, 0])
+    #    processDS.setb([0, 0])
     # Model
-    process = NonSmoothDynamicalSystem(t0, T)
+    process = sm.NonSmoothDynamicalSystem(t0, T)
     process.insertDynamicalSystem(processDS)
     # time discretization
-    processTD = TimeDiscretisation(t0, h)
-    tSensor = TimeDiscretisation(t0, hControl)
-    tActuator = TimeDiscretisation(t0, hControl)
+    processTD = siconos.simulation.TimeDiscretisation(t0, h)
+    tSensor = siconos.simulation.TimeDiscretisation(t0, hControl)
+    tActuator = siconos.simulation.TimeDiscretisation(t0, hControl)
     # Creation of the Simulation
-    processSimulation = TimeStepping(process, processTD, 0)
+    processSimulation = siconos.simulation.TimeStepping(process, processTD, 0)
     processSimulation.setName("plant simulation")
 
     # Declaration of the integrator
-    processIntegrator = ZeroOrderHoldOSI()
+    processIntegrator = siconos.integrators.ZeroOrderHoldOSI()
     processSimulation.associate(processIntegrator, processDS)
     # Actuator, Sensor & ControlManager
-    control = ControlManager(processSimulation)
-    sens = LinearSensor(processDS, sensorC, sensorD)
+    control = siconos.control.ControlManager(processSimulation)
+    sens = siconos.control.LinearSensor(processDS, sensorC, sensorD)
 
     control.addSensorPtr(sens, tSensor)
-    act = LinearSMCOT2(sens)
+    act = siconos.control.LinearSMCOT2(sens)
     act.setCsurface(Csurface)
     act.setB(Brel)
     control.addActuatorPtr(act, tActuator)
@@ -75,7 +91,7 @@ def test_smc1():
     # eventsManager = s.eventsManager()
 
     # Matrix for data storage
-    dataPlot = empty((3*(N+1), outputSize))
+    dataPlot = np.empty((3 * (N + 1), outputSize))
     dataPlot[0, 0] = t0
     dataPlot[0, 1] = processDS.x()[0]
     dataPlot[0, 2] = processDS.x()[1]
@@ -84,7 +100,10 @@ def test_smc1():
     # Main loop
     k = 1
     while processSimulation.hasNextEvent():
-        if processSimulation.eventsManager().nextEvent().getType() == TD_EVENT:
+        if (
+            processSimulation.eventsManager().nextEvent().getType()
+            == siconos.simulation.TD_EVENT
+        ):
             processSimulation.computeOneStep()
         dataPlot[k, 0] = processSimulation.nextTime()
         dataPlot[k, 1] = processDS.x()[0]
@@ -99,35 +118,27 @@ def test_smc1():
 
 # Same test, but with the simplified interface
 def test_smc2(datafile):  # uses datafile pytest fixture
-    from siconos.kernel import FirstOrderLinearDS
-    from siconos.control.sensor import LinearSensor
-    from siconos.control.controller import LinearSMCOT2
-    from siconos.control.simulation import ControlZOHSimulation
-    from numpy import eye, zeros
-    import numpy as np
-    from math import sin
-    from numpy.linalg import norm
 
     # Derive our own version of FirstOrderLinearDS
-    class MyFOLDS(FirstOrderLinearDS):
+    class MyFOLDS(sm.FirstOrderLinearDS):
         def computeb(self, time):
-            t = sin(50*time)
+            t = sin(50 * time)
             u = [t, -t]
             self.setbPtr(u)
 
     # variable declaration
-    ndof = 2   # Number of degrees of freedom of your system
-    t0 = 0.0   # start time
-    T = 1    # end time
+    ndof = 2  # Number of degrees of freedom of your system
+    t0 = 0.0  # start time
+    T = 1  # end time
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
 
     # Matrix declaration
-    A = zeros((ndof, ndof))
+    A = np.zeros((ndof, ndof))
     x0 = [Xinit, -Xinit]
-    sensorC = eye(ndof)
-    sensorD = zeros((ndof, ndof))
+    sensorC = np.eye(ndof)
+    sensorD = np.zeros((ndof, ndof))
     Brel = np.array([[0], [1]])
     Csurface = [[0, 1.0]]
 
@@ -140,13 +151,13 @@ def test_smc2(datafile):  # uses datafile pytest fixture
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
     processDS.setbPtr([0, 0])
-    sim = ControlZOHSimulation(t0, T, h)
+    sim = siconos.control.ControlZOHSimulation(t0, T, h)
     sim.addDynamicalSystem(processDS)
     # time discretisation
     # Actuator, Sensor & ControlManager
-    sens = LinearSensor(processDS, sensorC, sensorD)
+    sens = siconos.control.LinearSensor(processDS, sensorC, sensorD)
     sim.addSensor(sens, hControl)
-    act = LinearSMCOT2(sens)
+    act = siconos.control.LinearSMCOT2(sens)
     act.setCsurface(Csurface)
     act.setB(Brel)
     sim.addActuator(act, hControl)
@@ -160,14 +171,14 @@ def test_smc2(datafile):  # uses datafile pytest fixture
     # compare with the reference
     ref = np.loadtxt(datafile("smc_2.ref.gz"))
     np.savetxt("smc_2.dat", dataPlot)
-    print("%e" % norm(dataPlot - ref))
-    if (norm(dataPlot - ref) > 5e-12):
+    print("%e" % la.norm(dataPlot - ref))
+    if la.norm(dataPlot - ref) > 5e-12:
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
-    assert norm(dataPlot - ref) < 5e-12
+    assert la.norm(dataPlot - ref) < 5e-12
 
 
-if __name__ == '__main__':
-    print('test_smc1')
+if __name__ == "__main__":
+    print("test_smc1")
     test_smc1()
     test_smc2()

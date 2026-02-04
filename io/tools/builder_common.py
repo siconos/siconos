@@ -94,14 +94,10 @@ def get_priority(name, source_dir, header_path, header_line):
     )
 
     kernel_prio = (
-        ("utils/SiconosException", 0),
-        ("utils/SiconosMemory", 1),
-        ("utils/SiconosAlgebra", 2),
-        ("utils/SiconosTools", 3),
-        ("utils", 4),
-        ("plugin", 5),
-        ("modelingTools", 6),
-        ("simulationTools", 7),
+        ("utils", 0),
+        ("algebra", 1),
+        ("modeling", 2),
+        ("simulation", 3),
         (r".*", 8),
     )
 

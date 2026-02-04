@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /*! \file SimulationTools.hpp
-List of all headers from "simulationTools" directory.
+List of all headers from "simulation" directory.
 This should be used only by final user.
 */
 

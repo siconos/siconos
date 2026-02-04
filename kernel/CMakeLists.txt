@@ -22,14 +22,10 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
 set(${COMPONENT}_DIRS
   src/.
+  src/algebra
   src/utils
-  src/utils/SiconosAlgebra
-  src/utils/SiconosMemory
-  src/utils/SiconosTools
-  src/utils/ProgressBar
-  src/utils/plugins
-  src/modelingTools
-  src/simulationTools
+  src/modeling
+  src/simulation
 )
 
 # -- Documentation --
