@@ -352,7 +352,12 @@ class Body(BodyBase):
         self.handle().set_fext(array(fext))
 
     def setNumber(self, num):
-        self.handle().set_id(num)
+        # FIX: in mechanics_run insertDynamicalsystem is done before
+        # setNumber and as the map is handled in bridge.py by a python
+        # map, this is buggy.
+        # workaround: setNUmber is disabled
+        # self.handle().set_id(num)
+        pass
 
     def number(self):
         return self.handle().id()
