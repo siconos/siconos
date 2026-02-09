@@ -459,20 +459,15 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
 }
 
 void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
-  DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
-
   if (_newtonOptions == TimeSteppingType::NONLINEAR ||
       _newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
     for (auto& osi : *_allOSI) {
       osi->computeInitialNewtonState();
     }
   }
-  DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
 }
 
 void siconos::simulation::TimeStepping::updateAndSwapAllOutput() {
-  DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
-
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
@@ -483,9 +478,6 @@ void siconos::simulation::TimeStepping::updateAndSwapAllOutput() {
   for (auto& osi : *_allOSI) {
     osi->updateAndSwapAllOutput(tkp1);
   }
-
-
-  DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
 }
 
 void siconos::simulation::TimeStepping::initializeNewtonSolve() {

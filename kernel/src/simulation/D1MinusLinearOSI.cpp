@@ -179,7 +179,7 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
 
   if (!isOSNSPinitialized) {
     THROW_EXCEPTION(
-        "siconos::integrators::D1MinusLinearOSI::initialize() - not implemented for type of "
+        "siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() - not implemented for type of "
         "D1MinusLinearOSI: " +
         siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   }

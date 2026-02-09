@@ -68,6 +68,17 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
   virtual void initializeWorkVectorsForDS(
       double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   *
+   *  \param inter the interaction
+   *  \param interProp the properties on the graph
+   *  \param DSG the dynamical systems graph
+   */
+  virtual void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
+
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *
    *  @param time

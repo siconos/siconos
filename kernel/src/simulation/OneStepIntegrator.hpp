@@ -128,8 +128,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
         _levelMaxForOutput{lmax_output},
         _levelMinForInput{lmin_input},
         _levelMaxForInput{lmax_input} {
-            // Set levels. This may depend on the nonsmooth law and will be updated during
-            // initializeWorkVectorsForInteraction(...) call.
+          // Set levels. This may depend on the nonsmooth law and will be updated during
+          // initializeWorkVectorsForInteraction(...) call.
         };
 
   /**
@@ -249,7 +249,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   /**
      Initialization process of the nonsmooth problems
      linked to this OSI*/
-  virtual void initialize_nonsmooth_problems(){};
+  virtual void initialize_nonsmooth_problems() {};
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -369,7 +369,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    */
   virtual void computeIteration() = 0;
-  
+
   /** update the state of the DynamicalSystem attached to this Integrator
    *
    *  \param level level of interest for the dynamics

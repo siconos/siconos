@@ -36,128 +36,6 @@
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
-void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  // Get work buffers from the graph
-  auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
-
-  // Check dynamical system type
-  auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
-  // Compute W (iteration matrix)
-  initializeIterationMatrix(t, sods);
-  ds_work_vectors.resize(tools::enum_to_index(wk_ds::size));
-  ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
-  ds_work_vectors[tools::enum_to_index(wk_ds::vfree)] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
-  ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
-
-  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
-        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-    lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
-  } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-    // Compute a first value of the dotq  to store it in  _dotqMemory
-    *neds->dotq() = neds->T() * neds->twist_read();
-    // Compute a first value of the forces to store it in totalForcesMemory
-    neds->computeWrench(neds->twist_read(), neds->q_read(), t);
-  }
-  ds->swapInMemory();
-}
-
-void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
-    siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG) {
-  auto ds1 = interProp.source;
-  assert(ds1);
-  auto is_ds1_integrated_by_this_osi = checkOSI(DSG.descriptor(ds1));
-
-  auto ds2 = interProp.target;
-  assert(ds2);
-  auto use_two_ds = ds1 != ds2;
-  bool is_ds2_integrated_by_this_osi = use_two_ds && checkOSI(DSG.descriptor(ds2));
-
-  if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-            tools::enum_to_index(wk_inter::size));
-  }
-
-  if (!interProp.workBlockVectors) {
-    interProp.workBlockVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>(
-            tools::enum_to_index(wkb_inter::size));
-  }
-
-  auto& inter_work = *interProp.workVectors;
-  auto& inter_block_work = *interProp.workBlockVectors;
-
-  if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)])
-    inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)] =
-        std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
-
-  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current
-  // osi.
-  _check_and_update_interaction_levels(inter);
-  // Initialize/allocate memory buffers in interaction.
-  inter.initializeMemory(_steps);
-
-  /* allocate and set work vectors for the osi */
-  auto label_xfree = tools::enum_to_index(wkb_inter::xfree);
-
-  if (use_two_ds) {
-    if ((!inter_block_work[label_xfree]) ||
-        (inter_block_work[label_xfree]->numberOfBlocks() != 2))
-      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
-  } else {
-    if ((!inter_block_work[label_xfree]) ||
-        (inter_block_work[label_xfree]->numberOfBlocks() != 1))
-      inter_block_work[label_xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
-  }
-
-  if (is_ds1_integrated_by_this_osi) {
-    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-    auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    inter_block_work[label_xfree]->setVectorPtr(0,
-                                                workVds1[tools::enum_to_index(wk_ds::vfree)]);
-  }
-  if (is_ds2_integrated_by_this_osi) {
-    assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
-    auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    inter_block_work[label_xfree]->setVectorPtr(1,
-                                                workVds2[tools::enum_to_index(wk_ds::vfree)]);
-  }
-}
-
-void siconos::integrators::MoreauJeanGOSI::computeInitialNewtonState() {
-  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeInitialNewtonState()\n");
-  // Compute the position value giving the initial velocity.
-  // The goal is to save one newton iteration for nearly linear system
-  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
-
-  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
-    if (!checkOSI(dsi)) continue;
-    auto& ds = *_dynamicalSystemsGraph->bundle(*dsi);
-    auto dsType = siconos::types::type_value(ds);
-    // Copy current velocity in V_ITER
-    auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    auto& v_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)];
-
-    if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-        dsType == siconos::modeling::Type::LagrangianDS ||
-        dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
-        dsType == modeling::Type::LagrangianSparseDS) {
-      auto& lds = static_cast<siconos::modeling::LagrangianDS&>(ds);
-      v_iter = lds.velocity_read();
-
-    } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
-      auto& d = static_cast<siconos::modeling::NewtonEulerDS&>(ds);
-      v_iter = d.twist_read();
-    }
-  }
-  DEBUG_END("siconos::integrators::MoreauJeanOSI::computeInitialNewtonState()\n");
-}
 
 double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   DEBUG_PRINT("\nsiconos::integrators::MoreauJeanGOSI::computeResidu(), start\n");
@@ -479,8 +357,6 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       // computes forces(ti,v,q)
       // we use residu as a local buffer to compute the current iterate in position
-      auto& qold = neds->qMemory().getSiconosVector(0);
-
       siconos::algebra::SiconosVector6 velocityIncrement;
 
       velocityIncrement = time_step * _theta * v_iter +

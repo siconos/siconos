@@ -74,8 +74,6 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
   auto& y = *inter.y(derivativeNumber);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
 
-
-  
   siconos::algebra::matrixBlockVector_prod(
       *jacobianhOver_q_view_,
       *ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0) + derivativeNumber], y);
@@ -118,7 +116,8 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
 void siconos::modeling::LagrangianLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
-  std::cout << " C:\n" << jacobianhOver_q_view_ << "\n";
+  std::cout << " C:\n";
+  siconos::algebra::print(*jacobianhOver_q_view_);
   std::cout << " e: " << std::endl;
   if (eVector_view_)
     std::cout << eVector_view_ << "\n";

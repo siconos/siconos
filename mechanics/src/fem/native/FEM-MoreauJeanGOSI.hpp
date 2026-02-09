@@ -38,15 +38,6 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
   /** destructor */
   virtual ~MoreauJeanGOSI() noexcept = default;
 
-  /** initialization of the work vectors and matrices (properties) related to
-   *  one dynamical system on the graph and needed by the osi
-   *
-   *  \param t time of initialization
-   *  \param ds the dynamical system
-   */
-  virtual void initializeWorkVectorsForDS(
-      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
-
   siconos::algebra::SiconosVector& get_v_iter(
       std::vector<std::shared_ptr<algebra::SiconosVector>> ds_works) {
     return *ds_works[tools::enum_to_index(wk_ds::v_iter)];
@@ -55,21 +46,6 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
       std::vector<std::shared_ptr<algebra::SiconosVector>> ds_works) {
     return *ds_works[tools::enum_to_index(wk_ds::sigma_iter)];
   }
-
-  /** initialization of the work vectors and matrices (properties) related to
-   *  one interaction on the graph and needed by the osi
-   *
-   *  \param inter the interaction
-   *  \param interProp the properties on the graph
-   *  \param DSG the dynamical systems graph
-   */
-  virtual void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-      siconos::graphs::DynamicalSystemsGraph& DSG) override;
-
-  /** compute the initial state of the Newton loop.
-   */
-  void computeInitialNewtonState() override;
 
   /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */

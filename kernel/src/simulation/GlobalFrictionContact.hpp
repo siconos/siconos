@@ -107,19 +107,24 @@ class GlobalFrictionContact : public LinearOSNS {
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GFC3D_Driver _gfc_driver;
 
-  // GlobalFrictionContactProblem _numerics_problem;
+  /** update the rhs of the ns problem with nonsmooth laws contributions
+   *
+   *  @param indexSet set of active interactions
+   */
+  virtual void compute_nslaw_contribution(siconos::graphs::InteractionsGraph& indexSet);
+
  public:
   /** constructor (solver id and dimension)
    *
-   *  \param dimPb dimension (2D or 3D) of the friction-contact problem
-   *  \param numericsSolverId id of the solver to be used, optional,
+   *  @param dimPb dimension (2D or 3D) of the friction-contact problem
+   *  @param numericsSolverId id of the solver to be used, optional,
    *  default : SICONOS_GLOBAL_FRICTION_3D_NSGS
    */
   GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
 
   /** constructor from a pre-defined solver options set
    *
-   *  \param options the options set
+   *  @param options the options set
    */
   GlobalFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
@@ -129,19 +134,19 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** get the type of GlobalFrictionContact problem (2D or 3D)
    *
-   *  \return an int (2 or 3)
+   *  @return an int (2 or 3)
    */
   inline int getGlobalFrictionContactDim() const { return _contactProblemDim; }
 
   /** get dimension of the problem
    *
-   *  \return an unsigned ing
+   *  @return an unsigned ing
    */
   inline size_t getGlobalSizeOutput() const { return _sizeGlobalOutput; }
 
   /** get globalVelocities
    *
-   *  \return pointer on a siconos::algebra::SiconosVector
+   *  @return pointer on a siconos::algebra::SiconosVector
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities() const {
     return _globalVelocities;
@@ -149,7 +154,7 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** set globalVelocities to pointer newPtr
    *
-   *  \param newPtr the new vector
+   *  @param newPtr the new vector
    */
   inline void setGlobalVelocities(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _globalVelocities = newPtr;
@@ -157,13 +162,13 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** get a pointer to mu, the list of the friction coefficients
    *
-   *  \return pointer on a std::vector<double>
+   *  @return pointer on a std::vector<double>
    */
   inline std::shared_ptr<std::vector<double>> mu() const { return _mu; }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
    *
-   *  \return the friction coefficient for the ith contact
+   *  @return the friction coefficient for the ith contact
    */
   inline double getMu(unsigned int i) const { return (*_mu)[i]; }
 
@@ -174,22 +179,22 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** initialize the GlobalFrictionContact problem(compute topology ...)
    *
-   *  \param sim the simulation, owner of this OSNSPB
+   *  @param sim the simulation, owner of this OSNSPB
    */
   virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
-  /** \return the friction contact problem from Numerics
+  /** @return the friction contact problem from Numerics
    */
   std::shared_ptr<GlobalFrictionContactProblem> globalFrictionContactProblem();
 
-  // /** \return the friction contact problem from Numerics (raw ptr, do not f
+  // /** @return the friction contact problem from Numerics (raw ptr, do not f
   // ree)
   //  */
   // GlobalFrictionContactProblem* globalFrictionContactProblemPtr();
 
   /** solve a friction contact problem
    *
-   *  \return info solver information result
+   *  @return info solver information result
    */
   int solve();
   //  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
@@ -199,13 +204,13 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** Construction of the problem
    *
-   *  \param time current time
+   *  @param time current time
    */
   virtual bool preCompute(double time) override;
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *
-   *  \param time current time
+   *  @param time current time
    */
   virtual int compute(double time) override;
 

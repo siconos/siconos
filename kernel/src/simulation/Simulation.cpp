@@ -487,7 +487,7 @@ void siconos::simulation::Simulation::initializeInteraction(
   auto osi2Type = osi2.getType();
 
   // Check consistency of the OneStepIntegrator
-  // We assume that the osi of ds1 (osi1) is integrating the interaction (to be
+  // We assume that the osi of ds1 (osi1) is used for all DS of the interaction (to be
   // reworked for more general case)
   if (osi1Type != osi2Type) {
     THROW_EXCEPTION(

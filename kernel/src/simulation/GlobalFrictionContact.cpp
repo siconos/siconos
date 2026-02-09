@@ -22,11 +22,11 @@
 #include <chrono>
 #endif
 #include "Interaction.hpp"
-#include "LagrangianDS.hpp"
-#include "LagrangianSparseDS.hpp"
-#include "MohrCoulombPlasticityNSL.hpp"
+// #include "LagrangianDS.hpp"
+// #include "LagrangianSparseDS.hpp"
+// #include "MohrCoulombPlasticityNSL.hpp"
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
-#include "NewtonEulerDS.hpp"
+// #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
@@ -161,15 +161,11 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
     auto ds = DSG0.bundle(*dsi);
     auto ds_size = ds->dimension();
 
-    // OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
-    // siconos::integrators::IntegratorType osiType = Osi.getType();
     auto mjgosi = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
         DSG0.properties(DSG0.descriptor(ds)).osi);
     if (mjgosi) {
       auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-      if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
-          (std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) ||
-          (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
+      if ((std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds))) {
         auto& vfree = *ds_work_vectors[tools::enum_to_index(
             siconos::integrators::MoreauJeanGOSI::wk_ds::vfree)];
         _q->segment(offset, ds_size) = vfree.head(ds_size);
@@ -181,6 +177,45 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
 
     offset += ds_size;
   }
+}
+
+void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contribution(
+    siconos::graphs::InteractionsGraph& indexSet) {
+  if (_b->size() != _sizeOutput) _b->resize(_sizeOutput);
+  _b->setZero();
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
+    auto inter = indexSet.bundle(*ui);
+
+    if (auto nslaw = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+            inter->nonSmoothLaw()))
+      _mu->push_back(nslaw->mu());
+
+    // -- Dynamical systems of the current interaction
+    auto ds1 = indexSet.properties(*ui).source;
+    auto ds2 = indexSet.properties(*ui).target;
+
+    // We need to be sure that the integrators of these DS are MoreauJeanGOSI
+    auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+    auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi;
+    auto osi2 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
+        DSG0.properties(DSG0.descriptor(ds2)).osi);
+
+    if (auto mjgosi1 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi1)) {
+      assert(osi2);
+      mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
+    } else {
+      THROW_EXCEPTION(
+          "siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contribution:"
+          "only implemented for MoreauJeanGOSI integrators.")
+    }
+    auto& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
+        siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
+    auto pos = indexSet.properties(*ui).absolute_position;
+    auto sizeY = inter->dimension();
+    _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);
+  }
+  DEBUG_EXPR(siconos::algebra::print(*_b););
 }
 
 bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double time) {
@@ -281,47 +316,8 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 #endif
 
     // fill _b
-    if (_b->size() != _sizeOutput) _b->resize(_sizeOutput);
+    compute_nslaw_contribution(indexSet);
 
-    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-    for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
-      auto inter = indexSet.bundle(*ui);
-
-      // assert(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-      //        siconos::modeling::Type::NewtonImpactFrictionNSL);
-      if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-          siconos::modeling::Type::NewtonImpactFrictionNSL)
-        _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
-                           inter->nonSmoothLaw())
-                           ->mu());  // curious !!
-      // if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-      //     siconos::modeling::Type::MohrCoulombPlasticityNSL)
-      //     _mu->push_back(tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
-      //                      inter->nonSmoothLaw())
-      //                      ->phi()));
-
-      auto ds1 = indexSet.properties(*ui).source;
-      auto ds2 = indexSet.properties(*ui).target;
-      auto mjgosi1 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-          DSG0.properties(DSG0.descriptor(ds1)).osi);
-
-      if (mjgosi1 and std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-                          DSG0.properties(DSG0.descriptor(ds2)).osi)) {
-        // std::cout << "MoreauJeanGOSI case" << std::endl;
-        mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
-      } else {
-        THROW_EXCEPTION(
-            "siconos::nonsmooth_formulations::GlobalFrictionContact::computeq. Not yet "
-            "implemented for "
-            "the given Integrator type ");
-      }
-      auto& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
-          siconos::integrators::MoreauJeanGOSI::wk_inter::osnsp_rhs)];
-      auto pos = indexSet.properties(*ui).absolute_position;
-      auto sizeY = inter->dimension();
-      _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);
-    }
-    DEBUG_EXPR(siconos::algebra::print(*_b););
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();

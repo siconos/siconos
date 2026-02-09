@@ -40,6 +40,13 @@ class GlobalFrictionContact : public siconos::nonsmooth_formulations::GlobalFric
  protected:
   ACCEPT_SERIALIZATION(GlobalFrictionContact);
 
+  /** update the rhs of the ns problem with nonsmooth laws contributions
+   *
+   *  @param indexSet set of active interactions
+   */
+  virtual void compute_nslaw_contribution(
+      siconos::graphs::InteractionsGraph& indexSet) override;
+
  public:
   using siconos::nonsmooth_formulations::GlobalFrictionContact::GlobalFrictionContact;
 
