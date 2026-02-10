@@ -212,14 +212,15 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
       std::make_shared<siconos::algebra::SiconosVector>(sods->dimension());
 
   // Check dynamical system type
-  if (auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
     ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     // Update dynamical system components (for memory swap).
     lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
-  } else if (auto lsds = std::static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+  } else if (auto lsds =
+                 std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
     ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
         std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
     ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)] =
@@ -1148,10 +1149,8 @@ void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time) {
 
       //  VA <2016-04-19 Tue> We compute T to be consistent with the Jacobian
       //   at the beginning of the Newton iteration and not at the end
-      auto dsType = siconos::types::type_value(*ds);
-      if (dsType == siconos::modeling::Type::NewtonEulerDS) {
-        auto d = std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds);
-        d->computeT(d->q_read());
+      if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+        neds->computeT(neds->q_read());
       }
     }
   }
@@ -1710,12 +1709,8 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-    auto dsType = siconos::types::type_value(*ds);
     // 3 - Lagrangian Non Linear Systems
-    if (dsType == siconos::modeling::Type::LagrangianDS ||
-        dsType == siconos::modeling::Type::LagrangianLinearTIDS) {
-      // -- Convert the DS into a Lagrangian one.
-      auto lds = static_pointer_cast<siconos::modeling::LagrangianDS>(ds);
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       siconos::algebra::SiconosVector f_k_theta{lds->dimension()};
       siconos::algebra::SiconosVector v_k_theta{lds->dimension()};
       f_k_theta.setZero();
@@ -1741,10 +1736,8 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         cnt_ds++;
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
-    } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
-               dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
-      // -- Convert the DS into a Lagrangian one.
-      auto lds = static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds);
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       siconos::algebra::SiconosVector f_k_theta{lds->dimension()};
       siconos::algebra::SiconosVector v_k_theta{lds->dimension()};
       f_k_theta.setZero();
@@ -1769,14 +1762,10 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
         cnt_ds++ DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
-    } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
+    } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       DEBUG_PRINT("MoreauJeanOSI::computeWorkForces(), dsType == Type::NewtonEulerDS\n");
       // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) -
       // h*(1-_theta)*forces(ti,vi,qi) - pi+1
-
-      // -- Convert the DS into a NewtonEulerDS one.
-      auto neds = static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds);
-
       siconos::algebra::SiconosVector f_k_theta{neds->dimension()};
       siconos::algebra::SiconosVector v_k_theta{neds->dimension()};
 

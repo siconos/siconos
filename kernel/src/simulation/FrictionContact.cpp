@@ -17,11 +17,13 @@
  */
 #include "FrictionContact.hpp"
 
+#include <memory>
+
 #include "Interaction.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "Simulation.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb,
                                                                   int numericsSolverId)
@@ -77,9 +79,10 @@ void siconos::nonsmooth_formulations::FrictionContact::initialize(
     auto indexSet = simulation()->indexSet(indexSetLevel());
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-      _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
-                         indexSet->bundle(*ui)->nonSmoothLaw())
-                         ->mu());
+      auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+          indexSet->bundle(*ui)->nonSmoothLaw());
+      assert(nsl);
+      _mu->push_back(nsl->mu());
     }
   }
 }
@@ -89,9 +92,10 @@ void siconos::nonsmooth_formulations::FrictionContact::updateMu() {
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
-                       indexSet->bundle(*ui)->nonSmoothLaw())
-                       ->mu());
+    auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+        indexSet->bundle(*ui)->nonSmoothLaw());
+    assert(nsl);
+    _mu->push_back(nsl->mu());
   }
 }
 
@@ -118,7 +122,7 @@ int siconos::nonsmooth_formulations::FrictionContact::solve()
 }
 
 bool siconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw &nslaw) {
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);

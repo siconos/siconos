@@ -18,6 +18,7 @@
 #include "OSNSMatrix.hpp"
 
 #include <iostream>
+#include <memory>
 
 #include "BlockCSRMatrix.hpp"
 #include "BoundaryCondition.hpp"
@@ -177,9 +178,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
-      siconos::algebra::setBlock(
-          pos, pos, *indexSet.properties(*vi).block,
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(pos, pos, *indexSet.properties(*vi).block, *_M1);
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->rows(),
                    indexSet.properties(*vi).block->cols());
@@ -212,12 +211,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);
-      siconos::algebra::setBlock(
-          std::min(pos, col), std::max(pos, col), *indexSet.properties(*ei).upper_block,
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
-      siconos::algebra::setBlock(
-          std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block,
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(std::min(pos, col), std::max(pos, col),
+                                 *indexSet.properties(*ei).upper_block, *_M1);
+      siconos::algebra::setBlock(std::max(pos, col), std::min(pos, col),
+                                 *indexSet.properties(*ei).lower_block, *_M1);
     }
   } else if (_storageType == NM_SPARSE_BLOCK) {
     if (!_M2) {
@@ -364,9 +361,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
 
           auto osi = DSG.properties(*dsi).osi;
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
-          auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
-
-          // if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
+          auto sods = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+          assert(sods);
+          // if (auto mosi =
+          // dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
           //   iterationMatrixInverse = mosi->iterationMatrixInverse(sods, true);
           //} else
           if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
@@ -376,7 +374,6 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
             pos = DSG.properties(*dsi).absolute_position;
             siconos::algebra::fillTriplet(*iterationMatrixInverse, Mtriplet, pos, pos);
             DEBUG_PRINTF("pos = %u \n", pos);
-
           } else
             THROW_EXCEPTION(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "

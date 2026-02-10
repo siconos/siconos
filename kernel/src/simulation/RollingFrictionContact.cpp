@@ -17,6 +17,8 @@
  */
 #include "RollingFrictionContact.hpp"
 
+#include <memory>
+
 #include "Interaction.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
@@ -83,14 +85,11 @@ void siconos::nonsmooth_formulations::RollingFrictionContact::initialize(
     auto indexSet = simulation()->indexSet(indexSetLevel());
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-      _mu->push_back(
-          std::static_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
-              indexSet->bundle(*ui)->nonSmoothLaw())
-              ->mu());
-      _muR->push_back(
-          std::static_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
-              indexSet->bundle(*ui)->nonSmoothLaw())
-              ->muR());
+      auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
+          indexSet->bundle(*ui)->nonSmoothLaw());
+      assert(nsl);
+      _mu->push_back(nsl->mu());
+      _muR->push_back(nsl->muR());
     }
   }
 }
@@ -101,13 +100,11 @@ void siconos::nonsmooth_formulations::RollingFrictionContact::updateMu() {
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
-                       indexSet->bundle(*ui)->nonSmoothLaw())
-                       ->mu());
-    _muR->push_back(
-        std::static_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
-            indexSet->bundle(*ui)->nonSmoothLaw())
-            ->muR());
+    auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(
+        indexSet->bundle(*ui)->nonSmoothLaw());
+    assert(nsl);
+    _mu->push_back(nsl->mu());
+    _muR->push_back(nsl->muR());
   }
 }
 
@@ -134,7 +131,7 @@ int siconos::nonsmooth_formulations::RollingFrictionContact::solve(
 }
 
 bool siconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw &nslaw) {
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);

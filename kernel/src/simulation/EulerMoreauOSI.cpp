@@ -17,6 +17,8 @@
  */
 #include "EulerMoreauOSI.hpp"
 
+#include <memory>
+
 #include "BlockVector.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearR.hpp"
@@ -265,7 +267,8 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
   // Linear time-invariant system: W constant
   // if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
   if (fods->isTimeInvariant()) {
-    auto foltids = std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds);
+    auto foltids = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds);
+    assert(foltids);
     if (fods->hasMMatrix())
       *iterationMat = fods->MMatrix();
     else
@@ -1108,7 +1111,8 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
       *ds_vars[siconos::modeling::FirstOrderR::Rrr] += g_alpha;
 
       // compute the new g_alpha
-      forel->computeg(*ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
+      forel->computeg(*ds_vars[siconos::modeling::FirstOrderR::Xxx], time,
+                      *inter.lambda(level),
                       *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]);
     } else {
       inter.computeInput(time, level);

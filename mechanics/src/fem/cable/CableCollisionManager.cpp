@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "CableCollisionManager.h"
+#include <memory>
 
 #include "Cable2d3DR.hpp"
 #include "CableDS.hpp"
@@ -52,7 +53,8 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
         auto tangent = s->tangent();
 
         if (contact) {  // The interaction already exists
-          auto relation = std::static_pointer_cast<Cable2d3DR>(contact->relation());
+          auto relation = std::dynamic_pointer_cast<Cable2d3DR>(contact->relation());
+          assert(relation);
           relation->updateContactPoint(pc1, pc2, normal, tangent);
         } else {
           // create relation

@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
+
+#include <memory>
 #ifdef WITH_TIMER
 #include <chrono>
 #endif
@@ -431,7 +433,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
                relationType == siconos::modeling::RelationType::NewtonEuler) {
       // Applying boundary conditions
-      auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+      auto d = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+      assert(d);
       if (auto bc = d->boundaryConditions()) {
         for (auto itindex : bc->velocityIndices()) {
           leftInteractionBlock->col(itindex).setZero();
@@ -624,7 +627,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
              relationType2 == siconos::modeling::RelationType::NewtonEuler) {
     // Applying boundary conditions
     std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
-    auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+    auto d = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+    assert(d);
     if (d->boundaryConditions()) bc = d->boundaryConditions();
     if (bc) {
       for (auto itindex : bc->velocityIndices()) {

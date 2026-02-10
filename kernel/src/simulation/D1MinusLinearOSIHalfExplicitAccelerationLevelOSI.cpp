@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "D1MinusLinearOSI.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
@@ -700,15 +702,12 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
   assert(mainInteraction->relation());
 
   // only Lagrangian Systems
-  if (relationType == siconos::modeling::RelationType::Lagrangian) {
+  if (auto rel = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
+          mainInteraction->relation())) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
-    auto rel =
-        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
 
     assert(Xfree);
-    auto C =
-        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation())
-            ->jacobianhOver_q();
+    auto C = rel->jacobianhOver_q();
     siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
     DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -740,24 +739,21 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     }
 
     if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp) {
-      if (relationSubType == siconos::modeling::RelationSubType::
-                                 ScleronomousR)  // acceleration term involving Hessian matrix
-                                                 // of Relation with respect to degree is added
+      if (auto scler = std::dynamic_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+              inter->relation()))
+      // acceleration term involving Hessian matrix of Relation with respect to degree is added
       {
         DEBUG_PRINT(
             "siconos::integrators::D1MinusLinearOSI::computeFreeOutput. acceleration term "
             "involving Hessian matrix of Relation\n");
         DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
-        auto scler = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-            inter->relation());
         scler->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
         osnsp_rhs += *ID * scler->jacobianhOver_q_dot_X_qdot();
       }
       DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     }
-  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto ner =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation());
+  } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
+                 inter->relation())) {
     auto CT = ner->H_NE_prod_T();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);

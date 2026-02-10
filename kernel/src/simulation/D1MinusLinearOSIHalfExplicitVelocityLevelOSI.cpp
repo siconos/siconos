@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "D1MinusLinearOSI.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
@@ -664,9 +666,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   assert(mainInteraction->relation());
 
   // only Lagrangian Systems
-  if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    auto lagr =
-        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
+  if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
+          mainInteraction->relation())) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
     auto C = lagr->jacobianhOver_q();
 
@@ -695,9 +696,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
     DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
   }
   /*Newton-Euler */
-  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto ner =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation());
+  else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
+               mainInteraction->relation())) {
     auto CT = ner->H_NE_prod_T();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);

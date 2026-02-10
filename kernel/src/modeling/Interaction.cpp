@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include <iostream>
+#include <memory>
 
 #include "BlockVector.hpp"
 #include "ComplementarityConditionNSL.hpp"
@@ -522,22 +523,15 @@ void siconos::modeling::Interaction::computeInput(double time, unsigned int leve
 
 const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInteractionBlock()
     const {
-  auto relationType = relation()->getType();
-
-  if (relationType == RelationType::Lagrangian) {
-    auto r = std::static_pointer_cast<LagrangianR>(relation());
-    return r->jacobianhOver_q();
-  } else if (relationType == RelationType::NewtonEuler) {
-    auto r = std::static_pointer_cast<NewtonEulerR>(relation());
-    return r->H_NE_prod_T();
-  } else if (relationType == RelationType::FirstOrder) {
-    auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
+  if (auto lagr = std::dynamic_pointer_cast<LagrangianR>(relation())) {
+    return lagr->jacobianhOver_q();
+  } else if (auto ner = std::dynamic_pointer_cast<NewtonEulerR>(relation())) {
+    return ner->H_NE_prod_T();
+  } else if (auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation())) {
     return forel->jacobianhOver_state();
   } else {
     THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getLeftInteractionBlock, not yet implemented for "
-        "relations of type " +
-        std::to_string(static_cast<std::underlying_type<RelationType>::type>(relationType)));
+        "siconos::modeling::Interaction::getLeftInteractionBlock, unknown relation type.");
   }
 }
 
@@ -583,15 +577,8 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   DEBUG_PRINTF("pos = %i\n", pos);
 
   if (pos == 6) pos = pos + 1;
-
-  // Type::Siconos dsType = Type::value(*ds);
-  // if (dsType != Type::NewtonEulerDS)
-  //   THROW_EXCEPTION("siconos::modeling::Interaction::getLeftInteractionBlockForDSForProject-
-  //   ds is not from NewtonEulerDS.");
-
-  assert(relation()->getType() == RelationType::NewtonEuler);
-
-  auto neR = std::static_pointer_cast<NewtonEulerR>(relation());
+  auto neR = std::dynamic_pointer_cast<NewtonEulerR>(relation());
+  assert(neR);
   // proj_with_q originalMatrix = r->jachqProj();
   auto originalMatrix = neR->H_NE();
 

@@ -19,6 +19,7 @@
 #include "BlockCSRMatrix.hpp"
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <memory>
 
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
@@ -200,8 +201,9 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         }
       }
     }
-    auto rel = std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
+    auto rel = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
         indexSet.bundle(*vi)->relation());
+    assert(rel);
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
         const_cast<double*>(rel->H_NE_prod_T().data());
 

@@ -17,6 +17,8 @@
  */
 #include "EventDriven.hpp"
 
+#include <memory>
+
 #include "EventsManager.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
@@ -529,7 +531,8 @@ void siconos::simulation::EventDriven::computeg(
   auto indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0;
   std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, yddot, lambda;
-  auto lsodar = std::static_pointer_cast<siconos::integrators::LsodarOSI>(osi);
+  auto lsodar = std::dynamic_pointer_cast<siconos::integrators::LsodarOSI>(osi);
+  assert(lsodar);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction
   // of indexSet[2]
   assert(*sizeOfX >= 0);
@@ -803,32 +806,26 @@ double siconos::simulation::EventDriven::computeResiduConstraints() {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   double _maxResiduGap = 0.0;
   for (auto itosi : *_allOSI) {
-    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
-      auto osi_NewMark =
-          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      bool _flag = osi_NewMark->handleVelocityConstraints();
-      for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
-        auto& inter = *indexSet2->bundle(*ui);
-        if (!_flag)  // constraints at the position level
-        {
-          inter.computeOutput(t, 0);  // compute y[0] for the interaction at the end time
-          _y = (*inter.y(0))(0);
-        } else  // constraints at the velocity level
-        {
-          inter.computeOutput(t, 1);  // compute y[1] for the interaction at the end time
-          _y = (*inter.y(1))(0);
-        }
+    auto osi_NewMark = std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
+    assert(osi_NewMark);
 
-        if (_maxResiduGap < abs(_y)) {
-          _maxResiduGap = abs(_y);
-        }
-        DEBUG_PRINTF("Constraint residu: =  %e \n", _y);
+    bool _flag = osi_NewMark->handleVelocityConstraints();
+    for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
+      auto& inter = *indexSet2->bundle(*ui);
+      if (!_flag)  // constraints at the position level
+      {
+        inter.computeOutput(t, 0);  // compute y[0] for the interaction at the end time
+        _y = (*inter.y(0))(0);
+      } else  // constraints at the velocity level
+      {
+        inter.computeOutput(t, 1);  // compute y[1] for the interaction at the end time
+        _y = (*inter.y(1))(0);
       }
-    } else {
-      THROW_EXCEPTION(
-          "In siconos::simulation::EventDriven::predictionNewtonIteration, the "
-          "current OSI "
-          "must be NewMarkAlpha scheme!!!");
+
+      if (_maxResiduGap < abs(_y)) {
+        _maxResiduGap = abs(_y);
+      }
+      DEBUG_PRINTF("Constraint residu: =  %e \n", _y);
     }
   }
 
@@ -887,16 +884,9 @@ bool siconos::simulation::EventDriven::newtonCheckConvergence(double _tol) {
 void siconos::simulation::EventDriven::predictionNewtonIteration() {
   // Prediction of the state for all Dynamical Systems before Newton iteration
   for (auto itosi : *_allOSI) {
-    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
-      auto osi_NewMark =
-          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      osi_NewMark->prediction();
-    } else {
-      THROW_EXCEPTION(
-          "In siconos::simulation::EventDriven::predictionNewtonIteration, the "
-          "current OSI "
-          "must be NewMarkAlpha scheme!!!");
-    }
+    auto osi_NewMark = std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
+    assert(osi_NewMark);
+    osi_NewMark->prediction();
   }
   // Prediction of the output and lambda for all Interactions before Newton
   // iteration
@@ -918,16 +908,9 @@ void siconos::simulation::EventDriven::correctionNewtonIteration() {
   _nsds->updateInput(nextTime(), 2);
   // Correction
   for (auto itosi : *_allOSI) {
-    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
-      auto osi_NewMark =
-          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      osi_NewMark->correction();
-    } else {
-      THROW_EXCEPTION(
-          "In siconos::simulation::EventDriven::correctionNewtonIteration, the "
-          "current OSI "
-          "must be NewMarkAlpha scheme!!!");
-    }
+    auto osi_NewMark = std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
+    assert(osi_NewMark);
+    osi_NewMark->correction();
   }
 }
 
@@ -1079,16 +1062,9 @@ void siconos::simulation::EventDriven::LocalizeFirstEvent() {
   // flag _istate = 3 or 4 Compute the coefficients of the dense output
   // polynomial for all DSs
   for (auto itosi : *_allOSI) {
-    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
-      auto osi_NewMark =
-          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      osi_NewMark->prepareEventLocalization();
-    } else {
-      THROW_EXCEPTION(
-          "In siconos::simulation::EventDriven::LocalizeFirstEvent, the "
-          "current OSI must be "
-          "NewMarkAlpha scheme!!!");
-    }
+    auto osi_NewMark = std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
+    assert(osi_NewMark);
+    osi_NewMark->prepareEventLocalization();
   }
   //
   double t_a = startingTime();
@@ -1103,11 +1079,10 @@ void siconos::simulation::EventDriven::LocalizeFirstEvent() {
     // set t_i as the current time
     // Generate dense output for all DSs at the time t_i
     for (auto itosi : *_allOSI) {
-      if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
-        auto osi_NewMark =
-            std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-        osi_NewMark->DenseOutputallDSs(t_i);
-      }
+      auto osi_NewMark =
+          std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
+      assert(osi_NewMark);
+      osi_NewMark->DenseOutputallDSs(t_i);
     }
     // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute
     // y[0] for all interactions

@@ -108,9 +108,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       auto inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position_proj;
       assert(indexSet.blockProj[*vi]);
-      siconos::algebra::setBlock(
-          pos, pos, *(indexSet.blockProj[*vi]),
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(pos, pos, *(indexSet.blockProj[*vi]), *_M1);
     }
 
     siconos::graphs::InteractionsGraph::EIterator ei, eiend;
@@ -134,13 +132,11 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->rows(),
                    (indexSet.upper_blockProj[*ei])->cols());
 
-      siconos::algebra::setBlock(
-          std::min(pos, col), std::max(pos, col), *(indexSet.upper_blockProj[*ei]),
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(std::min(pos, col), std::max(pos, col),
+                                 *(indexSet.upper_blockProj[*ei]), *_M1);
 
-      siconos::algebra::setBlock(
-          std::max(pos, col), std::min(pos, col), *(indexSet.lower_blockProj[*ei]),
-          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(std::max(pos, col), std::min(pos, col),
+                                 *(indexSet.lower_blockProj[*ei]), *_M1);
     }
   } else  // if _storageType == NM_SPARSE_BLOCK
   {

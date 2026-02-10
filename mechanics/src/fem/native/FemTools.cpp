@@ -150,12 +150,14 @@ void siconos::mechanics::fem::ContactDetection::updateInteractions(
 
       std::shared_ptr<siconos::algebra::SiconosVector> pc2;
       if (contact_frame_dimension_ == 2) {
-        auto r = std::static_pointer_cast<siconos::mechanics::fem::NodeFem2d2DR>(
+        auto r = std::dynamic_pointer_cast<siconos::mechanics::fem::NodeFem2d2DR>(
             cn->inter_->relation());
+        assert(r);
         pc2 = r->pc2();
       } else {
-        auto r = std::static_pointer_cast<siconos::mechanics::fem::NodeFem1d2DR>(
+        auto r = std::dynamic_pointer_cast<siconos::mechanics::fem::NodeFem1d2DR>(
             cn->inter_->relation());
+        assert(r);
         pc2 = r->pc2();
       }
 

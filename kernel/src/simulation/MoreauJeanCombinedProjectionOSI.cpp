@@ -17,6 +17,8 @@
  */
 #include "MoreauJeanCombinedProjectionOSI.hpp"
 
+#include <memory>
+
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
@@ -94,31 +96,32 @@ void siconos::integrators::MoreauJeanCombinedProjectionOSI::
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     if (is_ds1_integrated_by_this_osi) {
       // SecondOrderDS to include Lagrangian and LagrangianSparse
-      auto& lds1 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
+      auto lds1 = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
+      assert(lds1);
       // inter.link[p0][0] = ds1->p[0]
       inter.append_to_dynamical_systems_variables(siconos::modeling::LagrangianR::ds_var::p0,
-                                                  0, lds1.p(0));
+                                                  0, lds1->p(0));
     }
     if (is_ds2_integrated_by_this_osi) {
-      auto& lds2 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
+      auto lds2 = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
       // inter.link[p0][1] = ds2->p[0]
       inter.append_to_dynamical_systems_variables(siconos::modeling::LagrangianR::ds_var::p0,
-                                                  1, lds2.p(0));
+                                                  1, lds2->p(0));
     }
   }
 
   else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     if (is_ds1_integrated_by_this_osi) {
-      auto& lds1 = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds1);
+      auto lds1 = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds1);
       // inter.link[p0][0] = ds1->p[0]
       inter.append_to_dynamical_systems_variables(siconos::modeling::NewtonEulerR::ds_var::p0,
-                                                  0, lds1.p(0));
+                                                  0, lds1->p(0));
     }
     if (is_ds2_integrated_by_this_osi) {
-      auto& lds2 = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds2);
+      auto lds2 = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds2);
       // inter.link[p0][1] = ds2->p[0]
       inter.append_to_dynamical_systems_variables(siconos::modeling::NewtonEulerR::ds_var::p0,
-                                                  1, lds2.p(0));
+                                                  1, lds2->p(0));
     }
   }
   DEBUG_END(

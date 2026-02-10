@@ -17,6 +17,8 @@
  */
 #include "EventsManager.hpp"
 
+#include <memory>
+
 #include "Event.hpp"
 #include "SiconosConst.hpp"  // siconos::internal::GAPLIMIT_DEFAULT
 #include "SiconosException.hpp"
@@ -93,18 +95,10 @@ double siconos::simulation::EventsManager::getTkp3() const {
 
 void siconos::simulation::EventsManager::noSaveInMemory(const Simulation& sim) {
   for (auto& it : _events) {
-    if (it->getType() == EventType::TD) {
-      static_pointer_cast<TimeDiscretisationEvent>(it)->noSaveInMemory();
+    if (auto event = std::dynamic_pointer_cast<TimeDiscretisationEvent>(it)) {
+      event->noSaveInMemory();
     }
   }
-  //   Event& ev = *it;
-  //   if (ev.getType() == EventType::TD) {
-  //     it =
-  //     std::make_shared<TimeDiscretisationEventNoSaveInMemory>(ev.getDoubleTimeOfEvent(),
-  //                                                                  0);
-  //     it->setTimeDiscretisation(ev.timeDiscretisation());
-  //   }
-  // }
 }
 
 void siconos::simulation::EventsManager::preUpdate(Simulation& sim) {
@@ -201,16 +195,18 @@ void siconos::simulation::EventsManager::update(Simulation& sim) {
   // delete last event, since we have processed one
   auto event0Type = _events[0]->getType();
   // reschedule a TD event if needed
-  if (event0Type == EventType::TD && _k != 0) {
-    // this checks whether the next time instant is less than T or not
-    // if it isn't then tkp1 is a NaN, in which case we don't reschedule the event
-    // and the simulation will stop
-    // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
-    // run until T
-    double tkp2 = getTkp2();
-    std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k + 2);
-    if (!std::isnan(tkp2)) {
-      insertEv(_events[0]);
+  if (auto event = std::dynamic_pointer_cast<TimeDiscretisationEvent>(_events[0])) {
+    if (_k != 0) {
+      // this checks whether the next time instant is less than T or not
+      // if it isn't then tkp1 is a NaN, in which case we don't reschedule the event
+      // and the simulation will stop
+      // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
+      // run until T
+      double tkp2 = getTkp2();
+      event->update(_k + 2);
+      if (!std::isnan(tkp2)) {
+        insertEv(_events[0]);
+      }
     }
   }
   // reschedule if needed
