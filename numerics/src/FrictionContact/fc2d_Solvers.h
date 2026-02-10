@@ -135,6 +135,19 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, double* z,
                                              double* w, int* info, SolverOptions* options);
 
+/**
+     Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
+   permutation used by parallel solvers.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
+                      SolverOptions* options);
+
 void test_solver(FrictionContactProblem* problem, double* z, double* w, int* info,
                  SolverOptions* options);
 

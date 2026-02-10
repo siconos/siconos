@@ -139,11 +139,14 @@ static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOpt
 
 static int determine_convergence_with_full_final(FrictionContactProblem* problem,
                                                  SolverOptions* options, double* reaction,
-                                                 double* velocity, double* tolerance,
-                                                 double norm_q, double error,
-                                                 unsigned int iter) {
+                                                 double* device_reaction, double* velocity,
+                                                 double* tolerance, double norm_q,
+                                                 double error, unsigned int iter) {
   int has_not_converged = 1;
   if (error < *tolerance) {
+    // Copy z back to host
+    cudaMemcpy(reaction, device_reaction, (2 * problem->numberOfContacts) * sizeof(double),
+               cudaMemcpyDeviceToHost);
     has_not_converged = 0;
     numerics_printf(
         "-- FC2D - NSGS - Iteration %i "
@@ -152,6 +155,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
 
     double absolute_error = calculateFullErrorFinal(
         problem, options, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q);
+
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
       *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
       assert(*tolerance > 0.0 && "tolerance has to be positive");
@@ -195,21 +199,6 @@ static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
     }
   }
   return diagonal_block_determinant;
-}
-
-/* Set diagonal blocks to 0.
- * We could also try to completely remove them.
- */
-static void remove_diagonal_blocks(FrictionContactProblem* problem) {
-  unsigned int nc = problem->numberOfContacts;
-  double* block;
-  int diagPos;
-
-  for (unsigned int i = 0; i < nc; ++i) {
-    diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
-    block = problem->M->matrix1->block[diagPos];
-    for (int j = 0; j < 4; j++) block[j] = 0.0;
-  }
 }
 
 /* CUDA kernel to solve local problems,
@@ -394,10 +383,6 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   // printf("time extracting diagonal + determinants: %e\n", time);
   // time = omp_get_wtime();
 
-  // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR
-  // conversion, unless the conversion function checks for 0 elements
-  remove_diagonal_blocks(problem);  // set diagonal blocks of problem->M->matrix1 to 0
-
   // Create an array storing, for each color, the row offsets of the corresponding CSR
   // submatrix
   int* h_all_RowOffsets = (int*)malloc((nc + n_colors) * sizeof(int));
@@ -437,11 +422,21 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   double* h_all_Values = (double*)malloc(
       4 * nbblocks * sizeof(double));  // to store all elements in a contiguous array
   double* current_block;
+  int ii = 0;
+  int diagPos = SBM_diagonal_block_index(SBM_permuted, ii);
 
   for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++) {
-    current_block = problem->M->matrix1->block[blockNum];
-    for (unsigned int j = 0; j < 4; j++) {
-      h_all_Values[blockNum * 4 + j] = current_block[j];
+    if (blockNum == diagPos) {
+      for (unsigned int j = 0; j < 4; j++) {
+        h_all_Values[blockNum * 4 + j] = 0;
+      }
+      ii++;
+      diagPos = SBM_diagonal_block_index(SBM_permuted, ii);
+    } else {
+      current_block = SBM_permuted->block[blockNum];
+      for (unsigned int j = 0; j < 4; j++) {
+        h_all_Values[blockNum * 4 + j] = current_block[j];
+      }
     }
   }
 
@@ -710,7 +705,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
         } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
           has_not_converged = determine_convergence_with_full_final(
-              problem, options, z, w, &tolerance, norm_q, error, iter);
+              problem, options, z, d_z, w, &tolerance, norm_q, error, iter);
         }
       }
 
@@ -726,6 +721,10 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
 
   // Copy z back to host
   CHECK_CUDA(cudaMemcpy(z, d_z, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost))
+
+  /* If we are using SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT, then w has never been
+     updated. This is the same behavior as fc2d_nsgs, which is a bit weird.
+  */
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==

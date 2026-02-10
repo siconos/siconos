@@ -138,11 +138,14 @@ static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOpt
 
 static int determine_convergence_with_full_final(FrictionContactProblem* problem,
                                                  SolverOptions* options, double* reaction,
-                                                 double* velocity, double* tolerance,
-                                                 double norm_q, double error,
-                                                 unsigned int iter) {
+                                                 double* device_reaction, double* velocity,
+                                                 double* tolerance, double norm_q,
+                                                 double error, unsigned int iter) {
   int has_not_converged = 1;
   if (error < *tolerance) {
+    // Copy z back to host
+    cudaMemcpy(reaction, device_reaction, (2 * problem->numberOfContacts) * sizeof(double),
+               cudaMemcpyDeviceToHost);
     has_not_converged = 0;
     numerics_printf(
         "-- FC2D - NSGS - Iteration %i "
@@ -194,21 +197,6 @@ static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
     }
   }
   return diagonal_block_determinant;
-}
-
-/* Set diagonal blocks to 0.
- * We could also try to completely remove them.
- */
-static void remove_diagonal_blocks(FrictionContactProblem* problem) {
-  unsigned int nc = problem->numberOfContacts;
-  double* block;
-  int diagPos;
-
-  for (unsigned int i = 0; i < nc; ++i) {
-    diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
-    block = problem->M->matrix1->block[diagPos];
-    for (int j = 0; j < 4; j++) block[j] = 0.0;
-  }
 }
 
 /* CUDA kernel to solve local problems,
@@ -330,6 +318,9 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // Initialize cusparse
   cusparseHandle_t handle = NULL;
   CHECK_CUSPARSE(cusparseCreate(&handle))
+  cudaStream_t stream;
+  CHECK_CUDA(cudaStreamCreate(&stream));
+  CHECK_CUSPARSE(cusparseSetStream(handle, stream));
   // int cusparse_version = -1;
   // CHECK_CUSPARSE( cusparseGetVersion(handle, &cusparse_version) )
   // printf("cusparse version: %d\n", cusparse_version);
@@ -393,13 +384,23 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // printf("time extracting diagonal + determinants: %e\n", time);
   // time = omp_get_wtime();
 
+  SparseBlockStructuredMatrix* SBM_permuted_with_diag = SBM_new();
+  SBM_copy(SBM_permuted, SBM_permuted_with_diag, 1);
+  problem->M->matrix1 = SBM_permuted_with_diag;
+
   // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR
   // conversion, unless the conversion function checks for 0 elements
-  remove_diagonal_blocks(problem);  // set diagonal blocks of problem->M->matrix1 to 0
+  double* block;
+  int diagPos;
+  for (unsigned int i = 0; i < nc; ++i) {
+    diagPos = SBM_diagonal_block_index(SBM_permuted, i);
+    block = SBM_permuted->block[diagPos];
+    for (int j = 0; j < 4; j++) block[j] = 0.0;
+  }
 
   CSparseMatrix* SBM_permuted_csr_nodiag = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
-  size_t res = SBM_to_sparse_init_memory(problem->M->matrix1, SBM_permuted_csr_nodiag);
-  res = SBM_to_sparse(problem->M->matrix1, SBM_permuted_csr_nodiag);
+  size_t res = SBM_to_sparse_init_memory(SBM_permuted, SBM_permuted_csr_nodiag);
+  res = SBM_to_sparse(SBM_permuted, SBM_permuted_csr_nodiag);
   /* if (res != 0) {
     printf("Error converting SBM to CSparse.\n");
     return;
@@ -729,6 +730,10 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
     double* d_sumP2 = NULL;
     double* d_sumErr2 = NULL;
 
+    cudaGraph_t graph;
+    cudaGraphExec_t instance;
+    bool graphCreated = false;
+
     CHECK_CUDA(cudaMalloc(&d_sumP2, sizeof(double)))
     CHECK_CUDA(cudaMalloc(&d_sumErr2, sizeof(double)))
 
@@ -736,11 +741,46 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
     CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
 
     while ((iter < itermax) && has_not_converged) {
+      if (!graphCreated) {
+        // 1. Start Capture
+        CHECK_CUDA(cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal));
+
+        // The "Work" to be recorded
+        CHECK_CUDA(cudaMemsetAsync(d_sumP2, 0, sizeof(double), stream));
+        CHECK_CUDA(cudaMemsetAsync(d_sumErr2, 0, sizeof(double), stream));
+
+        for (size_t color = 0; color < n_colors; color++) {
+          int rangeSize = sum_sizes[color + 1] - sum_sizes[color];
+          int threadsPerBlock = 256;
+          int blocks = (rangeSize + threadsPerBlock - 1) / threadsPerBlock;
+          size_t shmemSize = 2 * threadsPerBlock * sizeof(double);
+
+          // cuSPARSE calls are capture-friendly
+          CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
+                                      all_cusparse_csrmat[color], vec_z, &beta,
+                                      all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT,
+                                      d_all_Buffer[color]));
+
+          fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize,
+                                                      stream>>>(
+              d_diagonal_blocks, d_determinants, d_q_new, d_q_const, d_mu, d_z, d_sumP2,
+              d_sumErr2, sum_sizes[color], sum_sizes[color + 1]);
+        }
+
+        // 2. End Capture and Instantiate
+        CHECK_CUDA(cudaStreamEndCapture(stream, &graph));
+        CHECK_CUDA(cudaGraphInstantiate(&instance, graph, NULL, NULL, 0));
+        graphCreated = true;
+      }
+
+      // 3. Execute the Graph
+      CHECK_CUDA(cudaGraphLaunch(instance, stream));
+
       // Set local problems q to q
       // CHECK_CUDA(
       //    cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double),
       //    cudaMemcpyDeviceToDevice))
-      CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
+      /* CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
       CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
 
       for (size_t color = 0; color < n_colors; color++) {
@@ -758,7 +798,7 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
         fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize>>>(
             d_diagonal_blocks, d_determinants, d_q_new, d_q_const, d_mu, d_z, d_sumP2,
             d_sumErr2, sum_sizes[color], sum_sizes[color + 1]);
-      }
+      } */
 
       if (iter % 100 == 0 || iter == itermax - 1) {
         CHECK_CUDA(
@@ -775,7 +815,7 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
         } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
           has_not_converged = determine_convergence_with_full_final(
-              problem, options, z, w, &tolerance, norm_q, error, iter);
+              problem, options, z, d_z, w, &tolerance, norm_q, error, iter);
         }
       }
 
@@ -791,6 +831,10 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
 
   // Copy z back to host
   CHECK_CUDA(cudaMemcpy(z, d_z, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost))
+
+  /* If we are using SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT, then w has never been
+   updated. This is the same behavior as fc2d_nsgs, which is a bit weird.
+  */
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -865,4 +909,6 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
   CHECK_CUDA(cudaFree(d_determinants))
   CHECK_CUDA(cudaFree(d_mu))
   CHECK_CUDA(cudaFree(d_q_const))
+
+  // Free other stuff
 }
