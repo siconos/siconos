@@ -19,13 +19,12 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 
-#include <siconos/kernel/LagrangianScleronomousR.hpp>
-
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianLinearTIR.hpp"
 #include "LagrangianR.hpp"
+#include "LagrangianScleronomousR.hpp"
 #include "NewtonEulerR.hpp"
 
 namespace py = pybind11;
