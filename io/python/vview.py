@@ -373,35 +373,35 @@ class VViewOptions(object):
             self.usage()
             exit(1)
 
-def display(self):
-    display_str = f"""[io.VViewOptions] Display vview options:
-        min_time : {self.min_time}
-        max_time : {self.max_time}
-        cf_disable : {self.cf_disable}
-        cf_scale_factor : {self.cf_scale_factor}
-        normalcone_ratio : {self.normalcone_ratio}
-        time_scale_factor : {self.time_scale_factor}
-        advance_by_time : {self.advance_by_time}
-        frames_per_second : {self.frames_per_second}
-        imr : {self.imr}
-        depth_peeling : {self.depth_peeling}
-        maximum_number_of_peels : {self.maximum_number_of_peels}
-        occlusion_ratio : {self.occlusion_ratio}
-        offscreen : {self.offscreen}
-        zoom : {self.zoom}
-        global_filter : {self.global_filter}
-        view_as_glyphs : {self.view_as_glyphs}
-        glyphs_ratio : {self.glyphs_ratio}
-        initial_camera : {self.initial_camera}
-        visible_mode : {self.visible_mode}
-        export : {self.export}
-        gen_para_script : {self.gen_para_script}
-        with_edges : {self.with_edges}
-        with_random_color : {self.with_random_color}
-        with_charts : {self.with_charts}
-        depth_2d : {self.depth_2d}
-        verbose : {self.verbose}"""
-    print(display_str)
+    def display(self):
+        display_str = f"""[io.VViewOptions] Display vview options:
+            min_time : {self.min_time}
+            max_time : {self.max_time}
+            cf_disable : {self.cf_disable}
+            cf_scale_factor : {self.cf_scale_factor}
+            normalcone_ratio : {self.normalcone_ratio}
+            time_scale_factor : {self.time_scale_factor}
+            advance_by_time : {self.advance_by_time}
+            frames_per_second : {self.frames_per_second}
+            imr : {self.imr}
+            depth_peeling : {self.depth_peeling}
+            maximum_number_of_peels : {self.maximum_number_of_peels}
+            occlusion_ratio : {self.occlusion_ratio}
+            offscreen : {self.offscreen}
+            zoom : {self.zoom}
+            global_filter : {self.global_filter}
+            view_as_glyphs : {self.view_as_glyphs}
+            glyphs_ratio : {self.glyphs_ratio}
+            initial_camera : {self.initial_camera}
+            visible_mode : {self.visible_mode}
+            export : {self.export}
+            gen_para_script : {self.gen_para_script}
+            with_edges : {self.with_edges}
+            with_random_color : {self.with_random_color}
+            with_charts : {self.with_charts}
+            depth_2d : {self.depth_2d}
+            verbose : {self.verbose}"""
+        print(display_str)
 
 class VExportOptions(VViewOptions):
     def __init__(self):
@@ -1223,29 +1223,34 @@ class IOReader(VTKPythonAlgorithmBase):
 
         try:
             if self._with_contact_forces:
+                # get the number of time step with nonempty cf_data
                 ncfindices = len(self._cf_indices)
-                id_t_cf = min(
-                    numpy.searchsorted(self._cf_times, t, side="right"), ncfindices - 1
-                )
+
+                # get the indices of entries that corresponds to a given time
+                id_t_cf = numpy.searchsorted(self._cf_times, t, side="right")
+
+                # special treatment for the time after the last entry in cf_times
+                after_last_time_cf = (id_t_cf == ncfindices)
+
                 # Check the duration between t and last impact.
                 # If it is superior to current time step, we consider there
                 # is no contact (rebound).
                 # The current time step is the max between slider timestep
                 # and simulation timestep
                 ctimestep = max(self.timestep, self._avg_timestep)
+
                 if id_t_cf > 0 and abs(t - self._cf_times[id_t_cf - 1]) <= ctimestep:
-                    if id_t_cf < ncfindices - 1:
+                    if not after_last_time_cf:
                         self._id_t_m_cf = list(
                             range(
                                 self._cf_indices[id_t_cf - 1], self._cf_indices[id_t_cf]
                             )
                         )
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
-
+                        #self._cf_time = self._cf_times[id_t_cf]
                     else:
-                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf] :, :]
-
-                    self._cf_time = self._cf_times[id_t_cf]
+                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf-1] :, :]
+                        #self._cf_time = self._cf_times[id_t_cf-1]
 
                     vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
                     vtk_cf_data.SetName("cf_data")
@@ -2047,21 +2052,21 @@ class VView(object):
             elif primitive == "Capsule":
                 sphere1 = vtk.vtkSphereSource()
                 sphere1.SetRadius(attrs[0])
-                sphere1.SetCenter(0, attrs[1] / 2, 0)
+                sphere1.SetCenter(0, attrs[1] / 4., 0)
                 sphere1.SetThetaResolution(15)
                 sphere1.SetPhiResolution(15)
                 sphere1.Update()
 
                 sphere2 = vtk.vtkSphereSource()
                 sphere2.SetRadius(attrs[0])
-                sphere2.SetCenter(0, -attrs[1] / 2, 0)
+                sphere2.SetCenter(0, -attrs[1] / 4., 0)
                 sphere2.SetThetaResolution(15)
                 sphere2.SetPhiResolution(15)
                 sphere2.Update()
 
                 cylinder = vtk.vtkCylinderSource()
                 cylinder.SetRadius(attrs[0])
-                cylinder.SetHeight(attrs[1])
+                cylinder.SetHeight(attrs[1]/2.)
                 cylinder.SetResolution(15)
                 cylinder.Update()
 
