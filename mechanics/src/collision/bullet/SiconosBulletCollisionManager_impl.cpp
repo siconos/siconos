@@ -475,7 +475,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     double m = cone->outsideMargin();
 
     double radius = (cone->radius() + m) * _options->worldScale;
-    double length = (cone->length() / 2 + m) * _options->worldScale;
+    double length = (cone->length() + m) * _options->worldScale;
 
     assert(radius > 0 && length > 0);
 
@@ -523,7 +523,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     double m = capsule->outsideMargin();
 
     double radius = (capsule->radius() + m) * _options->worldScale;
-    double length = (capsule->length() / 2 + m) * _options->worldScale;
+    double length = (capsule->length() + m) * _options->worldScale;
 
     assert(radius > 0 && length > 0);
 
