@@ -311,10 +311,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     // btSphereShape has an internal margin
     btsphere->setMargin(sphere->insideMargin() * _options->worldScale);
 #endif
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
-    if (record->ds && rbds->useContactorInertia()) {
-      updateContactorInertia(rbds, btsphere);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) {
+        updateContactorInertia(rbds, btsphere);
+      }
     }
 
     if (record->btobject->getBroadphaseHandle()) {
@@ -382,10 +382,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     btbox->setLocalScaling(btVector3(sx, sy, sz));
     btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options->worldScale);
 
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
-
-    if (record->ds && rbds->useContactorInertia()) updateContactorInertia(rbds, btbox);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) updateContactorInertia(rbds, btbox);
+    }
 
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
@@ -432,10 +431,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
 
     btcyl->setLocalScaling(btVector3(radius, length, radius));
     btcyl->setMargin((cyl->insideMargin() + cyl->outsideMargin()) * _options->worldScale);
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
 
-    if (record->ds && rbds->useContactorInertia()) updateContactorInertia(rbds, btcyl);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) updateContactorInertia(rbds, btcyl);
+    }
 
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
@@ -482,10 +481,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
 
     btcone->setLocalScaling(btVector3(radius, length, radius));
     btcone->setMargin((cone->insideMargin() + cone->outsideMargin()) * _options->worldScale);
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
-    if (record->ds && rbds->useContactorInertia()) updateContactorInertia(rbds, btcone);
-
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) updateContactorInertia(rbds, btcone);
+    }
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
@@ -532,9 +530,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     btcapsule->setLocalScaling(btVector3(radius, length, radius));
     btcapsule->setMargin((capsule->insideMargin() + capsule->outsideMargin()) *
                          _options->worldScale);
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
-    if (record->ds && rbds->useContactorInertia()) updateContactorInertia(rbds, btcapsule);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) updateContactorInertia(rbds, btcapsule);
+    }
 
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
@@ -620,10 +618,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     // TODO
     // btbox->setLocalScaling(btVector3(sx, sy, sz));
     btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options->worldScale);
-    auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
-    assert(rbds);
-
-    if (record->ds && rbds->useContactorInertia()) updateContactorInertia(rbds, btch);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
+      if (rbds->useContactorInertia()) updateContactorInertia(rbds, btch);
+    }
 
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
@@ -912,11 +909,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     btconvex2d->setMargin((disk->insideMargin() + disk->outsideMargin()) *
                           _options->worldScale);
 
-    auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds);
-    assert(rbds);
-
-    if (record->ds && rbds->useContactorInertia()) update2DContactorInertia(rbds, btconvex2d);
-
+    if (auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds)) {
+      if (rbds->useContactorInertia()) update2DContactorInertia(rbds, btconvex2d);
+    }
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
@@ -1002,10 +997,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     btconvex2d->setMargin((box2d->insideMargin() + box2d->outsideMargin()) *
                           _options->worldScale);
 
-    auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds);
-    assert(rbds);
-
-    if (record->ds && rbds->useContactorInertia()) update2DContactorInertia(rbds, btconvex2d);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds)) {
+      if (rbds->useContactorInertia()) update2DContactorInertia(rbds, btconvex2d);
+    }
 
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
@@ -1217,14 +1211,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
                           _options->worldScale);
     // btconvex2d->setMargin((ch2d->outsideMargin()) * _options->worldScale);
 
-    auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds);
-    assert(rbds);
-
-    if (record->ds && rbds->useContactorInertia()) {
-      DEBUG_PRINT("We update the inertia using the contactor inertia");
-      update2DContactorInertia(rbds, btconvex2d);
+    if (auto rbds = std::dynamic_pointer_cast<RigidBody2dDS>(record->ds)) {
+      if (rbds->useContactorInertia()) {
+        DEBUG_PRINT("We update the inertia using the contactor inertia");
+        update2DContactorInertia(rbds, btconvex2d);
+      }
     }
-
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
@@ -1255,9 +1247,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     if (record->base->size() == 7) {
       DEBUG_PRINT("3D DS\n");
       if (_options->extrapolationCoefficient) {
-        if (record->ds) {
+        if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds)) {
           // record.ds->display();
-          auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(record->ds);
           rbds->compute_extrapolated_position(_options->extrapolationCoefficient);
         }
 
@@ -1346,14 +1337,11 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       "impl::"
       "createCollisionObjectsForBodyContactorSetFromDS(...)\n");
   assert(ds);
-
-  auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(ds);
-  auto rb2dds = std::dynamic_pointer_cast<RigidBody2dDS>(ds);
   std::shared_ptr<SiconosContactorSet> con{nullptr};
 
   std::shared_ptr<siconos::algebra::SiconosVector> base;
 
-  if (rbds) {
+  if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(ds)) {
     DEBUG_PRINT("RigidBodyDS case");
     con = rbds->contactors();
     // printf("\n\n extrapolation %e\n", _options.extrapolationCoefficient);
@@ -1366,7 +1354,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       // siconos::algebra::print(*base);
     }
   }
-  if (rb2dds) {
+  if (auto rb2dds = std::dynamic_pointer_cast<RigidBody2dDS>(ds)) {
     DEBUG_PRINT("RigidBody2dDS case");
     con = rb2dds->contactors();
     base = rb2dds->q();

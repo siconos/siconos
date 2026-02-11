@@ -45,8 +45,8 @@ if(HAVE_SICONOS_MECHANICS)
   else()
     list(REMOVE_ITEM pyfiles occtools.py)
   endif()
-
   foreach(pyfile IN LISTS pyfiles)
+    message(STATUS "PY FILES ${pyfile}")
     configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/io/${pyfile} @ONLY)
   endforeach()
 

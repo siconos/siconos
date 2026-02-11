@@ -824,15 +824,14 @@ static void compute_contact_work_and_status(
   double normal_contact_work_theta = vn_average_theta * pn;
   answer(3) = normal_contact_work_theta;
 
-
   // Compute tangent contact work of impulse
   auto vt_1_minus = (inter->y_k(1))(1);
   auto vt_2_minus = (inter->y_k(1))(2);
   auto vt_1_plus = (*inter->y(1))(1);
   auto vt_2_plus = (*inter->y(1))(2);
 
-  double vt_1_average = 1/2.*( vt_1_plus + vt_1_minus);
-  double vt_2_average = 1/2.*( vt_2_plus + vt_2_minus);
+  double vt_1_average = 1 / 2. * (vt_1_plus + vt_1_minus);
+  double vt_2_average = 1 / 2. * (vt_2_plus + vt_2_minus);
 
   double pt_1 = (*inter->lambda(1))(1);
   double pt_2 = (*inter->lambda(1))(2);
@@ -840,12 +839,11 @@ static void compute_contact_work_and_status(
   double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer(2) = tangent_contact_work;
 
-  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
-  double vt_2_average_theta = theta * vt_2_plus + (1. - theta) * vt_2_minus;
+  // double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  // double vt_2_average_theta = theta * vt_2_plus + (1. - theta) * vt_2_minus;
 
   double tangent_contact_work_theta = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer(4) = tangent_contact_work_theta;
-
 
   // // Compute directly work dissipated by friction impulse
   // double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
@@ -924,7 +922,7 @@ static void compute_contact_work_and_status_2d(
   double vn_plus = (*inter->y(1))(0);
   double pn = (*inter->lambda(1))(0);
 
-  double vn_average = 1/2. * (vn_plus * vn_minus) ;
+  double vn_average = 1 / 2. * (vn_plus * vn_minus);
   double normal_contact_work = vn_average * pn;
   answer(1) = normal_contact_work;
 
@@ -937,11 +935,11 @@ static void compute_contact_work_and_status_2d(
   double vt_1_plus = (*inter->y(1))(1);
   double pt_1 = (*inter->lambda(1))(1);
 
-  double vt_1_average = 1/2. *( vt_1_plus + vt_1_minus);
+  double vt_1_average = 1 / 2. * (vt_1_plus + vt_1_minus);
   double tangent_contact_work = vt_1_average * pt_1;
   answer(2) = tangent_contact_work;
 
-  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  // double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
   double tangent_contact_work_theta = vt_1_average * pt_1;
   answer(4) = tangent_contact_work_theta;
 
@@ -1056,7 +1054,6 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
   DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
-
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
 

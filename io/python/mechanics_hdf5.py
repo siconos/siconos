@@ -365,9 +365,7 @@ class MechanicsHdf5(object):
                 self._energy_work.attrs[
                     "info"
                 ] += " [5] : normal contact work theta average,\n [6] tangent contact work theta average \n"
-                self._energy_work.attrs[
-                    "info"
-                ] += "[7,8] only negative part "
+                self._energy_work.attrs["info"] += "[7,8] only negative part "
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
@@ -1344,6 +1342,10 @@ class MechanicsHdf5(object):
                 boundary_condition.attrs["omega"] = omega
                 boundary_condition.attrs["phi"] = phi
             elif bc_class == "BoundaryCondition":
+                if v is None:
+                    v = [
+                        0.0,
+                    ]
                 boundary_condition.attrs["v"] = v  # Might be None for "fixed"(val=0) BC
             else:
                 raise NotImplementedError

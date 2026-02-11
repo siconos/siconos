@@ -58,10 +58,10 @@ class NewtonImpactNSL : public NonSmoothLaw {
    *
    *  \param e the value of the coefficient of restitution
    */
-  NewtonImpactNSL(double e) : NonSmoothLaw(1), _e(e){};
+  NewtonImpactNSL(double e) : NonSmoothLaw(1), _e(e) {};
 
   /** Apply multiple-axis impact */
-  NewtonImpactNSL(siconos::algebra::Index size, double e) : NonSmoothLaw(size), _e(e){};
+  NewtonImpactNSL(siconos::algebra::Index size, double e) : NonSmoothLaw(size), _e(e) {};
 
   /** destructor
    */
@@ -88,9 +88,11 @@ class NewtonImpactNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

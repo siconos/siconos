@@ -309,11 +309,6 @@ siconos::modeling::NonSmoothDynamicalSystem::interaction(unsigned int nb) const 
   return _topology->getInteraction(nb);
 }
 
-std::shared_ptr<siconos::modeling::Interaction>
-siconos::modeling::NonSmoothDynamicalSystem::interaction(std::string name) const {
-  return _topology->getInteraction(name);
-}
-
 void siconos::modeling::NonSmoothDynamicalSystem::setName(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name) {
   _topology->setName(ds, name);

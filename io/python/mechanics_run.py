@@ -158,104 +158,90 @@ class MechanicsHdf5Runner_run_options(dict):
             self._d_comment[key]["default"] = default
             self._d_comment[key]["info"] = info
 
-        create_option(d,
-                      "t0",
-                      'real, optional',
-                      0.0,
-                      """initial time of the simulation""")
-        create_option(d,
-                      "T",
-                      'real, optional',
-                      10.0,
-                      """final time of the simulation""")
+        create_option(
+            d, "t0", "real, optional", 0.0, """initial time of the simulation"""
+        )
+        create_option(
+            d, "T", "real, optional", 10.0, """final time of the simulation"""
+        )
 
-        create_option(d,
-                      "h",
-                      'real, optional',
-                      5e-4,
-                      """time-step size""")
-        create_option(d,
-                      "theta",
-                      'real, optional',
-                      0.50001,
-                      """theta parameter for Moreau-Jean one-step integrator in [0,1] """)
-        create_option(d,
-                      "gamma",
-                      'real, optional',
-                      None,
-                      """gamma parameter for Moreau-Jean one-step integrator OSI  """)
-        create_option(d,
-                      "set_external_forces",
-                      'python function, optional',
-                      None,
-                      """ if None, set to self.apply_gravity
+        create_option(d, "h", "real, optional", 5e-4, """time-step size""")
+        create_option(
+            d,
+            "theta",
+            "real, optional",
+            0.50001,
+            """theta parameter for Moreau-Jean one-step integrator in [0,1] """,
+        )
+        create_option(
+            d,
+            "gamma",
+            "real, optional",
+            None,
+            """gamma parameter for Moreau-Jean one-step integrator OSI  """,
+        )
+        create_option(
+            d,
+            "set_external_forces",
+            "python function, optional",
+            None,
+            """ if None, set to self.apply_gravity
                       function used to apply forces onto the body with signature :
                       def funcname(body):
                       ...
-                      with body  a siconos Body (siconos.SecondOrderDS) """)
-        create_option(d,
-                      "gravity_scale",
-                      'real, optional',
-                      1.0,
-                      """ scaling factor for the gravity.
+                      with body  a siconos Body (siconos.SecondOrderDS) """,
+        )
+        create_option(
+            d,
+            "gravity_scale",
+            "real, optional",
+            1.0,
+            """ scaling factor for the gravity.
                       1.     for meters (default).
                       1./100 for centimeters.
                       This parameter may be needed for small
-                      objects because of Bullet collision margin (0.04). """
-                      )
+                      objects because of Bullet collision margin (0.04). """,
+        )
 
-        create_option(d,
-                      "bullet_options",
-                      '?, optional',
-                      None,
-                      """set of options for the interaction manager (e.g. SiconosBulletOptions)"""
-                      )
+        create_option(
+            d,
+            "bullet_options",
+            "?, optional",
+            None,
+            """set of options for the interaction manager (e.g. SiconosBulletOptions)""",
+        )
 
-        create_option(d,
-                      "multipoints_iterations",
-                      'boolean, optional',
-                      None,
-                      """if true use bullet "multipoint iterations (Obsolete)""")
+        create_option(
+            d,
+            "multipoints_iterations",
+            "boolean, optional",
+            None,
+            """if true use bullet "multipoint iterations (Obsolete)""",
+        )
 
-        create_option(d,
-                      "time_stepping",
-                      "siconos.kernel.Simulation, optional",
-                      None,
-                      'a siconos simulation type instance')
-        create_option(d,
-                      "interaction_manager",
-                      "SiconosCollisionManager, optional",
-                      None,
-                      """ user-defined interaction handler (e.g. from Bullet)
+        create_option(
+            d,
+            "time_stepping",
+            "siconos.kernel.Simulation, optional",
+            None,
+            "a siconos simulation type instance",
+        )
+        create_option(
+            d,
+            "interaction_manager",
+            "SiconosCollisionManager, optional",
+            None,
+            """ user-defined interaction handler (e.g. from Bullet)
                       (depends on the backend, e.g. Bullet or OCC).
                       Warning: overwrite the value
-                      provided during MechanicsHdf5Runner init.""")
+                      provided during MechanicsHdf5Runner init.""",
+        )
 
         # default hook options
-        create_option(d,
-                      "start_run_iteration_hook",
-                      '',
-                      None,
-                      """ """
-                      )
-        create_option(d,
-                      "before_next_step_iteration_hook",
-                      '',
-                      None,
-                      """ """
-                      )
-        create_option(d,
-                      "end_run_iteration_hook",
-                      '',
-                      None,
-                      """ """
-                      )
-        create_option(d,
-                      "controller",
-                      '',
-                      None,
-                      """ """
-                      )
+        create_option(d, "start_run_iteration_hook", "", None, """ """)
+        create_option(d, "before_next_step_iteration_hook", "", None, """ """)
+        create_option(d, "end_run_iteration_hook", "", None, """ """)
+        create_option(d, "controller", "", None, """ """)
 
         # create_optionaln(d,
         #                      "body_class",
@@ -279,275 +265,352 @@ class MechanicsHdf5Runner_run_options(dict):
         #                      """ class used for edge definition (e.g. occ.OccContactEdge) occ only?""")
 
         # default osi options
-        create_option(d,
-                      "osi",
-                      "integrators.OneStepIntegrator, optional",
-                      integrators.MoreauJeanOSI,
-                      "class type used to describe one-step integration"
-                      )
-        create_option(d,
-                      "constraint_activation_threshold",
-                      'real, optional',
-                      None,
-                      """threshold under which constraint is assume to be active.
-                      if None, default value is taken as default value of osi class""")
-        create_option(d,
-                      "constraint_activation_threshold_velocity",
-                      'real, optional',
-                      None,
-                      """threshold under which constraint is assume to be active at the veloicity level.
-                      if None, default value is taken as default value of osi class """)
-        create_option(d,
-                      "activate_with_negative_relative_velocity",
-                      'real, optional',
-                      None,
-                      """ activate constraints at the velocity level only if the relative velocity is negative
-                      if None, default value is taken as default value of osi class """)
-        create_option(d,
-                      "projection_itermax",
-                      'int, optional',
-                      20,
-                      """ max number of iteration for projection
-                      (only for TimeSteppingDirectProjection) """)
-        create_option(d,
-                      "projection_tolerance",
-                      'real, optional',
-                      1e-8,
-                      """ tolerance for the violation of the equality constraints at the  position level
-                      (only for TimeSteppingDirectProjection)""")
-        create_option(d,
-                      "projection_tolerance_unilateral",
-                      'real, optional',
-                      1e-8,
-                      """ tolerance for the violation of the unilateral constraints at the  position level
-                      (only for TimeSteppingDirectProjection) """)
+        create_option(
+            d,
+            "osi",
+            "integrators.OneStepIntegrator, optional",
+            integrators.MoreauJeanOSI,
+            "class type used to describe one-step integration",
+        )
+        create_option(
+            d,
+            "constraint_activation_threshold",
+            "real, optional",
+            None,
+            """threshold under which constraint is assume to be active.
+                      if None, default value is taken as default value of osi class""",
+        )
+        create_option(
+            d,
+            "constraint_activation_threshold_velocity",
+            "real, optional",
+            None,
+            """threshold under which constraint is assume to be active at the veloicity level.
+                      if None, default value is taken as default value of osi class """,
+        )
+        create_option(
+            d,
+            "activate_with_negative_relative_velocity",
+            "real, optional",
+            None,
+            """ activate constraints at the velocity level only if the relative velocity is negative
+                      if None, default value is taken as default value of osi class """,
+        )
+        create_option(
+            d,
+            "projection_itermax",
+            "int, optional",
+            20,
+            """ max number of iteration for projection
+                      (only for TimeSteppingDirectProjection) """,
+        )
+        create_option(
+            d,
+            "projection_tolerance",
+            "real, optional",
+            1e-8,
+            """ tolerance for the violation of the equality constraints at the  position level
+                      (only for TimeSteppingDirectProjection)""",
+        )
+        create_option(
+            d,
+            "projection_tolerance_unilateral",
+            "real, optional",
+            1e-8,
+            """ tolerance for the violation of the unilateral constraints at the  position level
+                      (only for TimeSteppingDirectProjection) """,
+        )
 
         # default Newton solve options
-        create_option(d,
-                      "Newton_options",
-                      'siconos.simulation.TYPE, optional',
-                      siconos.simulation.NONLINEAR,
-                      """simu.TimeStepping options to control the Newton loop
-                      possible values : LINEAR, LINEAR_IMPLICIT, NONLINEAR, NONLINEAR_FULL""")
-        create_option(d,
-                      "Newton_max_iter",
-                      'int, optional',
-                      20,
-                      """maximum number of iterations allowed for the Newton method""")
-        create_option(d,
-                      "Newton_tolerance",
-                      'real, optional',
-                      1e-10,
-                      """ required tolerance for the Newton method""")
-        create_option(d,
-                      "Newton_warning_on_nonconvergence",
-                      'boolean, optional',
-                      True,
-                      """ display a warning if the Newton method does not converge""")
-        create_option(d,
-                      "Warning_nonsmooth_solver",
-                      'boolean, optional',
-                      True,
-                      """ display a warning if the nonsmooth does not converge""")
-        create_option(d,
-                      "display_Newton_convergence",
-                      'boolean, optional',
-                      False,
-                      """ display the information about the convergence of the Newton method""")
-        create_option(d,
-                      "skip_last_update_output",
-                      'boolean, optional',
-                      False,
-                      """ Skip the computation of the last update of the output (kinematic contact variable)
-                      in order to save time""")
-        create_option(d,
-                      "skip_last_update_input",
-                      'boolean, optional',
-                      False,
-                      """ Skip the computation of the last update of the input (contact reaction variable)
-                      in order to save time""")
-        create_option(d,
-                      "skip_reset_lambdas",
-                      'boolean, optional',
-                      False,
-                      """ Skip the reset to 0.0 of the input (contact reaction variable) """)
+        create_option(
+            d,
+            "Newton_options",
+            "siconos.simulation.TYPE, optional",
+            siconos.simulation.NONLINEAR,
+            """simu.TimeStepping options to control the Newton loop
+                      possible values : LINEAR, LINEAR_IMPLICIT, NONLINEAR, NONLINEAR_FULL""",
+        )
+        create_option(
+            d,
+            "Newton_max_iter",
+            "int, optional",
+            20,
+            """maximum number of iterations allowed for the Newton method""",
+        )
+        create_option(
+            d,
+            "Newton_tolerance",
+            "real, optional",
+            1e-10,
+            """ required tolerance for the Newton method""",
+        )
+        create_option(
+            d,
+            "Newton_warning_on_nonconvergence",
+            "boolean, optional",
+            True,
+            """ display a warning if the Newton method does not converge""",
+        )
+        create_option(
+            d,
+            "Warning_nonsmooth_solver",
+            "boolean, optional",
+            True,
+            """ display a warning if the nonsmooth does not converge""",
+        )
+        create_option(
+            d,
+            "display_Newton_convergence",
+            "boolean, optional",
+            False,
+            """ display the information about the convergence of the Newton method""",
+        )
+        create_option(
+            d,
+            "skip_last_update_output",
+            "boolean, optional",
+            False,
+            """ Skip the computation of the last update of the output (kinematic contact variable)
+                      in order to save time""",
+        )
+        create_option(
+            d,
+            "skip_last_update_input",
+            "boolean, optional",
+            False,
+            """ Skip the computation of the last update of the input (contact reaction variable)
+                      in order to save time""",
+        )
+        create_option(
+            d,
+            "skip_reset_lambdas",
+            "boolean, optional",
+            False,
+            """ Skip the reset to 0.0 of the input (contact reaction variable) """,
+        )
 
         # default osnpb options
-        create_option(d,
-                      "solver_options",
-                      'numerics.SolverOptions, optional',
-                      None,
-                      """ SolverOptions for siconos.numerics solvers
+        create_option(
+            d,
+            "solver_options",
+            "numerics.SolverOptions, optional",
+            None,
+            """ SolverOptions for siconos.numerics solvers
                       we advice to create it with  siconos.numerics.solver_options_create
                       if solver_option is None, we leave siconos/numerics choosing the default option
-                      (see numerics solvers documentation for details)""")
-        create_option(d,
-                      "solver_options_pos",
-                      'numerics.SolverOptions, optional',
-                      None,
-                      """ SolverOptions for siconos.numerics solvers at the poistion level
+                      (see numerics solvers documentation for details)""",
+        )
+        create_option(
+            d,
+            "solver_options_pos",
+            "numerics.SolverOptions, optional",
+            None,
+            """ SolverOptions for siconos.numerics solvers at the poistion level
                       we advice to create it with  siconos.numerics.solver_options_create
                       if solver_option is None, we leave siconos/numerics choosing the default option
-                      (see numerics solvers documentation for details)""")
+                      (see numerics solvers documentation for details)""",
+        )
 
-        create_option(d,
-                      "osnspb_max_size",
-                      'int, optional',
-                      0,
-                      """  estimation of the maximum number of dynamical systems taken into account.
+        create_option(
+            d,
+            "osnspb_max_size",
+            "int, optional",
+            0,
+            """  estimation of the maximum number of dynamical systems taken into account.
                       Useful for memory pre-allocations and optimisation.
                       if equal to 0, it will be set to
-                      simulation().nonSmoothDynamicalSystem().topology().numberOfConstraints() """)
-        create_option(d,
-                      "osns_assembly_type",
-                      'siconos.nonsmooth_formulations.TYPE, optional',
-                      None,
-                      """  Assembly method for the Delassus operator. Possible value are:
+                      simulation().nonSmoothDynamicalSystem().topology().numberOfConstraints() """,
+        )
+        create_option(
+            d,
+            "osns_assembly_type",
+            "siconos.nonsmooth_formulations.TYPE, optional",
+            None,
+            """  Assembly method for the Delassus operator. Possible value are:
                       siconos.nonsmooth_formulations.REDUCED_BLOCK, GLOBAL, REDUCED_DIRECT, GLOBAL_REDUCED.
-                      if None, the osnspb uses thd default assembly type defined in LinearONSS.hpp""")
+                      if None, the osnspb uses thd default assembly type defined in LinearONSS.hpp""",
+        )
 
         d["friction_contact_trace_params"] = None
-        create_option(d,
-                      "friction_contact_trace_params",
-                      'FrictionContactTraceParams instance, optional',
-                      None,
-                      """  """)
+        create_option(
+            d,
+            "friction_contact_trace_params",
+            "FrictionContactTraceParams instance, optional",
+            None,
+            """  """,
+        )
 
         # default output options
-        create_option(d,
-                      "output_frequency",
-                      'int, optional',
-                      None,
-                      """ log and screen outputs frequency
+        create_option(
+            d,
+            "output_frequency",
+            "int, optional",
+            None,
+            """ log and screen outputs frequency
                       The initial step (k=0) and the first step (k=1) are always written in hdf5 file.
-                      if None set equal to 1. set equal to 0 to cancel output""")
-        create_option(d,
-                      "output_backup",
-                      'boolean, optional',
-                      False,
-                      """ if True, make a backup of the output (hdf5 file)""")
-        create_option(d,
-                      "output_backup_frequency",
-                      'int, optional',
-                      None,
-                      """ backup frequency""")
-        create_option(d,
-                      "output_contact_index_set",
-                      'int, optional',
-                      1,
-                      """ index set level for outputting contact info
+                      if None set equal to 1. set equal to 0 to cancel output""",
+        )
+        create_option(
+            d,
+            "output_backup",
+            "boolean, optional",
+            False,
+            """ if True, make a backup of the output (hdf5 file)""",
+        )
+        create_option(
+            d, "output_backup_frequency", "int, optional", None, """ backup frequency"""
+        )
+        create_option(
+            d,
+            "output_contact_index_set",
+            "int, optional",
+            1,
+            """ index set level for outputting contact info
                       1: only the contact active at the velocity level are written
-                      0: all contact are written""")
-        create_option(d,
-                      "output_contact_forces",
-                      'boolean, optional',
-                      True,
-                      """if True, the contact forces are written in the hdf5 file  """)
-        create_option(d,
-                      "output_contact_info",
-                      'boolean, optional',
-                      True,
-                      """if True, the contact information are written in the hdf5 file.
-                      it mainly contains for each contact, the bodies involved in the contact.""")
+                      0: all contact are written""",
+        )
+        create_option(
+            d,
+            "output_contact_forces",
+            "boolean, optional",
+            True,
+            """if True, the contact forces are written in the hdf5 file  """,
+        )
+        create_option(
+            d,
+            "output_contact_info",
+            "boolean, optional",
+            True,
+            """if True, the contact information are written in the hdf5 file.
+                      it mainly contains for each contact, the bodies involved in the contact.""",
+        )
 
-        create_option(d,
-                      "output_contact_work",
-                      'boolean, optional',
-                      True,
-                      """if True, the contact work is computed and are written in the hdf5 file""")
-        create_option(d,
-                      "output_energy_work",
-                      'boolean, optional',
-                      False,
-                      """if True, the kinetic and work for each bodies are computed and written in the hdf5 file""")
+        create_option(
+            d,
+            "output_contact_work",
+            "boolean, optional",
+            True,
+            """if True, the contact work is computed and are written in the hdf5 file""",
+        )
+        create_option(
+            d,
+            "output_energy_work",
+            "boolean, optional",
+            False,
+            """if True, the kinetic and work for each bodies are computed and written in the hdf5 file""",
+        )
 
         # default verbose and debug  options
-        create_option(d,
-                      "verbose",
-                      'boolean, optional',
-                      True,
-                      """if true, print current step information""")
-        create_option(d,
-                      "verbose_progress",
-                      'boolean, optional',
-                      True,
-                      """if true, print the number of step""")
-        create_option(d,
-                      "numerics_verbose",
-                      'boolean, optional',
-                      False,
-                      """if true, activate numerics verbosity """)
-        create_option(d,
-                      "numerics_verbose_level",
-                      'int, optional',
-                      0,
-                      """numerics verbosity level""")
-        create_option(d,
-                      "violation_verbose",
-                      'boolean, optional',
-                      False,
-                      """if true, print info about contact violation """)
+        create_option(
+            d,
+            "verbose",
+            "boolean, optional",
+            True,
+            """if true, print current step information""",
+        )
+        create_option(
+            d,
+            "verbose_progress",
+            "boolean, optional",
+            True,
+            """if true, print the number of step""",
+        )
+        create_option(
+            d,
+            "numerics_verbose",
+            "boolean, optional",
+            False,
+            """if true, activate numerics verbosity """,
+        )
+        create_option(
+            d,
+            "numerics_verbose_level",
+            "int, optional",
+            0,
+            """numerics verbosity level""",
+        )
+        create_option(
+            d,
+            "violation_verbose",
+            "boolean, optional",
+            False,
+            """if true, print info about contact violation """,
+        )
 
-        create_option(d,
-                      "with_timer",
-                      'boolean, optional',
-                      False,
-                      """if true, use a timer for log output in std::output and hdf5""")
-        create_option(d,
-                      "with_timer_output_at_the_end",
-                      'boolean, optional',
-                      True,
-                      """ if True, we store the timers into a dict and output it in hdf5 at the end
-                      fastest method but need to complete the simulation""")
+        create_option(
+            d,
+            "with_timer",
+            "boolean, optional",
+            False,
+            """if true, use a timer for log output in std::output and hdf5""",
+        )
+        create_option(
+            d,
+            "with_timer_output_at_the_end",
+            "boolean, optional",
+            True,
+            """ if True, we store the timers into a dict and output it in hdf5 at the end
+                      fastest method but need to complete the simulation""",
+        )
 
-        create_option(d,
-                      "explode_computeOneStep_in_python",
-                      'boolean, optional',
-                      False,
-                      """ if True, the ComputeOneStep function of siconos.TimeStepping is exploded in a python version
-                      in order to add more log/trace during Newton loop. """)
+        create_option(
+            d,
+            "explode_computeOneStep_in_python",
+            "boolean, optional",
+            False,
+            """ if True, the ComputeOneStep function of siconos.TimeStepping is exploded in a python version
+                      in order to add more log/trace during Newton loop. """,
+        )
 
-        create_option(d,
-                      "explode_computeOneStepNSProblem_in_python",
-                      'boolean, optional',
-                      False,
-                      """ if True, the ComputeOneStepNSProblem function of siconos.OneStepProblem is exploded in a python version
-                      in order to add more log/trace during Newton loop. """)
-        create_option(d,
-                      "exit_tolerance",
-                      'boolean, optional',
-                      False,
-                      """ if True, the simulation run exits if the tolerance is not reached """)
+        create_option(
+            d,
+            "explode_computeOneStepNSProblem_in_python",
+            "boolean, optional",
+            False,
+            """ if True, the ComputeOneStepNSProblem function of siconos.OneStepProblem is exploded in a python version
+                      in order to add more log/trace during Newton loop. """,
+        )
+        create_option(
+            d,
+            "exit_tolerance",
+            "boolean, optional",
+            False,
+            """ if True, the simulation run exits if the tolerance is not reached """,
+        )
 
         super(self.__class__, self).__init__(d)
 
     def display(self):
         def print_comment(d_comment_item):
             if d_comment_item is None:
-                print('  | no info on this option ')
+                print("  | no info on this option ")
             else:
                 for k in d_comment_item.keys():
-                    print('  |   {0}: {1}'.format(k, d_comment_item[k]))
-        print('display run options')
-        print('{0} = {1}'.format('option', 'value'))
+                    print("  |   {0}: {1}".format(k, d_comment_item[k]))
+
+        print("display run options")
+        print("{0} = {1}".format("option", "value"))
         for k in self.keys():
-            print('{0} = {1}'.format(k, self[k]))
+            print("{0} = {1}".format(k, self[k]))
             print_comment(self._d_comment.get(k))
 
     def check_valid_run_options(self):
 
         if self.get("explode_Newton_solve") is not None:
-            msg = 'run_options.check_valid_run_options() :  explode_Newton_solve option is obsolete. Use instead explode_computeOneStep_in_python'
+            msg = "run_options.check_valid_run_options() :  explode_Newton_solve option is obsolete. Use instead explode_computeOneStep_in_python"
             raise RuntimeError(msg)
 
         if self.get("explode_computeOneStep") is not None:
-            msg = 'run_options.check_valid_run_options() :  explode_computeOneStep option is obsolete. Use instead explode_computeOneStepNSProblem_in_python'
+            msg = "run_options.check_valid_run_options() :  explode_computeOneStep option is obsolete. Use instead explode_computeOneStepNSProblem_in_python"
             raise RuntimeError(msg)
 
         for k in self.keys():
             if not k in self._valid_options_keys:
-                msg = "run_options.check_valid_run_options() : the key " + str(k) + \
-                    " in run_options dictionnary is not a valid key"
+                msg = (
+                    "run_options.check_valid_run_options() : the key "
+                    + str(k)
+                    + " in run_options dictionnary is not a valid key"
+                )
                 raise RuntimeError(msg)
 
 
@@ -712,7 +775,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if not after:
                     print(
                         "[io.mechanics] |-->start {0:42s} ...".format(fun.__name__),
-                        flush=True)
+                        flush=True,
+                    )
 
                 output = fun(*args)
                 endt = t.elapsed()
@@ -720,15 +784,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if not after:
                     print(
                         "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(
-                            fun.__name__, endt),
+                            fun.__name__, endt
+                        ),
                         flush=True,
                     )
                 else:
-                    print("[io.mechanics] | {0:50s} .... {1:6.2e} s".format(
-                        fun.__name__, endt))
+                    print(
+                        "[io.mechanics] | {0:50s} .... {1:6.2e} s".format(
+                            fun.__name__, endt
+                        )
+                    )
 
                 # timing in hdf5
-                if self._run_options['with_timer_output_at_the_end']:
+                if self._run_options["with_timer_output_at_the_end"]:
                     # we store timing in a dictionnary
                     if self._timing.get(fun.__name__) is None:
                         self._timing[fun.__name__] = [endt]
@@ -1530,12 +1598,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             elif bc_type == "BoundaryCondition":
                 if self.boundary_conditions()[name].attrs["v"] is None:
                     # fixed bc
-                    bc = bc_class(
-                        self.boundary_conditions()[name].attrs["indices"])
+                    bc = bc_class(self.boundary_conditions()[name].attrs["indices"])
                 else:
                     bc = bc_class(
                         self.boundary_conditions()[name].attrs["indices"],
-                        self.boundary_conditions()[name].attrs["v"])
+                        self.boundary_conditions()[name].attrs["v"],
+                    )
 
             # set bc to the ds1
 
@@ -1641,7 +1709,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     cp1 = self.config.occ.ContactPoint(cocs1)
                     cp2 = self.config.occ.ContactPoint(cocs2)
-
 
                     relation = self.config.occ.OccR(
                         cp1, cp2, real_dist_calc[distance_calculator]()
@@ -2278,7 +2345,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
             contact_work = self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set, omega=self._run_options.get("theta")
+                self._nsds,
+                self._output_contact_index_set,
+                omega=self._run_options.get("theta"),
             )
 
             # print(contact_work)
@@ -2328,7 +2397,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 external_forces_work_sum = np.sum(work_forces[:, 1])
 
             cf_work = self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set, omega=self._run_options.get("theta")
+                self._nsds,
+                self._output_contact_index_set,
+                omega=self._run_options.get("theta"),
             )
             # print('cf_work', cf_work)
 
@@ -2349,11 +2420,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 normal_work_sum = np.sum(normal_work)
                 tangent_work_sum = np.sum(tangent_work)
 
-
-
                 normal_work_sum_theta = np.sum(cf_work[:, 3])
                 tangent_work_sum_theta = np.sum(cf_work[:, 4])
-
 
             else:
                 normal_work_negative_sum = 0.0
@@ -2362,7 +2430,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 normal_work_sum = 0.0
                 tangent_work_sum = 0.0
                 normal_work_sum_theta = 0.0
-                tangent_work_sum_theta =0.0
+                tangent_work_sum_theta = 0.0
 
             energy_contact_work[0] = kinetic_sum
             energy_contact_work[1] = external_forces_work_sum
@@ -2682,11 +2750,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         newtonNbIterations = 0
         isNewtonConverge = False
         explode_computeOneStepNSProblem_in_python = self._run_options.get(
-            "explode_computeOneStepNSProblem_in_python")
+            "explode_computeOneStepNSProblem_in_python"
+        )
 
         # self.log(s.initializeNewtonSolve, with_timer)()
         # explode version
-
 
         self.log(s.updateAndSwapAllOutput, with_timer)()
         self.log(s.updateIndexSets, with_timer)()
@@ -2694,7 +2762,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
-
 
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()
@@ -2725,7 +2792,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if not s.skipLastUpdateInput():
                     self.log(s.updateAllInput, with_timer)()
                 self.log(s.computeIteration, with_timer)()
-
 
         else:
             while (not isNewtonConverge) and newtonNbIterations < newtonMaxIteration:
@@ -2760,11 +2826,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 
-
         self.log(s.updateState, with_timer)()
         if not s.skipLastUpdateOutput():
             self.log(s.updateOutput, with_timer)()
-
 
     def build_run_options_from_old_arguments_in_kwargs(
         self,
@@ -2818,8 +2882,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         before_next_step_iteration_hook=None,
         skip_last_update_output=False,
     ):
-        """Run a simulation from a set of parameters described in a hdf5 file.
-        """
+        """Run a simulation from a set of parameters described in a hdf5 file."""
         build_from_kwargs = False
         if run_options is None:
             self.print_verbose("\nWARNING: no run_options given.")
@@ -2870,7 +2933,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 constraint_activation_threshold
             )
             run_options["explode_computeOneStep_in_python"] = explode_Newton_solve
-            run_options["explode_computeOneStepNSProblem_in_python"] = explode_computeOneStepNSProblem_in_python
+            run_options["explode_computeOneStepNSProblem_in_python"] = (
+                explode_computeOneStepNSProblem_in_python
+            )
             run_options["display_Newton_convergence"] = display_Newton_convergence
             run_options["start_run_iteration_hook"] = start_run_iteration_hook
             run_options["before_next_step_iteration_hook"] = (
@@ -3227,7 +3292,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             else:
                 osnspb_pos = nsf.MLCPProjectOnConstraints(
-                    run_options["solver_options_pos"], 1.0)
+                    run_options["solver_options_pos"], 1.0
+                )
 
             osnspb_pos.setMaxSize(osnspb_max_size)
             osnspb_pos.setMStorageType(sn.params.NM_DENSE)
@@ -3239,7 +3305,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             )
             simulation.setProjectionMaxIteration(run_options["projection_itermax"])
             simulation.setConstraintTolUnilateral(
-                run_options["projection_tolerance_unilateral"])
+                run_options["projection_tolerance_unilateral"]
+            )
             simulation.setConstraintTol(run_options["projection_tolerance"])
         else:
             simulation = self._time_stepping_class(nsds, timedisc)
@@ -3315,9 +3382,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
 
         solver_output = {}
-        mask = '|      '
-        solver_output['solver iter'] = [iterations, mask + '{:<10d}']
-        solver_output['solver error'] = [precision, mask + '{:8.4e}']
+        mask = "|      "
+        solver_output["solver iter"] = [iterations, mask + "{:<10d}"]
+        solver_output["solver error"] = [precision, mask + "{:8.4e}"]
 
         print_violation = None
 
@@ -3335,16 +3402,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             "  violation max is larger than the collision_margin"
                         )
                 lam = self._simulation.lambda_input(1, 0)
-                print_violation['violation max'] = [violation_max, mask + '{:8.4e}']
-                print_violation['reaction max'] = [np.max(lam), mask + '{:8.4e}']
+                print_violation["violation max"] = [violation_max, mask + "{:8.4e}"]
+                print_violation["reaction max"] = [np.max(lam), mask + "{:8.4e}"]
 
             if len(self._simulation.y_output(1, 0)) > 0:
                 v = self._simulation.y_output(1, 0)
                 vplus = np.zeros((2, len(v)))
                 vplus[0, :] = v
                 v = np.max(vplus, axis=1)
-                print_violation['velocity max'] = [np.max(v), mask + '{:8.4e}']
-                print_violation['velocity min'] = [np.min(v), mask + '{:8.4e}']
+                print_violation["velocity max"] = [np.max(v), mask + "{:8.4e}"]
+                print_violation["velocity min"] = [np.min(v), mask + "{:8.4e}"]
 
         if print_violation is not None:
             print_solver_verbose = {**solver_output, **print_violation}
@@ -3352,9 +3419,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             print_solver_verbose = solver_output
 
         # print banner
-        ll = ['| {:<14} '.format(k) for k in print_solver_verbose.keys()]
-        ll.append('|')
-        self.print_verbose(' '.join(ll))
+        ll = ["| {:<14} ".format(k) for k in print_solver_verbose.keys()]
+        ll.append("|")
+        self.print_verbose(" ".join(ll))
 
         # print results
         ll = []
@@ -3362,8 +3429,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             fmt = print_solver_verbose[k][1]
             value = print_solver_verbose[k][0]
             ll.append(fmt.format(value))
-        ll.append('|')
-        self.print_verbose(' '.join(ll))
+        ll.append("|")
+        self.print_verbose(" ".join(ll))
 
     def contact_statistics_verbose(self):
         # Note these are not the same and neither is correct.
@@ -3372,9 +3439,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # are not in indexset1.  Meanwhile checking the size of
         # the non-smooth problem is wrong when there are joints.
         if self.config.use_bullet:
-            number_of_contacts = (
-                self._interman.statistics().new_interactions_created
-            )
+            number_of_contacts = self._interman.statistics().new_interactions_created
             number_of_contacts += (
                 self._interman.statistics().existing_interactions_processed
             )
@@ -3431,8 +3496,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         while self._simulation.hasNextEvent():
             if self._run_options.get("verbose_progress"):
                 self.print_verbose(
-                    "step", self._k, "of", self._k0
-                    + int((T - t0) / h) - 1, " time : {0:12.8f}".format(self.current_time())
+                    "step",
+                    self._k,
+                    "of",
+                    self._k0 + int((T - t0) / h) - 1,
+                    " time : {0:12.8f}".format(self.current_time()),
                 )
 
             if self._start_run_iteration_hook is not None:
@@ -3532,20 +3600,24 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         return True
 
     def output_timer_at_the_end(self):
-        if (len(self._timing) > 0):
+        if len(self._timing) > 0:
             for k in self._timing.keys():
                 siconos.io.mechanics_hdf5.group(self.log_data(), k)
                 timing_data = np.array(self._timing[k])
-                data_set = siconos.io.mechanics_hdf5.data(self.log_data()[k], "timing", 1)
+                data_set = siconos.io.mechanics_hdf5.data(
+                    self.log_data()[k], "timing", 1
+                )
                 current_line = data_set.shape[0]
-                data_set.resize(current_line + timing_data.shape[0] , 0)
-                data_set[current_line: current_line + timing_data.shape[0]
-                         ] = timing_data[:].reshape(timing_data.shape[0], 1)
+                data_set.resize(current_line + timing_data.shape[0], 0)
+                data_set[current_line : current_line + timing_data.shape[0]] = (
+                    timing_data[:].reshape(timing_data.shape[0], 1)
+                )
 
     def run(self, *args, **kwargs):
 
         build_from_kwargs = self.build_run_options_from_old_arguments_in_kwargs(
-            *args, **kwargs)
+            *args, **kwargs
+        )
 
         if build_from_kwargs:
             run_options_default = MechanicsHdf5Runner_run_options()
@@ -3558,14 +3630,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         # print('diff', kwargs[k],run_options_default[k] )
                         print('run_options["{0}"]={1}'.format(k, kwargs[k]))
 
-            #input('Enter a key to continue')
+            # input('Enter a key to continue')
 
         with_timer = self._run_options.get("with_timer")
 
         info = self.log(self.run_initialize, with_timer)()
         info = self.log(self.run_loop, with_timer)()
 
-        if with_timer and self._run_options['with_timer_output_at_the_end']:
+        if with_timer and self._run_options["with_timer_output_at_the_end"]:
             self.output_timer_at_the_end()
 
         return info

@@ -19,11 +19,26 @@
 
 #include <memory>
 
+#include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
+#include "Question.hpp"
 #include "Simulation.hpp"
+
+// All laws complient with FrictionContact must have a visitor function to return mu.
+namespace siconos::nonsmooth_formulations::friction_contact {
+struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
+    answer = nsl.mu();
+  }
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) override {
+    answer = nsl.mu();
+  }
+};
+}  // namespace siconos::nonsmooth_formulations::friction_contact
+   // namespace siconos::nonsmooth_formulations::friction_contact
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb,
                                                                   int numericsSolverId)
@@ -79,10 +94,13 @@ void siconos::nonsmooth_formulations::FrictionContact::initialize(
     auto indexSet = simulation()->indexSet(indexSetLevel());
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-      auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
-          indexSet->bundle(*ui)->nonSmoothLaw());
-      assert(nsl);
-      _mu->push_back(nsl->mu());
+      // auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+      //     indexSet->bundle(*ui)->nonSmoothLaw());
+      // assert(nsl);
+      auto mu_val = siconos::modeling::nonsmooth_laws::ask<friction_contact::ForMu>(
+          *indexSet->bundle(*ui)->nonSmoothLaw());
+
+      _mu->push_back(mu_val);
     }
   }
 }
@@ -92,10 +110,13 @@ void siconos::nonsmooth_formulations::FrictionContact::updateMu() {
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
-        indexSet->bundle(*ui)->nonSmoothLaw());
-    assert(nsl);
-    _mu->push_back(nsl->mu());
+    // auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+    //     indexSet->bundle(*ui)->nonSmoothLaw());
+    // assert(nsl);
+    auto mu_val = siconos::modeling::nonsmooth_laws::ask<friction_contact::ForMu>(
+        *indexSet->bundle(*ui)->nonSmoothLaw());
+
+    _mu->push_back(mu_val);
   }
 }
 

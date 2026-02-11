@@ -37,15 +37,13 @@ namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-void wrap_nonsmoothlaws(py::module_ &m) {
-  py::class_<siconos::modeling::NonSmoothLaw,
-             std::shared_ptr<siconos::modeling::NonSmoothLaw>>(m, "NonSmoothLaw")
+void wrap_nonsmoothlaws(py::module_& m) {
+  py::classh<siconos::modeling::NonSmoothLaw>(m, "NonSmoothLaw")
       .def_property_readonly("size", &siconos::modeling::NonSmoothLaw::size);
 
   // nsl(e)
-  py::class_<siconos::modeling::NewtonImpactNSL,
-             std::shared_ptr<siconos::modeling::NewtonImpactNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "NewtonImpactNSL")
+  py::classh<siconos::modeling::NewtonImpactNSL, siconos::modeling::NonSmoothLaw>(
+      m, "NewtonImpactNSL")
       .def(py::init<double>())
 
       // nsl(size, e)
@@ -54,38 +52,32 @@ void wrap_nonsmoothlaws(py::module_ &m) {
       .def_property("e", &siconos::modeling::NewtonImpactNSL::e,
                     &siconos::modeling::NewtonImpactNSL::setE);
 
-  py::class_<siconos::modeling::NewtonImpactFrictionNSL,
-             std::shared_ptr<siconos::modeling::NewtonImpactFrictionNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "NewtonImpactFrictionNSL")
+  py::classh<siconos::modeling::NewtonImpactFrictionNSL, siconos::modeling::NonSmoothLaw>(
+      m, "NewtonImpactFrictionNSL")
       .def(py::init<unsigned int>(), py::arg("size") = 1)
       .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);
 
-  py::class_<siconos::modeling::NewtonImpactRollingFrictionNSL,
-             std::shared_ptr<siconos::modeling::NewtonImpactRollingFrictionNSL>,
+  py::classh<siconos::modeling::NewtonImpactRollingFrictionNSL,
              siconos::modeling::NonSmoothLaw>(m, "NewtonImpactRollingFrictionNSL")
       .def(py::init<unsigned int>(), py::arg("size") = 1)
       .def(py::init<double, double, double, double, unsigned int>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("muR") = 0., py::arg("size") = 1);
 
-  py::class_<siconos::modeling::FremondImpactFrictionNSL,
-             std::shared_ptr<siconos::modeling::FremondImpactFrictionNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "FremondImpactFrictionNSL")
+  py::classh<siconos::modeling::FremondImpactFrictionNSL, siconos::modeling::NonSmoothLaw>(
+      m, "FremondImpactFrictionNSL")
       .def(py::init<unsigned int>(), py::arg("size") = 1)
       .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);
 
-  py::class_<siconos::modeling::ComplementarityConditionNSL,
-             std::shared_ptr<siconos::modeling::ComplementarityConditionNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "ComplementarityConditionNSL")
+  py::classh<siconos::modeling::ComplementarityConditionNSL, siconos::modeling::NonSmoothLaw>(
+      m, "ComplementarityConditionNSL")
       .def(py::init<unsigned int>());
 
-  py::class_<siconos::modeling::RelayNSL, std::shared_ptr<siconos::modeling::RelayNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "RelayNSL")
+  py::classh<siconos::modeling::RelayNSL, siconos::modeling::NonSmoothLaw>(m, "RelayNSL")
       .def(py::init<unsigned int, double, double>());
 
-  py::class_<siconos::modeling::EqualityConditionNSL,
-             std::shared_ptr<siconos::modeling::EqualityConditionNSL>,
-             siconos::modeling::NonSmoothLaw>(m, "EqualityConditionNSL")
+  py::classh<siconos::modeling::EqualityConditionNSL, siconos::modeling::NonSmoothLaw>(
+      m, "EqualityConditionNSL")
       .def(py::init<unsigned int>());
 }

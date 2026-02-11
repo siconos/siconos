@@ -69,16 +69,14 @@ PYBIND11_MODULE(modeling, m) {
   wrap_boundaryconditions(m);
 
   // CLASSES with no Derived classes
-  py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(
-      m, "Interaction")
+  py::classh<siconos::modeling::Interaction>(m, "Interaction")
       .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothLaw>,
                     std::shared_ptr<siconos::modeling::Relation>>())
       .def("lambda_python", &siconos::modeling::Interaction::lambda_python,
            py::return_value_policy::reference_internal)
       .def("y", &siconos::modeling::Interaction::y_python,
            py::return_value_policy::reference_internal)
-      .def("relation", &siconos::modeling::Interaction::relation,
-           py::return_value_policy::reference_internal)
+      .def("relation", &siconos::modeling::Interaction::relation)
       .def("__repr__", [](const siconos::modeling::Interaction& self) {
         std::ostringstream buffer;
         py::scoped_ostream_redirect redirect(std::cout,
@@ -91,9 +89,7 @@ PYBIND11_MODULE(modeling, m) {
   m.def("interactions", &interactions, py::arg("graph"),
         "Return a list of Interaction objects from an InteractionsGraph");
 
-  py::class_<siconos::modeling::NonSmoothDynamicalSystem,
-             std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>>(
-      m, "NonSmoothDynamicalSystem")
+  py::classh<siconos::modeling::NonSmoothDynamicalSystem>(m, "NonSmoothDynamicalSystem")
       .def(py::init<double, double>())
       .def("insertDynamicalSystem",
            &siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem)
@@ -117,6 +113,9 @@ PYBIND11_MODULE(modeling, m) {
 
       .def("topology", &siconos::modeling::NonSmoothDynamicalSystem::topology,
            "display the topology of the system")
+
+      .def("interaction", &siconos::modeling::NonSmoothDynamicalSystem::interaction,
+           py::arg("id"), "Return interaction number 'id'")
 
       .def("setName",
            py::overload_cast<std::shared_ptr<siconos::modeling::DynamicalSystem>,

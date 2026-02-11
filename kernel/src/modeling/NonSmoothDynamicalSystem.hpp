@@ -320,13 +320,6 @@ class NonSmoothDynamicalSystem {
    */
   std::shared_ptr<siconos::modeling::Interaction> interaction(unsigned int nb) const;
 
-  /** get Interaction named name
-   *
-   *  \param name of the Interaction to get
-   *  \return a pointer to an Interaction
-   */
-  std::shared_ptr<siconos::modeling::Interaction> interaction(std::string name) const;
-
   /** get all the interactions declared in the NonSmoothDynamicalSystem.
    *  into a std::vector<std::shared_ptr<Interaction>>
    *  Useful for iterates on Interaction in Python for instance
