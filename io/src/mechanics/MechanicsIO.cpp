@@ -803,7 +803,7 @@ struct ContactContactWorkVisitor : public siconos::modeling::relations::Visitor 
 /* then specializations : */
 template <>
 void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel) {
-  answer.resize(6);
+  answer.resize(7);
 }
 
 static void compute_contact_work_and_status(
@@ -839,10 +839,10 @@ static void compute_contact_work_and_status(
   double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer(2) = tangent_contact_work;
 
-  // double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
-  // double vt_2_average_theta = theta * vt_2_plus + (1. - theta) * vt_2_minus;
+  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  double vt_2_average_theta = theta * vt_2_plus + (1. - theta) * vt_2_minus;
 
-  double tangent_contact_work_theta = vt_1_average * pt_1 + vt_2_average * pt_2;
+  double tangent_contact_work_theta = vt_1_average_theta * pt_1 + vt_2_average_theta * pt_2;
   answer(4) = tangent_contact_work_theta;
 
   // // Compute directly work dissipated by friction impulse
@@ -876,7 +876,7 @@ static void compute_contact_work_and_status(
     } else {
       // std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
-      answer(4) = 2;  // sliding = 2
+      answer(5) = 2;  // sliding = 2
     }
   } else
     answer(5) = -1;  // undetermined = -1
@@ -939,8 +939,8 @@ static void compute_contact_work_and_status_2d(
   double tangent_contact_work = vt_1_average * pt_1;
   answer(2) = tangent_contact_work;
 
-  // double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
-  double tangent_contact_work_theta = vt_1_average * pt_1;
+  double vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
+  double tangent_contact_work_theta = vt_1_average_theta * pt_1;
   answer(4) = tangent_contact_work_theta;
 
   // // Compute directly work dissipated by friction impulse
