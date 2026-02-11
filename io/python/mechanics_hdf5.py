@@ -1342,10 +1342,7 @@ class MechanicsHdf5(object):
                 boundary_condition.attrs["omega"] = omega
                 boundary_condition.attrs["phi"] = phi
             elif bc_class == "BoundaryCondition":
-                if v is None:
-                    v = [
-                        0.0,
-                    ]
-                boundary_condition.attrs["v"] = v  # Might be None for "fixed"(val=0) BC
+                if v is not None:
+                    boundary_condition.attrs["v"] = v  # Might be None for "fixed"(val=0) BC
             else:
                 raise NotImplementedError

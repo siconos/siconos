@@ -1596,13 +1596,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
 
             elif bc_type == "BoundaryCondition":
-                if self.boundary_conditions()[name].attrs["v"] is None:
-                    # fixed bc
+                velocity_values= self.boundary_conditions()[name].attrs.get("v", None)
+                if velocity_values is None:
+                    # fixed bc with zero prescribed velocities
                     bc = bc_class(self.boundary_conditions()[name].attrs["indices"])
                 else:
+                    # fixed bc with zero prescribed velocities
                     bc = bc_class(
                         self.boundary_conditions()[name].attrs["indices"],
-                        self.boundary_conditions()[name].attrs["v"],
+                        velocity_values,
                     )
 
             # set bc to the ds1
