@@ -164,8 +164,9 @@ PYBIND11_MODULE(_collision, m) {
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
            py::arg("q0"), py::arg("v0"));
 
-  py::classh<siconos::collision::SiconosCollisionManager,
-             siconos::simulation::InteractionManager>(m, "SiconosCollisionManager")
+  py::class_ < siconos::collision::SiconosCollisionManager,
+	       std::shared_ptr<siconos::collision::SiconosCollisionManager>,
+	       siconos::simulation::InteractionManager>(m, "SiconosCollisionManager")
       .def("insertNonSmoothLaw",
            &siconos::collision::SiconosCollisionManager::insertNonSmoothLaw);
 
