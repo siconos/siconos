@@ -66,11 +66,16 @@
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
 #include "Topology.hpp"
-#include "siconos_debug.h"
-// #include "SiconosBulletDefines.h"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "siconos_debug.h"
+// #include "SiconosBulletDefines.h"
+
+#ifdef DEBUG_MESSAGES
+#include "BulletUtils.hpp"
+#endif
+
 
 siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisionManager(
     std::shared_ptr<SiconosBulletOptions> options)
@@ -237,9 +242,9 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp,
                                              int partId0, int index0) {
   DEBUG_BEGIN("siconosBulletAdjustInternalEdgeContacts \n");
 
-  DEBUG_EXPR(display_info_contact_point(cp);
-             display_info_collision_object(colObj0Wrap->getCollisionObject());
-             display_info_collision_object(colObj1Wrap->getCollisionObject()););
+  DEBUG_EXPR(siconos::collision::bullet::display_info_contact_point(cp);
+             siconos::collision::bullet::display_info_collision_object(colObj0Wrap->getCollisionObject());
+             siconos::collision::bullet::display_info_collision_object(colObj1Wrap->getCollisionObject()););
 
   // btAssert(colObj0->getCollisionShape()->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
   //  if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
@@ -261,7 +266,8 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp,
     auto ch2d = std::dynamic_pointer_cast<siconos::collision::SiconosConvexHull2d>(sshape);
 
     if (ch2d && ch2d->avoidInternalEdgeContact()) {
-      DEBUG_PRINTF("a Siconos ch2d shape and ch2d->avoidInternalEdgeContact() true \n");
+
+      DEBUG_PRINT("a Siconos ch2d shape and ch2d->avoidInternalEdgeContact() true \n");
 
       // Retrieve the first two points assuming that it corresponds to the edge of interest
 

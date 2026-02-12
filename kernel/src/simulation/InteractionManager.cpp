@@ -26,26 +26,42 @@
 #include "Relation.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
-#include "siconos_debug.h"
 #include "SiconosMemory.hpp"
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "siconos_debug.h"
 
 void siconos::simulation::InteractionManager::insertNonSmoothLaw(
     std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw, long unsigned int group1,
     long unsigned int group2) {
+  DEBUG_BEGIN("siconos::simulation::InteractionManager::insertNonSmoothLaw\n");
+
   // ublas::matrix size type is not the same on 32 bits and 64 bits
   auto maxgroup = std::max((siconos::modeling::NSLawMatrix::size_type)group1,
                            (siconos::modeling::NSLawMatrix::size_type)group2);
+
   _nslaws.resize(std::max(_nslaws.size1(), maxgroup + 1));
+  DEBUG_PRINTF("group1 = %li\t group2 = %li\n", group1, group2);
   _nslaws(group1, group2) = nslaw;
+  DEBUG_END("siconos::simulation::InteractionManager::insertNonSmoothLaw\n");
+
 }
 
 std::shared_ptr<siconos::modeling::NonSmoothLaw>
 siconos::simulation::InteractionManager::nonSmoothLaw(long unsigned int group1,
                                                       long unsigned int group2) {
+
+  DEBUG_BEGIN("siconos::simulation::InteractionManager::nonSmoothLaw\n");
+  DEBUG_PRINTF("group1 = %i\t group2 = %i\n", group1, group2);
   if (group1 < _nslaws.size1() && group2 < _nslaws.size2())
+
     return _nslaws(group1, group2);
   else
     return std::shared_ptr<siconos::modeling::NonSmoothLaw>();  // ??
+
+  DEBUG_END("siconos::simulation::InteractionManager::nonSmoothLaw");
 }
 
 bool siconos::simulation::interactions_manager::is_interaction_present(

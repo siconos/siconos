@@ -39,7 +39,18 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StaticBody.hpp"
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "BulletUtils.hpp"
+#endif
+
+
+
 
 namespace {  // anonymous because only for local use
              // ======================= Helper functions
@@ -113,9 +124,11 @@ bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
   // add some additional logic here that modified 'collides'
   auto nslaw = interactionManager->nonSmoothLaw(proxy0->m_collisionFilterGroup,
                                                 proxy1->m_collisionFilterGroup);
-
+  DEBUG_PRINTF("proxy0->m_collisionFilterGroup : %i ", proxy0->m_collisionFilterGroup);
+  DEBUG_PRINTF("proxy1->m_collisionFilterGroup : %i", proxy1->m_collisionFilterGroup);
   bool collides = (bool)nslaw;
 
+  DEBUG_PRINT(collides ? "collides true \n " : "collides false  \n");
   DEBUG_END("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
   return collides;
 }
@@ -1144,7 +1157,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     }
   }
 
-  DEBUG_EXPR(display_info_btConvexHullShape(*btch););
+  DEBUG_EXPR(siconos::collision::bullet::display_info_btConvexHullShape(*btch););
 
   // recalc bounding box
   btch->recalcLocalAabb();
@@ -1243,7 +1256,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       "updateShapePosition(...)\n");
   siconos::algebra::SiconosVector q(7);
   if (record->base) {
-    DEBUG_EXPR(record->base->display(););
+    DEBUG_EXPR(siconos::algebra::print(*record->base););
     if (record->base->size() == 7) {
       DEBUG_PRINT("3D DS\n");
       if (_options->extrapolationCoefficient) {
@@ -1271,7 +1284,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     q.setZero();
     q(3) = 1;
   }
-  DEBUG_PRINT("Position of the shape given to bullet:")
+  DEBUG_PRINT("Position of the shape given to bullet:");
   DEBUG_EXPR_WE(siconos::algebra::print(q););
 
   auto t = offsetTransform(q, record->contactor->offset);

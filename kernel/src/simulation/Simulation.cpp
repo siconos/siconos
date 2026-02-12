@@ -30,9 +30,9 @@
 // #include "Topology.hpp"
 //  for Debug
 //  #define DEBUG_BEGIN_END_ONLY
-//  #define DEBUG_NOCOLOR
-//  #define DEBUG_STDOUT
-//  #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::simulation::Simulation::Simulation(
@@ -203,7 +203,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
     if (change.typeOfChange ==
         siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
-      DEBUG_PRINTF("ds number : %i\n", ds->number());
+      DEBUG_PRINTF("ds number : %zu\n", ds->number());
       if (!DSG->properties(DSG->descriptor(ds)).osi) {
         if (_allOSI->size() == 0)
           THROW_EXCEPTION("Simulation::initialize - there is no osi in this Simulation !!");
@@ -341,7 +341,7 @@ void siconos::simulation::Simulation::initializeIndexSets() {
   for (auto osi : *_allOSI) {
     if (!osi->isInitialized()) {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
-      DEBUG_PRINT("osi->initialize\n")
+      DEBUG_PRINT("osi->initialize\n");
       osi->initialize();
       _numberOfIndexSets = std::max<int>(osi->numberOfIndexSets(), _numberOfIndexSets);
     }
