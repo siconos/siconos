@@ -922,7 +922,7 @@ static void compute_contact_work_and_status_2d(
   double vn_plus = (*inter->y(1))(0);
   double pn = (*inter->lambda(1))(0);
 
-  double vn_average = 1 / 2. * (vn_plus * vn_minus);
+  double vn_average = 1 / 2. * (vn_plus + vn_minus);
   double normal_contact_work = vn_average * pn;
   answer(1) = normal_contact_work;
 
