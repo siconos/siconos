@@ -23,12 +23,14 @@
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::collision::Contact5DR::computeh(const siconos::algebra::BlockVector& q,
-                                              Eigen::Ref<siconos::algebra::SiconosVector> y) {
+void siconos::collision::Contact5DR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEulerR::computeh(q, y);
+  NewtonEulerR::computeh(q1, q2, y);
 
   y(0) = distance();
 

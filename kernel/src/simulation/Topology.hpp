@@ -366,7 +366,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \return an Interaction
    */
   std::shared_ptr<siconos::modeling::Interaction> getInteraction(
-      unsigned int requiredNumber) const;
+      size_t requiredNumber) const;
 
   /** Get a interaction using its name
    *  \warning O(n) complexity

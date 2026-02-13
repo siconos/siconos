@@ -58,7 +58,7 @@ void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1) {
   DEBUG_BEGIN("siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts()\n");
   double Nx = (*_Nc)(0);
   double Ny = (*_Nc)(1);
@@ -178,8 +178,8 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 }
 
 void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2) {
   double Nx = (*_Nc)(0);
   double Ny = (*_Nc)(1);
   double Nz = (*_Nc)(2);

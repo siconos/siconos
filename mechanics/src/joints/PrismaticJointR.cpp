@@ -187,19 +187,16 @@ void siconos::joints::PrismaticJointR::computeH_NE_(double time,
 }
 
 void siconos::joints::PrismaticJointR::computeh(
-    const siconos::algebra::BlockVector& q0, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_PRINT(
-      "siconos::joints::PrismaticJointR::computeh(double time, "
-      "siconos::algebra::BlockVector& "
-      "q0, siconos::algebra::SiconosVector& y) \n");
-  auto q1 = (q0.getAllVect())[0];
-  double X1 = (*q1)(0);
-  double Y1 = (*q1)(1);
-  double Z1 = (*q1)(2);
-  double q10 = (*q1)(3);
-  double q11 = (*q1)(4);
-  double q12 = (*q1)(5);
-  double q13 = (*q1)(6);
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -208,8 +205,7 @@ void siconos::joints::PrismaticJointR::computeh(
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
+  if (q2) {
     X2 = (*q2)(0);
     Y2 = (*q2)(1);
     Z2 = (*q2)(2);
@@ -224,14 +220,6 @@ void siconos::joints::PrismaticJointR::computeh(
   y(2) = H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
   y(3) = H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
   y(4) = H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
-
-  DEBUG_EXPR(siconos::algebra::print(y));
-  DEBUG_PRINTF(" siconos::algebra::normInf(y) = %12.8e \n", siconos::algebra::normInf(y));
-
-  // double norm = 0;
-  // for(int ii = 0; ii < 5; ii++)
-  //   norm += y(ii) * y(ii);
-  // std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 }
 
 /* sympy expression:
@@ -647,7 +635,7 @@ void siconos::joints::PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double
 
 /** Compute the vector of linear and angular positions of the degrees of freedom */
 void siconos::joints::PrismaticJointR::computehDoF(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   // Normally we fill y starting at axis up to the number of columns,
@@ -690,7 +678,7 @@ void siconos::joints::PrismaticJointR::computehDoF(
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PrismaticJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,

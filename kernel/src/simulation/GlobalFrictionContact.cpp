@@ -154,7 +154,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLa
 void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
   if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
 
-  size_t offset = 0;
+  siconos::algebra::Index offset = 0;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
@@ -410,7 +410,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
   // y and lambda vectors
   //   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
 
-  size_t pos = 0;
+  siconos::algebra::Index pos = 0;
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend;

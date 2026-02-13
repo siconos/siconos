@@ -299,7 +299,7 @@ siconos::algebra::SiconosVector siconos::algebra::io::readVectorFromJson(
   auto vec_size = jin.size();
   if (first.is_array()) vec_size *= first.size();
   siconos::algebra::SiconosVector vec{vec_size};
-  size_t element_index = 0;
+  Index element_index = 0;
   for (const auto& element : jin) {
     if (element.is_array()) {
       for (const auto& sub_element : element)

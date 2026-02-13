@@ -287,7 +287,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
   switch (_storageType) {
     case NM_SPARSE: {
       if (update) {
-        size_t sizeM = _dimRow;
+        auto sizeM = _dimRow;
         DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 
         // We choose a triplet matrix format for inserting values.
@@ -342,7 +342,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
   switch (_storageType) {
     case NM_SPARSE: {
       if (update) {
-        size_t sizeM = _dimRow;
+        auto sizeM = _dimRow;
         DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 
         // We choose a triplet matrix format for inserting values.

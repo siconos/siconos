@@ -34,13 +34,12 @@ class TimeDiscretisationEvent : public Event {
 
   /** Turn this on to limit memory print of event (no swap of the nsds during process ...*/
   bool noSaveInMemory_{false};
-  
+
  public:
   /** constructor with time value as a parameter
    *  \param time starting time (a double)
    */
   TimeDiscretisationEvent(double time) : Event(time, EventType::TD){};
-  ;
 
   /** destructor
    */
@@ -60,7 +59,7 @@ class TimeDiscretisationEvent : public Event {
       use this at your own risk, many integrators needs previous values
    *  to integrate properly
    */
-  void noSaveInMemory() {noSaveInMemory_ = true;};
+  void noSaveInMemory() { noSaveInMemory_ = true; };
 };
 
 // Register the event into the factory

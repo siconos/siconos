@@ -94,7 +94,7 @@ class KneeJointR : public NewtonEulerJointR {
           std::nullopt) override;
 
   /** Perform some checks on the initial conditions. */
-  void checkInitPos(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+  void checkInitPos(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
                     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&
                         q2 = std::nullopt);
 
@@ -125,26 +125,18 @@ class KneeJointR : public NewtonEulerJointR {
   };
 
   /**
-      to compute the output y = h(q) of the Relation
+     to compute the output y = h(q) of the Relation
 
-      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
       \param[in,out] y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector& q,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
-
-  /**
-    to compute the output y = h(q) of the Relation
-
-   \param[in] q1 generalized coordinates vector of the first dynamical system involved
-   in the relation
-   \param[in] q2 generalized coordinates vector of the second dynamical system
-   involved in the relation
-   \param[in,out] y the resulting vector
- */
-  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
@@ -154,32 +146,31 @@ class KneeJointR : public NewtonEulerJointR {
 // Free functions for knee joints
 
 namespace knee {
-void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
                const siconos::algebra::SiconosVector3& coords1,
                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
                const siconos::algebra::SiconosVector3& coords2,
                Eigen::Ref<siconos::algebra::SiconosVector> result);
 
-void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
-                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
                       const siconos::algebra::SiconosVector3& coords2,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_dot_for1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+void computeH_dot_for1DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot1,
                          const siconos::algebra::SiconosVector3& coords1,
                          Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot1,
                          const siconos::algebra::SiconosVector3& coords1,
-                         const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot2,
+                         const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot2,
                          const siconos::algebra::SiconosVector3& coords2,
                          Eigen::Ref<siconos::algebra::MapType> result);
-
 
 }  // namespace knee
 

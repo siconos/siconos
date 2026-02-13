@@ -26,12 +26,14 @@
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::collision::ContactR::computeh(const siconos::algebra::BlockVector& q,
-                                            Eigen::Ref<siconos::algebra::SiconosVector> y) {
+void siconos::collision::ContactR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("siconos::collision::ContactR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEuler3DR::computeh(q, y);
+  NewtonEuler3DR::computeh(q1, q2, y);
 
   y(0) = distance();
 

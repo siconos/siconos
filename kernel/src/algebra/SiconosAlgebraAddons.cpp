@@ -19,6 +19,7 @@
 #include "SiconosAlgebraAddons.hpp"
 
 #include <random>
+#include <utility>
 
 siconos::algebra::SiconosVector siconos::algebra::normInfByColumn(
     const siconos::algebra::SiconosDenseMatrix& m) {
@@ -68,12 +69,13 @@ void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* 
   const SparseIndex* inner = m.innerIndexPtr();  // row indices
   const double* values = m.valuePtr();           // non-zero values
 
-  int cols = m.cols();
+  Index cols = m.cols();
 
-  for (int j = 0; j < cols; ++j) {
-    for (int idx = outer[j]; idx < outer[j + 1]; ++idx) {
-      // Insert triplet directly, no threshold check
-      cs_entry(triplet, inner[idx] + row_off, j + col_off, values[idx]);
+  for (Index j = 0; j < cols; ++j) {
+    for (auto idx = outer[j]; idx < outer[j + 1]; ++idx) {
+      // Insert triplet directly, no threshold
+      size_t idx_s = static_cast<size_t>(idx);
+      cs_entry(triplet, inner[idx_s] + row_off, j + col_off, values[idx_s]);
     }
   }
 }
@@ -81,8 +83,8 @@ void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* 
 void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet,
                                    size_t row_off, size_t col_off, double tol) {
   assert(triplet);
-  size_t nrow = m.rows();
-  size_t ncol = m.cols();
+  size_t nrow = static_cast<size_t>(m.rows());
+  size_t ncol = static_cast<size_t>(m.cols());
 
   double* arr = m.data();
   for (size_t j = 0; j < ncol; ++j) {
@@ -111,8 +113,9 @@ siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatr
 
   // --- Generate keys (i,j) encoded in an uint64_t
   std::vector<uint64_t> keys;
-  keys.reserve(nnz * 1.1);
-  while (static_cast<SparseIndex>(keys.size()) < nnz) {
+  assert(nnz >= 0);
+  keys.reserve(static_cast<size_t>(nnz * 1.1));
+  while (std::ssize(keys) < nnz) {
     uint64_t key =
         (static_cast<uint64_t>(rowDist(rng)) << 32) | static_cast<uint32_t>(colDist(rng));
     keys.push_back(key);
@@ -123,7 +126,7 @@ siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatr
   keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
 
   // --- Add values to match nnz
-  while (static_cast<SparseIndex>(keys.size()) < nnz) {
+  while (std::ssize(keys) < nnz) {
     uint64_t key =
         (static_cast<uint64_t>(rowDist(rng)) << 32) | static_cast<uint32_t>(colDist(rng));
     if (!std::binary_search(keys.begin(), keys.end(), key)) {
@@ -134,7 +137,9 @@ siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatr
 
   // --- Generate triplets
   std::vector<Eigen::Triplet<double>> triplets;
-  triplets.reserve(nnz);
+  assert(nnz >= 0);
+  triplets.reserve(static_cast<size_t>(nnz));
+
   for (uint64_t key : keys) {
     Index i = static_cast<Index>(key >> 32);
     Index j = static_cast<Index>(key & 0xffffffffu);

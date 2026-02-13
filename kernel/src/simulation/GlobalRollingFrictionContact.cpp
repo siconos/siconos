@@ -164,7 +164,7 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
     // fill _q
     if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
 
-    size_t offset = 0;
+    siconos::algebra::Index offset = 0;
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
       auto ds = DSG0.bundle(*dsi);

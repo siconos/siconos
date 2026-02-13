@@ -50,7 +50,7 @@ siconos::modeling::NewtonEuler1DR::NewtonEuler1DR() : NewtonEulerR{} {
 }
 
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1) {
   double Nx = (*_Nc)(0);
   double Ny = (*_Nc)(1);
   double Nz = (*_Nc)(2);
@@ -99,8 +99,8 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 }
 
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2) {
   double Nx = (*_Nc)(0);
   double Ny = (*_Nc)(1);
   double Nz = (*_Nc)(2);
@@ -283,12 +283,13 @@ double siconos::modeling::NewtonEuler1DR::distance() const {
 }
 
 void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
+    double time, const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
 
   // Update pc1 based on q0 and relPc1
-  auto& q1 = *q0.vector(0);
   boost::math::quaternion<double> qq1(q1(3), q1(4), q1(5), q1(6));
   boost::math::quaternion<double> qpc1(0, (*_relPc1)(0), (*_relPc1)(1), (*_relPc1)(2));
 
@@ -298,17 +299,16 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
   (*_Pc1)(1) = qpc1.R_component_3() + q1(1);
   (*_Pc1)(2) = qpc1.R_component_4() + q1(2);
 
-  if (q0.numberOfBlocks() > 1) {
+  if (q2) {
     // Update pc2 based on q0 and relPc2
-    auto& q2 = *q0.vector(1);
-    boost::math::quaternion<double> qq2(q2(3), q2(4), q2(5), q2(6));
+    boost::math::quaternion<double> qq2((*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6));
     boost::math::quaternion<double> qpc2(0, (*_relPc2)(0), (*_relPc2)(1), (*_relPc2)(2));
 
     // apply q2 rotation and add
     qpc2 = qq2 * qpc2 / qq2;
-    (*_Pc2)(0) = qpc2.R_component_2() + q2(0);
-    (*_Pc2)(1) = qpc2.R_component_3() + q2(1);
-    (*_Pc2)(2) = qpc2.R_component_4() + q2(2);
+    (*_Pc2)(0) = qpc2.R_component_2() + (*q2)(0);
+    (*_Pc2)(1) = qpc2.R_component_3() + (*q2)(1);
+    (*_Pc2)(2) = qpc2.R_component_4() + (*q2)(2);
 
     // same for normal
     boost::math::quaternion<double> qnc(0, (*_relNc)(0), (*_relNc)(1), (*_relNc)(2));
@@ -316,10 +316,10 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
     (*_Nc)(0) = qnc.R_component_2();
     (*_Nc)(1) = qnc.R_component_3();
     (*_Nc)(2) = qnc.R_component_4();
+    NewtonEulerR::computeh(q1, q2, y);
   } else {
     *_Pc2 = *_relPc2;
     *_Nc = *_relNc;
+    NewtonEulerR::computeh(q1, std::nullopt, y);
   }
-
-  NewtonEulerR::computeh(q0, y);
 }

@@ -148,20 +148,16 @@ auto normInf(const Eigen::MatrixBase<Derived>& mat) {
 
 // Specialization for sparse matrices (uses iterators)
 inline double normInf(const SiconosSparseMatrix& mat) {
-  double maxNorm = 0.0;
   // Warn: col-major
-  std::vector<double> rowSums(mat.rows(), 0.0);
-
+  siconos::algebra::SiconosVector rowSums{mat.rows()};
+  rowSums.setZero();
   for (int k = 0; k < mat.outerSize(); ++k) {
     // Sum over each row
     for (SiconosSparseMatrix::InnerIterator it(mat, k); it; ++it) {
-      rowSums[it.row()] += std::abs(it.value());
+      rowSums(it.row()) += std::abs(it.value());
     }
   }
-  for (double rowSum : rowSums) {
-    maxNorm = std::max(maxNorm, rowSum);
-  }
-  return maxNorm;
+  return rowSums.maxCoeff();
 }
 
 /** Set a sub-block of a matrix

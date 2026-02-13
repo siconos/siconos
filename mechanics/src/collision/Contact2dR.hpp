@@ -36,14 +36,6 @@ class Contact2dR : public siconos::modeling::Lagrangian2d2DR {
   std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordA{nullptr};
   std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordB{nullptr};
 
-  // /** to compute the output y = h(q,z) of the Relation
-  //     \param q coordinates of the dynamical systems involved in the relation
-  //     \param z user defined parameters (optional)
-  //     \param y the resulting vector
-  // */
-  // virtual void computeh(const siconos::algebra::BlockVector& q,
-  // siconos::algebra::BlockVector& z, SiconosVector& y);
-
   /** Update this contact point information.
    *
    *  \param pos1 Position on ds1 in ds1 frame.
@@ -57,8 +49,9 @@ class Contact2dR : public siconos::modeling::Lagrangian2d2DR {
       const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
       const siconos::algebra::SiconosVector& normal);
   virtual void preDelete() {}
-  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
-
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif

@@ -43,8 +43,8 @@ class PivotJointR : public KneeJointR {
 
   /** Cumulative number of twists around the joint relative to initial
    * angular difference. */
-  int _twistCount{0};     // TODO: Should be in a graph work vector?
-  int _previousAngle{0};  // Needed to track _twistCount, TODO: work vector?
+  int _twistCount{0};        // TODO: Should be in a graph work vector?
+  double _previousAngle{0};  // Needed to track _twistCount, TODO: work vector?
 
   void buildOrthonormalBase();
 
@@ -110,24 +110,16 @@ class PivotJointR : public KneeJointR {
   /**
      to compute the output y = h(q) of the Relation
 
-     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
-    in the relation \param[in,out] y the resulting vector
- */
-  void computeh(const siconos::algebra::BlockVector& q,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
-
-  /**
-    to compute the output y = h(q) of the Relation
-
-   \param[in] q1 generalized coordinates vector of the fist dynamical system involved
-   in the relation
-   \param[in] q2 generalized coordinates vector of the second dynamical system
-   involved in the relation
-   \param[in,out] y the resulting vector
- */
-  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
   /**
        Get the number of constraints defined in the joint
 
@@ -155,14 +147,14 @@ class PivotJointR : public KneeJointR {
   };
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
@@ -172,16 +164,16 @@ class PivotJointR : public KneeJointR {
 
 // Free functions for pivot joints
 namespace pivot {
-void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
-                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
                       const siconos::algebra::SiconosVector3& coords2,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,
                       const siconos::algebra::SiconosVector& c2q,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,

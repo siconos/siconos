@@ -183,7 +183,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
 
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) {}
 
@@ -195,7 +195,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
   
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                               const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                               const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
                                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) {}

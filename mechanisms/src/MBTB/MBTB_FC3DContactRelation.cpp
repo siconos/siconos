@@ -34,7 +34,9 @@ siconos::mechanisms::MBTB_FC3DContactRelation::MBTB_FC3DContactRelation(
 
 /*This function has to compute the distance between the objects*/
 void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
-    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>&,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
   //  auto aux = *itDS;
   // if(mbtb::data::sPrintDist)

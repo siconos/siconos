@@ -172,18 +172,21 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
         "belong to the OSI.");
 
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  // For SolidLinearTIDS systems, we define W by blocks: W = [M h*theta*B^T; h*theta*B -S]
-  // so that the discretised system is W v_{\sigma} = RHS:
-  // $ \begin{bmatrix}
-  //      \boldsymbol M & h\theta {\boldsymbol B}^T \\
-  //      h\theta \boldsymbol B & - \boldsymbol S
-  //      \end{bmatrix}  \begin{bmatrix} v_{k+\theta} \\
-  //      \sigma_{k+\theta}
-  //      \end{bmatrix}}
-  //      = \begin{bmatrix}
-  //      \boldsymbol M v_{k} + h\theta F_{ext,k+\theta} + \theta \boldsymbol H p_{N,k+1}\\
-  //      -\boldsymbol S \sigma_{k} -h\theta z_{k+\theta}
-  //      \end{bmatrix}$
+
+  /* For SolidLinearTIDS systems, we define W by blocks: W = [M h*theta*B^T; h*theta*B -S]
+   so that the discretised system is W v_{\sigma} = RHS:
+   $ \begin{bmatrix}
+        \boldsymbol M & h\theta {\boldsymbol B}^T \\
+        h\theta \boldsymbol B & - \boldsymbol S
+        \end{bmatrix}  \begin{bmatrix} v_{k+\theta} \\
+        \sigma_{k+\theta}
+        \end{bmatrix}}
+        = \begin{bmatrix}
+        \boldsymbol M v_{k} + h\theta F_{ext,k+\theta} + \theta \boldsymbol H p_{N,k+1}\\
+        -\boldsymbol S \sigma_{k} -h\theta z_{k+\theta}
+        \end{bmatrix}$
+  */
+
   auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
   assert(solid);
 

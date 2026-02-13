@@ -50,13 +50,12 @@ class CouplerJointR : public NewtonEulerJointR {
 
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
-  void resolveVectors(
-      const siconos::algebra::SiconosVector* q1,
-      const siconos::algebra::SiconosVector* q2,
-      const siconos::algebra::SiconosVector*& v1_1,
-      const siconos::algebra::SiconosVector*& v1_2,
-      const siconos::algebra::SiconosVector*& v2_1,
-      const siconos::algebra::SiconosVector*& v2_2) const;
+  void resolveVectors(const siconos::algebra::SiconosVector* q1,
+                      const siconos::algebra::SiconosVector* q2,
+                      const siconos::algebra::SiconosVector*& v1_1,
+                      const siconos::algebra::SiconosVector*& v1_2,
+                      const siconos::algebra::SiconosVector*& v2_1,
+                      const siconos::algebra::SiconosVector*& v2_2) const;
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -90,26 +89,18 @@ class CouplerJointR : public NewtonEulerJointR {
   ~CouplerJointR() noexcept = default;
 
   /**
-      to compute the output y = h(q) of the Relation
+     to compute the output y = h(q) of the Relation
 
-      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
       \param[in,out] y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector& q,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
-  /**
-    to compute the output y = h(q) of the Relation
-
-    \param[in] q1 generalized coordinates vector of the fist dynamical system involved
-    in the relation
-    \param[in] q2 generalized coordinates vector of the second dynamical system
-    involved in the relation
-    \param[in,out] y the resulting vector
-*/
-
-  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /* Return the joint DoF index assigned to the first DoF. */
   siconos::algebra::Index dof1() { return _dof1; }
@@ -231,16 +222,16 @@ class CouplerJointR : public NewtonEulerJointR {
 
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                               const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                               Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
-                               unsigned int axis = 0) override;
+  virtual void computeJachqDoF(
+      siconos::modeling::Interaction& inter,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis = 0) override;
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);

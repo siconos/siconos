@@ -39,10 +39,12 @@ double siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::dis
 }
 
 void siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::computeh(
-    const siconos::algebra::BlockVector &q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  double q_0 = q(0);
-  double q_1 = q(1);
-  double q_2 = q(2);
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  double q_0 = q1(0);
+  double q_1 = q1(1);
+  double q_2 = q1(2);
 
   y(0) = distance(q_0, q_1, q_2, r);
   (*_Pc1)(0) = q_0 - r * n1;

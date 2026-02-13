@@ -883,7 +883,7 @@ static inline int orthoBaseFromVector(double* Ax, double* Ay, double* Az, double
   (*Ay) /= normA;
   (*Az) /= normA;
 
-  double sign = copysignf(1.0, *Az);
+  double sign = copysign(1.0, *Az);
   const double a = -1.0 / (sign + *Az);
   const double b = *Ax * *Ay * a;
 

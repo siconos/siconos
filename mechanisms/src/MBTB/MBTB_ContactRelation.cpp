@@ -33,11 +33,10 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 }
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
-    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_PRINT(
-      "siconos::mechanisms::MBTB_ContactRelation::computeh(double time, "
-      "BlockVector& q0, "
-      "SiconosVector& y)\n");
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>&,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  DEBUG_PRINT("siconos::mechanisms::MBTB_ContactRelation::computeh()\n");
 
   printf("sPrintDist=%d\t", mbtb::data::sPrintDist);
   if (mbtb::data::sPrintDist) {
@@ -133,8 +132,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
     *deltaPC = *_Pc1 - *_Pc2;
     double realdist = (deltaPC->norm());
     printf("    Distance between contact points =%lf \n", realdist);
-    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", (*_Nc)(0), (*_Nc)(1),
-           (*_Nc)(2));
+    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", (*_Nc)(0), (*_Nc)(1), (*_Nc)(2));
   }
   //}
   y(0) = _pContact->_dist;

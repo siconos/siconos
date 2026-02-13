@@ -116,7 +116,6 @@ class CylindricalJointR : public NewtonEulerJointR {
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
           std::nullopt) override;
 
-
   /** \return the axis of rotation.
    *  Retrieve a normal in the direction of a 0-indexed free
    *  axis. Useful for calculating velocities in the axis, or for
@@ -132,32 +131,24 @@ class CylindricalJointR : public NewtonEulerJointR {
    */
   virtual siconos::algebra::SiconosVector3 normalDoF(
       const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt, int axis = 0,
-      bool absoluteRef = true) override;
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      int axis = 0, bool absoluteRef = true) override;
 
   int twistCount() { return _twistCount; }
 
   /**
      to compute the output y = h(q) of the Relation
 
-     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
-    in the relation \param[in,out] y the resulting vector
- */
-  void computeh(const siconos::algebra::BlockVector& q,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
-
-  /**
-     to compute the output y = h(q) of the Relation
-
-    \param[in] q1 generalized coordinates vector of the fist dynamical system involved
-    in the relation
-    \param[in] q2 generalized coordinates vector of the second dynamical system
-    involved in the relation
-    \param[in,out] y the resulting vector
- */
-  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
@@ -193,16 +184,16 @@ class CylindricalJointR : public NewtonEulerJointR {
   }
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                               const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-                               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                               Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
-                               unsigned int axis = 0) override;
+  virtual void computeJachqDoF(
+      siconos::modeling::Interaction& inter,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
   }

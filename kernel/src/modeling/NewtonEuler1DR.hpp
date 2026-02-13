@@ -84,10 +84,10 @@ class NewtonEuler1DR : public NewtonEulerR {
 
  private:
   void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>&q1);
   void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q2);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>&q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>&q2);
 
  public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
@@ -119,11 +119,16 @@ class NewtonEuler1DR : public NewtonEulerR {
       to compute the output y = h(t,q,z) of the Relation
       with the relative contact points
       \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
    */
-  void computehFromRelativeContactPoints(double time, const siconos::algebra::BlockVector &q0,
-                                         siconos::algebra::SiconosVector &y);
+  void computehFromRelativeContactPoints(
+      double time, const Eigen::Ref<const siconos::algebra::SiconosVector7> &q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>> &q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

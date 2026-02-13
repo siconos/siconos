@@ -67,13 +67,8 @@ PYBIND11_MODULE(_joints, m) {
            py::arg("axis") = 0)
       .def("numberOfConstraints", &siconos::joints::NewtonEulerJointR::numberOfConstraints,
            "To get the number of constraints in the joint")
-      .def("computeh",
-           py::overload_cast<
-               const Eigen::Ref<const siconos::algebra::SiconosVector>&,
-               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
-               Eigen::Ref<siconos::algebra::SiconosVector>>(
-               &siconos::joints::NewtonEulerJointR::computeh),
-           py::arg("q1"), py::arg("q2") = std::nullopt, py::arg("y"),
+      .def("computeh", &siconos::joints::NewtonEulerJointR::computeh, py::arg("q1"),
+           py::arg("q2") = std::nullopt, py::arg("y"),
            "to compute the output y = h(q) of the Relation");
 
   py::class_<siconos::joints::CylindricalJointR,

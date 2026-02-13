@@ -40,10 +40,10 @@ class NewtonEuler3DR : public NewtonEuler1DR {
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
   void FC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
   void FC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q2);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
 
  public:
   /** destructor */

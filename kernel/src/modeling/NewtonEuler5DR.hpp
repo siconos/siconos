@@ -34,10 +34,10 @@ class NewtonEuler5DR : public NewtonEuler1DR {
   ACCEPT_SERIALIZATION(NewtonEuler5DR);
 
   void RFC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
   void RFC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q2);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
 
  protected:
  public:

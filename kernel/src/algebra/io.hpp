@@ -201,7 +201,7 @@ struct adl_serializer<siconos::algebra::SiconosVector> {
 
   static void from_json(const ordered_json &j, siconos::algebra::SiconosVector &vec) {
     vec = siconos::algebra::SiconosVector(j.size());
-    for (size_t i = 0; i < j.size(); ++i) vec(i) = j.at(i).get<double>();
+    for (siconos::algebra::Index i = 0; i < std::ssize(j); ++i) vec(i) = j.at(i).get<double>();
   }
 };
 }  // namespace nlohmann

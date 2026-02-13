@@ -147,23 +147,16 @@ void siconos::modeling::NewtonEulerR::computeH_NE_dot(
   }
 }
 
-void siconos::modeling::NewtonEulerR::computeh(const siconos::algebra::BlockVector& q,
-                                               Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  siconos::algebra::matrixBlockVector_prod(*H_NE_view_, q, y, true);
-  if (haseVector_) y += *eVector_view_;
-}
-
 void siconos::modeling::NewtonEulerR::computeh(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Default implementation: convert to BlockVector and call existing method
-  siconos::algebra::BlockVector q0;
-  q0.insertPtr(std::make_shared<siconos::algebra::SiconosVector>(q1));
+  y.noalias() = H_NE_view_->leftCols(7) * q1;
   if (q2) {
-    q0.insertPtr(std::make_shared<siconos::algebra::SiconosVector>(*q2));
+    y.noalias() += H_NE_view_->rightCols(7) * *q2;
   }
-  computeh(q0, y);
+  if (haseVector_) y += *eVector_view_;
 }
 
 void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& inter,
@@ -173,9 +166,13 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
 
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(derivativeNumber);
-  auto& q = *ds_vars[siconos::tools::enum_to_index(ds_var::q0)];
+  auto q = ds_vars[siconos::tools::enum_to_index(ds_var::q0)];
   if (derivativeNumber == 0) {
-    computeh(q, y);
+    if (q->numberOfBlocks() == 2)
+      computeh(*q->vector(0), *q->vector(1), y);
+    else
+      computeh(*q->vector(0), std::nullopt, y);
+
   } else {
     if (derivativeNumber == 1) {
       assert(H_NE_prod_T_);

@@ -373,7 +373,6 @@ class SiconosConvexHull2d : public SiconosShape,
                             public std::enable_shared_from_this<SiconosConvexHull2d> {
  private:
   SiconosConvexHull2d() = delete;
-  ;
 
  protected:
   ACCEPT_SERIALIZATION(SiconosConvexHull2d);

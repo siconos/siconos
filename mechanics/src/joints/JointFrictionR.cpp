@@ -64,14 +64,8 @@ siconos::joints::JointFrictionR::JointFrictionR(
          _joint->numberOfDoF());
 }
 
-void siconos::joints::JointFrictionR::computeh(const siconos::algebra::BlockVector& q,
-                                               Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  // Velocity-level constraint, no position-level h
-  y.setZero();
-}
-
 void siconos::joints::JointFrictionR::computeh(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Velocity-level constraint, no position-level h
@@ -91,11 +85,11 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
 
   // Compute the jacobian for the required range of axes
   if (q0.numberOfBlocks() > 1) {
-    _joint->computeJachqDoF(inter, *q0.vector(0), *q0.vector(1),
-                           *jacobianhOver_q_Tmp, _axisMin);
+    _joint->computeJachqDoF(inter, *q0.vector(0), *q0.vector(1), *jacobianhOver_q_Tmp,
+                            _axisMin);
   } else {
-    _joint->computeJachqDoF(inter, *q0.vector(0), std::nullopt,
-                           *jacobianhOver_q_Tmp, _axisMin);
+    _joint->computeJachqDoF(inter, *q0.vector(0), std::nullopt, *jacobianhOver_q_Tmp,
+                            _axisMin);
   }
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
@@ -108,11 +102,9 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
     }
 }
 
-unsigned int siconos::joints::JointFrictionR::numberOfConstraints() const {
-  return _axis->size();
-}
+size_t siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }
 unsigned int siconos::joints::JointFrictionR::axis(unsigned int _index) {
   return _axis->at(_index);
 }
 
-unsigned int siconos::joints::JointFrictionR::numberOfAxes() { return _axis->size(); }
+size_t siconos::joints::JointFrictionR::numberOfAxes() { return _axis->size(); }

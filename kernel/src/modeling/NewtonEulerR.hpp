@@ -138,7 +138,7 @@ class NewtonEulerR : public Relation {
 
  public:
   /** Default and only constructor */
-  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR) {};
+  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR){};
 
   /** destructor */
   virtual ~NewtonEulerR() noexcept = default;
@@ -234,15 +234,6 @@ class NewtonEulerR : public Relation {
   /**
       to compute the output y = h(q) of the Relation
 
-      \param[in] q generalized coordinates vector of the concerned dynamical systems
-      \param[in,out] y the resulting vector
-  */
-  virtual void computeh(const siconos::algebra::BlockVector& q,
-                        Eigen::Ref<siconos::algebra::SiconosVector> y);
-
-  /**
-     to compute the output y = h(q) of the Relation
-
       \param[in] q1 generalized coordinates vector of the fist dynamical system involved
       in the relation
       \param[in] q2 generalized coordinates vector of the second dynamical system
@@ -250,7 +241,7 @@ class NewtonEulerR : public Relation {
       \param[in,out] y the resulting vector
   */
   virtual void computeh(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y);
 

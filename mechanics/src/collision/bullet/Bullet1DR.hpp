@@ -37,13 +37,18 @@ class Bullet1DR : public siconos::modeling::NewtonEuler1DR {
   std::shared_ptr<btManifoldPoint> contactPoint() const { return _contactPoints; };
 
   /**
-       to compute the output y = h(q) of the Relation
+     to compute the output y = h(q) of the Relation
 
-       \param[in] q generalized coordinates vector of the dynamical systems (at most 2)
-     involved in the relation \param[in,out] y the resulting vector
-   */
-  void computeh(const siconos::algebra::BlockVector &q,
-                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 };
 }  // namespace siconos::collision::bullet
 #endif

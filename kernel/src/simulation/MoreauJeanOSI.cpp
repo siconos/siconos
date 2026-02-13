@@ -1702,7 +1702,7 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
   auto number_of_ds = _simulation->nonSmoothDynamicalSystem()->getNumberOfDS();
   siconos::algebra::SiconosMatrix workForces{number_of_ds, 2};
 
-  size_t cnt_ds = 0;
+  siconos::algebra::Index cnt_ds = 0;
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {

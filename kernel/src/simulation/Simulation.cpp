@@ -30,9 +30,9 @@
 // #include "Topology.hpp"
 //  for Debug
 //  #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::simulation::Simulation::Simulation(
@@ -121,11 +121,11 @@ siconos::simulation::Simulation::oneStepNSProblem(int Id) {
 void siconos::simulation::Simulation::updateIndexSets() {
   DEBUG_BEGIN("siconos::simulation::Simulation::updateIndexSets()\n");
   // update I0 indices
-  unsigned int nindexsets = _nsds->topology()->indexSetsSize();
+  auto nindexsets = _nsds->topology()->indexSetsSize();
 
   DEBUG_PRINTF("  nindexsets = %d\n", nindexsets);
   if (nindexsets > 1) {
-    for (unsigned int i = 1; i < nindexsets; ++i) {
+    for (decltype(nindexsets) i = 1; i < nindexsets; ++i) {
       updateIndexSet(i);
       _nsds->topology()->indexSet(i)->update_vertices_indices();
       _nsds->topology()->indexSet(i)->update_edges_indices();
@@ -341,7 +341,7 @@ void siconos::simulation::Simulation::initializeIndexSets() {
   for (auto osi : *_allOSI) {
     if (!osi->isInitialized()) {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
-      DEBUG_PRINT("osi->initialize\n");
+      DEBUG_PRINT("osi->initialize\n")
       osi->initialize();
       _numberOfIndexSets = std::max<int>(osi->numberOfIndexSets(), _numberOfIndexSets);
     }

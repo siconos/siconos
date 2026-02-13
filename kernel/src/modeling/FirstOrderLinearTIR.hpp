@@ -63,7 +63,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
 
  public:
   /** minimal constuctor. Use setXXX functions to fix B,C, D ... */
-  FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR) {};
+  FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR){};
 
   /** Build a time-invariant coeff. linear relation
    *
@@ -120,25 +120,6 @@ class FirstOrderLinearTIR : public FirstOrderR {
   /** True if e(t) is taken into account */
   bool haseVector() const { return haseVector_; }
 
-  // /** default function to compute h = y = Cx(t) + Fz + Dlambda + e
-  //  *
-  //  *  \param x
-  //  *  \param lambda
-  //  *  \param z
-  //  *  \param y the resulting vector
-  //  */
-  // void computeh(const siconos::algebra::BlockVector &x,
-  //               const siconos::algebra::SiconosVector &lambda,
-  //               siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
-
-  // /** default function to compute g = Blambda
-  //  *
-  //  *  \param lambda
-  //  *  \param r non-smooth input
-  //  */
-  // void computeg(const siconos::algebra::SiconosVector &lambda,
-  //               siconos::algebra::BlockVector &r);
-
   /** default function to compute y
    *
    *  \param time current time
@@ -166,7 +147,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   inline bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  void computeJach(double time, Interaction& inter) final {};
+  void computeJach(double time, Interaction& inter) final{};
 };
 }  // namespace siconos::modeling
 

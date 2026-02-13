@@ -229,109 +229,16 @@ void siconos::joints::CylindricalJointR::computeH_NE_(
 }
 
 void siconos::joints::CylindricalJointR::computeh(
-    const siconos::algebra::BlockVector& q0, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  auto q1 = (q0.getAllVect())[0];
-  double X1 = (*q1)(0);
-  double Y1 = (*q1)(1);
-  double Z1 = (*q1)(2);
-  double q10 = (*q1)(3);
-  double q11 = (*q1)(4);
-  double q12 = (*q1)(5);
-  double q13 = (*q1)(6);
-  double X2 = 0;
-  double Y2 = 0;
-  double Z2 = 0;
-  double q20 = 1;
-  double q21 = 0;
-  double q22 = 0;
-  double q23 = 0;
-
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
-    X2 = (*q2)(0);
-    Y2 = (*q2)(1);
-    Z2 = (*q2)(2);
-    q20 = (*q2)(3);
-    q21 = (*q2)(4);
-    q22 = (*q2)(5);
-    q23 = (*q2)(6);
-  }
-
-  /* sympy expression:
-   *
-   * HP = (G2-G1) + rot(G2P0, q2) - rot(G1P0, q1)
-   * H1 = np.dot(rot(V1,q1), HP)
-   * H2 = np.dot(rot(V2,q1), HP)
-   *
-   * i.e., the path formed by the 3 vectors, projected onto the plane
-   * V1,V2 orthogonal to V, should sum to zero.
-   *
-   * q2to1 = qmul(q1,qinv(qmul(q2,cq2q10)))
-   *
-   * H3 = np.dot(rot(V1,q1), q2to1)
-   * H4 = np.dot(rot(V2,q1), q2to1)
-   *
-   * i.e., the rotation from q2 to q1, corrected for initial offset,
-   * should be zero when projected onto the plane V1,V2 orthogonal to V
-   * and rotated into q1 frame.
-   */
-
-  const double x0 = axis1_(0) * q11 + axis1_(1) * q12 + axis1_(2) * q13;
-  const double x1 = axis1_(0) * q10 - axis1_(1) * q13 + axis1_(2) * q12;
-  const double x2 = axis1_(0) * q13 + axis1_(1) * q10 - axis1_(2) * q11;
-  const double x3 = -axis1_(0) * q12 + axis1_(1) * q11 + axis1_(2) * q10;
-  const double x4 = -q10 * x0 + q11 * x1 + q12 * x2 + q13 * x3;
-  const double x5 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x6 = (*_G2P0)(0) * q21 + (*_G2P0)(1) * q22 + (*_G2P0)(2) * q23;
-  const double x7 = (*_G2P0)(0) * q20 - (*_G2P0)(1) * q23 + (*_G2P0)(2) * q22;
-  const double x8 = (*_G2P0)(0) * q23 + (*_G2P0)(1) * q20 - (*_G2P0)(2) * q21;
-  const double x9 = -(*_G2P0)(0) * q22 + (*_G2P0)(1) * q21 + (*_G2P0)(2) * q20;
-  const double x10 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
-  const double x11 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
-  const double x12 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
-  const double x13 =
-      q10 * x5 - q11 * x10 - q12 * x11 - q13 * x12 - q20 * x6 + q21 * x7 + q22 * x8 + q23 * x9;
-  const double x14 = q10 * x1 + q11 * x0 + q12 * x3 - q13 * x2;
-  const double x15 = X1 - X2 + q10 * x10 + q11 * x5 + q12 * x12 - q13 * x11 - q20 * x7 -
-                     q21 * x6 - q22 * x9 + q23 * x8;
-  const double x16 = q10 * x3 + q11 * x2 - q12 * x1 + q13 * x0;
-  const double x17 = Z1 - Z2 + q10 * x12 + q11 * x11 - q12 * x10 + q13 * x5 - q20 * x9 -
-                     q21 * x8 + q22 * x7 - q23 * x6;
-  const double x18 = q10 * x2 - q11 * x3 + q12 * x0 + q13 * x1;
-  const double x19 = Y1 - Y2 + q10 * x11 - q11 * x12 + q12 * x5 + q13 * x10 - q20 * x8 +
-                     q21 * x9 - q22 * x6 - q23 * x7;
-  const double x20 = axis2_(0) * q11 + axis2_(1) * q12 + axis2_(2) * q13;
-  const double x21 = axis2_(0) * q10 - axis2_(1) * q13 + axis2_(2) * q12;
-  const double x22 = axis2_(0) * q13 + axis2_(1) * q10 - axis2_(2) * q11;
-  const double x23 = -axis2_(0) * q12 + axis2_(1) * q11 + axis2_(2) * q10;
-  const double x24 = -q10 * x20 + q11 * x21 + q12 * x22 + q13 * x23;
-  const double x25 = q10 * x21 + q11 * x20 + q12 * x23 - q13 * x22;
-  const double x26 = q10 * x23 + q11 * x22 - q12 * x21 + q13 * x20;
-  const double x27 = q10 * x22 - q11 * x23 + q12 * x20 + q13 * x21;
-  const double x28 = _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22;
-  const double x29 = -_cq2q101 * q20 + _cq2q102 * q21 + _cq2q103 * q22 + _cq2q104 * q23;
-  const double x30 = _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20;
-  const double x31 = _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21;
-  const double x32 = q10 * x28 + q11 * x29 + q12 * x30 - q13 * x31;
-  const double x33 = q10 * x30 + q11 * x31 - q12 * x28 + q13 * x29;
-  const double x34 = q10 * x31 - q11 * x30 + q12 * x29 + q13 * x28;
-  const double x35 = q10 * x29 - q11 * x28 - q12 * x31 - q13 * x30;
-  y(0) = x13 * x4 - x14 * x15 - x16 * x17 - x18 * x19;
-  y(1) = x13 * x24 - x15 * x25 - x17 * x26 - x19 * x27;
-  y(2) = -x14 * x32 - x16 * x33 - x18 * x34 + x35 * x4;
-  y(3) = x24 * x35 - x25 * x32 - x26 * x33 - x27 * x34;
-}
-
-void siconos::joints::CylindricalJointR::computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-              const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-              Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  double X1 = (q1)(0);
-  double Y1 = (q1)(1);
-  double Z1 = (q1)(2);
-  double q10 = (q1)(3);
-  double q11 = (q1)(4);
-  double q12 = (q1)(5);
-  double q13 = (q1)(6);
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -394,8 +301,6 @@ void siconos::joints::CylindricalJointR::computeh(const Eigen::Ref<const siconos
   y(1) = x13 * x24 - x15 * x25 - x17 * x26 - x19 * x27;
   y(2) = -x14 * x32 - x16 * x33 - x18 * x34 + x35 * x4;
   y(3) = x24 * x35 - x25 * x32 - x26 * x33 - x27 * x34;
-  std::cout << "yNEW : ";
-  std::cout << y << std::endl;
 }
 
 void siconos::joints::CylindricalJointR::Jd1d2(double X1, double Y1, double Z1, double q10,
@@ -722,7 +627,7 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
 
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::CylindricalJointR::computehDoF(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   if (axis > 1) return;
@@ -844,7 +749,7 @@ void siconos::joints::CylindricalJointR::computehDoF(
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::CylindricalJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   if (axis > 1) return;
@@ -1056,10 +961,11 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   }
 }
 
-
 // Return the normal of the angular DoF axis of rotation. axis must be 0
 siconos::algebra::SiconosVector3 siconos::joints::CylindricalJointR::normalDoF(
-    const siconos::algebra::SiconosVector& q0, const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis, bool absoluteRef) {
+    const siconos::algebra::SiconosVector& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    bool absoluteRef) {
   // Return the same axis for linear and rotational DoFs
   assert(axis == 0 || axis == 1);
   if (axis != 0 && axis != 1) return siconos::algebra::SiconosVector3{};

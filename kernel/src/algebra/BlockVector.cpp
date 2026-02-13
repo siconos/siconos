@@ -85,7 +85,7 @@ void siconos::algebra::BlockVector::fill(std::size_t size_of_data, const double*
   assert(static_cast<siconos::algebra::Index>(size_of_data) == totalSize_ &&
          "total size of data does not match expected BlockVector size");
   // Warning: we do not check data and assumes it is properly allocated
-  std::size_t offset = 0;
+  Index offset = 0;
   for (std::size_t nb = 0; nb < blocks_.size(); ++nb) {
     auto& block = *(blocks_[nb]);
     siconos::algebra::Index size = block.size();
@@ -99,7 +99,7 @@ void siconos::algebra::BlockVector::fill(const SiconosVector& input) {
   assert(input.size() == totalSize_ &&
          "total size of input vector does not match expected BlockVector size");
   // Warning: we do not check data and assumes it is properly allocated
-  std::size_t offset = 0;
+  Index offset = 0;
   for (std::size_t nb = 0; nb < blocks_.size(); ++nb) {
     auto& block = *(blocks_[nb]);
     auto blockSize = block.size();
@@ -113,7 +113,7 @@ double siconos::algebra::BlockVector::operator()(siconos::algebra::Index globalI
   for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
     if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
       // Then the index in the block
-      std::size_t localIndex = globalIndex - blockStartIndices_[i];
+      auto localIndex = globalIndex - blockStartIndices_[i];
       return (*blocks_[i])(localIndex);
     }
   }
@@ -125,7 +125,7 @@ double& siconos::algebra::BlockVector::BlockVector::operator()(
   for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
     if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
       // Then the index in the block
-      std::size_t localIndex = globalIndex - blockStartIndices_[i];
+      auto localIndex = globalIndex - blockStartIndices_[i];
       return (*blocks_[i])(localIndex);
     }
   }
@@ -227,7 +227,7 @@ double siconos::algebra::BlockVector::norm() const {
 
 siconos::algebra::SiconosVector siconos::algebra::BlockVector::toSiconosVector() const {
   SiconosVector result(totalSize_);
-  size_t currentIndex = 0;
+  Index currentIndex = 0;
   for (const auto& block : blocks_) {
     if (block) {
       auto vecSize = block->size();

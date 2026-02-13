@@ -39,6 +39,7 @@
 #define Question_hpp
 
 #include <array>
+#include <optional>
 
 #include "NSLVisitor.hpp"
 
@@ -49,11 +50,11 @@ template <typename AnswerType>
 struct Question : public Visitor {
   using type = AnswerType;
 
-  type answer{std::array<typename std::remove_reference<AnswerType>::type, 1>{}[0]};
-
+  //  type answer{std::a rray<typename std::remove_reference<AnswerType>::type, 1>{}[0]};
+  std::optional<type> answer;
   Question() = default;
 
-  Question(AnswerType ref) : answer(ref) {};
+  Question(AnswerType ref) : answer(ref){};
 };
 
 /** get some value from a visitable object with the help of a
@@ -66,7 +67,7 @@ typename GeneralQuestion::type ask(const Visitable& v) {
 
   v.accept(t);
 
-  return t.answer;
+  return *t.answer;
 }
 
 /** get some value from a visitable object with the help of a
@@ -80,7 +81,7 @@ typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg) {
 
   v.accept(t);
 
-  return t.answer;
+  return *t.answer;
 }
 
 /** apply a siconos::modeling::nonsmooth_laws::Visitor to a visitable object

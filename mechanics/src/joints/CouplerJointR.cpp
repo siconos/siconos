@@ -212,54 +212,14 @@ void siconos::joints::CouplerJointR::setBasePositions(
   _offset = y1(0) * _ratio - y2(0);
 }
 
-void siconos::joints::CouplerJointR::computeh(const siconos::algebra::BlockVector& q0,
-                                              Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  siconos::algebra::SiconosVector y1(y), y2(y);
-
-  // Get current positions of the implicated degrees of freedom
-  // siconos::algebra::BlockVector q01, q02;
-  // auto v0 = q0.vector(0);
-  // const_cast<siconos::algebra::BlockVector&>(q0)
-  const siconos::algebra::SiconosVector* v1_1 = nullptr;
-  const siconos::algebra::SiconosVector* v1_2 = nullptr;
-  const siconos::algebra::SiconosVector* v2_1 = nullptr;
-  const siconos::algebra::SiconosVector* v2_2 = nullptr;
-  if (q0.numberOfBlocks() > 1) {
-    // makeBlockVectors(*q0.vector(0), *q0.vector(1), q01, q02);
-    resolveVectors(q0.vector(0).get(), q0.vector(1).get(), v1_1, v1_2, v2_1, v2_2);
-  } else {
-    // makeBlockVectors(*q0.vector(0), std::nullopt, q01, q02);
-    resolveVectors(q0.vector(0).get(), nullptr, v1_1, v1_2, v2_1, v2_2);
-  }
-
-  // if (q01.numberOfBlocks() == 2)
-  //   _joint1->computehDoF(*q01.vector(0), *q01.vector(1), y1, _dof1);
-  // else
-  //   _joint1->computehDoF(*q01.vector(0), std::nullopt, y1, _dof1);
-  // if (q02.numberOfBlocks() == 2)
-  //   _joint2->computehDoF(*q02.vector(0), *q02.vector(1), y2, _dof2);
-  // else
-  //   _joint2->computehDoF(*q02.vector(0), std::nullopt, y2, _dof2);
-  if (v1_2)
-    _joint1->computehDoF(*v1_1, *v1_2, y1, _dof1);
-  else
-    _joint1->computehDoF(*v1_1, std::nullopt, y1, _dof1);
-  if (v2_2)
-    _joint2->computehDoF(*v2_1, *v2_2, y2, _dof2);
-  else
-    _joint2->computehDoF(*v2_1, std::nullopt, y2, _dof2);
-
-  // Constraint is the linear relation between them
-  y(0) = y2(0) - y1(0) * _ratio + _offset;
-}
-
 void siconos::joints::CouplerJointR::computeh(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   siconos::algebra::SiconosVector y1(y), y2(y);
 
   // Make local copies to ensure stable pointers for resolveVectors
+  // TEMP TO BE REVIEWED
   siconos::algebra::SiconosVector q1_copy(q1);
   std::optional<siconos::algebra::SiconosVector> q2_copy;
   if (q2) {
@@ -388,26 +348,17 @@ void siconos::joints::CouplerJointR::computeH_NE_(double time,
 // }
 
 void siconos::joints::CouplerJointR::computehDoF(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   // The DoF of the constraint is the same as the constraint itself
   assert(axis == 0);
-  siconos::algebra::BlockVector q0;
-  // This is a tmp workaround. To be reviewed
-  auto makeSharedPtr = [](const Eigen::Ref<const siconos::algebra::SiconosVector>& vec) {
-    return std::make_shared<siconos::algebra::SiconosVector>(vec);
-  };
-  auto q1Shared = makeSharedPtr(q1);
-  q0.insertPtr(q1Shared);
-  if (q2) q0.insertPtr(makeSharedPtr(q2.value()));
-
-  computeh(q0, y);
+  computeh(q1, q2, y);
 }
 
 void siconos::joints::CouplerJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // The Jacobian of the DoF of the constraint is the same as the

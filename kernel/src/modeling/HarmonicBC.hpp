@@ -38,10 +38,10 @@ class HarmonicBC : public BoundaryCondition {
   double aCoeff_ = 0.;
   /** Constant multiplicative term of the prescribed velocity  */
   double bCoeff_ = 0;
-  ;
+
   /** Constant frequency  */
   double omega_ = 0;
-  ;
+
   /** Constant phase  */
   double phi_ = 0;
 
@@ -70,7 +70,7 @@ class HarmonicBC : public BoundaryCondition {
         aCoeff_(a),
         bCoeff_(b),
         omega_(omega),
-        phi_(phi) {};
+        phi_(phi){};
 
   HarmonicBC(Indices newVelocityIndices,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& newa,

@@ -120,7 +120,7 @@ class MeshElement {
   MeshElement& operator=(MeshElement&&) = delete;
 
  public:
-  MeshElement(size_t num) {};
+  MeshElement(size_t num){};
   MeshElement(size_t num, FiniteElementType type,
               std::vector<std::shared_ptr<MeshVertex>> vertices, std::vector<int> tags = {})
       : num_{num}, type_{type}, vertices_{std::move(vertices)}, tags_{std::move(tags)} {};
@@ -181,8 +181,7 @@ class Mesh {
    */
   Mesh(int dim, std::vector<std::shared_ptr<MeshVertex>> vertices,
        std::vector<std::shared_ptr<MeshElement>> elements)
-      : Mesh(dim, vertices, elements, {}) {};
-  ;
+      : Mesh(dim, vertices, elements, {}){};
 
   /** destructor */
   ~Mesh() noexcept = default;

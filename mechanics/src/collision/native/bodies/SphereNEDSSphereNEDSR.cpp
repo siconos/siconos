@@ -39,14 +39,21 @@ double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
 }
 
 void siconos::collision::native::bodies::SphereNEDSSphereNEDSR::computeh(
-    const siconos::algebra::BlockVector &q0, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  double q_0 = q0(0);
-  double q_1 = q0(1);
-  double q_2 = q0(2);
-  double q_7 = q0(7);
-  double q_8 = q0(8);
-  double q_9 = q0(9);
-
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  assert(q2);
+  double q_0 = q1(0);
+  double q_1 = q1(1);
+  double q_2 = q1(2);
+  double q_7 = 0;
+  double q_8 = 0;
+  double q_9 = 0;
+  if (q2) {
+    q_7 = (*q2)(0);
+    q_8 = (*q2)(1);
+    q_9 = (*q2)(2);
+  }
   y(0) = distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2);
   // Approximation _Pc1=_Pc2
   (*_Pc1)(0) = (r1 * q_0 + r2 * q_7) / (r1 + r2);
@@ -58,7 +65,4 @@ void siconos::collision::native::bodies::SphereNEDSSphereNEDSR::computeh(
   (*_Nc)(0) = (q_0 - q_7) / (y(0) + r1pr2);
   (*_Nc)(1) = (q_1 - q_8) / (y(0) + r1pr2);
   (*_Nc)(2) = (q_2 - q_9) / (y(0) + r1pr2);
-  // std::cout<<" siconos::modeling::SphereNEDSSphereNEDSR::computeh
-  // dist:"<<(*y)(0)<<"\n"; std::cout<<"_Pc:\n"; siconos::algebra::print(*_Pc); std::cout<<"_Nc:\n";
-  //siconos::algebra::print(*_Nc);
 }

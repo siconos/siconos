@@ -86,7 +86,7 @@ class FirstOrderLinearR : public FirstOrderR {
 
  public:
   /** default (and only) constructor */
-  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR) {};
+  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR){};
 
   /** destructor
    */
@@ -180,32 +180,6 @@ class FirstOrderLinearR : public FirstOrderR {
    */
   void computee(double time);
 
-  // /**
-  //    to compute the output y = h(t,x,...) of the Relation
-
-  //    \param time current time value
-  //    \param x coordinates of the dynamical systems involved in the relation
-  //    \param lambda interaction \f$\lambda\f$ vector
-  //    \param z user defined parameters (optional)
-  //    \param y the resulting vector
-  // */
-  // virtual void computeh(double time, const siconos::algebra::BlockVector &x,
-  //                       const siconos::algebra::SiconosVector &lambda,
-  //                       siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector
-  //                       &y);
-
-  // /**
-  //    to compute the nonsmooth input r = g(t,x,...) of the Relation
-
-  //    \param time current time value
-  //    \param lambda interaction \f$\lambda\f$ vector
-  //    \param z user defined parameters (optional)
-  //    \param r the resulting vector
-  // */
-  // virtual void computeg(double time, const siconos::algebra::SiconosVector &lambda,
-  //                       siconos::algebra::BlockVector &z, siconos::algebra::BlockVector
-  //                       &r);
-
   /** default function to compute y
    *
    *  \param time current time
@@ -233,7 +207,7 @@ class FirstOrderLinearR : public FirstOrderR {
   bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  void computeJach(double time, Interaction &inter) final {};
+  void computeJach(double time, Interaction &inter) final{};
 };
 }  // namespace siconos::modeling
 

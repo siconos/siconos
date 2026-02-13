@@ -30,6 +30,8 @@
 // All laws complient with FrictionContact must have a visitor function to return mu.
 namespace siconos::nonsmooth_formulations::friction_contact {
 struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
+  using Visitor::visit;
+
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }

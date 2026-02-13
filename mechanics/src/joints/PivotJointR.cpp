@@ -156,24 +156,8 @@ void siconos::joints::PivotJointR::computeH_NE_(double time,
     pivot::computeH_for_1DS(q1->tail(4), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
 }
 
-void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector& q0,
-                                            Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  KneeJointR::computeh(q0, y);
-
-  auto q1 = q0.vector(0);
-  siconos::algebra::SiconosVector3 rot221;
-  if (q0.numberOfBlocks() == 2) {
-    auto q2 = q0.vector(1);
-    pivot::rot2to1(q1->tail(4), q2->tail(4), cq2q_, rot221);
-  } else
-    pivot::rot2to1(q1->tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
-
-  y(3) = axis1_.dot(rot221) - _initial_AscalA1;
-  y(4) = axis2_.dot(rot221) - _initial_AscalA2;
-}
-
 void siconos::joints::PivotJointR::computeh(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   KneeJointR::computeh(q1, q2, y);
@@ -191,7 +175,7 @@ void siconos::joints::PivotJointR::computeh(
 
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::PivotJointR::computehDoF(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   // Normally we fill y starting at axis up to the number of columns,
@@ -227,7 +211,7 @@ void siconos::joints::PivotJointR::computehDoF(
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PivotJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
@@ -387,9 +371,9 @@ siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
 // Free functions
 
 void siconos::joints::pivot::computeH_for_2DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
     const siconos::algebra::SiconosVector3& coords2,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
     const siconos::algebra::SiconosVector& cq2q,
@@ -529,7 +513,7 @@ void siconos::joints::pivot::computeH_for_2DS(
 }
 
 void siconos::joints::pivot::computeH_for_1DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
     const siconos::algebra::SiconosVector& cq2q,

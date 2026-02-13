@@ -24,20 +24,18 @@
 #include "Tools.hpp"
 
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, double h)
-    : default_time_step_(h), t0_(t0)
-{
+    : default_time_step_(h), t0_(t0) {
   mpf_init(_hgmp);
   mpf_init(_tkp1);
   mpf_init(_tk);
   mpf_init(_t0gmp);
   // Set timeStep method
   timeStep = [this](std::size_t = 0) { return default_time_step_; };
-  getTk = [this](std::size_t indx) { return t0_ + default_time_step_ * indx; };
+  getTk = [this](std::size_t indx) -> double { return t0_ + default_time_step_ * indx; };
 }
 
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, std::string hstr)
-    : TimeDiscretisation{t0, 0.}
-{
+    : TimeDiscretisation{t0, 0.} {
   gmp_is_on_ = true;
   mpf_set_str(_hgmp, hstr.c_str(), 10);
   mpf_set_d(_t0gmp, t0);
@@ -47,7 +45,7 @@ siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, std::stri
     mpf_add(_tk, _tk, _t0gmp);
     mpf_add(_tkp1, _tkp1, _t0gmp);
     return mpf_get_d(_tkp1) - mpf_get_d(_tk);
-  }; // FP : why don't we only return _hgmp supposed to be constant ???
+  };  // FP : why don't we only return _hgmp supposed to be constant ???
 
   getTk = [this](std::size_t indx) {
     mpf_mul_ui(_tk, _hgmp, indx);
@@ -58,13 +56,10 @@ siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, std::stri
 
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0,
                                                             double T)
-    : TimeDiscretisation{t0, (T - t0) / nSteps}
-{
-}
+    : TimeDiscretisation{t0, (T - t0) / nSteps} {}
 
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(const std::vector<double>& tk)
-    : time_instants_{tk}
-{
+    : time_instants_{tk} {
   step_is_constant_ = false;
   assert(tk.size() > 1 && "Please provide a vector which size is at least 2.");
   t0_ = tk[0];
@@ -76,16 +71,13 @@ siconos::simulation::TimeDiscretisation::TimeDiscretisation(const std::vector<do
 
 // Copy constructor
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
-    : TimeDiscretisation{0, 0.}
-{
+    : TimeDiscretisation{0, 0.} {
   if (gmp_is_on_) {
     mpf_set(_hgmp, *td.currentTimeStep());
     default_time_step_ = 0.;
-  }
-  else if (step_is_constant_) {
+  } else if (step_is_constant_) {
     default_time_step_ = td.default_time_step_;
-  }
-  else {
+  } else {
     default_time_step_ = 0.;
   }
   t0_ = td.getT0();
@@ -95,8 +87,7 @@ siconos::simulation::TimeDiscretisation::TimeDiscretisation(const TimeDiscretisa
 }
 
 // --- Destructor ---
-siconos::simulation::TimeDiscretisation::~TimeDiscretisation() noexcept
-{
+siconos::simulation::TimeDiscretisation::~TimeDiscretisation() noexcept {
   mpf_clear(_hgmp);
   mpf_clear(_tkp1);
   mpf_clear(_tk);
@@ -104,13 +95,11 @@ siconos::simulation::TimeDiscretisation::~TimeDiscretisation() noexcept
 }
 
 // --- Other functions ---
-void siconos::simulation::TimeDiscretisation::display() const
-{
+void siconos::simulation::TimeDiscretisation::display() const {
   if (hConst()) {
     std::cout << "====> Fixed time-step time discretisation :" << std::endl;
     std::cout << " the current timestep is " << timeStep(0) << "\n";
-  }
-  else
+  } else
     std::cout << "====> Variable time-step time discretisation.\n";
   std::cout << "====\n";
 }

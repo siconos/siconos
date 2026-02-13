@@ -74,7 +74,7 @@ siconos::joints::KneeJointR::KneeJointR() {
 }
 
 void siconos::joints::KneeJointR::checkInitPos(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
   // Ensure that each component of the compute hfunction is smaller than epsilon
   siconos::algebra::SiconosVector3 tmp;
@@ -154,17 +154,8 @@ void siconos::joints::KneeJointR::computeH_NE_(double time,
     knee::computeH_for_1DS(q1->tail(4), G1P0_, *H_NE_view_);
 }
 
-void siconos::joints::KneeJointR::computeh(const siconos::algebra::BlockVector& q0,
-                                           Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  if (q0.numberOfBlocks() == 2) {
-    knee::hfunction(*q0.vector(0), G1P0_, *q0.vector(1), G2P0_, y);
-  } else {
-    knee::hfunction(*q0.vector(0), G1P0_, std::nullopt, G2P0_, y);
-  }
-}
-
 void siconos::joints::KneeJointR::computeh(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   if (q2) {
@@ -176,7 +167,7 @@ void siconos::joints::KneeJointR::computeh(
 
 // Stand-alone functions
 void siconos::joints::knee::hfunction(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const siconos::algebra::SiconosVector3& coords1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
     const siconos::algebra::SiconosVector3& coords2,
@@ -226,9 +217,9 @@ void siconos::joints::knee::hfunction(
 }
 
 void siconos::joints::knee::computeH_for_2DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
     const siconos::algebra::SiconosVector3& coords2,
     Eigen::Ref<siconos::algebra::MapType> result) {
   assert(result.cols() == 14);
@@ -294,7 +285,7 @@ void siconos::joints::knee::computeH_for_2DS(
 }
 
 void siconos::joints::knee::computeH_for_1DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
     Eigen::Ref<siconos::algebra::MapType> result) {
   assert(result.cols() == 7);
@@ -336,7 +327,7 @@ void siconos::joints::knee::computeH_for_1DS(
 }
 
 void siconos::joints::knee::computeH_dot_for1DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot1,
     const siconos::algebra::SiconosVector3& coords1,
     Eigen::Ref<siconos::algebra::MapType> result) {
   double t1 = coords1(1) * qpdot1(0);
@@ -363,9 +354,9 @@ void siconos::joints::knee::computeH_dot_for1DS(
 }
 
 void siconos::joints::knee::computeH_dot_for2DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot1,
     const siconos::algebra::SiconosVector3& coords1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot2,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qpdot2,
     const siconos::algebra::SiconosVector3& coords2,
     Eigen::Ref<siconos::algebra::MapType> result) {
   double t1 = coords1(1) * qpdot1(0);

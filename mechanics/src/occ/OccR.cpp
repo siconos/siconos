@@ -31,12 +31,11 @@ siconos::mechanics::occ::OccR::OccR(const ContactPoint& contact1, const ContactP
                                     const DistanceCalculator& distance_calculator)
     : NewtonEuler3DR(), _contact1{contact1}, _contact2{contact2}, dt{distance_calculator} {}
 
-void siconos::mechanics::occ::OccR::computeh(const siconos::algebra::BlockVector&,
-                                             Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_BEGIN(
-      "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
-      "q0, "
-      "siconos::algebra::SiconosVector& y)\n");
+void siconos::mechanics::occ::OccR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>&,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  DEBUG_BEGIN("siconos::mechanics::occ::OccR::computeh()\n");
   // std::shared_ptr<ContactShapeDistance> distance{nullptr};
   ContactShapeDistance distance{};
 
@@ -74,8 +73,5 @@ void siconos::mechanics::occ::OccR::computeh(const siconos::algebra::BlockVector
 
   DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(siconos::algebra::print(*_Nc););
-  DEBUG_END(
-      "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
-      "q0, "
-      "siconos::algebra::SiconosVector& y)\n");
+  DEBUG_END("siconos::mechanics::occ::OccR::computeh()\n");
 }

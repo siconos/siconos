@@ -119,7 +119,7 @@ struct VertexIsRemoved {
   VertexIsRemoved(std::shared_ptr<siconos::modeling::Interaction> I,
                   std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                   std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _I(I), __DSG(sg), __IG(asg) {};
+      : _I(I), __DSG(sg), __IG(asg){};
   bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));
@@ -149,7 +149,7 @@ struct VertexIsRemovedDS {
   VertexIsRemovedDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
                     std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                     std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _ds(ds), __DSG(sg), __IG(asg) {};
+      : _ds(ds), __DSG(sg), __IG(asg){};
   bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));
@@ -365,7 +365,7 @@ siconos::simulation::Topology::getDynamicalSystem(unsigned int requiredNumber) c
 void siconos::simulation::Topology::displayDynamicalSystems() const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds;
-  unsigned int currentNumber;
+  size_t currentNumber;
   for (std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi) {
     ds = _DSG[0]->bundle(*vi);
     currentNumber = ds->number();
@@ -429,10 +429,10 @@ unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inum
 }
 
 std::shared_ptr<siconos::modeling::Interaction> siconos::simulation::Topology::getInteraction(
-    unsigned int requiredNumber) const {
+    size_t requiredNumber) const {
   siconos::graphs::InteractionsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::Interaction> inter;
-  unsigned int currentNumber;
+  size_t currentNumber;
   for (std::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi) {
     inter = _IG[0]->bundle(*vi);
     currentNumber = inter->number();
