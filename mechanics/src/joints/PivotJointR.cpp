@@ -150,10 +150,10 @@ void siconos::joints::PivotJointR::computeH_NE_(double time,
   // Only the quaternion part of q is required to compute H (last 4 components)
   if (q0.numberOfBlocks() > 1) {
     auto q2 = q0.vector(1);
-    pivot::computeH_for_2DS(q1->tail(4), G1P0_, q2->tail(4), G2P0_, axis1_, axis2_, cq2q_,
+    pivot::computeH_for_2DS(q1->tail<4>(), G1P0_, q2->tail<4>(), G2P0_, axis1_, axis2_, cq2q_,
                             *H_NE_view_);
   } else
-    pivot::computeH_for_1DS(q1->tail(4), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
+    pivot::computeH_for_1DS(q1->tail<4>(), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
 }
 
 void siconos::joints::PivotJointR::computeh(
@@ -371,9 +371,9 @@ siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
 // Free functions
 
 void siconos::joints::pivot::computeH_for_2DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
     const siconos::algebra::SiconosVector3& coords2,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
     const siconos::algebra::SiconosVector& cq2q,
@@ -513,7 +513,7 @@ void siconos::joints::pivot::computeH_for_2DS(
 }
 
 void siconos::joints::pivot::computeH_for_1DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
     const siconos::algebra::SiconosVector& cq2q,

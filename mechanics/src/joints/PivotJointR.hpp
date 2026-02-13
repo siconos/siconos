@@ -164,16 +164,16 @@ class PivotJointR : public KneeJointR {
 
 // Free functions for pivot joints
 namespace pivot {
-void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
-                      const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp2,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
                       const siconos::algebra::SiconosVector3& coords2,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,
                       const siconos::algebra::SiconosVector& c2q,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector7>& qp1,
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,

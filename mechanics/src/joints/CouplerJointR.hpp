@@ -100,7 +100,7 @@ class CouplerJointR : public NewtonEulerJointR {
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosVector> y);
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* Return the joint DoF index assigned to the first DoF. */
   siconos::algebra::Index dof1() { return _dof1; }
