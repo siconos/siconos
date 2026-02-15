@@ -39,8 +39,16 @@ if(WITH_GPU)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/cuNSearch/include)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/extern/cuNSearch/cuNSearch)
 else()
-  include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
+include(compactnsearch_setup)
+#include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
+
+if(WITH_GPU)
+  add_subdirectory(extern/cuNSearch)
+else()
+  #add_subdirectory(extern/CompactNSearch)
+endif()
+
 
 link_directories(${CMAKE_BUILD_DIR})
 
@@ -93,9 +101,9 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 
 if(WITH_GPU)
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics pthread fmt cuNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread fmt cuNSearch pybind11::headers)
 else()
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics pthread fmt CompactNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread fmt CompactNSearch pybind11::headers)
 endif()
 
 
@@ -132,11 +140,7 @@ add_subdirectory(src)
 
 OPTION(BUILD_AS_SHARED_LIBS "Build all the libraries as shared" ON)
 
-if(WITH_GPU)
-  add_subdirectory(extern/cuNSearch)
-else()
-  add_subdirectory(extern/CompactNSearch)
-endif()
+
 
 
 #set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
