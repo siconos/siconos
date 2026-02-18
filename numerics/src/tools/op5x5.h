@@ -60,11 +60,31 @@
  *        pointers on arrays[25] */
 #define OP5X5(EXPR) \
   do {              \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
   } while (0)
 
 /** OP5(EXPR) do EXPR 5 times
@@ -72,7 +92,11 @@
  *        pointers on arrays[5] */
 #define OP5(EXPR) \
   do {            \
-    EXPR; EXPR; EXPR; EXPR;  EXPR; \
+    EXPR;         \
+    EXPR;         \
+    EXPR;         \
+    EXPR;         \
+    EXPR;         \
   } while (0)
 
 /** SET5X5(V) set a 5x5 matrix to V column-major order
@@ -203,8 +227,6 @@ static inline void display5x5(double* restrict a) {
   printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a40, *a41, *a42, *a43, *a44);
 }
 
-
-
 static inline void mvp5x5(const double* restrict a, const double* restrict v,
                           double* restrict r) {
   double* pr;
@@ -250,8 +272,6 @@ static inline void mvp5x5(const double* restrict a, const double* restrict v,
   *pr++ += *a++ * *v++;
 }
 
-
-
 /** matrix matrix multiplication : c = a * b
  * \param[in] a  a[25]
  * \param[in] b  b[25]
@@ -293,8 +313,6 @@ static inline void mm5x5(double* restrict a, double* restrict b, double* restric
   *c44 = *a40 * *b04 + *a41 * *b14 + *a42 * *b24 + *a43 * *b34 + *a44 * *b44;
 }
 
-
-
 static inline double hypot5(double* a) {
   double r;
 
@@ -311,7 +329,6 @@ static inline double hypot5(double* a) {
   return sqrt(r);
 }
 static inline void zero5(double* v) { OP5(*v++ = 0.); }
-
 
 /*============= 5x5 matrices and 5D vectors =============*/
 
@@ -745,6 +762,235 @@ static inline int inv_5x5_gepp_for_loop(double* a) {
 
   /* Copy inverse back */
   for (int i = 0; i < 25; ++i) a[i] = B[i];
+  return 0;
+}
+
+/** Compute eigenvalues of a symmetric 5x5 matrix using Jacobi method
+ * \param[in] a symmetric 5x5 matrix in column-major order (only lower triangle used)
+ * \param[out] eigvals array of 5 eigenvalues in ascending order
+ * \return 0 on success, 1 if matrix is not symmetric
+ *
+ * Uses the Jacobi eigenvalue algorithm with cyclic sweeps.
+ * The input matrix is not modified.
+ */
+static inline int eigvals_sym5x5_for_loop(const double* restrict a, double* restrict eigvals) {
+  /* Working copy of matrix - we'll diagonalize this */
+  double A[25];
+
+  /* Copy lower triangle including diagonal */
+  for (int j = 0; j < 5; ++j) {
+    for (int i = j; i < 5; ++i) {
+      A[j * 5 + i] = a[j * 5 + i];
+    }
+    /* Zero upper triangle (not used but for cleanliness) */
+    for (int i = 0; i < j; ++i) {
+      A[j * 5 + i] = 0.0;
+    }
+  }
+
+  /* Symmetrize: copy lower to upper */
+  for (int j = 0; j < 5; ++j) {
+    for (int i = j + 1; i < 5; ++i) {
+      A[i * 5 + j] = A[j * 5 + i];
+    }
+  }
+
+  /* Jacobi iterations - cyclic sweeps */
+  const int max_sweeps = 50;
+  const double tol = 1e-12;
+
+  for (int sweep = 0; sweep < max_sweeps; ++sweep) {
+    double off_diag_norm = 0.0;
+
+    /* Cyclic sweep over all off-diagonal elements */
+    for (int p = 0; p < 5; ++p) {
+      for (int q = p + 1; q < 5; ++q) {
+        double a_pq = A[p * 5 + q]; /* A[q][p] in column-major */
+
+        if (fabs(a_pq) < tol) continue;
+
+        off_diag_norm += a_pq * a_pq;
+
+        /* Compute rotation angle */
+        double a_pp = A[p * 5 + p];
+        double a_qq = A[q * 5 + q];
+
+        double phi = 0.5 * atan2(2.0 * a_pq, a_qq - a_pp);
+        double c = cos(phi);
+        double s = sin(phi);
+
+        /* Apply Jacobi rotation J^T * A * J */
+        /* Update columns p and q */
+        for (int i = 0; i < 5; ++i) {
+          double a_ip = A[p * 5 + i]; /* A[i][p] */
+          double a_iq = A[q * 5 + i]; /* A[i][q] */
+
+          A[p * 5 + i] = c * a_ip - s * a_iq;
+          A[q * 5 + i] = s * a_ip + c * a_iq;
+        }
+
+        /* Update rows p and q (symmetric update) */
+        for (int j = 0; j < 5; ++j) {
+          double a_pj = A[j * 5 + p]; /* A[p][j] */
+          double a_qj = A[j * 5 + q]; /* A[q][j] */
+
+          A[j * 5 + p] = c * a_pj - s * a_qj;
+          A[j * 5 + q] = s * a_pj + c * a_qj;
+        }
+
+        /* Update diagonal elements explicitly */
+        double a_pp_new = c * c * a_pp - 2.0 * c * s * a_pq + s * s * a_qq;
+        double a_qq_new = s * s * a_pp + 2.0 * c * s * a_pq + c * c * a_qq;
+        A[p * 5 + p] = a_pp_new;
+        A[q * 5 + q] = a_qq_new;
+        A[p * 5 + q] = 0.0;
+        A[q * 5 + p] = 0.0;
+      }
+    }
+
+    /* Check convergence */
+    if (off_diag_norm < tol * tol) break;
+  }
+
+  /* Extract eigenvalues from diagonal */
+  eigvals[0] = A[0];
+  eigvals[1] = A[6];
+  eigvals[2] = A[12];
+  eigvals[3] = A[18];
+  eigvals[4] = A[24];
+
+  /* Sort eigenvalues in ascending order using simple bubble sort */
+  for (int i = 0; i < 4; ++i) {
+    for (int j = i + 1; j < 5; ++j) {
+      if (eigvals[j] < eigvals[i]) {
+        double tmp = eigvals[i];
+        eigvals[i] = eigvals[j];
+        eigvals[j] = tmp;
+      }
+    }
+  }
+
+  return 0;
+}
+
+/** Compute eigenvalues and eigenvectors of a symmetric 5x5 matrix using Jacobi method
+ * \param[in] a symmetric 5x5 matrix in column-major order (only lower triangle used)
+ * \param[out] eigvals array of 5 eigenvalues in ascending order
+ * \param[out] eigvecs 5x5 matrix where column j contains the eigenvector for eigvals[j]
+ * \return 0 on success
+ *
+ * The eigenvectors are returned as columns of eigvecs in the same order as eigvals.
+ */
+static inline int eigsym5x5_for_loop(const double* restrict a, double* restrict eigvals,
+                                     double* restrict eigvecs) {
+  /* Working copy of matrix */
+  double A[25];
+
+  /* Copy input matrix */
+  for (int i = 0; i < 25; ++i) A[i] = a[i];
+
+  /* Initialize eigenvector matrix to identity */
+  for (int i = 0; i < 5; ++i) {
+    for (int j = 0; j < 5; ++j) {
+      eigvecs[j * 5 + i] = (i == j) ? 1.0 : 0.0;
+    }
+  }
+
+  /* Jacobi iterations with eigenvector accumulation */
+  const int max_sweeps = 50;
+  const double tol = 1e-12;
+
+  for (int sweep = 0; sweep < max_sweeps; ++sweep) {
+    double off_diag_norm = 0.0;
+
+    for (int p = 0; p < 5; ++p) {
+      for (int q = p + 1; q < 5; ++q) {
+        double a_pq = A[p * 5 + q];
+
+        if (fabs(a_pq) < tol) continue;
+
+        off_diag_norm += a_pq * a_pq;
+
+        double a_pp = A[p * 5 + p];
+        double a_qq = A[q * 5 + q];
+
+        double phi = 0.5 * atan2(2.0 * a_pq, a_qq - a_pp);
+        double c = cos(phi);
+        double s = sin(phi);
+
+        /* Update matrix A */
+        for (int i = 0; i < 5; ++i) {
+          double a_ip = A[p * 5 + i];
+          double a_iq = A[q * 5 + i];
+
+          A[p * 5 + i] = c * a_ip - s * a_iq;
+          A[q * 5 + i] = s * a_ip + c * a_iq;
+        }
+
+        for (int j = 0; j < 5; ++j) {
+          double a_pj = A[j * 5 + p];
+          double a_qj = A[j * 5 + q];
+
+          A[j * 5 + p] = c * a_pj - s * a_qj;
+          A[j * 5 + q] = s * a_pj + c * a_qj;
+        }
+
+        double a_pp_new = c * c * a_pp - 2.0 * c * s * a_pq + s * s * a_qq;
+        double a_qq_new = s * s * a_pp + 2.0 * c * s * a_pq + c * c * a_qq;
+        A[p * 5 + p] = a_pp_new;
+        A[q * 5 + q] = a_qq_new;
+        A[p * 5 + q] = 0.0;
+        A[q * 5 + p] = 0.0;
+
+        /* Update eigenvectors */
+        for (int i = 0; i < 5; ++i) {
+          double v_ip = eigvecs[p * 5 + i];
+          double v_iq = eigvecs[q * 5 + i];
+
+          eigvecs[p * 5 + i] = c * v_ip - s * v_iq;
+          eigvecs[q * 5 + i] = s * v_ip + c * v_iq;
+        }
+      }
+    }
+
+    if (off_diag_norm < tol * tol) break;
+  }
+
+  /* Extract eigenvalues */
+  eigvals[0] = A[0];
+  eigvals[1] = A[6];
+  eigvals[2] = A[12];
+  eigvals[3] = A[18];
+  eigvals[4] = A[24];
+
+  /* Sort eigenvalues and reorder eigenvectors */
+  int order[5] = {0, 1, 2, 3, 4};
+  for (int i = 0; i < 4; ++i) {
+    for (int j = i + 1; j < 5; ++j) {
+      if (eigvals[j] < eigvals[i]) {
+        double tmp = eigvals[i];
+        eigvals[i] = eigvals[j];
+        eigvals[j] = tmp;
+
+        int tmp_idx = order[i];
+        order[i] = order[j];
+        order[j] = tmp_idx;
+      }
+    }
+  }
+
+  /* Reorder eigenvectors according to sorted eigenvalues */
+  if (order[0] != 0 || order[1] != 1 || order[2] != 2 || order[3] != 3 || order[4] != 4) {
+    double temp_vecs[25];
+    for (int i = 0; i < 25; ++i) temp_vecs[i] = eigvecs[i];
+
+    for (int j = 0; j < 5; ++j) {
+      for (int i = 0; i < 5; ++i) {
+        eigvecs[j * 5 + i] = temp_vecs[order[j] * 5 + i];
+      }
+    }
+  }
+
   return 0;
 }
 
