@@ -6,6 +6,7 @@ if(WITH_TESTING)
   begin_tests(src/tools/test)
 
   new_test(SOURCES test_op3x3.c DEPS externals)
+  new_test(SOURCES test_op5x5.c DEPS externals)
 
   new_test(SOURCES test_timers_interf.c)
 

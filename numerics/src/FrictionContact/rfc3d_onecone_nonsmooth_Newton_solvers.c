@@ -29,6 +29,7 @@
 #include "SiconosBlas.h"                             // for cblas_ddot
 #include "SolverOptions.h"                           // for SolverOptions
 #include "numerics_verbose.h"                        // for numerics_print...
+#include "op5x5.h"                                   // for cpy3, mvp3x3
 #include "op3x3.h"                                   // for cpy3, mvp3x3
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
 #include "rolling_fc2d_projection.h"
@@ -60,8 +61,8 @@ static double rfc3d_compute_local_error(RollingFrictionContactProblem* localprob
   double* local_M = localproblem->M->matrix0;
   double worktmp[3];
   double local_velocity[3] = {0., 0., 0.};
-  cpy3(local_q, local_velocity);
-  mvp3x3(local_M, local_reaction, local_velocity);
+  cpy5(local_q, local_velocity);
+  mvp5x5(local_M, local_reaction, local_velocity);
   DEBUG_EXPR(NV_display(local_q, 3););
   DEBUG_EXPR(NV_display(local_velocity, 3););
   DEBUG_EXPR(NV_display(local_reaction, 3););

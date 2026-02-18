@@ -17,7 +17,7 @@
  */
 #include "projectionOnRollingCone.h"
 
-#include "op3x3.h"  // for SET3, eig_3x3
+#include "op5x5.h"  // for SET3, eig_3x3
                     //
 #include <math.h>   // for sqrt
 #include <stdio.h>  // for printf

@@ -25,7 +25,7 @@
 /* #include "mc2d_naturalmap_functions.h" */
 /* #include "mc2d_onecone_nonsmooth_Newton_solvers.h"  // for mc2d_computeNonsmoo... */
 /* #include "numerics_verbose.h"                       // for numerics_printf */
-#include "op3x3.h"  // for SET3, eig_3x3
+#include "op5x5.h"  // for SET3, eig_3x3
 #include "projectionOnRollingCone.h"
 
 // extern computeNonsmoothFunction Function;
@@ -44,7 +44,7 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
   SET5(R);
   SET5(velocity);
-  SET3(Rho);
+  SET5(Rho);
 
 
   double RV[5]; /* = {0. , 0., 0.}; */
