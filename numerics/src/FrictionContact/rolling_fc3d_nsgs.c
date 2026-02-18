@@ -356,9 +356,9 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   /* problem->mu_r[0]=0.1; */
   /* problem->mu[0]=1.0; */
 
-  for (int c = 0; c < problem->numberOfContacts; c++) {
-    problem->mu[0]=0.0; 
-    }    
+  /* for (int c = 0; c < problem->numberOfContacts; c++) { */
+  /*   problem->mu[0]=0.0;  */
+  /*   }     */
 
   
   /* verbose=1; */

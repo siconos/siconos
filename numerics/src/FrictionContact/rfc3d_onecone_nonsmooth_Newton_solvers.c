@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <H5Apublic.h>
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt, fabs, isinf
 #include <stdio.h>   // for NULL, printf
@@ -39,9 +40,9 @@
 #include "rolling_naturalmap_functions.h"
 
 /* #define DEBUG_CHECK */
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 
 #ifdef DEBUG_MESSAGES
@@ -283,7 +284,13 @@ static void rfc3d_onecone_nonsmooth_Newton_initialize(
     } else
       numerics_error("rfc3d_onecone_nonsmooth_Newton_initialize",
                      "unknown strategy for computing rho");
-
+    double val = 1.;/* 1e-1; */
+    rho[0] = val;
+    rho[1] = val;
+    rho[2] = val;
+    rho[3] = val;
+    rho[4] = val;
+    
     rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
 
     if (verbose > 0) {
@@ -557,24 +564,48 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     /* compute -(A MLocal +B) */
     mm5x5(A, MLocal, AWplusB);
     add5x5(B, AWplusB);
-    //scal5x5(1., AWplusB);
-    scal5(-1., F);    
+    scal5x5(-1., AWplusB); 
     DEBUG_EXPR(printf("AWplusB"); display5x5(AWplusB));
 
-    double AWplusB_save[25];
-    cpy5x5(AWplusB, AWplusB_save);
-    
-    double F_save[5];
-    cpy5(F, F_save);
+    /* double AWplusB_save[25]; */
+    /* cpy5x5(AWplusB, AWplusB_save); */
+    /* double F_save[5]; */
+    /* cpy5(F, F_save); */
 
     /* Solve the linear system */
+    cpy5(F, dR);
+    solve_5x5_gepp_for_loop(AWplusB, dR);
 
-    solve_nxn_gepp(5, AWplusB, F, dR);
+    //solve_nxn_gepp(5, AWplusB, F, dR);
 
-    scal5(-1., F_save); 
-    mvp5x5(AWplusB_save, dR, F_save);
+    /* scal5(-1., F_save); */
+    /* mvp5x5(AWplusB_save, dR, F_save); */
+
+    /* printf("F_save \n"); */
+    /* display5(F_save); */
+    /* printf("hypot5 = %e \n", hypot5(F_save)); */
+
     
-    printf("hypot5 = %e \n", hypot5(F_save));
+    /* NumericsMatrix* M = NM_create(NM_DENSE, 5, 5); */
+    /* cpy5x5(AWplusB_save, M->matrix0); */
+
+    /* double AWplusB_save2[25]; */
+    /* double F_save2[5];     */
+    /* cpy5x5(AWplusB_save, AWplusB_save2); */
+    /* cpy5(F_save, F_save2); */
+
+    /* NM_LU_solve(M, F_save, 1); */
+    
+    /* cpy5(F_save, dR); */
+
+    
+    /* scal5(-1., F_save2);  */
+    /* mvp5x5(AWplusB_save2, F_save, F_save2); */
+    /* printf("hypot5 (F_save2 )= %e \n", hypot5(F_save2)); */
+
+
+    
+    
     
     
     DEBUG_EXPR(printf("dR"); display5(dR));
