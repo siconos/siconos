@@ -77,7 +77,7 @@ void rolling_fc2d_nsgs_initialize_local_solver(
   SolverOptions *localsolver_options = options->internalSolvers[0];
   /** Connect to local solver */
   switch (localsolver_options->solverId) {
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+    case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: {
       *solve = &rolling_fc2d_projectionOnConeWithLocalIteration_solve;
       *update = &rolling_fc2d_projection_update;
       *freeSolver =
@@ -87,7 +87,7 @@ void rolling_fc2d_nsgs_initialize_local_solver(
                                                                  localsolver_options);
       break;
     }
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
+    case SICONOS_ONECONE_ProjectionOnCone: {
       *solve = &rolling_fc2d_projectionOnCone_solve;
       *update = &rolling_fc2d_projection_update;
       *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_fc2d_projection_free;
@@ -543,5 +543,5 @@ void rfc2d_nsgs_set_default(SolverOptions *options) {
 
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(
-      SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
 }

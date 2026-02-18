@@ -82,11 +82,55 @@
     EXPR;           \
   } while (0)
 
+/** OP5X5(EXPR) do EXPR 25 times
+ * \param EXPR a C expression that should contains self incrementing
+ *        pointers on arrays[25] */
+#define OP5X5(EXPR) \
+  do {              \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+  } while (0)
+
 /** OP3(EXPR) do EXPR 3 times
  * \param EXPR a C expression that should contains self incrementing
- *        pointers on arrays[9] */
+ *        pointers on arrays[3] */
 #define OP3(EXPR) \
   do {            \
+    EXPR;         \
+    EXPR;         \
+    EXPR;         \
+  } while (0)
+
+/** OP5(EXPR) do EXPR 5 times
+ * \param EXPR a C expression that should contains self incrementing
+ *        pointers on arrays[5] */
+#define OP5(EXPR) \
+  do {            \
+    EXPR;         \
+    EXPR;         \
     EXPR;         \
     EXPR;         \
     EXPR;         \
@@ -127,6 +171,32 @@
     V##12 = V++;                  \
     V##22 = V++;                  \
   }
+#define SET5X5(V)                   \
+  double* V##00 MAYBE_UNUSED = V++; \
+  double* V##10 MAYBE_UNUSED = V++; \
+  double* V##20 MAYBE_UNUSED = V++; \
+  double* V##30 MAYBE_UNUSED = V++; \
+  double* V##40 MAYBE_UNUSED = V++; \
+  double* V##01 MAYBE_UNUSED = V++; \
+  double* V##11 MAYBE_UNUSED = V++; \
+  double* V##21 MAYBE_UNUSED = V++; \
+  double* V##31 MAYBE_UNUSED = V++; \
+  double* V##41 MAYBE_UNUSED = V++; \
+  double* V##02 MAYBE_UNUSED = V++; \
+  double* V##12 MAYBE_UNUSED = V++; \
+  double* V##22 MAYBE_UNUSED = V++; \
+  double* V##32 MAYBE_UNUSED = V++; \
+  double* V##42 MAYBE_UNUSED = V++; \
+  double* V##03 MAYBE_UNUSED = V++; \
+  double* V##13 MAYBE_UNUSED = V++; \
+  double* V##23 MAYBE_UNUSED = V++; \
+  double* V##33 MAYBE_UNUSED = V++; \
+  double* V##43 MAYBE_UNUSED = V++; \
+  double* V##04 MAYBE_UNUSED = V++; \
+  double* V##14 MAYBE_UNUSED = V++; \
+  double* V##24 MAYBE_UNUSED = V++; \
+  double* V##34 MAYBE_UNUSED = V++; \
+  double* V##44 MAYBE_UNUSED = V++;
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
  * Warning: the pointer v is modified and is ready for a next SET3
@@ -151,21 +221,65 @@
     V##1 = V++;                  \
     V##2 = V++;                  \
   }
+/** SET5 : set pointers on a vector5 v (*v0 *v1 *v2 *v3 *v4)
+ * Warning: the pointer v is modified and is ready for a next SET5
+ * use *v0 if you need *v
+ */
+#define SET5(V)                    \
+  double* V##0 MAYBE_UNUSED = V++; \
+  double* V##1 MAYBE_UNUSED = V++; \
+  double* V##2 MAYBE_UNUSED = V++; \
+  double* V##3 MAYBE_UNUSED = V++; \
+  double* V##4 MAYBE_UNUSED = V++;
+
+/** SET5MAYBE : set pointers on a vector5 v (*v0 *v1 *v2 *v3 *v4) only if v is
+ * non null.
+ * Warning: the pointer v is modified and is ready for a next SET5
+ * use *v0 if you need *v
+ */
+#define SET5MAYBE(V)             \
+  double* V##0 MAYBE_UNUSED = 0; \
+  double* V##1 MAYBE_UNUSED = 0; \
+  double* V##2 MAYBE_UNUSED = 0; \
+  double* V##3 MAYBE_UNUSED = 0; \
+  double* V##4 MAYBE_UNUSED = 0; \
+  if (V) {                       \
+    V##0 = V++;                  \
+    V##1 = V++;                  \
+    V##2 = V++;                  \
+    V##3 = V++;                  \
+    V##4 = V++;                  \
+  }
 
 /** copy a 3x3 matrix or a vector[9]
  * \param[in] a  a[9]
  * \param[out] b  b[9]*/
 static inline void cpy3x3(double* restrict a, double* restrict b) { OP3X3(*b++ = *a++); }
 
+/** copy a 5x5 matrix or a vector[25]
+ * \param[in] a  a[25]
+ * \param[out] b  b[25]*/
+static inline void cpy5x5(double* restrict a, double* restrict b) { OP5X5(*b++ = *a++); }
+
 /** add a 3x3 matrix or a vector[9]
  *\param[in] a a[9]
  *\param[in,out]  b b[9]*/
 static inline void add3x3(double a[9], double b[9]) { OP3X3(*b++ += *a++); }
 
+/** add a 5x5 matrix or a vector[9]
+ *\param[in] a a[25]
+ *\param[in,out]  b b[25]*/
+static inline void add5x5(double a[9], double b[9]) { OP5X5(*b++ += *a++); }
+
 /** sub a 3x3 matrix or a vector[9]
  *\param[in] a a[9]
  *\param[in,out] b b[9]*/
 static inline void sub3x3(double a[9], double b[9]) { OP3X3(*b++ -= *a++); }
+
+/** sub a 5x5 matrix or a vector[25]
+ *\param[in] a a[25]
+ *\param[in,out] b b[25]*/
+static inline void sub5x5(double a[25], double b[25]) { OP5X5(*b++ -= *a++); }
 
 /** copy a vector[3]
  * \param[in] a a[3]
@@ -173,10 +287,21 @@ static inline void sub3x3(double a[9], double b[9]) { OP3X3(*b++ -= *a++); }
  */
 static inline void cpy3(double a[3], double b[3]) { OP3(*b++ = *a++); }
 
+/** copy a vector[5]
+ * \param[in] a a[5]
+ * \param[out] b b[5]
+ */
+static inline void cpy5(double a[5], double b[5]) { OP5(*b++ = *a++); }
+
 /** add a vector[3]
  * \param[in] a a[3]
  * \param[in,out] b b[3]*/
 static inline void add3(double a[3], double b[3]) { OP3(*b++ += *a++); }
+
+/** add a vector[5]
+ * \param[in] a a[5]
+ * \param[in,out] b b[5]*/
+static inline void add5(double a[5], double b[5]) { OP5(*b++ += *a++); }
 
 /** sub a vector[3]
  * \param[in] a a[3]
@@ -190,10 +315,21 @@ static inline void sub3(double a[3], double b[3]) { OP3(*b++ -= *a++); }
  */
 static inline void scal3x3(double scal, double m[9]) { OP3X3(*m++ *= scal); }
 
+/** scalar multiplication of a matrix5x5
+ * \param[in] scal double scalar
+ * \param[in,out] m  m[25]
+ */
+static inline void scal5x5(double scal, double m[25]) { OP5X5(*m++ *= scal); }
+
 /** set to zero a matrix3x3
  * \param[in,out] m  m[9]
  */
 static inline void zero3x3(double m[9]) { OP3X3(*m++ = 0.); }
+
+/** set to zero a matrix5x5
+ * \param[in,out] m  m[25]
+ */
+static inline void zero5x5(double m[25]) { OP5X5(*m++ = 0.); }
 
 /** set to identity a matrix3x3
  * \param[in,out] m  m[9]
@@ -211,6 +347,37 @@ static inline void eye3x3(double m[9]) {
   *m22 = 1.;
 }
 
+/** set to identity a matrix5x5
+ * \param[in,out] m  m[25]
+ */
+static inline void eye5x5(double m[25]) {
+  SET5X5(m);
+  *m00 = 1.;
+  *m01 = 0.;
+  *m02 = 0.;
+  *m03 = 0.;
+  *m04 = 0.;
+  *m10 = 0.;
+  *m11 = 1.;
+  *m12 = 0.;
+  *m13 = 0.;
+  *m14 = 0.;
+  *m20 = 0.;
+  *m21 = 0.;
+  *m22 = 1.;
+  *m23 = 0.;
+  *m24 = 0.;
+  *m30 = 0.;
+  *m31 = 0.;
+  *m32 = 0.;
+  *m33 = 1.;
+  *m34 = 0.;
+  *m40 = 0.;
+  *m41 = 0.;
+  *m42 = 0.;
+  *m43 = 0.;
+  *m44 = 1.;
+}
 /** diagonal scaling of a vector
  * \param[in] scal_coeffs diagonal part of a matrix
  * \param[in,out] v a 3D vector
@@ -224,6 +391,12 @@ static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v) 
  * \param[in,out] v v[3]
  */
 static inline void scal3(double scal, double* v) { OP3(*v++ *= scal); }
+
+/** scalar multiplication of a vector5
+ * \param[in] scal double scalar
+ * \param[in,out] v v[5]
+ */
+static inline void scal5(double scal, double* v) { OP5(*v++ *= scal); }
 
 /** copy & transpose a matrix
  * \param[in] a *a
@@ -242,12 +415,27 @@ static inline void cpytr3x3(double* restrict a, double* restrict b) {
   *b12 = *a21;
   *b22 = *a22;
 }
-
+static inline void display3(double* restrict a) {
+  SET3(a);
+  printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a0, *a1, *a2);
+}
+static inline void display5(double* restrict a) {
+  SET5(a);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a0, *a1, *a2, *a3, *a4);
+}
 static inline void display3x3(double* restrict a) {
   SET3X3(a);
   printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a00, *a01, *a02);
   printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a10, *a11, *a12);
   printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a20, *a21, *a22);
+}
+static inline void display5x5(double* restrict a) {
+  SET5X5(a);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a00, *a01, *a02, *a03, *a04);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a10, *a11, *a12, *a13, *a14);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a20, *a21, *a22, *a23, *a24);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a30, *a31, *a32, *a33, *a34);
+  printf("[ %6.4e\t  %6.4e\t %6.4e\t  %6.4e\t %6.4e ]\n", *a40, *a41, *a42, *a43, *a44);
 }
 /** matrix vector multiplication
  * \param[in] a 3 by 3 matrix in col-major
@@ -494,6 +682,46 @@ static inline void mm3x3(double* restrict a, double* restrict b, double* restric
   *c20 = *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
   *c21 = *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
   *c22 = *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
+}
+/** matrix matrix multiplication : c = a * b
+ * \param[in] a  a[25]
+ * \param[in] b  b[25]
+ * \param[out] c c[25]
+ */
+static inline void mm5x5(double* restrict a, double* restrict b, double* restrict c) {
+  SET5X5(a);
+  SET5X5(b);
+  SET5X5(c);
+
+  *c00 = *a00 * *b00 + *a01 * *b10 + *a02 * *b20 + *a03 * *b30 + *a04 * *b40;
+  *c01 = *a00 * *b01 + *a01 * *b11 + *a02 * *b21 + *a03 * *b31 + *a04 * *b41;
+  *c02 = *a00 * *b02 + *a01 * *b12 + *a02 * *b22 + *a03 * *b32 + *a04 * *b42;
+  *c03 = *a00 * *b03 + *a01 * *b13 + *a02 * *b23 + *a03 * *b33 + *a04 * *b43;
+  *c04 = *a00 * *b04 + *a01 * *b14 + *a02 * *b24 + *a03 * *b34 + *a04 * *b44;
+
+  *c10 = *a10 * *b00 + *a11 * *b10 + *a12 * *b20 + *a13 * *b30 + *a14 * *b40;
+  *c11 = *a10 * *b01 + *a11 * *b11 + *a12 * *b21 + *a13 * *b31 + *a14 * *b41;
+  *c12 = *a10 * *b02 + *a11 * *b12 + *a12 * *b22 + *a13 * *b32 + *a14 * *b42;
+  *c13 = *a10 * *b03 + *a11 * *b13 + *a12 * *b23 + *a13 * *b33 + *a14 * *b43;
+  *c14 = *a10 * *b04 + *a11 * *b14 + *a12 * *b24 + *a13 * *b34 + *a14 * *b44;
+
+  *c20 = *a20 * *b00 + *a21 * *b10 + *a22 * *b20 + *a23 * *b30 + *a24 * *b40;
+  *c21 = *a20 * *b01 + *a21 * *b11 + *a22 * *b21 + *a23 * *b31 + *a24 * *b41;
+  *c22 = *a20 * *b02 + *a21 * *b12 + *a22 * *b22 + *a23 * *b32 + *a24 * *b42;
+  *c23 = *a20 * *b03 + *a21 * *b13 + *a22 * *b23 + *a23 * *b33 + *a24 * *b43;
+  *c24 = *a20 * *b04 + *a21 * *b14 + *a22 * *b24 + *a23 * *b34 + *a24 * *b44;
+
+  *c30 = *a30 * *b00 + *a31 * *b10 + *a32 * *b20 + *a33 * *b30 + *a34 * *b40;
+  *c31 = *a30 * *b01 + *a31 * *b11 + *a32 * *b21 + *a33 * *b31 + *a34 * *b41;
+  *c32 = *a30 * *b02 + *a31 * *b12 + *a32 * *b22 + *a33 * *b32 + *a34 * *b42;
+  *c33 = *a30 * *b03 + *a31 * *b13 + *a32 * *b23 + *a33 * *b33 + *a34 * *b43;
+  *c34 = *a30 * *b04 + *a31 * *b14 + *a32 * *b24 + *a33 * *b34 + *a34 * *b44;
+
+  *c40 = *a40 * *b00 + *a41 * *b10 + *a42 * *b20 + *a43 * *b30 + *a44 * *b40;
+  *c41 = *a40 * *b01 + *a41 * *b11 + *a42 * *b21 + *a43 * *b31 + *a44 * *b41;
+  *c42 = *a40 * *b02 + *a41 * *b12 + *a42 * *b22 + *a43 * *b32 + *a44 * *b42;
+  *c43 = *a40 * *b03 + *a41 * *b13 + *a42 * *b23 + *a43 * *b33 + *a44 * *b43;
+  *c44 = *a40 * *b04 + *a41 * *b14 + *a42 * *b24 + *a43 * *b34 + *a44 * *b44;
 }
 
 /** add a matrix matrix multiplication : c += a*b
@@ -1027,35 +1255,32 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b) {
   return info;
 }
 
-static inline int inv_3x3_gepp(double* restrict a)
-{
-
+static inline int inv_3x3_gepp(double* restrict a) {
   double b0[3] = {1., 0., 0.};
   int info = solve_3x3_gepp(a, b0);
   if (info) return info;
 
-  double b1[3]  = {0., 1., 0.};
+  double b1[3] = {0., 1., 0.};
   info = solve_3x3_gepp(a, b1);
   if (info) return info;
 
-  double b2[3]= {0., 0., 1.};
+  double b2[3] = {0., 0., 1.};
   info = solve_3x3_gepp(a, b2);
   if (info) return info;
 
+  a[0] = b0[0];
+  a[1] = b0[1];
+  a[2] = b0[2];
 
-  a[0]=b0[0];
-  a[1]=b0[1];
-  a[2]=b0[2];
+  a[3] = b1[0];
+  a[4] = b1[1];
+  a[5] = b1[2];
 
-  a[3]=b1[0];
-  a[4]=b1[1];
-  a[5]=b1[2];
+  a[6] = b2[0];
+  a[7] = b2[1];
+  a[8] = b2[2];
 
-  a[6]=b2[0];
-  a[7]=b2[1];
-  a[8]=b2[2];
-
- return info;
+  return info;
 }
 
 #define mat_elem(a, y, x, n) (a + ((y) * (n) + (x)))
@@ -1079,6 +1304,8 @@ static inline void solve_nxn_gepp(int n, double* a, double* b, double* x) {
   double max, tmp;
 
   for (dia = 0; dia < n; dia++) {
+    //max_row = dia;
+    //max = fabs(A(dia, dia));    
     max_row = dia, max = A(dia, dia);
 
     for (row = dia + 1; row < n; row++)

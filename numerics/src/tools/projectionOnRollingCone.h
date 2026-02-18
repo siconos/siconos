@@ -20,7 +20,7 @@
 #define ProjectionOnRollingCone_H
 
 /*!\file projectionOnCone.h
- * function to project on cones
+ * function to project on rolling cones
  */
 
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
@@ -37,36 +37,56 @@ extern "C" {
 #endif
 
 /**
-    projectionOnCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
-   \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+    projectionOnRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
+   \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \}
+   \f$
 
     \param[in,out] r the vector to be projected
-    \param[in] mu the angle of the cone
+    \param[in] mu the angle of the cone in reaction
+    \param[in] mu_r the angle of the cone in moment
     \return the type of projection
 */
 unsigned int projectionOnRollingCone(double *r, double mu, double mur);
 
 /**
-   projectionOnCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
-   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+   projectionOnRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
+   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \} \f$
 
    \param[in,out] r the vector to be projected
-   \param[in] mu the angle of the cone
+   \param[in] mu the angle of the cone in reaction
+   \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
 unsigned int projectionOn2DRollingCone(double *r, double mu, double mur);
 
 /**
-   projectionOnDualCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
-   \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
+   projectionOnDualRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
+   \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \}
+   \f$
 
    \param[in,out] u the vector to be projected
-   \param[in] mu the angle of the cone
+   \param[in] mu the angle of the cone in reaction
+   \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
 unsigned projectionOnDualRollingCone(double *u, double mu, double mur);
 
 void display_status_rolling_cone(unsigned int status);
+
+/**
+   subdifferentialProjectionOnRollingCone.
+   Compute an element of the the subdifferential of the
+   projection on the second Order Cone in \f$ R^5 \f$, \f$ K \{
+   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \} \f$
+
+   \param[out] H an element of the the subdifferential
+   \param[in] r the vector to be projected
+   \param[in] mu the angle of the cone in reaction
+   \param[in] mu_r the angle of the cone in moment
+   \return the type of projection
+*/
+
+unsigned subdifferentialProjectionOnRollingCone(double *H, double *r, double mu, double mur);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -21,7 +21,7 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ONECONTACT_NSN
+#include "Friction_cst.h"            // for SICONOS_ONECONE_NSN
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NumericsMatrix
 #include "SiconosBlas.h"             // for cblas_dnrm2
@@ -43,7 +43,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
   /** Connect to local solver */
   /* Projection */
   if (localsolver_options->solverId ==
-      SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity) {
+      SICONOS_ONECONE_ProjectionOnCone_velocity) {
     *solve = &fc3d_projectionOnCone_velocity_solve;
     *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error_velocity;
@@ -157,5 +157,5 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
 
 void fc3d_nsgs_velocity_set_default(SolverOptions* options) {
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN);
+  options->internalSolvers[0] = solver_options_create(SICONOS_ONECONE_NSN);
 }

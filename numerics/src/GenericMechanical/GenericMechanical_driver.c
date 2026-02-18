@@ -561,14 +561,14 @@ void gmp_set_default(SolverOptions* options) {
   // options->internalSolvers[1] =
   // solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
   options->internalSolvers[1] =
-      solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
+      solver_options_create(SICONOS_ONECONE_NSN_GP_HYBRID);
   options->internalSolvers[2] = solver_options_create(SICONOS_RELAY_LEMKE);
   options->internalSolvers[3] = solver_options_create(SICONOS_FRICTION_2D_NSGS);
 
   /* switch (id) */
   /*   { */
   /*     // Loop through ids from which default setup is not satisfying */
-  /*   case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: */
+  /*   case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: */
   /*     { */
   /*       // default is 1000 and 1e-14 */
   /*       options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */

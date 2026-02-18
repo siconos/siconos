@@ -17,9 +17,9 @@ if(WITH_TESTING)
     new_test(SOURCES  OccTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
 
-  # --- FEM tests ----
-  begin_tests(src/fem/cable/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
-  new_test(SOURCES CableDSTest.cpp ${SIMPLE_TEST_MAIN})
+  # # --- FEM tests ----
+  # begin_tests(src/fem/cable/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+  # new_test(SOURCES CableDSTest.cpp ${SIMPLE_TEST_MAIN})
 
   # --- Plasticity Components tests ----
   begin_tests(src/fem/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")

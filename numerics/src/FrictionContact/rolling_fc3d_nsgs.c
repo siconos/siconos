@@ -31,6 +31,7 @@
 #include "rolling_fc3d_compute_error.h"        // for rolling_fc3d_compute_e...
 #include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
 #include "rolling_fc3d_projection.h"           // for rolling_fc3d_projectio...
+#include "rfc3d_onecone_nonsmooth_Newton_solvers.h" // for rolling_fc3d_projectio...
 #include "rolling_fc_Solvers.h"                // for RollingComputeErrorPtr
 #include "siconos_debug.h"                     // for DEBUG_PRINTF, DEBUG_BEGIN
 
@@ -77,7 +78,7 @@ void rolling_fc3d_nsgs_initialize_local_solver(
   SolverOptions *localsolver_options = options->internalSolvers[0];
   /** Connect to local solver */
   switch (localsolver_options->solverId) {
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+    case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: {
       *solve = &rolling_fc3d_projectionOnConeWithLocalIteration_solve;
       *update = &rolling_fc3d_projection_update;
       *freeSolver =
@@ -87,12 +88,20 @@ void rolling_fc3d_nsgs_initialize_local_solver(
                                                                  localsolver_options);
       break;
     }
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
+    case SICONOS_ONECONE_ProjectionOnCone: {
       *solve = &rolling_fc3d_projectionOnCone_solve;
       *update = &rolling_fc3d_projection_update;
       *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_fc3d_projection_free;
       *computeError = (RollingComputeErrorPtr)&rolling_fc3d_compute_error;
       rolling_fc3d_projection_initialize(problem, localproblem);
+      break;
+    }
+    case SICONOS_ONECONE_NSN: {
+      *solve = &rfc3d_onecone_nonsmooth_Newton_solvers_solve;
+      *update = &rfc3d_onecone_nonsmooth_Newton_update;      
+      *freeSolver = (RollingFreeSolverNSGSPtr)&rfc3d_onecone_nonsmooth_Newton_solvers_free;
+      *computeError = (RollingComputeErrorPtr)&rfc3d_onecone_nonsmooth_Newton_solvers_computeError;
+      rfc3d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem, options->internalSolvers[0]);
       break;
     }
     default: {
@@ -347,6 +356,11 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   /* problem->mu_r[0]=0.1; */
   /* problem->mu[0]=1.0; */
 
+  for (int c = 0; c < problem->numberOfContacts; c++) {
+    problem->mu[0]=0.0; 
+    }    
+
+  
   /* verbose=1; */
   /* int and double parameters */
   int *iparam = options->iparam;
@@ -636,5 +650,5 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
 
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(
-      SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
 }

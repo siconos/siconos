@@ -30,12 +30,6 @@
 
 const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 
-const char* const
-    SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR =
-        "RFC3D_ProjectionOnConeWithLocalIteration";
-
-const char* const SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR =
-    "RFC3D_ProjectionOnCone";
 
 int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction,
                         double* velocity, SolverOptions* options) {

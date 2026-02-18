@@ -107,17 +107,17 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint);                         \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_FPP);                                            \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_EG);                                             \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN);                                 \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);                              \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);                       \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization); \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);                    \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);  \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);  \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_NSN);                                 \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_NSN_GP);                              \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_NSN_GP_HYBRID);                       \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_ProjectionOnConeWithDiagonalization); \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_ProjectionOnCone);                    \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);  \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_ProjectionOnConeWithRegularization);  \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder);                \
   SICONOS_SOLVER_MACRO(                                                                     \
       SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration);               \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity);           \
+  SICONOS_SOLVER_MACRO(SICONOS_ONECONE_ProjectionOnCone_velocity);           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NCPGlockerFBNewton);                             \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NCPGlockerFBPATH);                               \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER);                           \
@@ -132,9 +132,6 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ADMM);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_IPM_SNM);                                        \
   SICONOS_SOLVER_MACRO(SICONOS_ROLLING_FRICTION_3D_NSGS);                                   \
-  SICONOS_SOLVER_MACRO(                                                                     \
-      SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);           \
-  SICONOS_SOLVER_MACRO(SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);            \
   SICONOS_SOLVER_MACRO(SICONOS_ROLLING_FRICTION_3D_ADMM);                                   \
   SICONOS_SOLVER_MACRO(SICONOS_ROLLING_FRICTION_2D_NSGS);                                   \
   SICONOS_SOLVER_MACRO(                                                                     \

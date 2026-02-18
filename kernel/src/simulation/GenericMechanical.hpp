@@ -61,7 +61,7 @@ class GenericMechanical : public LinearOSNS {
    *  \param numericsSolverId id of the internal friction solver of the generic
    *  problem default = SICONOS_FRICTION_3D_ONECONTACT_NSN
    */
-  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_ONECONTACT_NSN);
+  GenericMechanical(int FC3D_Solver_Id = SICONOS_ONECONE_NSN);
 
   /** constructor from a pre-defined solver options set
    *

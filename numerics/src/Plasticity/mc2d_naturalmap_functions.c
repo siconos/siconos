@@ -20,16 +20,10 @@
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
-#include "MohrCoulomb2DProblem.h"                   // for MohrCoulomb2D...
-#include "NumericsFwd.h"                            // for MohrCoulomb2D...
-#include "NumericsMatrix.h"                         // for NumericsMatrix
-#include "mc2d_AlartCurnier_functions.h"            // for mc2d_computeAlartCu...
-#include "mc2d_onecone_nonsmooth_Newton_solvers.h"  // for mc2d_computeNonsmoo...
-#include "numerics_verbose.h"                       // for numerics_printf
-#include "op3x3.h"                                  // for SET3, eig_3x3
+#include "op3x3.h"  // for SET3, eig_3x3
 #include "projectionOnCone.h"
 
-extern computeNonsmoothFunction Function;
+//extern computeNonsmoothFunction Function;
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */

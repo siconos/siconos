@@ -42,7 +42,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
@@ -60,7 +60,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
@@ -78,7 +78,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     current++;
   }
   {
@@ -91,7 +91,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
@@ -108,7 +108,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
@@ -125,7 +125,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     // expected to fail
     collection[current].will_fail = 1;
     current++;
@@ -139,7 +139,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
@@ -158,7 +158,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+                                   SICONOS_ONECONE_NSN_GP);
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
@@ -178,7 +178,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
 
     solver_options_update_internal(
         collection[current].options, 0,
-        SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+        SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
     // expected to fail

@@ -730,32 +730,32 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATHVI, "3D GAMS/Path VI formulation")
 
       // 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers)
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN,
+      .value("SICONOS_ONECONE_NSN",
+             FRICTION_SOLVER::SICONOS_ONECONE_NSN,
              "3D One contact Non-smooth Newton Alart-Curnier")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
+      .value("SICONOS_ONECONE_NSN_GP",
+             FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP,
              "3D One contact Non-smooth Newton Alart-Curnier, damped")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
+      .value("SICONOS_ONECONE_ProjectionOnCone",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone,
              "3D One contact Projection on cone")
       .value(
-          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration",
-          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+          "SICONOS_ONECONE_ProjectionOnConeWithLocalIteration",
+          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithLocalIteration,
           "3D One contact Projection on cone with local iteration")
       .value(
-          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization",
-          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
+          "SICONOS_ONECONE_ProjectionOnConeWithRegularization",
+          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithRegularization,
           "3D One contact Projection on cone with regularization")
       .value(
-          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization",
-          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization,
+          "SICONOS_ONECONE_ProjectionOnConeWithDiagonalization",
+          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithDiagonalization,
           "3D One contact Projection on cone with diagonalization")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity,
+      .value("SICONOS_ONECONE_ProjectionOnCone_velocity",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone_velocity,
              "3D One contact Projection on cone, velocity")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
+      .value("SICONOS_ONECONE_NSN_GP_HYBRID",
+             FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP_HYBRID,
              "3D Frictional contact hybrid solver for one contact")
       .value("SICONOS_FRICTION_3D_VI_FPP_Cylinder",
              FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP_Cylinder,
@@ -857,12 +857,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_ROLLING_FRICTION_3D_NSGS",
              FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_NSGS,
              "3D Non-smooth Gauss Seidel, local formulation")
-      .value("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone",
-             FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone,
+      .value("SICONOS_ONECONE_ProjectionOnCone",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone,
              "3D Rolling friction one contact Projection on Cone")
-      .value("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration",
+      .value("SICONOS_ONECONE_ProjectionOnConeWithLocalIteration",
              FRICTION_SOLVER::
-                 SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+                 SICONOS_ONECONE_ProjectionOnConeWithLocalIteration,
              "3D Rolling friction one contact Projection on Cone with local iteration")
       .value("SICONOS_ROLLING_FRICTION_3D_ADMM",
              FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ADMM,

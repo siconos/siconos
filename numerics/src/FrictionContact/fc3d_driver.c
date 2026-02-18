@@ -46,25 +46,27 @@ const char* const SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 const char* const SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
 const char* const SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR =
     "FC3D_NCPGlockerFBFixedPoint";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_NSN_STR = "FC3D_ONECONTACT_NSN";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_STR = "FC3D_ONECONTACT_NSN_GP";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID_STR =
+const char* const SICONOS_ONECONE_NSN_STR = "FC3D_ONECONTACT_NSN";
+const char* const SICONOS_ONECONE_NSN_GP_STR = "FC3D_ONECONTACT_NSN_GP";
+const char* const SICONOS_ONECONE_NSN_GP_HYBRID_STR =
     "FC3D_ONECONTACT_NSN_GP_HYBRID";
 const char* const SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR = "FC3D_NCPGlockerFBNewton";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR =
-    "FC3D_ProjectionOnConeWithDiagonalization";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR =
-    "FC3D_ProjectionOnCone";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR =
-    "FC3D_ProjectionOnConeWithLocalIteration";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR =
-    "FC3D_projectionOnConeWithRegularization";
+
+const char* const SICONOS_ONECONE_ProjectionOnConeWithDiagonalization_STR =
+    "ONECONE_ProjectionOnConeWithDiagonalization";
+const char* const SICONOS_ONECONE_ProjectionOnCone_STR =
+    "ONECONE_ProjectionOnCone";
+const char* const SICONOS_ONECONE_ProjectionOnConeWithLocalIteration_STR =
+    "ONECONE_ProjectionOnConeWithLocalIteration";
+const char* const SICONOS_ONECONE_ProjectionOnConeWithRegularization_STR =
+    "ONECONE_projectionOnConeWithRegularization";
+
 const char* const SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "FC3D_NCPGlockerFBPATH";
 const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR =
     "FC3D_projectionOnCylinder";
 const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =
     "FC3D_projectionOnCylinderWithLocalIteration";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR =
+const char* const SICONOS_ONECONE_ProjectionOnCone_velocity_STR =
     "FC3D_ProjectionOnCone_velocity";
 const char* const SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR = "FC3D ConvexQP PG solver";
 const char* const SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
@@ -263,9 +265,9 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       fc3d_unitary_enumerative(problem, reaction, velocity, &info, options);
       break;
     }
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN:
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: {
+    case SICONOS_ONECONE_NSN:
+    case SICONOS_ONECONE_NSN_GP:
+    case SICONOS_ONECONE_NSN_GP_HYBRID: {
       numerics_printf(
           " ========================== Call Newton-based solver for one contact "
           "Friction-Contact 3D problem ==========================\n");
@@ -273,7 +275,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       info = fc3d_onecontact_nonsmooth_Newton_solvers_solve(problem, reaction, options);
       break;
     }
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+    case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: {
       numerics_printf(
           " ========================== Call Projection on cone solver for one contact "
           "Friction-Contact 3D problem ==========================\n");

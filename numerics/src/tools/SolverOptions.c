@@ -50,9 +50,10 @@
 #include "grfc3d_Solvers.h"                 // for grfc3d_IPM_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
 #include "mc2d_solvers.h"
-#include "mlcp_cst.h"            // for SICONOS_MLCP_DIRECT_ENUM_STR
-#include "numerics_verbose.h"    // for numerics_printf, numerics...
-#include "relay_cst.h"           // for SICONOS_RELAY_AVI_CAOFERR...
+#include "mlcp_cst.h"          // for SICONOS_MLCP_DIRECT_ENUM_STR
+#include "numerics_verbose.h"  // for numerics_printf, numerics...
+#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERR...
+#include "rfc3d_onecone_nonsmooth_Newton_solvers.h"
 #include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
 /** Create a struct SolverOptions and initialize its content.
 
@@ -76,9 +77,8 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
   options->solverId = solver_id;
   options->iSize = 30;
   options->dSize = 30;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-
+  options->iparam = (int*)calloc(options->iSize, sizeof(int));
+  options->dparam = (double*)calloc(options->dSize, sizeof(double));
 
   // The content of iparam and dparam for indices in SICONOS_IPARAM and SICONOS_DPARAM enums
   // enum must be set in this function with a default value.
@@ -616,26 +616,9 @@ SolverOptions* solver_options_create(int solverId) {
     }
     case SICONOS_FRICTION_3D_NSGS:
     case SICONOS_GLOBAL_FRICTION_3D_NSGS:
-  case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
-      {
+    case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR: {
       options = solver_options_initialize(solverId, 1000, 1e-4, 1);
       fc3d_nsgs_set_default(options);
-      break;
-    }
-
-    case SICONOS_ROLLING_FRICTION_3D_NSGS: {
-      options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-      rfc3d_nsgs_set_default(options);
-      break;
-    }
-    case SICONOS_ROLLING_FRICTION_3D_ADMM: {
-      options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-      rolling_fc3d_admm_set_default(options);
-      break;
-    }
-    case SICONOS_ROLLING_FRICTION_2D_NSGS: {
-      options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-      rfc2d_nsgs_set_default(options);
       break;
     }
 
@@ -743,74 +726,76 @@ SolverOptions* solver_options_create(int solverId) {
       gfc3d_admm_set_default(options);
       break;
     }
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN: {
+    case SICONOS_ONECONE_NSN: {
       options = solver_options_initialize(solverId, 10, 1e-14, 0);
       fc3d_onecontact_nsn_set_default(options);
       break;
     }
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
-    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: {
+    case SICONOS_ONECONE_NSN_GP:
+    case SICONOS_ONECONE_NSN_GP_HYBRID: {
       options = solver_options_initialize(solverId, 10, 1e-14, 0);
       fc3d_onecontact_nsn_gp_set_default(options);
       break;
     }
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity:
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization:
-    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization:
+    case SICONOS_ONECONE_ProjectionOnCone:
+    case SICONOS_ONECONE_ProjectionOnCone_velocity:
+    case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration:
+    case SICONOS_ONECONE_ProjectionOnConeWithRegularization:
+    case SICONOS_ONECONE_ProjectionOnConeWithDiagonalization:
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder:
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration: {
       options = solver_options_initialize(solverId, 1000, 1e-14, 0);
       fc3d_poc_set_default(options);
       break;
     }
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
-      options = solver_options_initialize(solverId, 1000, 1e-12, 0);
-      rfc3d_poc_set_default(options);
+      
+    case SICONOS_ROLLING_FRICTION_3D_NSGS: {
+      options = solver_options_initialize(solverId, 1000, 1e-4, 1);
+      rfc3d_nsgs_set_default(options);
+      break;
+    }
+    case SICONOS_ROLLING_FRICTION_3D_ADMM: {
+      options = solver_options_initialize(solverId, 1000, 1e-4, 0);
+      rolling_fc3d_admm_set_default(options);
+      break;
+    }
+    case SICONOS_ROLLING_FRICTION_2D_NSGS: {
+      options = solver_options_initialize(solverId, 1000, 1e-4, 1);
+      rfc2d_nsgs_set_default(options);
+      break;
+    }
+     
+
+    case SICONOS_GLOBAL_FRICTION_3D_IPM: {
+      options = solver_options_initialize(solverId, 20000, 1e-6, 0);
+      gfc3d_ipm_set_default(options);
+      break;
+    }
+    case SICONOS_FRICTION_3D_IPM_SNM:
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR: {
+      options = solver_options_initialize(solverId, 20000, 1e-6, 0);
+      fc3d_ipm_snm_set_default(options);
+      break;
+    }
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM: {
+      options = solver_options_initialize(solverId, 20000, 1e-6, 0);
+      gfc3d_ipm_snm_set_default(options);
+      break;
+    }
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX: {
+      options = solver_options_initialize(solverId, 20000, 1e-6, 1);
+      gfc3d_ipm_snm_set_default(options);
+      assert(options->numberOfInternalSolvers == 1);
+      options->internalSolvers[0] = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
+
       break;
     }
 
-  case SICONOS_GLOBAL_FRICTION_3D_IPM:
-  {
-    options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-    gfc3d_ipm_set_default(options);
-    break;
-  }
-  case SICONOS_FRICTION_3D_IPM_SNM:
-  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR:
-  {
-    options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-    fc3d_ipm_snm_set_default(options);
-    break;
-  }
-  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM:
-  {
-    options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-    gfc3d_ipm_snm_set_default(options);
-    break;
-  }
-  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
-  {
-    options = solver_options_initialize(solverId, 20000, 1e-6, 1);
-    gfc3d_ipm_snm_set_default(options);
-    assert(options->numberOfInternalSolvers == 1);
-    options->internalSolvers[0] = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
-    
-    break;
-  }
- 
-    case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
-      options = solver_options_initialize(solverId, 1000, 1e-12, 0);
-      rfc3d_poc_withLocalIteration_set_default(options);
-      break;
-    }
     case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone: {
       options = solver_options_initialize(solverId, 1000, 1e-12, 0);
       rfc2d_poc_set_default(options);
       break;
     }
-
 
     case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
       options = solver_options_initialize(solverId, 1000, 1e-12, 0);
