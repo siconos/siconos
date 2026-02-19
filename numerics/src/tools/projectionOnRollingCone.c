@@ -132,26 +132,22 @@ void display_status_rolling_cone(unsigned int status) {
 unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu, double mur) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
   double normMT = sqrt(r[3] * r[3] + r[4] * r[4]);
-  SET5X5(H);
-  zero5x5(H00);
-
   if (mu * normT + mur * normMT <= -r[0]) {
     // printf("We are in the polar cone\n");
+    zero5x5(H);
     return PROJRCONE_DUAL;
   } else if ((normT <= mu * r[0]) && (normMT <= mur * r[0])) {
-    *H00 = 1.;
-    *H11 = 1.;
-    *H22 = 1.;
-    *H33 = 1.;
-    *H44 = 1.;
+    eye5x5(H);
     // printf("We are in the cone\n");
     return PROJRCONE_INSIDE;
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
-
+    zero5x5(H);
+    SET5X5(H);
     double trial_rn = (mu * normT + mur * normMT + r[0]) / (mur2 + mu2 + 1.0);
     if ((normT > mu * trial_rn) && (normMT > mur * trial_rn)) {
+
       double oneoveroneplusmu2 = 1. / (1. + mu2 + mur2);
 
       double s1 = r[1] / normT;
@@ -162,8 +158,8 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H10 = muoveroneplusmu2 * s1;
       *H20 = muoveroneplusmu2 * s2;
 
-      double s3 = r[1] / normMT;
-      double s4 = r[2] / normMT;
+      double s3 = r[3] / normMT;
+      double s4 = r[4] / normMT;
       double muroveroneplusmu2 = mur * oneoveroneplusmu2;
       *H30 = muroveroneplusmu2 * s3;
       *H40 = muroveroneplusmu2 * s4;
