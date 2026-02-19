@@ -80,125 +80,17 @@ static double rfc3d_compute_local_error(RollingFrictionContactProblem* localprob
   return current_error;
 }
 
-static void compute_rho_split_spectral_norm_cond(RollingFrictionContactProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
-  assert(MLocal[0 + 0 * 5] > 0);
-
-  DEBUG_EXPR(NM_dense_display(MLocal, 5, 5, 5););
-  double sw = MLocal[1 + 1 * 5] + MLocal[2 + 2 * 5];
-  double dw = sw * sw - 4.0 * (sw - MLocal[2 + 1 * 5] + MLocal[1 + 2 * 5]);
-  DEBUG_PRINTF("dw = %e\n", dw);
-  if (dw > 0.0)
-    dw = sqrt(dw);
-  else
-    dw = 0.0;
-
-  rho[0] = 1.0 / MLocal[0 + 0 * 3];
-  rho[1] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
-  rho[2] = rho[1];
-
-  assert(rho[0] > 0);
-  assert(rho[1] > 0);
-  assert(rho[2] > 0);
-  
-  sw = MLocal[3 + 3 * 5] + MLocal[4 + 4 * 5];
-  dw = sw * sw - 4.0 * (sw - MLocal[4 + 1 * 5] + MLocal[3 + 2 * 5]);
-  DEBUG_PRINTF("dw = %e\n", dw);
-  if (dw > 0.0)
-    dw = sqrt(dw);
-  else
-    dw = 0.0;
-
-  rho[3] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
-  rho[4] = rho[3];
-
-  assert(rho[0] > 0);
-  assert(rho[1] > 0);
-  assert(rho[2] > 0);
-  assert(rho[3] > 0);
-  assert(rho[4] > 0);
-
-
-  DEBUG_PRINTF("sw=%le\t  ", sw);
-  DEBUG_PRINTF("dw=%le\n ", dw);
-  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
-  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
-  DEBUG_PRINTF("rho[2]=%le\t", rho[2]);
-  DEBUG_PRINTF("rho[3]=%le\t", rho[3]);
-  DEBUG_PRINTF("rho[4]=%le\n", rho[4]);
-}
-
-static void compute_rho_split_spectral_norm(RollingFrictionContactProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
-  assert(MLocal[0 + 0 * 3] > 0);
-
-  DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
-  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
-
-  double dw = sw * sw - 4.0 * (sw - MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-  DEBUG_PRINTF("dw = %e\n", dw);
-  if (dw > 0.0)
-    dw = sqrt(dw);
-  else
-    dw = 0.0;
-
-  rho[0] = 1.0 / MLocal[0 + 0 * 3];
-
-  rho[1] = 2.0 / (sw + dw);
-  rho[2] = rho[1];
-
-  assert(rho[0] > 0);
-  assert(rho[1] > 0);
-  assert(rho[2] > 0);
-  sw = MLocal[3 + 3 * 3] + MLocal[4 + 4 * 3];
-  dw = sw * sw - 4.0 * (sw - MLocal[4 + 1 * 3] + MLocal[3 + 2 * 3]);
-  DEBUG_PRINTF("dw = %e\n", dw);
-  if (dw > 0.0)
-    dw = sqrt(dw);
-  else
-    dw = 0.0;
-
-  rho[3] = 2.0 / (sw + dw);
-  rho[4] = rho[3];
-  assert(rho[3] > 0);
-  assert(rho[4] > 0);
-
-  
-  DEBUG_PRINTF("sw=%le\t  ", sw);
-  DEBUG_PRINTF("dw=%le\n ", dw);
-  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
-  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
-  DEBUG_PRINTF("rho[2]=%le\t", rho[2]);
-  DEBUG_PRINTF("rho[3]=%le\t", rho[3]);
-  DEBUG_PRINTF("rho[4]=%le\n", rho[4]);
-}
 
 static void compute_rho_spectral_norm(RollingFrictionContactProblem* localproblem, double* rho) {
+
   double* MLocal = localproblem->M->matrix0;
+  double eigvals[5];
+  int info = eigvals_sym5x5_for_loop(MLocal, eigvals);
 
-  SET5X5(MLocal);  
-
-  double Mlocal3x3[9] = {*MLocal00, *MLocal10, *MLocal20, *MLocal01, *MLocal11, *MLocal21, *MLocal03, *MLocal13, *MLocal23};
-
+  DEBUG_PRINTF("compute_rho_spectral_norm : eigvals\n");
+  //display5(eigvals);
+  rho[0] = 1.0 / eigvals[4];
   
-  double worktmp[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  double eig[3] = {0.0, 0.0, 0.0};
-  if (eig_3x3(MLocal, worktmp, eig)) numerics_printf("compute_rho_spectral_norm : failed");
-  DEBUG_PRINTF("eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", eig[0], eig[1], eig[2]);
-  DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0 / eig[0],
-               1.0 / eig[1], 1.0 / eig[2]);
-  rho[0] = 1.0 / eig[0];
-  rho[1] = rho[0];
-  rho[2] = rho[0];
-  rho[3] = rho[0];
-  rho[4] = rho[0];
-
- 
-  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
-  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
-  DEBUG_PRINTF("rho[2]=%le\t", rho[2]);
-  DEBUG_PRINTF("rho[3]=%le\t", rho[3]);
-  DEBUG_PRINTF("rho[4]=%le\n", rho[4]);
 }
 
 static void rfc3d_onecone_nonsmooth_Newton_initialize(
@@ -229,18 +121,17 @@ static void rfc3d_onecone_nonsmooth_Newton_initialize(
   /* Compute and store default value of rho value */
   size_t nc = problem->numberOfContacts;
 
-  double avg_rho[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-  // to be updated
+
   if (options->solverId == SICONOS_ONECONE_NSN ||
       options->solverId == SICONOS_ONECONE_NSN_GP) {
-    if (!options->dWork || options->dWorkSize < 5 * nc) {
-      options->dWork = (double*)realloc(options->dWork, 5 * nc * sizeof(double));
-      options->dWorkSize = 5 * nc;
+    if (!options->dWork || options->dWorkSize < nc) {
+      options->dWork = (double*)realloc(options->dWork, nc * sizeof(double));
+      options->dWorkSize = nc;
     }
   } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
-    if (!options->dWork || options->dWorkSize < 6 * nc) {
-      options->dWork = (double*)realloc(options->dWork, 4 * nc * sizeof(double));
-      options->dWorkSize = 6 * nc;
+    if (!options->dWork || options->dWorkSize < 2 * nc) {
+      options->dWork = (double*)realloc(options->dWork, 2 * nc * sizeof(double));
+      options->dWorkSize = 2 * nc;
     }
   }
 
@@ -248,57 +139,43 @@ static void rfc3d_onecone_nonsmooth_Newton_initialize(
   for (size_t cone = 0; cone < nc; cone++) {
     if (options->solverId == SICONOS_ONECONE_NSN ||
         options->solverId == SICONOS_ONECONE_NSN_GP) {
-      rho = &options->dWork[5 * cone];
+      rho = &options->dWork[cone];
     } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
       options->dWork[cone] = 1.0;  // for PLI algorithm.
-      rho = &options->dWork[5 * cone + nc];
+      rho = &options->dWork[cone + nc];
     }
     numerics_printf_verbose(2,
                             "rfc3d_onecone_nonsmooth_Newton_initialize"
                             " rfc3d_compute rho for cone = %i",
                             cone);
 
-    if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-        SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND) {
-      rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
-      compute_rho_split_spectral_norm_cond(localproblem, rho);
-    } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-               SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM) {
-      rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
-      compute_rho_split_spectral_norm(localproblem, rho);
-    } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-               SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM) {
-      rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
-      compute_rho_spectral_norm(localproblem, rho);
-    } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-               SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT) {
-      rho[0] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[1] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[2] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[3] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[4] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-    } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-               SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      numerics_error("rfc3d_onecone_nonsmooth_Newton_initialize",
-                     "Adaptive strategy for computing rho not yet implemented");
-    } else
-      numerics_error("rfc3d_onecone_nonsmooth_Newton_initialize",
-                     "unknown strategy for computing rho");
-    double val = 1.;/* 1e-1; */
-    rho[0] = val;
-    rho[1] = val;
-    rho[2] = val;
-    rho[3] = val;
-    rho[4] = val;
-    
-    rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
+    switch (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY]) {
+      case SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM: {
+	rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
+	compute_rho_spectral_norm(localproblem, rho);
+	break;
+      }
+      case SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT: {
+        rho[0] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+        break;
+      }
+      case SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE: {
+        numerics_warning("rfc3d_onecone_nonsmooth_Newton_initialize",
+                         "Adaptive strategy for computing rho not yet implemented");
+      }
+      default: {
+        numerics_warning("rfc3d_onecone_nonsmooth_Newton_initialize",
+                         "strategy for computing rho is unknown");
+	numerics_warning("rfc3d_onecone_nonsmooth_Newton_initialize",
+                         "switch back to RHO_STRATEGY_SPECTRAL_NORM");
+	rolling_fc3d_local_problem_fill_M(problem, localproblem, cone);
+        compute_rho_spectral_norm(localproblem, rho);
+      }
+    }
+    double avg_rho = 0.0;
 
     if (verbose > 0) {
-      avg_rho[0] += rho[0];
-      avg_rho[1] += rho[1];
-      avg_rho[2] += rho[2];
-      avg_rho[3] += rho[3];
-      avg_rho[4] += rho[4];
+      avg_rho += rho[0];
 
       double m_row_norm = 0.0, sum;
       for (int i = 0; i < 5; i++) {
@@ -311,17 +188,16 @@ static void rfc3d_onecone_nonsmooth_Newton_initialize(
       // to be updated
       numerics_printf_verbose(2,
                               "rfc3d_onecone_nonsmooth_Newton_initialize : "
-                              "cone = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e, "
+                              "cone = %i, rho[0] = %4.2e\t,"
                               "||M||^-1 = %4.2e, ||M||_row^-1 = %4.2e ",
-                              cone, rho[0], rho[1], rho[2],
+                              cone, rho[0], 
                               1.0 / hypot9(localproblem->M->matrix0), 1.0 / m_row_norm);
     }
-    DEBUG_EXPR(NM_display(localproblem->M););
+    numerics_printf("rfc3d_onecone_nonsmooth_Newton_initialize"
+		    " Avg. rho value = %e\t",
+		    avg_rho / nc)    ;
+      DEBUG_EXPR(NM_display(localproblem->M););
   }
-  numerics_printf(
-      "rfc3d_onecone_nonsmooth_Newton_initialize"
-      " Avg. rho value = %e\t%e\t%e\t%e\t%e\t",
-      avg_rho[0] / nc, avg_rho[1] / nc, avg_rho[2] / nc, avg_rho[3] / nc, avg_rho[4] / nc);
 }
 
 static void rfc3d_free(RollingFrictionContactProblem* problem,
@@ -350,7 +226,6 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_initialize(
 int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* localproblem,
                                                  double* local_reaction,
                                                  SolverOptions* options) {
-  verbose=3;
   numerics_printf_verbose(
       2, "--------------- rfc3d_onecone_nonsmooth_Newton_solvers_solve starts for cone %i",
       options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]);
@@ -378,21 +253,23 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* 
   if (options->solverId == SICONOS_ONECONE_NSN) {
     info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(localproblem, local_reaction,
                                                                options);
-  } else if (options->solverId == SICONOS_ONECONE_NSN_GP) {
-    info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                               options);
-  } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
-    if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-            SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
-        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-            SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) {
-      info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction,
-                                                                 options);
-    } else {
-      numerics_error("rfc3d_onecone_nonsmooth_Newton_solvers_solve",
-                     "Unknown local nsn hybrid solver");
-    }
-  } else {
+  } /* else if (options->solverId == SICONOS_ONECONE_NSN_GP) { */
+  /*   info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction, */
+  /*                                                              options); */
+  /* } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) { */
+  /*   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] == */
+  /*           SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP || */
+  /*       options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] == */
+  /*           SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) { */
+  /*     info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction, */
+  /*                                                                options); */
+  /*   } */
+  /* else { */
+  /*   numerics_error("rfc3d_onecone_nonsmooth_Newton_solvers_solve", */
+  /* 		   "Unknown local nsn hybrid solver"); */
+  /* } */
+/* } */
+  else {
     info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF, options);
   }
   if (info > 0) {
@@ -438,27 +315,6 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_free(RollingFrictionContactProblem* 
 
 void rfc3d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* velocity,
                                                          double* reaction, double* error) {
-  /*   int numberOfCones = n/3; */
-  /*   int sizeGlobal = numberOfCones*FSize; */
-  /*   //  double * FGlobal = (double*)malloc(sizeGlobal*sizeof(*FGlobal));  */
-  /*   (*computeFGlobal)(reaction,velocity); */
-  /*   int i; */
-  /*   double Fz; */
-  /*   *error = 0; */
-  /*   for(i=0;i<sizeGlobal;++i) */
-  /*     { */
-  /*       Fz = velocity[i]*reaction[i]; */
-  /*       if(Fz>0) */
-  /*  *error+=Fz; */
-  /*       if(reaction[i]<0) */
-  /*  *error+=reaction[i]; */
-  /*       if(velocity[i]<0) */
-  /*  *error+=velocity[i]; */
-  /*     } */
-
-  /*   // (*computeVelocity)(FGlobal); */
-
-  /*   free(FGlobal); */
 }
 
 
@@ -523,12 +379,11 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
   double* rho;
   if (options->solverId == SICONOS_ONECONE_NSN ||
       options->solverId == SICONOS_ONECONE_NSN_GP) {
-    rho = &options->dWork[5 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
+    rho = &options->dWork[iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   } else {
     int nc = options->dWorkSize / 4;
-    rho = &options->dWork[5 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
+    rho = &options->dWork[iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
   }
-
   /* compute the velocity */
   double velocity[5] = {0., 0., 0., 0., 0.};
   cpy5(qLocal, velocity);
@@ -575,38 +430,6 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     /* Solve the linear system */
     cpy5(F, dR);
     solve_5x5_gepp_for_loop(AWplusB, dR);
-
-    //solve_nxn_gepp(5, AWplusB, F, dR);
-
-    /* scal5(-1., F_save); */
-    /* mvp5x5(AWplusB_save, dR, F_save); */
-
-    /* printf("F_save \n"); */
-    /* display5(F_save); */
-    /* printf("hypot5 = %e \n", hypot5(F_save)); */
-
-    
-    /* NumericsMatrix* M = NM_create(NM_DENSE, 5, 5); */
-    /* cpy5x5(AWplusB_save, M->matrix0); */
-
-    /* double AWplusB_save2[25]; */
-    /* double F_save2[5];     */
-    /* cpy5x5(AWplusB_save, AWplusB_save2); */
-    /* cpy5(F_save, F_save2); */
-
-    /* NM_LU_solve(M, F_save, 1); */
-    
-    /* cpy5(F_save, dR); */
-
-    
-    /* scal5(-1., F_save2);  */
-    /* mvp5x5(AWplusB_save2, F_save, F_save2); */
-    /* printf("hypot5 (F_save2 )= %e \n", hypot5(F_save2)); */
-
-
-    
-    
-    
     
     DEBUG_EXPR(printf("dR"); display5(dR));
     DEBUG_EXPR(printf("F"); display5(F));
@@ -621,7 +444,7 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) *
                                     norm_relative;  // improve with relative tolerance
 
-    // VA 01/2025 : should be better but prevents convergemce due to rounding error
+    // VA 01/2025 : should be better but prevents convergence due to rounding error
     /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2] )* */
     /* 					 norm_relative;  // improve with relative tolerance */
     /* double error = rfc3d_compute_local_error(localproblem, R); */
@@ -659,414 +482,33 @@ static int LineSearchGP(RollingFrictionContactProblem* localproblem,
                         computeNonsmoothFunction Function, double* t_opt, double R[3],
                         double dR[3], double* rho, int LSitermax, double* F, double* A,
                         double* B, double* velocity) {
-  numerics_printf_verbose(2, "-- LineSearchGP starts");
-
-  double alpha = *t_opt;
-
-  double inf = 1e20;
-
-  double alphamin = 0.0;
-  double alphamax = inf;
-
-  double m1 = 0.1, m2 = 0.9;
-
-  /*     // store the value fo the function */
-  /*     double F[3]={0.,0.,0.}; */
-
-  /*     // Store the (sub)-gradient of the function */
-  /*     double A[9]={0.,0.,0.,0.,0.,0.,0.,0.,0.}; */
-  /*     double B[9]={0.,0.,0.,0.,0.,0.,0.,0.,0.}; */
-
-  /*     double velocity[3]={0.,0.,0.}; */
-
-  double mu = localproblem->mu[0];
-  double mu_r = localproblem->mu_r[0];
-  double* qLocal = localproblem->q;
-  double* MLocal = localproblem->M->matrix0;
-
-  /*     for (int i=0; i<3; i++) velocity[i] = MLocal[i+0*3]*R[0] + qLocal[i] */
-  /*          + MLocal[i+1*3]*R[1] + */
-  /*          + MLocal[i+2*3]*R[2] ; */
-
-  /*     Function(R,velocity,mu_r,rho,F,A,B); */
-
-  // Computation of q(t) and q'(t) for t =0
-
-  double q0 = 0.5 * cblas_ddot(3, F, 1, F, 1);
-
-  double tmp[3] = {0., 0., 0.};
-
-  // Value of AW+B
-  double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-
-  // compute A MLocal +B
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      AWplusB[i + 3 * j] = 0.0;
-      for (int k = 0; k < 3; k++) {
-        AWplusB[i + 3 * j] += A[i + 3 * k] * MLocal[k + j * 3];
-      }
-      AWplusB[i + 3 * j] += B[i + 3 * j];
-    }
-  }
-
-#ifdef DEBUG_MESSAGES
-  for (int l = 0; l < 3; l++) {
-    for (int k = 0; k < 3; k++) {
-      printf("AWplusB[%i+3*%i] = %le\t", l, k, AWplusB[l + 3 * k]);
-    }
-    printf("\n");
-  }
-#endif
-
-  for (int i = 0; i < 3; i++) {
-    tmp[i] = 0.0;
-    for (int j = 0; j < 3; j++) {
-      tmp[i] += AWplusB[i + 3 * j] * dR[j];
-    }
-  }
-
-  double dqdt0 = 0.0;
-  for (int i = 0; i < 3; i++) {
-    dqdt0 += F[i] * tmp[i];
-  }
-#ifdef DEBUG_MESSAGES
-  printf("q0 = %12.8e \n", q0);
-  printf("dqdt0 = %12.8e \n", dqdt0);
-  for (int i = 0; i < 3; i++) {
-    printf("tmp[%i] = %12.8e \t", i, tmp[i]);
-  }
-  printf("\n");
-  for (int i = 0; i < 3; i++) {
-    printf("dR[%i] = %12.8e \t", i, dR[i]);
-  }
-  printf("\n");
-#endif
-
-  for (int iter = 0; iter < LSitermax; iter++) {
-    for (int i = 0; i < 3; i++) tmp[i] = R[i] + alpha * dR[i];
-
-    for (int i = 0; i < 3; i++)
-      velocity[i] = MLocal[i + 0 * 3] * tmp[0] + qLocal[i] + MLocal[i + 1 * 3] * tmp[1] +
-                    +MLocal[i + 2 * 3] * tmp[2];
-
-    Function(tmp, velocity, mu, mu_r, rho, F, NULL, NULL);
-
-    double q = 0.5 * cblas_ddot(3, F, 1, F, 1);
-
-    double slope = (q - q0) / alpha;
-
-#ifdef DEBUG_MESSAGES
-    printf("q = %12.8e \n", q);
-    printf("slope = %12.8e \n", slope);
-#endif
-
-    int C1 = (slope >= m2 * dqdt0);
-    int C2 = (slope <= m1 * dqdt0);
-
-    if (C1 && C2) {
-      DEBUG_PRINTF("Success in LS: alpha = %12.8e\n", alpha);
-      *t_opt = alpha;
-
-      numerics_printf_verbose(
-          2, "-- LineSearchGP success number of iteration = %i  alpha = %.10e", iter, alpha);
-      return 0;
-
-    } else if (!C1) {
-#ifdef DEBUG_MESSAGES
-      printf("LS: alpha too small = %12.8e\t, slope =%12.8e\n", alpha, slope);
-      printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0, m2 * dqdt0);
-#endif
-      // std::cout << "t = " << t << " is too small : slope = " << slope << ", m2*qp0 = " <<
-      // m2*qp0 << std::endl;
-      alphamin = alpha;
-    } else  // not(C2)
-    {
-#ifdef DEBUG_MESSAGES
-      printf("LS: alpha too big = %12.8e\t, slope =%12.8e\n", alpha, slope);
-      printf(" m1*dqdt0 =%12.8e\t, m2*dqdt0 =%12.8e\n ", m1 * dqdt0, m2 * dqdt0);
-#endif
-      // std::cout << "t = " << t << " is too big : slope = " << slope << ", m1*qp0 = " <<
-      // m1*qp0 << std::endl;
-      alphamax = alpha;
-    }
-    if (alpha < inf) {
-      alpha = 0.5 * (alphamin + alphamax);
-    } else {
-      alpha = 10 * alpha;
-    }
-  }
-  numerics_printf_verbose(
-      2,
-      "-- LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e",
-      LSitermax, alpha);
-  *t_opt = alpha;
+  // to be implemented
+  assert(0);
+  int info =0;
   return -1;
 }
 #define DEBUG_MESSAGES
 int rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(
     RollingFrictionContactProblem* localproblem, double* R, SolverOptions* options) {
-  int* iparam = options->iparam;
-  double* dparam = options->dparam;
-
-  numerics_printf_verbose(
-      2, "--------------- rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped starts");
-
-  double mu = localproblem->mu[0];
-  double mu_r = localproblem->mu_r[0];
-  double* qLocal = localproblem->q;
-
-  double norm_qLocal =
-      sqrt(qLocal[0] * qLocal[0] + qLocal[1] * qLocal[1] + qLocal[2] * qLocal[2]);
-  double norm_relative = 1.0;
-  if (norm_qLocal > DBL_EPSILON) {
-    norm_relative /= norm_qLocal;
-  }
-
-  double* MLocal = localproblem->M->matrix0;
-
-  /* store the increment */
-  double dR[3] = {0., 0., 0.};
-  /* store the value fo the function */
-  double F[3] = {0., 0., 0.};
-  /* Store the (sub)-gradient of the function */
-  double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-  double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-  /* Value of AW+B */
-  double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-
-  /* retrieve value of rho */
-  double* rho;
-  if (options->solverId == SICONOS_ONECONE_NSN ||
-      options->solverId == SICONOS_ONECONE_NSN_GP) {
-    rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
-  } else {
-    int nc = options->dWorkSize / 4;
-    rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
-  }
-
-  /* compute the velocity */
-  double velocity[3] = {0., 0., 0.};
-  cpy3(qLocal, velocity);
-  mvp3x3(MLocal, R, velocity);
-
-  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
-
-  /* Newton iteration */
-  int inew;
-  int info_solv3x3;
-  double t = 1.;
-  double t_opt = 1.;
-  double t_init = 1.;
-
-  int LSitermax = iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER];
-  for (inew = 0; inew < itermax; ++inew) {
-    /* Update function and gradient */
-    Function(R, velocity, mu, mu_r, rho, F, A, B);
-
-    /* compute -(A MLocal +B) */
-    mm3x3(A, MLocal, AWplusB);
-    add3x3(B, AWplusB);
-    scal3x3(-1., AWplusB);
-
-
-    /* Solve the linear system */
-    cpy3(F, dR);
-    info_solv3x3 = solve_3x3_gepp(AWplusB, dR);
-
-    /* if determinant is zero, replace dR=NaN with zero (i.e. don't modify R) and return early
-     */
-    if (info_solv3x3) {
-      dR[0] = 0;
-      dR[1] = 0;
-      dR[2] = 0;
-    }
-    if (!info_solv3x3) {
-      /* Perform Line Search */
-      t_opt = t_init;
-      LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax, F, A, B, velocity);
-      t = t_opt;
-    }
-
-    /* update iterates */
-    R[0] = R[0] + t * dR[0];
-    R[1] = R[1] + t * dR[1];
-    R[2] = R[2] + t * dR[2];
-
-    /* compute new residue */
-    cpy3(qLocal, velocity);
-    mvp3x3(MLocal, R, velocity);
-    Function(R, velocity, mu, mu_r, rho, F, NULL, NULL);
-    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
-                                    norm_relative;  // improve with relative tolerance
-    /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
-    /*                                 norm_relative;  // improve with relative tolerance */
-
-    if (info_solv3x3) {
-      if (verbose > 0)
-        numerics_warning("rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped",
-                         "cone %i 3x3 linear system is irregular # iteration = %i"
-                         " error = %.10e \n",
-                         iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER], inew,
-                         dparam[SICONOS_DPARAM_RESIDU]);
-      break;
-    }
-    numerics_printf_verbose(2, "-- cone %i # iteration = %i  error = %.10e",
-                            iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER], inew,
-                            dparam[SICONOS_DPARAM_RESIDU]);
-
-    if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
-      iparam[SICONOS_IPARAM_ITER_DONE] = inew;
-      return 0;
-    }
-  }  // End of the Newton iteration
-
-  iparam[SICONOS_IPARAM_ITER_DONE] = inew;
+  // to be implemented
+  assert(0);
+  int info =0;
   return 1;
 }
 
 static void keep_or_discard_solution(RollingFrictionContactProblem* localproblem,
                                      double* local_reaction, double* local_reaction_backup,
                                      SolverOptions* options, double* current_error) {
-  double error = 0.0;
-  /* error = options->dparam[SICONOS_DPARAM_RESIDU]; */
-
-  error = rfc3d_compute_local_error(localproblem, local_reaction);
-  DEBUG_PRINTF("New local error = %e\n", error);
-  int nan = isnan(options->dparam[SICONOS_DPARAM_RESIDU]) ||
-            isinf(options->dparam[SICONOS_DPARAM_RESIDU]);
-  if (nan) {
-    DEBUG_PRINT("Residu is equal to nan or inf\n");
-    DEBUG_EXPR(NM_display(localproblem->M));
-    DEBUG_EXPR(NM_vector_display(localproblem->q, 3));
-    DEBUG_EXPR(NM_vector_display(local_reaction, 3));
-    DEBUG_EXPR(NM_vector_display(local_reaction_backup, 3));
-
-    /* DEBUG_PRINTF("No hope for cone %d, setting to zero.\n", */
-    /*              options->iparam[ SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]); */
-    /* local_reaction[0] = 0; */
-    /* local_reaction[1] = 0; */
-    /* local_reaction[2] = 0; */
-    DEBUG_PRINTF("Discard the new local solution with error = %e\n", error);
-    DEBUG_PRINTF("Get back to the local backup solution = %e\n", *current_error);
-    cpy3(local_reaction_backup, local_reaction);
-    // memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
-  } else {
-    if (error <= options->dparam[SICONOS_DPARAM_TOL] || error <= *current_error) {
-      DEBUG_PRINTF("Keep the new local solution with error = %e\n", error);
-      *current_error = error;
-      cpy3(local_reaction, local_reaction_backup);
-      // memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
-    } else {
-      DEBUG_PRINTF("Discard the new local solution with error = %e\n", error);
-      DEBUG_PRINTF("Get back to the local backup solution = %e\n", *current_error);
-      cpy3(local_reaction_backup, local_reaction);
-      // memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
-    }
-  }
+  // to be implemented
+  assert(0);
 }
 
 int rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(
     RollingFrictionContactProblem* localproblem, double* local_reaction,
     SolverOptions* options) {
-  numerics_printf_verbose(
-      2, "--------------- rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid starts");
-
-  int info = -1;
-  double local_reaction_backup[3] = {local_reaction[0], local_reaction[1], local_reaction[2]};
-
-  int max_loop = options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP];
-
-  int newton_iteration_number = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  int pli_iteration_number = options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER];
-
-  /* compute current_error */
-  double current_error = rfc3d_compute_local_error(localproblem, local_reaction);
-
-  DEBUG_PRINTF("rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid current_error= %e\n",
-               current_error);
-
-  if (!(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-            SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
-        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-            SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)) {
-    numerics_error("rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid",
-                   "Unknown local nsn hybrid solver");
-  }
-
-  /* 0 - Perform a first call to NSN solver to see if it succeeds quickly */
-
-  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-      SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) {
-    options->iparam[SICONOS_IPARAM_MAX_ITER] = newton_iteration_number;
-    info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                               options);
-
-    DEBUG_PRINTF("NSN solver ended with residual = %e\n",
-                 options->dparam[SICONOS_DPARAM_RESIDU]);
-
-    keep_or_discard_solution(localproblem, local_reaction, local_reaction_backup, options,
-                             &current_error);
-
-    if (current_error <= options->dparam[SICONOS_DPARAM_TOL]) {
-      options->dparam[SICONOS_DPARAM_RESIDU] = current_error;
-      DEBUG_PRINTF("First call of NSN solver ends with current_error= %e\n", current_error);
-      DEBUG_END("rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid\n");
-      return info;
-    }
-  }
-
-  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-          SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
-      options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
-          SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) {
-    int loop = 0;
-    while (loop < max_loop && current_error >= options->dparam[SICONOS_DPARAM_TOL]) {
-      loop++;
-      DEBUG_PRINTF(" SICONOS_ONECONE_NSN_GP_HYBRID:  loop = %i\n", loop);
-
-      /*  1 - fixed point projection solver */
-
-      options->iparam[SICONOS_IPARAM_MAX_ITER] = pli_iteration_number;
-      info = rolling_fc3d_projectionOnConeWithLocalIteration_solve(localproblem,
-                                                                   local_reaction, options);
-      DEBUG_PRINTF("PLI solver ended with residual = %e\n",
-                   options->dparam[SICONOS_DPARAM_RESIDU]);
-
-      keep_or_discard_solution(localproblem, local_reaction, local_reaction_backup, options,
-                               &current_error);
-      if (current_error < options->dparam[SICONOS_DPARAM_TOL]) {
-        options->iparam[SICONOS_IPARAM_MAX_ITER] = newton_iteration_number;
-        break;
-      }
-
-      /* 2 - nonsmooth Newton solver */
-
-      options->iparam[SICONOS_IPARAM_MAX_ITER] = newton_iteration_number;
-      info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                                 options);
-      DEBUG_PRINTF("NSN solver  ended with residual = %e\n",
-                   options->dparam[SICONOS_DPARAM_RESIDU]);
-
-      keep_or_discard_solution(localproblem, local_reaction, local_reaction_backup, options,
-                               &current_error);
-    }
-
-    if (loop == max_loop && max_loop != 1) {
-      if (verbose > 0) {
-        printf(
-            "Maximum number of loop (%i) in  SICONOS_ONECONE_NSN_GP_HYBRID has "
-            "been reached for cone %i with error = %e \n",
-            max_loop, options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-            current_error);
-      }
-    }
-  }
-
-  options->dparam[SICONOS_DPARAM_RESIDU] = current_error;
-  DEBUG_PRINTF("rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid END current_error= %e\n",
-               current_error);
-  DEBUG_END("rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid\n")
+  // to be implemented
+  assert(0);
+  int info =0;
   return info;
 }
 

@@ -48,10 +48,10 @@ int main (int argc, char *argv[])
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
 
-/* #if defined(TEST_FIRST_ORDER_COLLECTION) */
-/*   collection[8].will_fail = 1; /\* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d_dense.dat *\/ */
-/*   collection[9].will_fail = 1; /\* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d.dat *\/ */
-/* #endif */
+#if defined(TEST_FIRST_ORDER_COLLECTION)
+  collection[8].will_fail = 1; /* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d_dense.dat */
+  collection[9].will_fail = 1; /* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d.dat */
+#endif
 
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);

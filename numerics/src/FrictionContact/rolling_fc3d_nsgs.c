@@ -100,7 +100,7 @@ void rolling_fc3d_nsgs_initialize_local_solver(
       *solve = &rfc3d_onecone_nonsmooth_Newton_solvers_solve;
       *update = &rfc3d_onecone_nonsmooth_Newton_update;      
       *freeSolver = (RollingFreeSolverNSGSPtr)&rfc3d_onecone_nonsmooth_Newton_solvers_free;
-      *computeError = (RollingComputeErrorPtr)&rfc3d_onecone_nonsmooth_Newton_solvers_computeError;
+      *computeError = (RollingComputeErrorPtr)&rolling_fc3d_compute_error;
       rfc3d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem, options->internalSolvers[0]);
       break;
     }
@@ -312,18 +312,25 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
         calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                 options->dparam[SICONOS_DPARAM_TOL], norm_q);
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
-      *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
-      assert(*tolerance > 0.0 && "tolerance has to be positive");
-      /* if (*tolerance < DBL_EPSILON) */
-      /* { */
-      /*   numerics_warning("determine_convergence_with_full_final", "We try to set a very smal
-       * tolerance"); */
-      /*   *tolerance = DBL_EPSILON; */
-      /* } */
-      numerics_printf(
-          "------- RFC3D - NSGS - We modify the required incremental precision to reach "
-          "accuracy to %e",
-          *tolerance);
+      if (error < DBL_EPSILON) {
+        /* in this case, the relative error is very small
+           (meaning that the nsgs loop does not
+           improve accuracy).
+           We try to tighten the local solver tolerance */
+        options->internalSolvers[0]->dparam[0] = options->internalSolvers[0]->dparam[0] / 100.;
+        numerics_printf(
+            "------- RFC3D - NSGS - We modify the local solver tolerance precision to reach "
+            "accuracy to %e",
+            options->internalSolvers[0]->dparam[0]);
+	
+      } else {
+        *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
+	assert(*tolerance > 0.0 && "tolerance has to be positive");
+        numerics_printf(
+            "------- RFC3D - NSGS - We modify the required incremental precision to reach "
+            "accuracy to %e",
+            *tolerance);
+      }        
       hasNotConverged = 1;
     } else {
       numerics_printf(
@@ -649,6 +656,9 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
 
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(
-      SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
+  options->internalSolvers[0] =
+      solver_options_create(SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
+  
+  
+  
 }

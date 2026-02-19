@@ -36,7 +36,7 @@
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 
 void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], double mu,
-                                           double mur, double Rho[3], double F[5],
+                                           double mur, double * Rho, double F[5],
                                            double A[25], double B[25]) {
   DEBUG_PRINT("rolling_friction_3D_computeNaturalMap\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 5; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
@@ -44,15 +44,14 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
   SET5(R);
   SET5(velocity);
-  SET5(Rho);
-
 
   double RV[5]; /* = {0. , 0., 0.}; */
-  double rho = *Rho0;
+  double rho = *Rho;
   double normVT, normOmegaT;
 
   normVT = sqrt(*velocity1 * *velocity1 + *velocity2 * *velocity2);
   normOmegaT = sqrt(*velocity3 * *velocity3 + *velocity4 * *velocity4);
+  
   RV[0] = *R0 - rho * (*velocity0 + mu * normVT + mur * normOmegaT);
   RV[1] = *R1 - rho * *velocity1;
   RV[2] = *R2 - rho * *velocity2;
@@ -66,7 +65,7 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   DEBUG_PRINTF("rho= %12.8e \n", rho);
   unsigned int where = projectionOnRollingCone(F, mu, mur);
 
-  DEBUG_EXPR_WE(for (int i = 0; i < 5; i++) printf("projection F[%i]= %12.8e \n", i, F[i]));
+  DEBUG_EXPR_WE(printf("projection F\n"); display5(F););
 
   F[0] = *R0 - F[0];
   F[1] = *R1 - F[1];
@@ -74,11 +73,11 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   F[3] = *R3 - F[3];
   F[4] = *R4 - F[4];
 
-  DEBUG_EXPR_WE(for (int i = 0; i < 5; i++) printf("F[%i]= %12.8e \n", i, F[i]));
+  DEBUG_EXPR_WE(display5(F););
 
-  DEBUG_EXPR_WE(if (where == PROJRCONE_DUAL) printf("We are in the polar cone\n");
-                if (where == PROJRCONE_INSIDE) printf("We are in the cone\n");
-                if (where == PROJRCONE_BOUNDARY_FRICTION)
+  DEBUG_EXPR_WE(if (where == PROJRCONE_DUAL) {printf("We are in the polar cone\n");}
+		  else if (where == PROJRCONE_INSIDE) {printf("We are in the cone\n");}
+		  else 
                     printf("We are outside the cone and its polar\n"););
   if (A && B) {
     

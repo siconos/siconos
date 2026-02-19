@@ -26,6 +26,8 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SiconosBlas.h"                    // for cblas_dcopy
 #include "projectionOnRollingCone.h"        // for projectionOnRollingCone
+
+// #define DEBUG_MESSAGES                                       //
 #include "siconos_debug.h"                  // for DEBUG_EXPR, DEBUG_PRINTF
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

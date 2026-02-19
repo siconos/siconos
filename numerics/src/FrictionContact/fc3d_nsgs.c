@@ -483,26 +483,33 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
         calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                 options->dparam[SICONOS_DPARAM_TOL], norm_q);
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
-      *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
-      /* assert(*tolerance > 0.0 && "tolerance has to be positive"); */
-
-      /* if (*tolerance < DBL_EPSILON) */
-      /* { */
-      /*   numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal
-       * tolerance"); */
-      /*   *tolerance = DBL_EPSILON; */
-      /* } */
-      numerics_printf(
-          "------- FC3D - NSGS - We modify the required incremental precision to reach "
-          "accuracy to %e",
-          *tolerance);
+      if (error < DBL_EPSILON) {
+        /* in this case, the relative error is very small
+           (meaning that the nsgs loop does not
+           improve accuracy).
+           We try to tighten the local solver tolerance */
+        options->internalSolvers[0]->dparam[0] = options->internalSolvers[0]->dparam[0] / 100.;
+        numerics_printf(
+            "------- FC3D - NSGS - We modify the local solver tolerance precision to reach "
+            "accuracy to %e",
+            options->internalSolvers[0]->dparam[0]);
+	
+      } else {
+        *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
+	assert(*tolerance > 0.0 && "tolerance has to be positive");
+        numerics_printf(
+            "------- FC3D - NSGS - We modify the required incremental precision to reach "
+            "accuracy to %e",
+            *tolerance);
+      }        
       hasNotConverged = 1;
     } else {
       numerics_printf(
-          "------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to "
-          "%e",
+          "------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy "
+          "to %e",
           *tolerance);
     }
+
   } else {
     numerics_printf(
         "--------------- FC3D - NSGS - Iteration %i "

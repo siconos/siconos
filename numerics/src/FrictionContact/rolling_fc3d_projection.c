@@ -30,6 +30,7 @@
 #include "SiconosLapack.h"                     // for DGETRF, DGETRS, LA_NOTRANS
 #include "SolverOptions.h"                     // for SolverOptions, solver_...
 #include "numerics_verbose.h"                  // for numerics_printf_verbose
+#include "op5x5.h"
 #include "projectionOnRollingCone.h"           // for projectionOnRollingCone
 #include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
 #include "rolling_fc_Solvers.h"
@@ -134,49 +135,14 @@ void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(
     SolverOptions* localsolver_options) {
   size_t nc = problem->numberOfContacts;
   localsolver_options->iparam[SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS] = nc;
-  /* printf("rolling_fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of
-   * dwork\n"); */
-  if (!localsolver_options->dWork || localsolver_options->dWorkSize < nc) {
-    if (localsolver_options
-            ->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] ==
-        SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE) {
-      /* nc for rho parameter + 30 * nc for inverse of diagonal matrix */
-      unsigned int d_size = nc + 30 * nc;
-      localsolver_options->dWork =
-          (double*)realloc(localsolver_options->dWork, d_size * sizeof(double));
-      localsolver_options->dWorkSize = d_size;
-      unsigned int i_size = 5 * nc;
-      localsolver_options->iWork =
-          (int*)realloc(localsolver_options->iWork, i_size * sizeof(int));
-      localsolver_options->iWorkSize = i_size;
+  localsolver_options->dWork =
+    (double*)realloc(localsolver_options->dWork, nc * sizeof(double));
+  localsolver_options->dWorkSize = nc;
 
-    } else {
-      /* nc for rho parameter */
-      unsigned int size = nc;
-      localsolver_options->dWork =
-          (double*)realloc(localsolver_options->dWork, size * sizeof(double));
-      localsolver_options->dWorkSize = size;
+  for (int c = 0; c < nc; c++) {
+    localsolver_options->dWork[c]=1.0;
     }
-  }
-
-  for (size_t i = 0; i < nc; i++) {
-    localsolver_options->dWork[i] = 1.0;
-
-    if (localsolver_options
-            ->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] ==
-        SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE) {
-      /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-      rolling_fc3d_local_problem_fill_M(problem, localproblem, i);
-      double* MLocal = localproblem->M->matrix0;
-      unsigned int pos = i * 30 + nc;
-      double* MLocal_LU = &(localsolver_options->dWork[pos]);
-      memcpy(MLocal_LU, MLocal, 25 * sizeof(double));
-      int* ipiv = &(localsolver_options->iWork[i * 5]);
-      int info = 0;
-      DGETRF(5, 5, MLocal_LU, 5, ipiv, &info);
-      assert(!info);
-    }
-  }
+  
 };
 
 void rolling_fc3d_projectionOnConeWithLocalIteration_free(
@@ -186,8 +152,8 @@ void rolling_fc3d_projectionOnConeWithLocalIteration_free(
   localsolver_options->dWork = NULL;
 }
 
-static int rolling_fc3d_check_trivial_solution(unsigned int contact, unsigned int nc,
-                                               double* q, double mu, double mur,
+static int rolling_fc3d_check_trivial_solution(unsigned int contact, unsigned int nc,                                               
+                                               double *M, double* q, double mu, double mur,
                                                double* reaction,
                                                SolverOptions* localsolver_options) {
   if (q[0] > 0) {
@@ -198,62 +164,20 @@ static int rolling_fc3d_check_trivial_solution(unsigned int contact, unsigned in
     reaction[4] = 0.0;
     return 1;
   }
+  cpy5(q,reaction);
+  solve_5x5_gepp_for_loop(M, reaction);
 
-  unsigned int pos = contact * 30 + nc;
-  double* MLocal_LU = &(localsolver_options->dWork[pos]);
-  int* ipiv = &(localsolver_options->iWork[5 * contact]);
-  /* double * tmp = localsolver_options->dWork[pos+25]; */
-  memcpy(reaction, q, 5 * sizeof(double));
-  int info = 0;
-  DGETRS(LA_NOTRANS, 5, 1, MLocal_LU, 5, ipiv, reaction, 5, &info);
-  assert(!info);
-
-  /* DEBUG_EXPR(NM_dense_display(M, 5,5,5);); */
-  /* double * A =  (double * ) malloc(25*sizeof(double)); */
-
-  /* memcpy(A, M , 25*sizeof(double)); */
-  /* DEBUG_EXPR(NM_dense_display(A, 5,5,5);); */
-  /* double tmp[5];  */
-
-  /* memcpy(tmp, q , 5*sizeof(double)); */
-  /* DEBUG_EXPR(NV_display(q,5);); */
-
-  /* DEBUG_EXPR(NV_display(tmp,5);); */
-
-  /* DEBUG_PRINT("solve\n"); */
-  /* /\* solve_nxn_gepp(5, A, tmp, reaction); *\/ */
-
-  /* int ipiv[25]; */
-  /* int info=0; */
-  /* DGESV(5, 1, A, 5, ipiv, tmp, 5, &info); */
-  /* memcpy(reaction, tmp , 5*sizeof(double)); */
-
-  /* for (int i = 0; i < 5; i++) tmp[i] */
-  /*                           = M[i + 0 * 5] * reaction[0] - q[i] */
-  /*                           + M[i + 1 * 5] * reaction[1] */
-  /*                           + M[i + 2 * 5] * reaction[2] */
-  /*                           + M[i + 3 * 5] * reaction[3] */
-  /*                           + M[i + 4 * 5] * reaction[4]; */
-  /* /\* NV_display(tmp,5) *\/ */
-  /* DEBUG_EXPR(NV_display(reaction,5);); */
-  /* if (cblas_dnrm2(5, tmp, 1) >= 1e-10) */
-  /* { */
-  /*   NM_dense_display(M, 5,5,5); */
-  /*   NM_dense_display(MLocal_LU, 5,5,5); */
-  /* } */
-
-  /* assert(cblas_dnrm2(5, tmp, 1) < 1e-10); */
   double normT = sqrt(reaction[1] * reaction[1] + reaction[2] * reaction[2]);
   double normMT = sqrt(reaction[3] * reaction[3] + reaction[4] * reaction[4]);
-
+  
   if ((normT <= mu * -reaction[0]) && (normMT <= mur * -reaction[0])) {
-    reaction[0] = -reaction[0];
-    reaction[1] = -reaction[1];
-    reaction[2] = -reaction[2];
-    reaction[3] = -reaction[3];
-    reaction[4] = -reaction[4];
-    return 2;
-  }
+      reaction[0] = -reaction[0];
+      reaction[1] = -reaction[1];
+      reaction[2] = -reaction[2];
+      reaction[3] = -reaction[3];
+      reaction[4] = -reaction[4];
+      return 2;
+    }
   return 0;
 }
 
@@ -286,7 +210,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
   // double trivial_error=0.0;
   int trivial = rolling_fc3d_check_trivial_solution(
       options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-      options->iparam[SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS], qLocal, mu_i, mu_r_i,
+      options->iparam[SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS], MLocal, qLocal, mu_i, mu_r_i,
       reaction_k, options);
   if (trivial) {
     /* rolling_fc3d_unitary_compute_and_add_error(reaction_k , velocity_k, */
@@ -488,13 +412,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
 void rfc3d_poc_withLocalIteration_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] =
       0;  // this will be set by external solver
-  options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
-      SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE;
 }
 
 void rfc3d_poc_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] =
       0;  // this will be set by external solver
-  options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
-      SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_FALSE;
 }
