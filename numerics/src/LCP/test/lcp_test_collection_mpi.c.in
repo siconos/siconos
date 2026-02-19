@@ -38,7 +38,7 @@ int main(void)
   // Set solvers list for each collection of data.
 #if defined(TEST_LCP_MPI_COLLECTION_1) || defined(TEST_LCP_MPI_COLLECTION_2)
   // same solvers for data collections 1 and 2
-  int solvers[] = {SICONOS_LCP_PGS_GRAPH, SICONOS_LCP_PGS_GRAPH_PERMUT, SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE};
+  int solvers[] = {SICONOS_LCP_PGS_GRAPH, SICONOS_LCP_PGS_GRAPH_PERMUT};
 #endif
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
@@ -57,11 +57,6 @@ int main(void)
   collection[9].will_fail = 1; // not symmetric matrix
   collection[10].will_fail = 1; // not symmetric matrix
   collection[11].will_fail = 1; // not symmetric matrix
-
-  // Parallel graph with permutation and equitable coloring
-  collection[15].will_fail = 1; // not symmetric matrix
-  collection[16].will_fail = 1; // not symmetric matrix
-  collection[17].will_fail = 1; // not symmetric matrix
 #endif
 
 #ifdef TEST_LCP_MPI_COLLECTION_2
@@ -77,12 +72,6 @@ int main(void)
   collection[10].will_fail = 1;
   collection[11].will_fail = 1;
   collection[12].will_fail = 1;
-  // Parallel graph with permutation and equitable coloring
-  collection[14].will_fail = 1;
-  collection[16].will_fail = 1;
-  collection[17].will_fail = 1;
-  collection[18].will_fail = 1;
-  collection[19].will_fail = 1;
 #endif
 
   

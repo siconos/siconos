@@ -608,6 +608,10 @@ SolverOptions* solver_options_create(int solverId) {
 
     // --- Friction Solvers ---
     // ref list : enum FRICTION_SOLVER in Friction_cst.h
+    case SICONOS_FRICTION_2D_NSGS_GRAPH:
+    case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI:
+    case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT:
+    case SICONOS_FRICTION_2D_NSGS_PERMUT:
     case SICONOS_FRICTION_2D_NSGS: {
       options = solver_options_initialize(solverId, 1000, 1e-4, 0);
       fc2d_nsgs_set_default(options);

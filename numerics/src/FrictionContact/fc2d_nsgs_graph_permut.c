@@ -310,6 +310,45 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &sum_sizes,
                            inv_permutation);
 
+  /* Create SBM if it does not exist */
+  if (!problem->M->matrix1) {
+    SparseBlockStructuredMatrix* SBM_problem = SBM_new();
+    switch (problem->M->storageType) {
+      // Convert DENSE -> SBM
+      case NM_DENSE: {
+        printf("Converting DENSE -> SBM\n");
+        SBM_from_dense(problem->dimension, problem->M->size1, problem->M->size0,
+                       problem->M->matrix0, SBM_problem);
+        /* printf("Number of blocks: %d\n", SBM_problem->nbblocks);
+        for (int b = 0; b < SBM_problem->nbblocks; b++) {
+          printf("%e %e %e %e\n", SBM_problem->block[b][0], SBM_problem->block[b][1],
+                 SBM_problem->block[b][2], SBM_problem->block[b][3]);
+        } */
+        break;
+      }
+      // Convert SPARSE -> SBM
+      case NM_SPARSE: {
+        printf("Converting SPARSE -> SBM\n");
+        // Get Csparse matrix
+        CSparseMatrix* sparse;
+        if (problem->M->matrix2->origin == NSM_CSR) {
+          sparse = NM_csr(problem->M);
+        } else {
+          sparse = NM_csc_trans(problem->M);
+        }
+
+        SBM_from_csparse_2(problem->dimension, sparse, SBM_problem);
+        break;
+      }
+    }
+    problem->M->matrix1 = SBM_problem;
+    printf("conversion done\n");
+  }
+
+  /* Switch storageType to SBM temporarily */
+  unsigned int old_storageType = problem->M->storageType;
+  problem->M->storageType = NM_SPARSE_BLOCK;
+
   /* Permutate rows and columns of SBM */
   /* Can  do better? In place stuff? */
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
@@ -495,6 +534,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
             error = calculateLightError(light_error_sum, nc, z, &norm_r);
             has_not_converged = determine_convergence_with_full_final(
                 problem, options, z, w, &tolerance, norm_q, error, iter);
+            problem->M->storageType = NM_SPARSE_BLOCK;
           }
           light_error_sum = 0.;
           ++iter;
@@ -614,6 +654,7 @@ local_norm_r = 0.0;
                      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
             has_not_converged = determine_convergence_with_full_final(
                 problem, options, z, w, &tolerance, norm_q, error, iter);
+            problem->M->storageType = NM_SPARSE_BLOCK;
           }
 
           light_error_sum = 0.;
@@ -632,6 +673,7 @@ local_norm_r = 0.0;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
     error = calculateFullErrorFinal(problem, options, z, w, tolerance, norm_q);
+    problem->M->storageType = NM_SPARSE_BLOCK;
 
     has_not_converged =
         determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
@@ -678,6 +720,7 @@ local_norm_r = 0.0;
   problem->M->matrix1 = old_matrix1;
   problem->q = old_q;
   problem->mu = old_mu;
+  problem->M->storageType = old_storageType;
 
   free(SBM_col_permuted);
   free(SBM_permuted);

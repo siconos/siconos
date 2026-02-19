@@ -32,7 +32,8 @@
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
-#include "numerics_verbose.h"              // for numerics_printf, verbose
+#include "graph_tools.h"
+#include "numerics_verbose.h"  // for numerics_printf, verbose
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -445,8 +446,8 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
     }  // end while loop
 
   } else {
+    printf("No freezing\n");
     while ((iter < itermax) && has_not_converged) {
-      ++iter;
       double light_error_sum = 0.0;
       unsigned int pos;
       unsigned int contact;
@@ -488,8 +489,14 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, iter);
       }
+      ++iter;
     }  // end while loop
   }
+
+  double true_error = 0.;
+  fc2d_compute_error(problem, z, w, tolerance, norm_q, &true_error);
+  printf("True error = %.17g\n", true_error);
+
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {

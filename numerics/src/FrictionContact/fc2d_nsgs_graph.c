@@ -600,6 +600,10 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
         determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
   }
 
+  double true_error = 0.;
+  fc2d_compute_error(problem, z, w, tolerance, norm_q, &true_error);
+  printf("True error = %.17g\n", true_error);
+
   // numerics_printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n",
   //          blmat->blocknumber0,
   //          iter,

@@ -602,6 +602,10 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
       free(local_problem);
     }
   }
+
+  double true_error = 0.;
+  fc2d_compute_error(problem, z, w, tolerance, norm_q, &true_error);
+  printf("True error = %.17g\n", true_error);
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {

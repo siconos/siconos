@@ -36,11 +36,12 @@ const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR = "FC2D_NSGS_GRAPH";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR = "FC2D_NSGS_GRAPH_OPTI";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR = "FC2D_NSGS_GRAPH_PERMUT";
-//#define DUMP_PROBLEM
+const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR = "FC2D_NSGS_PERMUT";
+// #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
-//#define DUMP_PROBLEM_IF_INFO
+// #define DUMP_PROBLEM_IF_INFO
 #ifdef DUMP_PROBLEM_IF_INFO
 static int fccounter = 0;
 #endif
@@ -142,7 +143,8 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       case SICONOS_FRICTION_2D_NSGS_GRAPH: {
         if (verbose)
           printf(
-              " ========================== Call parallel graph NSGS solver for Friction-Contact 2D problem "
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
               "problem ==========================\n");
         fc2d_nsgs_graph(problem, reaction, velocity, &info, options);
         break;
@@ -151,7 +153,8 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI: {
         if (verbose)
           printf(
-              " ========================== Call parallel graph NSGS solver for Friction-Contact 2D problem "
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
               "problem ==========================\n");
         fc2d_nsgs_graph_opti(problem, reaction, velocity, &info, options);
         break;
@@ -160,9 +163,20 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT: {
         if (verbose)
           printf(
-              " ========================== Call parallel graph NSGS solver for Friction-Contact 2D problem "
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
               "problem ==========================\n");
         fc2d_nsgs_graph_permut(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Sequential NSGS ******/
+      case SICONOS_FRICTION_2D_NSGS_PERMUT: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
         break;
       }
       /*error */

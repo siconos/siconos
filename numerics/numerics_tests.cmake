@@ -154,7 +154,7 @@ if(WITH_TESTING)
   # 3D Friction Contact tests
   #===========================================
 
-  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
+  begin_tests(src/FrictionContact/test DEPS "PkgConfig::PETSC;MPI::MPI_C;SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
@@ -344,7 +344,10 @@ if(WITH_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
 
-  
+  new_tests_collection(
+    DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
+    EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c)
+
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
     EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)

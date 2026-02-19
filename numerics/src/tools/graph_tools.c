@@ -635,7 +635,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       bool block_is_zero = true;
 
       // Can I use sparse->nz ???
-      size_t nnz;
+      size_t nnz = 0;
 
       CS_INT* ps = (CS_INT*)malloc(d * sizeof(CS_INT));
 
@@ -649,7 +649,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
 
           for (size_t i = 0; i < d; i++) {
             while ((Mi_[ps[i]] / d < current_contact_col) ||
-                   (ps[i] < Mp_[d * (contact_i + 1) + i])) {
+                   (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
             }
@@ -676,7 +676,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
 
           for (size_t i = 0; i < d; i++) {
             while ((Mi_[ps[i]] / d < current_contact_col) ||
-                   (ps[i] < Mp_[d * (contact_i + 1) + i])) {
+                   (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
             }
@@ -934,7 +934,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       bool block_is_zero = true;
 
       // Can I use sparse->nz ???
-      size_t nnz;
+      size_t nnz = 0;
 
       CS_INT* ps = (CS_INT*)malloc(d * sizeof(CS_INT));
 
@@ -948,7 +948,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
 
           for (size_t i = 0; i < d; i++) {
             while ((Mi_[ps[i]] / d < current_contact_col) ||
-                   (ps[i] < Mp_[d * (contact_i + 1) + i])) {
+                   (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
             }
@@ -975,7 +975,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
 
           for (size_t i = 0; i < d; i++) {
             while ((Mi_[ps[i]] / d < current_contact_col) ||
-                   (ps[i] < Mp_[d * (contact_i + 1) + i])) {
+                   (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
             }
