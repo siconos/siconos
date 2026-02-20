@@ -112,7 +112,7 @@ static void statsIterationCallback(FrictionContactProblem* problem, SolverOption
   }
 }
 
-static void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
+void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
                              FrictionContactProblem* localproblem, double* reaction,
                              SolverOptions* options) {
   /* Build a local problem for a specific contact

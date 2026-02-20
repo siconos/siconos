@@ -24,6 +24,7 @@
 
 */
 
+#include "NumericsFwd.h"
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
@@ -84,6 +85,11 @@ extern "C" {
 */
 void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);
+void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
+                      FrictionContactProblem* localproblem, double* reaction,
+                      SolverOptions* options);
+void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double* velocity,
+                       int* info, SolverOptions* options);
 
 void fc3d_admm(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);

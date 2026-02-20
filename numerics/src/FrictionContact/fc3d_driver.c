@@ -119,7 +119,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       numerics_printf(
           " ========================== Call NSGS solver for Friction-Contact 3D problem "
           "==========================\n");
-      fc3d_nsgs(problem, reaction, velocity, &info, options);
+      fc3d_nsgs_generic(problem, reaction, velocity, &info, options);
       break;
     }
     case SICONOS_FRICTION_3D_NSGSV: {
