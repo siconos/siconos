@@ -222,6 +222,9 @@ if(WITH_TESTING)
   new_test(SOURCES fc3d_LmgcDriver_test4.c)
   new_test(SOURCES fc3d_LmgcDriver_test5.c)
 
+  # --- NSGS performance comparison test ---
+  # new_test(SOURCES test_nsgs_performance.c DEPS fclib::fclib)
+
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
   # ---------------------------------------------------
