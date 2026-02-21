@@ -21,7 +21,7 @@
 #ifndef RollingFrictionContact_H
 #define RollingFrictionContact_H
 
-#include "Friction_cst.h"  // contains only enum. Ok.
+#include "FrictionContact_options.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
 
 struct RollingFrictionContactProblem;

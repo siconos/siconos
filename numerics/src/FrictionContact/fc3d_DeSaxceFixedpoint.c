@@ -20,7 +20,7 @@
 #include <stdlib.h>  // for calloc, free
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_DSFP
+#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_DSFP
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SiconosBlas.h"             // for cblas_dcopy, cblas_dnrm2

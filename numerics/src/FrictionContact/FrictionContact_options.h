@@ -1,19 +1,74 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*!\file FrictionContact_options.h
+ * \brief Solver options and constants for Friction Contact problems
+ *
+ * This header defines:
+ * - Solver IDs (enum FRICTION_SOLVER): All available solvers for friction contact problems
+ * - Integer parameter indices (iparam): Configuration options stored as integers
+ * - Double parameter indices (dparam): Configuration options stored as doubles
+ * - Enumerated values: Valid values for various configuration options
+ *
+ * The friction contact solvers are organized into several categories:
+ * - 2D Frictional Contact solvers
+ * - 3D Frictional Contact solvers (local formulation)
+ * - One-contact solvers (used as local solvers within NSGS)
+ * - Global formulation solvers
+ * - Rolling friction solvers
+ *
+ * NSGS-specific options have been moved to NonSmoothSolvers/NonSmoothGaussSeidel_options.h
+ * but backward compatibility macros are provided.
+ */
+
 #ifndef FRICTION_CST_H
 #define FRICTION_CST_H
-/** \file Friction_cst.h */
-/** \enum FRICTION_SOLVER encode the list of solvers as integers, to avoid mispelling
- * with const char* const  variables
+
+/* ===========================================================================
+ * Solver IDs (enum FRICTION_SOLVER)
+ * ===========================================================================
+ * Each solver is assigned a unique integer ID to avoid string-based errors.
+ * The IDs are organized by solver category.
+ */
+/** \enum FRICTION_SOLVER
+ * \brief Unique identifiers for all friction contact solvers
+ *
+ * Solvers are grouped by problem formulation (2D, 3D, global, rolling)
+ * and solver family (NSGS, Proximal, Newton, etc.)
  */
 enum FRICTION_SOLVER {
-  /** 2D Frictional Contact solvers */
+  /* -----------------------------------------------------------------------
+   * 2D Frictional Contact solvers (IDs 400-499)
+   * ----------------------------------------------------------------------- */
+  /** Non-smooth Gauss-Seidel for 2D friction contact */
   SICONOS_FRICTION_2D_NSGS = 400,
   SICONOS_FRICTION_2D_CPG = 402,
   SICONOS_FRICTION_2D_LEMKE = 404,
+  /** Enumerative solver for 2D friction contact */
   SICONOS_FRICTION_2D_ENUM = 405,
 
-  /* 3D frictional contact solvers on local formulation */
-
-  /** Non-smooth Gauss Seidel, local formulation */
+  /* -----------------------------------------------------------------------
+   * 3D Frictional Contact solvers - Local formulation (IDs 500-549)
+   * -----------------------------------------------------------------------
+   * These solvers work on the local (contact-level) formulation of the
+   * 3D friction contact problem. They typically use a block decomposition
+   * where each contact is solved individually (e.g., NSGS).
+   */
   SICONOS_FRICTION_3D_NSGS = 500,
   /** Non-smooth Gauss Seidel-velocity, local formulation */
   SICONOS_FRICTION_3D_NSGSV = 501,
@@ -53,8 +108,9 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI = 519,
   /** Non-smooth Newton, natural map, local formulation */
   SICONOS_FRICTION_3D_NSN_NM = 520,
+  /** Non-smooth Newton, Alart-Curnier, new implementation */
   SICONOS_FRICTION_3D_NSN_AC_NEW = 521,
-  /** Panagiotopoulos, fixed point, local formulation */
+  /** Panagiotopoulos fixed point, local formulation */
   SICONOS_FRICTION_3D_PFP = 522,
   /** ADMM local formulation */
   SICONOS_FRICTION_3D_ADMM = 523,
@@ -63,9 +119,14 @@ enum FRICTION_SOLVER {
   /** IPM-SNM local formulation */
   SICONOS_FRICTION_3D_IPM_SNM = 525,
 
-  /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
+  /* -----------------------------------------------------------------------
+   * One-contact solvers (IDs 550-599)
+   * -----------------------------------------------------------------------
+   * These solvers are designed to solve a single contact problem.
+   * They are primarily used as local solvers within NSGS-type methods.
+   */
 
-  /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
+  /** Non-smooth Newton, Alart-Curnier 'direct', one contact solver */
   SICONOS_ONECONE_NSN = 550,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
   SICONOS_ONECONE_NSN_GP = 551,
@@ -89,7 +150,15 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_3D_VI_FPP_Cylinder = 566,
   SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER = 567,
 
-  /** 3D Frictional contact local solvers on global formulation */
+  /* -----------------------------------------------------------------------
+   * Global formulation solvers (IDs 600-699)
+   * -----------------------------------------------------------------------
+   * These solvers work on the global (aggregated) formulation of the
+   * friction contact problem, treating all contacts simultaneously.
+   * The "_WR" suffix indicates wrappers for reduced-space formulations.
+   */
+
+  /** Non-smooth Gauss-Seidel, global formulation with wrapper */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR = 601,
   SICONOS_GLOBAL_FRICTION_3D_PROX_WR = 602,
@@ -111,9 +180,17 @@ enum FRICTION_SOLVER {
   SICONOS_GLOBAL_FRICTION_3D_IPM_WR = 616,
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM = 617,
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR = 618,
+  /** IPM-SNM with proximal regularization */
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX = 620,
 
-  /** Non-smooth Gauss Seidel, local formulation */
+  /* -----------------------------------------------------------------------
+   * Rolling Friction solvers (IDs 3000-4999)
+   * -----------------------------------------------------------------------
+   * These solvers handle rolling friction contact problems, which extend
+   * standard friction contact with additional rolling resistance constraints.
+   */
+
+  /** Non-smooth Gauss-Seidel, rolling friction 3D, local formulation */
   SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
   SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
 
@@ -123,11 +200,21 @@ enum FRICTION_SOLVER {
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002,
 
   /** Non-smooth Gauss Seidel, global formulation */
+  /** Non-smooth Gauss-Seidel, rolling friction 3D, global formulation with wrapper */
   SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR = 5000,
+  /** Interior Point Method, rolling friction 3D */
   SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM = 5001
 
-};
+}; /* end of enum FRICTION_SOLVER */
 
+/* ===========================================================================
+ * Solver Name Strings
+ * ===========================================================================
+ * These are human-readable string representations of each solver ID,
+ * used for logging, debugging, and output purposes.
+ */
+
+/** String name for 2D NSGS solver */
 extern const char* const SICONOS_FRICTION_2D_NSGS_STR;
 extern const char* const SICONOS_FRICTION_2D_CPG_STR;
 extern const char* const SICONOS_FRICTION_2D_LEMKE_STR;
@@ -210,130 +297,110 @@ extern const char* const
 extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR;
 extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR;
 
+/* ===========================================================================
+ * Integer Parameter Indices (iparam)
+ * ===========================================================================
+ * These enums define indices into the iparam array of SolverOptions.
+ * Use these to configure integer-valued solver options.
+ *
+ * Example:
+ *   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] =
+ *       SICONOS_NSGS_ERROR_EVALUATION_LIGHT;
+ */
+
+/** Indices for general friction contact 3D solver parameters */
 enum SICONOS_FRICTION_3D_IPARAM {
 
-  /** index in iparam to store the error strategy for the internal solver */
+  /** Error strategy for the internal/local solver (see SICONOS_NSGS_INTERNAL_ERROR_STRATEGY) */
   SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY = 2,
-  /** index in iparam to store the rescaling  */
+  /** Rescaling strategy for the problem (see SICONOS_FRICTION_3D_RESCALING_ENUM) */
   SICONOS_FRICTION_3D_IPARAM_RESCALING = 3,
-  /** index in iparam to store the rescaling  */
+  /** Rescaling strategy for friction cones (see SICONOS_FRICTION_3D_RESCALING_CONE_ENUM) */
   SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE = 4,
-  /** current contact number (example of use: one contact solvers) **/
+  /** Current contact/block number (used by one-contact solvers) */
   SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER = 5,
-  /** index in iparam to store the error evaluation method */
+  /** Error evaluation method (see SICONOS_NSGS_ERROR_EVALUATION) - now in NonSmoothGaussSeidel_options.h */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
-  /** index in iparam to store the frequency of error evaluation method */
+  /** Frequency of error evaluation (0 = every iteration) */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
+  /** Number of contacts in the problem */
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
 };
 
-enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY {
-  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE = 0,
-  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE = 1,
-  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT = 2
-};
-
+/** Matrix rescaling strategies for friction contact problems */
 enum SICONOS_FRICTION_3D_RESCALING_ENUM {
+  /** No rescaling applied */
   SICONOS_FRICTION_3D_RESCALING_NO = 0,
+  /** Scalar rescaling (simple scaling factor) */
   SICONOS_FRICTION_3D_RESCALING_SCALAR = 1,
+  /** Matrix balancing on M */
   SICONOS_FRICTION_3D_RESCALING_BALANCING_M = 2,
+  /** Matrix balancing on M and H */
   SICONOS_FRICTION_3D_RESCALING_BALANCING_MH = 3,
+  /** Matrix balancing on M, H, and H^T */
   SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT = 4
 };
 
+/** Friction cone rescaling options */
 enum SICONOS_FRICTION_3D_RESCALING_CONE_ENUM {
+  /** No cone rescaling */
   SICONOS_FRICTION_3D_RESCALING_CONE_NO = 0,
+  /** Apply cone rescaling */
   SICONOS_FRICTION_3D_RESCALING_CONE_YES = 1
 };
 
+/* ===========================================================================
+ * Double Parameter Indices (dparam)
+ * ===========================================================================
+ * These enums define indices into the dparam array of SolverOptions.
+ * Use these to configure floating-point solver options like tolerances
+ * and numerical parameters.
+ */
+
+/** Indices for friction contact 3D double parameters */
 enum SICONOS_FRICTION_3D_DPARAM {
-  /** index in dparam to store the internal solver error ratio*/
+  /** Ratio for internal solver error tolerance (relative to outer tolerance) */
   SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO = 2
 };
 
-enum SICONOS_FRICTION_3D_NSGS_IPARAM {
-  /** index in iparam to store the relaxation strategy */
-  SICONOS_FRICTION_3D_NSGS_RELAXATION = 4,
-  /** index in iparam to store the shuffle strategy */
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE = 5,
-  /** index in iparam to store the shuffle seed */
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED = 6,
-  /** index in iparam to store the  */
-  SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT = 19,
-  /** index in iparam to store the  */
-  SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION = 14,
-  /** index in iparam to print on screen the output in the same style as in IPM solver */
-  SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM = 20,
-};
-enum SICONOS_FRICTION_3D_NSGS_DPARAM {
-  /** index in dparam to store the relaxation strategy */
-  SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE = 8,
-};
+/* ===========================================================================
+ * NSGS Options
+ * ===========================================================================
+ * NSGS-specific options are now defined in NonSmoothGaussSeidel_options.h.
+ * The include below provides backward compatibility macros so existing code
+ * using the old FRICTION_3D_NSGS_* names continues to work.
+ */
+#include "NonSmoothSolvers/NonSmoothGaussSeidel_options.h"
 
-enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM {
-  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION = 10
-};
+/* ===========================================================================
+ * Non-Smooth Newton (NSN) Solver Options
+ * ===========================================================================
+ * Parameters for Alart-Curnier, Fischer-Burmeister, and Natural Map
+ * Newton-type solvers. These are nonsmooth Newton methods for solving
+ * the friction contact problem via complementarity formulations.
+ */
 
-enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION {
-  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_FALSE = 0,
-  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE = 1
-};
-
-enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM {
-  /** Evaluation of the error with the expensive function fc3d_compute_error **/
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL = 0,
-  /** Evaluation of the error with the cheap incremental variation **/
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT = 1,
-  /** Evaluation of the error with the cheap incremental variation but we modify
-      the incremental toleranve to reach the requred accuracy **/
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 2,
-  /** Evaluation of the error with the expensive function fc3d_compute_error and
-      an adaptive frequency for calling the error function  **/
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE = 3,
-};
-enum SICONOS_FRICTION_3D_NSGS_SHUFFLE_ENUM {
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE = 0,
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE = 1,
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP = 2
-};
-
-enum SICONOS_FRICTION_3D_NSGS_RELAXATION_ENUM {
-  SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
-  SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
-};
-enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM {
-
-  SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE = 0,
-  SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE = 1
-};
-enum SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_ENUM {
-
-  SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_FALSE = 0,
-  SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE = 1
-};
-
+/** Indices for NSN solver integer parameters */
 enum SICONOS_FRICTION_3D_NSN_IPARAM {
-  /** index in iparam to store the strategy for computing rho */
+  /** Strategy for computing the rho parameter (see SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_ENUM) */
   SICONOS_FRICTION_3D_NSN_RHO_STRATEGY = 9,
-  /** index in iparam to store the formulation */
+  /** Complementarity formulation (see SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM) */
   SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
-  /** index in iparam to store the line-search */
+  /** Line-search strategy (see SICONOS_FRICTION_3D_NSN_LINESEARCH_ENUM) */
   SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
-  /** index in iparam to store the maximum number of iterations */
+  /** Maximum iterations for line-search */
   SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER = 12,
-  /** index in iparam to set the linear solver used at each Newton iteration
-   cs_lusol or mumps */
+  /** Linear solver for Newton systems (see SICONOS_FC3D_NSN_LINEAR_SOLVER) */
   SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER = 13,
-  /** index in iparam to store the strategy for the hybrid solver */
+  /** Hybrid solver strategy (see SICONOS_FRICTION_3D_NSN_HYBRID_ENUM) */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY = 14,
-  /** index in iparam to store the maximum number of loop for the hybrid solver */
+  /** Maximum outer loops for hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
-  /** index in iparam to store the maximum number of iterations for the projection solver */
+  /** Maximum iterations for projection solver in hybrid mode */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16,
-  /** index in iparam used to check if memory allocation has already be done (if true/1) or not
-     (if 0/false) for internal work array. */
+  /** Flag: internal work array allocated (1=yes, 0=no) */
   SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED = 17,
-  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  /** MPI communicator for distributed solving */
   SICONOS_FRICTION_3D_NSN_MPI_COM = 18
 
 };
@@ -387,6 +454,14 @@ enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM {
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN = 3
 };
 
+/* ===========================================================================
+ * Proximal Solver Options
+ * ===========================================================================
+ * Parameters for the proximal point algorithm and regularization methods
+ * for friction contact problems.
+ */
+
+/** Indices for Proximal solver integer parameters */
 enum SICONOS_FRICTION_3D_PROXIMAL_IPARAM {
   /** index in iparam to store the error strategy for the internal solver */
   SICONOS_FRICTION_3D_FP_ERROR_STRATEGY = 2,
@@ -416,6 +491,14 @@ enum SICONOS_FRICTION_3D_PROXIMAL {
 
 };
 
+/* ===========================================================================
+ * ADMM Solver Options (Alternating Direction Method of Multipliers)
+ * ===========================================================================
+ * Parameters for the ADMM solver, a first-order optimization method that
+ * splits the problem into simpler subproblems.
+ */
+
+/** Indices for ADMM solver integer parameters */
 enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM {
   /** index in iparam to store the strategy for computing rho */
   SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY = 9,
@@ -514,6 +597,14 @@ enum SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_ENUM {
   SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE = 1
 };
 
+/* ===========================================================================
+ * IPM Solver Options (Interior Point Method)
+ * ===========================================================================
+ * Parameters for the interior point method, a second-order optimization
+ * approach that follows the central path to the solution.
+ */
+
+/** Indices for IPM solver integer parameters */
 enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM {
   /** index in iparam to use NT scaling technique */
   SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING = 11,

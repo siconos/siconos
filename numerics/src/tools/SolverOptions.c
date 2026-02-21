@@ -28,15 +28,15 @@
 #include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
 #include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
 #include "ConvexQP_cst.h"               // for SICONOS_CONVEXQP_ADMM_STR
-#include "Friction_cst.h"               // for SICONOS_FRICTION_2D_CPG_STR
+#include "FrictionContact_options.h"               // for SICONOS_FRICTION_2D_CPG_STR
 #include "GenericMechanical_Solvers.h"  // for gmp_set_default
 #include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICA...
 #include "LCP_Solvers.h"                // for lcp_pivot_set_default
 #include "MCP_cst.h"                    // for SICONOS_MCP_NEWTON_FB_FBL...
 #include "MLCP_Solvers.h"               // for mlcp_direct_set_default
 #include "NCP_cst.h"                    // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "Newton_methods.h"             // for newton_lsa_set_default
-#include "NonSmoothNewton.h"            // for nonSmoothNewton_set_default
+#include "NonSmoothSolvers/Newton_methods.h"             // for newton_lsa_set_default
+#include "NonSmoothSolvers/NonSmoothNewton.h"            // for nonSmoothNewton_set_default
 #include "PathSearch.h"                 // for pathsearch_set_default
 #include "Plasticity_cst.h"
 #include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default

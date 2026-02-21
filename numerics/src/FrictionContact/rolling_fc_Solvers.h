@@ -24,7 +24,7 @@
 
 */
 
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "rolling_fc3d_local_problem_tools.h"

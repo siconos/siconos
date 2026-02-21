@@ -24,7 +24,7 @@
 
 #include "MohrCoulomb2DProblem.h"
 #include "NSSTools.h"         // for max
-#include "NonSmoothNewton.h"  // for nonSmoothDirec...
+#include "NonSmoothSolvers/NonSmoothNewton.h"  // for nonSmoothDirec...
 #include "NumericsFwd.h"      // for SolverOptions
 #include "NumericsMatrix.h"   // for NumericsMatrix
 #include "Plasticity_cst.h"

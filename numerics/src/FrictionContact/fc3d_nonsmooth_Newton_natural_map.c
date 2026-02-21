@@ -24,7 +24,7 @@
 #include <stdlib.h>  // for calloc, free, malloc
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_NSN_NM
+#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_NSN_NM
 #include "NaturalMapGenerated.h"     // for fc3d_NaturalMapFunctionGe...
 #include "SolverOptions.h"           // for SolverOptions, solver_opt...
 #include "fc3d_Solvers.h"

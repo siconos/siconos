@@ -22,7 +22,7 @@
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE, NULL
 
 #include "ArmijoSearch.h"    // for search_Armijo_standalone
-#include "Newton_methods.h"  // for functions_LSA, SICONOS_IPARAM_LSA_NONMON...
+#include "NonSmoothSolvers/Newton_methods.h"  // for functions_LSA, SICONOS_IPARAM_LSA_NONMON...
 #include "NumericsMatrix.h"  // for NM_create, NM_clear, NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SiconosSets.h"     // for free_siconos_set, project_on_set

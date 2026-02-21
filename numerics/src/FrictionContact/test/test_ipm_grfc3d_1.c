@@ -18,7 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "Friction_cst.h"                // for SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM
+#include "FrictionContact_options.h"                // for SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection

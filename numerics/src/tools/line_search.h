@@ -24,7 +24,7 @@
  *
  */
 
-#include "Newton_methods.h"
+#include "NonSmoothSolvers/Newton_methods.h"
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct search_data line_search.h

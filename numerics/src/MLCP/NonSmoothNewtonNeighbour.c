@@ -21,7 +21,7 @@
 #include <stdlib.h>  // for free, malloc
 #include <string.h>  // for NULL, memcpy, strcpy
 
-#include "NonSmoothNewton.h"  // for NewtonFunctionPtr
+#include "NonSmoothSolvers/NonSmoothNewton.h"  // for NewtonFunctionPtr
 #include "SiconosBlas.h"      // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
 #include "SiconosLapack.h"    // for DGESV, lapack_int
 #include "SolverOptions.h"

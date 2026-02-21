@@ -21,7 +21,7 @@
 #ifndef GENERICMECHANICAL_H
 #define GENERICMECHANICAL_H
 
-#include "Friction_cst.h"  // contains only enum. Ok. For SICONOS_FRICTION_3D_ONECONTACT_NSN
+#include "FrictionContact_options.h"  // contains only enum. Ok. For SICONOS_FRICTION_3D_ONECONTACT_NSN
 #include "GenericMechanical_cst.h"  // for SICONOS_GENERIC_MECHANICAL_NSGS
 #include "LinearOSNS.hpp"
 

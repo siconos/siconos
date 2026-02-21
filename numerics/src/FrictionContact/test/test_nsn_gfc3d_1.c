@@ -18,7 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
+#include "FrictionContact_options.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
 #include "SiconosConfig.h"               // for WITH_MUMPS // IWYU pragma: keep
 #include "SolverOptions.h"               // for solver_options_create
 #include "frictionContact_test_utils.h"  // for build_test_collection

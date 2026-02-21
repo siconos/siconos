@@ -27,8 +27,8 @@
 #include "NumericsFwd.h"
 #include "NumericsMatrix.h"
 #include "fc3d_Solvers.h"
-#include "nsgs_generic.h"
-#include "Friction_cst.h"
+#include "NonSmoothSolvers/nsgs_generic.h"
+#include "FrictionContact_options.h"
 #include "fc3d_local_problem_tools.h"
 #include "fc3d_projection.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
@@ -256,20 +256,13 @@ static void fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* o
                                            unsigned int block, int iter,
                                            double* var_z_global, double* var_z_local) {
   (void)local_problem;
+  (void)iter;
 
   PROFILE_START();
   double local_residual = options->dparam[SICONOS_DPARAM_RESIDU];
-  
-  /* DEBUG: Always print for first few iterations */
-  if (iter <= 2 && block < 3) {
-    printf("DEBUG accept: block=%d iter=%d local=[%.4e, %.4e, %.4e] residual=%.4e ",
-           block, iter, var_z_local[0], var_z_local[1], var_z_local[2], local_residual);
-  }
-  
   if (isnan(local_residual) || isinf(local_residual) || local_residual > 1.0) {
     numerics_printf("Discard local reaction for block %i at iteration %i with local_error = %e",
                     block, iter, local_residual);
-    if (iter <= 2 && block < 3) printf("[DISCARDED]\n");
     PROFILE_END(profile_accept_time, profile_accept_calls);
     return;
   }
@@ -277,12 +270,6 @@ static void fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* o
   var_z_global[block * 3 + 0] = var_z_local[0];
   var_z_global[block * 3 + 1] = var_z_local[1];
   var_z_global[block * 3 + 2] = var_z_local[2];
-  
-  if (iter <= 2 && block < 3) {
-    printf("[ACCEPTED] global[%d]=[%.4e, %.4e, %.4e]\n",
-           block, var_z_global[block*3], var_z_global[block*3+1], var_z_global[block*3+2]);
-  }
-  
   PROFILE_END(profile_accept_time, profile_accept_calls);
 }
 

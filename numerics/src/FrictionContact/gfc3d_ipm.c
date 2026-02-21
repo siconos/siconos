@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include "CSparseMatrix.h"
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

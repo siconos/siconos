@@ -23,7 +23,7 @@
 
 */
 
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "GlobalFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"

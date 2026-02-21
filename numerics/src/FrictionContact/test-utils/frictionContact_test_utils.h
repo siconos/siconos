@@ -18,7 +18,7 @@
 #ifndef FRICTIONCONTACT_TEST_UTILS_H
 #define FRICTIONCONTACT_TEST_UTILS_H
 
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "test_utils.h"     // for TestCase
 

@@ -34,7 +34,7 @@
 /* #include "NCP_cst.h" */
 /* #include "lcp_cst.h" */
 /* #include "relay_cst.h" */
-/* #include "Friction_cst.h" */
+/* #include "FrictionContact_options.h" */
 /* #include "VI_cst.h" */
 /* #include "AVI_cst.h" */
 /* #include "SOCLCP_cst.h" */
@@ -56,7 +56,7 @@
 /* #include "gfc3d_Solvers.h" */
 //#include "GenericMechanical_Solvers.h"
 
-//#include "NonSmoothNewton.h"
+//#include "NonSmoothSolvers/NonSmoothNewton.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {

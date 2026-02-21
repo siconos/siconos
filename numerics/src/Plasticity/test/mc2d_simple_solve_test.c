@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "FrictionContactProblem.h"
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "MohrCoulomb2DProblem.h"
 #include "NonSmoothDrivers.h"
 #include "NumericsMatrix.h"

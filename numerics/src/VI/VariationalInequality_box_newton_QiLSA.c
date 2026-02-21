@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "Newton_methods.h"                      // for functions_LSA, init_...
+#include "NonSmoothSolvers/Newton_methods.h"                      // for functions_LSA, init_...
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "Qi_merit.h"                            // for Jac_F_Qi, phi_Qi
 #include "SiconosSets.h"                         // for box_constraints

@@ -20,7 +20,7 @@
 #include <stdlib.h>  // for calloc, free, malloc
 
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_ENUM
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_2D_ENUM
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver

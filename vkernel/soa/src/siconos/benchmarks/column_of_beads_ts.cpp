@@ -1,5 +1,5 @@
 
-#include <Friction_cst.h>
+#include <FrictionContact_options.h>
 #include <stdlib.h>
 
 #include <chrono>

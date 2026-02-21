@@ -38,6 +38,7 @@ set(${COMPONENT}_DIRS
   src/GenericMechanical
   src/VI
   src/Plasticity
+  src/NonSmoothSolvers
 )
 
 # - Extras, optional -
@@ -77,6 +78,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/Relay
   src/FrictionContact
   src/FrictionContact/Generated
+  src/NonSmoothSolvers
   src/NCP
   src/MCP
   src/GenericMechanical

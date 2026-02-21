@@ -20,7 +20,7 @@
 #include <stdio.h>   // for fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv

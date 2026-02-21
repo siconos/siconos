@@ -21,7 +21,7 @@
 #ifndef FrictionContact_H
 #define FrictionContact_H
 
-#include <Friction_cst.h>  // contains only enum. Ok.
+#include <FrictionContact_options.h>  // contains only enum. Ok.
 
 #include "LinearOSNS.hpp"
 

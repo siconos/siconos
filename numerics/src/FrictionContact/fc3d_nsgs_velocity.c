@@ -21,7 +21,7 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_ONECONE_NSN
+#include "FrictionContact_options.h"            // for SICONOS_ONECONE_NSN
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NumericsMatrix
 #include "SiconosBlas.h"             // for cblas_dnrm2

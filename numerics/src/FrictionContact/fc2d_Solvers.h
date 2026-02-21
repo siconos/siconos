@@ -23,7 +23,7 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 

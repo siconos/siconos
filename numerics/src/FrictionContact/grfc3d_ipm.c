@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <time.h>  // for clock()
 
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "JordanAlgebra.h"  // for JA functions
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
