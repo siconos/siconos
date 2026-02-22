@@ -1,202 +1,213 @@
 # Siconos
 
-[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main)  [![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/main/COPYING)
+[![Pipeline Status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main)
+[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/main/COPYING)
 
-A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
+**A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and Python.**
 
-Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems:
+> 📚 **Examples and Tutorials**: Most examples and tutorials are in the separate **[siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials)** repository. Please ensure you use **consistent versions** of siconos and siconos-tutorials (e.g., both `main` branch or both same release version).
 
-  * _Mechanical systems_ (rigid or solid) with unilateral contact and Coulomb friction and impact (Nonsmooth mechanics, 
-contact dynamics, multibody systems dynamics or granular materials). 
-  * _Switched Electrical Circuit_ such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
-  * _Sliding mode control_ systems.
-  * _Biology_ Gene regulatory networks.
- 
-Other applications are found in Systems and Control (hybrid systems, differential inclusions,
-optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
-Fluid Mechanics, Computer Graphics, ...
+[Homepage](http://siconos.org) |
+[Documentation](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos) |
+[Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials) |
+[GitLab](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos)
 
-Read more about Siconos at the [Siconos homepage](http://siconos.org)
+---
 
-## Usage
+## What is Siconos?
 
-### Through your web browser
+Siconos is an open-source scientific software package designed for modeling and simulating **nonsmooth dynamical systems** - systems where the dynamics are not continuous due to phenomena like impacts, friction, switches, or constraints.
 
-Perfect to understand and test the software or run lite simulations, demos, teaching ...
+### Key Application Areas
 
-Prerequisite: a web browser and a network connection.
+| Domain | Examples |
+|--------|----------|
+| **Mechanical Systems** | Rigid body dynamics with contact and friction, multibody systems, granular materials |
+| **Electrical Circuits** | Power converters, rectifiers, PLLs, ADCs with ideal components |
+| **Control Systems** | Sliding mode control, hybrid systems |
+| **Biology** | Gene regulatory networks |
+| **Optimization** | Complementarity systems, variational inequalities |
 
-Pros: no installation prerequisites, nothing to do
+---
 
-Cons: limited resources. No long/important simulations.
+## Quick Start
 
-Just click there [![Binder](https://plmbinder.math.cnrs.fr/binder/badge_logo.svg)](https://plmbinder.math.cnrs.fr/binder/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorials.git/HEAD)
+### Option 1: Try Online (No Installation)
 
-### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+Run Siconos directly in your browser via Binder:
 
-Prerequisite: Docker installed and usable on your computer.
+[![Binder](https://plmbinder.math.cnrs.fr/binder/badge_logo.svg)](https://plmbinder.math.cnrs.fr/binder/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorials.git/HEAD)
 
+**Best for:** Testing the software, tutorials, lightweight demos
 
-To use last Siconos release, run the command line
-```bash
-docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
-```
-You will get something like
-```
-...
-To access the server, open this file in a browser:
-...
-        http://127.0.0.1:8888/lab?token=b8a131ed7aed720c8fe1d7fae034cd2b669dcf686126c598
-```
-Copy this last line into your browser, and there you will be able to start a terminal or a notebook session.
+### Option 2: Docker (Recommended for Development)
 
-
-You can also start a simple terminal to use Siconos through the command line with
+Prerequisite: [Docker](https://docs.docker.com/get-docker/)
 
 ```bash
-docker run --rm --entrypoint /bin/bash  -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
+# Jupyter Lab with Siconos and tutorials
+docker run --rm -p 8888:8888 -ti \
+  gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
+
+# Or command-line only
+docker run --rm --entrypoint /bin/bash -ti \
+  gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main:latest
 ```
 
+### Option 3: Build from Source
 
+```bash
+# Clone the repository
+git clone https://github.com/siconos/siconos.git
+cd siconos
 
-### From source
+# Configure and build
+cmake -S . -B build -DUSER_OPTIONS_FILE=config_samples/default.cmake
+cmake --build build -j$(nproc)
 
-Assuming you have cloned the project into <siconos-sources>, to build and install the libraries and the python interface ::
+# Run tests (optional)
+ctest --test-dir build
 
-* Create a user options file. Some templates are provided in <siconos-sources>/config_samples.
-* Run
-
+# Install
+cmake --install build
 ```
-cmake -S <path-to-siconos-sources> -B build-siconos -DUSER_OPTIONS_FILE=<your-options-file>
-cmake --build build-siconos -j 4 # or the number of cores available on your computer.
-ctest --test-dir build-siconos   # run tests, optional
-cmake --install build-siconos
-```
 
-More details in [Siconos download and install guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html).
+📖 [Detailed installation guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html)
 
-<!-- ## Docker images -->
+---
 
-<!-- #### Docker images with siconos ready to use: -->
+## Main Components
 
-<!-- * latest version (development) -->
+Each component can be used from C/C++ or Python.
 
-<!-- ``` -->
-<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-main:latest -->
-<!-- ``` -->
+### [siconos/numerics](numerics) (C)
 
-<!-- * A specific (release) version X.Y: -->
+Low-level numerical algorithms for solving optimization problems:
+- **Complementarity problems**: LCP, MLCP, NCP
+- **Friction-contact problems**: 2D/3D with Coulomb friction, rolling friction
+- **Variational inequalities**: AVI, VI
+- **Second-order cone programming (SOCP)**
+- **Relay problems**
 
-<!-- ``` -->
-<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest -->
-<!-- ``` -->
+📖 [Numerics documentation](numerics/README.md)
 
-<!-- #### Jupyter Lab environment with siconos ready to use and a set of end-user examples: -->
+### [siconos/kernel](kernel) (C++)
 
-<!-- * latest version (development) -->
+Core library for modeling and simulation:
+- Dynamical systems: Lagrangian, Newton-Euler, first-order formulations
+- Numerical integration: Event-driven and time-stepping schemes
+- Nonsmooth laws: Impact, friction, complementarity, relay
 
-<!-- ``` -->
-<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main -->
-<!-- ``` -->
+### [siconos/mechanics](mechanics) (C++)
 
+Mechanical simulation with contact detection:
+- Collision detection (native and [Bullet3](https://github.com/bulletphysics/bullet3))
+- CAD integration ([Open CASCADE](https://github.com/tpaviot/oce))
 
-<!-- * A specific (release) version X.Y: -->
+### [siconos/control](control) (C++)
 
-<!-- ``` -->
-<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y -->
-<!-- ``` -->
+Control systems with sliding mode control and implicit discretization.
 
+### [siconos/io](io) (C++)
 
+Serialization and visualization:
+- HDF5 import/export
+- VTK visualization
 
-# Main components
+---
 
-Each component can be used either from a low-level language like C/C++ or from Python.
+## Examples by Domain
 
-## siconos/numerics (C)
+The [siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials) repository contains comprehensive examples for each application area:
 
-Collection of low-level algorithms for solving optimization problems arising in the simulation of nonsmooth dynamical systems:
+| Domain | Example Topics | Link |
+|--------|---------------|------|
+| **Mechanics** | Bouncing ball, slider-crank, gear transmission, robotics, granular materials | [Mechanics Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials/tutorials/mechanics.html) |
+| **Electronics** | Power converters, rectifiers, PLLs, circuit simulation | [Electronics Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials/tutorials/electronics.html) |
+| **Control** | Sliding mode control, state observers, hybrid systems | [Control Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials/tutorials/control.html) |
+| **Numerics** | LCP solvers, friction contact, optimization problems | [Numerics Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials/tutorials/numerics.html) |
 
-  * Complementarity problems ([LCP](https://en.wikipedia.org/wiki/Linear_complementarity_problem), [MLCP](https://en.wikipedia.org/wiki/Mixed_linear_complementarity_problem), [NCP](https://en.wikipedia.org/wiki/Nonlinear_complementarity_problem))
-  * Friction-contact problems (2D or 3D)
-  * Second-order cone programming (SOCP)
-  * Primal or Dual Relay problems
-  * Finite dimensional [Variational Inequality](https://en.wikipedia.org/wiki/Variational_inequality) (AVI and VI)
+📁 **Browse all examples**: [siconos-tutorials repository](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/tree/main/examples)
 
-## siconos/kernel (C++)
+---
 
-Library for the modeling and simulation of nonsmooth dynamical systems.
+## Example: Bouncing Ball
 
-  * Dynamical systems formalism: first order systems, Lagrangian and Newton-Euler formulations
-  * Numerical integration techniques: Event-detecting (event-driven) and Event-Capturing (time-stepping) schemes
-  * Nonsmooth laws: complementarity, Relay, normal cone inclusion, Friction Contact, Newton impact, multiple impact law.
-
-## siconos/mechanics (C++)
-
-Component for the simulation of mechanical systems in interaction with their environment:
-* Contact detection procedure between simple primitives (homemade) and meshes [bullet3](https://github.com/bulletphysics/bullet3)
-* Contact detection between Brep representation based on [oce. Open CASCADE Community Edition](https://github.com/tpaviot/oce) and on [pythonOCC](https://github.com/tpaviot/pythonocc) 3D CAD/CAM package for python 
-
-## siconos/control (C++)
-
-Library to add a controller to a simulation. For now almost all the implemented control schemes are based on sliding modes with an implicit discretization.
-
-## siconos/io (C++)
-
-This component can be used to 
-* serialize almost any simulation using [boost::serialization](http://www.boost.org/doc/libs/1_60_0/libs/serialization/doc/index.html)
-* generate mechanical examples from HDF5 and to write HDF5 in view of visualization through [vtk](http://www.vtk.org)
-
-# License
-
-Siconos is currently distributed under Apache Licenses (v2).
-
-### The archetypal example: "The bouncing ball"
 ```python
 import siconos.modeling as sm
-from numpy import eye, empty
+import siconos.simulation as ss
+import numpy as np
 
-t0 = 0       # start time
-T = 10       # end time
-h = 0.005    # time step
-r = 0.1      # ball radius
-g = 9.81     # gravity
-m = 1        # ball mass
-e = 0.9      # restitution coeficient
-theta = 0.5  # theta scheme
+# Parameters
+t0, T, h = 0, 10, 0.005    # Time settings
+r, g, m = 0.1, 9.81, 1      # Ball properties
+e = 0.9                     # Restitution coefficient
 
-# the dynamical system
-x = [1, 0, 0]    # initial position
-v = [0, 0, 0]    # initial velocity
-mass = eye(3)  # mass matrix
-mass[2, 2] = 2. / 5 * r * r
-ball = LagrangianLinearTIDS(x, v, mass)
-weight_np = np.asarray([-m * g, 0, 0] )
-ball.setConstantFext(weight_np, sm.alias_t)
-# Interaction ball-floor
-H = [[1, 0, 0]]
-nslaw = NewtonImpactNSL(e)
-relation = LagrangianLinearTIR(H)
-inter = Interaction(nslaw, relation)
+# Create dynamical system (ball)
+position = [1, 0, 0]
+velocity = [0, 0, 0]
+mass = np.eye(3) * m
+mass[2, 2] = 2./5 * r * r
+
+ball = sm.LagrangianLinearTIDS(position, velocity, mass)
+ball.set_constant_fext(np.array([-m * g, 0, 0]))
+
+# Interaction with floor
+nslaw = sm.NewtonImpactNSL(e)
+relation = sm.LagrangianLinearTIR(np.array([[1, 0, 0]]))
+interaction = sm.Interaction(nslaw, relation)
+
 # Model
-bouncingBall = NonSmoothDynamicalSystem(t0, T)
-# add the dynamical system to the non smooth dynamical system
-bouncingBall.insertDynamicalSystem(ball)
-# link the interaction and the dynamical system
-bouncingBall.link(inter, ball)
-# Simulation
-# (1) OneStepIntegrators
-OSI = MoreauJeanOSI(theta)
-# (2) Time discretisation 
-t = TimeDiscretisation(t0, h)
-# (3) one step non smooth problem
-osnspb = LCP()
-# (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(bouncingBall, t, OSI, osnspb)
-# end of model definition
+model = sm.NonSmoothDynamicalSystem(t0, T)
+model.insert_dynamical_system(ball)
+model.link(interaction, ball)
 
-# computation
-N = (T - t0) / h # the number of time steps
-# time loop
-while s.hasNextEvent():
-    s.computeOneStep()
-    s.nextStep()
+# Simulation
+osi = ss.MoreauJeanOSI(0.5)
+td = ss.TimeDiscretisation(t0, h)
+osnspb = ss.LCP()
+sim = ss.TimeStepping(model, td, osi, osnspb)
+
+# Run simulation
+while sim.has_next_event():
+    sim.compute_one_step()
+    sim.next_step()
+```
+
+---
+
+## Documentation & Resources
+
+| Resource | Link |
+|----------|------|
+| **User Guide** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos) |
+| **Tutorials** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials) |
+| **API Reference (Doxygen)** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/doxygen](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/doxygen) |
+| **Bug Reports** | [GitHub Issues](https://github.com/siconos/siconos/issues) |
+
+---
+
+## Citation
+
+If you use Siconos in your research, please cite:
+
+```bibtex
+@software{siconos,
+  title = {Siconos: A Software Package for Modeling and Simulation of Nonsmooth Dynamical Systems},
+  author = {{Siconos Team}},
+  url = {http://siconos.org},
+  year = {2024}
+}
+```
+
+---
+
+## License
+
+Siconos is distributed under the [Apache License, Version 2.0](COPYING).
+
+---
+
+**Maintained by:** The Siconos Development Team  
+**Contact:** [GitHub Issues](https://github.com/siconos/siconos/issues)
