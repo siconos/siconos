@@ -222,8 +222,22 @@ if(WITH_TESTING)
   new_test(SOURCES fc3d_LmgcDriver_test4.c)
   new_test(SOURCES fc3d_LmgcDriver_test5.c)
 
-  # --- NSGS performance comparison test ---
-  # new_test(SOURCES test_nsgs_performance.c DEPS fclib::fclib)
+  # --- NSGS standalone debug tests ---
+  # These are simple debug tests that verify basic NSGS functionality
+  new_test(SOURCES test_nsgs_debug.c)
+  new_test(SOURCES test_nsgs_debug2.c)
+  new_test(SOURCES test_nsgs_debug3.c)
+  new_test(SOURCES test_nsgs_debug4.c)
+  new_test(SOURCES test_simple_compare.c)
+  # The following tests compare original and generic NSGS implementations
+  # They are debugging/development tools, not production tests
+  # To run them manually: cd build && make test_nsgs_compare && ./numerics/test_nsgs_compare
+  # new_test(SOURCES test_nsgs_compare.c)
+  # new_test(SOURCES test_nsgs_detailed_compare.c)
+  # Performance test - requires specific data file (KaplasTower-i1061-4.hdf5.dat)
+  # new_test(SOURCES test_nsgs_performance.c)
+  # Profile test - requires instrumentation header
+  # new_test(SOURCES test_nsgs_profile.c)
 
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---

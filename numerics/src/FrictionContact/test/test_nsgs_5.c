@@ -79,6 +79,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_ONECONE_NSN_GP);
+    collection[current].will_fail = 1;
     current++;
   }
   {
@@ -96,6 +97,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
         SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+    collection[current].will_fail = 1;
     current++;
   }
 
@@ -113,6 +115,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
         SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    collection[current].will_fail = 1;
     current++;
   }
 

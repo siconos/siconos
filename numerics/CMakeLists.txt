@@ -22,6 +22,11 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
 set(${COMPONENT}_DIRS
   src/.
+  src/core
+  src/linalg
+  src/optimization
+  src/io
+  src/utils
   src/tools
   src/tools/InterfaceToPathFerris
   src/tools/internal
@@ -67,6 +72,11 @@ set(${COMPONENT}_EXCLUDE_DOXY src/Unstable_or_deprecated)
 # ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
 set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src
+  src/core
+  src/linalg
+  src/optimization
+  src/io
+  src/utils
   src/tools
   src/tools/InterfaceToPathFerris
   src/tools/internal
