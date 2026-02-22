@@ -70,7 +70,7 @@ stdenv.mkDerivation rec {
 
  
   meta = with stdenv.lib; {
-    homepage = http://siconos.gforge.inria.fr/;
+    homepage = http://siconos.org/;
     description = "Nonsmooth dynamical systems simulator";
     license = licenses.asl20;
     platforms = platforms.all;

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-This is the changelog for the Siconos package, www.siconos.gforge.inria.fr.
+This is the changelog for the Siconos package, http://siconos.org.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 	before it.
@@ -302,7 +302,7 @@ Main Changes:
 
 ################## Old Changelog files before merge
 
-This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
+This is the changelog for the Siconos/Numerics package, http://siconos.org.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.

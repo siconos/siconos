@@ -55,7 +55,7 @@ The complete documentation can be generated in one shot using doc target
 
 
 It results in html pages, generated in build-dir/docs/build/html.
-Siconos web site (https://siconos.gforge.inria.fr) is the online version of those pages.
+Siconos web site (http://siconos.org) is the online version of those pages.
    
 The building process for documentation is described in :ref:`build_doc`.
 

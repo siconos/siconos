@@ -16,7 +16,7 @@ Other applications are found in Systems and Control (hybrid systems, differentia
 optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
 Fluid Mechanics, Computer Graphics, ...
 
-Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
+Read more about Siconos at the [Siconos homepage](http://siconos.org)
 
 ## Usage
 
