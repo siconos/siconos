@@ -168,7 +168,4 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
     DEBUG_EXPR_WE(printf("B"); display5x5(B00););
     DEBUG_EXPR_WE(printf("A:"); display5x5(A00););
   }
-  if isnan(*R0) {
-    getchar();
-    }    
 }
