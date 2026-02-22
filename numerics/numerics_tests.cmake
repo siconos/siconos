@@ -242,6 +242,7 @@ if(WITH_TESTING)
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
   # ---------------------------------------------------
+  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
@@ -272,6 +273,7 @@ if(WITH_TESTING)
   # --- Rolling friction contact problem formulation ---
   # ---------------------------------------------------
 
+  begin_tests(src/RollingFrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION
     EXTRA_SOURCES data_collection_rfc3d.c test_first_order_rfc3d_1.c )
@@ -281,10 +283,10 @@ if(WITH_TESTING)
 
   if(WITH_FCLIB)
 
+    begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
     new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS fclib::fclib)
 
     if(WITH_HDF5)
-
         new_tests_collection(
           DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
           EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_nsgs_1.c DEPS fclib::fclib
@@ -315,20 +317,21 @@ if(WITH_TESTING)
         #   HDF5 ON
         #   )
 
+        begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c
           HDF5 ON
           )
 
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c
           HDF5 ON
           )
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_PA
-          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c
           HDF5 ON
           )
 
@@ -340,25 +343,25 @@ if(WITH_TESTING)
 
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c
           HDF5 ON
           )
 
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c
           HDF5 ON
           )
 
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS fclib::fclib
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c
           HDF5 ON
           )
 
         new_tests_collection(
           DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB
-          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_snm_gfc3d_1.c DEPS fclib::fclib;HDF5::HDF5
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_snm_gfc3d_1.c
           HDF5 ON
           )
     endif()
@@ -386,13 +389,14 @@ if(WITH_TESTING)
     # --- Rolling friction contact problem formulation ---
     # ---------------------------------------------------
 
+    begin_tests(src/RollingFrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
     new_tests_collection(
       DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS fclib::fclib)
+      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c)
 
     new_tests_collection(
       DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c DEPS fclib::fclib
+      EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c
       HDF5 ON
       )
 
@@ -408,6 +412,7 @@ if(WITH_TESTING)
   #===========================================
   # 2D Friction Contact tests
   #===========================================
+  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   # test 2D dense, all solvers but enum
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1

@@ -38,6 +38,7 @@ set(${COMPONENT}_DIRS
   src/Relay
   src/FrictionContact
   src/FrictionContact/Generated
+  src/RollingFrictionContact
   src/NCP
   src/MCP
   src/GenericMechanical
@@ -88,6 +89,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/Relay
   src/FrictionContact
   src/FrictionContact/Generated
+  src/RollingFrictionContact
   src/NonSmoothSolvers
   src/NCP
   src/MCP

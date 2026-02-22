@@ -183,29 +183,15 @@ enum FRICTION_SOLVER {
   /** IPM-SNM with proximal regularization */
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX = 620,
 
-  /* -----------------------------------------------------------------------
-   * Rolling Friction solvers (IDs 3000-4999)
-   * -----------------------------------------------------------------------
-   * These solvers handle rolling friction contact problems, which extend
-   * standard friction contact with additional rolling resistance constraints.
-   */
-
-  /** Non-smooth Gauss-Seidel, rolling friction 3D, local formulation */
-  SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
-  SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
-
-  /** Non-smooth Gauss Seidel, local formulation */
-  SICONOS_ROLLING_FRICTION_2D_NSGS = 4000,
-  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone = 4001,
-  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002,
-
-  /** Non-smooth Gauss Seidel, global formulation */
-  /** Non-smooth Gauss-Seidel, rolling friction 3D, global formulation with wrapper */
-  SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR = 5000,
-  /** Interior Point Method, rolling friction 3D */
-  SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM = 5001
-
 }; /* end of enum FRICTION_SOLVER */
+
+/* ===========================================================================
+ * Rolling Friction Solver Options
+ * ===========================================================================
+ * Rolling friction solvers are defined in RollingFrictionContact_options.h
+ * Include it for rolling friction specific solver IDs and options.
+ */
+#include "RollingFrictionContact/RollingFrictionContact_options.h"
 
 /* ===========================================================================
  * Solver Name Strings
@@ -286,16 +272,7 @@ extern const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_STR;
 extern const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR;
 extern const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR;
 
-extern const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR;
-extern const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR;
-
-extern const char* const SICONOS_ROLLING_FRICTION_2D_NSGS_STR;
-extern const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
-extern const char* const
-    SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
-
-extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR;
-extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR;
+/* Rolling friction solver strings are declared in RollingFrictionContact_options.h */
 
 /* ===========================================================================
  * Integer Parameter Indices (iparam)
