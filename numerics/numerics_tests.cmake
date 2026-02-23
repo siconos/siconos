@@ -75,14 +75,16 @@ if(WITH_TESTING)
 
 
   # LCP with Petsc / MPI tests
-  begin_tests(src/LCP/test DEPS "PkgConfig::PETSC;MPI::MPI_C")
+  if (WITH_PETSC)
+    begin_tests(src/LCP/test DEPS "PkgConfig::PETSC;MPI::MPI_C")
 
-  new_tests_collection(
-    DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_1
-    EXTRA_SOURCES data_collection_1.c)
-  new_tests_collection(
-    DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_2
-    EXTRA_SOURCES data_collection_2.c)
+    new_tests_collection(
+      DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_1
+      EXTRA_SOURCES data_collection_1.c)
+    new_tests_collection(
+      DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_2
+      EXTRA_SOURCES data_collection_2.c)
+  endif()
 
   # ----------- Relay solvers tests -----------
   # Start tests for Relay dir.
@@ -345,14 +347,26 @@ if(WITH_TESTING)
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
 
   new_tests_collection(
-    DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
-    EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c)
-
-  new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
     EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
+
+  if (WITH_PETSC)
+
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c)
+
+    if (WITH_CUDA)
+
+      new_tests_collection(
+        DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_GPU_COLLECTION_1
+        EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c)
+
+    endif()
+
+  endif()
+
   # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
-  
   
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM

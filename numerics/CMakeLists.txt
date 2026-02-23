@@ -292,7 +292,7 @@ if(WITH_CUDA)
   # if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   #   set(CMAKE_CUDA_ARCHITECTURES 80 90)
   # endif()
-
+  # set(SICONOS_HAS_CUDA TRUE)
 
   enable_language(CUDA)
   
@@ -318,7 +318,7 @@ if(WITH_CUDA)
     CUDA_STANDARD_REQUIRED ON
     CUDA_SEPARABLE_COMPILATION ON)
 
-  target_compile_definitions(${COMPONENT} PUBLIC WITH_CUDA)
+  # target_compile_definitions(${COMPONENT} PUBLIC WITH_CUDA)
 
   target_sources(${COMPONENT} PRIVATE "src/FrictionContact/fc2d_nsgs_graph_permut_cuda.cu")
   target_sources(${COMPONENT} PRIVATE "src/FrictionContact/fc2d_nsgs_graph_permut_cuda_blocklegacy.cu")

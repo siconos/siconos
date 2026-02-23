@@ -107,7 +107,7 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
 void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
                             SolverOptions* options);
 
-// #ifdef WITH_CUDA
+#ifdef WITH_CUDA
 /**
      Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
    2D case. Permutates the problem to optimize the performance.
@@ -134,7 +134,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 */
 void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, double* z,
                                              double* w, int* info, SolverOptions* options);
-
+#endif
 /**
      Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
    permutation used by parallel solvers.

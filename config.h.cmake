@@ -94,6 +94,8 @@ Example : if cmake is executed with WITH_MPI=ON
 // - mpi part -
 #cmakedefine SICONOS_HAS_MPI
 #cmakedefine WITH_MPI4PY
+// - gpu part -
+#cmakedefine WITH_CUDA
 // - mumps solver -
 #cmakedefine WITH_MUMPS
 // - fclib interface -

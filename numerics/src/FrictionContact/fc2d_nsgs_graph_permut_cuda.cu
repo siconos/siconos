@@ -336,12 +336,36 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
-  // time = omp_get_wtime() - time;
-  // printf("time coloring: %es\n", time);
+  /* Create SBM if it does not exist */
+  if (!problem->M->matrix1) {
+    SparseBlockStructuredMatrix* SBM_problem = SBM_new();
+    switch (problem->M->storageType) {
+      // Convert DENSE -> SBM
+      case NM_DENSE: {
+        SBM_from_dense(problem->dimension, problem->M->size1, problem->M->size0,
+                       problem->M->matrix0, SBM_problem);
+        break;
+      }
+      // Convert SPARSE -> SBM
+      case NM_SPARSE: {
+        // Get Csparse matrix
+        CSparseMatrix* sparse;
+        if (problem->M->matrix2->origin == NSM_CSR) {
+          sparse = NM_csr(problem->M);
+        } else {
+          sparse = NM_csc_trans(problem->M);
+        }
 
-  // printf("Number of colors = %d\n", n_colors);
+        SBM_from_csparse_2(problem->dimension, sparse, SBM_problem);
+        break;
+      }
+    }
+    problem->M->matrix1 = SBM_problem;
+  }
 
-  // time = omp_get_wtime();
+  /* Switch storageType to SBM temporarily */
+  unsigned int old_storageType = problem->M->storageType;
+  problem->M->storageType = NM_SPARSE_BLOCK;
 
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
@@ -800,23 +824,22 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
             d_sumErr2, sum_sizes[color], sum_sizes[color + 1]);
       } */
 
-      if (iter % 100 == 0 || iter == itermax - 1) {
-        CHECK_CUDA(
-            cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
-        CHECK_CUDA(cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost))
+      CHECK_CUDA(
+          cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
+      CHECK_CUDA(cudaMemcpy(&norm_r, d_sumP2, sizeof(double), cudaMemcpyDeviceToHost))
 
-        error = sqrt(light_error_sum);
-        norm_r = sqrt(norm_r);
-        if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
+      error = sqrt(light_error_sum);
+      norm_r = sqrt(norm_r);
+      if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
 
-        if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-            SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-          has_not_converged = determine_convergence(error, tolerance, iter, options);
-        } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-          has_not_converged = determine_convergence_with_full_final(
-              problem, options, z, d_z, w, &tolerance, norm_q, error, iter);
-        }
+      if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
+        has_not_converged = determine_convergence(error, tolerance, iter, options);
+      } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+        has_not_converged = determine_convergence_with_full_final(
+            problem, options, z, d_z, w, &tolerance, norm_q, error, iter);
+        problem->M->storageType = NM_SPARSE_BLOCK;
       }
 
       ++iter;
@@ -840,6 +863,7 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
     error = calculateFullErrorFinal(problem, options, z, w, tolerance, norm_q);
+    problem->M->storageType = NM_SPARSE_BLOCK;
 
     has_not_converged =
         determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
@@ -909,6 +933,8 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
   CHECK_CUDA(cudaFree(d_determinants))
   CHECK_CUDA(cudaFree(d_mu))
   CHECK_CUDA(cudaFree(d_q_const))
+
+  problem->M->storageType = old_storageType;
 
   // Free other stuff
 }

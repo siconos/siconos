@@ -36,6 +36,10 @@ const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR = "FC2D_NSGS_GRAPH";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR = "FC2D_NSGS_GRAPH_OPTI";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR = "FC2D_NSGS_GRAPH_PERMUT";
+const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_STR =
+    "FC2D_NSGS_GRAPH_PERMUT_CUDA";
+const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY_STR =
+    "FC2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY";
 const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR = "FC2D_NSGS_PERMUT";
 // #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
@@ -133,6 +137,28 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
         break;
       }
+#ifdef WITH_CUDA
+      /****** GPU solver ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut_cuda(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** GPU solver with block format ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut_cuda_blocklegacy(problem, reaction, velocity, &info, options);
+        break;
+      }
+#endif
       default: {
         NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
         NM_to_dense(problem->M, M_dense);
@@ -223,6 +249,28 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
         break;
       }
+#ifdef WITH_CUDA
+      /****** GPU solver ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut_cuda(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** GPU solver with block format ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut_cuda_blocklegacy(problem, reaction, velocity, &info, options);
+        break;
+      }
+#endif
       /*error */
       default: {
         fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n",

@@ -134,6 +134,8 @@ extern const char* const SICONOS_FRICTION_2D_NSGS_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR;
+extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_STR;
+extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR;
 extern const char* const SICONOS_FRICTION_2D_CPG_STR;
 extern const char* const SICONOS_FRICTION_2D_LEMKE_STR;
