@@ -857,13 +857,6 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_ROLLING_FRICTION_3D_NSGS",
              FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_NSGS,
              "3D Non-smooth Gauss Seidel, local formulation")
-      .value("SICONOS_ONECONE_ProjectionOnCone",
-             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone,
-             "3D Rolling friction one contact Projection on Cone")
-      .value("SICONOS_ONECONE_ProjectionOnConeWithLocalIteration",
-             FRICTION_SOLVER::
-                 SICONOS_ONECONE_ProjectionOnConeWithLocalIteration,
-             "3D Rolling friction one contact Projection on Cone with local iteration")
       .value("SICONOS_ROLLING_FRICTION_3D_ADMM",
              FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ADMM,
              "3D Rolling friction ADMM solver")
