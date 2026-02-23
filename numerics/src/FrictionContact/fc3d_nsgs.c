@@ -39,6 +39,11 @@
 #include "fc3d_projection.h"                           // for fc3d_projectio...
 #include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
 #include "numerics_verbose.h"                          // for numerics_printf
+
+/* New utility headers for standardized error computation and tolerance management */
+#include "utils/error_computation.h"
+#include "utils/tolerance_manager.h"
+
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 
@@ -465,58 +470,86 @@ static int determine_convergence(double error, double tolerance, int iter,
   return hasNotConverged;
 }
 
+/** Check convergence with full error verification and tolerance adaptation
+ *
+ * This function checks if the NSGS solver has converged by:
+ * 1. Checking if incremental error is below working tolerance
+ * 2. If yes, computing full error and checking against user tolerance
+ * 3. Adapting tolerance if incremental converged but full didn't
+ *
+ * \param[in] problem Friction contact problem
+ * \param[in] options Solver options
+ * \param[in] computeError Function to compute full error
+ * \param[in] reaction Current reaction vector
+ * \param[in] velocity Current velocity vector
+ * \param[in,out] tm Tolerance manager (handles adaptation)
+ * \param[in] norm_q Norm of q vector
+ * \param[in] incr_error Incremental error
+ * \param[in] iter Current iteration
+ * \return 0 if converged, 1 if not converged
+ */
+static int check_convergence_with_adaptation(FrictionContactProblem* problem,
+                                             SolverOptions* options,
+                                             ComputeErrorPtr computeError,
+                                             double* reaction, double* velocity,
+                                             ToleranceManager* tm,
+                                             double norm_q,
+                                             double incr_error, int iter) {
+  /* Check if incremental error is below working tolerance */
+  if (incr_error >= tm->working_tolerance) {
+    numerics_printf(
+        "--------------- FC3D - NSGS - Iteration %i "
+        "Residual = %14.7e > %7.3e",
+        iter, incr_error, tm->working_tolerance);
+    return 1; /* Not converged */
+  }
+  
+  /* Incremental error converged - check full error */
+  numerics_printf(
+      "--------------- FC3D - NSGS - Iteration %i "
+      "Residual = %14.7e < %7.3e",
+      iter, incr_error, tm->working_tolerance);
+  
+  double full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
+                                              options->dparam[SICONOS_DPARAM_TOL], norm_q);
+  
+  /* Use tolerance manager to handle adaptation logic */
+  SolverOptions* localsolver_options = (options->numberOfInternalSolvers > 0) ? 
+                                        options->internalSolvers[0] : NULL;
+  int converged = tolerance_manager_check_convergence(tm, localsolver_options, 
+                                                       full_error, incr_error, verbose);
+  
+  if (converged == 0) {
+    numerics_printf(
+        "------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy "
+        "to %e", tm->working_tolerance);
+  }
+  
+  return converged;
+}
+
+/* Deprecated: Use check_convergence_with_adaptation() with ToleranceManager */
 static int determine_convergence_with_full_final(FrictionContactProblem* problem,
                                                  SolverOptions* options,
                                                  ComputeErrorPtr computeError,
                                                  double* reaction, double* velocity,
                                                  double* tolerance, double norm_q,
                                                  double error, int iter) {
-  int hasNotConverged = 1;
-  if (error < *tolerance) {
-    hasNotConverged = 0;
-    numerics_printf(
-        "--------------- FC3D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e",
-        iter, error, *tolerance);
-
-    double absolute_error =
-        calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                options->dparam[SICONOS_DPARAM_TOL], norm_q);
-    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
-      if (error < DBL_EPSILON) {
-        /* in this case, the relative error is very small
-           (meaning that the nsgs loop does not
-           improve accuracy).
-           We try to tighten the local solver tolerance */
-        options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = fmax(options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] / 100., DBL_EPSILON * 1e-6);
-        numerics_printf(
-            "------- FC3D - NSGS - We modify the local solver tolerance precision to reach "
-            "accuracy to %e",
-            options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]);
-
-      } else {
-        *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
-	assert(*tolerance > 0.0 && "tolerance has to be positive");
-        numerics_printf(
-            "------- FC3D - NSGS - We modify the required incremental precision to reach "
-            "accuracy to %e",
-            *tolerance);
-      }
-      hasNotConverged = 1;
-    } else {
-      numerics_printf(
-          "------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy "
-          "to %e",
-          *tolerance);
-    }
-
-  } else {
-    numerics_printf(
-        "--------------- FC3D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e",
-        iter, error, *tolerance);
-  }
-  return hasNotConverged;
+  /* Create temporary tolerance manager for backward compatibility */
+  ToleranceManager tm;
+  SolverOptions* localsolver_options = (options->numberOfInternalSolvers > 0) ? 
+                                        options->internalSolvers[0] : NULL;
+  tolerance_manager_init(&tm, options->dparam[SICONOS_DPARAM_TOL], localsolver_options);
+  tm.working_tolerance = *tolerance;
+  
+  int result = check_convergence_with_adaptation(problem, options, computeError,
+                                                 reaction, velocity, &tm, norm_q,
+                                                 error, iter);
+  
+  /* Sync back the adapted tolerance */
+  *tolerance = tm.working_tolerance;
+  
+  return result;
 }
 
 void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
@@ -533,9 +566,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
-  /* Tolerance */
-  double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double local_tolerance_save = options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL];
+  /* Tolerance setup with unified tolerance manager */
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
@@ -547,6 +578,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   }
 
   SolverOptions* localsolver_options = options->internalSolvers[0];
+  
+  /* Initialize tolerance manager for unified tolerance handling */
+  ToleranceManager tol_manager;
+  tolerance_manager_init(&tol_manager, dparam[SICONOS_DPARAM_TOL], localsolver_options);
+  
+  /* Working tolerance (may be adapted during iterations) */
+  double tolerance = tol_manager.working_tolerance;
+  
   ComputeErrorPtr computeError = NULL;
 
   struct LocalProblemFunctionToolkit* localProblemFunctionToolkit =
@@ -830,7 +869,9 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = local_tolerance_save;
+  
+  /* Restore original local solver tolerance */
+  tolerance_manager_restore_local(&tol_manager, localsolver_options);
 
   /** Free memory **/
 
