@@ -316,7 +316,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     switch (problem->M->storageType) {
       // Convert DENSE -> SBM
       case NM_DENSE: {
-        printf("Converting DENSE -> SBM\n");
         SBM_from_dense(problem->dimension, problem->M->size1, problem->M->size0,
                        problem->M->matrix0, SBM_problem);
         /* printf("Number of blocks: %d\n", SBM_problem->nbblocks);
@@ -328,7 +327,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       }
       // Convert SPARSE -> SBM
       case NM_SPARSE: {
-        printf("Converting SPARSE -> SBM\n");
         // Get Csparse matrix
         CSparseMatrix* sparse;
         if (problem->M->matrix2->origin == NSM_CSR) {
@@ -342,7 +340,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       }
     }
     problem->M->matrix1 = SBM_problem;
-    printf("conversion done\n");
   }
 
   /* Switch storageType to SBM temporarily */

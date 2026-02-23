@@ -446,7 +446,6 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
     }  // end while loop
 
   } else {
-    printf("No freezing\n");
     while ((iter < itermax) && has_not_converged) {
       double light_error_sum = 0.0;
       unsigned int pos;
@@ -492,10 +491,6 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
       ++iter;
     }  // end while loop
   }
-
-  double true_error = 0.;
-  fc2d_compute_error(problem, z, w, tolerance, norm_q, &true_error);
-  printf("True error = %.17g\n", true_error);
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==

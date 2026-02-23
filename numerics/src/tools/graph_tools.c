@@ -648,7 +648,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col) ||
+            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -668,6 +668,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       size_t current_index = 0;
 
       for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+        Mp[contact_i + 1] = Mp[contact_i];
         // Initialize pointers to go trhough lines
         for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
 
@@ -675,7 +676,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col) ||
+            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -947,7 +948,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col) ||
+            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -967,6 +968,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       size_t current_index = 0;
 
       for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+        Mp[contact_i + 1] = Mp[contact_i];
         // Initialize pointers to go trhough lines
         for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
 
@@ -974,7 +976,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col) ||
+            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;

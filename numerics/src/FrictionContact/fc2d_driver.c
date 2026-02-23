@@ -84,23 +84,67 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   /* Non Smooth Gauss Seidel (NSGS) */
 
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
-    if (options->solverId == SICONOS_FRICTION_2D_NSGS) {
-      numerics_printf(
-          " ======================= Call Sparse NSGS solver for Friction-Contact 2D problem "
-          "======================");
-      fc2d_nsgs(problem, reaction, velocity, &info, options);
-    } else {
-      NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
-      NM_to_dense(problem->M, M_dense);
-      NumericsMatrix* M_original = problem->M;
-      problem->M = M_dense;
+    switch (options->solverId) {
+      case SICONOS_FRICTION_2D_NSGS: {
+        if (verbose)
+          printf(
+              " ========================== Call NLGS solver for Friction-Contact 2D problem "
+              "==========================\n");
+        fc2d_nsgs(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Parallel Graph NSGS algorithm ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Parallel Graph NSGS algorithm ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_opti(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Parallel Graph NSGS algorithm ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Sequential NSGS ******/
+      case SICONOS_FRICTION_2D_NSGS_PERMUT: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for "
+              "Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
+        break;
+      }
+      default: {
+        NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
+        NM_to_dense(problem->M, M_dense);
+        NumericsMatrix* M_original = problem->M;
+        problem->M = M_dense;
 
-      info = fc2d_driver(problem, reaction, velocity, options);
+        info = fc2d_driver(problem, reaction, velocity, options);
 
-      NM_free(M_dense);
-      problem->M = M_original;
+        NM_free(M_dense);
+        problem->M = M_original;
+      }
     }
-
   } else if (problem->M->storageType == NM_DENSE) {
     switch (options->solverId) {
       /****** NLGS algorithm ******/

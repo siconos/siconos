@@ -364,6 +364,20 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
 
   local_problem->q = (double*)malloc(2 * sizeof(double));
 
+  /* SparseBlockStructuredMatrix* SBM_problem = NULL;
+  if (problem->M->storageType == NM_SPARSE) {
+    CSparseMatrix* sparse;
+    if (problem->M->matrix2->origin == NSM_CSR) {
+      sparse = NM_csr(problem->M);
+    } else {
+      sparse = NM_csc_trans(problem->M);
+    }
+    SBM_problem = SBM_new();
+    SBM_from_csparse(2, sparse, SBM_problem);
+    problem->M->storageType = 1;
+    problem->M->matrix1 = SBM_problem;
+  } */
+
   /* Coloring */
   size_t n_colors = 0;
   size_t* partition_size = NULL;
@@ -599,10 +613,6 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
     has_not_converged =
         determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
   }
-
-  double true_error = 0.;
-  fc2d_compute_error(problem, z, w, tolerance, norm_q, &true_error);
-  printf("True error = %.17g\n", true_error);
 
   // numerics_printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n",
   //          blmat->blocknumber0,
