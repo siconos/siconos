@@ -22,7 +22,6 @@
 #include "NumericsFwd.h"                      // for NonlinearComplementarit...
 #include "min_merit.h"                        // for F_min, Jac_F_min
 #include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
-
 static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem*)data_opaque;
 

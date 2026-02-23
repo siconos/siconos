@@ -27,7 +27,7 @@
 #include "Relay_Solvers.h"     // for relay_compute_error, relay_pgs
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 
 void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {

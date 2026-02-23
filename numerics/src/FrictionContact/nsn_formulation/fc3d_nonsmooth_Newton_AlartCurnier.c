@@ -31,7 +31,7 @@
 #include "fc3d_AlartCurnier_functions.h"    // for computeAlartCurnierJeanMo...
 #include "fc3d_Solvers.h"                   // for fc3d_VI_ExtraGradient
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
-#include "numerics_verbose.h"               // for numerics_error
+#include "numerics_verbose.h"
 
 void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr computeACFun3x3,
                                double *reaction, double *velocity, double *mu, double *rho,
@@ -120,8 +120,8 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
       SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN) {
     SolverOptions *options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
-    options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
-    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
+    SOLVER_MAX_ITER(options_vi_eg) = 50;
+    SOLVER_TOL(options_vi_eg) = sqrt(SOLVER_TOL(options));
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] =
         SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction, velocity, info, options_vi_eg);

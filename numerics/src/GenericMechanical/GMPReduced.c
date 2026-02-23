@@ -41,7 +41,6 @@
 #include "lcp_cst.h"                            // for SICONOS_LCP_ENUM
 #include "mlcp_cst.h"                           // for SICONOS_MLCP_ENUM
 #include "pinv.h"                               // for pinv
-
 void _GMPReducedEquality(GenericMechanicalProblem *pInProblem, double *reducedProb,
                          double *Qreduced, int *Me_size, int *Mi_size);
 void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, int *Me_size, int *Mi_size);

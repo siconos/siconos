@@ -29,7 +29,7 @@
 #include "SiconosBlas.h"         // for cblas_dcopy, cblas_dnrm2, cblas_...
 #include "fc3d_Solvers.h"        // for fc3d_ExtraGradient, fc3d_ExtraGr...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "numerics_verbose.h"    // for verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"    // for projectionOnCone
 #include "siconos_debug.h"       // for DEBUG_PRINTF, DEBUG_EXPR_WE
 

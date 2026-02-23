@@ -30,7 +30,7 @@
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "gfc3d_Solvers.h"                       // for gfc3d_VI_ExtraGradient
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
-#include "numerics_verbose.h"                    // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_BEGIN
 
 #ifdef DEBUG_MESSAGES

@@ -57,7 +57,6 @@ static inline char* strdup(const char* src) {
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 static int cp(const char* to, const char* from) {
   int fd_to, fd_from;
   char buf[4096];

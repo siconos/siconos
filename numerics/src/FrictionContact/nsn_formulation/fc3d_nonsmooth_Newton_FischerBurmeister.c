@@ -29,7 +29,7 @@
 #include "SolverOptions.h"               // for SolverOptions, solver_opt...
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
-#include "numerics_verbose.h"               // for verbose
+#include "numerics_verbose.h"
 
 void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
                                     FischerBurmeisterFun3x3Ptr computeACFun3x3,

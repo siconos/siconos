@@ -26,7 +26,7 @@
 #include "NumericsMatrix.h"                       //
 #include "SolverOptions.h"                        // for SolverOptions, solver_opti...
 #include "grfc3d_Solvers.h"                       // for grfc3d...
-#include "numerics_verbose.h"                     // for numerics_printf_verbose
+#include "numerics_verbose.h"
 // #include "gfc3d_compute_error.h"
 // #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 

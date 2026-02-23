@@ -27,7 +27,6 @@
 #include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
 #include "SolverOptions.h"                    // for SolverOptions
 #include "sn_error_handling.h"                // for sn_fatal_error_msg, SN_...
-
 const char* const SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
 const char* const SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
 const char* const SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";

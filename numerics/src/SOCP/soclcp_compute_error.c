@@ -29,7 +29,7 @@
 /* #define DEBUG_MESSAGES */
 #include "NSSTools.h"          // for max
 #include "SiconosBlas.h"       // for cblas_dcopy
-#include "numerics_verbose.h"  // for numerics_error
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionO...
 #include "siconos_debug.h"     // for DEBUG_PRINTF
 

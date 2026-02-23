@@ -27,7 +27,7 @@
 #include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 #include "fc3d_Solvers.h"            // for fc3d_DeSaxceFixedPoint, fc3d_DeS...
 #include "fc3d_compute_error.h"      // for fc3d_compute_error
-#include "numerics_verbose.h"        // for verbose, numerics_error
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"        // for projectionOnCone
 
 void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,

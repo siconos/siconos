@@ -25,7 +25,7 @@
 #include "NumericsSparseMatrix.h"          // for NSM_TRIPLET ...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
 
 /* #define DEWBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

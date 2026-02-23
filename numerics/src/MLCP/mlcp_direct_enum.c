@@ -36,7 +36,7 @@ dim(v)=nn
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_S...
 #include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
-#include "numerics_verbose.h"                   // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"

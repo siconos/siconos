@@ -27,7 +27,6 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
 #include "SolverOptions.h"
-
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w) {
   // Computation of the new val w = F(z) = Mz + q
   // q --> w

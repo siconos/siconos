@@ -26,7 +26,6 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 #include "relay_cst.h"                     // for SICONOS_LCP_LEMKE
-
 void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
                        SolverOptions *options) {
   int i;

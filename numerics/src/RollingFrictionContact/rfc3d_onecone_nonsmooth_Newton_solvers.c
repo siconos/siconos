@@ -29,7 +29,7 @@
 #include "RollingFrictionContactProblem.h"
 #include "SiconosBlas.h"                             // for cblas_ddot
 #include "SolverOptions.h"                           // for SolverOptions
-#include "numerics_verbose.h"                        // for numerics_print...
+#include "numerics_verbose.h"
 #include "op5x5.h"                                   // for cpy3, mvp3x3
 #include "op3x3.h"                                   // for cpy3, mvp3x3
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
@@ -224,7 +224,7 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_initialize(
 }
 
 int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* localproblem,
-                                                 double* local_reaction,
+                                                 double* r_local,
                                                  SolverOptions* options) {
   /* numerics_printf_verbose( */
   /*     2, "--------------- rfc3d_onecone_nonsmooth_Newton_solvers_solve starts for cone %i", */
@@ -236,22 +236,22 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* 
 
   double* q = localproblem->q;
   if (q[0] > -DBL_EPSILON) {
-    local_reaction[0] = 0.0;
-    local_reaction[1] = 0.0;
-    local_reaction[2] = 0.0;
-    local_reaction[3] = 0.0;
-    local_reaction[4] = 0.0;
+    r_local[0] = 0.0;
+    r_local[1] = 0.0;
+    r_local[2] = 0.0;
+    r_local[3] = 0.0;
+    r_local[4] = 0.0;
     numerics_printf_verbose(2, "rfc3d_nsn  take off, trivial solution reaction = 0, velocity = q.");
     info = 0;
-    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+    SET_SOLVER_ITER_DONE(options, 0);
+    SET_SOLVER_RESIDUAL(options, 0.0);
     /* numerics_printf_verbose( */
     /*     2, "--------------- rfc3d_onecone_nonsmooth_Newton_solvers_solve ends"); */
     return info;
   }
   // to be updated
   if (options->solverId == SICONOS_ONECONE_NSN) {
-    info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(localproblem, local_reaction,
+    info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(localproblem, r_local,
                                                                options);
   } /* else if (options->solverId == SICONOS_ONECONE_NSN_GP) { */
   /*   info = rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction, */
@@ -270,24 +270,24 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* 
   /* } */
 /* } */
   else {
-    info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF, options);
+    info = nonSmoothDirectNewton(Fsize, r_local, &F, &jacobianF, options);
   }
   if (info > 0) {
     if (verbose > 0) {
-      if (options->iparam[SICONOS_IPARAM_MAX_ITER] ==
-          options->iparam[SICONOS_IPARAM_ITER_DONE]) {
+      if (SOLVER_MAX_ITER(options) ==
+          SOLVER_ITER_DONE(options)) {
         numerics_warning(
             "rfc3d_onecone_nonsmooth_Newton_solvers_solve",
             "reached max. number of iterations (%i) for cone %i. Residual = %12.8e",
-            options->iparam[SICONOS_IPARAM_MAX_ITER],
-            options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-            options->dparam[SICONOS_DPARAM_RESIDU]);
+            SOLVER_MAX_ITER(options),
+            SOLVER_CURRENT_BLOCK(options),
+            SOLVER_RESIDUAL(options));
       } else {
         numerics_warning("rfc3d_onecone_nonsmooth_Newton_solvers_solve",
                          "no convergence for cone %i with error = %12.8e",
-                         options->iparam[SICONOS_IPARAM_MAX_ITER],
-                         options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-                         options->dparam[SICONOS_DPARAM_RESIDU]);
+                         SOLVER_MAX_ITER(options),
+                         SOLVER_CURRENT_BLOCK(options),
+                         SOLVER_RESIDUAL(options));
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
@@ -342,7 +342,7 @@ void rfc3d_onecone_nonsmooth_Newton_update(int cone, RollingFrictionContactProbl
 }
 
 int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
-    RollingFrictionContactProblem* localproblem, double* R, SolverOptions* options) {
+    RollingFrictionContactProblem* localproblem, double* r_local, SolverOptions* options) {
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
@@ -385,22 +385,22 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     rho = &options->dWork[iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
   }
   /* compute the velocity */
-  double velocity[5] = {0., 0., 0., 0., 0.};
-  cpy5(qLocal, velocity);
-  mvp5x5(MLocal, R, velocity);
+  double v_local[5] = {0., 0., 0., 0., 0.};
+  cpy5(qLocal, v_local);
+  mvp5x5(MLocal, r_local, v_local);
 
-  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = SOLVER_MAX_ITER(options);
 
   /* Newton iteration */
   int inew = 0;
   int info_solv5x5;
 
   /* compute first residue */
-  Function(R, velocity, mu, mu_r, rho, F, NULL, NULL);
-  /* dparam[SICONOS_DPARAM_RESIDU] = */
-  /*     0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) * norm_relative; */
-  dparam[SICONOS_DPARAM_RESIDU] =
-    sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) * norm_relative;
+  Function(r_local, v_local, mu, mu_r, rho, F, NULL, NULL);
+  /* SET_SOLVER_RESIDUAL(options, */
+  /*     0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) * norm_relative); */
+  SET_SOLVER_RESIDUAL(options,
+    sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) * norm_relative);
 
 
   //double error = rfc3d_compute_local_error(localproblem, R);
@@ -410,15 +410,15 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
   numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "rfc3d_nsn",
                           iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER], inew,
 			  sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2] * dR[2] + dR[3] * dR[3] + dR[4] * dR[4]),
-                          dparam[SICONOS_DPARAM_RESIDU], rfc3d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
-  if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
-    iparam[SICONOS_IPARAM_ITER_DONE] = inew;
+                          SOLVER_RESIDUAL(options), rfc3d_compute_local_error(localproblem, r_local), SOLVER_TOL(options));
+  if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
+    SET_SOLVER_ITER_DONE(options, inew);
     return 0;
   }
 
   for (inew = 1; inew < itermax; ++inew) {
     /* Update function and gradient */
-    Function(R, velocity, mu, mu_r, rho, F, A, B);
+    Function(r_local, v_local, mu, mu_r, rho, F, A, B);
     DEBUG_EXPR(printf("F"); display5(F));
     /* compute -(A MLocal +B) */
     mm5x5(A, MLocal, AWplusB);
@@ -434,20 +434,20 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     DEBUG_EXPR(printf("dR"); display5(dR));
     DEBUG_EXPR(printf("F"); display5(F));
     /* update iterates */
-    add5(dR, R);
+    add5(dR, r_local);
 
     /* compute new residue */
-    cpy5(qLocal, velocity);
-    mvp5x5(MLocal, R, velocity);
-    Function(R, velocity, mu, mu_r, rho, F, NULL, NULL);
+    cpy5(qLocal, v_local);
+    mvp5x5(MLocal, r_local, v_local);
+    Function(r_local, v_local, mu, mu_r, rho, F, NULL, NULL);
 
     //    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]+ F[3] * F[3] + F[4] * F[4]) *
     //                               norm_relative;  // improve with relative tolerance
 
     // VA 01/2025 : should be better but prevents convergence due to rounding error
-    dparam[SICONOS_DPARAM_RESIDU] =
+    SET_SOLVER_RESIDUAL(options,
       sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2] * F[2] + F[3] * F[3] + F[4] * F[4]) *
-      norm_relative;  // improve with relative tolerance
+      norm_relative);  // improve with relative tolerance
 
     //double error = rfc3d_compute_local_error(localproblem, R);
     //printf("New local error = %e\n", error);
@@ -465,10 +465,10 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
    numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "rfc3d_nsn",
                           iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER], inew,
 			  sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2] * dR[2] + dR[3] * dR[3] + dR[4] * dR[4]),
-                          dparam[SICONOS_DPARAM_RESIDU], rfc3d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
+                          SOLVER_RESIDUAL(options), rfc3d_compute_local_error(localproblem, r_local), SOLVER_TOL(options));
 
-    if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
-      iparam[SICONOS_IPARAM_ITER_DONE] = inew;
+    if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
+      SET_SOLVER_ITER_DONE(options, inew);
       return 0;
     }
     if ( sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2] * dR[2] + dR[3] * dR[3] + dR[4] * dR[4]) < 10* DBL_EPSILON) {
@@ -476,7 +476,7 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     }
   }  // End of the Newton iteration
 
-  iparam[SICONOS_IPARAM_ITER_DONE] = inew;
+  SET_SOLVER_ITER_DONE(options, inew);
   return 1;
 }
 

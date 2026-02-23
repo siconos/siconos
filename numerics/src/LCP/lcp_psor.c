@@ -28,7 +28,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *info,

@@ -51,7 +51,7 @@ happen:
 #include "SolverOptions.h"     // for SolverOptions
 #include "mlcp_cst.h"          // for SICONOS_IPARAM_MLCP_N...
 #include "mlcp_enum_tool.h"    // for mlcp_enum_build_M, mlcp_fil...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 
 #define DEBUG_MESSAGES
 #include "siconos_debug.h"

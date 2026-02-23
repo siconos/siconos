@@ -27,7 +27,7 @@
 #include "SiconosBlas.h"                   // for cblas_daxpy, cblas_dcopy
 #include "SiconosLapack.h"                 // for lapack_int, DGESV
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 
 void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                     SolverOptions *options) {

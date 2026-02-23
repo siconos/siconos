@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
-#include "numerics_verbose.h"              // for numerics_error, numerics_w...
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 /* #define DEBUG_NOCOLOR */

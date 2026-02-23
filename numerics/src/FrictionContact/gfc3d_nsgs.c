@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "gfc3d_Solvers.h"                 // for ComputeErrorGlobalPtr, gfc...
 #include "gfc3d_compute_error.h"           // for gfc3d_compute_error
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"              // for projectionOnCone
 #include "sanitizer.h"                     // for cblas_dcopy_msan
 #include "siconos_debug.h"                 // for DEBUG_EXPR, DEBUG_PRINTF

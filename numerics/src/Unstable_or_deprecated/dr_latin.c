@@ -24,7 +24,6 @@
 
 #include "Relay_Solvers.h"
 #include "SiconosLapack.h"
-
 void dr_latin(RelayProblem *problem, double *z, double *w, int *info, SolverOptions *options) {
   double *vec = problem->M->matrix0;
   double *qq = problem->q;

@@ -28,7 +28,7 @@
 #include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
 #include "SiconosConfig.h"                 // for WITH_FCLIB  // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
 
 #ifdef WITH_FCLIB

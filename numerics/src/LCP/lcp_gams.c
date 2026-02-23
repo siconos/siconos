@@ -15,7 +15,7 @@
 
 #include "LCP_Solvers.h"       // for lcp_gams
 #include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOptions
-#include "numerics_verbose.h"  // for numerics_error
+#include "numerics_verbose.h"
 
 #ifdef HAVE_GAMS_C_API
 

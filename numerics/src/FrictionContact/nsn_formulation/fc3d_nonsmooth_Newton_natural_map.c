@@ -29,7 +29,7 @@
 #include "SolverOptions.h"           // for SolverOptions, solver_opt...
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
-#include "numerics_verbose.h"               // for verbose
+#include "numerics_verbose.h"
 
 void fc3d_NaturalMapFunction(unsigned int problemSize, NaturalMapFun3x3Ptr computeACFun3x3,
                              double* reaction, double* velocity, double* mu, double* rho,
@@ -59,9 +59,10 @@ void fc3d_NaturalMapFunction(unsigned int problemSize, NaturalMapFun3x3Ptr compu
   }
 }
 
-int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* problem, double* z,
-                                                   double* w, double tolerance,
-                                                   SolverOptions* options, double* error) {
+int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* problem,
+                                                   double* reaction, double* velocity,
+                                                   double tolerance, SolverOptions* options,
+                                                   double* error) {
   double* A = NULL;
   double* B = NULL;
 
@@ -79,7 +80,8 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* probl
     }
   }
 
-  fc3d_NaturalMapFunction(problemSize, computeACFun3x3, z, w, problem->mu, rho, F, A, B);
+  fc3d_NaturalMapFunction(problemSize, computeACFun3x3, reaction, velocity, problem->mu, rho,
+                          F, A, B);
 
   *error = 0.;
   for (unsigned int i = 0; i < problemSize; i += 3) {
@@ -105,7 +107,7 @@ void fc3d_nsn_nm_set_default(SolverOptions* options) {
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1; /* erritermax */
+  SOLVER_MAX_ITER(options) = 1; /* erritermax */
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.;

@@ -157,19 +157,19 @@ static void acceptLocalReactionFiltered(RollingFrictionContactProblem *localprob
                                         SolverOptions *localsolver_options,
                                         unsigned int contact, unsigned int iter,
                                         double *reaction, double localreaction[3]) {
-  if (isnan(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
-      isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
-      localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0) {
+  if (isnan(SOLVER_RESIDUAL(localsolver_options)) ||
+      isinf(SOLVER_RESIDUAL(localsolver_options)) ||
+      SOLVER_RESIDUAL(localsolver_options) > 1.0) {
     DEBUG_EXPR(rollingFrictionContact_display(localproblem));
     DEBUG_PRINTF(
         "Discard local reaction for contact %i at iteration %i "
         "with local_error = %e\n",
-        contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        contact, iter, SOLVER_RESIDUAL(localsolver_options));
 
     numerics_printf(
         "Discard local reaction for contact %i at iteration %i "
         "with local_error = %e",
-        contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        contact, iter, SOLVER_RESIDUAL(localsolver_options));
   } else
     memcpy(&reaction[contact * 3], localreaction, sizeof(double) * 3);
 }
@@ -222,16 +222,16 @@ static double calculateFullErrorFinal(RollingFrictionContactProblem *problem,
   (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &absolute_error);
 
   if (verbose > 0) {
-    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
+    if (absolute_error > SOLVER_TOL(options)) {
       numerics_printf(
           "------- RFC2D - NSGS - Warning absolute "
           "Residual = %14.7e is larger than required precision = %14.7e",
-          absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+          absolute_error, SOLVER_TOL(options));
     } else {
       numerics_printf(
           "------- RFC2D - NSGS - absolute "
           "Residual = %14.7e is smaller than required precision = %14.7e",
-          absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+          absolute_error, SOLVER_TOL(options));
     }
   }
   return absolute_error;
@@ -271,21 +271,21 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
 
     double absolute_error =
         calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                options->dparam[SICONOS_DPARAM_TOL], norm_q);
-    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
+                                SOLVER_TOL(options), norm_q);
+    if (absolute_error > SOLVER_TOL(options)) {
       if (error < DBL_EPSILON) {
         /* in this case, the relative error is very small
            (meaning that the nsgs loop does not
            improve accuracy).
            We try to tighten the local solver tolerance */
-        options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = fmax(options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] / 100., DBL_EPSILON * 1e-6);
+        SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], fmax(LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100., DBL_EPSILON * 1e-6));
         numerics_printf(
             "------- RFC2D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
-            options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]);
+            LOCAL_SOLVER_TOL(options->internalSolvers[0]));
 
       } else {
-        *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
+        *tolerance = error / absolute_error * SOLVER_TOL(options);
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
             "------- RFC2D - NSGS - We modify the required incremental precision to reach "
@@ -333,11 +333,11 @@ void rolling_fc2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   unsigned int nc = problem->numberOfContacts;
 
   /* Maximum number of iterations */
-  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = SOLVER_MAX_ITER(options);
 
   /* Tolerance */
-  double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double local_tolerance_save = options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL];
+  double tolerance = SOLVER_TOL(options);
+  double local_tolerance_save = LOCAL_SOLVER_TOL(options->internalSolvers[0]);
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
@@ -514,16 +514,16 @@ void rolling_fc2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
     error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                     tolerance, norm_q);
 
-    hasNotConverged = determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
+    hasNotConverged = determine_convergence(error, SOLVER_TOL(options), iter, options);
   }
 
   *info = hasNotConverged;
 
   /** return parameter values */
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
-  dparam[SICONOS_DPARAM_RESIDU] = error;
-  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = local_tolerance_save;
+  SET_SOLVER_RESIDUAL(options, error);
+  SET_SOLVER_ITER_DONE(options, iter);
+  SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], local_tolerance_save);
 
   /** Free memory **/
   (*freeSolver)(problem, localproblem, localsolver_options);
@@ -547,7 +547,7 @@ void rfc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] =
       SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  SOLVER_TOL(options) = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
 
   assert(options->numberOfInternalSolvers == 1);

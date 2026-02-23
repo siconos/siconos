@@ -34,7 +34,6 @@ dim(v)=nn
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
 #include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
-
 static int sN;
 static int sM;
 

@@ -45,7 +45,6 @@
 #include "pivot-utils.h"                      // for lcp_pivot_diagnose_info
 #include "sanitizer.h"                        // for cblas_dcopy_msan
 #include "siconos_debug.h"                    // for DEBUG_PRINT, DEBUG_PRINTF
-
 /** update the lcp subproblem: M, q and r
  * \param problem the NCP problem to solve
  * \param lcp_subproblem the lcp problem to fill

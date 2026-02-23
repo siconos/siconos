@@ -23,7 +23,7 @@
 #include "Plasticity_cst.h"        // for PLASTICITY_IPARAM_INTER...
 #include "SolverOptions.h"         // for SolverOptions
 #include "mc2d_solvers.h"          // for mc2d_set_internalsolver_tolerance
-#include "numerics_verbose.h"      // for numerics_printf_verbose, numeric...
+#include "numerics_verbose.h"
 
 void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {

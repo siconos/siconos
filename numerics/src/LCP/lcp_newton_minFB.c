@@ -24,7 +24,6 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "lcp_newton_FB.h"                 // for FB_compute_F_lcp, FB_compu...
 #include "min_merit.h"                     // for F_min, Jac_F_min
-
 static void lcp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   F_min(0, ((LinearComplementarityProblem*)data_opaque)->size, z, F, Fmin);
 }

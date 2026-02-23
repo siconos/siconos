@@ -31,7 +31,7 @@
 #include "SolverOptions.h"                                // for SolverOptions
 #include "fc3d_Solvers.h"                                 // for fc3d_SOCLCP
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
-#include "numerics_verbose.h"                             // for verbose
+#include "numerics_verbose.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem *,

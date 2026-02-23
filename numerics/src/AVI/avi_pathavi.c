@@ -18,7 +18,7 @@
 
 #include "AVI_Solvers.h"       // for avi_pathavi
 #include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
-#include "numerics_verbose.h"  // for numerics_error_nonfatal
+#include "numerics_verbose.h"
 
 #ifdef HAVE_PATHVI
 

@@ -23,7 +23,7 @@
 #include "RelayProblem.h"      // for RelayProblem
 #include "Relay_Solvers.h"     // for relay_avi_caoferris, relay_avi_caoferr...
 #include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
-#include "numerics_verbose.h"  // for numerics_error, verbose
+#include "numerics_verbose.h"
 #include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 
 #ifndef MEXFLAG

@@ -27,7 +27,6 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
 #include "relay_cst.h"                     // for SICONOS_RELAY_ENUM
-
 void relay_enum(RelayProblem *problem, double *z, double *w, int *info,
                 SolverOptions *options) {
   int i;

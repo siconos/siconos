@@ -30,7 +30,7 @@
 #include "SiconosBlas.h"                        // for cblas_ddot, cblas_dcopy
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_P...
-#include "numerics_verbose.h"                   // for numerics_printf
+#include "numerics_verbose.h"
 
 /*
  *

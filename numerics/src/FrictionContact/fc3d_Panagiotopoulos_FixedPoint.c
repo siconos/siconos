@@ -37,7 +37,7 @@
 #include "fc3d_Solvers.h"                        // for fc3d_set_internalsol...
 #include "fc3d_compute_error.h"                  // for fc3d_compute_error
 #include "lcp_cst.h"                             // for SICONOS_LCP_PGS, SIC...
-#include "numerics_verbose.h"                    // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem *, double *, double *,

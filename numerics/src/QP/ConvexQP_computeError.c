@@ -31,7 +31,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
 
 int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, double tolerance,

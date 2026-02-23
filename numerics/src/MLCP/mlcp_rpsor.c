@@ -29,7 +29,6 @@
 #include "SiconosBlas.h"                        // for cblas_ddot
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_O...
-
 #define EPSDIAG DBL_EPSILON
 /*
  *

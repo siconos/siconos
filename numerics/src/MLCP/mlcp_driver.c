@@ -35,7 +35,7 @@
 #include "mlcp_enum.h"                          // for mlcp_enum_alloc_worki...
 #include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
 #include "mlcp_simplex.h"                       // for mlcp_simplex_init
-#include "numerics_verbose.h"                   // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for mlcp_driver

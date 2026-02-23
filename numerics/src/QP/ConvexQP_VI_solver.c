@@ -29,7 +29,7 @@
 #include "SolverOptions.h"                  // for SolverOptions, SICONOS_DP...
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
-#include "numerics_verbose.h"               // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 const char* const SICONOS_CONVEXQP_VI_FPP_STR = "CONVEXQP VI FPP";
 const char* const SICONOS_CONVEXQP_VI_EG_STR = "CONVEXQP VI EG";

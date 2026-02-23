@@ -24,7 +24,6 @@
 #include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
 #include "NumericsFwd.h"                      // for NonlinearComplementarit...
 #include "SiconosBlas.h"                      // for cblas_dnrm2
-
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB) {
   phi_FB(((NonlinearComplementarityProblem*)data_opaque)->n, z, F, F_FB);
 }

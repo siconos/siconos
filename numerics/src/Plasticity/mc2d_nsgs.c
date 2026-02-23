@@ -52,8 +52,8 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* static void fake_compute_error_nsgs(MohrCoulomb2DProblem* problem, double *reaction,
- * double *velocity, double tolerance, SolverOptions  *options,  double* error) */
+/* static void fake_compute_error_nsgs(MohrCoulomb2DProblem* problem, double *stress,
+ * double *strainrate, double tolerance, SolverOptions  *options,  double* error) */
 /* { */
 /*   int n = 3 * problem->numberOfCones; */
 /*   *error = 0.; */
@@ -66,61 +66,61 @@ static int fccounter = -1;
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localreaction[3], double *oldreaction,
+static inline void performRelaxation_3(double localstress[3], double *oldstress,
                                        double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
+  localstress[0] = omega * localstress[0] + (1.0 - omega) * oldstress[0];
+  localstress[1] = omega * localstress[1] + (1.0 - omega) * oldstress[1];
+  localstress[2] = omega * localstress[2] + (1.0 - omega) * oldstress[2];
 }
 
-static inline double light_error_squared_3(double localreaction[3], double *oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
+static inline double light_error_squared_3(double localstress[3], double *oldstress) {
+  return (pow(oldstress[0] - localstress[0], 2) +
+          pow(oldstress[1] - localstress[1], 2) +
+          pow(oldstress[2] - localstress[2], 2));
 }
 
-static inline double squared_norm_3(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
+static inline double squared_norm_3(double localstress[3]) {
+  return (pow(localstress[0], 2) + pow(localstress[1], 2) + pow(localstress[2], 2));
 }
 
-static double calculateLightError(double light_error_sum, unsigned int nc, double *reaction,
+static double calculateLightError(double light_error_sum, unsigned int nc, double *stress,
                                   double *norm_r) {
   double error = sqrt(light_error_sum);
-  *norm_r = cblas_dnrm2(nc * 3, reaction, 1);
+  *norm_r = cblas_dnrm2(nc * 3, stress, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
   return error;
 }
 
-static void acceptLocalReactionUnconditionally(unsigned int cone, double *reaction,
-                                               double localreaction[3]) {
-  memcpy(&reaction[cone * 3], localreaction, sizeof(double) * 3);
+static void acceptLocalReactionUnconditionally(unsigned int cone, double *stress,
+                                               double localstress[3]) {
+  memcpy(&stress[cone * 3], localstress, sizeof(double) * 3);
 }
 
 static void statsIterationCallback(MohrCoulomb2DProblem *problem, SolverOptions *options,
-                                   double *reaction, double *velocity, double error) {
+                                   double *stress, double *strainrate, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(
-        options->callback->env, problem->numberOfCones * 3, reaction, velocity, error, NULL);
+        options->callback->env, problem->numberOfCones * 3, stress, strainrate, error, NULL);
   }
 }
 
 static void mc2d_nsgs_update(int cone, MohrCoulomb2DProblem *problem,
-                             MohrCoulomb2DProblem *localproblem, double *reaction,
+                             MohrCoulomb2DProblem *localproblem, double *stress,
                              SolverOptions *options) {
   /* Build a local problem for a specific cone
-     reaction corresponds to the global vector (size n) of the global problem.
+     stress corresponds to the global vector (size n) of the global problem.
   */
   /* Call the update function which depends on the storage for MGlobal/MBGlobal */
   /* Build a local problem for a specific cone
-     reaction corresponds to the global vector (size n) of the global problem.
+     stress corresponds to the global vector (size n) of the global problem.
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   mc2d_local_problem_fill_M(problem, localproblem, cone);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
-     MLocal.reactionBlock, excluding the block corresponding to the current cone. ****/
-  mc2d_local_problem_compute_q(problem, localproblem, reaction, cone);
+     MLocal.stressBlock, excluding the block corresponding to the current cone. ****/
+  mc2d_local_problem_compute_q(problem, localproblem, stress, cone);
 
   /* coefficient for current block*/
   localproblem->eta[0] = problem->eta[cone];
@@ -229,15 +229,15 @@ static unsigned int *allocfreezingCones(MohrCoulomb2DProblem *problem,
 static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
                               CopyLocalReactionPtr copyLocalReaction, unsigned int cone,
                               MohrCoulomb2DProblem *problem,
-                              MohrCoulomb2DProblem *localproblem, double *reaction,
-                              SolverOptions *localsolver_options, double localreaction[3]) {
-  (*update_localproblem)(cone, problem, localproblem, reaction, localsolver_options);
+                              MohrCoulomb2DProblem *localproblem, double *stress,
+                              SolverOptions *localsolver_options, double localstress[3]) {
+  (*update_localproblem)(cone, problem, localproblem, stress, localsolver_options);
 
   localsolver_options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = cone;
 
-  copyLocalReaction(&(reaction[cone * problem->dimension]), localreaction);
+  copyLocalReaction(&(stress[cone * problem->dimension]), localstress);
 
-  return (*local_solver)(localproblem, localreaction, localsolver_options);
+  return (*local_solver)(localproblem, localstress, localsolver_options);
 }
 
 // static int file_exists(const char *fname) {
@@ -251,16 +251,16 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
 
 static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
                                         SolverOptions *localsolver_options, unsigned int cone,
-                                        unsigned int iter, double *reaction,
-                                        double localreaction[3]) {
-  if (isnan(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
-      isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
-      localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0) {
+                                        unsigned int iter, double *stress,
+                                        double localstress[3]) {
+  if (isnan(SOLVER_RESIDUAL(localsolver_options)) ||
+      isinf(SOLVER_RESIDUAL(localsolver_options)) ||
+      SOLVER_RESIDUAL(localsolver_options) > 1.0) {
     DEBUG_EXPR(mohrCoulomb2DProblem_display(localproblem));
     DEBUG_PRINTF(
-        "Discard local reaction for cone %i at iteration %i "
+        "Discard local stress for cone %i at iteration %i "
         "with local_error = %e\n",
-        cone, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        cone, iter, SOLVER_RESIDUAL(localsolver_options));
 
     /* #ifdef FCLIB_OUTPUT */
 
@@ -297,23 +297,23 @@ static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
     /* #endif */
 
     numerics_printf(
-        "Discard local reaction for cone %i at iteration %i "
+        "Discard local stress for cone %i at iteration %i "
         "with local_error = %e",
-        cone, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        cone, iter, SOLVER_RESIDUAL(localsolver_options));
   } else
-    memcpy(&reaction[cone * localproblem->dimension], localreaction,
+    memcpy(&stress[cone * localproblem->dimension], localstress,
            sizeof(double) * localproblem->dimension);
 }
 
 static double calculateFullErrorAdaptiveInterval(MohrCoulomb2DProblem *problem,
                                                  mc2d_ComputeErrorPtr computeError,
                                                  SolverOptions *options, int iter,
-                                                 double *reaction, double *velocity,
+                                                 double *stress, double *strainrate,
                                                  double tolerance, double norm_q) {
   double error = 1e+24;
   if (options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
     if (iter % options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
-      (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &error);
       if (error > tolerance && options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                                    PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
@@ -325,28 +325,28 @@ static double calculateFullErrorAdaptiveInterval(MohrCoulomb2DProblem *problem,
         iter, options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY],
         options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION]);
   } else
-    (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &error);
 
   return error;
 }
 
 static double calculateFullErrorFinal(MohrCoulomb2DProblem *problem, SolverOptions *options,
-                                      mc2d_ComputeErrorPtr computeError, double *reaction,
-                                      double *velocity, double tolerance, double norm_q) {
+                                      mc2d_ComputeErrorPtr computeError, double *stress,
+                                      double *strainrate, double tolerance, double norm_q) {
   double absolute_error;
-  (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &absolute_error);
+  (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &absolute_error);
 
   if (verbose > 0) {
-    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
+    if (absolute_error > SOLVER_TOL(options)) {
       numerics_printf(
           "------- MC2D - NSGS - Warning absolute "
           "Residual = %14.7e is larger than required precision = %14.7e",
-          absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+          absolute_error, SOLVER_TOL(options));
     } else {
       numerics_printf(
           "------- MC2D - NSGS - absolute "
           "Residual = %14.7e is smaller than required precision = %14.7e",
-          absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+          absolute_error, SOLVER_TOL(options));
     }
   }
   return absolute_error;
@@ -373,7 +373,7 @@ static int determine_convergence(double error, double tolerance, int iter,
 static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
                                                  SolverOptions *options,
                                                  mc2d_ComputeErrorPtr computeError,
-                                                 double *reaction, double *velocity,
+                                                 double *stress, double *strainrate,
                                                  double *tolerance, double norm_q,
                                                  double error, int iter) {
   int hasNotConverged = 1;
@@ -385,22 +385,22 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
         iter, error, *tolerance);
 
     double absolute_error =
-        calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                options->dparam[SICONOS_DPARAM_TOL], norm_q);
-    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
+        calculateFullErrorFinal(problem, options, computeError, stress, strainrate,
+                                SOLVER_TOL(options), norm_q);
+    if (absolute_error > SOLVER_TOL(options)) {
       if (error < DBL_EPSILON) {
         /* in this case, the relative error is very small
            (meaning that the nsgs loop does not
            improve accuracy).
            We try to tighten the local solver tolerance */
-        options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = fmax(options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] / 100., DBL_EPSILON * 1e-6);
+        SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], fmax(LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100., DBL_EPSILON * 1e-6));
         numerics_printf(
             "------- MC2D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
-            options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]);
+            LOCAL_SOLVER_TOL(options->internalSolvers[0]));
 
       } else {
-        *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
+        *tolerance = error / absolute_error * SOLVER_TOL(options);
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
             "------- MC2D - NSGS - We modify the required incremental precision to reach "
@@ -424,7 +424,7 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
   return hasNotConverged;
 }
 
-void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity, int *info,
+void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate, int *info,
                SolverOptions *options) {
   /* verbose=1; */
 
@@ -442,11 +442,12 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   unsigned int nc = problem->numberOfCones;
 
   /* Maximum number of iterations */
-  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = SOLVER_MAX_ITER(options);
 
   /* Tolerance */
-  double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double local_tolerance_save = options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL];
+  double tolerance = SOLVER_TOL(options);
+  SolverOptions *local_opts = options->internalSolvers[0];
+  double local_tolerance_save = LOCAL_SOLVER_TOL(local_opts);
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   double omega = dparam[PLASTICITY_NSGS_RELAXATION_VALUE];
 
@@ -466,7 +467,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 
   MohrCoulomb2DProblem *localproblem;
 
-  double localreaction[3];
+  double localstress[3];
 
   /*****  NSGS Iterations *****/
   int iter = 0;      /* Current iteration number */
@@ -545,21 +546,21 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
         solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
                            localProblemFunctionToolkit->local_solver,
                            localProblemFunctionToolkit->copy_local_reaction, cone, problem,
-                           localproblem, reaction, localsolver_options, localreaction);
+                           localproblem, stress, localsolver_options, localstress);
 
         light_error_sum += localProblemFunctionToolkit->light_error_squared(
-            localreaction, &reaction[cone * 3]);
+            localstress, &stress[cone * 3]);
 
         /* #if 0 */
-        acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, reaction,
-                                    localreaction);
+        acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, stress,
+                                    localstress);
       }
 
-      error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+      error = calculateLightError(light_error_sum, nc, stress, norm_r);
 
       hasNotConverged = determine_convergence(error, tolerance, iter, options);
 
-      statsIterationCallback(problem, options, reaction, velocity, error);
+      statsIterationCallback(problem, options, stress, strainrate, error);
     }
   }
 
@@ -607,49 +608,49 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
         solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
                            localProblemFunctionToolkit->local_solver,
                            localProblemFunctionToolkit->copy_local_reaction, cone, problem,
-                           localproblem, reaction, localsolver_options, localreaction);
+                           localproblem, stress, localsolver_options, localstress);
 
         if (iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_TRUE)
-          localProblemFunctionToolkit->perform_relaxation(localreaction, &reaction[cone * 3],
+          localProblemFunctionToolkit->perform_relaxation(localstress, &stress[cone * 3],
                                                           omega);
 
-        light_error_2 = localProblemFunctionToolkit->light_error_squared(localreaction,
-                                                                         &reaction[cone * 3]);
+        light_error_2 = localProblemFunctionToolkit->light_error_squared(localstress,
+                                                                         &stress[cone * 3]);
 
         light_error_sum += light_error_2;
 
         /* int test =100; */
         /* if (cone == test) */
         /* { */
-        /*   printf("reaction[%i] = %16.8e\t",3*cone-1,reaction[3*cone]); */
-        /*   printf("localreaction[%i] = %16.8e\n",2,localreaction[0]); */
+        /*   printf("stress[%i] = %16.8e\t",3*cone-1,stress[3*cone]); */
+        /*   printf("localstress[%i] = %16.8e\n",2,localstress[0]); */
         /* } */
 
         if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
-          double squared_norm_localreaction =
-              localProblemFunctionToolkit->squared_norm(localreaction);
+          double squared_norm_localstress =
+              localProblemFunctionToolkit->squared_norm(localstress);
           int relative_convergence_criteria =
-              light_error_2 <= tmp_criteria1 * squared_norm_localreaction;
-          int small_reaction_criteria = squared_norm_localreaction <= tmp_criteria2;
+              light_error_2 <= tmp_criteria1 * squared_norm_localstress;
+          int small_stress_criteria = squared_norm_localstress <= tmp_criteria2;
 
-          if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10)
-          /* if ((light_error_2 *squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10)
+          if ((relative_convergence_criteria || small_stress_criteria) && iter >= 10)
+          /* if ((light_error_2 *squared_norm(localstress) <= tolerance*tolerance/(nc*nc*10)
            */
-          /*      || squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc*1000))) */
+          /*      || squared_norm(localstress) <=  (*norm_r* *norm_r/(nc*nc*1000))) */
           /*     && iter >=10) */
           {
             /* we  freeze the cone for n iterations*/
             freeze_cones[cone] = iparam[PLASTICITY_NSGS_FREEZING_CONE];
 
-            DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
+            DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localstress) <= "
                               "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                              light_error_2 * squared_norm(localreaction),
+                              light_error_2 * squared_norm(localstress),
                               tolerance * tolerance / (nc * nc * 10),
                               relative_convergence_criteria);
-                       printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
+                       printf("second criteria :  squared_norm(localstress) <=  (*norm_r* "
                               "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                              squared_norm(localreaction),
-                              *norm_r * *norm_r / (nc * nc * 1000), small_reaction_criteria);
+                              squared_norm(localstress),
+                              *norm_r * *norm_r / (nc * nc * 1000), small_stress_criteria);
                        printf("Cone % i is freezed for %i steps\n", cone,
                               iparam[PLASTICITY_NSGS_FREEZING_CONE]););
           }
@@ -657,10 +658,10 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 
         if (iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] ==
             PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-          acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, reaction,
-                                      localreaction);
+          acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, stress,
+                                      localstress);
         else
-          acceptLocalReactionUnconditionally(cone, reaction, localreaction);
+          acceptLocalReactionUnconditionally(cone, stress, localstress);
       }
 
       /* DEBUG_EXPR( */
@@ -676,14 +677,14 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 
       if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
           PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculateLightError(light_error_sum, nc, stress, norm_r);
         hasNotConverged = determine_convergence(error, tolerance, iter, options);
       } else if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                  PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculateLightError(light_error_sum, nc, stress, norm_r);
         hasNotConverged =
-            determine_convergence_with_full_final(problem, options, computeError, reaction,
-                                                  velocity, &tolerance, norm_q, error, iter);
+            determine_convergence_with_full_final(problem, options, computeError, stress,
+                                                  strainrate, &tolerance, norm_q, error, iter);
 
         if (!(tolerance > 0.0)) {
           numerics_warning("mc2d_nsgs", "tolerance has to be positive!!");
@@ -694,11 +695,11 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
       } else if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                  PLASTICITY_NSGS_ERROR_EVALUATION_FULL) {
         error = calculateFullErrorAdaptiveInterval(problem, computeError, options, iter,
-                                                   reaction, velocity, tolerance, norm_q);
+                                                   stress, strainrate, tolerance, norm_q);
         hasNotConverged = determine_convergence(error, tolerance, iter, options);
       }
 
-      statsIterationCallback(problem, options, reaction, velocity, error);
+      statsIterationCallback(problem, options, stress, strainrate, error);
 
       /* if(iparam[PLASTICITY_NSGS_FREEZING_CONE] >0) */
       /* { */
@@ -719,19 +720,19 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   /* Full criterium */
   if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
+    error = calculateFullErrorFinal(problem, options, computeError, stress, strainrate,
                                     tolerance, norm_q);
 
-    hasNotConverged = determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
+    hasNotConverged = determine_convergence(error, tolerance, iter, options);
   }
 
   *info = hasNotConverged;
 
   /** return parameter values */
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
-  dparam[SICONOS_DPARAM_RESIDU] = error;
-  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = local_tolerance_save;
+  SET_SOLVER_RESIDUAL(options, error);
+  SET_SOLVER_ITER_DONE(options, iter);
+  SET_LOCAL_SOLVER_TOL(local_opts, local_tolerance_save);
 
   /** Free memory **/
 
@@ -764,7 +765,7 @@ void mc2d_nsgs_set_default(SolverOptions *options) {
       PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_FALSE;
   options->iparam[PLASTICITY_NSGS_RELAXATION] = PLASTICITY_NSGS_RELAXATION_FALSE;
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  SOLVER_TOL(options) = 1e-4;
   options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);

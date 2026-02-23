@@ -41,7 +41,6 @@ dim(v)=nn
 #include "SiconosCompat.h"
 /*import external implementation*/
 #include "external_mlcp_simplex.h"
-
 static int sIsInitialize = 0;
 #endif
 

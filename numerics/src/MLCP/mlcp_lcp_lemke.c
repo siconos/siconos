@@ -31,7 +31,7 @@
 #include "lcp_cst.h"                            // for SICONOS_LCP_LEMKE
 #include "mlcp_cst.h"                           // for SICONOS_MLCP_LCP_LEMKE
 #include "mlcp_to_lcp.h"                        // for mlcp_to_lcp
-#include "numerics_verbose.h"                   // for numerics_printf
+#include "numerics_verbose.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"

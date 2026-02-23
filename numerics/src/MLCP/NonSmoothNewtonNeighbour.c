@@ -26,7 +26,7 @@
 #include "SiconosLapack.h"    // for DGESV, lapack_int
 #include "SolverOptions.h"
 #include "math.h"              // for fabs, pow
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 #include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
 #include "stdlib.h"            // for exit, rand, EXIT_FAILURE
 static int sN;

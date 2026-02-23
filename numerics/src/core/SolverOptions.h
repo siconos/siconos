@@ -27,6 +27,7 @@
 
 #include "NumericsFwd.h"    // for SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "utils/naming_conventions.h"  // Standardized naming conventions and macros
 
 /**
     Structure used to store user callbacks inside solvers

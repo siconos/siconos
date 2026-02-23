@@ -34,7 +34,7 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"        // for fc3d_Tresca_unitary_compute_an...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
-#include "numerics_verbose.h"          // for numerics_printf, numerics_prin...
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"          // for projectionOnCone
 #include "projectionOnCylinder.h"      // for projectionOnCylinder
 /* #define DEBUG_NOCOLOR */

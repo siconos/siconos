@@ -33,7 +33,6 @@
 #include "lcp_cst.h"        // for SICONOS_LCP_PIVOT_PATHSEARCH
 #include "lcp_pivot.h"      // for LCP_PATHSEARCH_LEAVING_T
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_EXPR_WE
-
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                     SolverOptions* options) {

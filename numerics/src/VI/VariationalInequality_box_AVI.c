@@ -32,7 +32,6 @@
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
 #include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
 #include "sanitizer.h"                      // for cblas_dcopy_msan
-
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;

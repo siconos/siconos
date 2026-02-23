@@ -45,7 +45,7 @@
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
 #include "gfc3d_Solvers.h"                       // for gfc3d_nonsmooth_Newt...
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
-#include "numerics_verbose.h"                    // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "sanitizer.h"                           // for cblas_dcopy_msan
 
 /* compute psi function */

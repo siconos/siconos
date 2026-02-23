@@ -31,7 +31,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "enum_tool.h"
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_ENUM_US...
-#include "numerics_verbose.h"  // for numerics_printf, verbose
+#include "numerics_verbose.h"
 
 static void lcp_buildM(int* zw, double* M, double* Mref, int size, double* column_of_zero) {
   int col;

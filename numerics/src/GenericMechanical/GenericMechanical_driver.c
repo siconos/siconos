@@ -42,7 +42,7 @@
 #include "fc2d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
 
 /* #define DEBUG_NOCOLOR */

@@ -40,7 +40,7 @@
 #include "lcp_cst.h"           // for SICONOS_LCP_PIVOT_LEMKE
 #include "lcp_pivot.h"         // for LCP_PATHSEARCH_LEAVING_T
 #include "lumod_wrapper.h"     // for SN_lumod_dense_solve, SN_l...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 #include "pivot-utils.h"       // for do_pivot_lumod
 #include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
 

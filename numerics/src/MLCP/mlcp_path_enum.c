@@ -34,7 +34,6 @@ dim(v)=nn
 #include "MixedLinearComplementarityProblem.h"  // for mixedLinearComplement...
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_enum.h"                          // for mlcp_enum_getNbDWork
-
 static int sN;
 static int sM;
 

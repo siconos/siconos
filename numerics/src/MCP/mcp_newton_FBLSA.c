@@ -26,7 +26,7 @@
 #include "NonSmoothSolvers/Newton_methods.h"               // for functions_LSA, init_lsa_fun...
 #include "SiconosBlas.h"                  // for cblas_dnrm2
 #include "SolverOptions.h"                // for SolverOptions, SICONOS_DPAR...
-#include "numerics_verbose.h"             // for numerics_printf
+#include "numerics_verbose.h"
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp) {
   // Computation of the new value F(z)

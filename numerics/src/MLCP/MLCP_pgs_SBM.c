@@ -32,7 +32,7 @@
 #include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
 #include "lcp_cst.h"
 #include "mlcp_cst.h"          // for SICONOS_MLCP_PGS_SBM
-#include "numerics_verbose.h"  // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
                                            SparseBlockStructuredMatrix* const blmat,

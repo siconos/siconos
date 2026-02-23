@@ -20,7 +20,7 @@
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SolverOptions.h"                 // for SolverOptions
 #include "gfc3d_Solvers.h"                 // for gfc3d_set_internalsolver_t...
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
 
 void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                         SolverOptions* options,

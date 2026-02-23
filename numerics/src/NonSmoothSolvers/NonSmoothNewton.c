@@ -25,7 +25,7 @@
 #include "SiconosLapack.h"     // for lapack_int, DGESV
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "math.h"              // for fmax, pow
-#include "numerics_verbose.h"  // for numerics_printf, numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "stdio.h"             // for fprintf, stderr
 #include "stdlib.h"            // for exit, EXIT_FAILURE
 

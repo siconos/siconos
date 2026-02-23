@@ -26,7 +26,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
-#include "numerics_verbose.h"              // for numerics_error, verbose
+#include "numerics_verbose.h"
 #include "sanitizer.h"                     // for cblas_dcopy_msan
 
 /* #define DEBUG_STDOUT */

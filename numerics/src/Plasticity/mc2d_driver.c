@@ -26,11 +26,11 @@
 #include "Plasticity_cst.h"        // for SICONOS_FRICTI...
 #include "SolverOptions.h"         // for SolverOptions
 #include "mc2d_solvers.h"
-#include "numerics_verbose.h"  // for numerics_printf
+#include "numerics_verbose.h"
 
 const char* const SICONOS_MOHR_COULOMB_2D_NSGS_STR = "MC2D_NSGS";
 
-int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* plastic_strain_rate,
+int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* strainrate,
                 SolverOptions* options) {
   if (options == NULL) numerics_error("mc2d_driver", "null input for solver options");
 
@@ -47,13 +47,13 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* plastic_s
         "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
   /* Check for trivial case */
-  info = mc2d_checkTrivialCase(problem, plastic_strain_rate, stress, options);
+  info = mc2d_checkTrivialCase(problem, strainrate, stress, options);
   if (info == 0) {
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
     */
-    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+    SET_SOLVER_ITER_DONE(options, 0);
+    SET_SOLVER_RESIDUAL(options, 0.0);
     goto exit;
   }
 
@@ -63,7 +63,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* plastic_s
       numerics_printf(
           " ========================== Call NSGS solver for Mohr Coulomb 2D problem "
           "==========================");
-      mc2d_nsgs(problem, stress, plastic_strain_rate, &info, options);
+      mc2d_nsgs(problem, stress, strainrate, &info, options);
       break;
     }
     default: {
@@ -81,7 +81,7 @@ exit:
   return info;
 }
 
-int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* plastic_strain_rate,
+int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* strainrate,
                           double* stress, SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfCones;
@@ -94,11 +94,11 @@ int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* plastic_strain_
     if (q[3 * i] < -DBL_EPSILON) return -1;
   }
   for (i = 0; i < n; ++i) {
-    plastic_strain_rate[i] = q[i];
+    strainrate[i] = q[i];
     stress[i] = 0.;
   }
 
   numerics_printf(
-      "mc2d mc2d_checkTrivialCase,  trivial solution stress = 0, plastic_strain_rate = q.\n");
+      "mc2d mc2d_checkTrivialCase,  trivial solution stress = 0, strainrate = q.\n");
   return 0;
 }

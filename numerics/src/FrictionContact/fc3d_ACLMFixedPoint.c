@@ -36,7 +36,7 @@
 #define DEBUG_STDOUT
 #include "fc3d_Solvers.h"        // for fc3d_set_in...
 #include "fc3d_compute_error.h"  // for fc3d_comput...
-#include "numerics_verbose.h"    // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"       // lines 32-32
 
 /** pointer to function used to call internal solver for proximal point solver */

@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"                 // for NM_DENSE, NumericsMatrix
 #include "SolverOptions.h"                  // for solver_options_id_to_name
 #include "assert.h"                         // for assert
-#include "numerics_verbose.h"               // for numerics_error_nonfatal
+#include "numerics_verbose.h"
 
 const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";

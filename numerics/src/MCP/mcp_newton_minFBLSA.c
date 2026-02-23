@@ -23,7 +23,7 @@
 #include "SolverOptions.h"                // for SolverOptions, SICONOS_DPAR...
 #include "mcp_newton_FBLSA.h"             // for FB_compute_F_mcp, FB_comput...
 #include "min_merit.h"                    // for F_min, Jac_F_min
-#include "numerics_verbose.h"             // for numerics_printf
+#include "numerics_verbose.h"
 
 static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   MixedComplementarityProblem* data = (MixedComplementarityProblem*)data_opaque;

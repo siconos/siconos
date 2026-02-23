@@ -27,7 +27,7 @@
 #include "NumericsFwd.h"                               // for ConvexQP, Line...
 #include "SiconosBlas.h"                               // for cblas_dnrm2
 #include "SolverOptions.h"                             // for SolverOptions
-#include "numerics_verbose.h"                          // for verbose
+#include "numerics_verbose.h"
 
 void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem *problem, double *z,
                                     double *w, int *info, SolverOptions *options) {

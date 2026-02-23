@@ -24,7 +24,7 @@
 #include "NonSmoothDrivers.h"  // for mcp_driver, mcp_old_driver
 #include "NumericsFwd.h"       // for SolverOptions, MixedComplementarityPro...
 #include "SolverOptions.h"     // for SolverOptions
-#include "numerics_verbose.h"  // for numerics_error
+#include "numerics_verbose.h"
 
 const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
 const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";

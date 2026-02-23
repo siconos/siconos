@@ -27,7 +27,7 @@
 #include "SiconosBlas.h"                   // for cblas_ddot, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_RHO
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 
 #define EPSDIAG DBL_EPSILON
 void lcp_rpgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,

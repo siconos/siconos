@@ -28,7 +28,7 @@
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
 #include "fc3d_Solvers.h"                   // for fc3d_VI_ExtraGradient
 #include "fc3d_compute_error.h"             // for fc3d_compute_error
-#include "numerics_verbose.h"               // for verbose
+#include "numerics_verbose.h"
 
 void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
                            int *info, SolverOptions *options) {

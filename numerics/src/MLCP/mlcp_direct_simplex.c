@@ -22,7 +22,6 @@
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
 #include "mlcp_simplex.h"                       // for mlcp_simplex_init
-
 static int sN;
 static int sM;
 

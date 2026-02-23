@@ -36,7 +36,8 @@
 #include "SiconosBlas.h"               // for cblas_dcopy, cblas_dgemv, Cbla...
 #include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
-#include "numerics_verbose.h"          // for numerics_error
+#include "numerics_verbose.h"
+#include "utils/naming_conventions.h"  // Standardized naming conventions
 
 /*Static variables */
 

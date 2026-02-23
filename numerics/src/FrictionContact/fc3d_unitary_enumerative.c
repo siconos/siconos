@@ -27,7 +27,7 @@
 #include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_ONECONTACT_Q...
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
 #include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
-#include "numerics_verbose.h"        // for verbose, numerics_warning
+#include "numerics_verbose.h"
 #include "op3x3.h"                   // for SET3, print3, print3x3, SET3X3
 #include "projectionOnCone.h"        // for projectionOnCone
 #include "quartic.h"                 // for BIQUADROOTS, CUBICROOTS, QUADROOTS

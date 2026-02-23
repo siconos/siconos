@@ -29,7 +29,7 @@
 #include "SiconosLapack.h"     // for LA_UP, LA_NONUNIT, LA_NOTRANS, DTRTRS, DPOTRF, lapack_int
 #include "SolverOptions.h"     // for SolverOptions, solver_opti...
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_LATIN_P...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 
 void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {

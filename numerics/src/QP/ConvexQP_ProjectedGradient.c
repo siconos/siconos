@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"         // for NM_gemv
 #include "SiconosBlas.h"            // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
-#include "numerics_verbose.h"       // for numerics_error, verbose, numerics...
+#include "numerics_verbose.h"
 #include "siconos_debug.h"          // for DEBUG_PRINTF
 
 //#define VERBOSE_DEBUG

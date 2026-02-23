@@ -31,7 +31,6 @@ Ferris solves the subsequent AVI.
 #include "Relay_Solvers.h"                 // for relay_avi_caoferris
 #include "avi_caoferris.h"                 // for avi_caoferris_stage3
 #include "siconos_debug.h"                 // for DEBUG_PRINT_VEC_INT
-
 void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
                          SolverOptions *options) {
   unsigned int n = problem->size;

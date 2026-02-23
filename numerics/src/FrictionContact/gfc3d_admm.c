@@ -35,7 +35,7 @@
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "gfc3d_ipm.h"
-#include "numerics_verbose.h"  // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnDualCone
 
 /* #define DEBUG_NOCOLOR */

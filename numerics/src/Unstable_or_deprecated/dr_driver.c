@@ -23,7 +23,6 @@
 #include "NonSmoothDrivers.h"
 #endif
 #include "relay_cst.h"
-
 int dr_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options) {
   if (options == NULL) numerics_error("dr_driver", "null input for solver options");
 

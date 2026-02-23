@@ -33,7 +33,7 @@
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
 #include "fc3d_projection.h"                           // for fc3d_projectio...
 #include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
-#include "numerics_verbose.h"                          // for numerics_printf
+#include "numerics_verbose.h"
 
 const char* const SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 const char* const SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
@@ -108,8 +108,8 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
     */
-    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+    SET_SOLVER_ITER_DONE(options, 0);
+    SET_SOLVER_RESIDUAL(options, 0.0);
     goto exit;
   }
 

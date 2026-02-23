@@ -28,7 +28,7 @@
 #include "SolverOptions.h"           // for SolverOptions, solver_options_cr...
 #include "fc3d_Solvers.h"            // for fc3d_set_internalsolver_tolerance
 #include "fc3d_compute_error.h"      // for fc3d_compute_error
-#include "numerics_verbose.h"        // for numerics_error, verbose
+#include "numerics_verbose.h"
 
 void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                            int* info, SolverOptions* options) {

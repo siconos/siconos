@@ -27,7 +27,6 @@
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NumericsMatrix
 #include "SiconosBlas.h"                        // for cblas_dgemv, cblas_dcopy
-
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w) {

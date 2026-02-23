@@ -33,7 +33,6 @@ dim(v)=nn
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_FB.h"                            // for mlcp_FB_getNbDWork
 #include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
-
 static int sN;
 static int sM;
 

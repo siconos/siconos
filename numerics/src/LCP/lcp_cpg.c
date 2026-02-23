@@ -26,7 +26,7 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 
 void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *info,
              SolverOptions *options) {

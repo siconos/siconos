@@ -26,7 +26,7 @@
 #include "SiconosBlas.h"             // for cblas_dcopy, cblas_ddot, cblas_d...
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_RE...
 #include "fc2d_Solvers.h"            // for fc2d_projf, fc2d_projc, fc2d_cpg
-#include "numerics_verbose.h"        // for verbose
+#include "numerics_verbose.h"
 
 void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
               SolverOptions *options) {

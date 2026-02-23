@@ -29,7 +29,7 @@
 #include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
 #include "SiconosBlas.h"                        // for cblas_dcopy
 #include "SolverOptions.h"                      // for SolverOptions
-#include "numerics_verbose.h"                   // for verbose
+#include "numerics_verbose.h"
 
 static int sN = 0;
 static int sM = 0;

@@ -44,7 +44,7 @@
 #include "fc3d_local_problem_tools.h"                 // for fc3d_local_prob...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_FischerBur...
 #include "float.h"                                    // for DBL_EPSILON
-#include "numerics_verbose.h"                         // for verbose, numeri...
+#include "numerics_verbose.h"
 #include "op3x3.h"                                    // for extract3x3, add3x3
 #include "sanitizer.h"                                // for cblas_dcopy_msan
 #include "siconos_debug.h"                            // for DEBUG_EXPR_WE
@@ -409,13 +409,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   unsigned int problemSize = 3 * problem->numberOfContacts;
 
   unsigned int iter = 0;
-  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  unsigned int itermax = SOLVER_MAX_ITER(options);
   unsigned int erritermax =
       options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
 
   assert(itermax > 0);
 
-  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  double tolerance = SOLVER_TOL(options);
   assert(tolerance > 0);
 
   numerics_printf_verbose(1, "---- FC3D - NSN - start with tolerance = %g", tolerance);
@@ -618,27 +618,27 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
 
-    options->dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
+    SET_SOLVER_RESIDUAL(options, INFINITY);
 
     if (!(iter % erritermax)) {
       fc3d_compute_error(
           problem, reaction, velocity,
           //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,
-          tolerance, options, norm_q, &(options->dparam[SICONOS_DPARAM_RESIDU]));
+          tolerance, options, norm_q, &SOLVER_RESIDUAL(options));
 
       DEBUG_EXPR_WE(equation->function(equation->data, problemSize, reaction, velocity,
                                        equation->problem->mu, rho, F, NULL, NULL));
 
       DEBUG_EXPR_WE(assert(
           (cblas_dnrm2(problemSize, F, 1) / (1 + cblas_dnrm2(problemSize, problem->q, 1))) <=
-          (10 * options->dparam[SICONOS_DPARAM_RESIDU] + 1e-15)));
+          (10 * SOLVER_RESIDUAL(options) + 1e-15)));
     }
 
     if (verbose > 0) {
       equation->function(equation->data, problemSize, reaction, velocity,
                          equation->problem->mu, rho, F, NULL, NULL);
       numerics_printf_verbose(1, "---- FC3D - NSN | %3i | %.1e | %.1e | %8i | %.1e | %.1e |",
-                              iter, options->dparam[SICONOS_DPARAM_RESIDU],
+                              iter, SOLVER_RESIDUAL(options),
                               cblas_dnrm2(problemSize, F, 1), info_ls, alpha,
                               linear_solver_residual);
       /* printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver
@@ -649,10 +649,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, problemSize, reaction,
                                                velocity,
-                                               options->dparam[SICONOS_DPARAM_RESIDU], NULL);
+                                               SOLVER_RESIDUAL(options), NULL);
     }
 
-    if (isnan(options->dparam[SICONOS_DPARAM_RESIDU])) {
+    if (isnan(SOLVER_RESIDUAL(options))) {
       if (verbose > 0) {
         printf(
             "            fc3d_nonsmooth_Newton_solvers_solve: iteration %d : computed "
@@ -663,7 +663,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
       break;
     }
 
-    if (options->dparam[SICONOS_DPARAM_RESIDU] < tolerance) {
+    if (SOLVER_RESIDUAL(options) < tolerance) {
       info[0] = 0;
       break;
     }
@@ -673,15 +673,15 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     if (!info[0])
       numerics_printf_verbose(
           1, "---- FC3D - NSN - convergence after %d iterations, residual : %g < %g", iter,
-          options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
+          SOLVER_RESIDUAL(options), tolerance);
     else {
       numerics_printf_verbose(
           1, "---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g ",
-          iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
+          iter, SOLVER_RESIDUAL(options), tolerance);
     }
   }
 
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  SET_SOLVER_ITER_DONE(options, iter);
 
   if (!options->dWork) {
     assert(buffer);

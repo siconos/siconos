@@ -25,7 +25,7 @@
 #include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
-#include "numerics_verbose.h"               // for numerics_error, numerics_...
+#include "numerics_verbose.h"
 #include "rolling_fc_Solvers.h"             // for rolling_fc3d_nsgs, rollin...
 
 const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
@@ -60,8 +60,8 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
     */
-    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+    SET_SOLVER_ITER_DONE(options, 0);
+    SET_SOLVER_RESIDUAL(options, 0.0);
     goto exit;
   }
 

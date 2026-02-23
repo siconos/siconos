@@ -28,7 +28,6 @@ Ferris solves the subsequent AVI.
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "avi_caoferris.h"                 // for avi_caoferris_stage3
-
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                        SolverOptions* options) {
   unsigned int n = problem->size;

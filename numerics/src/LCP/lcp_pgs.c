@@ -31,7 +31,7 @@
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
 
 void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,

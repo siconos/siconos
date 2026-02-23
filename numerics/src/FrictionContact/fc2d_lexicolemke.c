@@ -28,7 +28,7 @@
 #include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_lexicolemke
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_verbose.h"
 
 void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double *velocity,
                       int *info, SolverOptions *options) {

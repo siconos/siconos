@@ -34,7 +34,7 @@
 /* #define DEBUG_STDOUT  */
 /* #define DEBUG_MESSAGES  */
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
 
 //#ifdef DEBUG_MESSAGES

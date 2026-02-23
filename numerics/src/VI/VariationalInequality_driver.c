@@ -29,7 +29,7 @@
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-#include "numerics_verbose.h"                    // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF
 
 const char* const SICONOS_VI_EG_STR = "VI_EG";

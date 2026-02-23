@@ -28,7 +28,6 @@
 #include "SolverOptions.h"      // for SolverOptions
 #include "fc3d_2NCP_Glocker.h"  // for NCPGlocker_initialize, comput...
 #include "fc3d_Solvers.h"       // for FreeSolverPtr, PostSolverPtr
-
 /* Pointer to function used to update the solver, to formalize the local problem for example.
  */
 typedef void (*UpdateSolverPtr)(int, double*);

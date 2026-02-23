@@ -26,7 +26,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                 // for DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
