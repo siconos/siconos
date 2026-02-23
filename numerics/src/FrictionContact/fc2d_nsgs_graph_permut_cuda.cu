@@ -364,7 +364,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   }
 
   /* Switch storageType to SBM temporarily */
-  unsigned int old_storageType = problem->M->storageType;
+  NM_types old_storageType = problem->M->storageType;
   problem->M->storageType = NM_SPARSE_BLOCK;
 
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();

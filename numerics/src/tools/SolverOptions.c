@@ -611,6 +611,8 @@ SolverOptions* solver_options_create(int solverId) {
     case SICONOS_FRICTION_2D_NSGS_GRAPH:
     case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI:
     case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT:
+    case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA:
+    case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY:
     case SICONOS_FRICTION_2D_NSGS_PERMUT:
     case SICONOS_FRICTION_2D_NSGS: {
       options = solver_options_initialize(solverId, 1000, 1e-4, 0);
