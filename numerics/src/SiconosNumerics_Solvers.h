@@ -27,6 +27,13 @@ See functions in SolverOptions.h
 //   NonSmoothSolvers/SiconosNumerics_Solvers.h
 
 #undef SICONOS_SOLVER_MACRO
+
+#ifdef WITH_CUDA
+#define CUDA_SOLVER(x) SICONOS_SOLVER_MACRO(x)
+#else
+#define CUDA_SOLVER(x)
+#endif
+
 #define SICONOS_REGISTER_SOLVERS()                                                          \
   SICONOS_SOLVER_MACRO(SICONOS_AVI_CAOFERRIS);                                              \
   SICONOS_SOLVER_MACRO(SICONOS_AVI_PATHAVI);                                                \
@@ -93,6 +100,12 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_QI);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_AVI_LSA);                                             \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS);                                           \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH);                                     \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI);                                \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT);                              \
+  CUDA_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA);                                  \
+  CUDA_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY);                      \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_PERMUT);                                    \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_CPG);                                            \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_ENUM);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_LEMKE);                                          \
