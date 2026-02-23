@@ -98,7 +98,7 @@ void rolling_fc3d_nsgs_initialize_local_solver(
     }
     case SICONOS_ONECONE_NSN: {
       *solve = &rfc3d_onecone_nonsmooth_Newton_solvers_solve;
-      *update = &rfc3d_onecone_nonsmooth_Newton_update;      
+      *update = &rfc3d_onecone_nonsmooth_Newton_update;
       *freeSolver = (RollingFreeSolverNSGSPtr)&rfc3d_onecone_nonsmooth_Newton_solvers_free;
       *computeError = (RollingComputeErrorPtr)&rolling_fc3d_compute_error;
       rfc3d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem, options->internalSolvers[0]);
@@ -298,7 +298,8 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
                                                  SolverOptions *options,
                                                  RollingComputeErrorPtr computeError,
                                                  double *reaction, double *velocity,
-                                                 double *tolerance, double norm_q,
+                                                 double *tolerance,
+                                                 double norm_q,
                                                  double error, int iter) {
   int hasNotConverged = 1;
   if (error < *tolerance) {
@@ -311,18 +312,19 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
     double absolute_error =
         calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                 options->dparam[SICONOS_DPARAM_TOL], norm_q);
+
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
       if (error < DBL_EPSILON) {
         /* in this case, the relative error is very small
            (meaning that the nsgs loop does not
            improve accuracy).
            We try to tighten the local solver tolerance */
-        options->internalSolvers[0]->dparam[0] = options->internalSolvers[0]->dparam[0] / 100.;
+	options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]= fmax(options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] / 100., DBL_EPSILON*1e-6);
         numerics_printf(
             "------- RFC3D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
             options->internalSolvers[0]->dparam[0]);
-	
+
       } else {
         *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
@@ -330,7 +332,7 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
             "------- RFC3D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
             *tolerance);
-      }        
+      }
       hasNotConverged = 1;
     } else {
       numerics_printf(
@@ -367,7 +369,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   /*   problem->mu[0]=0.0;  */
   /*   }     */
 
-  
+
   /* verbose=1; */
   /* int and double parameters */
   int *iparam = options->iparam;
@@ -381,6 +383,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
 
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
+  double local_tolerance_save = options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc * 5, problem->q, 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
@@ -588,7 +591,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
         error = calculateLightError(light_error_sum, nc, reaction, norm_r);
         hasNotConverged =
             determine_convergence_with_full_final(problem, options, computeError, reaction,
-                                                  velocity, &tolerance, norm_q, error, iter);
+                                                  velocity, &tolerance,  norm_q, error, iter);
 
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL) {
@@ -628,7 +631,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]=   local_tolerance_save ;
   /** Free memory **/
   (*freeSolver)(problem, localproblem, localsolver_options);
   rolling_fc3d_local_problem_free(localproblem, problem);
@@ -658,7 +661,7 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] =
       solver_options_create(SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
-  
-  
-  
+
+
+
 }
