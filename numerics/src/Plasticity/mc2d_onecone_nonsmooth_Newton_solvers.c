@@ -219,9 +219,9 @@ void mc2d_onecone_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* prob
 int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localproblem,
                                                 double* local_reaction,
                                                 SolverOptions* options) {
-  numerics_printf_verbose(
+  /* numerics_printf_verbose(
       2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve starts for cone %i",
-      options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
+      options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]); */
 
   int info = 1;
 
@@ -236,8 +236,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localprobl
     info = 0;
     options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
     options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
-    numerics_printf_verbose(
-        2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve ends");
+    /* numerics_printf_verbose(
+        2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve ends"); */
     return info;
   }
 
@@ -281,8 +281,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localprobl
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }
-  numerics_printf_verbose(2,
-                          "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve ends");
+  /* numerics_printf_verbose(2,
+                          "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve ends"); */
   return info;
   /*  (*postSolver)(cone,reaction); */
 }
@@ -395,8 +395,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  /* numerics_printf_verbose( */
-  /*     2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_direct starts"); */
+  /* numerics_printf_verbose(
+      2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_direct starts"); */
 
   double theta = localproblem->theta[0];
   double eta = localproblem->eta[0];
@@ -438,27 +438,28 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
 
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
-  /* Newton iteration */
   int inew = 0;
   int info_solv3x3;
 
   /* compute first residue */
   Function(R, velocity, eta, theta, rho, F, NULL, NULL);
   dparam[SICONOS_DPARAM_RESIDU] =
-      0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
-  /* dparam[SICONOS_DPARAM_RESIDU] = */
-  /*     sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative; */
+      sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
 
-  numerics_printf_verbose(
-      2,
-      "---------------    mc2d_onecone_nonsmooth_Newton_solvers_solve_direct  -- "
-      "cone %i # iteration = %i  merit = %.10e",
-      iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew, dparam[SICONOS_DPARAM_RESIDU]);
+  if (iparam[PLASTICITY_CURRENT_CONE_NUMBER] == 0)
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver",
+                            "cone", "it", "|dR|", "residu", "error", "tol");
+  numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "mc2d_nsn",
+                          iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
+                          0.0,
+                          dparam[SICONOS_DPARAM_RESIDU],
+                          mc2d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
   if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
     iparam[SICONOS_IPARAM_ITER_DONE] = inew;
     return 0;
   }
 
+  /* Newton iteration */
   for (inew = 1; inew < itermax; ++inew) {
     /* Update function and gradient */
     Function(R, velocity, eta, theta, rho, F, A, B);
@@ -493,14 +494,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
     mvp3x3(MLocal, R, velocity);
     Function(R, velocity, eta, theta, rho, F, NULL, NULL);
 
-    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
-                                    norm_relative;  // improve with relative tolerance
-
-    // VA 01/2025 : should be better but prevents convergemce due to rounding error
-    /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2] )* */
-    /* 					 norm_relative;  // improve with relative tolerance */
-    /* double error = mc2d_compute_local_error(localproblem, R); */
-    /* printf("New local error = %e\n", error); */
+    dparam[SICONOS_DPARAM_RESIDU] =
+        sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
 
     if (info_solv3x3) {
       if (verbose > 0)
@@ -512,15 +507,18 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
       break;
     }
 
-    numerics_printf_verbose(
-        2,
-        "---------------    mc2d_onecone_nonsmooth_Newton_solvers_solve_direct  -- "
-        "cone %i # iteration = %i  merit = %.10e",
-        iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew, dparam[SICONOS_DPARAM_RESIDU]);
+    numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "mc2d_nsn",
+                            iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
+                            sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]),
+                            dparam[SICONOS_DPARAM_RESIDU],
+                            mc2d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
 
     if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
       iparam[SICONOS_IPARAM_ITER_DONE] = inew;
       return 0;
+    }
+    if (sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]) < 10 * DBL_EPSILON) {
+      return 1;
     }
   }  // End of the Newton iteration
 
@@ -682,8 +680,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  numerics_printf_verbose(
-      2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_damped starts");
+  /* numerics_printf_verbose(
+      2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_damped starts"); */
 
   double eta = localproblem->eta[0];
   double theta = localproblem->theta[0];
@@ -725,15 +723,34 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
 
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
-  /* Newton iteration */
-  int inew;
+  int inew = 0;
   int info_solv3x3;
   double t = 1.;
   double t_opt = 1.;
   double t_init = 1.;
 
+  /* compute first residue */
+  Function(R, velocity, eta, theta, rho, F, NULL, NULL);
+  dparam[SICONOS_DPARAM_RESIDU] =
+      sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
+
+  if (iparam[PLASTICITY_CURRENT_CONE_NUMBER] == 0)
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver",
+                            "cone", "it", "|dR|", "residu", "error", "tol");
+  numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "mc2d_nsn_gp",
+                          iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
+                          0.0,
+                          dparam[SICONOS_DPARAM_RESIDU],
+                          mc2d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
+  if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
+    iparam[SICONOS_IPARAM_ITER_DONE] = inew;
+    return 0;
+  }
+
   int LSitermax = iparam[PLASTICITY_NSN_LINESEARCH_MAX_ITER];
-  for (inew = 0; inew < itermax; ++inew) {
+
+  /* Newton iteration */
+  for (inew = 1; inew < itermax; ++inew) {
     /* Update function and gradient */
     Function(R, velocity, eta, theta, rho, F, A, B);
 
@@ -774,10 +791,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
     cpy3(qLocal, velocity);
     mvp3x3(MLocal, R, velocity);
     Function(R, velocity, eta, theta, rho, F, NULL, NULL);
-    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
-                                    norm_relative;  // improve with relative tolerance
-    /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
-    /*                                 norm_relative;  // improve with relative tolerance */
+    dparam[SICONOS_DPARAM_RESIDU] =
+        sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
 
     if (info_solv3x3) {
       if (verbose > 0)
@@ -788,13 +803,18 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
                          dparam[SICONOS_DPARAM_RESIDU]);
       break;
     }
-    numerics_printf_verbose(2, "-- cone %i # iteration = %i  error = %.10e",
+    numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "mc2d_nsn_gp",
                             iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
-                            dparam[SICONOS_DPARAM_RESIDU]);
+                            sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]),
+                            dparam[SICONOS_DPARAM_RESIDU],
+                            mc2d_compute_local_error(localproblem, R), dparam[SICONOS_DPARAM_TOL]);
 
     if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL]) {
       iparam[SICONOS_IPARAM_ITER_DONE] = inew;
       return 0;
+    }
+    if (sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]) < 10 * DBL_EPSILON) {
+      return 1;
     }
   }  // End of the Newton iteration
 

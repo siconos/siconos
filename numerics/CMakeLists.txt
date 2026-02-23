@@ -37,7 +37,8 @@ set(${COMPONENT}_DIRS
   src/QP
   src/Relay
   src/FrictionContact
-  src/FrictionContact/Generated
+  src/FrictionContact/nsn_formulation
+  src/FrictionContact/nsn_formulation/Generated
   src/RollingFrictionContact
   src/NCP
   src/MCP

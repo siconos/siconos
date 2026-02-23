@@ -616,7 +616,7 @@ static inline int nsgs_adapt_tolerance(double incremental_error, double full_err
   if (incremental_error < 1e-15 || incremental_error < DBL_EPSILON * 100.0) {
     if (localsolver_options) {
       double current_local_tol = localsolver_options->dparam[SICONOS_DPARAM_TOL];
-      double new_local_tol = current_local_tol / 100.0;
+      double new_local_tol = fmax(current_local_tol / 100.0, DBL_EPSILON * 1e-6);
       localsolver_options->dparam[SICONOS_DPARAM_TOL] = new_local_tol;
       if (verbose > 0) {
         printf("Iter %d: Incr error very small (%.2e), tightening local solver: %.2e -> %.2e\n",
@@ -794,8 +794,10 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
 
   /* Get internal solver options */
   SolverOptions* localsolver_options = NULL;
+  double local_tolerance_save = 0.0;
   if (options->numberOfInternalSolvers > 0) {
     localsolver_options = options->internalSolvers[0];
+    local_tolerance_save = localsolver_options->dparam[SICONOS_DPARAM_TOL];
   }
 
   /* Check for early exit - if *info == 0 on entry, problem is already solved (trivial case) */
@@ -996,6 +998,11 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
   dparam[SICONOS_DPARAM_RESIDU] = error;
 
 nsgs_cleanup:
+  /* Restore local solver tolerance */
+  if (localsolver_options) {
+    localsolver_options->dparam[SICONOS_DPARAM_TOL] = local_tolerance_save;
+  }
+
   /* Cleanup */
   free(var_z_local);
   if (block_errors) free(block_errors);

@@ -488,12 +488,12 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
            (meaning that the nsgs loop does not
            improve accuracy).
            We try to tighten the local solver tolerance */
-        options->internalSolvers[0]->dparam[0] = options->internalSolvers[0]->dparam[0] / 100.;
+        options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = fmax(options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] / 100., DBL_EPSILON * 1e-6);
         numerics_printf(
             "------- FC3D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
-            options->internalSolvers[0]->dparam[0]);
-	
+            options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL]);
+
       } else {
         *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
@@ -501,7 +501,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
             "------- FC3D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
             *tolerance);
-      }        
+      }
       hasNotConverged = 1;
     } else {
       numerics_printf(
@@ -535,6 +535,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
+  double local_tolerance_save = options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
@@ -829,6 +830,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = local_tolerance_save;
 
   /** Free memory **/
 
