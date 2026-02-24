@@ -42,7 +42,7 @@ struct io : item {
       attribute<"co_info", some::unbounded_collection<some::vector<
                                some::scalar, some::indice_value<4>>>>,
       attribute<"work_info", some::unbounded_collection<some::vector<
-                                 some::scalar, some::indice_value<5>>>>>;
+                                 some::scalar, some::indice_value<7>>>>>;
 
   using properties =
       // an attached global ident for contact shapes
@@ -359,8 +359,9 @@ struct io : item {
           attr<"co_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_work(auto step, auto omega, auto tol)
+    decltype(auto) contact_work(auto step, auto theta, auto tol)
     {
+      // fix: theta is omega in mechanics_run.py & MechanicsIO.hpp
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
@@ -376,72 +377,102 @@ struct io : item {
 
       for (auto [ydot, ydot_k, lambda, index_nslaw] :
            view::zip(ydots, ydot_ks, lambdas, nslaws)) {
-
-        auto nslaw = storage::make_handle(data, index_nslaw);
+        handle nslaw = storage::make_handle(data, index_nslaw);
 
         scalar e = nslaw.e();
         scalar mu = nslaw.mu();
+
+        // answer(0) is not set in the version of MechanicsIO.cpp
+        scalar answer_0 = 0.;
 
         // Compute normal contact work
         scalar vn_minus = ydot_k(0);
         scalar vn_plus = ydot(0);
         scalar pn = lambda(0);
 
-        scalar vn_average = omega * vn_plus + (1. - omega) * vn_minus;
+        scalar vn_average = 1 / 2. * (vn_plus * vn_minus);
         scalar normal_contact_work = vn_average * pn;
+        scalar answer_1 = normal_contact_work;
+
+        scalar vn_average_theta = theta * vn_plus + (1. - theta) * vn_minus;
+        scalar normal_contact_work_theta = vn_average_theta * pn;
+        scalar answer_3 = normal_contact_work_theta;
 
         // Compute tangent contact work of impulse
         scalar vt_1_minus = ydot_k(1);
         scalar vt_1_plus = ydot(1);
-
-        scalar vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
         scalar pt_1 = lambda(1);
+        ;
 
+        scalar vt_1_average = 1 / 2. * (vt_1_plus + vt_1_minus);
         scalar tangent_contact_work = vt_1_average * pt_1;
+        scalar answer_2 = tangent_contact_work;
 
-        // Compute work dissipated by friction impulse
-        scalar norm_vt_average = sqrt(vt_1_average * vt_1_average);
-        scalar friction_dissipation = mu * norm_vt_average * pn;
+        scalar vt_1_average_theta =
+            theta * vt_1_plus + (1. - theta) * vt_1_minus;
+        scalar tangent_contact_work_theta = vt_1_average_theta * pt_1;
+        scalar answer_4 = tangent_contact_work_theta;
 
-        // Compute contact status
-        // Warning the status are consistent for the sticking and sliding
-        // only with fully implicit discretization o NewtonImpact law
-        // and not wih Fremond impact law
+        // // Compute directly work dissipated by friction impulse
+        // scalar norm_vt_average = sqrt(vt_1_average * vt_1_average);
+        // scalar friction_dissipation = mu * norm_vt_average * pn;
+        // answer(3) = friction_dissipation;
+
+        /* Compute contact status
+         * Warning the status are consistent for the sticking and sliding
+         * only with fully implicit discretization o NewtonImpact law
+         * and not wih Fremond impact law
+         */
+
+        scalar answer_5;
+        scalar answer_6;
+
         scalar norm_pt = sqrt(pt_1 * pt_1);
         scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
-
-        scalar answer_4;
-        scalar answer_5;
-        if ((pn < tol) and (vn_plus + e * vn_minus > tol)) {
-          answer_4 = 0;  // take-off = 0
-        }
-        else if ((pn > tol) and (vn_plus + e * vn_minus > tol)) {
+        // scalar norm_vt_minus = sqrt(vt_1_minus*vt_1_minus);
+        if ((pn < tol) and (vn_plus + e * vn_minus > tol))
+          answer_5 = 0;  // take-off = 0
+        else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
           if ((norm_pt - mu * pn > tol)) {
-            answer_4 = -3;  // outside the cone
+            // std::cout << "WARNING: the impulse is outside the Coulomb cone
+            // " << std::endl;
+            answer_5 = -3;  // outside the cone = -3
           }
-          else if (norm_pt - mu * pn < -tol) {
+          else if ((norm_pt - mu * pn < -tol)) {
+            // std::cout << "the impulse is in the *interior* of  the Coulomb
+            // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
+            // norm_vt_plus << std::endl;
             if (norm_vt_plus > tol) {
-              answer_4 =
+              // std::cout << "WARNING: but the norm of vt is not zero  " <<
+              // std::endl;
+              answer_5 =
                   -2;  // sticking with a non zero slifing velocity = -2
             }
-            else {
-              answer_4 = 1;  // sticking
-            }
+            // ?? answer_5 = -2 is always overwritten
+            answer_5 = 1;  // sticking = 1
           }
           else {
-            answer_4 = 2;
-          }  // sliding
+            // std::cout << "the impulse is on the *boundary* of the Coulomb
+            // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
+            // norm_vt_plus << std::endl;
+            answer_5 = 2;  // sliding = 2
+          }
         }
-        else {
-          answer_4 = -1;
-        }  // undetermined
+        else
+          answer_5 = -1;  // undetermined = -1
         if ((pn > tol) and (vn_minus > tol)) {
-          answer_5 = normal_contact_work;
+          // std::cout << "WARNING: we apply the impact law of positive
+          // velocity " << std::endl; std::cout << "pn " << pn << " vn minus "
+          // << vn_minus << " vn plus " << vn_plus
+          // 		<< " normal_contact_work " << normal_contact_work
+          // 		<< " -e * vn_minus   " << -e*vn_minus
+          // 		<< std::endl;
+          answer_6 = normal_contact_work;
         }
 
-        attr<"work_info">(*self()).push_back(
-            {normal_contact_work, tangent_contact_work, friction_dissipation,
-             answer_4, answer_5});
+        attr<"work_info">(*self()).push_back({answer_0, answer_1, answer_2,
+                                              answer_3, answer_4, answer_5,
+                                              answer_6});
       }
     }
 
