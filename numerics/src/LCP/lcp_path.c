@@ -33,6 +33,12 @@
 #include "numerics_verbose.h"
 #endif /*HAVE_PATHFERRIS*/
 
+#include "lcp_cst.h"        // for SICONOS_LCP_PATH
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void lcp_path(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
   *info = 1;
@@ -93,3 +99,22 @@ void lcp_path(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   return;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PATH in the global solver registry.
+ */
+
+static int lcp_path_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_path((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_PATH, "LCP_PATH",
+                       "PATH solver for LCP",
+                       lcp_path_solve_wrap,
+                       1000,  /* default_max_iter */
+                       1e-6   /* default_tol */);

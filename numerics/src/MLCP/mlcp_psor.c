@@ -31,6 +31,10 @@
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_O...
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /*
  *
  * double *z : size n+m
@@ -194,3 +198,31 @@ void mlcp_psor_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 1.2;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_PSOR in the global solver registry.
+ */
+
+static int mlcp_psor_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_psor_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_psor_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_psor((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_PSOR, "MLCP_PSOR",
+                "Projected Successive Over-Relaxation for Mixed Linear Complementarity Problems",
+                mlcp_psor_init_wrap,
+                mlcp_psor_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                50000, /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

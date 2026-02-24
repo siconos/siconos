@@ -30,8 +30,13 @@
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "gfc3d_Solvers.h"                       // for gfc3d_VI_ExtraGradient
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
+#include "fc3d_short_names.h"                    // for GFC3D_VI_EG
 #include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_BEGIN
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -115,3 +120,46 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *react
 
   DEBUG_END("gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n")
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_VI_EG in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_vi_eg_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_vi_eg_solve_wrap(void* problem, double* reaction,
+                                  double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  // For global solvers, we need to handle globalVelocity separately
+  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
+  int n = gfc3d_problem->M->size0;
+  double* globalVelocity = (double*)calloc(n, sizeof(double));
+  gfc3d_VI_ExtraGradient(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void gfc3d_vi_eg_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(GFC3D_VI_EG, "GFC3D_VI_EG",
+                "Variational Inequality Extra Gradient for 3D Global Friction Contact",
+                gfc3d_vi_eg_init_wrap,
+                gfc3d_vi_eg_solve_wrap,
+                gfc3d_vi_eg_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

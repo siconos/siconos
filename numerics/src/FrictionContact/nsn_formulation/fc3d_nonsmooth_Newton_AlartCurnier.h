@@ -92,6 +92,11 @@ void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr c
                                double* rho3D, double* output_blocklist3,
                                double* output_blocklist3x3_1, double* output_blocklist3x3_2);
 
+/** Set default solver options for FC3D_NSN_AC
+ *  \param options the solver options
+ */
+void fc3d_nsn_ac_set_default(SolverOptions* options);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

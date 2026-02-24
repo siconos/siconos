@@ -28,6 +28,10 @@ dim(v)=nn
 
 #include "mlcp_path_enum.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #include <stdio.h>  // for printf
 
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
@@ -89,3 +93,37 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double* z, doubl
     mlcp_enum(problem, z, w, info, options);
   }
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_PATH_ENUM in the global solver registry.
+ */
+
+static int mlcp_path_enum_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_path_enum_init((MixedLinearComplementarityProblem*)problem, options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_path_enum_solve_wrap(void* problem, double* reaction,
+                                      double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_path_enum((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void mlcp_path_enum_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_path_enum_reset();
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_PATH_ENUM, "MLCP_PATH_ENUM",
+                "PATH-Enum hybrid solver for Mixed Linear Complementarity Problems",
+                mlcp_path_enum_init_wrap,
+                mlcp_path_enum_solve_wrap,
+                mlcp_path_enum_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

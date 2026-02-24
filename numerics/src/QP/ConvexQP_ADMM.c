@@ -36,6 +36,10 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 const char* const SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 typedef struct {
   double* xi_hat;
@@ -543,3 +547,46 @@ void convexQP_ADMM_set_default(SolverOptions* options) {
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_TAU] = 2.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_PHI] = 10.0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_CONVEXQP_ADMM in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int convexqp_admm_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-6;
+  convexQP_ADMM_init((ConvexQP*)problem, options);
+  return NUMERICS_OK;
+}
+
+static int convexqp_admm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  /* ADMM requires additional workspace for xi and u */
+  ConvexQP* cqp = (ConvexQP*)problem;
+  size_t m = cqp->m;
+  double* xi = (double*)calloc(m, sizeof(double));
+  double* u = (double*)calloc(m, sizeof(double));
+  convexQP_ADMM(cqp, z, w, xi, u, &info, options);
+  free(xi);
+  free(u);
+  return info;
+}
+
+static void convexqp_admm_free_wrap(void* problem, SolverOptions* options) {
+  convexQP_ADMM_free((ConvexQP*)problem, options);
+}
+
+REGISTER_SOLVER(SICONOS_CONVEXQP_ADMM, "CONVEXQP_ADMM",
+                "Alternating Direction Method of Multipliers for Convex QP",
+                convexqp_admm_init_wrap,
+                convexqp_admm_solve_wrap,
+                convexqp_admm_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

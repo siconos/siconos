@@ -17,6 +17,7 @@
  */
 
 #include "MCP_Solvers.h"                  // for mcp_compute_error, mcp_newt...
+#include "MCP_cst.h"
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
 #include "NonSmoothSolvers/Newton_methods.h"               // for functions_LSA, init_lsa_fun...
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem
@@ -24,6 +25,10 @@
 #include "mcp_newton_FBLSA.h"             // for FB_compute_F_mcp, FB_comput...
 #include "min_merit.h"                    // for F_min, Jac_F_min
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   MixedComplementarityProblem* data = (MixedComplementarityProblem*)data_opaque;
@@ -70,3 +75,21 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double* z, doubl
 
   numerics_printf("mcp_newton_min_FBLSA. ends");
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers MCP_NEWTON_MIN_FBLSA in the global solver registry.
+ */
+
+static int mcp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
+                                          double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*)problem;
+  mcp_newton_min_FBLSA(mcp, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_MCP_NEWTON_MIN_FBLSA, "MCP_NEWTON_MIN_FBLSA",
+                       "Newton minFBLSA solver for Mixed Complementarity Problems",
+                       mcp_newton_minfblsa_solve_wrap, 1000, 1e-4)

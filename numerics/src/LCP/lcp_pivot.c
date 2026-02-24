@@ -37,6 +37,10 @@
 #include "pivot-utils.h"       // for do_pivot_driftless, do_pivot
 #include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_EXPR_WE
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void lcp_pivot(LinearComplementarityProblem* problem, double* u, double* s, int* info,
                SolverOptions* options) {
   lcp_pivot_covering_vector(problem, u, s, info, options, NULL);
@@ -520,3 +524,36 @@ void lcp_pivot_set_default(SolverOptions* options) {
 
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PIVOT in the global solver registry.
+ */
+
+static int lcp_pivot_init_wrap(void* problem, SolverOptions* options) {
+  lcp_pivot_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_pivot_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_pivot((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void lcp_pivot_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PIVOT, "LCP_PIVOT",
+                "Pivot solver for LCP (Lemke/Bard/Murty)",
+                lcp_pivot_init_wrap,
+                lcp_pivot_solve_wrap,
+                lcp_pivot_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

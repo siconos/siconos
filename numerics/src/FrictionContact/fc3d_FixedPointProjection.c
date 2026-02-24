@@ -35,6 +35,10 @@
 #include "projectionOnCone.h"    // for projectionOnCone
 #include "siconos_debug.h"       // for DEBUG_EXPR_WE, DEBUG_PRINTF
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction,
                                double* velocity, int* info, SolverOptions* options) {
   /* int and double parameters */
@@ -229,3 +233,36 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
 void fc3d_fpp_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_fpp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_fpp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_fpp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_fixedPointProjection((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_fpp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_FPP,
+                "FC3D_FPP",
+                "Fixed Point Projection for 3D Friction Contact",
+                fc3d_fpp_init_wrap,
+                fc3d_fpp_solve_wrap,
+                fc3d_fpp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

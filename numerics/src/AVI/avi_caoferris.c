@@ -23,6 +23,7 @@
 #include <string.h>  // for memset
 
 #include "AVI_Solvers.h"                    // for avi_caoferris
+#include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS
 #include "AffineVariationalInequalities.h"  // for AffineVariationalInequali...
 #include "LinearComplementarityProblem.h"   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                 // for NumericsMatrix, NM_fill
@@ -33,7 +34,9 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "numerics_verbose.h"
-#include "pivot-utils.h"        // for pivot_init_lemke, pivot_s...
+#include "pivot-utils.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"        // for pivot_init_lemke, pivot_s...
 #include "sanitizer.h"          // for cblas_dcopy_msan
 #include "siconos_debug.h"      // for DEBUG_PRINT, DEBUG_EXPR_WE
 #include "vertex_extraction.h"  // for siconos_find_vertex
@@ -247,6 +250,37 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
 
   return info;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int avi_caoferris_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  return avi_caoferris((AffineVariationalInequalities*)problem, z, w, options);
+}
+
+static void avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_AVI_CAOFERRIS,
+                "AVI_CAOFERRIS",
+                "AVI solver from Cao & Ferris",
+                avi_caoferris_init_wrap,
+                avi_caoferris_solve_wrap,
+                avi_caoferris_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)
 
 int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict u,
                          double* restrict s, double* restrict d, unsigned size_x,

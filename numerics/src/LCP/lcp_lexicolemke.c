@@ -37,6 +37,10 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 //#ifdef DEBUG_MESSAGES
 #include "pivot-utils.h"
 //#endif
@@ -506,3 +510,36 @@ void lcp_lexicolemke_set_default(SolverOptions *options) {
   options->dparam[2] = 0.0;
   options->dparam[3] = 0.0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_LEMKE in the global solver registry.
+ */
+
+static int lcp_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+  lcp_lexicolemke_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_lexicolemke_solve_wrap(void* problem, double* reaction,
+                                      double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_lexicolemke((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void lcp_lexicolemke_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_LEMKE, "LCP_LEMKE",
+                "Lexicographic Lemke solver for LCP",
+                lcp_lexicolemke_init_wrap,
+                lcp_lexicolemke_solve_wrap,
+                lcp_lexicolemke_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

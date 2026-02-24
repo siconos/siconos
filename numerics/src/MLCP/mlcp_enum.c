@@ -47,6 +47,10 @@ dim(v)=nn
 #include "mlcp_enum_tool.h"    //
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 #ifdef DEBUG_MESSAGES
@@ -391,3 +395,31 @@ void mlcp_enum_set_default(SolverOptions* options) {
   options->dparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS] = 0;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_ENUM in the global solver registry.
+ */
+
+static int mlcp_enum_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_enum_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_enum_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_enum((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
+                "Enumerative solver for Mixed Linear Complementarity Problems",
+                mlcp_enum_init_wrap,
+                mlcp_enum_solve_wrap,
+                NULL,    /* free function */
+                NULL,    /* error function */
+                10000000, /* default_max_iter */
+                1e-6,    /* default_tol */
+                0        /* is_local_solver */);

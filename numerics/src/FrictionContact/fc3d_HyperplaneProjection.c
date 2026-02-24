@@ -33,6 +33,10 @@
 
 // #define VERBOSE_DEBUG
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction,
                                double* velocity, int* info, SolverOptions* options) {
   /* int and double parameters */
@@ -205,3 +209,36 @@ void fc3d_hp_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 0.99;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_hp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_hp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_hp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_HyperplaneProjection((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_hp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_HP,
+                "FC3D_HP",
+                "Hyperplane Projection for 3D Friction Contact",
+                fc3d_hp_init_wrap,
+                fc3d_hp_solve_wrap,
+                fc3d_hp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-3,   /* default_tol - uses 1e-3 in set_default */
+                0       /* is_local_solver */)

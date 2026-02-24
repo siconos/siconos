@@ -53,6 +53,10 @@ happen:
 #include "mlcp_enum_tool.h"    // for mlcp_enum_build_M, mlcp_fil...
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
@@ -362,3 +366,37 @@ void mlcp_direct_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 0;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_DIRECT_ENUM (direct solver base) in the global solver registry.
+ */
+
+static int mlcp_direct_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_direct_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_direct_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_direct((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void mlcp_direct_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_direct_reset();
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT",
+                "Direct solver for Mixed Linear Complementarity Problems",
+                mlcp_direct_init_wrap,
+                mlcp_direct_solve_wrap,
+                mlcp_direct_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-12, /* default_tol */
+                0      /* is_local_solver */);

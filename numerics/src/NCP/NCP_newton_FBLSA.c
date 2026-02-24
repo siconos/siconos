@@ -20,10 +20,15 @@
 
 #include "FischerBurmeister.h"                // for Jac_F_FB, phi_FB
 #include "NCP_Solvers.h"                      // for ncp_newton_FBLSA
+#include "NCP_cst.h"
 #include "NonSmoothSolvers/Newton_methods.h"                   // for functions_LSA, init_lsa...
 #include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
 #include "NumericsFwd.h"                      // for NonlinearComplementarit...
 #include "SiconosBlas.h"                      // for cblas_dnrm2
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB) {
   phi_FB(((NonlinearComplementarityProblem*)data_opaque)->n, z, F, F_FB);
 }
@@ -59,3 +64,21 @@ void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double* z, doubl
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->n, z, F, info, (void*)problem, options, &functions_FBLSA_ncp);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers NCP_NEWTON_FB_FBLSA in the global solver registry.
+ */
+
+static int ncp_newton_fblsa_solve_wrap(void* problem, double* reaction,
+                                       double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
+  ncp_newton_FBLSA(ncp, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_NCP_NEWTON_FB_FBLSA, "NCP_NEWTON_FB_FBLSA",
+                       "Newton FBLSA solver for Nonlinear Complementarity Problems",
+                       ncp_newton_fblsa_solve_wrap, 1000, 1e-4)

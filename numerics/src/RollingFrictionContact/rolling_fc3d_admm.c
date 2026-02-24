@@ -39,6 +39,10 @@
 #include "rfc3d_short_names.h"
 #include "siconos_debug.h"               // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR = "RFC3D ADMM";
 
 typedef struct {
@@ -1084,3 +1088,35 @@ void rolling_fc3d_admm_set_default(SolverOptions* options) {
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
 }
+
+/* Solver registration wrapper functions */
+static int rfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  rolling_fc3d_admm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int rfc3d_admm_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  rolling_fc3d_admm((RollingFrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void rfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  if (options->solverData) {
+    rolling_fc3d_admm_free((RollingFrictionContactProblem*)problem, options);
+  }
+}
+
+REGISTER_SOLVER(RFC3D_ADMM, "RFC3D_ADMM",
+                "ADMM for 3D Rolling Friction Contact",
+                rfc3d_admm_init_wrap,
+                rfc3d_admm_solve_wrap,
+                rfc3d_admm_free_wrap,
+                NULL,  /* error function */
+                20000, /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

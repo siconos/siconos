@@ -35,6 +35,10 @@
 #include "sanitizer.h"                                    // for cblas_dcopy...
 #include "soclcp_compute_error.h"                         // for soclcp_unit...
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem* problem,
@@ -335,3 +339,36 @@ int soclcp_projectionOnCylinder_solve(
 void soclcp_projection_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
+
+/* ===========================================================================
+ * Solver Registration (Local Solvers)
+ * ===========================================================================
+ * These register SOCLCP projection-based local solvers in the global registry.
+ */
+
+static int soclcp_projectionOnCone_solve_wrap(void* problem, double* reaction,
+                                              double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return soclcp_projectionOnCone_solve((SecondOrderConeLinearComplementarityProblem*)problem,
+                                       reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(SICONOS_SOCLCP_ProjectionOnCone, "SOCLCP_ProjectionOnCone",
+                      "Projection on Second Order Cone (local solver)",
+                      soclcp_projectionOnCone_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-6); /* default_tol */
+
+static int soclcp_projectionOnConeWithLocalIteration_solve_wrap(
+    void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return soclcp_projectionOnConeWithLocalIteration_solve(
+      (SecondOrderConeLinearComplementarityProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration,
+                      "SOCLCP_ProjectionOnConeWithLocalIteration",
+                      "Projection on Second Order Cone with Local Iteration (local solver)",
+                      soclcp_projectionOnConeWithLocalIteration_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-6); /* default_tol */

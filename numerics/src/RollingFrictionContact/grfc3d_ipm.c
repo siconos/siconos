@@ -38,6 +38,10 @@
 #include "numerics_verbose.h"
 #include "rfc3d_short_names.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"
@@ -5941,3 +5945,42 @@ void grfc3d_IPM_set_default(SolverOptions *options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.09
 
 }  // end of grfc3d_IPM_set_default
+
+
+/* Solver registration wrapper functions */
+static int grfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  grfc3d_IPM_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int grfc3d_ipm_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  /* Note: GRFC3D_IPM requires globalVelocity as an additional argument.
+   * We allocate a temporary array for it here. */
+  GlobalRollingFrictionContactProblem* p = (GlobalRollingFrictionContactProblem*)problem;
+  size_t m = p->M->size0;
+  double* globalVelocity = (double*)calloc(m, sizeof(double));
+  grfc3d_IPM(p, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void grfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  if (options->solverData) {
+    grfc3d_IPM_free((GlobalRollingFrictionContactProblem*)problem, options);
+  }
+}
+
+REGISTER_SOLVER(GRFC3D_IPM, "GRFC3D_IPM",
+                "Interior Point Method for Global 3D Rolling Friction Contact",
+                grfc3d_ipm_init_wrap,
+                grfc3d_ipm_solve_wrap,
+                grfc3d_ipm_free_wrap,
+                NULL,  /* error function */
+                100,   /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

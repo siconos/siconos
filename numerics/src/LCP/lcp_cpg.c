@@ -21,12 +21,17 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_cpg
+#include "lcp_cst.h"                       // for SICONOS_LCP_CPG
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *info,
              SolverOptions *options) {
@@ -247,3 +252,22 @@ void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *i
   free(pp);
   free(zz);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_CPG in the global solver registry.
+ */
+
+static int lcp_cpg_solve_wrap(void* problem, double* reaction,
+                              double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_cpg((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_CPG, "LCP_CPG",
+                       "Conjugated Projected Gradient for LCP",
+                       lcp_cpg_solve_wrap,
+                       1000,  /* default_max_iter */
+                       1e-6   /* default_tol */);

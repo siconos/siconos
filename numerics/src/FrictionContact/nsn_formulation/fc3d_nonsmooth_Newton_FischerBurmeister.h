@@ -89,6 +89,11 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem
                                                           SolverOptions *options,
                                                           double *error);
 
+/** Set default solver options for FC3D_NSN_FB
+ *  \param options the solver options
+ */
+void fc3d_nsn_fb_set_default(SolverOptions *options);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

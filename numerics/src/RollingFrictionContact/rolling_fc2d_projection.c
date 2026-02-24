@@ -36,6 +36,10 @@
 #include "rfc3d_short_names.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
@@ -481,3 +485,66 @@ void rfc2d_poc_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
       SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_FALSE;
 }
+
+
+/* Solver registration wrapper functions for ProjectionOnCone */
+static int rfc2d_poc_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  rfc2d_poc_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int rfc2d_poc_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  (void)velocity;
+  info = rolling_fc2d_projectionOnCone_solve((RollingFrictionContactProblem*)problem, reaction, options);
+  return info;
+}
+
+static void rfc2d_poc_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(RFC2D_OC_PROJ, "RFC2D_OC_PROJ",
+                "Projection on Rolling Cone for 2D Rolling Friction Contact",
+                rfc2d_poc_init_wrap,
+                rfc2d_poc_solve_wrap,
+                rfc2d_poc_free_wrap,
+                NULL,  /* error function */
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                1      /* is_local_solver */);
+
+/* Solver registration wrapper functions for ProjectionOnConeWithLocalIteration */
+static int rfc2d_poc_li_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  rfc2d_poc_withLocalIteration_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int rfc2d_poc_li_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  (void)velocity;
+  info = rolling_fc2d_projectionOnConeWithLocalIteration_solve((RollingFrictionContactProblem*)problem, reaction, options);
+  return info;
+}
+
+static void rfc2d_poc_li_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(RFC2D_OC_PROJ_LI, "RFC2D_OC_PROJ_LI",
+                "Projection on Rolling Cone with Local Iteration for 2D Rolling Friction Contact",
+                rfc2d_poc_li_init_wrap,
+                rfc2d_poc_li_solve_wrap,
+                rfc2d_poc_li_free_wrap,
+                NULL,  /* error function */
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                1      /* is_local_solver */);

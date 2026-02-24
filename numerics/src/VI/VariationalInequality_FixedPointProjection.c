@@ -29,6 +29,8 @@
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
 #include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static int determine_convergence(double error, double *tolerance, int iter,
                                  SolverOptions *options, VariationalInequality *problem,
@@ -504,3 +506,36 @@ void variationalInequality_FixedPointProjection_set_default(SolverOptions *optio
   options->dparam[SICONOS_VI_DPARAM_LS_L] = 0.9;            /* L */
   options->dparam[SICONOS_VI_DPARAM_LS_LMIN] = 0.3;         /* Lmin */
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int vi_fpp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  variationalInequality_FixedPointProjection_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int vi_fpp_solve_wrap(void* problem, double* x, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  variationalInequality_FixedPointProjection((VariationalInequality*)problem, x, w, &info, options);
+  return info;
+}
+
+static void vi_fpp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_VI_FPP,
+                "VI_FPP",
+                "Fixed Point Projection for Variational Inequality",
+                vi_fpp_init_wrap,
+                vi_fpp_solve_wrap,
+                vi_fpp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

@@ -20,6 +20,10 @@
 #include <stdio.h>   // for printf, fprintf, stderr
 #include <stdlib.h>  // for exit
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #include "FischerBurmeister.h"                  // for jacobianPhi_Mixed_FB
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
@@ -136,3 +140,37 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double* z, double* w, i
 
   return;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_FB in the global solver registry.
+ */
+
+static int mlcp_FB_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_FB_init((MixedLinearComplementarityProblem*)problem, options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_FB_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_FB((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void mlcp_FB_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_FB_reset();
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_FB, "MLCP_FB",
+                "Fischer-Burmeister solver for Mixed Linear Complementarity Problems",
+                mlcp_FB_init_wrap,
+                mlcp_FB_solve_wrap,
+                mlcp_FB_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

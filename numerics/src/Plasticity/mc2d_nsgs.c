@@ -36,7 +36,11 @@
 #include "mc2d_onecone_nonsmooth_Newton_solvers.h"  //
 #include "mc2d_projection.h"                        // for fc3d_projectio...
 #include "mc2d_solvers.h"
-#include "numerics_verbose.h"  // for numerics_printf
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"  // for numerics_printf
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 
@@ -746,6 +750,43 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
   mc2d_local_problem_free(localproblem, problem);
   if (scones) free(scones);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers MOHR_COULOMB_2D_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int mc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  mc2d_nsgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mc2d_nsgs_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mc2d_nsgs((MohrCoulomb2DProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void mc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
+                "Non-smooth Gauss-Seidel for 2D Mohr Coulomb Plasticity",
+                mc2d_nsgs_init_wrap,
+                mc2d_nsgs_solve_wrap,
+                mc2d_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);
 
 void mc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =

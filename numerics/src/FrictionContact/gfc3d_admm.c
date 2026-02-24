@@ -33,6 +33,10 @@
 #include "fc3d_Solvers.h"
 #include "float.h"          // for DBL_EPSILON
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "gfc3d_ipm.h"
@@ -1020,3 +1024,45 @@ void gfc3d_admm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] =
       SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_ADMM in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
+  gfc3d_admm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gfc3d_admm_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  // For global solvers, we need to handle globalVelocity separately
+  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
+  int n = gfc3d_problem->M->size0;
+  double* globalVelocity = (double*)calloc(n, sizeof(double));
+  gfc3d_ADMM(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(GFC3D_ADMM, "GFC3D_ADMM",
+                "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
+                gfc3d_admm_init_wrap,
+                gfc3d_admm_solve_wrap,
+                gfc3d_admm_free_wrap,
+                NULL,   /* error function */
+                20000,  /* default_max_iter */
+                1e-6,   /* default_tol */
+                0       /* is_local_solver */);

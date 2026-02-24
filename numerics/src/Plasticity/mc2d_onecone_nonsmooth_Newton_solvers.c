@@ -39,6 +39,10 @@
 #include "numerics_verbose.h"             // for numerics_print...
 #include "op3x3.h"                        // for cpy3, mvp3x3
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* #define DEBUG_CHECK */
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -1004,3 +1008,54 @@ void mc2d_onecone_nsn_gp_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_NSN_HYBRID_MAX_LOOP] = 1;
   options->iparam[PLASTICITY_NSN_HYBRID_MAX_ITER] = 100;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers local one-cone nonsmooth Newton solvers in the global solver registry
+ */
+
+/* Wrapper for NSN direct solve (local solver) - Note: local solvers use 3 args */
+static int mc2d_onecone_nsn_solve_wrap(void* localproblem, double* reaction,
+                                       double* velocity, SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return mc2d_onecone_nonsmooth_Newton_solvers_solve_direct((MohrCoulomb2DProblem*)localproblem,
+                                                            reaction, options);
+}
+
+/* Wrapper for NSN GP (damped) solve (local solver) */
+static int mc2d_onecone_nsn_gp_solve_wrap(void* localproblem, double* reaction,
+                                          double* velocity, SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return mc2d_onecone_nonsmooth_Newton_solvers_solve_damped((MohrCoulomb2DProblem*)localproblem,
+                                                            reaction, options);
+}
+
+/* Wrapper for NSN GP hybrid solve (local solver) */
+static int mc2d_onecone_nsn_gp_hybrid_solve_wrap(void* localproblem, double* reaction,
+                                                 double* velocity, SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return mc2d_onecone_nonsmooth_Newton_solvers_solve_hybrid((MohrCoulomb2DProblem*)localproblem,
+                                                            reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN,
+                      "MOHR_COULOMB_2D_ONECONE_NSN",
+                      "Nonsmooth Newton Alart-Curnier direct for 2D Mohr Coulomb (one cone)",
+                      mc2d_onecone_nsn_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-14  /* default_tol */);
+
+REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP,
+                      "MOHR_COULOMB_2D_ONECONE_NSN_GP",
+                      "Nonsmooth Newton Alart-Curnier GP (damped) for 2D Mohr Coulomb (one cone)",
+                      mc2d_onecone_nsn_gp_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-14  /* default_tol */);
+
+REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID,
+                      "MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID",
+                      "Nonsmooth Newton Alart-Curnier GP hybrid for 2D Mohr Coulomb (one cone)",
+                      mc2d_onecone_nsn_gp_hybrid_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-14  /* default_tol */);

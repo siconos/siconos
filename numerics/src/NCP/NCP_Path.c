@@ -17,9 +17,14 @@
  */
 
 #include "NCP_Solvers.h"        // for ncp_path
+#include "NCP_cst.h"
 #include "NumericsFwd.h"        // for NonlinearComplementarityProblem, Solv...
 #include "SiconosConfig.h"      // for HAVE_PATHFERRIS // IWYU pragma: keep
 #include "sn_error_handling.h"  // for sn_fatal_error, SN_NOT_COMPILED_ERROR
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 #ifdef HAVE_PATHFERRIS
 #include <assert.h>
@@ -140,3 +145,21 @@ void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, in
 }
 
 #endif
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers NCP_PATH in the global solver registry.
+ */
+
+static int ncp_path_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
+  ncp_path(ncp, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_NCP_PATH, "NCP_PATH",
+                       "PATH solver for Nonlinear Complementarity Problems",
+                       ncp_path_solve_wrap, 1000, 1e-4)

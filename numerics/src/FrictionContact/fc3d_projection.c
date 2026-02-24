@@ -46,6 +46,10 @@
 #include "NumericsVector.h"
 #endif
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* Static variables */
 
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in
@@ -792,3 +796,69 @@ void fc3d_poc_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] =
       0.;  // Used only for ProjectionOnConeWithRegularization
 }
+
+/* ===========================================================================
+ * Solver Registration - Local Projection Solvers
+ * ===========================================================================
+ * These are one-contact solvers used within NSGS (Non-Smooth Gauss-Seidel)
+ */
+
+/* Projection on Cone with diagonalization */
+static int fc3d_proj_diag_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionWithDiagonalization_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(OC_PROJ_DIAG,
+                      "OC_PROJ_DIAG",
+                      "Projection on Cone with Diagonalization (local solver)",
+                      fc3d_proj_diag_solve_wrap,
+                      100, 1e-4)
+
+/* Projection on Cone */
+static int fc3d_proj_cone_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCone_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(OC_PROJ,
+                      "OC_PROJ",
+                      "Projection on Cone (local solver)",
+                      fc3d_proj_cone_solve_wrap,
+                      100, 1e-4)
+
+/* Projection on Cone with Local Iteration */
+static int fc3d_proj_li_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnConeWithLocalIteration_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(OC_PROJ_LI,
+                      "OC_PROJ_LI",
+                      "Projection on Cone with Local Iteration (local solver)",
+                      fc3d_proj_li_solve_wrap,
+                      100, 1e-4)
+
+/* Projection on Cylinder */
+static int fc3d_proj_cyl_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCylinder_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(OC_CYLINDER,
+                      "OC_CYLINDER",
+                      "Projection on Cylinder (local solver)",
+                      fc3d_proj_cyl_solve_wrap,
+                      100, 1e-4)
+
+/* Projection on Cylinder with Local Iteration */
+static int fc3d_proj_cyl_li_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCylinderWithLocalIteration_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(OC_CYLINDER_LI,
+                      "OC_CYLINDER_LI",
+                      "Projection on Cylinder with Local Iteration (local solver)",
+                      fc3d_proj_cyl_li_solve_wrap,
+                      100, 1e-4)

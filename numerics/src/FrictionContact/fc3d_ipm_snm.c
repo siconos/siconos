@@ -43,6 +43,10 @@
 #include "gfc3d_ipm.h"
 // #include "siconos_debug.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 const char* const SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
@@ -1016,3 +1020,36 @@ void fc3d_ipm_snm_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_ipm_snm_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_ipm_snm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_ipm_snm_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_IPM_SNM((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_IPM_SNM_free((FrictionContactProblem*)problem, options);
+}
+
+REGISTER_SOLVER(FC3D_IPM_SNM,
+                "FC3D_IPM_SNM",
+                "Interior Point Method with Smoothing and Newton for 3D Friction Contact",
+                fc3d_ipm_snm_init_wrap,
+                fc3d_ipm_snm_solve_wrap,
+                fc3d_ipm_snm_free_wrap,
+                NULL,
+                500,    /* default_max_iter - from set_default */
+                1e-10,  /* default_tol - from set_default */
+                0       /* is_local_solver */)

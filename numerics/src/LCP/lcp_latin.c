@@ -29,6 +29,10 @@
 #include "SiconosLapack.h"     // for LA_UP, LA_NONUNIT, LA_NOTRANS, DTRTRS, DPOTRF, lapack_int
 #include "SolverOptions.h"     // for SolverOptions, solver_opti...
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_LATIN_P...
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "numerics_verbose.h"
 
 void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int *info,
@@ -330,3 +334,36 @@ void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int 
 void lcp_latin_set_default(SolverOptions *options) {
   options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER] = 0.3;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_LATIN in the global solver registry.
+ */
+
+static int lcp_latin_init_wrap(void* problem, SolverOptions* options) {
+  lcp_latin_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_latin_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_latin((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void lcp_latin_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_LATIN, "LCP_LATIN",
+                "LArge Time INcrements solver for LCP",
+                lcp_latin_init_wrap,
+                lcp_latin_solve_wrap,
+                lcp_latin_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

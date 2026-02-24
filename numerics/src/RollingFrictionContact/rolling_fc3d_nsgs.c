@@ -35,6 +35,11 @@
 #include "rolling_fc_Solvers.h"                // for RollingComputeErrorPtr
 #include "siconos_debug.h"                     // for DEBUG_PRINTF, DEBUG_BEGIN
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+#include "rfc3d_short_names.h"
+
 // #define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
@@ -48,11 +53,11 @@ static int fccounter = -1;
  * RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options) */
 /* { */
 /*   /\* Build a local problem for a specific contact */
-/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*      reaction corresponds to the global vector (size n) of the global problem.
 /*   *\/ */
 /*   /\* Call the update function which depends on the storage for MGlobal/MBGlobal *\/ */
 /*   /\* Build a local problem for a specific contact */
-/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*      reaction corresponds to the global vector (size n) of the global problem.
 /*   *\/ */
 
 /*   /\* The part of MGlobal which corresponds to the current block is copied into MLocal *\/
@@ -665,3 +670,33 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
 
 
 }
+
+/* Solver registration wrapper functions */
+static int rfc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  rfc3d_nsgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int rfc3d_nsgs_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  rolling_fc3d_nsgs((RollingFrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void rfc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(RFC3D_NSGS, "RFC3D_NSGS",
+                "Non-smooth Gauss-Seidel for 3D Rolling Friction Contact",
+                rfc3d_nsgs_init_wrap,
+                rfc3d_nsgs_solve_wrap,
+                rfc3d_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

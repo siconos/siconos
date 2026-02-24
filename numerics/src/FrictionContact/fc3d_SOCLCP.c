@@ -34,6 +34,10 @@
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem *,
                                          double *, double *, int *, SolverOptions *);
@@ -115,3 +119,21 @@ void fc3d_SOCLCP(FrictionContactProblem *problem, double *reaction, double *velo
   dparam[SICONOS_DPARAM_RESIDU] = error;
   dparam[2] = fabs(real_error - error);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_soclcp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_SOCLCP((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(FC3D_SOCLCP,
+                       "FC3D_SOCLCP",
+                       "Second Order Cone LCP for 3D Friction Contact",
+                       fc3d_soclcp_solve_wrap,
+                       1000,   /* default_max_iter */
+                       1e-4)   /* default_tol */

@@ -32,6 +32,10 @@
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_P...
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /*
  *
  * double *z : size n+m
@@ -252,3 +256,31 @@ void mlcp_pgs_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 50000;
   options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0;  // implicit
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_PGS in the global solver registry.
+ */
+
+static int mlcp_pgs_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_pgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_pgs_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_pgs((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_PGS, "MLCP_PGS",
+                "Projected Gauss-Seidel for Mixed Linear Complementarity Problems",
+                mlcp_pgs_init_wrap,
+                mlcp_pgs_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                50000, /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

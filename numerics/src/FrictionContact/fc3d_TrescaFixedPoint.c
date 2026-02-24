@@ -31,6 +31,10 @@
 #include "fc3d_compute_error.h"      // for fc3d_compute_error
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                            int* info, SolverOptions* options) {
   /* int and double parameters */
@@ -154,3 +158,36 @@ void fc3d_tfp_set_default(SolverOptions* options) {
   options->internalSolvers[0]->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
   options->internalSolvers[0]->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_tfp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_tfp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_tfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_TrescaFixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_tfp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_TFP,
+                "FC3D_TFP",
+                "Tresca Fixed Point for 3D Friction Contact",
+                fc3d_tfp_init_wrap,
+                fc3d_tfp_solve_wrap,
+                fc3d_tfp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

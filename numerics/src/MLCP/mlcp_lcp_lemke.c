@@ -33,6 +33,10 @@
 #include "mlcp_to_lcp.h"                        // for mlcp_to_lcp
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
@@ -119,3 +123,31 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double* z, doubl
 }
 
 void mlcp_lcp_lemke_default(SolverOptions* options) { options->filterOn = false; }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_LCP_LEMKE in the global solver registry.
+ */
+
+static int mlcp_lcp_lemke_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_lcp_lemke_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_lcp_lemke_solve_wrap(void* problem, double* reaction,
+                                      double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_lcp_lemke((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_LCP_LEMKE, "MLCP_LCP_LEMKE",
+                "Lemke solver via LCP conversion for Mixed Linear Complementarity Problems",
+                mlcp_lcp_lemke_init_wrap,
+                mlcp_lcp_lemke_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

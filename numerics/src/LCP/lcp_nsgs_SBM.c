@@ -29,6 +29,10 @@
 #include "numerics_verbose.h"
 #include "sanitizer.h"                     // for cblas_dcopy_msan
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
 #include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END
@@ -218,3 +222,36 @@ void lcp_nsgs_sbm_set_default(SolverOptions* options) {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_NSGS_SBM in the global solver registry.
+ */
+
+static int lcp_nsgs_sbm_init_wrap(void* problem, SolverOptions* options) {
+  lcp_nsgs_sbm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_nsgs_sbm_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_nsgs_SBM((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void lcp_nsgs_sbm_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
+                "Non-smooth Gauss-Seidel for LCP with Sparse Block Matrix",
+                lcp_nsgs_sbm_init_wrap,
+                lcp_nsgs_sbm_solve_wrap,
+                lcp_nsgs_sbm_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

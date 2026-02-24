@@ -34,6 +34,10 @@
 #include "numerics_verbose.h"
 #include "soclcp_compute_error.h"                         // for soclcp_comp...
 #include "soclcp_projection.h"                            // for soclcp_proj...
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem,
@@ -533,3 +537,39 @@ void soclcp_nsgs_set_default(SolverOptions* options) {
       solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_SOCLCP_NSGS in the global solver registry.
+ */
+
+static int soclcp_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+  return NUMERICS_OK;
+}
+
+static int soclcp_nsgs_solve_wrap(void* problem, double* reaction,
+                                  double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  soclcp_nsgs((SecondOrderConeLinearComplementarityProblem*)problem, reaction, velocity, &info,
+              options);
+  return info;
+}
+
+static void soclcp_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup is handled internally by soclcp_nsgs */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_SOCLCP_NSGS, "SOCLCP_NSGS",
+                "Non-Smooth Gauss-Seidel for SOCLCP",
+                soclcp_nsgs_init_wrap,
+                soclcp_nsgs_solve_wrap,
+                soclcp_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

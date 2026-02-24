@@ -26,6 +26,7 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
+#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
@@ -33,6 +34,10 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "numerics_verbose.h"
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,
              SolverOptions *options) {
@@ -140,3 +145,22 @@ void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *i
 
   free(diag);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PGS in the global solver registry.
+ */
+
+static int lcp_pgs_solve_wrap(void* problem, double* reaction,
+                              double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_pgs((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_PGS, "LCP_PGS",
+                       "Projected Gauss-Seidel for LCP",
+                       lcp_pgs_solve_wrap,
+                       1000,  /* default_max_iter */
+                       1e-6   /* default_tol */);

@@ -14,6 +14,7 @@
 /* GAMS stuff */
 
 #include "LCP_Solvers.h"       // for lcp_gams
+#include "lcp_cst.h"
 #include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOptions
 #include "numerics_verbose.h"
 
@@ -144,3 +145,25 @@ TERMINATE:
 
 #endif  // HAVE_GAMS_C_API
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_GAMS in the global solver registry.
+ */
+
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
+static int lcp_gams_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_gams((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_GAMS, "LCP_GAMS",
+                       "GAMS solver for LCP",
+                       lcp_gams_solve_wrap,
+                       1000,  /* default_max_iter */
+                       1e-6   /* default_tol */);

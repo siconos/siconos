@@ -22,6 +22,10 @@
 
 #include "fc3d_short_names.h"
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv
@@ -186,3 +190,47 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /***** Free memory *****/
   (*freeSolver)(problem);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_nsgs_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  // For global solvers, we need to handle globalVelocity separately
+  // Use dWork for temporary storage of globalVelocity
+  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
+  int n = gfc3d_problem->M->size0;
+  double* globalVelocity = (double*)calloc(n, sizeof(double));
+  gfc3d_nsgs(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void gfc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(GFC3D_NSGS, "GFC3D_NSGS",
+                "Non-smooth Gauss-Seidel for 3D Global Friction Contact",
+                gfc3d_nsgs_init_wrap,
+                gfc3d_nsgs_solve_wrap,
+                gfc3d_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

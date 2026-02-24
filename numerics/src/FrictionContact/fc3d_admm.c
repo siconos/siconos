@@ -40,6 +40,10 @@
 #include "projectionOnCone.h"    // for projectionOnCone, projectionOnDu...
 #include "siconos_debug.h"       // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 const char* const SICONOS_FRICTION_3D_ADMM_STR = "FC3D ADMM";
 
 typedef struct {
@@ -1083,3 +1087,36 @@ void fc3d_admm_set_default(SolverOptions* options) {
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_admm_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_admm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_admm_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_admm((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_admm_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_admm_free((FrictionContactProblem*)problem, options);
+}
+
+REGISTER_SOLVER(FC3D_ADMM,
+                "FC3D_ADMM",
+                "Alternating Direction Method of Multipliers for 3D Friction Contact",
+                fc3d_admm_init_wrap,
+                fc3d_admm_solve_wrap,
+                fc3d_admm_free_wrap,
+                NULL,
+                20000,  /* default_max_iter - from set_default */
+                1e-6,   /* default_tol - from set_default */
+                0       /* is_local_solver */)

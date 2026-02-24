@@ -30,6 +30,7 @@
 #include "CSparseMatrix.h"
 #include "FrictionContact_options.h"
 #include "JordanAlgebra.h"
+#include "fc3d_short_names.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
@@ -2999,6 +3000,10 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   *info = hasNotConverged;
 }
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void gfc3d_ipm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
       SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
@@ -3038,3 +3043,45 @@ void gfc3d_ipm_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.095
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_IPM in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
+  gfc3d_ipm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gfc3d_ipm_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  // For global solvers, we need to handle globalVelocity separately
+  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
+  int n = gfc3d_problem->M->size0;
+  double* globalVelocity = (double*)calloc(n, sizeof(double));
+  gfc3d_IPM(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void gfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(GFC3D_IPM, "GFC3D_IPM",
+                "Interior Point Method for 3D Global Friction Contact",
+                gfc3d_ipm_init_wrap,
+                gfc3d_ipm_solve_wrap,
+                gfc3d_ipm_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-8,  /* default_tol */
+                0      /* is_local_solver */);

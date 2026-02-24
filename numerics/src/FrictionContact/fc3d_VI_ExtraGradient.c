@@ -31,6 +31,10 @@
 #include "fc3d_compute_error.h"             // for fc3d_compute_error
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
                            int *info, SolverOptions *options) {
   /* Number of contacts */
@@ -74,3 +78,21 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, do
   free(vi);
   free(fc3d_as_vi);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_VI_ExtraGradient((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(FC3D_VI_EG,
+                       "FC3D_VI_EG",
+                       "VI Extra Gradient for 3D Friction Contact",
+                       fc3d_vi_eg_solve_wrap,
+                       1000,   /* default_max_iter */
+                       1e-4)   /* default_tol */

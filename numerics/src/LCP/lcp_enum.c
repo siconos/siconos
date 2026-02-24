@@ -31,6 +31,10 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "enum_tool.h"
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_ENUM_US...
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "numerics_verbose.h"
 
 static void lcp_buildM(int* zw, double* M, double* Mref, int size, double* column_of_zero) {
@@ -221,3 +225,36 @@ void lcp_enum_set_default(SolverOptions* options) {
   // SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM (out)
   // SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS (out)
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_ENUM in the global solver registry.
+ */
+
+static int lcp_enum_init_wrap(void* problem, SolverOptions* options) {
+  lcp_enum_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_enum_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_enum((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void lcp_enum_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_enum_reset((LinearComplementarityProblem*)problem, options, 1);
+}
+
+REGISTER_SOLVER(SICONOS_LCP_ENUM, "LCP_ENUM",
+                "Enumerative solver for LCP",
+                lcp_enum_init_wrap,
+                lcp_enum_solve_wrap,
+                lcp_enum_free_wrap,
+                NULL,  /* error function */
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

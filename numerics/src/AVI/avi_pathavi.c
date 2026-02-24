@@ -17,8 +17,11 @@
  */
 
 #include "AVI_Solvers.h"       // for avi_pathavi
+#include "AVI_cst.h"           // for SICONOS_AVI_PATHAVI
 #include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
 #include "numerics_verbose.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_PATHVI
 
@@ -271,3 +274,34 @@ int avi_pathavi(AffineVariationalInequalities* problem, double* z, double* w,
 }
 
 #endif /*  HAVE_PATHVI */
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int avi_pathavi_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int avi_pathavi_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  return avi_pathavi((AffineVariationalInequalities*)problem, z, w, options);
+}
+
+static void avi_pathavi_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_AVI_PATHAVI,
+                "AVI_PATHAVI",
+                "PATHVI solver for AVI",
+                avi_pathavi_init_wrap,
+                avi_pathavi_solve_wrap,
+                avi_pathavi_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

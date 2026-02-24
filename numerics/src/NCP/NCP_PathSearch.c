@@ -28,6 +28,7 @@
 #include "LCP_Solvers.h"                      // for lcp_compute_error, lcp_...
 #include "LinearComplementarityProblem.h"     // for LinearComplementarityPr...
 #include "NCP_Solvers.h"                      // for ncp_compute_error, ncp_...
+#include "NCP_cst.h"
 #include "NMS.h"                              // for NMS_data, NMS, NMS_best...
 #include "NSSTools.h"                         // for pos_part
 #include "NonSmoothSolvers/Newton_methods.h"                   // for functions_LSA, init_lsa...
@@ -45,6 +46,10 @@
 #include "pivot-utils.h"                      // for lcp_pivot_diagnose_info
 #include "sanitizer.h"                        // for cblas_dcopy_msan
 #include "siconos_debug.h"                    // for DEBUG_PRINT, DEBUG_PRINTF
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 /** update the lcp subproblem: M, q and r
  * \param problem the NCP problem to solve
  * \param lcp_subproblem the lcp problem to fill
@@ -434,3 +439,21 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     ncp_pathsearch_free(options);
   }
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers NCP_PATHSEARCH in the global solver registry.
+ */
+
+static int ncp_pathsearch_solve_wrap(void* problem, double* reaction,
+                                     double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
+  ncp_pathsearch(ncp, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_NCP_PATHSEARCH, "NCP_PATHSEARCH",
+                       "Path search solver for Nonlinear Complementarity Problems",
+                       ncp_pathsearch_solve_wrap, 1000, 1e-4)

@@ -65,6 +65,10 @@ enum ROLLING_FRICTION_SOLVER {
    */
   /** Non-smooth Gauss-Seidel for 3D rolling friction, local formulation */
   SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
+  /** Projection on cone for 3D rolling friction, one contact solver */
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone = 3001,
+  /** Projection on cone with local iteration for 3D rolling friction */
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002,
   /** ADMM for 3D rolling friction, local formulation */
   SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
 
@@ -99,6 +103,9 @@ enum ROLLING_FRICTION_SOLVER {
  */
 
 extern const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR;
+extern const char* const SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
+extern const char* const
+    SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
 extern const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR;
 
 extern const char* const SICONOS_ROLLING_FRICTION_2D_NSGS_STR;

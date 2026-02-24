@@ -25,9 +25,14 @@
 #include "NumericsMatrix.h"    // for NumericsMatrix
 #include "RelayProblem.h"      // for RelayProblem
 #include "Relay_Solvers.h"     // for relay_compute_error, relay_pgs
+#include "relay_cst.h"
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {
@@ -112,3 +117,37 @@ void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
 
   free(diag);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_RELAY_PGS in the global solver registry.
+ */
+
+static int relay_pgs_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-6;
+  return NUMERICS_OK;
+}
+
+static int relay_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  relay_pgs((RelayProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void relay_pgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_RELAY_PGS, "RELAY_PGS",
+                "Projected Gauss-Seidel solver for Relay problems",
+                relay_pgs_init_wrap,
+                relay_pgs_solve_wrap,
+                relay_pgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

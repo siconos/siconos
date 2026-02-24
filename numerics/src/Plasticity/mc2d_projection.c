@@ -35,6 +35,10 @@
 #include "mc2d_local_problem_tools.h"  // for mc2d_local_problem_compute_q
 #include "mc2d_solvers.h"
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 /* #define DEBUG_NOCOLOR */
@@ -479,3 +483,40 @@ void mc2d_poc_set_default(SolverOptions* options) {
   options->dparam[PLASTICITY_NSN_RHO] =
       0.;  // Used only for ProjectionOnConeWithRegularization
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers local one-cone projection solvers in the global solver registry
+ */
+
+/* Wrapper for projection on cone (local solver) - Note: local solvers use 3 args */
+static int mc2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
+                                            double* velocity, SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return mc2d_projectionOnCone_solve((MohrCoulomb2DProblem*)localproblem, reaction, options);
+}
+
+/* Wrapper for projection on cone with local iteration (local solver) */
+static int mc2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem,
+                                                               double* reaction,
+                                                               double* velocity,
+                                                               SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return mc2d_projectionOnConeWithLocalIteration_solve((MohrCoulomb2DProblem*)localproblem,
+                                                        reaction, options);
+}
+
+REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnCone,
+                      "MOHR_COULOMB_2D_ONECONE_PROJECTION",
+                      "Projection on cone for 2D Mohr Coulomb (one cone)",
+                      mc2d_projectionOnCone_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-14  /* default_tol */);
+
+REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration,
+                      "MOHR_COULOMB_2D_ONECONE_PROJECTION_LI",
+                      "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
+                      mc2d_projectionOnConeWithLocalIteration_solve_wrap,
+                      100,   /* default_max_iter */
+                      1e-14  /* default_tol */);

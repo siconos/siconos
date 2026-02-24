@@ -33,8 +33,13 @@
 #include "SolverOptions.h"                             // for SolverOptions
 #include "gfc3d_Solvers.h"                             // for gfc3d_set_inte...
 #include "gfc3d_compute_error.h"                       // for gfc3d_compute_...
+#include "fc3d_short_names.h"                          // for GFC3D_ACLMFP
 #include "numerics_verbose.h"
 #include "siconos_debug.h"                             // for DEBUG_EXPR
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*internalSolverPtr)(ConvexQP *, double *, double *, double *, double *, int *,
@@ -176,3 +181,45 @@ void gfc3d_aclmfp_set_default(SolverOptions *options) {
   options->internalSolvers[0] = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_ACLMFP in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
+  gfc3d_aclmfp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gfc3d_aclmfp_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  // For global solvers, we need to handle globalVelocity separately
+  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
+  int n = gfc3d_problem->M->size0;
+  double* globalVelocity = (double*)calloc(n, sizeof(double));
+  gfc3d_ACLMFixedPoint(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
+  free(globalVelocity);
+  return info;
+}
+
+static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(GFC3D_ACLMFP, "GFC3D_ACLMFP",
+                "Alart-Curnier Lemke Fixed Point for 3D Global Friction Contact",
+                gfc3d_aclmfp_init_wrap,
+                gfc3d_aclmfp_solve_wrap,
+                gfc3d_aclmfp_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

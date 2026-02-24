@@ -29,6 +29,8 @@
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
 #include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double* x,
                                                 double* w, int* info, SolverOptions* options) {
@@ -191,3 +193,36 @@ void variationalInequality_HyperplaneProjection_set_default(SolverOptions* optio
   options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 1.0; /*tau */
   options->dparam[SICONOS_VI_DPARAM_SIGMA] = 0.8;  /* sigma */
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int vi_hp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  variationalInequality_HyperplaneProjection_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int vi_hp_solve_wrap(void* problem, double* x, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  variationalInequality_HyperplaneProjection((VariationalInequality*)problem, x, w, &info, options);
+  return info;
+}
+
+static void vi_hp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_VI_HP,
+                "VI_HP",
+                "Hyperplane Projection for Variational Inequality",
+                vi_hp_init_wrap,
+                vi_hp_solve_wrap,
+                vi_hp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

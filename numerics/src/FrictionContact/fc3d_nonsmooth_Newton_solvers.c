@@ -49,6 +49,11 @@
 #include "op3x3.h"                                    // for extract3x3, add3x3
 #include "sanitizer.h"                                // for cblas_dcopy_msan
 #include "siconos_debug.h"                            // for DEBUG_EXPR_WE
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+#include "nsn_formulation/fc3d_nonsmooth_Newton_AlartCurnier.h"
+#include "nsn_formulation/fc3d_nonsmooth_Newton_FischerBurmeister.h"
+#include "nsn_formulation/fc3d_nonsmooth_Newton_natural_map.h"
 
 static void NM_dense_to_sparse_diag_t(double *A, NumericsMatrix *B, size_t block_row_size,
                                       size_t block_col_size) {
@@ -698,3 +703,57 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     free(AWpB);
   }
 }
+
+/* Wrappers and registration for FC3D_NSN_AC */
+static int fc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
+  fc3d_nsn_ac_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_nonsmooth_Newton_AlartCurnier((FrictionContactProblem*)problem, reaction, velocity, &info,
+                                      options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_NSN_AC, "FC3D_NSN_AC",
+                "Nonsmooth Newton method based on Alart-Curnier formulation",
+                fc3d_nsn_ac_init_wrap, fc3d_nsn_ac_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+
+/* Wrappers and registration for FC3D_NSN_FB */
+static int fc3d_nsn_fb_init_wrap(void* problem, SolverOptions* options) {
+  fc3d_nsn_fb_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsn_fb_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_nonsmooth_Newton_FischerBurmeister((FrictionContactProblem*)problem, reaction, velocity,
+                                          &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_NSN_FB, "FC3D_NSN_FB",
+                "Nonsmooth Newton method based on Fischer-Burmeister formulation",
+                fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+
+/* Wrappers and registration for FC3D_NSN_NM */
+static int fc3d_nsn_nm_init_wrap(void* problem, SolverOptions* options) {
+  fc3d_nsn_nm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsn_nm_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_nonsmooth_Newton_NaturalMap((FrictionContactProblem*)problem, reaction, velocity, &info,
+                                   options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_NSN_NM, "FC3D_NSN_NM",
+                "Nonsmooth Newton method based on Natural Map formulation", fc3d_nsn_nm_init_wrap,
+                fc3d_nsn_nm_solve_wrap, NULL, NULL, 200, 1e-6, 0);

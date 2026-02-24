@@ -43,6 +43,10 @@
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
 
 /* #define DEBUG_NOCOLOR */
@@ -595,3 +599,40 @@ void gmp_working_memory_free(GenericMechanicalProblem* pGMP, SolverOptions* opti
 int gmp_get_nb_dwork(GenericMechanicalProblem* pGMP, SolverOptions* options) {
   return 2 * pGMP->size;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_GENERIC_MECHANICAL_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gmp_init_wrap(void* problem, SolverOptions* options) {
+  gmp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gmp_solve_wrap(void* problem, double* reaction, double* velocity,
+                          SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gmp_driver((GenericMechanicalProblem*)problem, reaction, velocity, options);
+  return info;
+}
+
+static void gmp_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_GENERIC_MECHANICAL_NSGS, "GMP_NSGS",
+                "Non-smooth Gauss-Seidel for Generic Mechanical Problem",
+                gmp_init_wrap,
+                gmp_solve_wrap,
+                gmp_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

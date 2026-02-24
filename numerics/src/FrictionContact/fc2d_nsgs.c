@@ -32,7 +32,13 @@
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
-#include "numerics_verbose.h"              // for numerics_printf, verbose
+#include "fc3d_short_names.h"              // for FC2D_NSGS
+#include "numerics_verbose.h"
+
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -789,4 +795,39 @@ void fc2d_nsgs_set_default(SolverOptions *options) {
   //  useful only for the sparse nsgs case.
 }
 
-// options setup is done through fc2d_nsgs_set_default.
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers FC2D_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  fc2d_nsgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc2d_nsgs_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc2d_nsgs((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC2D_NSGS, "FC2D_NSGS",
+                "Non-smooth Gauss-Seidel for 2D Friction Contact",
+                fc2d_nsgs_init_wrap,
+                fc2d_nsgs_solve_wrap,
+                fc2d_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

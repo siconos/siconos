@@ -30,6 +30,10 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"          // for DEBUG_PRINTF
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 //#define VERBOSE_DEBUG
 const char* const SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
 
@@ -276,3 +280,40 @@ void convexQP_ProjectedGradient_set_default(SolverOptions* options) {
   options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] = 0.9;
   options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] = 2.0 / 3.0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_CONVEXQP_PG in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int convexqp_pg_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-6;
+  return NUMERICS_OK;
+}
+
+static int convexqp_pg_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  convexQP_ProjectedGradient((ConvexQP*)problem, z, w, &info, options);
+  return info;
+}
+
+static void convexqp_pg_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_CONVEXQP_PG, "CONVEXQP_PG",
+                "Projected Gradient solver for Convex QP",
+                convexqp_pg_init_wrap,
+                convexqp_pg_solve_wrap,
+                convexqp_pg_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

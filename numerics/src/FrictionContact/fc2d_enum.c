@@ -30,8 +30,13 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_enum
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "fc3d_short_names.h"              // for FC2D_ENUM
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
                SolverOptions *options) {
@@ -112,3 +117,41 @@ void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *veloci
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers FC2D_ENUM in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int fc2d_enum_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 100;
+  SOLVER_TOL(options) = 1e-6;
+  return NUMERICS_OK;
+}
+
+static int fc2d_enum_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc2d_enum((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc2d_enum_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC2D_ENUM, "FC2D_ENUM",
+                "Enumerative solver for 2D Friction Contact",
+                fc2d_enum_init_wrap,
+                fc2d_enum_solve_wrap,
+                fc2d_enum_free_wrap,
+                NULL,  /* error function */
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

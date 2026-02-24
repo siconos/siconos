@@ -40,6 +40,8 @@
 #include "../fc3d_short_names.h"
 #include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
 #include "numerics_verbose.h"
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 typedef struct {
   FrictionContactProblem* problem;
@@ -190,3 +192,20 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
   free(opaque_data.Ax);
   free(opaque_data.Bx);
 }
+
+static int fc3d_nsn_ac_new_init_wrap(void *problem, SolverOptions *options) {
+  fc3d_nsn_ac_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsn_ac_new_solve_wrap(void *problem, double *reaction, double *velocity,
+                                       SolverOptions *options) {
+  int info = NUMERICS_OK;
+  fc3d_nonsmooth_Newton_AlartCurnier_new((FrictionContactProblem *)problem, reaction, velocity,
+                                          &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
+                "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
+                fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL, 200, 1e-6, 0);

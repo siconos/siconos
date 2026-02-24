@@ -40,6 +40,10 @@
 #include "lcp_cst.h"                             // for SICONOS_LCP_PGS, SIC...
 #include "numerics_verbose.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem *, double *, double *,
                                         int *, SolverOptions *);
@@ -281,3 +285,36 @@ void fc3d_pfp_set_default(SolverOptions *options) {
   options->internalSolvers[1] = solver_options_create(SICONOS_CONVEXQP_VI_FPP);
   options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_pfp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_pfp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_pfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_Panagiotopoulos_FixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_PFP,
+                "FC3D_PFP",
+                "Panagiotopoulos Fixed Point for 3D Friction Contact",
+                fc3d_pfp_init_wrap,
+                fc3d_pfp_solve_wrap,
+                fc3d_pfp_free_wrap,
+                NULL,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

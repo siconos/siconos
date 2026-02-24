@@ -31,6 +31,8 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
 #include "numerics_verbose.h"
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
                                     FischerBurmeisterFun3x3Ptr computeACFun3x3,
@@ -183,3 +185,20 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem* problem, do
 
   fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
 }
+
+static int fc3d_nsn_fb_init_wrap(void *problem, SolverOptions *options) {
+  fc3d_nsn_fb_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsn_fb_solve_wrap(void *problem, double *reaction, double *velocity,
+                                   SolverOptions *options) {
+  int info = NUMERICS_OK;
+  fc3d_nonsmooth_Newton_FischerBurmeister((FrictionContactProblem *)problem, reaction, velocity,
+                                          &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_NSN_FB, "FC3D_NSN_FB",
+                "Nonsmooth Newton method based on Fischer-Burmeister formulation",
+                fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL, 200, 1e-6, 0);

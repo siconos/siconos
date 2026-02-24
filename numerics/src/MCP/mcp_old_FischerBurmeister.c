@@ -20,11 +20,16 @@
 
 #include "FischerBurmeister.h"            // for jacobianPhi_Mixed_FB, phi_M...
 #include "MCP_Solvers.h"                  // for mcp_old_compute_error, mcp_...
+#include "MCP_cst.h"
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
 #include "NonSmoothSolvers/NonSmoothNewton.h"              // for nonSmoothNewton, nonSmoothN...
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem...
 #include "SolverOptions.h"                // for SolverOptions, solver_optio...
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -123,3 +128,21 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double*
 
   return;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers MCP_OLD_FB in the global solver registry.
+ */
+
+static int mcp_old_fb_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  MixedComplementarityProblem_old* mcp = (MixedComplementarityProblem_old*)problem;
+  mcp_old_FischerBurmeister(mcp, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_MCP_OLD_FB, "MCP_OLD_FB",
+                       "Old Fischer-Burmeister solver for Mixed Complementarity Problems",
+                       mcp_old_fb_solve_wrap, 1000, 1e-4)

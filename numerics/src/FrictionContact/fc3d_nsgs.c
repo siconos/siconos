@@ -41,6 +41,10 @@
 #include "fc3d_short_names.h"                  // Short names for solver IDs
 #include "numerics_verbose.h"                          // for numerics_printf
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 /* New utility headers for standardized error computation, tolerance management, and naming conventions */
 #include "utils/error_computation.h"
 #include "utils/tolerance_manager.h"
@@ -912,3 +916,40 @@ void fc3d_nsgs_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] =
       SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers FC3D_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int fc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  fc3d_nsgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_nsgs_solve_wrap(void* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_nsgs((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_NSGS, "FC3D_NSGS",
+                "Non-smooth Gauss-Seidel for 3D Friction Contact",
+                fc3d_nsgs_init_wrap,
+                fc3d_nsgs_solve_wrap,
+                fc3d_nsgs_free_wrap,
+                NULL,  /* error function */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

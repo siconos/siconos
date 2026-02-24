@@ -22,12 +22,17 @@
 #include "ConvexQP.h"                                  // for ConvexQP
 #include "ConvexQP_Solvers.h"                          // for convexQP_Proje...
 #include "LCP_Solvers.h"                               // for lcp_compute_error
+#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"              // for LinearCompleme...
 #include "LinearComplementarityProblem_as_ConvexQP.h"  // for LinearCompleme...
 #include "NumericsFwd.h"                               // for ConvexQP, Line...
 #include "SiconosBlas.h"                               // for cblas_dnrm2
 #include "SolverOptions.h"                             // for SolverOptions
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem *problem, double *z,
                                     double *w, int *info, SolverOptions *options) {
@@ -69,3 +74,22 @@ void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem *problem, doubl
   free(cqp);
   free(lcp_as_cqp);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_CONVEXQP_PG in the global solver registry.
+ */
+
+static int lcp_ConvexQP_PG_solve_wrap(void* problem, double* reaction,
+                                      double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_ConvexQP_ProjectedGradient((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_CONVEXQP_PG, "LCP_ConvexQP_PG",
+                       "ConvexQP Projected Gradient solver for LCP",
+                       lcp_ConvexQP_PG_solve_wrap,
+                       1000,  /* default_max_iter */
+                       1e-6   /* default_tol */);
