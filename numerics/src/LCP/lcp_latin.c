@@ -358,12 +358,13 @@ static void lcp_latin_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_LATIN, "LCP_LATIN",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_LATIN, "LCP_LATIN",
                 "LArge Time INcrements solver for LCP",
                 lcp_latin_init_wrap,
                 lcp_latin_solve_wrap,
                 lcp_latin_free_wrap,
                 NULL,  /* error function */
+                lcp_latin_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */)

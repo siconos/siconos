@@ -778,12 +778,13 @@ static void mc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
+REGISTER_SOLVER_WITH_DEFAULT(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
                 "Non-smooth Gauss-Seidel for 2D Mohr Coulomb Plasticity",
                 mc2d_nsgs_init_wrap,
                 mc2d_nsgs_solve_wrap,
                 mc2d_nsgs_free_wrap,
                 NULL,  /* error function */
+                mc2d_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);
@@ -808,7 +809,11 @@ void mc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   SOLVER_TOL(options) = 1e-4;
   options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-  // Internal solver
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID);
 }

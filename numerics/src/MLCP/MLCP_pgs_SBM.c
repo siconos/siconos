@@ -236,6 +236,11 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
 }
 
 void mlcp_pgs_sbm_set_default(SolverOptions* options) {
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PGS);
 }
@@ -258,12 +263,13 @@ static int mlcp_pgs_sbm_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
                 "Projected Gauss-Seidel for MLCP with Sparse Block Matrix",
                 mlcp_pgs_sbm_init_wrap,
                 mlcp_pgs_sbm_solve_wrap,
                 NULL,  /* free function */
                 NULL,  /* error function */
+                mlcp_pgs_sbm_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

@@ -232,12 +232,13 @@ static void lcp_rpgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_RPGS, "LCP_RPGS",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_RPGS, "LCP_RPGS",
                 "Regularized Projected Gauss-Seidel for LCP",
                 lcp_rpgs_init_wrap,
                 lcp_rpgs_solve_wrap,
                 lcp_rpgs_free_wrap,
                 NULL,  /* error function */
+                lcp_rpgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

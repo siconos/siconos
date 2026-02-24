@@ -534,12 +534,13 @@ static void lcp_lexicolemke_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_LEMKE, "LCP_LEMKE",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_LEMKE, "LCP_LEMKE",
                 "Lexicographic Lemke solver for LCP",
                 lcp_lexicolemke_init_wrap,
                 lcp_lexicolemke_solve_wrap,
                 lcp_lexicolemke_free_wrap,
                 NULL,  /* error function */
+                lcp_lexicolemke_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */)

@@ -393,6 +393,11 @@ void fc3d_proximal_set_default(SolverOptions* options) {
   /* default value for relaxation parameter omega */
   // options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_RELAXATION] = 1.5;
 
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   // options->internalSolvers[0] = solver_options_create(FC3D_NSN_AC);
   // options->internalSolvers[0] = solver_options_create(FC3D_IPM_SNM);
@@ -421,13 +426,14 @@ static void fc3d_proximal_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_PROX,
+REGISTER_SOLVER_WITH_DEFAULT(FC3D_PROX,
                 "FC3D_PROX",
                 "Proximal method for 3D Friction Contact",
                 fc3d_proximal_init_wrap,
                 fc3d_proximal_solve_wrap,
                 fc3d_proximal_free_wrap,
                 NULL,
+                fc3d_proximal_set_default,  /* set_default */
                 100,    /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

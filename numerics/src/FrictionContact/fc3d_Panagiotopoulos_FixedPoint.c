@@ -276,6 +276,11 @@ void fc3d_pfp_set_default(SolverOptions *options) {
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
 
+  // Internal solvers - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 2;
+    options->internalSolvers = calloc(2, sizeof(SolverOptions*));
+  }
   // Two internal solvers
   assert(options->numberOfInternalSolvers == 2);
 
@@ -308,13 +313,14 @@ static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_PFP,
+REGISTER_SOLVER_WITH_DEFAULT(FC3D_PFP,
                 "FC3D_PFP",
                 "Panagiotopoulos Fixed Point for 3D Friction Contact",
                 fc3d_pfp_init_wrap,
                 fc3d_pfp_solve_wrap,
                 fc3d_pfp_free_wrap,
                 NULL,
+                fc3d_pfp_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

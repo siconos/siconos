@@ -908,10 +908,13 @@ void fc3d_nsgs_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   SOLVER_TOL(options) = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-  // Internal solver
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] =
-      solver_options_create(OC_NSN_GP_HYBRID);
+  options->internalSolvers[0] = solver_options_create(OC_NSN_GP_HYBRID);
   // Printing in the same style as in IPM solver
   options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] =
       SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
@@ -944,12 +947,13 @@ static void fc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_NSGS, "FC3D_NSGS",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_FRICTION_3D_NSGS, "FC3D_NSGS",
                 "Non-smooth Gauss-Seidel for 3D Friction Contact",
                 fc3d_nsgs_init_wrap,
                 fc3d_nsgs_solve_wrap,
                 fc3d_nsgs_free_wrap,
                 NULL,  /* error function */
+                fc3d_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                0      /* is_local_solver */)

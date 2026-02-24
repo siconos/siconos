@@ -28,6 +28,11 @@ Ferris solves the subsequent AVI.
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "avi_caoferris.h"                 // for avi_caoferris_stage3
+#include "lcp_cst.h"                       // for SICONOS_LCP_AVI_CAOFERRIS
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                        SolverOptions* options) {
   unsigned int n = problem->size;
@@ -47,3 +52,26 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double*
   free(A);
   free(d_vec);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_AVI_CAOFERRIS in the global solver registry.
+ */
+
+static int lcp_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int lcp_avi_caoferris_solve_wrap(void* problem, double* reaction,
+                                        double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_avi_caoferris((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_AVI_CAOFERRIS, "LCP_AVI_CAOFERRIS",
+                       "AVI Cao-Ferris solver for LCP",
+                       lcp_avi_caoferris_solve_wrap, 1000, 1e-6)

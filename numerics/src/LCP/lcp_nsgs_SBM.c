@@ -219,6 +219,11 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
 }
 
 void lcp_nsgs_sbm_set_default(SolverOptions* options) {
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);
 }
@@ -246,12 +251,13 @@ static void lcp_nsgs_sbm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
                 "Non-smooth Gauss-Seidel for LCP with Sparse Block Matrix",
                 lcp_nsgs_sbm_init_wrap,
                 lcp_nsgs_sbm_solve_wrap,
                 lcp_nsgs_sbm_free_wrap,
                 NULL,  /* error function */
+                lcp_nsgs_sbm_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */)

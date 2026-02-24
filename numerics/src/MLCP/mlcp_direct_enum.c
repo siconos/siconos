@@ -136,12 +136,13 @@ static void mlcp_direct_enum_free_wrap(void* problem, SolverOptions* options) {
   mlcp_direct_enum_reset();
 }
 
-REGISTER_SOLVER(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT_ENUM",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT_ENUM",
                 "Direct-Enum hybrid solver for Mixed Linear Complementarity Problems",
                 mlcp_direct_enum_init_wrap,
                 mlcp_direct_enum_solve_wrap,
                 mlcp_direct_enum_free_wrap,
                 NULL,  /* error function */
+                mlcp_direct_enum_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-12, /* default_tol */
                 0      /* is_local_solver */);

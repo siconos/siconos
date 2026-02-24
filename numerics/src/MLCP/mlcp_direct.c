@@ -391,12 +391,6 @@ static void mlcp_direct_free_wrap(void* problem, SolverOptions* options) {
   mlcp_direct_reset();
 }
 
-REGISTER_SOLVER(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT",
-                "Direct solver for Mixed Linear Complementarity Problems",
-                mlcp_direct_init_wrap,
-                mlcp_direct_solve_wrap,
-                mlcp_direct_free_wrap,
-                NULL,  /* error function */
-                1000,  /* default_max_iter */
-                1e-12, /* default_tol */
-                0      /* is_local_solver */);
+/* Note: This solver implementation (mlcp_direct) is used by SICONOS_MLCP_DIRECT_SIMPLEX,
+   SICONOS_MLCP_DIRECT_PATH, and SICONOS_MLCP_DIRECT_FB. It is NOT registered under
+   SICONOS_MLCP_DIRECT_ENUM (107) because that ID is used by mlcp_direct_enum.c */

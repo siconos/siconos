@@ -29,6 +29,9 @@
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "utils/naming_conventions.h"  // Standardized naming conventions and macros
 
+/* Forward declaration for solver registry (avoid circular include) */
+typedef int solver_id_t;
+
 /**
     Structure used to store user callbacks inside solvers
 */
@@ -144,7 +147,7 @@ void solver_options_delete(SolverOptions *options);
     see users'guide for details
     \return a pointer to options set, ready to use by a driver.
 */
-SolverOptions *solver_options_create(int solverId);
+SolverOptions *solver_options_create_old_style(int solverId);
 
 /**
    Copy an existing set of options, to create a new one. Warning : callback,
@@ -204,6 +207,53 @@ SolverOptions *solver_options_get_internal_solver(SolverOptions *options, size_t
    \param the solver options to be used as internal solver number n
 */
 void solver_options_set_internal_solver(SolverOptions *options, size_t n, SolverOptions *NSO);
+
+/* ===========================================================================
+ * Registry-based Solver Options (NEW)
+ * =========================================================================== */
+
+/**
+ * Create solver options using registration system.
+ * 
+ * This uses the solver registry to:
+ * 1. Look up solver metadata (name, defaults)
+ * 2. Set default parameters from registration
+ * 3. Call solver-specific initialization if available
+ * 
+ * \param solver_id The solver ID (e.g., SICONOS_FRICTION_3D_NSGS)
+ * \return Pointer to created options, or NULL if solver not found
+ */
+SolverOptions* solver_options_create(int solver_id);
+
+/**
+ * Create solver options by name.
+ * 
+ * Convenience function to create options using solver name instead of ID.
+ * 
+ * \param solver_name The solver name (e.g., "FC3D_NSGS")
+ * \return Pointer to created options, or NULL if name not found
+ */
+SolverOptions* solver_options_create_by_name(const char* solver_name);
+
+/**
+ * Create options and apply solver initialization.
+ * 
+ * Creates options AND calls the solver's init function (if provided).
+ * 
+ * \param solver_id The solver ID
+ * \param problem Optional problem pointer (for problem-specific init)
+ * \return Pointer to created and initialized options, or NULL on failure
+ */
+SolverOptions* solver_options_create_and_init(int solver_id, void* problem);
+
+/**
+ * Reset options to registered defaults.
+ * 
+ * Restores all parameters to their registered default values.
+ * 
+ * \param options The options to reset (modified in place)
+ */
+void solver_options_reset_to_defaults(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

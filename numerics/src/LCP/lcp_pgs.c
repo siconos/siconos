@@ -160,7 +160,5 @@ static int lcp_pgs_solve_wrap(void* problem, double* reaction,
 }
 
 REGISTER_SOLVER_SIMPLE(SICONOS_LCP_PGS, "LCP_PGS",
-                       "Projected Gauss-Seidel for LCP",
-                       lcp_pgs_solve_wrap,
-                       1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                "Projected Gauss-Seidel for LCP",
+                lcp_pgs_solve_wrap, 1000, 1e-6)

@@ -182,19 +182,4 @@ void fc3d_nonsmooth_Newton_NaturalMap(FrictionContactProblem* problem, double* r
   fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
 }
 
-static int fc3d_nsn_nm_init_wrap(void *problem, SolverOptions *options) {
-  fc3d_nsn_nm_set_default(options);
-  return NUMERICS_OK;
-}
-
-static int fc3d_nsn_nm_solve_wrap(void *problem, double *reaction, double *velocity,
-                                   SolverOptions *options) {
-  int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_NaturalMap((FrictionContactProblem *)problem, reaction, velocity, &info,
-                                   options);
-  return info;
-}
-
-REGISTER_SOLVER(FC3D_NSN_NM, "FC3D_NSN_NM",
-                "Nonsmooth Newton method based on Natural Map formulation", fc3d_nsn_nm_init_wrap,
-                fc3d_nsn_nm_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+/* Registration is in fc3d_nonsmooth_Newton_solvers.c to avoid duplicate registrations */

@@ -249,12 +249,13 @@ static void lcp_enum_free_wrap(void* problem, SolverOptions* options) {
   lcp_enum_reset((LinearComplementarityProblem*)problem, options, 1);
 }
 
-REGISTER_SOLVER(SICONOS_LCP_ENUM, "LCP_ENUM",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_ENUM, "LCP_ENUM",
                 "Enumerative solver for LCP",
                 lcp_enum_init_wrap,
                 lcp_enum_solve_wrap,
                 lcp_enum_free_wrap,
                 NULL,  /* error function */
+                lcp_enum_set_default,  /* set_default */
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */)

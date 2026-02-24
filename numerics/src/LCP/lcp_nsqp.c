@@ -24,7 +24,12 @@
 #include "QP_Solvers.h"                    // for ql0001_
 #include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
 #include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
+#include "lcp_cst.h"                       // for SICONOS_LCP_NSQP
 #include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
 
 void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
@@ -150,3 +155,26 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   free(iwar);
   free(war);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_NSQP in the global solver registry.
+ */
+
+static int lcp_nsqp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int lcp_nsqp_solve_wrap(void* problem, double* reaction,
+                               double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_nsqp((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER_SIMPLE(SICONOS_LCP_NSQP, "LCP_NSQP",
+                       "Non-smooth QP solver for LCP",
+                       lcp_nsqp_solve_wrap, 1000, 1e-6)

@@ -41,6 +41,7 @@ typedef int (*SolverSolveFunc)(void* problem, double* reaction,
 typedef void (*SolverFreeFunc)(void* problem, SolverOptions* options);
 typedef double (*SolverErrorFunc)(void* problem, double* reaction,
                                   double* velocity, double* work);
+typedef void (*SolverSetDefaultFunc)(SolverOptions* options);
 
 typedef struct {
     solver_id_t id;
@@ -50,6 +51,7 @@ typedef struct {
     SolverSolveFunc solve;
     SolverFreeFunc free;
     SolverErrorFunc error;
+    SolverSetDefaultFunc set_default;  /* Called during options creation (no problem needed) */
     int default_max_iter;
     double default_tol;
     int is_local_solver;
@@ -67,7 +69,18 @@ int solver_registry_register(const SolverEntry* entry);
     static int _solver_reg_##id(void) __attribute__((constructor)); \
     static int _solver_reg_##id(void) { \
         static const SolverEntry entry = { \
-            id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, \
+            id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, NULL, \
+            max_iter_val, tol_val, local_val \
+        }; \
+        return solver_registry_register(&entry); \
+    }
+
+#define REGISTER_SOLVER_WITH_DEFAULT(id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, \
+                                      set_default_fn, max_iter_val, tol_val, local_val) \
+    static int _solver_reg_##id(void) __attribute__((constructor)); \
+    static int _solver_reg_##id(void) { \
+        static const SolverEntry entry = { \
+            id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, set_default_fn, \
             max_iter_val, tol_val, local_val \
         }; \
         return solver_registry_register(&entry); \

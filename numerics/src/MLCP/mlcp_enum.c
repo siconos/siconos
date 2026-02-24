@@ -414,12 +414,13 @@ static int mlcp_enum_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
+REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_ENUM, "MLCP_ENUM",
                 "Enumerative solver for Mixed Linear Complementarity Problems",
                 mlcp_enum_init_wrap,
                 mlcp_enum_solve_wrap,
                 NULL,    /* free function */
                 NULL,    /* error function */
+                mlcp_enum_set_default,  /* set_default */
                 10000000, /* default_max_iter */
                 1e-6,    /* default_tol */
                 0        /* is_local_solver */);

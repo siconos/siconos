@@ -128,8 +128,11 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
       acparams.computeACFun3x3 = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;
       break;
     }
+    default: {
+      acparams.computeACFun3x3 = &fc3d_AlartCurnierFunctionGenerated;
+      break;
+    }
   }
-
   fc3d_nonsmooth_Newton_solvers equation;
 
   equation.problem = problem;
@@ -193,8 +196,35 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
   free(opaque_data.Bx);
 }
 
+void fc3d_nsn_ac_new_set_default(SolverOptions *options) {
+  /* Same as fc3d_nsn_ac_set_default but adapted for newton_LSA
+   * - iparam[5] = 1 (force arc search) removed - arc search requires get_set_from_problem_data
+   * - iparam[3] = nzmax removed - index 3 is SICONOS_IPARAM_LSA_NONMONOTONE_LS in newton_LSA */
+  /* Note: nzmax is not used in the new implementation, skip setting iparam[3] */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] =
+      SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1; /* default rho */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1; /* mpi com fortran */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
+      SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
+  /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
+      SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE; /* 0 GoldsteinPrice line search, 1 FBLSA */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] =
+      100; /* max iter line search */
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
+      SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO;
+#ifdef WITH_MUMPS
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_MUMPS;
+#else
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_CSLUSOL;
+#endif
+}
+
 static int fc3d_nsn_ac_new_init_wrap(void *problem, SolverOptions *options) {
-  fc3d_nsn_ac_set_default(options);
+  fc3d_nsn_ac_new_set_default(options);
   return NUMERICS_OK;
 }
 

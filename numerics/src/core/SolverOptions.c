@@ -25,6 +25,9 @@
 #include <stdlib.h>  // for free, calloc, malloc
 #include <string.h>  // for strcmp
 
+/* Solver registration system (NEW) */
+#include "utils/solver_registry.h"
+
 #include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
 #include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
 #include "ConvexQP_cst.h"               // for SICONOS_CONVEXQP_ADMM_STR
@@ -271,7 +274,7 @@ SolverOptions* solver_options_copy(SolverOptions* source) {
   return options;
 }
 
-SolverOptions* solver_options_create(int solverId) {
+SolverOptions* solver_options_create_old_style(int solverId) {
   // This function must be the unique way for users to create a SolverOptions.
   // It ensures that the object is ready to use by a driver (pointers ready,
   // memory allocated, minimum default values set ...)
@@ -911,4 +914,80 @@ void solver_options_set_internal_solver(SolverOptions* options, size_t n, Solver
   } else {
     options->internalSolvers[n] = NSO;
   }
+}
+
+/* ===========================================================================
+ * Registry-based Solver Options (NEW)
+ * =========================================================================== */
+
+SolverOptions* solver_options_create(int solver_id) {
+  /* Look up solver in registry */
+  const SolverEntry* solver = solver_registry_lookup(solver_id);
+  if (!solver) {
+    /* Fallback to old-style creation for local/internal solvers not yet registered */
+    return solver_options_create_old_style(solver_id);
+  }
+  
+  /* Create options with registered defaults */
+  SolverOptions* options = solver_options_initialize(solver_id, 
+                                                      solver->default_max_iter,
+                                                      solver->default_tol, 0);
+  
+  /* Call set_default if provided - this sets solver-specific options
+   * and allocates internal solvers without requiring a problem pointer */
+  if (solver->set_default) {
+    solver->set_default(options);
+  }
+  
+  /* Note: We don't call solver->init here because many init functions
+   * require a valid problem pointer (not NULL). The init is typically
+   * called later in the driver before solving.
+   */
+  
+  return options;
+}
+
+SolverOptions* solver_options_create_by_name(const char* solver_name) {
+  if (!solver_name) return NULL;
+  
+  /* Look up solver by name */
+  const SolverEntry* solver = solver_registry_lookup_by_name(solver_name);
+  if (!solver) {
+    fprintf(stderr, "solver_options_create_by_name: solver '%s' not found in registry\n",
+            solver_name);
+    return NULL;
+  }
+  
+  return solver_options_create(solver->id);
+}
+
+SolverOptions* solver_options_create_and_init(int solver_id, void* problem) {
+  SolverOptions* options = solver_options_create(solver_id);
+  if (!options) return NULL;
+  
+  /* Call solver init with problem if provided */
+  const SolverEntry* solver = solver_registry_lookup(solver_id);
+  if (solver && solver->init && problem) {
+    int init_status = solver->init(problem, options);
+    if (init_status != 0) {
+      fprintf(stderr, "solver_options_create_and_init: solver init failed with status %d\n",
+              init_status);
+      solver_options_delete(options);
+      return NULL;
+    }
+  }
+  
+  return options;
+}
+
+void solver_options_reset_to_defaults(SolverOptions* options) {
+  if (!options) return;
+  
+  /* Look up solver in registry */
+  const SolverEntry* solver = solver_registry_lookup(options->solverId);
+  if (!solver) return;
+  
+  /* Reset to registered defaults */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = solver->default_max_iter;
+  options->dparam[SICONOS_DPARAM_TOL] = solver->default_tol;
 }

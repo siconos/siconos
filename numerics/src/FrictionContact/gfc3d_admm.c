@@ -1057,12 +1057,13 @@ static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(GFC3D_ADMM, "GFC3D_ADMM",
+REGISTER_SOLVER_WITH_DEFAULT(GFC3D_ADMM, "GFC3D_ADMM",
                 "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
                 gfc3d_admm_init_wrap,
                 gfc3d_admm_solve_wrap,
                 gfc3d_admm_free_wrap,
                 NULL,   /* error function */
+                gfc3d_admm_set_default,
                 20000,  /* default_max_iter */
                 1e-6,   /* default_tol */
                 0       /* is_local_solver */);
