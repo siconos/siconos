@@ -716,4 +716,16 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S {
 #define SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_ENUM SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY
 #define SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_ENUM SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S
 
+/* ===========================================================================
+ * Short Name Aliases (Optional)
+ * ===========================================================================
+ * For convenience, shorter macro aliases are available by including
+ * fc3d_short_names.h. These provide shorter names like FC3D_NSGS instead of
+ * SICONOS_FRICTION_3D_NSGS.
+ *
+ * Usage:
+ *   #include "FrictionContact/fc3d_short_names.h"
+ *   // Or use the long names directly (backward compatible)
+ */
+
 #endif

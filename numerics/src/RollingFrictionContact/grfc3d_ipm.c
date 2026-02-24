@@ -36,6 +36,7 @@
 #include "grfc3d_Solvers.h"
 #include "grfc3d_compute_error.h"  // for grfc3d_compute_error
 #include "numerics_verbose.h"
+#include "rfc3d_short_names.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */

@@ -24,7 +24,8 @@
 #include <string.h>
 
 // #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "FrictionContact_options.h"    // for ComputeErrorPtr
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"    // for ComputeErrorPtr
 #include "Friction_tools.h"  // for ComputeErrorPtr
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"

@@ -20,6 +20,7 @@
 #include <stdlib.h>  // for malloc, free, abs
 #include <string.h>  // for strncpy, NULL, memcpy
 
+#include "fc3d_short_names.h"
 #include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...

@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include "fc3d_short_names.h"
 #include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
 
 #include <stdio.h>   // for NULL, fprintf, stderr
@@ -62,7 +63,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
   */
 
   /* Glocker formulation */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint) {
+  if (localsolver_options->solverId == FC3D_NCPG_FP) {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
   } else {

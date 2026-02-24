@@ -18,6 +18,7 @@
 
 #include <math.h>  // for fmax
 
+#include "fc3d_short_names.h"
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_IPARAM_INTER...
 #include "Friction_tools.h"

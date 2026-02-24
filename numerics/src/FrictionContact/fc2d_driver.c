@@ -21,6 +21,7 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"            // for SICONOS_FRICTION_2D_NSGS, SICONO...
+#include "fc3d_short_names.h"
 #include "NonSmoothDrivers.h"        // for fc2d_driver
 #include "NumericsFwd.h"             // for FrictionContactProblem, SolverOp...
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
@@ -80,7 +81,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   /* Non Smooth Gauss Seidel (NSGS) */
 
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
-    if (options->solverId == SICONOS_FRICTION_2D_NSGS) {
+    if (options->solverId == FC2D_NSGS) {
       numerics_printf(
           " ======================= Call Sparse NSGS solver for Friction-Contact 2D problem "
           "======================");
@@ -100,7 +101,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   } else if (problem->M->storageType == NM_DENSE) {
     switch (options->solverId) {
       /****** NLGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS: {
+      case FC2D_NSGS: {
         if (verbose)
           printf(
               " ========================== Call NLGS solver for Friction-Contact 2D problem "
@@ -109,7 +110,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         break;
       }
       /****** CPG algorithm ******/
-      case SICONOS_FRICTION_2D_CPG: {
+      case FC2D_CPG: {
         if (verbose)
           printf(
               " ========================== Call CPG solver for Friction-Contact 2D problem "
@@ -118,7 +119,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         break;
       }
       /****** Lexicolemke algorithm ******/
-      case SICONOS_FRICTION_2D_LEMKE: {
+      case FC2D_LEMKE: {
         if (verbose)
           printf(
               " ========================== Call Lemke solver for Friction-Contact 2D problem "
@@ -127,7 +128,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         break;
       }
       /****** Enum algorithm ******/
-      case SICONOS_FRICTION_2D_ENUM: {
+      case FC2D_ENUM: {
         if (verbose)
           printf(
               " ========================== Call Enumerative solver for Friction-Contact 2D "

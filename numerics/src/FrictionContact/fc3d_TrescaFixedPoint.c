@@ -21,7 +21,8 @@
 #include <stdlib.h>  // for malloc
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_NSGS, SICONO...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_NSGS, SICONO...
 #include "Friction_tools.h"                  // for ComputeErrorPtr                                       
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "SiconosBlas.h"             // for cblas_dnrm2
@@ -68,19 +69,19 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, do
   // Warning : same dwork for current and internal solver !!
   internalsolver_options->dWork = mu;
 
-  if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) {
+  if (internalsolver_options->solverId == FC3D_NSGS) {
     if (verbose > 0)
       printf(
           " ========================== Call NSGS solver for Friction-Contact 3D problem "
           "==========================\n");
     internalsolver = &fc3d_nsgs;
-  } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER) {
+  } else if (internalsolver_options->solverId == FC3D_CONVEXQP_PG_CYLINDER) {
     if (verbose > 0)
       printf(
           " ========================== Call ConvexQP PG solver for Friction-Contact 3D "
           "problem ==========================\n");
     internalsolver = &fc3d_ConvexQP_ProjectedGradient_Cylinder;
-  } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_VI_FPP_Cylinder) {
+  } else if (internalsolver_options->solverId == FC3D_VI_FPP_Cylinder) {
     if (verbose > 0)
       printf(
           " ========================== Call VI FPP solver for Friction-Contact 3D problem "
@@ -143,7 +144,7 @@ void fc3d_tfp_set_default(SolverOptions* options) {
 
   // internal solver
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSGS);
+  options->internalSolvers[0] = solver_options_create(FC3D_NSGS);
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 
   // internal solver of the internal solver

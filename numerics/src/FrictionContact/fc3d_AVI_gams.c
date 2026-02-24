@@ -17,6 +17,7 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "fc3d_short_names.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_AVI_gams_path, fc3d_AVI_gams_pathvi
 

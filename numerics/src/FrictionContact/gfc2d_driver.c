@@ -20,6 +20,7 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "FrictionContact_options.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "fc3d_short_names.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
@@ -125,7 +126,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
-    case SICONOS_FRICTION_2D_NSGS: {
+    case FC2D_NSGS: {
       printf("SICONOS_FRICTION_2D_NSGS");
       numerics_printf_verbose(
           1,

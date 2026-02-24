@@ -25,7 +25,8 @@
 
 #include "FischerBurmeisterGenerated.h"  // for fc3d_FischerBurmeisterFun...
 #include "FrictionContactProblem.h"      // for FrictionContactProblem
-#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_NSN_FB
+#include "FrictionContact_options.h"                // for FC3D_NSN_FB
+#include "../fc3d_short_names.h"
 #include "SolverOptions.h"               // for SolverOptions, solver_opt...
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...

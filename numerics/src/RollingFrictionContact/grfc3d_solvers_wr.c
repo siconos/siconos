@@ -27,6 +27,7 @@
 #include "SiconosBlas.h"                          // for cblas_dcopy, cblas_d...
 #include "numerics_verbose.h"
 #include "rolling_fc_Solvers.h"                   // for fc3d_DeSaxceFixedPoint
+#include "rfc3d_short_names.h"
 // #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"  // for SICONOS_DPARAM_TOL
 

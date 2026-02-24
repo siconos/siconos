@@ -25,7 +25,8 @@
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_NSGS_LOCAL...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_NSGS_LOCAL...
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContact...
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
 #include "SiconosBlas.h"             // for cblas_ddot

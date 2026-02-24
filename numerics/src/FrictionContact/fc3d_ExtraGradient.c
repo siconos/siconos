@@ -20,7 +20,8 @@
 #include <stdlib.h>  // for calloc, free
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_EG
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_EG
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SolverOptions.h"           // for SolverOptions, solver_options_nu...

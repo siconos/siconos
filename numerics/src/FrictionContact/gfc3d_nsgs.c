@@ -20,6 +20,7 @@
 #include <stdio.h>   // for fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "fc3d_short_names.h"
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem

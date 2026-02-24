@@ -29,7 +29,8 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SiconosBlas.h"                                  // for cblas_dnrm2
 #include "SolverOptions.h"                                // for SolverOptions
-#include "fc3d_Solvers.h"                                 // for fc3d_SOCLCP
+#include "fc3d_Solvers.h"
+#include "fc3d_short_names.h"                                 // for fc3d_SOCLCP
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
 #include "numerics_verbose.h"
 

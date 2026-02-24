@@ -25,6 +25,7 @@
 #include "AlartCurnierGenerated.h"          // for fc3d_AlartCurnierFunction...
 #include "FrictionContactProblem.h"         // for FrictionContactProblem
 #include "FrictionContact_options.h"                   // for SICONOS_FRICTION_3D_NSN_H...
+#include "../fc3d_short_names.h"
 #include "NumericsFwd.h"                    // for SolverOptions, FrictionCo...
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_cst.h"                         // for SICONOS_VI_ERROR_EVALUATI...
@@ -119,7 +120,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
 
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
       SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN) {
-    SolverOptions *options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
+    SolverOptions *options_vi_eg = solver_options_create(FC3D_VI_EG);
     SOLVER_MAX_ITER(options_vi_eg) = 50;
     SOLVER_TOL(options_vi_eg) = sqrt(SOLVER_TOL(options));
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] =

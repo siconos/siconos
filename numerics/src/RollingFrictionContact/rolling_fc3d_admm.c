@@ -36,6 +36,7 @@
 #include "projectionOnRollingCone.h"     // for projectionOnRollingCone
 #include "rolling_fc3d_compute_error.h"  // for rolling_fc3d_compute_e...
 #include "rolling_fc_Solvers.h"          // for RollingComputeErrorPtr
+#include "rfc3d_short_names.h"
 #include "siconos_debug.h"               // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 
 const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR = "RFC3D ADMM";

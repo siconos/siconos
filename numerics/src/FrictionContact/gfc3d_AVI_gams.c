@@ -17,6 +17,7 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "fc3d_short_names.h"
 #include "NumericsFwd.h"    // for GlobalFrictionContactProblem, SolverOptions
 #include "SiconosConfig.h"  // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include "gfc3d_Solvers.h"  // for gfc3d_AVI_gams_path, gfc3d_AVI_gams_pathvi

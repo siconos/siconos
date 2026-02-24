@@ -24,7 +24,8 @@
 
 #include "AlartCurnierGenerated.h"                    // for fc3d_AlartCurn...
 #include "FrictionContactProblem.h"                   // for FrictionContac...
-#include "FrictionContact_options.h"                             // for SICONOS_FRICTI...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"                             // for SICONOS_FRICTI...
 #include "NSSTools.h"                                 // for max
 #include "NonSmoothSolvers/NonSmoothNewton.h"                          // for nonSmoothDirec...
 #include "NumericsFwd.h"                              // for SolverOptions
@@ -91,13 +92,13 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
 
   double avg_rho[3] = {0.0, 0.0, 0.0};
 
-  if (options->solverId == SICONOS_ONECONE_NSN ||
-      options->solverId == SICONOS_ONECONE_NSN_GP) {
+  if (options->solverId == OC_NSN ||
+      options->solverId == OC_NSN_GP) {
     if (!options->dWork || options->dWorkSize < 3 * nc) {
       options->dWork = (double*)realloc(options->dWork, 3 * nc * sizeof(double));
       options->dWorkSize = 3 * nc;
     }
-  } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
+  } else if (options->solverId == OC_NSN_GP_HYBRID) {
     if (!options->dWork || options->dWorkSize < 4 * nc) {
       options->dWork = (double*)realloc(options->dWork, 4 * nc * sizeof(double));
       options->dWorkSize = 4 * nc;
@@ -106,10 +107,10 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
 
   double* rho = 0;
   for (size_t contact = 0; contact < nc; contact++) {
-    if (options->solverId == SICONOS_ONECONE_NSN ||
-        options->solverId == SICONOS_ONECONE_NSN_GP) {
+    if (options->solverId == OC_NSN ||
+        options->solverId == OC_NSN_GP) {
       rho = &options->dWork[3 * contact];
-    } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
+    } else if (options->solverId == OC_NSN_GP_HYBRID) {
       options->dWork[contact] = 1.0;  // for PLI algorithm.
       rho = &options->dWork[3 * contact + nc];
     }
@@ -194,13 +195,13 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
    * formulation. */
 
   /* Alart-Curnier formulation */
-  if (localsolver_options->solverId == SICONOS_ONECONE_NSN ||
-      localsolver_options->solverId == SICONOS_ONECONE_NSN_GP ||
-      localsolver_options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
+  if (localsolver_options->solverId == OC_NSN ||
+      localsolver_options->solverId == OC_NSN_GP ||
+      localsolver_options->solverId == OC_NSN_GP_HYBRID) {
     fc3d_AC_initialize(problem, localproblem, localsolver_options);
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBNewton) {
+  else if (localsolver_options->solverId == FC3D_NCPG_NEWTON) {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
     F = &F_GlockerFischerBurmeister;
@@ -237,13 +238,13 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
     return info;
   }
 
-  if (options->solverId == SICONOS_ONECONE_NSN) {
+  if (options->solverId == OC_NSN) {
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(localproblem, local_reaction,
                                                                  options);
-  } else if (options->solverId == SICONOS_ONECONE_NSN_GP) {
+  } else if (options->solverId == OC_NSN_GP) {
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
                                                                  options);
-  } else if (options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
+  } else if (options->solverId == OC_NSN_GP_HYBRID) {
     if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
             SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
         options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
@@ -288,13 +289,13 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* probl
                                                    SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
-  if (localsolver_options->solverId == SICONOS_ONECONE_NSN ||
-      localsolver_options->solverId == SICONOS_ONECONE_NSN_GP ||
-      localsolver_options->solverId == SICONOS_ONECONE_NSN_GP_HYBRID) {
+  if (localsolver_options->solverId == OC_NSN ||
+      localsolver_options->solverId == OC_NSN_GP ||
+      localsolver_options->solverId == OC_NSN_GP_HYBRID) {
     fc3d_AC_free(problem, localproblem, localsolver_options);
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBNewton) {
+  else if (localsolver_options->solverId == FC3D_NCPG_NEWTON) {
     NCPGlocker_free(problem, localproblem, localsolver_options);
     ;
   } else {
@@ -430,8 +431,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 
   /* retrieve value of rho */
   double* rho;
-  if (options->solverId == SICONOS_ONECONE_NSN ||
-      options->solverId == SICONOS_ONECONE_NSN_GP) {
+  if (options->solverId == OC_NSN ||
+      options->solverId == OC_NSN_GP) {
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   } else {
     int nc = options->dWorkSize / 4;
@@ -713,8 +714,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
   /* retrieve value of rho */
   double* rho;
-  if (options->solverId == SICONOS_ONECONE_NSN ||
-      options->solverId == SICONOS_ONECONE_NSN_GP) {
+  if (options->solverId == OC_NSN ||
+      options->solverId == OC_NSN_GP) {
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   } else {
     int nc = options->dWorkSize / 4;
@@ -982,7 +983,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
     if (loop == max_loop && max_loop != 1) {
       if (verbose > 0) {
         printf(
-            "Maximum number of loop (%i) in SICONOS_ONECONE_NSN_GP_HYBRID has "
+            "Maximum number of loop (%i) in OC_NSN_GP_HYBRID has "
             "been reached for contact %i with error = %e \n",
             max_loop, options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
             current_error);

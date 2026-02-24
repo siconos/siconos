@@ -23,6 +23,7 @@
 
 #include "CSparseMatrix.h"
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
+#include "fc3d_short_names.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "NumericsMatrix.h"                // for NM_gemv, NumericsMatrix
@@ -48,6 +49,11 @@
 #endif
 
 const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
+
+// Short name for solver ID
+#ifndef GFC3D_ADMM
+#define GFC3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
+#endif
 
 typedef struct {
   double* reaction_hat;

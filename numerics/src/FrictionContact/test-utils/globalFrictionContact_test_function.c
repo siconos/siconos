@@ -31,6 +31,7 @@
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include "SiconosLapack.h"                 // for cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "fc3d_short_names.h"            // for short solver ID names
 #include "frictionContact_test_utils.h"    // for globalFrictionContact_test...
 #include "gfc3d_ipm.h"                     // for classify_BNRT_velocity_original, ...
 #include "test_utils.h"                    // for TestCase
@@ -166,8 +167,8 @@ int globalFrictionContact_test_function(TestCase* current) {
 
   // classification BNRT
   int nB, nN, nR, nT;
-  if (current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM ||
-      current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM) {
+  if (current->options->solverId == GFC3D_IPM_SNM ||
+      current->options->solverId == GFC3D_IPM) {
     // Take projerr value from test
     double* projerr_ptr = current->options->solverData;
     classify_BNRT_velocity_modified(problem->mu, velocity, reaction, NC * dim, NC, &nB, &nN,

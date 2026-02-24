@@ -21,6 +21,7 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "FrictionContact_options.h"                   // for SICONOS_ROLLING_FRICTION_...
+#include "rfc3d_short_names.h"
 #include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
 #include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
@@ -67,7 +68,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction
 
   switch (options->solverId) {
     /* Non Smooth Gauss Seidel (NSGS) */
-    case SICONOS_ROLLING_FRICTION_3D_NSGS: {
+    case RFC3D_NSGS: {
       numerics_printf(
           " ========================== Call NSGS solver for Rolling Friction-Contact 3D "
           "problem ==========================\n");
@@ -75,7 +76,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction
       break;
     }
       /* ADMM */
-    case SICONOS_ROLLING_FRICTION_3D_ADMM: {
+    case RFC3D_ADMM: {
       numerics_printf(
           " ========================== Call ADMM solver for Rolling Friction-Contact 3D "
           "problem ==========================\n");

@@ -38,6 +38,7 @@
 #include "rolling_fc3d_local_problem_tools.h"
 #include "rolling_fc3d_projection.h"
 #include "rolling_naturalmap_functions.h"
+#include "rfc3d_short_names.h"
 
 /* #define DEBUG_CHECK */
 /* #define DEBUG_NOCOLOR */

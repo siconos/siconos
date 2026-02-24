@@ -37,7 +37,8 @@
 #include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
 #include "fc3d_projection.h"                           // for fc3d_projectio...
-#include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
+#include "fc3d_unitary_enumerative.h"
+#include "fc3d_short_names.h"                  // Short names for solver IDs
 #include "numerics_verbose.h"                          // for numerics_printf
 
 /* New utility headers for standardized error computation, tolerance management, and naming conventions */
@@ -157,7 +158,7 @@ void fc3d_nsgs_initialize_local_solver(
   /** Connect to local solver */
   switch (local_opts->solverId) {
     /* Projection */
-    case SICONOS_ONECONE_ProjectionOnConeWithDiagonalization: {
+    case OC_PROJ_DIAG: {
       local_function_toolkit->local_solver = &fc3d_projectionWithDiagonalization_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_projectionWithDiagonalization_update;
@@ -165,14 +166,14 @@ void fc3d_nsgs_initialize_local_solver(
       fc3d_projection_initialize(problem, localproblem);
       break;
     }
-    case SICONOS_ONECONE_ProjectionOnCone: {
+    case OC_PROJ: {
       local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver = &fc3d_projection_free;
       fc3d_projection_initialize(problem, localproblem);
       break;
     }
-    case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: {
+    case OC_PROJ_LI: {
       local_function_toolkit->local_solver = &fc3d_projectionOnConeWithLocalIteration_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
@@ -181,7 +182,7 @@ void fc3d_nsgs_initialize_local_solver(
                                                          local_opts);
       break;
     }
-    case SICONOS_ONECONE_ProjectionOnConeWithRegularization: {
+    case OC_PROJ_REG: {
       local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_projection_update_with_regularization;
@@ -190,7 +191,7 @@ void fc3d_nsgs_initialize_local_solver(
       break;
     }
     /* Newton solver (Alart-Curnier) */
-    case SICONOS_ONECONE_NSN: {
+    case OC_NSN: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -200,7 +201,7 @@ void fc3d_nsgs_initialize_local_solver(
                                                           local_opts);
       break;
     }
-    case SICONOS_ONECONE_NSN_GP: {
+    case OC_NSN_GP: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -210,7 +211,7 @@ void fc3d_nsgs_initialize_local_solver(
                                                           local_opts);
       break;
     }
-    case SICONOS_ONECONE_NSN_GP_HYBRID: {
+    case OC_NSN_GP_HYBRID: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -242,7 +243,7 @@ void fc3d_nsgs_initialize_local_solver(
     }
 
     /* Fixed Point solver (Glocker Formulation) */
-    case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint: {
+    case FC3D_NCPG_FP: {
       local_function_toolkit->local_solver = &fc3d_FixedP_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
       local_function_toolkit->free_local_solver = (FreeLocalSolverPtr)&fc3d_FixedP_free;
@@ -906,7 +907,7 @@ void fc3d_nsgs_set_default(SolverOptions* options) {
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] =
-      solver_options_create(SICONOS_ONECONE_NSN_GP_HYBRID);
+      solver_options_create(OC_NSN_GP_HYBRID);
   // Printing in the same style as in IPM solver
   options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] =
       SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;

@@ -34,6 +34,7 @@
 #include "projectionOnRollingCone.h"           // for projectionOnRollingCone
 #include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
 #include "rolling_fc_Solvers.h"
+#include "rfc3d_short_names.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END
 
 #ifdef DEBUG_MESSAGES

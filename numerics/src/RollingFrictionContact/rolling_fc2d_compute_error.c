@@ -17,6 +17,7 @@
  */
 
 #include "rolling_fc2d_compute_error.h"
+#include "rfc3d_short_names.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
