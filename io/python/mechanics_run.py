@@ -213,6 +213,14 @@ class MechanicsHdf5Runner_run_options(dict):
 
         create_option(
             d,
+            "vnative_options",
+            "?, optional",
+            None,
+            """set of options for the vnative backend""",
+        )
+
+        create_option(
+            d,
             "multipoints_iterations",
             "boolean, optional",
             None,
@@ -2488,8 +2496,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         current_line = self._solv_data.shape[0]
         self._solv_data.resize(current_line + 1, 0)
-        iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
-        precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
+        if self.config.backend == "vnative":
+            # need a fix in bridge.py
+            iterations = so.iparam(sn.params.SICONOS_IPARAM_ITER_DONE)
+            precision = so.dparam(sn.params.SICONOS_DPARAM_RESIDU)
+        else:
+            iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
+            precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
         if so.solverId == sn.solver_ids.SICONOS_GENERIC_MECHANICAL_NSGS:
             local_precision = so.dparam[3]  # Check this !
         elif so.solverId == sn.solver_ids.SICONOS_FRICTION_3D_NSGS:
@@ -3380,8 +3393,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def solver_verbose(self, number_of_contacts):
 
         so = self._simulation.oneStepNSProblem(0).numericsSolverOptions()
-        iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
-        precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
+        if self.config.backend == "vnative":
+            # need a fix in bridge.py
+            iterations = so.iparam(sn.params.SICONOS_IPARAM_ITER_DONE)
+            precision = so.dparam(sn.params.SICONOS_DPARAM_RESIDU)
+        else:
+            iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
+            precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
 
         solver_output = {}
         mask = "|      "
