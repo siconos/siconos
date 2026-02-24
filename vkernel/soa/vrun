@@ -74,6 +74,7 @@ while [ $# -gt 0 ]; do
  "ninja"
  "parallel"
  "python"
+ "python-line-profiler"
  "python-packaging"
  "python-wheel"
  "rsync"
@@ -165,6 +166,7 @@ EOF
            --root=${VRUN_GUIX_BASE_DIR}/.siconos-guix-profile \
            -m ${VRUN_GUIX_BASE_DIR}/.siconos-disks-manifest.scm \
            -D siconos \
+           -m ${mydir}/pybind11-3.scm \
            ${VRUN_GUIX_CXX_TOOLCHAIN} \
            --with-git-url=fclib=https://github.com/FrictionalContactLibrary/fclib \
            ${VRUN_PACKAGES} \
