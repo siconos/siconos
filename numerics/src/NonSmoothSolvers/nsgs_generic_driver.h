@@ -27,6 +27,7 @@
 #define NSGS_GENERIC_DRIVER_H
 
 #include "nsgs_generic.h"
+#include "NonSmoothGaussSeidel_options.h"
 
 /** Generic NSGS solver function signature */
 typedef void (*NSGSSolver)(void* problem, double* reaction, double* velocity, int* info,
@@ -95,23 +96,22 @@ static inline void nsgs_driver(void* problem, double* reaction, double* velocity
                               .filter_local_sol = 1,
                               .error_eval_type = 0};
 
-  /* Extract options from SolverOptions if needed */
+  /* Extract options from SolverOptions using proper enums */
   if (options) {
     int* iparam = options->iparam;
     double* dparam = options->dparam;
 
-    /* Check for common option names across problem types */
+    /* Use proper enums from NonSmoothGaussSeidel_options.h */
     if (iparam) {
-      /* These indices should be standardized across problems */
-      toolkit.use_freezing = iparam[7];  /* SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT */
-      toolkit.use_shuffling = iparam[5]; /* SICONOS_FRICTION_3D_NSGS_SHUFFLE */
-      toolkit.filter_local_sol =
-          iparam[8];                       /* SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION */
-      toolkit.error_eval_type = iparam[9]; /* SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION */
+      toolkit.use_freezing = iparam[SICONOS_NSGS_FREEZING_CONTACT];
+      toolkit.use_shuffling = iparam[SICONOS_NSGS_SHUFFLE];
+      toolkit.filter_local_sol = iparam[SICONOS_NSGS_FILTER_LOCAL_SOLUTION];
+      toolkit.error_eval_type = iparam[SICONOS_NSGS_ERROR_EVALUATION_TYPE];
+      toolkit.freezing_iter = iparam[SICONOS_NSGS_FREEZING_CONTACT];
     }
 
     if (dparam) {
-      toolkit.omega = dparam[10]; /* SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE */
+      toolkit.omega = dparam[SICONOS_NSGS_RELAXATION_VALUE];
     }
   }
 

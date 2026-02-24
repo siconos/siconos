@@ -15,106 +15,131 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <assert.h>  // for assert
-#include <float.h>   // for DBL_EPSILON
-#include <stdio.h>   // for fprintf, NULL, stderr
-#include <string.h>  // for strcat, strcpy
 
-#include "FrictionContact_options.h"                   // for SICONOS_ROLLING_FRICTION_...
+/*!\file rolling_fc2d_driver.c
+ * \brief RFC2D driver using the solver registration system
+ */
+
+#include "RollingFrictionContactProblem.h"
+#include "FrictionContact_options.h"
 #include "rfc3d_short_names.h"
-#include "NonSmoothDrivers.h"               // for rolling_fc2d_driver
-#include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
-#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
-#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "numerics_verbose.h"
-#include "rolling_fc_Solvers.h"             // for rolling_fc2d_nsgs, rollin...
 
+/* Registration-based headers */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <float.h>
+#include <string.h>
+
+/* String constants */
 const char* const SICONOS_ROLLING_FRICTION_2D_NSGS_STR = "RFC2D_NSGS";
-
-const char* const
-    SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR =
-        "RFC2D_ProjectionOnConeWithLocalIteration";
-
+const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR =
+    "RFC2D_ProjectionOnConeWithLocalIteration";
 const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR =
     "RFC2D_ProjectionOnCone";
 
-int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction,
-                        double* velocity, SolverOptions* options) {
-  /* verbose=3; */
-  /* rollingFrictionContact_display(problem); */
-  /* rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat"); */
-
-  if (options == NULL) numerics_error("rolling_fc2d_driver", "null input for solver options");
-
-  assert(options->isSet); /* true(1) if the SolverOptions structure has been filled in else
-                             false(0) */
-
-  if (verbose > 1) solver_options_print(options);
-
-  int info = -1;
-
-  if (problem->dimension != 3) {
-    numerics_warning(
-        "rolling_fc2d_driver",
-        "Dimension of the problem : problem-> dimension is not compatible or is not set");
-    numerics_error(
-        "rolling_fc2d_driver",
-        "Dimension of the problem : problem-> dimension is not compatible or is not set");
-  }
-  /* Check for trivial case */
-  info = rolling_fc2d_checkTrivialCase(problem, velocity, reaction, options);
-  if (info == 0) {
-    /* If a trivial solution is found, we set the number of iterations to 0
-       and the reached acuracy to 0.0 .
-    */
-    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
-    goto exit;
-  }
-
-  switch (options->solverId) {
-    /* Non Smooth Gauss Seidel (NSGS) */
-    case RFC2D_NSGS: {
-      numerics_printf(
-          " ========================== Call NSGS solver for Rolling Friction-Contact 2D "
-          "problem ==========================\n");
-      rolling_fc2d_nsgs(problem, reaction, velocity, &info, options);
-      break;
-    }
-    default: {
-      char msg[200];
-      strcpy(msg, "Unknown solver : ");
-      strcat(msg, solver_options_id_to_name(options->solverId));
-      strcat(msg, "\n");
-      numerics_warning("rolling_fc2d_driver", msg);
-      numerics_error("rolling_fc2d_driver", msg);
-    }
-  }
-
-exit:
-
-  return info;
-}
+/* ===========================================================================
+ * Trivial Case Check
+ * =========================================================================== */
 
 int rolling_fc2d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
                                   double* reaction, SolverOptions* options) {
-  /* Number of contacts */
+  (void)options;
   int nc = problem->numberOfContacts;
   double* q = problem->q;
-  /* Dimension of the problem */
   int n = 3 * nc;
-  int i = 0;
-  /*take off? R=0 ?*/
-  for (i = 0; i < nc; i++) {
+  
+  for (int i = 0; i < nc; i++) {
     if (q[3 * i] < -DBL_EPSILON) return -1;
   }
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-
-  numerics_printf(
-      "rolling_fc2d rolling_fc2d_checkTrivialCase, take off, trivial solution reaction = 0, "
-      "velocity = q.\n");
+  
+  numerics_printf("rolling_fc2d: trivial solution (take-off), reaction = 0, velocity = q.");
   return 0;
+}
+
+/* ===========================================================================
+ * Registration-Based Driver
+ * =========================================================================== */
+
+int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction,
+                        double* velocity, SolverOptions* options) {
+  /* Input validation */
+  if (!problem || !reaction || !velocity || !options) {
+    numerics_error("rolling_fc2d_driver", "null input argument");
+    return NUMERICS_ERR_NULL_POINTER;
+  }
+
+  /* Check dimension */
+  if (problem->dimension != 3) {
+    numerics_error("rolling_fc2d_driver", "Problem dimension is not 3 or is not set");
+    return NUMERICS_ERR_INVALID_ARGUMENT;
+  }
+
+  /* Initialize output */
+  SET_SOLVER_ITER_DONE(options, 0);
+  SET_SOLVER_RESIDUAL(options, 0.0);
+
+  /* Check for trivial case */
+  int trivial_status = rolling_fc2d_checkTrivialCase(problem, velocity, reaction, options);
+  if (trivial_status == 0) {
+    return NUMERICS_OK;
+  }
+
+  /* Lookup solver in registry */
+  const SolverEntry* solver = solver_registry_lookup(options->solverId);
+
+  if (!solver) {
+    numerics_printf("rolling_fc2d_driver: solver ID %d not found in registry", options->solverId);
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  numerics_printf_verbose(1, "rolling_fc2d_driver: using solver '%s' (%s)",
+                          solver->name, solver->description);
+
+  /* Validate solver is appropriate for this problem type */
+  if (solver->is_local_solver) {
+    numerics_printf("rolling_fc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+                    solver->name);
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  /* Check solve function exists */
+  if (!solver->solve) {
+    numerics_printf("rolling_fc2d_driver: solver '%s' has no solve function", solver->name);
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  /* Initialize solver if init function provided */
+  if (solver->init) {
+    int init_status = solver->init(problem, options);
+    if (init_status != NUMERICS_OK) {
+      numerics_printf("rolling_fc2d_driver: solver initialization failed with error %d", init_status);
+      return init_status;
+    }
+  }
+
+  /* Call the solver */
+  numerics_printf_verbose(1, "rolling_fc2d_driver: calling solver...");
+  int solve_status = solver->solve(problem, reaction, velocity, options);
+
+  /* Cleanup if needed */
+  if (solver->free) {
+    solver->free(problem, options);
+  }
+
+  /* Log result */
+  if (solve_status == NUMERICS_OK) {
+    numerics_printf_verbose(1, "rolling_fc2d_driver: solver converged successfully");
+  } else {
+    numerics_printf_verbose(1, "rolling_fc2d_driver: solver returned status %d", solve_status);
+  }
+
+  return solve_status;
 }
