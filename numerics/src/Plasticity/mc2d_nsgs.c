@@ -362,13 +362,11 @@ static int determine_convergence(double error, double tolerance, int iter,
   if (error < tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "--------------- MC2D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e\n",
+        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   } else {
     numerics_printf(
-        "--------------- MC2D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e\n",
+        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   }
   return hasNotConverged;
@@ -384,8 +382,7 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
   if (error < *tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "--------------- MC2D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e",
+        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
 
     double absolute_error =
@@ -421,8 +418,7 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
 
   } else {
     numerics_printf(
-        "--------------- MC2D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e",
+        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
   }
   return hasNotConverged;

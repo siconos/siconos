@@ -215,8 +215,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
 
       numerics_printf_verbose(
-          1, "---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e", iter,
-          error, alpha);
+          1, "---- FC3D - PROXIMAL - | %3d | %14.7e | %7.3e | alpha = %12.8e", iter,
+          error, tolerance, alpha);
 
       /* update alpha */
       if (isVariable) {
@@ -297,10 +297,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       ++iter;
 
       numerics_printf_verbose(
-          1,
-          "---- FC3D - PROXIMAL - Iteration %i                                              "
-          "Residual = %14.7e with alpha = %8.1e",
-          iter, error, alpha);
+          1, "---- FC3D - PROXIMAL - | %3d | %14.7e | %7.3e | alpha = %8.1e",
+          iter, error, tolerance, alpha);
 
       cblas_dcopy(n, reaction, 1, reactionold, 1);
       //      errorold = error;
@@ -362,10 +360,10 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   } else
     numerics_error("fc3d_proximal", "Proximal strategy is unknown");
 
-  numerics_printf_verbose(1, "---- FC3D - PROXIMAL - # Iteration %i Final Residual = %.1e",
-                          iter, error);
+  numerics_printf_verbose(1, "---- FC3D - PROXIMAL - | %3d | %.1e | %7.3e | (final)",
+                          iter, error, tolerance);
   numerics_printf_verbose(
-      1, "---- FC3D - PROXIMAL - # Iteration of internal solver %i",
+      1, "---- FC3D - PROXIMAL - Iteration of internal solver %i",
       options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
 
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;

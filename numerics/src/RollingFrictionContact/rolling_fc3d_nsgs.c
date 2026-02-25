@@ -287,13 +287,11 @@ static int determine_convergence(double error, double tolerance, int iter,
   if (error < tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "--------------- RFC3D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e",
+        "---- RFC3D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   } else {
     numerics_printf(
-        "--------------- RFC3D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e",
+        "---- RFC3D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   }
   return hasNotConverged;
@@ -310,8 +308,7 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
   if (error < *tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "--------------- RFC3D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e",
+        "---- RFC3D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
 
     double absolute_error =
@@ -348,8 +345,7 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
 
   } else {
     numerics_printf(
-        "--------------- RFC3D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e",
+        "---- RFC3D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
   }
   return hasNotConverged;

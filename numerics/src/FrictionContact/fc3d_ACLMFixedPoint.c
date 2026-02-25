@@ -148,16 +148,14 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doub
     }
 
     if (verbose > 0)
-      printf("---- FC3D - ACLMFP - Iteration %i Residual = %14.7e\n", iter, error);
+      numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   if (verbose > 0) {
-    printf("--------------- FC3D - ACLMFP - # Iteration %i Final Residual = %14.7e\n", iter,
-           error);
-    printf("--------------- FC3D - ACLMFP - #              internal iteration = %i\n",
-           cumul_iter);
+    numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+    numerics_printf("---- FC3D - ACLMFP - internal iteration = %i", cumul_iter);
   }
   free(soclcp->q);
   free(soclcp->coneIndex);

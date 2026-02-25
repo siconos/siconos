@@ -462,8 +462,8 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
     if (r < epsilon_primal && s < epsilon_dual) stopping_criterion = 1;
 
     numerics_printf_verbose(
-        1, "---- RFC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e",
-        iter, rho, residual, tolerance);
+        1, "---- RFC3D - ADMM - | %3d | %14.7e | %7.3e |",
+        iter, residual, tolerance);
     numerics_printf_verbose(1,
                             "---- RFC3D - ADMM  -                            primal residual "
                             "= %14.7e, epsilon_primal = %14.7e",
@@ -491,8 +491,8 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
       if (error < dparam[SICONOS_DPARAM_TOL]) {
         hasNotConverged = 0;
         numerics_printf_verbose(
-            1, "---- RFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter,
-            rho, error);
+            1, "---- RFC3D - ADMM - | %3d | %14.7e | %7.3e | (full)", iter,
+            error, tolerance);
       } else {
         numerics_printf_verbose(1,
                                 "---- RFC3D - ADMM  - The tolerance on the  residual is not "
@@ -503,8 +503,8 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
             fmax(epsilon_dual / scaling_error_dual, epsilon_primal / scaling_error_primal) /
             error;
         numerics_printf_verbose(
-            1, "---- RFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e",
-            tolerance);
+            1, "---- RFC3D - ADMM - | %3d | %14.7e | %7.3e | (reducing tol)", iter,
+            error, tolerance);
         if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] ==
             SICONOS_FRICTION_3D_RESCALING_SCALAR) {
           norm_q = cblas_dnrm2(m, rescaled_problem->q, 1);
@@ -522,8 +522,8 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
       *info = 0;
     }
     numerics_printf_verbose(
-        1, "---- RFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho,
-        error);
+        1, "---- RFC3D - ADMM - | %3d | %14.7e | %7.3e | (final)", iter,
+        error, tolerance);
   }
   NM_clear(W);
   dparam[SICONOS_DPARAM_RESIDU] = error;

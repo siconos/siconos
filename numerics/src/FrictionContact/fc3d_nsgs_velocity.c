@@ -139,14 +139,12 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
 
     if (verbose > 0)
-      printf("--------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter,
-             error);
+      numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n",
-         iter, error);
+  numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
   dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[7] = iter;

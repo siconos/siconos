@@ -146,17 +146,14 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
     gfc3d_compute_error(problem, reaction, velocity, globalVelocity, tolerance, options,
                         norm_q, norm_b, &error);
 
-    numerics_printf_verbose(1, "---- GFC3D - ACLMFP - Iteration %i Residual = %14.7e", iter,
-                            error);
+    numerics_printf_verbose(1, "---- GFC3D - ACLMFP - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
-  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - # Iteration %i Final Residual = %14.7e",
-                          iter, error);
-  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - #              internal iteration = %i",
-                          cumul_iter);
+  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - internal iteration = %i", cumul_iter);
 
   NM_clear(cqp->A);
   free(cqp->b);
