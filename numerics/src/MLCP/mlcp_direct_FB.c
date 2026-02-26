@@ -124,7 +124,7 @@ static void mlcp_direct_FB_free_wrap(void* problem, SolverOptions* options) {
   mlcp_direct_FB_reset();
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_DIRECT_FB, "MLCP_DIRECT_FB",
+REGISTER_SOLVER(SICONOS_MLCP_DIRECT_FB, "MLCP_DIRECT_FB",
                 "Direct-Fischer-Burmeister hybrid solver for Mixed Linear Complementarity Problems",
                 mlcp_direct_FB_init_wrap,
                 mlcp_direct_FB_solve_wrap,

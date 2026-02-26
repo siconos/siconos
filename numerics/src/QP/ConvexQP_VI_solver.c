@@ -116,9 +116,14 @@ void convexQP_VI_solver(ConvexQP* problem, double* z, double* w, int* info,
  * - Elimination of giant switch statements in drivers
  */
 
+static void convexqp_vi_fpp_set_default(SolverOptions* options) {
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+}
+
 static int convexqp_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-4;
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -141,13 +146,19 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_VI_FPP, "CONVEXQP_VI_FPP",
                 convexqp_vi_fpp_solve_wrap,
                 convexqp_vi_fpp_free_wrap,
                 NULL,  /* error function */
+                convexqp_vi_fpp_set_default,
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);
 
+static void convexqp_vi_eg_set_default(SolverOptions* options) {
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+}
+
 static int convexqp_vi_eg_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-4;
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -170,6 +181,7 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_VI_EG, "CONVEXQP_VI_EG",
                 convexqp_vi_eg_solve_wrap,
                 convexqp_vi_eg_free_wrap,
                 NULL,  /* error function */
+                convexqp_vi_eg_set_default,
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

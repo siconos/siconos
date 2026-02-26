@@ -50,6 +50,7 @@
 #include "numerics_verbose.h"  // for numerics_error, numerics_printf...
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
+#include "utils/numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX, etc.
 
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
@@ -290,9 +291,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, do
       break;
 
     default:
-      fprintf(stderr,
-              "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown "
-              "storage type for A.\n");
+      fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage\n");
       exit(EXIT_FAILURE);
   }
 
@@ -327,9 +326,7 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
   else if (storage == NM_SPARSE_BLOCK)
     SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else {
-    fprintf(stderr,
-            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
-            "unknown storage type for A.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, unknown storage\n");
     exit(EXIT_FAILURE);
   }
 
@@ -418,10 +415,8 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
       break;
     }
     default: {
-      fprintf(stderr,
-              "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y) "
-              "failed, unknown storage type for A.\n");
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y)\n");
+      return;
     }
   }
 
@@ -550,8 +545,8 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d\n", A->storageType);
+      return;
     }
   }
 
@@ -628,8 +623,8 @@ void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, Numer
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d\n", A->storageType);
+      return;
     }
   }
 }
@@ -691,8 +686,8 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d\n", A->storageType);
+      return;
     }
   }
 
@@ -1053,11 +1048,14 @@ void NM_entry(NumericsMatrix* M, int i, int j, double val) {
 }
 
 double NM_get_value(const NumericsMatrix* const M, int i, int j) {
-  assert(M);
+  if (!M) {
+    fprintf(stderr, "NM_get_value: M is NULL\n");
+    return NAN;
+  }
 
   if ((i + 1 > M->size0) || (j + 1 > M->size1)) {
     fprintf(stderr, "NM_get_value :: out of range \n");
-    exit(EXIT_FAILURE);
+    return NAN;
   }
   switch (M->storageType) {
     case NM_DENSE: {
@@ -1147,8 +1145,7 @@ bool NM_equal(NumericsMatrix* A, NumericsMatrix* B) {
 
 bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol) {
   DEBUG_BEGIN("NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)\n");
-  assert(A);
-  assert(B);
+  if (!A || !B) return false;
   if (A->size0 != B->size0) {
     return false;
   }
@@ -1192,10 +1189,7 @@ void NM_vector_display(double* m, int nRow) {
 }
 
 void NM_display_storageType(const NumericsMatrix* const m) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   printf("========== Numerics Matrix\n");
 
   printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
@@ -1253,10 +1247,7 @@ void NM_display_storageType(const NumericsMatrix* const m) {
   }
 }
 void NM_display(const NumericsMatrix* const m) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   printf("========== Numerics Matrix\n");
 
   printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
@@ -1373,10 +1364,7 @@ void NM_display(const NumericsMatrix* const m) {
 }
 
 void NM_display_row_by_row(const NumericsMatrix* const m) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   NM_types storageType = m->storageType;
   if (storageType == NM_DENSE) {
     printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
@@ -1388,7 +1376,7 @@ void NM_display_row_by_row(const NumericsMatrix* const m) {
   } else if (storageType == NM_SPARSE_BLOCK)
     SBM_print(m->matrix1);
   else {
-    fprintf(stderr, "NM_display_row_by_row :: unknown matrix storage");
+    fprintf(stderr, "NM_display_row_by_row :: unknown matrix storage\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -1397,10 +1385,7 @@ void NM_write_in_file(const NumericsMatrix* const m, FILE* file) {
   DEBUG_PRINT(
       "\n  ========== NM_write_in_file(const NumericsMatrix* const m, FILE* file) start\n");
 
-  if (!m) {
-    fprintf(stderr, "Numerics, NM_write_in_file failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
 
   fprintf(file, "%d\n", m->storageType);
   fprintf(file, "%d\n", m->size0);
@@ -1434,10 +1419,7 @@ void NM_write_in_file(const NumericsMatrix* const m, FILE* file) {
       "\n  ========== NM_write_in_file(const NumericsMatrix* const m, FILE* file) end\n");
 }
 void NM_write_in_file_python(const NumericsMatrix* const m, FILE* file) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix_write_in_file_python  failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   fprintf(file, "storageType = %d ; \n", m->storageType);
   fprintf(file, "size0 = %d; \n", m->size0);
   fprintf(file, "size1 = %d; \n", m->size1);
@@ -1453,10 +1435,7 @@ void NM_write_in_file_python(const NumericsMatrix* const m, FILE* file) {
 }
 
 void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   fprintf(file, "storageType = %d ; \n", m->storageType);
   fprintf(file, "size0 = %d; \n", m->size0);
   fprintf(file, "size1 = %d; \n", m->size1);
@@ -1490,10 +1469,7 @@ void NM_read_in_filename(NumericsMatrix* const m, const char* filename) {
 }
 
 void NM_read_in_file(NumericsMatrix* const m, FILE* file) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NumericsMatrix NM_read_in_file failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   int tmp = 0;
   CHECK_IO(fscanf(file, "%d", &(tmp)));
   m->storageType = (NM_types)tmp;
@@ -1583,7 +1559,7 @@ NumericsMatrix* NM_create_from_filename(const char* filename) {
 }
 
 void NM_read_in_file_scilab(NumericsMatrix* const M, FILE* file) {
-  fprintf(stderr, "Numerics, NumericsMatrix,NM_read_in_file_scilab");
+  fprintf(stderr, "Numerics, NumericsMatrix,NM_read_in_file_scilab not implemented\n");
   exit(EXIT_FAILURE);
 }
 
@@ -1743,7 +1719,7 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block)
   }
 }
 SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
-  assert(M);
+  if (!M) return NULL;
   NM_types storageType = M->storageType;
 
   if (M->size0 != M->size1) return NULL;
@@ -1771,7 +1747,7 @@ SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_
   return sbm;
 }
 NumericsMatrix* NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
-  assert(M);
+  if (!M) return NULL;
   NM_types storageType = M->storageType;
 
   if (M->size0 != M->size1) return NULL;
@@ -2053,9 +2029,8 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat) {
       data = NSM_new();
       break;
     default:
-      fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !",
-              mat->storageType);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !\n", mat->storageType);
+      return NULL;
   }
 
   NM_fill(M, mat->storageType, size0, size1, data);
@@ -2496,8 +2471,8 @@ void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
     }
     default: {
       numerics_error("NM_version_copy", "unknown id");
-    }
       assert(false);
+    }
   }
 }
 
@@ -2707,7 +2682,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A) {
 }
 
 CSparseMatrix* NM_half_triplet(NumericsMatrix* A) {
-  assert(A);
+  if (!A) return NULL;
   assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   if (numericsSparseMatrix(A)->half_triplet &&
@@ -2759,7 +2734,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A) {
           }
           NSM_set_version(A->matrix2, NSM_HALF_TRIPLET, NM_version(A, NM_SPARSE_BLOCK));
         } else if (A->matrix0) {
-          fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+          fprintf(stderr, "NM_half_triplet: conversion is not implemented\n");
           exit(EXIT_FAILURE);
         }
         break;
@@ -2781,9 +2756,8 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A) {
             break;
           }
           case NSM_CSR: {
-            fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+            fprintf(stderr, "NM_half_triplet: conversion is not implemented\n");
             exit(EXIT_FAILURE);
-            break;
           }
           default:
           case NSM_UNKNOWN: {
@@ -2808,7 +2782,7 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
   assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   DEBUG_BEGIN("NM_csc(NumericsMatrix *A)\n");
-  assert(A);
+  if (!A) return NULL;
 
   assert(NM_version(A, A->storageType) == NM_max_version(A));
 
@@ -2830,7 +2804,7 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
 
         CSparseMatrix* Acsc = A->matrix2->csc;
 
-        assert(Acsc);
+        if (!Acsc) return NULL;
 
         CS_INT status =
             UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
@@ -2893,7 +2867,7 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A) {
 }
 
 CSparseMatrix* NM_csr(NumericsMatrix* A) {
-  assert(A);
+  if (!A) return NULL;
   assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   if (numericsSparseMatrix(A)->csr &&
@@ -3172,7 +3146,10 @@ NumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B) {
       if (check_mkl_lib() && (fabs(beta - 1.) < 100 * DBL_EPSILON)) {
         if (!B->matrix2) NM_triplet(B);
         NumericsSparseMatrix* result = NM_MKL_spblas_gemm(0, A->matrix2, B->matrix2);
-        assert(result);
+        if (!result) {
+          fprintf(stderr, "NM_gemm: NM_MKL_spblas_gemm failed\n");
+          exit(EXIT_FAILURE);
+        }
         int size0 = C->size0;
         int size1 = C->size1;
         NM_clear(C);
@@ -3280,7 +3257,10 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B, const dou
         if (!B->matrix2) NM_triplet(B);
         if (!C->matrix2) NM_triplet(C);
         NumericsSparseMatrix* tmp_matrix = NM_MKL_spblas_gemm(0, A->matrix2, B->matrix2);
-        assert(tmp_matrix);
+        if (!tmp_matrix) {
+          fprintf(stderr, "NM_gemm: NM_MKL_spblas_gemm failed\n");
+          exit(EXIT_FAILURE);
+        }
         NumericsSparseMatrix* result = NM_MKL_spblas_add(0, alpha, tmp_matrix, C->matrix2);
         int size0 = C->size0;
         int size1 = C->size1;
@@ -3630,8 +3610,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double* b, unsigned int nrhs) {
           }
 #endif /* WITH_MUMPS */
           default: {
-            fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
-            exit(EXIT_FAILURE);
+            CHECK_ARG(0, "NM_LU_solve: unknown sparse linearsolver %d\n");
           } break;
         }
         break;
@@ -3742,8 +3721,7 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
             }
 #endif /* WITH_MUMPS */
             default: {
-              fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
-              exit(EXIT_FAILURE);
+              CHECK_ARG(0, "NM_LU_solve: unknown sparse linearsolver %d\n");
             } break;
           }
           break;
@@ -4122,8 +4100,7 @@ int NM_gesv_expert(NumericsMatrix* A, double* b, unsigned keep) {
 
 #endif /* WITH_MKL_pardiso */
         default: {
-          fprintf(stderr, "NM_gesv: unknown sparse linearsolver %d\n", p->solver);
-          exit(EXIT_FAILURE);
+          CHECK_ARG(0, "NM_gesv: unknown sparse linearsolver %d\n");
         }
       }
       break;
@@ -4320,8 +4297,7 @@ int NM_posv_expert(NumericsMatrix* A, double* b, unsigned keep) {
 #endif /* WITH_MUMPS */
 
         default: {
-          fprintf(stderr, "NM_posv: unknown sparse linearsolver %d\n", p->solver);
-          exit(EXIT_FAILURE);
+          CHECK_ARG(0, "NM_posv: unknown sparse linearsolver %d\n");
         }
       }
       break;
@@ -4675,7 +4651,10 @@ size_t NM_nnz(const NumericsMatrix* M) {
 }
 
 double NM_norm_1(NumericsMatrix* A) {
-  assert(A);
+  if (!A) {
+    fprintf(stderr, "NM_norm_1: A is NULL\n");
+    return NAN;
+  }
 
   switch (A->storageType) {
     case NM_DENSE: {
@@ -4701,7 +4680,10 @@ double NM_norm_1(NumericsMatrix* A) {
 }
 
 double NM_norm_inf(NumericsMatrix* A) {
-  assert(A);
+  if (!A) {
+    fprintf(stderr, "NM_norm_inf: A is NULL\n");
+    return NAN;
+  }
   CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
   double norm = cs_norm(Acsct);
   assert(norm >= 0);
@@ -4710,7 +4692,7 @@ double NM_norm_inf(NumericsMatrix* A) {
 }
 
 int NM_is_symmetric(NumericsMatrix* A) {
-  assert(A);
+  CHECK_NULL(A);
 
   NumericsMatrix* Atrans = NM_transpose(A);
   NumericsMatrix* AplusATrans = NM_add(1 / 2.0, A, -1 / 2.0, Atrans);
@@ -4841,8 +4823,8 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax) {
 }
 
 int NM_max_by_columns(NumericsMatrix* A, double* max) {
-  assert(A);
-  assert(max);
+  CHECK_NULL(A);
+  CHECK_NULL(max);
 
   switch (A->storageType) {
     case NM_DENSE:
@@ -4857,8 +4839,8 @@ int NM_max_by_columns(NumericsMatrix* A, double* max) {
   return 0;
 }
 int NM_max_by_rows(NumericsMatrix* A, double* max) {
-  assert(A);
-  assert(max);
+  CHECK_NULL(A);
+  CHECK_NULL(max);
 
   CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
   int info = CSparseMatrix_max_by_columns(Acsct, max);
@@ -4866,8 +4848,8 @@ int NM_max_by_rows(NumericsMatrix* A, double* max) {
   return info;
 }
 int NM_max_abs_by_columns(NumericsMatrix* A, double* max) {
-  assert(A);
-  assert(max);
+  CHECK_NULL(A);
+  CHECK_NULL(max);
 
   switch (A->storageType) {
     case NM_DENSE:
@@ -4882,8 +4864,8 @@ int NM_max_abs_by_columns(NumericsMatrix* A, double* max) {
   return 0;
 }
 int NM_max_abs_by_rows(NumericsMatrix* A, double* max) {
-  assert(A);
-  assert(max);
+  CHECK_NULL(A);
+  CHECK_NULL(max);
 
   CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
   int info = CSparseMatrix_max_abs_by_columns(Acsct, max);
@@ -5314,8 +5296,7 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double* b, unsigned int nrhs) {
           }
 #endif /* WITH_MUMPS */
           default: {
-            fprintf(stderr, "NM_Cholesky_solve: unknown sparse linearsolver %d\n", p->solver);
-            exit(EXIT_FAILURE);
+            CHECK_ARG(0, "NM_Cholesky_solve: unknown sparse linearsolver %d\n");
           } break;
         }
         break;
@@ -5426,9 +5407,7 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
             }
 #endif /* WITH_MUMPS */
             default: {
-              fprintf(stderr, "NM_Cholesky_solve: unknown sparse linearsolver %d\n",
-                      p->solver);
-              exit(EXIT_FAILURE);
+              CHECK_ARG(0, "NM_Cholesky_solve: unknown sparse linearsolver %d\n");
             } break;
           }
           break;
@@ -5748,8 +5727,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double* b, unsigned int nrhs) {
           }
 #endif /* WITH_MUMPS */
           default: {
-            fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->LDLT_solver);
-            exit(EXIT_FAILURE);
+            CHECK_ARG(0, "NM_LDLT_solve: unknown sparse linearsolver %d\n");
           } break;
         }
         break;
@@ -5842,9 +5820,7 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double* x, double* b, unsigned int nrhs, 
           }
 #endif /* WITH_MUMPS */
           default: {
-            fprintf(stderr, "NM_LDLT_refine: unknown sparse linear refiner %d\n",
-                    p->LDLT_solver);
-            exit(EXIT_FAILURE);
+            CHECK_ARG(0, "NM_LDLT_refine: unknown sparse linear refiner %d\n");
           } break;
         }
         break;
@@ -6438,7 +6414,7 @@ struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A
 
 int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
                                 unsigned int** blocksizes) {
-  assert(A);
+  CHECK_NULL(A);
   struct connectedcomponent_node* connectedcomponents = NM_compute_connectedcomponents(A);
   unsigned int n_component = len_connectedcomponents(connectedcomponents);
   /* print_connectedcomponents(connectedcomponents); */

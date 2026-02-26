@@ -603,7 +603,7 @@ static void lcp_pivot_lumod_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD",
+REGISTER_SOLVER(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD",
                 "Pivot solver with LUMOD for LCP",
                 lcp_pivot_lumod_init_wrap,
                 lcp_pivot_lumod_solve_wrap,
@@ -612,4 +612,4 @@ REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD",
                 lcp_pivot_lumod_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+                0);     /* is_local_solver */

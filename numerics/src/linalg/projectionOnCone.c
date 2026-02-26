@@ -27,6 +27,7 @@
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
+#include "utils/numerics_errors.h"
 
 unsigned projectionOnCone(double* r, double mu) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
@@ -75,8 +76,7 @@ void projectionOnSecondOrderCone(double* r, double mu, int size) {
   if (size == 3) {
     projectionOnCone(r, mu);
   } else {
-    fprintf(stderr,
-            "Numerics, projectionOnSecondOrderCone f not yet implemented for size != 3 \n");
+    fprintf(stderr, "Numerics, projectionOnSecondOrderCone not yet implemented for size != 3\n");
     exit(EXIT_FAILURE);
   }
 }

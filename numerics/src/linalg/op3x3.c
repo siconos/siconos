@@ -22,6 +22,8 @@
  * \param mat double* a
  */
 #include <stdio.h>
+
+#include "utils/numerics_errors.h"
 void print3x3(double* mat) {
   SET3X3(mat);
 

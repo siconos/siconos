@@ -90,9 +90,19 @@ static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* veloci
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(FC3D_VI_EG,
-                       "FC3D_VI_EG",
-                       "VI Extra Gradient for 3D Friction Contact",
-                       fc3d_vi_eg_solve_wrap,
-                       1000,   /* default_max_iter */
-                       1e-4)   /* default_tol */
+static void fc3d_vi_eg_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+}
+
+REGISTER_SOLVER(FC3D_VI_EG,
+                             "FC3D_VI_EG",
+                             "VI Extra Gradient for 3D Friction Contact",
+                             NULL,   /* init_wrap */
+                             fc3d_vi_eg_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_vi_eg_set_default,
+                             1000,   /* default_max_iter */
+                             1e-4,   /* default_tol */
+                             0)      /* is_local_solver */

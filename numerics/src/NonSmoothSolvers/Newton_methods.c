@@ -32,6 +32,7 @@
 #include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
 #include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT
 #include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
 

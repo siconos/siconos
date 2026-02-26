@@ -27,6 +27,7 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SiconosBlas.h"                    // for cblas_dcopy
 #include "projectionOnRollingCone.h"        // for projectionOnRollingCone
+#include "utils/numerics_errors.h"
 
 // #define DEBUG_MESSAGES                                       //
 #include "siconos_debug.h"                  // for DEBUG_EXPR, DEBUG_PRINTF
@@ -72,10 +73,10 @@ int rolling_fc3d_compute_error(RollingFrictionContactProblem *problem, double *r
                                double *velocity, double tolerance, SolverOptions *options,
                                double norm, double *error) {
   DEBUG_BEGIN("rolling_fc3d_compute_error(...)\n");
-  assert(problem);
-  assert(reaction);
-  assert(velocity);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_NULL(error);
 
   /* Computes velocity = Mreaction + q */
   int incx = 1, incy = 1;

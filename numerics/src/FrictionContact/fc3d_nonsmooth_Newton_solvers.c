@@ -706,7 +706,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 
 /* Wrappers and registration for FC3D_NSN_AC */
 static int fc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
-  fc3d_nsn_ac_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -720,11 +721,14 @@ static int fc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* veloc
 
 REGISTER_SOLVER(FC3D_NSN_AC, "FC3D_NSN_AC",
                 "Nonsmooth Newton method based on Alart-Curnier formulation",
-                fc3d_nsn_ac_init_wrap, fc3d_nsn_ac_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+                fc3d_nsn_ac_init_wrap, fc3d_nsn_ac_solve_wrap, NULL, NULL,
+                fc3d_nsn_ac_set_default,  /* set_default */
+                200, 1e-6, 0);
 
 /* Wrappers and registration for FC3D_NSN_FB */
 static int fc3d_nsn_fb_init_wrap(void* problem, SolverOptions* options) {
-  fc3d_nsn_fb_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -738,11 +742,14 @@ static int fc3d_nsn_fb_solve_wrap(void* problem, double* reaction, double* veloc
 
 REGISTER_SOLVER(FC3D_NSN_FB, "FC3D_NSN_FB",
                 "Nonsmooth Newton method based on Fischer-Burmeister formulation",
-                fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+                fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL,
+                fc3d_nsn_fb_set_default,  /* set_default */
+                200, 1e-6, 0);
 
 /* Wrappers and registration for FC3D_NSN_NM */
 static int fc3d_nsn_nm_init_wrap(void* problem, SolverOptions* options) {
-  fc3d_nsn_nm_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -756,4 +763,6 @@ static int fc3d_nsn_nm_solve_wrap(void* problem, double* reaction, double* veloc
 
 REGISTER_SOLVER(FC3D_NSN_NM, "FC3D_NSN_NM",
                 "Nonsmooth Newton method based on Natural Map formulation", fc3d_nsn_nm_init_wrap,
-                fc3d_nsn_nm_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+                fc3d_nsn_nm_solve_wrap, NULL, NULL,
+                fc3d_nsn_nm_set_default,  /* set_default */
+                200, 1e-6, 0);

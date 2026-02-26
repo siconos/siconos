@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs, NAN
 #include <stdio.h>   // for printf, NULL, fprintf
@@ -31,6 +32,7 @@
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 
 static int determine_convergence(double error, double *tolerance, int iter,
                                  SolverOptions *options, VariationalInequality *problem,
@@ -470,10 +472,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality *problem, 
       }
     }
     if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2) {
-      fprintf(stderr,
-              "Numerics, VariationalInequality_FixedPointProjection failed. "
-              "iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2 .\n");
-      exit(EXIT_FAILURE);
+      assert(0);
     }
     /* we return the negative value of rho for multiple call to the solver */
     dparam[SICONOS_VI_DPARAM_RHO] = -rho;
@@ -513,8 +512,9 @@ void variationalInequality_FixedPointProjection_set_default(SolverOptions *optio
  */
 
 static int vi_fpp_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
   (void)problem;
-  variationalInequality_FixedPointProjection_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -536,6 +536,7 @@ REGISTER_SOLVER(SICONOS_VI_FPP,
                 vi_fpp_solve_wrap,
                 vi_fpp_free_wrap,
                 NULL,
+                variationalInequality_FixedPointProjection_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

@@ -55,6 +55,11 @@ void lcp_newton_minFB(LinearComplementarityProblem* problem, double* z, double* 
   newton_LSA(problem->size, z, w, info, (void*)problem, options, &functions_minFBLSA_lcp);
 }
 
+static void lcp_newton_minFB_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -63,7 +68,7 @@ void lcp_newton_minFB(LinearComplementarityProblem* problem, double* z, double* 
 
 static int lcp_newton_minFB_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  (void)options;
+  lcp_newton_minFB_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -74,6 +79,18 @@ static int lcp_newton_minFB_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_NEWTON_MIN_FBLSA, "LCP_NEWTON_MIN_FBLSA",
+static void lcp_newton_minFB_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NEWTON_MIN_FBLSA, "LCP_NEWTON_MIN_FBLSA",
                        "Newton Min FBLSA solver for LCP",
-                       lcp_newton_minFB_solve_wrap, 1000, 1e-6)
+                       lcp_newton_minFB_init_wrap,
+                       lcp_newton_minFB_solve_wrap,
+                       lcp_newton_minFB_free_wrap,
+                       NULL,  /* error function */
+                       lcp_newton_minFB_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

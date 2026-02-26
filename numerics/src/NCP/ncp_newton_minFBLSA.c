@@ -61,6 +61,17 @@ void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double* z, do
  * This registers NCP_NEWTON_MIN_FBLSA in the global solver registry.
  */
 
+static void ncp_newton_minfblsa_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int ncp_newton_minfblsa_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int ncp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
                                           double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -69,6 +80,12 @@ static int ncp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_NCP_NEWTON_MIN_FBLSA, "NCP_NEWTON_MIN_FBLSA",
+static void ncp_newton_minfblsa_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_NCP_NEWTON_MIN_FBLSA, "NCP_NEWTON_MIN_FBLSA",
                        "Newton minFBLSA solver for Nonlinear Complementarity Problems",
-                       ncp_newton_minfblsa_solve_wrap, 1000, 1e-4)
+                       ncp_newton_minfblsa_init_wrap, ncp_newton_minfblsa_solve_wrap, ncp_newton_minfblsa_free_wrap, NULL,
+                       ncp_newton_minfblsa_set_default, 1000, 1e-4, 0);

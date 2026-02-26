@@ -28,6 +28,7 @@
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 void VI_compute_F(void* data_opaque, double* x, double* F) {
   VariationalInequality* problem = (VariationalInequality*)data_opaque;
   problem->F(problem, problem->size, x, F);
@@ -83,7 +84,7 @@ void variationalInequality_BOX_QI_set_default(SolverOptions* options) {
 
 static int vi_box_qi_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  variationalInequality_BOX_QI_set_default(options);
+  /* set_default already called by solver_options_create */
   return NUMERICS_OK;
 }
 
@@ -105,6 +106,7 @@ REGISTER_SOLVER(SICONOS_VI_BOX_QI,
                 vi_box_qi_solve_wrap,
                 vi_box_qi_free_wrap,
                 NULL,
+                variationalInequality_BOX_QI_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

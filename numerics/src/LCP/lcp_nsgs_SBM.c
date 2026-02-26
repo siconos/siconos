@@ -84,8 +84,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
        with no null row (ie no rows with all blocks equal to null)
   */
   if (problem->M->matrix1 == NULL) {
-    fprintf(stderr, "lcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /*
@@ -104,8 +103,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
   if (nbOfNonNullBlocks < 1) {
-    fprintf(stderr, "Numerics::lcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* Local problem initialization */
@@ -251,7 +249,7 @@ static void lcp_nsgs_sbm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
+REGISTER_SOLVER(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
                 "Non-smooth Gauss-Seidel for LCP with Sparse Block Matrix",
                 lcp_nsgs_sbm_init_wrap,
                 lcp_nsgs_sbm_solve_wrap,

@@ -17,6 +17,7 @@
  */
 
 #include "fc2d_Solvers.h"  // for fc2d_projc
+#include "utils/numerics_errors.h"
 
 void fc2d_projc(double xi[], int *nn, int statusi[], double pi[], double fric[],
                 double *projc1, int *projc2) {

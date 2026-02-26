@@ -22,6 +22,7 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 
 #ifdef HAVE_PATHVI
 
@@ -280,9 +281,14 @@ int avi_pathavi(AffineVariationalInequalities* problem, double* z, double* w,
  * ===========================================================================
  */
 
+static void avi_pathavi_set_default(SolverOptions* options) {
+  /* No AVI-specific parameters to set */
+  (void)options;
+}
+
 static int avi_pathavi_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  (void)options;
+  avi_pathavi_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -302,6 +308,7 @@ REGISTER_SOLVER(SICONOS_AVI_PATHAVI,
                 avi_pathavi_solve_wrap,
                 avi_pathavi_free_wrap,
                 NULL,
+                avi_pathavi_set_default,
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

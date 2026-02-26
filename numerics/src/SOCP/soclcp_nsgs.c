@@ -281,8 +281,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
       localproblem->M = NM_new();
     }
   } else {
-    fprintf(stderr, "soclcp_nsgs error: not yet implemented.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   soclcp_initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
@@ -532,6 +531,11 @@ void soclcp_nsgs_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
   options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
   options->dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1.;
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] =
       solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
@@ -570,6 +574,7 @@ REGISTER_SOLVER(SICONOS_SOCLCP_NSGS, "SOCLCP_NSGS",
                 soclcp_nsgs_solve_wrap,
                 soclcp_nsgs_free_wrap,
                 NULL,  /* error function */
+                soclcp_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

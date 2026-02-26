@@ -90,9 +90,14 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *proble
  * This registers SICONOS_SOCLCP_VI_EG in the global solver registry.
  */
 
+static void soclcp_vi_eg_set_default(SolverOptions* options) {
+  /* Call VI_EG set_default for proper initialization */
+  variationalInequality_ExtraGradient_set_default(options);
+}
+
 static int soclcp_vi_eg_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-4;
+  (void)problem;
+  /* set_default already called by solver_options_create */
   return NUMERICS_OK;
 }
 
@@ -116,6 +121,7 @@ REGISTER_SOLVER(SICONOS_SOCLCP_VI_EG, "SOCLCP_VI_EG",
                 soclcp_vi_eg_solve_wrap,
                 soclcp_vi_eg_free_wrap,
                 NULL,  /* error function */
+                soclcp_vi_eg_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

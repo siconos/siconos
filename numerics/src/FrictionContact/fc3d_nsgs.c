@@ -947,7 +947,7 @@ static void fc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_FRICTION_3D_NSGS, "FC3D_NSGS",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_NSGS, "FC3D_NSGS",
                 "Non-smooth Gauss-Seidel for 3D Friction Contact",
                 fc3d_nsgs_init_wrap,
                 fc3d_nsgs_solve_wrap,

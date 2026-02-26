@@ -28,23 +28,21 @@
 #include "numerics_verbose.h"  // for. numerics_error
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
+
+#include "utils/numerics_errors.h"
 #define EPS 1e-40
 
 NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
-    fprintf(stderr,
-            "Arrow_repr: %zu variables can not be extracted from vector of size %zu.\n",
-            varsCount, vecSize);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Arrow_repr: %zu variables can not be extracted from vector of size %zu.\n", varsCount, vecSize);
+    return NULL;
   }
 
   size_t dimension = vecSize / varsCount;
   if (dimension < 2) {
-    fprintf(stderr,
-            "Arrow_repr: The dimension of variables can not be less than 2 but given %zu.\n",
-            dimension);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Arrow_repr: The dimension of variables can not be less than 2 but given %zu.\n", dimension);
+    return NULL;
   }
 
   NumericsMatrix* Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
@@ -73,27 +71,16 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
                         const size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
-    fprintf(
-        stderr,
-        "Arrow_repr_replace: %zu variables can not be extracted from vector of size %zu.\n",
-        varsCount, vecSize);
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   size_t dimension = (size_t)(vecSize / varsCount);
   if (dimension < 2) {
-    fprintf(stderr,
-            "Arrow_repr_replace: The dimension of variables can not be less than 2 but given "
-            "%zu.\n",
-            dimension);
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   if (!Arw_mat || !Arw_mat->matrix2 || Arw_mat->matrix2->origin != NSM_TRIPLET) {
-    fprintf(stderr,
-            "Arrow_repr_replace: Arw_mat is not valid. Need a declaration of triplet sparse "
-            "matrix.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   // Note FP: convert from or compare size_t to/with int --> need to be careful
@@ -101,9 +88,7 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
   if (!(vecSize <= INT_MAX))
     numerics_error("Arrow_repr_replace", "value too large for an int");
   if (Arw_mat->size0 != (int)vecSize && Arw_mat->size1 != (int)vecSize) {
-    fprintf(stderr,
-            "Arrow_repr_replace: Size of the input Arw_mat does not match size of vector.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* Arrow matrix filling */
@@ -115,9 +100,7 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
     numerics_error("Arrow_repr_replace", "value too large for an int64_t");
 
   if (cs->nz != (int64_t)memSize) {
-    fprintf(stderr,
-            "Arrow_repr_replace: Size of allocated triplet memory is not sufficient.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   // Reset data
@@ -224,9 +207,8 @@ void NesterovToddVector(const double* const vec1, const double* const vec2,
 
 double* JA_iden(const unsigned int vecSize, const size_t varsCount) {
   if (vecSize % varsCount != 0) {
-    fprintf(stderr, "JA_iden: %zu variables can not be extracted from vector of size %u.\n",
-            varsCount, vecSize);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "JA_iden: %zu variables can not be extracted from vector of size %u.\n", varsCount, vecSize);
+    return NULL;
   }
   double* out = (double*)calloc(vecSize, sizeof(double));
   unsigned int dimension = (int)(vecSize / varsCount);

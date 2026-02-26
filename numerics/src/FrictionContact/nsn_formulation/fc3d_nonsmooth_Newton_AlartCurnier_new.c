@@ -224,7 +224,8 @@ void fc3d_nsn_ac_new_set_default(SolverOptions *options) {
 }
 
 static int fc3d_nsn_ac_new_init_wrap(void *problem, SolverOptions *options) {
-  fc3d_nsn_ac_new_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -238,4 +239,6 @@ static int fc3d_nsn_ac_new_solve_wrap(void *problem, double *reaction, double *v
 
 REGISTER_SOLVER(FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
                 "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
-                fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL, 200, 1e-6, 0);
+                fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL,
+                fc3d_nsn_ac_new_set_default,  /* set_default */
+                200, 1e-6, 0);

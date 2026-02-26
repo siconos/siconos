@@ -1016,6 +1016,32 @@ void mc2d_onecone_nsn_gp_set_default(SolverOptions* options) {
  */
 
 /* Wrapper for NSN direct solve (local solver) - Note: local solvers use 3 args */
+static void mc2d_onecone_nsn_set_default_reg(SolverOptions* options) {
+  /* Value of rho parameter */
+  options->iparam[PLASTICITY_NSN_RHO_STRATEGY] =
+      PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+  options->dparam[PLASTICITY_NSN_RHO] = 1.0;
+
+  /* Choice of formulation */
+  options->iparam[PLASTICITY_NSN_FORMULATION] = PLASTICITY_NSN_FORMULATION_NATURALMAP;
+
+  /* Choice of line -search method */
+  options->iparam[PLASTICITY_NSN_LINESEARCH] = PLASTICITY_NSN_LINESEARCH_NO;
+
+  /* parameters for hybrid solvers */
+  options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] =
+      PLASTICITY_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+
+  options->iparam[PLASTICITY_NSN_HYBRID_MAX_LOOP] = 1;
+  options->iparam[PLASTICITY_NSN_HYBRID_MAX_ITER] = 10;
+}
+
+static int mc2d_onecone_nsn_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mc2d_onecone_nsn_solve_wrap(void* localproblem, double* reaction,
                                        double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
@@ -1024,6 +1050,31 @@ static int mc2d_onecone_nsn_solve_wrap(void* localproblem, double* reaction,
 }
 
 /* Wrapper for NSN GP (damped) solve (local solver) */
+static void mc2d_onecone_nsn_gp_set_default_reg(SolverOptions* options) {
+  /* Value of rho parameter */
+  options->iparam[PLASTICITY_NSN_RHO_STRATEGY] =
+      PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM;
+  options->dparam[PLASTICITY_NSN_RHO] = 1.0;
+
+  /* Choice of formulation */
+  options->iparam[PLASTICITY_NSN_FORMULATION] = PLASTICITY_NSN_FORMULATION_NATURALMAP;
+  /* Choice of line -search method */
+  options->iparam[PLASTICITY_NSN_LINESEARCH] = PLASTICITY_NSN_LINESEARCH_GOLDSTEINPRICE;
+  options->iparam[PLASTICITY_NSN_LINESEARCH_MAX_ITER] = 10;
+
+  /* parameters for hybrid solvers */
+  options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] =
+      PLASTICITY_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP;
+  options->iparam[PLASTICITY_NSN_HYBRID_MAX_LOOP] = 1;
+  options->iparam[PLASTICITY_NSN_HYBRID_MAX_ITER] = 100;
+}
+
+static int mc2d_onecone_nsn_gp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mc2d_onecone_nsn_gp_solve_wrap(void* localproblem, double* reaction,
                                           double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
@@ -1032,6 +1083,17 @@ static int mc2d_onecone_nsn_gp_solve_wrap(void* localproblem, double* reaction,
 }
 
 /* Wrapper for NSN GP hybrid solve (local solver) */
+static void mc2d_onecone_nsn_gp_hybrid_set_default(SolverOptions* options) {
+  /* Use same defaults as GP version */
+  mc2d_onecone_nsn_gp_set_default_reg(options);
+}
+
+static int mc2d_onecone_nsn_gp_hybrid_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mc2d_onecone_nsn_gp_hybrid_solve_wrap(void* localproblem, double* reaction,
                                                  double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
@@ -1039,23 +1101,38 @@ static int mc2d_onecone_nsn_gp_hybrid_solve_wrap(void* localproblem, double* rea
                                                             reaction, options);
 }
 
-REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN,
-                      "MOHR_COULOMB_2D_ONECONE_NSN",
-                      "Nonsmooth Newton Alart-Curnier direct for 2D Mohr Coulomb (one cone)",
-                      mc2d_onecone_nsn_solve_wrap,
-                      100,   /* default_max_iter */
-                      1e-14  /* default_tol */);
+REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN,
+                "MOHR_COULOMB_2D_ONECONE_NSN",
+                "Nonsmooth Newton Alart-Curnier direct for 2D Mohr Coulomb (one cone)",
+                mc2d_onecone_nsn_init_wrap,
+                mc2d_onecone_nsn_solve_wrap,
+                NULL,
+                NULL,
+                mc2d_onecone_nsn_set_default_reg,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */
 
-REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP,
-                      "MOHR_COULOMB_2D_ONECONE_NSN_GP",
-                      "Nonsmooth Newton Alart-Curnier GP (damped) for 2D Mohr Coulomb (one cone)",
-                      mc2d_onecone_nsn_gp_solve_wrap,
-                      100,   /* default_max_iter */
-                      1e-14  /* default_tol */);
+REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP,
+                "MOHR_COULOMB_2D_ONECONE_NSN_GP",
+                "Nonsmooth Newton Alart-Curnier GP (damped) for 2D Mohr Coulomb (one cone)",
+                mc2d_onecone_nsn_gp_init_wrap,
+                mc2d_onecone_nsn_gp_solve_wrap,
+                NULL,
+                NULL,
+                mc2d_onecone_nsn_gp_set_default_reg,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */
 
-REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID,
-                      "MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID",
-                      "Nonsmooth Newton Alart-Curnier GP hybrid for 2D Mohr Coulomb (one cone)",
-                      mc2d_onecone_nsn_gp_hybrid_solve_wrap,
-                      100,   /* default_max_iter */
-                      1e-14  /* default_tol */);
+REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID,
+                "MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID",
+                "Nonsmooth Newton Alart-Curnier GP hybrid for 2D Mohr Coulomb (one cone)",
+                mc2d_onecone_nsn_gp_hybrid_init_wrap,
+                mc2d_onecone_nsn_gp_hybrid_solve_wrap,
+                NULL,
+                NULL,
+                mc2d_onecone_nsn_gp_hybrid_set_default,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */

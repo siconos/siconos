@@ -26,6 +26,7 @@
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "math.h"              // for fmax, pow
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "stdio.h"             // for fprintf, stderr
 #include "stdlib.h"            // for exit, EXIT_FAILURE
 
@@ -36,9 +37,7 @@ void linesearch_Armijo(int n, double* z, double* dir, double psi_k, double desce
                        NewtonFunctionPtr* phi) {
   double* phiVector = (double*)malloc((size_t)n * sizeof(*phiVector));
   if (phiVector == NULL) {
-    fprintf(stderr,
-            "NonSmoothNewton: linesearch_Armijo, memory allocation failed for phiVector\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* IN :
@@ -85,8 +84,7 @@ void linesearch_Armijo(int n, double* z, double* dir, double psi_k, double desce
 int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi,
                     SolverOptions* options) {
   if (phi == NULL || jacobianPhi == NULL) {
-    fprintf(stderr, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
   }
 
   int* iparam = options->iparam;
@@ -116,8 +114,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
 
   lapack_int* ipiv = (lapack_int*)malloc((size_t)n * sizeof(lapack_int));
   if (phiVector == NULL || jacobianPhiMatrix == NULL || gradient_psi == NULL || ipiv == NULL) {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "NonSmoothNewton, memory allocation failed.\n");
   }
 
   /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel,
@@ -230,8 +227,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
 int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                           NewtonFunctionPtr* jacobianPhi, SolverOptions* options) {
   if (phi == NULL || jacobianPhi == NULL) {
-    fprintf(stderr, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
   }
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -252,8 +248,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
   double* gradient_psi = (double*)malloc((size_t)n * sizeof(*gradient_psi));
   lapack_int* ipiv = (lapack_int*)malloc((size_t)n * sizeof(lapack_int));
   if (phiVector == NULL || jacobianPhiMatrix == NULL || gradient_psi == NULL || ipiv == NULL) {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "NonSmoothNewton, memory allocation failed.\n");
   }
 
   /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of

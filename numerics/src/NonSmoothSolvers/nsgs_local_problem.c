@@ -133,10 +133,7 @@ int nsgs_local_problem_set_solver(NSGSLocalProblem* local, const char* name) {
   }
   
   const SolverEntry* solver = solver_registry_lookup_by_name(name);
-  if (!solver) {
-    numerics_warning("nsgs_local_problem_set_solver", "Solver '%s' not found", name);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver not found");
   
   local->solver = solver;
   

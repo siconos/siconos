@@ -390,7 +390,7 @@ static void lcp_latin_w_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_LATIN_W, "LCP_LATIN_W",
+REGISTER_SOLVER(SICONOS_LCP_LATIN_W, "LCP_LATIN_W",
                 "LArge Time INcrements with relaxation for LCP",
                 lcp_latin_w_init_wrap,
                 lcp_latin_w_solve_wrap,

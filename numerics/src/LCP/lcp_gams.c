@@ -146,6 +146,11 @@ TERMINATE:
 #endif  // HAVE_GAMS_C_API
 }
 
+static void lcp_gams_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -155,6 +160,12 @@ TERMINATE:
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
+static int lcp_gams_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_gams_set_default(options);
+  return NUMERICS_OK;
+}
+
 static int lcp_gams_solve_wrap(void* problem, double* reaction,
                                double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -162,8 +173,18 @@ static int lcp_gams_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_GAMS, "LCP_GAMS",
+static void lcp_gams_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_GAMS, "LCP_GAMS",
                        "GAMS solver for LCP",
+                       lcp_gams_init_wrap,
                        lcp_gams_solve_wrap,
+                       lcp_gams_free_wrap,
+                       NULL,  /* error function */
+                       lcp_gams_set_default,  /* set_default */
                        1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

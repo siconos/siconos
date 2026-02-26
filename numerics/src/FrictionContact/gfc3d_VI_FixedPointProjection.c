@@ -149,9 +149,15 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
  * - Elimination of giant switch statements in drivers
  */
 
+void gfc3d_vi_fpp_set_default(SolverOptions* options) {
+  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper initialization */
+  variationalInequality_FixedPointProjection_set_default(options);
+}
+
 static int gfc3d_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-4;
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -179,6 +185,7 @@ REGISTER_SOLVER(GFC3D_VI_FPP, "GFC3D_VI_FPP",
                 gfc3d_vi_fpp_solve_wrap,
                 gfc3d_vi_fpp_free_wrap,
                 NULL,  /* error function */
+                gfc3d_vi_fpp_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

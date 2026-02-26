@@ -30,6 +30,7 @@
 #include "SiconosBlas.h"       // for cblas_dscal, cblas_dcopy
 #include "io_tools.h"          // for check_hdf5_file
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
+#include "utils/numerics_errors.h"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -101,9 +102,7 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
 int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem* problem,
                                              FILE* file) {
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -149,7 +148,7 @@ int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactPro
 
 GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FILE* file) {
   GlobalRollingFrictionContactProblem* problem = globalRollingFrictionContactProblem_new();
-  assert(file);
+  if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int "
       "globalRollingFrictionContact_newFromFile(GlobalRollingFrictionContactProblem* problem, "

@@ -26,6 +26,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
+#include "utils/numerics_errors.h"
 
 void Projection_ConvexQP_GFC3D_DualCone(void *cqpIn, double *x, double *PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")

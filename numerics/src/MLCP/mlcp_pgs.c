@@ -264,7 +264,8 @@ void mlcp_pgs_set_default(SolverOptions* options) {
  */
 
 static int mlcp_pgs_init_wrap(void* problem, SolverOptions* options) {
-  mlcp_pgs_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -281,6 +282,7 @@ REGISTER_SOLVER(SICONOS_MLCP_PGS, "MLCP_PGS",
                 mlcp_pgs_solve_wrap,
                 NULL,  /* free function */
                 NULL,  /* error function */
+                mlcp_pgs_set_default,
                 50000, /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

@@ -91,8 +91,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION) /* Only regularization */
   {
     if (fabs(dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA]) < 1e-12) {
-      fprintf(stderr, "Numerics,  fc3d_proximal. Initial alpha parameters equal 0 \n");
-      exit(EXIT_FAILURE);
+      assert(0);
     } else if (dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] < -1e-12) {
       internalsolver_options->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
       alpha = -dparam[3];
@@ -105,8 +104,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   } else if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
              SICONOS_FRICTION_3D_PROXIMAL_PROX) {
     if (fabs(dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA]) < 1e-12) {
-      fprintf(stderr, "Numerics,  fc3d_proximal. Initial alpha parameters equal 0 \n");
-      exit(EXIT_FAILURE);
+      assert(0);
     } else if (dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] < -1e-12) {
       alpha = -dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA];
       isVariable = 0;
@@ -424,7 +422,7 @@ static void fc3d_proximal_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(FC3D_PROX,
+REGISTER_SOLVER(FC3D_PROX,
                 "FC3D_PROX",
                 "Proximal method for 3D Friction Contact",
                 fc3d_proximal_init_wrap,

@@ -110,7 +110,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   }
 
   // ProjectionOnConeWithLocalIteration fails on Rover11211.dat (test #63)
-  collection[63].will_fail = 1;
+  //collection[63].will_fail = 1;
 
   return collection;
 }

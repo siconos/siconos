@@ -828,6 +828,7 @@ REGISTER_SOLVER(FC2D_NSGS, "FC2D_NSGS",
                 fc2d_nsgs_solve_wrap,
                 fc2d_nsgs_free_wrap,
                 NULL,  /* error function */
+                fc2d_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                0);     /* is_local_solver */

@@ -25,6 +25,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT
 
 void secondOrderConeLinearComplementarityProblem_display(
@@ -66,10 +67,7 @@ void secondOrderConeLinearComplementarityProblem_display(
 int secondOrderConeLinearComplementarityProblem_printInFile(
     SecondOrderConeLinearComplementarityProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, SecondOrderConeLinearComplementarityProblem_printInFile failed, NULL "
-            "input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, SecondOrderConeLinearComplementarityProblem_printInFile failed, NULL ");
   }
   int i;
   int n = problem->n;

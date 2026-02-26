@@ -140,7 +140,7 @@ void fc3d_dsfp_set_default(SolverOptions* options) {
 
 static int fc3d_dsfp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_dsfp_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -162,6 +162,7 @@ REGISTER_SOLVER(FC3D_DSFP,
                 fc3d_dsfp_solve_wrap,
                 fc3d_dsfp_free_wrap,
                 NULL,
+                fc3d_dsfp_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

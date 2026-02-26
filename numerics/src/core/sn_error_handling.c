@@ -23,6 +23,7 @@
 #include <stdlib.h>  // for NULL, abort, size_t
 
 #include "tlsdef.h"  // for tlsvar
+#include "utils/numerics_errors.h"
 
 tlsvar jmp_buf internal_jmp_buf;
 tlsvar jmp_buf external_jmp_buf;

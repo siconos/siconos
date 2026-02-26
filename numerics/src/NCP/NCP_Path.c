@@ -152,6 +152,17 @@ void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, in
  * This registers NCP_PATH in the global solver registry.
  */
 
+static void ncp_path_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int ncp_path_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int ncp_path_solve_wrap(void* problem, double* reaction,
                                double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -160,6 +171,12 @@ static int ncp_path_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_NCP_PATH, "NCP_PATH",
+static void ncp_path_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_NCP_PATH, "NCP_PATH",
                        "PATH solver for Nonlinear Complementarity Problems",
-                       ncp_path_solve_wrap, 1000, 1e-4)
+                       ncp_path_init_wrap, ncp_path_solve_wrap, ncp_path_free_wrap, NULL,
+                       ncp_path_set_default, 1000, 1e-4, 0);

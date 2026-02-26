@@ -97,12 +97,15 @@ void fc3d_print_solver_info(solver_id_t solver_id);
 int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* reaction,
                           SolverOptions* options) {
   (void)options;
+  assert(problem);
+  assert(problem->q);
+  
   int nc = problem->numberOfContacts;
   double* q = problem->q;
   int n = 3 * nc;
   
   for (int i = 0; i < nc; i++) {
-    if (q[3 * i] < -DBL_EPSILON) return -1;
+    if (q[3 * i] < -DBL_EPSILON) return NUMERICS_ERR_INFEASIBLE;
   }
   for (int i = 0; i < n; ++i) {
     velocity[i] = q[i];
@@ -110,7 +113,7 @@ int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, dou
   }
   
   numerics_printf("fc3d: trivial solution (take-off), reaction = 0, velocity = q.");
-  return 0;
+  return NUMERICS_OK;
 }
 
 /* ===========================================================================
@@ -120,16 +123,17 @@ int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, dou
 int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
                 SolverOptions* options) {
   /* Input validation using standardized macros */
-  NUMERICS_CHECK_NULL(problem);
-  NUMERICS_CHECK_NULL(reaction);
-  NUMERICS_CHECK_NULL(velocity);
-  NUMERICS_CHECK_NULL(options);
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
+  CHECK_ARG(problem->numberOfContacts > 0, "Number of contacts must be positive");
 
   /* Check dimension */
-  if (problem->dimension != 3) {
-    numerics_error("fc3d_driver", "Problem dimension is not 3 or is not set");
-    return NUMERICS_ERR_INVALID_ARGUMENT;
-  }
+  CHECK_DIMENSION(problem->dimension, 3);
 
   /* Initialize output */
   SET_SOLVER_ITER_DONE(options, 0);
@@ -137,41 +141,32 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 
   /* Check for trivial case */
   int trivial_status = fc3d_checkTrivialCase(problem, velocity, reaction, options);
-  if (trivial_status == 0) {
+  if (trivial_status == NUMERICS_OK) {
     return NUMERICS_OK;
   }
 
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
-
-  if (!solver) {
-    numerics_printf_verbose(0, "fc3d_driver: solver ID %d not found in registry",
-                            options->solverId);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, 
+             "Solver ID not found in registry");
 
   numerics_printf_verbose(1, "fc3d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
 
   /* Validate solver is appropriate for this problem type */
-  if (solver->is_local_solver) {
-    numerics_printf_verbose(0, "fc3d_driver: solver '%s' is a local solver, "
-                               "cannot be used as main solver", solver->name);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(!solver->is_local_solver, NUMERICS_ERR_INVALID_SOLVER,
+             "Local solver cannot be used as main solver");
 
   /* Check solve function exists */
-  if (!solver->solve) {
-    numerics_printf_verbose(0, "fc3d_driver: solver '%s' has no solve function", solver->name);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER,
+             "Solver has no solve function");
 
   /* Initialize solver if init function provided */
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf_verbose(0, "fc3d_driver: solver initialization failed "
-                                 "with error %d", init_status);
+      fprintf(stderr, "[ERROR] fc3d_driver: solver initialization failed: %s\n",
+              numerics_error_string(init_status));
       return init_status;
     }
   }
@@ -189,8 +184,8 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   if (solve_status == NUMERICS_OK) {
     numerics_printf_verbose(1, "fc3d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "fc3d_driver: solver returned status %d (%s)",
-                            solve_status, numerics_error_string(solve_status));
+    fprintf(stderr, "[WARN] fc3d_driver: solver returned status %d (%s)\n",
+            solve_status, numerics_error_string(solve_status));
   }
 
   return solve_status;
@@ -205,15 +200,15 @@ SolverOptions* fc3d_solver_options_create(solver_id_t solver_id) {
   const SolverEntry* solver = solver_registry_lookup(solver_id);
   
   if (!solver) {
-    fprintf(stderr, "fc3d_solver_options_create: solver ID %d not registered\n", 
+    fprintf(stderr, "[ERROR] fc3d_solver_options_create: solver ID %d not registered\n", 
             solver_id);
-    fprintf(stderr, "Available FC3D solvers:\n");
+    fprintf(stderr, "[INFO] Available FC3D solvers:\n");
     fc3d_list_available_solvers();
     return NULL;
   }
   
   if (solver->is_local_solver) {
-    fprintf(stderr, "fc3d_solver_options_create: solver '%s' is a local solver, "
+    fprintf(stderr, "[ERROR] fc3d_solver_options_create: solver '%s' is a local solver, "
                     "use it within NSGS instead\n", solver->name);
     return NULL;
   }
@@ -222,7 +217,7 @@ SolverOptions* fc3d_solver_options_create(solver_id_t solver_id) {
   SolverOptions* options = solver_options_create(solver_id);
   
   if (!options) {
-    fprintf(stderr, "fc3d_solver_options_create: failed to create options\n");
+    fprintf(stderr, "[ERROR] fc3d_solver_options_create: failed to create options\n");
     return NULL;
   }
   

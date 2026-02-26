@@ -291,8 +291,8 @@ void convexQP_ProjectedGradient_set_default(SolverOptions* options) {
  */
 
 static int convexqp_pg_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-6;
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -314,6 +314,7 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_PG, "CONVEXQP_PG",
                 convexqp_pg_solve_wrap,
                 convexqp_pg_free_wrap,
                 NULL,  /* error function */
+                convexQP_ProjectedGradient_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

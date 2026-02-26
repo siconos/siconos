@@ -35,6 +35,7 @@
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
@@ -135,7 +136,7 @@ void variationalInequality_BOX_AVI_set_default(SolverOptions* options) {
 
 static int vi_box_avi_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  variationalInequality_BOX_AVI_set_default(options);
+  /* set_default already called by solver_options_create */
   return NUMERICS_OK;
 }
 
@@ -157,6 +158,7 @@ REGISTER_SOLVER(SICONOS_VI_BOX_AVI_LSA,
                 vi_box_avi_solve_wrap,
                 vi_box_avi_free_wrap,
                 NULL,
+                variationalInequality_BOX_AVI_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

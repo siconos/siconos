@@ -91,9 +91,13 @@ void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_LEMKE in the global solver registry.
  */
 
-static int relay_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+static void relay_lexicolemke_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
+}
+
+static int relay_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
   return NUMERICS_OK;
 }
 
@@ -115,6 +119,7 @@ REGISTER_SOLVER(SICONOS_RELAY_LEMKE, "RELAY_LEMKE",
                 relay_lexicolemke_solve_wrap,
                 relay_lexicolemke_free_wrap,
                 NULL,  /* error function */
+                relay_lexicolemke_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

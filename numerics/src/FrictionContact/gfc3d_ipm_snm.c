@@ -35,6 +35,7 @@
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "projectionOnCone.h"
 
 /* #define DEBUG_MESSAGES */
@@ -397,10 +398,8 @@ static void NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const unsigned in
     numerics_error("NM_insert_Arrow_to_Triplet", "value too large for an int64_t");
 
   if (triplet->nzmax < ((int64_t)total_element + triplet->nz)) {
-    fprintf(
-        stderr,
-        "NM_insert_Arrow_to_Triplet: Size of allocated triplet memory is not sufficient.\n");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "NM_insert_Arrow_to_Triplet: Size of allocated triplet memory is not sufficient.\n");
+    return;
   }
 
   for (size_t i = 0; i < varsCount; ++i) {
@@ -1078,8 +1077,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
             diff_fixp = fmax(diff_fixp, fabs(diff_fixp_vec[i]));
           }
         } else {
-          fprintf(stderr, "type = %d is undefined.\n", type);
-          exit(EXIT_FAILURE);
+          assert(0);
         }
 
         // totalresidual = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),complem);
@@ -1424,8 +1422,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
           int maxIndex = cblas_idamax(n, diff_fixp_vec, 1);
           diff_fixp = fabs(diff_fixp_vec[maxIndex]);
         } else {
-          fprintf(stderr, "type = %d is undefined.\n", type);
-          exit(EXIT_FAILURE);
+          assert(0);
         }
 
         // totalresidual = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),complem);

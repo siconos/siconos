@@ -44,17 +44,18 @@ const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
 
 int fc2d_driver(FrictionContactProblem* problem, double* reaction,
                 double* velocity, SolverOptions* options) {
-  /* Input validation */
-  if (!problem || !reaction || !velocity || !options) {
-    numerics_error("fc2d_driver", "null input argument");
-    return NUMERICS_ERR_NULL_POINTER;
-  }
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
+  CHECK_ARG(problem->numberOfContacts > 0, "Number of contacts must be positive");
 
   /* Check dimension */
-  if (problem->dimension != 2) {
-    numerics_error("fc2d_driver", "Problem dimension is not 2 or is not set");
-    return NUMERICS_ERR_INVALID_ARGUMENT;
-  }
+  CHECK_DIMENSION(problem->dimension, 2);
 
   /* Initialize output */
   SET_SOLVER_ITER_DONE(options, 0);
@@ -72,7 +73,6 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction,
 
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
-
   if (!solver) {
     numerics_printf("fc2d_driver: solver ID %d not found in registry", options->solverId);
     /* Restore original matrix if converted */

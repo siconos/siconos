@@ -24,6 +24,8 @@
 
 #include "NumericsMatrix.h"
 
+#include "utils/numerics_errors.h"
+
 #ifdef __cplusplus
 #undef restrict
 #include <sys/cdefs.h>  // for __restrict
@@ -31,8 +33,8 @@
 #endif
 
 void project_on_set(int n, double* restrict x, void* restrict set) {
-  assert(set);
-  assert(x);
+  if (!set) return;
+  if (!x) return;
 
   assert(n > 0);
 
@@ -58,7 +60,7 @@ void project_on_set(int n, double* restrict x, void* restrict set) {
 }
 
 void free_siconos_set(void* set) {
-  assert(set);
+  if (!set) return;
 
   int set_id = ((generic_set*)set)->id;
   switch (set_id) {
@@ -80,7 +82,7 @@ void free_siconos_set(void* set) {
 }
 
 void free_box(box_constraints* b) {
-  assert(b);
+  if (!b) return;
   if (b->lb) {
     free(b->lb);
     b->lb = NULL;
@@ -92,7 +94,7 @@ void free_box(box_constraints* b) {
 }
 
 void free_polyhedron(polyhedron* poly) {
-  assert(poly);
+  if (!poly) return;
   if (poly->H) {
     NM_clear(poly->H);
     free(poly->H);
@@ -114,7 +116,7 @@ void free_polyhedron(polyhedron* poly) {
 }
 
 void free_polyhedron_unified(polyhedron_unified* poly) {
-  assert(poly);
+  if (!poly) return;
   if (poly->A) {
     NM_clear(poly->A);
     free(poly->A);

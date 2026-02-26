@@ -35,6 +35,7 @@
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "siconos_debug.h"     // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "string.h"            // for memcpy, memset
+#include "utils/numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX
 
 typedef struct {
   CS_INT i;
@@ -74,7 +75,7 @@ static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1, NSM_t ty
 }
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M) {
-  assert(M);
+  CHECK_NULL(M);
 
   return (nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET, NSM_HALF_TRIPLET), NSM_CSC), NSM_CSR));
 }
@@ -84,7 +85,7 @@ version_t NSM_max_version(const NumericsSparseMatrix* M) {
 }
 
 CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M) {
-  assert(M);
+  if (!M) return NULL;
 
   switch (NSM_latest_id(M)) {
     case NSM_TRIPLET:
@@ -226,8 +227,8 @@ void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix*
     }
     default: {
       numerics_error("NSM_version_copy", "unknown id");
-    }
       assert(false);
+    }
   }
 }
 
@@ -294,7 +295,7 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B) {
     }
     default: {
       fprintf(stderr, "NSM_copy :: error unknown origin %u for sparse matrix\n", A->origin);
-      exit(EXIT_FAILURE);
+      return;
     }
   }
   CSparseMatrix_copy(A_, B_);
@@ -407,7 +408,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* 
 }
 
 void NSM_clear_p(void* p) {
-  assert(p);
+  if (!p) return;
   NSM_linear_solver_params* ptr = (NSM_linear_solver_params*)p;
   CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*)NSM_linear_solver_data(ptr);
 
@@ -424,8 +425,7 @@ size_t NSM_nnz(const CSparseMatrix* const A) {
   } else if (A->nz == NSM_CS_CSR) {
     return (size_t)A->p[A->m];
   } else {
-    fprintf(stderr, "NSM_nnz :: unsupported nz number " CS_ID, A->nz);
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "NSM_nnz :: unsupported nz number ");
   }
 }
 
@@ -512,14 +512,14 @@ int NSM_to_dense(const NumericsSparseMatrix* const A, double* B) {
 }
 
 unsigned NSM_origin(const NumericsSparseMatrix* M) {
-  assert(M);
-  if (!M) return -1;
+  CHECK_NULL(M);
+  if (!M) return NSM_UNKNOWN;
   assert(NSM_version(M, NSM_latest_id(M)) == NSM_version(M, M->origin));
   return M->origin;
 }
 
 CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M) {
-  assert(M);
+  if (!M) return NULL;
   switch (M->origin) {
     case NSM_CSC:
       return M->csc;
@@ -613,7 +613,7 @@ NumericsSparseMatrix* NSM_triplet_scalar(unsigned int size, double s) {
 
 static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M) {
   NumericsSparseMatrix* A = M->matrix2;
-  assert(A);
+  if (!A) return NULL;
   if (A->diag_indx) return A->diag_indx;
 
   CS_INT* indices = (CS_INT*)malloc((size_t)M->size0 * sizeof(CS_INT));
@@ -682,7 +682,7 @@ static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M) {
 CS_INT* NSM_diag_indices(NumericsMatrix* M) {
   DEBUG_BEGIN("NSM_diag_indices(NumericsMatrix* M)\n");
   NumericsSparseMatrix* A = M->matrix2;
-  assert(A);
+  if (!A) return NULL;
   if (A->diag_indx) return A->diag_indx;
 
   /* 1-  we assume that all diagonal elements exist, and we search it in a trivial way */
@@ -791,7 +791,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
     case NSM_TRIPLET:
     case NSM_CSC: {
       CSparseMatrix* Mcsc = NM_csc(M);
-      assert(Mcsc);
+      if (!Mcsc) return;
       CS_INT* Mp = Mcsc->p;
       CS_INT* Mi = Mcsc->i;
       double* Mx = Mcsc->x;
@@ -813,7 +813,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
     }
     case NSM_CSR: {
       CSparseMatrix* Mcsr = M->matrix2->csr;
-      assert(Mcsr);
+      if (!Mcsr) return;
       CS_INT* Mp = Mcsr->p;
       CS_INT* Mi = Mcsr->i;
       double* Mx = Mcsr->x;
@@ -841,7 +841,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
 }
 
 double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
-  assert(M);
+  if (!M) return NULL;
   assert(M->storageType == NM_SPARSE);
   assert(M->matrix2);
 
@@ -851,7 +851,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
     case NSM_TRIPLET:
     case NSM_CSC: {
       CSparseMatrix* Mcsc = NM_csc(M);
-      assert(Mcsc);
+      if (!Mcsc) return NULL;
 
       CS_INT n = Mcsc->n;
       CS_INT m = Mcsc->m;
@@ -868,7 +868,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
     }
     case NSM_CSR: {
       CSparseMatrix* Mcsr = M->matrix2->csr;
-      assert(Mcsr);
+      if (!Mcsr) return NULL;
       CS_INT n = Mcsr->n;
       CS_INT m = Mcsr->m;
 
@@ -902,7 +902,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
 }
 
 CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
-  assert(M);
+  if (!M) return NULL;
   assert(M->storageType == NM_SPARSE);
   assert(M->matrix2);
 

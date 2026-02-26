@@ -58,6 +58,8 @@
 #include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERR...
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"
 #include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
+
+#include "utils/numerics_errors.h"
 /** Create a struct SolverOptions and initialize its content.
 
     Allocate memory for internal parameters array, ensure that pointers

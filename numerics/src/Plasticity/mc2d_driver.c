@@ -71,10 +71,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
   }
 
   /* Check dimension */
-  if (problem->dimension != 3) {
-    numerics_error("mc2d_driver", "Problem dimension is not 3 or is not set");
-    return NUMERICS_ERR_INVALID_ARGUMENT;
-  }
+  CHECK_DIMENSION(problem->dimension, 3);
 
   /* Initialize output */
   SET_SOLVER_ITER_DONE(options, 0);
@@ -89,10 +86,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
 
-  if (!solver) {
-    numerics_printf("mc2d_driver: solver ID %d not found in registry", options->solverId);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver not found");
 
   numerics_printf_verbose(1, "mc2d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
@@ -105,10 +99,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
   }
 
   /* Check solve function exists */
-  if (!solver->solve) {
-    numerics_printf("mc2d_driver: solver '%s' has no solve function", solver->name);
-    return NUMERICS_ERR_INVALID_SOLVER;
-  }
+  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver has no solve function");
 
   /* Initialize solver if init function provided */
   if (solver->init) {

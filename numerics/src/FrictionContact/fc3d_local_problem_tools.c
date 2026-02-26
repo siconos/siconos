@@ -24,6 +24,7 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
+#include "utils/numerics_errors.h"
 
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void) {
   struct LocalProblemFunctionToolkit* lpft =

@@ -24,6 +24,7 @@
 #include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem,
 #include "NumericsMatrix.h"        // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
+#include "utils/numerics_errors.h"
 
 struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new(void) {
   struct LocalMC2DProblemFunctionToolkit* lpft =

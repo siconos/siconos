@@ -106,8 +106,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
   if (nbOfNonNullBlocks < 1) {
-    fprintf(stderr, "Numerics::mlcp_PGS_SBM error: empty M matrix (all blocks = NULL).\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* Local problem initialization */
@@ -263,7 +262,7 @@ static int mlcp_pgs_sbm_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
+REGISTER_SOLVER(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
                 "Projected Gauss-Seidel for MLCP with Sparse Block Matrix",
                 mlcp_pgs_sbm_init_wrap,
                 mlcp_pgs_sbm_solve_wrap,

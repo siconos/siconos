@@ -72,8 +72,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
   } else {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 }
 
@@ -87,11 +86,7 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
   int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
   if (info > 0) {
-    fprintf(stderr,
-            "Numerics, fc3d_FixedP failed, reached max. number of iterations without "
-            "convergence. Residual = %f\n",
-            dparam[SICONOS_DPARAM_RESIDU]);
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, fc3d_FixedP failed, reached max. number of iterations without ");
   }
   return info;
 
@@ -114,14 +109,29 @@ double fc3d_FixedP_computeError(int contact, int dimReaction, double* reaction, 
  * This is a one-contact solver used within NSGS
  */
 
+static void fc3d_ncpg_fp_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_ncpg_fp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int fc3d_ncpg_fp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
   (void)velocity;
   return fc3d_FixedP_solve((FrictionContactProblem*)problem, reaction, options);
 }
 
-REGISTER_LOCAL_SOLVER(FC3D_NCPG_FP,
-                      "FC3D_NCPG_FP",
-                      "NCP Glocker Fixed Point (local solver)",
-                      fc3d_ncpg_fp_solve_wrap,
-                      100,    /* default_max_iter */
-                      1e-4)   /* default_tol */
+REGISTER_SOLVER(FC3D_NCPG_FP,
+                "FC3D_NCPG_FP",
+                "NCP Glocker Fixed Point (local solver)",
+                fc3d_ncpg_fp_init_wrap,
+                fc3d_ncpg_fp_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_ncpg_fp_set_default,
+                100,    /* default_max_iter */
+                1e-4,   /* default_tol */
+                1)      /* is_local */

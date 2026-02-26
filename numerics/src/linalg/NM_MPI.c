@@ -18,11 +18,13 @@
 #include "NM_MPI.h"
 
 #include <assert.h>
+#include <stdio.h>
+#include "utils/numerics_errors.h"
 #ifdef SICONOS_HAS_MPI
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 MPI_Comm NM_MPI_comm(NumericsMatrix* A) {
-  assert(A);
+  if (!A) return MPI_COMM_NULL;
   if (NM_internalData(A)->mpi_comm == MPI_COMM_NULL) {
     if (verbose) {
       fprintf(stderr,
@@ -42,7 +44,7 @@ void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm) {
 #endif /* WITH_MPI */
 
 int NM_MPI_rank(NumericsMatrix* A) {
-  assert(A);
+  CHECK_NULL(A);
   int myid;
 #ifdef SICONOS_HAS_MPI
   CHECK_MPI(NM_MPI_comm(A), MPI_Comm_rank(NM_MPI_comm(A), &myid));

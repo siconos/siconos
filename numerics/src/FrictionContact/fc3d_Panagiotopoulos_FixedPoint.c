@@ -308,7 +308,7 @@ static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(FC3D_PFP,
+REGISTER_SOLVER(FC3D_PFP,
                 "FC3D_PFP",
                 "Panagiotopoulos Fixed Point for 3D Friction Contact",
                 fc3d_pfp_init_wrap,

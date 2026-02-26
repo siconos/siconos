@@ -1092,7 +1092,7 @@ void rolling_fc3d_admm_set_default(SolverOptions* options) {
 /* Solver registration wrapper functions */
 static int rfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rolling_fc3d_admm_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -1117,6 +1117,7 @@ REGISTER_SOLVER(RFC3D_ADMM, "RFC3D_ADMM",
                 rfc3d_admm_solve_wrap,
                 rfc3d_admm_free_wrap,
                 NULL,  /* error function */
+                rolling_fc3d_admm_set_default,
                 20000, /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

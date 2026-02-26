@@ -29,6 +29,7 @@
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
+#include "utils/numerics_errors.h"
 
 void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double theta,
                             double Rho[3], double F[3], double A[9], double B[9]) {

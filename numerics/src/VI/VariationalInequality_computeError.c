@@ -29,15 +29,16 @@
 #include "SolverOptions.h"          // for SolverOptions
 #include "VariationalInequality.h"  // for VariationalInequality
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"          // for DEBUG_PRINTF
 
 int variationalInequality_computeError(VariationalInequality* problem, double* z, double* w,
                                        double tolerance, SolverOptions* options,
                                        double* error) {
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   int incx = 1;
   int n = problem->size;
@@ -87,10 +88,10 @@ int variationalInequality_computeError(VariationalInequality* problem, double* z
 
 int variationalInequality_compute_error_box(VariationalInequality* problem, double* x,
                                             double* F, double tolerance, double* error) {
-  assert(problem);
-  assert(x);
-  assert(F);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(x);
+  CHECK_NULL(F);
+  CHECK_NULL(error);
   assert(problem->set);
 
   double* lb = ((box_constraints*)problem->set)->lb;
@@ -128,10 +129,10 @@ int variationalInequality_computeError_wait(
   SolverOptions * options, double * error)
 {
 
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   int incx = 1;
 

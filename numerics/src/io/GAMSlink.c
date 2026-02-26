@@ -57,6 +57,8 @@ static inline char* strdup(const char* src) {
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "utils/numerics_errors.h"
 static int cp(const char* to, const char* from) {
   int fd_to, fd_from;
   char buf[4096];
@@ -186,7 +188,7 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
 }
 int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model,
                   const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data) {
-  assert(gdx_data);
+  CHECK_NULL(gdx_data);
   SN_GAMS_NM_gdx* mat_for_gdx = gdx_data->mat_for_gdx;
   SN_GAMS_NV_gdx* vec_for_gdx = gdx_data->vec_for_gdx;
   SN_GAMS_NV_gdx* vec_from_gdx = gdx_data->vec_from_gdx;
@@ -347,8 +349,8 @@ fail:
   new_opt->next_opt = NULL;
 
 #define GAMS_ADD_PREP(GP, name) \
-  assert(GP);                   \
-  assert(name);                 \
+  assert(GP);                       \
+  assert(name);                     \
   char* lname = strdup(name);
 
 void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type) {

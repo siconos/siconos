@@ -741,6 +741,15 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem *probl
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
+/* Minimal set_default functions for QUARTIC solvers */
+static void fc3d_quartic_set_default(SolverOptions* options) {
+  (void)options;
+}
+
+static void fc3d_quartic_nu_set_default(SolverOptions* options) {
+  (void)options;
+}
+
 /* SICONOS_FRICTION_3D_ONECONTACT_QUARTIC (562) - Quartic solver for one contact */
 static int quartic_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -758,6 +767,7 @@ static int quartic_solve_wrap(void* problem, double* reaction, double* velocity,
 REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, "FC3D_QUARTIC",
                 "Quartic one-contact enumerative solver (sliding case)",
                 quartic_init_wrap, quartic_solve_wrap, NULL, NULL,
+                fc3d_quartic_set_default,  /* set_default */
                 1000, 1e-12, 1)  /* is_local_solver=1 */
 
 /* SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU (563) - Quartic NU solver for one contact */
@@ -777,4 +787,5 @@ static int quartic_nu_solve_wrap(void* problem, double* reaction, double* veloci
 REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU, "FC3D_QUARTIC_NU",
                 "Quartic one-contact enumerative solver (non-sliding case)",
                 quartic_nu_init_wrap, quartic_nu_solve_wrap, NULL, NULL,
+                fc3d_quartic_nu_set_default,  /* set_default */
                 1000, 1e-12, 1)  /* is_local_solver=1 */

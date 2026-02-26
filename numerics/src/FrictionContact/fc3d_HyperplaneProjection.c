@@ -217,7 +217,7 @@ void fc3d_hp_set_default(SolverOptions* options) {
 
 static int fc3d_hp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_hp_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -239,6 +239,7 @@ REGISTER_SOLVER(FC3D_HP,
                 fc3d_hp_solve_wrap,
                 fc3d_hp_free_wrap,
                 NULL,
+                fc3d_hp_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-3,   /* default_tol - uses 1e-3 in set_default */
                 0       /* is_local_solver */)

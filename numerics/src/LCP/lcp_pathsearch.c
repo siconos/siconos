@@ -144,6 +144,18 @@ static int lcp_pathsearch_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_PATHSEARCH, "LCP_PATHSEARCH",
+static void lcp_pathsearch_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PATHSEARCH, "LCP_PATHSEARCH",
                        "Path search solver for LCP",
-                       lcp_pathsearch_solve_wrap, 1000, 1e-6)
+                       lcp_pathsearch_init_wrap,
+                       lcp_pathsearch_solve_wrap,
+                       lcp_pathsearch_free_wrap,
+                       NULL,  /* error function */
+                       lcp_pathsearch_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

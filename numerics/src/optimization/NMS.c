@@ -29,6 +29,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
+#include "utils/numerics_errors.h"
 
 #ifdef __cplusplus
 #undef restrict
@@ -325,7 +326,7 @@ accept_z_N:
 NMS_data* create_NMS_data(unsigned size, int matrix_type, int* restrict iparam,
                           double* restrict dparam) {
   NMS_data* data = (NMS_data*)malloc(sizeof(NMS_data));
-  assert(data);
+  if (!data) return NULL;
   data->size = size;
   data->n = 0;
 

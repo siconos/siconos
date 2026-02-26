@@ -23,6 +23,7 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SolverOptions.h"                  // for SolverOptions
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "rolling_fc_Solvers.h"             // for rolling_fc3d_set_internal...
 
 void rolling_fc2d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,

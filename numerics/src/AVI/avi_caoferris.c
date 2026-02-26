@@ -37,13 +37,14 @@
 #include "pivot-utils.h"
 #include "solver_registry.h"
 #include "numerics_errors.h"        // for pivot_init_lemke, pivot_s...
+#include "utils/numerics_errors.h"
 #include "sanitizer.h"          // for cblas_dcopy_msan
 #include "siconos_debug.h"      // for DEBUG_PRINT, DEBUG_EXPR_WE
 #include "vertex_extraction.h"  // for siconos_find_vertex
 
 int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
                   SolverOptions* options) {
-  assert(problem);
+  CHECK_NULL(problem);
   assert(problem->M);
   assert(problem->q);
   assert(problem->poly.set);
@@ -77,7 +78,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
   siconos_find_vertex(problem->poly.split, n, basis);
   DEBUG_PRINT_VEC_INT(basis, nrows + 1);
   const double* H = problem->poly.split->H->matrix0;
-  assert(H);
+  CHECK_NULL(H);
   const double* K = problem->poly.split->K;
   /* Set of active constraints */
   unsigned* A = (unsigned*)malloc(n * sizeof(unsigned));
@@ -256,9 +257,14 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
  * ===========================================================================
  */
 
+static void avi_caoferris_set_default(SolverOptions* options) {
+  /* No AVI-specific parameters to set */
+  (void)options;
+}
+
 static int avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  (void)options;
+  avi_caoferris_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -278,6 +284,7 @@ REGISTER_SOLVER(SICONOS_AVI_CAOFERRIS,
                 avi_caoferris_solve_wrap,
                 avi_caoferris_free_wrap,
                 NULL,
+                avi_caoferris_set_default,
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)
@@ -289,10 +296,10 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   int info = 0;
   assert(size_x > 0);
   /* matrix M of the avi */
-  assert(problem);
+  CHECK_NULL(problem);
   assert(problem->M);
   double* M = problem->M->matrix0;
-  assert(M);
+  CHECK_NULL(M);
   /* size of the AVI */
 
   unsigned int dim = problem->size;
@@ -347,7 +354,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   }
 
   /** Add covering vector */
-  assert(d);
+  CHECK_NULL(d);
   for (unsigned int i = 0; i < size_x; ++i) mat[i + dim * (dim + 1)] = d[i];
   for (unsigned int i = size_x; i < dim; ++i) mat[i + dim * (dim + 1)] = 0.0;
 

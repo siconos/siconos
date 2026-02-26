@@ -110,9 +110,13 @@ void relay_path(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_PATH in the global solver registry.
  */
 
-static int relay_path_init_wrap(void* problem, SolverOptions* options) {
+static void relay_path_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
+}
+
+static int relay_path_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
   return NUMERICS_OK;
 }
 
@@ -134,6 +138,7 @@ REGISTER_SOLVER(SICONOS_RELAY_PATH, "RELAY_PATH",
                 relay_path_solve_wrap,
                 relay_path_free_wrap,
                 NULL,  /* error function */
+                relay_path_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

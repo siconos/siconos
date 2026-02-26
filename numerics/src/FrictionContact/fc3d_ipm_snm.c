@@ -1028,7 +1028,7 @@ void fc3d_ipm_snm_set_default(SolverOptions* options) {
 
 static int fc3d_ipm_snm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_ipm_snm_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -1050,6 +1050,7 @@ REGISTER_SOLVER(FC3D_IPM_SNM,
                 fc3d_ipm_snm_solve_wrap,
                 fc3d_ipm_snm_free_wrap,
                 NULL,
+                fc3d_ipm_snm_set_default,  /* set_default */
                 500,    /* default_max_iter - from set_default */
                 1e-10,  /* default_tol - from set_default */
                 0       /* is_local_solver */)

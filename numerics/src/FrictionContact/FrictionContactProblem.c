@@ -31,6 +31,7 @@
 // #define DEBUG_MESSAGES
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
@@ -64,8 +65,7 @@ void frictionContact_display(FrictionContactProblem* problem) {
 
 int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -101,7 +101,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
 
 FrictionContactProblem* frictionContact_newFromFile(FILE* file) {
   FrictionContactProblem* problem = frictionContactProblem_new();
-  assert(file);
+  if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* "
       "file)\n");
@@ -345,7 +345,7 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
 }
 
 FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem) {
-  assert(problem);
+  if (!problem) return NULL;
 
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;

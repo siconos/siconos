@@ -39,6 +39,7 @@
 #include "fclib_interface.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 #include "timers_interf.h"  // for MAYBE_UNUSED
+#include "utils/numerics_errors.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
@@ -249,8 +250,7 @@ int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title
 
     fclib_problem->W->info = NULL;
   } else {
-    fprintf(stderr, "frictionContact_fclib_write, unknown storage type for A.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "frictionContact_fclib_write, unknown storage type for A.\n");
     ;
   }
 
@@ -380,8 +380,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
      */
 
     fprintf(stderr, "from_fclib_global not implemented for csr matrices.\n");
-    exit(EXIT_FAILURE);
-    ;
+    return NULL;
   } else {
     /* triplet */
     problem->M->matrix2->triplet = M;
@@ -412,8 +411,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
   } else if (fclib_problem->H->nz == -2) {
     /* compressed rows */
     fprintf(stderr, "from_fclib_global not implemented for csr matrices.\n");
-    exit(EXIT_FAILURE);
-    ;
+    return NULL;
   } else {
     /* triplet */
     problem->H->matrix2->triplet = H;
@@ -578,8 +576,7 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
      */
 
     fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
-    exit(EXIT_FAILURE);
-    ;
+    return NULL;
   } else {
     /* triplet */
     problem->M->matrix2->triplet = M;
@@ -610,8 +607,7 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
   } else if (fclib_problem->H->nz == -2) {
     /* compressed rows */
     fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
-    exit(EXIT_FAILURE);
-    ;
+    return NULL;
   } else {
     /* triplet */
     problem->H->matrix2->triplet = H;

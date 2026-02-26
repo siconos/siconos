@@ -30,6 +30,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
@@ -58,10 +59,10 @@ void mc2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, 
 int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error) {
   DEBUG_BEGIN("mc2d_compute_error(...)\n");
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

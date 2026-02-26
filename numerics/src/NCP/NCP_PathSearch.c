@@ -446,6 +446,17 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
  * This registers NCP_PATHSEARCH in the global solver registry.
  */
 
+static void ncp_pathsearch_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int ncp_pathsearch_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int ncp_pathsearch_solve_wrap(void* problem, double* reaction,
                                      double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -454,6 +465,12 @@ static int ncp_pathsearch_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_NCP_PATHSEARCH, "NCP_PATHSEARCH",
+static void ncp_pathsearch_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_NCP_PATHSEARCH, "NCP_PATHSEARCH",
                        "Path search solver for Nonlinear Complementarity Problems",
-                       ncp_pathsearch_solve_wrap, 1000, 1e-4)
+                       ncp_pathsearch_init_wrap, ncp_pathsearch_solve_wrap, ncp_pathsearch_free_wrap, NULL,
+                       ncp_pathsearch_set_default, 1000, 1e-4, 0);

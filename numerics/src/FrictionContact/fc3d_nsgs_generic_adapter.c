@@ -37,6 +37,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "numerics_verbose.h"
 #include "utils/naming_conventions.h"  // Standardized naming conventions
+#include "utils/numerics_errors.h"
 #include "fc3d_2NCP_Glocker.h"
 #include "fc3d_compute_error.h"
 
@@ -123,10 +124,7 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
                                                             SolverOptions* options,
                                                             SolverPtr* local_solver) {
   FrictionContactProblem* localproblem = fc3d_local_problem_allocate(problem);
-  if (!localproblem) {
-    numerics_error("fc3d_nsgs_local_problem_new", "Failed to allocate local problem");
-    return NULL;
-  }
+  if (!localproblem) return NULL;
   
   SolverOptions* localsolver_options = options->internalSolvers[0];
   SolverPtr solver = NULL;

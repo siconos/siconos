@@ -21,13 +21,13 @@
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"  // for NM_clear
+#include "utils/numerics_errors.h"
 
 void variationalInequality_display(VariationalInequality* vi) { assert(vi); }
 
 int variationalInequality_printInFile(VariationalInequality* vi, FILE* file) {
   if (!vi) {
-    fprintf(stderr, "Numerics, VariationalInequality printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, VariationalInequality printInFile failed, NULL input.\n");
   }
 
   return 0;

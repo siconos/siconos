@@ -427,7 +427,7 @@ void rfc3d_poc_set_default(SolverOptions* options) {
 /* Solver registration wrapper functions for ProjectionOnCone */
 static int rfc3d_poc_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rfc3d_poc_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -451,6 +451,7 @@ REGISTER_SOLVER(RFC3D_OC_PROJ, "RFC3D_OC_PROJ",
                 rfc3d_poc_solve_wrap,
                 rfc3d_poc_free_wrap,
                 NULL,  /* error function */
+                rfc3d_poc_set_default,
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 1      /* is_local_solver */);
@@ -458,7 +459,7 @@ REGISTER_SOLVER(RFC3D_OC_PROJ, "RFC3D_OC_PROJ",
 /* Solver registration wrapper functions for ProjectionOnConeWithLocalIteration */
 static int rfc3d_poc_li_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rfc3d_poc_withLocalIteration_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -482,6 +483,7 @@ REGISTER_SOLVER(RFC3D_OC_PROJ_LI, "RFC3D_OC_PROJ_LI",
                 rfc3d_poc_li_solve_wrap,
                 rfc3d_poc_li_free_wrap,
                 NULL,  /* error function */
+                rfc3d_poc_withLocalIteration_set_default,
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 1      /* is_local_solver */);

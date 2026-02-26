@@ -95,6 +95,10 @@ void mlcp_simplex(MixedLinearComplementarityProblem* problem, double* z, double*
  * This registers SICONOS_MLCP_SIMPLEX in the global solver registry.
  */
 
+static void mlcp_simplex_set_default(SolverOptions* options) {
+  /* No specific defaults for simplex solver */
+}
+
 static int mlcp_simplex_init_wrap(void* problem, SolverOptions* options) {
   mlcp_simplex_init((MixedLinearComplementarityProblem*)problem, options);
   return NUMERICS_OK;
@@ -119,6 +123,7 @@ REGISTER_SOLVER(SICONOS_MLCP_SIMPLEX, "MLCP_SIMPLEX",
                 mlcp_simplex_solve_wrap,
                 mlcp_simplex_free_wrap,
                 NULL,  /* error function */
+                mlcp_simplex_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

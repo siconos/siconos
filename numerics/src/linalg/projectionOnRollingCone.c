@@ -21,6 +21,7 @@
                     //
 #include <math.h>   // for sqrt
 #include <stdio.h>  // for printf
+#include "utils/numerics_errors.h"
 
 unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);

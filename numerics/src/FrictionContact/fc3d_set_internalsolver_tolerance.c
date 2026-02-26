@@ -26,6 +26,7 @@
 #include "SolverOptions.h"     // for SolverOptions
 #include "fc3d_Solvers.h"      // for fc3d_set_internalsolver_tolerance
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 
 void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {

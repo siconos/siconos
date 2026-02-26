@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 
 int pathvi_get_z(struct vi_desc *desc, double *z) {
   SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);

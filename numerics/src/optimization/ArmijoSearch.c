@@ -32,6 +32,8 @@
 #define restrict __restrict
 #else
 #include <stdbool.h>  // for bool, only required in C
+
+#include "utils/numerics_errors.h"
 #endif
 
 double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data) {
@@ -50,7 +52,7 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   double RHS;
 
   armijo_extra_params* aep = (armijo_extra_params*)ls_data->extra_params;
-  assert(aep);
+  CHECK_NULL(aep);
   preRHS *= aep->gamma;
 
   int success = 1;

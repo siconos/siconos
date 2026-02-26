@@ -24,6 +24,7 @@
 #include "Relay_Solvers.h"     // for relay_avi_caoferris, relay_avi_caoferr...
 #include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 
 #ifndef MEXFLAG
@@ -41,12 +42,12 @@ const char* const SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR =
 int relay_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options) {
   // Relay_display(problem);
 
-  if (options == NULL)
-    numerics_error("Relay_driver", "null input for solver and/or global options");
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;

@@ -30,6 +30,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
@@ -69,10 +70,13 @@ void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restric
 int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error) {
   DEBUG_BEGIN("fc3d_compute_error(...)\n");
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
@@ -121,10 +125,10 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
                                            double *w, double tolerance, SolverOptions *options,
                                            double norm, double *error, int on_dual_cone) {
   DEBUG_BEGIN("fc3d_compute_error_norm_infinity_conic(...)\n");
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

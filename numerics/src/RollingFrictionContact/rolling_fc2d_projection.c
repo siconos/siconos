@@ -490,7 +490,7 @@ void rfc2d_poc_set_default(SolverOptions* options) {
 /* Solver registration wrapper functions for ProjectionOnCone */
 static int rfc2d_poc_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rfc2d_poc_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -514,6 +514,7 @@ REGISTER_SOLVER(RFC2D_OC_PROJ, "RFC2D_OC_PROJ",
                 rfc2d_poc_solve_wrap,
                 rfc2d_poc_free_wrap,
                 NULL,  /* error function */
+                rfc2d_poc_set_default,
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 1      /* is_local_solver */);
@@ -521,7 +522,7 @@ REGISTER_SOLVER(RFC2D_OC_PROJ, "RFC2D_OC_PROJ",
 /* Solver registration wrapper functions for ProjectionOnConeWithLocalIteration */
 static int rfc2d_poc_li_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rfc2d_poc_withLocalIteration_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -545,6 +546,7 @@ REGISTER_SOLVER(RFC2D_OC_PROJ_LI, "RFC2D_OC_PROJ_LI",
                 rfc2d_poc_li_solve_wrap,
                 rfc2d_poc_li_free_wrap,
                 NULL,  /* error function */
+                rfc2d_poc_withLocalIteration_set_default,
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 1      /* is_local_solver */);

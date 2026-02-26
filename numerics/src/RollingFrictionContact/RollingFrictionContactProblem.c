@@ -25,6 +25,7 @@
 
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
+#include "utils/numerics_errors.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
@@ -63,9 +64,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem* problem) {
 
 int rollingFrictionContact_printInFile(RollingFrictionContactProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, RollingFrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, RollingFrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -106,7 +105,7 @@ int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* proble
 
 RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file) {
   RollingFrictionContactProblem* problem = rollingFrictionContactProblem_new();
-  assert(file);
+  if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* "
       "problem, FILE* file)\n");

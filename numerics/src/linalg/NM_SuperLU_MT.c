@@ -25,6 +25,7 @@
 
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
+#include "utils/numerics_errors.h"
 
 /** \struct NM_SuperLU_MT_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
@@ -193,11 +194,11 @@ int NM_SuperLU_MT_solve(NumericsMatrix* A, double* b, NM_SuperLU_MT_WS* superlu_
 }
 
 void NM_SuperLU_MT_free(void* p) {
-  assert(p);
+  if (!p) return;
   NSM_linear_solver_params* params = (NSM_linear_solver_params*)p;
-  assert(params);
+  if (!params) return;
   NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*)params->linear_solver_data;
-  assert(superlu_mt_ws);
+  if (!superlu_mt_ws) return;
 
   SUPERLU_FREE(superlu_mt_ws->perm_r);
   SUPERLU_FREE(superlu_mt_ws->perm_c);

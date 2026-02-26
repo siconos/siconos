@@ -198,7 +198,7 @@ static void lcp_psor_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_PSOR, "LCP_PSOR",
+REGISTER_SOLVER(SICONOS_LCP_PSOR, "LCP_PSOR",
                 "Projected Successive Over-Relaxation for LCP",
                 lcp_psor_init_wrap,
                 lcp_psor_solve_wrap,

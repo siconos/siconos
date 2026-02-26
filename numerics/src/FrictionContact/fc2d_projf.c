@@ -18,6 +18,7 @@
  */
 
 #include "fc2d_Solvers.h"  // for fc2d_projf
+#include "utils/numerics_errors.h"
 
 void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[]) {
   int i, nc, n = *nn;

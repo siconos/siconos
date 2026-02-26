@@ -253,11 +253,22 @@ void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *i
   free(zz);
 }
 
+static void lcp_cpg_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
  * This registers SICONOS_LCP_CPG in the global solver registry.
  */
+
+static int lcp_cpg_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_cpg_set_default(options);
+  return NUMERICS_OK;
+}
 
 static int lcp_cpg_solve_wrap(void* problem, double* reaction,
                               double* velocity, SolverOptions* options) {
@@ -266,8 +277,18 @@ static int lcp_cpg_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_CPG, "LCP_CPG",
+static void lcp_cpg_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_CPG, "LCP_CPG",
                        "Conjugated Projected Gradient for LCP",
+                       lcp_cpg_init_wrap,
                        lcp_cpg_solve_wrap,
+                       lcp_cpg_free_wrap,
+                       NULL,  /* error function */
+                       lcp_cpg_set_default,  /* set_default */
                        1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

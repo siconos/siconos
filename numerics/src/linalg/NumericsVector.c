@@ -28,6 +28,7 @@
 #include "SiconosBlas.h"
 #include "float.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF
+#include "utils/numerics_errors.h"
 
 void NV_display(const double* const m, int nRow) {
   int lin;
@@ -49,10 +50,7 @@ void NV_copy(const double* const vec, unsigned int vecSize, double* out) {
 }
 
 void NV_write_in_file_python(double* m, int nRow, FILE* file) {
-  if (!m) {
-    fprintf(stderr, "Numerics, NV_write_in_file_python  failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(m);
   fprintf(file, "size = %d; \n", nRow);
   fprintf(file, "data= [");
   for (int i = 0; i < nRow; i++) {
@@ -74,20 +72,8 @@ bool NV_equal(double* x, double* y, int n, double tol) {
 
 void NV_insert(double* x, const unsigned int xSize, const double* const y,
                const unsigned int ySize, unsigned int i) {
-  if (xSize < ySize) {
-    fprintf(stderr,
-            "NV_insert ::  the vector to be inserted is greater than the given vector: size_x "
-            "< size_y - %d < %d\n",
-            xSize, ySize);
-    exit(EXIT_FAILURE);
-  }
-  if (i + ySize > xSize) {
-    fprintf(
-        stderr,
-        "NV_insert ::  the vector to be inserted is too big for insertion from position %d\n",
-        i);
-    exit(EXIT_FAILURE);
-  }
+  assert(xSize >= ySize);
+  assert(i + ySize <= xSize);
   for (unsigned int j = i; j < i + ySize; ++j) x[j] = y[j - i];
 }
 

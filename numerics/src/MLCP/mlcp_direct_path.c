@@ -85,7 +85,7 @@ static void mlcp_direct_path_free_wrap(void* problem, SolverOptions* options) {
   mlcp_direct_path_reset();
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_DIRECT_PATH, "MLCP_DIRECT_PATH",
+REGISTER_SOLVER(SICONOS_MLCP_DIRECT_PATH, "MLCP_DIRECT_PATH",
                 "Direct-Path hybrid solver for Mixed Linear Complementarity Problems",
                 mlcp_direct_path_init_wrap,
                 mlcp_direct_path_solve_wrap,

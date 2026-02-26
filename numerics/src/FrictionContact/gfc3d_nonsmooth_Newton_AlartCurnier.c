@@ -737,7 +737,9 @@ void gfc3d_nsn_ac_set_default(SolverOptions *options) {
  */
 
 static int gfc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
-  gfc3d_nsn_ac_set_default(options);
+  /* set_default is now called by the registry before init_wrap */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -765,6 +767,7 @@ REGISTER_SOLVER(GFC3D_NSN_AC, "GFC3D_NSN_AC",
                 gfc3d_nsn_ac_solve_wrap,
                 gfc3d_nsn_ac_free_wrap,
                 NULL,  /* error function */
+                gfc3d_nsn_ac_set_default,  /* set_default */
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

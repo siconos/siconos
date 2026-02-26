@@ -23,13 +23,14 @@
 #include "solver_registry.h"
 #include <stdio.h>
 #include <string.h>
+#include "utils/numerics_errors.h"
 
 /* Static registry table */
 static const SolverEntry* registry[SOLVER_REGISTRY_MAX];
 static size_t registry_count = 0;
 
 int solver_registry_register(const SolverEntry* entry) {
-    if (!entry) return -1;
+    CHECK_NULL(entry);
     if (registry_count >= SOLVER_REGISTRY_MAX) return -1;
     
     /* Check for duplicate ID */

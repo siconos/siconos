@@ -86,7 +86,8 @@ void lcp_newton_FB_set_default(SolverOptions* options) {
 #include "utils/numerics_errors.h"
 
 static int lcp_newton_FB_init_wrap(void* problem, SolverOptions* options) {
-  lcp_newton_FB_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -108,6 +109,7 @@ REGISTER_SOLVER(SICONOS_LCP_NEWTON_FB_FBLSA, "LCP_NEWTON_FB",
                 lcp_newton_FB_solve_wrap,
                 lcp_newton_FB_free_wrap,
                 NULL,  /* error function */
+                lcp_newton_FB_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+                0);     /* is_local_solver */

@@ -27,6 +27,7 @@
 #include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
 #include "SolverOptions.h"                    // for SolverOptions
 #include "sn_error_handling.h"                // for sn_fatal_error_msg, SN_...
+#include "utils/numerics_errors.h"
 const char* const SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
 const char* const SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
 const char* const SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
@@ -34,11 +35,11 @@ const char* const SICONOS_NCP_PATH_STR = "NCP PATH";
 
 int ncp_driver(NonlinearComplementarityProblem* problem, double* z, double* F,
                SolverOptions* options) {
-  assert(options && "ncp_driver null input for solver options.\n");
-
-  /* Checks inputs */
-  assert(problem && z && F &&
-         "ncp_driver null input for NonlinearComplementarityProblem and/or unknowns (z,w)");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(F);
+  CHECK_OPTIONS(options);
 
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
@@ -59,8 +60,7 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double* z, double* F,
         ncp_path(problem, z, F, &info, options);
         break;
       default:
-        fprintf(stderr, "ncp_driver error: unknown solver id: %d\n", options->solverId);
-        exit(EXIT_FAILURE);
+        CHECK_ARG(0, "ncp_driver error: unknown solver id: %d\n");
     }
 
     /* check the conditions 0 <= z _|_ F(z) >= 0 */

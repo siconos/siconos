@@ -29,6 +29,7 @@
 #include "SparseBlockMatrix.h"     // for SBM_gemv, SBM_free
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)
@@ -57,9 +58,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void) {
 
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -238,7 +237,7 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem) {
 
 GlobalFrictionContactProblem* globalFrictionContact_copy(
     GlobalFrictionContactProblem* problem) {
-  assert(problem);
+  if (!problem) return NULL;
 
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
@@ -358,7 +357,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     // Compute W <-  H^T M^1 H
 
     assert(H->matrix0);
-    assert(Htmp);
+    if (!Htmp) return NULL;
     assert(Wnum->matrix0);
 
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n,

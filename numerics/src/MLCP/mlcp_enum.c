@@ -233,12 +233,12 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
 /** End of static functions **/
 
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
-  if (!problem) return 0;
+  CHECK_NULL(problem);
   return 2 * (problem->n + problem->m) + problem->m;
 }
 
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
-  if (!problem) return 0;
+  CHECK_NULL(problem);
   assert(problem->M);
   int LWORK = 0;
   if (options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS]) {
@@ -403,7 +403,9 @@ void mlcp_enum_set_default(SolverOptions* options) {
  */
 
 static int mlcp_enum_init_wrap(void* problem, SolverOptions* options) {
-  mlcp_enum_set_default(options);
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -414,7 +416,7 @@ static int mlcp_enum_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_MLCP_ENUM, "MLCP_ENUM",
+REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
                 "Enumerative solver for Mixed Linear Complementarity Problems",
                 mlcp_enum_init_wrap,
                 mlcp_enum_solve_wrap,

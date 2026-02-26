@@ -127,9 +127,13 @@ void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *veloci
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_enum_init_wrap(void* problem, SolverOptions* options) {
+static void fc2d_enum_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 100;
   SOLVER_TOL(options) = 1e-6;
+}
+
+static int fc2d_enum_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
   return NUMERICS_OK;
 }
 
@@ -152,6 +156,7 @@ REGISTER_SOLVER(FC2D_ENUM, "FC2D_ENUM",
                 fc2d_enum_solve_wrap,
                 fc2d_enum_free_wrap,
                 NULL,  /* error function */
+                fc2d_enum_set_default,  /* set_default */
                 100,   /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

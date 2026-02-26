@@ -207,6 +207,11 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
   free(rho);
 }
 
+static void lcp_newton_min_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -216,6 +221,12 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
+static int lcp_newton_min_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_newton_min_set_default(options);
+  return NUMERICS_OK;
+}
+
 static int lcp_newton_min_solve_wrap(void* problem, double* reaction,
                                      double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -223,8 +234,18 @@ static int lcp_newton_min_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_NEWTONMIN, "LCP_NEWTONMIN",
+static void lcp_newton_min_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NEWTONMIN, "LCP_NEWTONMIN",
                        "Newton min solver for LCP",
+                       lcp_newton_min_init_wrap,
                        lcp_newton_min_solve_wrap,
+                       lcp_newton_min_free_wrap,
+                       NULL,  /* error function */
+                       lcp_newton_min_set_default,  /* set_default */
                        1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

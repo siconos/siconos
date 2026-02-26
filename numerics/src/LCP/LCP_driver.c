@@ -29,6 +29,7 @@
 /* #define DEBUG_MESSAGES */
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_END, DEBUG_BEGIN
 
 const char* const SICONOS_LCP_LEMKE_STR = "Lemke";

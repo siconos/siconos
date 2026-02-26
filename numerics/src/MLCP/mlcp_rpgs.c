@@ -198,7 +198,8 @@ void mlcp_rpgs_set_default(SolverOptions* options) {
  */
 
 static int mlcp_rpgs_init_wrap(void* problem, SolverOptions* options) {
-  mlcp_rpgs_set_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -215,6 +216,7 @@ REGISTER_SOLVER(SICONOS_MLCP_RPGS, "MLCP_RPGS",
                 mlcp_rpgs_solve_wrap,
                 NULL,  /* free function */
                 NULL,  /* error function */
+                mlcp_rpgs_set_default,
                 50000, /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

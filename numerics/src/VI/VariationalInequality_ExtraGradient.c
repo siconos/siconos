@@ -32,6 +32,7 @@
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -471,8 +472,9 @@ void variationalInequality_ExtraGradient_set_default(SolverOptions *options) {
  */
 
 static int vi_eg_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
   (void)problem;
-  variationalInequality_ExtraGradient_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -494,6 +496,7 @@ REGISTER_SOLVER(SICONOS_VI_EG,
                 vi_eg_solve_wrap,
                 vi_eg_free_wrap,
                 NULL,
+                variationalInequality_ExtraGradient_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

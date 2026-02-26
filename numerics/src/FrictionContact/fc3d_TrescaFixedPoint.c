@@ -181,7 +181,7 @@ static void fc3d_tfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(FC3D_TFP,
+REGISTER_SOLVER(FC3D_TFP,
                 "FC3D_TFP",
                 "Tresca Fixed Point for 3D Friction Contact",
                 fc3d_tfp_init_wrap,

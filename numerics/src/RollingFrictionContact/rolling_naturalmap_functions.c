@@ -34,6 +34,7 @@
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
+#include "utils/numerics_errors.h"
 
 void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], double mu,
                                            double mur, double * Rho, double F[5],

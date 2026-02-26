@@ -27,6 +27,7 @@
 #include "SolverOptions.h"                    // for SolverOptions
 #include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
 #include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
+#include "utils/numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* Pointer to function used to update the solver, to formalize the local problem for example.
@@ -81,8 +82,7 @@ void fc3d_Path_initialize(FrictionContactProblem* problem,
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH) {
     NCPGlocker_initialize(problem, localproblem);
   } else {
-    fprintf(stderr, "Numerics, fc3d_Path failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 }
 
@@ -95,8 +95,7 @@ int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
   int info;
   ncp_path(&NCP_struct, reaction, Fvec, &info, options);
   if (info > 0) {
-    fprintf(stderr, "Numerics, fc3d_Path failed");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, fc3d_Path failed");
   }
   return info;
   /*   (*postSolver)(contact,reaction); */

@@ -82,6 +82,17 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double* z, doubl
  * This registers MCP_NEWTON_MIN_FBLSA in the global solver registry.
  */
 
+static void mcp_newton_minfblsa_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int mcp_newton_minfblsa_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mcp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
                                           double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -90,6 +101,12 @@ static int mcp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_MCP_NEWTON_MIN_FBLSA, "MCP_NEWTON_MIN_FBLSA",
+static void mcp_newton_minfblsa_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_MCP_NEWTON_MIN_FBLSA, "MCP_NEWTON_MIN_FBLSA",
                        "Newton minFBLSA solver for Mixed Complementarity Problems",
-                       mcp_newton_minfblsa_solve_wrap, 1000, 1e-4)
+                       mcp_newton_minfblsa_init_wrap, mcp_newton_minfblsa_solve_wrap, mcp_newton_minfblsa_free_wrap, NULL,
+                       mcp_newton_minfblsa_set_default, 1000, 1e-4, 0);

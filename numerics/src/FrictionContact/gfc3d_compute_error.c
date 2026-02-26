@@ -29,6 +29,7 @@
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 /* #define DEBUG_NOCOLOR */
@@ -45,9 +46,16 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
 {
   DEBUG_BEGIN("gfc3d_compute_error(...)\n");
-  /* Checks inputs */
-  if (problem == NULL || globalVelocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_NULL(globalVelocity);
+  CHECK_NULL(error);
+  CHECK_MATRIX(problem->M);
+  CHECK_MATRIX(problem->H);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;

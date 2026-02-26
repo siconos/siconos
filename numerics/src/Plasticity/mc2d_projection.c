@@ -147,9 +147,7 @@ void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem
     qLocal[2] -= MLocal[8] * stress[is];
 
   } else {
-    fprintf(stderr,
-            "mc2d_projectionWithDiagonalization_update :: Unsupported matrix storage)");
-    exit(EXIT_FAILURE);
+    assert(0);;
   }
   /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
 
@@ -222,8 +220,7 @@ int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
   } else {
     if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON ||
         MLocal[2 * nLocal + 2] < DBL_EPSILON) {
-      fprintf(stderr, "mc2d_projection error: null term on MLocal diagonal.\n");
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "mc2d_projection error: null term on MLocal diagonal.\n");
     }
 
     stress_local[0] = -qLocal[0] / MLocal[0];
@@ -491,6 +488,16 @@ void mc2d_poc_set_default(SolverOptions* options) {
  */
 
 /* Wrapper for projection on cone (local solver) - Note: local solvers use 3 args */
+static void mc2d_projectionOnCone_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int mc2d_projectionOnCone_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mc2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
                                             double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
@@ -498,6 +505,16 @@ static int mc2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction
 }
 
 /* Wrapper for projection on cone with local iteration (local solver) */
+static void mc2d_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int mc2d_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
 static int mc2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem,
                                                                double* reaction,
                                                                double* velocity,
@@ -507,16 +524,26 @@ static int mc2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem
                                                         reaction, options);
 }
 
-REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnCone,
-                      "MOHR_COULOMB_2D_ONECONE_PROJECTION",
-                      "Projection on cone for 2D Mohr Coulomb (one cone)",
-                      mc2d_projectionOnCone_solve_wrap,
-                      100,   /* default_max_iter */
-                      1e-14  /* default_tol */);
+REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnCone,
+                "MOHR_COULOMB_2D_ONECONE_PROJECTION",
+                "Projection on cone for 2D Mohr Coulomb (one cone)",
+                mc2d_projectionOnCone_init_wrap,
+                mc2d_projectionOnCone_solve_wrap,
+                NULL,
+                NULL,
+                mc2d_projectionOnCone_set_default,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */
 
-REGISTER_LOCAL_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration,
-                      "MOHR_COULOMB_2D_ONECONE_PROJECTION_LI",
-                      "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
-                      mc2d_projectionOnConeWithLocalIteration_solve_wrap,
-                      100,   /* default_max_iter */
-                      1e-14  /* default_tol */);
+REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration,
+                "MOHR_COULOMB_2D_ONECONE_PROJECTION_LI",
+                "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
+                mc2d_projectionOnConeWithLocalIteration_init_wrap,
+                mc2d_projectionOnConeWithLocalIteration_solve_wrap,
+                NULL,
+                NULL,
+                mc2d_projectionOnConeWithLocalIteration_set_default,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */

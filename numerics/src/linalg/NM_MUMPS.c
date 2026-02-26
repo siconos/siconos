@@ -29,6 +29,7 @@
 
 /*#define DEBUG_MESSAGES*/
 #include "siconos_debug.h"
+#include "utils/numerics_errors.h"
 
 void NM_MUMPS_free(void* p) {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*)p;

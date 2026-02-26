@@ -35,6 +35,8 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
 
+#include "utils/numerics_errors.h"
+
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"
@@ -95,8 +97,20 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                  double* globalVelocity, SolverOptions* options) {
   // verbose = 1;
+  
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_NULL(globalVelocity);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
+  CHECK_MATRIX(problem->H);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->b);
+  
   assert(options->isSet);
-  DEBUG_EXPR(NV_display(globalVelocity, problem_ori->M->size0););
+  DEBUG_EXPR(NV_display(globalVelocity, problem->M->size0););
   if (verbose > 0) solver_options_print(options);
 
   /* Solver name */
@@ -110,10 +124,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   }
   int info = -1;
 
-  if (problem->dimension != 3)
-    numerics_error(
-        "gfc3d_driver",
-        "Dimension of the problem : problem-> dimension is not compatible or is not set");
+  /* Check dimension */
+  CHECK_DIMENSION(problem->dimension, 3);
 
   /* if there is no contact, we compute directly the global velocity as M^{-1}q */
   int m = problem->H->size1;
@@ -297,9 +309,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n",
-              options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, gfc3d_driver failed. Unknown solver %d.\n");
     }
   }
 

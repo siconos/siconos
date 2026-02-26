@@ -558,8 +558,6 @@ void convexQP_ADMM_set_default(SolverOptions* options) {
  */
 
 static int convexqp_admm_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-6;
   convexQP_ADMM_init((ConvexQP*)problem, options);
   return NUMERICS_OK;
 }
@@ -587,6 +585,7 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_ADMM, "CONVEXQP_ADMM",
                 convexqp_admm_solve_wrap,
                 convexqp_admm_free_wrap,
                 NULL,  /* error function */
+                convexQP_ADMM_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

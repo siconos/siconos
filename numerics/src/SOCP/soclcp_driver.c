@@ -27,6 +27,7 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 
 const char* const SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 const char* const SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
@@ -63,8 +64,13 @@ const char* const SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
                   SolverOptions* options) {
-  if (options == NULL)
-    numerics_error("soclcp_driver", "null input for solver and/or global options");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(r);
+  CHECK_NULL(v);
+  CHECK_OPTIONS(options);
+  CHECK_NULL(problem->M);
+  CHECK_NULL(problem->q);
 
   assert(options->isSet);
 
@@ -175,10 +181,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* 
     /*   break; */
     /* } */
     default: {
-      fprintf(
-          stderr,
-          "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
     }
   }
 

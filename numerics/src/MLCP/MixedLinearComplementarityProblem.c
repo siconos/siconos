@@ -26,6 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 
 void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem) {
   if (problem->isStorageType1) {
@@ -166,9 +167,7 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
                                            FILE* file) {
   int info = 0;
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
   }
   int i, j;
   fprintf(file, "%d\n", problem->isStorageType1);
@@ -244,11 +243,9 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
 int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem,
                                            FILE* file) {
   int info = 0;
-  assert(file);
+  CHECK_NULL(file);
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
   }
   int i, j;
   int st1, st2;

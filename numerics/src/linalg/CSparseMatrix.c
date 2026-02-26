@@ -44,6 +44,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
+#include "utils/numerics_errors.h"  // for CHECK_NULL, CHECK_ARG, etc.
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -69,8 +70,7 @@ double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j) {
   }
 
   else {
-    fprintf(stderr, "CSparseMatrix_get_value :: format\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "CSparseMatrix_get_value :: format\n");
   }
   return 0.0;
 }
@@ -260,7 +260,7 @@ CSparseMatrix *CSparseMatrix_spfree_on_stack(CSparseMatrix *A) {
 
 int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol,
                                    CSparseMatrix_factors *cs_lu_A) {
-  assert(A);
+  CHECK_NULL(A);
   cs_lu_A->n = A->n;
   css *S = cs_sqr(order, A, 0);
   cs_lu_A->S = S;
@@ -270,7 +270,7 @@ int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol,
 }
 int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,
                                      CSparseMatrix_factors *cs_chol_A) {
-  assert(A);
+  CHECK_NULL(A);
   cs_chol_A->n = A->n;
   css *S = cs_schol(order, A);
   cs_chol_A->S = S;
@@ -280,7 +280,7 @@ int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,
 }
 int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
                                      CSparseMatrix_factors *cs_ldlt_A) {
-  assert(A);
+  CHECK_NULL(A);
 
   CS_INT *Ap, *Ai, *Lp, *Li;
   CS_INT *Parent;
@@ -365,7 +365,7 @@ void CSparseMatrix_free_lu_factors(CSparseMatrix_factors *cs_lu_A) {
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
  * This is extracted from cs_lusol, you need to synchronize any changes! */
 CS_INT CSparseMatrix_solve(CSparseMatrix_factors *cs_lu_A, double *x, double *b) {
-  assert(cs_lu_A);
+  CHECK_NULL(cs_lu_A);
 
   CS_INT ok;
   CS_INT n = cs_lu_A->n;
@@ -386,7 +386,7 @@ CS_INT CSparseMatrix_solve(CSparseMatrix_factors *cs_lu_A, double *x, double *b)
  * This is extracted from cs_lusol, you need to synchronize any changes! */
 CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
                              CSparseMatrix *B) {
-  assert(cs_lu_A);
+  CHECK_NULL(cs_lu_A);
   DEBUG_BEGIN("CSparseMatrix_spsolve(...)\n");
 
   if (!CS_CSC(X)) return 1; /* check inputs */
@@ -395,9 +395,9 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
   CS_INT ok;
   CS_INT n = cs_lu_A->n;
   csn *N = cs_lu_A->N;
-  if (!N) return 1;
+  CHECK_NULL(N);
   css *S = cs_lu_A->S;
-  if (!S) return 1;
+  CHECK_NULL(S);
 
   CS_ENTRY *x, *b, *Xx, *Bx;
   CS_INT *xi, *pinv, *q, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
@@ -476,7 +476,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
 }
 
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors *cs_chol_A, double *x, double *b) {
-  assert(cs_chol_A);
+  CHECK_NULL(cs_chol_A);
 
   CS_INT ok;
   CS_INT n = cs_chol_A->n;
@@ -505,9 +505,9 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
   CS_INT ok;
   CS_INT n = cs_chol_A->n;
   csn *N = cs_chol_A->N;
-  if (!N) return 1;
+  CHECK_NULL(N);
   css *S = cs_chol_A->S;
-  if (!S) return 1;
+  CHECK_NULL(S);
 
   CS_ENTRY *x, *b, *Xx, *Bx;
   CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
@@ -595,7 +595,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
 }
 
 CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors *cs_ldlt_A, double *x, double *b) {
-  assert(cs_ldlt_A);
+  CHECK_NULL(cs_ldlt_A);
 
   CS_INT ok;
 
@@ -1012,7 +1012,7 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix *const A, double *B) {
 }
 
 CSparseMatrix *CSparseMatrix_alloc_for_copy(const CSparseMatrix *const m) {
-  assert(m);
+  if (!m) return NULL;
   CSparseMatrix *out = NULL;
   if (m->nz >= 0) /* triplet  */
   {
@@ -1027,8 +1027,8 @@ CSparseMatrix *CSparseMatrix_alloc_for_copy(const CSparseMatrix *const m) {
     out->m = m->m;
     out->n = m->n;
   } else {
-    fprintf(stderr, "NM_copy :: error unknown type " CS_ID " for CSparse matrix\n", m->nz);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "NM_copy :: error unknown type\n");
+    return NULL;
   }
 
   return out;

@@ -136,6 +136,11 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
   free(Q);
 }
 
+static void lcp_qp_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -145,6 +150,12 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
+static int lcp_qp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_qp_set_default(options);
+  return NUMERICS_OK;
+}
+
 static int lcp_qp_solve_wrap(void* problem, double* reaction,
                              double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -152,8 +163,18 @@ static int lcp_qp_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_QP, "LCP_QP",
+static void lcp_qp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_QP, "LCP_QP",
                        "Quadratic Programming solver for LCP",
+                       lcp_qp_init_wrap,
                        lcp_qp_solve_wrap,
+                       lcp_qp_free_wrap,
+                       NULL,  /* error function */
+                       lcp_qp_set_default,  /* set_default */
                        1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                       1e-6,  /* default_tol */
+                       0      /* is_local_solver */)

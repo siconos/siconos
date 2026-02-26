@@ -53,6 +53,11 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double*
   free(d_vec);
 }
 
+static void lcp_avi_caoferris_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -61,7 +66,7 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double*
 
 static int lcp_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  (void)options;
+  lcp_avi_caoferris_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -72,6 +77,18 @@ static int lcp_avi_caoferris_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_AVI_CAOFERRIS, "LCP_AVI_CAOFERRIS",
+static void lcp_avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_AVI_CAOFERRIS, "LCP_AVI_CAOFERRIS",
                        "AVI Cao-Ferris solver for LCP",
-                       lcp_avi_caoferris_solve_wrap, 1000, 1e-6)
+                       lcp_avi_caoferris_init_wrap,
+                       lcp_avi_caoferris_solve_wrap,
+                       lcp_avi_caoferris_free_wrap,
+                       NULL,  /* error function */
+                       lcp_avi_caoferris_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

@@ -548,7 +548,7 @@ static void lcp_pivot_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_PIVOT, "LCP_PIVOT",
+REGISTER_SOLVER(SICONOS_LCP_PIVOT, "LCP_PIVOT",
                 "Pivot solver for LCP (Lemke/Bard/Murty)",
                 lcp_pivot_init_wrap,
                 lcp_pivot_solve_wrap,
@@ -557,7 +557,7 @@ REGISTER_SOLVER_WITH_DEFAULT(SICONOS_LCP_PIVOT, "LCP_PIVOT",
                 lcp_pivot_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+                0);     /* is_local_solver */
 
 /* Additional registrations for pivot variants */
 static int lcp_bard_init_wrap(void* problem, SolverOptions* options) {
@@ -566,9 +566,16 @@ static int lcp_bard_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_BARD, "LCP_BARD",
+REGISTER_SOLVER(SICONOS_LCP_BARD, "LCP_BARD",
                        "Bard-type pivoting method for LCP",
-                       lcp_pivot_solve_wrap, 1000, 1e-6)
+                       lcp_bard_init_wrap,
+                       lcp_pivot_solve_wrap,
+                       lcp_pivot_free_wrap,
+                       NULL,  /* error function */
+                       lcp_pivot_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */
 
 static int lcp_murty_init_wrap(void* problem, SolverOptions* options) {
   lcp_pivot_set_default(options);
@@ -576,6 +583,13 @@ static int lcp_murty_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_MURTY, "LCP_MURTY",
+REGISTER_SOLVER(SICONOS_LCP_MURTY, "LCP_MURTY",
                        "Murty's least index pivoting method for LCP",
-                       lcp_pivot_solve_wrap, 1000, 1e-6)
+                       lcp_murty_init_wrap,
+                       lcp_pivot_solve_wrap,
+                       lcp_pivot_free_wrap,
+                       NULL,  /* error function */
+                       lcp_pivot_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

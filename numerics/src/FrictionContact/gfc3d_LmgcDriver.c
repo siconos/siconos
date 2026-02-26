@@ -30,6 +30,7 @@
 #include "SiconosConfig.h"                 // for WITH_FCLIB  // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
 
 #ifdef WITH_FCLIB
@@ -131,8 +132,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   }
 
 #ifdef USE_NM_DENSE
-  assert(M);
-  assert(H);
+  CHECK_NULL(M);
+  CHECK_NULL(H);
 
   NumericsMatrix *MMtmp = NM_new();
   NumericsMatrix *HHtmp = NM_new();

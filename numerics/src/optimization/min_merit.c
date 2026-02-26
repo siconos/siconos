@@ -23,11 +23,12 @@
 #include "NumericsMatrix.h"  // for NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy
 #include "assert.h"          // for assert
+#include "utils/numerics_errors.h"
 
 void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin) {
-  assert(z != NULL);
-  assert(F != NULL);
-  assert(Fmin != NULL);
+  assert(z);
+  assert(F);
+  assert(Fmin);
 
   for (int i = 0; i < n1; ++i) {
     Fmin[i] = F[i];

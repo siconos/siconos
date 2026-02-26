@@ -166,6 +166,83 @@ void numerics_log_info(const char* file, int line, const char* func,
                        const char* fmt, ...);
 
 /* ===========================================================================
+ * Standardized Error Handling Macros
+ * =========================================================================== */
+
+/** Standardized NULL pointer check - returns NUMERICS_ERR_NULL_POINTER */
+#define CHECK_NULL(ptr) \
+    do { \
+        if ((ptr) == NULL) { \
+            fprintf(stderr, "[ERROR] %s:%d (%s) - Null pointer: " #ptr "\n", \
+                    __FILE__, __LINE__, __func__); \
+            return NUMERICS_ERR_NULL_POINTER; \
+        } \
+    } while(0)
+
+/** Check condition and return specific error code */
+#define CHECK_COND(cond, err_code, msg) \
+    do { \
+        if (!(cond)) { \
+            fprintf(stderr, "[ERROR] %s:%d (%s) - %s\n", \
+                    __FILE__, __LINE__, __func__, msg); \
+            return err_code; \
+        } \
+    } while(0)
+
+/** Check condition and return NUMERICS_ERR_INVALID_ARGUMENT */
+#define CHECK_ARG(cond, msg) CHECK_COND(cond, NUMERICS_ERR_INVALID_ARGUMENT, msg)
+
+/** Check solver options validity */
+#define CHECK_OPTIONS(opts) \
+    do { \
+        CHECK_NULL(opts); \
+        CHECK_COND((opts)->iparam != NULL, NUMERICS_ERR_INVALID_OPTION, "iparam is NULL"); \
+        CHECK_COND((opts)->dparam != NULL, NUMERICS_ERR_INVALID_OPTION, "dparam is NULL"); \
+    } while(0)
+
+/** Check problem dimensions are valid */
+#define CHECK_DIMENSION(dim, expected) \
+    CHECK_COND((dim) == (expected), NUMERICS_ERR_INVALID_ARGUMENT, \
+               "Invalid dimension: expected " #expected ", got " #dim)
+
+/** Check matrix is not NULL and has valid dimensions */
+#define CHECK_MATRIX(M) \
+    do { \
+        CHECK_NULL(M); \
+        CHECK_COND((M)->size0 > 0 && (M)->size1 > 0, NUMERICS_ERR_INVALID_ARGUMENT, \
+                   "Matrix has invalid dimensions"); \
+    } while(0)
+
+/** Standardized iteration limit check with error logging */
+#define CHECK_MAX_ITER(iter, max_iter) \
+    do { \
+        if ((iter) >= (max_iter)) { \
+            fprintf(stderr, "[ERROR] %s:%d (%s) - Maximum iterations reached: %d >= %d\n", \
+                    __FILE__, __LINE__, __func__, (int)(iter), (int)(max_iter)); \
+            return NUMERICS_ERR_MAX_ITER; \
+        } \
+    } while(0)
+
+/** Check memory allocation succeeded */
+#define CHECK_ALLOC(ptr) \
+    do { \
+        if ((ptr) == NULL) { \
+            fprintf(stderr, "[ERROR] %s:%d (%s) - Memory allocation failed\n", \
+                    __FILE__, __LINE__, __func__); \
+            return NUMERICS_ERR_MEMORY; \
+        } \
+    } while(0)
+
+/** Standardized convergence check - logs warning if not converged */
+#define CHECK_CONVERGENCE(error, tol, iter) \
+    do { \
+        if ((error) > (tol)) { \
+            fprintf(stderr, "[WARN] %s:%d (%s) - Not converged: error=%.3e > tol=%.3e at iter=%d\n", \
+                    __FILE__, __LINE__, __func__, (double)(error), (double)(tol), (int)(iter)); \
+        } \
+    } while(0)
+
+/* ===========================================================================
  * Legacy Compatibility
  * =========================================================================== */
 
@@ -174,6 +251,13 @@ void numerics_log_info(const char* file, int line, const char* func,
     ((ret) == 0 ? NUMERICS_OK : \
      (ret) == 1 ? NUMERICS_ERR_MAX_ITER : \
      (ret) < 0 ? (NumericsError)(ret) : NUMERICS_ERR_UNKNOWN)
+
+/* Legacy wrapper - converts to new system but maintains compatibility */
+#define numerics_error_std(fn_name, msg) \
+    do { \
+        fprintf(stderr, "[ERROR] %s:%d (%s) - %s: %s\n", \
+                __FILE__, __LINE__, __func__, fn_name, msg); \
+    } while(0)
 
 #ifdef __cplusplus
 }

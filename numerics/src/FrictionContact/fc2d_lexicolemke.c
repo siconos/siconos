@@ -124,9 +124,13 @@ void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double 
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+static void fc2d_lexicolemke_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
+}
+
+static int fc2d_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
   return NUMERICS_OK;
 }
 
@@ -149,6 +153,7 @@ REGISTER_SOLVER(FC2D_LEMKE, "FC2D_LEMKE",
                 fc2d_lexicolemke_solve_wrap,
                 fc2d_lexicolemke_free_wrap,
                 NULL,  /* error function */
+                fc2d_lexicolemke_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

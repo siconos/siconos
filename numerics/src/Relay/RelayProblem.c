@@ -26,6 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 
 void Relay_display(RelayProblem* p) {
   assert(p);
@@ -59,8 +60,7 @@ void Relay_display(RelayProblem* p) {
 
 int relay_printInFile(RelayProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr, "Numerics, RelayProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, RelayProblem printInFile failed, NULL input.\n");
   }
   int i;
   int n = problem->size;

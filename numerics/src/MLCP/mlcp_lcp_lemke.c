@@ -131,7 +131,8 @@ void mlcp_lcp_lemke_default(SolverOptions* options) { options->filterOn = false;
  */
 
 static int mlcp_lcp_lemke_init_wrap(void* problem, SolverOptions* options) {
-  mlcp_lcp_lemke_default(options);
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -148,6 +149,7 @@ REGISTER_SOLVER(SICONOS_MLCP_LCP_LEMKE, "MLCP_LCP_LEMKE",
                 mlcp_lcp_lemke_solve_wrap,
                 NULL,  /* free function */
                 NULL,  /* error function */
+                mlcp_lcp_lemke_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

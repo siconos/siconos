@@ -31,6 +31,7 @@
 #include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
 #include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "pinv.h"                    // for pinv
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -98,9 +99,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     double tolpinv = 1e-07;
     pinv(M->matrix0, n, n, tolpinv);
   } else {
-    fprintf(stderr, "Numerics, fc3d_nsgs_velocity. Not yet implemented for storageType %i\n",
-            M->storageType);
-    exit(EXIT_FAILURE);
+    assert(0);
   }
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("fc3d_nsgs_velocity",

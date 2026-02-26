@@ -18,6 +18,7 @@
 #include "projectionOnCylinder.h"
 
 #include <math.h>
+#include "utils/numerics_errors.h"
 
 void projectionOnCylinder(double* r, double R) {
   double normTsquare = r[1] * r[1] + r[2] * r[2];

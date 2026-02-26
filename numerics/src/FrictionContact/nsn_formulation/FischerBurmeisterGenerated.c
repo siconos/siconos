@@ -61,6 +61,8 @@
 
 #ifdef __cplusplus
 #include <cmath>
+
+#include "utils/numerics_errors.h"
 #define CHECK(x)
 #else
 #define CHECK(x)

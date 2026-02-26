@@ -100,11 +100,22 @@ void lcp_path(LinearComplementarityProblem *problem, double *z, double *w, int *
   return;
 }
 
+static void lcp_path_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
  * This registers SICONOS_LCP_PATH in the global solver registry.
  */
+
+static int lcp_path_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_path_set_default(options);
+  return NUMERICS_OK;
+}
 
 static int lcp_path_solve_wrap(void* problem, double* reaction,
                                double* velocity, SolverOptions* options) {
@@ -113,8 +124,18 @@ static int lcp_path_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_PATH, "LCP_PATH",
+static void lcp_path_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PATH, "LCP_PATH",
                        "PATH solver for LCP",
+                       lcp_path_init_wrap,
                        lcp_path_solve_wrap,
+                       lcp_path_free_wrap,
+                       NULL,  /* error function */
+                       lcp_path_set_default,  /* set_default */
                        1000,  /* default_max_iter */
-                       1e-6   /* default_tol */);
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

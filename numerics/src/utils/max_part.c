@@ -17,6 +17,8 @@
  */
 
 #include "NSSTools.h"  // for max_part
+
+#include "utils/numerics_errors.h"
 void max_part(double* x, double* sol, int n)
 
 {

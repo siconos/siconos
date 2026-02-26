@@ -28,6 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"                 // for DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
@@ -168,9 +169,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n",
-              options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, gfc3d_driver failed. Unknown solver %d.\n");
     }
   }
 

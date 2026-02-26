@@ -182,6 +182,10 @@ void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
  * This registers SICONOS_MLCP_PATH in the global solver registry.
  */
 
+static void mlcp_path_set_default(SolverOptions* options) {
+  /* No specific defaults for PATH solver */
+}
+
 static int mlcp_path_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -202,6 +206,7 @@ REGISTER_SOLVER(SICONOS_MLCP_PATH, "MLCP_PATH",
                 mlcp_path_solve_wrap,
                 NULL,  /* free function */
                 NULL,  /* error function */
+                mlcp_path_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

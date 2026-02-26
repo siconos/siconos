@@ -27,6 +27,7 @@
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 #include "SiconosSets.h"       // for polyhedron_set, free_polyhedron, free_...
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 
 void AVI_display(AffineVariationalInequalities* avi) {
   assert(avi);
@@ -55,9 +56,7 @@ void AVI_display(AffineVariationalInequalities* avi) {
 
 int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file) {
   if (!avi) {
-    fprintf(stderr,
-            "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
   }
   int i;
   size_t n = avi->size;

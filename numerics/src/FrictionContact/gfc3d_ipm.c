@@ -40,6 +40,7 @@
 // #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"
+#include "utils/numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -188,8 +189,8 @@ double NV_norm_type(const unsigned int vecSize, const double* const vec, const i
   }
 
   else {
-    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n");
+    return -1;
   }
 
   return norm;
@@ -217,8 +218,8 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
   }
 
   else {
-    fprintf(stderr, "xdoty_type: type = %d is undefined.\n", type);
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "xdoty_type: type = %d is undefined.\n");
+    return -1;
   }
 
   return xdoty;
@@ -617,7 +618,7 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
     } break;
     default:
       fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
-      exit(EXIT_FAILURE);
+      return NULL;
   }
   free(a);
   free(b);
@@ -741,8 +742,7 @@ void classify_BNRT(const double* velocity, const double* reaction, const unsigne
                    const unsigned int varsCount, int* nB, int* nN, int* nR, int* nT) {
   size_t d = (size_t)(vecSize / varsCount);
   if (d != 3) {
-    fprintf(stderr, "classify_BNRT: This function ONLY supports for 3-dimensional model.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double somme[3];
@@ -798,10 +798,7 @@ void classify_BNRT_velocity_original(const double* mu, const double* velocity,
                                      int* nT) {
   size_t d = (size_t)(vecSize / varsCount);
   if (d != 3) {
-    fprintf(stderr,
-            "classify_BNRT_velocity_original: This function ONLY supports for 3-dimensional "
-            "model.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double* velocity_no_mu =
@@ -835,10 +832,7 @@ void classify_BNRT_velocity_modified(const double* mu, const double* velocity,
                                      int* nT) {
   size_t d = (size_t)(vecSize / varsCount);
   if (d != 3) {
-    fprintf(stderr,
-            "classify_BNRT_velocity_modified: This function ONLY supports for 3-dimensional "
-            "model.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double* velocity_no_mu =
@@ -876,9 +870,7 @@ void classify_indices_R(const double* velocity, const double* reaction,
 
   size_t d = (size_t)(vecSize / varsCount);
   if (d != 3) {
-    fprintf(stderr,
-            "classify_indices_R: This function ONLY supports for 3-dimensional model.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double somme[3];
@@ -3054,7 +3046,9 @@ void gfc3d_ipm_set_default(SolverOptions* options) {
  */
 
 static int gfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
-  gfc3d_ipm_set_default(options);
+  /* set_default is now called by the registry before init_wrap */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -3082,6 +3076,7 @@ REGISTER_SOLVER(GFC3D_IPM, "GFC3D_IPM",
                 gfc3d_ipm_solve_wrap,
                 gfc3d_ipm_free_wrap,
                 NULL,  /* error function */
+                gfc3d_ipm_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-8,  /* default_tol */
                 0      /* is_local_solver */);

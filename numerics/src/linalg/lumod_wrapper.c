@@ -31,6 +31,7 @@
 #include "SiconosLapack.h"  // for lapack_int, DGETRF, DGETRS
 #include "lumod_dense.h"    // for LUmod_dense, Lprod_dense, Usolve_dense
 #include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+#include "utils/numerics_errors.h"
 
 #define TOL_BLU 1e-30
 #define BASIS_OFFSET 1
@@ -238,7 +239,7 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   double* H = lumod_data->LU_H;
   unsigned* factorized_basis = lumod_data->factorized_basis;
   double* Mlcp = M->matrix0;
-  assert(Mlcp);
+  CHECK_NULL(Mlcp);
 
   /* Reset the factorized_basis */
   memset(factorized_basis, 0, (2 * n + 1) * sizeof(unsigned));

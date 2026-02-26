@@ -24,13 +24,14 @@
 #include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_dscal, cblas_dgemv
 #include "assert.h"          // for assert
+#include "utils/numerics_errors.h"
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z)
  */
 void phi_FB(int size, double* restrict z, double* restrict F, double* restrict phiVector) {
-  assert(z != NULL);
-  assert(F != NULL);
-  assert(phiVector != NULL);
+  assert(z);
+  assert(F);
+  assert(phiVector);
 
   for (int i = 0; i < size; ++i) {
     phiVector[i] = sqrt(z[i] * z[i] + F[i] * F[i]) - (z[i] + F[i]);
@@ -40,10 +41,10 @@ void phi_FB(int size, double* restrict z, double* restrict F, double* restrict p
 /* Compute the jacobian of the Fischer function */
 void jacobianPhi_FB(int size, double* restrict z, double* restrict F,
                     double* restrict jacobianF, double* restrict jacobianPhiMatrix) {
-  assert(z != NULL);
-  assert(F != NULL);
-  assert(jacobianF != NULL);
-  assert(jacobianPhiMatrix != NULL);
+  assert(z);
+  assert(F);
+  assert(jacobianF);
+  assert(jacobianPhiMatrix);
 
   /* jacobianPhiMatrix is initialized with jacobianF */
   cblas_dcopy(size * size, jacobianF, 1, jacobianPhiMatrix, 1);
@@ -70,9 +71,9 @@ void jacobianPhi_FB(int size, double* restrict z, double* restrict F,
 /* Computation of the mixed Fischer-Burmeister function */
 void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict F,
                   double* restrict phiVector) {
-  assert(z != NULL);
-  assert(F != NULL);
-  assert(phiVector != NULL);
+  assert(z);
+  assert(F);
+  assert(phiVector);
 
   int totalSize = sizeEq + sizeIneq;
 
@@ -87,10 +88,10 @@ void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict
 /* Compute the jacobian of the mixed Fischer function */
 void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict F,
                           double* restrict jacobianF, double* restrict jacobianPhiMatrix) {
-  assert(z != NULL);
-  assert(F != NULL);
-  assert(jacobianF != NULL);
-  assert(jacobianPhiMatrix != NULL);
+  assert(z);
+  assert(F);
+  assert(jacobianF);
+  assert(jacobianPhiMatrix);
 
   /* jacobianPhiMatrix is initialized with jacobianF */
   cblas_dcopy((sizeEq + sizeIneq) * (sizeEq + sizeIneq), jacobianF, 1, jacobianPhiMatrix, 1);

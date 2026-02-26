@@ -26,6 +26,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 
 /* #define DEWBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -339,7 +340,10 @@ void gfc3d_balancing_back_to_original_variables(GlobalFrictionContactProblem* ba
 
 GlobalFrictionContactProblem* gfc3d_balancing_free(
     GlobalFrictionContactProblem* balanced_problem, SolverOptions* options) {
-  assert(balanced_problem);
+  if (!balanced_problem) {
+    fprintf(stderr, "gfc3d_balancing_free: balanced_problem is NULL\n");
+    return NULL;
+  }
   GlobalFrictionContactProblem_balancing_data* balancing_data =
       (GlobalFrictionContactProblem_balancing_data*)balanced_problem->env;
   if (balancing_data) {

@@ -19,6 +19,7 @@
 #include "NumericsDataVersion.h"
 
 #include "assert.h"
+#include "utils/numerics_errors.h"
 
 void NDV_inc(NumericsDataVersion* v) {
   assert(v->number < UINT64_MAX);

@@ -31,6 +31,7 @@
 //#define DEBUG_MESSAGES
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
+#include "utils/numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
@@ -70,8 +71,7 @@ void mohrCoulomb2D_display(MohrCoulomb2DProblem* problem) {
 
 int mohrCoulomb2D_printInFile(MohrCoulomb2DProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr, "Numerics, MohrCoulomb2DProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, MohrCoulomb2DProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -111,7 +111,7 @@ int mohrCoulomb2D_printInFilename(MohrCoulomb2DProblem* problem, char* filename)
 
 MohrCoulomb2DProblem* mohrCoulomb2D_newFromFile(FILE* file) {
   MohrCoulomb2DProblem* problem = mohrCoulomb2DProblem_new();
-  assert(file);
+  if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int mohrCoulomb2D_newFromFile(MohrCoulomb2DProblem* problem, FILE* "
       "file)\n");
@@ -218,7 +218,7 @@ MohrCoulomb2DProblem* mohrCoulomb2DProblem_new_with_data(int dim, int nc, Numeri
 }
 
 MohrCoulomb2DProblem* mohrCoulomb2D_copy(MohrCoulomb2DProblem* problem) {
-  assert(problem);
+  if (!problem) return NULL;
 
   int nc = problem->numberOfCones;
   int n = problem->M->size0;

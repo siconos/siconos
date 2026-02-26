@@ -24,6 +24,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
+#include "utils/numerics_errors.h"
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A) {
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
@@ -79,11 +80,11 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A) {
 }
 
 void NM_UMFPACK_free(void* p) {
-  assert(p);
+  if (!p) return;
   NSM_linear_solver_params* params = (NSM_linear_solver_params*)p;
-  assert(params);
+  if (!params) return;
   NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*)params->linear_solver_data;
-  assert(umfpack_ws);
+  if (!umfpack_ws) return;
 
   UMFPACK_FN(free_symbolic)(&(umfpack_ws->symbolic));
   UMFPACK_FN(free_numeric)(&(umfpack_ws->numeric));

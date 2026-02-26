@@ -610,7 +610,8 @@ int gmp_get_nb_dwork(GenericMechanicalProblem* pGMP, SolverOptions* options) {
  */
 
 static int gmp_init_wrap(void* problem, SolverOptions* options) {
-  gmp_set_default(options);
+  (void)problem;
+  /* set_default already called by solver_options_create */
   return NUMERICS_OK;
 }
 
@@ -633,6 +634,7 @@ REGISTER_SOLVER(SICONOS_GENERIC_MECHANICAL_NSGS, "GMP_NSGS",
                 gmp_solve_wrap,
                 gmp_free_wrap,
                 NULL,  /* error function */
+                gmp_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

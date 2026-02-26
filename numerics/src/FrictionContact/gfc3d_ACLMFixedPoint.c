@@ -117,8 +117,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
     internalsolver = &convexQP_ADMM;
     convexQP_ADMM_init(cqp, options->internalSolvers[0]);
   } else {
-    fprintf(stderr, "Numerics, gfc3d_ACLMFixedPoint failed. Unknown internal solver.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double normUT;
@@ -216,7 +215,7 @@ static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(GFC3D_ACLMFP, "GFC3D_ACLMFP",
+REGISTER_SOLVER(GFC3D_ACLMFP, "GFC3D_ACLMFP",
                 "Alart-Curnier Lemke Fixed Point for 3D Global Friction Contact",
                 gfc3d_aclmfp_init_wrap,
                 gfc3d_aclmfp_solve_wrap,

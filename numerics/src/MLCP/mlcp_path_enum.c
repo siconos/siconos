@@ -100,6 +100,10 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double* z, doubl
  * This registers SICONOS_MLCP_PATH_ENUM in the global solver registry.
  */
 
+static void mlcp_path_enum_set_default(SolverOptions* options) {
+  /* No specific defaults for path_enum solver */
+}
+
 static int mlcp_path_enum_init_wrap(void* problem, SolverOptions* options) {
   mlcp_path_enum_init((MixedLinearComplementarityProblem*)problem, options);
   return NUMERICS_OK;
@@ -124,6 +128,7 @@ REGISTER_SOLVER(SICONOS_MLCP_PATH_ENUM, "MLCP_PATH_ENUM",
                 mlcp_path_enum_solve_wrap,
                 mlcp_path_enum_free_wrap,
                 NULL,  /* error function */
+                mlcp_path_enum_set_default,
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
                 0      /* is_local_solver */);

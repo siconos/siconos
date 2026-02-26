@@ -23,6 +23,7 @@
 #include <math.h>    // for sqrt, fabs
 
 #include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
+#include "utils/numerics_errors.h"
 
 void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox,
             double* restrict lb, double* restrict ub) {

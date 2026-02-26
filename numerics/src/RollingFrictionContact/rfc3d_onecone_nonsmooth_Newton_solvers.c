@@ -30,6 +30,7 @@
 #include "SiconosBlas.h"                             // for cblas_ddot
 #include "SolverOptions.h"                           // for SolverOptions
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 #include "op5x5.h"                                   // for cpy3, mvp3x3
 #include "op3x3.h"                                   // for cpy3, mvp3x3
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...

@@ -27,6 +27,7 @@
 #include "SolverOptions.h"                        // for SolverOptions, solver_opti...
 #include "grfc3d_Solvers.h"                       // for grfc3d...
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 // #include "gfc3d_compute_error.h"
 // #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 
@@ -51,6 +52,7 @@ const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR =
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"  // for frictionContact_fclib_write, fri...
 #include "string.h"           // for strcpy, strcat
+#include "utils/numerics_errors.h"
 #endif
 static int fccounter = -1;
 #endif
@@ -133,9 +135,7 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double* 
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, grfc3d_driver failed. Unknown solver %d.\n",
-              options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, grfc3d_driver failed. Unknown solver %d.\n");
     }
   }
 

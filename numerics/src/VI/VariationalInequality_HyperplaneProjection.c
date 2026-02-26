@@ -31,6 +31,7 @@
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
 #include "numerics_errors.h"
+#include "utils/numerics_errors.h"
 
 void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double* x,
                                                 double* w, int* info, SolverOptions* options) {
@@ -200,8 +201,9 @@ void variationalInequality_HyperplaneProjection_set_default(SolverOptions* optio
  */
 
 static int vi_hp_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
   (void)problem;
-  variationalInequality_HyperplaneProjection_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -223,6 +225,7 @@ REGISTER_SOLVER(SICONOS_VI_HP,
                 vi_hp_solve_wrap,
                 vi_hp_free_wrap,
                 NULL,
+                variationalInequality_HyperplaneProjection_set_default,  /* set_default */
                 1000,   /* default_max_iter */
                 1e-4,   /* default_tol */
                 0       /* is_local_solver */)

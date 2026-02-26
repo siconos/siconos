@@ -24,6 +24,7 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "NumericsMatrix.h"  // for NM_clear
+#include "utils/numerics_errors.h"
 
 void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem) {
   //  if (problem->Fmcp) free(problem->Fmcp);

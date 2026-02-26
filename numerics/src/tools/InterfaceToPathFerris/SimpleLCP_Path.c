@@ -38,6 +38,7 @@ extern "C" {
 #include "PATH_SDK/include/Output_Interface.h"
 #include "PATH_SDK/include/Path.h"
 #include "PATH_SDK/include/PathOptions.h"
+#include "utils/numerics_errors.h"
 
 #if defined(__cplusplus)
 }

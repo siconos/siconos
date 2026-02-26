@@ -36,6 +36,7 @@
 #include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
 #include "mlcp_simplex.h"                       // for mlcp_simplex_init
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for mlcp_driver
@@ -198,12 +199,12 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w
       "mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, "
       "SolverOptions* options)\n");
   /* verbose=1; */
-  if (options == NULL) numerics_error("mlcp_driver ", "null input for solver options.\n");
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mlcp_driver",
-                   "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
+  
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   //  if(verbose)
@@ -325,8 +326,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w
 
     /*error */
     default: {
-      fprintf(stderr, "mlcp_driver error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "mlcp_driver error: unknown solver id: %d\n");
     }
   }
   DEBUG_END(

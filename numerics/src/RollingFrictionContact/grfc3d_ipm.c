@@ -170,10 +170,10 @@ static double grfc3d_complemResidualNorm(const double *const velocity,
 static void extract_vector(const double *const vec, const size_t vecSize,
                            const size_t varsCount, const size_t i, const size_t j,
                            double *out) {
-  assert(vec);
+  if (!vec) return;
   assert(i >= 1);
   assert(i <= j);
-  assert(out);
+  if (!out) return;
 
   size_t vec_dim = (int)(vecSize / varsCount);
   assert(j <= vec_dim);
@@ -1507,9 +1507,8 @@ static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) 
     }
 
     default:
-      fprintf(stderr,
-              "Numerics, GRFC3D IPM, multiply_UinvH failed, unknown storage type for H.\n");
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "Numerics, GRFC3D IPM, multiply_UinvH failed, unknown storage type for H.\n");
+      return NULL;
   }
 
   return UinvH;
@@ -5950,7 +5949,7 @@ void grfc3d_IPM_set_default(SolverOptions *options) {
 /* Solver registration wrapper functions */
 static int grfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  grfc3d_IPM_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -5981,6 +5980,7 @@ REGISTER_SOLVER(GRFC3D_IPM, "GRFC3D_IPM",
                 grfc3d_ipm_solve_wrap,
                 grfc3d_ipm_free_wrap,
                 NULL,  /* error function */
+                grfc3d_IPM_set_default,
                 100,   /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

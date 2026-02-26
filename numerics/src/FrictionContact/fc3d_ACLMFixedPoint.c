@@ -117,8 +117,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doub
           "==========================\n");
     internalsolver = &soclcp_VI_ExtraGradient;
   } else {
-    fprintf(stderr, "Numerics, fc3d_ACLMFixedPoint failed. Unknown internal solver.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double normUT;
@@ -203,7 +202,7 @@ static void fc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(FC3D_ACLMFP,
+REGISTER_SOLVER(FC3D_ACLMFP,
                 "FC3D_ACLMFP",
                 "Augmented Cone Linear Mapping Fixed Point for 3D Friction Contact",
                 fc3d_aclmfp_init_wrap,

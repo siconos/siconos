@@ -29,6 +29,7 @@
 #include "assert.h"
 // #include "CSparseMatrix.h"
 #include "CSparseMatrix.h"
+#include "utils/numerics_errors.h"
 
 bool SN_logh5_check_gzip(void) {
   unsigned filter_info;
@@ -52,13 +53,13 @@ bool SN_logh5_check_gzip(void) {
 SN_logh5* SN_logh5_init(const char* filename, const unsigned iter_max) {
   herr_t status;
 
-  assert(filename);
+  if (!filename) return NULL;
   assert(iter_max > 0);
 
   SN_logh5* logger = (SN_logh5*)malloc(sizeof(SN_logh5));
   if (!logger) {
     fprintf(stderr, "SN_logh5_init :: could not allocate a logger struct!\n");
-    exit(EXIT_FAILURE);
+    return NULL;
   }
 
   logger->file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -74,7 +75,7 @@ SN_logh5* SN_logh5_init(const char* filename, const unsigned iter_max) {
 }
 
 bool SN_logh5_end(SN_logh5* logger) {
-  assert(logger);
+  CHECK_NULL(logger);
   herr_t status = 0;
 
   if (logger->group) {
@@ -95,7 +96,7 @@ bool SN_logh5_end(SN_logh5* logger) {
 }
 
 bool SN_logh5_new_iter(unsigned iter, SN_logh5* logger) {
-  assert(logger);
+  CHECK_NULL(logger);
   herr_t status = 0;
 
   if (logger->group) {
@@ -114,7 +115,7 @@ bool SN_logh5_new_iter(unsigned iter, SN_logh5* logger) {
 }
 
 bool SN_logh5_end_iter(SN_logh5* logger) {
-  assert(logger);
+  CHECK_NULL(logger);
   assert(logger->group);
 
   if (!logger->group) {
@@ -149,8 +150,8 @@ static bool SN_logh5_write_attr(hid_t loc_id, const char* name, hid_t type, hid_
 }
 
 bool SN_logh5_scalar_double(double val, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(name);
 
   herr_t status;
   hid_t space = H5Screate(H5S_SCALAR);
@@ -162,8 +163,8 @@ bool SN_logh5_scalar_double(double val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_scalar_integer(ptrdiff_t val, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(name);
 
   hid_t type;
   herr_t status;
@@ -190,8 +191,8 @@ bool SN_logh5_scalar_integer(ptrdiff_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_scalar_uinteger(size_t val, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(name);
 
   hid_t type;
   herr_t status;
@@ -218,8 +219,8 @@ bool SN_logh5_scalar_uinteger(size_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_attr_uinteger(size_t val, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(name);
 
   hid_t type;
   herr_t status;
@@ -246,9 +247,9 @@ bool SN_logh5_attr_uinteger(size_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_vec_double(size_t size, double* vec, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(vec);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(vec);
+  CHECK_NULL(name);
 
   hsize_t dims[1] = {size};
   hid_t type = H5T_NATIVE_DOUBLE;
@@ -262,8 +263,8 @@ bool SN_logh5_vec_double(size_t size, double* vec, const char* name, hid_t loc_i
 }
 
 bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id) {
-  assert(cs);
-  assert(loc_id);
+  CHECK_NULL(cs);
+  CHECK_NULL(loc_id);
   hid_t mat_group;
 
   bool result = false;
@@ -303,8 +304,8 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger) {
-  assert(mat);
-  assert(name);
+  CHECK_NULL(mat);
+  CHECK_NULL(name);
 
   bool result = false;
   herr_t status;
@@ -353,9 +354,9 @@ bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger) {
 
 bool SN_logh5_mat_dense(size_t size0, size_t size1, double* mat, const char* name,
                         hid_t loc_id) {
-  assert(loc_id);
-  assert(mat);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(mat);
+  CHECK_NULL(name);
 
   hsize_t dims[2] = {size0, size1};
   hid_t type = H5T_NATIVE_DOUBLE;
@@ -369,9 +370,9 @@ bool SN_logh5_mat_dense(size_t size0, size_t size1, double* mat, const char* nam
 }
 
 bool SN_logh5_vec_int32(size_t size, int32_t* vec, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(vec);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(vec);
+  CHECK_NULL(name);
 
   hsize_t dims[1] = {size};
   hid_t type = H5T_NATIVE_INT_LEAST32;
@@ -385,9 +386,9 @@ bool SN_logh5_vec_int32(size_t size, int32_t* vec, const char* name, hid_t loc_i
 }
 
 bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(vec);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(vec);
+  CHECK_NULL(name);
 
   hsize_t dims[1] = {size};
   hid_t type = H5T_NATIVE_INT_LEAST64;
@@ -401,9 +402,9 @@ bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_i
 }
 
 bool SN_logh5_vec_uint64(size_t size, uint64_t* vec, const char* name, hid_t loc_id) {
-  assert(loc_id);
-  assert(vec);
-  assert(name);
+  CHECK_NULL(loc_id);
+  CHECK_NULL(vec);
+  CHECK_NULL(name);
 
   hsize_t dims[1] = {size};
   hid_t type = H5T_NATIVE_UINT_LEAST64;

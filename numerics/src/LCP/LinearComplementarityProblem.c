@@ -26,6 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 #include "numerics_verbose.h"  // for CHECK_IO
+#include "utils/numerics_errors.h"
 
 void linearComplementarity_display(LinearComplementarityProblem* problem) {
   assert(problem);
@@ -46,11 +47,8 @@ void linearComplementarity_display(LinearComplementarityProblem* problem) {
 }
 
 int linearComplementarity_printInFile(LinearComplementarityProblem* problem, FILE* file) {
-  if (!problem) {
-    fprintf(stderr,
-            "Numerics, LinearComplementarityProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  CHECK_NULL(problem);
+  CHECK_NULL(file);
   int i;
   int n = problem->size;
   fprintf(file, "%d\n", n);

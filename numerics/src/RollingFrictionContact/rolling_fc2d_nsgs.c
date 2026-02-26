@@ -562,7 +562,7 @@ void rfc2d_nsgs_set_default(SolverOptions *options) {
 /* Solver registration wrapper functions */
 static int rfc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  rfc2d_nsgs_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 
@@ -585,6 +585,7 @@ REGISTER_SOLVER(RFC2D_NSGS, "RFC2D_NSGS",
                 rfc2d_nsgs_solve_wrap,
                 rfc2d_nsgs_free_wrap,
                 NULL,  /* error function */
+                rfc2d_nsgs_set_default,
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

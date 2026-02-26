@@ -63,20 +63,9 @@ typedef struct {
 /* Registration function - called by solvers to register themselves */
 int solver_registry_register(const SolverEntry* entry);
 
-/* Convenience macro for registration */
+/* Main registration macro - all solvers must provide a set_default function */
 #define REGISTER_SOLVER(id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, \
-                         max_iter_val, tol_val, local_val) \
-    static int _solver_reg_##id(void) __attribute__((constructor)); \
-    static int _solver_reg_##id(void) { \
-        static const SolverEntry entry = { \
-            id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, NULL, \
-            max_iter_val, tol_val, local_val \
-        }; \
-        return solver_registry_register(&entry); \
-    }
-
-#define REGISTER_SOLVER_WITH_DEFAULT(id, name_str, desc_str, init_fn, solve_fn, free_fn, err_fn, \
-                                      set_default_fn, max_iter_val, tol_val, local_val) \
+                         set_default_fn, max_iter_val, tol_val, local_val) \
     static int _solver_reg_##id(void) __attribute__((constructor)); \
     static int _solver_reg_##id(void) { \
         static const SolverEntry entry = { \
@@ -85,12 +74,6 @@ int solver_registry_register(const SolverEntry* entry);
         }; \
         return solver_registry_register(&entry); \
     }
-
-#define REGISTER_SOLVER_SIMPLE(id, name_str, desc_str, solve_fn, max_iter_val, tol_val) \
-    REGISTER_SOLVER(id, name_str, desc_str, NULL, solve_fn, NULL, NULL, max_iter_val, tol_val, 0)
-
-#define REGISTER_LOCAL_SOLVER(id, name_str, desc_str, solve_fn, max_iter_val, tol_val) \
-    REGISTER_SOLVER(id, name_str, desc_str, NULL, solve_fn, NULL, NULL, max_iter_val, tol_val, 1)
 
 /* Registry lookup functions */
 const SolverEntry* solver_registry_lookup(solver_id_t id);

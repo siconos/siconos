@@ -38,6 +38,7 @@
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
 #include "numerics_verbose.h"
 #include "utils/naming_conventions.h"  // Standardized naming conventions
+#include "utils/numerics_errors.h"
 
 /*Static variables */
 

@@ -89,9 +89,14 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem 
  * This registers SICONOS_SOCLCP_VI_FPP in the global solver registry.
  */
 
+static void soclcp_vi_fpp_set_default(SolverOptions* options) {
+  /* Call VI_FPP set_default for proper initialization */
+  variationalInequality_FixedPointProjection_set_default(options);
+}
+
 static int soclcp_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
-  SOLVER_MAX_ITER(options) = 1000;
-  SOLVER_TOL(options) = 1e-4;
+  (void)problem;
+  /* set_default already called by solver_options_create */
   return NUMERICS_OK;
 }
 
@@ -115,6 +120,7 @@ REGISTER_SOLVER(SICONOS_SOCLCP_VI_FPP, "SOCLCP_VI_FPP",
                 soclcp_vi_fpp_solve_wrap,
                 soclcp_vi_fpp_free_wrap,
                 NULL,  /* error function */
+                soclcp_vi_fpp_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

@@ -774,7 +774,7 @@ static void mc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_WITH_DEFAULT(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
+REGISTER_SOLVER(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
                 "Non-smooth Gauss-Seidel for 2D Mohr Coulomb Plasticity",
                 mc2d_nsgs_init_wrap,
                 mc2d_nsgs_solve_wrap,

@@ -156,6 +156,11 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   free(war);
 }
 
+static void lcp_nsqp_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
@@ -164,7 +169,7 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
 
 static int lcp_nsqp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  (void)options;
+  lcp_nsqp_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -175,6 +180,18 @@ static int lcp_nsqp_solve_wrap(void* problem, double* reaction,
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(SICONOS_LCP_NSQP, "LCP_NSQP",
+static void lcp_nsqp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NSQP, "LCP_NSQP",
                        "Non-smooth QP solver for LCP",
-                       lcp_nsqp_solve_wrap, 1000, 1e-6)
+                       lcp_nsqp_init_wrap,
+                       lcp_nsqp_solve_wrap,
+                       lcp_nsqp_free_wrap,
+                       NULL,  /* error function */
+                       lcp_nsqp_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0      /* is_local_solver */)

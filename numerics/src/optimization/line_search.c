@@ -26,6 +26,8 @@
 #ifdef __cplusplus
 #undef restrict
 #include <sys/cdefs.h>  // for __restrict
+
+#include "utils/numerics_errors.h"
 #define restrict __restrict
 #endif
 

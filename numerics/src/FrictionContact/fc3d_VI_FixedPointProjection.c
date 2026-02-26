@@ -151,12 +151,22 @@ static int fc3d_vi_fpp_solve_wrap(void* problem, double* reaction, double* veloc
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(FC3D_VI_FPP,
-                       "FC3D_VI_FPP",
-                       "VI Fixed Point Projection for 3D Friction Contact",
-                       fc3d_vi_fpp_solve_wrap,
-                       1000,   /* default_max_iter */
-                       1e-4)   /* default_tol */
+static void fc3d_vi_fpp_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+}
+
+REGISTER_SOLVER(FC3D_VI_FPP,
+                             "FC3D_VI_FPP",
+                             "VI Fixed Point Projection for 3D Friction Contact",
+                             NULL,   /* init_wrap */
+                             fc3d_vi_fpp_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_vi_fpp_set_default,
+                             1000,   /* default_max_iter */
+                             1e-4,   /* default_tol */
+                             0)      /* is_local_solver */
 
 static int fc3d_vi_fpp_cyl_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
@@ -164,9 +174,19 @@ static int fc3d_vi_fpp_cyl_solve_wrap(void* problem, double* reaction, double* v
   return info;
 }
 
-REGISTER_SOLVER_SIMPLE(FC3D_VI_FPP_Cylinder,
-                       "FC3D_VI_FPP_Cylinder",
-                       "VI Fixed Point Projection on Cylinder for 3D Friction Contact",
-                       fc3d_vi_fpp_cyl_solve_wrap,
-                       1000,   /* default_max_iter */
-                       1e-4)   /* default_tol */
+static void fc3d_vi_fpp_cyl_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+}
+
+REGISTER_SOLVER(FC3D_VI_FPP_Cylinder,
+                             "FC3D_VI_FPP_Cylinder",
+                             "VI Fixed Point Projection on Cylinder for 3D Friction Contact",
+                             NULL,   /* init_wrap */
+                             fc3d_vi_fpp_cyl_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_vi_fpp_cyl_set_default,
+                             1000,   /* default_max_iter */
+                             1e-4,   /* default_tol */
+                             0)      /* is_local_solver */
