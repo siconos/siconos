@@ -276,6 +276,12 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     pPrevReaction = (double*)malloc(gmp_get_nb_dwork(pGMP, options) * sizeof(double));
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
+
+
+
+
+
+  
   while (it < iterMax && tolViolate) {
 #ifdef GENERICMECHANICAL_DEBUG_CMP
     SScmpTotal++;
@@ -368,17 +374,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           fcProblem->M->matrix0 = diagBlock;
           memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
 
-          DEBUG_EXPR_WE(NV_display(curProblem->q, 3);
-                        for (int i = 0; i < 3; i++) numerics_printf(
-                            "curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
-                            curProblem->q[i], i, fcProblem->q[i]););
-
           NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
                               fcProblem->q, NULL, 0);
-
-          DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) numerics_printf(
-                            "reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
-                            reaction[i], i, fcProblem->q[i]););
 
           /* We call the generic driver (rather than the specific) since we may choose between
            * various local solvers */
@@ -561,6 +558,14 @@ void gmp_set_default(SolverOptions* options) {
   /*Useful parameter for LS*/
   options->dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.0;
 
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 4;
+    options->internalSolvers = calloc(4, sizeof(SolverOptions*));
+  }
+  assert(options->numberOfInternalSolvers == 4);
+
+
+  
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
   // options->internalSolvers[1] =
   // solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);

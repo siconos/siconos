@@ -477,7 +477,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
   unsigned int *scones = NULL;
   unsigned int *freeze_cones = NULL;
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   SparseBlockStructuredMatrix *matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {

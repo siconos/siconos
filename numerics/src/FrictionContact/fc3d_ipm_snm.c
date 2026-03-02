@@ -175,6 +175,7 @@ void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options) 
     data->P_mu->inv_mat = NULL;
 
     free(data->P_mu);
+    data->P_mu = NULL;
 
     for (unsigned int i = 0; i < 10; ++i) free(data->tmp_vault_nd[i]);
     free(data->tmp_vault_nd);
@@ -189,6 +190,9 @@ void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options) 
     free(data->tmp_point);
 
     free(data->internal_params);
+
+    free(data);
+    options->solverData = NULL;
   }
 }
 

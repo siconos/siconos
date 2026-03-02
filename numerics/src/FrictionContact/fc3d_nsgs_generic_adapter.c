@@ -132,15 +132,15 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
   switch (localsolver_options->solverId) {
     case SICONOS_ONECONE_ProjectionOnConeWithDiagonalization:
       solver = &fc3d_projectionWithDiagonalization_solve;
-      fc3d_projection_initialize(problem, localproblem);
+      fc3d_projection_initialize(problem);
       break;
     case SICONOS_ONECONE_ProjectionOnCone:
       solver = &fc3d_projectionOnCone_solve;
-      fc3d_projection_initialize(problem, localproblem);
+      fc3d_projection_initialize(problem);
       break;
     case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration:
       solver = &fc3d_projectionOnConeWithLocalIteration_solve;
-      fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options);
+      fc3d_projectionOnConeWithLocalIteration_initialize(problem, localsolver_options);
       break;
     case SICONOS_ONECONE_ProjectionOnConeWithRegularization:
       solver = &fc3d_projectionOnCone_solve;
@@ -148,19 +148,19 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
       break;
     case SICONOS_ONECONE_NSN:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
       break;
     case SICONOS_ONECONE_NSN_GP:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
       break;
     case SICONOS_ONECONE_NSN_GP_HYBRID:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
       break;
     case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
       break;
     case SICONOS_FRICTION_3D_NCPGlockerFBPATH:
       solver = &fc3d_Path_solve;

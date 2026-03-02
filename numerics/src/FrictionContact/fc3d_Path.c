@@ -80,7 +80,7 @@ void fc3d_Path_initialize(FrictionContactProblem* problem,
 
   /* Glocker formulation */
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH) {
-    NCPGlocker_initialize(problem, localproblem);
+    NCPGlocker_initialize(problem);
   } else {
     assert(0);
   }

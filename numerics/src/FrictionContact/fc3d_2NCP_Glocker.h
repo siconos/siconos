@@ -62,8 +62,7 @@ extern "C" {
    \param problem the global problem
    \param localproblem the local problem
 */
-void NCPGlocker_initialize(FrictionContactProblem* problem,
-                           FrictionContactProblem* localproblem);
+void NCPGlocker_initialize(FrictionContactProblem* problem);
 
 /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
    operators required for the Glocker formulation

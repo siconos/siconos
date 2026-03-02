@@ -359,7 +359,7 @@ void rolling_fc2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   unsigned int contact; /* Number of the current row of blocks in M */
   unsigned int *scontacts = NULL;
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("rolling_fc2d_nsgs",

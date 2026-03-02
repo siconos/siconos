@@ -193,8 +193,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem* problem,
                    "unknown storage type for matrix M");
 }
 
-void NCPGlocker_initialize(FrictionContactProblem* problem,
-                           FrictionContactProblem* localproblem) {
+void NCPGlocker_initialize(FrictionContactProblem* problem) {
   /*
     INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction
     coefficients. In initialize, these operators are "connected" to their corresponding static
@@ -204,7 +203,6 @@ void NCPGlocker_initialize(FrictionContactProblem* problem,
     Fill vectors/matrices of parameters: Ip, Ipinv ...
   */
 
-  localFC3D = localproblem;
   globalFC3D = problem;
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]

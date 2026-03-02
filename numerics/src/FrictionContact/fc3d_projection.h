@@ -43,40 +43,39 @@ extern "C" {
 #endif
 
 /** Initialize friction-contact 3D projection
- * \param problem :  the global problem to solve
+ * \param main_problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  */
-void fc3d_projection_initialize(FrictionContactProblem* problem,
-                                FrictionContactProblem* localproblem);
+void fc3d_projection_initialize(FrictionContactProblem* main_problem);
 
 /** Initialize friction-contact 3D projection with regularization
- * \param problem :  the global problem to solve
+ * \param problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  */
-void fc3d_projection_initialize_with_regularization(FrictionContactProblem* problem,
+void fc3d_projection_initialize_with_regularization(FrictionContactProblem* main_problem,
                                                     FrictionContactProblem* localproblem);
 
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
+ * \param number (position in main matrix) of the considered contact
+ * \param problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  * \param reaction (only the block corresponding to the current contact will be modified,
  *   the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projection_update(int number, FrictionContactProblem* problem,
+void fc3d_projection_update(int number, FrictionContactProblem* main_problem,
                             FrictionContactProblem* localproblem, double* reaction,
                             SolverOptions* options);
 
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
+ * \param number (position in main matrix) of the considered contact
+ * \param problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  * \param reaction (only the block corresponding to the current contact will be modified,
  * the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projection_update_with_regularization(int number, FrictionContactProblem* problem,
+void fc3d_projection_update_with_regularization(int number, FrictionContactProblem* main_problem,
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
 
@@ -90,14 +89,14 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
                                              double* reaction, SolverOptions* options);
 
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
+ * \param number (position in main matrix) of the considered contact
+ * \param problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  * \param reaction (only the block corresponding to the current contact will be modified,
  * the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projectionWithDiagonalization_update(int number, FrictionContactProblem* problem,
+void fc3d_projectionWithDiagonalization_update(int number, FrictionContactProblem* main_problem,
                                                FrictionContactProblem* localproblem,
                                                double* reaction, SolverOptions* options);
 
@@ -111,14 +110,14 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
                                 SolverOptions* options);
 
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
- * \param number (position in global matrix) of the considered contact
- * \param problem :  the global problem to solve
+ * \param number (position in main matrix) of the considered contact
+ * \param problem :  the main problem to solve
  * \param localproblem :  the local problem to initialize
  * \param reaction (only the block corresponding to the current contact will be modified,
  * the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projectionOnCylinder_update(int number, FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_update(int number, FrictionContactProblem* main_problem,
                                       FrictionContactProblem* localproblem, double* reaction,
                                       SolverOptions* options);
 
@@ -131,11 +130,10 @@ void fc3d_projectionOnCylinder_update(int number, FrictionContactProblem* proble
  */
 int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem,
                                                   double* reaction, SolverOptions* options);
-void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* problem,
+void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* main_problem,
                                                   FrictionContactProblem* localproblem,
                                                   SolverOptions* localsolver_options);
-void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* problem,
-                                                        FrictionContactProblem* localproblem,
+void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* main_problem,
                                                         SolverOptions* localsolver_options);
 /** solve friction-contact 3D problem with projection on the Cone
  * \param localproblem :  the local problem to initialize
@@ -152,10 +150,10 @@ int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
  */
 int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double* reaction,
                                     SolverOptions* options);
-void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* main_problem,
                                           FrictionContactProblem* localproblem,
                                           SolverOptions* options);
-void fc3d_projectionOnCylinder_free(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_free(FrictionContactProblem* main_problem,
                                     FrictionContactProblem* localproblem,
                                     SolverOptions* localsolver_options);
 
@@ -170,10 +168,10 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
                                                       SolverOptions* options);
 
 void fc3d_projectionOnCylinderWithLocalIteration_initialize(
-    FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+    FrictionContactProblem* main_problem, FrictionContactProblem* localproblem,
     SolverOptions* options, SolverOptions* localsolver_options);
 
-void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* main_problem,
                                                       FrictionContactProblem* localproblem,
                                                       SolverOptions* localsolver_options);
 
@@ -182,7 +180,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* pr
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void fc3d_projection_free(FrictionContactProblem* problem,
+void fc3d_projection_free(FrictionContactProblem* main_problem,
                           FrictionContactProblem* localproblem,
                           SolverOptions* localsolver_options);
 
@@ -191,7 +189,7 @@ void fc3d_projection_free(FrictionContactProblem* problem,
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void fc3d_projection_with_regularization_free(FrictionContactProblem* problem,
+void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
                                               FrictionContactProblem* localproblem,
                                               SolverOptions* localsolver_options);
 

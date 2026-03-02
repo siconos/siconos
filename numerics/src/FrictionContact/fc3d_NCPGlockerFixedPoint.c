@@ -70,7 +70,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
   /* Glocker formulation */
   if (localsolver_options->solverId == FC3D_NCPG_FP) {
     Fsize = 5;
-    NCPGlocker_initialize(problem, localproblem);
+    NCPGlocker_initialize(problem);
   } else {
     assert(0);
   }

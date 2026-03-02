@@ -19,9 +19,10 @@
 #include <stdio.h>   // for printf, fclose, fopen
 #include <stdlib.h>  // for malloc, free, exit
 
-#include "FrictionContactProblem.h"              // for FrictionContactProblem
-#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
-#include "NumericsFwd.h"                         // for NumericsMatrix, Fric...
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContac...
+#include "NumericsFwd.h"                   // for NumericsMatrix, Fric...
+#include "NumericsVector.h"
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
 #include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 #include "fc3d_Solvers.h"                        // for fc3d_DeSaxceFixedPoint
@@ -55,17 +56,17 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
     // Reformulation
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
     // call nsgs solver for the local problem
     // long clk_tck = CLOCKS_PER_SEC;
     // clock_t t1 = clock();
-    fc3d_nsgs(localproblem, reaction, velocity, info, options);
+    fc3d_nsgs(reduced_problem, reaction, velocity, info, options);
     // clock_t t2 = clock();
     // printf("\nTIME = %10.4f\n", (double)(t2 - t1) / (double)clk_tck);
 
@@ -94,8 +95,9 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
 
     gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
                         options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
-    frictionContactProblem_free(localproblem);
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -114,17 +116,28 @@ void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
 
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_admm(localproblem, reaction, velocity, info, options);
+    fc3d_admm(reduced_problem, reaction, velocity, info, options);
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -142,20 +155,32 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* proble
   DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
   if (H->size1 > 0) {
     // Reformulation
-
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
 
-    fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction, velocity, info, options);
+    fc3d_nonsmooth_Newton_AlartCurnier(reduced_problem, reaction, velocity, info, options);
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -177,18 +202,29 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_new_wr(GlobalFrictionContactProblem* pr
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ... "
                             "this make take a while");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     numerics_printf(
         "gfc3d_nonsmooth_Newton_AlartCurnier_new_wr - Call to the fc3d solver ...\n");
 
-    fc3d_nonsmooth_Newton_AlartCurnier_new(localproblem, reaction, velocity, info, options);
+    fc3d_nonsmooth_Newton_AlartCurnier_new(reduced_problem, reaction, velocity, info, options);
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -210,18 +246,29 @@ void gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double* react
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ... "
                             "this make take a while");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_nsgs_velocity(localproblem, reaction, velocity, info, options);
+    fc3d_nsgs_velocity(reduced_problem, reaction, velocity, info, options);
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -239,19 +286,30 @@ void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double* reaction,
 
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_proximal(localproblem, reaction, velocity, info, options);
+    fc3d_proximal(reduced_problem, reaction, velocity, info, options);
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -270,18 +328,29 @@ void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double* r
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ... "
                             "this make take a while");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_DeSaxceFixedPoint(localproblem, reaction, velocity, info, options);
+    fc3d_DeSaxceFixedPoint(reduced_problem, reaction, velocity, info, options);
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -299,18 +368,29 @@ void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double* re
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ... "
                             "this make take a while");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_TrescaFixedPoint(localproblem, reaction, velocity, info, options);
+    fc3d_TrescaFixedPoint(reduced_problem, reaction, velocity, info, options);
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
@@ -329,17 +409,28 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ... "
                             "this make take a while");
-    FrictionContactProblem* localproblem =
+    FrictionContactProblem* reduced_problem =
         globalFrictionContact_reformulation_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContact_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_IPM_SNM(localproblem, reaction, velocity, info, options);
+    fc3d_IPM_SNM(reduced_problem, reaction, velocity, info, options);
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n, problem->q, 1);
+    double norm_b = cblas_dnrm2(m, problem->b, 1);
+    double error;
 
-    frictionContactProblem_free(localproblem);
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity,
+                        options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+    options->dparam[SICONOS_DPARAM_RESIDU] = error;
+    frictionContactProblem_free(reduced_problem);
   } else {
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;

@@ -624,9 +624,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
 
-    SET_SOLVER_RESIDUAL(options, INFINITY);
+    /* SET_SOLVER_RESIDUAL(options, INFINITY); */
 
-    if (!(iter % erritermax)) {
+    /* if (!(iter % erritermax)) */ {
       fc3d_compute_error(
           problem, reaction, velocity,
           //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,

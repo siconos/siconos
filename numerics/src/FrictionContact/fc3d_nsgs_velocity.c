@@ -48,7 +48,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
     *solve = &fc3d_projectionOnCone_velocity_solve;
     *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error_velocity;
-    fc3d_projection_initialize(problem, localproblem);
+    fc3d_projection_initialize(problem);
   } else {
     fprintf(stderr, "Numerics, fc3d_nsgs_velocity failed. Unknown internal solver : %s.\n",
             solver_options_id_to_name(localsolver_options->solverId));
@@ -75,7 +75,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
   /* Check for trivial case */
   /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   SolverPtr local_solver = NULL;
   FreeSolverPtr freeSolver = NULL;

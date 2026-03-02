@@ -405,7 +405,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
   unsigned int *scontacts = NULL;
   unsigned int *freeze_contacts = NULL;
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("rolling_fc3d_nsgs",
@@ -658,7 +658,10 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] =
       solver_options_create(SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);

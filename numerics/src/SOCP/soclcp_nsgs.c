@@ -234,7 +234,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("soclcp_nsgs",

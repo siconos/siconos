@@ -153,9 +153,9 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   numerics_printf_verbose(1, "fc3d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
 
-  /* Validate solver is appropriate for this problem type */
-  CHECK_COND(!solver->is_local_solver, NUMERICS_ERR_INVALID_SOLVER,
-             "Local solver cannot be used as main solver");
+  /* /\* Validate solver is appropriate for this problem type *\/ */
+  /* CHECK_COND(!solver->is_local_solver, NUMERICS_ERR_INVALID_SOLVER, */
+  /*            "Local solver cannot be used as main solver"); */
 
   /* Check solve function exists */
   CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER,

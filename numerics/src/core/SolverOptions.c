@@ -940,6 +940,7 @@ SolverOptions* solver_options_create(int solver_id) {
   if (solver->set_default) {
     solver->set_default(options);
   }
+
   
   /* Note: We don't call solver->init here because many init functions
    * require a valid problem pointer (not NULL). The init is typically

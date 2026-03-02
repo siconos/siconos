@@ -91,7 +91,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   SolverGlobalPtr local_solver = NULL;
   FreeSolverGlobalPtr freeSolver = NULL;

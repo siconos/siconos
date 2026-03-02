@@ -965,7 +965,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   /* Check for trivial case */
   *info = fc3d_checkTrivialCase(problem, velocity, reaction, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   double norm_q = cblas_dnrm2(m, problem->q, 1);
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==

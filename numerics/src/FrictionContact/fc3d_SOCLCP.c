@@ -132,8 +132,11 @@ static int fc3d_soclcp_solve_wrap(void* problem, double* reaction, double* veloc
 }
 
 static void fc3d_soclcp_set_default(SolverOptions* options) {
-  (void)options;
-  /* No special defaults needed - uses standard SolverOptions */
+  /* Set up internal solver for SOCLCP NSGS */
+  options->numberOfInternalSolvers = 1;
+  options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
 
 REGISTER_SOLVER(FC3D_SOCLCP,

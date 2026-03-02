@@ -451,7 +451,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   double norm_q = cblas_dnrm2(n, q, 1);
   problem->norm_q = norm_q;

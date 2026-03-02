@@ -167,14 +167,14 @@ void fc3d_nsgs_initialize_local_solver(
       local_function_toolkit->update_local_problem =
           &fc3d_projectionWithDiagonalization_update;
       local_function_toolkit->free_local_solver = &fc3d_projection_free;
-      fc3d_projection_initialize(problem, localproblem);
+      fc3d_projection_initialize(problem);
       break;
     }
     case OC_PROJ: {
       local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver = &fc3d_projection_free;
-      fc3d_projection_initialize(problem, localproblem);
+      fc3d_projection_initialize(problem);
       break;
     }
     case OC_PROJ_LI: {
@@ -182,7 +182,7 @@ void fc3d_nsgs_initialize_local_solver(
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_projectionOnConeWithLocalIteration_free;
-      fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
+      fc3d_projectionOnConeWithLocalIteration_initialize(problem,
                                                          local_opts);
       break;
     }
@@ -201,7 +201,7 @@ void fc3d_nsgs_initialize_local_solver(
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,
                                                           local_opts);
       break;
     }
@@ -211,7 +211,7 @@ void fc3d_nsgs_initialize_local_solver(
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,
                                                           local_opts);
       break;
     }
@@ -221,7 +221,7 @@ void fc3d_nsgs_initialize_local_solver(
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, 
                                                           local_opts);
       break;
     } /* Newton solver (Glocker-Fischer-Burmeister)*/
@@ -231,7 +231,7 @@ void fc3d_nsgs_initialize_local_solver(
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       // *computeError = &fake_compute_error;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, 
                                                           local_opts);
       break;
     }
@@ -607,8 +607,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   unsigned int* scontacts = NULL;
   unsigned int* freeze_contacts = NULL;
 
-  if (*info == 0) return;
-
   SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
     if (problem->M->matrix1) {
@@ -930,7 +928,9 @@ void fc3d_nsgs_set_default(SolverOptions* options) {
  */
 
 static int fc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
-  fc3d_nsgs_set_default(options);
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
