@@ -25,7 +25,7 @@
 
 #include "Actuator.hpp"
 #include "FunctionTypes.hpp"
-#include "relay_cst.h"  // contains only enum. Ok.
+#include "Relay_options.h"  // contains only enum. Ok.
 
 namespace siconos::modeling {
 

@@ -25,7 +25,7 @@
 #include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
 #include "numerics_verbose.h"
 #include "utils/numerics_errors.h"
-#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for relay_driver

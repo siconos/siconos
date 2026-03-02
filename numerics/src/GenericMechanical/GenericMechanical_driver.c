@@ -47,7 +47,7 @@
 /* Solver registration system */
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
-#include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
+#include "Relay_options.h"                     // for SICONOS_RELAY_LEMKE
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */

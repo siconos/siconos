@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-/*!\file relay_cst.h
+/*!\file Relay_options.h
  * \brief Relay constants*/
 
-#ifndef RELAY_CST_H
-#define RELAY_CST_H
+#ifndef RELAY_OPTIONS_H
+#define RELAY_OPTIONS_H
 
 enum RELAY_SOLVER {
   SICONOS_RELAY_PGS = 300,

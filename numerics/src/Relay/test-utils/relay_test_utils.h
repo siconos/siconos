@@ -23,7 +23,7 @@
 
 #include "SiconosConfig.h"  // for BUILD_AS_CPP
 #include "SolverOptions.h"
-#include "relay_cst.h"
+#include "Relay_options.h"
 #include "test_utils.h"  // for TestCase
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

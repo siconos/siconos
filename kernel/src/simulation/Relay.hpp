@@ -23,7 +23,7 @@
 #define Relay_H
 
 #include "LinearOSNS.hpp"
-#include "relay_cst.h"  // contains only enum. Ok.
+#include "Relay_options.h"  // contains only enum. Ok.
 struct RelayProblem;
 struct SolverOptions;
 

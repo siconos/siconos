@@ -23,10 +23,10 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_lexico...
-#include "relay_cst.h"
+#include "Relay_options.h"
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "relay_cst.h"                     // for SICONOS_LCP_LEMKE
+#include "Relay_options.h"                     // for SICONOS_LCP_LEMKE
 
 /* Solver registration system */
 #include "utils/solver_registry.h"

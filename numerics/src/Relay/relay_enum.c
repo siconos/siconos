@@ -24,10 +24,10 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_enum
-#include "relay_cst.h"
+#include "Relay_options.h"
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
-#include "relay_cst.h"                     // for SICONOS_RELAY_ENUM
+#include "Relay_options.h"                     // for SICONOS_RELAY_ENUM
 
 /* Solver registration system */
 #include "utils/solver_registry.h"

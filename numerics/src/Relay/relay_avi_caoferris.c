@@ -29,7 +29,7 @@ Ferris solves the subsequent AVI.
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_avi_caoferris
-#include "relay_cst.h"
+#include "Relay_options.h"
 #include "avi_caoferris.h"                 // for avi_caoferris_stage3
 #include "siconos_debug.h"                 // for DEBUG_PRINT_VEC_INT
 

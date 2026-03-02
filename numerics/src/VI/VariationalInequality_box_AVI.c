@@ -31,7 +31,7 @@
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
+#include "Relay_options.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 #include "solver_registry.h"
 #include "numerics_errors.h"

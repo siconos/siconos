@@ -17,7 +17,7 @@
  */
 #include "NumericsFwd.h"    // for SolverOptions, RelayProblem
 #include "Relay_Solvers.h"  // for relay_path, relay_path_setDefaultSolverOp...
-#include "Relay_cst.h"
+#include "Relay_options.h"
 #ifdef HAVE_PATHFERRIS
 #include <math.h>
 #include <stdio.h>
@@ -26,7 +26,7 @@
 
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
-#include "relay_cst.h"
+#include "Relay_options.h"
 #include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 

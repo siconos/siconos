@@ -138,16 +138,16 @@ void solver_options_print(SolverOptions *options);
 */
 void solver_options_delete(SolverOptions *options);
 
-/**
-    Create and initialize a SolverOptions struct: allocate internal memories,
-    set default values depending on the id.
+/* /\** */
+/*     Create and initialize a SolverOptions struct: allocate internal memories, */
+/*     set default values depending on the id. */
 
-    \param id solver id number
-    It must belong to one of the available ids defined for each formulation,
-    see users'guide for details
-    \return a pointer to options set, ready to use by a driver.
-*/
-SolverOptions *solver_options_create_old_style(int solverId);
+/*     \param id solver id number */
+/*     It must belong to one of the available ids defined for each formulation, */
+/*     see users'guide for details */
+/*     \return a pointer to options set, ready to use by a driver. */
+/* *\/ */
+/* SolverOptions *solver_options_create_old_style(int solverId); */
 
 /**
    Copy an existing set of options, to create a new one. Warning : callback,

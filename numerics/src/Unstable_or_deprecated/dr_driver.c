@@ -22,7 +22,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-#include "relay_cst.h"
+#include "Relay_options.h"
 
 #include "utils/numerics_errors.h"
 int dr_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options) {
