@@ -44,7 +44,7 @@
 #include "Plasticity_cst.h"
 #include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default
 #include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
-#include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
+/* Solver registry now provides id<->name mapping */
 #include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
 #include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_default
@@ -289,22 +289,18 @@ void solver_options_update_internal(SolverOptions* parent, size_t internal_solve
 }
 
 const char* solver_options_id_to_name(int Id) {
-  switch (Id) {
-#undef SICONOS_SOLVER_MACRO
-#define SICONOS_SOLVER_MACRO(X) \
-  case X:                       \
-    return X##_STR;
-    SICONOS_REGISTER_SOLVERS()
-    default:
-      return SICONOS_NONAME_STR;
+  const SolverEntry* solver = solver_registry_lookup(Id);
+  if (solver) {
+    return solver->name;
   }
+  return SICONOS_NONAME_STR;
 }
 
 int solver_options_name_to_id(const char* pName) {
-#undef SICONOS_SOLVER_MACRO
-#define SICONOS_SOLVER_MACRO(X) \
-  if (strcmp(X##_STR, pName) == 0) return X;
-  SICONOS_REGISTER_SOLVERS()
+  const SolverEntry* solver = solver_registry_lookup_by_name(pName);
+  if (solver) {
+    return solver->id;
+  }
   return 0;
 }
 

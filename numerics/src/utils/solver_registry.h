@@ -58,7 +58,7 @@ typedef struct {
 } SolverEntry;
 
 /* Maximum number of solvers that can be registered */
-#define SOLVER_REGISTRY_MAX 128
+#define SOLVER_REGISTRY_MAX 256
 
 /* Registration function - called by solvers to register themselves */
 int solver_registry_register(const SolverEntry* entry);
