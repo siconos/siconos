@@ -165,7 +165,7 @@ typedef unsigned int block_id_t;
 typedef int iter_t;
 
 /** Type for error values */
-typedef double error_t;
+typedef double numerical_error_t;
 
 /** Type for tolerance values */
 typedef double tolerance_t;
