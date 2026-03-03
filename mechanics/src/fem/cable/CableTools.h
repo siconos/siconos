@@ -40,21 +40,17 @@ int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
 
-template <typename T>
-std::vector<double> linspace(T start_in, T end_in, int num_in) {
-  double start = static_cast<double>(start_in);
-  double end = static_cast<double>(end_in);
-  double num = static_cast<double>(num_in);
-
-  std::vector<double> result(num);
+template <typename T, std::integral S>
+std::vector<T> linspace(T start, T end, S num) {
+  std::vector<T> result(num);
 
   if (num == 0) {
     return result;
   }
 
-  double step = (end - start) / (num - 1);
+  T step = (end - start) / (num - 1);
 
-  for (int i = 0; i < num; ++i) {
+  for (S i = 0; i < num; ++i) {
     result[i] = (start + step * i);
   }
   result[num - 1] = end;  // I want to ensure that start and end

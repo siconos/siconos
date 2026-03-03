@@ -32,9 +32,9 @@
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 #include "op3x3.h"  // det3x3
-#define DEBUG_STDOUT
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 std::shared_ptr<siconos::mechanics::fem::FENode>
@@ -69,10 +69,10 @@ siconos::algebra::Index siconos::mechanics::fem::FiniteElementModel::init() {
         // only if the node has not already been registered
         if (vertexToNode_.find(v) == vertexToNode_.end()) {
           // Total number of dofs
-          ndof += ndofPerNode;
+          ndof += siconos::algebra::to_index(ndofPerNode);
           // Global index of the nodes of the current element
-          std::vector<std::size_t> dofIndex(ndofPerNode);
-          for (int d = 0; d < ndofPerNode; d++) dofIndex[d] = dofIdx++;
+          std::vector<siconos::algebra::Index> dofIndex(ndofPerNode);
+          for (size_t d = 0; d < ndofPerNode; d++) dofIndex[d] = dofIdx++;
           DEBUG_PRINTF(
               "  create node num_mode: %lu with dofIndex.size() = %lu, for vertex "
               "num = %lu\n",
@@ -121,10 +121,11 @@ void siconos::mechanics::fem::FiniteElementModel::assembleElementaryMatrix(
     size_t node2_cnt = 0;
     for (const auto& node2 : fe.nodes()) {
       auto dofIndex2 = node2->global_dof_index();
-      for (std::size_t i = 0; i < dofIndex1.size(); i++) {
+      for (size_t i = 0; i < dofIndex1.size(); i++) {
         for (std::size_t j = 0; j < dofIndex2.size(); j++) {
-          M.coeffRef(dofIndex1[i], dofIndex2[j]) +=
-              Me(i + node1_cnt * dofIndex1.size(), j + node2_cnt * dofIndex2.size());
+          auto indx = siconos::algebra::to_index(i + node1_cnt * dofIndex1.size());
+          auto indy = siconos::algebra::to_index(j + node2_cnt * dofIndex2.size());
+          M.coeffRef(dofIndex1[i], dofIndex2[j]) += Me(indx, indy);
         }
       }
       node2_cnt++;
@@ -142,10 +143,12 @@ void siconos::mechanics::fem::FiniteElementModel::assembleElementary_B_Matrix(
   auto dim_stress = fe.dimStress();
   for (const auto& node1 : fe.nodes()) {
     auto dofIndex1 = node1->global_dof_index();
-    for (size_t i = 0; i < dofIndex1.size(); i++)
+    auto dofsize = siconos::algebra::to_index(dofIndex1.size());
+    for (siconos::algebra::Index i = 0; i < dofsize; i++)
       for (size_t j = 0; j < dofIndex1.size(); j++) {
-        Bmatrix.coeffRef(dim_stress * elem_cnt + i, dofIndex1[j]) +=
-            Be(i, j + node1_cnt * dofIndex1.size());
+        auto indx = siconos::algebra::to_index(elem_cnt) * dim_stress + i;
+        auto indy = siconos::algebra::to_index(j + node1_cnt * dofIndex1.size());
+        Bmatrix.coeffRef(indx, dofIndex1[j]) += Be(i, indy);
       }
     node1_cnt++;
   }
@@ -157,7 +160,11 @@ void siconos::mechanics::fem::FiniteElementModel::assembleElementary_S_Matrix(
   auto dim_stress = fe.dimStress();
   for (siconos::algebra::Index i = 0; i < dim_stress; i++)
     for (siconos::algebra::Index j = 0; j < dim_stress; j++) {
-      S.coeffRef(dim_stress * elem_cnt + i, dim_stress * elem_cnt + j) += Se(i, j);
+      auto indx =
+          siconos::algebra::to_index(elem_cnt) * dim_stress + siconos::algebra::to_index(i);
+      auto indy =
+          siconos::algebra::to_index(elem_cnt) * dim_stress + siconos::algebra::to_index(j);
+      S.coeffRef(indx, indy) += Se(i, j);
     }
 }
 
@@ -174,7 +181,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
   std::vector<double> Neta(nnodes);
   std::vector<double> Nzeta(nnodes);
 
-  std::vector<double> J(dim * dim);
+  std::vector<double> J(static_cast<size_t>(dim * dim));
 
   /** We perform integration by summing over the gauss points
    * this could be simplified by explicit formulae
@@ -190,7 +197,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       double gp_w = gp[2];
       fe.shapeFunctionIso2D(gp_eta, gp_ksi, N, Nksi, Neta);
       // Compute element determinant
-      for (int i = 0; i < 4; i++) J[i] = 0.0;
+      for (size_t i = 0; i < 4; i++) J[i] = 0.0;
       for (decltype(nnodes) n = 0; n < nnodes; n++) {
         // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
         // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->_mVertex->x(),
@@ -212,12 +219,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       double coeff = gp_w * massDensity * detJ;
 
       /* M += (coeff * Nt N)*/
-      for (decltype(nnodes) i = 0; i < nnodes; i++) {
-        for (decltype(nnodes) j = 0; j < nnodes; j++) {
+      for (size_t i = 0; i < nnodes; i++) {
+        for (size_t j = 0; j < nnodes; j++) {
           // DEBUG_PRINTF(" N[%i] = %e\t N[%i] = %e\t entry = %e \n", i, N[i],
           // j, N[j], coeff* N[i]*N[j]);
-          Me(i * 2, j * 2) += coeff * N[i] * N[j];
-          Me(i * 2 + 1, j * 2 + 1) += coeff * N[i] * N[j];
+          auto i2 = siconos::algebra::to_index(2 * i);
+          auto j2 = siconos::algebra::to_index(2 * j);
+          Me(i2, j2) += coeff * N[i] * N[j];
+          Me(i2 + 1, j2 + 1) += coeff * N[i] * N[j];
         }
       }
     } else if (dim == 3 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
@@ -229,7 +238,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       double gp_w = gp[3];
       fe.shapeFunctionIso3D(gp_eta, gp_ksi, gp_zeta, N, Nksi, Neta, Nzeta);
       // Compute element determinant
-      for (int i = 0; i < 9; i++) J[i] = 0.0;
+      for (size_t i = 0; i < 9; i++) J[i] = 0.0;
       for (decltype(nnodes) n = 0; n < nnodes; n++) {
         // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\t Nzeta[%i] = %e\n", n,
         // Nksi[n], n, Neta[n], n, Nzeta[n]); DEBUG_PRINTF(" x = %e\t y = %e, z
@@ -260,9 +269,12 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
         for (size_t j = 0; j < nnodes; j++) {
           // DEBUG_PRINTF(" N[%i] = %e\t N[%i] = %e\t entry = %e \n", i, N[i],
           // j, N[j], coeff* N[i]*N[j]);
-          Me(i * 3, j * 3) += coeff * N[i] * N[j];
-          Me(i * 3 + 1, j * 3 + 1) += coeff * N[i] * N[j];
-          Me(i * 3 + 2, j * 3 + 2) += coeff * N[i] * N[j];
+          auto i3 = siconos::algebra::to_index(3 * i);
+          auto j3 = siconos::algebra::to_index(3 * i);
+
+          Me(i3, j3) += coeff * N[i] * N[j];
+          Me(i3 + 1, j3 + 1) += coeff * N[i] * N[j];
+          Me(i3 + 2, j3 + 2) += coeff * N[i] * N[j];
         }
       }
     }
@@ -716,7 +728,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
   const auto& nodes = fe.nodes();
   auto nnodes = fe.nodes().size();
 
-  int dim = mesh_->dim();
+  size_t dim = static_cast<size_t>(mesh_->dim());
   std::vector<double> N(nnodes);
   std::vector<double> Nksi(nnodes);
   std::vector<double> Neta(nnodes);
@@ -776,12 +788,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       siconos::algebra::SiconosDenseMatrix B{3, ndof};
       B.setZero();
       for (size_t n = 0; n < nnodes; n++) {
-        B(0, 2 * n) = Nx[n];
-        B(1, 2 * n) = 0.0;
-        B(2, 2 * n) = Ny[n];
-        B(0, 2 * n + 1) = 0.0;
-        B(1, 2 * n + 1) = Ny[n];
-        B(2, 2 * n + 1) = Nx[n];
+        auto two_n = siconos::algebra::to_index(2 * n);
+
+        B(0, two_n) = Nx[n];
+        B(1, two_n) = 0.0;
+        B(2, two_n) = Ny[n];
+        B(0, two_n + 1) = 0.0;
+        B(1, two_n + 1) = Ny[n];
+        B(2, two_n + 1) = Nx[n];
       }
 
       // Compte BT D B
@@ -810,7 +824,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       double gp_w = gp[3];
       fe.shapeFunctionIso3D(gp_eta, gp_ksi, gp_zeta, N, Nksi, Neta, Nzeta);
       // Compute element determinant
-      for (int i = 0; i < 9; i++) J[i] = 0.0;
+      for (size_t i = 0; i < 9; i++) J[i] = 0.0;
       for (size_t n = 0; n < nnodes; n++) {
         // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
         // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->x(),
@@ -848,26 +862,27 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       siconos::algebra::SiconosDenseMatrix B{6, ndof};
       B.setZero();
       for (size_t n = 0; n < nnodes; n++) {
-        B(0, 3 * n) = Nx[n];
-        B(1, 3 * n) = 0.0;
-        B(2, 3 * n) = 0.0;
-        B(3, 3 * n) = Ny[n];
-        B(4, 3 * n) = 0.0;
-        B(5, 3 * n) = Nz[n];
+        auto three_n = siconos::algebra::to_index(3 * n);
+        B(0, three_n) = Nx[n];
+        B(1, three_n) = 0.0;
+        B(2, three_n) = 0.0;
+        B(3, three_n) = Ny[n];
+        B(4, three_n) = 0.0;
+        B(5, three_n) = Nz[n];
 
-        B(0, 3 * n + 1) = 0.0;
-        B(1, 3 * n + 1) = Ny[n];
-        B(2, 3 * n + 1) = 0.0;
-        B(3, 3 * n + 1) = Nx[n];
-        B(4, 3 * n + 1) = Nz[n];
-        B(5, 3 * n + 1) = 0.0;
+        B(0, three_n + 1) = 0.0;
+        B(1, three_n + 1) = Ny[n];
+        B(2, three_n + 1) = 0.0;
+        B(3, three_n + 1) = Nx[n];
+        B(4, three_n + 1) = Nz[n];
+        B(5, three_n + 1) = 0.0;
 
-        B(0, 3 * n + 2) = 0.0;
-        B(1, 3 * n + 2) = 0.0;
-        B(2, 3 * n + 2) = Nz[n];
-        B(3, 3 * n + 2) = 0.0;
-        B(4, 3 * n + 2) = Ny[n];
-        B(5, 3 * n + 2) = Nx[n];
+        B(0, three_n + 2) = 0.0;
+        B(1, three_n + 2) = 0.0;
+        B(2, three_n + 2) = Nz[n];
+        B(3, three_n + 2) = 0.0;
+        B(4, three_n + 2) = Ny[n];
+        B(5, three_n + 2) = Nx[n];
       }
       DEBUG_EXPR(siconos::algebra::print(B););
       // Compte BT D B
@@ -980,7 +995,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementary_B_Matrix(
     FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& B, double length) {
   auto nnodes = fe.nodes().size();
   B.setZero();
-  size_t cpt = 0;
+  siconos::algebra::Index cpt = 0;
   for (const auto& gp : fe.GaussPoints(3)) {
     if (mesh_->dim() == 1) {
       // Compute shape function and derivatives of shape function
@@ -1119,7 +1134,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
       elem_cnt++;
     } else {
-      auto dimStress = fe->ndofPerNode() * (fe->ndofPerNode() + 1) / 2;
+      auto dimStress =
+          siconos::algebra::to_index(fe->ndofPerNode() * (fe->ndofPerNode() + 1) / 2);
       Be.resize(dimStress, fe->ndof());
       const Material& material = mat.at(fe->mElement()->tags(0));
       computeElementaryBMatrix_direct(*fe, Be, material.thickness());
@@ -1216,7 +1232,8 @@ void siconos::mechanics::fem::FiniteElementModel::applyDirichletBoundaryConditio
         auto node = vertexToNode_[vertex];
         auto n_dof_index = node->global_dof_index();
         for (siconos::algebra::SiconosVector::Index i : input_dof_index) {
-          boundaryConditions->appendIndex(n_dof_index[i], imposedVelocity);
+          boundaryConditions->appendIndex(
+              n_dof_index[siconos::algebra::to_unsigned<size_t>(i)], imposedVelocity);
         }
       }
     }
@@ -1226,7 +1243,7 @@ void siconos::mechanics::fem::FiniteElementModel::applyDirichletBoundaryConditio
 void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
     int physical_entity_tag, const siconos::algebra::SiconosVector& nodal_forces,
     Eigen::Ref<siconos::algebra::SiconosVector> forces) {
-  std::vector<int> f_index(0);
+  std::vector<size_t> f_index(0);
   for (auto elem : mesh_->elements()) {
     if (elem->tags(0) == physical_entity_tag) {
       for (auto vertex : elem->vertices()) {
@@ -1240,7 +1257,7 @@ void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
           f_index.push_back(node->num());
           auto n_dof_index = node->global_dof_index();
           for (siconos::algebra::Index i = 0; i < nodal_forces.size(); i++) {
-            forces(n_dof_index[i]) = nodal_forces(i);
+            forces(n_dof_index[siconos::algebra::to_unsigned<size_t>(i)]) = nodal_forces(i);
           }
         }
       }

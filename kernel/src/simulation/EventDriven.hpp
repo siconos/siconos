@@ -22,6 +22,7 @@
 #define EventDriven_H
 
 #include "Simulation.hpp"
+#include "SimulationGraphs.hpp"
 
 namespace siconos::simulation {
 
@@ -102,7 +103,7 @@ class EventDriven : public Simulation {
    *  \param nb number of NSProblem
    */
   EventDriven(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-              std::shared_ptr<TimeDiscretisation> td, int nb);
+              std::shared_ptr<TimeDiscretisation> td, std::size_t nb);
 
   // /** defaut constructor (needed for serialization)
   //  */
@@ -211,7 +212,7 @@ class EventDriven : public Simulation {
    *  \param i the number of the set to be updated
    */
 
-  void updateIndexSet(unsigned int i) override;
+  void updateIndexSet(siconos::simulation::Topology::size_type i) override;
 
   /** update indexSets[1] and [2] (using current y and lambda values of
    *  Interactions) with conditions on y[2] AND lambda[2].
@@ -244,7 +245,7 @@ class EventDriven : public Simulation {
    *
    *  \return unsigned int
    */
-  virtual unsigned int computeSizeOfg();
+  auto computeSizeOfg() const { return (_indexSet0->size()); }
 
   /** compute constraint function g(x,t,...) for osi.
    *

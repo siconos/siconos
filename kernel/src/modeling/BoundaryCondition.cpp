@@ -60,9 +60,12 @@ void siconos::modeling::BoundaryCondition::appendIndex(
     siconos::algebra::SiconosVector::Index ind, double imposedVelocity) {
   if (find(velocityIndices_.begin(), velocityIndices_.end(), ind) == velocityIndices_.end()) {
     velocityIndices_.push_back(ind);
-    prescribedVelocity_.conservativeResize(size());
-    prescribedVelocity_(size() - 1) = imposedVelocity;
-    prescribedVelocityOld_.conservativeResize(size());
-    prescribedVelocity_(size() - 1) = imposedVelocity;
+
+    auto sizev = siconos::algebra::to_index(size());
+
+    prescribedVelocity_.conservativeResize(sizev);
+    prescribedVelocity_(sizev - 1) = imposedVelocity;
+    prescribedVelocityOld_.conservativeResize(sizev);
+    prescribedVelocity_(sizev - 1) = imposedVelocity;
   }
 }

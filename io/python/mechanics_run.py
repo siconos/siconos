@@ -605,15 +605,19 @@ class MechanicsHdf5Runner_run_options(dict):
     def check_valid_run_options(self):
 
         if self.get("explode_Newton_solve") is not None:
-            msg = "run_options.check_valid_run_options() :  explode_Newton_solve option is obsolete. Use instead explode_computeOneStep_in_python"
+            msg = "run_options.check_valid_run_options():"
+            msg += "explode_Newton_solve option is obsolete."
+            msg += " Use instead explode_computeOneStep_in_python"
             raise RuntimeError(msg)
 
         if self.get("explode_computeOneStep") is not None:
-            msg = "run_options.check_valid_run_options() :  explode_computeOneStep option is obsolete. Use instead explode_computeOneStepNSProblem_in_python"
+            msg = "run_options.check_valid_run_options():"
+            msg += "explode_computeOneStep option is obsolete."
+            msg += "Use instead explode_computeOneStepNSProblem_in_python"
             raise RuntimeError(msg)
 
         for k in self.keys():
-            if not k in self._valid_options_keys:
+            if k not in self._valid_options_keys:
                 msg = (
                     "run_options.check_valid_run_options() : the key "
                     + str(k)
@@ -1604,7 +1608,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
 
             elif bc_type == "BoundaryCondition":
-                velocity_values= self.boundary_conditions()[name].attrs.get("v", None)
+                velocity_values = self.boundary_conditions()[name].attrs.get("v", None)
                 if velocity_values is None:
                     # fixed bc with zero prescribed velocities
                     bc = bc_class(self.boundary_conditions()[name].attrs["indices"])
@@ -2552,7 +2556,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.print_verbose(
                     "[warning] output_contact_work with "
                     "the options skip_last_update_output=True\n"
-                    "                         or skip_last_update_input=True could result in wrong output"
+                    " or skip_last_update_input=True\n"
+                    " could result in wrong output"
                 )
         else:
             self.print_verbose(

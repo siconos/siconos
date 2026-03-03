@@ -233,7 +233,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacobiangOver_lambda(
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interaction& inter,
-                                                            unsigned int level) {
+                                                            siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
@@ -241,10 +241,11 @@ void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interac
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeInput(double time, Interaction& inter,
-                                                           unsigned int level) {
+                                                           siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(level);
-  if (computeg_) computeg_(*ds_vars[FirstOrderR::Xxx], time, lambda, *ds_vars[FirstOrderR::Rrr]);
+  if (computeg_)
+    computeg_(*ds_vars[FirstOrderR::Xxx], time, lambda, *ds_vars[FirstOrderR::Rrr]);
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJach(double time, Interaction& inter) {

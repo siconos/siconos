@@ -69,7 +69,6 @@ using SiconosMatrix37 = Eigen::Matrix<double_t, 3, 7, Eigen::ColMajor>;
 using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
 using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
 using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
-using Index = Eigen::Index;
 using SiconosMatrix33Diagonal = Eigen::DiagonalMatrix<double_t, 3>;
 using SiconosMatrix66Diagonal = Eigen::DiagonalMatrix<double_t, 6>;
 
@@ -79,6 +78,17 @@ inline const SiconosMatrix33 identity33 = SiconosMatrix33::Identity();
 using SparseIndex = SICONOS_SPARSE_STORAGE_INDEX_TYPE;
 using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, SparseIndex>;
 using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
+
+/** Utility function to ensure proper cast from Sparse Eigen indices type to size_t (or
+ * equivalent) */
+template <std::unsigned_integral T>  // Nodiscard to force a return value (else warning)
+[[nodiscard]] T sparse_index_to_unsigned(SparseIndex value) {
+  // if (!std::in_range<T>(value))
+  //   throw std::overflow_error(
+  //       "SparseIndex value cannot be represented as an unsigned integer");
+  assert(std::in_range<T>(value));
+  return static_cast<T>(value);
+}
 
 // Map types
 
@@ -133,8 +143,8 @@ inline void print(const SiconosSparseMatrix& mat) {
 //   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 // }
 template <typename Derived>
-  requires(Derived::ColsAtCompileTime == 1 || Derived::RowsAtCompileTime == 1)
-void print(const Eigen::MatrixBase<Derived>& vec) {
+requires(Derived::ColsAtCompileTime == 1 ||
+         Derived::RowsAtCompileTime == 1) void print(const Eigen::MatrixBase<Derived>& vec) {
   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 }
 

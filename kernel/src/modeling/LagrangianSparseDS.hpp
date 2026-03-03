@@ -130,8 +130,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   ACCEPT_SERIALIZATION(LagrangianSparseDS);
 
   /** state of the system. See details on top of page. */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_q_ = {nullptr, nullptr,
-                                                                            nullptr};
+  siconos::algebra::blocks::SharedVector state_q_ = {nullptr, nullptr, nullptr};
 
   /** Initial position of the system */
   siconos::algebra::DenseVectorStorage q0_storage_{std::monostate{}};
@@ -452,7 +451,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  @param level input-level to be initialized.
    */
-  void initializeNonSmoothInput(unsigned int level) override;
+  void initializeNonSmoothInput(siconos::algebra::blocks::size_type level) override;
 
   /** update right-hand side for the current state
    *
@@ -473,7 +472,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  @param level
    */
-  void resetNonSmoothPart(unsigned int level) override;
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level) override;
 
   /** Compute  \f$ F_{total}(v,q,t) \f$
    *
@@ -1213,7 +1212,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** \return last saved (memory) values of p[level] vector
    * @param level required index for p
    */
-  inline const siconos::algebra::SiconosMemory& pMemory(unsigned int level) {
+  inline const siconos::algebra::SiconosMemory& pMemory(
+      siconos::algebra::blocks::size_type level) {
     return pMemory_[level];
   }
 
@@ -1227,7 +1227,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  @param size the size of the siconos::algebra::SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int size) override;
+  void initMemory(siconos::algebra::blocks::size_type size) override;
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
@@ -1254,7 +1254,7 @@ class LagrangianSparseDS : public SecondOrderDS {
 
      @param level the required level
    */
-  void initMemoryForGeneralizedCoordinates(unsigned int level);
+  void initMemoryForGeneralizedCoordinates(siconos::algebra::blocks::size_type level);
 
   /**
      Allocate memory and lu-factorize the mass of the system.

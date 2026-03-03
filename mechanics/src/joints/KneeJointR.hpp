@@ -117,7 +117,7 @@ class KneeJointR : public NewtonEulerJointR {
 
      \return the type of the degree of freedom (DoF)
   */
-  virtual DofType typeOfDoF(unsigned int axis) const override {
+  virtual DofType typeOfDoF(siconos::algebra::Index axis) const override {
     if (axis < 3)
       return DofType::ANGULAR;
     else

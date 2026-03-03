@@ -23,6 +23,7 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
+#include "DynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
 #include "OneStepIntegratorTypes.hpp"  // IntegratorType
 #include "SimulationGraphs.hpp"
@@ -128,8 +129,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
         _levelMaxForOutput{lmax_output},
         _levelMinForInput{lmin_input},
         _levelMaxForInput{lmax_input} {
-          // Set levels. This may depend on the nonsmooth law and will be updated during
-          // initializeWorkVectorsForInteraction(...) call.
+            // Set levels. This may depend on the nonsmooth law and will be updated during
+            // initializeWorkVectorsForInteraction(...) call.
         };
 
   /**
@@ -145,8 +146,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param ds the dynamical system
    */
-  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
-  _initializeDSWorkVectors(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  std::shared_ptr<siconos::algebra::blocks::SharedVector> _initializeDSWorkVectors(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
  private:
   // Rule of five
@@ -249,7 +250,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   /**
      Initialization process of the nonsmooth problems
      linked to this OSI*/
-  virtual void initialize_nonsmooth_problems() {};
+  virtual void initialize_nonsmooth_problems(){};
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -348,7 +349,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param level
    */
-  void resetNonSmoothPart(unsigned int level);
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level);
 
   /** \return the iteration matrix corresponding to a given dynamical system
    *
@@ -424,7 +425,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  \return bool
    */
   virtual bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                        unsigned int i);
+                                        siconos::graphs::InteractionsGraph::size_type i);
 
   /** Apply the rule to one Interaction to know if is it should be removed
    *  from the IndexSet of level i
@@ -434,7 +435,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  \return bool
    */
   virtual bool removeInteractionFromIndexSet(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i);
 
   /** get the ExtraAdditionalTerms.
    *

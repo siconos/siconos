@@ -637,7 +637,7 @@ void siconos::joints::PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double
 void siconos::joints::PrismaticJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
@@ -680,7 +680,7 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.

@@ -228,7 +228,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param level input-level to be initialized.
    */
-  void initializeNonSmoothInput(unsigned int level) override;
+  void initializeNonSmoothInput(siconos::algebra::blocks::size_type level) override;
 
   /*  \return a read-only reference on the matrix M(t) */
   Eigen::Ref<const siconos::algebra::SiconosDenseMatrix> MMatrix() const {
@@ -412,7 +412,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param level
    */
-  virtual void resetNonSmoothPart(unsigned int level) override;
+  virtual void resetNonSmoothPart(siconos::algebra::blocks::size_type level) override;
 
   /** \return LU-factorization of the M matrix (pointer link) */
   inline auto LU_M() const { return LU_M_; }
@@ -432,7 +432,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
 
       \param steps the size of the SiconosMemory (i)
   */
-  void initMemory(unsigned int steps) override;
+  void initMemory(siconos::algebra::blocks::size_type steps) override;
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted
    *  vector) xMemory and rMemory,

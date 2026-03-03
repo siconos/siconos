@@ -163,7 +163,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \return true if y<=0
    */
   bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+                                siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    *  in the IndexSet of level i
@@ -173,7 +173,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \return true if y>0
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Unused
    *

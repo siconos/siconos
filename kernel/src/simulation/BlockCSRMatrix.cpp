@@ -29,7 +29,8 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Tools.hpp"     // For print
+#include "Tools.hpp"  // For print
+#include "Topology.hpp"
 #include "TypeName.hpp"  // for DS type visitor
 
 // #define DEBUG_STDOUT
@@ -42,7 +43,9 @@
 // initialized with nr to reserve at first step the maximum possible
 // (according to given nr) space in memory.  Thus a future resize
 // will not require memory allocation or copy.
-siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow) : _nr(nRow), _nc{_nr} {
+siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(
+    siconos::graphs::InteractionsGraph::size_type nRow)
+    : _nr(nRow), _nc{_nr} {
   _blockCSR = std::make_shared<CompressedRowMat>(_nr, _nr);
   _sparseBlockStructuredMatrix = std::make_shared<SparseBlockStructuredMatrix>();
   _diagsize0 = std::make_shared<std::vector<unsigned int>>(_nr);
@@ -81,7 +84,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
-  int sizeV = 0;
+  unsigned int sizeV = 0;
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
@@ -89,7 +92,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
 
     assert(inter->nonSmoothLaw()->size() > 0);
 
-    sizeV += inter->nonSmoothLaw()->size();
+    sizeV += static_cast<unsigned int>(inter->nonSmoothLaw()->size());
     (*_diagsize0)[indexSet.index(*vi)] = sizeV;
     (*_diagsize1)[indexSet.index(*vi)] = sizeV;
     assert((*_diagsize0)[indexSet.index(*vi)] > 0);
@@ -155,7 +158,8 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
 
   /* here we suppose NewtonEuler with 6 dofs */
   /* it cannot be another case at this point */
-  unsigned int index, ac;
+  unsigned int ac;
+  std::size_t index;
   for (index = 0, ac = 6; index < involvedDS.size(); ++index, ac += 6) {
     (*_diagsize0)[index] = ac;
     (*_diagsize1)[index] = ac;
@@ -215,7 +219,8 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
   _diagsize1->resize(involvedDS.size());
 
   /* only NewtonEuler3DR */
-  unsigned int index, ac0, ac1;
+  unsigned int ac0, ac1;
+  std::size_t index;
   for (index = 0, ac0 = 6, ac1 = 3; index < involvedDS.size(); ++index, ac0 += 6, ac1 += 3) {
     (*_diagsize0)[index] = ac0;
     (*_diagsize1)[index] = ac1;
@@ -225,9 +230,10 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
 // convert _blockCSR to numerics structure
 void siconos::simulation::BlockCSRMatrix::convert() {
   DEBUG_BEGIN("void siconos::simulation::BlockCSRMatrix::convert()\n");
-  _sparseBlockStructuredMatrix->blocknumber0 = _nr;
-  _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
-  _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
+  _sparseBlockStructuredMatrix->blocknumber0 = static_cast<unsigned int>(_nr);
+  _sparseBlockStructuredMatrix->blocknumber1 =
+      static_cast<unsigned int>(_nr);  // nc not always set
+  _sparseBlockStructuredMatrix->nbblocks = static_cast<unsigned int>((*_blockCSR).nnz());
   // Next copies: pointer links!!
   _sparseBlockStructuredMatrix->blocksize0 = _diagsize0->data();
   _sparseBlockStructuredMatrix->blocksize1 = _diagsize1->data();  // nr = nc
@@ -286,6 +292,6 @@ void siconos::simulation::BlockCSRMatrix::display() const {
   siconos::tools::print("_diagsize1 , sum of col sizes of the diagonal blocks\t", *_diagsize1);
 }
 
-unsigned int siconos::simulation::BlockCSRMatrix::getNbNonNullBlocks() const {
+std::size_t siconos::simulation::BlockCSRMatrix::getNbNonNullBlocks() const {
   return _blockCSR->nnz();
 };

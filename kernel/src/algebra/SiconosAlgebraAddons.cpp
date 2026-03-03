@@ -21,6 +21,9 @@
 #include <random>
 #include <utility>
 
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
 siconos::algebra::SiconosVector siconos::algebra::normInfByColumn(
     const siconos::algebra::SiconosDenseMatrix& m) {
   siconos::algebra::SiconosVector v(m.cols());
@@ -74,8 +77,9 @@ void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* 
   for (Index j = 0; j < cols; ++j) {
     for (auto idx = outer[j]; idx < outer[j + 1]; ++idx) {
       // Insert triplet directly, no threshold
-      size_t idx_s = static_cast<size_t>(idx);
-      cs_entry(triplet, inner[idx_s] + row_off, j + col_off, values[idx_s]);
+      size_t idx_s = sparse_index_to_unsigned<size_t>(idx);
+      cs_entry(triplet, sparse_index_to_unsigned<size_t>(inner[idx_s]) + row_off,
+               siconos::algebra::to_unsigned<size_t>(j) + col_off, values[idx_s]);
     }
   }
 }
@@ -83,15 +87,18 @@ void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* 
 void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet,
                                    size_t row_off, size_t col_off, double tol) {
   assert(triplet);
-  size_t nrow = static_cast<size_t>(m.rows());
-  size_t ncol = static_cast<size_t>(m.cols());
+  size_t nrow = to_unsigned<size_t>(m.rows());
+  size_t ncol = to_unsigned<size_t>(m.cols());
 
   double* arr = m.data();
   for (size_t j = 0; j < ncol; ++j) {
     for (size_t i = 0; i < nrow; ++i) {
       // col-major
-
-      CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j * nrow],
+      assert(std::in_range<int64_t>(i + row_off));
+      assert(std::in_range<int64_t>(j + col_off));
+      int64_t row = static_cast<int64_t>(i + row_off);
+      int64_t col = static_cast<int64_t>(j + col_off);
+      CSparseMatrix_zentry(triplet, row, col, arr[i + j * nrow],
                            std::numeric_limits<double>::epsilon());
     }
   }

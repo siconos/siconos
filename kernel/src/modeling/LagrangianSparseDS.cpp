@@ -71,7 +71,8 @@ siconos::modeling::LagrangianSparseDS::LagrangianSparseDS(
   p_[1]->setZero();
 }
 
-void siconos::modeling::LagrangianSparseDS::initializeNonSmoothInput(unsigned int level) {
+void siconos::modeling::LagrangianSparseDS::initializeNonSmoothInput(
+    siconos::algebra::blocks::size_type level) {
   if (!p_[level]) {
     p_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     p_[level]->setZero();
@@ -84,7 +85,7 @@ void siconos::modeling::LagrangianSparseDS::resetToInitialState() {
 }
 
 void siconos::modeling::LagrangianSparseDS::initMemoryForGeneralizedCoordinates(
-    unsigned int level) {
+    siconos::algebra::blocks::size_type level) {
   assert(level > 1);
   if (!state_q_[level])
     state_q_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
@@ -755,7 +756,8 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
 }
 
 // --- Functions for memory handling ---
-void siconos::modeling::LagrangianSparseDS::initMemory(unsigned int steps) {
+void siconos::modeling::LagrangianSparseDS::initMemory(
+    siconos::algebra::blocks::size_type steps) {
   if (steps == 0) {
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero\n";
     return;
@@ -766,7 +768,7 @@ void siconos::modeling::LagrangianSparseDS::initMemory(unsigned int steps) {
   pMemory_.resize(3);
 
   // TODO : initMemory in graph + f(OSI/level)
-  for (unsigned int level = 0; level < 3; ++level) {
+  for (siconos::algebra::blocks::size_type level = 0; level < 3; ++level) {
     if (pMemory_[level].size() == 0) pMemory_[level].setMemorySize(steps, ndof_);
   }
 }
@@ -790,7 +792,8 @@ void siconos::modeling::LagrangianSparseDS::resetAllNonSmoothParts() {
   if (p_[2]) p_[2]->setZero();
 }
 
-void siconos::modeling::LagrangianSparseDS::resetNonSmoothPart(unsigned int level) {
+void siconos::modeling::LagrangianSparseDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   if (level < siconos::internal::LEVELMAX)
     if (p_[level]) p_[level]->setZero();
 }

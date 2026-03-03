@@ -67,7 +67,6 @@ class StressLinearTIR : public siconos::modeling::LagrangianLinearTIR {
    *  \param inter an siconos::modeling::Interaction using this relation
    */
   void checkSize(const siconos::modeling::Interaction& inter) const override;
-  ;
 
   /** default function to compute y
    *
@@ -76,8 +75,7 @@ class StressLinearTIR : public siconos::modeling::LagrangianLinearTIR {
    *  \param derivativeNumber the derivative of y we want to compute
    */
   void computeOutput(double time, siconos::modeling::Interaction& inter,
-                     unsigned int derivativeNumber = 0) override;
-  ;
+                     siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** default function to compute r
    *
@@ -86,7 +84,7 @@ class StressLinearTIR : public siconos::modeling::LagrangianLinearTIR {
    *  \param level the derivative of lambda we want to compute
    */
   void computeInput(double time, siconos::modeling::Interaction& inter,
-                    unsigned int level = 0) override;
+                    siconos::algebra::blocks::size_type level = 0) override;
 
   /** compute all the H Jacobian
    *

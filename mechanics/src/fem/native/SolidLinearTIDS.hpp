@@ -61,11 +61,9 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
   /** stress of the system */
   std::unique_ptr<siconos::algebra::SiconosVector> sigma_{nullptr};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> stress_{nullptr, nullptr,
-                                                                        nullptr};
+  siconos::algebra::blocks::SharedVector stress_{nullptr, nullptr, nullptr};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> epsilon_p_ = {nullptr, nullptr,
-                                                                              nullptr};
+  siconos::algebra::blocks::SharedVector epsilon_p_ = {nullptr, nullptr, nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> plasticRate_ = {nullptr};
 
   /** total size of sigma tensor */
@@ -281,7 +279,7 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
    *
    *  @param size the size of the siconos::algebra::SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int size) override;
+  void initMemory(siconos::algebra::blocks::size_type size) override;
 
   inline const siconos::algebra::SiconosMemory& stressMemory() { return stressMemory_; }
 

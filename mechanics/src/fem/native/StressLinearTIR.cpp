@@ -52,7 +52,8 @@ void siconos::mechanics::fem::StressLinearTIR::checkSize(
 }
 
 void siconos::mechanics::fem::StressLinearTIR::computeOutput(
-    double time, siconos::modeling::Interaction& inter, unsigned int derivativeNumber) {
+    double time, siconos::modeling::Interaction& inter,
+    siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_BEGIN("siconos::mechanics::fem::StressLinearTIR::computeOutput(...)\n");
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
@@ -70,7 +71,8 @@ void siconos::mechanics::fem::StressLinearTIR::computeOutput(
   DEBUG_END("siconos::mechanics::fem::StressLinearTIR::computeOutput(...)\n");
 }
 void siconos::mechanics::fem::StressLinearTIR::computeInput(
-    double time, siconos::modeling::Interaction& inter, unsigned int level) {
+    double time, siconos::modeling::Interaction& inter,
+    siconos::algebra::blocks::size_type level) {
   // get lambda of the concerned interaction
   // Here lambda = plastic Rate
 

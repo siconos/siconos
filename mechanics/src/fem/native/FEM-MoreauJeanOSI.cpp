@@ -82,7 +82,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wk_inter::size));
   }
 
@@ -589,7 +589,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeIteration() {
 }
 
 bool siconos::mechanics::fem::integrators::MoreauJeanOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction>"
       " inter, "

@@ -54,7 +54,7 @@ struct siconos::nonsmooth_formulations::Relay::_BoundsNSLEffect
 
   _BoundsNSLEffect(Relay* p, std::shared_ptr<siconos::modeling::Interaction> inter,
                    unsigned int pos)
-      : _parent(p), _inter(inter), _pos(pos) {};
+      : _parent(p), _inter(inter), _pos(pos){};
 
   void visit(const siconos::modeling::RelayNSL& nslaw) override {
     for (siconos::algebra::Index i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
@@ -90,9 +90,6 @@ void siconos::nonsmooth_formulations::Relay::initialize(
 }
 bool siconos::nonsmooth_formulations::Relay::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number = static_cast<float>(siconos::types::type_value(nslaw));
-  _nslawtype.insert(type_number);
-
   if (not(siconos::types::type_value(nslaw) ==
               siconos::modeling::Type::ComplementarityConditionNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::RelayNSL)) {

@@ -25,6 +25,7 @@
 
 #include "NonSmoothLaw.hpp"
 #include "OneStepIntegrator.hpp"
+#include "SimulationGraphs.hpp"
 namespace siconos::modeling {
 
 class SecondOrderDS;
@@ -188,13 +189,13 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
     void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
 
-    void visit(const siconos::modeling::RelayNSL& nslaw) override {};
+    void visit(const siconos::modeling::RelayNSL& nslaw) override{};
     void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override;
     void visit(const siconos::modeling::FremondImpactFrictionNSL& nslaw) override;
     void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nslaw) override;
-    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override {};
-    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override {};
-    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override{};
     void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
   };
 
@@ -451,8 +452,9 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  @param i level of the IndexSet
    *  \return Boolean
    */
-  virtual bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                        unsigned int i) override;
+  virtual bool addInteractionInIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
    *  IndexSet of level i
@@ -462,7 +464,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \return Boolean
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** method to prepare the fist Newton iteration
    *  @param time

@@ -21,8 +21,8 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 // #define DEBUG_STDOUT
@@ -87,8 +87,8 @@ void siconos::modeling::LagrangianRheonomousR::computeJacobianhOver_q(
     computejacobianhOver_q_(positions, time, *jacobianhOver_q_view_);
 }
 
-void siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Interaction& inter,
-                                                             unsigned int derivativeNumber) {
+void siconos::modeling::LagrangianRheonomousR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0)
@@ -122,15 +122,16 @@ void siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Intera
   }
 }
 
-void siconos::modeling::LagrangianRheonomousR::computeInput(double time, Interaction& inter,
-                                                            unsigned int level) {
+void siconos::modeling::LagrangianRheonomousR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
+      lambda, *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level],
+      false);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeJach(double time, Interaction& inter) {

@@ -38,9 +38,6 @@ siconos::nonsmooth_formulations::LCP::LCP(std::shared_ptr<SolverOptions> options
 
 bool siconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number = (float)(siconos::types::type_value(nslaw));
-  _nslawtype.insert(type_number);
-
   if (not(siconos::types::type_value(nslaw) ==
               siconos::modeling::Type::ComplementarityConditionNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::NewtonImpactNSL ||

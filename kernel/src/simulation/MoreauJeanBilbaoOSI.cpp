@@ -81,7 +81,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteract
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
   }
 
@@ -308,7 +308,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          siconos::modeling::Interaction& inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
@@ -442,7 +442,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::prepareNewtonIteration(double ti
 }
 
 bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction>"
       " inter, "
@@ -477,6 +478,7 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   return !(addInteractionInIndexSet(inter, i));
 }

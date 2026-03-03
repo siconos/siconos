@@ -18,6 +18,8 @@
 
 #include "LsodarOSI.hpp"
 
+#include <limits>
+
 #include "BlockVector.hpp"
 #include "EventDriven.hpp"
 #include "Interaction.hpp"
@@ -296,7 +298,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::LsodarOSI::WORK_INTERACTION_LENGTH);
   }
 
@@ -414,8 +416,10 @@ void siconos::integrators::LsodarOSI::initialize() {
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 2 - Ng, number of constraints:
-  _intData[1] = std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
-                    ->computeSizeOfg();
+  auto sizeofg = std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+                     ->computeSizeOfg();
+  assert(sizeofg <= std::numeric_limits<int>::max());
+  _intData[1] = static_cast<int>(sizeofg);
   // 3 - Itol, itask, iopt
   // intData[2,3,4,5] : default values set in class attribute
   // _intData[2] = 1 if ATOL is a scalar, else 2 (ATOL array)
@@ -590,7 +594,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   _NSLEffectOnFreeOutput() = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;

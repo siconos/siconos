@@ -423,7 +423,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::Hem5OSI::WORK_INTERACTION_LENGTH);
   }
 

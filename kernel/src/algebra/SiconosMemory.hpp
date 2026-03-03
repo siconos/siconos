@@ -27,9 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
-#include "SiconosVector.hpp"
-#include "SiconosVector.hpp"  // Required because of inheritance. Works without this with gnu compilers, but not with clang (?)
 
 namespace siconos::algebra {
 
@@ -49,20 +48,20 @@ namespace siconos::algebra {
    object.
 
 */
-class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
+class SiconosMemory : public siconos::algebra::blocks::Vector {
  private:
   ACCEPT_SERIALIZATION(SiconosMemory);
 
   /** the real number of siconos::algebra::SiconosVectors saved in the Memory (ie the ones for
    * which memory has been allocated) */
-  std::vector<siconos::algebra::SiconosVector>::size_type _nbVectorsInMemory{0};
+  siconos::algebra::blocks::size_type _nbVectorsInMemory{0};
 
   /** index to avoid removal and creation of vectors.
    this[_indx] is to the oldest element in the set */
-  std::vector<siconos::algebra::SiconosVector>::size_type _indx{0};
+  siconos::algebra::blocks::size_type _indx{0};
 
-  SiconosMemory(const std::vector<siconos::algebra::SiconosVector>&) = delete;
-  SiconosMemory& operator=(const std::vector<siconos::algebra::SiconosVector>& V) = delete;
+  SiconosMemory(const siconos::algebra::blocks::Vector&) = delete;
+  SiconosMemory& operator=(const siconos::algebra::blocks::Vector& V) = delete;
 
  public:
   /** creates an empty SiconosMemory. */
@@ -73,7 +72,8 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    *  \param size number of elements in the container
    *  \param vectorSize size of each vector in the container
    */
-  SiconosMemory(const unsigned int size, const unsigned int vectorSize);
+  SiconosMemory(const siconos::algebra::blocks::size_type size,
+                const siconos::algebra::blocks::size_type vectorSize);
 
   /** creates a SiconosMemory, copy constructor
    *  Required because of resize call in DS initMemory function.
@@ -96,7 +96,8 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    *
    *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
    */
-  const siconos::algebra::SiconosVector& getSiconosVector(const unsigned int) const;
+  const siconos::algebra::SiconosVector& getSiconosVector(
+      const siconos::algebra::blocks::size_type) const;
 
   /** return vector number if from the memory, as a mutable reference.
    *  Use should be avoided whenever possible.
@@ -104,20 +105,22 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    *
    *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
    */
-  siconos::algebra::SiconosVector& getSiconosVectorMutable(const unsigned int);
+  siconos::algebra::SiconosVector& getSiconosVectorMutable(
+      const siconos::algebra::blocks::size_type);
 
   /** set size of the SiconosMemory (number of vectors and size of vector)
    *
    *  \param steps the max size for this SiconosMemory, size of the container
    *  \param vectorSize size of each vector of the container
    */
-  void setMemorySize(const unsigned int steps, const unsigned int vectorSize);
+  void setMemorySize(const siconos::algebra::blocks::size_type steps,
+                     const siconos::algebra::Index vectorSize);
 
   /** gives the numbers of siconos::algebra::SiconosVectors currently stored in the memory
    *
    *  \return int >= 0
    */
-  inline std::vector<siconos::algebra::SiconosVector>::size_type nbVectorsInMemory() const {
+  inline siconos::algebra::blocks::size_type nbVectorsInMemory() const {
     return _nbVectorsInMemory;
   };
 

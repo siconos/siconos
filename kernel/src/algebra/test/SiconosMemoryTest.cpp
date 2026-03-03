@@ -62,9 +62,9 @@ void SiconosMemoryTest::setUp()
   c1->insertPtr(q2);
   c2->insertPtr(q3);
 
-  V1 = std::make_shared<std::vector<siconos::algebra::SiconosVector>>();
-  V2 = std::make_shared<std::vector<siconos::algebra::SiconosVector>>();
-  V3 = std::make_shared<std::vector<siconos::algebra::SiconosVector>>();
+  V1 = std::make_shared<siconos::algebra::blocks::Vector>();
+  V2 = std::make_shared<siconos::algebra::blocks::Vector>();
+  V3 = std::make_shared<siconos::algebra::blocks::Vector>();
 
   V1->push_back(*q1);
   V1->push_back(*q2);

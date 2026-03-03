@@ -64,12 +64,9 @@ void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter)
         "between e vector and the dimension of the interaction.");
 }
 
-void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter,
-                                                           unsigned int derivativeNumber) {
-  DEBUG_BEGIN(
-      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, "
-      "Interaction& inter, "
-      "unsigned int derivativeNumber)\n");
+void siconos::modeling::LagrangianLinearTIR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
+  DEBUG_BEGIN("siconos::modeling::LagrangianLinearTIR::computeOutput()\n");
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -82,18 +79,12 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
     if (eVector_view_) y += *eVector_view_;
   }
 
-  DEBUG_END(
-      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, "
-      "Interaction& inter, "
-      "unsigned int derivativeNumber)\n");
+  DEBUG_END("siconos::modeling::LagrangianLinearTIR::computeOutput()\n");
 }
 
 void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& inter,
-                                                          unsigned int level) {
-  DEBUG_BEGIN(
-      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
-      "Interaction& "
-      "inter, unsigned int level)\n")
+                                                          siconos::algebra::blocks::size_type level) {
+  DEBUG_BEGIN("void siconos::modeling::LagrangianLinearTIR::computeInput()\n")
   // get lambda of the concerned interaction
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -107,10 +98,7 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
       lambda, *jacobianhOver_q_view_,
       *ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + level], false);
 
-  DEBUG_END(
-      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
-      "Interaction& "
-      "inter, unsigned int level)\n")
+  DEBUG_END("void siconos::modeling::LagrangianLinearTIR::computeInput()\n")
 }
 
 void siconos::modeling::LagrangianLinearTIR::display() const {

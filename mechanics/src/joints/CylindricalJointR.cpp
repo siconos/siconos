@@ -629,7 +629,7 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
 void siconos::joints::CylindricalJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   if (axis > 1) return;
 
   double X1 = q1(0);
@@ -751,7 +751,7 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
   if (axis > 1) return;
 
   double X1 = q1(0);

@@ -42,7 +42,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(
 
   // Computes the size of the stress tensor
   size_t dimStressInElem = (dim == 2) ? 3 : 6;  // Works also for Beam cases
-  dimStress_ = dimStressInElem * nElements;
+  dimStress_ = siconos::algebra::to_index(dimStressInElem * nElements);
 
   x_size_ = ndof_ + dimStress_;
   // aka the true unknowns are v and sigma
@@ -83,7 +83,8 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(
 }
 
 // --- Functions for memory handling ---
-void siconos::mechanics::fem::SolidLinearTIDS::initMemory(unsigned int steps) {
+void siconos::mechanics::fem::SolidLinearTIDS::initMemory(
+    siconos::algebra::blocks::size_type steps) {
   LagrangianSparseDS::initMemory(steps);
   stressMemory_.setMemorySize(steps, dimStress_);
   // plasticDeformationMemory_.setMemorySize(steps, dimStress_);

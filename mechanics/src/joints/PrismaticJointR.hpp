@@ -176,7 +176,7 @@ class PrismaticJointR : public NewtonEulerJointR {
   siconos::algebra::Index numberOfDoF() const override { return 2; }
 
   /** \return the type of the degree of freedom (DoF) */
-  DofType typeOfDoF(unsigned int axis) const override {
+  DofType typeOfDoF(siconos::algebra::Index axis) const override {
     if (axis == 0)
       return DofType::LINEAR;
     else
@@ -187,14 +187,16 @@ class PrismaticJointR : public NewtonEulerJointR {
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
+      Eigen::Ref<siconos::algebra::SiconosVector> y,
+      siconos::algebra::Index axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis = 0) override;
+      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      siconos::algebra::Index axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
   }

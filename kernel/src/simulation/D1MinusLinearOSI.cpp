@@ -41,7 +41,7 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
     siconos::nonsmooth_formulations::OneStepNSProblem* p,
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionProperties& interProp)
-    : _osnsp(p), _inter(inter), _interProp(interProp) {};
+    : _osnsp(p), _inter(inter), _interProp(interProp){};
 
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL& nslaw) {
@@ -129,7 +129,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
         "or NewtonEuler dynamical systems.");
   }
 
-  for (unsigned int k = _levelMinForInput; k < _levelMaxForInput + 1; k++) {
+  for (siconos::algebra::blocks::size_type k = _levelMinForInput; k < _levelMaxForInput + 1;
+       k++) {
     ds->initializeNonSmoothInput(k);
   }
 }
@@ -179,7 +180,8 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
 
   if (!isOSNSPinitialized) {
     THROW_EXCEPTION(
-        "siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() - not implemented for type of "
+        "siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() - not "
+        "implemented for type of "
         "D1MinusLinearOSI: " +
         siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   }
@@ -199,9 +201,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
   DEBUG_PRINTF("interaction number %i\n", inter.number());
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-            siconos::integrators::D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
   }
   if (!interProp.workBlockVectors) {
     interProp.workBlockVectors =
@@ -499,7 +500,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
 }
 
 bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {
@@ -518,7 +520,8 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {

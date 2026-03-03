@@ -350,7 +350,7 @@ void siconos::joints::CouplerJointR::computeH_NE_(double time,
 void siconos::joints::CouplerJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   // The DoF of the constraint is the same as the constraint itself
   assert(axis == 0);
   computeh(q1, q2, y);
@@ -360,7 +360,7 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
   // The Jacobian of the DoF of the constraint is the same as the
   // Jacobian of the constraint itself. (Same as computeJacobianhOver_q(), but
   // don't store result in member object.)

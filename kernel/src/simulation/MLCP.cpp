@@ -114,9 +114,6 @@ void siconos::nonsmooth_formulations::MLCP::computeOptions(
 
 bool siconos::nonsmooth_formulations::MLCP::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number = static_cast<float>(siconos::types::type_value(nslaw));
-  _nslawtype.insert(type_number);
-
   if (not(siconos::types::type_value(nslaw) ==
               siconos::modeling::Type::MixedComplementarityConditionNSL ||
           siconos::types::type_value(nslaw) ==

@@ -34,6 +34,7 @@
 #include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
+#include "SimulationGraphs.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
 #include "TypeName.hpp"  // for siconos::types visitors
@@ -811,7 +812,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
 
 bool siconos::integrators::D1MinusLinearOSI::
     addInteractionInIndexSetHalfExplicitAccelerationLevel(
-        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+        std::shared_ptr<siconos::modeling::Interaction> inter,
+        siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "addInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
@@ -864,7 +866,8 @@ bool siconos::integrators::D1MinusLinearOSI::
 
 bool siconos::integrators::D1MinusLinearOSI::
     removeInteractionFromIndexSetHalfExplicitAccelerationLevel(
-        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+        std::shared_ptr<siconos::modeling::Interaction> inter,
+        siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "removeInteractionFromIndexSetHalfExplicitAccelerationLevel.\n");

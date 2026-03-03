@@ -99,7 +99,7 @@ class FixedJointR : public NewtonEulerJointR {
 
   virtual siconos::algebra::Index numberOfDoF() const override { return 0; }
 
-  virtual DofType typeOfDoF(unsigned int axis) const override { return DofType::INVALID; }
+  virtual DofType typeOfDoF(siconos::algebra::Index axis) const override { return DofType::INVALID; }
 
  protected:
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12,

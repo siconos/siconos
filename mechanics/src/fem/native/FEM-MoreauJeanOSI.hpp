@@ -139,8 +139,9 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    *  @param i level of the IndexSet
    *  @return Boolean
    */
-  virtual bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                        unsigned int i) override;
+  virtual bool addInteractionInIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i) override;
 };
 
 }  // namespace siconos::mechanics::fem::integrators

@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <tuple>
@@ -59,6 +60,7 @@ siconos::mechanics::fem::Mesh::Mesh(
       vertices_{vertices},
       elements_{elements},
       physical_entities_{physical_entities} {
+  assert(dim > 0);
   // Construction of the reverse map : node -> element
   for (auto elem : elements_) {
     for (auto vertex : elem->vertices()) {

@@ -32,9 +32,6 @@ siconos::nonsmooth_formulations::Equality::Equality(std::shared_ptr<SolverOption
 
 bool siconos::nonsmooth_formulations::Equality::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number = (float)(siconos::types::type_value(nslaw));
-  _nslawtype.insert(type_number);
-
   if (not(siconos::types::type_value(nslaw) ==
           siconos::modeling::Type::EqualityConditionNSL)) {
     THROW_EXCEPTION(

@@ -80,10 +80,6 @@ std::shared_ptr<GlobalRollingFrictionContactProblem> siconos::nonsmooth_formulat
 
 bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  auto type_number =
-      static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
-  _nslawtype.insert(type_number);
-
   if (siconos::types::type_value(nslaw) !=
       siconos::modeling::Type::NewtonImpactRollingFrictionNSL) {
     THROW_EXCEPTION(
@@ -92,6 +88,9 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::checkCompati
                       Compatible siconos::modeling::NonSmoothLaw is NewtonImpactRollingFrictionNSL (3D) \n");
     return false;
   }
+  NSLTypeKey nsltype{siconos::types::type_value(nslaw), nslaw.size()};
+  _nslawtype.insert(nsltype);
+
   if (_nslawtype.size() > 1) {
     THROW_EXCEPTION(
         "\nFrictionContact::checkCompatibleNSLaw -  \n\

@@ -117,7 +117,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
   }
 

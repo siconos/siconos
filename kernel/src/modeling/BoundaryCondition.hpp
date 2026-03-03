@@ -82,9 +82,10 @@ class BoundaryCondition {
    */
   BoundaryCondition(Indices newVelocityIndices)
       : velocityIndices_{std::move(newVelocityIndices)},
-        prescribedVelocity_{siconos::algebra::SiconosVector::Zero(velocityIndices_.size())},
-        prescribedVelocityOld_{
-            siconos::algebra::SiconosVector::Zero(velocityIndices_.size())} {};
+        prescribedVelocity_{siconos::algebra::SiconosVector::Zero(
+            siconos::algebra::to_index(velocityIndices_.size()))},
+        prescribedVelocityOld_{siconos::algebra::SiconosVector::Zero(
+            siconos::algebra::to_index(velocityIndices_.size()))} {};
   // Notice the std::move in constructor  + pass by value
   // BoundaryCondition{BoundaryCondition::Indices{v1, v2,...}}
   //  --> rvalue + move : only one memory print

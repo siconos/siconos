@@ -142,14 +142,14 @@ void siconos::modeling::FirstOrderType1R::computeJacobiangOver_lambda(
 }
 
 void siconos::modeling::FirstOrderType1R::computeOutput(double time, Interaction& inter,
-                                                        unsigned int level) {
+                                                        siconos::algebra::blocks::size_type level) {
   siconos::algebra::SiconosVector& y = *inter.y(0);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   computeh_(*ds_vars[FirstOrderR::Xxx], y);
 }
 
 void siconos::modeling::FirstOrderType1R::computeInput(double time, Interaction& inter,
-                                                       unsigned int level) {
+                                                       siconos::algebra::blocks::size_type level) {
   auto lambda = inter.lambda(level);
 
   const auto& ds_vars = inter.read_dynamical_systems_variables();

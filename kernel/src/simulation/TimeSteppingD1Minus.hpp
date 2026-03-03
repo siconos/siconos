@@ -24,6 +24,7 @@
 #define TIMESTEPPINGD1MINUS_H
 
 #include "Simulation.hpp"
+#include "Topology.hpp"
 
 namespace siconos::simulation {
 
@@ -61,7 +62,7 @@ class TimeSteppingD1Minus : public Simulation {
    *  1 : ACTIVE interactions for IMPACTS
    *  2 : ACTIVE interactions for CONTACTS
    */
-  void updateIndexSet(unsigned int i) override;
+  void updateIndexSet(siconos::simulation::Topology::size_type i) override;
 
   /** run the simulation, from t0 to T */
   void run() override;

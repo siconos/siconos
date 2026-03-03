@@ -401,7 +401,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *
    *  \param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override {};
+  void updateState(const unsigned int level) override{};
 
   /** compute the current iteration
    *

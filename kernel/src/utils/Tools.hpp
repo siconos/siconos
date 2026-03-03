@@ -23,12 +23,10 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-// #include <algorithm>
 #include <iostream>
-// #include <iterator>
+#include <limits>
 #include <ranges>
 #include <sstream>
-// #include <string>
 
 namespace siconos::tools {
 

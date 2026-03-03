@@ -80,9 +80,9 @@ class NonSmoothDynamicalSystem {
 
     Change(Change&&) = default;  // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
-        : typeOfChange(t), ds(dsnew) {};
-    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew) {};
-    Change(ChangeType t) : typeOfChange(t) {};
+        : typeOfChange(t), ds(dsnew){};
+    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};
+    Change(ChangeType t) : typeOfChange(t){};
     void display() const;
   };
 
@@ -282,7 +282,7 @@ class NonSmoothDynamicalSystem {
    *  \param nb the identifier of the DynamicalSystem to get
    *  \return a pointer on DynamicalSystem
    */
-  std::shared_ptr<siconos::modeling::DynamicalSystem> dynamicalSystem(unsigned int nb) const;
+  std::shared_ptr<siconos::modeling::DynamicalSystem> dynamicalSystem(size_t nb) const;
 
   void displayDynamicalSystems() const;
 
@@ -294,11 +294,10 @@ class NonSmoothDynamicalSystem {
 
   // === Interactions management ===
 
-  /** get the number of Interactions present in the NSDS.
+  /** \return the number of Interactions present in the NSDS.
    *
-   *  \return an unsigned int
    */
-  size_t getNumberOfInteractions() const;
+  siconos::graphs::InteractionsGraph::size_type getNumberOfInteractions() const;
 
   /** return the graph of  Interactions present in the NSDS.
    *
@@ -318,7 +317,7 @@ class NonSmoothDynamicalSystem {
    *  \param nb the identifier of the Interaction to get
    *  \return a pointer to an Interaction
    */
-  std::shared_ptr<siconos::modeling::Interaction> interaction(unsigned int nb) const;
+  std::shared_ptr<siconos::modeling::Interaction> interaction(size_t nb) const;
 
   /** get all the interactions declared in the NonSmoothDynamicalSystem.
    *  into a std::vector<std::shared_ptr<Interaction>>
@@ -407,7 +406,7 @@ class NonSmoothDynamicalSystem {
    *
    *  \param level the level to will be zeroed
    */
-  void resetNonSmoothPart(unsigned int level);
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level);
 
   /** save DynamicalSystems and Interactions states in Memories
    */
@@ -429,14 +428,14 @@ class NonSmoothDynamicalSystem {
    *  \param time
    *  \param level lambda level
    */
-  void updateInput(double time, unsigned int level);
+  void updateInput(double time, siconos::algebra::blocks::size_type level);
 
   /** compute output for all the interactions for a given level
    *
    *  \param time
    *  \param level y order to be computed
    */
-  void updateOutput(double time, unsigned int level = 0);
+  void updateOutput(double time, siconos::algebra::blocks::size_type level = 0);
 
   /** compute output for all the interactions and for a level range
    *
@@ -444,7 +443,8 @@ class NonSmoothDynamicalSystem {
    *  \param level_min y min order to be computed
    *  \param level_max y max order to be computed
    */
-  void updateOutput(double time, unsigned int level_min, unsigned int level_max);
+  void updateOutput(double time, siconos::algebra::blocks::size_type level_min,
+                    siconos::algebra::blocks::size_type level_max);
 
   /** compute Jacobians for all the interactions (in indexSet0)
    *

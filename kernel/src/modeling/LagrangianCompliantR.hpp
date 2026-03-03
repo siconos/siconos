@@ -147,14 +147,14 @@ class LagrangianCompliantR : public LagrangianR {
    *  \param derivativeNumber the number of the derivative to compute, optional, default = 0.
    */
   void computeOutput(double time, Interaction &inter,
-                     unsigned int derivativeNumber = 0) override;
+                     siconos::algebra::blocks::size_type derivativeNumber = 0) override;
   /** to compute the input
    *
    *  \param time the current time
    *  \param inter the Interaction owning lambda
    *  \param level "derivative" order of lambda used to compute input
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter, siconos::algebra::blocks::size_type level = 0) override;
 
   /** compute all the H Jacobian */
   void computeJach(double time, Interaction &inter) override;

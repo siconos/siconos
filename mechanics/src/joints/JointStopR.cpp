@@ -36,10 +36,10 @@
  * single stop, either positive or negative. For use with
  * NewtonImpactNSL. */
 siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos,
-                                        bool dir, unsigned int axis)
+                                        bool dir, siconos::algebra::Index axis)
     : NewtonEulerR{},
       _joint(joint),
-      _axis(std::make_shared<std::vector<unsigned int>>()),
+      _axis(std::make_shared<std::vector<siconos::algebra::Index>>()),
       _pos(std::make_shared<siconos::algebra::SiconosVector>(1)),
       _dir(std::make_shared<siconos::algebra::SiconosVector>(1)) {
   _axis->push_back(axis);
@@ -47,8 +47,7 @@ siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint
   (*_dir)(0) = dir ? -1 : 1;
   _axisMin = axis;
   _axisMax = axis;
-  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
-         _joint->numberOfDoF());
+  assert(siconos::algebra::to_index(_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint stop, e.g. the cone stop on
@@ -57,7 +56,7 @@ siconos::joints::JointStopR::JointStopR(
     std::shared_ptr<NewtonEulerJointR> joint,
     const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
     const Eigen::Ref<const siconos::algebra::SiconosVector>& dir,
-    std::shared_ptr<std::vector<unsigned int>> axes)
+    std::shared_ptr<std::vector<siconos::algebra::Index>> axes)
     : NewtonEulerR{}, _joint(joint), _axis(axes) {
   _axisMin = 100;
   _axisMax = 0;
@@ -65,22 +64,21 @@ siconos::joints::JointStopR::JointStopR(
   _pos = std::make_shared<siconos::algebra::SiconosVector>(pos);
   _dir = std::make_shared<siconos::algebra::SiconosVector>(dir);
 
-  for (unsigned int i = 0; i < _axis->size(); i++) {
+  for (size_t i = 0; i < _axis->size(); i++) {
     if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
     if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
   }
-  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
-         _joint->numberOfDoF());
+  assert(siconos::algebra::to_index(_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 #if 0  // Disabled, see JointStopR.hpp.  Use multiple JointStopR instead.
 /** Initialize a joint stop for a common case: a single axis with a
  * double stop, one positive and one negative. */
 siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos, double neg,
-                       unsigned int axis)
+                       siconos::algebra::Index axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std::make_shared< std::vector<unsigned int> >())
+  , _axis(std::make_shared< std::vector<siconos::algebra::Index> >())
   , _pos(std::make_shared<siconos::algebra::SiconosVector>(2))
   , _dir(std::make_shared<siconos::algebra::SiconosVector>(2))
 {
@@ -123,14 +121,15 @@ void siconos::joints::JointStopR::computeh(
 
   // Copy and scale each stop for its axis/position/direction
   for (siconos::algebra::Index i = 0; i < y.size(); i++) {
-    y(i) = (tmp_y((*_axis)[i]) - (*_pos)(i)) * (*_dir)(i);
+    y(i) =
+        (tmp_y((*_axis)[siconos::algebra::to_unsigned<size_t>(i)]) - (*_pos)(i)) * (*_dir)(i);
   }
 }
 
 void siconos::joints::JointStopR::computeH_NE_(double time,
                                                siconos::modeling::Interaction& inter,
                                                const siconos::algebra::BlockVector& q0) {
-  auto n = static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1);
+  auto n = siconos::algebra::to_index(_axisMax - _axisMin + 1);
 
   if (!jacobianhOver_q_Tmp ||
       !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
@@ -149,16 +148,23 @@ void siconos::joints::JointStopR::computeH_NE_(double time,
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
   for (siconos::algebra::Index i = 0; i < H_NE_view_->rows(); i++)
     for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++)
-      H_NE_view_->setValue(i, j,
-                           (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (*_dir)(i));
+      H_NE_view_->setValue(
+          i, j,
+          (*jacobianhOver_q_Tmp)((*_axis)[siconos::algebra::to_unsigned<size_t>(i)] - _axisMin,
+                                 j) *
+              (*_dir)(i));
 }
 
 std::size_t siconos::joints::JointStopR::numberOfConstraints() const { return _axis->size(); }
 
-auto siconos::joints::JointStopR::axis(unsigned int _index) { return _axis->at(_index); }
+auto siconos::joints::JointStopR::axis(size_t _index) { return _axis->at(_index); }
 
-double siconos::joints::JointStopR::position(unsigned int _index) { return (*_pos)(_index); }
+double siconos::joints::JointStopR::position(siconos::algebra::Index _index) {
+  return (*_pos)(_index);
+}
 
-double siconos::joints::JointStopR::direction(unsigned int _index) { return (*_dir)(_index); }
+double siconos::joints::JointStopR::direction(siconos::algebra::Index _index) {
+  return (*_dir)(_index);
+}
 
 auto siconos::joints::JointStopR::numberOfAxes() { return _axis->size(); }

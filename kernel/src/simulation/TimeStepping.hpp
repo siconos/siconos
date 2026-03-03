@@ -22,6 +22,7 @@
 #define TimeStepping_H
 
 #include "Simulation.hpp"
+#include "Topology.hpp"
 
 namespace siconos::simulation {
 
@@ -169,7 +170,7 @@ class TimeStepping : public Simulation {
    *  \param nb number of non smooth problem
    */
   TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-               std::shared_ptr<TimeDiscretisation> td, int nb = 0);
+               std::shared_ptr<TimeDiscretisation> td, size_t nb = 0);
 
   /** insert an Integrator into the simulation list of integrators
    *
@@ -186,7 +187,7 @@ class TimeStepping : public Simulation {
    *
    *  \param i the number of the set to be updated
    */
-  void updateIndexSet(unsigned int i) override;
+  void updateIndexSet(siconos::simulation::Topology::size_type i) override;
 
   // /** Used by the updateIndexSet function in order to deactivate
   // std::shared_ptr<siconos::modeling::Interaction>.
@@ -239,7 +240,7 @@ class TimeStepping : public Simulation {
    *  to start the newton algorithm.
    */
   void initializeNewtonSolve();
-  void updateAndSwapAllOutput  ()  override;
+  void updateAndSwapAllOutput() override;
   void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 

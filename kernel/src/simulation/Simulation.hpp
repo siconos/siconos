@@ -280,7 +280,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       \param i number of the required index set
       \return a graph of interactions
    */
-  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet(unsigned int i);
+  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet(
+      siconos::simulation::Topology::size_type i);
 
   /** get allNSProblems
    *
@@ -300,7 +301,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
      \param id number of the required osnspb
      \return a pointer to OneStepNSProblem
   */
-  std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> oneStepNSProblem(int id);
+  std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> oneStepNSProblem(
+      std::size_t id);
 
   /**
       add a OneStepNSProblem in the Simulation
@@ -312,7 +314,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   virtual void insertNonSmoothProblem(
       std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns,
-      int Id = SICONOS_OSNSP_DEFAULT);
+      std::size_t Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the NonSmoothDynamicalSystem
    *
@@ -356,9 +358,9 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline bool getPrintStat() const { return _printStat; };
 
-  virtual void computeInitialStateOfTheStep() {};
+  virtual void computeInitialStateOfTheStep(){};
 
-  virtual void updateAndSwapAllOutput() {};
+  virtual void updateAndSwapAllOutput(){};
 
   /**
       update all index sets of the topology, using current y and lambda values of Interactions
@@ -370,7 +372,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
       \param level the number of the set to be updated
    */
-  virtual void updateIndexSet(unsigned int level) = 0;
+  virtual void updateIndexSet(siconos::simulation::Topology::size_type level) = 0;
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
       siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
@@ -399,7 +401,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *  \param nb the id of the siconos::nonsmooth_formulations::OneStepNSProblem to be computed
    *  \return information about the solver convergence.
    */
-  int computeOneStepNSProblem(int nb);
+  int computeOneStepNSProblem(std::size_t nb);
 
   /** update the plugins of the DS
    *
@@ -420,7 +422,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   virtual void updateState(unsigned int level = 0);
 
- /** update state of each dynamical system
+  /** update state of each dynamical system
    */
   virtual void computeIteration();
 
@@ -505,7 +507,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       \param level lambda min order to be computed
       \param coor the coordinate of interest
   */
-  siconos::algebra::SiconosVector lambda_input(unsigned int level, unsigned int coor) const;
+  siconos::algebra::SiconosVector lambda_input(unsigned int level,
+                                               siconos::algebra::Index coor) const;
 
   /**
       \return  a vector which contains all output  y[level](coor) for all interactions of a
@@ -514,7 +517,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       \param level y min order to be computed
       \param coor the coordinate of interest
   */
-  siconos::algebra::SiconosVector y_output(unsigned int level, unsigned int coor);
+  siconos::algebra::SiconosVector y_output(unsigned int level, siconos::algebra::Index coor);
 
   /** call eventsManager processEvents.
    */

@@ -49,7 +49,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
    *
    *  \param size size of the ns law
    */
-  NewtonImpactFrictionNSL(siconos::algebra::Index size) : NonSmoothLaw(size) {};
+  NewtonImpactFrictionNSL(siconos::algebra::Index size) : NonSmoothLaw(size){};
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
    *
@@ -59,7 +59,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
    *  \param size size of the ns law
    */
   NewtonImpactFrictionNSL(double en, double et, double mu, siconos::algebra::Index size)
-      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu) {};
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
 
   /** Destructor */
   ~NewtonImpactFrictionNSL() noexcept = default;

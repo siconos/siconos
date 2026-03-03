@@ -38,11 +38,11 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
 
   std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
 
-  std::shared_ptr<std::vector<unsigned int>> _axis{nullptr};
+  std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> _pos{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> _dir{nullptr};
 
-  unsigned int _axisMin{0}, _axisMax{0};
+  siconos::algebra::Index _axisMin{0}, _axisMax{0};
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
   /** compute the jacobian of h w.r.t. q
@@ -59,14 +59,14 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
    *  single stop, either positive or negative. For use with
    *  NewtonImpactNSL. */
   JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos, bool dir,
-             unsigned int axis = 0);
+             siconos::algebra::Index axis = 0);
 
   /** Initialize a multidimensional joint stop, e.g. the cone stop on
    *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
   JointStopR(std::shared_ptr<NewtonEulerJointR> joint,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& dir,
-             std::shared_ptr<std::vector<unsigned int>> axes);
+             std::shared_ptr<std::vector<siconos::algebra::Index>> axes);
 
 #if 0
   /* The following constructor is disabled for now.  In fact
@@ -79,7 +79,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   /** Initialize a joint stop for a common case: a single axis with a
    * double stop, one positive and one negative. */
   JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos, double neg,
-             unsigned int axis=0);
+             siconos::algebra::Index axis=0);
 #endif
   /** destructor */
   virtual ~JointStopR() noexcept = default;
@@ -101,13 +101,13 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   virtual std::size_t numberOfConstraints() const;
 
   /** Return the joint axis number assigned to a stop index. */
-  auto axis(unsigned int _index);
+  auto axis(size_t _index);
 
   /** Return the joint position assigned to a stop index. */
-  double position(unsigned int _index);
+  double position(siconos::algebra::Index _index);
 
   /** Return the direction (1 or -1) assigned to a stop index. */
-  double direction(unsigned int _index);
+  double direction(siconos::algebra::Index _index);
 
   /** Return the joint assigned to this joint stop relation. */
   std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }

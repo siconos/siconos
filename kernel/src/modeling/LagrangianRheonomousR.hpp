@@ -146,7 +146,7 @@ class LagrangianRheonomousR : public LagrangianR {
    *  default = 0.
    */
   void computeOutput(double time, Interaction &inter,
-                     unsigned int derivativeNumber = 0) override;
+                     siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** to compute p
    *
@@ -154,7 +154,8 @@ class LagrangianRheonomousR : public LagrangianR {
    *  \param inter the Interaction
    *  \param level "derivative" order of lambda used to compute input
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter,
+                    siconos::algebra::blocks::size_type level = 0) override;
 };
 }  // namespace siconos::modeling
 #endif

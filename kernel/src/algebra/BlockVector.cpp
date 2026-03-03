@@ -82,7 +82,7 @@ void siconos::algebra::BlockVector::setConstant(double value) {
 
 void siconos::algebra::BlockVector::fill(std::size_t size_of_data, const double* data) {
   assert(data && "BlockVector::fill: input data pointer is null");
-  assert(static_cast<siconos::algebra::Index>(size_of_data) == totalSize_ &&
+  assert(siconos::algebra::to_index(size_of_data) == totalSize_ &&
          "total size of data does not match expected BlockVector size");
   // Warning: we do not check data and assumes it is properly allocated
   Index offset = 0;

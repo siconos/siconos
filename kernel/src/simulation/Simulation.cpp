@@ -33,6 +33,7 @@
 //  #define DEBUG_NOCOLOR
 //  #define DEBUG_STDOUT
 //  #define DEBUG_MESSAGES
+#include "Topology.hpp"
 #include "siconos_debug.h"
 
 siconos::simulation::Simulation::Simulation(
@@ -103,12 +104,12 @@ void siconos::simulation::Simulation::associate(
 }
 
 std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Simulation::indexSet(
-    unsigned int i) {
+    siconos::simulation::Topology::size_type i) {
   return _nsds->topology()->indexSet(i);
 }
 
 std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
-siconos::simulation::Simulation::oneStepNSProblem(int Id) {
+siconos::simulation::Simulation::oneStepNSProblem(std::size_t Id) {
   if (!(*_allNSProblems)[Id])
     THROW_EXCEPTION(
         "Simulation - oneStepNSProblem(Id) - The One Step NS Problem is not in "
@@ -139,8 +140,8 @@ void siconos::simulation::Simulation::updateDSPlugins(double time) {
 }
 
 void siconos::simulation::Simulation::insertNonSmoothProblem(
-    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns, int Id) {
-  if (_allNSProblems->size() > (unsigned int)Id) {
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns, std::size_t Id) {
+  if (_allNSProblems->size() > Id) {
     if ((*_allNSProblems)[Id])
       THROW_EXCEPTION(
           "Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP "
@@ -343,7 +344,8 @@ void siconos::simulation::Simulation::initializeIndexSets() {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
       DEBUG_PRINT("osi->initialize\n")
       osi->initialize();
-      _numberOfIndexSets = std::max<int>(osi->numberOfIndexSets(), _numberOfIndexSets);
+      _numberOfIndexSets =
+          std::max<unsigned int>(osi->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
 
@@ -498,7 +500,7 @@ void siconos::simulation::Simulation::initializeInteraction(
   }
 }
 
-int siconos::simulation::Simulation::computeOneStepNSProblem(int Id) {
+int siconos::simulation::Simulation::computeOneStepNSProblem(std::size_t Id) {
   DEBUG_BEGIN("siconos::simulation::Simulation::computeOneStepNSProblem(int Id)\n");
   DEBUG_PRINTF("with Id = %i\n", Id);
 
@@ -521,8 +523,8 @@ int siconos::simulation::Simulation::computeOneStepNSProblem(int Id) {
   return info;
 }
 
-siconos::algebra::SiconosVector siconos::simulation::Simulation::y_output(unsigned int level,
-                                                                          unsigned int coor) {
+siconos::algebra::SiconosVector siconos::simulation::Simulation::y_output(
+    unsigned int level, siconos::algebra::Index coor) {
   // return output(level) (ie with y[level]) for all Interactions.
   // assert(level>=0);
 
@@ -551,7 +553,7 @@ siconos::algebra::SiconosVector siconos::simulation::Simulation::y_output(unsign
 }
 
 siconos::algebra::SiconosVector siconos::simulation::Simulation::lambda_input(
-    unsigned int level, unsigned int coor) const {
+    unsigned int level, siconos::algebra::Index coor) const {
   // return input(level) (ie with lambda[level]) for all Interactions.
   // assert(level>=0);
 

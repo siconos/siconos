@@ -31,7 +31,9 @@ siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, double h)
   mpf_init(_t0gmp);
   // Set timeStep method
   timeStep = [this](std::size_t = 0) { return default_time_step_; };
-  getTk = [this](std::size_t indx) -> double { return t0_ + default_time_step_ * indx; };
+  getTk = [this](std::size_t indx) -> double {
+    return t0_ + default_time_step_ * static_cast<double>(indx);
+  };
 }
 
 siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, std::string hstr)

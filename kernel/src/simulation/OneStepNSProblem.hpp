@@ -27,10 +27,9 @@
 
 #include "SiconosSerialization.hpp"
 #include "SimulationGraphs.hpp"
+#include "TypeName.hpp"
 
-// namespace siconos::numerics {
 struct SolverOptions;
-//}
 
 namespace siconos::simulation {
 class Simulation;
@@ -111,8 +110,21 @@ class OneStepNSProblem {
   */
   siconos::algebra::Index _maxSize = 0;
 
+  /** Internal struc used to check that one and only one "type" of nslaw is used
+  Same "type" means same class of nslaw AND same size.
+  */
+  struct NSLTypeKey {
+    siconos::modeling::Type t;
+    siconos::algebra::Index size;
+
+    // for std::set
+    bool operator<(const NSLTypeKey& other) const {
+      return std::tie(t, size) < std::tie(other.t, other.size);
+    }
+  };
+
   /* set of nslaw types */
-  std::set<float> _nslawtype = {};
+  std::set<NSLTypeKey> _nslawtype = {};
 
   /*During Newton it, this flag allows to update the numerics matrices only once if
    * necessary.*/
@@ -132,7 +144,7 @@ class OneStepNSProblem {
    *  \param options the options set
    */
   OneStepNSProblem(std::shared_ptr<SolverOptions> options)
-      : _numerics_solver_options(options) {};
+      : _numerics_solver_options(options){};
 
   /** destructor
    */

@@ -256,7 +256,7 @@ void siconos::simulation::Topology::setControlProperty(
 }
 
 std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Topology::indexSet(
-    unsigned int num) const {
+    size_type num) const {
   if (num >= _IG.size()) {
     THROW_EXCEPTION("siconos::simulation::Topology::indexSet: indexSet does not exist");
   }
@@ -298,7 +298,7 @@ siconos::simulation::Topology::link(std::shared_ptr<siconos::modeling::Interacti
   }
 
   // Compute interaction dimension (sum of involved dynamical systems sizes)
-  unsigned int sumOfDSSizes = 0;
+  siconos::algebra::Index sumOfDSSizes = 0;
   sumOfDSSizes += ds->dimension();
   if (ds2) {
     sumOfDSSizes += ds2->dimension();
@@ -323,7 +323,7 @@ void siconos::simulation::Topology::setProperties() {
   _IG[0]->update_vertices_indices();
   _IG[0]->update_edges_indices();
 
-  for (unsigned int i = 1; i < _IG.size(); ++i) {
+  for (size_type i = 1; i < _IG.size(); ++i) {
     // .. global properties may be defined here with
     // InteractionsSubGraphProperties(), see SiconosProperties.hpp
     // VertexSubProperties or EdgeSubProperties and the macros
@@ -347,10 +347,10 @@ void siconos::simulation::Topology::clear() {
 }
 
 std::shared_ptr<siconos::modeling::DynamicalSystem>
-siconos::simulation::Topology::getDynamicalSystem(unsigned int requiredNumber) const {
+siconos::simulation::Topology::getDynamicalSystem(size_t requiredNumber) const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds;
-  unsigned int currentNumber;
+  size_t currentNumber;
   for (std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi) {
     ds = _DSG[0]->bundle(*vi);
     currentNumber = ds->number();
@@ -386,7 +386,7 @@ siconos::simulation::Topology::getDynamicalSystem(std::string name) const {
   return std::shared_ptr<siconos::modeling::DynamicalSystem>();
 }
 
-unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inumber) {
+size_t siconos::simulation::Topology::numberOfInvolvedDS(size_t inumber) {
   if (inumber >= _IG.size()) {
     THROW_EXCEPTION(
         "siconos::simulation::Topology::numberOfInvolvedDS :: index number must be smaller "
@@ -396,7 +396,7 @@ unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inum
   /* on an adjoint graph a dynamical system may be on several edges */
   std::map<std::shared_ptr<siconos::modeling::DynamicalSystem>, bool> flag;
 
-  unsigned int return_value = 0;
+  size_t return_value = 0;
 
   auto indexSet = _IG[inumber];
 

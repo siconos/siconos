@@ -128,8 +128,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  - for the constraints at the position level, p_[0] stores the multiplier
    * for a constraint in position
    */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> p_ = {nullptr, nullptr,
-                                                                      nullptr};
+  siconos::algebra::blocks::SharedVector p_ = {nullptr, nullptr, nullptr};
 
   bool hasLUMass_{false};
 
@@ -153,7 +152,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param ndof number of degrees of freedom
    */
   SecondOrderDS(siconos::algebra::Index dimension, siconos::algebra::Index ndof)
-      : DynamicalSystem(dimension), ndof_(ndof) {};
+      : DynamicalSystem(dimension), ndof_(ndof){};
 
  public:
   /** destructor */
@@ -225,7 +224,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param size the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int size) override = 0;
+  void initMemory(siconos::algebra::blocks::size_type size) override = 0;
 
   /** set Boundary Conditions
    *

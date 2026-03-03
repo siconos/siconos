@@ -72,7 +72,8 @@ siconos::modeling::LagrangianDS::LagrangianDS(const siconos::algebra::SiconosVec
   p_[1]->setZero();
 }
 
-void siconos::modeling::LagrangianDS::initializeNonSmoothInput(unsigned int level) {
+void siconos::modeling::LagrangianDS::initializeNonSmoothInput(
+    siconos::algebra::blocks::size_type level) {
   if (!p_[level]) {
     p_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     p_[level]->setZero();
@@ -84,7 +85,8 @@ void siconos::modeling::LagrangianDS::resetToInitialState() {
   *(state_q_[1]) = velocity0();
 }
 
-void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsigned int level) {
+void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(
+    siconos::algebra::blocks::size_type level) {
   assert(level > 1);
   if (!state_q_[level])
     state_q_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
@@ -794,9 +796,9 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
 }
 
 // --- Functions for memory handling ---
-void siconos::modeling::LagrangianDS::initMemory(unsigned int steps) {
+void siconos::modeling::LagrangianDS::initMemory(siconos::algebra::blocks::size_type steps) {
   DEBUG_PRINTF(
-      "siconos::modeling::LagrangianDS::initMemory(unsigned int steps) with "
+      "siconos::modeling::LagrangianDS::initMemory(...) with "
       "steps = %i\n",
       steps);
   if (steps == 0)
@@ -808,7 +810,7 @@ void siconos::modeling::LagrangianDS::initMemory(unsigned int steps) {
     pMemory_.resize(3);
 
     // TODO : initMemory in graph + f(OSI/level)
-    for (unsigned int level = 0; level < 3; ++level) {
+    for (siconos::algebra::blocks::size_type level = 0; level < 3; ++level) {
       if (pMemory_[level].size() == 0) pMemory_[level].setMemorySize(steps, ndof_);
     }
 
@@ -835,7 +837,8 @@ void siconos::modeling::LagrangianDS::resetAllNonSmoothParts() {
   if (p_[2]) p_[2]->setZero();
 }
 
-void siconos::modeling::LagrangianDS::resetNonSmoothPart(unsigned int level) {
+void siconos::modeling::LagrangianDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   if (level < siconos::internal::LEVELMAX)
     if (p_[level]) p_[level]->setZero();
 }

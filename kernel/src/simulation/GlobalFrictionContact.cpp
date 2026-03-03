@@ -22,11 +22,7 @@
 #include <chrono>
 #endif
 #include "Interaction.hpp"
-// #include "LagrangianDS.hpp"
-// #include "LagrangianSparseDS.hpp"
-// #include "MohrCoulombPlasticityNSL.hpp"
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
-// #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
@@ -34,7 +30,6 @@
 #include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-// #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -125,10 +120,6 @@ siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactPro
 
 bool siconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number =
-      static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
-  _nslawtype.insert(type_number);
-
   if ((siconos::types::type_value(nslaw) !=
        siconos::modeling::Type::NewtonImpactFrictionNSL) ||
       (siconos::types::type_value(nslaw) !=
@@ -139,6 +130,10 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLa
                       Compatible siconos::modeling::NonSmoothLaw is NewtonImpactFrictionNSL (2D or 3D) \n");
     return false;
   }
+
+  NSLTypeKey nsltype{siconos::types::type_value(nslaw), nslaw.size()};
+  _nslawtype.insert(nsltype);
+
   if (_nslawtype.size() > 1) {
     THROW_EXCEPTION(
         "\nFrictionContact::checkCompatibleNSLaw -  \n\

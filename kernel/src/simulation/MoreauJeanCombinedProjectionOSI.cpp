@@ -61,7 +61,8 @@ void siconos::integrators::MoreauJeanCombinedProjectionOSI::initializeWorkVector
   //       "siconos::integrators::MoreauJeanCombinedProjectionOSI::initialize() - DS not of the
   //       " "right type");
   // }
-  for (unsigned int k = _levelMinForInput; k < _levelMaxForInput + 1; k++) {
+  for (siconos::algebra::blocks::size_type k = _levelMinForInput; k < _levelMaxForInput + 1;
+       k++) {
     ds->initializeNonSmoothInput(k);
   }
 
@@ -131,7 +132,8 @@ void siconos::integrators::MoreauJeanCombinedProjectionOSI::
 }
 
 bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1 || i == 2);
   // double h = _simulation->timeStep();
   if (i == 1)  // index set for resolution at the velocity
@@ -167,7 +169,8 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
 }
 
 bool siconos::integrators::MoreauJeanCombinedProjectionOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   assert(0);
   return (0);
 }

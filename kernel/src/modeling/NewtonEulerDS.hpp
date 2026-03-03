@@ -317,7 +317,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param level input-level to be initialized.
    */
-  void initializeNonSmoothInput(unsigned int level) override;
+  void initializeNonSmoothInput(siconos::algebra::blocks::size_type level) override;
 
   /** update right-hand side for the current state
    *
@@ -338,7 +338,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param level
    */
-  void resetNonSmoothPart(unsigned int level) override;
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level) override;
 
   /** \return a read-only view onto the wrench vector */
   inline auto wrench() const {
@@ -502,7 +502,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param steps the size of the siconos::algebra::SiconosMemory (i)
    */
-  void initMemory(unsigned int steps) override;
+  void initMemory(siconos::algebra::blocks::size_type steps) override;
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,

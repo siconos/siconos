@@ -137,7 +137,7 @@ void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
 // }
 
 void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction& inter,
-                                                           unsigned int level) {
+                                                           siconos::algebra::blocks::size_type level) {
   // We get y and lambda of the interaction (pointers)
   siconos::algebra::SiconosVector& y = *inter.y(level);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
@@ -161,7 +161,7 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
 // }
 
 void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& inter,
-                                                          unsigned int level) {
+                                                          siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")

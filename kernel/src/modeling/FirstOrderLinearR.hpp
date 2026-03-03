@@ -186,7 +186,8 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level dummy parameter, always=0
    */
-  void computeOutput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeOutput(double time, Interaction &inter,
+                     siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r
    *
@@ -194,7 +195,8 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level dummy parameter, always=0
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter,
+                    siconos::algebra::blocks::size_type level = 0) override;
 
   /** print the data to the screen
    */

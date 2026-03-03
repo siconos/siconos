@@ -106,7 +106,7 @@ struct InteractionProperties {
       0};                 /**< Absolute position of the interaction variables
                in the unknown vector in osnsp for projection*/
   bool forControl{false}; /**< true if the relation is used to add a control input to a DS */
-  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
+  std::shared_ptr<siconos::algebra::blocks::SharedVector>
       workVectors; /**< set of SiconosVector, useful to ensure contiguous memory vectors, used
                       as buffers in OneStepIntegrator classes. */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>
@@ -127,7 +127,7 @@ jacobians or other temporary matrices. */
 struct DynamicalSystemProperties {
   std::shared_ptr<siconos::algebra::SiconosMatrix> upper_block{nullptr}; /**< i,j block i<j */
   std::shared_ptr<siconos::algebra::SiconosMatrix> lower_block{nullptr}; /**< i,j block i>j */
-  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>> workVectors{
+  std::shared_ptr<siconos::algebra::blocks::SharedVector> workVectors{
       nullptr}; /**< Used for instance in Newton iteration */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Mostly for Lagrangian system.*/

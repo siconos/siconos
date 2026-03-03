@@ -465,43 +465,52 @@ MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(
   mlcp->n = problem->n; /* Equalities */
   mlcp->m = problem->m; /* Inequalities */
 
-  int m = problem->m;
-  int n = problem->n;
+  if ((size_t)problem->m > SIZE_MAX / sizeof(double)) {
+    numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+  }
+
+  if ((size_t)problem->n > SIZE_MAX / sizeof(double)) {
+    numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+  }
+
+  size_t m = (size_t)problem->m;
+  size_t n = (size_t)problem->n;
+
   mlcp->A = (double*)calloc(n * n, sizeof(double));
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < n; j++) {
       mlcp->A[i + j * n] = problem->M->matrix0[i + j * (m + n)];
     }
   }
 
   mlcp->B = (double*)calloc(m * m, sizeof(double));
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < m; j++) {
+  for (size_t i = 0; i < m; i++) {
+    for (size_t j = 0; j < m; j++) {
       mlcp->B[i + j * m] = problem->M->matrix0[i + n + (j + n) * (m + n)];
     }
   }
 
   mlcp->C = (double*)calloc(n * m, sizeof(double));
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < m; j++) {
       mlcp->C[i + j * m] = problem->M->matrix0[i + (j + n) * (m + n)];
     }
   }
 
   mlcp->D = (double*)calloc(m * n, sizeof(double));
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
+  for (size_t i = 0; i < m; i++) {
+    for (size_t j = 0; j < n; j++) {
       mlcp->D[i + j * n] = problem->M->matrix0[i + n + j * (m + n)];
     }
   }
 
   mlcp->a = (double*)calloc(n, sizeof(double));
-  for (int i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     mlcp->a[i] = problem->q[i];
   }
 
   mlcp->b = (double*)calloc(m, sizeof(double));
-  for (int i = 0; i < m; i++) {
+  for (size_t i = 0; i < m; i++) {
     mlcp->b[i] = problem->q[i + n];
   }
 

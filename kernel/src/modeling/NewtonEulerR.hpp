@@ -271,7 +271,7 @@ class NewtonEulerR : public Relation {
    *  default = 0.
    */
   virtual void computeOutput(double time, Interaction& inter,
-                             unsigned int derivativeNumber = 0) override;
+                             siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** to compute the input
    *
@@ -279,7 +279,7 @@ class NewtonEulerR : public Relation {
    *  \param inter the interaction using this relation
    *  \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
+  virtual void computeInput(double time, Interaction& inter, siconos::algebra::blocks::size_type level = 0) override;
 
   void display() const override {}
 

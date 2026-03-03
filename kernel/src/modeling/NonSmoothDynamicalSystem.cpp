@@ -136,7 +136,8 @@ void siconos::modeling::NonSmoothDynamicalSystem::setSymmetric(bool val) {
   _topology->setSymmetric(val);
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::resetNonSmoothPart(unsigned int level) {
+void siconos::modeling::NonSmoothDynamicalSystem::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   for (auto& vi : *dynamicalSystems()) {
     dynamicalSystems()->bundle(vi)->resetNonSmoothPart(level);
   }
@@ -169,9 +170,9 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateDSPlugins(double time) {
     dynamicalSystems()->bundle(vi)->updatePlugins(time);
   }
 }
-void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time,
-                                                              unsigned int level) {
-  DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+void siconos::modeling::NonSmoothDynamicalSystem::updateInput(
+    double time, siconos::algebra::blocks::size_type level) {
+  DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(...)\n");
   DEBUG_PRINTF("with level = %i\n", level);
 
   // To compute input(level) (ie with lambda[level]) for all Interactions.
@@ -191,16 +192,15 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time,
     inter->computeInput(time, level);
   }
 
-  DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
+  DEBUG_END("Nonsmoothdynamicalsystem::updateInput(...)\n");
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
-                                                               unsigned int level) {
+void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(
+    double time, siconos::algebra::blocks::size_type level) {
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
 
-  DEBUG_BEGIN(
-      "siconos::modeling::NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+  DEBUG_BEGIN("siconos::modeling::NonSmoothDynamicalSystem::updateOutput(...)\n");
   DEBUG_PRINTF("with level = %i\n", level);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   std::shared_ptr<siconos::modeling::Interaction> inter;
@@ -211,12 +211,15 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
     assert(inter->upperLevelForOutput() >= level);
     inter->computeOutput(time, level);
   }
-  DEBUG_END("siconos::modeling::NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+  DEBUG_END(
+      "siconos::modeling::NonSmoothDynamicalSystem::updateOutput(siconos::algebra::blocks::"
+      "size_type "
+      "level)\n");
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
-                                                               unsigned int level_min,
-                                                               unsigned int level_max) {
+void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(
+    double time, siconos::algebra::blocks::size_type level_min,
+    siconos::algebra::blocks::size_type level_max) {
   // To compute output(level) (ie with y[level]) for all Interactions in I0
   // and for a range of levels in a single pass through I0.
   //  assert(level>=0);
@@ -228,7 +231,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level_max);
     assert(inter->upperLevelForOutput() >= level_min);
-    for (unsigned int level = level_min; level <= level_max; ++level)
+    for (siconos::algebra::blocks::size_type level = level_min; level <= level_max; ++level)
       inter->computeOutput(time, level);
   }
 }
@@ -287,7 +290,7 @@ siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystems() const {
 }
 
 std::shared_ptr<siconos::modeling::DynamicalSystem>
-siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem(unsigned int nb) const {
+siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem(size_t nb) const {
   return _topology->getDynamicalSystem(nb);
 }
 
@@ -295,7 +298,8 @@ void siconos::modeling::NonSmoothDynamicalSystem::displayDynamicalSystems() cons
   _topology->displayDynamicalSystems();
 }
 
-size_t siconos::modeling::NonSmoothDynamicalSystem::getNumberOfInteractions() const {
+siconos::graphs::InteractionsGraph::size_type
+siconos::modeling::NonSmoothDynamicalSystem::getNumberOfInteractions() const {
   return _topology->indexSet0()->size();
 };
 
@@ -305,7 +309,7 @@ siconos::modeling::NonSmoothDynamicalSystem::interactions() const {
 };
 
 std::shared_ptr<siconos::modeling::Interaction>
-siconos::modeling::NonSmoothDynamicalSystem::interaction(unsigned int nb) const {
+siconos::modeling::NonSmoothDynamicalSystem::interaction(size_t nb) const {
   return _topology->getInteraction(nb);
 }
 

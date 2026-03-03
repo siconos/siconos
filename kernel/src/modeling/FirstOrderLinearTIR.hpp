@@ -126,7 +126,8 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeOutput(double time, Interaction& inter, unsigned int level = 0) override;
+  void computeOutput(double time, Interaction& inter,
+                     siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r
    *
@@ -134,7 +135,8 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction& inter,
+                    siconos::algebra::blocks::size_type level = 0) override;
 
   /** print the data to the screen
    */

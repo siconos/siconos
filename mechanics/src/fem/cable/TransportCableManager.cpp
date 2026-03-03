@@ -141,9 +141,13 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
       std::make_shared<CableCollisionManager>(cable, m_results.supports, a_tolContact);
 
   // frictions
-  int ns = m_results.supports.size();
-  for (int i = 0; i < ns; i++) {
-    if (i == m_results.topPulleyId || i == m_results.downPulleyId) {
+  auto ns = m_results.supports.size();
+  assert(std::in_range<size_t>(m_results.topPulleyId));
+  assert(std::in_range<size_t>(m_results.downPulleyId));
+  auto topId = static_cast<size_t>(m_results.topPulleyId);
+  auto downId = static_cast<size_t>(m_results.downPulleyId);
+  for (size_t i = 0; i < ns; i++) {
+    if (i == topId || i == downId) {
       m_results.supports[i]->InitFriction(a_mup);
     } else {
       m_results.supports[i]->InitFriction(a_mus);
@@ -213,7 +217,7 @@ void siconos::fem::cable::TransportCableManager::compute_mass(double a_length, d
     m_results.mass->insert(i, i + 3) = k;
     m_results.mass->insert(i + 3, i) = k;
   }
-  for (size_t i = 0; i < 3; i++) {
+  for (siconos::algebra::SparseIndex i = 0; i < 3; i++) {
     m_results.mass->insert(i + ndof - 3, i + ndof - 3) = 4 * k;
     m_results.mass->insert(i, i + ndof - 3) = k;
     m_results.mass->insert(i + ndof - 3, i) = k;

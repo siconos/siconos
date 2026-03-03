@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "OneStepIntegrator.hpp"
 
 #include "DynamicalSystem.hpp"
@@ -27,14 +26,14 @@
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 
-std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
+std::shared_ptr<siconos::algebra::blocks::SharedVector>
 siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv =
       _dynamicalSystemsGraph->descriptor(ds);
 
   // Create new work buffers, store in the graph
-  auto wv = std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>();
+  auto wv = std::make_shared<siconos::algebra::blocks::SharedVector>();
   auto wm = std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>>();
   _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
   _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
@@ -148,7 +147,8 @@ void siconos::integrators::OneStepIntegrator::resetAllNonSmoothParts() {
   }
 }
 
-void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int level) {
+void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -258,14 +258,16 @@ double siconos::integrators::OneStepIntegrator::computeResiduInput(
 }
 
 bool siconos::integrators::OneStepIntegrator::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   THROW_EXCEPTION(
       "OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
   return 0;
 };
 
 bool siconos::integrators::OneStepIntegrator::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   THROW_EXCEPTION(
       "OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this "
       "level");

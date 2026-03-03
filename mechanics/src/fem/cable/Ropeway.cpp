@@ -81,7 +81,8 @@ void siconos::fem::cable::Ropeway::addSupport(
     a_supports.back()->prepare(a_rope);
   } else if (a_pulleyIdx <
              0) {  // station case (--> PulleyWrapping), only if not already in the set
-    a_pulleyIdx = a_supports.size();
+    assert(std::in_range<int>(a_supports.size()));
+    a_pulleyIdx = static_cast<int>(a_supports.size());
     a_supports.push_back(std::make_shared<PulleyWrapping>(a_rope.start_pylon().coords()));
   }
 }

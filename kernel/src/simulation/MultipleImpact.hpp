@@ -23,6 +23,8 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
+#include "SiconosVector.hpp"
+#include "SimulationGraphs.hpp"
 
 namespace siconos::nonsmooth_formulations {
 
@@ -39,7 +41,7 @@ class MultipleImpact : public LinearOSNS {
   //! Time variable
   double _timeVariable = 0.;
   //! Number of contacts (only the active contacts)
-  unsigned int _nContact = 0;
+  siconos::algebra::Index _nContact = 0;
   //! Maximal number of steps for each computation
   unsigned int _nStepMax = 100000;
   //! Tolerance to define zero
@@ -68,7 +70,7 @@ class MultipleImpact : public LinearOSNS {
    place at this contact without potential energy (beginning of impact or
    repeating impact) if *_stateContact[i] = 2 => impact takes place with
    not-zero potential energy */
-  std::shared_ptr<std::vector<siconos::algebra::Index>> _stateContact{nullptr};
+  std::shared_ptr<siconos::algebra::IndicesVector> _stateContact{nullptr};
   //! Stiffness at contacts
   std::shared_ptr<siconos::algebra::SiconosVector> _Kcontact{nullptr};
   //! Restitution coefficient of contacts
@@ -84,7 +86,7 @@ class MultipleImpact : public LinearOSNS {
   //! Force at contacts
   std::shared_ptr<siconos::algebra::SiconosVector> _forceContact{nullptr};
   //! ID of the primary contact
-  unsigned int _primaryContactId = 0;
+  siconos::algebra::Index _primaryContactId = 0;
   /** Indicator about the selection of the primary contact
       true if primary contact is selected according to the potential energy
       false if primary contact is selected according to the relative velocity */
@@ -194,7 +196,7 @@ class MultipleImpact : public LinearOSNS {
   /** Set number of points to be saved during impact
    * \param var
    */
-  void SetSizeDataSave(unsigned int var);
+  void SetSizeDataSave(siconos::algebra::Index var) { _sizeDataSave = var; }
 
   /** Set tolerence to define whether or not a velocity is zero
    * \param var

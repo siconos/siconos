@@ -403,6 +403,7 @@ class VViewOptions(object):
             verbose : {self.verbose}"""
         print(display_str)
 
+
 class VExportOptions(VViewOptions):
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -903,7 +904,7 @@ class InputObserver:
         if self._recording:
             if self.vview.opts.advance_by_time is not None:
                 self._time += self.vview.opts.advance_by_time
-                if hasattr(self.vview, 'slwsc'):
+                if hasattr(self.vview, "slwsc"):
                     self.vview.slwsc.SetEnabled(False)  # Scale slider
                 self.vview.xslwsc.SetEnabled(False)  # Time scale slider
                 # slider_widget.SetEnabled(False) # Time slider (TODO video options)
@@ -912,7 +913,7 @@ class InputObserver:
             self.vview.image_maker.Modified()
             self.vview.recorder.Write()
             if self.vview.opts.advance_by_time is not None:
-                if hasattr(self.vview, 'slwsc'):
+                if hasattr(self.vview, "slwsc"):
                     self.vview.slwsc.SetEnabled(True)
                 self.vview.xslwsc.SetEnabled(True)
                 # slider_widget.SetEnabled(True)
@@ -1010,10 +1011,8 @@ class IOReader(VTKPythonAlgorithmBase):
 
     def InitGlyphs(self):
         self.polydata.SetPoints(self.points)
-        self.polydata.GetPointData().AddArray(
-            self.vtk_radii_data)
-        self.polydata.GetPointData().AddArray(
-            self.vtk_p0_norm_data)
+        self.polydata.GetPointData().AddArray(self.vtk_radii_data)
+        self.polydata.GetPointData().AddArray(self.vtk_p0_norm_data)
 
         self.polydata.GetPointData().SetActiveScalars("radii")
 
@@ -1026,10 +1025,11 @@ class IOReader(VTKPythonAlgorithmBase):
         if self.options.glyphs_ratio is not None:
             self.mask_points = vtk.vtkMaskPoints()
             self.mask_points.SetInputData(self.polydata)
-            self.mask_points.SetOnRatio(self.options.glyphs_ratio)  # Keep 1 out of 10 points
+            self.mask_points.SetOnRatio(
+                self.options.glyphs_ratio
+            )  # Keep 1 out of 10 points
             self.mask_points.SetRandomMode(1)  # Random sampling
             self.mask_points.Update()
-
 
         self.glyph_filter = vtk.vtkGlyph3D()
 
@@ -1071,7 +1071,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self.stream_tracer.SetInputData(self.polydata)
         self.stream_tracer.SetSourceConnection(self.seeds.GetOutputPort())
         self.stream_tracer.SetMaximumPropagation(10)
-        self.stream_tracer.SetInitialIntegrationStep(.1)
+        self.stream_tracer.SetInitialIntegrationStep(0.1)
         self.stream_tracer.SetIntegrationDirectionToForward()
         self.stream_tracer.SetIntegratorTypeToRungeKutta4()
 
@@ -1090,7 +1090,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self.stream_actor = vtk.vtkActor()
         self.stream_actor.SetMapper(self.stream_mapper)
-
 
     def RequestInformation(self, request, inInfo, outInfo):
 
@@ -1154,12 +1153,13 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName("pos_data")
 
-        self.vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data[:,0:2])
+        self.vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data[:, 0:2])
         self.vtk_velo_data.SetName("velocity")
 
         if len(self._radii_data) > 0:
             self.vtk_radii_data = dsa.numpyTovtkDataArray(
-                self._radii_data[self._id_t_m,1])
+                self._radii_data[self._id_t_m, 1]
+            )
             self.vtk_radii_data.SetName("radii")
         else:
             self.vtk_radii_data = None
@@ -1167,8 +1167,7 @@ class IOReader(VTKPythonAlgorithmBase):
         if len(self._p0s_data) > 0:
 
             self.current_p0_norm = self.p0_norm[self._id_t_m]
-            self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(
-                self.current_p0_norm)
+            self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(self.current_p0_norm)
             self.vtk_p0_norm_data.SetName("p0_norm")
         else:
             self.vtk_p0_norm_data = None
@@ -1181,24 +1180,23 @@ class IOReader(VTKPythonAlgorithmBase):
         self.polydata.SetPoints(self.points)
 
         if len(self._radii_data) > 0:
-            self.polydata.GetPointData().AddArray(
-                self.vtk_radii_data)
+            self.polydata.GetPointData().AddArray(self.vtk_radii_data)
             self.polydata.GetPointData().SetActiveScalars("radii")
 
         if len(self._p0s_data) > 0:
-            self.polydata.GetPointData().AddArray(
-                self.vtk_p0_norm_data)
+            self.polydata.GetPointData().AddArray(self.vtk_p0_norm_data)
 
             min_p0v = numpy.min(self.current_p0_norm)
             max_p0v = numpy.max(self.current_p0_norm)
 
             self.ctf.RemoveAllPoints()
 
-            for t in numpy.flip(numpy.linspace(0,0.9,3)):
-                color = 1-t
+            for t in numpy.flip(numpy.linspace(0, 0.9, 3)):
+                color = 1 - t
 
-                self.ctf.AddRGBPoint(numpy.quantile(self.current_p0_norm, t),
-                                     color, color, color)
+                self.ctf.AddRGBPoint(
+                    numpy.quantile(self.current_p0_norm, t), color, color, color
+                )
 
             self.ctf.Modified()
 
@@ -1230,7 +1228,7 @@ class IOReader(VTKPythonAlgorithmBase):
                 id_t_cf = numpy.searchsorted(self._cf_times, t, side="right")
 
                 # special treatment for the time after the last entry in cf_times
-                after_last_time_cf = (id_t_cf == ncfindices)
+                after_last_time_cf = id_t_cf == ncfindices
 
                 # Check the duration between t and last impact.
                 # If it is superior to current time step, we consider there
@@ -1247,10 +1245,12 @@ class IOReader(VTKPythonAlgorithmBase):
                             )
                         )
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
-                        #self._cf_time = self._cf_times[id_t_cf]
+                        # self._cf_time = self._cf_times[id_t_cf]
                     else:
-                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf-1] :, :]
-                        #self._cf_time = self._cf_times[id_t_cf-1]
+                        self.cf_data = self._icf_data[
+                            self._cf_indices[id_t_cf - 1] :, :
+                        ]
+                        # self._cf_time = self._cf_times[id_t_cf-1]
 
                     vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
                     vtk_cf_data.SetName("cf_data")
@@ -1375,9 +1375,10 @@ class IOReader(VTKPythonAlgorithmBase):
 
         if len(self._p0s_data) > 0:
             self.p0_norm = numpy.sqrt(
-                self._p0s_data[:,1]*self._p0s_data[:,1]+
-                self._p0s_data[:,2]*self._p0s_data[:,2]+
-                self._p0s_data[:,3]*self._p0s_data[:,3])
+                self._p0s_data[:, 1] * self._p0s_data[:, 1]
+                + self._p0s_data[:, 2] * self._p0s_data[:, 2]
+                + self._p0s_data[:, 3] * self._p0s_data[:, 3]
+            )
 
             self.global_min_p0v = numpy.min(self.p0_norm)
             self.global_max_p0v = numpy.max(self.p0_norm)
@@ -2052,21 +2053,21 @@ class VView(object):
             elif primitive == "Capsule":
                 sphere1 = vtk.vtkSphereSource()
                 sphere1.SetRadius(attrs[0])
-                sphere1.SetCenter(0, attrs[1] / 4., 0)
+                sphere1.SetCenter(0, attrs[1] / 4.0, 0)
                 sphere1.SetThetaResolution(15)
                 sphere1.SetPhiResolution(15)
                 sphere1.Update()
 
                 sphere2 = vtk.vtkSphereSource()
                 sphere2.SetRadius(attrs[0])
-                sphere2.SetCenter(0, -attrs[1] / 4., 0)
+                sphere2.SetCenter(0, -attrs[1] / 4.0, 0)
                 sphere2.SetThetaResolution(15)
                 sphere2.SetPhiResolution(15)
                 sphere2.Update()
 
                 cylinder = vtk.vtkCylinderSource()
                 cylinder.SetRadius(attrs[0])
-                cylinder.SetHeight(attrs[1]/2.)
+                cylinder.SetHeight(attrs[1] / 2.0)
                 cylinder.SetResolution(15)
                 cylinder.Update()
 
@@ -2120,7 +2121,7 @@ class VView(object):
                 source.SetYLength(attrs[1])
                 source.SetZLength(self.opts.depth_2d)
 
-            elif primitive == 'Segment':
+            elif primitive == "Segment":
                 line = vtk.vtkLineSource()
                 (x1, y1, x2, y2) = attrs
 
@@ -2129,22 +2130,22 @@ class VView(object):
 
                 source = vtk.vtkTubeFilter()
                 source.SetInputConnection(line.GetOutputPort())
-                source.SetRadius(.1)
+                source.SetRadius(0.1)
                 source.SetNumberOfSides(30)
                 source.Update()
 
-            elif primitive == 'Line':
+            elif primitive == "Line":
                 line = vtk.vtkLineSource()
                 (a, b, c) = attrs
-                a2pb2 = a*a + b*b
-                assert (a2pb2 > 0)
+                a2pb2 = a * a + b * b
+                assert a2pb2 > 0
 
-                if (b != 0):
-                    x0 = 0.
+                if b != 0:
+                    x0 = 0.0
                     y0 = -c / b
                 else:
-                    x0 =-c / a
-                    y0 = 0.
+                    x0 = -c / a
+                    y0 = 0.0
 
                 x1 = x0 - b
                 y1 = y0 + a
@@ -2230,8 +2231,7 @@ class VView(object):
             actor = None
             actor_edge = None
 
-            if (instance.attrs.get("mass", 0) > 0 and
-                not self.opts.view_as_glyphs):
+            if instance.attrs.get("mass", 0) > 0 and not self.opts.view_as_glyphs:
 
                 # objects that may move
                 actor = vtk.vtkActor()
@@ -2258,7 +2258,7 @@ class VView(object):
                     )
                     actor_edge.GetProperty().SetRepresentationToWireframe()
 
-            elif (instance.attrs.get("mass", 0) <= 0):
+            elif instance.attrs.get("mass", 0) <= 0:
                 # objects that are not supposed to move
                 actor = vtk.vtkActor()
                 if self.opts.with_edges:
@@ -2283,7 +2283,9 @@ class VView(object):
 
                 actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
                 if self.opts.with_edges:
-                    actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
+                    actor_edge.SetMapper(
+                        self.unfrozen_mappers_edges[contact_shape_indx]
+                    )
 
                 self.renderer.AddActor(actor)
                 if self.opts.with_edges:
@@ -2336,15 +2338,25 @@ class VView(object):
                 # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
                 # we propose to erase it.
                 try:
-                    if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
-                        offset_orientation = [math.cos(pi / 4.0), math.sin(pi / 4.0), 0.0, 0.0]
+                    if (
+                        self.io.shapes()[contact_shape_name].attrs["primitive"]
+                        == "Disk"
+                    ):
+                        offset_orientation = [
+                            math.cos(pi / 4.0),
+                            math.sin(pi / 4.0),
+                            0.0,
+                            0.0,
+                        ]
                 except KeyError:
                     pass
                 self.offsets[instid].append(
-                    (numpy.subtract(
-                        contactor.attrs["translation"].astype(float), center_of_mass),
-                     offset_orientation,
-                     )
+                    (
+                        numpy.subtract(
+                            contactor.attrs["translation"].astype(float), center_of_mass
+                        ),
+                        offset_orientation,
+                    )
                 )
 
                 cc = CellConnector(
@@ -3397,8 +3409,11 @@ class VView(object):
                     self.init_cf_sources(mu, transform)
 
             if not self.opts.export:
-                if (not self.opts.cf_disable and not self.opts.global_filter
-                    and not self.opts.view_as_glyphs):
+                if (
+                    not self.opts.cf_disable
+                    and not self.opts.global_filter
+                    and not self.opts.view_as_glyphs
+                ):
                     for mu in self.io_reader._mu_coefs:
                         self.renderer.AddActor(self.gactor[mu])
                         self.renderer.AddActor(self.cactor[mu])

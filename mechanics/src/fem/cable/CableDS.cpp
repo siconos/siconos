@@ -121,13 +121,13 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
   // KT
   // intforces: K
 
-  size_t nb_elem = ndof_ - 3;
+  siconos::algebra::Index nb_elem = ndof_ - 3;
   double k = EA_ / l_e_;
   siconos::algebra::SiconosVector Tq{6};
   siconos::algebra::SiconosMatrix TqqT{6, 6};
 
   // All points but the last
-  for (size_t i = 0; i < nb_elem - 3; i += 3) {
+  for (siconos::algebra::Index i = 0; i < nb_elem - 3; i += 3) {
     auto q_e = q.segment<6>(i);  // View onto memory starting at pos i in q (size = 6)
     double n_e = (q_e.tail<3>() - q_e.head<3>()).norm();
     double eps = n_e / l_e_ - 1;
@@ -143,15 +143,15 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
       TqqT.noalias() = Tq * Tq.transpose();
       double kKT = 1 / (1 + f_e);
       kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
-      for (size_t j = 0; j < 6; j++) {
-        for (size_t l = 0; l < 6; l++) {
+      for (siconos::algebra::Index j = 0; j < 6; j++) {
+        for (siconos::algebra::Index l = 0; l < 6; l++) {
           jacobianTotalForcesOver_q_->coeffRef(i + j, i + l) += kKT * TqqT(j, l);
         }
       }
     }
     jacobianTotalForcesOver_q_->makeCompressed();
-    for (size_t j = 0; j < 6; j++) {
-      for (size_t l = 0; l < 6; l++) {
+    for (siconos::algebra::Index j = 0; j < 6; j++) {
+      for (siconos::algebra::Index l = 0; l < 6; l++) {
         jacobianTotalForcesOver_q_->coeffRef(i + j, i + l) += kf * TRNp_Np->coeff(j, l);
       }
     }
@@ -180,8 +180,8 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
     TqqT.noalias() = Tq * Tq.transpose();
     double kKT = 1 / (1 + f_e);
     kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
-    for (size_t j = 0; j < 3; j++) {
-      for (size_t l = 0; l < 3; l++) {
+    for (siconos::algebra::Index j = 0; j < 3; j++) {
+      for (siconos::algebra::Index l = 0; l < 3; l++) {
         jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, nb_elem + l) +=
             kKT * TqqT(j, l) + kf * TRNp_Np->coeff(j, l);
         jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, l) +=
@@ -193,8 +193,8 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
       }
     }
   } else {
-    for (size_t j = 0; j < 3; j++) {
-      for (size_t l = 0; l < 3; l++) {
+    for (siconos::algebra::Index j = 0; j < 3; j++) {
+      for (siconos::algebra::Index l = 0; l < 3; l++) {
         jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, nb_elem + l) +=
             kf * TRNp_Np->coeff(j, l);
         jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, l) += kf * TRNp_Np->coeff(j, l + 3);

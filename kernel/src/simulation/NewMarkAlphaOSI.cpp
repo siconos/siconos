@@ -417,7 +417,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
   }
 

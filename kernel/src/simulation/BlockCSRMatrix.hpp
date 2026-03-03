@@ -106,10 +106,10 @@ class BlockCSRMatrix {
   ACCEPT_SERIALIZATION(BlockCSRMatrix);
 
   /** Number of blocks rows (first dimension of the block matrix)*/
-  unsigned int _nr{0};
+  siconos::graphs::InteractionsGraph::size_type _nr{0};
 
   /** Number of blocks columns (second dimension of the block matrix)*/
-  unsigned int _nc{0};
+  siconos::graphs::InteractionsGraph::size_type _nc{0};
 
   /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
   std::shared_ptr<CompressedRowMat> _blockCSR{nullptr};
@@ -145,7 +145,7 @@ class BlockCSRMatrix {
    *
    *  \param n number of blocks in a row/column (only square matrices allowed)
    */
-  BlockCSRMatrix(unsigned int n);
+  BlockCSRMatrix(siconos::graphs::InteractionsGraph::size_type n);
 
   /** Constructor from index set
    *
@@ -161,13 +161,13 @@ class BlockCSRMatrix {
    *
    *  \return unsigned int NumberOfBlocksInARow
    */
-  inline unsigned int numberOfBlocksInARow() const { return _nr; };
+  inline auto numberOfBlocksInARow() const { return _nr; };
 
   /** get total number of non-null blocks
    *
    *  \return unsigned int
    */
-  unsigned int getNbNonNullBlocks() const;
+  std::size_t getNbNonNullBlocks() const;
 
   /** \return the numerics-readable structure
    */

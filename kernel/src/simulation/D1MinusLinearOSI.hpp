@@ -303,7 +303,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be added or not
    */
   bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+                                siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -312,7 +312,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be removed or not
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -321,7 +321,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be added or not
    */
   virtual bool addInteractionInIndexSetHalfExplicitAccelerationLevel(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -330,7 +331,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be removed or not
    */
   virtual bool removeInteractionFromIndexSetHalfExplicitAccelerationLevel(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -339,7 +341,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be added or not
    */
   virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -348,7 +351,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return a boolean if it needs to be removed or not
    */
   virtual bool removeInteractionFromIndexSetHalfExplicitVelocityLevel(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
   void display() const override {
@@ -367,10 +371,12 @@ namespace d1_minus_linear {
 // Free functions
 
 template <typename DS>
-concept LDS = requires(DS ds) { ds.velocity(); };
+concept LDS = requires(DS ds) {
+  ds.velocity();
+};
 
 template <typename DS>
-  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
 void compute_residufree_lagrangian(double time_step, double time, DS& lagds,
                                    siconos::algebra::SiconosVector& free_tdg,
                                    siconos::algebra::SiconosVector& residufree) {

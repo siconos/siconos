@@ -306,8 +306,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::initialize(
 void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(
     const siconos::graphs::InteractionsGraph::VDescriptor& vd) {
   DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(const "
-      "siconos::graphs::InteractionsGraph::VDescriptor& vd)\n");
+      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(...)\n");
 
   // Compute diagonal block (graph property) for a given interaction.
   // - How  blocks are computed depends explicitely on the nonsmooth law, the relation and the
@@ -443,7 +442,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
 
       if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
           std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
-        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(
+            leftInteractionBlock->rows(), leftInteractionBlock->cols());
+
         // Get inverse of the iteration matrix
         auto inv_iteration_matrix = osi.iterationMatrix(ds);
         // work = HW (remind that W contains the inverse of the iteration matrix)
@@ -468,8 +469,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        if (centralInteractionBlock)  // else it means centralInteractionBlock = identity
+        if (centralInteractionBlock) {  // else it means centralInteractionBlock = identity
           *work = centralInteractionBlock->solve(*work);
+        }
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(siconos::algebra::print(*work););
         *currentInteractionBlock += *leftInteractionBlock * *work;
@@ -686,10 +688,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::"
-      "modeling::"
-      "Interaction> inter, unsigned int pos)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(...)\n");
   auto indexSet = simulation()->indexSet(indexSetLevel());
 
   auto& osi1 = *indexSet->properties(vertex_inter).osi1;
@@ -698,8 +697,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
   auto inter = indexSet->bundle(vertex_inter);
   auto sizeY = inter->nonSmoothLaw()->size();
 
-  osi1.computeFreeOutput(vertex_inter, this);
   auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
+  osi1.computeFreeOutput(vertex_inter, this);  // Update osnsp_rhs
   _q->segment(pos, sizeY) = osnsp_rhs;
 
   DEBUG_EXPR(siconos::algebra::print(*_q));
@@ -784,7 +783,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     NM_scal(theta, &*_M->numericsMatrix());
   }
 
-  DEBUG_EXPR(siconos::algebra::print(*_M););
+  DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )
   //   NM_display(M_NM);
@@ -903,7 +902,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
   // This function is used to set lambda values using output from
   // lcp_driver (w,z).  Only Interactions of indexSet(leveMin) are concerned.
-
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 

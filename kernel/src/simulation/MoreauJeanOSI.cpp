@@ -256,9 +256,8 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
   bool is_ds2_integrated_by_this_osi = use_two_ds && checkOSI(DSG.descriptor(ds2));
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-            tools::enum_to_index(wk_inter::size));
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        tools::enum_to_index(wk_inter::size));
   }
 
   if (!interProp.workBlockVectors) {
@@ -275,6 +274,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
   if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)])
     inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
+  inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)]->setZero();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with
   // the current osi.
@@ -308,6 +308,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     inter_work_block[label_xfree]->setVectorPtr(1,
                                                 workVds2[tools::enum_to_index(wk_ds::vfree)]);
   }
+  inter_work_block[label_xfree]->setZero();
 }
 
 void siconos::integrators::MoreauJeanOSI::initialize_nonsmooth_problems() {
@@ -549,7 +550,7 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
   if (sds.boundaryConditions()) {
     sds.boundaryConditions()->computePrescribedVelocity(t);
 
-    unsigned int columnindex = 0;
+    siconos::algebra::Index columnindex = 0;
     auto& IterationMatrixBoundaryConditions =
         *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions;
     auto prescribedVelocity = sds.boundaryConditions()->prescribedVelocity();
@@ -1169,11 +1170,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   /** \warning: ensures that it can also work with two different osi for two
    * different ds ?
    */
-  DEBUG_BEGIN(
-      "siconos::integrators::MoreauJeanOSI::computeFreeOutput("
-      "InteractionsGraph::VDescriptor& "
-      "vertex_inter, siconos::nonsmooth_formulations::OneStepNSProblem* "
-      "osnsp)\n");
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeFreeOutput(...)\n");
   auto allOSNS = _simulation->oneStepNSProblems();
   auto& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
@@ -1360,13 +1357,12 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto& ds = *_dynamicalSystemsGraph->bundle(*dsi);
-
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // Get the DS type
     auto dsType = siconos::types::type_value(ds);
 
-    auto& v_iter = *ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)];
+    auto v_iter = ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)];
 
     // 3 - Lagrangian Systems
     if (dsType == siconos::modeling::Type::LagrangianDS ||
@@ -1384,23 +1380,23 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
                " siconos::integrators::MoreauJeanOSI::ComputeIteration() "
                "*d.p(_levelMaxForInput) "
                "== nullptr.");
-        v_iter = d.p_read(_levelMaxForInput);  // v = p
+        *v_iter = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
           for (auto itindex : d.boundaryConditions()->velocityIndices()) {
-            v_iter(itindex) = 0.0;
+            (*v_iter)(itindex) = 0.0;
           }
         }
 
         if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
-          v_iter = vfree;
+          (*v_iter) = vfree;
           auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
-          v_iter += iterationMatrix.diagonal().cwiseProduct(v_iter);
+          (*v_iter) += iterationMatrix.diagonal().cwiseProduct(*v_iter);
         } else {
-          v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(v_iter);
-          v_iter += vfree;
+          (*v_iter) = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*v_iter);
+          (*v_iter) += vfree;
         }
       } else {
-        v_iter = vfree;
+        (*v_iter) = vfree;
       }
       DEBUG_EXPR(siconos::algebra::print(v));
 
@@ -1414,7 +1410,7 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
                   bc);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
 
-          double value = -1. * columntmp->dot(v_iter);
+          double value = -1. * columntmp->dot(*v_iter);
           if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
             value += (d.p_read(_levelMaxForInput))(itindex);
           }
@@ -1458,18 +1454,18 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
                " siconos::integrators::MoreauJeanOSI::ComputeIteration() "
                "*d.p(_levelMaxForInput) "
                "== nullptr.");
-        v_iter = d.p_read(_levelMaxForInput);  // v = p
+        *v_iter = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
           for (auto itindex : d.boundaryConditions()->velocityIndices()) {
-            (v_iter)(itindex) = 0.0;
+            (*v_iter)(itindex) = 0.0;
           }
         }
 
-        v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(v_iter);
-        v_iter += vfree;
+        *v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*v_iter);
+        *v_iter += vfree;
 
       } else {
-        v_iter = vfree;
+        *v_iter = vfree;
       }
       DEBUG_EXPR(siconos::algebra::print(v));
 
@@ -1483,7 +1479,7 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
                   bc);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
 
-          double value = -1. * columntmp->dot(v_iter);
+          double value = -1. * columntmp->dot(*v_iter);
           if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
             value += (d.p_read(_levelMaxForInput))(itindex);
           }
@@ -1534,20 +1530,19 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
       if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
         /*d.p has been fill by the Relation->computeInput, it contains
           B \lambda _{k+1}*/
-        v_iter = d.p_read(_levelMaxForInput);  // v = p
+        *v_iter = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions())
           for (auto itindex : d.boundaryConditions()->velocityIndices()) {
-            (v_iter)(itindex) = 0.;
+            (*v_iter)(itindex) = 0.;
           }
-        v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(v_iter);
+        *v_iter = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*v_iter);
 
         DEBUG_EXPR(std::cout << d.p_read(_levelMaxForInput));
         DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::ComputeIteration W CT lambda\n");
         DEBUG_EXPR(siconos::algebra::print(v));
-        v_iter += vfree;
+        *v_iter += vfree;
       } else
-        v_iter = vfree;
-
+        *v_iter = vfree;
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::ComputeIteration work free\n");
       DEBUG_EXPR(siconos::algebra::print(vfree));
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::ComputeIteration new v\n");
@@ -1585,7 +1580,8 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
 }
 
 bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction>"
       " inter, "
@@ -1679,7 +1675,8 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   return !(addInteractionInIndexSet(inter, i));
 }
 
@@ -1731,7 +1728,8 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        workForces(cnt_ds, 0) = ds->number();
+        workForces(cnt_ds, 0) =
+            static_cast<siconos::algebra::SiconosMatrix::Scalar>(ds->number());
         workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
         cnt_ds++;
         DEBUG_EXPR(siconos::algebra::print(*workForces););
@@ -1758,7 +1756,8 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
         DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
-        workForces(cnt_ds, 0) = ds->number();
+        workForces(cnt_ds, 0) =
+            static_cast<siconos::algebra::SiconosMatrix::Scalar>(ds->number());
         workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
         cnt_ds++ DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
@@ -1786,7 +1785,8 @@ siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::computeWork
       DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
       // scalar product
-      workForces(cnt_ds, 0) = ds->number();
+      workForces(cnt_ds, 0) =
+          static_cast<siconos::algebra::SiconosMatrix::Scalar>(ds->number());
       workForces(cnt_ds, 1) = h * f_k_theta.dot(v_k_theta);
 
       cnt_ds++;

@@ -51,7 +51,7 @@ private:
   void testSwap();
   void End();
 
-  std::shared_ptr<std::vector<siconos::algebra::SiconosVector>> V1, V2, V3;
+  std::shared_ptr<siconos::algebra::blocks::Vector> V1, V2, V3;
   std::shared_ptr<siconos::algebra::SiconosVector> q1, q2, q3;
   std::shared_ptr<siconos::algebra::BlockVector> c1, c2;
   unsigned int _sizeMem;

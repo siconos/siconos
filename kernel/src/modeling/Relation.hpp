@@ -109,7 +109,7 @@ class Relation {
    *  \param subtype subtype of the relation
    */
   Relation(RelationType type, RelationSubType subtype)
-      : _relationType(type), _subType(subtype) {};
+      : _relationType(type), _subType(subtype){};
 
  private:
   // Rule of five ...
@@ -154,9 +154,8 @@ class Relation {
    *  \param inter the interaction using this relation
    *  \param interProp
    */
-  virtual void computeJacg(
-      double time,
-      Interaction& inter) { /*Does nothing by default. Reimplement if required*/ };
+  virtual void computeJacg(double time, Interaction& inter){
+      /*Does nothing by default. Reimplement if required*/};
 
   /** default function to compute y
    *
@@ -166,14 +165,15 @@ class Relation {
    *  default = 0)
    */
   virtual void computeOutput(double time, Interaction& inter,
-                             unsigned int derivativeNumber = 0) = 0;
+                             siconos::algebra::blocks::size_type derivativeNumber = 0) = 0;
   /** default function to compute r
    *
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter,
+                            siconos::algebra::blocks::size_type level = 0) = 0;
 
   /** \return true if the relation is linear */
   virtual bool isLinear() const { return false; }

@@ -192,11 +192,11 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 }
 
 // void siconos::modeling::Lagrangian2d2DR::computeOutput(double time, Interaction& inter,
-// unsigned int derivativeNumber)
+// siconos::algebra::blocks::size_type derivativeNumber)
 // {
 
 //   DEBUG_PRINTF("siconos::modeling::Lagrangian2d2DR::computeOutput(double time, Interaction&
-//   inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and
+//   inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type derivativeNumber) with time = %f and
 //   derivativeNumber = %i\n", time, derivativeNumber);
 //   std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars =
 //   inter.read_dynamical_systems_variables(); siconos::algebra::SiconosVector& y =
@@ -238,10 +238,10 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //     //         + A[7]* (*v)(3) + A[9]* (*v)(4) + A[11]* (*v)(5);
 
 //     //   }
-//       // for (unsigned int i =0; i < 2; i++)
+//       // for (siconos::algebra::blocks::size_type i =0; i < 2; i++)
 //       // {
 //       //   y(i)= A[i]* (*v)(0);
-//       //   for (unsigned int j =1; j<v->size(); j++)
+//       //   for (siconos::algebra::blocks::size_type j =1; j<v->size(); j++)
 //       //   {
 //       //     y(i) += A[i+j*2] * (*v)(j);
 //       //   }
@@ -249,16 +249,16 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //     }
 //     else
 //       THROW_EXCEPTION("siconos::modeling::Lagrangian2d2DR::computeOutput(double time,
-//       Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber),
+//       Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type derivativeNumber),
 //       index out of range");
 //   }
 // }
 
-// void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int
+// void LagrangianScleronomousR::computeInput(double time, Interaction& inter, siconos::algebra::blocks::size_type
 // level)
 // {
 //   DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter,
-//   InteractionProperties& interProp, unsigned int level) \n");
+//   InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
 
 //   DEBUG_PRINTF("level = %i\n", level);
 //   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -274,15 +274,15 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //   double * A = &*jacobianhOver_q_->data();
 //   std::shared_ptr<siconos::algebra::BlockVector> v = ds_vars[tools::enum_to_index(ds_var::q1)];
 //   int v_size= v->size();
-//   for (unsigned int i =0; i < 2; i++)
+//   for (siconos::algebra::blocks::size_type i =0; i < 2; i++)
 //   {
 //     y(i)= A[i]* (*v)(0);
-//     for (unsigned int j =1; j<v->size(); j++)
+//     for (siconos::algebra::blocks::size_type j =1; j<v->size(); j++)
 //     {
 //       y(i) += A[i+j*2] * (*v)(j);
 //     }
 //   }
 
 //   DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter,
-//   InteractionProperties& interProp, unsigned int level) \n");
+//   InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
 // }

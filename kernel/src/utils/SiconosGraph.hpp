@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosGraph.hpp
   Template class to define a graph of Siconos object.
@@ -103,6 +103,7 @@ class SiconosGraph {
   using AVIterator = typename boost::graph_traits<graph_t>::adjacency_iterator;
   using EIndexAccess = typename boost::property_map<graph_t, boost::edge_index_t>::type;
   using VIndexAccess = typename boost::property_map<graph_t, boost::vertex_index_t>::type;
+  using size_type = typename boost::graph_traits<graph_t>::vertices_size_type;
 
   // Need some Base, otherwise, we have a compile error with boost >= 1.51
 

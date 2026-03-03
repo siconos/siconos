@@ -81,8 +81,9 @@ void siconos::modeling::DynamicalSystem::setX0(
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps) {
-  DEBUG_BEGIN("void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps)\n");
+void siconos::modeling::DynamicalSystem::initMemory(
+    siconos::algebra::blocks::size_type steps) {
+  DEBUG_BEGIN("void siconos::modeling::DynamicalSystem::initMemory(...)\n");
   if (steps > xMemory_.size()) {
     if (steps == 0)
       std::cout << "Warning : initMemory with size equal to zero" << std::endl;
@@ -93,5 +94,5 @@ void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps) {
   }
   DEBUG_EXPR(siconos::algebra::print(xMemory_););
 
-  DEBUG_END("void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps)\n");
+  DEBUG_END("void siconos::modeling::DynamicalSystem::initMemory(...)\n");
 }

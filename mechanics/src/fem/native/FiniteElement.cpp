@@ -30,7 +30,7 @@ siconos::mechanics::fem::FiniteElement::FiniteElement(
     std::shared_ptr<MeshElement> mesh_elem, const std::vector<std::shared_ptr<FENode>>& nodes)
     : num_{mesh_elem->num()}, type_{mesh_elem->type()}, mElement_{mesh_elem} {
   for (auto node : nodes) nodes_.push_back(node);
-  ndof_ = nodes_.size() * number_of_dof_per_node(type_);
+  ndof_ = siconos::algebra::to_index(nodes_.size() * number_of_dof_per_node(type_));
 
   switch (type_) {
     case FiniteElementType::T3:

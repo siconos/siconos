@@ -83,6 +83,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       if (!indexSet->properties(*vi).block) {
         indexSet->properties(*vi).block =
             std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
+        indexSet->properties(*vi).block->setZero();
       }
 
       if (!isLinear || !_hasBeenUpdated) {
@@ -144,9 +145,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         currentInteractionBlock->setZero();
       }
       if (!isLinear || !_hasBeenUpdated) {
-        {
-          computeInteractionBlock(*ei);
-        }
+        computeInteractionBlock(*ei);
 
         // allocation for transposed block
         // should be avoided
@@ -353,17 +352,19 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   auto osiType = osi.getType();
   // auto dsType = Type::value(*ds);
 
-  // First, we deal with the non-standard cases (when iteration matrix is not available in the
-  // graph)
+  // First, we deal with the non-standard cases (when iteration matrix is not available in
+  // the graph)
   if (osiType == siconos::integrators::IntegratorType::LSODAROSI) {
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       luIterationMatrix = lds->LUMass();
-    }  // else if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds))
+    }  // else if (auto lds =
+       // dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds))
     // {
     //   luIterationMatrix = lds->LUMass();
     else
       THROW_EXCEPTION(
-          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented for "
+          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented "
+          "for "
           "LsodarOSI "
           "only with LagrangianDS systems.");
   } else if (osiType == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
@@ -378,7 +379,8 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
       }
     } else {
       THROW_EXCEPTION(
-          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented for "
+          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented "
+          "for "
           "NewmarkAlphaOSI only with LagrangianDS systems.");
     }
   } else if (osiType == siconos::integrators::IntegratorType::D1MINUSLINEAROSI) {
@@ -419,10 +421,8 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     luIterationMatrix = osi.LUiterationMatrix(ds);
   }
   // else THROW_EXCEPTION(
-  //     "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix not yet implemented "
-  //     "for "
-  //     "Integrator of type " +
-  //     siconos::tools::enum_to_string(osiType));
+  //     "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix not yet implemented
+  //     " "for " "Integrator of type " + siconos::tools::enum_to_string(osiType));
   return luIterationMatrix;
 }
 

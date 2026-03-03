@@ -67,25 +67,25 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2d
 }
 
 std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2dMeshnxm(
-    int n, int m, double Lx, double Ly) {
-  double lx = Lx / n;
-  double ly = Ly / m;
+    size_t n, size_t m, double Lx, double Ly) {
+  double lx = Lx / static_cast<double>(n);
+  double ly = Ly / static_cast<double>(m);
 
   std::vector<std::shared_ptr<MeshVertex>> vertices;
 
   vertices.resize((n + 1) * (m + 1));
 
-  for (int i = 0; i < n + 1; i++) {
-    for (int j = 0; j < m + 1; j++) {
-      vertices[i + j * (n + 1)] =
-          std::make_shared<MeshVertex>(i + j * (n + 1), i * lx, j * ly, 0.);
+  for (size_t i = 0; i < n + 1; i++) {
+    for (size_t j = 0; j < m + 1; j++) {
+      vertices[i + j * (n + 1)] = std::make_shared<MeshVertex>(
+          i + j * (n + 1), static_cast<double>(i) * lx, static_cast<double>(j) * ly, 0.);
     }
   }
   std::vector<std::shared_ptr<MeshElement>> elements;
   // elements.resize(2*n*m);
   int element_cnt = 0;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < m; j++) {
       std::vector<std::shared_ptr<MeshVertex>> vertices_e_1 = {
           vertices[i + j * (n + 1)], vertices[i + 1 + (j) * (n + 1)],
           vertices[i + (j + 1) * (n + 1)]};
@@ -122,9 +122,10 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
   std::vector<std::shared_ptr<MeshVertex>> vertices(nb_elements + 1);
 
   for (size_t i = 0; i < nb_elements + 1; i++) {
-    vertices[i] = std::make_shared<MeshBeamVertex>(i, coords_start[0] + i * step(0),
-                                                   coords_start[1] + i * step(1),
-                                                   coords_start[2] + i * step(2), 0, 0, 0);
+    vertices[i] = std::make_shared<MeshBeamVertex>(
+        i, coords_start[0] + step(0) * static_cast<double>(i),
+        coords_start[1] + static_cast<double>(i) * step(1),
+        coords_start[2] + static_cast<double>(i) * step(2), 0, 0, 0);
   }
 
   // 2. Computes the list of mesh elements
@@ -212,7 +213,8 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         name.erase(name.end() - 1);
         name.erase(name.end() - 1);
         name.erase(name.begin());
-        int type, number;
+        int type;
+        size_t number;
         t_type >> type;
         t_number >> number;
         std::cout << type << " " << number << " name: " << name << std::endl;
@@ -287,7 +289,7 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
           std::stringstream token(words[k]);
           token >> node_number;
           //        std::cout << "node_number" << node_number << std::endl;
-          int v;
+          size_t v;
           for (decltype(vertices.size()) k = 0; k < vertices.size(); k++) {
             if (node_number - 1 + k < vertices.size())
               v = node_number - 1 + k;
@@ -385,7 +387,7 @@ void siconos::mechanics::fem::writeDisplacementforPython(
   outfile.setf(std::ios::scientific);
 
   std::vector<std::string> fields = {"x", "y", "z"};
-  int pos = 0;
+  size_t pos = 0;
   for (auto& str : fields) {
     outfile << str + ".append(np.array([";
     if (pos == 2 && mesh.dim() < 3) {
@@ -423,10 +425,11 @@ void siconos::mechanics::fem::writeTensorforPython(const FiniteElementModel& fem
                                      tensorName + "_xy"};
   int pos = 0;
   for (auto& str : fields) {
-    size_t elem_cnt = 0;
+    siconos::algebra::Index elem_cnt = 0;
     outfile << str + ".append(np.array([";
     for (size_t elem_cnt = 0; elem_cnt < femodel.elements().size(); elem_cnt++) {
-      outfile << x(elem_cnt * 3 + pos) << ", ";
+      auto count = siconos::algebra::to_index(3 * elem_cnt);
+      outfile << x(count + pos) << ", ";
     }
     std::cout << " elem_cnt:" << elem_cnt << std::endl;
     outfile << "]))\n\n";

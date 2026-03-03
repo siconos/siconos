@@ -66,7 +66,7 @@ siconos::simulation::TimeStepping::TimeStepping(
 
 siconos::simulation::TimeStepping::TimeStepping(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-    std::shared_ptr<TimeDiscretisation> td, int nb)
+    std::shared_ptr<TimeDiscretisation> td, size_t nb)
     : Simulation(nsds, td) {
   (*_allNSProblems).resize(nb);
 }
@@ -107,7 +107,8 @@ void siconos::simulation::TimeStepping::insertIntegrator(
 //   return (y<=0);
 // }
 
-void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
+void siconos::simulation::TimeStepping::updateIndexSet(
+    siconos::simulation::Topology::size_type i) {
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
   // boost::default_color_type is used to organize update in InteractionsGraph:
@@ -141,13 +142,13 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   topo->setHasChanged(false);
 
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "siconos::simulation::TimeStepping::updateIndexSet(i). "
       "update indexSets "
       "start : indexSet0 size "
       ": %ld\n",
       indexSet0->size());
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "siconos::simulation::TimeStepping::updateIndexSet(i). "
       "update IndexSets "
       "start : indexSet1 size "
       ": %ld\n",
@@ -276,13 +277,13 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   assert(indexSet1->size() <= indexSet0->size());
 
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "siconos::simulation::TimeStepping::updateIndexSet(i). "
       "update indexSets "
       "end : indexSet0 size : "
       "%ld\n",
       indexSet0->size());
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "siconos::simulation::TimeStepping::updateIndexSet(i). "
       "update IndexSets "
       "end : indexSet1 size : "
       "%ld\n",

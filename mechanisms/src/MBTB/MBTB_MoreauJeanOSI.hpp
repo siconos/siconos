@@ -50,8 +50,8 @@ class MBTB_MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    * \param i level
    * \return a Boolean
    */
-  bool addInteractionInIndexSet(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                siconos::graphs::InteractionsGraph::size_type i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -59,8 +59,8 @@ class MBTB_MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    * \param i level
    * \return a Boolean
    */
-  bool removeInteractionFromIndexSet(
-      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                     siconos::graphs::InteractionsGraph::size_type i);
 };
 }  // namespace siconos::mechanisms
 #endif

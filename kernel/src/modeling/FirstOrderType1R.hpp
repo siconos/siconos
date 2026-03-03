@@ -73,7 +73,7 @@ class FirstOrderType1R : public FirstOrderR {
 
  public:
   /** Default and only constructor */
-  FirstOrderType1R() : FirstOrderR(RelationSubType::Type1R) {};
+  FirstOrderType1R() : FirstOrderR(RelationSubType::Type1R){};
 
   /** destructor */
   virtual ~FirstOrderType1R() noexcept = default;
@@ -123,7 +123,8 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param newValue \f$ \nabla_x h(x) \f$ matrix
    *
    */
-  void setConstantJacobianhOver_state(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantJacobianhOver_state(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_x h(x) \f$ \f$
    *
@@ -143,7 +144,8 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param newValue \f$ \nabla_{\lambda} g(\lambda) \f$ matrix
    *
    */
-  void setConstantJacobiangOver_lambda(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantJacobiangOver_lambda(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_{\lambda} g(\lambda) \f$ \f$
    *
@@ -165,7 +167,8 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeOutput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeOutput(double time, Interaction &inter,
+                     siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
    *
@@ -173,7 +176,8 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter,
+                    siconos::algebra::blocks::size_type level = 0) override;
 
   void computeJach(double time, Interaction &inter) override;
 
@@ -186,7 +190,7 @@ class FirstOrderType1R : public FirstOrderR {
    */
   bool requireResidu() override { return true; }
 
-  void display() const override {};
+  void display() const override{};
 };
 }  // namespace siconos::modeling
 

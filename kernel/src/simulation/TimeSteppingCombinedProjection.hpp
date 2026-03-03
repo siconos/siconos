@@ -22,6 +22,7 @@
 #define TIMESTEPPINGCOMBINEDPROJECTION_H
 
 #include "TimeStepping.hpp"
+#include "Topology.hpp"
 
 namespace siconos::simulation {
 
@@ -93,7 +94,7 @@ class TimeSteppingCombinedProjection : public TimeStepping {
    *
    *  \param level unsigned int: the level of the set to be updated
    */
-  void updateIndexSet(unsigned int level) override;
+  void updateIndexSet(siconos::simulation::Topology::size_type level) override;
 
   // struct _SimulationEffectOnOSNSP;
 

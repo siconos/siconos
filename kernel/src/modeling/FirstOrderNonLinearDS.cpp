@@ -339,7 +339,8 @@ void siconos::modeling::FirstOrderNonLinearDS::updatePlugins(double time) {
     use_jacobianfOver_x([&](auto& jac) { computejacobianfOver_x_(*state_x_[0], time, jac); });
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level) {
+void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(
+    siconos::algebra::blocks::size_type level) {
   /**\warning V.A. rVector_ should be initialized here and not in  the constructor
    * The level should also be used if we need more that one rVector_
    */
@@ -348,7 +349,8 @@ void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void siconos::modeling::FirstOrderNonLinearDS::initMemory(unsigned int steps) {
+void siconos::modeling::FirstOrderNonLinearDS::initMemory(
+    siconos::algebra::blocks::size_type steps) {
   DynamicalSystem::initMemory(steps);
 
   if (hasfVector() && !fbuffer_)
@@ -395,7 +397,8 @@ void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() {
   rVector_->setZero();
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level) {
+void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
   // assert(0);
   rVector_->setZero();

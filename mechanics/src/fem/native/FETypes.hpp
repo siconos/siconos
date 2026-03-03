@@ -17,6 +17,7 @@
  */
 #ifndef FETypesH
 #define FETypesH
+#include <cstddef>  // For size_t
 
 namespace siconos::mechanics::fem {
 
@@ -46,7 +47,7 @@ enum class FiniteElementType : int  // we (try to) follow the gmsh numbering con
  *
  * @param type element type
  */
-inline constexpr int number_of_dof_per_node(FiniteElementType type) {
+inline constexpr std::size_t number_of_dof_per_node(FiniteElementType type) {
   switch (type) {
     case FiniteElementType::T3:
     case FiniteElementType::Q4:

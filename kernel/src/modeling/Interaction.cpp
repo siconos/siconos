@@ -57,7 +57,7 @@ struct siconos::modeling::Interaction::SetLevels
 
   Interaction* interaction_{nullptr};
 
-  SetLevels(Interaction* inter) : interaction_(inter) {};
+  SetLevels(Interaction* inter) : interaction_(inter){};
 
   void visit(const ComplementarityConditionNSL& nslaw) override {
     auto relationType = interaction_->relation()->getType();
@@ -322,7 +322,8 @@ void siconos::modeling::Interaction::initialize_read_access_to_ds_variables(
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void siconos::modeling::Interaction::initializeMemory(unsigned int steps) {
+void siconos::modeling::Interaction::initializeMemory(
+    siconos::algebra::blocks::size_type steps) {
   DEBUG_BEGIN("siconos::modeling::Interaction::initializeMemory() \n");
   // Warning: this function is called from Simulation initialize,
   // since we need to know :
@@ -362,31 +363,30 @@ void siconos::modeling::Interaction::resetAllLambda() {
   }
 }
 
-void siconos::modeling::Interaction::resetLambda(unsigned int level) {
+void siconos::modeling::Interaction::resetLambda(siconos::algebra::blocks::size_type level) {
   if (_lambda[level]) _lambda[level]->setZero();
 }
 
 void siconos::modeling::Interaction::setY(
-    const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& newVector) {
+    const siconos::algebra::blocks::SharedVector& newVector) {
   auto size = newVector.size();
 
   _y.clear();
   _y.resize(size);
 
-  for (std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>::size_type i = 0;
-       i < size; i++)
+  for (siconos::algebra::blocks::size_type i = 0; i < size; i++)
     _y[i] = std::make_shared<siconos::algebra::SiconosVector>(*(newVector[i]));  // -> copy !
 }
 
 void siconos::modeling::Interaction::setYPtr(
-    const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& newVector) {
+    const siconos::algebra::blocks::SharedVector& newVector) {
   _y.clear();
 
   // copy
   _y = newVector;  // smart ptr
 }
 
-void siconos::modeling::Interaction::setY(const unsigned int index,
+void siconos::modeling::Interaction::setY(const siconos::algebra::blocks::size_type index,
                                           const siconos::algebra::SiconosVector& newY) {
   assert(_y.size() > index && "siconos::modeling::Interaction::setY, index out of range ");
 
@@ -402,7 +402,8 @@ void siconos::modeling::Interaction::setY(const unsigned int index,
 }
 
 void siconos::modeling::Interaction::setYPtr(
-    const unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> newY) {
+    const siconos::algebra::blocks::size_type index,
+    std::shared_ptr<siconos::algebra::SiconosVector> newY) {
   assert(_y.size() > index && "siconos::modeling::Interaction::setYPtr, index out of range");
 
   assert(newY->size() == _interactionSize &&
@@ -413,26 +414,26 @@ void siconos::modeling::Interaction::setYPtr(
 }
 
 void siconos::modeling::Interaction::setLambda(
-    const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& newVector) {
+    const siconos::algebra::blocks::SharedVector& newVector) {
   auto size = newVector.size();
   _lambda.clear();
   _lambda.resize(size);
 
-  for (std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>::size_type i = 0;
-       i < size; i++)
+  for (siconos::algebra::blocks::size_type i = 0; i < size; i++)
     _lambda[i] =
         std::make_shared<siconos::algebra::SiconosVector>(*(newVector[i]));  // -> copy !
 }
 
 void siconos::modeling::Interaction::setLambdaPtr(
-    const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& newVector) {
+    const siconos::algebra::blocks::SharedVector& newVector) {
   _lambda.clear();
 
   _lambda = newVector;  // smart ptr
 }
 
 void siconos::modeling::Interaction::setLambda(
-    const unsigned int index, const siconos::algebra::SiconosVector& newLambda) {
+    const siconos::algebra::blocks::size_type index,
+    const siconos::algebra::SiconosVector& newLambda) {
   assert(_lambda.size() <= index &&
          "siconos::modeling::Interaction::setLambda, index out of range");
 
@@ -448,7 +449,8 @@ void siconos::modeling::Interaction::setLambda(
 }
 
 void siconos::modeling::Interaction::setLambdaPtr(
-    const unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> newLambda) {
+    const siconos::algebra::blocks::size_type index,
+    std::shared_ptr<siconos::algebra::SiconosVector> newLambda) {
   assert(_lambda.size() > index &&
          "siconos::modeling::Interaction::setLambdaPtr, index out of range ");
 
@@ -460,33 +462,34 @@ void siconos::modeling::Interaction::setLambdaPtr(
 }
 
 const siconos::algebra::SiconosVector siconos::modeling::Interaction::getCopyOfy(
-    const unsigned int i) const {
+    const siconos::algebra::blocks::size_type i) const {
   assert(_y[i] && "_y[i]");
   return *(_y[i]);
 }
 
-siconos::algebra::SiconosMemory& siconos::modeling::Interaction::yMemory(unsigned int level) {
+siconos::algebra::SiconosMemory& siconos::modeling::Interaction::yMemory(
+    siconos::algebra::blocks::size_type level) {
   return _yMemory[level];
 }
 
 const siconos::algebra::SiconosVector& siconos::modeling::Interaction::y_k(
-    const unsigned int i) const {
+    const siconos::algebra::blocks::size_type i) const {
   return _yMemory[i].getSiconosVector(0);
 }
 
 const siconos::algebra::SiconosVector siconos::modeling::Interaction::getLambda(
-    const unsigned int i) const {
+    const siconos::algebra::blocks::size_type i) const {
   assert(_lambda[i]);
   return *(_lambda[i]);
 }
 
 siconos::algebra::SiconosMemory& siconos::modeling::Interaction::lambdaMemory(
-    unsigned int level) {
+    siconos::algebra::blocks::size_type level) {
   return _lambdaMemory[level];
 }
 
 const siconos::algebra::SiconosVector& siconos::modeling::Interaction::lambda_k(
-    const unsigned int i) const {
+    const siconos::algebra::blocks::size_type i) const {
   return _lambdaMemory[i].getSiconosVector(0);
 }
 
@@ -504,8 +507,8 @@ void siconos::modeling::Interaction::swapInMemory() {
   DEBUG_END("void siconos::modeling::Interaction::swapInMemory()\n");
 }
 
-void siconos::modeling::Interaction::computeOutput(double time,
-                                                   unsigned int derivativeNumber) {
+void siconos::modeling::Interaction::computeOutput(
+    double time, siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_BEGIN("siconos::modeling::Interaction::computeOutput(...)\n");
   DEBUG_PRINTF("time= %f\t", time);
   DEBUG_PRINTF("derivativeNumber= %i\n", derivativeNumber);
@@ -513,7 +516,8 @@ void siconos::modeling::Interaction::computeOutput(double time,
   DEBUG_END("siconos::modeling::Interaction::computeOutput(...)\n");
 }
 
-void siconos::modeling::Interaction::computeInput(double time, unsigned int level) {
+void siconos::modeling::Interaction::computeInput(double time,
+                                                  siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN("siconos::modeling::Interaction::computeInput(...)\n");
   DEBUG_PRINTF("time= %f\t", time);
   DEBUG_PRINTF("level= %i\n", level);
@@ -541,7 +545,6 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(
     siconos::algebra::Index ds_size) const {
   auto interactionBlock =
       std::make_shared<siconos::algebra::SiconosMatrix>(nslaw_size, ds_size);
-
   auto relationType = relation()->getType();
   if (relationType == RelationType::FirstOrder) {
     auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
@@ -638,7 +641,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
   std::cout << "| ";
   _relation->display();
   _nslaw->display();
-  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
+  for (siconos::algebra::blocks::size_type i = 0; i < _upperLevelForOutput + 1; i++) {
     std::cout << "| y[" << i << "] : \n";
     if (_y[i]) {
       if (_y[i]->size() >= 5) std::cout << "\n";
@@ -646,7 +649,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
     } else
       std::cout << "->nullptr\n";
   }
-  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++) {
+  for (siconos::algebra::blocks::size_type i = 0; i < _upperLevelForInput + 1; i++) {
     std::cout << "| lambda[" << i << "] :\n ";
     if (_lambda[i]) {
       if (_lambda[i]->size() >= 5) std::cout << "\n";
@@ -657,7 +660,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
   if (!brief) {
     std::cout << "| _yMemory size: " << _yMemory.size() << "\n";
 
-    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
+    for (siconos::algebra::blocks::size_type i = 0; i < _upperLevelForOutput + 1; i++) {
       std::cout << "| y_Memory[" << i << "] :\n ";
       siconos::algebra::print(_yMemory[i]);
     }

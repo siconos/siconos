@@ -60,10 +60,11 @@ void siconos::nonsmooth_formulations::AVI::initialize(
            "NormalConeNSL type! This is currently not supported");
     auto& K = nc.K();
     auto& H = nc.H();
-    _numerics_problem->size = nc.size();
+    _numerics_problem->size = siconos::algebra::to_unsigned<size_t>(nc.size());
     _numerics_problem->d = nullptr;
     _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
-    _numerics_problem->poly.split->size_ineq = K.size();
+    _numerics_problem->poly.split->size_ineq =
+        siconos::algebra::to_unsigned<unsigned int>(K.size());
     _numerics_problem->poly.split->size_eq = 0;
     _numerics_problem->poly.split->H =
         NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.data());
@@ -81,9 +82,6 @@ void siconos::nonsmooth_formulations::AVI::initialize(
 }
 bool siconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
-  float type_number = static_cast<float>(siconos::types::type_value(nslaw));
-  _nslawtype.insert(type_number);
-
   if (not(siconos::types::type_value(nslaw) == siconos::modeling::Type::NormalConeNSL)) {
     THROW_EXCEPTION(
         "\nsiconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw -  \n\
@@ -100,7 +98,7 @@ int siconos::nonsmooth_formulations::AVI::compute(double time) {
   bool cont = preCompute(time);
   if (!cont) return info;
 
-  if (static_cast<siconos::algebra::Index>(_numerics_problem->size) != _sizeOutput) {
+  if (siconos::algebra::to_index(_numerics_problem->size) != _sizeOutput) {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::AVI::compute - size mismatch between AVI size and "
         "and the "

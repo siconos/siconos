@@ -38,9 +38,9 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
 
   std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
 
-  std::shared_ptr<std::vector<unsigned int>> _axis{nullptr};
+  std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
 
-  unsigned int _axisMin{0}, _axisMax{0};
+  siconos::algebra::Index _axisMin{0}, _axisMax{0};
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
   /** compute the jacobian of h w.r.t. q
@@ -56,12 +56,12 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   /** Initialize a joint friction for a common case: a single axis with a
    *  single friction, either positive or negative. For use with
    *  NewtonImpactNSL. */
-  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint, unsigned int axis);
+  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint, siconos::algebra::Index axis);
 
   /** Initialize a multidimensional joint friction, e.g. the cone friction on
    *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
   JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint,
-                 std::shared_ptr<std::vector<unsigned int>> axes = nullptr);
+                 std::shared_ptr<std::vector<siconos::algebra::Index>> axes = nullptr);
 
   virtual ~JointFrictionR() noexcept = default;
 
@@ -82,7 +82,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   virtual size_t numberOfConstraints() const;
 
   /** Return the joint axis number assigned to a friction axis. */
-  unsigned int axis(unsigned int _index);
+  siconos::algebra::Index axis(size_t _index);
 
   /** Return the joint assigned to this friction relation. */
   std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }

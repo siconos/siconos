@@ -53,7 +53,7 @@ siconos::simulation::EventDriven::EventDriven(
 
 siconos::simulation::EventDriven::EventDriven(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-    std::shared_ptr<TimeDiscretisation> td, int nb)
+    std::shared_ptr<TimeDiscretisation> td, std::size_t nb)
     : Simulation{nsds, td}, _numberOfOneStepNSproblems{0} {
   (*_allNSProblems).resize(nb);
 }
@@ -75,8 +75,9 @@ void siconos::simulation::EventDriven::insertIntegrator(
   }
 }
 
-void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
-  DEBUG_BEGIN("siconos::simulation::EventDriven::updateIndexSet(unsigned int i)\n");
+void siconos::simulation::EventDriven::updateIndexSet(
+    siconos::simulation::Topology::size_type i) {
+  DEBUG_BEGIN("siconos::simulation::EventDriven::updateIndexSet(i)\n");
   DEBUG_PRINTF("with i = %i\n", i);
   assert(_nsds);
   assert(_nsds->topology());
@@ -173,7 +174,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
   DEBUG_PRINTF("update indexSets end : _indexSet0 size : %ld\n", _indexSet0->size());
   DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
   DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
-  DEBUG_END("siconos::simulation::EventDriven::updateIndexSet(unsigned int i)\n");
+  DEBUG_END("siconos::simulation::EventDriven::updateIndexSet(i)\n");
 }
 
 void siconos::simulation::EventDriven::updateIndexSetsWithDoubleCondition() {
@@ -450,8 +451,7 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto qdot = lds->velocity_read();
       auto acc = lds->acceleration_read();
-      assert((pos + acc.size() + qdot.size()) <=
-                 static_cast<siconos::algebra::Index>(*sizeOfX) &&
+      assert((pos + acc.size() + qdot.size()) <= siconos::algebra::to_index(*sizeOfX) &&
              "Destination buffer too small!");
       std::copy(qdot.data(), qdot.data() + qdot.size(), &xdot[pos]);
       pos += qdot.size();
@@ -461,8 +461,7 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
                    std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       auto qdot = lds->velocity_read();
       auto acc = lds->acceleration_read();
-      assert((pos + acc.size() + qdot.size()) <=
-                 static_cast<siconos::algebra::Index>(*sizeOfX) &&
+      assert((pos + acc.size() + qdot.size()) <= siconos::algebra::to_index(*sizeOfX) &&
              "Destination buffer too small!");
       std::copy(qdot.data(), qdot.data() + qdot.size(), &xdot[pos]);
       pos += qdot.size();
@@ -517,10 +516,6 @@ void siconos::simulation::EventDriven::computeJacobianfx(
   }
 }
 
-unsigned int siconos::simulation::EventDriven::computeSizeOfg() {
-  return (_indexSet0->size());
-}
-
 void siconos::simulation::EventDriven::computeg(
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi, int* sizeOfX, double* time,
     double* x, int* ng, double* gOut) {
@@ -529,7 +524,7 @@ void siconos::simulation::EventDriven::computeg(
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   auto topo = _nsds->topology();
   auto indexSet2 = topo->indexSet(2);
-  unsigned int nsLawSize, k = 0;
+  siconos::algebra::Index nsLawSize, k = 0;
   std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, yddot, lambda;
   auto lsodar = std::dynamic_pointer_cast<siconos::integrators::LsodarOSI>(osi);
   assert(lsodar);

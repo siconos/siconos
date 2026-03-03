@@ -118,10 +118,10 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot_X_qd
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& inter,
-                                                               unsigned int derivativeNumber) {
+                                                               siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_PRINTF(
       "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& "
-      "inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = "
+      "inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type derivativeNumber) with time = "
       "%f "
       "and derivativeNumber = %i\n",
       time, derivativeNumber);
@@ -146,16 +146,16 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
     } else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, "
-          "Interaction& inter, InteractionProperties& interProp, unsigned int "
+          "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type "
           "derivativeNumber), index out of range");
   }
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Interaction& inter,
-                                                              unsigned int level) {
+                                                              siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
-      "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+      "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -170,7 +170,7 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
   DEBUG_EXPR(siconos::algebra::print(*ds_vars[tools::enum_to_index(ds_var::p0) + level]););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
-      "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+      "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Interaction& inter) {

@@ -206,7 +206,7 @@ class FirstOrderType2R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeOutput(double time, Interaction& inter, unsigned int level = 0) override;
+  void computeOutput(double time, Interaction& inter, siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
    *
@@ -214,7 +214,7 @@ class FirstOrderType2R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
+  void computeInput(double time, Interaction& inter, siconos::algebra::blocks::size_type level = 0) override;
 
   /**\return true if residu are required, false otherwise */
   bool requireResidu() override { return true; }

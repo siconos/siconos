@@ -31,6 +31,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
+#include "SimulationGraphs.hpp"
 #include "Tools.hpp"  // for enum_to_string
 
 // #define DEBUG_NOCOLOR
@@ -41,7 +42,7 @@
 namespace siconos::integrators::d1_minus_linear {
 
 template <typename DS>
-  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
 void compute_vfree_lagrangian(double told, double time_step, DS& lagds,
                               siconos::algebra::SiconosVector& vfree,
                               siconos::algebra::SiconosVector& free_tdg) {
@@ -84,10 +85,10 @@ void compute_vfree_lagrangian(double told, double time_step, DS& lagds,
 }
 
 template <typename DS>
-  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
-siconos::algebra::SiconosVector compute_residu_lagrangian(
-    double time_step, DS& lagds, const siconos::algebra::SiconosVector& vfree,
-    const siconos::algebra::SiconosVector& free_tdg) {
+requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+    siconos::algebra::SiconosVector compute_residu_lagrangian(
+        double time_step, DS& lagds, const siconos::algebra::SiconosVector& vfree,
+        const siconos::algebra::SiconosVector& free_tdg) {
   // initialize *it->residuFree and predicted right velocity (left limit)
 
   siconos::algebra::SiconosVector residufree{vfree.size()};
@@ -734,7 +735,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
 }
 
 bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "addInteractionInIndexSetHalfExplicitVelocityLevel.\n");
@@ -772,7 +774,8 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSetHalfExplici
 
 bool siconos::integrators::D1MinusLinearOSI::
     removeInteractionFromIndexSetHalfExplicitVelocityLevel(
-        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+        std::shared_ptr<siconos::modeling::Interaction> inter,
+        siconos::graphs::InteractionsGraph::size_type i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "removeInteractionFromIndexSetHalfExplicitVelocityLevel.\n");

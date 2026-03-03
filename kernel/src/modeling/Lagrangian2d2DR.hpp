@@ -84,9 +84,6 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   */
   void computeJacobianhOver_q(const siconos::algebra::BlockVector &q) override;
 
-  // virtual void computeOutput(double time, Interaction& inter,  unsigned int
-  // derivativeNumber);
-
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
@@ -95,7 +92,6 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   inline auto nc() const { return _Nc; }
   void display() const override;
   virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
-
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRIMPACT_H

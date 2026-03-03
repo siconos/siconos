@@ -49,7 +49,7 @@ void wrap_nonsmoothlaws(py::module_ &m) {
       .def(py::init<double>())
 
       // nsl(size, e)
-      .def(py::init<unsigned int, double>(), py::arg("size") = 1, py::arg("e") = 0.)
+      .def(py::init<siconos::algebra::Index, double>(), py::arg("size") = 1, py::arg("e") = 0.)
       // Access to restitution coefficient
       .def_property("e", &siconos::modeling::NewtonImpactNSL::e,
                     &siconos::modeling::NewtonImpactNSL::setE);
@@ -57,35 +57,35 @@ void wrap_nonsmoothlaws(py::module_ &m) {
   py::class_<siconos::modeling::NewtonImpactFrictionNSL,
              std::shared_ptr<siconos::modeling::NewtonImpactFrictionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "NewtonImpactFrictionNSL")
-      .def(py::init<unsigned int>(), py::arg("size") = 1)
-      .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
+      .def(py::init<siconos::algebra::Index>(), py::arg("size") = 1)
+      .def(py::init<double, double, double, siconos::algebra::Index>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);
 
   py::class_<siconos::modeling::NewtonImpactRollingFrictionNSL,
              std::shared_ptr<siconos::modeling::NewtonImpactRollingFrictionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "NewtonImpactRollingFrictionNSL")
-      .def(py::init<unsigned int>(), py::arg("size") = 1)
-      .def(py::init<double, double, double, double, unsigned int>(), py::arg("en") = 0.,
+      .def(py::init<siconos::algebra::Index>(), py::arg("size") = 1)
+      .def(py::init<double, double, double, double, siconos::algebra::Index>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("muR") = 0., py::arg("size") = 1);
 
   py::class_<siconos::modeling::FremondImpactFrictionNSL,
              std::shared_ptr<siconos::modeling::FremondImpactFrictionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "FremondImpactFrictionNSL")
-      .def(py::init<unsigned int>(), py::arg("size") = 1)
-      .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
+      .def(py::init<siconos::algebra::Index>(), py::arg("size") = 1)
+      .def(py::init<double, double, double, siconos::algebra::Index>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);
 
   py::class_<siconos::modeling::ComplementarityConditionNSL,
              std::shared_ptr<siconos::modeling::ComplementarityConditionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "ComplementarityConditionNSL")
-      .def(py::init<unsigned int>());
+      .def(py::init<siconos::algebra::Index>());
 
   py::class_<siconos::modeling::RelayNSL, std::shared_ptr<siconos::modeling::RelayNSL>,
              siconos::modeling::NonSmoothLaw>(m, "RelayNSL")
-      .def(py::init<unsigned int, double, double>());
+      .def(py::init<siconos::algebra::Index, double, double>());
 
   py::class_<siconos::modeling::EqualityConditionNSL,
              std::shared_ptr<siconos::modeling::EqualityConditionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "EqualityConditionNSL")
-      .def(py::init<unsigned int>());
+      .def(py::init<siconos::algebra::Index>());
 }

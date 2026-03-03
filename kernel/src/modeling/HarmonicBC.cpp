@@ -38,7 +38,8 @@ siconos::modeling::HarmonicBC::HarmonicBC(
       b_vec_{newb},
       omega_vec_{omega},
       phi_vec_{phi} {
-  siconos::algebra::SiconosVector::Index bc_size = std::ssize(newVelocityIndices);
+  [[maybe_unused]] siconos::algebra::SiconosVector::Index bc_size =
+      siconos::algebra::to_index(newVelocityIndices.size());
   assert(newa.size() == bc_size);
   assert(newb.size() == bc_size);
   assert(omega.size() == bc_size);

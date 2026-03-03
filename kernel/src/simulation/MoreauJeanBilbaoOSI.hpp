@@ -169,7 +169,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \return Boolean
    */
   bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+                                siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
    *  IndexSet of level i
@@ -179,7 +179,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \return Boolean
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
 };
 }  // namespace siconos::integrators
 

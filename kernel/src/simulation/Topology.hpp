@@ -70,7 +70,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
 
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Interactions of IndexSet0.*/
-  unsigned int _numberOfConstraints = 0;
+  siconos::algebra::Index _numberOfConstraints = 0;
 
   /** symmetry in the blocks computation */
   bool _symmetric = false;
@@ -119,7 +119,8 @@ class Topology : public std::enable_shared_from_this<Topology> {
   Topology& operator=(Topology&&) = delete;
 
  public:
-  // --- CONSTRUCTORS/DESTRUCTOR ---
+  using size_type =
+      std::vector<std::shared_ptr<siconos::graphs::InteractionsGraph>>::size_type;
 
   /** default constructor */
   Topology();
@@ -230,14 +231,12 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *
    *  \return a std::shared_ptr<siconos::graphs::InteractionsGraph>
    */
-  inline std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet0() const
-  {
+  inline std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet0() const {
     return _IG[0];
   }
 
   std::shared_ptr<siconos::graphs::InteractionProperties> interaction_properties(
-      unsigned int index, std::shared_ptr<siconos::modeling::Interaction> inter)
-  {
+      unsigned int index, std::shared_ptr<siconos::modeling::Interaction> inter) {
     auto ui = indexSet(index)->descriptor(inter);
     return std::make_shared<siconos::graphs::InteractionProperties>(
         indexSet(index)->properties(ui));
@@ -248,7 +247,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param num the number of indexSet
    *  \return a std::shared_ptr<siconos::graphs::InteractionsGraph>
    */
-  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet(unsigned int num) const;
+  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet(size_type num) const;
 
   /** get a pointer to the graph at level num of Interactions
    *
@@ -260,8 +259,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *
    *  \param num the indexSet to reset
    */
-  inline void resetIndexSetPtr(unsigned int num)
-  {
+  inline void resetIndexSetPtr(size_t num) {
     assert(num < _IG.size());
 
     // .. global properties may be defined here with
@@ -281,8 +279,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param num the level
    *  \return a shared ptr to the DynamicalSystemsGraph
    */
-  inline std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dSG(unsigned int num) const
-  {
+  inline std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dSG(size_t num) const {
     assert(num < _DSG.size());
     return _DSG[num];
   };
@@ -298,13 +295,13 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param level
    *  \return size of the  InteractionGraphs at a given level
    */
-  inline size_t indexSetSize(unsigned int level) const { return _IG[level]->size(); };
+  inline size_t indexSetSize(size_t level) const { return _IG[level]->size(); };
 
   /** resize Interactions Graphs
    *
    *  \param newSize the new size
    */
-  inline void indexSetsResize(unsigned int newSize) { _IG.resize(newSize); };
+  inline void indexSetsResize(size_t newSize) { _IG.resize(newSize); };
 
   // --- _hasChanged ---
 
@@ -320,11 +317,8 @@ class Topology : public std::enable_shared_from_this<Topology> {
    */
   inline bool hasChanged() const { return _hasChanged; }
 
-  /** get the total number of scalar constraints
-   *
-   *  \return an unsigned int
-   */
-  inline unsigned int numberOfConstraints() const { return _numberOfConstraints; };
+  /** \return the total number of scalar constraints  */
+  inline siconos::algebra::Index numberOfConstraints() const { return _numberOfConstraints; };
 
   void clear();
 
@@ -344,7 +338,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \return a siconos::modeling::DynamicalSystem
    */
   std::shared_ptr<siconos::modeling::DynamicalSystem> getDynamicalSystem(
-      unsigned int requiredNumber) const;
+      size_t requiredNumber) const;
 
   /** list and display all dynamical systems
    */
@@ -365,8 +359,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param requiredNumber the required number
    *  \return an Interaction
    */
-  std::shared_ptr<siconos::modeling::Interaction> getInteraction(
-      size_t requiredNumber) const;
+  std::shared_ptr<siconos::modeling::Interaction> getInteraction(size_t requiredNumber) const;
 
   /** Get a interaction using its name
    *  \warning O(n) complexity
@@ -405,8 +398,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \return the descriptor in DSG0 from a DynamicalSystem
    */
   siconos::graphs::DynamicalSystemsGraph::VDescriptor getDSG0Descriptor(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-  {
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
     return _DSG[0]->descriptor(ds);
   }
 
@@ -415,7 +407,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param inumber the indexSet number
    *  \return the number of siconos::modeling::DynamicalSystem involved
    */
-  unsigned int numberOfInvolvedDS(unsigned int inumber);
+  size_t numberOfInvolvedDS(size_t inumber);
 };
 
 }  // namespace siconos::simulation

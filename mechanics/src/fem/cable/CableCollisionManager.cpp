@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "CableCollisionManager.h"
+
 #include <memory>
 
 #include "Cable2d3DR.hpp"
@@ -30,10 +31,10 @@
 void siconos::fem::cable::CableCollisionManager::updateInteractions(
     std::shared_ptr<siconos::simulation::Simulation> simulation) {
   auto &q = cable_ds_->q_read();
-  size_t nb = q.size();
+  auto nb = q.size();
 
   unsigned int node_idx = 0;
-  for (size_t i = 0; i < nb; i += 3, node_idx++) {
+  for (siconos::algebra::Index i = 0; i < nb; i += 3, node_idx++) {
     auto contactItr = contacts_map_.find(node_idx);
     std::shared_ptr<siconos::modeling::Interaction> contact = nullptr;
     if (contactItr != contacts_map_.end()) {

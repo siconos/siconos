@@ -28,6 +28,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
+#include "Topology.hpp"
 #include "siconos_debug.h"
 
 siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
@@ -648,7 +649,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
 #endif
 }
 
-void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigned int i) {
+void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
+    siconos::simulation::Topology::size_type i) {
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
   // boost::default_color_type is used to organize update in InteractionsGraph:

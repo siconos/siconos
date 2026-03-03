@@ -28,6 +28,7 @@
 //  #define DEBUG_STDOUT
 //  #define DEBUG_MESSAGES
 #include "OneStepNSProblem.hpp"
+#include "Topology.hpp"
 #include "siconos_debug.h"
 
 void siconos::simulation::TimeSteppingD1Minus::initializeOneStepNSProblem() {
@@ -58,10 +59,10 @@ siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus(
   (*_allNSProblems).resize(nb);
 }
 
-void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
+void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(
+    siconos::simulation::Topology::size_type i) {
   DEBUG_PRINTF(
-      "\nsiconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int "
-      "i) for i = "
+      "\nsiconos::simulation::TimeSteppingD1Minus::updateIndexSet(i) for i = "
       "%i\n",
       i);
   // To update IndexSet i: add or remove Interactions from

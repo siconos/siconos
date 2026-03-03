@@ -35,7 +35,7 @@
 void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
   if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
 
-  size_t offset = 0;
+  siconos::algebra::Index offset = 0;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
@@ -96,7 +96,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
     auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
     auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi;
     auto osi2 = DSG0.properties(DSG0.descriptor(ds2)).osi;
-    bool is_ds2_mjgosi =
+    [[maybe_unused]] bool is_ds2_mjgosi =
         std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi2) ||
         std::dynamic_pointer_cast<siconos::mechanics::fem::integrators::MoreauJeanGOSI>(osi2);
 

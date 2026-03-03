@@ -80,7 +80,6 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::FirstOrderLinearR::checkSize(const Interaction& inter) const {
-
   // Check if various operators sizes are consistent.
   // Reference: interaction.
 
@@ -223,7 +222,7 @@ void siconos::modeling::FirstOrderLinearR::computee(double time) {
 // }
 
 void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interaction& inter,
-                                                         unsigned int) {
+                                                         siconos::algebra::blocks::size_type) {
   DEBUG_BEGIN("siconos::modeling::FirstOrderLinearR::computeOutput \n");
   siconos::algebra::SiconosVector& y = *inter.y(0);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(0);
@@ -257,7 +256,7 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
 // }
 
 void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction& inter,
-                                                        unsigned int) {
+                                                        siconos::algebra::blocks::size_type) {
   if (jacobiangOver_lambda_view_) {
     const auto& ds_vars = inter.read_dynamical_systems_variables();
     if (!hasConstantJacobiangOver_lambda_)  // B not constant

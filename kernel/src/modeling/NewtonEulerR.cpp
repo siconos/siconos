@@ -65,6 +65,7 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 
   if (!H_NE_prod_T_)
     H_NE_prod_T_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
+  H_NE_prod_T_->setZero();
 
   // Allocate internal buffer, used to save T(q)
   if (!T_buffer_) {
@@ -88,9 +89,9 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::NewtonEulerR::checkSize(const Interaction& inter) const {
-  auto ySize = inter.dimension();
-  auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
-  auto Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
+  [[maybe_unused]] auto ySize = inter.dimension();
+  [[maybe_unused]] auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
+  [[maybe_unused]] auto Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
   if (H_NE_view_) {
     assert(H_NE_view_->rows() == ySize);
@@ -159,8 +160,8 @@ void siconos::modeling::NewtonEulerR::computeh(
   if (haseVector_) y += *eVector_view_;
 }
 
-void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& inter,
-                                                    unsigned int derivativeNumber) {
+void siconos::modeling::NewtonEulerR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeOutput(...)\n");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
@@ -202,7 +203,7 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
 }
 
 void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter,
-                                                   unsigned int level) {
+                                                   siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeInput(...)\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n", &inter););
@@ -235,7 +236,8 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   } else
     THROW_EXCEPTION(
         "siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter, "
-        "InteractionProperties& interProp, unsigned int level)  not yet implemented for "
+        "InteractionProperties& interProp, siconos::algebra::blocks::size_type level)  not "
+        "yet implemented for "
         "level "
         "> 1");
   DEBUG_END("siconos::modeling::NewtonEulerR::computeInput(...)\n");
@@ -246,7 +248,6 @@ void siconos::modeling::NewtonEulerR::computeH_NE_prod_T(
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeH_NE_prod_T(...) \n");
   DEBUG_PRINTF("with inter =  %p\n", &inter);
   DEBUG_EXPR(inter.display());
-
   // For each qi from DS
   // compute H.T(qi)
 

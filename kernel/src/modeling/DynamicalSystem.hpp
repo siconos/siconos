@@ -114,7 +114,7 @@ class DynamicalSystem {
 
   /** state of the system,
    *  \f$  x \in R^{n} \f$ - With state_x_[0]= \f$ x \f$ , state_x_[1]= \f$ \dot{x} \f$ . */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_x_ = {nullptr, nullptr};
+  siconos::algebra::blocks::SharedVector state_x_ = {nullptr, nullptr};
 
   /** jacobian according to x of the right-hand side (\f$ rhs = \dot x = M^{-1}
       f(x,t) + r \f$) */
@@ -135,7 +135,7 @@ class DynamicalSystem {
   siconos::algebra::SiconosMemory xMemory_;
 
   /** number of previous states stored in memory */
-  unsigned int stepsInMemory_{1};
+  siconos::algebra::blocks::size_type stepsInMemory_{1};
 
   // ===== CONSTRUCTORS =====
 
@@ -146,7 +146,7 @@ class DynamicalSystem {
       result in \f$ \dot x = r \f$
    *  \param dimension size of the system (n)
    */
-  DynamicalSystem(siconos::algebra::Index dimension) : x_size_(dimension) {};
+  DynamicalSystem(siconos::algebra::Index dimension) : x_size_(dimension){};
 
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
@@ -181,7 +181,7 @@ class DynamicalSystem {
    *
    *  \param level input-level to be initialized.
    */
-  virtual void initializeNonSmoothInput(unsigned int level) = 0;
+  virtual void initializeNonSmoothInput(siconos::algebra::blocks::size_type level) = 0;
 
   /** compute all component of the dynamical system, for the current state.
    *
@@ -208,7 +208,7 @@ class DynamicalSystem {
    *
    *  \param level
    */
-  virtual void resetNonSmoothPart(unsigned int level) = 0;
+  virtual void resetNonSmoothPart(siconos::algebra::blocks::size_type level) = 0;
 
   /** returns the id of the dynamical system */
   inline size_t number() const { return number_; }
@@ -302,14 +302,16 @@ class DynamicalSystem {
    *
    *  \param steps
    */
-  inline void setStepsInMemory(unsigned int steps) { stepsInMemory_ = steps; }
+  inline void setStepsInMemory(siconos::algebra::blocks::size_type steps) {
+    stepsInMemory_ = steps;
+  }
 
   /** initialize the SiconosMemory objects: reserve memory for i vectors in
    * memory and reset all to zero.
    *
    *  \param steps the size of the SiconosMemory (i)
    */
-  virtual void initMemory(unsigned int steps);
+  virtual void initMemory(siconos::algebra::blocks::size_type steps);
 
   /** push the current values of x and r in memory (index 0 of memory is the
    * last inserted vector) xMemory and rMemory,
@@ -320,7 +322,7 @@ class DynamicalSystem {
    *
    *  \param time  the current time
    */
-  virtual void updatePlugins(double time) {};
+  virtual void updatePlugins(double time){};
 
   /** reset the global DynamicSystem counter (for ids)
    *

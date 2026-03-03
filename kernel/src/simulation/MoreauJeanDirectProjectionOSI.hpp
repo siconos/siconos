@@ -131,7 +131,7 @@ class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
    *  \return bool
    */
   bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+                                siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    *  in the IndexSet of level i
@@ -141,7 +141,7 @@ class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
    *  \return bool
    */
   bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)

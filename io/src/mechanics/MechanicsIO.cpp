@@ -87,7 +87,7 @@ struct siconos::io::GetPosition : public siconos::modeling::dynamical_systems::V
 
   template <typename T>
   void operator()(const T& ds) {
-    (*result)(0) = ds.number();
+    (*result)(0) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds.number());
     result->segment(1, ds.q_read().size()) = ds.q_read();
   }
 };
@@ -99,7 +99,7 @@ struct siconos::io::GetVelocity : public siconos::modeling::dynamical_systems::V
   }
   template <typename T>
   void operator()(const T& ds) {
-    (*result)(0) = ds.number();
+    (*result)(0) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds.number());
     result->segment(1, ds.velocity_read().size()) = ds.velocity_read();
   }
 };
@@ -155,7 +155,7 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
   cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
@@ -197,7 +197,7 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
   cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
@@ -251,7 +251,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cpbx = x2 - ncx * r2;
   auto cpby = y2 - ncy * r2;
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
   cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
@@ -316,7 +316,7 @@ void siconos::io::ContactPointVisitor::operator()(
     cpax = x1 + ncx * r1;
     cpay = y1 + ncy * r1;
   }
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
   cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
@@ -371,7 +371,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cpax = x1 + ncx * r1;
   auto cpay = y1 + ncy * r1;
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
   cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
@@ -411,7 +411,7 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
   cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
@@ -452,7 +452,7 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
   cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
@@ -503,7 +503,7 @@ void siconos::io::ContactPointDomainVisitor::operator()(
    */
   answer(0) = (*rel.pc1())(0) > 0;
 
-  answer(1) = inter->number();
+  answer(1) = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
 }
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::domains(
@@ -514,7 +514,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::domains(
   auto& graph = *nsds.topology()->indexSet(1);
   siconos::algebra::SiconosMatrix result{graph.vertices_number(), 2};
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  unsigned int current_row;
+  siconos::algebra::Index current_row;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
        ++vi, ++current_row) {
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
@@ -541,7 +541,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVec
   // Temp. Iterate through the graph to count the number of DS and
   // the max size of these systems
   typename G::VIterator vi, viend;
-  unsigned int current_col;
+  siconos::algebra::Index current_col;
 
   siconos::algebra::Index max_size = 0;
   for (current_col = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
@@ -567,7 +567,7 @@ siconos::algebra::SiconosVector siconos::io::MechanicsIO::visitAllVerticesForDou
   siconos::algebra::SiconosVector result{graph.vertices_number()};
 
   typename G::VIterator vi, viend;
-  unsigned int current_row;
+  siconos::algebra::Index current_row;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
        ++vi, ++current_row) {
     T getter;
@@ -607,7 +607,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
 
   // if (nsds.topology()->numberOfIndexSet() > 0) {
   auto& graph = *nsds.topology()->indexSet(index_set);
-  unsigned int current_row;
+  siconos::algebra::Index current_row;
   siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
   int data_size = 0;
@@ -640,11 +640,12 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
       DEBUG_EXPR(siconos::algebra::print(data););
       auto& ds1 = *graph.properties(*vi).source;
       auto& ds2 = *graph.properties(*vi).target;
-      data(data_size) = ds1.number();
-      data(data_size + 1) = ds2.number();
+      data(data_size) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds1.number());
+      data(data_size + 1) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds2.number());
       DEBUG_EXPR(siconos::algebra::print(data););
       if (result.cols() != data.size()) {
-        result.conservativeResize(graph.vertices_number(), data.size());
+        result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
+                                  data.size());
       }
       result.row(current_row++) = data;
       data_size += 2;
@@ -669,7 +670,7 @@ struct ContactInfoVisitor : public siconos::modeling::relations::Visitor {
 /* then specializations : */
 template <>
 void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(10);
   // answer[0]= id;
   // answer[1]= 0; // reserve for ds1.number
@@ -681,7 +682,7 @@ void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::ContactR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(4);
   answer(0) = id;
   answer(1) = 0;
@@ -694,7 +695,7 @@ void ContactInfoVisitor::operator()(const siconos::collision::ContactR& rel) {
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact5DR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(4);
   answer(0) = id;
   answer(1) = 0;
@@ -707,7 +708,7 @@ void ContactInfoVisitor::operator()(const siconos::collision::Contact5DR& rel) {
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact2dR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(4);
   answer(0) = id;
   answer(1) = 0;
@@ -720,7 +721,7 @@ void ContactInfoVisitor::operator()(const siconos::collision::Contact2dR& rel) {
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact2d3DR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(4);
   answer(0) = id;
   answer(1) = 0;
@@ -740,7 +741,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
   if (!(nsds.topology()->numberOfIndexSet() > 0)) return std::nullopt;
 
   auto& graph = *nsds.topology()->indexSet(index_set);
-  unsigned int current_row;
+  siconos::algebra::Index current_row;
   siconos::algebra::SiconosMatrix result{graph.vertices_number(), 4};
 
   int data_size = 0;
@@ -769,11 +770,12 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       DEBUG_EXPR(siconos::algebra::print(data););
       auto& ds1 = *graph.properties(*vi).source;
       auto& ds2 = *graph.properties(*vi).target;
-      data(1) = ds1.number();
-      data(2) = ds2.number();
+      data(1) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds1.number());
+      data(2) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds2.number());
     }
     if (result.cols() != data.size()) {
-      result.conservativeResize(graph.vertices_number(), data.size());
+      result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
+                                data.size());
     }
     result.row(current_row++) = data;
   }
@@ -1014,7 +1016,7 @@ static void compute_contact_work_and_status_2d(
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::ContactR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(7);
   answer(0) = id;
   compute_contact_work_and_status(inter, omega, tol, answer);
@@ -1023,7 +1025,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact5DR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(7);
   answer(0) = id;
 
@@ -1033,7 +1035,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2dR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(7);
   answer(0) = id;
 
@@ -1043,7 +1045,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2d3DR& rel) {
-  auto id = inter->number();
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(7);
   answer(0) = id;
 
@@ -1061,7 +1063,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
 
   auto& graph = *nsds.topology()->indexSet(index_set);
 
-  unsigned int current_row;
+  siconos::algebra::Index current_row;
   siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
   int data_size = 0;
@@ -1094,7 +1096,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     } else {
     }
     if (result.cols() != data.size()) {
-      result.conservativeResize(graph.vertices_number(), data.size());
+      result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
+                                data.size());
     }
     result.row(current_row++) = data;
   }

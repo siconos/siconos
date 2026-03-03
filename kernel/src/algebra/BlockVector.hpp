@@ -41,15 +41,13 @@ namespace siconos::algebra {
 */
 class BlockVector {
  private:
-  using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
-
   ACCEPT_SERIALIZATION(BlockVector);
 
   /** Size (ie total number of scalar elements, not number of blocks) */
   Eigen::Index totalSize_ = 0;
 
   /** A container of pointers on SiconosVector. */
-  VectorOfVectors blocks_;
+  siconos::algebra::blocks::SharedVector blocks_;
 
   /** blockStartIndices_[i] = blockStartIndices_[i-1] + ni, ni being the size of block[i]. */
   std::vector<Eigen::Index> blockStartIndices_ = {0};
@@ -89,19 +87,23 @@ class BlockVector {
   auto size() const { return totalSize_; };
 
   /** \return an iterator pointing to the first block in the container. */
-  inline VectorOfVectors::iterator begin() { return blocks_.begin(); };
+  inline siconos::algebra::blocks::SharedVector::iterator begin() { return blocks_.begin(); };
 
   /**  \return an iterator referring to the past-the-end element in the container. */
-  inline VectorOfVectors::iterator end() { return blocks_.end(); };
+  inline siconos::algebra::blocks::SharedVector::iterator end() { return blocks_.end(); };
 
   /** \return an iterator pointing to the first block in the container. */
-  inline VectorOfVectors::const_iterator begin() const { return blocks_.begin(); };
+  inline siconos::algebra::blocks::SharedVector::const_iterator begin() const {
+    return blocks_.begin();
+  };
 
   /**  \return an iterator referring to the past-the-end element in the container. */
-  inline VectorOfVectors::const_iterator end() const { return blocks_.end(); };
+  inline siconos::algebra::blocks::SharedVector::const_iterator end() const {
+    return blocks_.end();
+  };
 
   /** \return the complete stl container */
-  inline VectorOfVectors getAllVect() const { return blocks_; }
+  inline siconos::algebra::blocks::SharedVector getAllVect() const { return blocks_; }
 
   /** \return the number of SiconosVectors in the container */
   inline auto numberOfBlocks() const { return blocks_.size(); };

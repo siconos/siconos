@@ -148,7 +148,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForInteraction
 
   if (!interProp.workVectors) {
     interProp.workVectors =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+        std::make_shared<siconos::algebra::blocks::SharedVector>(
             siconos::integrators::ZeroOrderHoldOSI::WORK_INTERACTION_LENGTH);
   }
 
@@ -322,7 +322,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
@@ -501,7 +501,8 @@ void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int leve
 }
 
 bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1);
   double h = _simulation->timeStep();
   double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
@@ -521,7 +522,8 @@ bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::ZeroOrderHoldOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
   return !(addInteractionInIndexSet(inter, i));
 }
 

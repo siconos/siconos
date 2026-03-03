@@ -22,9 +22,9 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
+#include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 
@@ -78,8 +78,8 @@ void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_lambda(
     computejacobianhOver_lambda_(positions, lambda, *jacobianhOver_lambda_);
 }
 
-void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interaction& inter,
-                                                            unsigned int derivativeNumber) {
+void siconos::modeling::LagrangianCompliantR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   if (derivativeNumber == 0) {
     auto& y = *inter.y(0);
@@ -107,7 +107,7 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interac
 }
 
 void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interaction& inter,
-                                                           unsigned int level) {
+                                                           siconos::algebra::blocks::size_type level) {
   // get lambda of the concerned interaction
 
   auto& lambda = *inter.lambda(level);

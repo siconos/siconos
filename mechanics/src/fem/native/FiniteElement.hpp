@@ -137,9 +137,9 @@ class FiniteElement {
 
   FiniteElementFamily family() const { return family_; }
 
-  int order() const { return element_order(type_); };
+  auto order() const { return element_order(type_); };
 
-  int ndofPerNode() const { return number_of_dof_per_node(type_); };
+  auto ndofPerNode() const { return number_of_dof_per_node(type_); };
 
   std::span<const std::vector<double>> GaussPoints(int order) const;
 

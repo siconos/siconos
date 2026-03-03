@@ -33,7 +33,7 @@ class FiniteElementModel;
 
 std::shared_ptr<Mesh> create2dMesh2x1();
 
-std::shared_ptr<Mesh> create2dMeshnxm(int n, int m, double Lx, double Ly);
+std::shared_ptr<Mesh> create2dMeshnxm(size_t n, size_t m, double Lx, double Ly);
 
 /** @brief read a mesh from a gmsh file and convert it into a siconos mesh
  *  @param fname gmsh file name

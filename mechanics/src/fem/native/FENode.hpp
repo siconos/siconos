@@ -27,6 +27,8 @@
 #include <span>
 #include <vector>
 
+#include "SiconosMatrix.hpp"
+
 namespace siconos::mechanics::fem {
 
 class MeshVertex;
@@ -40,7 +42,7 @@ class FENode {
   std::shared_ptr<MeshVertex> mVertex_{nullptr};
 
   /* associated dof numbers in the global dof vector*/
-  std::vector<size_t> global_dof_index_ = {};
+  std::vector<siconos::algebra::Index> global_dof_index_ = {};
 
   /** Rule of five */
   FENode() = delete;
@@ -55,14 +57,17 @@ class FENode {
       \param v vertex associated to the node
       \param dofIndex global dof index
    */
-  FENode(size_t num, std::shared_ptr<MeshVertex> v, const std::vector<size_t>& dofIndex)
-      : num_(num), mVertex_(v), global_dof_index_(dofIndex) {};
+  FENode(size_t num, std::shared_ptr<MeshVertex> v,
+         const std::vector<siconos::algebra::Index>& dofIndex)
+      : num_(num), mVertex_(v), global_dof_index_(dofIndex){};
 
   ~FENode() noexcept = default;
   auto num() { return num_; }
 
   /** \returns associated dof numbers in the global dof vector*/
-  std::span<const size_t> global_dof_index() const { return global_dof_index_; };
+  std::span<const siconos::algebra::Index> global_dof_index() const {
+    return global_dof_index_;
+  };
 
   /** \returns x coordinate */
   double x() const;

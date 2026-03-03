@@ -78,9 +78,8 @@ void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(
         "between e vector and the dimension of the interaction.");
 }
 
-void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
-                                                                   Interaction& inter,
-                                                                   unsigned int level) {
+void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -90,13 +89,14 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
       false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
-    double time, Interaction& inter, unsigned int derivativeNumber) {
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   auto& lambda = *inter.lambda(derivativeNumber);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   siconos::algebra::matrixBlockVector_prod(
-      *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::q0) + derivativeNumber], y);
+      *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::q0) + derivativeNumber],
+      y);
   y += *DMatrix_view_ * lambda;
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;

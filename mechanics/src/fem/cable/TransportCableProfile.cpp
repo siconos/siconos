@@ -60,11 +60,13 @@ void siconos::fem::cable::TransportCableProfile::computeInitialProfile(int nb_no
 void siconos::fem::cable::TransportCableProfile::initializeFEM(int nb_elem, double a_eps,
                                                                double a_tol) {
   // -- Computes the lengths of the cable around the pulleys (stations)
-  auto topPulley =
-      std::dynamic_pointer_cast<PulleyWrapping>(r_results.supports[r_results.topPulleyId]);
+  assert(r_results.topPulleyId >= 0);
+  assert(r_results.downPulleyId >= 0);
+  auto topPulley = std::dynamic_pointer_cast<PulleyWrapping>(
+      r_results.supports[static_cast<size_t>(r_results.topPulleyId)]);
 
-  auto downPulley =
-      std::dynamic_pointer_cast<PulleyWrapping>(r_results.supports[r_results.downPulleyId]);
+  auto downPulley = std::dynamic_pointer_cast<PulleyWrapping>(
+      r_results.supports[static_cast<size_t>(r_results.downPulleyId)]);
 
   double topLength = topPulley->length(r_results.ropes_down);
   double downLength = downPulley->length(r_results.ropes_up);
@@ -224,14 +226,14 @@ void siconos::fem::cable::TransportCableProfile::computeConstraintsSparse(
     const siconos::algebra::SiconosVector &cableNodesPositions, double tol,
     Eigen::Ref<siconos::algebra::SiconosVector> distances,
     siconos::algebra::SiconosSparseMatrix &jacobian) {
-  const int nb = cableNodesPositions.size() / 3;
+  const siconos::algebra::Index nb = cableNodesPositions.size() / 3;
   std::vector<Eigen::Triplet<double>> triplets;
-  triplets.reserve(2 * nb);  // max 2 per col¨
+  triplets.reserve(2 * siconos::algebra::to_unsigned<size_t>(nb));  // max 2 per col¨
   for (auto &s : r_results.supports) {
     const auto &center = s->center();
     auto radius = s->radius();
     if (auto pulley = std::dynamic_pointer_cast<PulleyWrapping>(s)) {
-      for (int i = 0; i < nb; ++i) {
+      for (siconos::algebra::Index i = 0; i < nb; ++i) {
         double dx = cableNodesPositions(3 * i) - center(0);
         double dy = cableNodesPositions(3 * i + 1) - center(1);
         double norm = std::sqrt(dx * dx + dy * dy);
@@ -243,7 +245,7 @@ void siconos::fem::cable::TransportCableProfile::computeConstraintsSparse(
         }
       }
     } else {
-      for (int i = 0; i < nb; ++i) {
+      for (siconos::algebra::Index i = 0; i < nb; ++i) {
         double dx = cableNodesPositions(3 * i) - center(0);
         double dz = cableNodesPositions(3 * i + 2) - center(2);
         double norm = std::sqrt(dx * dx + dz * dz);
@@ -308,7 +310,8 @@ siconos::algebra::SiconosVector siconos::fem::cable::distribute_carriers_weight(
     // if found, it corresponds to a vehicle (or is close to ...)
     auto it = std::find_if(ind.begin(), ind.end(), [k](int val) { return val > k; });
     if (it != ind.end()) {
-      size_t index = std::distance(ind.begin(), it);
+      siconos::algebra::Index index =
+          siconos::algebra::to_index(std::distance(ind.begin(), it));
       weight(index) = mass;
     }
   }

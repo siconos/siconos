@@ -255,9 +255,10 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   DEBUG_END("siconos::modeling::NewtonEulerDS::initRhs(double time)\n");
 }
 
-void siconos::modeling::NewtonEulerDS::initializeNonSmoothInput(unsigned int level) {
+void siconos::modeling::NewtonEulerDS::initializeNonSmoothInput(
+    siconos::algebra::blocks::size_type level) {
   DEBUG_PRINTF(
-      "siconos::modeling::NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for "
+      "siconos::modeling::NewtonEulerDS::initializeNonSmoothInput(...) for "
       "level = %i\n",
       level);
 
@@ -680,7 +681,7 @@ void siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame(bool va
 }
 
 // --- Functions for memory handling ---
-void siconos::modeling::NewtonEulerDS::initMemory(unsigned int steps) {
+void siconos::modeling::NewtonEulerDS::initMemory(siconos::algebra::blocks::size_type steps) {
   DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
@@ -709,7 +710,8 @@ void siconos::modeling::NewtonEulerDS::resetAllNonSmoothParts() {
   else
     p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
 }
-void siconos::modeling::NewtonEulerDS::resetNonSmoothPart(unsigned int level) {
+void siconos::modeling::NewtonEulerDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
   if (p_[level]) p_[level]->setZero();
 }
 
