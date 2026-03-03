@@ -145,7 +145,7 @@ void siconos::mechanics::fem::FiniteElementModel::assembleElementary_B_Matrix(
     auto dofIndex1 = node1->global_dof_index();
     auto dofsize = siconos::algebra::to_index(dofIndex1.size());
     for (siconos::algebra::Index i = 0; i < dofsize; i++)
-      for (size_t j = 0; j < dofIndex1.size(); j++) {
+      for (size_t j = 0; j < siconos::algebra::to_unsigned<size_t>(dim_stress); j++) {
         auto indx = siconos::algebra::to_index(elem_cnt) * dim_stress + i;
         auto indy = siconos::algebra::to_index(j + node1_cnt * dofIndex1.size());
         Bmatrix.coeffRef(indx, dofIndex1[j]) += Be(i, indy);
