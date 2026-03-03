@@ -49,8 +49,6 @@
 #include "gfc3d_ipm.h"
 #include "siconos_debug.h"
 
-const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
-
 /* ------------------------- Helper functions implementation ------------------------------ */
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.

@@ -33,14 +33,6 @@
 #include "utils/numerics_errors.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF
 
-const char* const SICONOS_VI_EG_STR = "VI_EG";
-const char* const SICONOS_VI_FPP_STR = "VI_FPP";
-const char* const SICONOS_VI_HP_STR = "VI_HP";
-const char* const SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
-const char* const SICONOS_VI_BOX_AVI_LSA_STR =
-    "Box VI solver based on the Newton-Josephy method";
-const char* const SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
-
 int variationalInequality_driver(VariationalInequality* problem, double* x, double* w,
                                  SolverOptions* options) {
   /* Input validation using standardized macros */

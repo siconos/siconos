@@ -31,7 +31,7 @@
 #include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
 #include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
 #include "ConvexQP_cst.h"               // for SICONOS_CONVEXQP_ADMM_STR
-#include "FrictionContact_options.h"               // for SICONOS_FRICTION_2D_CPG_STR
+#include "FrictionContact_options.h"               // for friction contact solver parameters
 #include "GenericMechanical_Solvers.h"  // for gmp_set_default
 #include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICA...
 #include "LCP_Solvers.h"                // for lcp_pivot_set_default
@@ -53,13 +53,17 @@
 #include "grfc3d_Solvers.h"                 // for grfc3d_IPM_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
 #include "mc2d_solvers.h"
-#include "mlcp_cst.h"          // for SICONOS_MLCP_DIRECT_ENUM_STR
+#include "mlcp_cst.h"          // for SICONOS_MLCP_* enum values
 #include "numerics_verbose.h"
 #include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERR...
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"
 #include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
 
 #include "utils/numerics_errors.h"
+
+/** String constant for unknown solvers */
+static const char* const SICONOS_NONAME_STR = "UNKNOWN";
+
 /** Create a struct SolverOptions and initialize its content.
 
     Allocate memory for internal parameters array, ensure that pointers
@@ -293,7 +297,7 @@ const char* solver_options_id_to_name(int Id) {
   if (solver) {
     return solver->name;
   }
-  return SICONOS_NONAME_STR;
+  return "NONAME";
 }
 
 int solver_options_name_to_id(const char* pName) {
@@ -331,10 +335,11 @@ void solver_options_set_internal_solver(SolverOptions* options, size_t n, Solver
 SolverOptions* solver_options_create(int solver_id) {
   /* Look up solver in registry */
   const SolverEntry* solver = solver_registry_lookup(solver_id);
-  /* if (!solver) { */
-  /*   /\* Fallback to old-style creation for local/internal solvers not yet registered *\/ */
-  /*   return solver_options_create_old_style(solver_id); */
-  /* } */
+  if (!solver) {
+    fprintf(stderr, "solver_options_create: solver '%i' not found in registry : %s\n",
+            solver_id, solver_options_id_to_name(solver_id));
+    return NULL;
+  }
   
   /* Create options with registered defaults */
   SolverOptions* options = solver_options_initialize(solver_id, 

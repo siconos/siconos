@@ -34,13 +34,6 @@
 #include <float.h>
 #include <string.h>
 
-/* String constants */
-const char* const SICONOS_ROLLING_FRICTION_2D_NSGS_STR = "RFC2D_NSGS";
-const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR =
-    "RFC2D_ProjectionOnConeWithLocalIteration";
-const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR =
-    "RFC2D_ProjectionOnCone";
-
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */

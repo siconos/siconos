@@ -33,9 +33,6 @@
 #include <stdlib.h>
 #include <float.h>
 
-/* String constant */
-const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
-
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */

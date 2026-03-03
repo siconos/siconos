@@ -38,8 +38,6 @@
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
-const char* const SICONOS_NEWTON_LSA_STR = "Newton method LSA";
-
 void newton_LSA(unsigned n, double* z, double* F, int* info, void* data,
                 SolverOptions* options, functions_LSA* functions) {
   /* size of the problem */

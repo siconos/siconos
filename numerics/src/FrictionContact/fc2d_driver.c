@@ -32,12 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* String constants */
-const char* const SICONOS_FRICTION_2D_NSGS_STR = "FC2D_NSGS";
-const char* const SICONOS_FRICTION_2D_CPG_STR = "FC2D_CPG";
-const char* const SICONOS_FRICTION_2D_LEMKE_STR = "FC2D_LEMKE";
-const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
-
 /* ===========================================================================
  * Registration-Based Driver
  * =========================================================================== */

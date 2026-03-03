@@ -58,8 +58,6 @@
 #include "NumericsVector.h"
 #endif
 
-const char* const SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
-
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       double tol, SolverOptions* options, double* err) {
   listNumericsProblem* curProblem = pGMP->firstListElem;

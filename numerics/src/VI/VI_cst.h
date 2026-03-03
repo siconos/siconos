@@ -83,11 +83,4 @@ enum SICONOS_VI_ERROR_EVALUATION_ENUM {
   SICONOS_VI_ERROR_EVALUATION_ADAPTIVE = 3,
 };
 
-extern const char* const SICONOS_VI_EG_STR;
-extern const char* const SICONOS_VI_FPP_STR;
-extern const char* const SICONOS_VI_HP_STR;
-extern const char* const SICONOS_VI_BOX_QI_STR;
-extern const char* const SICONOS_VI_BOX_AVI_LSA_STR;
-extern const char* const SICONOS_VI_BOX_PATH_STR;
-
 #endif

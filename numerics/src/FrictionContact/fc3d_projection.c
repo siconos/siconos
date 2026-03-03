@@ -194,6 +194,36 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
   /* Friction coefficient for current block*/
   localproblem->mu[0] = main_problem->mu[contact];
 }
+void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
+                                              FrictionContactProblem* localproblem,
+                                              SolverOptions* localsolver_options) {
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
+}
+static int fc3d_proj_cone_with_regularization_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_cone_with_regularization_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCone_solve((FrictionContactProblem*)problem, reaction, options);
+}
+/* Projection on Cone _with_regularization*/
+static void fc3d_proj_cone_with_regularization_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+REGISTER_SOLVER(OC_PROJ_REG,
+                "OC_PROJ_REG",
+                "Projection on Cone (local solver) with regularization",
+                fc3d_proj_cone_with_regularization_init_wrap,
+                fc3d_proj_cone_with_regularization_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_cone_with_regularization_set_default,
+                100, 1e-4, 1)
+
 
 int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproblem,
                                              double* reaction, SolverOptions* options) {
@@ -496,12 +526,6 @@ void fc3d_projection_free(FrictionContactProblem* main_problem,
                           FrictionContactProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
-void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
-                                              FrictionContactProblem* localproblem,
-                                              SolverOptions* localsolver_options) {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
-}
 
 int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
                                          double* velocity, SolverOptions* options) {

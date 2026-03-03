@@ -45,24 +45,6 @@
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
-const char* const SICONOS_NONAME_STR = "NONAME";
-const char* const SICONOS_MLCP_PGS_STR = "MLCP_PGS";
-const char* const SICONOS_MLCP_RPGS_STR = "MLCP_RPGS";
-const char* const SICONOS_MLCP_PSOR_STR = "MLCP_PSOR";
-const char* const SICONOS_MLCP_RPSOR_STR = "MLCP_RPSOR";
-const char* const SICONOS_MLCP_PATH_STR = "MLCP_PATH";
-const char* const SICONOS_MLCP_ENUM_STR = "MLCP_ENUM";
-const char* const SICONOS_MLCP_SIMPLEX_STR = "MLCP_SIMPLEX";
-const char* const SICONOS_MLCP_DIRECT_ENUM_STR = "MLCP_DIRECT_ENUM";
-const char* const SICONOS_MLCP_PATH_ENUM_STR = "MLCP_PATH_ENUM";
-const char* const SICONOS_MLCP_DIRECT_SIMPLEX_STR = "MLCP_DIRECT_SIMPLEX";
-const char* const SICONOS_MLCP_DIRECT_PATH_STR = "MLCP_DIRECT_PATH";
-const char* const SICONOS_MLCP_DIRECT_PATH_ENUM_STR = "MLCP_DIRECT_PATH_ENUM";
-const char* const SICONOS_MLCP_FB_STR = "MLCP_FB";
-const char* const SICONOS_MLCP_DIRECT_FB_STR = "MLCP_DIRECT_FB";
-const char* const SICONOS_MLCP_PGS_SBM_STR = "MLCP_PGS_SBM";
-const char* const SICONOS_MLCP_LCP_LEMKE_STR = "MLCP_LCP_LEMKE";
-
 /** Compute the size of internal work arrays (for SolverOptions struct) and allocate them.
 
     static function : it does not need to be in the interface.

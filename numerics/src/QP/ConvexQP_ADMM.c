@@ -40,7 +40,6 @@
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 typedef struct {
   double* xi_hat;
   double* u_hat;

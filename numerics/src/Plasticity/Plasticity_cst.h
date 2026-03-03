@@ -23,8 +23,6 @@ enum PLASTICITY_SOLVER {
   MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID = 20065
 };
 
-extern const char* const SICONOS_MOHR_COULOMB_2D_NSGS_STR;
-
 enum PLASTICITY_IPARAM {
   /** index in iparam to store the error strategy for the internal solver */
   PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY = 2,

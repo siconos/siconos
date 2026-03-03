@@ -106,8 +106,6 @@ typedef struct {
 
 enum NEWTON_SOLVER { SICONOS_NEWTON_LSA = 10000 };
 
-extern const char *const SICONOS_NEWTON_LSA_STR;
-
 enum SICONOS_NEWTON_IPARAM {
   /** line search based algo use this */
   SICONOS_IPARAM_LSA_NONMONOTONE_LS = 3,

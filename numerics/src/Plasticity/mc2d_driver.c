@@ -32,9 +32,6 @@
 #include <stdlib.h>
 #include <float.h>
 
-/* String constant */
-const char* const SICONOS_MOHR_COULOMB_2D_NSGS_STR = "MC2D_NSGS";
-
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */

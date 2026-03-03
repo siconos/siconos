@@ -28,11 +28,6 @@
 #include "SolverOptions.h"                    // for SolverOptions
 #include "sn_error_handling.h"                // for sn_fatal_error_msg, SN_...
 #include "utils/numerics_errors.h"
-const char* const SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
-const char* const SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
-const char* const SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
-const char* const SICONOS_NCP_PATH_STR = "NCP PATH";
-
 int ncp_driver(NonlinearComplementarityProblem* problem, double* z, double* F,
                SolverOptions* options) {
   /* Input validation using standardized macros */

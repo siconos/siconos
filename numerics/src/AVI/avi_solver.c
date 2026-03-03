@@ -30,9 +30,6 @@
 #include "numerics_verbose.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
-const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";
-
 int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
                SolverOptions* options) {
   /* Input validation using standardized macros */

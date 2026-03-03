@@ -35,9 +35,6 @@
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_CONVEXQP_VI_FPP_STR = "CONVEXQP VI FPP";
-const char* const SICONOS_CONVEXQP_VI_EG_STR = "CONVEXQP VI EG";
-
 void convexQP_VI_solver(ConvexQP* problem, double* z, double* w, int* info,
                         SolverOptions* options);
 

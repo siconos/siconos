@@ -27,10 +27,6 @@
 #include "numerics_verbose.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
-const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";
-const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR = "MCP Newton minFBLSA";
-
 int mcp_driver(MixedComplementarityProblem* problem, double* z, double* Fmcp,
                SolverOptions* options) {
   /* Input validation using standardized macros */

@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"    
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_internal.h"
@@ -50,6 +52,10 @@
 #include "io_tools.h"
 #include "siconos_debug.h"
 
+/* Solver registration system */
+#include "utils/solver_registry.h"
+#include "utils/numerics_errors.h"
+
 #if defined(WITH_FCLIB) && defined(WITH_HDF5)
 #include <fclib.h>
 #include <hdf5.h>
@@ -60,8 +66,6 @@
 #define CONTACT_INDEX 1
 #define BODY_INDEX 2
 #define RANK_Hc 3
-
-const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_STR = "GFC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
@@ -1859,3 +1863,14 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.095
 }
+REGISTER_SOLVER(GFC3D_IPM_SNM,
+                "GFC3D_IPM_SNM",
+                "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact",
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                gfc3d_ipm_snm_set_default,  /* set_default */
+                500,    /* default_max_iter - from set_default */
+                1e-10,  /* default_tol - from set_default */
+                0       /* is_local_solver */)

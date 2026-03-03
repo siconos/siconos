@@ -102,20 +102,6 @@ enum ROLLING_FRICTION_SOLVER {
  * Human-readable string representations of rolling friction solver IDs.
  */
 
-extern const char* const SICONOS_ROLLING_FRICTION_3D_NSGS_STR;
-extern const char* const SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
-extern const char* const
-    SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
-extern const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR;
-
-extern const char* const SICONOS_ROLLING_FRICTION_2D_NSGS_STR;
-extern const char* const SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
-extern const char* const
-    SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
-
-extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR;
-extern const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR;
-
 /* ===========================================================================
  * Short Name Aliases (Optional)
  * ===========================================================================

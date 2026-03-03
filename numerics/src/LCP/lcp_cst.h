@@ -94,27 +94,4 @@ enum SICONOS_LCP_PIVOT_TYPE {
   SICONOS_LCP_PIVOT_PATHSEARCH = 4
 };
 
-extern const char* const SICONOS_LCP_LEMKE_STR;
-extern const char* const SICONOS_LCP_NSGS_SBM_STR;
-extern const char* const SICONOS_LCP_PGS_STR;
-extern const char* const SICONOS_LCP_CPG_STR;
-extern const char* const SICONOS_LCP_LATIN_STR;
-extern const char* const SICONOS_LCP_LATIN_W_STR;
-extern const char* const SICONOS_LCP_QP_STR;
-extern const char* const SICONOS_LCP_NSQP_STR;
-extern const char* const SICONOS_LCP_NEWTONMIN_STR;
-extern const char* const SICONOS_LCP_NEWTON_FB_FBLSA_STR;
-extern const char* const SICONOS_LCP_NEWTON_MIN_FBLSA_STR;
-extern const char* const SICONOS_LCP_PSOR_STR;
-extern const char* const SICONOS_LCP_RPGS_STR;
-extern const char* const SICONOS_LCP_PATH_STR;
-extern const char* const SICONOS_LCP_ENUM_STR;
-extern const char* const SICONOS_LCP_AVI_CAOFERRIS_STR;
-extern const char* const SICONOS_LCP_PIVOT_STR;
-extern const char* const SICONOS_LCP_BARD_STR;
-extern const char* const SICONOS_LCP_MURTY_STR;
-extern const char* const SICONOS_LCP_PATHSEARCH_STR;
-extern const char* const SICONOS_LCP_PIVOT_LUMOD_STR;
-extern const char* const SICONOS_LCP_GAMS_STR;
-extern const char* const SICONOS_LCP_CONVEXQP_PG_STR;
 #endif

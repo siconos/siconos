@@ -37,10 +37,6 @@
 #include "NumericsVector.h"
 #endif
 
-const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
-const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR =
-    "GRFC3D_IPM";  // for printing the name of solver
-
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"  // for frictionContact_fclib_write, fri...
 #include "string.h"           // for strcpy, strcat

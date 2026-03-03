@@ -45,47 +45,6 @@
 #include <stdlib.h>
 #include <float.h>
 
-/* String constants */
-const char* const SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
-const char* const SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
-const char* const SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
-const char* const SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
-const char* const SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
-const char* const SICONOS_FRICTION_3D_NSN_AC_NEW_STR = "FC3D_NSN_AC_NEW (Newton method LSA)";
-const char* const SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
-const char* const SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
-const char* const SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
-const char* const SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR = "FC3D_NCPGlockerFBFixedPoint";
-const char* const SICONOS_ONECONE_NSN_STR = "FC3D_ONECONTACT_NSN";
-const char* const SICONOS_ONECONE_NSN_GP_STR = "FC3D_ONECONTACT_NSN_GP";
-const char* const SICONOS_ONECONE_NSN_GP_HYBRID_STR = "FC3D_ONECONTACT_NSN_GP_HYBRID";
-const char* const SICONOS_ONECONE_ProjectionOnConeWithDiagonalization_STR = "ONECONE_ProjectionOnConeWithDiagonalization";
-const char* const SICONOS_ONECONE_ProjectionOnCone_STR = "ONECONE_ProjectionOnCone";
-const char* const SICONOS_ONECONE_ProjectionOnConeWithLocalIteration_STR = "ONECONE_ProjectionOnConeWithLocalIteration";
-const char* const SICONOS_ONECONE_ProjectionOnConeWithRegularization_STR = "ONECONE_projectionOnConeWithRegularization";
-const char* const SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "FC3D_NCPGlockerFBPATH";
-const char* const SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR = "FC3D_NCPGlockerFBNewton";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "FC3D_projectionOnCylinder";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR = "FC3D_projectionOnCylinderWithLocalIteration";
-const char* const SICONOS_ONECONE_ProjectionOnCone_velocity_STR = "FC3D_ProjectionOnCone_velocity";
-const char* const SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR = "FC3D ConvexQP PG solver";
-const char* const SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
-const char* const SICONOS_FRICTION_3D_EG_STR = "FC3D_ExtraGradient";
-const char* const SICONOS_FRICTION_3D_FPP_STR = "FC3D_FixedPointProjection";
-const char* const SICONOS_FRICTION_3D_VI_EG_STR = "FC3D_VI_ExtraGradient";
-const char* const SICONOS_FRICTION_3D_VI_FPP_STR = "FC3D_VI_FixedPointProjection";
-const char* const SICONOS_FRICTION_3D_HP_STR = "FC3D_HyperplaneProjection";
-const char* const SICONOS_FRICTION_3D_PROX_STR = "FC3D_PROX";
-const char* const SICONOS_FRICTION_3D_GAMS_PATH_STR = "FC3D_GAMS_PATH";
-const char* const SICONOS_FRICTION_3D_GAMS_PATHVI_STR = "FC3D_GAMS_PATHVI";
-const char* const SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR = "FC3D_GAMS_LCP_PATH";
-const char* const SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR = "FC3D_GAMS_LCP_PATHVI";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "FC3D_QUARTIC";
-const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "FC3D_QUARTIC_NU";
-const char* const SICONOS_FRICTION_3D_ACLMFP_STR = "FC3D_ACLMFP";
-const char* const SICONOS_FRICTION_3D_SOCLCP_STR = "FC3D_SOCLCP";
-const char* const SICONOS_FRICTION_3D_IPM_STR = "FC3D_IPM";
-
 /* Forward declarations for convenience functions */
 void fc3d_list_available_solvers(void);
 void fc3d_print_solver_info(solver_id_t solver_id);

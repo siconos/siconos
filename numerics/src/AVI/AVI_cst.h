@@ -30,7 +30,4 @@ enum AVI_SOLVER {
   SICONOS_AVI_PATHAVI = 801,
 };
 
-extern const char* const SICONOS_AVI_CAOFERRIS_STR;
-extern const char* const SICONOS_AVI_PATHAVI_STR;
-
 #endif

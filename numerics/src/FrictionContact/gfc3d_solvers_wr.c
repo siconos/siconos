@@ -27,9 +27,13 @@
 #include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 #include "fc3d_Solvers.h"                        // for fc3d_DeSaxceFixedPoint
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_nonsmooth_Newto...
+#include "fc3d_short_names.h"
 #include "gfc3d_Solvers.h"                       // for gfc3d_DeSaxceFixedPo...
 #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
+#include "utils/numerics_errors.h"
+/* Solver registration system */
+#include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
@@ -105,6 +109,18 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   DEBUG_END("gfc3d_nsgs_wr\n");
 }
 
+REGISTER_SOLVER(GFC3D_NSGS_WR,
+                "GFC3D_NSGS_WR",
+                "Non-smooth Gauss-Seidel for Global 3D Friction Contact with reduction",
+                NULL,
+                NULL,
+                NULL,
+                NULL,  /* error function */
+                fc3d_nsgs_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */)
+
 void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options) {
   DEBUG_BEGIN("gfc3d_admm_wr\n");
@@ -144,6 +160,17 @@ void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   }
   DEBUG_END("gfc3d_admm_wr\n");
 }
+REGISTER_SOLVER(GFC3D_ADMM_WR,
+                "GFC3D_ADMM_WR",
+                "ADMM for Global 3D Friction Contact with reduction",
+                NULL,
+                NULL,
+                NULL,
+                NULL,  /* error function */
+                fc3d_admm_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */)
 
 void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem,
                                             double* reaction, double* velocity,
@@ -188,6 +215,15 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* proble
 
   DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
 }
+
+REGISTER_SOLVER(GFC3D_NSN_AC_WR,
+                "GFC3D_NSN_AC_WR",
+                "Non-smooth Newton for Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,           /* error function */
+                fc3d_nsn_ac_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-4,                 /* default_tol */
+                0 /* is_local_solver */)
 
 void gfc3d_nonsmooth_Newton_AlartCurnier_new_wr(GlobalFrictionContactProblem* problem,
                                                 double* reaction, double* velocity,
@@ -274,6 +310,13 @@ void gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double* react
     *info = 0;
   }
 }
+REGISTER_SOLVER(GFC3D_NSGSV_WR, "GFC3D_NSGSV_WR",
+                "Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,              /* error function */
+                fc3d_nsgs_velocity_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)
 
 void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double* reaction,
                        double* velocity, double* globalVelocity, int* info,
@@ -315,6 +358,14 @@ void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double* reaction,
     *info = 0;
   }
 }
+REGISTER_SOLVER(GFC3D_PROX_WR, "GFC3D_PROX_WR",
+                "Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,              /* error function */
+                fc3d_proximal_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)
+
 
 void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double* reaction,
                                 double* velocity, double* globalVelocity, int* info,
@@ -356,6 +407,13 @@ void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double* r
     *info = 0;
   }
 }
+REGISTER_SOLVER(GFC3D_DSFP_WR, "GFC3D_DSFP_WR",
+                "Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,              /* error function */
+                fc3d_dsfp_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)
 
 void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double* reaction,
                                double* velocity, double* globalVelocity, int* info,
@@ -396,7 +454,13 @@ void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double* re
     *info = 0;
   }
 }
-
+REGISTER_SOLVER(GFC3D_TFP_WR, "GFC3D_TFP_WR",
+                "Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,              /* error function */
+                fc3d_tfp_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)
 void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
                       double* velocity, double* globalVelocity, int* info,
                       SolverOptions* options) {
@@ -436,3 +500,10 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
     *info = 0;
   }
 }
+REGISTER_SOLVER(GFC3D_IPM_SNM_WR, "GFC3D_DSFP_WRGFC3D_IPM_SNM_WR",
+                "Global 3D Friction Contact with reduction", NULL, NULL,
+                NULL, NULL,              /* error function */
+                fc3d_ipm_snm_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)

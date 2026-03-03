@@ -43,8 +43,6 @@
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_ROLLING_FRICTION_3D_ADMM_STR = "RFC3D ADMM";
-
 typedef struct {
   double* xi;
   double* xi_k;

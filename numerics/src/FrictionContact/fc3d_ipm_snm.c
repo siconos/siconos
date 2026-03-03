@@ -47,8 +47,6 @@
 #include "utils/solver_registry.h"
 #include "utils/numerics_errors.h"
 
-const char* const SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
-
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
    and the relative 2-norm of this vector: rnorm = |out|/max{|Wr|, |q|, |velocity|, |Es|} */

@@ -36,8 +36,7 @@ extern "C" {
 typedef int solver_id_t;
 
 typedef int (*SolverInitFunc)(void* problem, SolverOptions* options);
-typedef int (*SolverSolveFunc)(void* problem, double* reaction,
-                               double* velocity, SolverOptions* options);
+typedef int (*SolverSolveFunc)(void* problem, double* reaction, double* velocity, SolverOptions* options);
 typedef void (*SolverFreeFunc)(void* problem, SolverOptions* options);
 typedef double (*SolverErrorFunc)(void* problem, double* reaction,
                                   double* velocity, double* work);

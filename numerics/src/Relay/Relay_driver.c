@@ -31,14 +31,6 @@
 #include "NonSmoothDrivers.h"  // for relay_driver
 #endif
 
-const char* const SICONOS_RELAY_PGS_STR = "RELAY_PGS";
-const char* const SICONOS_RELAY_PATH_STR = "RELAY_PATH";
-const char* const SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
-const char* const SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
-const char* const SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
-const char* const SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR =
-    "test version of the solver by Cao & Ferris; DO NOT USE!";
-
 int relay_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options) {
   // Relay_display(problem);
 

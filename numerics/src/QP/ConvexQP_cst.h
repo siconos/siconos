@@ -37,11 +37,6 @@ enum CONVEXQP_SOLVER {
   SICONOS_CONVEXQP_ADMM = 1203
 };
 
-extern const char* const SICONOS_CONVEXQP_PG_STR;
-extern const char* const SICONOS_CONVEXQP_VI_FPP_STR;
-extern const char* const SICONOS_CONVEXQP_VI_EG_STR;
-extern const char* const SICONOS_CONVEXQP_ADMM_STR;
-
 /** iparam indices specific to QP solvers. */
 enum SICONOS_CONVEXQP_PGOC_IPARAM_ENUM {
   /** index in iparam to store the maximum number of iterations */

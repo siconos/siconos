@@ -52,8 +52,6 @@
 #include "NumericsVector.h"
 #endif
 
-const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
-
 // Short name for solver ID
 #ifndef GFC3D_ADMM
 #define GFC3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
