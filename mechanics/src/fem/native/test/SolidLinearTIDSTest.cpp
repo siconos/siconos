@@ -57,8 +57,6 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
   auto norm = (solid.elasticityMatrix() - S).norm();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testS : ", norm < 1.0e-16, true);
   norm = (solid.BMatrix() - B).norm();
-  siconos::algebra::print(solid.BMatrix().toDense() - B.toDense());
-
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testB: ", norm < 1.0e-16, true);
   std::cout << "✅ Basic constructor test ended with success." << std::endl;
 }

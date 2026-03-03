@@ -143,9 +143,8 @@ void siconos::mechanics::fem::FiniteElementModel::assembleElementary_B_Matrix(
   auto dim_stress = fe.dimStress();
   for (const auto& node1 : fe.nodes()) {
     auto dofIndex1 = node1->global_dof_index();
-    auto dofsize = siconos::algebra::to_index(dofIndex1.size());
-    for (siconos::algebra::Index i = 0; i < dofsize; i++)
-      for (size_t j = 0; j < siconos::algebra::to_unsigned<size_t>(dim_stress); j++) {
+    for (siconos::algebra::Index i = 0; i < dim_stress; i++)
+      for (size_t j = 0; j < dofIndex1.size(); j++) {
         auto indx = siconos::algebra::to_index(elem_cnt) * dim_stress + i;
         auto indy = siconos::algebra::to_index(j + node1_cnt * dofIndex1.size());
         Bmatrix.coeffRef(indx, dofIndex1[j]) += Be(i, indy);
@@ -395,7 +394,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
         fe->mElement()->type() == FiniteElementType::B3) {
       computeBeamElementaryMassMatrix_direct(Me, *fe, mat);
     } else {
-      std::cout << "TATATATATA GGS " << fe->mElement()->tags(0) << "\n";
       double massDensity = mat.at(fe->mElement()->tags(0)).massDensity();
       computeElementaryMassMatrix(Me, *fe, massDensity);
     }
@@ -1096,7 +1094,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direc
   double twoA = x2 * y3 - x3 * y2 + x3 * y1 - x1 * y3 + x1 * y2 - x2 * y1;
   DEBUG_PRINTF("twoA = %e\n", twoA);
   //    std::shared_ptr<SiconosDenseMatrix> B = std::make_shared<SiconosDenseMatrix>(3,ndof);
-
+  B.setZero();
   B(0, 0) = -y32;
   B(0, 2) = y31;
   B(0, 4) = -y21;
@@ -1125,18 +1123,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
   /* loop over the elements */
   for (std::shared_ptr<FiniteElement> fe : elements()) {
     if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3) {
-      double dim = mesh_->dim();
-      if (dim == 2)
-        Be.resize(3, 6);
-      else
-        Be.resize(6, 12);
+      siconos::algebra::SiconosDenseMatrix Be{fe->dimStress(), fe->ndof()};
       computeBeamElementaryBMatrix_direct(*fe, Be, mat);
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
       elem_cnt++;
     } else {
       auto dimStress =
           siconos::algebra::to_index(fe->ndofPerNode() * (fe->ndofPerNode() + 1) / 2);
-      Be.resize(dimStress, fe->ndof());
+      siconos::algebra::SiconosDenseMatrix Be{dimStress, fe->ndof()};
       const Material& material = mat.at(fe->mElement()->tags(0));
       computeElementaryBMatrix_direct(*fe, Be, material.thickness());
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
