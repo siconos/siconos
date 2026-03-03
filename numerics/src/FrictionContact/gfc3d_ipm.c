@@ -3051,14 +3051,9 @@ static int gfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
 }
 
 static int gfc3d_ipm_solve_wrap(void* problem, double* reaction,
-                                double* velocity, SolverOptions* options) {
+                                double* velocity, double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  // For global solvers, we need to handle globalVelocity separately
-  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
-  int n = gfc3d_problem->M->size0;
-  double* globalVelocity = (double*)calloc(n, sizeof(double));
-  gfc3d_IPM(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
-  free(globalVelocity);
+  gfc3d_IPM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
   return info;
 }
 
@@ -3068,7 +3063,7 @@ static void gfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(GFC3D_IPM, "GFC3D_IPM",
+REGISTER_SOLVER_3VAR(GFC3D_IPM, "GFC3D_IPM",
                 "Interior Point Method for 3D Global Friction Contact",
                 gfc3d_ipm_init_wrap,
                 gfc3d_ipm_solve_wrap,

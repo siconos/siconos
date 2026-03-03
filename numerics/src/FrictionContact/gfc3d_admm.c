@@ -1038,14 +1038,9 @@ static int gfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
 }
 
 static int gfc3d_admm_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, SolverOptions* options) {
+                                 double* velocity, double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  // For global solvers, we need to handle globalVelocity separately
-  GlobalFrictionContactProblem* gfc3d_problem = (GlobalFrictionContactProblem*)problem;
-  int n = gfc3d_problem->M->size0;
-  double* globalVelocity = (double*)calloc(n, sizeof(double));
-  gfc3d_ADMM(gfc3d_problem, reaction, velocity, globalVelocity, &info, options);
-  free(globalVelocity);
+  gfc3d_ADMM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
   return info;
 }
 
@@ -1055,7 +1050,7 @@ static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(GFC3D_ADMM, "GFC3D_ADMM",
+REGISTER_SOLVER_3VAR(GFC3D_ADMM, "GFC3D_ADMM",
                 "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
                 gfc3d_admm_init_wrap,
                 gfc3d_admm_solve_wrap,

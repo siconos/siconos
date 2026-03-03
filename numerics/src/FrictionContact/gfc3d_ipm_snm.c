@@ -1863,7 +1863,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.095
 }
-REGISTER_SOLVER(GFC3D_IPM_SNM,
+REGISTER_SOLVER_3VAR(GFC3D_IPM_SNM,
                 "GFC3D_IPM_SNM",
                 "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact",
                 NULL,

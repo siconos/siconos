@@ -87,7 +87,15 @@ int prefix##_driver_registered(ProblemType* problem, double* sol, \
     if (status != NUMERICS_OK) return status; \
   } \
   \
-  int status = solver->solve(problem, sol, aux, options); \
+  int status; \
+  if (solver->has_3var) { \
+    /* For 3-parameter solvers (e.g., GFC3D with globalVelocity) */ \
+    double* third_var = (double*)calloc(1, sizeof(double)); /* placeholder */ \
+    status = solver->solve3(problem, sol, aux, third_var, options); \
+    free(third_var); \
+  } else { \
+    status = solver->solve(problem, sol, aux, options); \
+  } \
   \
   if (solver->free) solver->free(problem, options); \
   \

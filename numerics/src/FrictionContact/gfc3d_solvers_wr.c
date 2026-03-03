@@ -109,7 +109,7 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   DEBUG_END("gfc3d_nsgs_wr\n");
 }
 
-REGISTER_SOLVER(GFC3D_NSGS_WR,
+REGISTER_SOLVER_3VAR(GFC3D_NSGS_WR,
                 "GFC3D_NSGS_WR",
                 "Non-smooth Gauss-Seidel for Global 3D Friction Contact with reduction",
                 NULL,
@@ -160,7 +160,7 @@ void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   }
   DEBUG_END("gfc3d_admm_wr\n");
 }
-REGISTER_SOLVER(GFC3D_ADMM_WR,
+REGISTER_SOLVER_3VAR(GFC3D_ADMM_WR,
                 "GFC3D_ADMM_WR",
                 "ADMM for Global 3D Friction Contact with reduction",
                 NULL,
@@ -216,7 +216,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* proble
   DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
 }
 
-REGISTER_SOLVER(GFC3D_NSN_AC_WR,
+REGISTER_SOLVER_3VAR(GFC3D_NSN_AC_WR,
                 "GFC3D_NSN_AC_WR",
                 "Non-smooth Newton for Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,           /* error function */
@@ -310,7 +310,7 @@ void gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double* react
     *info = 0;
   }
 }
-REGISTER_SOLVER(GFC3D_NSGSV_WR, "GFC3D_NSGSV_WR",
+REGISTER_SOLVER_3VAR(GFC3D_NSGSV_WR, "GFC3D_NSGSV_WR",
                 "Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,              /* error function */
                 fc3d_nsgs_velocity_set_default, /* set_default */
@@ -358,7 +358,7 @@ void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double* reaction,
     *info = 0;
   }
 }
-REGISTER_SOLVER(GFC3D_PROX_WR, "GFC3D_PROX_WR",
+REGISTER_SOLVER_3VAR(GFC3D_PROX_WR, "GFC3D_PROX_WR",
                 "Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,              /* error function */
                 fc3d_proximal_set_default, /* set_default */
@@ -407,7 +407,7 @@ void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double* r
     *info = 0;
   }
 }
-REGISTER_SOLVER(GFC3D_DSFP_WR, "GFC3D_DSFP_WR",
+REGISTER_SOLVER_3VAR(GFC3D_DSFP_WR, "GFC3D_DSFP_WR",
                 "Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,              /* error function */
                 fc3d_dsfp_set_default, /* set_default */
@@ -454,7 +454,7 @@ void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double* re
     *info = 0;
   }
 }
-REGISTER_SOLVER(GFC3D_TFP_WR, "GFC3D_TFP_WR",
+REGISTER_SOLVER_3VAR(GFC3D_TFP_WR, "GFC3D_TFP_WR",
                 "Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,              /* error function */
                 fc3d_tfp_set_default, /* set_default */
@@ -500,7 +500,7 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
     *info = 0;
   }
 }
-REGISTER_SOLVER(GFC3D_IPM_SNM_WR, "GFC3D_DSFP_WRGFC3D_IPM_SNM_WR",
+REGISTER_SOLVER_3VAR(GFC3D_IPM_SNM_WR, "GFC3D_DSFP_WRGFC3D_IPM_SNM_WR",
                 "Global 3D Friction Contact with reduction", NULL, NULL,
                 NULL, NULL,              /* error function */
                 fc3d_ipm_snm_set_default, /* set_default */
