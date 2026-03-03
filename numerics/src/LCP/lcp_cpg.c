@@ -270,10 +270,9 @@ static int lcp_cpg_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_cpg_solve_wrap(void* problem, double* reaction,
-                              double* velocity, SolverOptions* options) {
+static int lcp_cpg_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_cpg((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  lcp_cpg((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

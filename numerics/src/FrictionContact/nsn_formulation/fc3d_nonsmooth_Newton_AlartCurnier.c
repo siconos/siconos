@@ -127,6 +127,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
     SOLVER_TOL(options_vi_eg) = sqrt(SOLVER_TOL(options));
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] =
         SICONOS_VI_ERROR_EVALUATION_LIGHT;
+
     fc3d_VI_ExtraGradient(problem, reaction, velocity, info, options_vi_eg);
 
     fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);

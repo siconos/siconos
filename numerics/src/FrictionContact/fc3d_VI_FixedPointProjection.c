@@ -154,6 +154,7 @@ static int fc3d_vi_fpp_solve_wrap(void* problem, double* reaction, double* veloc
 static void fc3d_vi_fpp_set_default(SolverOptions* options) {
   (void)options;
   /* No special defaults needed - uses standard SolverOptions */
+  variationalInequality_FixedPointProjection_set_default(options);
 }
 
 REGISTER_SOLVER(FC3D_VI_FPP,

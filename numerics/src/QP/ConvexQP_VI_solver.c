@@ -114,8 +114,7 @@ void convexQP_VI_solver(ConvexQP* problem, double* z, double* w, int* info,
  */
 
 static void convexqp_vi_fpp_set_default(SolverOptions* options) {
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  variationalInequality_FixedPointProjection_set_default(options);
 }
 
 static int convexqp_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
@@ -149,8 +148,7 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_VI_FPP, "CONVEXQP_VI_FPP",
                 0      /* is_local_solver */);
 
 static void convexqp_vi_eg_set_default(SolverOptions* options) {
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  variationalInequality_ExtraGradient_set_default(options);  
 }
 
 static int convexqp_vi_eg_init_wrap(void* problem, SolverOptions* options) {

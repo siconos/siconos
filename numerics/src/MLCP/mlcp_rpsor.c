@@ -205,10 +205,9 @@ static int mlcp_rpsor_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_rpsor_solve_wrap(void* problem, double* reaction,
-                                  double* velocity, SolverOptions* options) {
+static int mlcp_rpsor_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_rpsor((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  mlcp_rpsor((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

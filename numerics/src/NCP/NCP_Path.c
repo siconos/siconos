@@ -163,11 +163,10 @@ static int ncp_path_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int ncp_path_solve_wrap(void* problem, double* reaction,
-                               double* velocity, SolverOptions* options) {
+static int ncp_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
   NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
-  ncp_path(ncp, reaction, velocity, &info, options);
+  ncp_path(ncp, z, w, &info, options);
   return info;
 }
 

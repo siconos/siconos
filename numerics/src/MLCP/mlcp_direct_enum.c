@@ -123,10 +123,9 @@ static int mlcp_direct_enum_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_direct_enum_solve_wrap(void* problem, double* reaction,
-                                        double* velocity, SolverOptions* options) {
+static int mlcp_direct_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_direct_enum((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  mlcp_direct_enum((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
@@ -143,6 +142,6 @@ REGISTER_SOLVER(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT_ENUM",
                 mlcp_direct_enum_free_wrap,
                 NULL,  /* error function */
                 mlcp_direct_enum_set_default,  /* set_default */
-                1000,  /* default_max_iter */
+                100000000,  /* default_max_iter */
                 1e-12, /* default_tol */
                 0      /* is_local_solver */);

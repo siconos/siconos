@@ -129,7 +129,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       return init_status;
     }
   }
-
+  
   /* Call the solver */
   numerics_printf_verbose(1, "fc3d_driver: calling solver...");
   int solve_status = solver->solve(problem, reaction, velocity, options);

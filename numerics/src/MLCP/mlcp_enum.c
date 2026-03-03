@@ -128,6 +128,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
   unsigned long long int nbCase = enum_compute_nb_cases(problem->m);
 
   if (itermax < (int)nbCase) {
+    printf("mlcp_enum_block itermax %i nbCase % i ", itermax, nbCase);
     numerics_warning("mlcp_enum_block",
                      "all the cases will not be enumerated since itermax < nbCase)");
   }
@@ -409,10 +410,9 @@ static int mlcp_enum_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_enum_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, SolverOptions* options) {
+static int mlcp_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_enum((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  mlcp_enum((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
@@ -423,6 +423,6 @@ REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
                 NULL,    /* free function */
                 NULL,    /* error function */
                 mlcp_enum_set_default,  /* set_default */
-                10000000, /* default_max_iter */
+                100000000, /* default_max_iter */
                 1e-6,    /* default_tol */
                 0        /* is_local_solver */);

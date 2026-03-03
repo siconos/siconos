@@ -80,10 +80,9 @@ static int mlcp_direct_simplex_init_wrap(void* problem, SolverOptions* options) 
   return NUMERICS_OK;
 }
 
-static int mlcp_direct_simplex_solve_wrap(void* problem, double* reaction,
-                                           double* velocity, SolverOptions* options) {
+static int mlcp_direct_simplex_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_direct_simplex((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  mlcp_direct_simplex((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

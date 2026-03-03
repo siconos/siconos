@@ -93,6 +93,7 @@ static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* veloci
 static void fc3d_vi_eg_set_default(SolverOptions* options) {
   (void)options;
   /* No special defaults needed - uses standard SolverOptions */
+  variationalInequality_ExtraGradient_set_default(options);  
 }
 
 REGISTER_SOLVER(FC3D_VI_EG,

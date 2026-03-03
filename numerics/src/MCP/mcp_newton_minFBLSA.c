@@ -93,11 +93,10 @@ static int mcp_newton_minfblsa_init_wrap(void* problem, SolverOptions* options) 
   return NUMERICS_OK;
 }
 
-static int mcp_newton_minfblsa_solve_wrap(void* problem, double* reaction,
-                                          double* velocity, SolverOptions* options) {
+static int mcp_newton_minfblsa_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
   MixedComplementarityProblem* mcp = (MixedComplementarityProblem*)problem;
-  mcp_newton_min_FBLSA(mcp, reaction, velocity, &info, options);
+  mcp_newton_min_FBLSA(mcp, z, w, &info, options);
   return info;
 }
 

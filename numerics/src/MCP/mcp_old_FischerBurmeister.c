@@ -146,11 +146,10 @@ static int mcp_old_fb_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mcp_old_fb_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, SolverOptions* options) {
+static int mcp_old_fb_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
   MixedComplementarityProblem_old* mcp = (MixedComplementarityProblem_old*)problem;
-  mcp_old_FischerBurmeister(mcp, reaction, velocity, &info, options);
+  mcp_old_FischerBurmeister(mcp, z, w, &info, options);
   return info;
 }
 

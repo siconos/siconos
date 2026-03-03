@@ -29,6 +29,9 @@
 #include "SiconosConfig.h"           // for WITH_FCLIB // IWYU pragma: keep
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
+
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES  */
 #include "siconos_debug.h"           // for DEBUG_EXPR
 
 // avoid a conflict with old csparse.h in case fclib includes it
@@ -82,8 +85,8 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     for (unsigned int k = 0; k < 3 * nc; k++) reaction_guess[k] = reaction[k];
     for (unsigned int k = 0; k < 3 * nc; k++) velocity_guess[k] = velocity[k];
   }
-
   DEBUG_EXPR(frictionContact_display(FC););
+  DEBUG_EXPR(solver_options_print(numerics_solver_options););
 
   int info = fc3d_driver(FC, reaction, velocity, numerics_solver_options);
 

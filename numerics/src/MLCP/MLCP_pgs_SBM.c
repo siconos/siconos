@@ -255,10 +255,9 @@ static int mlcp_pgs_sbm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_pgs_sbm_solve_wrap(void* problem, double* reaction,
-                                    double* velocity, SolverOptions* options) {
+static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_pgs_SBM((MixedLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  mlcp_pgs_SBM((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

@@ -518,9 +518,9 @@ static int vi_fpp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int vi_fpp_solve_wrap(void* problem, double* x, double* w, SolverOptions* options) {
+static int vi_fpp_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
   int info = NUMERICS_OK;
-  variationalInequality_FixedPointProjection((VariationalInequality*)problem, x, w, &info, options);
+  variationalInequality_FixedPointProjection((VariationalInequality*)problem, x, F, &info, options);
   return info;
 }
 

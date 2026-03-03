@@ -156,10 +156,9 @@ static int lcp_qp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_qp_solve_wrap(void* problem, double* reaction,
-                             double* velocity, SolverOptions* options) {
+static int lcp_qp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_qp((LinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  lcp_qp((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

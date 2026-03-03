@@ -82,11 +82,10 @@ static int ncp_newton_fblsa_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int ncp_newton_fblsa_solve_wrap(void* problem, double* reaction,
-                                       double* velocity, SolverOptions* options) {
+static int ncp_newton_fblsa_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
   NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
-  ncp_newton_FBLSA(ncp, reaction, velocity, &info, options);
+  ncp_newton_FBLSA(ncp, z, w, &info, options);
   return info;
 }
 
