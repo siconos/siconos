@@ -24,7 +24,7 @@
 # Set minimum version for cmake
 # We advise the most recent version of cmake.
 # Use python3 -m pip install cmake to get it.
-cmake_minimum_required(VERSION 3.19) 
+cmake_minimum_required(VERSION 3.19)
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
@@ -44,8 +44,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 include(new_cmake_functions)
 
 # Force out-of-source build
-if ("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
-  message (SEND_ERROR "In source building not supported (not recommanded indeed). You need to :
+if("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
+  message(SEND_ERROR "In source building not supported (not recommanded indeed). You need to :
     * cleanup your source directory :  \"rm -rf ./CMakeFiles/ ./CMakeCache.txt\"
     * try configure process again in a new directory
     (e.g. mkdir <anywhere>/build ; cd <anywhere>/build ; cmake ${CMAKE_SOURCE_DIR}) ...")
@@ -54,7 +54,11 @@ endif()
 
 # If not given, turn build type to release mode.
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  if(WITH_ASAN) # asan conf will be done at component level (in ComponentSetup.cmake)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  else()
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  endif()
 endif()
 
 # Some useful macros and functions
@@ -115,7 +119,7 @@ endforeach()
 if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
   message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
 endif()
-  
+
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)
@@ -143,13 +147,13 @@ void print(std::ranges::range auto const& container) {
 int
 main()
 {}
-" HAS_RANGE)
+"    HAS_RANGE)
   if(NOT HAS_RANGE)
     message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
   endif()
 
   # set(BUILD_AS_CPP ON)
-  
+
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -206,7 +210,7 @@ endforeach()
 if(WITH_DOCUMENTATION)
   finalize_doc()
 endif()
-  
+
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 

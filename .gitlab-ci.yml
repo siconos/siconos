@@ -156,6 +156,42 @@ ubuntu24.04-release:test:
       - .devel-rules
     needs: ["ubuntu24.04-release:build"]
 
+# ------ ubuntu 24, asan (sanitizer) setup -------
+# This job is to be started manually through gitlab interface
+ubuntu24.04-asan:configure:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+    CDASH_SUBMIT: 1
+    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_asan.cmake
+  extends:
+    - .siconos-configure
+    - .devel-rules
+  needs:
+    - job: ubuntu24.04:docker-build
+      optional: true
+  when: manual
+
+ubuntu24.04-asan:build:
+  variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+      CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["ubuntu24.04-asan:configure"]
+  when: manual
+
+ubuntu24.04-asan:test:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-test
+    - .devel-rules
+  needs: ["ubuntu24.04-asan:build"]
+  when: manual
+
+
 # ------ ubuntu 22, default setup -------
 ubuntu22.04-release:configure:
    variables:
