@@ -79,7 +79,7 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
   cqpsolver_options->iparam[SICONOS_IPARAM_MAX_ITER] =
       options->iparam[SICONOS_IPARAM_MAX_ITER];
   // cqpsolver_options->dWork =  options->dWork;
-  convexQP_ProjectedGradient(cqp, reaction, velocity, &info, cqpsolver_options);
+  convexQP_ProjectedGradient(cqp, reaction, velocity, info, cqpsolver_options);
   // options->solverId = SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER;
 
   /* **** Criterium convergence **** */
