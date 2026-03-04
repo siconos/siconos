@@ -18,43 +18,41 @@
 
 #include "MBTB_PYTHON_API.hpp"
 
+#include <boost/math/quaternion.hpp>
 #include <cassert>
 
-#include "CADMBTB_API.hpp"  // for CADMBTB_init ...
-#include "MBTB_Body.hpp"
-#include "MBTB_DATA.hpp"
-#include "MBTB_internalTool.hpp"  // For MBTB_updateContactFromDS
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-// #include "CADMBTB_PYTHON_API.hpp"
-#include <boost/math/quaternion.hpp>
-// #include "KneeJointR.hpp"
 #include "BoundaryCondition.hpp"
+#include "CADMBTB_API.hpp"  // for CADMBTB_init ...
 #include "EqualityConditionNSL.hpp"
+#include "FrictionContact_options.h"
+#include "GenericMechanical.hpp"
 #include "Interaction.hpp"
+#include "MBTB_Body.hpp"
 #include "MBTB_Contact.hpp"
 #include "MBTB_ContactRelation.hpp"
+#include "MBTB_DATA.hpp"
 #include "MBTB_FC3DContactRelation.hpp"
 #include "MBTB_JointR.hpp"
 #include "MBTB_TimeStepping.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "MBTB_TimeSteppingProj.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-#include "OneStepNSProblem.hpp"
-#include "PivotJointR.hpp"
-#include "PrismaticJointR.hpp"
-#include "TimeStepping.hpp"
-#include "ace.h"
-// #include <BRepTools.hxx>
-#include "GenericMechanical.hpp"
+#include "MBTB_internalTool.hpp"  // For MBTB_updateContactFromDS
 #include "MLCPProjectOnConstraints.hpp"
 #include "MoreauJeanCombinedProjectionOSI.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "OneStepNSProblem.hpp"
+#include "PivotJointR.hpp"
+#include "PrismaticJointR.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "SolverOptions.h"  // for SolverOptions struct
 #include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
 #include "Topology.hpp"
+#include "ace.h"
 // #define MBTB_MOREAU_YES
 //  #define DEBUG_STDOUT
 //  #define DEBUG_NOCOLOR
@@ -210,8 +208,7 @@ void MBTB_BodyBuildComputeInitPosition(
    */
   ::boost::math::quaternion<double> quattrf(q1, q2, q3, q4);
 
-  ::boost::math::quaternion<double> quatOG(0, (*modelCenterMass)(0),
-                                           (*modelCenterMass)(1),
+  ::boost::math::quaternion<double> quatOG(0, (*modelCenterMass)(0), (*modelCenterMass)(1),
                                            (*modelCenterMass)(2));
   ::boost::math::quaternion<double> quatRes(0, 0, 0, 0);
   quatRes = quattrf * quatOG / quattrf;
@@ -522,7 +519,7 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   // osnspb.reset(new Equality());
   // osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::GenericMechanical>(
-      SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      SICONOS_ONECONE_NSN);
 
   osnspb->setKeepLambdaAndYState(true);
   // osnspb->numericsSolverOptions()->iparam[1]=0;
