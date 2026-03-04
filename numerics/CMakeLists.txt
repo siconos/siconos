@@ -337,8 +337,8 @@ if(WITH_CUDA)
 
   # target_compile_definitions(${COMPONENT} PUBLIC WITH_CUDA)
 
-  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/fc2d_nsgs_graph_permut_cuda.cu")
-  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/fc2d_nsgs_graph_permut_cuda_blocklegacy.cu")
+  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/parallel/gpu/fc2d_nsgs_graph_permut_cuda.cu")
+  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/parallel/gpu/fc2d_nsgs_graph_permut_cuda_blocklegacy.cu")
 
   message(STATUS "CUDA support enabled for numerics")
   message(STATUS "  CUDA Toolkit version: ${CUDAToolkit_VERSION}")
