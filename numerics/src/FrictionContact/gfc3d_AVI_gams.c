@@ -38,7 +38,7 @@
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
 #include "siconos_debug.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #define NB_APPROX 10
 
 static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, void* env) {

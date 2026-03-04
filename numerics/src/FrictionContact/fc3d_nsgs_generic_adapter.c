@@ -36,8 +36,8 @@
 #include "fc3d_NCPGlockerFixedPoint.h"
 #include "fc3d_unitary_enumerative.h"
 #include "numerics_verbose.h"
-#include "utils/naming_conventions.h"  // Standardized naming conventions
-#include "utils/numerics_errors.h"
+#include "naming_conventions.h"  // Standardized naming conventions
+#include "numerics_errors.h"
 #include "fc3d_2NCP_Glocker.h"
 #include "fc3d_compute_error.h"
 

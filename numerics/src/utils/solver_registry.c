@@ -23,7 +23,7 @@
 #include "solver_registry.h"
 #include <stdio.h>
 #include <string.h>
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* Static registry table */
 static const SolverEntry* registry[SOLVER_REGISTRY_MAX];

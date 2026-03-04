@@ -33,7 +33,7 @@
 
 #include "SolverOptions.h"
 #include "NonSmoothGaussSeidel_options.h"
-#include "utils/solver_registry.h"
+#include "solver_registry.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {

@@ -24,7 +24,7 @@
 
 #include "NumericsMatrix.h"
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef __cplusplus
 #undef restrict

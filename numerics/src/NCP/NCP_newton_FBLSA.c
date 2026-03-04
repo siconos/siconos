@@ -27,8 +27,8 @@
 #include "SiconosBlas.h"                      // for cblas_dnrm2
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB) {
   phi_FB(((NonlinearComplementarityProblem*)data_opaque)->n, z, F, F_FB);
 }

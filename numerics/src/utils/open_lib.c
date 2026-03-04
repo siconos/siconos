@@ -33,7 +33,7 @@ typedef void* PluginHandle;
 #endif
 
 #include "open_lib.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void* open_library(const char* lib_name, const int flags) {
   void* HandleRes;

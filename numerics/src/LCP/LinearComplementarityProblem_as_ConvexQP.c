@@ -25,7 +25,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_PRINT
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX) {
   DEBUG_PRINT("Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)\n")

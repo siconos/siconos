@@ -27,7 +27,7 @@
 #include "RelayProblem.h"                  // for RelayProblem
 #include "SparseBlockMatrix.h"             // for SBMfree, SparseBlockStruct...
 #include "numerics_verbose.h"              // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 GenericMechanicalProblem* genericMechanicalProblem_new() {
   GenericMechanicalProblem* paux =

@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                  // for solver_options_id_to_name
 #include "assert.h"                         // for assert
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
                SolverOptions* options) {

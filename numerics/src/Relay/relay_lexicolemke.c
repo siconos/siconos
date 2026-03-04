@@ -29,8 +29,8 @@
 #include "Relay_options.h"                     // for SICONOS_LCP_LEMKE
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
                        SolverOptions *options) {
   int i;

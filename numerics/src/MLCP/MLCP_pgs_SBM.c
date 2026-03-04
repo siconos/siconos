@@ -35,8 +35,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
                                            SparseBlockStructuredMatrix* const blmat,

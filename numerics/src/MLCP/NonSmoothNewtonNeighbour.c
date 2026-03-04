@@ -27,7 +27,7 @@
 #include "SolverOptions.h"
 #include "math.h"              // for fabs, pow
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
 #include "stdlib.h"            // for exit, rand, EXIT_FAILURE
 static int sN;

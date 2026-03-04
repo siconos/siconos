@@ -26,7 +26,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* #define DEWBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

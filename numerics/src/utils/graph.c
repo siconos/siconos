@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 struct node* create_node(int v) {
   struct node* newNode = malloc(sizeof(struct node));

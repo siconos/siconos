@@ -26,7 +26,7 @@
 #include "RollingFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "SiconosBlas.h"                          // for cblas_dcopy, cblas_d...
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "rolling_fc_Solvers.h"                   // for fc3d_DeSaxceFixedPoint
 #include "rfc3d_short_names.h"
 // #include "gfc3d_compute_error.h"

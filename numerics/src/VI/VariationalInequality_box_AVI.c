@@ -35,7 +35,7 @@
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 #include "solver_registry.h"
 #include "numerics_errors.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;

@@ -44,8 +44,8 @@
 // #include "siconos_debug.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u

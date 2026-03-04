@@ -22,7 +22,7 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_problem) {
   lcp_problem->size = 2 * problem->size;

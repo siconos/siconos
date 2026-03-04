@@ -39,7 +39,7 @@
 #include "fclib_interface.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 #include "timers_interf.h"  // for MAYBE_UNUSED
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

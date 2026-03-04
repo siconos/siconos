@@ -44,7 +44,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
-#include "utils/numerics_errors.h"  // for CHECK_NULL, CHECK_ARG, etc.
+#include "numerics_errors.h"  // for CHECK_NULL, CHECK_ARG, etc.
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

@@ -35,8 +35,8 @@
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "gfc3d_ipm.h"

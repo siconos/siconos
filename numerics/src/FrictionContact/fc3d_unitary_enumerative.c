@@ -738,8 +738,8 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem *probl
  * These are local solvers used within NSGS for single contact problems.
  */
 
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* Minimal set_default functions for QUARTIC solvers */
 static void fc3d_quartic_set_default(SolverOptions* options) {

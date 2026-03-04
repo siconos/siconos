@@ -36,8 +36,8 @@
 #include "soclcp_projection.h"                            // for soclcp_proj...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem,

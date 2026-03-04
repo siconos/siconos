@@ -29,7 +29,7 @@
 #include "SolverOptions.h"          // for SolverOptions
 #include "VariationalInequality.h"  // for VariationalInequality
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"          // for DEBUG_PRINTF
 
 int variationalInequality_computeError(VariationalInequality* problem, double* z, double* w,

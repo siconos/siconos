@@ -40,7 +40,7 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "NumericsMatrix.h"
 #include "lp_lib.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis) {
   unsigned nrows = P->size_ineq;

@@ -28,8 +28,8 @@ dim(v)=nn
 #include "mlcp_direct_path_enum.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #include <stdio.h>  // for printf
 

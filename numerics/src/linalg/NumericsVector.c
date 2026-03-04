@@ -28,7 +28,7 @@
 #include "SiconosBlas.h"
 #include "float.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void NV_display(const double* const m, int nRow) {
   int lin;

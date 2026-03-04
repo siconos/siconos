@@ -45,8 +45,8 @@
 #include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #define BASIS_OFFSET 1
 

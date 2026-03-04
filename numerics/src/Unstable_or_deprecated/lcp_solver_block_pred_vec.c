@@ -35,7 +35,7 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #endif
 
 int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,

@@ -35,7 +35,7 @@
 #else
 #include <stdbool.h>  // for bool
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #endif
 
 double search_Goldstein_standalone(int n, double* theta, double preRHS, search_data* ls_data) {

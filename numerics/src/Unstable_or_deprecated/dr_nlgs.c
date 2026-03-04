@@ -23,7 +23,7 @@
 #include "Relay_Solvers.h"
 #include "SiconosBlas.h"
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 void dr_nlgs(RelayProblem *problem, double *z, double *w, int *info, SolverOptions *options) {
   double *vec = problem->M->matrix0;
   double *q = problem->q;

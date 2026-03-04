@@ -28,7 +28,7 @@
 #include "NumericsVector.h"
 #include "SiconosBlas.h"              // for cblas_dcopy
 #include "numerics_verbose.h"         // for numerics_error, numerics_w...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 #include "sanitizer.h"                // for cblas_dcopy_msan
 #include "siconos_debug.h"            // for DEBUG_EXPR, DEBUG_PRINTF

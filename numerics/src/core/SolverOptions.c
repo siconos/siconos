@@ -26,7 +26,7 @@
 #include <string.h>  // for strcmp
 
 /* Solver registration system (NEW) */
-#include "utils/solver_registry.h"
+#include "solver_registry.h"
 
 #include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
 #include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
@@ -59,7 +59,7 @@
 #include "rfc3d_onecone_nonsmooth_Newton_solvers.h"
 #include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /** String constant for unknown solvers */
 static const char* const SICONOS_NONAME_STR = "UNKNOWN";

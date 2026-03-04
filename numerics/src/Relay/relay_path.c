@@ -27,12 +27,12 @@
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 #include "Relay_options.h"
-#include "tools/InterfaceToPathFerris/SimpleLCP.h"
+#include "InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void relay_path(RelayProblem *problem, double *z, double *w, int *info,
                 SolverOptions *options) {

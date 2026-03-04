@@ -41,7 +41,7 @@
 #include "NumericsMatrix.h"
 #endif
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 // #define VERBOSE_DEBUG
 

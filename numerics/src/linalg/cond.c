@@ -23,7 +23,7 @@
 
 #include "NSSTools.h"       // for min
 #include "SiconosLapack.h"  // for DGESVD, lapack_int
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 double cond(double *A, int n, int m) {
   //#ifdef COMPLETE_LAPACK_LIBRARIES

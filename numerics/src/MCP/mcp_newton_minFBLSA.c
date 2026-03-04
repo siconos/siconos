@@ -27,8 +27,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   MixedComplementarityProblem* data = (MixedComplementarityProblem*)data_opaque;

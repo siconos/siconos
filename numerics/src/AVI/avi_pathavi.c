@@ -22,7 +22,7 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 #include "numerics_errors.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_PATHVI
 

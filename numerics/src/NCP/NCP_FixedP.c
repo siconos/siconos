@@ -23,7 +23,7 @@
 #include "SolverOptions.h"
 #include "fc3d_2NCP_Glocker.h"  // for compute_Z_GlockerFixedP
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "stdio.h"              // for printf
 
 /*============================ Fixed point Solver ==================================*/

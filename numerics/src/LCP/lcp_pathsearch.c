@@ -35,8 +35,8 @@
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_EXPR_WE
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                     SolverOptions* options) {

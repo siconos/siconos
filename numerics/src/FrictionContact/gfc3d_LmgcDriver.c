@@ -30,7 +30,7 @@
 #include "SiconosConfig.h"                 // for WITH_FCLIB  // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
 
 #ifdef WITH_FCLIB

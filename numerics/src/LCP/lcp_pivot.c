@@ -38,8 +38,8 @@
 #include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_EXPR_WE
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void lcp_pivot(LinearComplementarityProblem* problem, double* u, double* s, int* info,
                SolverOptions* options) {

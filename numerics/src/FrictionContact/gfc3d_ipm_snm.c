@@ -37,7 +37,7 @@
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"
 
 /* #define DEBUG_MESSAGES */
@@ -53,8 +53,8 @@
 #include "siconos_debug.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #if defined(WITH_FCLIB) && defined(WITH_HDF5)
 #include <fclib.h>

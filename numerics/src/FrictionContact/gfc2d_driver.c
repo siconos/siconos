@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"                 // for DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES

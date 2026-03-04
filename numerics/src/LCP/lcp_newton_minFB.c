@@ -27,8 +27,8 @@
 #include "min_merit.h"                     // for F_min, Jac_F_min
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 static void lcp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   F_min(0, ((LinearComplementarityProblem*)data_opaque)->size, z, F, Fmin);
 }

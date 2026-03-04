@@ -24,7 +24,7 @@
 
 #include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void rolling_fc2d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                           RollingFrictionContactProblem* localproblem,

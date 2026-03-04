@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "NSSTools.h"  // for min_part
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void min_part(double* x, double* sol, int n)
 

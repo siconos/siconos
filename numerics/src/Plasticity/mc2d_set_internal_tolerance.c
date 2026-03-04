@@ -24,7 +24,7 @@
 #include "SolverOptions.h"         // for SolverOptions
 #include "mc2d_solvers.h"          // for mc2d_set_internalsolver_tolerance
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {

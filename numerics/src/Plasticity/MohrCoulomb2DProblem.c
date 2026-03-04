@@ -31,7 +31,7 @@
 //#define DEBUG_MESSAGES
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"

@@ -40,8 +40,8 @@
 #include "op3x3.h"                        // for cpy3, mvp3x3
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_CHECK */
 /* #define DEBUG_NOCOLOR */

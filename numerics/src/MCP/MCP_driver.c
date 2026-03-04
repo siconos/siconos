@@ -25,7 +25,7 @@
 #include "NumericsFwd.h"       // for SolverOptions, MixedComplementarityPro...
 #include "SolverOptions.h"     // for SolverOptions
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 int mcp_driver(MixedComplementarityProblem* problem, double* z, double* Fmcp,
                SolverOptions* options) {

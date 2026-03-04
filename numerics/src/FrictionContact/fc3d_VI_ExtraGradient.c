@@ -32,8 +32,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
                            int *info, SolverOptions *options) {

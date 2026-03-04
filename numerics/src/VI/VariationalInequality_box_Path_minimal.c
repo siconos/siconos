@@ -4,7 +4,7 @@
 #include "VI_cst.h"
 #include "solver_registry.h"
 #include "numerics_errors.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void vi_box_path(VariationalInequality* problem, double *z, double *F, int *info, SolverOptions* options);
 

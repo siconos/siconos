@@ -27,7 +27,7 @@
 
 #include "NumericsFwd.h"    // for SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-#include "utils/naming_conventions.h"  // Standardized naming conventions and macros
+#include "naming_conventions.h"  // Standardized naming conventions and macros
 
 /* Forward declaration for solver registry (avoid circular include) */
 typedef int solver_id_t;

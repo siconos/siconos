@@ -35,7 +35,7 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"

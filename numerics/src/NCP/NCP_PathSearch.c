@@ -48,8 +48,8 @@
 #include "siconos_debug.h"                    // for DEBUG_PRINT, DEBUG_PRINTF
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /** update the lcp subproblem: M, q and r
  * \param problem the NCP problem to solve
  * \param lcp_subproblem the lcp problem to fill

@@ -24,7 +24,7 @@
 #include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_dscal, cblas_dgemv
 #include "assert.h"          // for assert
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z)
  */

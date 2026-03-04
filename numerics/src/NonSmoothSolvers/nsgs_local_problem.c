@@ -18,7 +18,7 @@
 
 #include "nsgs_local_problem.h"
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include <stdlib.h>
 #include <string.h>
 

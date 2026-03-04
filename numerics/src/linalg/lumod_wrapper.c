@@ -31,7 +31,7 @@
 #include "SiconosLapack.h"  // for lapack_int, DGETRF, DGETRS
 #include "lumod_dense.h"    // for LUmod_dense, Lprod_dense, Usolve_dense
 #include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #define TOL_BLU 1e-30
 #define BASIS_OFFSET 1

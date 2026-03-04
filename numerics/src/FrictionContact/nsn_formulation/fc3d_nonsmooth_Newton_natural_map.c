@@ -31,8 +31,8 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
 #include "numerics_verbose.h"
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_NaturalMapFunction(unsigned int problemSize, NaturalMapFun3x3Ptr computeACFun3x3,
                              double* reaction, double* velocity, double* mu, double* rho,

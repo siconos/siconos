@@ -29,8 +29,8 @@ dim(v)=nn
 #include "mlcp_direct_FB.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...

@@ -37,8 +37,8 @@
 #include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
 #include "numerics_verbose.h"
-#include "utils/naming_conventions.h"  // Standardized naming conventions
-#include "utils/numerics_errors.h"
+#include "naming_conventions.h"  // Standardized naming conventions
+#include "numerics_errors.h"
 
 /*Static variables */
 

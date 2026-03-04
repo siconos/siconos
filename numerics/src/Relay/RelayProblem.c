@@ -26,7 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void Relay_display(RelayProblem* p) {
   assert(p);

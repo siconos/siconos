@@ -31,7 +31,7 @@
 #include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
 #include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "pinv.h"                    // for pinv
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"

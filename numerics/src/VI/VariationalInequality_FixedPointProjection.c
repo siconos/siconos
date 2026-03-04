@@ -32,7 +32,7 @@
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
 #include "numerics_errors.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 static int determine_convergence(double error, double *tolerance, int iter,
                                  SolverOptions *options, VariationalInequality *problem,

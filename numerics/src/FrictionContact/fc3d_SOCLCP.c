@@ -35,8 +35,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem *,

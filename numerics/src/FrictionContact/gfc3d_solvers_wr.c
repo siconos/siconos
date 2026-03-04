@@ -31,10 +31,10 @@
 #include "gfc3d_Solvers.h"                       // for gfc3d_DeSaxceFixedPo...
 #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */

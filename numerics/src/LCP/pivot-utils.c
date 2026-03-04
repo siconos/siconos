@@ -32,7 +32,7 @@
 #include "lumod_wrapper.h"  // for SN_lumod_dense_data, SN_lumod_find_a...
 #include "sanitizer.h"      // for cblas_dcopy_msan
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR_WE, DEBUG_G...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #define TOL_LEXICO DBL_EPSILON * 10000
 #define MIN_INCREASE 10

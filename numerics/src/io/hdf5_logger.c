@@ -29,7 +29,7 @@
 #include "assert.h"
 // #include "CSparseMatrix.h"
 #include "CSparseMatrix.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 bool SN_logh5_check_gzip(void) {
   unsigned filter_info;

@@ -26,7 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void linearComplementarity_display(LinearComplementarityProblem* problem) {
   assert(problem);

@@ -36,8 +36,8 @@
 #include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_BEGIN
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

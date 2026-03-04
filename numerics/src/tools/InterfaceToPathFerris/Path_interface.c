@@ -46,7 +46,7 @@ extern "C" {
 //#define DEBUG_MESSAGES
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #if defined(__cplusplus)
 #undef restrict

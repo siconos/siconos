@@ -23,7 +23,7 @@
 #include "NumericsMatrix.h"  // for NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy
 #include "assert.h"          // for assert
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin) {
   assert(z);

@@ -31,8 +31,8 @@ Ferris solves the subsequent AVI.
 #include "lcp_cst.h"                       // for SICONOS_LCP_AVI_CAOFERRIS
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                        SolverOptions* options) {
   unsigned int n = problem->size;

@@ -31,8 +31,8 @@
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_LATIN_P...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int *info,

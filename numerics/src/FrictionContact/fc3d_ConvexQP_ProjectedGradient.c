@@ -30,11 +30,11 @@
 #include "fc3d_Solvers.h"                        // for fc3d_ConvexQP_Projec...
 #include "fc3d_compute_error.h"                  // for fc3d_Tresca_compute_...
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
                                               double *reaction, double *velocity, int *info,

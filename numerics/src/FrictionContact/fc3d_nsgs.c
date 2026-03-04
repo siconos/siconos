@@ -42,12 +42,12 @@
 #include "numerics_verbose.h"                          // for numerics_printf
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* New utility headers for standardized error computation, tolerance management, and naming conventions */
-#include "utils/error_computation.h"
-#include "utils/tolerance_manager.h"
+#include "error_computation.h"
+#include "tolerance_manager.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

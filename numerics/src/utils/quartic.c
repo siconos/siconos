@@ -35,7 +35,7 @@ Assume p[0]<>0 (overflows otherwise)
 #include "quartic.h"
 
 #include <math.h>  // for sqrt, fabs, atan, cos, pow, sin
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 int QUADROOTS(double p[5], double r[3][5]) {
   /*

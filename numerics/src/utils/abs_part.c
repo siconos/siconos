@@ -17,7 +17,7 @@
  */
 
 #include "NSSTools.h"  // for abs_part
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void abs_part(double x[], double sol[], int n)
 

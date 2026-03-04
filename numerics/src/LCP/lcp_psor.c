@@ -30,8 +30,8 @@
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */

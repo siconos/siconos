@@ -27,7 +27,7 @@
 #include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
 #include "SolverOptions.h"                    // for SolverOptions
 #include "sn_error_handling.h"                // for sn_fatal_error_msg, SN_...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 int ncp_driver(NonlinearComplementarityProblem* problem, double* z, double* F,
                SolverOptions* options) {
   /* Input validation using standardized macros */

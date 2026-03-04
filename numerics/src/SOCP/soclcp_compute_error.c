@@ -30,7 +30,7 @@
 #include "NSSTools.h"          // for max
 #include "SiconosBlas.h"       // for cblas_dcopy
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"  // for projectionO...
 #include "siconos_debug.h"     // for DEBUG_PRINTF
 

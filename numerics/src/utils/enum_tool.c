@@ -5,7 +5,7 @@
 
 #include "numerics_verbose.h"  // for verbose
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 unsigned long long int enum_compute_nb_cases(int M) {
   unsigned long long int nbCase = 1;
   for (int cmp = 0; cmp < M; cmp++) nbCase = nbCase << 1;

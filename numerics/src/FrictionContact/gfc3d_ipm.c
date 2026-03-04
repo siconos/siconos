@@ -40,7 +40,7 @@
 // #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -2991,8 +2991,8 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 }
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void gfc3d_ipm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =

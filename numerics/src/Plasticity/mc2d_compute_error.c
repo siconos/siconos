@@ -30,7 +30,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...

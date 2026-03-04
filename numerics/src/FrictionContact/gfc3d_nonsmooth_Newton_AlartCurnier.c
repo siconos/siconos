@@ -50,8 +50,8 @@
 #include "sanitizer.h"                           // for cblas_dcopy_msan
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* compute psi function */
 void ACPsi(GlobalFrictionContactProblem *problem, AlartCurnierFun3x3Ptr computeACFun3x3,

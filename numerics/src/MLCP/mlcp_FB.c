@@ -21,8 +21,8 @@
 #include <stdlib.h>  // for exit
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #include "FischerBurmeister.h"                  // for jacobianPhi_Mixed_FB
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...

@@ -37,8 +37,8 @@
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 typedef struct {
   double* xi_hat;

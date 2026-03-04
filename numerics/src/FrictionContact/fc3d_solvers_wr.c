@@ -25,7 +25,7 @@
 #include "NumericsMatrix.h"                // for NM_create, NM_display, NM_eye
 #include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_...
 #include "SiconosBlas.h"                   // for cblas_dcopy
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 // #define TEST_COND
 

@@ -31,8 +31,8 @@
 #include "soclcp_compute_error.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"                               // for soclc...
+#include "solver_registry.h"
+#include "numerics_errors.h"                               // for soclc...
 
 void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *problem,
                              double *reaction, double *velocity, int *info,

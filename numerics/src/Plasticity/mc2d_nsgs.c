@@ -39,8 +39,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"  // for numerics_printf
+#include "solver_registry.h"
+#include "numerics_errors.h"  // for numerics_printf
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 

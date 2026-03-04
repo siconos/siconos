@@ -26,7 +26,7 @@
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_...
 #include "numerics_verbose.h"                   // for verbose */
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */

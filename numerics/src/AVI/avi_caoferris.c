@@ -37,7 +37,7 @@
 #include "pivot-utils.h"
 #include "solver_registry.h"
 #include "numerics_errors.h"        // for pivot_init_lemke, pivot_s...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "sanitizer.h"          // for cblas_dcopy_msan
 #include "siconos_debug.h"      // for DEBUG_PRINT, DEBUG_EXPR_WE
 #include "vertex_extraction.h"  // for siconos_find_vertex

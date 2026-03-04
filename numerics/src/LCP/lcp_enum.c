@@ -33,8 +33,8 @@
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_ENUM_US...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 static void lcp_buildM(int* zw, double* M, double* Mref, int size, double* column_of_zero) {

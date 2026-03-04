@@ -18,7 +18,7 @@
 
 #include "NSSTools.h"  // for pos_part
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 void pos_part(unsigned n, double* restrict x, double* restrict x_plus) {
   for (unsigned i = 0; i < n; ++i) {
     if (x[i] > 0.0) {

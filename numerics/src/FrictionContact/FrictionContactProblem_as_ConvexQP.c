@@ -28,7 +28,7 @@
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "projectionOnDisk.h"      // for projectionOnDisk
 #include "siconos_debug.h"         // for DEBUG_PRINT
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")
 

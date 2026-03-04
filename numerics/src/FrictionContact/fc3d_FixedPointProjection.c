@@ -36,8 +36,8 @@
 #include "siconos_debug.h"       // for DEBUG_EXPR_WE, DEBUG_PRINTF
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction,
                                double* velocity, int* info, SolverOptions* options) {

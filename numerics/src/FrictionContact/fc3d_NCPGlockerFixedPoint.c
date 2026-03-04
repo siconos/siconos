@@ -31,8 +31,8 @@
 #include "fc3d_Solvers.h"       // for FreeSolverPtr, PostSolverPtr
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* Pointer to function used to update the solver, to formalize the local problem for example.
  */

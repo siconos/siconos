@@ -29,7 +29,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef __cplusplus
 #undef restrict

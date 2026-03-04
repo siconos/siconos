@@ -50,7 +50,7 @@
 #include "numerics_verbose.h"  // for numerics_error, numerics_printf...
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
-#include "utils/numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX, etc.
+#include "numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX, etc.
 
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>

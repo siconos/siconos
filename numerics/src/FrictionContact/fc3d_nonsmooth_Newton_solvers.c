@@ -49,8 +49,8 @@
 #include "op3x3.h"                                    // for extract3x3, add3x3
 #include "sanitizer.h"                                // for cblas_dcopy_msan
 #include "siconos_debug.h"                            // for DEBUG_EXPR_WE
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_natural_map.h"

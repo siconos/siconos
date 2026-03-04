@@ -40,8 +40,8 @@
 #include "numerics_verbose.h"
 
 /* Registration-based headers */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #include <stdio.h>
 #include <stdlib.h>

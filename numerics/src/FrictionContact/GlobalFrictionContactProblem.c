@@ -29,7 +29,7 @@
 #include "SparseBlockMatrix.h"     // for SBM_gemv, SBM_free
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)

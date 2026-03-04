@@ -25,7 +25,7 @@
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "numerics_verbose.h"              // for numerics_error, numerics_p...
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double*
  * restrict error) */

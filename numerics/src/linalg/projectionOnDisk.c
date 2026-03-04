@@ -18,7 +18,7 @@
 #include "projectionOnDisk.h"
 
 #include <math.h>
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void projectionOnDisk(double* r, double R) {
   double normTsquare = r[0] * r[0] + r[1] * r[1];

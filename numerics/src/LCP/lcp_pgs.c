@@ -36,8 +36,8 @@
 #include "siconos_debug.h"                 // for DEBUG_PRINTF
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,
              SolverOptions *options) {

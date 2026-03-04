@@ -30,7 +30,7 @@
 #include "SiconosBlas.h"       // for cblas_dscal, cblas_dcopy
 #include "io_tools.h"          // for check_hdf5_file
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

@@ -19,7 +19,7 @@
 #include "SiconosBlas.h"
 #include "geheader.h"
 #include "gfc3d_Gams.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #define BOGUS_EXTEQ 2
 

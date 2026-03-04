@@ -26,8 +26,8 @@
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv

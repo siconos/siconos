@@ -2,7 +2,7 @@
 
 #include "math.h"
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /** tolerance value for zero */
 static double zeroTol = 1e-15;

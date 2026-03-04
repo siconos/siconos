@@ -157,8 +157,8 @@ static void lcp_gams_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_GAMS in the global solver registry.
  */
 
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static int lcp_gams_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;

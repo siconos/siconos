@@ -24,7 +24,7 @@
 
 #include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
 #include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"

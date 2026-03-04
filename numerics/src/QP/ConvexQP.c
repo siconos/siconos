@@ -22,7 +22,7 @@
 
 #include "NumericsMatrix.h"  // for NM_display, NM_clear
 #include "NumericsVector.h"  // for NV_display
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void convexQP_display(ConvexQP* cqp) {
   assert(cqp);

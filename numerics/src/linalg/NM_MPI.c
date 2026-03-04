@@ -19,7 +19,7 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #ifdef SICONOS_HAS_MPI
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"

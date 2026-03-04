@@ -67,8 +67,8 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "utils/naming_conventions.h"  // Standardized naming conventions
-#include "utils/numerics_errors.h"
+#include "naming_conventions.h"  // Standardized naming conventions
+#include "numerics_errors.h"
 static int cp(const char *to, const char *from)
 {
   int fd_to, fd_from;

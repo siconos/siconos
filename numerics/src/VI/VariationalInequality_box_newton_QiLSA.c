@@ -28,7 +28,7 @@
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
 #include "solver_registry.h"
 #include "numerics_errors.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 void VI_compute_F(void* data_opaque, double* x, double* F) {
   VariationalInequality* problem = (VariationalInequality*)data_opaque;
   problem->F(problem, problem->size, x, F);

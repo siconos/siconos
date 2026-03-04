@@ -26,7 +26,7 @@
 
 #include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem) {
   if (problem->isStorageType1) {

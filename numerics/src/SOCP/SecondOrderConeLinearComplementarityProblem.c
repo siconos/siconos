@@ -25,7 +25,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT
 
 void secondOrderConeLinearComplementarityProblem_display(

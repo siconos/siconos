@@ -25,8 +25,8 @@
 #include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem*)data_opaque;
 

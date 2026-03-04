@@ -29,7 +29,7 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #define EPS 1e-40
 
 NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsCount) {

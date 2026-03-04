@@ -45,8 +45,8 @@ static int sIsInitialize = 0;
 #endif
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
 #ifdef HAVE_MLCPSIMPLEX

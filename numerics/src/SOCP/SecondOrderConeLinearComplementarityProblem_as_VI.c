@@ -25,7 +25,7 @@
 #include "SiconosBlas.h"       // for cblas_dcopy
 #include "projectionOnCone.h"  // for projectionO...
 #include "siconos_debug.h"     // for DEBUG_PRINT
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void Function_VI_SOCLCP(void *self, int n_notused, double *x, double *F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")

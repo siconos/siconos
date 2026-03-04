@@ -24,7 +24,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A) {
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);

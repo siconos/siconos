@@ -29,7 +29,7 @@
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 /* #define DEBUG_NOCOLOR */

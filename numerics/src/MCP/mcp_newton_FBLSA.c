@@ -30,8 +30,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp) {
   // Computation of the new value F(z)

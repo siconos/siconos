@@ -23,8 +23,8 @@
 #include "sn_error_handling.h"  // for sn_fatal_error, SN_NOT_COMPILED_ERROR
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_PATHFERRIS
 #include <assert.h>

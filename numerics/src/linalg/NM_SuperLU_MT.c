@@ -25,7 +25,7 @@
 
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /** \struct NM_SuperLU_MT_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs

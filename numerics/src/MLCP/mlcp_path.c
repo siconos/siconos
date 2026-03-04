@@ -28,12 +28,12 @@
 #include "NumericsMatrix.h"
 #include "SiconosCompat.h"
 #include "numerics_verbose.h"
-#include "tools/InterfaceToPathFerris/SimpleLCP.h"
+#include "InterfaceToPathFerris/SimpleLCP.h"
 #endif
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {

@@ -22,8 +22,8 @@
 #include "fc3d_Solvers.h"  // for fc3d_AVI_gams_path, fc3d_AVI_gams_pathvi
 
 /* Solver registration system */
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_GAMS_C_API
 

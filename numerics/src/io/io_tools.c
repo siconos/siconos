@@ -19,7 +19,7 @@
 #include "io_tools.h"
 
 #include <string.h>  // for strcmp, strrchr
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 int check_hdf5_file(const char* filename) {
   // get last occurence of dot in the file name

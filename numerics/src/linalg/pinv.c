@@ -22,7 +22,7 @@
 #include "NSSTools.h"       // for min
 #include "SiconosBlas.h"    // for cblas_dgemm, CblasColMajor, CblasNoTrans
 #include "SiconosLapack.h"  // for DGESVD, lapack_int
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /**
  * n : row number

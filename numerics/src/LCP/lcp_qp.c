@@ -147,8 +147,8 @@ static void lcp_qp_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_QP in the global solver registry.
  */
 
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static int lcp_qp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;

@@ -26,7 +26,7 @@
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SiconosBlas.h"             // for cblas_dcopy
 #include "numerics_verbose.h"        // for numerics_error, verbose
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */

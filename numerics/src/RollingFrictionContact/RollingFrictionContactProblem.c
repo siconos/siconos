@@ -25,7 +25,7 @@
 
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF

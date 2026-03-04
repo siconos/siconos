@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "NSSTools.h"  // for diffns
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void diffns(int *na, int *a, int *nb, int *b, int *nc, int *c) {
   int pta, ptb, ptc;

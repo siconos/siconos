@@ -27,7 +27,7 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
 #include "numerics_verbose.h"
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
                   SolverOptions* options) {

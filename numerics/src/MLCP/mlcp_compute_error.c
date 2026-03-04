@@ -24,7 +24,7 @@
 #include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
 #include "SiconosBlas.h"                        // for cblas_dnrm2, cblas_dgemv
 #include "numerics_verbose.h"                   // for numerics_error, verbose
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /*
  * (input) double *z : size n+m

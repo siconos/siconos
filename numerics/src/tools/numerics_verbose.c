@@ -26,7 +26,7 @@
 #include "NumericsVerbose.h"    // for NUMERICS_LOG_TO_SCREEN, NUMERICS_EXTE...
 #include "sn_error_handling.h"  // for sn_fatal_error, SN_UNKOWN_ERROR
 #include "tlsdef.h"             // for tlsvar
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 /* the warning on vprintf is reported as a bug of clang ... --vacary */
 #ifdef __clang__

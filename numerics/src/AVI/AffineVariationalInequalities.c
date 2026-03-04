@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 #include "SiconosSets.h"       // for polyhedron_set, free_polyhedron, free_...
 #include "numerics_verbose.h"  // for CHECK_IO
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 
 void AVI_display(AffineVariationalInequalities* avi) {
   assert(avi);

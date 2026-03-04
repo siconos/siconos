@@ -1051,8 +1051,8 @@ void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options) {
  * These are local solvers used within NSGS for single contact problems.
  */
 
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* Forward declarations for solve functions */
 extern int fc3d_onecontact_nonsmooth_Newton_solvers_solve(

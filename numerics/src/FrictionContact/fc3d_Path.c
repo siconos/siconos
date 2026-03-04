@@ -27,7 +27,7 @@
 #include "SolverOptions.h"                    // for SolverOptions
 #include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
 #include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* Pointer to function used to update the solver, to formalize the local problem for example.

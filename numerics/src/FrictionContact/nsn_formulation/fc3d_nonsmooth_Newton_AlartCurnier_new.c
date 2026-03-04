@@ -41,8 +41,8 @@
 #include "../fc3d_short_names.h"
 #include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
 #include "numerics_verbose.h"
-#include "utils/solver_registry.h"
-#include "utils/numerics_errors.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 typedef struct {
   FrictionContactProblem* problem;

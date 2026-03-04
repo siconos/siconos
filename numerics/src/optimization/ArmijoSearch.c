@@ -33,7 +33,7 @@
 #else
 #include <stdbool.h>  // for bool, only required in C
 
-#include "utils/numerics_errors.h"
+#include "numerics_errors.h"
 #endif
 
 double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data) {
