@@ -4,18 +4,24 @@
 /** \enum FRICTION_SOLVER encode the list of solvers as integers, to avoid mispelling
  * with const char* const  variables
  */
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
+
 enum FRICTION_SOLVER {
   /** 2D Frictional Contact solvers */
   SICONOS_FRICTION_2D_NSGS = 400,
   SICONOS_FRICTION_2D_CPG = 402,
   SICONOS_FRICTION_2D_LEMKE = 404,
   SICONOS_FRICTION_2D_ENUM = 405,
+#if defined SICONOS_OMP && defined SICONOS_PETSC
   SICONOS_FRICTION_2D_NSGS_GRAPH = 406,
   SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI = 407,
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT = 408,
+  SICONOS_FRICTION_2D_NSGS_PERMUT = 411,
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA = 409,
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY = 410,
-  SICONOS_FRICTION_2D_NSGS_PERMUT = 411,
+#endif
 
   /* 3D frictional contact solvers on local formulation */
 
@@ -64,8 +70,10 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_3D_PFP = 522,
   /** ADMM local formulation */
   SICONOS_FRICTION_3D_ADMM = 523,
-  /** Parallel NSGS using graph coloring */
+/** Parallel NSGS using graph coloring */
+#if defined SICONOS_OMP && defined SICONOS_PETSC
   SICONOS_FRICTION_3D_NSGS_GRAPH = 524,
+#endif
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
 
@@ -131,12 +139,16 @@ enum FRICTION_SOLVER {
 };
 
 extern const char* const SICONOS_FRICTION_2D_NSGS_STR;
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR;
+extern const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR;
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_STR;
 extern const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY_STR;
-extern const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR;
+#endif
 extern const char* const SICONOS_FRICTION_2D_CPG_STR;
 extern const char* const SICONOS_FRICTION_2D_LEMKE_STR;
 extern const char* const SICONOS_FRICTION_2D_ENUM_STR;

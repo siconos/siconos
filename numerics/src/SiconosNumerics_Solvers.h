@@ -26,9 +26,17 @@ See functions in SolverOptions.h
 //   's/.*\(SICONOS_[A-Z_]*\).*/SICONOS_SOLVER_MACRO(\1); \\/' | grep -v NUMERICS_PROBLEM >
 //   NonSmoothSolvers/SiconosNumerics_Solvers.h
 
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
+
 #undef SICONOS_SOLVER_MACRO
 
-#ifdef WITH_CUDA
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+#define OMP_SOLVER(x) SICONOS_SOLVER_MACRO(x)
+#else
+#define OMP_SOLVER(x)
+#endif
+
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
 #define CUDA_SOLVER(x) SICONOS_SOLVER_MACRO(x)
 #else
 #define CUDA_SOLVER(x)
@@ -40,11 +48,11 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LEMKE);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_NSGS_SBM);                                               \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS);                                                    \
-  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_PARALLEL);                                           \
-  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH);                                              \
-  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH_PERMUT);                                       \
-  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE);                             \
-  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI);                        \
+  OMP_SOLVER(SICONOS_LCP_PGS_PARALLEL);                                                     \
+  OMP_SOLVER(SICONOS_LCP_PGS_GRAPH);                                                        \
+  OMP_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT);                                                 \
+  OMP_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE);                                       \
+  OMP_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI);                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_CPG);                                                    \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN_W);                                                \
@@ -100,12 +108,12 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_QI);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_VI_BOX_AVI_LSA);                                             \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS);                                           \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH);                                     \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI);                                \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT);                              \
+  OMP_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH);                                               \
+  OMP_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI);                                          \
+  OMP_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT);                                        \
   CUDA_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA);                                  \
   CUDA_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY);                      \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_NSGS_PERMUT);                                    \
+  OMP_SOLVER(SICONOS_FRICTION_2D_NSGS_PERMUT);                                              \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_CPG);                                            \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_ENUM);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_LEMKE);                                          \

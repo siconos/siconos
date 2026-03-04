@@ -29,7 +29,6 @@ int main(void) {
                    SICONOS_LCP_LEMKE,
                    SICONOS_LCP_NSGS_SBM,
                    SICONOS_LCP_PGS,
-                   SICONOS_LCP_PGS_PARALLEL,
                    SICONOS_LCP_CPG,
                    SICONOS_LCP_LATIN,
                    SICONOS_LCP_LATIN_W,

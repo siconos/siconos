@@ -210,6 +210,9 @@ endif()
 #== == == == == = OpenMP == == == == ==
 option(WITH_OPENMP "Use OpenMP" OFF)
 
+#== == == == == = PETSc == == == == ==
+option(WITH_PETSC "Use PetSC" OFF)
+
 #== == == == == = CUDA == == == == ==
 option(WITH_CUDA "Use CUDA" OFF)
 

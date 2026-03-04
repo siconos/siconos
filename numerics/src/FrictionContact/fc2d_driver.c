@@ -24,6 +24,7 @@
 #include "NonSmoothDrivers.h"        // for fc2d_driver
 #include "NumericsFwd.h"             // for FrictionContactProblem, SolverOp...
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SiconosConfig.h"           // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"           // for SolverOptions, solver_options_id...
 #include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBM...
 #include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
@@ -33,14 +34,18 @@ const char* const SICONOS_FRICTION_2D_NSGS_STR = "FC2D_NSGS";
 const char* const SICONOS_FRICTION_2D_CPG_STR = "FC2D_CPG";
 const char* const SICONOS_FRICTION_2D_LEMKE_STR = "FC2D_LEMKE";
 const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR = "FC2D_NSGS_GRAPH";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR = "FC2D_NSGS_GRAPH_OPTI";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR = "FC2D_NSGS_GRAPH_PERMUT";
+const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR = "FC2D_NSGS_PERMUT";
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_STR =
     "FC2D_NSGS_GRAPH_PERMUT_CUDA";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY_STR =
     "FC2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY";
-const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR = "FC2D_NSGS_PERMUT";
+#endif
 // #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
@@ -97,6 +102,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_nsgs(problem, reaction, velocity, &info, options);
         break;
       }
+#if defined SICONOS_OMP && defined SICONOS_PETSC
       /****** Parallel Graph NSGS algorithm ******/
       case SICONOS_FRICTION_2D_NSGS_GRAPH: {
         if (verbose)
@@ -137,7 +143,8 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
         break;
       }
-#ifdef WITH_CUDA
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
       /****** GPU solver ******/
       case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
         if (verbose)
@@ -209,6 +216,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_enum(problem, reaction, velocity, &info, options);
         break;
       }
+#if defined SICONOS_OMP && defined SICONOS_PETSC
       /****** Parallel Graph NSGS algorithm ******/
       case SICONOS_FRICTION_2D_NSGS_GRAPH: {
         if (verbose)
@@ -249,7 +257,8 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
         fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
         break;
       }
-#ifdef WITH_CUDA
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
       /****** GPU solver ******/
       case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
         if (verbose)

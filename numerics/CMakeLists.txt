@@ -84,6 +84,19 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
 
 # ---- Final setup for the library ----
 
+# -- Add parallel solvers
+if(WITH_OPENMP AND WITH_PETSC)
+  # Add parallel tools (graph coloring with PETSc)
+  list(APPEND ${COMPONENT}_DIRS src/tools/parallel)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES src/tools/parallel)
+
+  # Add parallel LCP solvers
+  list(APPEND ${COMPONENT}_DIRS src/LCP/parallel)
+
+  # Add parallel FrictionContact solvers
+  list(APPEND ${COMPONENT}_DIRS src/FrictionContact/parallel)
+
+endif()
 
 # -- create/setup component target --
 include(ComponentSetup)
@@ -177,9 +190,9 @@ if(NOT DEFINED SICONOS_INT64)
   endif()
 endif()
 
-option(WITH_PETSC "Use PetSC" OFF)
 if(WITH_PETSC)
   include(PetscSetup)
+  set(SICONOS_PETSC ON PARENT_SCOPE)
   target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
   target_link_libraries(numerics PRIVATE MPI::MPI_C)
 endif()
@@ -280,6 +293,7 @@ endif()
 # -- OpenMP --
 if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
+  set(SICONOS_OMP ON PARENT_SCOPE) # for SiconosConfig.h
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
 endif()
@@ -295,6 +309,9 @@ if(WITH_CUDA)
   # set(SICONOS_HAS_CUDA TRUE)
 
   enable_language(CUDA)
+
+  # PARENT_SCOPE so that the variable is defined in siconos/CMakeLists.txt
+  set(SICONOS_CUDA ON PARENT_SCOPE)
   
   # Required for cuSPARSE
   find_package(CUDAToolkit REQUIRED)

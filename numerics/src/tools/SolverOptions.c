@@ -40,6 +40,7 @@
 #include "PathSearch.h"                     // for pathsearch_set_default
 #include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default
 #include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
+#include "SiconosConfig.h"                  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
 #include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
@@ -359,11 +360,13 @@ SolverOptions* solver_options_create(int solverId) {
       break;
     }
     case SICONOS_LCP_PGS:
+#if defined SICONOS_OMP && defined SICONOS_PETSC
     case SICONOS_LCP_PGS_PARALLEL:
     case SICONOS_LCP_PGS_GRAPH:
     case SICONOS_LCP_PGS_GRAPH_PERMUT:
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE:
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI:
+#endif
     case SICONOS_RELAY_PGS: {
       options = solver_options_initialize(solverId, 10000, 1e-6, 0);
       break;
@@ -606,14 +609,18 @@ SolverOptions* solver_options_create(int solverId) {
       break;
     }
 
-    // --- Friction Solvers ---
-    // ref list : enum FRICTION_SOLVER in Friction_cst.h
+// --- Friction Solvers ---
+// ref list : enum FRICTION_SOLVER in Friction_cst.h
+#if defined SICONOS_OMP && defined SICONOS_PETSC
     case SICONOS_FRICTION_2D_NSGS_GRAPH:
     case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI:
     case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT:
+    case SICONOS_FRICTION_2D_NSGS_PERMUT:
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
     case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA:
     case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY:
-    case SICONOS_FRICTION_2D_NSGS_PERMUT:
+#endif
     case SICONOS_FRICTION_2D_NSGS: {
       options = solver_options_initialize(solverId, 1000, 1e-4, 0);
       fc2d_nsgs_set_default(options);
@@ -623,6 +630,9 @@ SolverOptions* solver_options_create(int solverId) {
       options = solver_options_initialize(solverId, 1000, 1e-4, 0);
       break;
     }
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+    case SICONOS_FRICTION_3D_NSGS_GRAPH:
+#endif
     case SICONOS_FRICTION_3D_NSGS:
     case SICONOS_GLOBAL_FRICTION_3D_NSGS:
     case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR: {

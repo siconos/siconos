@@ -26,6 +26,7 @@
 
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"
 #include "fc3d_2NCP_Glocker.h"
 #include "fc3d_AlartCurnier_functions.h"
@@ -39,31 +40,31 @@
 #include "fc3d_unitary_enumerative.h"
 
 /** pointer to function used to call local solver */
-typedef int (*SolverPtr)(FrictionContactProblem *, double *, SolverOptions *);
+typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions*);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem *, FrictionContactProblem *, double *,
-                          SolverOptions *);
+typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*,
+                          SolverOptions*);
 
 /** pointer to function used to post-processed results after a call to the
  * (local) solver */
-typedef void (*PostSolverPtr)(int, double *);
+typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *, double,
-                                SolverOptions *, double, double *);
+typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double,
+                                SolverOptions*, double, double*);
 
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem *, FrictionContactProblem *,
-                                  SolverOptions *);
+typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*,
+                                  SolverOptions*);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
-typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, int *,
-                                  SolverOptions *);
+typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int*,
+                                  SolverOptions*);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -121,24 +122,24 @@ extern "C" {
     The internal (local) solver must set by the SolverOptions options[1]
 
 */
-void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-               SolverOptions *options);
+void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+               SolverOptions* options);
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* velocity,
+                     int* info, SolverOptions* options);
+#endif
+void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
+                                       FreeSolverNSGSPtr* freeSolver,
+                                       ComputeErrorPtr* computeError,
+                                       FrictionContactProblem* problem,
+                                       FrictionContactProblem* localproblem,
+                                       SolverOptions* options);
 
-void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-                     SolverOptions *options);
+void fc3d_admm(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+               SolverOptions* options);
 
-void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
-                                       FreeSolverNSGSPtr *freeSolver,
-                                       ComputeErrorPtr *computeError,
-                                       FrictionContactProblem *problem,
-                                       FrictionContactProblem *localproblem,
-                                       SolverOptions *options);
-
-void fc3d_admm(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-               SolverOptions *options);
-
-void fc3d_admm_init(FrictionContactProblem *problem, SolverOptions *options);
-void fc3d_admm_free(FrictionContactProblem *problem, SolverOptions *options);
+void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options);
+void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options);
 /**
     Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
 
@@ -149,8 +150,8 @@ void fc3d_admm_free(FrictionContactProblem *problem, SolverOptions *options);
     \param options the solver options
 */
 
-void fc3d_nsgs_velocity(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options);
+void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options);
 
 /**
    Proximal point solver for friction-contact 3D problem
@@ -161,8 +162,8 @@ void fc3d_nsgs_velocity(FrictionContactProblem *problem, double *reaction, doubl
    \param info return 0 if the solution is found
    \param options the solver options :
 */
-void fc3d_proximal(FrictionContactProblem *problem, double *reaction, double *velocity,
-                   int *info, SolverOptions *options);
+void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* velocity,
+                   int* info, SolverOptions* options);
 
 /**
    Fixed point solver for friction-contact 3D problem based on the Tresca
@@ -174,8 +175,8 @@ void fc3d_proximal(FrictionContactProblem *problem, double *reaction, double *ve
    \param info return 0 if the solution is found
    \param options the solver options :
 */
-void fc3d_TrescaFixedPoint(FrictionContactProblem *problem, double *reaction, double *velocity,
-                           int *info, SolverOptions *options);
+void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
+                           int* info, SolverOptions* options);
 
 /**
     Fixed point solver for friction-contact 3D problem based on the
@@ -188,11 +189,11 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem *problem, double *reaction, do
     \param info return 0 if the solution is found
     \param options the solver options
 */
-void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *reaction,
-                                     double *velocity, int *info, SolverOptions *options);
+void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* reaction,
+                                     double* velocity, int* info, SolverOptions* options);
 
-void fc3d_SOCLCP(FrictionContactProblem *problem, double *reaction, double *velocity,
-                 int *info, SolverOptions *options);
+void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velocity,
+                 int* info, SolverOptions* options);
 
 /**
    Fixed point solver for friction-contact 3D problem based on the ACLM
@@ -203,8 +204,8 @@ void fc3d_SOCLCP(FrictionContactProblem *problem, double *reaction, double *velo
    \param info return 0 if the solution is found
    \param options the solver options :
 */
-void fc3d_ACLMFixedPoint(FrictionContactProblem *problem, double *reaction, double *velocity,
-                         int *info, SolverOptions *options);
+void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
+                         int* info, SolverOptions* options);
 
 /**
     Projected Gradient on Cylinder solver for  Friction-contact 3D problem
@@ -219,9 +220,9 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem *problem, double *reaction, doub
     maximum number of iteration is the line--search. The internal (local) solver
     must set by the SolverOptions options->internalsolvers.
  */
-void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
-                                              double *reaction, double *velocity, int *info,
-                                              SolverOptions *options);
+void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem,
+                                              double* reaction, double* velocity, int* info,
+                                              SolverOptions* options);
 
 /**
    Fixed Point solver for friction-contact 3D problem based on the De Saxce
@@ -234,8 +235,8 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
    \param options the solver options : dparam[3] : rho . if dparam[3] >0 then
    rho=dparam[3] otherwise a computataion of rho is assumed.
 */
-void fc3d_DeSaxceFixedPoint(FrictionContactProblem *problem, double *reaction,
-                            double *velocity, int *info, SolverOptions *options);
+void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,
+                            double* velocity, int* info, SolverOptions* options);
 
 /**
    Fixed Point Projection solver for friction-contact 3D problem based on the De
@@ -249,8 +250,8 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem *problem, double *reaction,
    dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a
    computataion of rho is assumed.
 */
-void fc3d_fixedPointProjection(FrictionContactProblem *problem, double *reaction,
-                               double *velocity, int *info, SolverOptions *options);
+void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction,
+                               double* velocity, int* info, SolverOptions* options);
 
 /**
    Fixed Point solver for friction-contact 3D problem based on the VI
@@ -262,12 +263,12 @@ void fc3d_fixedPointProjection(FrictionContactProblem *problem, double *reaction
    \param info return 0 if the solution is found
    \param options the solver options :
 */
-void fc3d_VI_FixedPointProjection(FrictionContactProblem *problem, double *reaction,
-                                  double *velocity, int *info, SolverOptions *options);
+void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double* reaction,
+                                  double* velocity, int* info, SolverOptions* options);
 
-void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem *problem, double *reaction,
-                                           double *velocity, int *info,
-                                           SolverOptions *options);
+void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, double* reaction,
+                                           double* velocity, int* info,
+                                           SolverOptions* options);
 
 /**
    Extra Gradient solver for friction-contact 3D problem based on the De Saxce
@@ -279,8 +280,8 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem *problem, doub
    \param info return 0 if the solution is found
    \param options the solver options
 */
-void fc3d_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options);
+void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options);
 
 /**
    Extra Gradient solver (VI_EG) for friction-contact 3D problem based on a VI
@@ -292,8 +293,8 @@ void fc3d_ExtraGradient(FrictionContactProblem *problem, double *reaction, doubl
    \param info return 0 if the solution is found
    \param options the solver options
 */
-void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
-                           int *info, SolverOptions *options);
+void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double* reaction, double* velocity,
+                           int* info, SolverOptions* options);
 
 /**
    Hyperplane Projection solver for friction-contact 3D problem based on the De
@@ -305,8 +306,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, do
    \param info return 0 if the solution is found
    \param options the solver options
 */
-void fc3d_HyperplaneProjection(FrictionContactProblem *problem, double *reaction,
-                               double *velocity, int *info, SolverOptions *options);
+void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction,
+                               double* velocity, int* info, SolverOptions* options);
 
 /**
    solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI
@@ -318,8 +319,8 @@ void fc3d_HyperplaneProjection(FrictionContactProblem *problem, double *reaction
    \param info return 0 if the solution is found
    \param uoptions the solver options
 */
-void fc3d_AVI_gams_path(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options);
+void fc3d_AVI_gams_path(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options);
 
 /**
    solver using PATHVI (via GAMS) for friction-contact 3D problem based on an
@@ -331,8 +332,8 @@ void fc3d_AVI_gams_path(FrictionContactProblem *problem, double *reaction, doubl
    \param info return 0 if the solution is found
    \param options the solver options
 */
-void fc3d_AVI_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
-                          int *info, SolverOptions *options);
+void fc3d_AVI_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
+                          int* info, SolverOptions* options);
 
 /**
     solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI
@@ -344,8 +345,8 @@ void fc3d_AVI_gams_pathvi(FrictionContactProblem *problem, double *reaction, dou
     \param info return 0 if the solution is found
     \param options the solver options
 */
-void fc3d_lcp_gams_path(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options);
+void fc3d_lcp_gams_path(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options);
 
 /**
    solver using PATHVI (via GAMS) for friction-contact 3D problem based on an
@@ -357,8 +358,8 @@ void fc3d_lcp_gams_path(FrictionContactProblem *problem, double *reaction, doubl
    \param info return 0 if the solution is found
    \param options the solver options
 */
-void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
-                          int *info, SolverOptions *options);
+void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
+                          int* info, SolverOptions* options);
 
 /**
     Check for trivial solution in the friction-contact 3D problem
@@ -369,35 +370,35 @@ void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction, dou
     \param options the pointer to the array of options to set
     \return info  =0 if a trivial solution has been found, else = -1
 */
-int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity, double *reaction,
-                          SolverOptions *options);
+int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* reaction,
+                          SolverOptions* options);
 
-void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem *problem, double *reaction,
-                                         double *velocity, int *info, SolverOptions *options);
+void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double* reaction,
+                                         double* velocity, int* info, SolverOptions* options);
 
-void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,
-                                       SolverOptions *internalsolver_options, double error);
+void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOptions* options,
+                                       SolverOptions* internalsolver_options, double error);
 
 /** \addtogroup SetSolverOptions
  * @{
  */
-void fc3d_nsgs_set_default(SolverOptions *options);
-void fc3d_nsgs_velocity_set_default(SolverOptions *options);
-void fc3d_proximal_set_default(SolverOptions *options);
-void fc3d_tfp_set_default(SolverOptions *options);
-void fc3d_nsn_ac_set_default(SolverOptions *options);
-void fc3d_dsfp_set_default(SolverOptions *options);
-void fc3d_hp_set_default(SolverOptions *options);
-void fc3d_fpp_set_default(SolverOptions *options);
-void fc3d_eg_set_default(SolverOptions *options);
-void fc3d_nsn_fb_set_default(SolverOptions *options);
-void fc3d_aclmfp_set_default(SolverOptions *options);
-void fc3d_nsn_nm_set_default(SolverOptions *options);
-void fc3d_pfp_set_default(SolverOptions *options);
-void fc3d_admm_set_default(SolverOptions *options);
-void fc3d_onecontact_nsn_set_default(SolverOptions *options);
-void fc3d_onecontact_nsn_gp_set_default(SolverOptions *options);
-void fc3d_poc_set_default(SolverOptions *options);
+void fc3d_nsgs_set_default(SolverOptions* options);
+void fc3d_nsgs_velocity_set_default(SolverOptions* options);
+void fc3d_proximal_set_default(SolverOptions* options);
+void fc3d_tfp_set_default(SolverOptions* options);
+void fc3d_nsn_ac_set_default(SolverOptions* options);
+void fc3d_dsfp_set_default(SolverOptions* options);
+void fc3d_hp_set_default(SolverOptions* options);
+void fc3d_fpp_set_default(SolverOptions* options);
+void fc3d_eg_set_default(SolverOptions* options);
+void fc3d_nsn_fb_set_default(SolverOptions* options);
+void fc3d_aclmfp_set_default(SolverOptions* options);
+void fc3d_nsn_nm_set_default(SolverOptions* options);
+void fc3d_pfp_set_default(SolverOptions* options);
+void fc3d_admm_set_default(SolverOptions* options);
+void fc3d_onecontact_nsn_set_default(SolverOptions* options);
+void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);
+void fc3d_poc_set_default(SolverOptions* options);
 /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

@@ -24,7 +24,8 @@
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "SiconosConfig.h"
+#include "SolverOptions.h"  // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
@@ -56,12 +57,16 @@ const char* const SICONOS_LCP_PIVOT_LUMOD_STR =
     "Pivot based method with BLU updates using LUMOD";
 const char* const SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
 const char* const SICONOS_LCP_CONVEXQP_PG_STR = "Convex QP Projected Gradient";
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 const char* const SICONOS_LCP_PGS_PARALLEL_STR = "Parallel PGS";
 const char* const SICONOS_LCP_PGS_GRAPH_STR = "Parallel Graph PGS";
 const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_STR = "Parallel Graph PGS with permutation";
-const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR = "Parallel Graph PGS with permutation and equitable coloring";
-const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR = "Parallel Graph PGS with permutation and equitable coloring, optimized";
+const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR =
+    "Parallel Graph PGS with permutation and equitable coloring";
+const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR =
+    "Parallel Graph PGS with permutation and equitable coloring, optimized";
 const char* const SICONOS_LCP_PGS_OPTI_STR = "PGS optimized";
+#endif
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);
@@ -225,6 +230,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
     case SICONOS_LCP_PGS:
       lcp_pgs(problem, z, w, &info, options);
       break;
+#if defined SICONOS_OMP && defined SICONOS_PETSC
     /****** Parallel PGS Solver ******/
     /* IN: itermax, tolerance
        OUT: iter, error */
@@ -249,18 +255,21 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE:
       lcp_pgs_graph_permut_equitable(problem, z, w, &info, options);
       break;
-    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver ******/
+    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver
+     * ******/
     /* IN: itermax, tolerance
        OUT: iter, error */
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI:
       lcp_pgs_graph_permut_equitable_opti(problem, z, w, &info, options);
       break;
-    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver ******/
+    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver
+     * ******/
     /* IN: itermax, tolerance
        OUT: iter, error */
     case SICONOS_LCP_PGS_OPTI:
       lcp_pgs_opti(problem, z, w, &info, options);
       break;
+#endif
     /****** CPG Solver ******/
     /* IN: itermax, tolerance
        OUT: iter, error */

@@ -24,6 +24,7 @@
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
 #include "NonSmoothDrivers.h"                          // for fc3d_driver
 #include "NumericsFwd.h"                               // for SolverOptions
+#include "SiconosConfig.h"                             // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"                             // for SolverOptions
 #include "fc3d_Solvers.h"                              // for fc3d_ACLMFixed...
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"        // for fc3d_nonsmooth...
@@ -82,8 +83,9 @@ const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "FC3D_QUARTIC";
 const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "FC3D_QUARTIC_NU";
 const char* const SICONOS_FRICTION_3D_ACLMFP_STR = "FC3D_ACLMFP";
 const char* const SICONOS_FRICTION_3D_SOCLCP_STR = "FC3D_SOCLCP";
-
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 const char* const SICONOS_FRICTION_3D_NSGS_GRAPH_STR = "FC3D_NSGS_GRAPH";
+#endif
 
 int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
                 SolverOptions* options) {
@@ -121,6 +123,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       fc3d_nsgs(problem, reaction, velocity, &info, options);
       break;
     }
+#if defined SICONOS_OMP && defined SICONOS_PETSC
     /* Non Smooth Gauss Seidel (NSGS) */
     case SICONOS_FRICTION_3D_NSGS_GRAPH: {
       numerics_printf(
@@ -129,6 +132,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       fc3d_nsgs_graph(problem, reaction, velocity, &info, options);
       break;
     }
+#endif
     case SICONOS_FRICTION_3D_NSGSV: {
       numerics_printf(
           " ========================== Call NSGSV solver for Friction-Contact 3D problem "

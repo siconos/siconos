@@ -75,7 +75,7 @@ if(WITH_TESTING)
 
 
   # LCP with Petsc / MPI tests
-  if (WITH_PETSC)
+  if (WITH_OPENMP AND WITH_PETSC)
     begin_tests(src/LCP/test DEPS "PkgConfig::PETSC;MPI::MPI_C")
 
     new_tests_collection(
@@ -156,7 +156,7 @@ if(WITH_TESTING)
   # 3D Friction Contact tests
   #===========================================
 
-  begin_tests(src/FrictionContact/test DEPS "PkgConfig::PETSC;MPI::MPI_C;SuiteSparse::CXSparse;externals")
+  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
@@ -350,19 +350,19 @@ if(WITH_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
     EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
 
-  if (WITH_PETSC)
+  if(WITH_OPENMP AND WITH_PETSC)
 
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
       EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c)
 
-    if (WITH_CUDA)
+  endif()
 
-      new_tests_collection(
-        DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_GPU_COLLECTION_1
-        EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c)
+  if (WITH_CUDA AND WITH_PETSC)
 
-    endif()
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_GPU_COLLECTION_1
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c)
 
   endif()
 

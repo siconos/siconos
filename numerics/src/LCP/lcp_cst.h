@@ -24,6 +24,8 @@
   \rst Check the detailed documentation in :ref:`lcp_solvers`. \endrst
 */
 
+#include "SiconosConfig.h"
+
 /**\enum LCP_SOLVER
    Each SICONOS_LCP_XXX refers to number of the solver XXX for LCP.
  */
@@ -51,12 +53,14 @@ enum LCP_SOLVER {
   SICONOS_LCP_PIVOT_LUMOD = 220,
   SICONOS_LCP_GAMS = 221,
   SICONOS_LCP_CONVEXQP_PG = 222,
+#if defined SICONOS_OMP && defined SICONOS_PETSC
   SICONOS_LCP_PGS_PARALLEL = 223,
   SICONOS_LCP_PGS_GRAPH = 224,
   SICONOS_LCP_PGS_GRAPH_PERMUT = 225,
   SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE = 226,
   SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI = 227,
   SICONOS_LCP_PGS_OPTI = 228
+#endif
 };
 
 enum SICONOS_LCP_IPARAM {
@@ -123,10 +127,12 @@ extern const char* const SICONOS_LCP_PATHSEARCH_STR;
 extern const char* const SICONOS_LCP_PIVOT_LUMOD_STR;
 extern const char* const SICONOS_LCP_GAMS_STR;
 extern const char* const SICONOS_LCP_CONVEXQP_PG_STR;
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 extern const char* const SICONOS_LCP_PGS_PARALLEL_STR;
 extern const char* const SICONOS_LCP_PGS_GRAPH_STR;
 extern const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_STR;
 extern const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR;
 extern const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR;
 extern const char* const SICONOS_LCP_PGS_OPTI_STR;
+#endif
 #endif

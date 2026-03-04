@@ -78,7 +78,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double* z, double* w, int* i
  * 1 : iter = itermax
  * 2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
+ */
 void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
              SolverOptions* options);
 
@@ -99,10 +99,10 @@ void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* i
 */
 void lcp_rpgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
               SolverOptions* options);
-
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 /** \brief Parallel implementation of the Projected Gauss-Seidel solver for LCP problems.
- * 
- *  It is based on the paper "Parallel Dense Gauss-Seidel Algorithm on Many-Core Processors", 
+ *
+ *  It is based on the paper "Parallel Dense Gauss-Seidel Algorithm on Many-Core Processors",
  *  by H. Courtecuisse and J. Allard
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
@@ -115,16 +115,16 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double* z, double* w, int* 
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
  *
- *  \cite H. Courtecuisse and J. Allard, "Parallel Dense Gauss-Seidel Algorithm on Many-Core Processors," 
- *        2009 11th IEEE International Conference on High Performance Computing and Communications, Seoul, 
- *        Korea (South), 2009, pp. 139-147, doi: 10.1109/HPCC.2009.51.
-*/
+ *  \cite H. Courtecuisse and J. Allard, "Parallel Dense Gauss-Seidel Algorithm on Many-Core
+ * Processors," 2009 11th IEEE International Conference on High Performance Computing and
+ * Communications, Seoul, Korea (South), 2009, pp. 139-147, doi: 10.1109/HPCC.2009.51.
+ */
 void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                       SolverOptions* options);
 
 /** \brief Parallel implementation of the Projected Gauss-Seidel solver, using graph coloring
- *  
- *  Builds a graph to identify independent rows and update them in parallel. 
+ *
+ *  Builds a graph to identify independent rows and update them in parallel.
  *
  *  See https://erkaman.github.io/posts/gauss_seidel_graph_coloring.html
  *
@@ -137,7 +137,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
+ */
 void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                    SolverOptions* options);
 
@@ -154,9 +154,9 @@ void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, 
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                          SolverOptions *options);
+ */
+void lcp_pgs_graph_permut(LinearComplementarityProblem* problem, double* z, double* w,
+                          int* info, SolverOptions* options);
 
 /** \brief Same as `lcp_pgs_graph_permut`, but with equitable graph coloring
  *
@@ -171,9 +171,9 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                                    SolverOptions *options);
+ */
+void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, double* z,
+                                    double* w, int* info, SolverOptions* options);
 
 /** \brief Same as `lcp_pgs_graph_permut_equitable`, but with one big parallel region
  *
@@ -188,9 +188,9 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                                         SolverOptions *options);
+ */
+void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem* problem, double* z,
+                                         double* w, int* info, SolverOptions* options);
 
 /** \brief Jacobi solver
  *
@@ -203,9 +203,7 @@ void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem *problem, 
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int *info, SolverOptions *options);
-
+ */
 /** \brief Parallel Jacobi solver
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
@@ -217,12 +215,12 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options);
+ */
+void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, double* w,
+                         int* info, SolverOptions* options);
 
 /** \brief Optimized sequential Projected Gauss-Seidel
- * 
+ *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
  *  solution of the problem.
@@ -232,9 +230,12 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
  *  1 : iter = itermax
  *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-*/
-void lcp_pgs_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                  SolverOptions *options);
+ */
+void lcp_pgs_opti(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+                  SolverOptions* options);
+#endif
+void lcp_jacobi(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+                SolverOptions* options);
 
 /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
  *

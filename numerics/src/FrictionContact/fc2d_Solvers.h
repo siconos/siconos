@@ -25,6 +25,7 @@
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"
 #include "LinearComplementarityProblem.h"
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -67,7 +68,7 @@ void fc2d_nsgs_dense(FrictionContactProblem* problem, double* reaction, double* 
 */
 void fc2d_nsgs(FrictionContactProblem* problem, double* z, double* w, int* info,
                SolverOptions* options);
-
+#if defined SICONOS_OMP && defined SICONOS_PETSC
 /**
      Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
    2D case.
@@ -106,8 +107,36 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
 */
 void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
                             SolverOptions* options);
+/**
+Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
+permutation used by parallel solvers.
 
-#ifdef WITH_CUDA
+\param[in] problem the friction-contact problem
+\param[out] reaction vector
+\param[out] velocity vector
+\param[in,out] info termination value
+\param[in,out] options structure
+*/
+void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
+                      SolverOptions* options);
+void test_solver(FrictionContactProblem* problem, double* z, double* w, int* info,
+                 SolverOptions* options);
+
+/** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
+ * algorithm for global contact problem with friction.
+ *
+ *
+ *  \param[in] xi  the intermediate iterate which goes to be projected (projc1).
+ *  \param[in] n   the dimension of the system.
+ *  \param[in] statusi  a vector which contains the initial status.
+ *  \param[in] p       a vector which contains the components of the descent direction.
+ *  \param[in] fric a vector which contains the friction coefficient.
+ *  \param[out] reaction the corrected iterate.
+ *  \param[out] status  the new status.
+ *
+ */
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
 /**
      Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
    2D case. Permutates the problem to optimize the performance.
@@ -135,35 +164,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, double* z,
                                              double* w, int* info, SolverOptions* options);
 #endif
-/**
-     Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
-   permutation used by parallel solvers.
-
-     \param[in] problem the friction-contact problem
-     \param[out] reaction vector
-     \param[out] velocity vector
-     \param[in,out] info termination value
-     \param[in,out] options structure
-*/
-void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
-                      SolverOptions* options);
-
-void test_solver(FrictionContactProblem* problem, double* z, double* w, int* info,
-                 SolverOptions* options);
-
-/** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
- * algorithm for global contact problem with friction.
- *
- *
- *  \param[in] xi  the intermediate iterate which goes to be projected (projc1).
- *  \param[in] n   the dimension of the system.
- *  \param[in] statusi  a vector which contains the initial status.
- *  \param[in] p       a vector which contains the components of the descent direction.
- *  \param[in] fric a vector which contains the friction coefficient.
- *  \param[out] reaction the corrected iterate.
- *  \param[out] status  the new status.
- *
- */
 void fc2d_projc(double xi[], int* n, int statusi[], double p[], double fric[],
                 double* reaction, int* status);
 
