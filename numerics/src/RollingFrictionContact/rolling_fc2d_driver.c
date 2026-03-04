@@ -23,6 +23,7 @@
 #include "RollingFrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "rfc3d_short_names.h"
+#include "rolling_fc_Solvers.h"
 #include "numerics_verbose.h"
 
 /* Registration-based headers */

@@ -22,6 +22,7 @@
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
+#include "fc2d_Solvers.h"
 #include "fc3d_short_names.h"
 #include "numerics_verbose.h"
 

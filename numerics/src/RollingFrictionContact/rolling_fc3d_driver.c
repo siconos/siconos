@@ -22,6 +22,7 @@
 
 #include "RollingFrictionContactProblem.h"
 #include "FrictionContact_options.h"
+#include "rolling_fc_Solvers.h"
 #include "rfc3d_short_names.h"
 #include "numerics_verbose.h"
 

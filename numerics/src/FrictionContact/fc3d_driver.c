@@ -35,6 +35,8 @@
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
+#include "Friction_tools.h"
+#include "fc3d_Solvers.h"
 #include "numerics_verbose.h"
 
 /* Registration-based headers */
@@ -45,9 +47,7 @@
 #include <stdlib.h>
 #include <float.h>
 
-/* Forward declarations for convenience functions */
-void fc3d_list_available_solvers(void);
-void fc3d_print_solver_info(solver_id_t solver_id);
+
 
 /* ===========================================================================
  * Trivial Case Check

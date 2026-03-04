@@ -109,6 +109,18 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *plastic_st
 int mc2d_checkTrivialCase(MohrCoulomb2DProblem *problem, double *plastic_strain_rate,
                           double *stress, SolverOptions *options);
 
+/**
+    Driver for Mohr Coulomb 2D problem
+
+    \param problem the Mohr Coulomb 2D problem to solve
+    \param stress global vector (n), in-out parameters
+    \param plastic_strain_rate global vector (n), in-out parameter
+    \param options the solver options
+    \return 0 if successful, otherwise error code
+*/
+int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
+                double* plastic_strain_rate, SolverOptions* options);
+
 /** \addtogroup SetSolverOptions
  * @{
  */

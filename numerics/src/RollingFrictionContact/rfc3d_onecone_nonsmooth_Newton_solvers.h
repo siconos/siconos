@@ -101,6 +101,16 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(RollingFrictionContactPr
                                                        double* local_reaction,
                                                        SolverOptions* options);
 
+/** Set default options for onecone NSN solver
+ * \param options the solver options
+ */
+void rfc3d_onecone_nsn_set_default(SolverOptions* options);
+
+/** Set default options for onecone NSN GP solver
+ * \param options the solver options
+ */
+void rfc3d_onecone_nsn_gp_set_default(SolverOptions* options);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

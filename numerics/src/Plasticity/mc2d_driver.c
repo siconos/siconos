@@ -23,6 +23,7 @@
 #include "MohrCoulomb2DProblem.h"
 #include "Plasticity_cst.h"
 #include "numerics_verbose.h"
+#include "mc2d_solvers.h"
 
 /* Registration-based headers */
 #include "utils/solver_registry.h"

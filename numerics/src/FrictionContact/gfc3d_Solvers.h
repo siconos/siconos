@@ -305,6 +305,9 @@ void gfc3d_ipm_set_default(SolverOptions* options);
 void gfc3d_nsn_ac_set_default(SolverOptions* options);
 void gfc3d_aclmfp_set_default(SolverOptions* options);
 void gfc3d_admm_set_default(SolverOptions* options);
+void gfc3d_nsgs_set_default(SolverOptions* options);
+void gfc3d_vi_eg_set_default(SolverOptions* options);
+void gfc3d_vi_fpp_set_default(SolverOptions* options);
 
 /** @} */
 

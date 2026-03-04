@@ -247,6 +247,31 @@ void rfc2d_poc_set_default(SolverOptions *options);
 
 /** @} */
 
+/* ===========================================================================
+ * Driver Functions
+ * ===========================================================================
+ */
+
+/** Driver for 3D rolling friction contact problem
+ * \param problem the problem to solve
+ * \param reaction the reaction vector (output)
+ * \param velocity the velocity vector (output)
+ * \param options the solver options
+ * \return 0 iff successful
+ */
+int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction,
+                        double* velocity, SolverOptions* options);
+
+/** Driver for 2D rolling friction contact problem
+ * \param problem the problem to solve
+ * \param reaction the reaction vector (output)
+ * \param velocity the velocity vector (output)
+ * \param options the solver options
+ * \return 0 iff successful
+ */
+int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction,
+                        double* velocity, SolverOptions* options);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

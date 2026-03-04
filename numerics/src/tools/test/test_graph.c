@@ -3,7 +3,7 @@
 
 #include "graph.h"
 
-struct Graph* graph_1() {
+static struct Graph* graph_1(void) {
   int n_vertices =8;
   struct Graph* graph = create_graph(n_vertices);
   add_edge(graph, 0, 1);
@@ -19,7 +19,7 @@ struct Graph* graph_1() {
   return graph;
 }
 
-struct Graph* graph_2() {
+static struct Graph* graph_2(void) {
   int n_vertices =9;
   struct Graph* graph =  create_graph(n_vertices);
   add_edge(graph, 0, 1);

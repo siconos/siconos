@@ -18,6 +18,8 @@
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
+#include "rolling_naturalmap_functions.h"
+
 /* #include "MohrCoulomb2DProblem.h"         // for MohrCoulomb2D... */
 /* #include "NumericsFwd.h"                  // for MohrCoulomb2D... */
 /* #include "NumericsMatrix.h"               // for NumericsMatrix */

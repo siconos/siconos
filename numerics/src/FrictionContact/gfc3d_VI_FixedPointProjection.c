@@ -22,6 +22,7 @@
 
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
+#include "gfc3d_Solvers.h"
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
 #include "SiconosBlas.h"                         // for cblas_dnrm2

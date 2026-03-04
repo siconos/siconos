@@ -40,6 +40,8 @@
 #define ROLLING_FRICTION_CONTACT_OPTIONS_H
 
 #include "FrictionContact/FrictionContact_options.h"
+#include "NumericsFwd.h"
+#include "SolverOptions.h"
 
 /* ===========================================================================
  * Rolling Friction Solver IDs

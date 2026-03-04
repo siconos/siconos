@@ -22,6 +22,7 @@
 
 #include "fc3d_short_names.h"
 #include "fc3d_Solvers.h"                  // for fc3d_nsgs_set_default
+#include "gfc3d_Solvers.h"
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
 
 /* Solver registration system */

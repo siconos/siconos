@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #include "FrictionContactProblem.h"
+#include "SolverOptions.h"
 
 /**
     Non-Smooth Gauss Seidel solver for friction-contact 3D problem
@@ -321,6 +322,8 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
                                             double* velocity, int* info,
                                             SolverOptions* options);
 
+void fc3d_nsn_ac_new_set_default(SolverOptions* options);
+
 /*
  * Info to complete
  */
@@ -354,6 +357,16 @@ void fc3d_onecontact_nsn_set_default(SolverOptions* options);
 void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);
 void fc3d_poc_set_default(SolverOptions* options);
 /** @} */
+
+/* Driver and convenience functions */
+int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options);
+
+SolverOptions* fc3d_solver_options_create(solver_id_t solver_id);
+
+void fc3d_list_available_solvers(void);
+
+void fc3d_print_solver_info(solver_id_t solver_id);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
