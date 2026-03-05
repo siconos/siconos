@@ -29,4 +29,4 @@ def test_solver_options_create():
     print(so)
     assert so.iparam[pnames.SICONOS_IPARAM_MAX_ITER] == 1000
     assert so.solverId == solver_ids.SICONOS_FRICTION_3D_NSGS
-    assert so.dparam[pnames.SICONOS_DPARAM_TOL] == 1.e-4
+    assert so.dparam[pnames.SICONOS_DPARAM_TOL] == 1.0e-4

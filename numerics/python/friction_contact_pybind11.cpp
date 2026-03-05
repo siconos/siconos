@@ -28,15 +28,15 @@
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
-#include "RollingFrictionContact_options.h"
-#include "NonSmoothSolvers/NonSmoothGaussSeidel_options.h"
 #include "GenericMechanicalProblem.h"
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContactProblem.h"
 #include "NonSmoothDrivers.h"
+#include "NonSmoothSolvers/NonSmoothGaussSeidel_options.h"
 #include "NumericsFwd.h"
 #include "NumericsMatrix_pybind11.h"
 #include "RollingFrictionContactProblem.h"
+#include "RollingFrictionContact_options.h"
 #include "SolverOptions.h"
 
 namespace py = pybind11;
@@ -597,7 +597,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .def(py::init<int, int, py::object, py::object, py::array_t<double>,
                     py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
-           py::arg("q"), py::arg("mu"),"Build with all operators/parameters (H, M, ...)")
+           py::arg("q"), py::arg("mu"), "Build with all operators/parameters (H, M, ...)")
       .def(py::init<std::string>(), py::arg("fname"), "Build from hdf5 file")
       .def("M", &GlobalFrictionContactProblemWrapper::M)
       .def("H", &GlobalFrictionContactProblemWrapper::H)
@@ -732,32 +732,26 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATHVI, "3D GAMS/Path VI formulation")
 
       // 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers)
-      .value("SICONOS_ONECONE_NSN",
-             FRICTION_SOLVER::SICONOS_ONECONE_NSN,
+      .value("SICONOS_ONECONE_NSN", FRICTION_SOLVER::SICONOS_ONECONE_NSN,
              "3D One contact Non-smooth Newton Alart-Curnier")
-      .value("SICONOS_ONECONE_NSN_GP",
-             FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP,
+      .value("SICONOS_ONECONE_NSN_GP", FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP,
              "3D One contact Non-smooth Newton Alart-Curnier, damped")
       .value("SICONOS_ONECONE_ProjectionOnCone",
              FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone,
              "3D One contact Projection on cone")
-      .value(
-          "SICONOS_ONECONE_ProjectionOnConeWithLocalIteration",
-          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithLocalIteration,
-          "3D One contact Projection on cone with local iteration")
-      .value(
-          "SICONOS_ONECONE_ProjectionOnConeWithRegularization",
-          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithRegularization,
-          "3D One contact Projection on cone with regularization")
-      .value(
-          "SICONOS_ONECONE_ProjectionOnConeWithDiagonalization",
-          FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithDiagonalization,
-          "3D One contact Projection on cone with diagonalization")
+      .value("SICONOS_ONECONE_ProjectionOnConeWithLocalIteration",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithLocalIteration,
+             "3D One contact Projection on cone with local iteration")
+      .value("SICONOS_ONECONE_ProjectionOnConeWithRegularization",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithRegularization,
+             "3D One contact Projection on cone with regularization")
+      .value("SICONOS_ONECONE_ProjectionOnConeWithDiagonalization",
+             FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnConeWithDiagonalization,
+             "3D One contact Projection on cone with diagonalization")
       .value("SICONOS_ONECONE_ProjectionOnCone_velocity",
              FRICTION_SOLVER::SICONOS_ONECONE_ProjectionOnCone_velocity,
              "3D One contact Projection on cone, velocity")
-      .value("SICONOS_ONECONE_NSN_GP_HYBRID",
-             FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP_HYBRID,
+      .value("SICONOS_ONECONE_NSN_GP_HYBRID", FRICTION_SOLVER::SICONOS_ONECONE_NSN_GP_HYBRID,
              "3D Frictional contact hybrid solver for one contact")
       .value("SICONOS_FRICTION_3D_VI_FPP_Cylinder",
              FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP_Cylinder,
@@ -899,8 +893,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS", SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS)
       .export_values();
 
-  py::enum_<SICONOS_NSGS_INTERNAL_ERROR_STRATEGY>(
-      params, "SICONOS_NSGS_INTERNAL_ERROR_STRATEGY_enum")
+  py::enum_<SICONOS_NSGS_INTERNAL_ERROR_STRATEGY>(params,
+                                                  "SICONOS_NSGS_INTERNAL_ERROR_STRATEGY_enum")
       .value("SICONOS_NSGS_INTERNAL_ERROR_STRATEGY_ADAPTIVE",
              SICONOS_NSGS_INTERNAL_ERROR_STRATEGY_ADAPTIVE)
       .value("SICONOS_NSGS_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE",
@@ -921,13 +915,15 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_RESCALING_CONE>(params,
-                                                     "SICONOS_FRICTION_3D_RESCALING_CONE_enum")
+                                                "SICONOS_FRICTION_3D_RESCALING_CONE_enum")
       .value("SICONOS_FRICTION_3D_RESCALING_CONE_NO", SICONOS_FRICTION_3D_RESCALING_CONE_NO)
       .value("SICONOS_FRICTION_3D_RESCALING_CONE_YES", SICONOS_FRICTION_3D_RESCALING_CONE_YES)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_DPARAM>(params, "SICONOS_FRICTION_3D_DPARAM")
-      .export_values();
+  //   py::enum_<SICONOS_FRICTION_3D_DPARAM>(params, "SICONOS_FRICTION_3D_DPARAM")
+  //       .value("SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO",
+  //              SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO)
+  //       .export_values();
 
   py::enum_<SICONOS_NSGS_IPARAM>(params, "SICONOS_NSGS_IPARAM")
       .value("SICONOS_NSGS_RELAXATION", SICONOS_NSGS_RELAXATION)
@@ -936,7 +932,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_NSGS_FREEZING_CONTACT", SICONOS_NSGS_FREEZING_CONTACT)
       .value("SICONOS_NSGS_FILTER_LOCAL_SOLUTION", SICONOS_NSGS_FILTER_LOCAL_SOLUTION)
       .value("SICONOS_NSGS_ERROR_EVALUATION_TYPE", SICONOS_NSGS_ERROR_EVALUATION_TYPE)
-      .value("SICONOS_NSGS_ERROR_EVALUATION_FREQUENCY", SICONOS_NSGS_ERROR_EVALUATION_FREQUENCY)
+      .value("SICONOS_NSGS_ERROR_EVALUATION_FREQUENCY",
+             SICONOS_NSGS_ERROR_EVALUATION_FREQUENCY)
       .export_values();
 
   py::enum_<SICONOS_NSGS_DPARAM>(params, "SICONOS_NSGS_DPARAM_enum")
@@ -971,9 +968,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_NSGS_RELAXATION_TRUE", SICONOS_NSGS_RELAXATION_TRUE)
       .export_values();
 
-  py::enum_<enum SICONOS_NSGS_FILTER_LOCAL_SOLUTION>(params, "SICONOS_NSGS_FILTER_LOCAL_SOLUTION_enum")
-      .value("SICONOS_NSGS_FILTER_LOCAL_SOLUTION_FALSE", SICONOS_NSGS_FILTER_LOCAL_SOLUTION_FALSE)
-      .value("SICONOS_NSGS_FILTER_LOCAL_SOLUTION_TRUE", SICONOS_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+  py::enum_<enum SICONOS_NSGS_FILTER_LOCAL_SOLUTION>(params,
+                                                     "SICONOS_NSGS_FILTER_LOCAL_SOLUTION_enum")
+      .value("SICONOS_NSGS_FILTER_LOCAL_SOLUTION_FALSE",
+             SICONOS_NSGS_FILTER_LOCAL_SOLUTION_FALSE)
+      .value("SICONOS_NSGS_FILTER_LOCAL_SOLUTION_TRUE",
+             SICONOS_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_NSN_IPARAM>(params, "SICONOS_FRICTION_3D_NSN_IPARAM_enum")
@@ -1051,7 +1051,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_PROXIMAL_IPARAM>(params, "SICONOS_FRICTION_3D_PROXIMAL_IPARAM_enum")
+  py::enum_<SICONOS_FRICTION_3D_PROXIMAL_IPARAM>(params,
+                                                 "SICONOS_FRICTION_3D_PROXIMAL_IPARAM_enum")
       .value("SICONOS_FRICTION_3D_FP_ERROR_STRATEGY", SICONOS_FRICTION_3D_FP_ERROR_STRATEGY)
       .value("SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE",
              SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE)
@@ -1061,7 +1062,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_PROXIMAL_DPARAM>(params, "SICONOS_FRICTION_3D_PROXIMAL_DPARAM_enum")
+  py::enum_<SICONOS_FRICTION_3D_PROXIMAL_DPARAM>(params,
+                                                 "SICONOS_FRICTION_3D_PROXIMAL_DPARAM_enum")
       .value("SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA",
              SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA)
       .value("SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA",
@@ -1077,8 +1079,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_ADMM_IPARAM>(params,
-                                                  "SICONOS_FRICTION_3D_ADMM_IPARAM_enum")
+  py::enum_<SICONOS_FRICTION_3D_ADMM_IPARAM>(params, "SICONOS_FRICTION_3D_ADMM_IPARAM_enum")
       .value("SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY",
              SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY)
       .value("SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO",
@@ -1096,8 +1097,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H", SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_ADMM_DPARAM>(params,
-                                                  "SICONOS_FRICTION_3D_ADMM_DPARAM_enum")
+  py::enum_<SICONOS_FRICTION_3D_ADMM_DPARAM>(params, "SICONOS_FRICTION_3D_ADMM_DPARAM_enum")
       .value("SICONOS_FRICTION_3D_ADMM_RHO", SICONOS_FRICTION_3D_ADMM_RHO)
       .value("SICONOS_FRICTION_3D_ADMM_RESTART_ETA", SICONOS_FRICTION_3D_ADMM_RESTART_ETA)
       .value("SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU",
@@ -1116,7 +1116,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_ADMM_SYMMETRY>(params,
-                                                    "SICONOS_FRICTION_3D_ADMM_SYMMETRY_enum")
+                                               "SICONOS_FRICTION_3D_ADMM_SYMMETRY_enum")
       .value("SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY",
              SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY)
       .value("SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY",
@@ -1128,8 +1128,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_ADMM_STORAGE>(params,
-                                                   "SICONOS_FRICTION_3D_ADMM_STORAGE_enum")
+  py::enum_<SICONOS_FRICTION_3D_ADMM_STORAGE>(params, "SICONOS_FRICTION_3D_ADMM_STORAGE_enum")
       .value("SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE", SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE)
       .value("SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE",
              SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE)
@@ -1144,13 +1143,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_ADMM_UPDATE_S>(params,
-                                                    "SICONOS_FRICTION_3D_ADMM_UPDATE_S_enum")
+                                               "SICONOS_FRICTION_3D_ADMM_UPDATE_S_enum")
       .value("SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES", SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
       .value("SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO", SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_ADMM_FULL_H>(params,
-                                                  "SICONOS_FRICTION_3D_ADMM_FULL_H_enum")
+  py::enum_<SICONOS_FRICTION_3D_ADMM_FULL_H>(params, "SICONOS_FRICTION_3D_ADMM_FULL_H_enum")
       .value("SICONOS_FRICTION_3D_ADMM_FULL_H_NO", SICONOS_FRICTION_3D_ADMM_FULL_H_NO)
       .value("SICONOS_FRICTION_3D_ADMM_FULL_H_YES", SICONOS_FRICTION_3D_ADMM_FULL_H_YES)
       .export_values();
@@ -1165,8 +1163,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
       .export_values();
 
-  py::enum_<SICONOS_FRICTION_3D_ADMM_INITIAL_RHO>(
-      params, "SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_enum")
+  py::enum_<SICONOS_FRICTION_3D_ADMM_INITIAL_RHO>(params,
+                                                  "SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_enum")
       .value("SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN",
              SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN)
       .value("SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF",
@@ -1219,8 +1217,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .export_values();
 
   // Exposer l'énumération SICONOS_FRICTION_3D_IPM_STORAGE
-  py::enum_<SICONOS_FRICTION_3D_IPM_STORAGE>(params,
-                                                  "SICONOS_FRICTION_3D_IPM_STORAGE_enum")
+  py::enum_<SICONOS_FRICTION_3D_IPM_STORAGE>(params, "SICONOS_FRICTION_3D_IPM_STORAGE_enum")
       .value("SICONOS_FRICTION_3D_IPM_KEEP_STORAGE", SICONOS_FRICTION_3D_IPM_KEEP_STORAGE)
       .value("SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE",
              SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE)
