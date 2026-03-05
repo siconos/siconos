@@ -24,10 +24,10 @@
 #include <stdlib.h>  // for calloc, realloc
 
 #include "FrictionContact_options.h"
-#include "NSSTools.h"                          // for max
-#include "NonSmoothSolvers/NonSmoothNewton.h"  // for nonSmoothDirec...
-#include "NumericsFwd.h"                       // for SolverOptions
-#include "NumericsMatrix.h"                    // for NumericsMatrix
+#include "NSSTools.h"         // for max
+#include "NonSmoothNewton.h"  // for nonSmoothDirec...
+#include "NumericsFwd.h"      // for SolverOptions
+#include "NumericsMatrix.h"   // for NumericsMatrix
 #include "RollingFrictionContactProblem.h"
 #include "SiconosBlas.h"    // for cblas_ddot
 #include "SolverOptions.h"  // for SolverOptions

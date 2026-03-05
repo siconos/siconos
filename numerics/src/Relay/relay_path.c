@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 #include "Relay_options.h"
-#include "InterfaceToPathFerris/SimpleLCP.h"
+#include "SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
 /* Solver registration system */

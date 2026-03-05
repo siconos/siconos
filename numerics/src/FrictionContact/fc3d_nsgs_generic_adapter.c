@@ -27,7 +27,7 @@
 #include "NumericsFwd.h"
 #include "NumericsMatrix.h"
 #include "fc3d_Solvers.h"
-#include "NonSmoothSolvers/nsgs_generic.h"
+#include "nsgs_generic.h"
 #include "FrictionContact_options.h"
 #include "fc3d_local_problem_tools.h"
 #include "fc3d_projection.h"

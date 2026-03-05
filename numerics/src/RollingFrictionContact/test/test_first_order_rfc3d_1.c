@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 #include <stdlib.h>  // for malloc
-
-#include "FrictionContact_options.h"                // for SICONOS_ROLLING_FRICTION_3D_...
+#include "RollingFrictionContact_options.h"                // for SICONOS_ROLLING_FRICTION_3D_...
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection

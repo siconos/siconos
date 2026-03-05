@@ -27,7 +27,7 @@
  *
  */
 
-#include "NonSmoothSolvers/Newton_methods.h"  // for functions_LSA
+#include "Newton_methods.h"  // for functions_LSA
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 #include "line_search.h"     // for search_data

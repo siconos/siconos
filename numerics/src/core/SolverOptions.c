@@ -38,8 +38,8 @@
 #include "MCP_cst.h"                    // for SICONOS_MCP_NEWTON_FB_FBL...
 #include "MLCP_Solvers.h"               // for mlcp_direct_set_default
 #include "NCP_cst.h"                    // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "NonSmoothSolvers/Newton_methods.h"             // for newton_lsa_set_default
-#include "NonSmoothSolvers/NonSmoothNewton.h"            // for nonSmoothNewton_set_default
+#include "Newton_methods.h"             // for newton_lsa_set_default
+#include "NonSmoothNewton.h"            // for nonSmoothNewton_set_default
 #include "PathSearch.h"                 // for pathsearch_set_default
 #include "Plasticity_cst.h"
 #include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default

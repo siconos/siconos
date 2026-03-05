@@ -13,7 +13,7 @@
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
 #include "numerics_verbose.h"
-#include "NonSmoothSolvers/nsgs_generic_instrumented.h"
+#include "nsgs_generic_instrumented.h"
 
 /* External timer struct from instrumented header */
 extern NSGSInstrumentedTimers nsgs_timers;

@@ -21,7 +21,7 @@
 #ifndef GlobalRollingFrictionContact_H
 #define GlobalRollingFrictionContact_H
 
-#include "FrictionContact_options.h"  // contains only enum. Ok.
+#include "RollingFrictionContact_options.h"  // contains only enum. Ok.
 #include "GlobalFrictionContact.hpp"
 
 struct GlobalRollingFrictionContactProblem;

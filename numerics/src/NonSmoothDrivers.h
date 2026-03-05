@@ -56,7 +56,7 @@
 /* #include "gfc3d_Solvers.h" */
 //#include "GenericMechanical_Solvers.h"
 
-//#include "NonSmoothSolvers/NonSmoothNewton.h"
+//#include "NonSmoothNewton.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {

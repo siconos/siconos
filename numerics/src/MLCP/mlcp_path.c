@@ -28,7 +28,7 @@
 #include "NumericsMatrix.h"
 #include "SiconosCompat.h"
 #include "numerics_verbose.h"
-#include "InterfaceToPathFerris/SimpleLCP.h"
+#include "SimpleLCP.h"
 #endif
 
 /* Solver registration system */

@@ -39,7 +39,7 @@
 #ifndef ROLLING_FRICTION_CONTACT_OPTIONS_H
 #define ROLLING_FRICTION_CONTACT_OPTIONS_H
 
-#include "FrictionContact/FrictionContact_options.h"
+#include "FrictionContact_options.h"
 #include "NumericsFwd.h"
 #include "SolverOptions.h"
 
@@ -112,7 +112,7 @@ enum ROLLING_FRICTION_SOLVER {
  * SICONOS_ROLLING_FRICTION_3D_NSGS.
  *
  * Usage:
- *   #include "RollingFrictionContact/rfc3d_short_names.h"
+ *   #include "rfc3d_short_names.h"
  *   // Or use the long names directly (backward compatible)
  */
 

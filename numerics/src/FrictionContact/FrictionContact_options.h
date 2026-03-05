@@ -186,14 +186,6 @@ enum FRICTION_SOLVER {
 }; /* end of enum FRICTION_SOLVER */
 
 /* ===========================================================================
- * Rolling Friction Solver Options
- * ===========================================================================
- * Rolling friction solvers are defined in RollingFrictionContact_options.h
- * Include it for rolling friction specific solver IDs and options.
- */
-#include "RollingFrictionContact/RollingFrictionContact_options.h"
-
-/* ===========================================================================
  * Integer Parameter Indices (iparam)
  * ===========================================================================
  * These enums define indices into the iparam array of SolverOptions.
@@ -266,7 +258,7 @@ enum SICONOS_FRICTION_3D_DPARAM {
  * The include below provides backward compatibility macros so existing code
  * using the old FRICTION_3D_NSGS_* names continues to work.
  */
-#include "NonSmoothSolvers/NonSmoothGaussSeidel_options.h"
+#include "NonSmoothGaussSeidel_options.h"
 
 /* ===========================================================================
  * Non-Smooth Newton (NSN) Solver Options
@@ -643,7 +635,7 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S {
  * SICONOS_FRICTION_3D_NSGS.
  *
  * Usage:
- *   #include "FrictionContact/fc3d_short_names.h"
+ *   #include "fc3d_short_names.h"
  *   // Or use the long names directly (backward compatible)
  */
 

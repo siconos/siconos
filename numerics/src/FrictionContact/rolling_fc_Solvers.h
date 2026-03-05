@@ -4,6 +4,6 @@
 
 #pragma message("Warning: rolling_fc_Solvers.h has moved to RollingFrictionContact/rolling_fc_Solvers.h")
 
-#include "RollingFrictionContact/rolling_fc_Solvers.h"
+#include "rolling_fc_Solvers.h"
 
 #endif
