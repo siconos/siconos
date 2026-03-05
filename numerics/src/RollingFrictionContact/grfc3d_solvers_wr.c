@@ -31,7 +31,9 @@
 #include "rfc3d_short_names.h"
 // #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"  // for SICONOS_DPARAM_TOL
-
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_P...
@@ -79,3 +81,14 @@ void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reacti
   }
   DEBUG_END("grfc3d_nsgs_wr\n");
 }
+REGISTER_SOLVER_3VAR(GRFC3D_NSGS_WR,
+                "GRFC3D_NSGS_WR",
+                "Non-smooth Gauss-Seidel for Global 3D Rolling Friction Contact with reduction",
+                NULL,
+                NULL,
+                NULL,
+                NULL,  /* error function */
+                rfc3d_nsgs_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */)
