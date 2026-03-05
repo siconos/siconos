@@ -920,12 +920,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_3D_RESCALING_CONE_YES", SICONOS_FRICTION_3D_RESCALING_CONE_YES)
       .export_values();
 
-  //   py::enum_<SICONOS_FRICTION_3D_DPARAM>(params, "SICONOS_FRICTION_3D_DPARAM")
-  //       .value("SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO",
-  //              SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO)
-  //       .export_values();
 
-  py::enum_<SICONOS_NSGS_IPARAM>(params, "SICONOS_NSGS_IPARAM")
+  py::enum_<SICONOS_NSGS_IPARAM>(params, "SICONOS_NSGS_IPARAM_enum")
       .value("SICONOS_NSGS_RELAXATION", SICONOS_NSGS_RELAXATION)
       .value("SICONOS_NSGS_SHUFFLE", SICONOS_NSGS_SHUFFLE)
       .value("SICONOS_NSGS_SHUFFLE_SEED", SICONOS_NSGS_SHUFFLE_SEED)

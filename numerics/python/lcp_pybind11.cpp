@@ -59,7 +59,7 @@ void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
              "ConvexQP PG LCP solver")
       .export_values();
 
-  py::enum_<SICONOS_LCP_IPARAM>(params, "SICONOS_LCP_IPARAM", "LCP IPARAM enum")
+  py::enum_<SICONOS_LCP_IPARAM>(params, "SICONOS_LCP_IPARAM_enum", "LCP IPARAM enum")
       .value("SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM",
              SICONOS_LCP_IPARAM::SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM,
              "Sum of local solver iterations")
@@ -83,7 +83,7 @@ void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
              "Activate multiple solutions search")
       .export_values();
 
-  py::enum_<SICONOS_LCP_DPARAM>(params, "SICONOS_LCP_DPARAM", "LCP DPARAM enum")
+  py::enum_<SICONOS_LCP_DPARAM>(params, "SICONOS_LCP_DPARAM_enum", "LCP DPARAM enum")
       .value("SICONOS_LCP_DPARAM_RHO", SICONOS_LCP_DPARAM::SICONOS_LCP_DPARAM_RHO,
              "Relaxation or regularization parameter")
       .value("SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM",
@@ -93,7 +93,7 @@ void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
              SICONOS_LCP_DPARAM::SICONOS_LCP_DPARAM_LATIN_PARAMETER, "Latin parameter")
       .export_values();
 
-  py::enum_<SICONOS_LCP_SKIP_TRIVIAL>(params, "SICONOS_LCP_SKIP_TRIVIAL",
+  py::enum_<SICONOS_LCP_SKIP_TRIVIAL>(params, "SICONOS_LCP_SKIP_TRIVIAL_enum",
                                       "LCP skip trivial enum")
       .value("SICONOS_LCP_SKIP_TRIVIAL_NO",
              SICONOS_LCP_SKIP_TRIVIAL::SICONOS_LCP_SKIP_TRIVIAL_NO, "No trivial solution skip")
@@ -102,7 +102,7 @@ void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
              "Yes trivial solution skip")
       .export_values();
 
-  py::enum_<SICONOS_LCP_PIVOT_TYPE>(params, "SICONOS_LCP_PIVOT_TYPE", "LCP pivot type enum")
+  py::enum_<SICONOS_LCP_PIVOT_TYPE>(params, "SICONOS_LCP_PIVOT_TYPE_enum", "LCP pivot type enum")
       .value("SICONOS_LCP_PIVOT_BARD", SICONOS_LCP_PIVOT_TYPE::SICONOS_LCP_PIVOT_BARD,
              "Bard pivoting")
       .value("SICONOS_LCP_PIVOT_LEAST_INDEX",

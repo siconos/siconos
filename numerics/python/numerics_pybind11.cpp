@@ -87,7 +87,7 @@ PYBIND11_MODULE(_numerics, m) {
       .value("NM_UNKNOWN", NM_UNKNOWN, "Unset. Used in NM_null")
       .export_values();
 
-  py::enum_<SICONOS_IPARAM>(params, "SICONOS_IPARAM", "Some value for iparam index")
+  py::enum_<SICONOS_IPARAM>(params, "SICONOS_IPARAM_enum", "Some value for iparam index")
       .value("SICONOS_IPARAM_MAX_ITER", SICONOS_IPARAM::SICONOS_IPARAM_MAX_ITER,
              "Maximum iterations")
       .value("SICONOS_IPARAM_ITER_DONE", SICONOS_IPARAM::SICONOS_IPARAM_ITER_DONE,
@@ -102,7 +102,7 @@ PYBIND11_MODULE(_numerics, m) {
              SICONOS_IPARAM::SICONOS_IPARAM_PATHSEARCH_STACKSIZE, "Path search stack size")
       .export_values();
 
-  py::enum_<SICONOS_DPARAM>(params, "SICONOS_DPARAM", "Some values for double parameter index")
+  py::enum_<SICONOS_DPARAM>(params, "SICONOS_DPARAM_enum", "Some values for double parameter index")
       .value("SICONOS_DPARAM_TOL", SICONOS_DPARAM::SICONOS_DPARAM_TOL, "Tolerance parameter")
       .value("SICONOS_DPARAM_RESIDU", SICONOS_DPARAM::SICONOS_DPARAM_RESIDU,
              "Residual parameter")
