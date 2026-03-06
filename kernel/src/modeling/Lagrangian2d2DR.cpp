@@ -24,6 +24,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosException.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -97,6 +98,17 @@ void siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(
   DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
+  if (fabs((sqrt(Nx * Nx + Ny * Ny) - 1.0)) > 1e-02) {
+    printf("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
+    printf("| N |  : %e |N| -1 : %e\n", sqrt(Nx * Nx + Ny * Ny), sqrt(Nx * Nx + Ny * Ny) - 1.0);
+    THROW_EXCEPTION(
+        "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q, Normal to contact is not "
+        "unitary ");
+    }
+
+  //printf("############ Nx*Nx + Ny*Ny : %e", Nx*Nx + Ny*Ny);
+  //assert((fabs(Nx*Nx + Ny*Ny) -1.0 ) > 1e-04);
+
   // jacobianhOver_q_->setValue(0,0,Nx);
   // jacobianhOver_q_->setValue(0,1,Ny);
   // jacobianhOver_q_->setValue(0,2,lever_arm_x*Ny - lever_arm_y*Nx );
@@ -146,7 +158,7 @@ void siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(
     array[9] = -Ty;
     array[11] = lever_arm_y * Tx - lever_arm_x * Ty;
   }
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
+  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_view_););
   DEBUG_END(
       "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(Interaction& inter, "
       "siconos::algebra::BlockVector q0) \n");
