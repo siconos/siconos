@@ -3077,15 +3077,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     3 * multipoints_iterations
                 )
 
+               
         # MB: this may be in conflict with 'dimension' attribute
         if bullet_options is not None and self.config.bullet is not None:
-            if bullet_options.dimension == self.config.bullet.TwoD:
-                self._dimension = 2
+            # we are using bullet
+            if self._dimension == 2:
+                if bullet_options.dimension != self.config.bullet.TwoD:
+                    self.print_verbose(
+                        """Warning. The infered dimention in attrs["dimension"] is 2D
+                        but the bullet_options are not consistent
+                        we impose bullet_options.dimension == self.config.bullet.TwoD""")
+                    bullet_options.dimension == self.config.bullet.TwoD
         else:
             if self._out.attrs.get("dimension", None) is None:
                 # this is a second place to set the default
                 self._dimension = 3
 
+                
         if self.config.backend == "vnative":
             if vnative_options is None:
                 vnative_options = sio.SpaceFilterOptions()
