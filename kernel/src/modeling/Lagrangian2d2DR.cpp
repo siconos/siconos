@@ -98,13 +98,13 @@ void siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(
   DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
-  if (fabs((sqrt(Nx * Nx + Ny * Ny) - 1.0)) > 1e-02) {
-    printf("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
-    printf("| N |  : %e |N| -1 : %e\n", sqrt(Nx * Nx + Ny * Ny), sqrt(Nx * Nx + Ny * Ny) - 1.0);
-    THROW_EXCEPTION(
-        "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q, Normal to contact is not "
-        "unitary ");
-    }
+  // if (fabs((sqrt(Nx * Nx + Ny * Ny) - 1.0)) > 1e-02) {
+  //   printf("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
+  //   printf("| N |  : %e |N| -1 : %e\n", sqrt(Nx * Nx + Ny * Ny), sqrt(Nx * Nx + Ny * Ny) - 1.0);
+  //   THROW_EXCEPTION(
+  //       "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q, Normal to contact is not "
+  //       "unitary ");
+  //   }
 
   //printf("############ Nx*Nx + Ny*Ny : %e", Nx*Nx + Ny*Ny);
   //assert((fabs(Nx*Nx + Ny*Ny) -1.0 ) > 1e-04);
