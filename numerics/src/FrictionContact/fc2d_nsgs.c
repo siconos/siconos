@@ -32,6 +32,7 @@
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "NumericsMatrix.h"
 #include "numerics_verbose.h"              // for numerics_printf, verbose
 
 /* #define DEBUG_STDOUT */
@@ -237,6 +238,10 @@ static double *fc2d_nsgs_compute_local_problem_determinant(
     double *block = diagonal_blocks->block[contact];
     diagonal_block_determinant[contact] = block[0] * block[3] - block[1] * block[2];
     if (diagonal_block_determinant[contact] < DBL_EPSILON) {
+      numerics_warning(
+		       "fc2d_nsgs_compute_local_problem_determinant","null determinant for block %i : %e",
+          contact, diagonal_block_determinant[contact]);
+
       free(diagonal_block_determinant);
       return NULL;
     }
@@ -327,13 +332,14 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, int *info,
     /* Number of GS iterations */
     iparam[SICONOS_IPARAM_ITER_DONE] = 0;
     dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
-    numerics_printf("-- FC2D - NSGS - error: determinant diagonal block in W is zero \n");
+    numerics_warning("fc2d_nsgs","-- FC2D - NSGS - error: determinant diagonal block in W is zero \n");
     *info = 1;
     diagonal_blocks = fc3d_free_diagonal_blocks(problem, diagonal_blocks);
     free(diagonal_block_determinant);
     free(local_problem->q);
     free(local_problem->M);
     free(local_problem);
+    return;
   }
 
   local_problem->M = NM_new();
