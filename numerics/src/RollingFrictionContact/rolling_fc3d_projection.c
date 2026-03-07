@@ -221,12 +221,13 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
     /*                                            mu_i, mu_r_i, */
     /*                                            &trivial_error, worktmp); */
     /* assert(trivial_error < 1e-14); */
-    numerics_printf_verbose(2, "found trivial solution = %i\t error = %e", trivial);
     /* printf( "found trivial solution = %i\t error = %e\n", trivial, trivial_error );  */
     SET_SOLVER_RESIDUAL(options, 0.0);
     memcpy(reaction_local, reaction_k, 5 * sizeof(double));
     /* NV_display(reaction,5); */
     /* NV_display(velocity_k,5); */
+    numerics_printf_verbose(2, "found trivial solution = %i\t error = %e", trivial, options->dparam[SICONOS_DPARAM_RESIDU]);
+ 
     DEBUG_END("rolling_fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
     return 0;
   } else

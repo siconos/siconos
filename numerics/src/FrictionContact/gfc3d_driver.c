@@ -82,14 +82,12 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   
   /* Input validation using standardized macros */
   CHECK_NULL(problem);
-  CHECK_NULL(reaction);
-  CHECK_NULL(velocity);
   CHECK_NULL(globalVelocity);
   CHECK_OPTIONS(options);
   CHECK_MATRIX(problem->M);
-  CHECK_MATRIX(problem->H);
+
   CHECK_NULL(problem->q);
-  CHECK_NULL(problem->b);
+
   
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity, problem->M->size0););
@@ -117,7 +115,10 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     return 0;
   }
-
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_MATRIX(problem->H);
+  CHECK_NULL(problem->b);  
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
     case GFC3D_NSGS_WR: {
