@@ -296,15 +296,30 @@ class Simulation(Stored):
     def oneStepNSProblem(self, idx):
         return self._osnspb
 
-class Body(Stored):
+# Allow for enumerated bodies with associated disk shape.
+class BodyBase(Stored):
 
     __count = 0
     __disk_shapes = {}
 
+    @classmethod
+    def count(cls):
+        return cls.__count
+
+    @classmethod
+    def set_count(cls, newcount):
+        cls.__count = newcount
+
+    @classmethod
+    def disk_shapes(cls):
+        return cls.__disk_shapes
+
+class Body(BodyBase):
+
     def __init__(self, radius, mass, position, velocity):
 
-        Body.__count += 1
-        self._ident = Body.__count
+        self.set_count(self.count() + 1)
+        self._ident = self.count()
 
         body = vkernel.disks.add_disk(self.data())
         self._handle = body
@@ -314,15 +329,111 @@ class Body(Stored):
         body.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
 
         disk_shape = None
-        if radius in Body.__disk_shapes:
-            disk_shape = Body.__disk_shapes[radius]
+        if radius in self.disk_shapes():
+            disk_shape = self.disk_shapes()[radius]
         else:
             disk_shape = vkernel.disks.add_disk_shape(self.data())
             disk_shape.set_radius(radius)
-            Body.__disk_shapes[radius] = disk_shape
+            self.disk_shapes()[radius] = disk_shape
 
         body.set_shape(disk_shape)
         body.set_fext(array([0,0,0])) # default
+
+    def getMassValue(self):
+        return self.handle().mass_matrix()[0]
+
+    def setConstantFext(self, fext, nargument=None):
+        self.handle().set_fext(array(fext))
+
+    def setFExtPtr(self, fext):
+        self.handle().set_fext(array(fext))
+
+    def setNumber(self, num):
+        self.handle().set_id(num)
+
+    def number(self):
+        return self.handle().id()
+
+    def setQ0Ptr(self, pos, step=0):
+
+        # FIX: next step not necessary 1
+        self.handle().set_q_at_step(array(pos), 0)
+        self.handle().set_q_at_step(array(pos), 1)
+
+    def setVelocity0Ptr(self, vel, step=0):
+
+        # FIX: next step not necessary 1
+        self.handle().set_velocity_at_step(array(vel), step)
+        self.handle().set_velocity_at_step(array([0., 0., 0.]), step+1)
+
+    def resetToInitialState(self):
+        pass # compatibility
+
+    def swapInMemory(self):
+        pass # compatibility
+
+class BodyWrap():
+
+    def __init__(self, bdy):
+
+        self._bdy = bdy
+
+    def getMassValue(self):
+        return self._bdy.mass_matrix()[0]
+
+    def setConstantFext(self, fext, nargument=None):
+        self._bdy.set_fext(array(fext))
+
+    def number(self):
+        return self._bdy.id()
+
+    def setQ0Ptr(self, pos, step=0):
+
+        # FIX: next step not necessary 1
+        self._bdy.set_q_at_step(array(pos), 0)
+        self._bdy.set_q_at_step(array(pos), 1)
+
+    def setVelocity0Ptr(self, vel, step=0):
+
+        # FIX: next step not necessary 1
+        self._bdy.set_velocity_at_step(array(vel), step)
+        self._bdy.set_velocity_at_step(array([0., 0., 0.]), step+1)
+
+    def resetToInitialState(self):
+        pass # compatibility
+
+    def swapInMemory(self):
+        pass # compatibility
+
+# many bodies
+class Bodies(BodyBase):
+
+    def __init__(self, radius, mass, positions, velocities):
+
+        start = self.count()
+        self.set_count(self.count() + len(positions))
+        self._ident = np.arange(start, self.count())
+
+        bodies = vkernel.disks.multiple_add_disk(self.data(), len(positions))
+        self._handle = bodies
+        bodies.multiple_set_id(self._ident)
+        bodies.multiple_set_q(array(positions))
+        bodies.multiple_set_velocity(array(velocities))
+        bodies.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
+
+        disk_shape = None
+        if radius in self.disk_shapes():
+            disk_shape = self.disk_shapes()[radius]
+        else:
+            disk_shape = vkernel.disks.add_disk_shape(self.data())
+            disk_shape.set_radius(radius)
+            self.disk_shapes()[radius] = disk_shape
+
+        bodies.set_shape(disk_shape)
+        bodies.set_fext(array([0,0,0])) # default
+
+    def get(self):
+        return [BodyWrap(bdy) for bdy in self.handle().get()]
 
     def getMassValue(self):
         return self.handle().mass_matrix()[0]

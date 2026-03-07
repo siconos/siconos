@@ -15,6 +15,8 @@ struct lagrangian_ds : item {
   /// @brief Degree of freedom parameter specifying system dimension
   using dof = some::indice_parameter<"dof">;
 
+  using batch_capable = void;
+
   /**
    * @brief Attributes defining the state and properties of the system
    *

@@ -253,7 +253,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   handle() : base_t{} {};
 
   /// @brief Copy constructor from handle reference
-  handle(handle& h) : base_t{h._data, h._index} {};
+  handle(const handle& h) : base_t{h._data, h._index} {};
 
   /// @brief Move constructor
   handle(handle&&) = default;

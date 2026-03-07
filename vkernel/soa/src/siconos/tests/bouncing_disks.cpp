@@ -88,24 +88,24 @@ int main(int argc, char* argv[])
   auto disk_shape = storage::add<config::disk_shape>(data);
   disk_shape.radius() = radius;
 
-  for (unsigned int i = 0; i < ndisks; ++i) {
-    auto d1 = storage::add<config::disk>(data);
-    //  auto d2 = storage::add<config::disk>(data);
+  auto disks = storage::add<config::disk>(data, ndisks);
 
-    storage::prop<"id">(d1) = i + 1;
+  for (auto [i, disk] : disks | view::enumerate) {
 
-    d1.q() = {0, position_init * (i + 1), 0};
-    d1.velocity() = {0, velocity_init, 0};
-    d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+    storage::prop<"id">(disk) = static_cast<uint>(i + 1);
 
-    prop<"shape">(d1) = disk_shape;
+    disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
+    disk.velocity() = {0, velocity_init, 0};
+    disk.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+
+    prop<"shape">(disk) = disk_shape;
 
     // -- Set external forces (weight) --
-    d1.fext() = {0., -m * g, 0.};
+    disk.fext() = {0., -m * g, 0.};
     //  d2.fext() = {-m * g, 0., 0.};
   }
 
-  for (auto disk : storage::handles<config::disk>(data, 0)) {
+  for (auto disk : disks) {
     print("disk:{} , disk.q()={}\n", disk.index().value(), disk.q()[0]);
   }
 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 
   //  auto fd = io::open<ascii>("result.dat");
 
-  auto disks = storage::handles<config::disk>(data, 0);
+//  auto disks = storage::handles<config::disk>(data, 0);
   auto disk1 = (disks | view::take(1)).front();
   auto disk2 = (disks | view::take(2)).back();
 

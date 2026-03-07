@@ -14,7 +14,7 @@ namespace siconos::storage {
 using namespace siconos::storage::pattern;
 
 template <match::item Item>
-static auto add = [](auto&& data) constexpr -> decltype(auto) {
+decltype(auto) add(auto&& data) {
   // types
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
@@ -74,5 +74,13 @@ static auto add = [](auto&& data) constexpr -> decltype(auto) {
     return make_full_handle<Item>(data, indice{0});
   }
 };
+
+// Multiple add at once.
+template <match::item Item>
+decltype(auto) add(auto&&data, std::size_t count)
+{
+  return view::iota(std::size_t{0}, count) |
+         view::transform([&data](auto&&) { return add<Item>(data); });
+}
 
 }  // namespace siconos::storage
