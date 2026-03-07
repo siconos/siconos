@@ -20,6 +20,7 @@
 
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
+#include <openblas_config.h>
 #include <stdlib.h>  // for calloc, realloc, free
 #include <string.h>  // for memcpy, NULL
 
@@ -279,26 +280,30 @@ int rolling_fc2d_projectionOnConeWithLocalIteration_solve(
   double velocity[3], velocity_k[3], reaction_k[3];
 
   // double trivial_error=0.0;
-  int trivial = rolling_fc2d_check_trivial_solution(
-      options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-      options->iparam[SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS], qLocal, mu_i, mu_r_i,
-      reaction_k, options);
-  if (trivial) {
-    /* rolling_fc2d_unitary_compute_and_add_error(reaction_k , velocity_k, */
-    /*                                            mu_i, mu_r_i, */
-    /*                                            &trivial_error, worktmp); */
-    /* assert(trivial_error < 1e-14); */
-    numerics_printf_verbose(2, "found trivial solution = %i\t error = %e", trivial);
-    /* printf( "found trivial solution = %i\t error = %e\n", trivial, trivial_error );  */
-    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
-    memcpy(reaction, reaction_k, 3 * sizeof(double));
-    /* NV_display(reaction,5); */
-    /* NV_display(velocity_k,5); */
-    DEBUG_END("rolling_fc2d_projectionOnConeWithLocalIteration_solve(...)\n");
-    return 0;
-  } else
-    numerics_printf_verbose(2, "trivial solution not found = %i", trivial);
 
+  if (options
+      ->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] ==
+      SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE) {
+    int trivial = rolling_fc2d_check_trivial_solution(
+        options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
+        options->iparam[SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS], qLocal, mu_i, mu_r_i,
+        reaction_k, options);
+    if (trivial) {
+      /* rolling_fc2d_unitary_compute_and_add_error(reaction_k , velocity_k, */
+      /*                                            mu_i, mu_r_i, */
+      /*                                            &trivial_error, worktmp); */
+      /* assert(trivial_error < 1e-14); */
+      numerics_printf_verbose(2, "found trivial solution = %i\t error = %e", trivial);
+      /* printf( "found trivial solution = %i\t error = %e\n", trivial, trivial_error );  */
+      options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+      memcpy(reaction, reaction_k, 3 * sizeof(double));
+      /* NV_display(reaction,5); */
+      /* NV_display(velocity_k,5); */
+      DEBUG_END("rolling_fc2d_projectionOnConeWithLocalIteration_solve(...)\n");
+      return 0;
+    } else
+      numerics_printf_verbose(2, "trivial solution not found = %i", trivial);
+  }
   double localerror = 1.0;
   // printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;

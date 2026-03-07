@@ -552,10 +552,14 @@ void rfc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   SOLVER_TOL(options) = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-
-  assert(options->numberOfInternalSolvers == 1);
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   options->internalSolvers[0] = solver_options_create(
       SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
+  assert(options->numberOfInternalSolvers == 1);
+
 }
 
 
