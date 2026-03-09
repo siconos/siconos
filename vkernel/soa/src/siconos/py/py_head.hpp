@@ -206,4 +206,11 @@ static decltype(auto) in_formatter(H&& h, T&& in_value)
   }
 }
 
+// Hide std::vector from pybind11 to avoid a list binding
+template <typename T>
+struct handles_wrap {
+  T handles;
+};
+
+
 using namespace boost::hana::literals;

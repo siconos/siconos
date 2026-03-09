@@ -17,12 +17,27 @@ runner_config = RunnerConfig(backend)
 
 import nonos
 
-import numpy
+import numpy as np
 from math import sqrt
 from random import random
 
 disk_radius = 1
 N = 10
+
+# Create meshgrid for positions
+i = np.arange(N)
+j = np.arange(N)
+ii, jj = np.meshgrid(i, j, indexing='ij')
+
+# Build arrays
+translations = np.column_stack([
+    0.2 * ii.ravel(),
+    3*disk_radius + 0.2 * jj.ravel()
+])
+
+orientations = np.zeros(N * N)            # All zeros
+velocities = np.zeros((N * N, 3))         # All zeros
+
 
 with MechanicsHdf5Runner(config=runner_config) as io:
 
@@ -32,12 +47,14 @@ with MechanicsHdf5Runner(config=runner_config) as io:
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0)
 
-#    io.add_primitive_shape('Ground', 'Segment', [-10,-10,10,-10])
-    for i in range(N):
-        for j in range(N):
-            io.add_object('disk-{}-{}'.format(i,j), [Contactor('DiskR2')],
-                          translation=[0.2*i, 3*disk_radius+0.2*j],
-                          orientation=[0], velocity=[0, 0, 0], mass=1, inertia=0.5)
+    #    io.add_primitive_shape('Ground', 'Segment', [-10,-10,10,-10])
+    io.add_objects('granular_disks', [Contactor('DiskR2')],
+                   translations=translations,
+                   orientations=orientations,
+                   velocities=velocities,
+                   mass=1.0,
+                   inertia=0.5)
+
 
     io.add_object('fixed-disk1', [Contactor('DiskR1')], translation=[0, 0])
 
@@ -61,8 +78,8 @@ class recirculation_start_hook():
     def call(self, step):
         positions  = self._io._io.positions(self._io._nsds)
         y = positions[:,2]
-        maxy=numpy.max(y)
-        ds_idy = numpy.nonzero(y < -6)
+        maxy=np.max(y)
+        ds_idy = np.nonzero(y < -6)
 
         for i,k in enumerate(ds_idy[0]):
 

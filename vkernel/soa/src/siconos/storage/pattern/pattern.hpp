@@ -680,6 +680,9 @@ template <typename Item>
 concept without_attached_storages_bindings =
     requires { typename Item::without_attached_storages_bindings; };
 
+template <typename Item>
+concept batch_capable = requires { typename Item::batch_capable; };
+
 }  // namespace match
 
 struct empty_item : item {};

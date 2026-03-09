@@ -133,6 +133,7 @@ class RunnerConfig:
             self.default_manager_class = sio.SpaceFilter
             self.default_simulation_class = sio.Simulation
             self.default_body_class = sio.Body
+            self.default_bodies_class = sio.Bodies
 
         else:
             raise RuntimeError(f"Unavailable chosen backend {self.backend}")
@@ -1908,6 +1909,49 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 self._deaths[time_of_death] = [(name, obj, body, flag)]
 
+    def import_objects(self, name, body_class=None, shape_class=None,
+                       face_class=None, edge_class=None, birth=False):
+        """
+        Import several objects at once.
+        """
+
+        # This is implemented only for the vnative backend
+        assert self.config.backend == "vnative"
+
+        obj = self._input[name]
+
+        translations = np.asarray(obj["translations"][:], dtype=np.float64)
+        orientations = np.asarray(obj["orientations"][:], dtype=np.float64)
+        positions = np.concatenate([translations, orientations], axis=1)
+        velocities = np.asarray(obj["velocities"][:], dtype=np.float64)
+        mass = obj.attrs.get("mass", None)
+        inertia = obj.attrs.get("inertia", None)
+        base_id = obj.attrs["id"]
+        count = obj.attrs["count"]
+
+        # Create contactor (same for all grains)
+        import siconos.mechanics.collision.tools as smct_tools
+        contactor = smct_tools.Contactor(
+            shape_name=obj.attrs["shape_name"],
+            collision_group=obj.attrs.get("group", 0)
+        )
+
+        self.print_verbose(f"Importing aggregate {name} with {count} grains...")
+
+        # For vnative backend, create bodies efficiently
+        ctor = contactor
+        radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+
+        # Only dynamic objects
+        assert mass is not None
+
+        bodies = self.config.default_bodies_class(radius, mass, positions, velocities)
+        np.vectorize(self._nsds.insertDynamicalSystem)(bodies.get())
+        np.vectorize(self._set_external_forces)(bodies.get())
+
+        self.print_verbose(f"Finished importing aggregate {name}")
+        return bodies
+
     def import_scene(self, time, body_class, shape_class, face_class, edge_class):
         """
         From the specification given in the hdf5 file with the help of
@@ -1971,6 +2015,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 id_last = None
             self.print_verbose("import dynamical systems ...")
             for name, obj in sorted(self._input.items(), key=lambda x: x[0]):
+                 # Check if this is an aggregate object first
+                obj_type = obj.attrs.get("type", "")
+
+                if obj_type in ("dynamic_aggregate", "static_aggregate"):
+                    # Import aggregate as individual bodies
+                    self.import_objects(name, body_class, shape_class, face_class, edge_class)
+                    continue
+
                 mass = obj.attrs.get("mass", None)
                 time_of_birth = obj.attrs.get("time_of_birth", -1)
                 time_of_death = obj.attrs.get("time_of_death", float("inf"))

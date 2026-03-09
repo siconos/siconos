@@ -1102,6 +1102,102 @@ class MechanicsHdf5(object):
 
         return obj
 
+    def add_objects(self, name, shapes, translations, orientations=None, velocities=None,
+                mass=None, inertia=None, time_of_birth=-1, time_of_death=-1):
+        """
+        Add an aggregate of objects (e.g., granular material) with shared properties.
+
+        All objects share the same shape, mass and inertia. Only translations,
+        orientations and velocities are specific to each grain.
+
+        Parameters
+        ----------
+        name: string
+            The name of the aggregate.
+        shapes: Contactor or list of Contactors
+            The shape(s) for all grains (only first contactor used for now).
+        translations: array_like (N, 2) or (N, 3)
+            Initial translations for all N grains.
+        orientations: array_like (N,) for 2D or (N, 4) for 3D, optional
+            Initial orientations. Default: zero rotation.
+        velocities: array_like (N, 3) for 2D or (N, 6) for 3D, optional
+            Initial velocities. Default: zero.
+        mass: float, optional
+            Mass for each grain (all grains have same mass).
+        inertia: array_like, optional
+            Inertia for each grain (all grains have same inertia).
+        """
+        if name in self._input:
+            return
+
+        obj = group(self._input, name)
+
+        # Store as aggregate type
+        if mass is not None:
+            obj.attrs["type"] = "dynamic_aggregate"
+            obj.attrs["id"] = self._number_of_dynamic_objects + 1
+            self._number_of_dynamic_objects += len(translations)
+        else:
+            obj.attrs["type"] = "static_aggregate"
+            obj.attrs["id"] = -(self._number_of_static_objects + 1)
+            self._number_of_static_objects += len(translations)
+
+        # Store shape info (same for all grains)
+        if isinstance(shapes, (list, tuple)):
+            shape_info = shapes[0]
+        else:
+            shape_info = shapes
+
+        obj.attrs["shape_name"] = shape_info.shape_name
+        if hasattr(shape_info, "group"):
+            obj.attrs["group"] = shape_info.group
+        if hasattr(shape_info, "collision_group"):
+            obj.attrs["group"] = shape_info.collision_group
+
+        if mass is not None:
+            obj.attrs["mass"] = mass
+        if inertia is not None:
+            obj.attrs["inertia"] = np.asarray(inertia, dtype=np.float64)
+
+        # Store arrays
+        translations = np.asarray(translations, dtype=np.float64)
+        if self._dimension == 2 and translations.shape[-1] != 2:
+            raise ValueError(f"Expected Nx2 translations for 2D, got {translations.shape}")
+        if self._dimension == 3 and translations.shape[-1] != 3:
+            raise ValueError(f"Expected Nx3 translations for 3D, got {translations.shape}")
+
+        obj.create_dataset("translations", data=translations, compression="gzip" if self._use_compression else None)
+        obj.attrs["count"] = len(translations)
+
+        # Handle orientations
+        if orientations is None:
+            if self._dimension == 2:
+                orientations = np.zeros(len(translations), dtype=np.float64)
+            else:
+                orientations = np.tile(np.array([1., 0., 0., 0.], dtype=np.float64), (len(translations), 1))
+        else:
+            orientations = np.asarray(orientations, dtype=np.float64)
+            if self._dimension == 2 and orientations.ndim == 1:
+                orientations = orientations.reshape(-1, 1)
+        obj.create_dataset("orientations", data=orientations, compression="gzip" if self._use_compression else None)
+
+        # Handle velocities
+        if velocities is None:
+            if self._dimension == 2:
+                velocities = np.zeros((len(translations), 3), dtype=np.float64)
+            else:
+                velocities = np.zeros((len(translations), 6), dtype=np.float64)
+        else:
+            velocities = np.asarray(velocities, dtype=np.float64)
+        obj.create_dataset("velocities", data=velocities, compression="gzip" if self._use_compression else None)
+
+        if time_of_birth >= 0:
+            obj.attrs["time_of_birth"] = time_of_birth
+        if time_of_death >= 0:
+            obj.attrs["time_of_death"] = time_of_death
+
+        return obj
+
     def add_Newton_impact_rolling_friction_nsl(
         self, name, mu, mu_r, e=0, collision_group1=0, collision_group2=0
     ):

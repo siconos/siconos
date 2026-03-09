@@ -114,35 +114,60 @@ if not os.path.exists(io_filename):
         io.add_object('box-wall-right', [Contactor('BoxWallRight')], translation=[0, 0])
         io.add_object('box-bottom', [Contactor('BoxBottom')], translation=[0, 0])
 
-        # Disks: fill in a grid, but close to the silo top
+        # Generate positions for disks
+        y_offset = silo_height
         disks_per_row = sqrtN
         num_rows = sqrtN
 
-        print(f'disks_per_row : {disks_per_row}')
+        x_vals = disk_radius + np.arange(disks_per_row) * (2 * disk_radius)
+        y_vals = y_offset + disk_radius - np.arange(num_rows) * (2 * disk_radius)
 
-        disks_created = 0
-        y_offset = silo_height
-        for row in range(num_rows):
-            y = y_offset - row * (2 * disk_radius) + disk_radius
-            for col in range(disks_per_row):
-                if disks_created >= N:
-                    break
-                x = disk_radius + col * (2 * disk_radius)
-                if x + disk_radius > silo_width:
-                    break
-                contact = random.choice(disk_contactors)
-                radius = contact[0]
-                io.add_object(
-                    'disk{}-{}'.format(row, col),
-                    [contact[1]],
-                    translation=[x, y],
-                    orientation=[0],
-                    velocity=[0, 0, 0],
-                    mass=disk_mass*radius*radius
-                )
-                disks_created += 1
-            if disks_created >= N:
-                break
+        xx, yy = np.meshgrid(x_vals, y_vals, indexing='xy')
+
+        # Flatten and apply silo width constraint
+        xx_flat = xx.ravel()
+        yy_flat = yy.ravel()
+        mask = xx_flat + disk_radius <= silo_width
+
+        # Stack coordinates and take first N positions
+        positions = np.column_stack([xx_flat[mask], yy_flat[mask]])[:N]
+
+        if len(positions) == 0:
+            raise ValueError("No valid positions generated! Check silo_width vs disk_radius")
+
+        # Shuffle in-place (numpy version)
+        np.random.shuffle(positions)
+
+        # Distribute among different disk types and create aggregates
+        n_types = len(disk_contactors)
+        base_count = N // n_types
+        remainder = N % n_types
+
+        idx = 0
+        for i, (radius, contactor) in enumerate(disk_contactors):
+            count = base_count + (1 if i < remainder else 0)
+            if count == 0:
+                continue
+
+            # Slice the pre-shuffled array
+            type_positions = positions[idx:idx+count]
+            idx += count
+
+            # type_positions is already a float64 numpy array
+            translations = type_positions
+            orientations = np.zeros(count, dtype=np.float64)
+            velocities = np.zeros((count, 3), dtype=np.float64)
+
+            io.add_objects(
+                f'granular_disks_{i}',
+                [contactor],
+                translations=translations,
+                orientations=orientations,
+                velocities=velocities,
+                mass=disk_mass * radius * radius,
+                inertia=disk_inertia
+            )
+
         io.add_Newton_impact_friction_nsl('contact', mu=0.5, e=0)
 
 bullet_options = SiconosBulletOptions()
@@ -150,7 +175,7 @@ bullet_options.worldScale = 1.0
 bullet_options.perturbationIterations = 1
 bullet_options.minimumPointsPerturbationThreshold = 1
 
-theta = '?'
+theta = 0.50001
 
 solver = sn.solver_ids.SICONOS_FRICTION_2D_NSGS
 
