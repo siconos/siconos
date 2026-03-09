@@ -130,6 +130,7 @@ enum FRICTION_SOLVER {
   SICONOS_ONECONE_NSN = 550,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
   SICONOS_ONECONE_NSN_GP = 551,
+  SICONOS_ONECONE_NSN_GP_HYBRID = 565,
   /** Projection on cone, one contact solver */
   SICONOS_ONECONE_ProjectionOnCone = 552,
   /** Projection on cone, one contact solver */
@@ -137,16 +138,17 @@ enum FRICTION_SOLVER {
   SICONOS_ONECONE_ProjectionOnConeWithRegularization = 554,
   SICONOS_ONECONE_ProjectionOnConeWithDiagonalization = 555,
   SICONOS_ONECONE_ProjectionOnCone_velocity = 558,
-
-  /** Fischer Burmeister/Path, Glocker formulation, one contact solver */
-  SICONOS_FRICTION_3D_NCPGlockerFBPATH = 556,
-  /** Newton/Fischer Burmeister, Glocker formulation, one contact solver */
-  SICONOS_FRICTION_3D_NCPGlockerFBNewton = 561,
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC = 562,
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU = 563,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
-  SICONOS_ONECONE_NSN_GP_HYBRID = 565,
+  
+  /** Fischer Burmeister/Path, Glocker formulation, one contact solver */
+  SICONOS_FRICTION_3D_NCPGlockerFBPATH = 556,
+  /** Newton/Fischer Burmeister, Glocker formulation, one contact solver */
+  SICONOS_FRICTION_3D_NCPGlockerFBNewton = 561,
+
+
   SICONOS_FRICTION_3D_VI_FPP_Cylinder = 566,
   SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER = 567,
 

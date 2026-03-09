@@ -843,7 +843,7 @@ REGISTER_SOLVER(OC_PROJ_DIAG,
                 NULL,
                 NULL,
                 fc3d_proj_diag_set_default,
-                100, 1e-4, 1)
+                1000, 1e-14, 1)
 
 /* Projection on Cone */
 static void fc3d_proj_cone_set_default(SolverOptions* options) {
@@ -869,7 +869,7 @@ REGISTER_SOLVER(OC_PROJ,
                 NULL,
                 NULL,
                 fc3d_proj_cone_set_default,
-                100, 1e-4, 1)
+                1000, 1e-14, 1)
 
 /* Projection on Cone with Local Iteration */
 static void fc3d_proj_li_set_default(SolverOptions* options) {
@@ -897,7 +897,7 @@ REGISTER_SOLVER(OC_PROJ_LI,
                 NULL,
                 NULL,
                 fc3d_proj_li_set_default,
-                100, 1e-4, 1)
+                1000, 1e-14, 1)
 
 /* Projection on Cylinder */
 static void fc3d_proj_cyl_set_default(SolverOptions* options) {
@@ -923,7 +923,7 @@ REGISTER_SOLVER(OC_CYLINDER,
                 NULL,
                 NULL,
                 fc3d_proj_cyl_set_default,
-                100, 1e-4, 1)
+                1000, 1e-14, 1)
 
 /* Projection on Cylinder with Local Iteration */
 static void fc3d_proj_cyl_li_set_default(SolverOptions* options) {
@@ -949,4 +949,4 @@ REGISTER_SOLVER(OC_CYLINDER_LI,
                 NULL,
                 NULL,
                 fc3d_proj_cyl_li_set_default,
-                100, 1e-4, 1)
+                1000, 1e-14, 1)

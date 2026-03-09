@@ -485,6 +485,6 @@ REGISTER_SOLVER(RFC3D_OC_PROJ_LI, "RFC3D_OC_PROJ_LI",
                 rfc3d_poc_li_free_wrap,
                 NULL,  /* error function */
                 rfc3d_poc_withLocalIteration_set_default,
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
+                1000,   /* default_max_iter */
+                1e-12,  /* default_tol */
                 1      /* is_local_solver */);
