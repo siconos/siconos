@@ -76,7 +76,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
   CSparseMatrix *triplet_2 = NM_csc_to_triplet(csc);
   /* CSparseMatrix_print(triplet_2, 1); */
 
-  int is_equal = CSparseMatrix_is_equal(triplet, triplet_2, 1e-14);
+  bool is_equal = CSparseMatrix_is_equal(triplet, triplet_2, 1e-14);
 
   if (!is_equal) {
     printf("triplet and triplet_2 are not equal\n");

@@ -49,18 +49,32 @@ extern "C" {
 #define restrict __restrict
 #endif
 
-static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned rindx) {
-  return &mat[rindx * ncols];
-}
+// // static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned
+// rindx) {
+// //   return &mat[rindx * ncols];
+// // }
 
-static inline void NMD_copycol_rmajor(int nrows, double* col, double* restrict mat, int ncols,
-                                      unsigned cindx) {
-  cblas_dcopy(nrows, col, 1, &mat[cindx], ncols);
-}
+// // static inline void NMD_copycol_rmajor(int nrows, double* col, double* restrict mat, int
+// // ncols,
+// //                                       unsigned cindx) {
+// //   cblas_dcopy(nrows, col, 1, &mat[cindx], ncols);
+// // }
 
-static inline void NMD_dense_gemv(int nrows, int ncols, double alpha, double* restrict mat,
-                                  double* restrict y, double beta, double* restrict x) {
-  cblas_dgemv(CblasColMajor, CblasTrans, ncols, nrows, alpha, mat, ncols, y, 1, beta, x, 1);
-}
+// // static inline void NMD_dense_gemv(int nrows, int ncols, double alpha, double* restrict
+// mat,
+// //                                   double* restrict y, double beta, double* restrict x) {
+// //   cblas_dgemv(CblasColMajor, CblasTrans, ncols, nrows, alpha, mat, ncols, y, 1, beta, x,
+// 1);
+// // }
+
+// BLASINT_SIZE set by cmake
+//#ifdef SIZEOF_BLASINT
+#if SIZEOF_BLASINT == 8
+#define BLASINT_MAX LLONG_MAX
+#else
+#define BLASINT_MAX INT_MAX
+#endif
+//#else
+//#endif
 
 #endif  // SiconosBlas_H

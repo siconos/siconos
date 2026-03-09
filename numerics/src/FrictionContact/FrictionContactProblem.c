@@ -30,7 +30,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "io_tools.h"
-#include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_pr...
 #include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
@@ -107,21 +107,21 @@ FrictionContactProblem* frictionContact_newFromFile(FILE* file) {
       "file)\n");
   int nc = 0, d = 0;
   int i;
-  CHECK_IO(fscanf(file, "%d\n", &d));
+  check_io(fscanf(file, "%d\n", &d));
   problem->dimension = d;
   DEBUG_PRINTF("problem->dimension = %i \n", problem->dimension);
-  CHECK_IO(fscanf(file, "%d\n", &nc));
+  check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
+    check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
   DEBUG_PRINT(
       "End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* "

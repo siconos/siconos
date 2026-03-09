@@ -33,7 +33,7 @@
 /* #define DEBUG_STDOUT 1 */
 /* #define DEBUG_MESSAGES 1 */
 #include "NSSTools.h"          // for min, max
-#include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_war...
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_war...
 #include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
 #include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
 
@@ -1754,39 +1754,39 @@ SparseBlockStructuredMatrix* SBM_new_from_file(FILE* file) {
   SparseBlockStructuredMatrix* m = SBM_new();
 
   if (!file) return NULL;
-  CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
+  check_io(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0) return NULL;
 
-  CHECK_IO(fscanf(file, "%d", &(m->blocknumber0)));
-  CHECK_IO(fscanf(file, "%d", &(m->blocknumber1)));
+  check_io(fscanf(file, "%d", &(m->blocknumber0)));
+  check_io(fscanf(file, "%d", &(m->blocknumber1)));
 
   m->blocksize0 = (unsigned int*)malloc(m->blocknumber0 * sizeof(unsigned int));
   m->blocksize1 = (unsigned int*)malloc(m->blocknumber1 * sizeof(unsigned int));
 
   for (unsigned int i = 0; i < m->blocknumber0; i++) {
-    CHECK_IO(fscanf(file, "%d", &(m->blocksize0[i])));
+    check_io(fscanf(file, "%d", &(m->blocksize0[i])));
   }
   for (unsigned int i = 0; i < m->blocknumber1; i++) {
-    CHECK_IO(fscanf(file, "%d", &(m->blocksize1[i])));
+    check_io(fscanf(file, "%d", &(m->blocksize1[i])));
   }
 
   unsigned int filled1 = 0, filled2 = 0;
-  CHECK_IO(fscanf(file, "%d", &(filled1)));
+  check_io(fscanf(file, "%d", &(filled1)));
   m->filled1 = filled1;
-  CHECK_IO(fscanf(file, "%d", &(filled2)));
+  check_io(fscanf(file, "%d", &(filled2)));
   m->filled2 = filled2;
   m->index1_data = (size_t*)malloc(m->filled1 * sizeof(size_t));
   m->index2_data = (size_t*)malloc(m->filled2 * sizeof(size_t));
 
   int index1_dataCurrent = 0;
   for (unsigned int i = 0; i < m->filled1; i++) {
-    CHECK_IO(fscanf(file, "%d", &(index1_dataCurrent)));
+    check_io(fscanf(file, "%d", &(index1_dataCurrent)));
     m->index1_data[i] = index1_dataCurrent;
   }
   int index2_dataCurrent = 0;
   for (unsigned int i = 0; i < m->filled2; i++) {
-    CHECK_IO(fscanf(file, "%d", &(index2_dataCurrent)));
+    check_io(fscanf(file, "%d", &(index2_dataCurrent)));
     m->index2_data[i] = index2_dataCurrent;
   }
   m->block = (double**)malloc(m->nbblocks * sizeof(double*));
@@ -1808,7 +1808,7 @@ SparseBlockStructuredMatrix* SBM_new_from_file(FILE* file) {
       if (colNumber != 0) nbColumns -= m->blocksize1[colNumber - 1];
       // fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
 
-      CHECK_IO(fscanf(file, "%d", &(blockk)));
+      check_io(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum) {
         printf(
             "Numerics, SparseBlockStructuredMatrix SBM_read_in_file failed, problem in block "
@@ -1816,7 +1816,7 @@ SparseBlockStructuredMatrix* SBM_new_from_file(FILE* file) {
       }
       m->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
       for (unsigned int i = 0; i < nbRows * nbColumns; i++) {
-        CHECK_IO(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
+        check_io(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
       }
     }
   }
@@ -1826,34 +1826,34 @@ SparseBlockStructuredMatrix* SBM_new_from_file(FILE* file) {
 void SBM_read_in_file(SparseBlockStructuredMatrix* const m, FILE* file) {
   assert(m);
   assert(file);
-  CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
+  check_io(fscanf(file, "%d", &(m->nbblocks)));
 
   if (m->nbblocks == 0) return;
 
-  CHECK_IO(fscanf(file, "%d", &(m->blocknumber0)));
-  CHECK_IO(fscanf(file, "%d", &(m->blocknumber1)));
+  check_io(fscanf(file, "%d", &(m->blocknumber0)));
+  check_io(fscanf(file, "%d", &(m->blocknumber1)));
 
   for (unsigned int i = 0; i < m->blocknumber0; i++) {
-    CHECK_IO(fscanf(file, "%d", &(m->blocksize0[i])));
+    check_io(fscanf(file, "%d", &(m->blocksize0[i])));
   }
   for (unsigned int i = 0; i < m->blocknumber1; i++) {
-    CHECK_IO(fscanf(file, "%d", &(m->blocksize1[i])));
+    check_io(fscanf(file, "%d", &(m->blocksize1[i])));
   }
 
   unsigned int filled1 = 0, filled2 = 0;
-  CHECK_IO(fscanf(file, "%d", &(filled1)));
+  check_io(fscanf(file, "%d", &(filled1)));
   m->filled1 = filled1;
-  CHECK_IO(fscanf(file, "%d", &(filled2)));
+  check_io(fscanf(file, "%d", &(filled2)));
   m->filled2 = filled2;
 
   unsigned int index1_dataCurrent = 0;
   for (unsigned int i = 0; i < m->filled1; i++) {
-    CHECK_IO(fscanf(file, "%d", &(index1_dataCurrent)));
+    check_io(fscanf(file, "%d", &(index1_dataCurrent)));
     m->index1_data[i] = index1_dataCurrent;
   }
   unsigned int index2_dataCurrent = 0;
   for (unsigned int i = 0; i < m->filled2; i++) {
-    CHECK_IO(fscanf(file, "%d", &(index2_dataCurrent)));
+    check_io(fscanf(file, "%d", &(index2_dataCurrent)));
     m->index2_data[i] = index2_dataCurrent;
   }
   unsigned int currentRowNumber;
@@ -1874,7 +1874,7 @@ void SBM_read_in_file(SparseBlockStructuredMatrix* const m, FILE* file) {
       if (colNumber != 0) nbColumns -= m->blocksize1[colNumber - 1];
       // fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
 
-      CHECK_IO(fscanf(file, "%d", &(blockk)));
+      check_io(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum) {
         printf(
             "Numerics, SparseBlockStructuredMatrix SBM_read_in_file failed, problem in block "
@@ -1882,7 +1882,7 @@ void SBM_read_in_file(SparseBlockStructuredMatrix* const m, FILE* file) {
       }
 
       for (unsigned int i = 0; i < nbRows * nbColumns; i++) {
-        CHECK_IO(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
+        check_io(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
       }
     }
   }

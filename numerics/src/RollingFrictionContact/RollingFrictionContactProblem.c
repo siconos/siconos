@@ -24,7 +24,7 @@
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
-#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
+#include "numerics_verbose.h"  // for check_io, numerics_printf_verbose
 #include "numerics_errors.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -111,25 +111,25 @@ RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file) {
       "problem, FILE* file)\n");
   int nc = 0, d = 0;
   int i;
-  CHECK_IO(fscanf(file, "%d\n", &d));
+  check_io(fscanf(file, "%d\n", &d));
   problem->dimension = d;
   DEBUG_PRINTF("problem->dimension = %i \n", problem->dimension);
-  CHECK_IO(fscanf(file, "%d\n", &nc));
+  check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
+    check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
   problem->mu_r = (double*)malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu_r[i])));
+    check_io(fscanf(file, "%lf ", &(problem->mu_r[i])));
   }
   DEBUG_PRINT(
       "End --  int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, "

@@ -19,11 +19,11 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "CSparseMatrix.h"  // for cs_dl_entry, CS_INT, cs_dl_print
-#include "NumericsFwd.h"             // for NumericsMatrix, NumericsSparseMatrix
-#include "NumericsMatrix.h"          // for NM_entry, NM_display, NM_create
-#include "NumericsSparseMatrix.h"    // for NumericsSparseMatrix, NSM_TRIPLET
-#include "NumericsVector.h"          // for NV_display
+#include "CSparseMatrix.h"         // for cs_dl_entry, CS_INT, cs_dl_print
+#include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
+#include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
+#include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
+#include "NumericsVector.h"        // for NV_display
 
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
@@ -231,21 +231,21 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   CSparseMatrix_factors *cs_lu_M =
       (CSparseMatrix_factors *)malloc(sizeof(CSparseMatrix_factors));
 
-  int info = 1 - CSparseMatrix_lu_factorization(1, M, 1e-14, cs_lu_M);
+  bool info = CSparseMatrix_lu_factorization(1, M, 1e-14, cs_lu_M);
 
-  if (info) {
+  if (!info) {
     printf("problem in Lu factor\n");
-    return info;
+    return EXIT_FAILURE;
   }
   /* printf(" L:\n"); */
   /* cs_print(cs_lu_M->N->L, 0); */
   /* printf(" U:\n"); */
   /* cs_print(cs_lu_M->N->U, 0); */
 
-  info = 1 - CSparseMatrix_spsolve(cs_lu_M, X, B);
-  if (info) {
+  info = CSparseMatrix_spsolve(cs_lu_M, X, B);
+  if (!info) {
     printf("problem in spsolve\n");
-    return info;
+    return EXIT_FAILURE;
   }
   CSparseMatrix *II = cs_multiply(M, B);
   // printf(" M * M^-1:\n");
@@ -268,10 +268,10 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   cs_spfree(check);
 
   if (error > 1e-12) {
-    return 1;
+    return EXIT_FAILURE;
   }
 
-  return info;
+  return EXIT_SUCCESS;
 }
 
 static int test_CSparseMatrix_spsolve(void) {
@@ -331,19 +331,19 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
   CSparseMatrix_factors *cs_chol_M =
       (CSparseMatrix_factors *)malloc(sizeof(CSparseMatrix_factors));
 
-  int info = 1 - CSparseMatrix_chol_factorization(1, M, cs_chol_M);
+  bool info = CSparseMatrix_chol_factorization(1, M, cs_chol_M);
 
-  if (info) {
+  if (!info) {
     printf("problem in Cholesky factor\n");
-    return info;
+    return EXIT_FAILURE;
   }
   /* printf(" L:\n"); */
   /* cs_print(cs_chol_M->N->L, 0); */
 
-  info = 1 - CSparseMatrix_chol_spsolve(cs_chol_M, X, B);
-  if (info) {
+  info = CSparseMatrix_chol_spsolve(cs_chol_M, X, B);
+  if (!info) {
     printf("problem in chol_spsolve\n");
-    return info;
+    return EXIT_FAILURE;
   }
   CSparseMatrix *II = cs_multiply(M, B);
   // printf(" M * M^-1:\n");
@@ -365,10 +365,10 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
   cs_spfree(check);
 
   if (error > 1e-12) {
-    return 1;
+    return EXIT_FAILURE;
   }
   // printf("info =%i\n", info);
-  return info;
+  return EXIT_SUCCESS;
 }
 
 static int test_CSparseMatrix_chol_spsolve(void) {

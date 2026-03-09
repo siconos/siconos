@@ -22,14 +22,14 @@
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
+#include <inttypes.h>
 #include <math.h>    // for fabs
 #include <stdio.h>   // for fprintf, sscanf, printf, NULL, fgets
 #include <stdlib.h>  // for realloc, exit, free, malloc, EXIT_FAILURE
-#include <inttypes.h>
 #include <string.h>  // for strtok_r, memcpy, strncmp
 
 #include "ldl.h"
-#include "numerics_verbose.h"  // for CHECK_IO
+#include "numerics_verbose.h"  // for check_io
 #if defined(_WIN32) || defined(_WIN64)
 /* We are on Windows */
 #define strtok_r strtok_s
@@ -43,8 +43,8 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"  // for DEBUG_PRINTF
 #include "numerics_errors.h"  // for CHECK_NULL, CHECK_ARG, etc.
+#include "siconos_debug.h"    // for DEBUG_PRINTF
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -79,9 +79,9 @@ void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m, FILE *file
   fprintf(file, "m = %" PRCS_INT "; \n", m->m);
   fprintf(file, "n = %" PRCS_INT "; \n", m->n);
   fprintf(file, "data= [");
-  for (int i = 0; i < m->m; i++) {
+  for (CS_INT i = 0; i < m->m; i++) {
     fprintf(file, "[");
-    for (int j = 0; j < m->n; j++) {
+    for (CS_INT j = 0; j < m->n; j++) {
       fprintf(file, "%32.24e,\t ", CSparseMatrix_get_value((CSparseMatrix *)m, i, j));
     }
     fprintf(file, "],\n");
@@ -89,7 +89,7 @@ void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m, FILE *file
   fprintf(file, "]");
 }
 
-int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol) {
+bool CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol) {
   CS_INT m = A->n;
   CS_INT n = A->m;
   if (m != B->m) return 1;
@@ -98,11 +98,11 @@ int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, doubl
   for (CS_INT i = 0; i < m; i++) {
     for (CS_INT j = 0; j < n; j++) {
       if (fabs(CSparseMatrix_get_value(A, i, j) - CSparseMatrix_get_value(B, i, j)) > tol)
-        return 0;
+        return false;
     }
   }
 
-  return 1;
+  return true;
 }
 
 /* y = alpha*A*x+beta*y */
@@ -119,17 +119,17 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const doubl
     Ax = A->x;
 
     if ((beta == 1.0) && (alpha == 1.0)) {
-      for (int j = 0; j < n; j++) {
+      for (CS_INT j = 0; j < n; j++) {
         for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
           y[Ai[p]] += Ax[p] * x[j];
         }
       }
     } else {
-      for (int j = 0; j < m; j++) {
+      for (CS_INT j = 0; j < m; j++) {
         y[j] *= beta;
       }
 
-      for (int j = 0; j < n; j++) {
+      for (CS_INT j = 0; j < n; j++) {
         for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
           y[Ai[p]] += alpha * Ax[p] * x[j];
         }
@@ -147,7 +147,7 @@ int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A) {
     n = A->n;
     Ap = A->p;
     Ax = A->x;
-    for (int j = 0; j < n; j++) {
+    for (CS_INT j = 0; j < n; j++) {
       for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
         Ax[p] = alpha * Ax[p];
       }
@@ -258,8 +258,8 @@ CSparseMatrix *CSparseMatrix_spfree_on_stack(CSparseMatrix *A) {
   return NULL;
 }
 
-int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol,
-                                   CSparseMatrix_factors *cs_lu_A) {
+bool CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol,
+                                    CSparseMatrix_factors *cs_lu_A) {
   CHECK_NULL(A);
   cs_lu_A->n = A->n;
   css *S = cs_sqr(order, A, 0);
@@ -268,8 +268,8 @@ int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol,
 
   return (S && cs_lu_A->N);
 }
-int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,
-                                     CSparseMatrix_factors *cs_chol_A) {
+bool CSparseMatrix_chol_factorization(CS_INT order, const cs *A,
+                                      CSparseMatrix_factors *cs_chol_A) {
   CHECK_NULL(A);
   cs_chol_A->n = A->n;
   css *S = cs_schol(order, A);
@@ -278,8 +278,8 @@ int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,
 
   return (S && cs_chol_A->N);
 }
-int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
-                                     CSparseMatrix_factors *cs_ldlt_A) {
+bool CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
+                                      CSparseMatrix_factors *cs_ldlt_A) {
   CHECK_NULL(A);
 
   CS_INT *Ap, *Ai, *Lp, *Li;
@@ -315,12 +315,12 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
   cs_ldlt_A->N->pinv = Perm = cs_amd(order, A); /* We used pinv to store Perm !! */
   PermInv = cs_malloc(n, sizeof(CS_INT));
 
-  DEBUG_EXPR(for (int k = 0; k < n + 1; k++) { printf("%li\t", Perm[k]); } printf("\n"););
+  DEBUG_EXPR(for (CS_INT k = 0; k < n + 1; k++) { printf("%li\t", Perm[k]); } printf("\n"););
 
   /* symbolic factorization to get Lp, Parent, Lnz, and Pinv */
   LDL_symbolic(n, Ap, Ai, Lp, Parent, Lnz, Flag, Perm, PermInv);
-  DEBUG_EXPR(for (int k = 0; k < n + 1; k++) { printf("%li\t", Lp[k]); } printf("\n"););
-  DEBUG_EXPR(for (int k = 0; k < n; k++) { printf("%li\t", Flag[k]); } printf("\n"););
+  DEBUG_EXPR(for (CS_INT k = 0; k < n + 1; k++) { printf("%li\t", Lp[k]); } printf("\n"););
+  DEBUG_EXPR(for (CS_INT k = 0; k < n; k++) { printf("%li\t", Flag[k]); } printf("\n"););
 
   /* factorization */
   lnz = Lp[n];
@@ -642,10 +642,9 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
   CS_INT m = 0, n = 0, nzmax = 0, nz, p, j, *Ap, *Ai;
   long long foo;
   double *Ax;
-  int info = 0;
   char line[2048];
 
-  /* CHECK_IO(fscanf(file, "%20[^\n]", line ), &info); */
+  /* info = check_io(fscanf(file, "%20[^\n]", line )); */
   /* fscanf(file, "%2047[^\n]", line ); */
 
   if (fgets(line, 2047, file) != NULL) {
@@ -717,7 +716,7 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
   Ap = out->p;
   Ax = out->x;
 
-  long long int val1, val2;
+  CS_INT val1, val2;
   double val3;
   if (out->nz < 0) {
     for (j = 0; j < n; j++) {
@@ -732,20 +731,20 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
         if (token == NULL) break;
         DEBUG_PRINTF("%d: %s\n", k, token);
         if (k == 2) {
-          if (1 == sscanf(token, "%lld", &val1)) {
+          if (1 == sscanf(token, "%" PRCS_INT, &val1)) {
             DEBUG_PRINTF(" j- col = %lli\n", j - val1);
           }
           assert(j - val1 == 0);
         }
         if (k == 5) {
-          if (1 == sscanf(token, "%lld", &val1)) Ap[j] = (CS_INT)val1;
+          if (1 == sscanf(token, "%" PRCS_INT, &val1)) Ap[j] = (CS_INT)val1;
         }
         if (k == 7) {
-          if (1 == sscanf(token, "%lld", &val2)) Ap[j + 1] = (CS_INT)val2 + 1;
+          if (1 == sscanf(token, "%" PRCS_INT, &val2)) Ap[j + 1] = (CS_INT)val2 + 1;
         }
       }
-      DEBUG_PRINTF("    col %lld : locations %lld to %lld\n", (long long int)j,
-                   (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
+      DEBUG_PRINTF("    col %" PRCS_INT ": locations %" PRCS_INT "to %" PRCS_INT "\n", j,
+                   Ap[j], Ap[j + 1] - 1);
 
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
         if (fgets(line, 2047, file) != NULL) {
@@ -757,7 +756,7 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
           if (token == NULL) break;
           DEBUG_PRINTF("%d: %s\n", k, token);
           if (k == 1) {
-            if (1 == sscanf(token, "%lld", &val1)) Ai[p] = (CS_INT)val1;
+            if (1 == sscanf(token, "%" PRCS_INT, &val1)) Ai[p] = (CS_INT)val1;
           }
           if (k == 3) {
             if (1 == sscanf(token, "%32le", &val3)) Ax[p] = val3;
@@ -771,7 +770,7 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
     /*         (long long int)nzmax,  (long long int)nz) ; */
 
     for (p = 0; p < nz; p++) {
-      CHECK_IO(fscanf(file, "    %lld %lld : %32le\n", &val1, &val2, &val3), &info);
+      check_io(fscanf(file, "    %" PRCS_INT "%" PRCS_INT " : %32le\n", &val1, &val2, &val3));
       DEBUG_PRINTF("    %lld %lld : %32le\n", val1, val2, val3);
       Ai[p] = (CS_INT)val1;
       Ap[p] = (CS_INT)val2;

@@ -116,7 +116,7 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
 
 static int pathavi_get_jacobian_nnz(struct vi_desc *desc, int *nnz) {
   SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  *nnz = (int)NM_nnz(((AffineVariationalInequalities *)env->problem)->M);
+  *nnz = NM_nnz(((AffineVariationalInequalities *)env->problem)->M);
   return 0;
 }
 
@@ -154,7 +154,7 @@ int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
 
   if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED) {
     nb_cstr = problem->poly.unif->A->size0;
-    nnz_H = (int)NM_nnz(problem->poly.unif->A);
+    nnz_H = NM_nnz(problem->poly.unif->A);
     lambda = (double *)calloc(nb_cstr, sizeof(double));
   } else {
     numerics_error_nonfatal("avi_pathavi", "unsupported set type %d", problem->poly.set->id);

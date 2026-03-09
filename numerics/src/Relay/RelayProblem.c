@@ -25,7 +25,7 @@
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
-#include "numerics_verbose.h"  // for CHECK_IO
+#include "numerics_verbose.h"  // for check_io
 #include "numerics_errors.h"
 
 void Relay_display(RelayProblem* p) {
@@ -97,23 +97,23 @@ RelayProblem* relay_newFromFile(FILE* file) {
   int n = 0;
   int i;
 
-  CHECK_IO(fscanf(file, "%d\n", &n));
+  check_io(fscanf(file, "%d\n", &n));
   problem->size = n;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->lb = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->lb[i])));
+    check_io(fscanf(file, "%lf ", &(problem->lb[i])));
   }
 
   problem->ub = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->ub[i])));
+    check_io(fscanf(file, "%lf ", &(problem->ub[i])));
   }
   return problem;
 }

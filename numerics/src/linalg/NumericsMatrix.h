@@ -121,8 +121,8 @@ extern "C" {
  *  \return a pointer to allocated space
  */
 RawNumericsMatrix* NM_new(void);
-RawNumericsMatrix* NM_eye(int size);
-RawNumericsMatrix* NM_scalar(int size, double s);
+RawNumericsMatrix* NM_eye(size_t size);
+RawNumericsMatrix* NM_scalar(size_t size, double s);
 
 /** create a NumericsMatrix and allocate the memory according to the matrix type
  *
@@ -879,20 +879,20 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number,
                                                  unsigned int* blocksizes);
 
-/** Direct computation of the solution of a real system of linear
- *  equations: A x = b.
- *
- *  \param[in,out] A a NumericsMatrix. On a dense factorisation
- *  A.iWork is initialized.
- *  \param[in,out] b pointer on a dense vector of size A->size1
- *  \param preserve preserve the original matrix data. Only useful in the
- *  dense case, where the LU factorization is done in-place.
- *  \return 0 if successful, else the error is specific to the backend solver
- *  used
- */
-static inline int NM_gesv(NumericsMatrix* A, double* b, bool preserve) {
-  return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
-}
+// /** Direct computation of the solution of a real system of linear
+//  *  equations: A x = b.
+//  *
+//  *  \param[in,out] A a NumericsMatrix. On a dense factorisation
+//  *  A.iWork is initialized.
+//  *  \param[in,out] b pointer on a dense vector of size A->size1
+//  *  \param preserve preserve the original matrix data. Only useful in the
+//  *  dense case, where the LU factorization is done in-place.
+//  *  \return 0 if successful, else the error is specific to the backend solver
+//  *  used
+//  */
+// static inline int NM_gesv(NumericsMatrix* A, double* b, bool preserve) {
+//   return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
+// }
 
 /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
  *
@@ -1090,53 +1090,52 @@ void NM_version_sync(NumericsMatrix* M);
  */
 int NM_isnan(NumericsMatrix* M);
 
-  /** Delete absolute values less than tol.
-   *
-   *  \param[in] A a NumericsMatrix
-   *  \param[in] tol a tolerance that defines zero
-   *  \param[in,out] C a NumericsMatrix having the same size
-   */
-  RawNumericsMatrix * NM_clear_zero(NumericsMatrix* A, const double tol) ;
+/** Delete absolute values less than tol.
+ *
+ *  \param[in] A a NumericsMatrix
+ *  \param[in] tol a tolerance that defines zero
+ *  \param[in,out] C a NumericsMatrix having the same size
+ */
+RawNumericsMatrix* NM_clear_zero(NumericsMatrix* A, const double tol);
 
-  struct Triplet {
-    int row_index;
-    int col_index;
-    double value;
-  };
+struct Triplet {
+  int row_index;
+  int col_index;
+  double value;
+};
 
-  int compareTriplets(const void *a, const void *b);
-  void sortTriplets(struct Triplet *triplets, size_t num_triplets);
-  void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear);
+int compareTriplets(const void* a, const void* b);
+void sortTriplets(struct Triplet* triplets, size_t num_triplets);
+void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
+                            int* cones_to_clear);
 
+struct HashSet {
+  int capacity;
+  int* allElements;
+};
 
-  struct HashSet
-  {
-    int capacity;
-    int* allElements;
-  };
+struct HashSet* createHashSet(int capacity);
+void addToHashSet(struct HashSet* set, int element, int index);  // Constructor
+bool isInHashSet(struct HashSet* set, int element);
+void freeHashSet(struct HashSet* set);  // Destructor
 
-  struct HashSet* createHashSet(int capacity);
-  void addToHashSet(struct HashSet* set, int element, int index); // Constructor
-  bool isInHashSet(struct HashSet* set, int element);
-  void freeHashSet(struct HashSet* set);               // Destructor
+/* This function is to extract some rows and columns of a matrix. The new one has a reduced
+ * size. For example:
+ *
+ *     [ 1 0 3 0 ]                             [ 1 3 ]
+ * A = [ 0 9 0 0 ]  => Ac = A(:, column 0 2) = [ 0 0 ]
+ *     [ 0 0 0 4 ]                             [ 0 0 ]
+ * An allocation is done. All matrices are stored as sparse.
+ */
+NumericsMatrix* NM_extract(NumericsMatrix* A, int n_rows, int* target_rows, int n_cols,
+                           int* target_cols);
 
-  /* This function is to extract some rows and columns of a matrix. The new one has a reduced size. For example:
-   *
-   *     [ 1 0 3 0 ]                             [ 1 3 ]
-   * A = [ 0 9 0 0 ]  => Ac = A(:, column 0 2) = [ 0 0 ]
-   *     [ 0 0 0 4 ]                             [ 0 0 ]
-   * An allocation is done. All matrices are stored as sparse.
-   */
-  NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
+struct Graph* NM_create_adjacency_graph(NumericsMatrix* A);
 
+struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A);
 
-  struct Graph* NM_create_adjacency_graph(NumericsMatrix* A);
-
-  struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A);
-
-  int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
-				  unsigned int** blocksizes);
-
+int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
+                                unsigned int** blocksizes);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same
@@ -1183,9 +1182,6 @@ bool NM_check_values_sha1(NumericsMatrix* A);
  */
 bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B);
 
-
-
-  
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

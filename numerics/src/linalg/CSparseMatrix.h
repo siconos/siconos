@@ -27,7 +27,7 @@
 #include <cs.h>
 #include <inttypes.h>
 //#include <stdint.h>  // for intXX_t
-#include <stdio.h>   // for FILE
+#include <stdio.h>  // for FILE
 
 #include "SiconosConfig.h"
 
@@ -89,9 +89,9 @@ typedef struct {
  *  \param A the sparse matrix
  *  \param tol the tolerance
  *  \param cs_lu_A the parameter structure that eventually holds the factors
- *  \return 1 if the factorization was successful, 1 otherwise
+ *  \return true if the factorization was successful, 1 otherwise
  */
-int CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix* A, double tol,
+bool CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix* A, double tol,
                                    CSparseMatrix_factors* cs_lu_A);
 
 /** compute a Cholesky factorization of A and store it in a workspace
@@ -99,9 +99,9 @@ int CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix* A, double 
  *  \param order control if ordering is used
  *  \param A the sparse matrix
  *  \param cs_chol_A the parameter structure that eventually holds the factors
- *  \return 1 if the factorization was successful, 1 otherwise
+ *  \return true if the factorization was successful, 1 otherwise
  */
-int CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix* A,
+bool CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix* A,
                                      CSparseMatrix_factors* cs_chol_A);
 
 /** compute a LDLT factorization of A and store it in a workspace
@@ -109,9 +109,9 @@ int CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix* A,
  *  \param order control if ordering is used
  *  \param A the sparse matrix
  *  \param cs_ldlt_A the parameter structure that eventually holds the factors
- *  \return 1 if the factorization was successful, 1 otherwise
+ *  \return true if the factorization was successful, 1 otherwise
  */
-int CSparseMatrix_ldlt_factorization(CS_INT order, const CSparseMatrix* A,
+bool CSparseMatrix_ldlt_factorization(CS_INT order, const CSparseMatrix* A,
                                      CSparseMatrix_factors* cs_ldlt_A);
 
 /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
@@ -200,7 +200,7 @@ int CSparseMatrix_print(const CSparseMatrix* A, int brief);
 int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file);
 
 int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix* A, int brief, FILE* file);
-int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol);
+bool CSparseMatrix_is_equal(const CSparseMatrix* A, const CSparseMatrix* B, double tol);
 
 CSparseMatrix* CSparseMatrix_new_from_file(FILE* file);
 

@@ -47,10 +47,10 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "NumericsVector.h"    // for NV_max
+#include "numerics_errors.h"   // for CHECK_NULL, CHECK_MATRIX, etc.
 #include "numerics_verbose.h"  // for numerics_error, numerics_printf...
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
-#include "numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX, etc.
 
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
@@ -291,7 +291,9 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, do
       break;
 
     default:
-      fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage\n");
+      fprintf(stderr,
+              "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown "
+              "storage\n");
       exit(EXIT_FAILURE);
   }
 
@@ -326,7 +328,9 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
   else if (storage == NM_SPARSE_BLOCK)
     SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, unknown storage\n");
+    fprintf(stderr,
+            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
+            "unknown storage\n");
     exit(EXIT_FAILURE);
   }
 
@@ -415,7 +419,9 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y)\n");
+      fprintf(
+          stderr,
+          "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y)\n");
       return;
     }
   }
@@ -1471,17 +1477,17 @@ void NM_read_in_filename(NumericsMatrix* const m, const char* filename) {
 void NM_read_in_file(NumericsMatrix* const m, FILE* file) {
   assert(m);
   int tmp = 0;
-  CHECK_IO(fscanf(file, "%d", &(tmp)));
+  check_io(fscanf(file, "%d", &(tmp)));
   m->storageType = (NM_types)tmp;
-  CHECK_IO(fscanf(file, "%d", &(m->size0)));
-  CHECK_IO(fscanf(file, "%d", &(m->size1)));
+  check_io(fscanf(file, "%d", &(m->size0)));
+  check_io(fscanf(file, "%d", &(m->size1)));
   NM_types storageType = m->storageType;
 
   if (storageType == NM_DENSE) {
-    CHECK_IO(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
+    check_io(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
 
     for (int i = 0; i < m->size1 * m->size0; i++) {
-      CHECK_IO(fscanf(file, "%le ", &(m->matrix0[i])));
+      check_io(fscanf(file, "%le ", &(m->matrix0[i])));
     }
   } else if (storageType == NM_SPARSE_BLOCK) {
     SBM_read_in_file(m->matrix1, file);
@@ -1502,24 +1508,23 @@ NumericsMatrix* NM_new_from_file(FILE* file) {
 
   size_t size0;
   size_t size1;
-  int info = 0;
   void* data = NULL;
 
   int tmp = 0;
-  CHECK_IO(fscanf(file, "%d", &tmp), &info);
+  check_io(fscanf(file, "%d", &tmp));
   m->storageType = (NM_types)tmp;
 
-  CHECK_IO(fscanf(file, "%zu", &size0), &info);
-  CHECK_IO(fscanf(file, "%zu", &size1), &info);
+  check_io(fscanf(file, "%zu", &size0));
+  check_io(fscanf(file, "%zu", &size1));
 
   if (m->storageType == NM_DENSE) {
-    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1), &info);
+    check_io(fscanf(file, "%zu\t%zu\n", &size0, &size1));
 
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*)data;
 
     for (size_t i = 0; i < size1 * size0; ++i) {
-      CHECK_IO(fscanf(file, "%le ", &(data_d[i])), &info);
+      check_io(fscanf(file, "%le ", &(data_d[i])));
     }
   } else if (m->storageType == NM_SPARSE_BLOCK) {
     data = SBM_new_from_file(file);
@@ -2029,7 +2034,8 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat) {
       data = NSM_new();
       break;
     default:
-      fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !\n", mat->storageType);
+      fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !\n",
+              mat->storageType);
       return NULL;
   }
 
@@ -2049,7 +2055,7 @@ NumericsMatrix* NM_new(void) {
   return M;
 }
 
-NumericsMatrix* NM_eye(int size) {
+NumericsMatrix* NM_eye(size_t size) {
   NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
   /* version incremented in NSM_triplet_eye */
   NSM_clear(M->matrix2);
@@ -2059,7 +2065,7 @@ NumericsMatrix* NM_eye(int size) {
   return M;
 }
 
-NumericsMatrix* NM_scalar(int size, double s) {
+NumericsMatrix* NM_scalar(size_t size, double s) {
   NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
   M->matrix2 = NSM_triplet_scalar(size, s);
   return M;
@@ -4726,7 +4732,7 @@ int NM_isnan(NumericsMatrix* M) {
       return NV_isnan(M->matrix0, M->size0 * M->size1);
     case NM_SPARSE: {
       assert(M->matrix2);
-      int nnz = NSM_nnz(NSM_get_origin(M->matrix2));
+      size_t nnz = NSM_nnz(NSM_get_origin(M->matrix2));
       return NV_isnan(NM_csc(M)->x, nnz);
     }
     default:

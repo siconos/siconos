@@ -21,6 +21,7 @@
 
 #include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, cs_dl_spfree
 #include "NumericsDataVersion.h"
+#include "safe_casts.h"
 #ifndef __cplusplus
 #include <stdbool.h>  // for bool, false, true
 #endif
@@ -32,10 +33,10 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
+#include "numerics_errors.h"   // CHECK_MATRIX
+#include "numerics_verbose.h"  // for numerics_error_nonfatal, check_io
 #include "siconos_debug.h"     // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "string.h"            // for memcpy, memset
-#include "numerics_errors.h"  // for CHECK_NULL, CHECK_MATRIX
 
 typedef struct {
   CS_INT i;
@@ -75,7 +76,9 @@ static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1, NSM_t ty
 }
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M) {
-  CHECK_NULL(M);
+  if (!M) {
+    numerics_error("NSM_latest_id", "Null pointer Matrix");
+  }
 
   return (nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET, NSM_HALF_TRIPLET), NSM_CSC), NSM_CSR));
 }
@@ -419,13 +422,14 @@ void NSM_clear_p(void* p) {
 
 size_t NSM_nnz(const CSparseMatrix* const A) {
   if (A->nz >= 0) {
-    return (size_t)A->nz;
+    return csint_to_size_t(A->nz);
   } else if (A->nz == NSM_CS_CSC) {
-    return (size_t)A->p[A->n];
+    return csint_to_size_t(A->p[A->n]);
   } else if (A->nz == NSM_CS_CSR) {
-    return (size_t)A->p[A->m];
+    return csint_to_size_t(A->p[A->m]);
   } else {
-    CHECK_ARG(0, "NSM_nnz :: unsupported nz number ");
+    numerics_error("NSM_nnz", "unsupported nz number");
+    return 0;
   }
 }
 
@@ -455,11 +459,11 @@ void NSM_fix_csc(CSparseMatrix* A) {
           break;
         }
       }
-      size_t len = Ap[j + 1] - ps;
+      size_t len = csint_to_size_t(Ap[j + 1] - ps);
       s = (sort_indices_struct*)realloc(s, len * sizeof(sort_indices_struct));
       xbck = (double*)realloc(xbck, len * sizeof(double));
       memcpy(xbck, &Ax[ps], len * sizeof(double));
-      for (size_t i = 0, pp = ps; i < len; ++i, ++pp) {
+      for (size_t i = 0, pp = csint_to_size_t(ps); i < len; ++i, ++pp) {
         s[i].i = Ai[pp];
         s[i].indx = i;
       }
@@ -470,7 +474,7 @@ void NSM_fix_csc(CSparseMatrix* A) {
       qsort(s, len, sizeof(sort_indices_struct), sort_indices_struct_cmp);
 #endif
 
-      for (size_t i = 0, pp = ps; i < len; ++i, ++pp) {
+      for (size_t i = 0, pp = csint_to_size_t(ps); i < len; ++i, ++pp) {
         Ai[pp] = s[i].i;
         Ax[pp] = xbck[s[i].indx];
       }
@@ -511,9 +515,10 @@ int NSM_to_dense(const NumericsSparseMatrix* const A, double* B) {
   return (int)CSparseMatrix_to_dense(NSM_get_origin(A), B);
 }
 
-unsigned NSM_origin(const NumericsSparseMatrix* M) {
-  CHECK_NULL(M);
-  if (!M) return NSM_UNKNOWN;
+NSM_t NSM_origin(const NumericsSparseMatrix* M) {
+  if (!M) {
+    numerics_error("NSM_latest_id", "Null pointer Matrix");
+  }
   assert(NSM_version(M, NSM_latest_id(M)) == NSM_version(M, M->origin));
   return M->origin;
 }
@@ -542,9 +547,8 @@ void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file) {
 }
 
 NumericsSparseMatrix* NSM_new_from_file(FILE* file) {
-  int info;
   NSM_t _origin = 0;
-  CHECK_IO(fscanf(file, "%d", (int*)&_origin), &info);
+  check_io(fscanf(file, "%d", (int*)&_origin));
   NumericsSparseMatrix* out = NSM_new();
   out->origin = _origin;
 
@@ -572,14 +576,14 @@ NumericsSparseMatrix* NSM_new_from_file(FILE* file) {
   return out;
 }
 
-NumericsSparseMatrix* NSM_triplet_eye(unsigned int size) {
+NumericsSparseMatrix* NSM_triplet_eye(size_t size) {
   NSM_t _origin = NSM_TRIPLET;
   NumericsSparseMatrix* out = NSM_new();
   out->origin = _origin;
 
   CSparseMatrix* C = cs_spalloc(size, size, size, 1, 1);
 
-  for (unsigned int k = 0; k < size; k++) {
+  for (CS_INT k = 0; k < to_csint(size); k++) {
     C->nz++;
     C->i[k] = k;
     C->p[k] = k;
@@ -592,14 +596,14 @@ NumericsSparseMatrix* NSM_triplet_eye(unsigned int size) {
   return out;
 }
 
-NumericsSparseMatrix* NSM_triplet_scalar(unsigned int size, double s) {
-  int _origin = NSM_TRIPLET;
+NumericsSparseMatrix* NSM_triplet_scalar(size_t size, double s) {
+  NSM_t _origin = NSM_TRIPLET;
   NumericsSparseMatrix* out = NSM_new();
   out->origin = _origin;
 
   CSparseMatrix* C = cs_spalloc(size, size, size, 1, 1);
 
-  for (unsigned int k = 0; k < size; k++) {
+  for (CS_INT k = 0; k < to_csint(size); k++) {
     C->nz++;
     C->i[k] = k;
     C->p[k] = k;
@@ -797,11 +801,11 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
       double* Mx = Mcsc->x;
       for (size_t j = pos_col; j < pos_col + block_col_size; ++j) {
         for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
-          CS_INT row_nb = Mi[p];
+          size_t row_nb = csint_to_size_t(Mi[p]);
           /* Warning : the following strategy work only if the csc storage is
              correclty ordered. Use NSM_fix_csc to be sure*/
-          if (row_nb >= (CS_INT)pos_row) {
-            if (row_nb >= (CS_INT)(pos_row + block_row_size)) {
+          if (row_nb >= pos_row) {
+            if (row_nb >= (pos_row + block_row_size)) {
               break;
             } else {
               blockM[(j - pos_col) * block_col_size + row_nb - pos_row] = Mx[p];
@@ -820,11 +824,11 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
 
       for (size_t i = pos_row; i < pos_row + block_row_size; ++i) {
         for (CS_INT p = Mp[i]; p < Mp[i + 1]; ++p) {
-          CS_INT col_nb = Mi[p];
+          size_t col_nb = csint_to_size_t(Mi[p]);
           /* Warning : the following strategy work only if the csc storage is
              correclty ordered. Use NSM_fix_csc to be sure*/
-          if (col_nb >= (CS_INT)pos_col) {
-            if (col_nb >= (CS_INT)(pos_col + block_col_size)) {
+          if (col_nb >= pos_col) {
+            if (col_nb >= (pos_col + block_col_size)) {
               break;
             } else {
               blockM[(col_nb - pos_col) * block_col_size + i - pos_row] = Mx[p];
@@ -846,15 +850,15 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
   assert(M->matrix2);
 
   double** diag_blocks = NULL;
-  CS_INT number_of_diagonal_blocks = 0;
+  size_t number_of_diagonal_blocks = 0;
   switch (M->matrix2->origin) {
     case NSM_TRIPLET:
     case NSM_CSC: {
       CSparseMatrix* Mcsc = NM_csc(M);
       if (!Mcsc) return NULL;
 
-      CS_INT n = Mcsc->n;
-      CS_INT m = Mcsc->m;
+      size_t n = csint_to_size_t(Mcsc->n);
+      size_t m = csint_to_size_t(Mcsc->m);
 
       if (n != m) return diag_blocks;
 
@@ -869,8 +873,8 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
     case NSM_CSR: {
       CSparseMatrix* Mcsr = M->matrix2->csr;
       if (!Mcsr) return NULL;
-      CS_INT n = Mcsr->n;
-      CS_INT m = Mcsr->m;
+      size_t n = csint_to_size_t(Mcsr->n);
+      size_t m = csint_to_size_t(Mcsr->m);
 
       if (n != m) return diag_blocks;
 
@@ -889,7 +893,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
 
   diag_blocks = (double**)malloc(number_of_diagonal_blocks * sizeof(double*));
 
-  for (CS_INT b = 0; b < number_of_diagonal_blocks; b++) {
+  for (size_t b = 0; b < number_of_diagonal_blocks; b++) {
     diag_blocks[b] = (double*)malloc(block_size * block_size * sizeof(double));
 
     size_t pos_row = b * block_size;
@@ -917,13 +921,13 @@ CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) 
   CS_INT nz = M_triplet->nz;
 
   for (CS_INT e = 0; e < nz; e++) {
-    CS_INT i = Mi[e];
-    CS_INT j = Mp[e];
+    size_t i = csint_to_size_t(Mi[e]);
+    size_t j = csint_to_size_t(Mp[e]);
 
-    int is_block_diagonal_element = 0;
+    bool is_block_diagonal_element = false;
 
-    CS_INT index = i % block_size;
-    CS_INT k = block_size - index;
+    size_t index = i % block_size;
+    size_t k = block_size - index;
     if ((j >= i - index) && (j < (i + k))) {
       is_block_diagonal_element = 1;
     }
@@ -934,7 +938,7 @@ CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) 
     /* 	printf("%i %i is NOT diagonal \n", i, j); */
 
     if (!is_block_diagonal_element) {
-      CSparseMatrix_entry(out, i, j, Mx[e]);  // to be improved
+      CSparseMatrix_entry(out, to_csint(i), to_csint(j), Mx[e]);  // to be improved
     }
   }
 

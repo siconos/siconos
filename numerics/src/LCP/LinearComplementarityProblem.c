@@ -25,7 +25,7 @@
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
-#include "numerics_verbose.h"  // for CHECK_IO
+#include "numerics_verbose.h"  // for check_io
 #include "numerics_errors.h"
 
 void linearComplementarity_display(LinearComplementarityProblem* problem) {
@@ -63,13 +63,13 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   int n = 0;
   int i;
 
-  CHECK_IO(fscanf(file, "%d\n", &n));
+  check_io(fscanf(file, "%d\n", &n));
   problem->size = n;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
   return 1;
 }

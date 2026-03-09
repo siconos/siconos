@@ -134,7 +134,7 @@ if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_STANDARD 20) # Default standard
-
+  #set(CMAKE_C_STANDARD 17) # Default C standard. Unfortunately 23 is not guaranteed in all current compilers.
   # check if the compiler has the required features ...
   include(CheckCXXSourceCompiles)
   check_cxx_source_compiles(

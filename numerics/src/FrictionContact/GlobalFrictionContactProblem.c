@@ -28,8 +28,8 @@
 #include "SiconosBlas.h"           // for cblas_dscal, cblas_dcopy
 #include "SparseBlockMatrix.h"     // for SBM_gemv, SBM_free
 #include "io_tools.h"
-#include "numerics_verbose.h"  // for CHECK_IO
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)
@@ -86,10 +86,9 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FIL
 GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file) {
   GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();
   int nc = 0, d = 0;
-  int info = 0;
-  CHECK_IO(fscanf(file, "%d\n", &d), &info);
+  int info = check_io(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  CHECK_IO(fscanf(file, "%d\n", &nc), &info);
+  info = check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
@@ -97,19 +96,19 @@ GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file) {
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (int i = 0; i < problem->M->size1; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
   problem->b = (double*)malloc(problem->H->size1 * sizeof(double));
   for (int i = 0; i < problem->H->size1; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->b[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
   for (int i = 0; i < nc; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
 
-  if (info) {
+  if (!info) {
     problem = NULL;
   }
   return problem;
@@ -472,8 +471,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
           NM_is_diagonal_block_matrix(problem->M, &block_number, &blocksizes);
 
       if (is_diagonal_block_matrix) {
-        numerics_printf_verbose(1,"the matrix is block diagonal\n");
-        numerics_printf_verbose(1,"block_number = %i\n", block_number);
+        numerics_printf_verbose(1, "the matrix is block diagonal\n");
+        numerics_printf_verbose(1, "block_number = %i\n", block_number);
         /* for (unsigned int k = 0; k < block_number; k++) */
         /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
         block_number = M->size0 / 3;

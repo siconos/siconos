@@ -22,10 +22,11 @@
 #include <stdlib.h>  // for free, malloc, NULL, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"  // for NM_display, NM_clear, NM_new_from_file
+#include "safe_casts.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "numerics_verbose.h"  // for CHECK_IO
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 #include "siconos_debug.h"     // for DEBUG_PRINT
 
 void secondOrderConeLinearComplementarityProblem_display(
@@ -67,7 +68,8 @@ void secondOrderConeLinearComplementarityProblem_display(
 int secondOrderConeLinearComplementarityProblem_printInFile(
     SecondOrderConeLinearComplementarityProblem* problem, FILE* file) {
   if (!problem) {
-    CHECK_ARG(0, "Numerics, SecondOrderConeLinearComplementarityProblem_printInFile failed, NULL ");
+    CHECK_ARG(
+        0, "Numerics, SecondOrderConeLinearComplementarityProblem_printInFile failed, NULL ");
   }
   int i;
   int n = problem->n;
@@ -116,24 +118,24 @@ int secondOrderConeLinearComplementarityProblem_newFromFile(
   int nc = 0;
   int i;
 
-  CHECK_IO(fscanf(file, "%d\n", &n));
+  check_io(fscanf(file, "%d\n", &n));
   problem->n = n;
-  CHECK_IO(fscanf(file, "%d\n", &nc));
+  check_io(fscanf(file, "%d\n", &nc));
   problem->nc = nc;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
   problem->coneIndex = (unsigned int*)malloc((nc + 1) * sizeof(unsigned int));
   for (i = 0; i < nc + 1; i++) {
-    CHECK_IO(fscanf(file, "%d ", &(problem->coneIndex[i])));
+    check_io(fscanf(file, "%d ", &(problem->coneIndex[i])));
   }
 
-  problem->tau = (double*)malloc(nc * sizeof(double));
+  problem->tau = (double*)malloc(to_size_t(nc) * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->tau[i])));
+    check_io(fscanf(file, "%lf ", &(problem->tau[i])));
   }
   DEBUG_PRINT(
       "End --  int "

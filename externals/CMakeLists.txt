@@ -135,6 +135,18 @@ if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SER
     DESTINATION include/siconos/boost/serialization)
 endif()
 
+
+# Blas/lapack: check blasint to handle conversions properly in numerics
+include(CheckTypeSize)
+set(CMAKE_EXTRA_INCLUDE_FILES ${BLAS_INCLUDE_DIR}/${BLAS_HEADER})
+check_type_size(blasint SIZEOF_BLASINT LANGUAGE C)
+
+# message("HAVE_BLASINT: ${HAVE_SIZEOF_BLASINT}")
+# message("SIZEOF_BLASINT: ${SIZEOF_BLASINT}")
+# message("SIZEOF_BLASINT_CODE: ${SIZEOF_BLASINT_CODE}")
+
+target_compile_definitions(externals PUBLIC SIZEOF_BLASINT=${SIZEOF_BLASINT})
+
 # --- tests ---
 include(externals_tests.cmake)
 

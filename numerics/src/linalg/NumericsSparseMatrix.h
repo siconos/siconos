@@ -123,9 +123,9 @@ void NSM_null(NumericsSparseMatrix* A);
  */
 NumericsSparseMatrix* NSM_new(void);
 
-NumericsSparseMatrix* NSM_triplet_eye(unsigned int size);
+NumericsSparseMatrix* NSM_triplet_eye(size_t size);
 
-NumericsSparseMatrix* NSM_triplet_scalar(unsigned int size, double s);
+NumericsSparseMatrix* NSM_triplet_scalar(size_t size, double s);
 
 /** Free allocated space for a NumericsSparseMatrix.
  *
@@ -207,9 +207,9 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M);
  */
 void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
                        size_t block_row_size, size_t block_col_size);
-double**  NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
-CSparseMatrix*   NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
-  
+double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+
 /** Free allocated space for NSM_linear_solver_params.
  *
  *  \param p a NSM_linear_solver_params
@@ -243,7 +243,7 @@ void NSM_sort_csc(CSparseMatrix* A);
  *  \param M the matrix
  *  \return -1 if the matrix has no sparse representation, the origin
  * otherwise*/
-unsigned NSM_origin(const NumericsSparseMatrix* M);
+NSM_t NSM_origin(const NumericsSparseMatrix* M);
 
 /** return the sparse matrix that has the original label
  *
