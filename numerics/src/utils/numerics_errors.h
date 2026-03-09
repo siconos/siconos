@@ -179,6 +179,17 @@ void numerics_log_info(const char* file, int line, const char* func,
         } \
     } while(0)
 
+
+/** Standardized NULL pointer check - returns NUMERICS_ERR_NULL_POINTER */
+#define CHECK_ZERO(value) \
+    do { \
+        if ((value) == 0) { \
+            fprintf(stderr, "[ERROR] %s:%d (%s) - zero value: " #value "\n", \
+                    __FILE__, __LINE__, __func__); \
+            return NUMERICS_ERR_NULL_POINTER; \
+        } \
+    } while(0)
+
 /** Check condition and return specific error code */
 #define CHECK_COND(cond, err_code, msg) \
     do { \

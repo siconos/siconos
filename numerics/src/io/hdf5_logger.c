@@ -150,7 +150,7 @@ static bool SN_logh5_write_attr(hid_t loc_id, const char* name, hid_t type, hid_
 }
 
 bool SN_logh5_scalar_double(double val, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(name);
 
   herr_t status;
@@ -163,7 +163,7 @@ bool SN_logh5_scalar_double(double val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_scalar_integer(ptrdiff_t val, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(name);
 
   hid_t type;
@@ -191,7 +191,7 @@ bool SN_logh5_scalar_integer(ptrdiff_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_scalar_uinteger(size_t val, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(name);
 
   hid_t type;
@@ -219,7 +219,7 @@ bool SN_logh5_scalar_uinteger(size_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_attr_uinteger(size_t val, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(name);
 
   hid_t type;
@@ -247,7 +247,7 @@ bool SN_logh5_attr_uinteger(size_t val, const char* name, hid_t loc_id) {
 }
 
 bool SN_logh5_vec_double(size_t size, double* vec, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(vec);
   CHECK_NULL(name);
 
@@ -264,7 +264,7 @@ bool SN_logh5_vec_double(size_t size, double* vec, const char* name, hid_t loc_i
 
 bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id) {
   CHECK_NULL(cs);
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   hid_t mat_group;
 
   bool result = false;
@@ -354,7 +354,7 @@ bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger) {
 
 bool SN_logh5_mat_dense(size_t size0, size_t size1, double* mat, const char* name,
                         hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(mat);
   CHECK_NULL(name);
 
@@ -370,7 +370,7 @@ bool SN_logh5_mat_dense(size_t size0, size_t size1, double* mat, const char* nam
 }
 
 bool SN_logh5_vec_int32(size_t size, int32_t* vec, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(vec);
   CHECK_NULL(name);
 
@@ -386,7 +386,7 @@ bool SN_logh5_vec_int32(size_t size, int32_t* vec, const char* name, hid_t loc_i
 }
 
 bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(vec);
   CHECK_NULL(name);
 
@@ -402,7 +402,7 @@ bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_i
 }
 
 bool SN_logh5_vec_uint64(size_t size, uint64_t* vec, const char* name, hid_t loc_id) {
-  CHECK_NULL(loc_id);
+  CHECK_ZERO(loc_id);
   CHECK_NULL(vec);
   CHECK_NULL(name);
 

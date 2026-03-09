@@ -187,7 +187,7 @@ double NV_norm_type(const unsigned int vecSize, const double* const vec, const i
   }
 
   else {
-    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n");
+    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
     return -1;
   }
 
@@ -216,7 +216,7 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
   }
 
   else {
-    fprintf(stderr, "xdoty_type: type = %d is undefined.\n");
+    fprintf(stderr, "xdoty_type: type = %d is undefined.\n", type);    
     return -1;
   }
 

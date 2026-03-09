@@ -128,7 +128,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
   unsigned long long int nbCase = enum_compute_nb_cases(problem->m);
 
   if (itermax < (int)nbCase) {
-    printf("mlcp_enum_block itermax %i nbCase % i ", itermax, nbCase);
+    printf("mlcp_enum_block itermax %i nbCase %llu ", itermax, nbCase);
     numerics_warning("mlcp_enum_block",
                      "all the cases will not be enumerated since itermax < nbCase)");
   }

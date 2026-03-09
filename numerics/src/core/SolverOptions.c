@@ -27,38 +27,7 @@
 
 /* Solver registration system (NEW) */
 #include "solver_registry.h"
-
-#include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
-#include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
-#include "ConvexQP_cst.h"               // for SICONOS_CONVEXQP_ADMM_STR
-#include "FrictionContact_options.h"               // for friction contact solver parameters
-#include "GenericMechanical_Solvers.h"  // for gmp_set_default
-#include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICA...
-#include "LCP_Solvers.h"                // for lcp_pivot_set_default
-#include "MCP_cst.h"                    // for SICONOS_MCP_NEWTON_FB_FBL...
-#include "MLCP_Solvers.h"               // for mlcp_direct_set_default
-#include "NCP_cst.h"                    // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "Newton_methods.h"             // for newton_lsa_set_default
-#include "NonSmoothNewton.h"            // for nonSmoothNewton_set_default
-#include "PathSearch.h"                 // for pathsearch_set_default
-#include "Plasticity_cst.h"
-#include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default
-#include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
-/* Solver registry now provides id<->name mapping */
-#include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
-#include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_default
-#include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_default
-#include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
-#include "grfc3d_Solvers.h"                 // for grfc3d_IPM_set_default
-#include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
-#include "mc2d_solvers.h"
-#include "mlcp_cst.h"          // for SICONOS_MLCP_* enum values
 #include "numerics_verbose.h"
-#include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERR...
-#include "rfc3d_onecone_nonsmooth_Newton_solvers.h"
-#include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
-
 #include "numerics_errors.h"
 
 /** String constant for unknown solvers */
