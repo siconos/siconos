@@ -117,6 +117,8 @@ PYBIND11_MODULE(modeling, m) {
 
       .def("topology", &siconos::modeling::NonSmoothDynamicalSystem::topology,
            "display the topology of the system")
+      .def("interaction", &siconos::modeling::NonSmoothDynamicalSystem::interaction,
+           "get interaction by id",  py::arg("inter_id"))
 
       .def("setName",
            py::overload_cast<std::shared_ptr<siconos::modeling::DynamicalSystem>,
