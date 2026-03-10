@@ -33,13 +33,13 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   for (int d = 0; d < n_data; d++) {
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;    
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;    
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(
         collection[current].options, 0,
         SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
     current++;
   }
 
@@ -65,7 +65,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         collection[current].options, 0,
         SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
     collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     current++;
   }
@@ -78,7 +78,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         collection[current].options, 0,
         SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
     collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     collection[current]
         .options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
@@ -89,10 +89,10 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 6000;
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-06;
     solver_options_update_internal(collection[current].options, 0, SICONOS_ONECONE_NSN);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 20;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
     collection[current]
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =

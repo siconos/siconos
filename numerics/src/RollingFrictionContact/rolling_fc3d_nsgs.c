@@ -636,11 +636,14 @@ void rfc3d_nsgs_set_default(SolverOptions *options) {
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
   }
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] =
-      solver_options_create(SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
-
-
-
+  options->internalSolvers[0] = solver_options_create(SICONOS_ONECONE_NSN);
+  /* should be better in a set_default */
+  options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 20;
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+  options->internalSolvers[0]
+    ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
+    SICONOS_FRICTION_3D_NSN_FORMULATION_NATURALMAP;
+  options->internalSolvers[0]->dparam[SICONOS_FRICTION_3D_NSN_RHO]=1e-6;
 }
 
 /* Solver registration wrapper functions */
