@@ -22,6 +22,7 @@
 
 #include "RollingFrictionContactProblem.h"
 #include "FrictionContact_options.h"
+#include "SolverOptions.h"
 #include "rolling_fc_Solvers.h"
 #include "rfc3d_short_names.h"
 #include "numerics_verbose.h"
@@ -34,6 +35,24 @@
 #include <stdlib.h>
 #include <float.h>
 
+//#define FILE_OUTPUT
+
+#ifdef FILE_OUTPUT
+static int fccounter = -1;
+#include <sys/stat.h>
+static int file_exists(const char* fname) {
+  FILE* file;
+  if ((file = fopen(fname, "r"))) {
+    fclose(file);
+    return 1;
+  }
+  return 0;
+}
+
+#endif
+
+
+
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */
@@ -44,7 +63,7 @@ int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double
   int nc = problem->numberOfContacts;
   double* q = problem->q;
   int n = 5 * nc;
-  
+
   for (int i = 0; i < nc; i++) {
     if (q[5 * i] < -DBL_EPSILON) return -1;
   }
@@ -52,7 +71,7 @@ int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  
+
   numerics_printf("rolling_fc3d: trivial solution (take-off), reaction = 0, velocity = q.");
   return 0;
 }
@@ -122,6 +141,33 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction
   /* Call the solver */
   numerics_printf_verbose(1, "rolling_fc3d_driver: calling solver...");
   int solve_status = solver->solve(problem, reaction, velocity, options);
+
+
+#ifdef FILE_OUTPUT
+
+    char fname[256];
+    fccounter++;
+    mkdir("data", 0777);  // create directory if not existing
+
+    snprintf(fname, sizeof(fname), "./data/rockfall_%i_%i.dat", problem->numberOfContacts,
+             fccounter);
+
+    if (file_exists(fname)) {
+      /* printf(" %s already dumped\n", fname); */
+    } else {
+      if (problem->numberOfContacts > 0 && options->iparam[SICONOS_IPARAM_ITER_DONE] >= 40) {
+        printf("Dump %s\n", fname);
+        FILE* file = fopen(fname, "w");
+        rollingFrictionContact_printInFile(problem, file);
+
+        fclose(file);
+        printf("end of dump %s\n", fname);
+      }
+    }
+
+#endif
+
+
 
   /* Cleanup if needed */
   if (solver->free) {
