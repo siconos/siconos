@@ -25,7 +25,7 @@
 #include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "numerics_errors.h"
-
+#include "SparseBlockMatrix.h"
 void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                           RollingFrictionContactProblem* localproblem,
                                           double* reaction, int contact) {
@@ -48,7 +48,11 @@ void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem
 void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
                                        RollingFrictionContactProblem* localproblem,
                                        int contact) {
-  NM_extract_diag_block5(problem->M, contact, &localproblem->M->matrix0);
+ if (problem->M->storageType == NM_SPARSE) {
+    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+  } else
+    NM_extract_diag_block5(problem->M, contact, &localproblem->M->matrix0);
+
 }
 
 RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
@@ -68,12 +72,16 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
     localproblem->M = NM_create_from_data(
         NM_DENSE, 5, 5, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
+
   return localproblem;
 }
 
 void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
                                      RollingFrictionContactProblem* problem) {
-  if (problem->M->storageType == NM_SPARSE_BLOCK) {
+
+  printf("rolling_fc3d_local_problem_free %i \n", problem->M->storageType);
+
+  if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
     localproblem->M->matrix0 = NULL;

@@ -37,10 +37,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(
         collection[current].options, 0,
-        SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
-    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
-    current++;
+	SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+     current++;
   }
 
   for (int d = 0; d < n_data; d++) {
@@ -48,7 +46,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_ONECONE_ProjectionOnCone);
+				   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     current++;
   }
   for (int d = 0; d < n_data; d++) {
@@ -63,9 +61,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(
         collection[current].options, 0,
-        SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
-    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
+        SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
     collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     current++;
   }
@@ -76,10 +72,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(
         collection[current].options, 0,
-        SICONOS_ONECONE_ProjectionOnConeWithLocalIteration);
+        SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-08;
-    collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     collection[current]
         .options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
         SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE;
@@ -90,15 +84,6 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 6000;
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-06;
-    solver_options_update_internal(collection[current].options, 0, SICONOS_ONECONE_NSN);
-    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 20;
-    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    collection[current]
-        .options->internalSolvers[0]
-        ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
-        SICONOS_FRICTION_3D_NSN_FORMULATION_NATURALMAP;
-    collection[current]
-        .options->internalSolvers[0]->dparam[SICONOS_FRICTION_3D_NSN_RHO]=1e-6;
     current++;
   }
 

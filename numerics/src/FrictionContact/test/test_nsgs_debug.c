@@ -33,7 +33,7 @@ int main() {
   SolverOptions* options = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;  /* Just 10 iterations for debug */
-  solver_options_update_internal(options, 0, SICONOS_ONECONE_ProjectionOnCone);
+  solver_options_update_internal(options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
   
   /* Allocate and zero initial guess */

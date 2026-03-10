@@ -957,7 +957,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
     int loop = 0;
     while (loop < max_loop && current_error >= SOLVER_TOL(options)) {
       loop++;
-      DEBUG_PRINTF("SICONOS_ONECONE_NSN_GP_HYBRID:  loop = %i\n", loop);
+      DEBUG_PRINTF("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:  loop = %i\n", loop);
 
       /*  1 - fixed point projection solver */
 
@@ -1058,7 +1058,7 @@ void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options) {
 extern int fc3d_onecontact_nonsmooth_Newton_solvers_solve(
     FrictionContactProblem* localproblem, double* r_local, SolverOptions* options);
 
-/* SICONOS_ONECONE_NSN (550) - One-contact NSN */
+/* SICONOS_FRICTION_3D_ONECONTACT_NSN (550) - One-contact NSN */
 static int oc_nsn_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -1074,13 +1074,13 @@ static int oc_nsn_solve_wrap(void* problem, double* reaction, double* velocity,
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_ONECONE_NSN, "ONECONE_NSN",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_NSN, "ONECONE_NSN",
                 "One-contact nonsmooth Newton solver",
                 oc_nsn_init_wrap, oc_nsn_solve_wrap, NULL, NULL,
                 fc3d_onecontact_nsn_set_default,  /* set_default */
                 100, 1e-14, 1)  /* is_local_solver=1 */
 
-/* SICONOS_ONECONE_NSN_GP (551) - One-contact NSN with Goldstein-Price linesearch */
+/* SICONOS_FRICTION_3D_ONECONTACT_NSN_GP (551) - One-contact NSN with Goldstein-Price linesearch */
 static int oc_nsn_gp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -1096,13 +1096,13 @@ static int oc_nsn_gp_solve_wrap(void* problem, double* reaction, double* velocit
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_ONECONE_NSN_GP, "ONECONE_NSN_GP",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, "ONECONE_NSN_GP",
                 "One-contact nonsmooth Newton with Goldstein-Price linesearch",
                 oc_nsn_gp_init_wrap, oc_nsn_gp_solve_wrap, NULL, NULL,
                 fc3d_onecontact_nsn_gp_set_default,  /* set_default */
                 100, 1e-14, 1)  /* is_local_solver=1 */
 
-/* SICONOS_ONECONE_NSN_GP_HYBRID (565) - Hybrid PLI-NSN solver */
+/* SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID (565) - Hybrid PLI-NSN solver */
 static int oc_nsn_gp_hybrid_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -1122,7 +1122,7 @@ static int oc_nsn_gp_hybrid_solve_wrap(void* problem, double* reaction, double* 
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_ONECONE_NSN_GP_HYBRID, "ONECONE_NSN_GP_HYBRID",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID, "ONECONE_NSN_GP_HYBRID",
                 "Hybrid PLI-NSN one-contact solver",
                 oc_nsn_gp_hybrid_init_wrap, oc_nsn_gp_hybrid_solve_wrap, NULL, NULL,
                 fc3d_onecontact_nsn_gp_set_default,  /* set_default */

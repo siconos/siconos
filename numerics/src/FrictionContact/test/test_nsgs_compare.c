@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
   options_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   
   /* Setup internal solver (projection on cone) */
-  solver_options_update_internal(options_orig, 0, SICONOS_ONECONE_ProjectionOnCone);
+  solver_options_update_internal(options_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   

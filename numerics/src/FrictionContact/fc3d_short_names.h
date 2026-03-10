@@ -82,14 +82,14 @@
 /* ===========================================================================
  * One-Contact Solvers (OC_*) - Local solvers used within NSGS
  * =========================================================================== */
-#define OC_NSN              SICONOS_ONECONE_NSN
-#define OC_NSN_GP           SICONOS_ONECONE_NSN_GP
-#define OC_NSN_GP_HYBRID    SICONOS_ONECONE_NSN_GP_HYBRID
-#define OC_PROJ             SICONOS_ONECONE_ProjectionOnCone
-#define OC_PROJ_LI          SICONOS_ONECONE_ProjectionOnConeWithLocalIteration
-#define OC_PROJ_REG         SICONOS_ONECONE_ProjectionOnConeWithRegularization
-#define OC_PROJ_DIAG        SICONOS_ONECONE_ProjectionOnConeWithDiagonalization
-#define OC_PROJ_V           SICONOS_ONECONE_ProjectionOnCone_velocity
+#define OC_NSN              SICONOS_FRICTION_3D_ONECONTACT_NSN
+#define OC_NSN_GP           SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
+#define OC_NSN_GP_HYBRID    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+#define OC_PROJ             SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone
+#define OC_PROJ_LI          SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
+#define OC_PROJ_REG         SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization
+#define OC_PROJ_DIAG        SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization
+#define OC_PROJ_V           SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity
 #define OC_QUARTIC          SICONOS_FRICTION_3D_ONECONTACT_QUARTIC
 #define OC_QUARTIC_NU       SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU
 #define OC_CYLINDER         SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder

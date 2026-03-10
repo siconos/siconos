@@ -167,7 +167,7 @@ static void test_problem(const char* filename, double tol) {
   SolverOptions* opts_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   opts_orig->dparam[SICONOS_DPARAM_TOL] = tol;
   opts_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-  solver_options_update_internal(opts_orig, 0, SICONOS_ONECONE_NSN_GP_HYBRID);
+  solver_options_update_internal(opts_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
   opts_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = tol * 100;
   opts_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   

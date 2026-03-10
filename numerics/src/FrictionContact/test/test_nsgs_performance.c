@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
     SolverOptions* options_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
     options_orig->dparam[SICONOS_DPARAM_TOL] = tol;
     options_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    solver_options_update_internal(options_orig, 0, SICONOS_ONECONE_NSN_GP_HYBRID);
+    solver_options_update_internal(options_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
     options_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = tol * 100;
     options_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
     
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
   SolverOptions* opts = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   opts->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   opts->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-  solver_options_update_internal(opts, 0, SICONOS_ONECONE_NSN_GP_HYBRID);
+  solver_options_update_internal(opts, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
   opts->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   
   double* r_orig = (double*)calloc(nc * 3, sizeof(double));

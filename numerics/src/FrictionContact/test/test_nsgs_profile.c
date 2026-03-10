@@ -58,11 +58,11 @@ static void fc3d_nsgs_generic_instrumented(FrictionContactProblem* problem,
   /* Initialize local solver based on type */
   SolverOptions* localsolver_options = options->internalSolvers[0];
   switch (localsolver_options->solverId) {
-    case SICONOS_ONECONE_ProjectionOnCone:
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
       fc3d_projection_initialize(problem, localproblem);
       local_solver = &fc3d_projectionOnCone_solve;
       break;
-    case SICONOS_ONECONE_NSN_GP_HYBRID:
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
       local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       break;
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
   SolverOptions* opts_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   opts_orig->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   opts_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  solver_options_update_internal(opts_orig, 0, SICONOS_ONECONE_ProjectionOnCone);
+  solver_options_update_internal(opts_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   opts_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   
   SolverOptions* opts_gen = solver_options_copy(opts_orig);

@@ -127,17 +127,17 @@ enum FRICTION_SOLVER {
    */
 
   /** Non-smooth Newton, Alart-Curnier 'direct', one contact solver */
-  SICONOS_ONECONE_NSN = 550,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN = 550,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
-  SICONOS_ONECONE_NSN_GP = 551,
-  SICONOS_ONECONE_NSN_GP_HYBRID = 565,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP = 551,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 565,
   /** Projection on cone, one contact solver */
-  SICONOS_ONECONE_ProjectionOnCone = 552,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone = 552,
   /** Projection on cone, one contact solver */
-  SICONOS_ONECONE_ProjectionOnConeWithLocalIteration = 553,
-  SICONOS_ONECONE_ProjectionOnConeWithRegularization = 554,
-  SICONOS_ONECONE_ProjectionOnConeWithDiagonalization = 555,
-  SICONOS_ONECONE_ProjectionOnCone_velocity = 558,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 553,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization = 554,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization = 555,
+  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity = 558,
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC = 562,
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU = 563,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,

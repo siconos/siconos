@@ -46,7 +46,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     solver_options_update_internal(collection[current].options, 0,
-                                   SICONOS_ONECONE_ProjectionOnCone);
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     current++;
   }
 

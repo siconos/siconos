@@ -320,7 +320,6 @@ SolverOptions* solver_options_create(int solver_id) {
   if (solver->set_default) {
     solver->set_default(options);
   }
-
   
   /* Note: We don't call solver->init here because many init functions
    * require a valid problem pointer (not NULL). The init is typically
@@ -831,22 +830,22 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       gfc3d_admm_set_default(options); */
 /*       break; */
 /*     } */
-/*     case SICONOS_ONECONE_NSN: { */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN: { */
 /*       options = solver_options_initialize(solverId, 10, 1e-14, 0); */
 /*       fc3d_onecontact_nsn_set_default(options); */
 /*       break; */
 /*     } */
-/*     case SICONOS_ONECONE_NSN_GP: */
-/*     case SICONOS_ONECONE_NSN_GP_HYBRID: { */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: { */
 /*       options = solver_options_initialize(solverId, 10, 1e-14, 0); */
 /*       fc3d_onecontact_nsn_gp_set_default(options); */
 /*       break; */
 /*     } */
-/*     case SICONOS_ONECONE_ProjectionOnCone: */
-/*     case SICONOS_ONECONE_ProjectionOnCone_velocity: */
-/*     case SICONOS_ONECONE_ProjectionOnConeWithLocalIteration: */
-/*     case SICONOS_ONECONE_ProjectionOnConeWithRegularization: */
-/*     case SICONOS_ONECONE_ProjectionOnConeWithDiagonalization: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization: */
+/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization: */
 /*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder: */
 /*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */

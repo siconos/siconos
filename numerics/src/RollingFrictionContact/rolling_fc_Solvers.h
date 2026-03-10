@@ -146,8 +146,6 @@ void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem *pr
 void rfc3d_nsgs_set_default(SolverOptions *options);
 void rfc3d_poc_withLocalIteration_set_default(SolverOptions *options);
 void rfc3d_poc_set_default(SolverOptions *options);
-void rfc3d_onecone_nsn_set_default(SolverOptions *options);
-void rfc3d_onecone_nsn_gp_set_default(SolverOptions *options);
 void rfc3d_poc_set_default(SolverOptions *options);
 void rfc3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);

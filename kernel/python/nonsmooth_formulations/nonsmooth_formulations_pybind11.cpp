@@ -121,7 +121,7 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
              std::shared_ptr<siconos::nonsmooth_formulations::GenericMechanical>,
              siconos::nonsmooth_formulations::LinearOSNS>(m, "GenericMechanical")
       .def(py::init<int>(),
-           py::arg("numericsSolverId") = solver_ids.attr("SICONOS_ONECONE_NSN"))
+           py::arg("numericsSolverId") = solver_ids.attr("SICONOS_FRICTION_3D_ONECONTACT_NSN"))
       .def(py::init<std::shared_ptr<SolverOptions>>(), py::arg("options"));
 
   py::class_<siconos::nonsmooth_formulations::MLCP,

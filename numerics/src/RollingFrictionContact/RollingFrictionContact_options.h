@@ -71,8 +71,12 @@ enum ROLLING_FRICTION_SOLVER {
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone = 3001,
   /** Projection on cone with local iteration for 3D rolling friction */
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002,
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN = 3003,
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP = 3004,
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 3005,
+  
   /** ADMM for 3D rolling friction, local formulation */
-  SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
+  SICONOS_ROLLING_FRICTION_3D_ADMM = 3010,
 
   /* -----------------------------------------------------------------------
    * 2D Rolling Friction solvers (IDs 4000-4999)

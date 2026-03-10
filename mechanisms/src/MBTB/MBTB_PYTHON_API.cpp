@@ -519,7 +519,7 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   // osnspb.reset(new Equality());
   // osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::GenericMechanical>(
-      SICONOS_ONECONE_NSN);
+      SICONOS_FRICTION_3D_ONECONTACT_NSN);
 
   osnspb->setKeepLambdaAndYState(true);
   // osnspb->numericsSolverOptions()->iparam[1]=0;

@@ -29,7 +29,7 @@ int main() {
   /* Setup options */
   SolverOptions* options = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  solver_options_update_internal(options, 0, SICONOS_ONECONE_ProjectionOnCone);
+  solver_options_update_internal(options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
   
   /* Set residual to 0 initially */
@@ -51,7 +51,7 @@ int main() {
   /* Now try with fresh options */
   SolverOptions* options2 = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options2->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  solver_options_update_internal(options2, 0, SICONOS_ONECONE_ProjectionOnCone);
+  solver_options_update_internal(options2, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options2->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
   
   /* Set residual to NaN initially */
