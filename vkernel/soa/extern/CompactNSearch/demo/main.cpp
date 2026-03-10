@@ -8,6 +8,7 @@
 #include <limits>
 #include <chrono>
 #include <random>
+#include <algorithm>
 
 #include <omp.h>
 
@@ -151,21 +152,15 @@ enright_velocity_field(std::array<Real, 3> const& x)
 void
 advect()
 {
-#ifdef _MSC_VER
-	concurrency::parallel_for_each(
-#elif defined(__APPLE__) && defined(__clang__)
-	std::for_each(oneapi::dpl::execution::par,
-#else
-	__gnu_parallel::for_each(
-#endif
-	positions.begin(), positions.end(), [&](std::array<Real, 3>& x)
+#pragma omp parallel for
+	for (int _i = 0; _i < positions.size(); _i++)
 	{
+		std::array<Real, 3>& x = positions[_i];
 		std::array<Real, 3> v = enright_velocity_field(x);
 		x[0] += static_cast<Real>(0.005) * v[0];
 		x[1] += static_cast<Real>(0.005) * v[1];
 		x[2] += static_cast<Real>(0.005) * v[1];
 	}
-	);
 }
 
 int main(int argc, char* argv[])

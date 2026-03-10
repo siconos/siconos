@@ -234,15 +234,9 @@ NeighborhoodSearch::update_point_sets()
 	}
 
 	// Precompute cell indices.
-#ifdef _MSC_VER
-	concurrency::parallel_for_each(
-#elif defined(__APPLE__) && defined(__clang__)
-	std::for_each(oneapi::dpl::execution::par,
-#else
-	__gnu_parallel::for_each(
-#endif
-	m_point_sets.begin(), m_point_sets.end(), [&](PointSet& d)
-	{
+#pragma omp parallel for
+	for (int j = 0; j < m_point_sets.size(); j++){
+		PointSet& d = m_point_sets[j];
 		if (d.is_dynamic()) 
 		{
 			d.m_keys.swap(d.m_old_keys);
@@ -251,7 +245,7 @@ NeighborhoodSearch::update_point_sets()
 				d.m_keys[i] = cell_index(d.point(i));
 			}
 		}
-	});
+	}
 
 	std::vector<unsigned int> to_delete;
 	if (m_erase_empty_cells)
@@ -315,15 +309,9 @@ NeighborhoodSearch::erase_empty_entries(std::vector<unsigned int> const& to_dele
 	});
 
 	// Perform neighborhood search.
-#ifdef _MSC_VER
-	concurrency::parallel_for_each(
-#elif defined(__APPLE__) && defined(__clang__)
-	std::for_each(oneapi::dpl::execution::par,
-#else
-	__gnu_parallel::for_each(
-#endif
-	kvps.begin(), kvps.end(), [&](std::pair<HashKey const, unsigned int>* kvp_)
-	{
+#pragma omp parallel for
+	for (int j =0; j < kvps.size(); j++){
+		std::pair<HashKey const, unsigned int>* kvp_ = kvps[j];
 		auto& kvp = *kvp_;
 
 		for (unsigned int i = 0; i < to_delete.size(); ++i)
@@ -334,7 +322,7 @@ NeighborhoodSearch::erase_empty_entries(std::vector<unsigned int> const& to_dele
 				break;
 			}
 		}
-	});
+	}
 }
 
 void
@@ -415,22 +403,16 @@ NeighborhoodSearch::query()
 	});
 
 	// Perform neighborhood search.
-#ifdef _MSC_VER
-	concurrency::parallel_for_each(
-#elif defined(__APPLE__) && defined(__clang__)
-	std::for_each(oneapi::dpl::execution::par,
-#else
-	__gnu_parallel::for_each(
-#endif
-	kvps.begin(), kvps.end(), [&](std::pair<HashKey const, unsigned int> const* kvp_)
-	{
+#pragma omp parallel for
+	for (int _i = 0; _i < kvps.size(); _i++){
+		std::pair<HashKey const, unsigned int> const* kvp_ = kvps[_i];
 		auto const& kvp = *kvp_;
 		HashEntry const& entry = m_entries[kvp.second];
 		HashKey const& key = kvp.first;
 
 		if (entry.n_searching_points == 0u)
 		{
-			return;
+			continue;
 		}
 
 		for (unsigned int a = 0; a < entry.n_indices(); ++a)
@@ -471,26 +453,20 @@ NeighborhoodSearch::query()
 			}
 		}
 	}
-	);
 
 
 	std::vector<std::array<bool, 27>> visited(m_entries.size(), {false});
 	std::vector<Spinlock> entry_locks(m_entries.size());
 
-#ifdef _MSC_VER
-	concurrency::parallel_for_each(
-#elif defined(__APPLE__) && defined(__clang__)
-	std::for_each(oneapi::dpl::execution::par,
-#else
-	__gnu_parallel::for_each(
-#endif
-	kvps.begin(), kvps.end(), [&](std::pair<HashKey const, unsigned int> const* kvp_)
-	{
+#pragma omp parallel for
+	for (int _i = 0; _i < kvps.size(); _i++){
+		std::pair<HashKey const, unsigned int> const* kvp_ = kvps[_i];
+
 		auto const& kvp = *kvp_;
 		HashEntry const& entry = m_entries[kvp.second];
 
 		if (entry.n_searching_points == 0u)
-			return;
+			continue;
 		HashKey const& key = kvp.first;
 
 		for (int dj = -1; dj <= 1; dj++)
@@ -579,8 +555,7 @@ NeighborhoodSearch::query()
 				}
 			}
 		}
-	});
-
+	}
 }
 
 

@@ -39,14 +39,13 @@ if(WITH_GPU)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/cuNSearch/include)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/extern/cuNSearch/cuNSearch)
 else()
-include(compactnsearch_setup)
-#include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
+  include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
 
 if(WITH_GPU)
   add_subdirectory(extern/cuNSearch)
 else()
-  #add_subdirectory(extern/CompactNSearch)
+  add_subdirectory(extern/CompactNSearch)
 endif()
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Config.h>
+#include "Config.h"
+#include <limits>
 #include <iostream>
 
 namespace CompactNSearch

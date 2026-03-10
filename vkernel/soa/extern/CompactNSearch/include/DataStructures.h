@@ -2,6 +2,7 @@
 
 #include "Config.h"
 
+#include <algorithm>
 #include <atomic>
 #include <vector>
 
