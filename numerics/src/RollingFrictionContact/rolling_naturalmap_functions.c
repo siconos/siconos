@@ -67,7 +67,7 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   DEBUG_PRINTF("mur= %12.8e \n", mur);
   DEBUG_PRINTF("rho= %12.8e \n", rho);
   unsigned int where = projectionOnRollingCone(F, mu, mur);
-
+  //display_status_rolling_cone(where);
   DEBUG_EXPR_WE(printf("projection F\n"); display5(F););
 
   F[0] = *R0 - F[0];
