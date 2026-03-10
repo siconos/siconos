@@ -144,16 +144,17 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
-    zero5x5(H);
+    //zero5x5(H);
     SET5X5(H);
-    double trial_rn = (mu * normT + mur * normMT + r[0]) / (mur2 + mu2 + 1.0);
+    double a_1 = mu * normT + mur * normMT + r[0];
+    double oneoveroneplusmu2 = 1. / (1. + mu2 + mur2);
+    double trial_rn =a_1 * oneoveroneplusmu2;
     if ((normT > mu * trial_rn) && (normMT > mur * trial_rn)) {
 
-      double oneoveroneplusmu2 = 1. / (1. + mu2 + mur2);
-
+      *H00 = 1. * oneoveroneplusmu2;
       double s1 = r[1] / normT;
       double s2 = r[2] / normT;
-      *H00 = 1. * oneoveroneplusmu2;
+
 
       double muoveroneplusmu2 = mu * oneoveroneplusmu2;
       *H10 = muoveroneplusmu2 * s1;
@@ -171,36 +172,45 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H04 = *H40;
 
       double muoveroneplusmu2overnormT = muoveroneplusmu2 / normT;
-      double r0plusmunormT = r[0] + mu * normT;
 
-      *H11 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s1 * s1);
-      *H12 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
-      *H21 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
-      *H22 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s2 * s2);
+      double a_2 = r[0] + mur * normMT;
 
+      *H11 = muoveroneplusmu2overnormT * (-a_2 * s1 * s1 + a_1);
+      *H12 = muoveroneplusmu2overnormT * (-a_2 * s1 * s2);
+      *H13 = 0.;
+      *H14 = 0.;
 
+      *H21 = muoveroneplusmu2overnormT * (-a_2 * s1 * s2);
+      *H22 = muoveroneplusmu2overnormT * (-a_2 * s2 * s2 + a_1);
+      *H23 = 0.;
+      *H24 = 0.;
 
       double muroveroneplusmu2overnormMT = muroveroneplusmu2 / normMT;
-      double r0plusmunormMT = r[0] + mur * normMT;
 
-      *H33 = muroveroneplusmu2overnormMT * (r0plusmunormMT - r[0] * s3 * s3);
-      *H34 = muroveroneplusmu2overnormMT * (-r[0] * s3 * s4);
-      *H43 = muroveroneplusmu2overnormMT * (-r[0] * s3 * s4);
-      *H44 = muroveroneplusmu2overnormMT * (r0plusmunormMT - r[0] * s4 * s4);
-
-
+      double a_3 = r[0] + mu * normT;
+      *H33 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s3 + a_1);
+      *H34 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s4);
+      *H31 = 0.;
+      *H32 = 0.;
+      *H43 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s4);
+      *H44 = muroveroneplusmu2overnormMT * (-a_3 * s4 * s4 + a_1);
+      *H41 = 0.;
+      *H42 = 0.;
 
       return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
     }
+    zero5x5(H00);
+    double b_1 = r[0] + mu * normT;
+    oneoveroneplusmu2 = 1. / (1. + mu2);
 
-
-    trial_rn = (mu * normT + r[0]) / (mu2 + 1.0);
+    trial_rn = b_1 * oneoveroneplusmu2;
     if ((normT > mu * trial_rn) && (normMT <= mur * trial_rn)) {
-      double oneoveroneplusmu2 = 1. / (1. + mu2);
+
+      *H00 = 1. * oneoveroneplusmu2;
 
       double s1 = r[1] / normT;
       double s2 = r[2] / normT;
-      *H00 = 1. * oneoveroneplusmu2;
+
 
       double muoveroneplusmu2 = mu * oneoveroneplusmu2;
       *H10 = muoveroneplusmu2 * s1;
@@ -210,12 +220,11 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H02 = *H20;
 
       double muoveroneplusmu2overnormT = muoveroneplusmu2 / normT;
-      double r0plusmunormT = r[0] + mu * normT;
 
-      *H11 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s1 * s1);
+      *H11 = muoveroneplusmu2overnormT * (-r[0] * s1 * s1 + b_1);
       *H12 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
       *H21 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
-      *H22 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s2 * s2);
+      *H22 = muoveroneplusmu2overnormT * (-r[0] * s2 * s2 + b_1);
 
       *H33 = 1.;
       *H44 = 1.;
@@ -223,10 +232,12 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       return PROJRCONE_BOUNDARY_FRICTION;
     }
 
+    double c_1 = mur * normMT + r[0];
+    double oneoveroneplusmur2 = 1. / (1. + mur2);
+    trial_rn = c_1 * oneoveroneplusmur2;
 
-    trial_rn = (mur * normMT + r[0]) / (mur2 + 1.0);
     if ((normT <= mu * trial_rn) && (normMT > mur * trial_rn)) {
-      double oneoveroneplusmur2 = 1. / (1. + mur2);
+
 
       *H00 = 1. * oneoveroneplusmur2;
 
@@ -241,12 +252,11 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H04 = *H40;
 
       double muroveroneplusmu2overnormMT = muroveroneplusmu2 / normMT;
-      double r0plusmunormMT = r[0] + mur * normMT;
 
-      *H33 = muroveroneplusmu2overnormMT * (r0plusmunormMT - r[0] * s3 * s3);
+      *H33 = muroveroneplusmu2overnormMT * (-r[0] * s3 * s3 + c_1);
       *H34 = muroveroneplusmu2overnormMT * (-r[0] * s3 * s4);
       *H43 = muroveroneplusmu2overnormMT * (-r[0] * s3 * s4);
-      *H44 = muroveroneplusmu2overnormMT * (r0plusmunormMT - r[0] * s4 * s4);
+      *H44 = muroveroneplusmu2overnormMT * (-r[0] * s4 * s4 + c_1);
 
       *H11 = 1.;
       *H22 = 1.;
