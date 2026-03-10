@@ -31,15 +31,14 @@ import logging
 from pathlib import Path
 from packaging import version
 import shutil
-import siconos.utils
 
 
 def main():
     """process :
-       - parse command line
-       - process options
-       - generate CMakeLists.txt for the current driver (if any)
-       - configure, build and execute.
+    - parse command line
+    - process options
+    - generate CMakeLists.txt for the current driver (if any)
+    - configure, build and execute.
 
     """
     # -- Parse command line --
@@ -68,23 +67,14 @@ def main():
         print(siconos_pythonpath)
         sys.exit()
 
+    # -- Run : build (if required) and execute siconos on driver file --
+    # command : siconos <file>.[py,cpp]
+
     args.rundir = Path.cwd()
 
     if not args.driver:
-        # No driver : check if we need to build plugins
-        # else exit.
-        if args.build_plugins:
-            args.is_python = False
-            create_build_dir(args)
-            args.driver_dir = Path.cwd()
-            args.exe_name = "plugin_only"
-            build = generate_cmakelists(args)
-            # generate_cmakelists returns true if the driver
-            # is C++ or if plugins must be built.
-            if build:
-                build_project(args)
-        else:
-            parser.print_usage()
+        # No driver : print info and exit
+        parser.print_usage()
         sys.exit()
 
     # -- Create binary dir --
@@ -94,10 +84,6 @@ def main():
     # (--quiet to turn this off)
     if not args.quiet:
         cartridge()
-
-    # -- Run : build (if required) and execute siconos on driver file --
-    # command : siconos <file>.[py,cpp]
-
     # Check if the driver file exists
     main_source = Path(args.driver).expanduser().resolve()
     assert main_source.exists(), "Driver file does not exists."
@@ -130,8 +116,9 @@ def main():
     logging.info(msg)
 
     # Check if the current directory contains a 'addons' directory
-    # Addons if present, may contain c++ files used with cppimport in
-    # Python code.
+    # Addons if present, may contain c++ files (with pybind11) that may be called
+    # from Python code.
+    # Add-on activated if : python AND addons dir exists.
     # Warning: case-sensitive only on Linux systems
     has_addons = False
     addons_path = Path(args.driver_dir, "addons")
@@ -141,25 +128,26 @@ def main():
     )
     args.use_addons = has_addons and args.is_python
     if args.use_addons:
-        msg = "Addons (cppimport) will be used"
+        msg = "Addons c++/pybind11 files will be used."
         logging.info(msg)
+        args.addons = addons_path
 
-    # Do we need to build plugins ?
-    if args.is_python and not args.build_plugins:
-        # By default, plugins are ignored when
-        # driver is in python.
-        # This must be asked explicitely with --build-plugins
-        args.build_plugins = False
+    # Do we need to build addons ?
+    if args.is_python:
+        # By default, no build when in Python
         args.no_build = True
 
-    if not args.is_python and not args.no_plugins:
-        # By default, plugins are always built when
-        # driver is in C++.
-        # This must be turned off explicitely with --no-plugins
-        args.build_plugins = True
+    if args.use_addons:
+        # if addons, we need to call cmake.
+        args.no_build = False
 
     if args.use_addons:
-        args.no_build = False
+        # If a file addons/somename.cpp exists, we need to:
+        #  - generate addons/__init__.py file
+        #  - generate .siconos/pyproject.toml file
+        #  - add and configure a target name 'somename' in the generated CMakeLists.txt
+        #
+        generate_addons_python_project(args)
 
     # If build is required :
     # - generate CMakeListst.txt in build_dir
@@ -169,23 +157,12 @@ def main():
     if not args.no_build:
         build = generate_cmakelists(args)
         # generate_cmakelists returns true if the driver
-        # is C++ or if plugins must be built.
-        if build:
-            build_project(args)
+        # is C++
+        if args.use_addons:
+            build_addons(args)
 
-    if args.use_addons:
-        # Use cmake to generate cppimport_build_info.txt
-        quiet = args.quiet
-        args.quiet = True
-        build_project(args, configure=True, build=False)
-        args.quiet = quiet
-        # Prepare header for cppimport, if required
-        source_header = os.path.join(args.build_dir, "cppimport_build_info.txt")
-        output_header = os.path.join(args.rundir, "cppimport_header.py")
-        siconos.utils.generate_cppimport_header(source_header, output_header)
-        msg = f"✅ cppimport header generated: {output_header}"
-        format_msg(msg, args.quiet)
-        logging.info(msg)
+        elif build:
+            build_project(args)
 
     # If execution is required :
     # Rq : default is yes,
@@ -213,8 +190,6 @@ def main():
         # Execute ...
         format_msg("run " + " ".join(cmd), args.quiet)
         logging.info(msg)
-
-        # for plugins
         env["LD_LIBRARY_PATH"] = args.rundir.as_posix()
         run_command(cmd, args.quiet, env)
         msg = "✅ Run done"
@@ -276,37 +251,20 @@ Usage :
 
   driver_name : .cpp or .py file name (with absolute or relative path).\n
 
-or
-
->> siconos --build-plugins
-
 Options are detailed below.
 
 Actions :
 
 For cpp driver :
 
- - build libraries from all plugins sources (see plugins-dirs option)
  - use driver.cpp and extra sources (see src-dirs option) to build
-   an executable, linked with plugins
+   an executable
  - run executable
 
 
 For python driver :
 
  - execute python on your driver.
-
- To build plugins when using a python driver, use:
-
- siconos <file>.py --build-plugins
-
-For --build-plugins options :
-
-  build all plugins from "plugin"-like sources available
-  in the current directory.
-
-
-
 
 ===============================================================
 """
@@ -390,9 +348,12 @@ def parse_command_line():
     )
 
     # Print version
-    parser.add_argument("--version", action="version",
-                        version="@SICONOS_VERSION@",
-                        help="Print Siconos version.")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="@SICONOS_VERSION@",
+        help="Print Siconos version.",
+    )
 
     # Clean binary dir (if it exists).
     msg = "Clean binary directory (if it exists).\n"
@@ -444,7 +405,7 @@ def parse_command_line():
     parser.add_argument("--cline-args", "-cla", help=msg, action="extend", nargs="+")
     # action='append')
 
-    # -- Build options (compile, link ...) for main and plugins) --
+    # -- Build options (compile, link ...) for main) --
     compile_group = parser.add_argument_group("Build options (compiling and linking)")
     compile_group.add_argument(
         "-D",
@@ -481,16 +442,7 @@ def parse_command_line():
         action="append",
         default=[],
     )
-    msg = "Add source dirs for plugins. By default, plugins dir in driver "
-    msg += "directory is always taken into account."
-    plugins_group = compile_group.add_mutually_exclusive_group()
-    plugins_group.add_argument("--plugins-dirs", help=msg, action="append")
-    msg = "Do not compile any plugins. Useful only for C/C++ input "
-    msg += "(no plugins by default for python inputs)."
-    plugins_group.add_argument("--no-plugins", help=msg, action="store_true")
-    msg = "Build all plugins. Useful only for Python input "
-    msg += "(plugins are built by default for C++ inputs)."
-    plugins_group.add_argument("--build-plugins", help=msg, action="store_true")
+
     msg = "Add source dirs for driver. By default, src "
     msg += "in driver directory is always taken into account."
     compile_group.add_argument("--src-dirs", help=msg, action="append")
@@ -619,43 +571,69 @@ def prepare_target(target, extra_args):
     return result
 
 
-def write_plugin(plugin, extra_args):
-    """Configure plugin
+def generate_addons_python_project(args):
+    """ """
+    msg = "Start addons python project generation"
+    logging.info(msg)
+    if not args.use_addons:
+        return False
 
-    Parameters
-    ----------
-    plugin : Path or string.
-         directory which contains source files for the
-         plugin
-    extra_args : argsparse.Namespace
-         arguments parsed from command line.
+    # List cpp files in addons
+    addons_files = collect_sources(args.addons)
+    # Creates the __init__.py file in addons dir
+    init_path = os.path.join(args.addons, "__init__.py")
+    with open(init_path, "w", encoding="utf-8") as f:
+        for fname in addons_files:
+            fname = Path(fname)
+            module_name = fname.stem
+            f.write(f"from .{module_name} import *\n")
+    msg = "✅ addons/__init__.py generated"
+    format_msg(msg, args.quiet)
+    logging.info(msg)
+    # Creates the pyproject.toml file
+    toml_file = """[build-system]
+    requires = ["scikit-build-core", "pybind11"]
+    build-backend = "scikit_build_core.build"
 
-    Returns a string, cmake commands to create the plugin.
+    [project]
+    name = "addons"
+    version = "1.0.0"
+
+    [tool.scikit-build]
+    wheel.packages = ["addons"]
     """
-    result = ""
-    dd = Path(plugin).expanduser().resolve()
-    assert dd.exists()
-    srcfiles = collect_sources(dd)
-    if srcfiles:
-        result += "\n# === Create plugin {} === \n".format(plugin.name)
-        result += "add_library({} MODULE {})\n".format(plugin.name, srcfiles[0])
-        for sourcefile in srcfiles:
-            result += "target_sources({} PRIVATE {})\n".format(plugin.name, sourcefile)
-        extra_args.includes.append(dd)
-        result += prepare_target(plugin.name, extra_args)
-        result += "set_target_properties({}".format(plugin.name)
-        result += ' PROPERTIES PREFIX "")\n'
-        # if 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
-        #    result += 'target_link_options({}'.format(plugin.name)
-        #    result += ' PRIVATE "-undefined dynamic_lookup")\n'
-        # elif 'Clang' in compiler_id:
-        #    result += 'set_target_properties({} '.format(plugin.name)
-        #    result += 'PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")\n'
-        result += "install(TARGETS {}".format(plugin.name)
-        result += " DESTINATION {})\n".format(extra_args.rundir)
+
+    filename = Path(args.build_dir, "pyproject.toml").as_posix()
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(toml_file)
+
+    msg = "✅ .siconos/pyproject.toml generated"
+    format_msg(msg, args.quiet)
+    logging.info(msg)
 
 
-    return result
+def build_addons(args):
+    """Call pip to build a python package
+    to wrap c++ file from addons.
+    Requires:
+        - addons/__init__.py
+        - addons/somefile.cpp
+        - .siconos/CMakeLists.txt
+        - .siconos/pyproject.toml
+    """
+    cmd = [
+        "@Python_EXECUTABLE@",
+        "-m",
+        "pip",
+        "install",
+        "-e",
+        f"{args.build_dir}",
+        f"--prefix={args.build_dir}/",
+    ]
+    run_command(cmd, args.quiet)
+    msg = "✅ addons python package built."
+    format_msg(msg, args.quiet)
+    logging.info(msg)
 
 
 def generate_cmakelists(args):
@@ -666,41 +644,23 @@ def generate_cmakelists(args):
 
     Returns a boolean, True if cmake
     call is required for the current example
-    (i.e. if sources are C++ or if plugins must be built)
+    (i.e. if sources are C++)
     """
     msg = "Start CMakeLists.txt generation"
     logging.info(msg)
 
     # Return value : true if cmake/make is required
-    # i.e. if driver is cpp and/or if some plugins
-    # have been found.
+    # i.e. if driver is cpp
     build_required = not args.no_build
-    if not build_required:
-        # exit if no build has been set from command line.
-        return False
 
-    # -- Check if some plugins must be built --
-    # Only if --no-plugins=False (default).
-    # Any  *Plugin* or *plugin* directory is taken into account
-    # in addition to plugins_dirs command line arg.
-    plugins_dirs = []
-    if args.build_plugins:
-        # Automatically add *plugins* dir
-        for d in args.driver_dir.glob("*[Pp]lugin*"):
-            if d.is_dir():
-                plugins_dirs.append(d)
-        # Add command line options for plugins
-        if args.plugins_dirs:
-            plugins_dirs.append(Path(args.plugins_dirs).expanduser())
-
-    # Build either if some plugins must be compiled
-    # or if the sources are c++.
-    if not plugins_dirs and args.is_python and not args.use_addons:
+    # Build if the sources are c++.
+    if args.is_python and not args.use_addons:
         build_required = False
 
     if not build_required:
         # exit if no build has been set from command line.
         return False
+
     # cmake minimum version
     result = "cmake_minimum_required(VERSION 3.19)\n"
     result += "cmake_policy(SET CMP0074 NEW)\n"
@@ -728,7 +688,7 @@ def generate_cmakelists(args):
 
     # -- Extra headers --
     # It's allowed to put some headers in the driver dir.
-    # These headers might be useful for extra sources and/or plugins.
+    # These headers might be useful for extra sources.
     args.includes = [args.driver_dir]
     if args.include_directories:
         args.includes += args.include_directories
@@ -782,31 +742,22 @@ def generate_cmakelists(args):
         # == install binary ==
         result += "install(TARGETS {}".format(args.exe_name)
         result += " DESTINATION {})\n".format(args.rundir)
-       
+
     if args.use_addons:
         msg = "Creates addons part in CMakeLists.txt ..."
         logging.info(msg)
-        # Create dummy.cpp
-        dummy_cpp_path = os.path.join(args.build_dir, "dummy.cpp")
-        dummy_code = "int main() { return 0; }\n"
-        with open(dummy_cpp_path, "w") as f:
-            f.write(dummy_code)
-        result += "add_executable(dummy "
-        result += f" {dummy_cpp_path})\n"
-
-        # target setup (compile options, headers, links ...)
-        result += prepare_target("dummy", args)
-        result += "include(export_runtime_conf)\n"
-        result += f"export_build_conf(dummy)\n"
-        result += "install(TARGETS dummy"
-        result += f" DESTINATION {args.rundir})\n"
-        build_required = False  # We only need to configure
-
-    # -- Plugins --
-    # Build plugins
-    for plugin in plugins_dirs:
-        plugin = Path(plugin)
-        result += write_plugin(plugin, args)
+        srcfiles = collect_sources(args.addons)
+        args.includes.append(args.addons)
+        if srcfiles:
+            result += "find_package(pybind11 CONFIG REQUIRED)\n"
+            result += "find_package(Eigen3 REQUIRED)\n"
+            for fname in srcfiles:
+                fname = Path(fname)
+                mod = fname.stem
+                result += f"pybind11_add_module({mod} {fname})\n"
+                result += prepare_target(mod, args)
+                result += f"set_target_properties({mod} PROPERTIES "
+                result += f"LIBRARY_OUTPUT_DIRECTORY {args.addons})\n"
 
     filename = Path(args.build_dir, "CMakeLists.txt").as_posix()
     with open(filename, "w") as f:

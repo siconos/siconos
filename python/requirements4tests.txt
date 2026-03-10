@@ -3,4 +3,3 @@ scipy
 pytest
 h5py
 vtk
-cppimport

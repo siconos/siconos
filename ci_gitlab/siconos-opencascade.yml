@@ -35,4 +35,3 @@ dependencies:
   - gmsh
   - pythreejs
   - ifcopenshell
-  - cppimport

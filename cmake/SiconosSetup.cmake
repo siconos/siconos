@@ -145,18 +145,6 @@ if("${isSystemDir}" STREQUAL "-1")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-if(WITH_TESTING)
-  # cppimport needs a specific conf to handle the RPATH properly
-  set(TEST_RPATH_FLAGS_LIST)
-  foreach(comp IN LISTS COMPONENTS)
-    if(APPLE)
-      list(APPEND TEST_RPATH_FLAGS_LIST "-Wl,-rpath,@loader_path/../../../../${comp}")
-    else()
-      list(APPEND TEST_RPATH_FLAGS_LIST "-Wl,-rpath,\$ORIGIN/../../../../${comp}")
-    endif()
-  endforeach()
-  string(JOIN " " TEST_RPATH_FLAGS ${TEST_RPATH_FLAGS_LIST})
-endif()
 
 #init all common options for enabled components
 set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_WRAPPER

@@ -1,0 +1,16 @@
+foreach(src ${ADDONS_SRCS})
+    get_filename_component(name ${src} NAME_WE)
+
+    pybind11_add_module(${name} ${src})
+
+    target_link_libraries(${name} PUBLIC ${COMPONENT})
+    #target_link_libraries (${name} PUBLIC Eigen3::Eigen) 
+
+    foreach(dep ${test_DEPS})
+        target_link_libraries(${name} PUBLIC ${dep})
+    endforeach()
+    
+    set_target_properties(${name} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY @RUNDIR@/addons)
+endforeach()
+

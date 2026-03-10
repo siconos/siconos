@@ -10,6 +10,5 @@ vtk
 packaging
 bullet
 setuptools
-cppimport
 trimesh
 numpy-stl

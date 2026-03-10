@@ -1,24 +1,25 @@
-/* cppimport
-
-<%
-
-import os
-setup_pybind11(cfg)
-
-with open("cppimport_header.py") as f:
-    exec(f.read())
-
-%>
-*/
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2026 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <NumericsMatrix.h>
-#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <sys/cdefs.h>  // for __restrict
 
 #include "VariationalInequality.h"  // for VI_get_env
-
-namespace py = pybind11;
 
 typedef struct {
   int id;
@@ -32,7 +33,7 @@ typedef struct {
   unsigned int nabla_eval;
 } data;
 
-void compute_F(void* problem, int n, double* restrict l, double* restrict F) {
+void compute_F(void* problem, int n, double* __restrict__ l, double* __restrict__ F) {
   data* d = (data*)VI_get_env(problem);
 
   double xk0 = d->xk[0];
@@ -51,10 +52,10 @@ void compute_F(void* problem, int n, double* restrict l, double* restrict F) {
   d->f_eval += 1;
 }
 
-void compute_nabla_F(void* problem, int n, double* restrict l,
-                     NumericsMatrix* restrict nabla_F_mat) {
+void compute_nabla_F(void* problem, int n, double* __restrict__ l,
+                     NumericsMatrix* __restrict__ nabla_F_mat) {
   data* d = (data*)VI_get_env(problem);
-  double* restrict nabla_F = nabla_F_mat->matrix0;
+  double* __restrict__ nabla_F = nabla_F_mat->matrix0;
 
   double l0 = l[0];
   double l1 = l[1];
@@ -77,7 +78,7 @@ void compute_nabla_F(void* problem, int n, double* restrict l,
   d->nabla_eval += 1;
 }
 
-void compute_Fmcp(void* env, int n, double* restrict z, double* restrict F) {
+void compute_Fmcp(void* env, int n, double* __restrict__ z, double* __restrict__ F) {
   data* d = (data*)env;
   double l0 = 2.0 * z[0] - 1.0;
   double l1 = 2.0 * z[2] - 1.0;
@@ -92,7 +93,8 @@ void compute_Fmcp(void* env, int n, double* restrict z, double* restrict F) {
   d->f_eval += 1;
 }
 
-void compute_nabla_Fmcp(void* env, int n, double* restrict z, double* restrict nabla_Fmcp) {
+void compute_nabla_Fmcp(void* env, int n, double* __restrict__ z,
+                        double* __restrict__ nabla_Fmcp) {
   data* d = (data*)env;
   double l0 = 2.0 * z[0] - 1.0;
   double l1 = 2.0 * z[2] - 1.0;
@@ -126,7 +128,8 @@ void compute_nabla_Fmcp(void* env, int n, double* restrict z, double* restrict n
   d->nabla_eval += 1;
 }
 
-void compute_nabla_Fmcp2(void* env, int n, double* restrict z, double* restrict nabla_Fmcp) {
+void compute_nabla_Fmcp2(void* env, int n, double* __restrict__ z,
+                         double* __restrict__ nabla_Fmcp) {
   data* d = (data*)env;
   double l0 = 2.0 * z[0] - 1.0;
   double l1 = 2.0 * z[2] - 1.0;

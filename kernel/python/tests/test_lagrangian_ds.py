@@ -20,7 +20,6 @@
 
 """
 
-import cppimport.import_hook
 import addons.computeLDS
 
 import numpy as np

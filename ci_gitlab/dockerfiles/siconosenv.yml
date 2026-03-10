@@ -22,4 +22,3 @@ dependencies:
   - suitesparse
   - openblas
   - lp_solve
-  - cppimport

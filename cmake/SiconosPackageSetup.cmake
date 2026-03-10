@@ -12,7 +12,6 @@ set(cmake_macros
   FindBLASDEV.cmake
   FindLAPACKDEV.cmake
   BlasLapackUtils.cmake
-  export_runtime_conf.cmake
 )
 
 
