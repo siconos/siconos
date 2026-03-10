@@ -27,7 +27,7 @@
 #include "RollingFrictionContactProblem.h"  // for rollingFrictionContactPro...
 #include "frictionContact_test_utils.h"     // for rollingFrictionContact_te...
 #include "test_utils.h"                     // for TestCase
-
+#include "SiconosBlas.h"
 int rollingFrictionContact_test_function(TestCase* current) {
   int k;
   RollingFrictionContactProblem* problem =
@@ -49,17 +49,26 @@ int rollingFrictionContact_test_function(TestCase* current) {
   } else if (dim == 5) {
     info = rolling_fc3d_driver(problem, reaction, velocity, current->options);
   }
-  printf("\n");
-  for (k = 0; k < dim * NC; k++) {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
-           reaction[k]);
-  }
-  printf("\n");
-
-  for (k = 0; k < dim * NC; ++k) {
+  for (int k = 0; k < dim * NC; ++k) {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
 
+  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC * dim, velocity, 1));
+  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC * dim, reaction, 1));
+  int print_size = 10;
+  if (dim * NC >= print_size) {
+    printf("First values (%i)\n", print_size);
+    for (int k = 0; k < print_size; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
+    }
+  } else {
+    for (int k = 0; k < dim * NC; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
+    }
+  }
+  printf(" ..... \n");
   if (!info) {
     printf("test succeeded\n");
   } else {
