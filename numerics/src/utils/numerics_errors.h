@@ -26,6 +26,8 @@
 #ifndef NUMERICS_ERRORS_H
 #define NUMERICS_ERRORS_H
 
+#include <stdio.h> /* for fprintf */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
