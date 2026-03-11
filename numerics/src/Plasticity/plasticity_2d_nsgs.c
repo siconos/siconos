@@ -126,13 +126,12 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem *problem,
      MLocal.stressBlock, excluding the block corresponding to the current cone. ****/
   plasticity_2d_local_problem_compute_q(problem, localproblem, stress, cone);
 
-  /* coefficient for current block - only Drucker-Prager model supported for now */
+  /* coefficient for current block - handle both model types */
   if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER) {
     localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[cone];
     localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[cone];
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
-    /* Von Mises model not yet implemented in NSGS */
-    numerics_error("plasticity_2d_nsgs_update", "Von Mises model not yet implemented");
+    localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[cone];
   }
 }
 
@@ -150,56 +149,97 @@ void plasticity_2d_nsgs_initialize_local_solver(
     local_function_toolkit->light_error_squared = &light_error_squared_3;
     local_function_toolkit->squared_norm = &squared_norm_3;
   }
+  if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER) {
+    /** Connect to local solver */
+    switch (localsolver_options->solverId) {
+      case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
+        local_function_toolkit->local_solver = &plasticity_2d_projectionOnCone_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
+        plasticity_2d_projection_initialize(problem, localproblem);
+        break;
+      }
+      case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
+        local_function_toolkit->local_solver =
+            &plasticity_2d_projectionOnConeWithLocalIteration_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver =
+            &plasticity_2d_projectionOnConeWithLocalIteration_free;
+        plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
+                                                                    localsolver_options);
+        break;
+      }
+      /* Newton solver (Alart-Curnier) */
+      case PLASTICITY_2D_ONECONE_NSN: {
+        local_function_toolkit->local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+        local_function_toolkit->update_local_problem =
+            &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+        local_function_toolkit->free_local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+        plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                                  localsolver_options);
+        break;
+      }
+      case PLASTICITY_2D_ONECONE_NSN_GP: {
+        local_function_toolkit->local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+        local_function_toolkit->update_local_problem =
+            &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+        local_function_toolkit->free_local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+        plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                                  localsolver_options);
+        break;
+      }
+      case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID: {
+        local_function_toolkit->local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+        local_function_toolkit->update_local_problem =
+            &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+        local_function_toolkit->free_local_solver =
+            &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+        plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                                  localsolver_options);
+        break;
+      }
+      default: {
+        numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+                       "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
+                       solver_options_id_to_name(localsolver_options->solverId));
+      }
+    }
+  } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
+    switch (localsolver_options->solverId) {
+      case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
+        local_function_toolkit->local_solver = & plasticity_2d_projectionOnVonMises_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
+        plasticity_2d_projection_initialize(problem, localproblem);
+        break;
+      }
+      case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
+        local_function_toolkit->local_solver =
+	  &plasticity_2d_projectionOnVonMises_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver =
+            &plasticity_2d_projectionOnConeWithLocalIteration_free;
+        plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
+                                                                    localsolver_options);
+	getchar();        
+        break;
+      }
+      default: {
+        numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+                       "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
+                       solver_options_id_to_name(localsolver_options->solverId));
+      }
+    }
+  } else {
+    numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+		   "Numerics, plasticity_2d_nsgs failed. Unknown plasticity model \n");
+    }
 
-  /** Connect to local solver */
-  switch (localsolver_options->solverId) {
-    case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
-      local_function_toolkit->local_solver = &plasticity_2d_projectionOnCone_solve;
-      local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
-      local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
-      plasticity_2d_projection_initialize(problem, localproblem);
-      break;
-    }
-    case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
-      local_function_toolkit->local_solver = &plasticity_2d_projectionOnConeWithLocalIteration_solve;
-      local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
-      local_function_toolkit->free_local_solver =
-          &plasticity_2d_projectionOnConeWithLocalIteration_free;
-      plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
-                                                         localsolver_options);
-      break;
-    }
-    /* Newton solver (Alart-Curnier) */
-    case PLASTICITY_2D_ONECONE_NSN: {
-      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
-      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                       localsolver_options);
-      break;
-    }
-    case PLASTICITY_2D_ONECONE_NSN_GP: {
-      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
-      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                       localsolver_options);
-      break;
-    }
-    case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID: {
-      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
-      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                       localsolver_options);
-      break;
-    }
-    default: {
-      numerics_error("plasticity_2d_nsgs_initialize_local_solver",
-                     "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
-                     solver_options_id_to_name(localsolver_options->solverId));
-    }
-  }
 }
 
 static unsigned int *allocShuffledCones(PlasticityProblem *problem,

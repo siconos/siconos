@@ -34,6 +34,7 @@
 #include "plasticity_2d_compute_error.h"        // for plasticity_2d_Tresca_unitary_compute_an...
 #include "plasticity_2d_local_problem_tools.h"  // for plasticity_2d_local_problem_compute_q
 #include "plasticity_2d_solvers.h"
+#include "plasticity_2d_vonmises_projection.h"  // for Von Mises projection
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -88,154 +89,13 @@ void plasticity_2d_projection_update(int contact, PlasticityProblem* problem,
      MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
   plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
 
-  /* coefficient for current block*/
-  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
-  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
-}
-
-void plasticity_2d_projectionWithDiagonalization_update(int contact, PlasticityProblem* problem,
-                                               PlasticityProblem* localproblem,
-                                               double* stress, SolverOptions* options) {
-  /* Build a local problem for a specific contact
-     stress corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
-   reaction corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  plasticity_2d_local_problem_fill_M(problem, localproblem, contact);
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
-     MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
-
-  NumericsMatrix* MGlobal = problem->M;
-  double* MLocal = localproblem->M->matrix0;
-
-  double* qLocal = localproblem->q;
-  double* qGlobal = problem->q;
-  int n = 3 * problem->numberOfCones;
-
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  /* stress current block set to zero, to exclude current contact block */
-  /*   double rin= stress[in] ; double rit= stress[it] ; double ris= stress[is] ;  */
-  /* qLocal computation*/
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-
-  if (MGlobal->storageType == NM_DENSE) {
-    double* MM = MGlobal->matrix0;
-    int incx = n, incy = 1;
-    qLocal[0] += cblas_ddot(n, &MM[in], incx, stress, incy);
-    qLocal[1] += cblas_ddot(n, &MM[it], incx, stress, incy);
-    qLocal[2] += cblas_ddot(n, &MM[is], incx, stress, incy);
-    // Substract diagonal term
-    qLocal[0] -= MM[in + n * in] * stress[in];
-    qLocal[1] -= MM[it + n * it] * stress[it];
-    qLocal[2] -= MM[is + n * is] * stress[is];
-  } else if (MGlobal->storageType == NM_SPARSE_BLOCK) {
-    /* qLocal += rowMB * stress
-       with rowMB the row of blocks of MGlobal which corresponds to the current contact
-    */
-    SBM_row_prod(n, 3, contact, MGlobal->matrix1, stress, qLocal, 0);
-    // Substract diagonal term
-    qLocal[0] -= MLocal[0] * stress[in];
-    qLocal[1] -= MLocal[4] * stress[it];
-    qLocal[2] -= MLocal[8] * stress[is];
-
-  } else {
-    assert(0);;
+  /* coefficient for current block - handle both model types */
+  if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER) {
+    localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
+    localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
+  } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
+    localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[contact];
   }
-  /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
-
-  /* Coefficient for current block*/
-  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
-  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
-}
-
-void plasticity_2d_projection_initialize_with_regularization(PlasticityProblem* problem,
-                                                    PlasticityProblem* localproblem) {
-  if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
-}
-
-void plasticity_2d_projection_update_with_regularization(int contact, PlasticityProblem* problem,
-                                                PlasticityProblem* localproblem,
-                                                double* stress, SolverOptions* options) {
-  /* Build a local problem for a specific contact
-     stress corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
-   reaction corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-
-  NM_copy_diag_block3(problem->M, contact, &localproblem->M->matrix0);
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
-     MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
-  plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
-
-  double rho = options->dparam[PLASTICITY_NSN_RHO];
-  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
-
-  double* qLocal = localproblem->q;
-  int in = 3 * contact, it = in + 1, is = it + 1;
-
-  /* qLocal computation*/
-  qLocal[0] -= rho * stress[in];
-  qLocal[1] -= rho * stress[it];
-  qLocal[2] -= rho * stress[is];
-
-  /* Coefficient for current block*/
-  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
-  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
-}
-
-int plasticity_2d_projectionWithDiagonalization_solve(PlasticityProblem* localproblem,
-                                             double* stress_local, SolverOptions* options) {
-  /* Current block position */
-
-  /* Builds local problem for the current contact */
-  /*  plasticity_2d_projection_update(contact, stress); */
-  /*  plasticity_2d_projectionWithDiagonalization_update(contact, stress);  */
-
-  double* MLocal = localproblem->M->matrix0;
-  double* qLocal = localproblem->q;
-  double theta_i = localproblem->model.drucker_prager->theta[0];
-  int nLocal = 3;
-
-  double mrn, num, theta2 = theta_i * theta_i;
-
-  /* projection */
-  if (qLocal[0] > 0.) {
-    stress_local[0] = 0.;
-    stress_local[1] = 0.;
-    stress_local[2] = 0.;
-  } else {
-    if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON ||
-        MLocal[2 * nLocal + 2] < DBL_EPSILON) {
-      CHECK_ARG(0, "plasticity_2d_projection error: null term on MLocal diagonal.\n");
-    }
-
-    stress_local[0] = -qLocal[0] / MLocal[0];
-    stress_local[1] = -qLocal[1] / MLocal[nLocal + 1];
-    stress_local[2] = -qLocal[2] / MLocal[2 * nLocal + 2];
-
-    mrn = stress_local[1] * stress_local[1] + stress_local[2] * stress_local[2];
-
-    if (mrn > theta2 * stress_local[0] * stress_local[0]) {
-      num = theta_i * stress_local[0] / sqrt(mrn);
-      stress_local[1] = stress_local[1] * num;
-      stress_local[2] = stress_local[2] * num;
-    }
-  }
-  return 0;
 }
 
 void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProblem* problem,
@@ -252,7 +112,6 @@ void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProbl
     localsolver_options->dWork[i] = 1.0;
   }
 }
-
 void plasticity_2d_projectionOnConeWithLocalIteration_free(PlasticityProblem* problem,
                                                   PlasticityProblem* localproblem,
                                                   SolverOptions* localsolver_options) {
@@ -468,12 +327,7 @@ int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double
 void plasticity_2d_projection_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
-void plasticity_2d_projection_with_regularization_free(PlasticityProblem* problem,
-                                              PlasticityProblem* localproblem,
-                                              SolverOptions* localsolver_options) {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
-}
+
 
 void plasticity_2d_poc_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = 0;  // this will be set by external solver
@@ -544,6 +398,71 @@ REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
                 NULL,
                 NULL,
                 plasticity_2d_projectionOnConeWithLocalIteration_set_default,
+                100,   /* default_max_iter */
+                1e-14, /* default_tol */
+                1);    /* is_local */
+
+/* ===========================================================================
+ * Von Mises Projection Solver
+ * ===========================================================================
+ * Simple radial return algorithm for Von Mises plasticity
+ */
+
+int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem, double* stress_local,
+                                 SolverOptions* options) {
+  (void)options;  /* Unused for now - simple projection doesn't need options */
+  
+  double* MLocal = localproblem->M->matrix0;
+  double* qLocal = localproblem->q;
+  double sigma_y = localproblem->model.von_mises->sigma_y[0];
+  
+  /* Compute trial stress: sigma_trial = MLocal * stress_local + qLocal */
+  double trial_stress[3];
+  for (int i = 0; i < 3; i++) {
+    trial_stress[i] = MLocal[i + 0 * 3] * stress_local[0] + qLocal[i] +
+                      MLocal[i + 1 * 3] * stress_local[1] +
+                      MLocal[i + 2 * 3] * stress_local[2];
+  }
+  
+  /* Project onto Von Mises yield surface */
+  plasticity_2d_projectionOnVonMises(trial_stress, sigma_y);
+  
+  /* Update stress_local */
+  stress_local[0] = trial_stress[0];
+  stress_local[1] = trial_stress[1];
+  stress_local[2] = trial_stress[2];
+  
+  return 0;
+}
+
+void plasticity_2d_vonmises_set_default(SolverOptions* options) {
+  (void)options;
+}
+
+/* Wrapper for Von Mises projection (local solver) */
+static int plasticity_2d_projectionOnVonMises_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int plasticity_2d_projectionOnVonMises_solve_wrap(void* localproblem,
+                                                         double* reaction,
+                                                         double* velocity,
+                                                         SolverOptions* options) {
+  (void)velocity;  /* Local solvers don't use velocity parameter */
+  return plasticity_2d_projectionOnVonMises_solve((PlasticityProblem*)localproblem,
+                                                  reaction, options);
+}
+
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES,
+                "PLASTICITY_2D_ONECONE_VONMISES",
+                "Radial return projection for Von Mises plasticity (one cone)",
+                plasticity_2d_projectionOnVonMises_init_wrap,
+                plasticity_2d_projectionOnVonMises_solve_wrap,
+                NULL,
+                NULL,
+                plasticity_2d_vonmises_set_default,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */

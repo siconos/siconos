@@ -188,6 +188,9 @@ int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
   
   /* TODO: Add file format version marker for multiple model types
    * For now, we don't write model_type to maintain backward compatibility */
+  int model_type  = problem->model_type;
+
+  fprintf(file, "%d\n", model_type);
   
   NM_write_in_file(problem->M, file);
   for (i = 0; i < problem->M->size1; i++) {
@@ -233,7 +236,7 @@ int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
 int plasticity_printInFilename(PlasticityProblem *problem, char *filename) {
   int info = 0;
   FILE *file = fopen(filename, "w");
-
+  printf("filename %s", filename);
   if (!file) {
     return errno;
   }
@@ -260,7 +263,7 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
   
   /* For now, default to Drucker-Prager model for file reading
    * TODO: Add file format version marker to support multiple model types in files */
-  problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
+  problem->model_type = PLASTICITY_MODEL_VON_MISES;
   
   problem->M = NM_new_from_file(file);
 
@@ -299,11 +302,10 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
       problem->model.generic = NULL;
       break;
   }
-  
+
   DEBUG_PRINT(
       "End --  int plasticity_newFromFile(PlasticityProblem* problem, FILE* "
       "file)\n");
-
   return problem;
 }
 
