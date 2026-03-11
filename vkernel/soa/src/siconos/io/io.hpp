@@ -198,7 +198,7 @@ struct io : item {
               prop<"index">(hds1); /* cf one_step_integrator.hpp,
                                     * assemble_h_matrix_for_involved_ds =>
                                     * row of p0_vector_assembled */
-          auto index_ds2 = prop<"index">(hds2);
+
           auto p0 =
               algebra::get_vector(p0_v, index_ds1); /* in 2D, 2 components */
 
@@ -270,6 +270,9 @@ struct io : item {
                     }));
           };
 
+          auto id_ds1 = storage::prop<"id">(hds1);
+          auto id_ds2 = storage::prop<"id">(hds2);
+
           /* disk / segment */
           attr<"cp_info">(*self()).push_back(
               {storage::make_handle(data, nslaw).mu(),
@@ -295,8 +298,8 @@ struct io : item {
                lambda[1],
                0. /* 2D */,
                (scalar)k,
-               (scalar)index_ds1,
-               (scalar)index_ds2});
+               (scalar)id_ds1,
+               (scalar)id_ds2});
           k++;
         }
       }
@@ -329,8 +332,8 @@ struct io : item {
         if (activation) {
           auto hds1 = storage::make_handle(data, ds1);
           auto hds2 = storage::make_handle(data, ds2);
-          auto index_ds1 = prop<"index">(hds1);
-          auto index_ds2 = prop<"index">(hds2);
+          auto id_ds1 = prop<"id">(hds1);
+          auto id_ds2 = prop<"id">(hds2);
 
           indice inter_index = k++; /* index of interaction in indexset 1 */
           // a pair type of shape (unsigned int) + index
@@ -348,7 +351,7 @@ struct io : item {
                   }));
 
           attr<"co_info">(*self()).push_back(
-              {(scalar)inter_index, (scalar)index_ds1, (scalar)index_ds2,
+              {(scalar)inter_index, (scalar)id_ds1, (scalar)id_ds2,
                (scalar)static_shape_info});
         }
       }
