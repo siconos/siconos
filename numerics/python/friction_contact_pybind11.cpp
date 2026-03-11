@@ -860,6 +860,10 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_ROLLING_FRICTION_3D_ADMM",
              ROLLING_FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ADMM,
              "3D Rolling friction ADMM solver")
+      .value("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration",
+             ROLLING_FRICTION_SOLVER::
+                 SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+             "3D Rolling friction one contact Projection on Cone with local iteration")
 
       // Rolling friction solvers for 2D problems
       .value("SICONOS_ROLLING_FRICTION_2D_NSGS",

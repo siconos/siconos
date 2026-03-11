@@ -592,4 +592,4 @@ REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN, "ONECONE_RFC3D_NSN",
                 "One-contact nonsmooth Newton solver",
                 oc_nsn_init_wrap, oc_nsn_solve_wrap, NULL, NULL,
                 rfc3d_onecone_nsn_set_default,  /* set_default */
-                20, 1e-12, 1);  /* is_local_solver=1 */
+                20, 1e-10, 1);  /* is_local_solver=1 */
