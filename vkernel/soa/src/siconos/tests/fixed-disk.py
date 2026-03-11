@@ -65,7 +65,7 @@ with MechanicsHdf5Runner(config=runner_config) as io:
 options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 500
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-6
-options.iparam[sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
+options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 class recirculation_start_hook():
 

@@ -182,7 +182,7 @@ solver = sn.solver_ids.SICONOS_FRICTION_2D_NSGS
 options = sn.solver_options_create(solver)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = itermax
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
-#options.iparam[sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
+options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 fileName = f"./Silo-{N}-2D-disks"
 title = "Silo simulation"
