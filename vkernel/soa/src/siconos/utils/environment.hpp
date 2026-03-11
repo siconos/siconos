@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 #include <unordered_map>
-#include <map>
+
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
@@ -26,7 +26,7 @@ struct standard_environment {
   using integer = std::int64_t;
 
   template <typename K, typename V>
-  using map = std::map<K, V>;
+  using map = std::unordered_map<K, V>;
 
   template <typename... Ts>
   using tuple = std::tuple<Ts...>;
