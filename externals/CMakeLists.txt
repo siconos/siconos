@@ -140,10 +140,19 @@ endif()
 include(CheckTypeSize)
 set(CMAKE_EXTRA_INCLUDE_FILES ${BLAS_INCLUDE_DIR}/${BLAS_HEADER})
 check_type_size(blasint SIZEOF_BLASINT LANGUAGE C)
+if(NOT HAVE_SIZEOF_BLASINT)
+  # reference cblas.h
+  check_type_size(CBLAS_INT SIZEOF_BLASINT LANGUAGE C)
+endif()
 
-# message("HAVE_BLASINT: ${HAVE_SIZEOF_BLASINT}")
-# message("SIZEOF_BLASINT: ${SIZEOF_BLASINT}")
-# message("SIZEOF_BLASINT_CODE: ${SIZEOF_BLASINT_CODE}")
+#message("HAVE_BLASINT: ${HAVE_SIZEOF_BLASINT}")
+#message("SIZEOF_BLASINT: ${SIZEOF_BLASINT}")
+#message("SIZEOF_BLASINT_CODE: ${SIZEOF_BLASINT_CODE}")
+
+if(NOT SIZEOF_BLASINT)
+  message(WARNING "Could not detect CBLAS_INT size, defaulting to 32-bit")
+  set(SIZEOF_BLASINT 4)
+endif()
 
 target_compile_definitions(externals PUBLIC SIZEOF_BLASINT=${SIZEOF_BLASINT})
 
