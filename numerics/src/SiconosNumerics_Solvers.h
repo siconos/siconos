@@ -118,6 +118,7 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_ENUM);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_2D_LEMKE);                                          \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSGS);                                           \
+  OMP_SOLVER(SICONOS_FRICTION_3D_NSGS_GRAPH);                                               \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSGSV);                                          \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_PROX);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_TFP);                                            \

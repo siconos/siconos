@@ -154,6 +154,9 @@ extern const char* const SICONOS_FRICTION_2D_LEMKE_STR;
 extern const char* const SICONOS_FRICTION_2D_ENUM_STR;
 
 extern const char* const SICONOS_FRICTION_3D_NSGS_STR;
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+extern const char* const SICONOS_FRICTION_3D_NSGS_GRAPH_STR;
+#endif
 extern const char* const SICONOS_FRICTION_3D_NSGSV_STR;
 extern const char* const SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const SICONOS_FRICTION_3D_TFP_STR;
