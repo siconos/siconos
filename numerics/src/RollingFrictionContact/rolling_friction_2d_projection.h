@@ -18,7 +18,7 @@
 #ifndef ROLLINGFRICTIONCONTACT2DProjection_H
 #define ROLLINGFRICTIONCONTACT2DProjection_H
 
-/*!\file rolling_fc2d_projection.h
+/*!\file rolling_friction_2d_projection.h
   \brief Typedef and functions declarations related to projection solver for 3 dimension
   frictional contact problems
 
@@ -50,19 +50,19 @@ extern "C" {
  *   the rest is used to formalize the local problem)
  * \param options
  */
-void rolling_fc2d_projection_update(int number, RollingFrictionContactProblem* problem,
+void rolling_friction_2d_projection_update(int number, RollingFrictionContactProblem* problem,
                                     RollingFrictionContactProblem* localproblem,
                                     double* reaction, SolverOptions* options);
 
-void rolling_fc2d_projection_initialize(RollingFrictionContactProblem* problem,
+void rolling_friction_2d_projection_initialize(RollingFrictionContactProblem* problem,
                                         RollingFrictionContactProblem* localproblem);
-void rolling_fc2d_projection_free(RollingFrictionContactProblem* problem,
+void rolling_friction_2d_projection_free(RollingFrictionContactProblem* problem,
                                   RollingFrictionContactProblem* localproblem,
                                   SolverOptions* localsolver_options);
 
-int rolling_fc2d_projectionOnCone_solve(RollingFrictionContactProblem* localproblem,
+int rolling_friction_2d_projectionOnCone_solve(RollingFrictionContactProblem* localproblem,
                                         double* reaction, SolverOptions* options);
-int rolling_fc2d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options);
+int rolling_friction_2d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection on the Cone with local
  *   iteration up to convergence of the local problem
@@ -71,15 +71,15 @@ int rolling_fc2d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options
  * \param options
  * \return 0 if successfull
  */
-int rolling_fc2d_projectionOnConeWithLocalIteration_solve(
+int rolling_friction_2d_projectionOnConeWithLocalIteration_solve(
     RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions* options);
-void rolling_fc2d_projectionOnConeWithLocalIteration_free(
+void rolling_friction_2d_projectionOnConeWithLocalIteration_free(
     RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem,
     SolverOptions* localsolver_options);
-void rolling_fc2d_projectionOnConeWithLocalIteration_initialize(
+void rolling_friction_2d_projectionOnConeWithLocalIteration_initialize(
     RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem,
     SolverOptions* localsolver_options);
-int rolling_fc2d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(
+int rolling_friction_2d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(
     SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

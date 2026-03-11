@@ -33,10 +33,10 @@
 #include "cs.h"
 #include "float.h"
 #include "gfc3d_ipm.h"  // for primalResidual, dualResidual, ...
-#include "grfc3d_Solvers.h"
-#include "grfc3d_compute_error.h"  // for grfc3d_compute_error
+#include "global_rolling_friction_3d_Solvers.h"
+#include "global_rolling_friction_3d_compute_error.h"  // for global_rolling_friction_3d_compute_error
 #include "numerics_verbose.h"
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_short_names.h"
 
 /* Solver registration system */
 #include "solver_registry.h"
@@ -66,13 +66,13 @@ typedef struct {
   double *reaction_2;  // reaction_2 = (r0, r_tilde)
   double *t;
   double *t_prime;
-} IPM_grfc3d_point;
+} global_rolling_friction_3d_ipm_point;
 
 typedef struct {
   /* initial interior points */
   IPM_point *starting_point;  // initial point
   IPM_point *original_point;  // original point which is not changed by the matrix P_mu
-  IPM_grfc3d_point *grfc3d_point;
+  global_rolling_friction_3d_ipm_point *global_rolling_friction_3d_point;
 
   /* change of variable matrix */
   IPM_change_of_variable *P_mu;
@@ -92,7 +92,7 @@ typedef struct {
 // whoever is concerned with the ipm implementation.
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
  */
-static double grfc3d_getStepLength(const double *const x, const double *const dx,
+static double global_rolling_friction_3d_ipm_getStepLength(const double *const x, const double *const dx,
                                    const unsigned int vecSize, const unsigned int varsCount,
                                    const double gamma) {
   int dimension = (int)(vecSize / varsCount);
@@ -134,7 +134,7 @@ static double grfc3d_getStepLength(const double *const x, const double *const dx
 }
 
 /* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
-static double grfc3d_relGap(NumericsMatrix *M, const double *f, const double *w,
+static double global_rolling_friction_3d_ipm_relGap(NumericsMatrix *M, const double *f, const double *w,
                             const double *globalVelocity, const double *reaction,
                             const unsigned int nd, const unsigned int m, const double gapVal) {
   double *Mv = (double *)calloc(m, sizeof(double));
@@ -150,7 +150,7 @@ static double grfc3d_relGap(NumericsMatrix *M, const double *f, const double *w,
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
  * velocity o reaction  */
-static double grfc3d_complemResidualNorm(const double *const velocity,
+static double global_rolling_friction_3d_ipm_complemResidualNorm(const double *const velocity,
                                          const double *const reaction,
                                          const unsigned int vecSize,
                                          const unsigned int varsCount) {
@@ -1800,7 +1800,7 @@ static void printInteresProbPythonFile(int iteration, double *v, double *u, doub
 //   return;
 // }
 
-/* This function replaces for grfc3d_compute_error */
+/* This function replaces for global_rolling_friction_3d_compute_error */
 /* Compute:
     + Relative dual residual:
       ++ error_dual   = |Mv - H'r - f|/max{|Mv|, |Hr|, |f|}               if max >= tol
@@ -1869,7 +1869,7 @@ static void compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w
    * for non-convex case --- */
   *proj_error = 0.;
   for (size_t i = 0; i < n; i++) {
-    grfc3d_unitary_compute_and_add_error(&r[i * 5], &u[i * 5], 1., 1., proj_error, worktmp,
+    global_rolling_friction_3d_unitary_compute_and_add_error(&r[i * 5], &u[i * 5], 1., 1., proj_error, worktmp,
                                          problemIsNotConvex);
   }
   *proj_error = sqrt(*proj_error);
@@ -2015,10 +2015,10 @@ static void update_w(double *w, double *w_origin, const double *velocity, const 
 //                                          *dz, const double *t, const double *dt, const
 //                                          size_t vecSize, const size_t varsCount, double
 //                                          gamma) {
-//   double alpha_primal_1 = grfc3d_getStepLength(x, dx, vecSize, varsCount, gamma);
-//   double alpha_primal_2 = grfc3d_getStepLength(y, dy, vecSize, varsCount, gamma);
-//   double alpha_dual_1 = grfc3d_getStepLength(z, dz, vecSize, varsCount, gamma);
-//   double alpha_dual_2 = grfc3d_getStepLength(t, dt, vecSize, varsCount, gamma);
+//   double alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(x, dx, vecSize, varsCount, gamma);
+//   double alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(y, dy, vecSize, varsCount, gamma);
+//   double alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(z, dz, vecSize, varsCount, gamma);
+//   double alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(t, dt, vecSize, varsCount, gamma);
 
 //   return fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
 // }
@@ -2224,13 +2224,13 @@ static NumericsMatrix *compute_JQinv(const double *u1, const double *r1, const d
    H = n*d x m matrix
    w = n*d-vector */
 
-void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
+void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
                 double *restrict reaction, double *restrict velocity,
                 double *restrict globalVelocity, int *restrict info,
                 SolverOptions *restrict options) {
   //  clock_t t1 = clock();
 
-  printf("\n\n#################### grfc3d_IPM is starting ####################\n\n");
+  printf("\n\n#################### global_rolling_friction_3d_IPM is starting ####################\n\n");
 
   /* -------------------------- Variable declaration -------------------------- */
   // the size of the problem detection
@@ -2298,7 +2298,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   // initialize solver if it is not set
   int internal_allocation = 0;
   if (!options->dWork) {
-    grfc3d_IPM_init(problem, options);
+    global_rolling_friction_3d_IPM_init(problem, options);
     internal_allocation = 1;
   }
 
@@ -2755,7 +2755,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
     }
 
     // ComputeErrorGlobalRollingPtr computeError = NULL;
-    // computeError = (ComputeErrorGlobalRollingPtr)&grfc3d_compute_error;
+    // computeError = (ComputeErrorGlobalRollingPtr)&global_rolling_friction_3d_compute_error;
 
     /* -------------------------- Display problem info -------------------------- */
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] ==
@@ -2934,15 +2934,15 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
       // reaction_1, 1, velocity_1, 1);
 
       // Note: primal objectif func = 1/2 * v' * M *v + f' * v
-      relgap = grfc3d_relGap(M, f, w, globalVelocity, reaction, nd, m, gapVal);
+      relgap = global_rolling_friction_3d_ipm_relGap(M, f, w, globalVelocity, reaction, nd, m, gapVal);
 
       barr_param = gapVal / n;
-      // barr_param = grfc3d_complemResidualNorm(velocity, reaction, nd, n);
+      // barr_param = global_rolling_friction_3d_ipm_complemResidualNorm(velocity, reaction, nd, n);
       // barr_param = fabs(barr_param);
 
-      complem_1 = grfc3d_complemResidualNorm(velocity_1, reaction_1, n_dminus2,
+      complem_1 = global_rolling_friction_3d_ipm_complemResidualNorm(velocity_1, reaction_1, n_dminus2,
                                              n);  // (t, u_bar) o (r0, r_bar)
-      complem_2 = grfc3d_complemResidualNorm(velocity_2, reaction_2, n_dminus2,
+      complem_2 = global_rolling_friction_3d_ipm_complemResidualNorm(velocity_2, reaction_2, n_dminus2,
                                              n);  // (t', u_tilde) o (r0, r_tilde)
 
       udotr = gapVal;
@@ -3134,10 +3134,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
 
           /* 5. Computing the affine step-length */
 
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -3365,10 +3365,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -3700,10 +3700,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -4062,10 +4062,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -4526,10 +4526,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -4934,10 +4934,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -5256,10 +5256,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
           }
 
           /* 5. Computing the affine step-length */
-          alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-          alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-          alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-          alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+          alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+          alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+          alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+          alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
           alpha_primal =
               fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -5451,10 +5451,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
       }  // end switch
 
       // 9. Compute again the affine step-length
-      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = global_rolling_friction_3d_ipm_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = global_rolling_friction_3d_ipm_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = global_rolling_friction_3d_ipm_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = global_rolling_friction_3d_ipm_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal =
           fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
@@ -5682,7 +5682,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   }
 
   if (internal_allocation) {
-    grfc3d_IPM_free(problem, options);
+    global_rolling_friction_3d_IPM_free(problem, options);
   }
 
   options->solverData = (double *)malloc(sizeof(double));
@@ -5697,10 +5697,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
   }
   *info = hasNotConverged;
 
-}  // end of grfc3d_IPM
+}  // end of global_rolling_friction_3d_IPM
 
 /* initialize solver (allocate memory) */
-void grfc3d_IPM_init(GlobalRollingFrictionContactProblem *problem, SolverOptions *options) {
+void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem *problem, SolverOptions *options) {
   size_t m = problem->M->size0;
   size_t nd = problem->H->size1;
   size_t d = problem->dimension;  // d must be 5 because of rolling friction problem
@@ -5731,7 +5731,7 @@ void grfc3d_IPM_init(GlobalRollingFrictionContactProblem *problem, SolverOptions
         break;
 
       default:
-        printf("ERROR of options->dWork allocation in grfc3d_IPM_init\n");
+        printf("ERROR of options->dWork allocation in global_rolling_friction_3d_IPM_init\n");
     }
   }
 
@@ -5820,10 +5820,10 @@ void grfc3d_IPM_init(GlobalRollingFrictionContactProblem *problem, SolverOptions
   for (size_t i = 0; i < 2; ++i)
     data->tmp_vault_n_dplus1[i] = (double *)calloc(n_dplus1, sizeof(double));
 
-}  // end of grfc3d_IPM_init
+}  // end of global_rolling_friction_3d_IPM_init
 
 /* deallocate memory */
-void grfc3d_IPM_free(GlobalRollingFrictionContactProblem *problem, SolverOptions *options) {
+void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem *problem, SolverOptions *options) {
   if (options->dWork) {
     free(options->dWork);
     options->dWork = NULL;
@@ -5894,10 +5894,10 @@ void grfc3d_IPM_free(GlobalRollingFrictionContactProblem *problem, SolverOptions
 
   free(options->solverData);
   options->solverData = NULL;
-}  // end of grfc3d_IPM_free
+}  // end of global_rolling_friction_3d_IPM_free
 
 /* setup default solver parameters */
-void grfc3d_IPM_set_default(SolverOptions *options) {
+void global_rolling_friction_3d_IPM_set_default(SolverOptions *options) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
@@ -5943,17 +5943,17 @@ void grfc3d_IPM_set_default(SolverOptions *options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.09
 
-}  // end of grfc3d_IPM_set_default
+}  // end of global_rolling_friction_3d_IPM_set_default
 
 
 /* Solver registration wrapper functions */
-static int grfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
+static int global_rolling_friction_3d_ipm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int grfc3d_ipm_solve_wrap(void* problem, double* reaction,
+static int global_rolling_friction_3d_ipm_solve_wrap(void* problem, double* reaction,
                                  double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
   /* Note: GRFC3D_IPM requires globalVelocity as an additional argument.
@@ -5961,26 +5961,26 @@ static int grfc3d_ipm_solve_wrap(void* problem, double* reaction,
   GlobalRollingFrictionContactProblem* p = (GlobalRollingFrictionContactProblem*)problem;
   size_t m = p->M->size0;
   double* globalVelocity = (double*)calloc(m, sizeof(double));
-  grfc3d_IPM(p, reaction, velocity, globalVelocity, &info, options);
+  global_rolling_friction_3d_IPM(p, reaction, velocity, globalVelocity, &info, options);
   free(globalVelocity);
   return info;
 }
 
-static void grfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
+static void global_rolling_friction_3d_ipm_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   if (options->solverData) {
-    grfc3d_IPM_free((GlobalRollingFrictionContactProblem*)problem, options);
+    global_rolling_friction_3d_IPM_free((GlobalRollingFrictionContactProblem*)problem, options);
   }
 }
 
 REGISTER_SOLVER(GRFC3D_IPM, "GRFC3D_IPM",
                 "Interior Point Method for Global 3D Rolling Friction Contact",
-                grfc3d_ipm_init_wrap,
-                grfc3d_ipm_solve_wrap,
-                grfc3d_ipm_free_wrap,
+                global_rolling_friction_3d_ipm_init_wrap,
+                global_rolling_friction_3d_ipm_solve_wrap,
+                global_rolling_friction_3d_ipm_free_wrap,
                 NULL,  /* error function */
-                grfc3d_IPM_set_default,
+                global_rolling_friction_3d_IPM_set_default,
                 100,   /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);

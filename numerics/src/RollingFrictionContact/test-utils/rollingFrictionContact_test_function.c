@@ -21,7 +21,7 @@
 #include <stdio.h>   // for printf, fclose, fopen, FILE
 #include <stdlib.h>  // for calloc, free
 
-#include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
+#include "NonSmoothDrivers.h"               // for rolling_friction_3d_driver
 #include "NumericsFwd.h"                    // for RollingFrictionContactPro...
 #include "NumericsVerbose.h"                // for numerics_set_verbose
 #include "RollingFrictionContactProblem.h"  // for rollingFrictionContactPro...
@@ -47,7 +47,7 @@ int rollingFrictionContact_test_function(TestCase* current) {
   if (dim == 2) {
     info = 1;
   } else if (dim == 5) {
-    info = rolling_fc3d_driver(problem, reaction, velocity, current->options);
+    info = rolling_friction_3d_driver(problem, reaction, velocity, current->options);
   }
   for (int k = 0; k < dim * NC; ++k) {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;

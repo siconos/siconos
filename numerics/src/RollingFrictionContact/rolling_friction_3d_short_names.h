@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-/*!\file rfc3d_short_names.h
+/*!\file rolling_friction_3d_short_names.h
  * \brief Short macro aliases for long RollingFrictionContact enum names
  *
  * This header provides shorter names for frequently used enum values.

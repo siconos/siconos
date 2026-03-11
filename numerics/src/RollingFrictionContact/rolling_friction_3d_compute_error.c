@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#include "rolling_fc3d_compute_error.h"
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_compute_error.h"
+#include "rolling_friction_3d_short_names.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
@@ -35,10 +35,10 @@
 #include "NumericsVector.h"
 #endif
 
-void rolling_fc3d_unitary_compute_and_add_error(double r[5], double u[5], double mu,
+void rolling_friction_3d_unitary_compute_and_add_error(double r[5], double u[5], double mu,
                                                 double mur, double *restrict error,
                                                 double *worktmp) {
-  DEBUG_BEGIN("rolling_fc3d_unitary_compute_and_add_error(...)\n");
+  DEBUG_BEGIN("rolling_friction_3d_unitary_compute_and_add_error(...)\n");
   DEBUG_EXPR(NV_display(r, 5););
   DEBUG_EXPR(NV_display(u, 5););
   DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu * hypot(u[1], u[2]) + mur * hypot(u[3], u[4]));
@@ -66,13 +66,13 @@ void rolling_fc3d_unitary_compute_and_add_error(double r[5], double u[5], double
   DEBUG_EXPR(NV_display(worktmp, 5););
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2] +
             worktmp[3] * worktmp[3] + worktmp[4] * worktmp[4];
-  DEBUG_END("rolling_fc3d_unitary_compute_and_add_error(...)\n");
+  DEBUG_END("rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 }
 
-int rolling_fc3d_compute_error(RollingFrictionContactProblem *problem, double *reaction,
+int rolling_friction_3d_compute_error(RollingFrictionContactProblem *problem, double *reaction,
                                double *velocity, double tolerance, SolverOptions *options,
                                double norm, double *error) {
-  DEBUG_BEGIN("rolling_fc3d_compute_error(...)\n");
+  DEBUG_BEGIN("rolling_friction_3d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
   CHECK_NULL(velocity);
@@ -96,7 +96,7 @@ int rolling_fc3d_compute_error(RollingFrictionContactProblem *problem, double *r
   int ic, ic5;
   double worktmp[5];
   for (ic = 0, ic5 = 0; ic < nc; ic++, ic5 += 5) {
-    rolling_fc3d_unitary_compute_and_add_error(reaction + ic5, velocity + ic5, mu[ic], mur[ic],
+    rolling_friction_3d_unitary_compute_and_add_error(reaction + ic5, velocity + ic5, mu[ic], mur[ic],
                                                error, worktmp);
     DEBUG_PRINTF("squared absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
   }
@@ -111,7 +111,7 @@ int rolling_fc3d_compute_error(RollingFrictionContactProblem *problem, double *r
   /* *error = *error / (norm + 1.0); old version */
   DEBUG_PRINTF("relative error = %12.8e\n", *error);
 
-  DEBUG_END("rolling_fc3d_compute_error(...)\n");
+  DEBUG_END("rolling_friction_3d_compute_error(...)\n");
   if (*error > tolerance) return 1;
 
   return 0;

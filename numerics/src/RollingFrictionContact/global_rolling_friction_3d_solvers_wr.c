@@ -28,7 +28,7 @@
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 #include "rolling_fc_Solvers.h"                   // for fc3d_DeSaxceFixedPoint
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_short_names.h"
 // #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"  // for SICONOS_DPARAM_TOL
 /* Solver registration system */
@@ -40,11 +40,11 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reaction,
+void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reaction,
                     double* velocity, double* globalVelocity, int* info,
                     SolverOptions* options) {
   /* verbose=1; */
-  DEBUG_BEGIN("grfc3d_nsgs_wr\n");
+  DEBUG_BEGIN("global_rolling_friction_3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;
   // We compute only if the local problem has contacts
   DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 5);
@@ -60,7 +60,7 @@ void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reacti
       printf("Call to the rfc3d solver ...\n");
     }
     // call nsgs solver for the local problem
-    rolling_fc3d_nsgs(localproblem, reaction, velocity, info, options);
+    rolling_friction_3d_nsgs(localproblem, reaction, velocity, info, options);
 
     globalRollingFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     /* Number of contacts */
@@ -79,7 +79,7 @@ void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reacti
     globalRollingFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0;
   }
-  DEBUG_END("grfc3d_nsgs_wr\n");
+  DEBUG_END("global_rolling_friction_3d_nsgs_wr\n");
 }
 REGISTER_SOLVER_3VAR(GRFC3D_NSGS_WR,
                 "GRFC3D_NSGS_WR",
@@ -88,7 +88,7 @@ REGISTER_SOLVER_3VAR(GRFC3D_NSGS_WR,
                 NULL,
                 NULL,
                 NULL,  /* error function */
-                rfc3d_nsgs_set_default,  /* set_default */
+                rolling_friction_3d_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */)

@@ -91,7 +91,7 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
   std::shared_ptr<std::vector<double>> _mu_r{nullptr};
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
-  GRFC3D_Driver _g_rolling_driver;
+  GRFC3D_Driver _global_rolling_driver;
 
   // GlobalRollingFrictionContactProblem _numerics_problem;
  public:

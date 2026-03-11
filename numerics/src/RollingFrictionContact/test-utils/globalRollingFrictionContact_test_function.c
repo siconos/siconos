@@ -25,14 +25,14 @@
 
 #include "GlobalRollingFrictionContactProblem.h"  // for globalRollingFrictionContactPro...
 #include "JordanAlgebra.h"                        // for dnrm2l
-#include "NonSmoothDrivers.h"                     // for g_rolling_fc3d_driver
+#include "NonSmoothDrivers.h"                     // for global_rolling_friction_3d_driver
 #include "NumericsFwd.h"                          // for GlobalRollingFrictionContactPro...
 #include "NumericsMatrix.h"                       // for NumericsMatrix
 #include "NumericsVerbose.h"                      // for numerics_set_verbose
 #include "SolverOptions.h"                        // for SolverOptions, SICONOS_DPA...
 #include "frictionContact_test_utils.h"           // for globalRollingFrictionContact_te...
 #include "test_utils.h"                           // for TestCase
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_short_names.h"
 
 int globalRollingFrictionContact_test_function(TestCase* current) {
   int k;
@@ -75,7 +75,7 @@ int globalRollingFrictionContact_test_function(TestCase* current) {
     info = 1;
   } else if (dim == 5) {
     info =
-        g_rolling_fc3d_driver(problem, reaction, velocity, globalvelocity, current->options);
+        global_rolling_friction_3d_driver(problem, reaction, velocity, globalvelocity, current->options);
   }
 
   clock_t t2 = clock();

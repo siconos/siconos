@@ -27,8 +27,8 @@
 #include "FrictionContact_options.h"
 #include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
-#include "rolling_fc3d_local_problem_tools.h"
-#include "rolling_fc3d_projection.h"
+#include "rolling_friction_3d_local_problem_tools.h"
+#include "rolling_friction_3d_projection.h"
 
 /** pointer to function used to call local solver */
 typedef int (*RollingSolverPtr)(RollingFrictionContactProblem *, double *, SolverOptions *);
@@ -114,10 +114,10 @@ extern "C" {
 
 */
 
-void rolling_fc3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
+void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
                        double *velocity, int *info, SolverOptions *options);
 
-void rolling_fc3d_nsgs_initialize_local_solver(
+void rolling_friction_3d_nsgs_initialize_local_solver(
     RollingSolverPtr *solve, RollingUpdatePtr *update, RollingFreeSolverNSGSPtr *freeSolver,
     RollingComputeErrorPtr *computeError, RollingFrictionContactProblem *problem,
     RollingFrictionContactProblem *localproblem, SolverOptions *options);
@@ -132,10 +132,10 @@ void rolling_fc3d_nsgs_initialize_local_solver(
     \return info  =0 if a trivial solution has been found, else = -1
 */
 
-int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
+int rolling_friction_3d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
                                   double *reaction, SolverOptions *options);
 
-void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
+void rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
                                                SolverOptions *options,
                                                SolverOptions *internalsolver_options,
                                                double error);
@@ -143,20 +143,20 @@ void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem *pr
 /** \addtogroup SetSolverOptions
  * @{
  */
-void rfc3d_nsgs_set_default(SolverOptions *options);
-void rfc3d_poc_withLocalIteration_set_default(SolverOptions *options);
-void rfc3d_poc_set_default(SolverOptions *options);
-void rfc3d_poc_set_default(SolverOptions *options);
-void rfc3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem, SolverOptions *options,
+void rolling_friction_3d_nsgs_set_default(SolverOptions *options);
+void rolling_friction_3d_poc_withLocalIteration_set_default(SolverOptions *options);
+void rolling_friction_3d_poc_set_default(SolverOptions *options);
+void rolling_friction_3d_poc_set_default(SolverOptions *options);
+void rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);
 /** @} */
 
-void rolling_fc3d_admm(RollingFrictionContactProblem *problem, double *reaction,
+void rolling_friction_3d_admm(RollingFrictionContactProblem *problem, double *reaction,
                        double *velocity, int *info, SolverOptions *options);
 
-void rolling_fc3d_admm_init(RollingFrictionContactProblem *problem, SolverOptions *options);
-void rolling_fc3d_admm_free(RollingFrictionContactProblem *problem, SolverOptions *options);
-void rolling_fc3d_admm_set_default(SolverOptions *options);
+void rolling_friction_3d_admm_init(RollingFrictionContactProblem *problem, SolverOptions *options);
+void rolling_friction_3d_admm_free(RollingFrictionContactProblem *problem, SolverOptions *options);
+void rolling_friction_3d_admm_set_default(SolverOptions *options);
 
 /**
    Non-Smooth Gauss Seidel solver for Rolling friction-contact 2D problem
@@ -210,10 +210,10 @@ void rolling_fc3d_admm_set_default(SolverOptions *options);
    The internal (local) solver must set by the SolverOptions options[1]
 
 */
-void rolling_fc2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
+void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
                        double *velocity, int *info, SolverOptions *options);
 
-void rolling_fc2d_nsgs_initialize_local_solver(
+void rolling_friction_2d_nsgs_initialize_local_solver(
     RollingSolverPtr *solve, RollingUpdatePtr *update, RollingFreeSolverNSGSPtr *freeSolver,
     RollingComputeErrorPtr *computeError, RollingFrictionContactProblem *problem,
     RollingFrictionContactProblem *localproblem, SolverOptions *options);
@@ -228,10 +228,10 @@ void rolling_fc2d_nsgs_initialize_local_solver(
     \return info  =0 if a trivial solution has been found, else = -1
 */
 
-int rolling_fc2d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
+int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
                                   double *reaction, SolverOptions *options);
 
-void rolling_fc2d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
+void rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
                                                SolverOptions *options,
                                                SolverOptions *internalsolver_options,
                                                double error);
@@ -239,9 +239,9 @@ void rolling_fc2d_set_internalsolver_tolerance(RollingFrictionContactProblem *pr
 /** \addtogroup SetSolverOptions
  * @{
  */
-void rfc2d_nsgs_set_default(SolverOptions *options);
-void rfc2d_poc_withLocalIteration_set_default(SolverOptions *options);
-void rfc2d_poc_set_default(SolverOptions *options);
+void rolling_friction_2d_nsgs_set_default(SolverOptions *options);
+void rolling_friction_2d_poc_withLocalIteration_set_default(SolverOptions *options);
+void rolling_friction_2d_poc_set_default(SolverOptions *options);
 
 /** @} */
 
@@ -257,7 +257,7 @@ void rfc2d_poc_set_default(SolverOptions *options);
  * \param options the solver options
  * \return 0 iff successful
  */
-int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction,
+int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* reaction,
                         double* velocity, SolverOptions* options);
 
 /** Driver for 2D rolling friction contact problem
@@ -267,7 +267,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double* reaction
  * \param options the solver options
  * \return 0 iff successful
  */
-int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction,
+int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* reaction,
                         double* velocity, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

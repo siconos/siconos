@@ -18,7 +18,7 @@
 #ifndef ROLLING_FRICTION_onecone_nonsmooth_Newton_solvers_H
 #define ROLLING_FRICTION_onecone_nonsmooth_Newton_solvers_H
 
-/*!\file rfc3d_onecone_nonsmooth_Newton_solvers.h
+/*!\file rolling_friction_3d_onecone_nonsmooth_Newton_solvers.h
   \brief Typedef and functions declarations related to Newton solver for rolling friction 3D
   problems.
 
@@ -46,7 +46,7 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double, doubl
  * \param localproblem to solve
  * \param options of the solver
  */
-void rfc3d_onecone_nonsmooth_Newton_solvers_initialize(RollingFrictionContactProblem* problem,
+void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(RollingFrictionContactProblem* problem,
                                                       RollingFrictionContactProblem* localproblem,
                                                       SolverOptions* options);
 
@@ -55,7 +55,7 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_initialize(RollingFrictionContactPro
  * \param options of the solver
  * \return 0 iff successful.
  */
-int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* localproblem, double*,
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* localproblem, double*,
                                                 SolverOptions* options);
 
 /** free memory for rolling friction 3D Newton solver
@@ -63,7 +63,7 @@ int rfc3d_onecone_nonsmooth_Newton_solvers_solve(RollingFrictionContactProblem* 
     \param localproblem for freeing matrix0
     \param localsolver_options options of the solver
  */
-void rfc3d_onecone_nonsmooth_Newton_solvers_free(RollingFrictionContactProblem* problem,
+void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_free(RollingFrictionContactProblem* problem,
                                                 RollingFrictionContactProblem* localproblem,
                                                 SolverOptions* localsolver_options);
 
@@ -73,7 +73,7 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_free(RollingFrictionContactProblem* 
  *  \param reaction global reaction vector
  *  \param output_error
  */
-void rfc3d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
+void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
                                                         double* reaction,
                                                         double* output_error);
 
@@ -87,29 +87,29 @@ void rfc3d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* 
 
     the rest is used to formalize the local problem)
 */
-void rfc3d_onecone_nonsmooth_Newton_update(int number, RollingFrictionContactProblem* problem,
+void rolling_friction_3d_onecone_nonsmooth_Newton_update(int number, RollingFrictionContactProblem* problem,
                                              RollingFrictionContactProblem* localproblem,
                                              double* reaction, SolverOptions* options);
 
-int rfc3d_onecone_nonsmooth_Newton_solvers_solve_direct(RollingFrictionContactProblem* localproblem,
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_direct(RollingFrictionContactProblem* localproblem,
                                                        double* R, SolverOptions* options);
 
-int rfc3d_onecone_nonsmooth_Newton_solvers_solve_damped(RollingFrictionContactProblem* localproblem,
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_damped(RollingFrictionContactProblem* localproblem,
                                                        double* R, SolverOptions* options);
 
-int rfc3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(RollingFrictionContactProblem* localproblem,
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_hybrid(RollingFrictionContactProblem* localproblem,
                                                        double* local_reaction,
                                                        SolverOptions* options);
 
 /** Set default options for onecone NSN solver
  * \param options the solver options
  */
-void rfc3d_onecone_nsn_set_default(SolverOptions* options);
+void rolling_friction_3d_onecone_nsn_set_default(SolverOptions* options);
 
 /** Set default options for onecone NSN GP solver
  * \param options the solver options
  */
-void rfc3d_onecone_nsn_gp_set_default(SolverOptions* options);
+void rolling_friction_3d_onecone_nsn_gp_set_default(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

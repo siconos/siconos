@@ -18,15 +18,15 @@
 #include <math.h>  // for fmax
 
 #include "FrictionContact_options.h"                   // for SICONOS_FRICTION_3D_IPARA...
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_short_names.h"
 #include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SolverOptions.h"                  // for SolverOptions
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
-#include "rolling_fc_Solvers.h"             // for rolling_fc3d_set_internal...
+#include "rolling_fc_Solvers.h"             // for rolling_friction_3d_set_internal...
 
-void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
+void rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
                                                SolverOptions* options,
                                                SolverOptions* internalsolver_options,
                                                double error) {
@@ -57,7 +57,7 @@ void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* pr
                             "tolerance is set to %e",
                             internalsolver_options->dparam[0]);
   } else {
-    numerics_error("rolling_fc3d__set_internalsolver_tolerance",
+    numerics_error("rolling_friction_3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
 }

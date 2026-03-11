@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-#ifndef grfc3d_compute_error_H
-#define grfc3d_compute_error_H
+#ifndef global_rolling_friction_3d_compute_error_H
+#define global_rolling_friction_3d_compute_error_H
 
-/*!\file grfc3d_compute_error.h
+/*!\file global_rolling_friction_3d_compute_error.h
   \brief functions related to error computation for rolling friction-contact problems
 
 */
@@ -41,7 +41,7 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
+int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
                          double* velocity, double* globalVelocity, double tolerance,
                          double* error, int problemIsNotConvex);
 
@@ -50,7 +50,7 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* r
    friction \param mur coeficient of rolling \param worktmp work vector \param[in,out] error
    value
  */
-void grfc3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
+void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
                                           double* error, double* worktmp,
                                           int problemIsNotConvex);
 

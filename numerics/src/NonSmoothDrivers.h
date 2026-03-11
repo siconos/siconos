@@ -125,7 +125,7 @@ int fc3d_driver(FrictionContactProblem *problem, double *reaction, double *veloc
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_fc3d_driver(RollingFrictionContactProblem *problem, double *reaction,
+int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *reaction,
                         double *velocity, SolverOptions *options);
 
 /**
@@ -137,7 +137,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem *problem, double *reaction
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_fc2d_driver(RollingFrictionContactProblem *problem, double *reaction,
+int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *reaction,
                         double *velocity, SolverOptions *options);
 
 /**
@@ -175,7 +175,7 @@ int gfc3d_driver(GlobalFrictionContactProblem *problem, double *reaction, double
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem *problem, double *reaction,
+int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *problem, double *reaction,
                           double *velocity, double *globalVelocity, SolverOptions *options);
 
 /**

@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-/*!\file rolling_fc2d_driver.c
+/*!\file rolling_friction_2d_driver.c
  * \brief RFC2D driver using the solver registration system
  */
 
 #include "RollingFrictionContactProblem.h"
 #include "FrictionContact_options.h"
-#include "rfc3d_short_names.h"
+#include "rolling_friction_3d_short_names.h"
 #include "rolling_fc_Solvers.h"
 #include "numerics_verbose.h"
 
@@ -39,7 +39,7 @@
  * Trivial Case Check
  * =========================================================================== */
 
-int rolling_fc2d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
+int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
                                   double* reaction, SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfContacts;
@@ -62,11 +62,11 @@ int rolling_fc2d_checkTrivialCase(RollingFrictionContactProblem* problem, double
  * Registration-Based Driver
  * =========================================================================== */
 
-int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction,
+int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* reaction,
                         double* velocity, SolverOptions* options) {
   /* Input validation */
   if (!problem || !reaction || !velocity || !options) {
-    numerics_error("rolling_fc2d_driver", "null input argument");
+    numerics_error("rolling_friction_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
 
@@ -78,7 +78,7 @@ int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction
   SET_SOLVER_RESIDUAL(options, 0.0);
 
   /* Check for trivial case */
-  int trivial_status = rolling_fc2d_checkTrivialCase(problem, velocity, reaction, options);
+  int trivial_status = rolling_friction_2d_checkTrivialCase(problem, velocity, reaction, options);
   if (trivial_status == 0) {
     return NUMERICS_OK;
   }
@@ -88,12 +88,12 @@ int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction
 
   CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver not found");
 
-  numerics_printf_verbose(1, "rolling_fc2d_driver: using solver '%s' (%s)",
+  numerics_printf_verbose(1, "rolling_friction_2d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("rolling_fc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+    numerics_printf("rolling_friction_2d_driver: solver '%s' is a local solver, cannot be used as main solver",
                     solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
@@ -105,13 +105,13 @@ int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf("rolling_fc2d_driver: solver initialization failed with error %d", init_status);
+      numerics_printf("rolling_friction_2d_driver: solver initialization failed with error %d", init_status);
       return init_status;
     }
   }
 
   /* Call the solver */
-  numerics_printf_verbose(1, "rolling_fc2d_driver: calling solver...");
+  numerics_printf_verbose(1, "rolling_friction_2d_driver: calling solver...");
   int solve_status = solver->solve(problem, reaction, velocity, options);
 
   /* Cleanup if needed */
@@ -121,9 +121,9 @@ int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double* reaction
 
   /* Log result */
   if (solve_status == NUMERICS_OK) {
-    numerics_printf_verbose(1, "rolling_fc2d_driver: solver converged successfully");
+    numerics_printf_verbose(1, "rolling_friction_2d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "rolling_fc2d_driver: solver returned status %d", solve_status);
+    numerics_printf_verbose(1, "rolling_friction_2d_driver: solver returned status %d", solve_status);
   }
 
   return solve_status;

@@ -42,9 +42,9 @@ siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(
   }
 
   if (dimPb == 5) {
-    _rolling_frictionContact_driver = &rolling_fc3d_driver;
+    _rolling_frictionContact_driver = &rolling_friction_3d_driver;
   } else if (dimPb == 3) {
-    _rolling_frictionContact_driver = &rolling_fc2d_driver;
+    _rolling_frictionContact_driver = &rolling_friction_2d_driver;
   } else
     THROW_EXCEPTION(
         "Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact "

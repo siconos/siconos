@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "grfc3d_compute_error.h"
+#include "global_rolling_friction_3d_compute_error.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
@@ -35,10 +35,10 @@
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)  // = sqrt(1e-16)
 
-void grfc3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
+void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
                                           double* error, double* worktmp,
                                           int problemIsNotConvex) {
-  DEBUG_BEGIN("grfc3d_unitary_compute_and_add_error(...)\n");
+  DEBUG_BEGIN("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 
   if (problemIsNotConvex == 0) {
     worktmp[0] = r[0] - u[0];
@@ -63,18 +63,18 @@ void grfc3d_unitary_compute_and_add_error(double* r, double* u, double mu, doubl
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2] +
             worktmp[3] * worktmp[3] + worktmp[4] * worktmp[4];
 
-  DEBUG_END("grfc3d_unitary_compute_and_add_error(...)\n");
+  DEBUG_END("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 }
 
-int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
+int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
                          double* velocity, double* globalVelocity, double tolerance,
                          double* error, int problemIsNotConvex) {
-  DEBUG_BEGIN("grfc3d_compute_error(...)\n");
+  DEBUG_BEGIN("global_rolling_friction_3d_compute_error(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL || velocity == NULL || reaction == NULL ||
       error == NULL)
-    numerics_error("grfc3d_compute_error", "null input");
-  // printf("\n\ngrfc3d_compute_error\n\n");
+    numerics_error("global_rolling_friction_3d_compute_error", "null input");
+  // printf("\n\nglobal_rolling_friction_3d_compute_error\n\n");
   int nc = problem->numberOfContacts;
   assert(nc > 0);
   int nd = nc * 5;
@@ -144,7 +144,7 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* r
   double error_complementarity = 0.0;
   double worktmp[5];
   for (int ic = 0; ic < nc; ic++) {
-    grfc3d_unitary_compute_and_add_error(&reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic],
+    global_rolling_friction_3d_unitary_compute_and_add_error(&reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic],
                                          &error_complementarity, worktmp, problemIsNotConvex);
   }
 
@@ -156,9 +156,9 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* r
   else
     *error += error_complementarity;
 
-  DEBUG_END("grfc3d_compute_error(...)\n");
+  DEBUG_END("global_rolling_friction_3d_compute_error(...)\n");
 
-  // printf("\n\ngrfc3d_compute_error\n");
+  // printf("\n\nglobal_rolling_friction_3d_compute_error\n");
   // printf("error_primal = %5.30e\n", error_primal);
   // printf("error_dual = %5.30e\n", error_dual);
   // printf("relative_scaling = %5.30e\n", relative_scaling);

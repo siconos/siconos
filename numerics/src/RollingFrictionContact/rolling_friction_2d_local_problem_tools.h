@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROLLINGFRICTIONCONTACT3D_local_problem_tools_H
-#define ROLLINGFRICTIONCONTACT3D_local_problem_tools_H
+#ifndef ROLLINGFRICTIONCONTACT2D_local_problem_tools_H
+#define ROLLINGFRICTIONCONTACT2D_local_problem_tools_H
 
 /*!\file
 
@@ -27,14 +27,14 @@
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
-RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
+RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
     RollingFrictionContactProblem* problem);
-void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
+void rolling_friction_2d_local_problem_free(RollingFrictionContactProblem* localproblem,
                                      RollingFrictionContactProblem* problem);
-void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
+void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                           RollingFrictionContactProblem* localproblem,
                                           double* reaction, int contact);
-void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
+void rolling_friction_2d_local_problem_fill_M(RollingFrictionContactProblem* problem,
                                        RollingFrictionContactProblem* localproblem,
                                        int contact);
 

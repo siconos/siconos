@@ -112,11 +112,11 @@ enum ROLLING_FRICTION_SOLVER {
  * Short Name Aliases (Optional)
  * ===========================================================================
  * For convenience, shorter macro aliases are available by including
- * rfc3d_short_names.h. These provide shorter names like RFC3D_NSGS instead of
+ * rolling_friction_3d_short_names.h. These provide shorter names like RFC3D_NSGS instead of
  * SICONOS_ROLLING_FRICTION_3D_NSGS.
  *
  * Usage:
- *   #include "rfc3d_short_names.h"
+ *   #include "rolling_friction_3d_short_names.h"
  *   // Or use the long names directly (backward compatible)
  */
 

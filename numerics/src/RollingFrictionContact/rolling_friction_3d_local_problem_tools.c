@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "rolling_fc3d_local_problem_tools.h"
+#include "rolling_friction_3d_local_problem_tools.h"
 #ifndef __cplusplus
 #include <stdbool.h>  // for false
 #endif
@@ -26,7 +26,7 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "numerics_errors.h"
 #include "SparseBlockMatrix.h"
-void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
+void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                           RollingFrictionContactProblem* localproblem,
                                           double* reaction, int contact) {
   double* qLocal = localproblem->q;
@@ -45,7 +45,7 @@ void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem
   NM_row_prod_no_diag(n, 5, contact, 5 * contact, problem->M, reaction, qLocal, NULL, false);
 }
 
-void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
+void rolling_friction_3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
                                        RollingFrictionContactProblem* localproblem,
                                        int contact) {
  if (problem->M->storageType == NM_SPARSE) {
@@ -55,7 +55,7 @@ void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
 
 }
 
-RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
+RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(
     RollingFrictionContactProblem* problem) {
   /* Connect local solver and local problem*/
   RollingFrictionContactProblem* localproblem = rollingFrictionContactProblem_new();
@@ -76,10 +76,10 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
   return localproblem;
 }
 
-void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
+void rolling_friction_3d_local_problem_free(RollingFrictionContactProblem* localproblem,
                                      RollingFrictionContactProblem* problem) {
 
-  printf("rolling_fc3d_local_problem_free %i \n", problem->M->storageType);
+  printf("rolling_friction_3d_local_problem_free %i \n", problem->M->storageType);
 
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
