@@ -26,8 +26,11 @@
 
 #include <cs.h>
 #include <inttypes.h>
+#include <stdbool.h>  // for bool
 //#include <stdint.h>  // for intXX_t
 #include <stdio.h>  // for FILE
+
+
 
 #include "SiconosConfig.h"
 
