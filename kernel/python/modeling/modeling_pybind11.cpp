@@ -79,6 +79,10 @@ PYBIND11_MODULE(modeling, m) {
            py::return_value_policy::reference_internal)
       .def("relation", &siconos::modeling::Interaction::relation,
            py::return_value_policy::reference_internal)
+      .def("computeInput", &siconos::modeling::Interaction::computeInput,
+           "Computes input lambda")
+      .def("computeOutput", &siconos::modeling::Interaction::computeOutput,
+           "Computes output y")
       .def("__repr__", [](const siconos::modeling::Interaction& self) {
         std::ostringstream buffer;
         py::scoped_ostream_redirect redirect(std::cout,
@@ -118,7 +122,7 @@ PYBIND11_MODULE(modeling, m) {
       .def("topology", &siconos::modeling::NonSmoothDynamicalSystem::topology,
            "display the topology of the system")
       .def("interaction", &siconos::modeling::NonSmoothDynamicalSystem::interaction,
-           "get interaction by id",  py::arg("inter_id"))
+           "get interaction by id", py::arg("inter_id"))
 
       .def("setName",
            py::overload_cast<std::shared_ptr<siconos::modeling::DynamicalSystem>,

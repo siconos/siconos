@@ -27,36 +27,10 @@
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
 
-#include "SiconosConfig.h"
+#include <stddef.h>  // size_t
 
-/* #include "mlcp_cst.h" */
-/* #include "MCP_cst.h" */
-/* #include "NCP_cst.h" */
-/* #include "lcp_cst.h" */
-/* #include "Relay_options.h" */
-/* #include "FrictionContact_options.h" */
-/* #include "VI_cst.h" */
-/* #include "AVI_cst.h" */
-/* #include "SOCLCP_cst.h" */
-//#include "VariationalInequality.h"
-//#include "VariationalInequality_Solvers.h"
-//#include "SecondOrderConeLinearComplementarityProblem.h"
-/* #include "SOCLCP_Solvers.h" */
-/* #include "Relay_Solvers.h" */
-/* #include "LCP_Solvers.h" */
-/* #include "AVI_Solvers.h" */
-/* #include "MLCP_Solvers.h" */
-/* #include "NCP_Solvers.h" */
-/* #include "MCP_Solvers.h" */
-//#include "SolverOptions.h"
 #include "NumericsFwd.h"
-//#include "MixedComplementarityProblem.h"
-/* #include "fc2d_Solvers.h" */
-/* #include "fc3d_Solvers.h" */
-/* #include "gfc3d_Solvers.h" */
-//#include "GenericMechanical_Solvers.h"
-
-//#include "NonSmoothNewton.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -324,7 +298,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
                      double *b, double *mu, double *Mdata, unsigned int nzM,
                      unsigned int *rowM, unsigned int *colM, double *Hdata, unsigned int nzH,
                      unsigned int *rowH, unsigned int *colH, unsigned int n, unsigned int nc,
-                     int solver_id, int isize, int *iparam, int dsize, double *dparam,
+                     int solver_id, size_t isize, int *iparam, size_t dsize, double *dparam,
                      int verbose, int outputFile, int freq_output);
 
 /**

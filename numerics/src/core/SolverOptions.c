@@ -26,12 +26,9 @@
 #include <string.h>  // for strcmp
 
 /* Solver registration system (NEW) */
-#include "solver_registry.h"
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
-
-/** String constant for unknown solvers */
-static const char* const SICONOS_NONAME_STR = "UNKNOWN";
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /** Create a struct SolverOptions and initialize its content.
 
@@ -65,7 +62,6 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->iparam[SICONOS_IPARAM_PREALLOC] = 0;
 
-  
   options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;      // not common to all formulations ?
   options->iparam[SICONOS_IPARAM_ERROR_EVALUATION] = 0;  // not common to all formulations ?
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] =
@@ -112,10 +108,10 @@ static void recursive_solver_options_print(SolverOptions* options, int level) {
     numerics_printf("%sName of the solver\t\t\t\t %s ", marge,
                     solver_options_id_to_name(options->solverId));
     if (options->iparam != NULL) {
-      numerics_printf("%ssize of the int parameters\t\t\t options->iSize = %i", marge,
+      numerics_printf("%ssize of the int parameters\t\t\t options->iSize = %zu", marge,
                       options->iSize);
       numerics_printf("%snon zero int parameters in options->iparam:", marge);
-      for (int i = 0; i < options->iSize; ++i) {
+      for (size_t i = 0; i < options->iSize; ++i) {
         if (options->iparam[i])
           numerics_printf("%s\t\t\t\t\t\t options->iparam[%i] = %d", marge, i,
                           options->iparam[i]);
@@ -123,10 +119,10 @@ static void recursive_solver_options_print(SolverOptions* options, int level) {
     }
     if (options->dparam != NULL) {
       numerics_printf("%sdouble parameters \t\t\t\t options->dparam", marge);
-      numerics_printf("%ssize of the double parameters\t\t\t options->dSize = %i", marge,
+      numerics_printf("%ssize of the double parameters\t\t\t options->dSize = %zu", marge,
                       options->dSize);
       numerics_printf("%snon zero double parameters in options->dparam:", marge);
-      for (int i = 0; i < options->dSize; ++i) {
+      for (size_t i = 0; i < options->dSize; ++i) {
         if (options->dparam[i] > 0.)
           numerics_printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le", marge, i,
                           options->dparam[i]);
@@ -139,7 +135,7 @@ static void recursive_solver_options_print(SolverOptions* options, int level) {
   } else {
     numerics_printf("%sinteger work array have been allocated. \t options->iWork = %p ", marge,
                     options->iWork);
-    numerics_printf("%sinteger work array size \t\t\t options->iSize = %i ", marge,
+    numerics_printf("%sinteger work array size \t\t\t options->iSize = %zu ", marge,
                     options->iSize);
   }
   if (options->dWork == NULL) {
@@ -148,7 +144,7 @@ static void recursive_solver_options_print(SolverOptions* options, int level) {
   } else {
     numerics_printf("%sdouble work array have been allocated. \t options->dWork = %p ", marge,
                     options->dWork);
-    numerics_printf("%sdouble work array size \t\t\t options->dSize = %i ", marge,
+    numerics_printf("%sdouble work array size \t\t\t options->dSize = %zu ", marge,
                     options->dSize);
   }
 
@@ -309,29 +305,27 @@ SolverOptions* solver_options_create(int solver_id) {
             solver_id, solver_options_id_to_name(solver_id));
     return NULL;
   }
-  
+
   /* Create options with registered defaults */
-  SolverOptions* options = solver_options_initialize(solver_id, 
-                                                      solver->default_max_iter,
-                                                      solver->default_tol, 0);
-  
+  SolverOptions* options =
+      solver_options_initialize(solver_id, solver->default_max_iter, solver->default_tol, 0);
+
   /* Call set_default if provided - this sets solver-specific options
    * and allocates internal solvers without requiring a problem pointer */
   if (solver->set_default) {
     solver->set_default(options);
   }
-  
   /* Note: We don't call solver->init here because many init functions
    * require a valid problem pointer (not NULL). The init is typically
    * called later in the driver before solving.
    */
-  
+
   return options;
 }
 
 SolverOptions* solver_options_create_by_name(const char* solver_name) {
   if (!solver_name) return NULL;
-  
+
   /* Look up solver by name */
   const SolverEntry* solver = solver_registry_lookup_by_name(solver_name);
   if (!solver) {
@@ -339,14 +333,14 @@ SolverOptions* solver_options_create_by_name(const char* solver_name) {
             solver_name);
     return NULL;
   }
-  
+
   return solver_options_create(solver->id);
 }
 
 SolverOptions* solver_options_create_and_init(int solver_id, void* problem) {
   SolverOptions* options = solver_options_create(solver_id);
   if (!options) return NULL;
-  
+
   /* Call solver init with problem if provided */
   const SolverEntry* solver = solver_registry_lookup(solver_id);
   if (solver && solver->init && problem) {
@@ -358,22 +352,21 @@ SolverOptions* solver_options_create_and_init(int solver_id, void* problem) {
       return NULL;
     }
   }
-  
+
   return options;
 }
 
 void solver_options_reset_to_defaults(SolverOptions* options) {
   if (!options) return;
-  
+
   /* Look up solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
   if (!solver) return;
-  
+
   /* Reset to registered defaults */
   options->iparam[SICONOS_IPARAM_MAX_ITER] = solver->default_max_iter;
   options->dparam[SICONOS_DPARAM_TOL] = solver->default_tol;
 }
-
 
 /* SolverOptions* solver_options_create_old_style(int solverId) { */
 /*   // This function must be the unique way for users to create a SolverOptions. */
@@ -386,9 +379,11 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*   SolverOptions* options = NULL; */
 
 /*   // In each case : */
-/*   // - first call a default setup, common to all solvers, with tolerance and max iter value, */
+/*   // - first call a default setup, common to all solvers, with tolerance and max iter value,
+ */
 /*   //   to ensure that pointers are ready, and minimum default values set; */
-/*   // - then call <formulation>_<solver_name>_set_default(options) to set value specific to */
+/*   // - then call <formulation>_<solver_name>_set_default(options) to set value specific to
+ */
 /*   //   each solver, if required (if not, the function does not exist). */
 /*   switch (solverId) { */
 /*     // --- VI Solvers --- */
@@ -547,7 +542,8 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*     case SICONOS_LCP_MURTY: { */
 /*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
 /*       lcp_pivot_set_default(options); */
-/*       // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX set in */
+/*       // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX set
+ * in */
 /*       // lcp_driver */
 /*       break; */
 /*     } */
@@ -726,7 +722,6 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       break; */
 /*     } */
 
-
 /*     case SICONOS_FRICTION_3D_NSGSV: */
 /*     case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
@@ -852,7 +847,7 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       fc3d_poc_set_default(options); */
 /*       break; */
 /*     } */
-      
+
 /*     case SICONOS_ROLLING_FRICTION_3D_NSGS: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
 /*       rfc3d_nsgs_set_default(options); */
@@ -868,7 +863,6 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       rfc2d_nsgs_set_default(options); */
 /*       break; */
 /*     } */
-     
 
 /*     case SICONOS_GLOBAL_FRICTION_3D_IPM: { */
 /*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
@@ -890,7 +884,8 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       options = solver_options_initialize(solverId, 20000, 1e-6, 1); */
 /*       gfc3d_ipm_snm_set_default(options); */
 /*       assert(options->numberOfInternalSolvers == 1); */
-/*       options->internalSolvers[0] = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR); */
+/*       options->internalSolvers[0] =
+ * solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR); */
 
 /*       break; */
 /*     } */

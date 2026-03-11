@@ -76,7 +76,10 @@ class Material {
    * @param nu Poisson ratio
    */
   constexpr Material(double massDensity, double E, double nu, double radius = 1.)
-      : massDensity_(massDensity), elasticYoungModulus_(E), poisson_sRatio_(nu) {}
+      : massDensity_{massDensity},
+        elasticYoungModulus_{E},
+        poisson_sRatio_{nu},
+        radius_{radius} {}
 
   /** destructor */
   ~Material() noexcept = default;

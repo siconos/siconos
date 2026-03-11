@@ -92,8 +92,6 @@
 #ifndef NAMING_CONVENTIONS_H
 #define NAMING_CONVENTIONS_H
 
-#include "SolverOptions.h"
-
 /* ============================================================================
  * ACCESSOR MACROS FOR SOLVER OPTIONS
  * ============================================================================ */
@@ -102,19 +100,18 @@
 #define SOLVER_TOL(options) ((options)->dparam[SICONOS_DPARAM_TOL])
 
 /** Get local solver tolerance */
-#define LOCAL_SOLVER_TOL(local_opts) \
-    ((local_opts)->dparam[SICONOS_DPARAM_TOL])
+#define LOCAL_SOLVER_TOL(local_opts) ((local_opts)->dparam[SICONOS_DPARAM_TOL])
 
 /** Set local solver tolerance */
 #define SET_LOCAL_SOLVER_TOL(local_opts, value) \
-    ((local_opts)->dparam[SICONOS_DPARAM_TOL] = (value))
+  ((local_opts)->dparam[SICONOS_DPARAM_TOL] = (value))
 
 /** Get residual from solver options */
 #define SOLVER_RESIDUAL(options) ((options)->dparam[SICONOS_DPARAM_RESIDU])
 
 /** Set residual in solver options */
 #define SET_SOLVER_RESIDUAL(options, value) \
-    ((options)->dparam[SICONOS_DPARAM_RESIDU] = (value))
+  ((options)->dparam[SICONOS_DPARAM_RESIDU] = (value))
 
 /** Get max iterations from solver options */
 #define SOLVER_MAX_ITER(options) ((options)->iparam[SICONOS_IPARAM_MAX_ITER])
@@ -124,15 +121,15 @@
 
 /** Set iterations done in solver options */
 #define SET_SOLVER_ITER_DONE(options, value) \
-    ((options)->iparam[SICONOS_IPARAM_ITER_DONE] = (value))
+  ((options)->iparam[SICONOS_IPARAM_ITER_DONE] = (value))
 
 /** Get current block/contact number from solver options */
 #define SOLVER_CURRENT_BLOCK(options) \
-    ((options)->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER])
+  ((options)->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER])
 
 /** Set current block/contact number in solver options */
 #define SET_SOLVER_CURRENT_BLOCK(options, block_id) \
-    ((options)->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = (block_id))
+  ((options)->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = (block_id))
 
 /* ============================================================================
  * COMMON VARIABLE SHORTCUTS
@@ -148,8 +145,7 @@
 #define BLOCK_SIZE_5D 5
 
 /** Compute global index from block index and local dimension */
-#define GLOBAL_INDEX(block_id, local_dim, local_idx) \
-    ((block_id) * (local_dim) + (local_idx))
+#define GLOBAL_INDEX(block_id, local_dim, local_idx) ((block_id) * (local_dim) + (local_idx))
 
 /** Compute block start index */
 #define BLOCK_START(block_id, local_dim) ((block_id) * (local_dim))
@@ -175,11 +171,11 @@ typedef double tolerance_t;
  * ============================================================================ */
 
 /* These are kept for backward compatibility but should not be used in new code:
- * 
+ *
  * INCONSISTENT            PREFERRED
  * ---------               ---------
  * contact (as index)  ->  block_id
- * cone (as index)     ->  block_id  
+ * cone (as index)     ->  block_id
  * R (reaction)        ->  reaction or z
  * var_z               ->  z or reaction
  * var_x               ->  x or velocity

@@ -120,7 +120,7 @@ def create_rfcpb(dim, nc):
 
     qFC[...] = [-1, 1, 3, -1, 1, 3, -1, 1, 3, -1]
     mu = np.ones(nc, dtype=np.float64)
-    mu_r = 2. * np.ones(nc, dtype=np.float64)
+    mu_r = 2.0 * np.ones(nc, dtype=np.float64)
     problem = sn.RollingFrictionContactProblem(5, nc, mFC, qFC, mu, mu_r)
 
     # problem.mu() = [0.3, 0.2]

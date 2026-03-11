@@ -18,7 +18,6 @@
 
 import siconos.numerics as sn
 import numpy as np
-import siconos
 
 # basic interface
 # Murty88, p2

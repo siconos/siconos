@@ -20,7 +20,6 @@
 #include <stdlib.h>  // for malloc, free, abs
 #include <string.h>  // for strncpy, NULL, memcpy
 
-#include "fc3d_short_names.h"
 #include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
@@ -29,9 +28,10 @@
 #include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
 #include "SiconosConfig.h"                 // for WITH_FCLIB  // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-#include "numerics_verbose.h"
+#include "fc3d_short_names.h"
 #include "numerics_errors.h"
-#include "siconos_debug.h"                 // for DEBUG_PRINTF
+#include "numerics_verbose.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 #ifdef WITH_FCLIB
 // avoid a conflict with old csparse.h
@@ -64,7 +64,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
                      double *b, double *mu, double *Mdata, unsigned int nzM,
                      unsigned int *rowM, unsigned int *colM, double *Hdata, unsigned int nzH,
                      unsigned int *rowH, unsigned int *colH, unsigned int n, unsigned int nc,
-                     int solver_id, int isize, int *iparam, int dsize, double *dparam,
+                     int solver_id, size_t isize, int *iparam, size_t dsize, double *dparam,
                      int verbose_in, int outputFile, int freq_output) {
   verbose = verbose_in;
 
@@ -169,15 +169,15 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   problem->mu = mu;
 
   SolverOptions *numerics_solver_options = solver_options_create(solver_id);
-  int iSize_min =
+  size_t iSize_min =
       isize < numerics_solver_options->iSize ? isize : numerics_solver_options->iSize;
-  DEBUG_PRINTF("iSize_min = %i", iSize_min);
-  for (int i = 0; i < iSize_min; ++i)
+  DEBUG_PRINTF("iSize_min = %zu", iSize_min);
+  for (size_t i = 0; i < iSize_min; ++i)
     if (abs(iparam[i]) > 0) numerics_solver_options->iparam[i] = iparam[i];
 
-  int dSize_min =
+  size_t dSize_min =
       dsize < numerics_solver_options->dSize ? dsize : numerics_solver_options->dSize;
-  for (int i = 0; i < dSize_min; ++i)
+  for (size_t i = 0; i < dSize_min; ++i)
     if (fabs(dparam[i]) > 0) numerics_solver_options->dparam[i] = dparam[i];
 
   /* solver_options_print(&numerics_solver_options); */
@@ -217,9 +217,12 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
       int n = 100;
       char *title = (char *)malloc(n * sizeof(char));
       strncpy(title, "LMGC dump in hdf5", n);
-      size_t req_size = snprintf(NULL, 0, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname) + 1;
+      size_t req_size =
+          snprintf(NULL, 0, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname) +
+          1;
       char *description = malloc(req_size);
-      snprintf(description, req_size, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
+      snprintf(description, req_size,
+               "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
       char *mathInfo = (char *)malloc(n * sizeof(char));
       strncpy(mathInfo, "unknown", n);
 

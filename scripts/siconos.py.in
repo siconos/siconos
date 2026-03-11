@@ -31,6 +31,7 @@ import logging
 from pathlib import Path
 from packaging import version
 import shutil
+import hashlib
 
 
 def main():
@@ -147,7 +148,15 @@ def main():
         #  - generate .siconos/pyproject.toml file
         #  - add and configure a target name 'somename' in the generated CMakeLists.txt
         #
-        generate_addons_python_project(args)
+        if not addons_need_rebuild(args):
+            msg = "✅ addons unchanged, skipping rebuild"
+            logging.info(msg)
+        else:
+            generate_addons_python_project(args)
+            build = generate_cmakelists(args)
+            build_addons(args)
+
+        args.no_build = True
 
     # If build is required :
     # - generate CMakeListst.txt in build_dir
@@ -158,10 +167,7 @@ def main():
         build = generate_cmakelists(args)
         # generate_cmakelists returns true if the driver
         # is C++
-        if args.use_addons:
-            build_addons(args)
-
-        elif build:
+        if build:
             build_project(args)
 
     # If execution is required :
@@ -600,6 +606,8 @@ def generate_addons_python_project(args):
     version = "1.0.0"
 
     [tool.scikit-build]
+    editable.mode = "redirect"
+    build-dir = "build"
     wheel.packages = ["addons"]
     """
 
@@ -890,6 +898,45 @@ def print_siconos_info(what="all"):
         print("- Siconos cmake files are in {}.\n".format(siconos_package_dir))
     elif what == "config_path":
         print(siconos_package_dir)
+
+
+def hash_directory(directory, extensions=(".cpp", ".cxx", ".hpp", ".h")):
+    """Compute a deterministic hash of all source files in a directory.
+
+    Used to optimize the generation of addons package
+    and avoid useless build
+    """
+    # init hash
+    h = hashlib.sha256()
+
+    directory = Path(directory)
+
+    # sort files on dir
+    files = sorted(
+        f for f in directory.rglob("*") if f.suffix in extensions and f.is_file()
+    )
+
+    for f in files:
+        h.update(f.relative_to(directory).as_posix().encode()) # hash on file name
+        h.update(f.read_bytes()) # include file contents
+    # Warning: one hash including all files in the dir
+
+    return h.hexdigest()
+
+
+def addons_need_rebuild(args):
+    hash_file = Path(args.build_dir) / ".addons_hash"
+
+    new_hash = hash_directory(args.addons)
+    old_hash = None
+    if Path(hash_file).exists():
+        old_hash = Path(hash_file).read_text().strip()
+
+    if new_hash != old_hash:
+        Path(hash_file).write_text(new_hash)
+        return True
+
+    return False
 
 
 if __name__ == "__main__":

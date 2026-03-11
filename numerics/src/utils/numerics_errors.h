@@ -140,11 +140,11 @@ static inline const char* numerics_error_string(NumericsError err) {
 /** Check option index is within bounds */
 #define NUMERICS_CHECK_IPARAM(options, idx)                                           \
   NUMERICS_CHECK((idx) >= 0 && (idx) < (options)->iSize, NUMERICS_ERR_INVALID_OPTION, \
-                 "iparam index %d out of bounds (size=%d)", (int)(idx), (options)->iSize)
+                 "iparam index %d out of bounds (size=%zu)", (int)(idx), (options)->iSize)
 
 #define NUMERICS_CHECK_DPARAM(options, idx)                                           \
   NUMERICS_CHECK((idx) >= 0 && (idx) < (options)->dSize, NUMERICS_ERR_INVALID_OPTION, \
-                 "dparam index %d out of bounds (size=%d)", (int)(idx), (options)->dSize)
+                 "dparam index %d out of bounds (size=%zu)", (int)(idx), (options)->dSize)
 
 /** Check solver converged (error < tolerance) */
 #define NUMERICS_CHECK_CONVERGENCE(error, tol)                           \

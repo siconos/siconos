@@ -25,8 +25,8 @@
 #include <stdbool.h>  // for boolean type
 #include <stdio.h>    // for size_t
 
-#include "NumericsFwd.h"    // for SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"         // for SolverOptions
+#include "SiconosConfig.h"       // for BUILD_AS_CPP // IWYU pragma: keep
 #include "naming_conventions.h"  // Standardized naming conventions and macros
 
 /* Forward declaration for solver registry (avoid circular include) */
@@ -68,10 +68,10 @@ struct SolverOptions {
   int solverId;     /**< id number of the solver. */
   bool isSet;       /**< true(1) if the structure is ready to be used by a numerics
                        driver. */
-  int iSize;        /**< iSize size of vector iparam */
+  size_t iSize;     /**< iSize size of vector iparam */
   int *iparam;      /**< list of solver parameters (integer type); Check solvers doc
                        for details. */
-  int dSize;        /**< size of vector dparam */
+  size_t dSize;     /**< size of vector dparam */
   double *dparam;   /**< list of solver parameters (double type); Check solvers
                        doc for details. */
   bool filterOn;    /**< if true (1), check solution validity after the driver
@@ -203,46 +203,46 @@ void solver_options_set_internal_solver(SolverOptions *options, size_t n, Solver
 
 /**
  * Create solver options using registration system.
- * 
+ *
  * This uses the solver registry to:
  * 1. Look up solver metadata (name, defaults)
  * 2. Set default parameters from registration
  * 3. Call solver-specific initialization if available
- * 
+ *
  * \param solver_id The solver ID (e.g., SICONOS_FRICTION_3D_NSGS)
  * \return Pointer to created options, or NULL if solver not found
  */
-SolverOptions* solver_options_create(int solver_id);
+SolverOptions *solver_options_create(int solver_id);
 
 /**
  * Create solver options by name.
- * 
+ *
  * Convenience function to create options using solver name instead of ID.
- * 
+ *
  * \param solver_name The solver name (e.g., "FC3D_NSGS")
  * \return Pointer to created options, or NULL if name not found
  */
-SolverOptions* solver_options_create_by_name(const char* solver_name);
+SolverOptions *solver_options_create_by_name(const char *solver_name);
 
 /**
  * Create options and apply solver initialization.
- * 
+ *
  * Creates options AND calls the solver's init function (if provided).
- * 
+ *
  * \param solver_id The solver ID
  * \param problem Optional problem pointer (for problem-specific init)
  * \return Pointer to created and initialized options, or NULL on failure
  */
-SolverOptions* solver_options_create_and_init(int solver_id, void* problem);
+SolverOptions *solver_options_create_and_init(int solver_id, void *problem);
 
 /**
  * Reset options to registered defaults.
- * 
+ *
  * Restores all parameters to their registered default values.
- * 
+ *
  * \param options The options to reset (modified in place)
  */
-void solver_options_reset_to_defaults(SolverOptions* options);
+void solver_options_reset_to_defaults(SolverOptions *options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

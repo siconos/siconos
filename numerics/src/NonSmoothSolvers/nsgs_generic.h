@@ -38,16 +38,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "NumericsMatrix.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
+#include "SparseBlockMatrix.h" /* for SparseBlockStructuredMatrix */
 #include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"  /* for SparseBlockStructuredMatrix */
 
 /** Callback type for updating local problem for a given block */
-typedef void (*NSGSUpdateLocalProblem)(unsigned int block, void* problem,
-                                       void* local_problem, double* var_z_global,
-                                       SolverOptions* options);
+typedef void (*NSGSUpdateLocalProblem)(unsigned int block, void* problem, void* local_problem,
+                                       double* var_z_global, SolverOptions* options);
 
 /** Callback type for solving the local problem */
 typedef void (*NSGSSolveLocal)(void* local_problem, SolverOptions* options,
@@ -60,7 +59,8 @@ typedef double (*NSGSComputeError)(void* problem, double* var_z, double* var_x,
 /** Callback type for copying old local solution from global to local buffer (warm start) */
 typedef void (*NSGSCopyLocal)(unsigned int block, double* var_z_global, double* var_z_local);
 
-/** Callback type for computing incremental error (squared) between new and old local solution */
+/** Callback type for computing incremental error (squared) between new and old local solution
+ */
 typedef double (*NSGSIncrError)(double* var_z_local_new, double* var_z_local_old);
 
 /** Callback type for accepting local solution into global solution */
@@ -96,9 +96,9 @@ typedef void (*NSGSRelaxation)(double* var_z_local_new, double* var_z_local_old,
 typedef double (*NSGSSquaredNorm)(double* var_z_local);
 
 /** Callback type for checking if a block should be frozen */
-typedef int (*NSGSShouldFreeze)(double incremental_error, double squared_norm_local, 
-                                double tolerance, double norm_z_global, 
-                                unsigned int nb_blocks, int iter);
+typedef int (*NSGSShouldFreeze)(double incremental_error, double squared_norm_local,
+                                double tolerance, double norm_z_global, unsigned int nb_blocks,
+                                int iter);
 
 /** Generic local problem toolkit structure
  *
@@ -123,19 +123,21 @@ typedef struct {
   NSGSShouldFreeze should_freeze;
 
   /* Problem-specific data */
-  int dimension;        /* Dimension per block (2, 3, 5, etc.) */
-  double omega;         /* Relaxation parameter */
-  int use_freezing;     /* Whether to use block freezing */
-  int use_shuffling;    /* Whether to shuffle blocks */
-  int use_incremental_error;    /* Whether to use incremental error for convergence */
-  int use_relaxation;     /* Whether to use relaxation */
-  int filter_local_sol;   /* Whether to filter local solutions */
-  int error_eval_type;    /* Error evaluation mode (0=FULL, 1=LIGHT_WITH_FULL_FINAL, 2=LIGHT, 3=ADAPTIVE) */
-  int error_eval_freq;    /* Full error evaluation frequency (0=every iter, N=every N iter) */
-  int freezing_iter;      /* Number of iterations to freeze a block */
-  int verbose;            /* Verbosity level (0=none, 1=iterations, 2=detailed) */
-  double user_tolerance;  /* User-requested tolerance (for reference, adaptive logic uses working tolerance) */
-  void* localproblem;     /* Pointer to local problem (passed to callbacks) */
+  int dimension;             /* Dimension per block (2, 3, 5, etc.) */
+  double omega;              /* Relaxation parameter */
+  int use_freezing;          /* Whether to use block freezing */
+  int use_shuffling;         /* Whether to shuffle blocks */
+  int use_incremental_error; /* Whether to use incremental error for convergence */
+  int use_relaxation;        /* Whether to use relaxation */
+  int filter_local_sol;      /* Whether to filter local solutions */
+  int error_eval_type;   /* Error evaluation mode (0=FULL, 1=LIGHT_WITH_FULL_FINAL, 2=LIGHT,
+                            3=ADAPTIVE) */
+  int error_eval_freq;   /* Full error evaluation frequency (0=every iter, N=every N iter) */
+  int freezing_iter;     /* Number of iterations to freeze a block */
+  int verbose;           /* Verbosity level (0=none, 1=iterations, 2=detailed) */
+  double user_tolerance; /* User-requested tolerance (for reference, adaptive logic uses
+                            working tolerance) */
+  void* localproblem;    /* Pointer to local problem (passed to callbacks) */
 } NSGSLocalToolkit;
 
 /** Generic problem data structure
@@ -143,13 +145,13 @@ typedef struct {
  * This holds the common data needed by the NSGS algorithm.
  */
 typedef struct {
-  unsigned int nb_blocks;  /* Number of blocks */
-  double* q;               /* Right-hand side vector */
-  void* M;                 /* Matrix (NumericsMatrix*) */
-  double* mu;              /* Friction coefficients (optional) */
-  double* mu_r;            /* Rolling friction coefficients (optional) */
-  int storage_type;        /* Matrix storage type */
-  int dimension;           /* Problem dimension per block */
+  unsigned int nb_blocks; /* Number of blocks */
+  double* q;              /* Right-hand side vector */
+  void* M;                /* Matrix (NumericsMatrix*) */
+  double* mu;             /* Friction coefficients (optional) */
+  double* mu_r;           /* Rolling friction coefficients (optional) */
+  int storage_type;       /* Matrix storage type */
+  int dimension;          /* Problem dimension per block */
 } NSGSProblemData;
 
 /** Generic local problem structure for block-structured matrices
@@ -158,11 +160,11 @@ typedef struct {
  * It assumes all blocks have the same dimension.
  */
 typedef struct {
-  double* M_local;         /* Local matrix (dimension x dimension) */
-  double* q_local;         /* Local RHS vector (dimension) */
-  double* mu_local;        /* Local friction coefficient (optional) */
-  double* mu_r_local;      /* Local rolling friction (optional) */
-  int dimension;           /* Dimension of this local problem */
+  double* M_local;    /* Local matrix (dimension x dimension) */
+  double* q_local;    /* Local RHS vector (dimension) */
+  double* mu_local;   /* Local friction coefficient (optional) */
+  double* mu_r_local; /* Local rolling friction (optional) */
+  int dimension;      /* Dimension of this local problem */
 } NSGSLocalProblem;
 
 /** Generic local problem update function
@@ -182,10 +184,9 @@ typedef struct {
  * \param[in] dim Dimension per block
  */
 static inline void nsgs_generic_update_local_problem(unsigned int block,
-                                                      NSGSProblemData* problem_data,
-                                                      NSGSLocalProblem* local_problem,
-                                                      double* var_z_global,
-                                                      int dim) {
+                                                     NSGSProblemData* problem_data,
+                                                     NSGSLocalProblem* local_problem,
+                                                     double* var_z_global, int dim) {
   NumericsMatrix* M = (NumericsMatrix*)problem_data->M;
   double* q = problem_data->q;
   int block_start = block * dim;
@@ -193,7 +194,7 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
   /* =====================================================================
    * Step 1: Extract diagonal block into local M
    * ===================================================================== */
-  
+
   /* Check for pre-extracted diagonal blocks (NM_SPARSE with matrix1) */
   if (M->storageType == NM_SPARSE && M->matrix1) {
     /* Use pre-extracted block from SparseBlockStructuredMatrix */
@@ -233,17 +234,17 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
   /* Add off-diagonal contributions using dimension-specific optimized functions */
   switch (dim) {
     case 2:
-      NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start,
-                           M, var_z_global, local_problem->q_local, false);
+      NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start, M, var_z_global,
+                           local_problem->q_local, false);
       break;
     case 3:
-      NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start,
-                           M, var_z_global, local_problem->q_local, false);
+      NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start, M, var_z_global,
+                           local_problem->q_local, false);
       break;
     default:
       /* Generic fallback for other dimensions using NM_row_prod_no_diag */
-      NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start,
-                          M, var_z_global, local_problem->q_local, NULL, false);
+      NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start, M,
+                          var_z_global, local_problem->q_local, NULL, false);
       break;
   }
 
@@ -273,22 +274,21 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
  * \param[in] options Solver options (contains problem_data in solverData)
  */
 static inline void nsgs_generic_update_local_problem_callback(unsigned int block,
-                                                               void* problem,
-                                                               void* local_problem,
-                                                               double* var_z_global,
-                                                               SolverOptions* options) {
+                                                              void* problem,
+                                                              void* local_problem,
+                                                              double* var_z_global,
+                                                              SolverOptions* options) {
   (void)problem; /* Not used, data comes from options->solverData */
-  
+
   NSGSProblemData* problem_data = (NSGSProblemData*)options->solverData;
   if (!problem_data) {
     numerics_error("nsgs_generic_update_local_problem_callback",
                    "options->solverData must contain NSGSProblemData pointer");
     return;
   }
-  
-  nsgs_generic_update_local_problem(block, problem_data,
-                                     (NSGSLocalProblem*)local_problem,
-                                     var_z_global, problem_data->dimension);
+
+  nsgs_generic_update_local_problem(block, problem_data, (NSGSLocalProblem*)local_problem,
+                                    var_z_global, problem_data->dimension);
 }
 
 /** Extract diagonal blocks from matrix for efficient access
@@ -301,20 +301,23 @@ static inline void nsgs_generic_update_local_problem_callback(unsigned int block
  *
  * \param[in,out] M The matrix to extract diagonal blocks from
  * \param[in] dim Dimension per block
- * \return Pointer to the original M->matrix1 (for later restoration), or NULL if no extraction was done
+ * \return Pointer to the original M->matrix1 (for later restoration), or NULL if no extraction
+ * was done
  */
 static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int dim) {
   if (!M) return NULL;
-  
+
   if (M->storageType == NM_SPARSE) {
     void* original_matrix1 = M->matrix1;
     if (M->matrix1) {
-      numerics_printf("nsgs_generic_extract_diagonal_blocks: Warning - M->matrix1 already exists, overwriting");
+      numerics_printf(
+          "nsgs_generic_extract_diagonal_blocks: Warning - M->matrix1 already exists, "
+          "overwriting");
     }
     M->matrix1 = NM_extract_diagonal_blocks(M, dim);
     return original_matrix1;
   }
-  
+
   return NULL;
 }
 
@@ -324,11 +327,13 @@ static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int 
  * and restores the original M->matrix1 pointer.
  *
  * \param[in,out] M The matrix to clean up
- * \param[in] original_matrix1 The original M->matrix1 pointer (from nsgs_generic_extract_diagonal_blocks)
+ * \param[in] original_matrix1 The original M->matrix1 pointer (from
+ * nsgs_generic_extract_diagonal_blocks)
  */
-static inline void nsgs_generic_free_diagonal_blocks(NumericsMatrix* M, void* original_matrix1) {
+static inline void nsgs_generic_free_diagonal_blocks(NumericsMatrix* M,
+                                                     void* original_matrix1) {
   if (!M) return;
-  
+
   if (M->storageType == NM_SPARSE && M->matrix1) {
     /* Free the extracted diagonal blocks */
     SBM_clear_block(M->matrix1);
@@ -365,15 +370,15 @@ static inline int nsgs_determine_convergence(double error, double tolerance, int
  * \return Number of frozen blocks
  */
 static inline unsigned int nsgs_check_freezing_reset(unsigned int* freeze_blocks,
-                                                      unsigned int nb_blocks,
-                                                      int use_freezing) {
+                                                     unsigned int nb_blocks,
+                                                     int use_freezing) {
   if (!use_freezing || !freeze_blocks) return 0;
-  
+
   unsigned int nb_frozen = 0;
   for (unsigned int i = 0; i < nb_blocks; ++i) {
     if (freeze_blocks[i] > 0) nb_frozen++;
   }
-  
+
   /* If too many blocks frozen, reset all */
   if (nb_frozen >= nb_blocks - 1) {
     for (unsigned int i = 0; i < nb_blocks; ++i) {
@@ -381,7 +386,7 @@ static inline unsigned int nsgs_check_freezing_reset(unsigned int* freeze_blocks
     }
     nb_frozen = 0;
   }
-  
+
   return nb_frozen;
 }
 
@@ -401,19 +406,21 @@ static inline unsigned int nsgs_check_freezing_reset(unsigned int* freeze_blocks
  * \param iter Current iteration
  * \return 1 if block should be frozen, 0 otherwise
  */
-static inline int nsgs_default_should_freeze(double incremental_error_2, double squared_norm_local,
-                                              double tolerance, double norm_z_global,
-                                              unsigned int nb_blocks, int iter) {
+static inline int nsgs_default_should_freeze(double incremental_error_2,
+                                             double squared_norm_local, double tolerance,
+                                             double norm_z_global, unsigned int nb_blocks,
+                                             int iter) {
   if (iter < 10) return 0;
   if (nb_blocks == 0) return 0;
-  
+
   /* Criteria matching fc3d_nsgs exactly */
   double tmp_criteria1 = tolerance * tolerance * 100.0 * 100.0;
   double tmp_criteria2 = norm_z_global * norm_z_global / (nb_blocks * nb_blocks * 1000.0);
-  
-  int relative_convergence_criteria = incremental_error_2 <= tmp_criteria1 * squared_norm_local;
+
+  int relative_convergence_criteria =
+      incremental_error_2 <= tmp_criteria1 * squared_norm_local;
   int small_reaction_criteria = squared_norm_local <= tmp_criteria2;
-  
+
   return (relative_convergence_criteria || small_reaction_criteria) ? 1 : 0;
 }
 
@@ -425,9 +432,9 @@ static inline int nsgs_default_should_freeze(double incremental_error_2, double 
  * \param should_freeze Whether this block should be frozen
  */
 static inline void nsgs_update_freeze_counter(unsigned int* freeze_blocks, unsigned int block,
-                                               int freezing_iter, int should_freeze) {
+                                              int freezing_iter, int should_freeze) {
   if (!freeze_blocks) return;
-  
+
   if (should_freeze) {
     freeze_blocks[block] = freezing_iter;
   }
@@ -441,10 +448,10 @@ static inline void nsgs_update_freeze_counter(unsigned int* freeze_blocks, unsig
  * \param iter Current iteration
  */
 static inline void nsgs_shuffle_blocks(unsigned int* sblocks, unsigned int nb_blocks,
-                                        int shuffle_mode, int iter) {
+                                       int shuffle_mode, int iter) {
   if (!sblocks) return;
   if (shuffle_mode == 0) return;
-  
+
   /* Shuffle each loop, or first iteration only */
   if (shuffle_mode == 2 || (shuffle_mode == 1 && iter == 1)) {
     /* Note: uint_shuffle is from NumericsArrays.h */
@@ -460,11 +467,10 @@ static inline void nsgs_shuffle_blocks(unsigned int* sblocks, unsigned int nb_bl
  * \param[in] use_freezing Whether freezing is enabled
  * \return Percentage of frozen blocks (0-100)
  */
-static inline double nsgs_count_frozen_percent(unsigned int* freeze_blocks, 
-                                                unsigned int nb_blocks, 
-                                                int use_freezing) {
+static inline double nsgs_count_frozen_percent(unsigned int* freeze_blocks,
+                                               unsigned int nb_blocks, int use_freezing) {
   if (!use_freezing || !freeze_blocks || nb_blocks == 0) return 0.0;
-  
+
   unsigned int nb_frozen = 0;
   for (unsigned int i = 0; i < nb_blocks; ++i) {
     if (freeze_blocks[i] > 0) nb_frozen++;
@@ -486,16 +492,18 @@ static inline double nsgs_count_frozen_percent(unsigned int* freeze_blocks,
  * \param[out] full_error Computed full error
  * \return 0 if converged (full_error <= user_tolerance), 1 otherwise
  */
-static inline int nsgs_check_full_error_convergence(void* problem, double* var_z, double* var_x,
-                                                     SolverOptions* options, NSGSLocalToolkit* toolkit,
-                                                     double user_tolerance, double* full_error) {
+static inline int nsgs_check_full_error_convergence(void* problem, double* var_z,
+                                                    double* var_x, SolverOptions* options,
+                                                    NSGSLocalToolkit* toolkit,
+                                                    double user_tolerance,
+                                                    double* full_error) {
   if (!toolkit->compute_error) {
     *full_error = 0.0;
     return 0;
   }
-  
+
   *full_error = toolkit->compute_error(problem, var_z, var_x, options);
-  
+
   return (*full_error <= user_tolerance) ? 0 : 1;
 }
 
@@ -514,34 +522,34 @@ static inline int nsgs_check_full_error_convergence(void* problem, double* var_z
  * \param[in] iter Current iteration
  */
 static inline void nsgs_early_tolerance_adapt(void* problem, double* var_z, double* var_x,
-                                               SolverOptions* options, NSGSLocalToolkit* toolkit,
-                                               double incremental_error, double* tolerance,
-                                               double* full_error, int iter) {
+                                              SolverOptions* options,
+                                              NSGSLocalToolkit* toolkit,
+                                              double incremental_error, double* tolerance,
+                                              double* full_error, int iter) {
   if (iter != 10 || !toolkit->compute_error) return;
-  
-  nsgs_check_full_error_convergence(
-      problem, var_z, var_x, options, toolkit, toolkit->user_tolerance, full_error);
-  
+
+  nsgs_check_full_error_convergence(problem, var_z, var_x, options, toolkit,
+                                    toolkit->user_tolerance, full_error);
+
   /* Adapt tolerance based on the ratio at iteration 10 (use ratio directly) */
   if (incremental_error > 0 && *full_error > 0) {
     double error_ratio = incremental_error / *full_error;
     double new_tolerance = error_ratio * toolkit->user_tolerance;
-    
+
     if (toolkit->verbose > 0) {
-      printf("Iter %d: Early adapt - Incr: %.4e, Full: %.4e, Ratio: %.4f, "
-             "Current tol: %.4e, New tol: %.4e %s\n",
-             iter, incremental_error, *full_error, error_ratio, *tolerance, new_tolerance,
-             (new_tolerance != *tolerance) ? "[APPLYING]" : "[NO CHANGE]");
+      printf(
+          "Iter %d: Early adapt - Incr: %.4e, Full: %.4e, Ratio: %.4f, "
+          "Current tol: %.4e, New tol: %.4e %s\n",
+          iter, incremental_error, *full_error, error_ratio, *tolerance, new_tolerance,
+          (new_tolerance != *tolerance) ? "[APPLYING]" : "[NO CHANGE]");
     }
-    
+
     /* Always apply the new tolerance (as long as it's positive) */
     if (new_tolerance > 0) {
       *tolerance = new_tolerance;
     }
   }
 }
-
-
 
 /** Print iteration statistics (verbose output)
  *
@@ -554,25 +562,24 @@ static inline void nsgs_early_tolerance_adapt(void* problem, double* var_z, doub
  * \param[in] hasNotConverged Convergence flag
  * \param[in] verbose Verbosity level
  */
-static inline void nsgs_print_iteration_stats(int iter, double incremental_error, double full_error,
-                                               double tolerance, double user_tolerance,
-                                               double frozen_percent, int hasNotConverged,
-                                               int verbose) {
+static inline void nsgs_print_iteration_stats(int iter, double incremental_error,
+                                              double full_error, double tolerance,
+                                              double user_tolerance, double frozen_percent,
+                                              int hasNotConverged, int verbose) {
   if (verbose <= 0 || iter % verbose != 0) return;
-  
+
   /* Print header on first iteration */
   if (iter == 1) {
-    printf("\n%-8s %-12s %-12s %-12s %-12s %-8s %-8s\n", 
-           "Iter", "IncrError", "FullError", "WorkTol", "UserTol", "Frozen%", "Status");
-    printf("%-8s %-12s %-12s %-12s %-12s %-8s %-8s\n", 
-           "--------", "------------", "------------", "------------", "------------", "--------", "--------");
+    printf("\n%-8s %-12s %-12s %-12s %-12s %-8s %-8s\n", "Iter", "IncrError", "FullError",
+           "WorkTol", "UserTol", "Frozen%", "Status");
+    printf("%-8s %-12s %-12s %-12s %-12s %-8s %-8s\n", "--------", "------------",
+           "------------", "------------", "------------", "--------", "--------");
   }
-  
+
   const char* status = hasNotConverged ? "..." : "CONV";
-  
-  printf("%-8d %-12.4e %-12.4e %-12.4e %-12.4e %-7.1f%% %-8s\n", 
-         iter, incremental_error, full_error, tolerance, user_tolerance,
-         frozen_percent, status);
+
+  printf("%-8d %-12.4e %-12.4e %-12.4e %-12.4e %-7.1f%% %-8s\n", iter, incremental_error,
+         full_error, tolerance, user_tolerance, frozen_percent, status);
 }
 
 /** Adapt working tolerance based on incremental and full error
@@ -594,23 +601,26 @@ static inline void nsgs_print_iteration_stats(int iter, double incremental_error
  * \return 1 if we should continue iterating, 0 if converged
  */
 static inline int nsgs_adapt_tolerance(double incremental_error, double full_error,
-                                        double user_tolerance, double* working_tolerance,
-                                        SolverOptions* localsolver_options, int iter, int verbose) {
+                                       double user_tolerance, double* working_tolerance,
+                                       SolverOptions* localsolver_options, int iter,
+                                       int verbose) {
   /* If full error is within user tolerance, we're converged */
   if (full_error <= user_tolerance) {
     if (verbose > 0) {
-      printf("Iter %d: CONVERGED - Full error (%.2e) <= user tolerance (%.2e)\n",
-             iter, full_error, user_tolerance);
+      printf("Iter %d: CONVERGED - Full error (%.2e) <= user tolerance (%.2e)\n", iter,
+             full_error, user_tolerance);
     }
     return 0; /* Converged */
   }
-  
+
   /* Full error not converged - need to adapt */
   if (verbose > 0) {
-    printf("Iter %d: Incr error (%.2e) < work_tol (%.2e), but full error (%.2e) > user_tol (%.2e)\n",
-           iter, incremental_error, *working_tolerance, full_error, user_tolerance);
+    printf(
+        "Iter %d: Incr error (%.2e) < work_tol (%.2e), but full error (%.2e) > user_tol "
+        "(%.2e)\n",
+        iter, incremental_error, *working_tolerance, full_error, user_tolerance);
   }
-  
+
   /* If incremental error is very small, the NSGS loop is not improving the solution.
    * We need to tighten the local solver tolerance instead of adapting working tolerance. */
   if (incremental_error < 1e-15 || incremental_error < DBL_EPSILON * 100.0) {
@@ -619,8 +629,9 @@ static inline int nsgs_adapt_tolerance(double incremental_error, double full_err
       double new_local_tol = fmax(current_local_tol / 100.0, DBL_EPSILON * 1e-6);
       localsolver_options->dparam[SICONOS_DPARAM_TOL] = new_local_tol;
       if (verbose > 0) {
-        printf("Iter %d: Incr error very small (%.2e), tightening local solver: %.2e -> %.2e\n",
-               iter, incremental_error, current_local_tol, new_local_tol);
+        printf(
+            "Iter %d: Incr error very small (%.2e), tightening local solver: %.2e -> %.2e\n",
+            iter, incremental_error, current_local_tol, new_local_tol);
       }
     } else if (verbose > 0) {
       printf("Iter %d: Incr error very small (%.2e) but no local solver options to tighten\n",
@@ -629,34 +640,35 @@ static inline int nsgs_adapt_tolerance(double incremental_error, double full_err
     /* Don't change working tolerance when incr error is negligible */
     return 1; /* Not converged, continue iterating */
   }
-  
+
   /* Normal case: adapt working tolerance based on error ratio */
   if (full_error > 0 && incremental_error > 0) {
     /* The ratio tells us how much tighter we need to go */
     double error_ratio = incremental_error / full_error;
     double new_tolerance = error_ratio * user_tolerance;
-    
+
     /* Sanity checks: don't go below machine epsilon, don't increase tolerance */
     double min_tolerance = user_tolerance * 1e-6;
     if (new_tolerance < min_tolerance) {
       if (verbose > 1) {
-        printf("Iter %d: Capping tolerance at %.2e (computed: %.2e)\n", iter, min_tolerance, new_tolerance);
+        printf("Iter %d: Capping tolerance at %.2e (computed: %.2e)\n", iter, min_tolerance,
+               new_tolerance);
       }
       new_tolerance = min_tolerance;
     }
-    
+
     if (new_tolerance > 0 && new_tolerance < *working_tolerance) {
       if (verbose > 0) {
-        printf("Iter %d: Adapting working tolerance: %.4e -> %.4e (ratio=%.4f)\n",
-               iter, *working_tolerance, new_tolerance, error_ratio);
+        printf("Iter %d: Adapting working tolerance: %.4e -> %.4e (ratio=%.4f)\n", iter,
+               *working_tolerance, new_tolerance, error_ratio);
       }
       *working_tolerance = new_tolerance;
     } else if (verbose > 1) {
-      printf("Iter %d: Skipping tolerance adaptation (new=%.2e not < current=%.2e)\n",
-             iter, new_tolerance, *working_tolerance);
+      printf("Iter %d: Skipping tolerance adaptation (new=%.2e not < current=%.2e)\n", iter,
+             new_tolerance, *working_tolerance);
     }
   }
-  
+
   return 1; /* Not converged, continue iterating */
 }
 /** Check convergence when incremental error has converged
@@ -678,31 +690,29 @@ static inline int nsgs_adapt_tolerance(double incremental_error, double full_err
  * \return 0 if converged, 1 if not converged
  */
 static inline int nsgs_check_convergence_with_full_error(
-    void* problem, double* var_z, double* var_x,
-    SolverOptions* options, NSGSLocalToolkit* toolkit,
-    double incremental_error, double* tolerance, double* full_error,
+    void* problem, double* var_z, double* var_x, SolverOptions* options,
+    NSGSLocalToolkit* toolkit, double incremental_error, double* tolerance, double* full_error,
     int computed_full_error, SolverOptions* localsolver_options, int iter) {
-  
   /* Compute full error if not already done */
   if (!computed_full_error) {
-    nsgs_check_full_error_convergence(
-        problem, var_z, var_x, options, toolkit, toolkit->user_tolerance, full_error);
+    nsgs_check_full_error_convergence(problem, var_z, var_x, options, toolkit,
+                                      toolkit->user_tolerance, full_error);
   }
-  
+
   /* Check if full error is within user tolerance */
   if (*full_error <= toolkit->user_tolerance) {
     /* Both incremental and full errors converged */
     if (toolkit->verbose > 0) {
-      printf("Iter %d: CONVERGED - Incr (%.2e) <= tol (%.2e), Full (%.2e) <= user_tol (%.2e)\n",
-             iter, incremental_error, *tolerance, *full_error, toolkit->user_tolerance);
+      printf(
+          "Iter %d: CONVERGED - Incr (%.2e) <= tol (%.2e), Full (%.2e) <= user_tol (%.2e)\n",
+          iter, incremental_error, *tolerance, *full_error, toolkit->user_tolerance);
     }
     return 0; /* Converged */
   }
-  
+
   /* Incremental converged but full did not - adapt tolerance and continue */
-  return nsgs_adapt_tolerance(
-      incremental_error, *full_error, toolkit->user_tolerance, tolerance,
-      localsolver_options, iter, toolkit->verbose);
+  return nsgs_adapt_tolerance(incremental_error, *full_error, toolkit->user_tolerance,
+                              tolerance, localsolver_options, iter, toolkit->verbose);
 }
 /** Generic NSGS solver - SINGLE LOOP VERSION (Optimized)
  *
@@ -735,9 +745,9 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
   unsigned int nb_blocks = problem_data->nb_blocks;
   int dim = toolkit->dimension;
 
-  double norm_q = cblas_dnrm2(nb_blocks * dim, problem_data->q, 1);
+  // double norm_q = cblas_dnrm2(nb_blocks * dim, problem_data->q, 1);
   double norm_z = 1e24;
-  double prev_norm_z = 1e24;  /* For freezing criteria (like original) */
+  double prev_norm_z = 1e24; /* For freezing criteria (like original) */
 
   /* Iteration variables */
   int iter = 0;
@@ -746,13 +756,19 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
 
   /* Allocate working buffers - minimal for single-loop version */
   double* var_z_local = (double*)malloc(dim * sizeof(double));
-  double* block_errors = NULL;  /* Per-block squared errors for freezing */
+  double* block_errors = NULL; /* Per-block squared errors for freezing */
   if (toolkit->use_incremental_error || toolkit->use_freezing) {
     block_errors = (double*)malloc(nb_blocks * sizeof(double));
   }
 
-  /* Get local problem: use alloc_local callback if provided, otherwise use toolkit.localproblem */
+  /* Get local problem: use alloc_local callback if provided, otherwise use
+   * toolkit.localproblem */
   void* local_problem = NULL;
+  /* Allocate block ordering arrays */
+  unsigned int* sblocks = NULL;
+  unsigned int* freeze_blocks = NULL;
+  SolverOptions* localsolver_options = NULL;
+
   if (toolkit->alloc_local) {
     local_problem = toolkit->alloc_local(problem);
     if (!local_problem) {
@@ -764,10 +780,6 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     /* Use pre-allocated local problem from toolkit */
     local_problem = toolkit->localproblem;
   }
-
-  /* Allocate block ordering arrays */
-  unsigned int* sblocks = NULL;
-  unsigned int* freeze_blocks = NULL;
 
   /* Allocate shuffled blocks array if shuffling is enabled */
   if (toolkit->use_shuffling) {
@@ -793,7 +805,6 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
   }
 
   /* Get internal solver options */
-  SolverOptions* localsolver_options = NULL;
   double local_tolerance_save = 0.0;
   if (options->numberOfInternalSolvers > 0) {
     localsolver_options = options->internalSolvers[0];
@@ -823,8 +834,9 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
 
     /* Pre-compute freezing criteria constants (like original fc3d_nsgs) */
     double tmp_criteria1 = tolerance * tolerance * 100.0 * 100.0;
-    double tmp_criteria2 = (prev_norm_z > 0.0) ? 
-        (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0)) : 0.0;
+    double tmp_criteria2 = (prev_norm_z > 0.0)
+                               ? (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0))
+                               : 0.0;
 
     /* =====================================================================
      * SINGLE LOOP: Process all blocks with inline error and freezing
@@ -880,7 +892,7 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
         }
         if (toolkit->use_incremental_error) {
           incremental_error_sum += incr_err_2;
-          block_errors[block] = incr_err_2;  /* Store for potential reuse */
+          block_errors[block] = incr_err_2; /* Store for potential reuse */
         }
       }
 
@@ -911,9 +923,9 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     /* =====================================================================
      * Compute global error and check convergence
      * ===================================================================== */
-    prev_norm_z = norm_z;  /* Save for next iteration's freezing criteria */
+    prev_norm_z = norm_z; /* Save for next iteration's freezing criteria */
     norm_z = cblas_dnrm2(nb_blocks * dim, var_z, 1);
-    
+
     double incremental_error = 0.0;
     if (toolkit->use_incremental_error) {
       incremental_error = sqrt(incremental_error_sum);
@@ -926,7 +938,6 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     hasNotConverged = 1;
     error = incremental_error;
     double full_error = 0.0;
-    int computed_full_error = 0;
 
     /* Note: Original fc3d_nsgs does NOT do early tolerance adaptation at iter 10.
      * Tolerance is only adapted when incremental error converges but full error doesn't.
@@ -938,25 +949,27 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
        * This matches fc3d_nsgs behavior: only adapt when incr converges but full doesn't */
       int full_already_computed = 0;
       hasNotConverged = nsgs_check_convergence_with_full_error(
-          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance,
-          &full_error, full_already_computed, localsolver_options, iter);
+          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance, &full_error,
+          full_already_computed, localsolver_options, iter);
       error = full_error;
     } else {
       /* Incremental not converged - standard check */
       if (toolkit->check_convergence) {
-        hasNotConverged = toolkit->check_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            toolkit->check_convergence(incremental_error, tolerance, iter, options);
       } else {
-        hasNotConverged = nsgs_determine_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            nsgs_determine_convergence(incremental_error, tolerance, iter, options);
       }
     }
 
     /* Print iteration statistics */
-    double frozen_percent = nsgs_count_frozen_percent(
-        freeze_blocks, nb_blocks, toolkit->use_freezing);
+    double frozen_percent =
+        nsgs_count_frozen_percent(freeze_blocks, nb_blocks, toolkit->use_freezing);
 
     nsgs_print_iteration_stats(iter, incremental_error, full_error, tolerance,
-                                toolkit->user_tolerance, frozen_percent,
-                                hasNotConverged, toolkit->verbose);
+                               toolkit->user_tolerance, frozen_percent, hasNotConverged,
+                               toolkit->verbose);
 
     /* Statistics callback */
     if (toolkit->stats_callback) {
@@ -974,12 +987,12 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     double final_full_error;
     int final_converged = !nsgs_check_full_error_convergence(
         problem, var_z, var_x, options, toolkit, toolkit->user_tolerance, &final_full_error);
-    
+
     if (toolkit->verbose > 0) {
-      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n", 
+      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n",
              final_full_error, toolkit->user_tolerance, final_converged ? "YES" : "NO");
     }
-    
+
     /* Final result based on full error vs user tolerance */
     error = final_full_error;
     *info = final_converged ? 0 : 1;
@@ -1030,8 +1043,8 @@ nsgs_cleanup:
  * \param[in] problem_data Common problem data
  */
 static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x, int* info,
-                              SolverOptions* options, NSGSLocalToolkit* toolkit,
-                              NSGSProblemData* problem_data) {
+                                     SolverOptions* options, NSGSLocalToolkit* toolkit,
+                                     NSGSProblemData* problem_data) {
   /* Get solver parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -1041,7 +1054,7 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
   unsigned int nb_blocks = problem_data->nb_blocks;
   int dim = toolkit->dimension;
 
-  double norm_q = cblas_dnrm2(nb_blocks * dim, problem_data->q, 1);
+  // double norm_q = cblas_dnrm2(nb_blocks * dim, problem_data->q, 1);
   double norm_z = 1e24;
 
   /* Iteration variables */
@@ -1052,7 +1065,7 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
   /* Allocate working buffers */
   double* var_z_local = (double*)malloc(dim * sizeof(double));
   double* var_z_old = NULL;
-  double* diff_vec = NULL;  /* For BLAS-based incremental error computation */
+  double* diff_vec = NULL; /* For BLAS-based incremental error computation */
   if (toolkit->use_incremental_error || toolkit->use_freezing) {
     var_z_old = (double*)malloc(nb_blocks * dim * sizeof(double));
     if (toolkit->use_incremental_error) {
@@ -1060,7 +1073,8 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     }
   }
 
-  /* Get local problem: use alloc_local callback if provided, otherwise use toolkit.localproblem */
+  /* Get local problem: use alloc_local callback if provided, otherwise use
+   * toolkit.localproblem */
   void* local_problem = NULL;
   if (toolkit->alloc_local) {
     local_problem = toolkit->alloc_local(problem);
@@ -1183,9 +1197,9 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
      * STAGE 2: Compute error(s)
      * ===================================================================== */
     double incremental_error = 0.0;
-    double incr_err_sq = 0.0;  /* Squared incremental error for freezing */
+    double incr_err_sq = 0.0; /* Squared incremental error for freezing */
     norm_z = cblas_dnrm2(nb_blocks * dim, var_z, 1);
-    
+
     if (toolkit->use_incremental_error && var_z_old) {
       /* Optimized incremental error computation using BLAS:
        * 1. diff_vec = var_z - var_z_old  (using daxpy: y = -1*old + z)
@@ -1213,23 +1227,25 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     int computed_full_error = 0;
 
     /* At iteration 10, compute full error to adapt tolerance early */
-    nsgs_early_tolerance_adapt(problem, var_z, var_x, options, toolkit,
-                                incremental_error, &tolerance, &full_error, iter);
+    nsgs_early_tolerance_adapt(problem, var_z, var_x, options, toolkit, incremental_error,
+                               &tolerance, &full_error, iter);
     if (iter == 10) computed_full_error = 1;
 
     /* Check convergence based on incremental error */
     if (incremental_error <= tolerance) {
       /* Incremental converged - check full error and adapt if needed */
       hasNotConverged = nsgs_check_convergence_with_full_error(
-          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance,
-          &full_error, computed_full_error, localsolver_options, iter);
+          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance, &full_error,
+          computed_full_error, localsolver_options, iter);
       error = full_error;
     } else {
       /* Incremental not converged - standard check */
       if (toolkit->check_convergence) {
-        hasNotConverged = toolkit->check_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            toolkit->check_convergence(incremental_error, tolerance, iter, options);
       } else {
-        hasNotConverged = nsgs_determine_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            nsgs_determine_convergence(incremental_error, tolerance, iter, options);
       }
     }
 
@@ -1261,11 +1277,11 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
 
         int should_freeze = 0;
         if (toolkit->should_freeze) {
-          should_freeze = toolkit->should_freeze(incr_err_2, sq_norm_local, tolerance,
-                                                  norm_z, nb_blocks, iter);
+          should_freeze = toolkit->should_freeze(incr_err_2, sq_norm_local, tolerance, norm_z,
+                                                 nb_blocks, iter);
         } else {
           should_freeze = nsgs_default_should_freeze(incr_err_2, sq_norm_local, tolerance,
-                                                      norm_z, nb_blocks, iter);
+                                                     norm_z, nb_blocks, iter);
         }
 
         if (should_freeze) {
@@ -1277,12 +1293,12 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     /* =====================================================================
      * STAGE 4: Print iteration statistics
      * ===================================================================== */
-    double frozen_percent = nsgs_count_frozen_percent(
-        freeze_blocks, nb_blocks, toolkit->use_freezing);
+    double frozen_percent =
+        nsgs_count_frozen_percent(freeze_blocks, nb_blocks, toolkit->use_freezing);
 
     nsgs_print_iteration_stats(iter, incremental_error, full_error, tolerance,
-                                toolkit->user_tolerance, frozen_percent,
-                                hasNotConverged, toolkit->verbose);
+                               toolkit->user_tolerance, frozen_percent, hasNotConverged,
+                               toolkit->verbose);
 
     /* Statistics callback */
     if (toolkit->stats_callback) {
@@ -1300,12 +1316,12 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     double final_full_error;
     int final_converged = !nsgs_check_full_error_convergence(
         problem, var_z, var_x, options, toolkit, toolkit->user_tolerance, &final_full_error);
-    
+
     if (toolkit->verbose > 0) {
-      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n", 
+      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n",
              final_full_error, toolkit->user_tolerance, final_converged ? "YES" : "NO");
     }
-    
+
     /* Final result based on full error vs user tolerance */
     error = final_full_error;
     *info = final_converged ? 0 : 1;
