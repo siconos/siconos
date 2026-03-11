@@ -27,7 +27,7 @@ of the file were added first, and each subsequent addition is placed on a line
 --------------------------------------------------------------------------------
 
 Main changes:
-	* [vkernel] NEW: Virtual kernel module with SoA (Structure of Arrays) architecture
+	* [vkernel] NEW: Vectorized kernel module with SoA (Structure of Arrays) architecture
 	  for large-scale systems. Features Eigen-based algebra, runtime-defined systems,
 	  and cache-friendly memory layout for millions of objects.
 	* [numerics] Solver registration system with unified drivers (REGISTER_SOLVER macros)
