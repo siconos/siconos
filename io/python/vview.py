@@ -1203,11 +1203,11 @@ class IOReader(VTKPythonAlgorithmBase):
 
             self.ctf.RemoveAllPoints()
 
-            for t in numpy.flip(numpy.linspace(0, 0.9, 3)):
-                color = 1 - t
+            for __c in numpy.flip(numpy.linspace(0, 0.9, 3)):
+                color = 1 - __c
 
                 self.ctf.AddRGBPoint(
-                    numpy.quantile(self.current_p0_norm, t), color, color, color
+                    numpy.quantile(self.current_p0_norm, __c), color, color, color
                 )
 
             self.ctf.Modified()
