@@ -23,7 +23,22 @@ of the file were added first, and each subsequent addition is placed on a line
 
 
 --------------------------------------------------------------------------------
-  Current (in development branch siconos/master) --> 4.5.0.rc
+  v 2026.rc1
+--------------------------------------------------------------------------------
+
+Main changes:
+	* [vkernel] NEW: Virtual kernel module with SoA (Structure of Arrays) architecture
+	  for large-scale systems. Features Eigen-based algebra, runtime-defined systems,
+	  and cache-friendly memory layout for millions of objects.
+	* [numerics] Solver registration system with unified drivers (REGISTER_SOLVER macros)
+	* [numerics] Rolling friction contact solvers (3D/2D, NSGS, NSN, IPM)
+	* [numerics] Plasticity 2D module (renamed from Mohr-Coulomb)
+	* [python] pybind11 bindings replacing SWIG (with Eigen-NumPy zero-copy mapping)
+	* [kernel] C++20 modernization: namespace encapsulation (siconos::), removal of SP::
+	* [build] scikit-build integration, nlohmann/json support
+
+--------------------------------------------------------------------------------
+  v 4.5.0
 --------------------------------------------------------------------------------
 
 Main changes:
