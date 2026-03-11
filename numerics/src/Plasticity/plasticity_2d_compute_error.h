@@ -24,7 +24,7 @@
 
 */
 
-#include "NumericsFwd.h"    // for Plasticity2DProblem, SolverOptions
+#include "NumericsFwd.h"    // for PlasticityProblem, SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -43,7 +43,7 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int plasticity_2d_compute_error(Plasticity2DProblem *problem, double *z, double *w, double tolerance,
+int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error);
 
 /**

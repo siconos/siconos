@@ -61,5 +61,6 @@ TYPEDEF_STRUCT(AffineVariationalInequalities)
 TYPEDEF_STRUCT(ConvexQP)
 TYPEDEF_STRUCT(ConvexQP_as_VI)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem_balancing_data)
-TYPEDEF_STRUCT(Plasticity2DProblem)
+TYPEDEF_STRUCT(PlasticityProblem)
+TYPEDEF_STRUCT(Plasticity_DruckerPrager_model)
 #endif

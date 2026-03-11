@@ -38,6 +38,9 @@ void wrap_relay(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
 void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
+// Plasticity
+void wrap_plasticity(py::module_ &m);
+
 py::array_t<int> get_iparam(SolverOptions &options) {
   return py::array_t<int>({options.iSize}, {sizeof(int)}, options.iparam, py::cast(&options));
 }
@@ -120,4 +123,6 @@ PYBIND11_MODULE(_numerics, m) {
   wrap_relay(m, params, solver_ids);
 
   wrap_generic_mechanical(m, params, solver_ids);
+
+  wrap_plasticity(m);
 }

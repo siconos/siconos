@@ -35,7 +35,7 @@
   Two different storages are available for M: dense and sparse block.
 
 */
-#include "NumericsFwd.h"    // for Plasticity2DProblem, SolverOptions
+#include "NumericsFwd.h"    // for PlasticityProblem, SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -46,15 +46,15 @@ extern "C" {
  * \param problem :  the global problem to solve
  * \param localproblem :  the local problem to initialize
  */
-void plasticity_2d_projection_initialize(Plasticity2DProblem* problem,
-                                Plasticity2DProblem* localproblem);
+void plasticity_2d_projection_initialize(PlasticityProblem* problem,
+                                PlasticityProblem* localproblem);
 
 /** Initialize Mohr Coulomb 2D projection with regularization
  * \param problem :  the global problem to solve
  * \param localproblem :  the local problem to initialize
  */
-void plasticity_2d_projection_initialize_with_regularization(Plasticity2DProblem* problem,
-                                                    Plasticity2DProblem* localproblem);
+void plasticity_2d_projection_initialize_with_regularization(PlasticityProblem* problem,
+                                                    PlasticityProblem* localproblem);
 
 /** Update Mohr Coulomb 2D projection solver: formalize local problem for one contact.
  * \param number (position in global matrix) of the considered contact
@@ -64,8 +64,8 @@ void plasticity_2d_projection_initialize_with_regularization(Plasticity2DProblem
  *   the rest is used to formalize the local problem)
  * \param options
  */
-void plasticity_2d_projection_update(int number, Plasticity2DProblem* problem,
-                            Plasticity2DProblem* localproblem, double* reaction,
+void plasticity_2d_projection_update(int number, PlasticityProblem* problem,
+                            PlasticityProblem* localproblem, double* reaction,
                             SolverOptions* options);
 
 /** Update Mohr Coulomb 2D projection solver: formalize local problem for one contact.
@@ -76,8 +76,8 @@ void plasticity_2d_projection_update(int number, Plasticity2DProblem* problem,
  * the rest is used to formalize the local problem)
  * \param options
  */
-void plasticity_2d_projection_update_with_regularization(int number, Plasticity2DProblem* problem,
-                                                Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_update_with_regularization(int number, PlasticityProblem* problem,
+                                                PlasticityProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with projection assuming that M is diagonal
@@ -86,7 +86,7 @@ void plasticity_2d_projection_update_with_regularization(int number, Plasticity2
  * \param options
  * \return 0 if successfull
  */
-int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* localproblem,
+int plasticity_2d_projectionWithDiagonalization_solve(PlasticityProblem* localproblem,
                                              double* reaction, SolverOptions* options);
 
 /** Update Mohr Coulomb 2D projection solver: formalize local problem for one contact.
@@ -97,8 +97,8 @@ int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* local
  * the rest is used to formalize the local problem)
  * \param options
  */
-void plasticity_2d_projectionWithDiagonalization_update(int number, Plasticity2DProblem* problem,
-                                               Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionWithDiagonalization_update(int number, PlasticityProblem* problem,
+                                               PlasticityProblem* localproblem,
                                                double* reaction, SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with projection on the Cone
@@ -107,7 +107,7 @@ void plasticity_2d_projectionWithDiagonalization_update(int number, Plasticity2D
  * \param options
  * \return 0 if successfull
  */
-int plasticity_2d_projectionOnCone_solve(Plasticity2DProblem* localproblem, double* reaction,
+int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double* reaction,
                                 SolverOptions* options);
 
 /** Update Mohr Coulomb 2D projection solver: formalize local problem for one contact.
@@ -118,8 +118,8 @@ int plasticity_2d_projectionOnCone_solve(Plasticity2DProblem* localproblem, doub
  * the rest is used to formalize the local problem)
  * \param options
  */
-void plasticity_2d_projectionOnCylinder_update(int number, Plasticity2DProblem* problem,
-                                      Plasticity2DProblem* localproblem, double* reaction,
+void plasticity_2d_projectionOnCylinder_update(int number, PlasticityProblem* problem,
+                                      PlasticityProblem* localproblem, double* reaction,
                                       SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with projection on the Cone with local
@@ -129,20 +129,20 @@ void plasticity_2d_projectionOnCylinder_update(int number, Plasticity2DProblem* 
  * \param options
  * \return 0 if successfull
  */
-int plasticity_2d_projectionOnConeWithLocalIteration_solve(Plasticity2DProblem* localproblem,
+int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* localproblem,
                                                   double* reaction, SolverOptions* options);
-void plasticity_2d_projectionOnConeWithLocalIteration_free(Plasticity2DProblem* problem,
-                                                  Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_free(PlasticityProblem* problem,
+                                                  PlasticityProblem* localproblem,
                                                   SolverOptions* localsolver_options);
-void plasticity_2d_projectionOnConeWithLocalIteration_initialize(Plasticity2DProblem* problem,
-                                                        Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProblem* problem,
+                                                        PlasticityProblem* localproblem,
                                                         SolverOptions* localsolver_options);
 /** free memory for Mohr Coulomb 2D projection solver
  * \param problem :  the  problem to free
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void plasticity_2d_projection_free(Plasticity2DProblem* problem, Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
                           SolverOptions* localsolver_options);
 
 /** free memory for Mohr Coulomb 2D projection solver
@@ -150,8 +150,8 @@ void plasticity_2d_projection_free(Plasticity2DProblem* problem, Plasticity2DPro
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void plasticity_2d_projection_with_regularization_free(Plasticity2DProblem* problem,
-                                              Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_with_regularization_free(PlasticityProblem* problem,
+                                              PlasticityProblem* localproblem,
                                               SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

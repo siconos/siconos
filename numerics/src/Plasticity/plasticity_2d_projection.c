@@ -24,7 +24,7 @@
 #include <stdio.h>   // for fprintf, printf, NULL, stderr
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
-#include "Plasticity2DProblem.h"      // for Plasticity2DProblem
+#include "PlasticityProblem.h"      // for PlasticityProblem
 #include "NumericsFwd.h"               // for SolverOptions, MohrCoulomb2D...
 #include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
 #include "Plasticity_cst.h"            // for PLASTICITY_NSGS_LOCAL...
@@ -66,11 +66,11 @@
 /* static double qLocal[3]; */
 /* static double theta_i = 0.0; */
 
-void plasticity_2d_projection_initialize(Plasticity2DProblem* problem,
-                                Plasticity2DProblem* localproblem) {}
+void plasticity_2d_projection_initialize(PlasticityProblem* problem,
+                                PlasticityProblem* localproblem) {}
 
-void plasticity_2d_projection_update(int contact, Plasticity2DProblem* problem,
-                            Plasticity2DProblem* localproblem, double* stress,
+void plasticity_2d_projection_update(int contact, PlasticityProblem* problem,
+                            PlasticityProblem* localproblem, double* stress,
                             SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -89,12 +89,12 @@ void plasticity_2d_projection_update(int contact, Plasticity2DProblem* problem,
   plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
 
   /* coefficient for current block*/
-  localproblem->eta[0] = problem->eta[contact];
-  localproblem->theta[0] = problem->theta[contact];
+  localproblem->model->eta[0] = problem->model->eta[contact];
+  localproblem->model->theta[0] = problem->model->theta[contact];
 }
 
-void plasticity_2d_projectionWithDiagonalization_update(int contact, Plasticity2DProblem* problem,
-                                               Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionWithDiagonalization_update(int contact, PlasticityProblem* problem,
+                                               PlasticityProblem* localproblem,
                                                double* stress, SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -152,17 +152,17 @@ void plasticity_2d_projectionWithDiagonalization_update(int contact, Plasticity2
   /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
 
   /* Coefficient for current block*/
-  localproblem->eta[0] = problem->eta[contact];
-  localproblem->theta[0] = problem->theta[contact];
+  localproblem->model->eta[0] = problem->model->eta[contact];
+  localproblem->model->theta[0] = problem->model->theta[contact];
 }
 
-void plasticity_2d_projection_initialize_with_regularization(Plasticity2DProblem* problem,
-                                                    Plasticity2DProblem* localproblem) {
+void plasticity_2d_projection_initialize_with_regularization(PlasticityProblem* problem,
+                                                    PlasticityProblem* localproblem) {
   if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
 }
 
-void plasticity_2d_projection_update_with_regularization(int contact, Plasticity2DProblem* problem,
-                                                Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_update_with_regularization(int contact, PlasticityProblem* problem,
+                                                PlasticityProblem* localproblem,
                                                 double* stress, SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -193,11 +193,11 @@ void plasticity_2d_projection_update_with_regularization(int contact, Plasticity
   qLocal[2] -= rho * stress[is];
 
   /* Coefficient for current block*/
-  localproblem->eta[0] = problem->eta[contact];
-  localproblem->theta[0] = problem->theta[contact];
+  localproblem->model->eta[0] = problem->model->eta[contact];
+  localproblem->model->theta[0] = problem->model->theta[contact];
 }
 
-int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* localproblem,
+int plasticity_2d_projectionWithDiagonalization_solve(PlasticityProblem* localproblem,
                                              double* stress_local, SolverOptions* options) {
   /* Current block position */
 
@@ -207,7 +207,7 @@ int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* local
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double theta_i = localproblem->theta[0];
+  double theta_i = localproblem->model->theta[0];
   int nLocal = 3;
 
   double mrn, num, theta2 = theta_i * theta_i;
@@ -238,8 +238,8 @@ int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* local
   return 0;
 }
 
-void plasticity_2d_projectionOnConeWithLocalIteration_initialize(Plasticity2DProblem* problem,
-                                                        Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProblem* problem,
+                                                        PlasticityProblem* localproblem,
                                                         SolverOptions* localsolver_options) {
   size_t nc = problem->numberOfCones;
   /* printf("plasticity_2d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
@@ -253,14 +253,14 @@ void plasticity_2d_projectionOnConeWithLocalIteration_initialize(Plasticity2DPro
   }
 }
 
-void plasticity_2d_projectionOnConeWithLocalIteration_free(Plasticity2DProblem* problem,
-                                                  Plasticity2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_free(PlasticityProblem* problem,
+                                                  PlasticityProblem* localproblem,
                                                   SolverOptions* localsolver_options) {
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
 }
 
-int plasticity_2d_projectionOnConeWithLocalIteration_solve(Plasticity2DProblem* localproblem,
+int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* localproblem,
                                                   double* stress_local, SolverOptions* options) {
   DEBUG_BEGIN("plasticity_2d_projectionOnConeWithLocalIteration_solve(...)\n");
 
@@ -268,8 +268,8 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(Plasticity2DProblem* 
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double eta_i = localproblem->eta[0];
-  double theta_i = localproblem->theta[0];
+  double eta_i = localproblem->model->eta[0];
+  double theta_i = localproblem->model->theta[0];
   /* int nLocal = 3; */
 
   /*   /\* Builds local problem for the current contact *\/ */
@@ -423,15 +423,15 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(Plasticity2DProblem* 
   return 0;
 }
 
-int plasticity_2d_projectionOnCone_solve(Plasticity2DProblem* localproblem, double* stress_local,
+int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double* stress_local,
                                 SolverOptions* options) {
   /*  /\* Builds local problem for the current contact *\/ */
   /*   plasticity_2d_projection_update(contact, stress_local); */
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double eta_i = localproblem->eta[0];
-  double theta_i = localproblem->theta[0];
+  double eta_i = localproblem->model->eta[0];
+  double theta_i = localproblem->model->theta[0];
   /* int nLocal = 3; */
 
   /* this part is critical for the success of the projection */
@@ -465,11 +465,11 @@ int plasticity_2d_projectionOnCone_solve(Plasticity2DProblem* localproblem, doub
   return 0;
 }
 
-void plasticity_2d_projection_free(Plasticity2DProblem* problem, Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
-void plasticity_2d_projection_with_regularization_free(Plasticity2DProblem* problem,
-                                              Plasticity2DProblem* localproblem,
+void plasticity_2d_projection_with_regularization_free(PlasticityProblem* problem,
+                                              PlasticityProblem* localproblem,
                                               SolverOptions* localsolver_options) {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
@@ -501,7 +501,7 @@ static int plasticity_2d_projectionOnCone_init_wrap(void* problem, SolverOptions
 static int plasticity_2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
                                             double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnCone_solve((Plasticity2DProblem*)localproblem, reaction, options);
+  return plasticity_2d_projectionOnCone_solve((PlasticityProblem*)localproblem, reaction, options);
 }
 
 /* Wrapper for projection on cone with local iteration (local solver) */
@@ -520,7 +520,7 @@ static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(void* loc
                                                                double* velocity,
                                                                SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnConeWithLocalIteration_solve((Plasticity2DProblem*)localproblem,
+  return plasticity_2d_projectionOnConeWithLocalIteration_solve((PlasticityProblem*)localproblem,
                                                         reaction, options);
 }
 

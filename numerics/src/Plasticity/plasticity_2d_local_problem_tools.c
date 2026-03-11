@@ -21,7 +21,7 @@
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "Plasticity2DProblem.h"  // for Plasticity2DProblem,
+#include "PlasticityProblem.h"  // for PlasticityProblem,
 #include "NumericsMatrix.h"        // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 #include "numerics_errors.h"
@@ -43,8 +43,8 @@ void localPLASTICITY_2DProblemFunctionToolkit_display(struct LocalPLASTICITY_2DP
   printf("post_processed_local_result %p\n ", lpft->post_processed_local_result);
   printf("free_local_solver %p\n ", lpft->free_local_solver);
 };
-void plasticity_2d_local_problem_compute_q(Plasticity2DProblem* problem,
-                                  Plasticity2DProblem* localproblem, double* reaction,
+void plasticity_2d_local_problem_compute_q(PlasticityProblem* problem,
+                                  PlasticityProblem* localproblem, double* reaction,
                                   int contact) {
   double* qLocal = localproblem->q;
 
@@ -60,23 +60,24 @@ void plasticity_2d_local_problem_compute_q(Plasticity2DProblem* problem,
   NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
 }
 
-void plasticity_2d_local_problem_fill_M(Plasticity2DProblem* problem,
-                               Plasticity2DProblem* localproblem, int contact) {
+void plasticity_2d_local_problem_fill_M(PlasticityProblem* problem,
+                               PlasticityProblem* localproblem, int contact) {
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->matrix0 = problem->M->matrix1->block[contact];
   } else
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 }
 
-Plasticity2DProblem* plasticity_2d_local_problem_allocate(Plasticity2DProblem* problem) {
+PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* problem) {
   /* Connect local solver and local problem*/
-  Plasticity2DProblem* localproblem =
-      (Plasticity2DProblem*)malloc(sizeof(Plasticity2DProblem));
+  PlasticityProblem* localproblem =
+      (PlasticityProblem*)malloc(sizeof(PlasticityProblem));
   localproblem->numberOfCones = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->theta = (double*)malloc(sizeof(double));
-  localproblem->eta = (double*)malloc(sizeof(double));
+  localproblem->model = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+  localproblem->model->theta = (double*)malloc(sizeof(double));
+  localproblem->model->eta = (double*)malloc(sizeof(double));
 
   if (problem->M->storageType != NM_SPARSE_BLOCK) {
     localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
@@ -88,8 +89,8 @@ Plasticity2DProblem* plasticity_2d_local_problem_allocate(Plasticity2DProblem* p
   return localproblem;
 }
 
-void plasticity_2d_local_problem_free(Plasticity2DProblem* localproblem,
-                             Plasticity2DProblem* problem) {
+void plasticity_2d_local_problem_free(PlasticityProblem* localproblem,
+                             PlasticityProblem* problem) {
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/

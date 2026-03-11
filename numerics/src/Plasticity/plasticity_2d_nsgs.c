@@ -22,7 +22,7 @@
 #include <stdlib.h>  // for calloc, malloc
 #include <string.h>  // for NULL, memcpy
 
-#include "Plasticity2DProblem.h"  // for Plasticity2DProblem
+#include "PlasticityProblem.h"  // for PlasticityProblem
 #include "NumericsArrays.h"        // for uint_shuffle
 #include "NumericsFwd.h"           // for SolverOptions
 #include "NumericsMatrix.h"
@@ -56,7 +56,7 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* static void fake_compute_error_nsgs(Plasticity2DProblem* problem, double *stress,
+/* static void fake_compute_error_nsgs(PlasticityProblem* problem, double *stress,
  * double *strainrate, double tolerance, SolverOptions  *options,  double* error) */
 /* { */
 /*   int n = 3 * problem->numberOfCones; */
@@ -100,7 +100,7 @@ static void acceptLocalReactionUnconditionally(unsigned int cone, double *stress
   memcpy(&stress[cone * 3], localstress, sizeof(double) * 3);
 }
 
-static void statsIterationCallback(Plasticity2DProblem *problem, SolverOptions *options,
+static void statsIterationCallback(PlasticityProblem *problem, SolverOptions *options,
                                    double *stress, double *strainrate, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(
@@ -108,8 +108,8 @@ static void statsIterationCallback(Plasticity2DProblem *problem, SolverOptions *
   }
 }
 
-static void plasticity_2d_nsgs_update(int cone, Plasticity2DProblem *problem,
-                             Plasticity2DProblem *localproblem, double *stress,
+static void plasticity_2d_nsgs_update(int cone, PlasticityProblem *problem,
+                             PlasticityProblem *localproblem, double *stress,
                              SolverOptions *options) {
   /* Build a local problem for a specific cone
      stress corresponds to the global vector (size n) of the global problem.
@@ -127,16 +127,16 @@ static void plasticity_2d_nsgs_update(int cone, Plasticity2DProblem *problem,
   plasticity_2d_local_problem_compute_q(problem, localproblem, stress, cone);
 
   /* coefficient for current block*/
-  localproblem->eta[0] = problem->eta[cone];
+  localproblem->model->eta[0] = problem->model->eta[cone];
 
   /* coefficient for current block*/
-  localproblem->theta[0] = problem->theta[cone];
+  localproblem->model->theta[0] = problem->model->theta[cone];
 }
 
 void plasticity_2d_nsgs_initialize_local_solver(
     struct LocalPLASTICITY_2DProblemFunctionToolkit *local_function_toolkit,
-    plasticity_2d_ComputeErrorPtr *computeError, Plasticity2DProblem *problem,
-    Plasticity2DProblem *localproblem, SolverOptions *options) {
+    plasticity_2d_ComputeErrorPtr *computeError, PlasticityProblem *problem,
+    PlasticityProblem *localproblem, SolverOptions *options) {
   SolverOptions *localsolver_options = options->internalSolvers[0];
 
   *computeError = (plasticity_2d_ComputeErrorPtr)&plasticity_2d_compute_error;
@@ -199,7 +199,7 @@ void plasticity_2d_nsgs_initialize_local_solver(
   }
 }
 
-static unsigned int *allocShuffledCones(Plasticity2DProblem *problem,
+static unsigned int *allocShuffledCones(PlasticityProblem *problem,
                                         SolverOptions *options) {
   unsigned int *scones = 0;
   unsigned int nc = problem->numberOfCones;
@@ -217,7 +217,7 @@ static unsigned int *allocShuffledCones(Plasticity2DProblem *problem,
   }
   return scones;
 }
-static unsigned int *allocfreezingCones(Plasticity2DProblem *problem,
+static unsigned int *allocfreezingCones(PlasticityProblem *problem,
                                         SolverOptions *options) {
   unsigned int *fcones = 0;
   unsigned int nc = problem->numberOfCones;
@@ -232,8 +232,8 @@ static unsigned int *allocfreezingCones(Plasticity2DProblem *problem,
 
 static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
                               CopyLocalReactionPtr copyLocalReaction, unsigned int cone,
-                              Plasticity2DProblem *problem,
-                              Plasticity2DProblem *localproblem, double *stress,
+                              PlasticityProblem *problem,
+                              PlasticityProblem *localproblem, double *stress,
                               SolverOptions *localsolver_options, double localstress[3]) {
   (*update_localproblem)(cone, problem, localproblem, stress, localsolver_options);
 
@@ -253,7 +253,7 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
 //   return 0;
 // }
 
-static void acceptLocalReactionFiltered(Plasticity2DProblem *localproblem,
+static void acceptLocalReactionFiltered(PlasticityProblem *localproblem,
                                         SolverOptions *localsolver_options, unsigned int cone,
                                         unsigned int iter, double *stress,
                                         double localstress[3]) {
@@ -309,7 +309,7 @@ static void acceptLocalReactionFiltered(Plasticity2DProblem *localproblem,
            sizeof(double) * localproblem->dimension);
 }
 
-static double calculateFullErrorAdaptiveInterval(Plasticity2DProblem *problem,
+static double calculateFullErrorAdaptiveInterval(PlasticityProblem *problem,
                                                  plasticity_2d_ComputeErrorPtr computeError,
                                                  SolverOptions *options, int iter,
                                                  double *stress, double *strainrate,
@@ -334,7 +334,7 @@ static double calculateFullErrorAdaptiveInterval(Plasticity2DProblem *problem,
   return error;
 }
 
-static double calculateFullErrorFinal(Plasticity2DProblem *problem, SolverOptions *options,
+static double calculateFullErrorFinal(PlasticityProblem *problem, SolverOptions *options,
                                       plasticity_2d_ComputeErrorPtr computeError, double *stress,
                                       double *strainrate, double tolerance, double norm_q) {
   double absolute_error;
@@ -372,7 +372,7 @@ static int determine_convergence(double error, double tolerance, int iter,
   return hasNotConverged;
 }
 
-static int determine_convergence_with_full_final(Plasticity2DProblem *problem,
+static int determine_convergence_with_full_final(PlasticityProblem *problem,
                                                  SolverOptions *options,
                                                  plasticity_2d_ComputeErrorPtr computeError,
                                                  double *stress, double *strainrate,
@@ -424,7 +424,7 @@ static int determine_convergence_with_full_final(Plasticity2DProblem *problem,
   return hasNotConverged;
 }
 
-void plasticity_2d_nsgs(Plasticity2DProblem *problem, double *stress, double *strainrate, int *info,
+void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *strainrate, int *info,
                SolverOptions *options) {
   /* verbose=1; */
 
@@ -465,7 +465,7 @@ void plasticity_2d_nsgs(Plasticity2DProblem *problem, double *stress, double *st
       localPLASTICITY_2DProblemFunctionToolkit_new();
   /* localPLASTICITY_2DProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
-  Plasticity2DProblem *localproblem;
+  PlasticityProblem *localproblem;
 
   double localstress[3];
 
@@ -764,7 +764,7 @@ static int plasticity_2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
 static int plasticity_2d_nsgs_solve_wrap(void* problem, double* reaction,
                                 double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  plasticity_2d_nsgs((Plasticity2DProblem*)problem, reaction, velocity, &info, options);
+  plasticity_2d_nsgs((PlasticityProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 

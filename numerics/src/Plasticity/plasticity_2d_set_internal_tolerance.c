@@ -18,7 +18,7 @@
 
 #include <math.h>  // for fmax
 
-#include "Plasticity2DProblem.h"  // for Plasticity2DProblem
+#include "PlasticityProblem.h"  // for PlasticityProblem
 #include "NumericsFwd.h"           // for SolverOptions, MohrCoulomb2DPr...
 #include "Plasticity_cst.h"        // for PLASTICITY_IPARAM_INTER...
 #include "SolverOptions.h"         // for SolverOptions
@@ -26,7 +26,7 @@
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 
-void plasticity_2d_set_internalsolver_tolerance(Plasticity2DProblem* problem, SolverOptions* options,
+void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==

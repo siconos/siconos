@@ -20,7 +20,7 @@
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
-#include "Plasticity2DProblem.h"                   // for MohrCoulomb2D...
+#include "PlasticityProblem.h"                   // for MohrCoulomb2D...
 #include "NumericsFwd.h"                            // for MohrCoulomb2D...
 #include "NumericsMatrix.h"                         // for NumericsMatrix
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  // for plasticity_2d_computeNonsmoo...
@@ -450,7 +450,7 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
   DEBUG_EXPR(if (B) NM_dense_display(B, 3, 3, 3););
 }
 
-void plasticity_2d_compute_rho_split_spectral_norm_cond(Plasticity2DProblem* localproblem,
+void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* localproblem,
                                                double* rho) {
   double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
@@ -480,7 +480,7 @@ void plasticity_2d_compute_rho_split_spectral_norm_cond(Plasticity2DProblem* loc
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 }
 
-void plasticity_2d_compute_rho_split_spectral_norm(Plasticity2DProblem* localproblem, double* rho) {
+void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem, double* rho) {
   double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
 
@@ -510,7 +510,7 @@ void plasticity_2d_compute_rho_split_spectral_norm(Plasticity2DProblem* localpro
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 }
 
-void plasticity_2d_compute_rho_spectral_norm(Plasticity2DProblem* localproblem, double* rho) {
+void plasticity_2d_compute_rho_spectral_norm(PlasticityProblem* localproblem, double* rho) {
   double* MLocal = localproblem->M->matrix0;
   double worktmp[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   double eig[3] = {0.0, 0.0, 0.0};

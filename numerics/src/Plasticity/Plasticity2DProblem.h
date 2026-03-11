@@ -19,122 +19,16 @@
 #define PLASTICITY2DPROBLEM_H
 
 /*!\file Plasticity2DProblem.h
-  Definition of a structure to handle Mohr Coulomb 2D plasticity problems.
-*/
-#include <stdio.h>  // for FILE
-
-#include "NumericsFwd.h"     // for NumericsMatrix
-#include "NumericsMatrix.h"  // for RawNumericsMatrix
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
-
-/**
-    The structure that defines a Mohr Coulomb 2D xproblem.
-*/
-struct Plasticity2DProblem {
-  /** dimension of the stress space */
-  int dimension;
-  /** the number of  \f$ n_c \f$ */
-  int numberOfCones;
-  /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
-     a matrix with \f$ n = d  n_c \f$ stored in NumericsMatrix structure */
-  RawNumericsMatrix *M;
-  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
-  double *q;
-  /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of cone coefficients
-      (\f$ n_c = \f$ numberOfCones) */
-  double *eta;
-  /** \f$ {\theta} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dilatency coefficients
-      (\f$ n_c = \f$ numberOfCones) */
-  double *theta;
-};
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C" {
-#endif
-
-/* create an empty Plasticity2DProblem
- * \return an empty fcp */
-Plasticity2DProblem *plasticity2DProblem_new(void);
-
-/** new Plasticity2DProblem from minimal set of data
- *
- *  \param[in] dim the problem dimension
- *  \param[in] nc the number of contact
- *  \param[in] M the NumericsMatrix
- *  \param[in] q the q vector
- *  \param[in] theta the theta vector
- *  \return a pointer to a Plasticity2DProblem structure
+ * \brief Backward compatibility header - redirects to PlasticityProblem.h
+ * 
+ * This header is kept for backward compatibility. New code should include
+ * PlasticityProblem.h directly.
+ * 
+ * The Plasticity2DProblem structure has been renamed to PlasticityProblem
+ * and the eta/theta parameters have been moved to a model-specific structure
+ * (Plasticity_DruckerPrager_model) accessible via problem->model.
  */
-Plasticity2DProblem *plasticity2DProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                         double *q, double *eta, double *theta);
 
-/** free a Plasticity2DProblem
- *
- *  \param problem the problem to free
- */
-void plasticity2DProblem_free(Plasticity2DProblem *problem);
+#include "PlasticityProblem.h"
 
-/** display a Plasticity2DProblem
- *
- *  \param problem the problem to display
- */
-void plasticity2D_display(Plasticity2DProblem *problem);
-
-/** print a Plasticity2DProblem in a file (numerics .dat format)
- *
- *  \param problem the problem to print out
- *  \param file the dest file
- *  \return 0 if successfull
- */
-int plasticity2D_printInFile(Plasticity2DProblem *problem, FILE *file);
-
-/** print a Plasticity2DProblem in a file (numerics dat format)
- *
- *  \param problem the problem to print out
- *  \param filename the dest file
- *  \return 0 if successfull
- */
-int plasticity2D_printInFilename(Plasticity2DProblem *problem, char *filename);
-
-/** read a Plasticity2DProblem from a file descriptor
- *
- *  \param file descriptor
- *  \return problem the problem to read
- */
-Plasticity2DProblem *plasticity2D_newFromFile(FILE *file);
-
-/** read a Plasticity2DProblem from a file (.dat or hdf5 if fclib is on) from
- *  its filename
- *
- *  \param filename the name of the input file
- *  \return problem the problem to read
- */
-Plasticity2DProblem *plasticity2D_new_from_filename(const char *filename);
-
-/**
-    Creates a new MohrCoulomb2D problem and initialize its content by copying
-    an existing problem.
-
-    \param problem the source problem to be copied
-    \return a pointer to a new Plasticity2DProblem
-*/
-Plasticity2DProblem *plasticity2D_copy(Plasticity2DProblem *problem);
-
-/**
-    Rescales M matrix and q vector of a given Plasticity2DProblem.
-
-    \f[
-    :math:`M = \alpha\gamma^2 M, q=\alpha\gamma q`
-    \f]
-
-    \param problem to be rescaled
-    \param alpha rescaling factor
-    \param gamma rescaling factor
-*/
-void plasticity2D_rescaling(Plasticity2DProblem *problem, double alpha, double gamma);
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-}
-#endif
-
-#endif
+#endif /* PLASTICITY2DPROBLEM_H */

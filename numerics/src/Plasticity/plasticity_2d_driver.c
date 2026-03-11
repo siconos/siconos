@@ -20,7 +20,7 @@
  * \brief PLASTICITY_2D driver using the solver registration system
  */
 
-#include "Plasticity2DProblem.h"
+#include "PlasticityProblem.h"
 #include "Plasticity_cst.h"
 #include "numerics_verbose.h"
 #include "plasticity_2d_solvers.h"
@@ -37,7 +37,7 @@
  * Trivial Case Check
  * =========================================================================== */
 
-int plasticity_2d_checkTrivialCase(Plasticity2DProblem* problem, double* strainrate,
+int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrate,
                           double* stress, SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfCones;
@@ -60,7 +60,7 @@ int plasticity_2d_checkTrivialCase(Plasticity2DProblem* problem, double* strainr
  * Registration-Based Driver
  * =========================================================================== */
 
-int plasticity_2d_driver(Plasticity2DProblem* problem, double* stress,
+int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
                 double* strainrate, SolverOptions* options) {
   /* Input validation */
   if (!problem || !stress || !strainrate || !options) {

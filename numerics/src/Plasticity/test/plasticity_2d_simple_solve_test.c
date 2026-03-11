@@ -23,7 +23,7 @@
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
-#include "Plasticity2DProblem.h"
+#include "PlasticityProblem.h"
 #include "NonSmoothDrivers.h"
 #include "NumericsMatrix.h"
 #include "Plasticity_cst.h"
@@ -37,7 +37,7 @@
 static int test_unit(char* filename, SolverOptions* options) {
   printf("start test unit on %s\n", filename);
 
-  Plasticity2DProblem* problem = plasticity2D_new_from_filename(filename);
+  PlasticityProblem* problem = plasticity2D_new_from_filename(filename);
   // plasticity2D_display(problem);
   int NC = problem->numberOfCones;
   int dim = problem->dimension;

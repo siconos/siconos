@@ -23,7 +23,7 @@
 #include <math.h>    // for sqrt, fabs
 #include <stddef.h>  // for NULL
 
-#include "Plasticity2DProblem.h"  // for Mohrcoulomb2dproblem
+#include "PlasticityProblem.h"  // for Mohrcoulomb2dproblem
 #include "NumericsMatrix.h"        // for NM_prod_mv_3x3, NM_gemv
 #include "SolverOptions.h"         // for SolverOptions
 /* #define DEBUG_NOCOLOR */
@@ -56,7 +56,7 @@ void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *res
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-int plasticity_2d_compute_error(Plasticity2DProblem *problem, double *z, double *w, double tolerance,
+int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error) {
   DEBUG_BEGIN("plasticity_2d_compute_error(...)\n");
   CHECK_NULL(problem);
@@ -68,8 +68,8 @@ int plasticity_2d_compute_error(Plasticity2DProblem *problem, double *z, double 
   int incx = 1, incy = 1;
   int nc = problem->numberOfCones;
   int n = nc * 3;
-  double *eta = problem->eta;
-  double *theta = problem->theta;
+  double *eta = problem->model->eta;
+  double *theta = problem->model->theta;
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q

@@ -24,6 +24,7 @@ create_pybind11_module(
   ${CMAKE_CURRENT_SOURCE_DIR}/numerics_pybind11.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lcp_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mlcp_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/friction_contact_pybind11.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/relay_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/generic_mechanical_pybind11.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/plasticity_pybind11.cpp
   DEPENDENCIES kernel numerics
   PARENT_NAME numerics
 )
@@ -51,7 +52,7 @@ if(WITH_TESTING)
   endif()
   list(APPEND python_excluded_tests tests/test_fclib.py) # fclib pybind11 not yet implemented
   list(APPEND python_excluded_tests tests/test_lcp.py) # LCP pybind11 not yet implemented
-  list(APPEND python_excluded_tests tests/test_mc2d.py) # MohrCoulomb2DProblem pybind11 not yet implemented
+  #list(APPEND python_excluded_tests tests/test_mc2d.py) # Now implemented!
   list(APPEND python_excluded_tests tests/test_mcp.py) # MCP pybind11 not yet implemented
   list(APPEND python_excluded_tests tests/test_mcp2.py) # MCP pybind11 not yet implemented
   list(APPEND python_excluded_tests tests/test_mlcp.py) # MLCP pybind11 not yet implemented

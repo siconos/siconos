@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Plasticity2DProblem.h"
+#include "PlasticityProblem.h"
 #include "NumericsMatrix.h"
 #include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
@@ -47,7 +47,7 @@ int main(void) {
   NM_copy_to_sparse(tmpM, W, 1e-16);
 
 
-  Plasticity2DProblem* PLASTICITY_2D = plasticity2DProblem_new_with_data(3, 3, W, q, eta, theta);
+  PlasticityProblem* PLASTICITY_2D = plasticity2DProblem_new_with_data(3, 3, W, q, eta, theta);
   double stress[9] = {0.};
   double plastic_strain_rate[9] = {0.};
   plasticity2D_display(PLASTICITY_2D);
@@ -55,11 +55,11 @@ int main(void) {
   
   PLASTICITY_2D->M = NULL;
   PLASTICITY_2D->q = NULL;
-  PLASTICITY_2D->eta = NULL;
-  PLASTICITY_2D->theta = NULL;
+  PLASTICITY_2D->model->eta = NULL;
+  PLASTICITY_2D->model->theta = NULL;
   plasticity2DProblem_free(PLASTICITY_2D);
   
-  Plasticity2DProblem* PLASTICITY_2D_r= plasticity2D_new_from_filename("plasticity_2d_example1.dat");
+  PlasticityProblem* PLASTICITY_2D_r= plasticity2D_new_from_filename("plasticity_2d_example1.dat");
   plasticity2D_display(PLASTICITY_2D_r);
   plasticity2DProblem_free(PLASTICITY_2D_r);
 
