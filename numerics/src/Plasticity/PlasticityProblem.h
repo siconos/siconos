@@ -28,6 +28,17 @@
 #include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
+    Enum to identify the type of plasticity model.
+*/
+enum PlasticityModelType {
+  PLASTICITY_MODEL_UNKNOWN = 0,       /**< Unknown or uninitialized model */
+  PLASTICITY_MODEL_DRUCKER_PRAGER,    /**< Drucker-Prager model (eta, theta) */
+  PLASTICITY_MODEL_VON_MISES          /**< Von Mises model (yield stress) */
+};
+
+typedef enum PlasticityModelType PlasticityModelType;
+
+/**
     Drucker-Prager plasticity model parameters.
     This structure contains the model-specific parameters for Drucker-Prager
     plasticity (which includes Mohr-Coulomb as a special case).
@@ -44,6 +55,31 @@ struct Plasticity_DruckerPrager_model {
 typedef struct Plasticity_DruckerPrager_model Plasticity_DruckerPrager_model;
 
 /**
+    Von Mises plasticity model parameters.
+    This structure contains the model-specific parameters for Von Mises
+    plasticity (J2 plasticity with associative flow rule).
+*/
+struct Plasticity_VonMises_model {
+  /** \f$ {\sigma_y} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of yield stresses
+      (\f$ n_c = \f$ numberOfCones) */
+  double *sigma_y;
+};
+
+typedef struct Plasticity_VonMises_model Plasticity_VonMises_model;
+
+/**
+    Union to hold model-specific parameters for different plasticity models.
+    Use the model_type field in PlasticityProblem to determine which member is active.
+*/
+union PlasticityModelUnion {
+  Plasticity_DruckerPrager_model *drucker_prager;  /**< Drucker-Prager model parameters */
+  Plasticity_VonMises_model *von_mises;            /**< Von Mises model parameters */
+  void *generic;                                   /**< Generic pointer for future models */
+};
+
+typedef union PlasticityModelUnion PlasticityModelUnion;
+
+/**
     The structure that defines a Plasticity problem.
     This is a generic structure that can be used with different plasticity models.
 */
@@ -57,9 +93,12 @@ struct PlasticityProblem {
   RawNumericsMatrix *M;
   /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double *q;
-  /** Pointer to model-specific parameters (e.g., Drucker-Prager model).
-      NULL if no model is set. */
-  Plasticity_DruckerPrager_model *model;
+  /** Type of plasticity model (determines which union member is active) */
+  PlasticityModelType model_type;
+  /** Union containing model-specific parameters.
+      Access via: model.drucker_prager, model.von_mises, etc.
+      Only valid if model_type != PLASTICITY_MODEL_UNKNOWN */
+  PlasticityModelUnion model;
 };
 
 typedef struct PlasticityProblem PlasticityProblem;
@@ -87,17 +126,40 @@ Plasticity_DruckerPrager_model *plasticity_DruckerPrager_model_new(double *eta, 
 */
 void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model *model);
 
+/**
+    Create a new Von Mises model with given parameters.
+    
+    \param[in] sigma_y vector of yield stresses
+    \return a pointer to a new Plasticity_VonMises_model structure
+*/
+Plasticity_VonMises_model *plasticity_VonMises_model_new(double *sigma_y);
+
+/**
+    Free a Von Mises model.
+    
+    \param[in] model the model to free
+*/
+void plasticity_VonMises_model_free(Plasticity_VonMises_model *model);
+
+/**
+    Get a string representation of the model type.
+    
+    \param[in] model_type the model type enum
+    \return a string describing the model type
+*/
+const char *plasticity_model_type_to_string(PlasticityModelType model_type);
+
 /* create an empty PlasticityProblem
  * \return an empty problem */
 PlasticityProblem *plasticityProblem_new(void);
 
-/** new PlasticityProblem from minimal set of data
+/** new PlasticityProblem from minimal set of data (Drucker-Prager model)
  *
  *  \param[in] dim the problem dimension
  *  \param[in] nc the number of contact
  *  \param[in] M the NumericsMatrix
  *  \param[in] q the q vector
- *  \param[in] model pointer to model parameters (can be NULL)
+ *  \param[in] model pointer to Drucker-Prager model parameters (can be NULL)
  *  \return a pointer to a PlasticityProblem structure
  */
 PlasticityProblem *plasticityProblem_new_with_data(int dim, int nc, NumericsMatrix *M,

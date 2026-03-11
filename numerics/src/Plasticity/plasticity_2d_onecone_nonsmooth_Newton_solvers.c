@@ -74,8 +74,8 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
 
   double current_error = 0.0;
 
-  plasticity_2d_unitary_compute_and_add_error(local_reaction, local_velocity, localproblem->model->eta[0],
-                                     localproblem->model->theta[0], &current_error, worktmp);
+  plasticity_2d_unitary_compute_and_add_error(local_reaction, local_velocity, localproblem->model.drucker_prager->eta[0],
+                                     localproblem->model.drucker_prager->theta[0], &current_error, worktmp);
   current_error = sqrt(current_error);
   DEBUG_PRINTF("absolute local error = %e", current_error);
   if (fabs(norm_q) > DBL_EPSILON) current_error /= norm_q;
@@ -390,8 +390,8 @@ void plasticity_2d_onecone_nonsmooth_Newton_AC_update(int cone, PlasticityProble
   plasticity_2d_local_problem_compute_q(problem, localproblem, reaction, cone);
 
   /*  coefficient for current block*/
-  localproblem->model->eta[0] = problem->model->eta[cone];
-  localproblem->model->theta[0] = problem->model->theta[cone];
+  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[cone];
+  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[cone];
 }
 
 int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProblem* localproblem,
@@ -402,8 +402,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProble
   /* numerics_printf_verbose(
       2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct starts"); */
 
-  double theta = localproblem->model->theta[0];
-  double eta = localproblem->model->eta[0];
+  double theta = localproblem->model.drucker_prager->theta[0];
+  double eta = localproblem->model.drucker_prager->eta[0];
   double* qLocal = localproblem->q;
 
   double norm_qLocal =
@@ -553,8 +553,8 @@ static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunctio
 
   /*     double velocity[3]={0.,0.,0.}; */
 
-  double eta = localproblem->model->eta[0];
-  double theta = localproblem->model->theta[0];
+  double eta = localproblem->model.drucker_prager->eta[0];
+  double theta = localproblem->model.drucker_prager->theta[0];
   double* qLocal = localproblem->q;
   double* MLocal = localproblem->M->matrix0;
 
@@ -686,8 +686,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProble
   /* numerics_printf_verbose(
       2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped starts"); */
 
-  double eta = localproblem->model->eta[0];
-  double theta = localproblem->model->theta[0];
+  double eta = localproblem->model.drucker_prager->eta[0];
+  double theta = localproblem->model.drucker_prager->theta[0];
   double* qLocal = localproblem->q;
 
   double norm_qLocal =

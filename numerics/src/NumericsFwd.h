@@ -63,4 +63,5 @@ TYPEDEF_STRUCT(ConvexQP_as_VI)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem_balancing_data)
 TYPEDEF_STRUCT(PlasticityProblem)
 TYPEDEF_STRUCT(Plasticity_DruckerPrager_model)
+TYPEDEF_STRUCT(Plasticity_VonMises_model)
 #endif

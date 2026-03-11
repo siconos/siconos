@@ -64,12 +64,20 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
   CHECK_NULL(w);
   CHECK_NULL(error);
 
+  /* Check model type - only Drucker-Prager supported for now */
+  if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER) {
+    numerics_error("plasticity_2d_compute_error", "Only Drucker-Prager model is currently supported");
+    *error = 0.0;
+    DEBUG_END("plasticity_2d_compute_error(...)\n");
+    return 1;
+  }
+
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfCones;
   int n = nc * 3;
-  double *eta = problem->model->eta;
-  double *theta = problem->model->theta;
+  double *eta = problem->model.drucker_prager->eta;
+  double *theta = problem->model.drucker_prager->theta;
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q

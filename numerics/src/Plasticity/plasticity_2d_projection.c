@@ -89,8 +89,8 @@ void plasticity_2d_projection_update(int contact, PlasticityProblem* problem,
   plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
 
   /* coefficient for current block*/
-  localproblem->model->eta[0] = problem->model->eta[contact];
-  localproblem->model->theta[0] = problem->model->theta[contact];
+  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
+  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
 }
 
 void plasticity_2d_projectionWithDiagonalization_update(int contact, PlasticityProblem* problem,
@@ -152,8 +152,8 @@ void plasticity_2d_projectionWithDiagonalization_update(int contact, PlasticityP
   /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
 
   /* Coefficient for current block*/
-  localproblem->model->eta[0] = problem->model->eta[contact];
-  localproblem->model->theta[0] = problem->model->theta[contact];
+  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
+  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
 }
 
 void plasticity_2d_projection_initialize_with_regularization(PlasticityProblem* problem,
@@ -193,8 +193,8 @@ void plasticity_2d_projection_update_with_regularization(int contact, Plasticity
   qLocal[2] -= rho * stress[is];
 
   /* Coefficient for current block*/
-  localproblem->model->eta[0] = problem->model->eta[contact];
-  localproblem->model->theta[0] = problem->model->theta[contact];
+  localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
+  localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
 }
 
 int plasticity_2d_projectionWithDiagonalization_solve(PlasticityProblem* localproblem,
@@ -207,7 +207,7 @@ int plasticity_2d_projectionWithDiagonalization_solve(PlasticityProblem* localpr
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double theta_i = localproblem->model->theta[0];
+  double theta_i = localproblem->model.drucker_prager->theta[0];
   int nLocal = 3;
 
   double mrn, num, theta2 = theta_i * theta_i;
@@ -268,8 +268,8 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double eta_i = localproblem->model->eta[0];
-  double theta_i = localproblem->model->theta[0];
+  double eta_i = localproblem->model.drucker_prager->eta[0];
+  double theta_i = localproblem->model.drucker_prager->theta[0];
   /* int nLocal = 3; */
 
   /*   /\* Builds local problem for the current contact *\/ */
@@ -430,8 +430,8 @@ int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double eta_i = localproblem->model->eta[0];
-  double theta_i = localproblem->model->theta[0];
+  double eta_i = localproblem->model.drucker_prager->eta[0];
+  double theta_i = localproblem->model.drucker_prager->theta[0];
   /* int nLocal = 3; */
 
   /* this part is critical for the success of the projection */

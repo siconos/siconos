@@ -55,8 +55,8 @@ int main(void) {
   
   PLASTICITY_2D->M = NULL;
   PLASTICITY_2D->q = NULL;
-  PLASTICITY_2D->model->eta = NULL;
-  PLASTICITY_2D->model->theta = NULL;
+  PLASTICITY_2D->model.drucker_prager->eta = NULL;
+  PLASTICITY_2D->model.drucker_prager->theta = NULL;
   plasticity2DProblem_free(PLASTICITY_2D);
   
   PlasticityProblem* PLASTICITY_2D_r= plasticity2D_new_from_filename("plasticity_2d_example1.dat");

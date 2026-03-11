@@ -62,14 +62,15 @@ void wrap_plasticity(py::module_& m) {
       problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
       std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
       
-      // Create model and copy eta/theta
-      problem->model = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+      // Create Drucker-Prager model and copy eta/theta
+      problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
+      problem->model.drucker_prager = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
       py::buffer_info eta_info = eta.request();
       py::buffer_info theta_info = theta.request();
-      problem->model->eta = (double*)malloc(eta_info.shape[0] * sizeof(double));
-      problem->model->theta = (double*)malloc(theta_info.shape[0] * sizeof(double));
-      std::memcpy(problem->model->eta, eta_info.ptr, eta_info.shape[0] * sizeof(double));
-      std::memcpy(problem->model->theta, theta_info.ptr, theta_info.shape[0] * sizeof(double));
+      problem->model.drucker_prager->eta = (double*)malloc(eta_info.shape[0] * sizeof(double));
+      problem->model.drucker_prager->theta = (double*)malloc(theta_info.shape[0] * sizeof(double));
+      std::memcpy(problem->model.drucker_prager->eta, eta_info.ptr, eta_info.shape[0] * sizeof(double));
+      std::memcpy(problem->model.drucker_prager->theta, theta_info.ptr, theta_info.shape[0] * sizeof(double));
       
       return problem;
     }, py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("eta"), py::arg("theta"),
@@ -97,14 +98,15 @@ void wrap_plasticity(py::module_& m) {
       problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
       std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
       
-      // Create model and copy eta/theta
-      problem->model = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+      // Create Drucker-Prager model and copy eta/theta
+      problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
+      problem->model.drucker_prager = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
       py::buffer_info eta_info = eta.request();
       py::buffer_info theta_info = theta.request();
-      problem->model->eta = (double*)malloc(eta_info.shape[0] * sizeof(double));
-      problem->model->theta = (double*)malloc(theta_info.shape[0] * sizeof(double));
-      std::memcpy(problem->model->eta, eta_info.ptr, eta_info.shape[0] * sizeof(double));
-      std::memcpy(problem->model->theta, theta_info.ptr, theta_info.shape[0] * sizeof(double));
+      problem->model.drucker_prager->eta = (double*)malloc(eta_info.shape[0] * sizeof(double));
+      problem->model.drucker_prager->theta = (double*)malloc(theta_info.shape[0] * sizeof(double));
+      std::memcpy(problem->model.drucker_prager->eta, eta_info.ptr, eta_info.shape[0] * sizeof(double));
+      std::memcpy(problem->model.drucker_prager->theta, theta_info.ptr, theta_info.shape[0] * sizeof(double));
       
       return problem;
     }, py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("eta"), py::arg("theta"),

@@ -75,9 +75,29 @@ PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* probl
   localproblem->numberOfCones = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->model = (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
-  localproblem->model->theta = (double*)malloc(sizeof(double));
-  localproblem->model->eta = (double*)malloc(sizeof(double));
+  
+  /* Copy model type from parent problem */
+  localproblem->model_type = problem->model_type;
+  
+  /* Allocate model-specific data based on model type */
+  switch (problem->model_type) {
+    case PLASTICITY_MODEL_DRUCKER_PRAGER: {
+      localproblem->model.drucker_prager = (Plasticity_DruckerPrager_model*)malloc(
+          sizeof(Plasticity_DruckerPrager_model));
+      localproblem->model.drucker_prager->theta = (double*)malloc(sizeof(double));
+      localproblem->model.drucker_prager->eta = (double*)malloc(sizeof(double));
+      break;
+    }
+    case PLASTICITY_MODEL_VON_MISES: {
+      localproblem->model.von_mises = (Plasticity_VonMises_model*)malloc(
+          sizeof(Plasticity_VonMises_model));
+      localproblem->model.von_mises->sigma_y = (double*)malloc(sizeof(double));
+      break;
+    }
+    default:
+      localproblem->model.generic = NULL;
+      break;
+  }
 
   if (problem->M->storageType != NM_SPARSE_BLOCK) {
     localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
