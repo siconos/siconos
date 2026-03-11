@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2D_local_problem_tools_H
-#define MOHRCOULOMB2D_local_problem_tools_H
+#ifndef PLASTICITY2D_local_problem_tools_H
+#define PLASTICITY2D_local_problem_tools_H
 
 /*!\file
 
  */
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"    // for Plasticity2DProblem
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -29,10 +29,10 @@ extern "C" {
 #endif
 
 /** pointer to function used to call local solver */
-typedef int (*SolverPtr)(MohrCoulomb2DProblem *, double *, SolverOptions *);
+typedef int (*SolverPtr)(Plasticity2DProblem *, double *, SolverOptions *);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, MohrCoulomb2DProblem *, MohrCoulomb2DProblem *, double *,
+typedef void (*UpdatePtr)(int, Plasticity2DProblem *, Plasticity2DProblem *, double *,
                           SolverOptions *);
 
 /** pointer to function used to post-processed results after a call to the
@@ -40,7 +40,7 @@ typedef void (*UpdatePtr)(int, MohrCoulomb2DProblem *, MohrCoulomb2DProblem *, d
 typedef void (*PostSolverPtr)(int, double *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalSolverPtr)(MohrCoulomb2DProblem *, MohrCoulomb2DProblem *,
+typedef void (*FreeLocalSolverPtr)(Plasticity2DProblem *, Plasticity2DProblem *,
                                    SolverOptions *);
 
 typedef void (*CopyLocalReactionPtr)(double *, double *);
@@ -51,7 +51,7 @@ typedef double (*LightErrorSquaredPtr)(double *, double *);
 
 typedef double (*SquaredNormPtr)(double *);
 
-struct LocalMC2DProblemFunctionToolkit {
+struct LocalPLASTICITY_2DProblemFunctionToolkit {
   SolverPtr local_solver;
   UpdatePtr update_local_problem;
   PostSolverPtr post_processed_local_result;
@@ -62,19 +62,19 @@ struct LocalMC2DProblemFunctionToolkit {
   SquaredNormPtr squared_norm;
 };
 
-struct LocalMC2DProblemFunctionToolkit *localMC2DProblemFunctionToolkit_new(void);
+struct LocalPLASTICITY_2DProblemFunctionToolkit *localPLASTICITY_2DProblemFunctionToolkit_new(void);
 
-void localMC2DProblemFunctionToolkit_display(struct LocalMC2DProblemFunctionToolkit *);
+void localPLASTICITY_2DProblemFunctionToolkit_display(struct LocalPLASTICITY_2DProblemFunctionToolkit *);
 
-MohrCoulomb2DProblem *mc2d_local_problem_allocate(MohrCoulomb2DProblem *problem);
+Plasticity2DProblem *plasticity_2d_local_problem_allocate(Plasticity2DProblem *problem);
 
-void mc2d_local_problem_free(MohrCoulomb2DProblem *localproblem,
-                             MohrCoulomb2DProblem *problem);
-void mc2d_local_problem_compute_q(MohrCoulomb2DProblem *problem,
-                                  MohrCoulomb2DProblem *localproblem, double *reaction,
+void plasticity_2d_local_problem_free(Plasticity2DProblem *localproblem,
+                             Plasticity2DProblem *problem);
+void plasticity_2d_local_problem_compute_q(Plasticity2DProblem *problem,
+                                  Plasticity2DProblem *localproblem, double *reaction,
                                   int contact);
-void mc2d_local_problem_fill_M(MohrCoulomb2DProblem *problem,
-                               MohrCoulomb2DProblem *localproblem, int contact);
+void plasticity_2d_local_problem_fill_M(Plasticity2DProblem *problem,
+                               Plasticity2DProblem *localproblem, int contact);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

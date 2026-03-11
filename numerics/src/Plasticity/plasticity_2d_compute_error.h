@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-#ifndef mc2d_compute_error_H
-#define mc2d_compute_error_H
+#ifndef plasticity_2d_compute_error_H
+#define plasticity_2d_compute_error_H
 
-/*!\file mc2d_compute_error.h
+/*!\file plasticity_2d_compute_error.h
   \brief functions related to error computation for Mohr Coulomb 2D plasticity
 
 */
 
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem, SolverOptions
+#include "NumericsFwd.h"    // for Plasticity2DProblem, SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -43,7 +43,7 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, double tolerance,
+int plasticity_2d_compute_error(Plasticity2DProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error);
 
 /**
@@ -56,7 +56,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
     \param worktmp work vector
     \param[in,out] error value
  */
-void mc2d_unitary_compute_and_add_error(double r[3], double u[3], double eta, double theta,
+void plasticity_2d_unitary_compute_and_add_error(double r[3], double u[3], double eta, double theta,
                                         double *error, double *worktmp);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

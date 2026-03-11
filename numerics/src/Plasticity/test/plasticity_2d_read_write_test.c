@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "MohrCoulomb2DProblem.h"
+#include "Plasticity2DProblem.h"
 #include "NumericsMatrix.h"
 #include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
@@ -47,21 +47,21 @@ int main(void) {
   NM_copy_to_sparse(tmpM, W, 1e-16);
 
 
-  MohrCoulomb2DProblem* MC2D = mohrCoulomb2DProblem_new_with_data(3, 3, W, q, eta, theta);
+  Plasticity2DProblem* PLASTICITY_2D = plasticity2DProblem_new_with_data(3, 3, W, q, eta, theta);
   double stress[9] = {0.};
   double plastic_strain_rate[9] = {0.};
-  mohrCoulomb2D_display(MC2D);
-  mohrCoulomb2D_printInFilename(MC2D, "mc2d_example1.dat");
+  plasticity2D_display(PLASTICITY_2D);
+  plasticity2D_printInFilename(PLASTICITY_2D, "plasticity_2d_example1.dat");
   
-  MC2D->M = NULL;
-  MC2D->q = NULL;
-  MC2D->eta = NULL;
-  MC2D->theta = NULL;
-  mohrCoulomb2DProblem_free(MC2D);
+  PLASTICITY_2D->M = NULL;
+  PLASTICITY_2D->q = NULL;
+  PLASTICITY_2D->eta = NULL;
+  PLASTICITY_2D->theta = NULL;
+  plasticity2DProblem_free(PLASTICITY_2D);
   
-  MohrCoulomb2DProblem* MC2D_r= mohrCoulomb2D_new_from_filename("mc2d_example1.dat");
-  mohrCoulomb2D_display(MC2D_r);
-  mohrCoulomb2DProblem_free(MC2D_r);
+  Plasticity2DProblem* PLASTICITY_2D_r= plasticity2D_new_from_filename("plasticity_2d_example1.dat");
+  plasticity2D_display(PLASTICITY_2D_r);
+  plasticity2DProblem_free(PLASTICITY_2D_r);
 
   NM_clear(W);
   tmpM->matrix0 = NULL;

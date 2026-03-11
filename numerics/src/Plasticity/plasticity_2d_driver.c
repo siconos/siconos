@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-/*!\file mc2d_driver.c
- * \brief MC2D driver using the solver registration system
+/*!\file plasticity_2d_driver.c
+ * \brief PLASTICITY_2D driver using the solver registration system
  */
 
-#include "MohrCoulomb2DProblem.h"
+#include "Plasticity2DProblem.h"
 #include "Plasticity_cst.h"
 #include "numerics_verbose.h"
-#include "mc2d_solvers.h"
+#include "plasticity_2d_solvers.h"
 
 /* Registration-based headers */
 #include "solver_registry.h"
@@ -37,7 +37,7 @@
  * Trivial Case Check
  * =========================================================================== */
 
-int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* strainrate,
+int plasticity_2d_checkTrivialCase(Plasticity2DProblem* problem, double* strainrate,
                           double* stress, SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfCones;
@@ -60,11 +60,11 @@ int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* strainrate,
  * Registration-Based Driver
  * =========================================================================== */
 
-int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
+int plasticity_2d_driver(Plasticity2DProblem* problem, double* stress,
                 double* strainrate, SolverOptions* options) {
   /* Input validation */
   if (!problem || !stress || !strainrate || !options) {
-    numerics_error("mc2d_driver", "null input argument");
+    numerics_error("plasticity_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
 
@@ -76,7 +76,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
   SET_SOLVER_RESIDUAL(options, 0.0);
 
   /* Check for trivial case */
-  int trivial_status = mc2d_checkTrivialCase(problem, strainrate, stress, options);
+  int trivial_status = plasticity_2d_checkTrivialCase(problem, strainrate, stress, options);
   if (trivial_status == 0) {
     return NUMERICS_OK;
   }
@@ -86,12 +86,12 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
 
   CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver not found");
 
-  numerics_printf_verbose(1, "mc2d_driver: using solver '%s' (%s)",
+  numerics_printf_verbose(1, "plasticity_2d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("mc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+    numerics_printf("plasticity_2d_driver: solver '%s' is a local solver, cannot be used as main solver",
                     solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
@@ -103,13 +103,13 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf("mc2d_driver: solver initialization failed with error %d", init_status);
+      numerics_printf("plasticity_2d_driver: solver initialization failed with error %d", init_status);
       return init_status;
     }
   }
 
   /* Call the solver */
-  numerics_printf_verbose(1, "mc2d_driver: calling solver...");
+  numerics_printf_verbose(1, "plasticity_2d_driver: calling solver...");
   int solve_status = solver->solve(problem, stress, strainrate, options);
 
   /* Cleanup if needed */
@@ -119,9 +119,9 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
 
   /* Log result */
   if (solve_status == NUMERICS_OK) {
-    numerics_printf_verbose(1, "mc2d_driver: solver converged successfully");
+    numerics_printf_verbose(1, "plasticity_2d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "mc2d_driver: solver returned status %d", solve_status);
+    numerics_printf_verbose(1, "plasticity_2d_driver: solver returned status %d", solve_status);
   }
 
   return solve_status;

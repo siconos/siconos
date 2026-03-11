@@ -15,21 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "mc2d_local_problem_tools.h"
+#include "plasticity_2d_local_problem_tools.h"
 #ifndef __cplusplus
 #include <stdbool.h>  // for false
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem,
+#include "Plasticity2DProblem.h"  // for Plasticity2DProblem,
 #include "NumericsMatrix.h"        // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 #include "numerics_errors.h"
 
-struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new(void) {
-  struct LocalMC2DProblemFunctionToolkit* lpft =
-      (struct LocalMC2DProblemFunctionToolkit*)malloc(
-          sizeof(struct LocalMC2DProblemFunctionToolkit));
+struct LocalPLASTICITY_2DProblemFunctionToolkit* localPLASTICITY_2DProblemFunctionToolkit_new(void) {
+  struct LocalPLASTICITY_2DProblemFunctionToolkit* lpft =
+      (struct LocalPLASTICITY_2DProblemFunctionToolkit*)malloc(
+          sizeof(struct LocalPLASTICITY_2DProblemFunctionToolkit));
 
   lpft->local_solver = NULL;
   lpft->update_local_problem = NULL;
@@ -37,14 +37,14 @@ struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new(void
   lpft->free_local_solver = NULL;
   return lpft;
 }
-void localMC2DProblemFunctionToolkit_display(struct LocalMC2DProblemFunctionToolkit* lpft) {
+void localPLASTICITY_2DProblemFunctionToolkit_display(struct LocalPLASTICITY_2DProblemFunctionToolkit* lpft) {
   printf("local_solver %p\n ", lpft->local_solver);
   printf("update_local_problem %p\n ", lpft->update_local_problem);
   printf("post_processed_local_result %p\n ", lpft->post_processed_local_result);
   printf("free_local_solver %p\n ", lpft->free_local_solver);
 };
-void mc2d_local_problem_compute_q(MohrCoulomb2DProblem* problem,
-                                  MohrCoulomb2DProblem* localproblem, double* reaction,
+void plasticity_2d_local_problem_compute_q(Plasticity2DProblem* problem,
+                                  Plasticity2DProblem* localproblem, double* reaction,
                                   int contact) {
   double* qLocal = localproblem->q;
 
@@ -60,18 +60,18 @@ void mc2d_local_problem_compute_q(MohrCoulomb2DProblem* problem,
   NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
 }
 
-void mc2d_local_problem_fill_M(MohrCoulomb2DProblem* problem,
-                               MohrCoulomb2DProblem* localproblem, int contact) {
+void plasticity_2d_local_problem_fill_M(Plasticity2DProblem* problem,
+                               Plasticity2DProblem* localproblem, int contact) {
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->matrix0 = problem->M->matrix1->block[contact];
   } else
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 }
 
-MohrCoulomb2DProblem* mc2d_local_problem_allocate(MohrCoulomb2DProblem* problem) {
+Plasticity2DProblem* plasticity_2d_local_problem_allocate(Plasticity2DProblem* problem) {
   /* Connect local solver and local problem*/
-  MohrCoulomb2DProblem* localproblem =
-      (MohrCoulomb2DProblem*)malloc(sizeof(MohrCoulomb2DProblem));
+  Plasticity2DProblem* localproblem =
+      (Plasticity2DProblem*)malloc(sizeof(Plasticity2DProblem));
   localproblem->numberOfCones = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
@@ -88,12 +88,12 @@ MohrCoulomb2DProblem* mc2d_local_problem_allocate(MohrCoulomb2DProblem* problem)
   return localproblem;
 }
 
-void mc2d_local_problem_free(MohrCoulomb2DProblem* localproblem,
-                             MohrCoulomb2DProblem* problem) {
+void plasticity_2d_local_problem_free(Plasticity2DProblem* localproblem,
+                             Plasticity2DProblem* problem) {
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
-  mohrCoulomb2DProblem_free(localproblem);
+  plasticity2DProblem_free(localproblem);
 }

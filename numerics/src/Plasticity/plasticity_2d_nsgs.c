@@ -22,7 +22,7 @@
 #include <stdlib.h>  // for calloc, malloc
 #include <string.h>  // for NULL, memcpy
 
-#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem
+#include "Plasticity2DProblem.h"  // for Plasticity2DProblem
 #include "NumericsArrays.h"        // for uint_shuffle
 #include "NumericsFwd.h"           // for SolverOptions
 #include "NumericsMatrix.h"
@@ -31,11 +31,11 @@
 #include "SiconosBlas.h"     // for cblas_dnrm2
 #include "SolverOptions.h"   // for SolverOptions
 #include "SparseBlockMatrix.h"
-#include "mc2d_compute_error.h"                     // for fc3d_compute_e..
-#include "mc2d_local_problem_tools.h"               // for fc3d_local_pro..
-#include "mc2d_onecone_nonsmooth_Newton_solvers.h"  //
-#include "mc2d_projection.h"                        // for fc3d_projectio...
-#include "mc2d_solvers.h"
+#include "plasticity_2d_compute_error.h"                     // for fc3d_compute_e..
+#include "plasticity_2d_local_problem_tools.h"               // for fc3d_local_pro..
+#include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  //
+#include "plasticity_2d_projection.h"                        // for fc3d_projectio...
+#include "plasticity_2d_solvers.h"
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -56,7 +56,7 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* static void fake_compute_error_nsgs(MohrCoulomb2DProblem* problem, double *stress,
+/* static void fake_compute_error_nsgs(Plasticity2DProblem* problem, double *stress,
  * double *strainrate, double tolerance, SolverOptions  *options,  double* error) */
 /* { */
 /*   int n = 3 * problem->numberOfCones; */
@@ -100,7 +100,7 @@ static void acceptLocalReactionUnconditionally(unsigned int cone, double *stress
   memcpy(&stress[cone * 3], localstress, sizeof(double) * 3);
 }
 
-static void statsIterationCallback(MohrCoulomb2DProblem *problem, SolverOptions *options,
+static void statsIterationCallback(Plasticity2DProblem *problem, SolverOptions *options,
                                    double *stress, double *strainrate, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(
@@ -108,8 +108,8 @@ static void statsIterationCallback(MohrCoulomb2DProblem *problem, SolverOptions 
   }
 }
 
-static void mc2d_nsgs_update(int cone, MohrCoulomb2DProblem *problem,
-                             MohrCoulomb2DProblem *localproblem, double *stress,
+static void plasticity_2d_nsgs_update(int cone, Plasticity2DProblem *problem,
+                             Plasticity2DProblem *localproblem, double *stress,
                              SolverOptions *options) {
   /* Build a local problem for a specific cone
      stress corresponds to the global vector (size n) of the global problem.
@@ -120,11 +120,11 @@ static void mc2d_nsgs_update(int cone, MohrCoulomb2DProblem *problem,
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  mc2d_local_problem_fill_M(problem, localproblem, cone);
+  plasticity_2d_local_problem_fill_M(problem, localproblem, cone);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.stressBlock, excluding the block corresponding to the current cone. ****/
-  mc2d_local_problem_compute_q(problem, localproblem, stress, cone);
+  plasticity_2d_local_problem_compute_q(problem, localproblem, stress, cone);
 
   /* coefficient for current block*/
   localproblem->eta[0] = problem->eta[cone];
@@ -133,13 +133,13 @@ static void mc2d_nsgs_update(int cone, MohrCoulomb2DProblem *problem,
   localproblem->theta[0] = problem->theta[cone];
 }
 
-void mc2d_nsgs_initialize_local_solver(
-    struct LocalMC2DProblemFunctionToolkit *local_function_toolkit,
-    mc2d_ComputeErrorPtr *computeError, MohrCoulomb2DProblem *problem,
-    MohrCoulomb2DProblem *localproblem, SolverOptions *options) {
+void plasticity_2d_nsgs_initialize_local_solver(
+    struct LocalPLASTICITY_2DProblemFunctionToolkit *local_function_toolkit,
+    plasticity_2d_ComputeErrorPtr *computeError, Plasticity2DProblem *problem,
+    Plasticity2DProblem *localproblem, SolverOptions *options) {
   SolverOptions *localsolver_options = options->internalSolvers[0];
 
-  *computeError = (mc2d_ComputeErrorPtr)&mc2d_compute_error;
+  *computeError = (plasticity_2d_ComputeErrorPtr)&plasticity_2d_compute_error;
 
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
@@ -150,56 +150,56 @@ void mc2d_nsgs_initialize_local_solver(
 
   /** Connect to local solver */
   switch (localsolver_options->solverId) {
-    case MOHR_COULOMB_2D_ONECONE_ProjectionOnCone: {
-      local_function_toolkit->local_solver = &mc2d_projectionOnCone_solve;
-      local_function_toolkit->update_local_problem = &mc2d_nsgs_update;
-      local_function_toolkit->free_local_solver = &mc2d_projection_free;
-      mc2d_projection_initialize(problem, localproblem);
+    case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
+      local_function_toolkit->local_solver = &plasticity_2d_projectionOnCone_solve;
+      local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+      local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
+      plasticity_2d_projection_initialize(problem, localproblem);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
-      local_function_toolkit->local_solver = &mc2d_projectionOnConeWithLocalIteration_solve;
-      local_function_toolkit->update_local_problem = &mc2d_nsgs_update;
+    case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
+      local_function_toolkit->local_solver = &plasticity_2d_projectionOnConeWithLocalIteration_solve;
+      local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
       local_function_toolkit->free_local_solver =
-          &mc2d_projectionOnConeWithLocalIteration_free;
-      mc2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
+          &plasticity_2d_projectionOnConeWithLocalIteration_free;
+      plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
                                                          localsolver_options);
       break;
     }
     /* Newton solver (Alart-Curnier) */
-    case MOHR_COULOMB_2D_ONECONE_NSN: {
-      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
-      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+    case PLASTICITY_2D_ONECONE_NSN: {
+      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
                                                        localsolver_options);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONE_NSN_GP: {
-      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
-      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+    case PLASTICITY_2D_ONECONE_NSN_GP: {
+      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
                                                        localsolver_options);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID: {
-      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
-      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+    case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID: {
+      local_function_toolkit->local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &plasticity_2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &plasticity_2d_onecone_nonsmooth_Newton_solvers_free;
+      plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
                                                        localsolver_options);
       break;
     }
     default: {
-      numerics_error("mc2d_nsgs_initialize_local_solver",
-                     "Numerics, mc2d_nsgs failed. Unknown internal solver : %s.\n",
+      numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+                     "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
                      solver_options_id_to_name(localsolver_options->solverId));
     }
   }
 }
 
-static unsigned int *allocShuffledCones(MohrCoulomb2DProblem *problem,
+static unsigned int *allocShuffledCones(Plasticity2DProblem *problem,
                                         SolverOptions *options) {
   unsigned int *scones = 0;
   unsigned int nc = problem->numberOfCones;
@@ -217,7 +217,7 @@ static unsigned int *allocShuffledCones(MohrCoulomb2DProblem *problem,
   }
   return scones;
 }
-static unsigned int *allocfreezingCones(MohrCoulomb2DProblem *problem,
+static unsigned int *allocfreezingCones(Plasticity2DProblem *problem,
                                         SolverOptions *options) {
   unsigned int *fcones = 0;
   unsigned int nc = problem->numberOfCones;
@@ -232,8 +232,8 @@ static unsigned int *allocfreezingCones(MohrCoulomb2DProblem *problem,
 
 static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
                               CopyLocalReactionPtr copyLocalReaction, unsigned int cone,
-                              MohrCoulomb2DProblem *problem,
-                              MohrCoulomb2DProblem *localproblem, double *stress,
+                              Plasticity2DProblem *problem,
+                              Plasticity2DProblem *localproblem, double *stress,
                               SolverOptions *localsolver_options, double localstress[3]) {
   (*update_localproblem)(cone, problem, localproblem, stress, localsolver_options);
 
@@ -253,14 +253,14 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
 //   return 0;
 // }
 
-static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
+static void acceptLocalReactionFiltered(Plasticity2DProblem *localproblem,
                                         SolverOptions *localsolver_options, unsigned int cone,
                                         unsigned int iter, double *stress,
                                         double localstress[3]) {
   if (isnan(SOLVER_RESIDUAL(localsolver_options)) ||
       isinf(SOLVER_RESIDUAL(localsolver_options)) ||
       SOLVER_RESIDUAL(localsolver_options) > 1.0) {
-    DEBUG_EXPR(mohrCoulomb2DProblem_display(localproblem));
+    DEBUG_EXPR(plasticity2DProblem_display(localproblem));
     DEBUG_PRINTF(
         "Discard local stress for cone %i at iteration %i "
         "with local_error = %e\n",
@@ -289,7 +289,7 @@ static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
     /*       char *mathInfo = (char *)malloc(n * sizeof(char)); */
     /*       strcpy(mathInfo, "unknown"); */
 
-    /*       mohrCoulomb2D_fclib_write(localproblem, title, description, mathInfo, fname, 3);
+    /*       plasticity2D_fclib_write(localproblem, title, description, mathInfo, fname, 3);
      */
 
     /*       printf("end of dump %s\n", fname); */
@@ -309,8 +309,8 @@ static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
            sizeof(double) * localproblem->dimension);
 }
 
-static double calculateFullErrorAdaptiveInterval(MohrCoulomb2DProblem *problem,
-                                                 mc2d_ComputeErrorPtr computeError,
+static double calculateFullErrorAdaptiveInterval(Plasticity2DProblem *problem,
+                                                 plasticity_2d_ComputeErrorPtr computeError,
                                                  SolverOptions *options, int iter,
                                                  double *stress, double *strainrate,
                                                  double tolerance, double norm_q) {
@@ -323,7 +323,7 @@ static double calculateFullErrorAdaptiveInterval(MohrCoulomb2DProblem *problem,
         options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
     }
     numerics_printf(
-        "--------------- MC2D - NSGS - Iteration %i "
+        "--------------- PLASTICITY_2D - NSGS - Iteration %i "
         "options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] = %i, "
         "options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] = % i",
         iter, options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY],
@@ -334,8 +334,8 @@ static double calculateFullErrorAdaptiveInterval(MohrCoulomb2DProblem *problem,
   return error;
 }
 
-static double calculateFullErrorFinal(MohrCoulomb2DProblem *problem, SolverOptions *options,
-                                      mc2d_ComputeErrorPtr computeError, double *stress,
+static double calculateFullErrorFinal(Plasticity2DProblem *problem, SolverOptions *options,
+                                      plasticity_2d_ComputeErrorPtr computeError, double *stress,
                                       double *strainrate, double tolerance, double norm_q) {
   double absolute_error;
   (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &absolute_error);
@@ -343,12 +343,12 @@ static double calculateFullErrorFinal(MohrCoulomb2DProblem *problem, SolverOptio
   if (verbose > 0) {
     if (absolute_error > SOLVER_TOL(options)) {
       numerics_printf(
-          "------- MC2D - NSGS - Warning absolute "
+          "------- PLASTICITY_2D - NSGS - Warning absolute "
           "Residual = %14.7e is larger than required precision = %14.7e",
           absolute_error, SOLVER_TOL(options));
     } else {
       numerics_printf(
-          "------- MC2D - NSGS - absolute "
+          "------- PLASTICITY_2D - NSGS - absolute "
           "Residual = %14.7e is smaller than required precision = %14.7e",
           absolute_error, SOLVER_TOL(options));
     }
@@ -362,19 +362,19 @@ static int determine_convergence(double error, double tolerance, int iter,
   if (error < tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
+        "---- PLASTICITY_2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   } else {
     numerics_printf(
-        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
+        "---- PLASTICITY_2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, tolerance);
   }
   return hasNotConverged;
 }
 
-static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
+static int determine_convergence_with_full_final(Plasticity2DProblem *problem,
                                                  SolverOptions *options,
-                                                 mc2d_ComputeErrorPtr computeError,
+                                                 plasticity_2d_ComputeErrorPtr computeError,
                                                  double *stress, double *strainrate,
                                                  double *tolerance, double norm_q,
                                                  double error, int iter) {
@@ -382,7 +382,7 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
   if (error < *tolerance) {
     hasNotConverged = 0;
     numerics_printf(
-        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
+        "---- PLASTICITY_2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
 
     double absolute_error =
@@ -396,7 +396,7 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
            We try to tighten the local solver tolerance */
         SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], fmax(LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100., DBL_EPSILON * 1e-6));
         numerics_printf(
-            "------- MC2D - NSGS - We modify the local solver tolerance precision to reach "
+            "------- PLASTICITY_2D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
             LOCAL_SOLVER_TOL(options->internalSolvers[0]));
 
@@ -404,33 +404,33 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
         *tolerance = error / absolute_error * SOLVER_TOL(options);
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
-            "------- MC2D - NSGS - We modify the required incremental precision to reach "
+            "------- PLASTICITY_2D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
             *tolerance);
       }
       hasNotConverged = 1;
     } else {
       numerics_printf(
-          "------- MC2D - NSGS - The incremental precision is sufficient to reach accuracy "
+          "------- PLASTICITY_2D - NSGS - The incremental precision is sufficient to reach accuracy "
           "to %e",
           *tolerance);
     }
 
   } else {
     numerics_printf(
-        "---- MC2D - NSGS - | %3d | %14.7e | %7.3e |",
+        "---- PLASTICITY_2D - NSGS - | %3d | %14.7e | %7.3e |",
         iter, error, *tolerance);
   }
   return hasNotConverged;
 }
 
-void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate, int *info,
+void plasticity_2d_nsgs(Plasticity2DProblem *problem, double *stress, double *strainrate, int *info,
                SolverOptions *options) {
   /* verbose=1; */
 
-  FILE *foutput = fopen("mc2d_footing_100_theta0.05.dat", "w");
+  FILE *foutput = fopen("plasticity_2d_footing_100_theta0.05.dat", "w");
   // int info_output =
-  mohrCoulomb2D_printInFile(problem, foutput);
+  plasticity2D_printInFile(problem, foutput);
   fclose(foutput);
 
   /* int and double parameters */
@@ -453,19 +453,19 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
 
   double norm_r[] = {1e24};
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("mc2d_nsgs",
+    numerics_error("plasticity_2d_nsgs",
                    "The NSGS method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >= 1");
   }
 
   SolverOptions *localsolver_options = options->internalSolvers[0];
-  mc2d_ComputeErrorPtr computeError = NULL;
+  plasticity_2d_ComputeErrorPtr computeError = NULL;
 
-  struct LocalMC2DProblemFunctionToolkit *localProblemFunctionToolkit =
-      localMC2DProblemFunctionToolkit_new();
-  /* localMC2DProblemFunctionToolkit_display(localProblemFunctionToolkit); */
+  struct LocalPLASTICITY_2DProblemFunctionToolkit *localProblemFunctionToolkit =
+      localPLASTICITY_2DProblemFunctionToolkit_new();
+  /* localPLASTICITY_2DProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
-  MohrCoulomb2DProblem *localproblem;
+  Plasticity2DProblem *localproblem;
 
   double localstress[3];
 
@@ -489,9 +489,9 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
   }
 
   /*****  Initialize various solver options *****/
-  localproblem = mc2d_local_problem_allocate(problem);
+  localproblem = plasticity_2d_local_problem_allocate(problem);
 
-  mc2d_nsgs_initialize_local_solver(localProblemFunctionToolkit, &computeError, problem,
+  plasticity_2d_nsgs_initialize_local_solver(localProblemFunctionToolkit, &computeError, problem,
                                     localproblem, options);
 
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
@@ -501,7 +501,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
   if (!(iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
-    numerics_error("mc2d_nsgs",
+    numerics_error("plasticity_2d_nsgs",
                    "iparam[PLASTICITY_NSGS_SHUFFLE] must be equal to "
                    "PLASTICITY_NSGS_SHUFFLE_FALSE (0), "
                    "PLASTICITY_NSGS_SHUFFLE_TRUE (1) or "
@@ -515,7 +515,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] == PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT ||
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
             PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
-    numerics_error("mc2d_nsgs",
+    numerics_error("plasticity_2d_nsgs",
                    "iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] must be equal to "
                    "PLASTICITY_NSGS_ERROR_EVALUATION_FULL (0), "
                    "PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
@@ -538,7 +538,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
       ++iter;
       double light_error_sum = 0.0;
 
-      mc2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
+      plasticity_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0; i < nc; ++i) {
         cone = i;
@@ -573,7 +573,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
       ++iter;
       double light_error_sum = 0.0;
       double light_error_2 = 0.0;
-      mc2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
+      plasticity_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       unsigned int number_of_freezed_cone = 0;
       double tmp_criteria1 = tolerance * tolerance * 100 * 100;
@@ -687,8 +687,8 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
                                                   strainrate, &tolerance, norm_q, error, iter);
 
         if (!(tolerance > 0.0)) {
-          numerics_warning("mc2d_nsgs", "tolerance has to be positive!!");
-          numerics_warning("mc2d_nsgs", "we stop the iterations");
+          numerics_warning("plasticity_2d_nsgs", "tolerance has to be positive!!");
+          numerics_warning("plasticity_2d_nsgs", "we stop the iterations");
           break;
         }
 
@@ -743,49 +743,49 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *strainrate
   }
   localProblemFunctionToolkit->free_local_solver(problem, localproblem, localsolver_options);
 
-  mc2d_local_problem_free(localproblem, problem);
+  plasticity_2d_local_problem_free(localproblem, problem);
   if (scones) free(scones);
 }
 
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers MOHR_COULOMB_2D_NSGS in the global solver registry, enabling:
+ * This registers PLASTICITY_2D_NSGS in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int mc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
-  mc2d_nsgs_set_default(options);
+static int plasticity_2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  plasticity_2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int mc2d_nsgs_solve_wrap(void* problem, double* reaction,
+static int plasticity_2d_nsgs_solve_wrap(void* problem, double* reaction,
                                 double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mc2d_nsgs((MohrCoulomb2DProblem*)problem, reaction, velocity, &info, options);
+  plasticity_2d_nsgs((Plasticity2DProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void mc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void plasticity_2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(MOHR_COULOMB_2D_NSGS, "MOHR_COULOMB_2D_NSGS",
+REGISTER_SOLVER(PLASTICITY_2D_NSGS, "PLASTICITY_2D_NSGS",
                 "Non-smooth Gauss-Seidel for 2D Mohr Coulomb Plasticity",
-                mc2d_nsgs_init_wrap,
-                mc2d_nsgs_solve_wrap,
-                mc2d_nsgs_free_wrap,
+                plasticity_2d_nsgs_init_wrap,
+                plasticity_2d_nsgs_solve_wrap,
+                plasticity_2d_nsgs_free_wrap,
                 NULL,  /* error function */
-                mc2d_nsgs_set_default,  /* set_default */
+                plasticity_2d_nsgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-4,  /* default_tol */
                 0      /* is_local_solver */);
 
-void mc2d_nsgs_set_default(SolverOptions *options) {
+void plasticity_2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   // options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
@@ -811,5 +811,5 @@ void mc2d_nsgs_set_default(SolverOptions *options) {
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
   }
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID);
+  options->internalSolvers[0] = solver_options_create(PLASTICITY_2D_ONECONE_NSN_GP_HYBRID);
 }

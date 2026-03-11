@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-#include "mc2d_compute_error.h"
+#include "plasticity_2d_compute_error.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt, fabs
 #include <stddef.h>  // for NULL
 
-#include "MohrCoulomb2DProblem.h"  // for Mohrcoulomb2dproblem
+#include "Plasticity2DProblem.h"  // for Mohrcoulomb2dproblem
 #include "NumericsMatrix.h"        // for NM_prod_mv_3x3, NM_gemv
 #include "SolverOptions.h"         // for SolverOptions
 /* #define DEBUG_NOCOLOR */
@@ -39,7 +39,7 @@
 #endif
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
-void mc2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double eta,
+void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double eta,
                                         double theta, double *restrict error,
                                         double *worktmp) {
   // double normUT;
@@ -56,9 +56,9 @@ void mc2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, 
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, double tolerance,
+int plasticity_2d_compute_error(Plasticity2DProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error) {
-  DEBUG_BEGIN("mc2d_compute_error(...)\n");
+  DEBUG_BEGIN("plasticity_2d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
   CHECK_NULL(w);
@@ -86,7 +86,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    mc2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error, worktmp);
+    plasticity_2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error, worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);
@@ -102,7 +102,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   // if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
 
   DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
-  DEBUG_END("mc2d_compute_error(...)\n");
+  DEBUG_END("plasticity_2d_compute_error(...)\n");
   if (*error > tolerance) return 1;
 
   return 0;

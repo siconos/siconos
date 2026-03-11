@@ -6,21 +6,21 @@
  */
 enum PLASTICITY_SOLVER {
   /** 2D Mohr Coulomb solvers */
-  MOHR_COULOMB_2D_NSGS = 20000,
+  PLASTICITY_2D_NSGS = 20000,
 
   /* 2D Mohr Coulomb  solvers for one cone (used mainly inside NSGS solvers) */
 
   /** Non-smooth Newton Alart-Curnier, 'direct', one cone solver */
-  MOHR_COULOMB_2D_ONECONE_NSN = 20050,
+  PLASTICITY_2D_ONECONE_NSN = 20050,
   /** Non-smooth Newton Alart-Curnier, 'damped', one cone solver */
-  MOHR_COULOMB_2D_ONECONE_NSN_GP = 20051,
+  PLASTICITY_2D_ONECONE_NSN_GP = 20051,
   /** Projection on cone, one cone solver */
-  MOHR_COULOMB_2D_ONECONE_ProjectionOnCone = 20052,
+  PLASTICITY_2D_ONECONE_ProjectionOnCone = 20052,
   /** Projection on cone, one cone solver */
-  MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration = 20053,
+  PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration = 20053,
   /** Non-smooth Newton Alart-Curnier, 'damped' and hybrid with projection, one cone solver
    */
-  MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID = 20065
+  PLASTICITY_2D_ONECONE_NSN_GP_HYBRID = 20065
 };
 
 enum PLASTICITY_IPARAM {

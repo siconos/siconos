@@ -50,7 +50,7 @@
  * SUBSYSTEM IDENTIFIERS:
  * - 'block'         - Generic term for contact/cone/subsystem (preferred)
  * - 'contact'       - 3D friction contact (FC3D)
- * - 'cone'          - Mohr-Coulomb cone (MC2D) or friction cone
+ * - 'cone'          - Mohr-Coulomb cone (PLASTICITY_2D) or friction cone
  * - 'nc' or 'n_blocks' - Number of subsystems
  * - 'block_id'      - Index of current subsystem (preferred over 'contact', 'cone')
  *

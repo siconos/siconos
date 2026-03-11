@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "mc2d_projection.h"  // for mc2d_projectionOnConeWithDiago...
+#include "plasticity_2d_projection.h"  // for plasticity_2d_projectionOnConeWithDiago...
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
@@ -24,16 +24,16 @@
 #include <stdio.h>   // for fprintf, printf, NULL, stderr
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
-#include "MohrCoulomb2DProblem.h"      // for MohrCoulomb2DProblem
+#include "Plasticity2DProblem.h"      // for Plasticity2DProblem
 #include "NumericsFwd.h"               // for SolverOptions, MohrCoulomb2D...
 #include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
 #include "Plasticity_cst.h"            // for PLASTICITY_NSGS_LOCAL...
 #include "SiconosBlas.h"               // for cblas_ddot
 #include "SolverOptions.h"             // for SolverOptions, solver_options_...
 #include "SparseBlockMatrix.h"         // for SBM_row_prod
-#include "mc2d_compute_error.h"        // for mc2d_Tresca_unitary_compute_an...
-#include "mc2d_local_problem_tools.h"  // for mc2d_local_problem_compute_q
-#include "mc2d_solvers.h"
+#include "plasticity_2d_compute_error.h"        // for plasticity_2d_Tresca_unitary_compute_an...
+#include "plasticity_2d_local_problem_tools.h"  // for plasticity_2d_local_problem_compute_q
+#include "plasticity_2d_solvers.h"
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -66,11 +66,11 @@
 /* static double qLocal[3]; */
 /* static double theta_i = 0.0; */
 
-void mc2d_projection_initialize(MohrCoulomb2DProblem* problem,
-                                MohrCoulomb2DProblem* localproblem) {}
+void plasticity_2d_projection_initialize(Plasticity2DProblem* problem,
+                                Plasticity2DProblem* localproblem) {}
 
-void mc2d_projection_update(int contact, MohrCoulomb2DProblem* problem,
-                            MohrCoulomb2DProblem* localproblem, double* stress,
+void plasticity_2d_projection_update(int contact, Plasticity2DProblem* problem,
+                            Plasticity2DProblem* localproblem, double* stress,
                             SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -82,19 +82,19 @@ void mc2d_projection_update(int contact, MohrCoulomb2DProblem* problem,
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  mc2d_local_problem_fill_M(problem, localproblem, contact);
+  plasticity_2d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
-  mc2d_local_problem_compute_q(problem, localproblem, stress, contact);
+  plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
 
   /* coefficient for current block*/
   localproblem->eta[0] = problem->eta[contact];
   localproblem->theta[0] = problem->theta[contact];
 }
 
-void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem* problem,
-                                               MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projectionWithDiagonalization_update(int contact, Plasticity2DProblem* problem,
+                                               Plasticity2DProblem* localproblem,
                                                double* stress, SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -106,7 +106,7 @@ void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  mc2d_local_problem_fill_M(problem, localproblem, contact);
+  plasticity_2d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
@@ -156,13 +156,13 @@ void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem
   localproblem->theta[0] = problem->theta[contact];
 }
 
-void mc2d_projection_initialize_with_regularization(MohrCoulomb2DProblem* problem,
-                                                    MohrCoulomb2DProblem* localproblem) {
+void plasticity_2d_projection_initialize_with_regularization(Plasticity2DProblem* problem,
+                                                    Plasticity2DProblem* localproblem) {
   if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
 }
 
-void mc2d_projection_update_with_regularization(int contact, MohrCoulomb2DProblem* problem,
-                                                MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projection_update_with_regularization(int contact, Plasticity2DProblem* problem,
+                                                Plasticity2DProblem* localproblem,
                                                 double* stress, SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
@@ -179,7 +179,7 @@ void mc2d_projection_update_with_regularization(int contact, MohrCoulomb2DProble
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.stressBlock, excluding the block corresponding to the current contact. ****/
-  mc2d_local_problem_compute_q(problem, localproblem, stress, contact);
+  plasticity_2d_local_problem_compute_q(problem, localproblem, stress, contact);
 
   double rho = options->dparam[PLASTICITY_NSN_RHO];
   for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
@@ -197,13 +197,13 @@ void mc2d_projection_update_with_regularization(int contact, MohrCoulomb2DProble
   localproblem->theta[0] = problem->theta[contact];
 }
 
-int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
+int plasticity_2d_projectionWithDiagonalization_solve(Plasticity2DProblem* localproblem,
                                              double* stress_local, SolverOptions* options) {
   /* Current block position */
 
   /* Builds local problem for the current contact */
-  /*  mc2d_projection_update(contact, stress); */
-  /*  mc2d_projectionWithDiagonalization_update(contact, stress);  */
+  /*  plasticity_2d_projection_update(contact, stress); */
+  /*  plasticity_2d_projectionWithDiagonalization_update(contact, stress);  */
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
@@ -220,7 +220,7 @@ int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
   } else {
     if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON ||
         MLocal[2 * nLocal + 2] < DBL_EPSILON) {
-      CHECK_ARG(0, "mc2d_projection error: null term on MLocal diagonal.\n");
+      CHECK_ARG(0, "plasticity_2d_projection error: null term on MLocal diagonal.\n");
     }
 
     stress_local[0] = -qLocal[0] / MLocal[0];
@@ -238,11 +238,11 @@ int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
   return 0;
 }
 
-void mc2d_projectionOnConeWithLocalIteration_initialize(MohrCoulomb2DProblem* problem,
-                                                        MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_initialize(Plasticity2DProblem* problem,
+                                                        Plasticity2DProblem* localproblem,
                                                         SolverOptions* localsolver_options) {
   size_t nc = problem->numberOfCones;
-  /* printf("mc2d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
+  /* printf("plasticity_2d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork || localsolver_options->dWorkSize < nc) {
     localsolver_options->dWork =
         (double*)realloc(localsolver_options->dWork, nc * sizeof(double));
@@ -253,18 +253,18 @@ void mc2d_projectionOnConeWithLocalIteration_initialize(MohrCoulomb2DProblem* pr
   }
 }
 
-void mc2d_projectionOnConeWithLocalIteration_free(MohrCoulomb2DProblem* problem,
-                                                  MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projectionOnConeWithLocalIteration_free(Plasticity2DProblem* problem,
+                                                  Plasticity2DProblem* localproblem,
                                                   SolverOptions* localsolver_options) {
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
 }
 
-int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localproblem,
+int plasticity_2d_projectionOnConeWithLocalIteration_solve(Plasticity2DProblem* localproblem,
                                                   double* stress_local, SolverOptions* options) {
-  DEBUG_BEGIN("mc2d_projectionOnConeWithLocalIteration_solve(...)\n");
+  DEBUG_BEGIN("plasticity_2d_projectionOnConeWithLocalIteration_solve(...)\n");
 
-  DEBUG_EXPR(mohrCoulomb2DProblem_display(localproblem););
+  DEBUG_EXPR(plasticity2DProblem_display(localproblem););
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
@@ -273,7 +273,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   /* int nLocal = 3; */
 
   /*   /\* Builds local problem for the current contact *\/ */
-  /*   mc2d_projection_update(localproblem, stress_local); */
+  /*   plasticity_2d_projection_update(localproblem, stress_local); */
 
   /*double an = 1./(MLocal[0]);*/
   /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
@@ -313,10 +313,10 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
 
   double tau = 2.0 / 3.0, tauinv = 3.0 / 2.0, L = 0.9, Lmin = 0.3;
 
-  numerics_printf_verbose(2, "--  mc2d_projectionOnConeWithLocalIteration_solve contact = %i",
+  numerics_printf_verbose(2, "--  plasticity_2d_projectionOnConeWithLocalIteration_solve contact = %i",
                           options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
   numerics_printf_verbose(2,
-                          "--  mc2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
+                          "--  plasticity_2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
                           "rho \t\t\t| error\t\t\t|");
   numerics_printf_verbose(
       2, "--                                                | %i \t\t| %.10e\t| %.10e\t|",
@@ -402,7 +402,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
 
     /* compute local error */
     localerror = 0.0;
-    mc2d_unitary_compute_and_add_error(stress_local, strainrate_local, eta_i, theta_i, &localerror, worktmp);
+    plasticity_2d_unitary_compute_and_add_error(stress_local, strainrate_local, eta_i, theta_i, &localerror, worktmp);
 
     /*Update rho*/
     if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {
@@ -418,15 +418,15 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   SET_SOLVER_RESIDUAL(options, localerror);
   DEBUG_PRINTF("final rho  =%e\n", rho);
 
-  DEBUG_END("mc2d_projectionOnConeWithLocalIteration_solve(...)\n");
+  DEBUG_END("plasticity_2d_projectionOnConeWithLocalIteration_solve(...)\n");
   if (localerror > localtolerance) return 1;
   return 0;
 }
 
-int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* stress_local,
+int plasticity_2d_projectionOnCone_solve(Plasticity2DProblem* localproblem, double* stress_local,
                                 SolverOptions* options) {
   /*  /\* Builds local problem for the current contact *\/ */
-  /*   mc2d_projection_update(contact, stress_local); */
+  /*   plasticity_2d_projection_update(contact, stress_local); */
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
@@ -465,17 +465,17 @@ int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* stre
   return 0;
 }
 
-void mc2d_projection_free(MohrCoulomb2DProblem* problem, MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projection_free(Plasticity2DProblem* problem, Plasticity2DProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
-void mc2d_projection_with_regularization_free(MohrCoulomb2DProblem* problem,
-                                              MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_projection_with_regularization_free(Plasticity2DProblem* problem,
+                                              Plasticity2DProblem* localproblem,
                                               SolverOptions* localsolver_options) {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
 }
 
-void mc2d_poc_set_default(SolverOptions* options) {
+void plasticity_2d_poc_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = 0;  // this will be set by external solver
   options->dparam[PLASTICITY_NSN_RHO] =
       0.;  // Used only for ProjectionOnConeWithRegularization
@@ -488,62 +488,62 @@ void mc2d_poc_set_default(SolverOptions* options) {
  */
 
 /* Wrapper for projection on cone (local solver) - Note: local solvers use 3 args */
-static void mc2d_projectionOnCone_set_default(SolverOptions* options) {
+static void plasticity_2d_projectionOnCone_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int mc2d_projectionOnCone_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_projectionOnCone_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int mc2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
+static int plasticity_2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
                                             double* velocity, SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
-  return mc2d_projectionOnCone_solve((MohrCoulomb2DProblem*)localproblem, reaction, options);
+  return plasticity_2d_projectionOnCone_solve((Plasticity2DProblem*)localproblem, reaction, options);
 }
 
 /* Wrapper for projection on cone with local iteration (local solver) */
-static void mc2d_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
+static void plasticity_2d_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int mc2d_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int mc2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem,
+static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem,
                                                                double* reaction,
                                                                double* velocity,
                                                                SolverOptions* options) {
   (void)velocity;  /* Local solvers don't use velocity parameter */
-  return mc2d_projectionOnConeWithLocalIteration_solve((MohrCoulomb2DProblem*)localproblem,
+  return plasticity_2d_projectionOnConeWithLocalIteration_solve((Plasticity2DProblem*)localproblem,
                                                         reaction, options);
 }
 
-REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnCone,
-                "MOHR_COULOMB_2D_ONECONE_PROJECTION",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnCone,
+                "PLASTICITY_2D_ONECONE_PROJECTION",
                 "Projection on cone for 2D Mohr Coulomb (one cone)",
-                mc2d_projectionOnCone_init_wrap,
-                mc2d_projectionOnCone_solve_wrap,
+                plasticity_2d_projectionOnCone_init_wrap,
+                plasticity_2d_projectionOnCone_solve_wrap,
                 NULL,
                 NULL,
-                mc2d_projectionOnCone_set_default,
+                plasticity_2d_projectionOnCone_set_default,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */
 
-REGISTER_SOLVER(MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration,
-                "MOHR_COULOMB_2D_ONECONE_PROJECTION_LI",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
+                "PLASTICITY_2D_ONECONE_PROJECTION_LI",
                 "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
-                mc2d_projectionOnConeWithLocalIteration_init_wrap,
-                mc2d_projectionOnConeWithLocalIteration_solve_wrap,
+                plasticity_2d_projectionOnConeWithLocalIteration_init_wrap,
+                plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap,
                 NULL,
                 NULL,
-                mc2d_projectionOnConeWithLocalIteration_set_default,
+                plasticity_2d_projectionOnConeWithLocalIteration_set_default,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */

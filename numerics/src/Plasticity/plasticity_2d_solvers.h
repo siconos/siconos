@@ -15,24 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2DSOLVERS_H
-#define MOHRCOULOMB2DSOLVERS_H
+#ifndef PLASTICITY2DSOLVERS_H
+#define PLASTICITY2DSOLVERS_H
 
-/*!\file mc2d_Solvers.h
+/*!\file plasticity_2d_Solvers.h
   Subroutines for the resolution of Mohr Coulomb 2D plasticity
 */
 
-#include "MohrCoulomb2DProblem.h"
+#include "Plasticity2DProblem.h"
 #include "Plasticity_cst.h"
 #include "SolverOptions.h"
 
 /** pointer to function used to update plastic_strain_rate and compute error */
-typedef void (*mc2d_ComputeErrorPtr)(MohrCoulomb2DProblem *, double *, double *, double,
+typedef void (*plasticity_2d_ComputeErrorPtr)(Plasticity2DProblem *, double *, double *, double,
                                      SolverOptions *, double, double *);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
-typedef void (*mc2d_internalSolverPtr)(MohrCoulomb2DProblem *, double *, double *, int *,
+typedef void (*plasticity_2d_internalSolverPtr)(Plasticity2DProblem *, double *, double *, int *,
                                        SolverOptions *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
@@ -94,19 +94,19 @@ extern "C" {
     The internal (local) solver must set by the SolverOptions options[1]
 
 */
-void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *stress, double *plastic_strain_rate,
+void plasticity_2d_nsgs(Plasticity2DProblem *problem, double *stress, double *plastic_strain_rate,
                int *info, SolverOptions *options);
 
 /**
     Check for trivial solution in the Mohr Coulomb 2D problem
 
-    \param problem MohrCoulomb2DProblem*  the problem
+    \param problem Plasticity2DProblem*  the problem
     \param plastic_strain_rate global vector (n), in-out parameter
     \param stress global vector (n), in-out parameters
     \param options the pointer to the array of options to set
     \return info  =0 if a trivial solution has been found, else = -1
 */
-int mc2d_checkTrivialCase(MohrCoulomb2DProblem *problem, double *plastic_strain_rate,
+int plasticity_2d_checkTrivialCase(Plasticity2DProblem *problem, double *plastic_strain_rate,
                           double *stress, SolverOptions *options);
 
 /**
@@ -118,17 +118,17 @@ int mc2d_checkTrivialCase(MohrCoulomb2DProblem *problem, double *plastic_strain_
     \param options the solver options
     \return 0 if successful, otherwise error code
 */
-int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress,
+int plasticity_2d_driver(Plasticity2DProblem* problem, double* stress,
                 double* plastic_strain_rate, SolverOptions* options);
 
 /** \addtogroup SetSolverOptions
  * @{
  */
-void mc2d_nsgs_set_default(SolverOptions *options);
-void mc2d_onecone_nsn_set_default(SolverOptions *options);
-void mc2d_onecone_nsn_gp_set_default(SolverOptions *options);
-void mc2d_poc_set_default(SolverOptions *options);
-void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem *problem, SolverOptions *options,
+void plasticity_2d_nsgs_set_default(SolverOptions *options);
+void plasticity_2d_onecone_nsn_set_default(SolverOptions *options);
+void plasticity_2d_onecone_nsn_gp_set_default(SolverOptions *options);
+void plasticity_2d_poc_set_default(SolverOptions *options);
+void plasticity_2d_set_internalsolver_tolerance(Plasticity2DProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);
 
 /** @} */

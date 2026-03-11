@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "mc2d_naturalmap_functions.h"
+#include "plasticity_2d_naturalmap_functions.h"
 
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
@@ -31,9 +31,9 @@
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 #include "numerics_errors.h"
 
-void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double theta,
+void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta, double theta,
                             double Rho[3], double F[3], double A[9], double B[9]) {
-  DEBUG_PRINT("mc2d_computeNaturalMap starts\n");
+  DEBUG_PRINT("plasticity_2d_computeNaturalMap starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
                                                    i, R[i], i, velocity[i]););
 

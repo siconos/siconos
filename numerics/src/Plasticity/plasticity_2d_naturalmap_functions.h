@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2D_naturalmap_functions_H
-#define MOHRCOULOMB2D_naturalmap_functions_H
+#ifndef PLASTICITY2D_naturalmap_functions_H
+#define PLASTICITY2D_naturalmap_functions_H
 
 /*!\file fc3d_AlartCurnier_functions.h
 
@@ -25,14 +25,14 @@
 
 
  */
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"    // for Plasticity2DProblem
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
-void mc2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double theta,
+void plasticity_2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double theta,
                             double rho[3], double result[3], double A[9], double B[9]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

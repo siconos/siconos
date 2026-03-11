@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2D_AlartCurnier_functions_H
-#define MOHRCOULOMB2D_AlartCurnier_functions_H
+#ifndef PLASTICITY2D_AlartCurnier_functions_H
+#define PLASTICITY2D_AlartCurnier_functions_H
 
 /*!\file fc3d_AlartCurnier_functions.h
 
@@ -50,21 +50,21 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"    // for Plasticity2DProblem
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
-void mc2d_compute_rho_split_spectral_norm_cond(MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_compute_rho_split_spectral_norm_cond(Plasticity2DProblem* localproblem,
                                                double* rho);
 
-void mc2d_compute_rho_split_spectral_norm(MohrCoulomb2DProblem* localproblem, double* rho);
+void plasticity_2d_compute_rho_split_spectral_norm(Plasticity2DProblem* localproblem, double* rho);
 
-void mc2d_compute_rho_spectral_norm(MohrCoulomb2DProblem* localproblem, double* rho);
+void plasticity_2d_compute_rho_spectral_norm(Plasticity2DProblem* localproblem, double* rho);
 
-void mc2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double theta, double eta,
+void plasticity_2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double theta, double eta,
                                  double rho[3], double result[3], double A[9], double B[9]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

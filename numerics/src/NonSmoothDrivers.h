@@ -257,7 +257,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return result (0 if successful otherwise 1).
 */
-int mc2d_driver(MohrCoulomb2DProblem *problem, double *stress, double *plastic_strain_rate,
+int plasticity_2d_driver(Plasticity2DProblem *problem, double *stress, double *plastic_strain_rate,
                 SolverOptions *options);
 
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,

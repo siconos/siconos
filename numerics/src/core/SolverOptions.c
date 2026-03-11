@@ -930,27 +930,27 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
 /*       gmp_set_default(options); */
 /*       break; */
 /*     } */
-/*     case MOHR_COULOMB_2D_NSGS: { */
+/*     case PLASTICITY_2D_NSGS: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       mc2d_nsgs_set_default(options); */
+/*       plasticity_2d_nsgs_set_default(options); */
 /*       break; */
 /*     } */
 
-/*     case MOHR_COULOMB_2D_ONECONE_NSN: { */
+/*     case PLASTICITY_2D_ONECONE_NSN: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */
-/*       mc2d_onecone_nsn_set_default(options); */
+/*       plasticity_2d_onecone_nsn_set_default(options); */
 /*       break; */
 /*     } */
-/*     case MOHR_COULOMB_2D_ONECONE_NSN_GP: */
-/*     case MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID: { */
+/*     case PLASTICITY_2D_ONECONE_NSN_GP: */
+/*     case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */
-/*       mc2d_onecone_nsn_gp_set_default(options); */
+/*       plasticity_2d_onecone_nsn_gp_set_default(options); */
 /*       break; */
 /*     } */
-/*     case MOHR_COULOMB_2D_ONECONE_ProjectionOnCone: */
-/*     case MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration: { */
+/*     case PLASTICITY_2D_ONECONE_ProjectionOnCone: */
+/*     case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: { */
 /*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       mc2d_poc_set_default(options); */
+/*       plasticity_2d_poc_set_default(options); */
 /*       break; */
 /*     } */
 

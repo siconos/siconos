@@ -18,15 +18,15 @@
 
 #include <math.h>  // for fmax
 
-#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem
+#include "Plasticity2DProblem.h"  // for Plasticity2DProblem
 #include "NumericsFwd.h"           // for SolverOptions, MohrCoulomb2DPr...
 #include "Plasticity_cst.h"        // for PLASTICITY_IPARAM_INTER...
 #include "SolverOptions.h"         // for SolverOptions
-#include "mc2d_solvers.h"          // for mc2d_set_internalsolver_tolerance
+#include "plasticity_2d_solvers.h"          // for plasticity_2d_set_internalsolver_tolerance
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 
-void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOptions* options,
+void plasticity_2d_set_internalsolver_tolerance(Plasticity2DProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
@@ -35,7 +35,7 @@ void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOpti
         fmax(error / options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO],
              options->dparam[SICONOS_DPARAM_TOL] / problem->numberOfCones);
     numerics_printf_verbose(2,
-                            "mc2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
                             "tolerance is set to %e\n",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
@@ -44,18 +44,18 @@ void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOpti
         error /
         (options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] * problem->numberOfCones);
     numerics_printf_verbose(2,
-                            "mc2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
                             "tolerance is set to %e",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
              PLASTICITY_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE) {
     // We use the user value for the error of the local solver
     numerics_printf_verbose(2,
-                            "mc2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
                             "tolerance is set to %e",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
-    numerics_error("mc2d__set_internalsolver_tolerance",
+    numerics_error("plasticity_2d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
 }

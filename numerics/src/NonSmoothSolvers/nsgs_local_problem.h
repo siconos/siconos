@@ -23,7 +23,7 @@
  * within NSGS (Non-Smooth Gauss-Seidel) and other decomposition methods.
  *
  * Design Principles:
- * - Problem-type agnostic (works with FC3D, RFC3D, MC2D, etc.)
+ * - Problem-type agnostic (works with FC3D, RFC3D, PLASTICITY_2D, etc.)
  * - Integrates with solver registration system
  * - Runtime local solver selection via registry
  */
@@ -47,7 +47,7 @@ typedef enum {
   NSGS_LP_FC2D,       /**< 2D Friction Contact (dim 2) */
   NSGS_LP_RFC3D,      /**< 3D Rolling Friction Contact (dim 5) */
   NSGS_LP_RFC2D,      /**< 2D Rolling Friction Contact (dim 3) */
-  NSGS_LP_MC2D,       /**< 2D Mohr-Coulomb (dim 2) */
+  NSGS_LP_PLASTICITY_2D,       /**< 2D Mohr-Coulomb (dim 2) */
   NSGS_LP_MC3D        /**< 3D Mohr-Coulomb (dim 3) */
 } NSGSLocalProblemType;
 
@@ -128,7 +128,7 @@ NSGSLocalProblemType nsgs_local_problem_get_type(const NSGSLocalProblem* local);
 const NSGSLocalProblemOps* nsgs_fc3d_local_ops(void);
 const NSGSLocalProblemOps* nsgs_fc2d_local_ops(void);
 const NSGSLocalProblemOps* nsgs_rfc3d_local_ops(void);
-const NSGSLocalProblemOps* nsgs_mc2d_local_ops(void);
+const NSGSLocalProblemOps* nsgs_plasticity_2d_local_ops(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2D_onecone_nonsmooth_Newton_solvers_H
-#define MOHRCOULOMB2D_onecone_nonsmooth_Newton_solvers_H
+#ifndef PLASTICITY2D_onecone_nonsmooth_Newton_solvers_H
+#define PLASTICITY2D_onecone_nonsmooth_Newton_solvers_H
 
-/*!\file mc2d_onecone_nonsmooth_Newton_solvers.h
+/*!\file plasticity_2d_onecone_nonsmooth_Newton_solvers.h
   \brief Typedef and functions declarations related to Newton solver for Mohr Coulomb 2D
   problems.
 
@@ -31,7 +31,7 @@
 
 */
 
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem, SolverOptions
+#include "NumericsFwd.h"    // for Plasticity2DProblem, SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -46,8 +46,8 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double, doubl
  * \param localproblem to solve
  * \param options of the solver
  */
-void mc2d_onecone_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* problem,
-                                                      MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(Plasticity2DProblem* problem,
+                                                      Plasticity2DProblem* localproblem,
                                                       SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with Newton
@@ -55,7 +55,7 @@ void mc2d_onecone_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* prob
  * \param options of the solver
  * \return 0 iff successful.
  */
-int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localproblem, double*,
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(Plasticity2DProblem* localproblem, double*,
                                                 SolverOptions* options);
 
 /** free memory for Mohr Coulomb 2D Newton solver
@@ -63,8 +63,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localprobl
     \param localproblem for freeing matrix0
     \param localsolver_options options of the solver
  */
-void mc2d_onecone_nonsmooth_Newton_solvers_free(MohrCoulomb2DProblem* problem,
-                                                MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_onecone_nonsmooth_Newton_solvers_free(Plasticity2DProblem* problem,
+                                                Plasticity2DProblem* localproblem,
                                                 SolverOptions* localsolver_options);
 
 /** compute error for Mohr Coulomb 2D problem with Newton
@@ -73,7 +73,7 @@ void mc2d_onecone_nonsmooth_Newton_solvers_free(MohrCoulomb2DProblem* problem,
  *  \param reaction global reaction vector
  *  \param output_error
  */
-void mc2d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
+void plasticity_2d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
                                                         double* reaction,
                                                         double* output_error);
 
@@ -87,17 +87,17 @@ void mc2d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* v
 
     the rest is used to formalize the local problem)
 */
-void mc2d_onecone_nonsmooth_Newton_AC_update(int number, MohrCoulomb2DProblem* problem,
-                                             MohrCoulomb2DProblem* localproblem,
+void plasticity_2d_onecone_nonsmooth_Newton_AC_update(int number, Plasticity2DProblem* problem,
+                                             Plasticity2DProblem* localproblem,
                                              double* reaction, SolverOptions* options);
 
-int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* localproblem,
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(Plasticity2DProblem* localproblem,
                                                        double* R, SolverOptions* options);
 
-int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* localproblem,
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(Plasticity2DProblem* localproblem,
                                                        double* R, SolverOptions* options);
 
-int mc2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(MohrCoulomb2DProblem* localproblem,
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(Plasticity2DProblem* localproblem,
                                                        double* local_reaction,
                                                        SolverOptions* options);
 

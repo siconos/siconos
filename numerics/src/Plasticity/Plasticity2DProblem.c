@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MohrCoulomb2DProblem.h"
+#include "Plasticity2DProblem.h"
 
 #include <assert.h>     // for assert
 #include <math.h>       // for fabs
@@ -37,7 +37,7 @@
 #include "fclib_interface.h"
 #endif
 
-void mohrCoulomb2D_display(MohrCoulomb2DProblem* problem) {
+void plasticity2D_display(Plasticity2DProblem* problem) {
   assert(problem);
   int n = problem->dimension * problem->numberOfCones;
   printf("MohrCoulomb2D Display :\n-------------\n");
@@ -69,9 +69,9 @@ void mohrCoulomb2D_display(MohrCoulomb2DProblem* problem) {
     printf("No theta vector:\n");
 }
 
-int mohrCoulomb2D_printInFile(MohrCoulomb2DProblem* problem, FILE* file) {
+int plasticity2D_printInFile(Plasticity2DProblem* problem, FILE* file) {
   if (!problem) {
-    CHECK_ARG(0, "Numerics, MohrCoulomb2DProblem printInFile failed, NULL input.\n");
+    CHECK_ARG(0, "Numerics, Plasticity2DProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -95,7 +95,7 @@ int mohrCoulomb2D_printInFile(MohrCoulomb2DProblem* problem, FILE* file) {
   return 0;
 }
 
-int mohrCoulomb2D_printInFilename(MohrCoulomb2DProblem* problem, char* filename) {
+int plasticity2D_printInFilename(Plasticity2DProblem* problem, char* filename) {
   int info = 0;
   FILE* file = fopen(filename, "w");
 
@@ -103,17 +103,17 @@ int mohrCoulomb2D_printInFilename(MohrCoulomb2DProblem* problem, char* filename)
     return errno;
   }
 
-  info = mohrCoulomb2D_printInFile(problem, file);
+  info = plasticity2D_printInFile(problem, file);
 
   fclose(file);
   return info;
 }
 
-MohrCoulomb2DProblem* mohrCoulomb2D_newFromFile(FILE* file) {
-  MohrCoulomb2DProblem* problem = mohrCoulomb2DProblem_new();
+Plasticity2DProblem* plasticity2D_newFromFile(FILE* file) {
+  Plasticity2DProblem* problem = plasticity2DProblem_new();
   if (!file) return NULL;
   DEBUG_PRINT(
-      "Start -- int mohrCoulomb2D_newFromFile(MohrCoulomb2DProblem* problem, FILE* "
+      "Start -- int plasticity2D_newFromFile(Plasticity2DProblem* problem, FILE* "
       "file)\n");
   int nc = 0, d = 0;
   int i;
@@ -138,35 +138,35 @@ MohrCoulomb2DProblem* mohrCoulomb2D_newFromFile(FILE* file) {
     check_io(fscanf(file, "%lf ", &(problem->theta[i])));
   }
   DEBUG_PRINT(
-      "End --  int mohrCoulomb2D_newFromFile(MohrCoulomb2DProblem* problem, FILE* "
+      "End --  int plasticity2D_newFromFile(Plasticity2DProblem* problem, FILE* "
       "file)\n");
 
   return problem;
 }
 
-MohrCoulomb2DProblem* mohrCoulomb2D_new_from_filename(const char* filename) {
-  MohrCoulomb2DProblem* problem = NULL;
+Plasticity2DProblem* plasticity2D_new_from_filename(const char* filename) {
+  Plasticity2DProblem* problem = NULL;
   int is_hdf5 = check_hdf5_file(filename);
   // if the input file is an hdf5 file, we try to read it with fclib interface function.
   if (is_hdf5) {
     /* #if defined(WITH_FCLIB) */
     /* #else */
-    numerics_error("MohrCoulomb2DProblem",
+    numerics_error("Plasticity2DProblem",
                    "Try to read an hdf5 file, while fclib interface is not active. Recompile "
                    "Siconos with fclib.",
                    filename);
     //#endif
   } else {
     FILE* file = fopen(filename, "r");
-    if (!file) numerics_error("MohrCoulomb2DProblem", "Can not open file ", filename);
+    if (!file) numerics_error("Plasticity2DProblem", "Can not open file ", filename);
 
-    problem = mohrCoulomb2D_newFromFile(file);
+    problem = plasticity2D_newFromFile(file);
     fclose(file);
   }
   return problem;
 }
 
-void mohrCoulomb2DProblem_free(MohrCoulomb2DProblem* problem) {
+void plasticity2DProblem_free(Plasticity2DProblem* problem) {
   assert(problem);
   if (problem->M) {
     NM_clear(problem->M);
@@ -191,8 +191,8 @@ void mohrCoulomb2DProblem_free(MohrCoulomb2DProblem* problem) {
   free(problem);
 }
 
-MohrCoulomb2DProblem* mohrCoulomb2DProblem_new(void) {
-  MohrCoulomb2DProblem* mc2d = (MohrCoulomb2DProblem*)malloc(sizeof(MohrCoulomb2DProblem));
+Plasticity2DProblem* plasticity2DProblem_new(void) {
+  Plasticity2DProblem* mc2d = (Plasticity2DProblem*)malloc(sizeof(Plasticity2DProblem));
   mc2d->dimension = 0;
   mc2d->numberOfCones = 0;
   mc2d->M = NULL;
@@ -203,9 +203,9 @@ MohrCoulomb2DProblem* mohrCoulomb2DProblem_new(void) {
   return mc2d;
 }
 
-MohrCoulomb2DProblem* mohrCoulomb2DProblem_new_with_data(int dim, int nc, NumericsMatrix* M,
+Plasticity2DProblem* plasticity2DProblem_new_with_data(int dim, int nc, NumericsMatrix* M,
                                                          double* q, double* eta, double* theta) {
-  MohrCoulomb2DProblem* mc2d = (MohrCoulomb2DProblem*)malloc(sizeof(MohrCoulomb2DProblem));
+  Plasticity2DProblem* mc2d = (Plasticity2DProblem*)malloc(sizeof(Plasticity2DProblem));
 
   mc2d->dimension = dim;
   mc2d->numberOfCones = nc;
@@ -217,12 +217,12 @@ MohrCoulomb2DProblem* mohrCoulomb2DProblem_new_with_data(int dim, int nc, Numeri
   return mc2d;
 }
 
-MohrCoulomb2DProblem* mohrCoulomb2D_copy(MohrCoulomb2DProblem* problem) {
+Plasticity2DProblem* plasticity2D_copy(Plasticity2DProblem* problem) {
   if (!problem) return NULL;
 
   int nc = problem->numberOfCones;
   int n = problem->M->size0;
-  MohrCoulomb2DProblem* new = (MohrCoulomb2DProblem*)malloc(sizeof(MohrCoulomb2DProblem));
+  Plasticity2DProblem* new = (Plasticity2DProblem*)malloc(sizeof(Plasticity2DProblem));
   new->dimension = problem->dimension;
   new->numberOfCones = problem->numberOfCones;
   new->M = NM_new();
@@ -236,7 +236,7 @@ MohrCoulomb2DProblem* mohrCoulomb2D_copy(MohrCoulomb2DProblem* problem) {
   return new;
 }
 
-void mohrCoulomb2D_rescaling(MohrCoulomb2DProblem* problem, double alpha, double gamma) {
+void plasticity2D_rescaling(Plasticity2DProblem* problem, double alpha, double gamma) {
   int n = problem->M->size0;
   /* scaling of M */
   NM_scal(alpha * gamma * gamma, problem->M);
