@@ -260,10 +260,15 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
   DEBUG_PRINTF("problem->dimension = %i \n", problem->dimension);
   check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfCones = nc;
+  int model_type=0;
+  check_io(fscanf(file, "%d\n", &model_type));
+
+  problem->model_type = model_type;
   
-  /* For now, default to Drucker-Prager model for file reading
-   * TODO: Add file format version marker to support multiple model types in files */
-  problem->model_type = PLASTICITY_MODEL_VON_MISES;
+  /* /\* For now, default to Drucker-Prager model for file reading */
+  /*  * TODO: Add file format version marker to support multiple model types in files *\/ */
+  /* problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER; */
+  /* problem->model_type = PLASTICITY_MODEL_VON_MISES; */
   
   problem->M = NM_new_from_file(file);
 

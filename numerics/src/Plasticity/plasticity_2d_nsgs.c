@@ -212,26 +212,23 @@ void plasticity_2d_nsgs_initialize_local_solver(
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     switch (localsolver_options->solverId) {
       case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
-        local_function_toolkit->local_solver = & plasticity_2d_projectionOnVonMises_solve;
+        local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
         local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
         local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
         plasticity_2d_projection_initialize(problem, localproblem);
         break;
       }
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
-        local_function_toolkit->local_solver =
-	  &plasticity_2d_projectionOnVonMises_solve;
+        local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
         local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
         local_function_toolkit->free_local_solver =
             &plasticity_2d_projectionOnConeWithLocalIteration_free;
         plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
                                                                     localsolver_options);
-	getchar();        
         break;
       }
       default: {
-        numerics_error("plasticity_2d_nsgs_initialize_local_solver",
-                       "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
+        numerics_printf_verbose(1,"plasticity_2d_nsgs_initialize_local_solver, Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
                        solver_options_id_to_name(localsolver_options->solverId));
       }
     }
@@ -471,10 +468,13 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
                SolverOptions *options) {
   /* verbose=1; */
 
-  FILE *foutput = fopen("plasticity_2d_footing_100_theta0.05.dat", "w");
-  // int info_output =
-  plasticity2D_printInFile(problem, foutput);
-  fclose(foutput);
+
+  /* plasticity_display(problem); */
+  
+  /* FILE *foutput = fopen("plasticity_2d_footing_100_theta0.05.dat", "w"); */
+  /* // int info_output = */
+  /* plasticity2D_printInFile(problem, foutput); */
+  /* fclose(foutput); */
 
   /* int and double parameters */
 

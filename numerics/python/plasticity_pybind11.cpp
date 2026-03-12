@@ -27,12 +27,25 @@
 namespace py = pybind11;
 
 void wrap_plasticity(py::module_& m) {
+  // PlasticityModelType enum
+  py::enum_<PlasticityModelType>(m, "PlasticityModelType", "Type of plasticity model")
+      .value("UNKNOWN", PLASTICITY_MODEL_UNKNOWN, "Unknown model")
+      .value("DRUCKER_PRAGER", PLASTICITY_MODEL_DRUCKER_PRAGER, "Drucker-Prager model")
+      .value("VON_MISES", PLASTICITY_MODEL_VON_MISES, "Von Mises model")
+      .export_values();
+
   // Plasticity_DruckerPrager_model
   py::class_<Plasticity_DruckerPrager_model>(m, "Plasticity_DruckerPrager_model",
     "Drucker-Prager plasticity model parameters (eta, theta)")
     .def(py::init<>())
     .def_readwrite("eta", &Plasticity_DruckerPrager_model::eta, "Cone coefficients")
     .def_readwrite("theta", &Plasticity_DruckerPrager_model::theta, "Dilatancy coefficients");
+
+  // Plasticity_VonMises_model
+  py::class_<Plasticity_VonMises_model>(m, "Plasticity_VonMises_model",
+    "Von Mises plasticity model parameters (yield stress)")
+    .def(py::init<>())
+    .def_readwrite("sigma_y", &Plasticity_VonMises_model::sigma_y, "Yield stress");
 
   // PlasticityProblem - use a wrapper approach similar to friction contact
   py::class_<PlasticityProblem>(m, "PlasticityProblem",
@@ -42,7 +55,8 @@ void wrap_plasticity(py::module_& m) {
     .def_readwrite("numberOfCones", &PlasticityProblem::numberOfCones, "Number of cones")
     .def_readwrite("M", &PlasticityProblem::M, "M matrix")
     .def_readwrite("q", &PlasticityProblem::q, "q vector")
-    .def_readwrite("model", &PlasticityProblem::model, "Model parameters");
+    .def_readwrite("model_type", &PlasticityProblem::model_type, "Model type enum")
+    .def_readwrite("model", &PlasticityProblem::model, "Model parameters union");
 
   // Factory function for creating PlasticityProblem with Drucker-Prager model
   m.def("PlasticityProblem_new", [](int dim, py::array_t<double> M, py::array_t<double> q,
@@ -113,6 +127,36 @@ void wrap_plasticity(py::module_& m) {
        "Create a PlasticityProblem (backward compatibility)",
        py::return_value_policy::take_ownership);
 
+  // Factory function for creating PlasticityProblem with Von Mises model
+  m.def("PlasticityProblem_new_VonMises", [](int dim, py::array_t<double> M, py::array_t<double> q,
+                                              py::array_t<double> sigma_y) {
+      auto* problem = new PlasticityProblem();
+      problem->dimension = dim;
+      problem->numberOfCones = sigma_y.size();
+      problem->model_type = PLASTICITY_MODEL_VON_MISES;
+      
+      // Create M matrix from numpy array
+      py::buffer_info M_info = M.request();
+      problem->M = NM_create(NM_DENSE, M_info.shape[0], M_info.shape[1]);
+      problem->M->matrix0 = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
+      std::memcpy(problem->M->matrix0, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
+      
+      // Copy q vector
+      py::buffer_info q_info = q.request();
+      problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
+      std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
+      
+      // Create Von Mises model and copy sigma_y
+      problem->model.von_mises = (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+      py::buffer_info sigma_y_info = sigma_y.request();
+      problem->model.von_mises->sigma_y = (double*)malloc(sigma_y_info.shape[0] * sizeof(double));
+      std::memcpy(problem->model.von_mises->sigma_y, sigma_y_info.ptr, sigma_y_info.shape[0] * sizeof(double));
+      
+      return problem;
+    }, py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("sigma_y"),
+       "Create a PlasticityProblem with Von Mises model",
+       py::return_value_policy::take_ownership);
+
   // Driver function (forward declaration - actual implementation is in the driver)
   // We need to declare it here to make it available in Python
   // The driver function signature is:
@@ -142,6 +186,7 @@ void wrap_plasticity(py::module_& m) {
       .value("PLASTICITY_2D_ONECONE_ProjectionOnCone", PLASTICITY_2D_ONECONE_ProjectionOnCone, "Projection on cone")
       .value("PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration", 
              PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration, "Projection with local iteration")
+      .value("PLASTICITY_2D_ONECONE_VONMISES", PLASTICITY_2D_ONECONE_VONMISES, "Von Mises radial return")
       .export_values();
 
   // Also export as module attributes for convenience
@@ -152,6 +197,7 @@ void wrap_plasticity(py::module_& m) {
   m.attr("PLASTICITY_2D_ONECONE_ProjectionOnCone") = (int)PLASTICITY_2D_ONECONE_ProjectionOnCone;
   m.attr("PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration") = 
       (int)PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration;
+  m.attr("PLASTICITY_2D_ONECONE_VONMISES") = (int)PLASTICITY_2D_ONECONE_VONMISES;
 
   // Backward compatibility solver IDs
   m.attr("MOHR_COULOMB_2D_NSGS") = (int)PLASTICITY_2D_NSGS;
