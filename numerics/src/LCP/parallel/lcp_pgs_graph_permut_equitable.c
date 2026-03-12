@@ -8,6 +8,7 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
+#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
@@ -17,6 +18,10 @@
 #include "siconos_debug.h"  
 
 #include "graph_tools.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                                     SolverOptions *options) {
@@ -215,3 +220,42 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   free(lefts);
 
 }
+
+static void lcp_pgs_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PGS in the global solver registry.
+ */
+
+static int lcp_pgs_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_pgs_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_pgs((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_pgs_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE, "SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE",
+                "SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE",
+                lcp_pgs_init_wrap,
+                lcp_pgs_solve_wrap,
+                lcp_pgs_free_wrap,
+                NULL,  /* error function */
+                lcp_pgs_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0);     /* is_local_solver */

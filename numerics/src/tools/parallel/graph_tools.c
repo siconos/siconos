@@ -226,7 +226,7 @@ typedef struct node {
   struct node* next;
 } node_t;
 
-node_t* create_node(size_t val) {
+node_t* create_node_(size_t val) {
   node_t* new_node = (node_t*)malloc(sizeof(node_t));
   new_node->val = val;
   new_node->next = NULL;
@@ -235,7 +235,7 @@ node_t* create_node(size_t val) {
 }
 
 void push_new_node(node_t** head_node, size_t val) {
-  node_t* new_node = create_node(val);
+  node_t* new_node = create_node_(val);
 
   new_node->next = *head_node;
   *head_node = new_node;
@@ -327,7 +327,7 @@ void create_adjacency_lists(int n, NumericsMatrix* M, node_t** adjacency_lists) 
       int64_t* Mi = sparse->i;
 
       for (int row = 0; row < n; row++) {
-        adjacency_lists[row] = create_node(0);
+        adjacency_lists[row] = create_node_(0);
         for (CS_INT p = Mp[row]; p < Mp[row + 1]; ++p) {
           // push_new_node(&adjacency_lists[row], (size_t)Mi[p]);
           if (row != Mi[p]) push_new_node(&adjacency_lists[row], (size_t)Mi[p]);
@@ -380,7 +380,7 @@ int color_graph_permut_equitable(int n, NumericsMatrix* M, size_t* n_colors,
   /* Array containing lists of vertices for each color */
   node_t** vertices_array = (node_t**)malloc(tmp_n_colors * 2 * sizeof(node_t*));
   for (size_t i = 0; i < tmp_n_colors * 2; i++) {
-    vertices_array[i] = create_node(0);
+    vertices_array[i] = create_node_(0);
     if (i < tmp_n_colors) {
       for (size_t j = tmp_sum_sizes[i]; j < tmp_sum_sizes[i + 1]; j++) {
         push_new_node(&vertices_array[i], inv_permutation[j]);

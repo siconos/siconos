@@ -97,12 +97,12 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
                      int* info, SolverOptions* options);
 #endif
 
-void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
+/* void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
                                        FreeSolverNSGSPtr *freeSolver,
                                        ComputeErrorPtr *computeError,
                                        FrictionContactProblem *problem,
                                        FrictionContactProblem *localproblem,
-                                       SolverOptions *options);
+                                       SolverOptions *options); */
 
 void fc3d_admm(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);

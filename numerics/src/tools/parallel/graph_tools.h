@@ -72,7 +72,7 @@ int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t
 
 typedef struct node node_t;
 
-node_t *create_node(size_t val);
+node_t *create_node_(size_t val);
 
 void push_new_node(node_t **head_node, size_t val);
 

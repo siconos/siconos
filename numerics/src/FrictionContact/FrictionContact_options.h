@@ -63,16 +63,16 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_2D_LEMKE = 404,
   /** Enumerative solver for 2D friction contact */
   SICONOS_FRICTION_2D_ENUM = 405,
-#if defined SICONOS_OMP && defined SICONOS_PETSC
+// #if defined SICONOS_OMP && defined SICONOS_PETSC
   SICONOS_FRICTION_2D_NSGS_GRAPH = 406,
   SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI = 407,
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT = 408,
   SICONOS_FRICTION_2D_NSGS_PERMUT = 411,
-#endif
-#if defined SICONOS_CUDA && defined SICONOS_PETSC
+// #endif
+// #if defined SICONOS_CUDA && defined SICONOS_PETSC
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA = 409,
   SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY = 410,
-#endif
+// #endif
 
   /* -----------------------------------------------------------------------
    * 3D Frictional Contact solvers - Local formulation (IDs 500-549)
