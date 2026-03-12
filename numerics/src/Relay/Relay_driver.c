@@ -23,30 +23,23 @@
 #include "RelayProblem.h"      // for RelayProblem
 #include "Relay_Solvers.h"     // for relay_avi_caoferris, relay_avi_caoferr...
 #include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
-#include "numerics_verbose.h"  // for numerics_error, verbose
-#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
+#include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for relay_driver
 #endif
 
-const char* const SICONOS_RELAY_PGS_STR = "RELAY_PGS";
-const char* const SICONOS_RELAY_PATH_STR = "RELAY_PATH";
-const char* const SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
-const char* const SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
-const char* const SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
-const char* const SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR =
-    "test version of the solver by Cao & Ferris; DO NOT USE!";
-
 int relay_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options) {
   // Relay_display(problem);
 
-  if (options == NULL)
-    numerics_error("Relay_driver", "null input for solver and/or global options");
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;

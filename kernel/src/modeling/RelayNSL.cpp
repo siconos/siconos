@@ -1,0 +1,47 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+#include "RelayNSL.hpp"
+
+#include <iostream>
+
+siconos::modeling::RelayNSL::RelayNSL(siconos::algebra::Index size, double lb, double ub):
+  NonSmoothLaw(size), _lb(lb), _ub(ub)
+{
+  if(ub < lb)
+    THROW_EXCEPTION("RelayNSL::RelayNSL). Upper bound ub must be greater than lower bound lb");
+}
+
+
+bool siconos::modeling::RelayNSL::RelayNSL::isVerified(void) const
+{
+  bool res = false;
+  // to do
+  return res;
+}
+
+void siconos::modeling::RelayNSL::RelayNSL::display() const
+{
+  std::cout << "------------------------------------" <<std::endl;
+  std::cout << "____ data of the RelayNSL" <<std::endl;
+  std::cout << "| nSLawSize : " << _size <<std::endl;
+  std::cout << "| lb : " << _lb <<std::endl;
+  std::cout << "| ub : " << _ub <<std::endl;
+  std::cout << "____________________________" <<std::endl;
+  std::cout << "------------------------------------" <<std::endl;
+}

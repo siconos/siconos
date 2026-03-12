@@ -32,7 +32,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_PRINT
-
+#include "numerics_errors.h"
 void Function_VI_FC3D(void *self, int n_notused, double *x, double *F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
   VariationalInequality *vi = (VariationalInequality *)self;

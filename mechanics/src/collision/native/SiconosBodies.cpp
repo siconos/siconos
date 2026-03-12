@@ -14,25 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "SiconosBodies.hpp"
-#include <Simulation.hpp>
-#include "SpaceFilter.hpp"
 
-#include <iostream>
+#include "SiconosException.hpp"
+#include "Simulation.hpp"
 
-void SiconosBodies::compute()
-{
-  try
-  {
+void siconos::collision::native::SiconosBodies::compute() {
+  try {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
 
-  catch(...)
-  {
+  catch (...) {
     siconos::exception::process();
   }
 }
-

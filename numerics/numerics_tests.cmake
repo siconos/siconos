@@ -1,11 +1,12 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+
   add_custom_target(numerics-tests echo "Start numerics tests")
-  
   begin_tests(src/tools/test)
 
   new_test(SOURCES test_op3x3.c DEPS externals)
+  new_test(SOURCES test_op5x5.c DEPS externals)
 
   new_test(SOURCES test_timers_interf.c)
 
@@ -14,13 +15,17 @@ if(WITH_TESTING)
   #if(HAS_LAPACK_dgesvd) # Some lapack versions miss dgesvd
   new_test(SOURCES test_pinv.c)# DEPS "externals")
   #endif()
-  
+
+  new_test(SOURCES test_graph.c)
+
   new_test(NAME tools_projection SOURCES test_projection.c)
 
   new_test(SOURCES NumericsArrays.c)
 
   #  tests for NumericsMatrix
+
   new_test(SOURCES NM_test.c DEPS "SuiteSparse::CXSparse;externals")
+
 
   #  tests for JordanAlgebra
   NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
@@ -29,13 +34,17 @@ if(WITH_TESTING)
   if(WITH_MUMPS)
     new_test(SOURCES NM_MUMPS_test.c)
   endif()
-  
+
   # Specfic tests for SBM matrices 
   new_test(SOURCES SBM_test.c DEPS "SuiteSparse::CXSparse;externals")
   new_test(SOURCES SBCM_to_SBM.c)
 
   # Specfic tests for sparse matrices 
   new_test(SOURCES SparseMatrix_test.c DEPS "SuiteSparse::CXSparse")
+
+
+  # Specfic tests for sparse matrices
+  new_test(SOURCES NM_conversions_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
     new_test(SOURCES vertex_problem.c DEPS externals)
@@ -54,7 +63,7 @@ if(WITH_TESTING)
   #  Usually, solvers list is defined in test_solvers_collection* files and data files list
   #  in data_collection* files.
   #  Use new_tests_collection function as below.
-  
+
   new_test(NAME lcp_test_DefaultSolverOptions SOURCES LinearComplementarity_DefaultSolverOptions_test.c)
 
   new_tests_collection(
@@ -137,9 +146,9 @@ if(WITH_TESTING)
   if(HAVE_PATHFERRIS)
     list(APPEND SICONOS_NCP_SOLVERS "SICONOS_NCP_PATH")
   endif()
-  
+
   if(WITH_UNSTABLE_TEST)
-  
+
     # -- Declare the tests --
     foreach(SOLVER IN LISTS SICONOS_NCP_SOLVERS)
       new_tests_collection(DRIVER NCP_ZI1.c.in FORMULATION NCP COLLECTION ${SOLVER})
@@ -147,7 +156,7 @@ if(WITH_TESTING)
         new_tests_collection(DRIVER NCP_ZIT1.c.in FORMULATION NCP COLLECTION ${SOLVER} SUFFIX _UNSTABLE)
       endif()
     endforeach()
-    
+
   endif()
 
   #===========================================
@@ -174,7 +183,7 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_5
     EXTRA_SOURCES data_collection_3.c test_nsgs_5.c)
-  
+
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_admm_1.c)
@@ -210,6 +219,9 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_QUARTIC_COLLECTION_1
     EXTRA_SOURCES data_collection_5.c test_quartic_1.c)
+  new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_1
+    EXTRA_SOURCES data_collection_1.c test_ipm_snm_fc3d_1.c)
 
   if (WITH_OPENMP AND WITH_PETSC)
     new_tests_collection(
@@ -231,7 +243,7 @@ if(WITH_TESTING)
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_5
       EXTRA_SOURCES data_collection_3.c test_nsgs_5_parallel.c DEPS "PkgConfig::PETSC")
   endif()
-    
+
   # --- LMGC driver ---
   new_test(SOURCES fc3d_newFromFortranData.c)
   new_test(SOURCES fc3d_LmgcDriver_test1.c)
@@ -240,9 +252,27 @@ if(WITH_TESTING)
   new_test(SOURCES fc3d_LmgcDriver_test4.c)
   new_test(SOURCES fc3d_LmgcDriver_test5.c)
 
+  # --- NSGS standalone debug tests ---
+  # These are simple debug tests that verify basic NSGS functionality
+  new_test(SOURCES test_nsgs_debug.c)
+  new_test(SOURCES test_nsgs_debug2.c)
+  new_test(SOURCES test_nsgs_debug3.c)
+  new_test(SOURCES test_nsgs_debug4.c)
+  new_test(SOURCES test_simple_compare.c)
+  # The following tests compare original and generic NSGS implementations
+  # They are debugging/development tools, not production tests
+  # To run them manually: cd build && make test_nsgs_compare && ./numerics/test_nsgs_compare
+  # new_test(SOURCES test_nsgs_compare.c)
+  # new_test(SOURCES test_nsgs_detailed_compare.c)
+  # Performance test - requires specific data file (KaplasTower-i1061-4.hdf5.dat)
+  # new_test(SOURCES test_nsgs_performance.c)
+  # Profile test - requires instrumentation header
+  # new_test(SOURCES test_nsgs_profile.c)
+
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
   # ---------------------------------------------------
+  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
@@ -255,6 +285,9 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
+  new_tests_collection(
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d_semismooth COLLECTION TEST_IPM_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_snm_gfc3d_1.c )
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_admm_gfc3d_1.c )
@@ -269,68 +302,115 @@ if(WITH_TESTING)
   # ---------------------------------------------------
   # --- Rolling friction contact problem formulation ---
   # ---------------------------------------------------
-  
+
+  begin_tests(src/RollingFrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_tests_collection(
     DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION
     EXTRA_SOURCES data_collection_rfc3d.c test_first_order_rfc3d_1.c )
   new_tests_collection(
     DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_grfc3d.c test_ipm_grfc3d_1.c )
-      
+
   if(WITH_FCLIB)
 
-    new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS FCLIB::fclib)
+    begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
+    new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS fclib::fclib)
 
-    new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_fclib.c test_nsgs_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
+    if(WITH_HDF5)
+        new_tests_collection(
+          DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_nsgs_1.c DEPS fclib::fclib
+          HDF5 ON
+          )
+          
+        new_tests_collection(
+          DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_admm_1.c DEPS fclib::fclib
+          HDF5 ON
+          )
 
-    new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_fclib.c test_admm_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
+        new_tests_collection(
+          DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_ipm_snm_fc3d_1.c DEPS fclib::fclib
+          HDF5 ON 
+          )
 
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
-    
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_PA
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
- 
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
+        # new_tests_collection(
+        #   DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
+        #   EXTRA_SOURCES data_collection_fc3d_fclib_full.c test_ipm_snm_fc3d_1.c DEPS fclib::fclib
+        #   HDF5 ON
+        #   )
 
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
-      
-    new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
-      
+        # new_tests_collection(
+        #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSGS_WR_COLLECTION_FCLIB_FULL
+        #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_nsgs_wr_gfc3d_1.c DEPS fclib::fclib
+        #   HDF5 ON
+        #   )
+
+        begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c
+          HDF5 ON
+          )
+
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c
+          HDF5 ON
+          )
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_PA
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c
+          HDF5 ON
+          )
+
+        # new_tests_collection(
+        #   DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_FULL
+        #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_admm_gfc3d_1.c DEPS fclib::fclib
+        #   HDF5 ON
+        #   )
+
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c
+          HDF5 ON
+          )
+
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c
+          HDF5 ON
+          )
+
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c
+          HDF5 ON
+          )
+
+        new_tests_collection(
+          DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB
+          EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_snm_gfc3d_1.c
+          HDF5 ON
+          )
+    endif()
+
+    # new_tests_collection(
+    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
+    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_gfc3d_1.c DEPS fclib::fclib
+    #   HDF5 ON
+    #   )
+
+    # new_tests_collection(
+    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_WR_COLLECTION_FCLIB_FULL
+    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_wr_gfc3d_1.c DEPS fclib::fclib
+    #   HDF5 ON
+    #   )
+
     # new_tests_collection(
     #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
+    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS fclib::fclib
     #   HDF5 ON
     #   )
 
@@ -338,33 +418,35 @@ if(WITH_TESTING)
     # ---------------------------------------------------
     # --- Rolling friction contact problem formulation ---
     # ---------------------------------------------------
-    
+
+    begin_tests(src/RollingFrictionContact/test DEPS "SuiteSparse::CXSparse;externals;fclib::fclib")
     new_tests_collection(
       DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
+      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c)
 
     new_tests_collection(
       DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+      EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c
       HDF5 ON
       )
-      
+
      # new_tests_collection(
      #  DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
-     #  EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+     #  EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS fclib::fclib
      #  HDF5 ON
      #  )
-    
+
+
   endif()
 
   #===========================================
   # 2D Friction Contact tests
   #===========================================
+  begin_tests(src/FrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   # test 2D dense, all solvers but enum
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
-
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
     EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
@@ -386,10 +468,20 @@ if(WITH_TESTING)
   endif()
 
   # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
-  
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)
+
+  #===========================================
+  # Mohr Coulomb platicity
+  #===========================================
+  begin_tests(src/Plasticity/test)
+  new_test(SOURCES mc2d_read_write_test.c)
+  new_test(SOURCES mc2d_simple_solve_test.c)
+  
+
+    
+
 
   #===========================================
   # Generic mechanical tests
@@ -413,7 +505,7 @@ if(WITH_TESTING)
   if(HAVE_PATHFERRIS)
     list(APPEND SICONOS_VI_SOLVERS "SICONOS_VI_BOX_PATH")
   endif()
-  
+
   if(WARNINGS_LEVEL GREATER 0)
     foreach(SOLVER IN LISTS SICONOS_VI_SOLVERS)
       new_tests_collection(DRIVER VI_ZI1.c.in FORMULATION vi COLLECTION ${SOLVER} SUFFIX I1 )
@@ -425,8 +517,10 @@ if(WITH_TESTING)
   begin_tests(src/QP/test)
 
   new_test(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
+
   new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS externals)
-  
+
+
   # ----------- AVI solvers tests -----------
   begin_tests(src/AVI/test)
 
@@ -446,12 +540,12 @@ if(WITH_TESTING)
   #new_test(SOURCES soclcp_test5.c)
   new_test(SOURCES fc3d_to_soclcp.c)
 
-  # ---- Extra conf for ${COMPONENT}-test library ---
-  if(TARGET numerics-test)
+  # ---- Extra conf for ${COMPONENT}-tests library ---
+  if(TARGET numerics-tests)
     if(MSVC)
       # This part should be reviewed by a windows expert ...
       include(WindowsLibrarySetup)
-      windows_library_extra_setup("numerics-test" "numerics-test")
+      windows_library_extra_setup("numerics-tests" "numerics-tests")
     endif()
   endif()
 

@@ -16,14 +16,29 @@
 # limitations under the License.
 #
 
-This is the changelog for the Siconos package, www.siconos.gforge.inria.fr.
+This is the changelog for the Siconos package, http://siconos.org.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 	before it.
 
 
 --------------------------------------------------------------------------------
-  Current (in development branch siconos/master) --> 4.5.0.rc
+  v 2026.rc1
+--------------------------------------------------------------------------------
+
+Main changes:
+	* [vkernel] NEW: Vectorized kernel module with SoA (Structure of Arrays) architecture
+	  for large-scale systems. Features Eigen-based algebra, runtime-defined systems,
+	  and cache-friendly memory layout for millions of objects.
+	* [numerics] Solver registration system with unified drivers (REGISTER_SOLVER macros)
+	* [numerics] Rolling friction contact solvers (3D/2D, NSGS, NSN, IPM)
+	* [numerics] Plasticity 2D module (renamed from Mohr-Coulomb)
+	* [python] pybind11 bindings replacing SWIG (with Eigen-NumPy zero-copy mapping)
+	* [kernel] C++20 modernization: namespace encapsulation (siconos::), removal of SP::
+	* [build] scikit-build integration, nlohmann/json support
+
+--------------------------------------------------------------------------------
+  v 4.5.0
 --------------------------------------------------------------------------------
 
 Main changes:
@@ -118,7 +133,7 @@ Main changes:
         This hacks is done to avoid multiple memory resetting if multiple simulations shared the same memory
         In the latter case, this has to be done more carefully in the future.
 
-	* [kernel] separate initialization of DSlink and work vectors and matrices in Relation.
+	* [kernel] separate initialization of ds_vars and work vectors and matrices in Relation.
         rename initialize --> initializeDSLink
         rename initcomponents --> initializeWorkVectorsAndMatrices
 
@@ -244,7 +259,7 @@ Main changes:
 	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
 
 	* [kernel] cleaning and rewriting of methods in NewtonEulerDS and NewtonEulerR
-	to be more explicit(avoid the use of DSlink in particular)
+	to be more explicit(avoid the use of ds_vars in particular)
 
 	* [kernel] move some methods in Simulation to NonSmoothDynamicalSystem
 	(reset, swapInMemory,  updateOutput, updateInput) and change the initialization
@@ -302,7 +317,7 @@ Main Changes:
 
 ################## Old Changelog files before merge
 
-This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
+This is the changelog for the Siconos/Numerics package, http://siconos.org.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.

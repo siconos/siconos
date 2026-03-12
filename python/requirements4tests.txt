@@ -1,0 +1,5 @@
+numpy
+scipy
+pytest
+h5py
+vtk

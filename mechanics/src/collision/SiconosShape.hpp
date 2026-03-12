@@ -14,48 +14,54 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosShape.hpp
-  \brief Definition of an abstract rigid shape
+  \brief Definition of rigid shapes (derivated from top level abstract class SiconosShape)
+  derivated
 */
-
 
 #ifndef SiconosShape_h
 #define SiconosShape_h
 
-#include "MechanicsFwd.hpp"
-#include <SiconosVisitor.hpp>
 #include <SiconosSerialization.hpp>
-#include <SiconosVector.hpp>
-#include <SiconosMatrix.hpp>
+#include <memory>
+#include <vector>
 
-class SiconosShape
-{
-protected:
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
+namespace siconos::collision {
+
+namespace internal {
+class ShapeVisitor;
+}
+
+class SiconosShape {
+ protected:
   ACCEPT_SERIALIZATION(SiconosShape);
 
-  double _inside_margin;
-  double _outside_margin;
-  unsigned int _version; // version number tracks changes to shape properties
+  double _inside_margin{0.1};
+  double _outside_margin{0.};
+  unsigned int _version{0};
+  // version number tracks changes to shape properties
 
-  SiconosShape()
-    : _inside_margin(0.1)
-    , _outside_margin(0.0)
-    , _version(0)
-    {}
+  // Rule of five
+  SiconosShape() = default;
+  SiconosShape(const SiconosShape&) = delete;
+  SiconosShape(SiconosShape&&) = delete;
+  SiconosShape& operator=(const SiconosShape&) = delete;
+  SiconosShape& operator=(SiconosShape&&) = delete;
 
-public:
-
-  virtual ~SiconosShape() {}
+ public:
+  virtual ~SiconosShape() noexcept = default;
 
   /** Set the inside margin of the shape.  This is a distance that the
    *  contour should be shrunk to improve contact detection robustness.
    *  It will have an effect on the roundness of corners. */
-  void setInsideMargin (double margin)
-  {
+  void setInsideMargin(double margin) {
     _inside_margin = margin;
-    _version ++;
+    _version++;
   }
 
   /** Set the outside margin of the shape.  This is the distance from
@@ -64,10 +70,9 @@ public:
    *  the external shell and project them back to the contact shell.
    *  Note: Currently not working in Bullet implementation!  Better to
    *  leave at zero. */
-  void setOutsideMargin(double margin)
-  {
+  void setOutsideMargin(double margin) {
     _outside_margin = margin;
-    _version ++;
+    _version++;
   }
 
   double insideMargin() { return _inside_margin; }
@@ -76,429 +81,328 @@ public:
 
   unsigned int version() const { return _version; }
 
-  VIRTUAL_ACCEPT_VISITORS();
+  virtual void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) = 0;
 };
 
-class SiconosPlane : public SiconosShape,
-                     public std::enable_shared_from_this<SiconosPlane>
-{
-protected:
+class SiconosPlane : public SiconosShape, public std::enable_shared_from_this<SiconosPlane> {
+ protected:
   ACCEPT_SERIALIZATION(SiconosPlane);
 
-public:
-  SiconosPlane() : SiconosShape() {}
+ public:
+  SiconosPlane() = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  virtual ~SiconosPlane() {}
-
-  ACCEPT_VISITORS();
+  virtual ~SiconosPlane() noexcept = default;
 };
 
-class SiconosSphere : public SiconosShape,
-                      public std::enable_shared_from_this<SiconosSphere>
-{
-private:
-  SiconosSphere() : SiconosShape() {};
+class SiconosSphere : public SiconosShape, public std::enable_shared_from_this<SiconosSphere> {
+ private:
+  SiconosSphere() = delete;
 
-protected:
+ protected:
   ACCEPT_SERIALIZATION(SiconosSphere);
-  float _radius;
+  float _radius{0.};
 
-public:
-  SiconosSphere(float radius)
-    : SiconosShape(), _radius(radius) {}
+ public:
+  SiconosSphere(float radius) : SiconosShape(), _radius(radius) {}
 
-  virtual ~SiconosSphere() {}
+  virtual ~SiconosSphere() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
   float radius() const { return _radius; }
-  void setRadius(float r) { _radius = r; _version ++; }
-
-  ACCEPT_VISITORS();
+  void setRadius(float r) {
+    _radius = r;
+    _version++;
+  }
 };
 
-class SiconosBox : public SiconosShape,
-                   public std::enable_shared_from_this<SiconosBox>
-{
-private:
-  SiconosBox() : SiconosShape() {};
+class SiconosBox : public SiconosShape, public std::enable_shared_from_this<SiconosBox> {
+ private:
+  SiconosBox() = delete;
 
-protected:
+ protected:
   ACCEPT_SERIALIZATION(SiconosBox);
-  SP::SiconosVector _dimensions;
+  std::shared_ptr<siconos::algebra::SiconosVector> _dimensions{nullptr};
 
-public:
-  SiconosBox(double width, double height, double depth)
-    : SiconosShape(), _dimensions(new SiconosVector(3))
-  {
-    (*_dimensions)(0) = width;
-    (*_dimensions)(1) = height;
-    (*_dimensions)(2) = depth;
-  }
+ public:
+  SiconosBox(double width, double height, double depth);
 
-  SiconosBox(SP::SiconosVector dimensions)
-    : SiconosShape(), _dimensions(dimensions) {}
+  SiconosBox(std::shared_ptr<siconos::algebra::SiconosVector> dimensions)
+      : SiconosShape(), _dimensions(dimensions) {}
 
-  virtual ~SiconosBox() {}
+  SiconosBox(Eigen::Ref<siconos::algebra::SiconosVector> dimensions)
+      : SiconosShape(),
+        _dimensions(std::make_shared<siconos::algebra::SiconosVector>(dimensions)) {}
 
-  SP::SiconosVector dimensions() const { return _dimensions; }
+  virtual ~SiconosBox() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  void setDimensions(double width, double height, double depth)
-  {
-    (*_dimensions)(0) = width;
-    (*_dimensions)(1) = height;
-    (*_dimensions)(2) = depth;
-    _version ++;
-  }
+  std::shared_ptr<siconos::algebra::SiconosVector> dimensions() const { return _dimensions; }
 
-  void setDimensions(SP::SiconosVector dim)
-  {
+  void setDimensions(double width, double height, double depth);
+
+  void setDimensions(std::shared_ptr<siconos::algebra::SiconosVector> dim) {
     _dimensions = dim;
-    _version ++;
+    _version++;
   }
 
-  void setDimensions(const SiconosVector& dim)
-  {
-    (*_dimensions)(0) = dim(0);
-    (*_dimensions)(1) = dim(1);
-    (*_dimensions)(2) = dim(2);
-    _version ++;
-  }
-
-  ACCEPT_VISITORS();
+  void setDimensions(const siconos::algebra::SiconosVector& dim);
 };
 
 class SiconosCylinder : public SiconosShape,
-                        public std::enable_shared_from_this<SiconosCylinder>
-{
-private:
-  SiconosCylinder() : SiconosShape() {};
+                        public std::enable_shared_from_this<SiconosCylinder> {
+ private:
+  SiconosCylinder() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosCylinder);
-  double _radius;
-  double _length;
+  double _radius{0.};
+  double _length{0.};
 
-public:
+ public:
   SiconosCylinder(float radius, float length)
-    : SiconosShape(), _radius(radius), _length(length)
-  {
-  }
+      : SiconosShape(), _radius(radius), _length(length) {}
 
-  virtual ~SiconosCylinder() {}
+  virtual ~SiconosCylinder() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  void setRadius(double radius)
-  {
+  void setRadius(double radius) {
     _radius = radius;
-    _version ++;
+    _version++;
   }
 
   double radius() { return _radius; }
 
-  void setLength(double length)
-  {
+  void setLength(double length) {
     _length = length;
-    _version ++;
+    _version++;
   }
 
   double length() { return _length; }
-
-  ACCEPT_VISITORS();
 };
 
-class SiconosCone : public SiconosShape,
-                        public std::enable_shared_from_this<SiconosCone>
-{
-private:
-  SiconosCone() : SiconosShape() {};
+class SiconosCone : public SiconosShape, public std::enable_shared_from_this<SiconosCone> {
+ private:
+  SiconosCone() = delete;
 
-protected:
+ protected:
   ACCEPT_SERIALIZATION(SiconosCone);
-  double _radius;
-  double _length;
+  double _radius{0.};
+  double _length{0.};
 
-public:
-  SiconosCone(float radius, float length)
-    : SiconosShape(), _radius(radius), _length(length)
-  {
-  }
+ public:
+  SiconosCone(float radius, float length) : SiconosShape(), _radius(radius), _length(length) {}
 
-  virtual ~SiconosCone() {}
+  virtual ~SiconosCone() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  void setRadius(double radius)
-  {
+  void setRadius(double radius) {
     _radius = radius;
-    _version ++;
+    _version++;
   }
 
   double radius() { return _radius; }
 
-  void setLength(double length)
-  {
+  void setLength(double length) {
     _length = length;
-    _version ++;
+    _version++;
   }
 
   double length() { return _length; }
-
-  ACCEPT_VISITORS();
 };
 
 class SiconosCapsule : public SiconosShape,
-                        public std::enable_shared_from_this<SiconosCapsule>
-{
-private:
-  SiconosCapsule() : SiconosShape() {};
+                       public std::enable_shared_from_this<SiconosCapsule> {
+ private:
+  SiconosCapsule() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosCapsule);
-  double _radius;
-  double _length;
+  double _radius{0.};
+  double _length{0.};
 
-public:
+ public:
   SiconosCapsule(float radius, float length)
-    : SiconosShape(), _radius(radius), _length(length)
-  {
-  }
+      : SiconosShape(), _radius(radius), _length(length) {}
 
-  virtual ~SiconosCapsule() {}
+  virtual ~SiconosCapsule() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  void setRadius(double radius)
-  {
+  void setRadius(double radius) {
     _radius = radius;
-    _version ++;
+    _version++;
   }
 
   double radius() { return _radius; }
 
-  void setLength(double length)
-  {
+  void setLength(double length) {
     _length = length;
-    _version ++;
+    _version++;
   }
 
   double length() { return _length; }
-
-  ACCEPT_VISITORS();
 };
-
-
 
 class SiconosConvexHull : public SiconosShape,
-                          public std::enable_shared_from_this<SiconosConvexHull>
-{
-private:
-  SiconosConvexHull() : SiconosShape() {};
+                          public std::enable_shared_from_this<SiconosConvexHull> {
+ private:
+  SiconosConvexHull() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosConvexHull);
-  SP::SiconosMatrix _vertices;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _vertices{nullptr};
 
-public:
-  SiconosConvexHull(SP::SiconosMatrix vertices)
-    : SiconosShape(), _vertices(vertices)
-  {
-    if (_vertices && _vertices->size(1) != 3)
-      THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
-  }
+ public:
+  SiconosConvexHull(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosConvexHull(Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
-  virtual ~SiconosConvexHull() {}
+  virtual ~SiconosConvexHull() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  SP::SiconosMatrix vertices() const { return _vertices; }
+  std::shared_ptr<siconos::algebra::SiconosMatrix> vertices() const { return _vertices; }
 
-  void setVertices(SP::SiconosMatrix vertices)
-  {
+  void setVertices(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices) {
     _vertices = vertices;
-    _version ++;
+    _version++;
   }
-
-  ACCEPT_VISITORS();
 };
 
-typedef std::vector<unsigned int> VUInt;
-TYPEDEF_SPTR(VUInt)
+class SiconosMesh : public SiconosShape, public std::enable_shared_from_this<SiconosMesh> {
+ private:
+  SiconosMesh() = delete;
 
-class SiconosMesh : public SiconosShape,
-                    public std::enable_shared_from_this<SiconosMesh>
-{
-private:
-  SiconosMesh() : SiconosShape() {};
-
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosMesh);
-  SP::VUInt _indexes;
-  SP::SiconosMatrix _vertices;
+  std::shared_ptr<std::vector<unsigned int>> _indexes{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _vertices{nullptr};
 
-public:
-  SiconosMesh(SP::VUInt indexes,
-              SP::SiconosMatrix vertices)
-    : SiconosShape(), _indexes(indexes), _vertices(vertices)
-  {
-    if (!_indexes || (_indexes->size() % 3) != 0)
-      THROW_EXCEPTION("Mesh indexes size must be divisible by 3.");
-    if (!_vertices || _vertices->size(0) != 3)
-      THROW_EXCEPTION("Mesh vertices matrix must have 3 columns.");
-  }
+ public:
+  SiconosMesh(std::shared_ptr<std::vector<unsigned int>> indexes,
+              std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosMesh(const std::vector<unsigned int>& indexes,
+              Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
-  SP::VUInt indexes() { return _indexes; }
-  SP::SiconosMatrix vertices() { return _vertices; }
+  std::shared_ptr<std::vector<unsigned int>> indexes() { return _indexes; }
+  std::shared_ptr<siconos::algebra::SiconosMatrix> vertices() { return _vertices; }
 
-  virtual ~SiconosMesh() {}
-
-  ACCEPT_VISITORS();
+  virtual ~SiconosMesh() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 };
 
 class SiconosHeightMap : public SiconosShape,
-                         public std::enable_shared_from_this<SiconosHeightMap>
-{
-private:
-  SiconosHeightMap() : SiconosShape() {};
+                         public std::enable_shared_from_this<SiconosHeightMap> {
+ private:
+  SiconosHeightMap() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosHeightMap);
-  SP::SiconosMatrix _height_data;
-  double _length_x;
-  double _length_y;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _height_data{nullptr};
+  double _length_x{0.};
+  double _length_y{0.};
 
-public:
-  SiconosHeightMap(SP::SiconosMatrix height_data,
+ public:
+  SiconosHeightMap(std::shared_ptr<siconos::algebra::SiconosMatrix> height_data,
                    double length_x, double length_y)
-    : SiconosShape(), _height_data(height_data),
-      _length_x(length_x), _length_y(length_y)
-  {
-  }
+      : SiconosShape(), _height_data(height_data), _length_x(length_x), _length_y(length_y) {}
+  SiconosHeightMap(Eigen::Ref<siconos::algebra::SiconosMatrix> height_data, double length_x,
+                   double length_y)
+      : SiconosShape(),
+        _height_data(std::make_shared<siconos::algebra::SiconosMatrix>(height_data)),
+        _length_x(length_x),
+        _length_y(length_y) {}
 
-  SP::SiconosMatrix height_data() { return _height_data; }
+  std::shared_ptr<siconos::algebra::SiconosMatrix> height_data() { return _height_data; }
   double length_x() { return _length_x; }
   double length_y() { return _length_y; }
-
-  virtual ~SiconosHeightMap() {}
-
-  ACCEPT_VISITORS();
+  //
+  virtual ~SiconosHeightMap() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 };
 
+class SiconosDisk : public SiconosShape, public std::enable_shared_from_this<SiconosDisk> {
+ private:
+  SiconosDisk() = delete;
 
-class SiconosDisk : public SiconosShape,
-                    public std::enable_shared_from_this<SiconosDisk>
-{
-private:
-  SiconosDisk() : SiconosShape() {};
-
-protected:
+ protected:
   ACCEPT_SERIALIZATION(SiconosDisk);
-  float _radius;
+  float _radius{0.};
 
-public:
-  SiconosDisk(float radius)
-    : SiconosShape(), _radius(radius) {}
+ public:
+  SiconosDisk(float radius) : SiconosShape(), _radius(radius) {}
 
-  virtual ~SiconosDisk() {}
+  virtual ~SiconosDisk() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
   float radius() const { return _radius; }
-  void setRadius(float r) { _radius = r; _version ++; }
-
-  ACCEPT_VISITORS();
+  void setRadius(float r) {
+    _radius = r;
+    _version++;
+  }
 };
 
-class SiconosBox2d : public SiconosShape,
-                   public std::enable_shared_from_this<SiconosBox2d>
-{
-private:
-  SiconosBox2d() : SiconosShape() {};
+class SiconosBox2d : public SiconosShape, public std::enable_shared_from_this<SiconosBox2d> {
+ private:
+  SiconosBox2d() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosBox2d);
-  SP::SiconosVector _dimensions;
+  std::shared_ptr<siconos::algebra::SiconosVector> _dimensions{nullptr};
 
-public:
-  SiconosBox2d(double width, double height)
-    : SiconosShape(), _dimensions(new SiconosVector(2))
-  {
-    (*_dimensions)(0) = width;
-    (*_dimensions)(1) = height;
-  }
+ public:
+  SiconosBox2d(double width, double height);
 
-  SiconosBox2d(SP::SiconosVector dimensions)
-    : SiconosShape(), _dimensions(dimensions) {}
+  SiconosBox2d(std::shared_ptr<siconos::algebra::SiconosVector> dimensions)
+      : SiconosShape(), _dimensions(dimensions) {}
 
-  virtual ~SiconosBox2d() {}
+  virtual ~SiconosBox2d() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  SP::SiconosVector dimensions() const { return _dimensions; }
+  std::shared_ptr<siconos::algebra::SiconosVector> dimensions() const { return _dimensions; }
 
-  void setDimensions(double width, double height)
-  {
-    (*_dimensions)(0) = width;
-    (*_dimensions)(1) = height;
-    _version ++;
-  }
+  void setDimensions(double width, double height);
 
-  void setDimensions(SP::SiconosVector dim)
-  {
+  void setDimensions(std::shared_ptr<siconos::algebra::SiconosVector> dim) {
     _dimensions = dim;
-    _version ++;
+    _version++;
   }
 
-  void setDimensions(const SiconosVector& dim)
-  {
-    (*_dimensions)(0) = dim(0);
-    (*_dimensions)(1) = dim(1);
-    _version ++;
-  }
-
-  ACCEPT_VISITORS();
+  void setDimensions(const siconos::algebra::SiconosVector& dim);
 };
 
 class SiconosConvexHull2d : public SiconosShape,
-                          public std::enable_shared_from_this<SiconosConvexHull2d>
-{
-private:
-  SiconosConvexHull2d() : SiconosShape() {};
+                            public std::enable_shared_from_this<SiconosConvexHull2d> {
+ private:
+  SiconosConvexHull2d() = delete;
 
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(SiconosConvexHull2d);
-  SP::SiconosMatrix _vertices;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _vertices{nullptr};
 
   /* boolean to use the normal to the selected edge of the convexhull
      to avoid contact with vertex */
-  bool _avoidInternalEdgeContact;
+  bool _avoidInternalEdgeContact{false};
 
-
-public:
+ public:
   /* index of the first point of the selected edge to compute the normal edge (default=0) */
-  int _normal_edge_pointA;
+  int _normal_edge_pointA{0};
   /* index of the first point of the selected edge to compute the normal edge (default=1) */
-  int _normal_edge_pointB;
+  int _normal_edge_pointB{1};
 
+  SiconosConvexHull2d(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosConvexHull2d(Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
-  SiconosConvexHull2d(SP::SiconosMatrix vertices)
-    : SiconosShape(), _vertices(vertices), _avoidInternalEdgeContact(false), _normal_edge_pointA(0), _normal_edge_pointB(1)
-  {
-    if (_vertices && _vertices->size(1) != 2)
-      THROW_EXCEPTION("Convex hull vertices matrix must have 2 columns in 2d.");
-  }
+  virtual ~SiconosConvexHull2d() noexcept = default;
+  void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
 
-  virtual ~SiconosConvexHull2d() {}
+  std::shared_ptr<siconos::algebra::SiconosMatrix> vertices() const { return _vertices; }
 
-  SP::SiconosMatrix vertices() const { return _vertices; }
-
-  void setVertices(SP::SiconosMatrix vertices)
-  {
+  void setVertices(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices) {
     _vertices = vertices;
-    _version ++;
+    _version++;
   }
-  bool avoidInternalEdgeContact() const {return _avoidInternalEdgeContact;}
+  bool avoidInternalEdgeContact() const { return _avoidInternalEdgeContact; }
 
-  void setAvoidInternalEdgeContact(bool value)
-  {
-    _avoidInternalEdgeContact = value;
-  }
-
-  ACCEPT_VISITORS();
+  void setAvoidInternalEdgeContact(bool value) { _avoidInternalEdgeContact = value; }
 };
-
+}  // namespace siconos::collision
 #endif /* SiconosShape_h */

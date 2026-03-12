@@ -14,18 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file JointFrictionR.cpp
-*/
+ */
 
 #include "JointFrictionR.hpp"
-#include <NewtonEulerDS.hpp>
-#include <Interaction.hpp>
-#include <boost/math/quaternion.hpp>
-#include <BlockVector.hpp>
-#include <cfloat>
-#include <iostream>
 
+#include "BlockVector.hpp"
+#include "NewtonEulerJointR.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -34,75 +32,78 @@
 /** Initialize a joint friction for a common case: a single axis with a
  * single friction, either positive or negative. For use with
  * NewtonImpactNSL. */
-JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis)
-  : NewtonEulerR()
-  , _joint(joint)
-  , _axis(std::make_shared< std::vector<unsigned int> >())
-{
+siconos::joints::JointFrictionR::JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint,
+                                                siconos::algebra::Index axis)
+    : NewtonEulerR{},
+      _joint(joint),
+      _axis(std::make_shared<std::vector<siconos::algebra::Index>>()) {
   _axis->push_back(axis);
   _axisMin = axis;
   _axisMax = axis;
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(siconos::algebra::to_index(_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint friction, e.g. the cone friction on
  * a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
-JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVector axes)
-  : NewtonEulerR()
-  , _joint(joint)
-  , _axis(axes)
-{
-  if(axes)
-  {
+siconos::joints::JointFrictionR::JointFrictionR(
+    std::shared_ptr<NewtonEulerJointR> joint,
+    std::shared_ptr<std::vector<siconos::algebra::Index>> axes)
+    : NewtonEulerR{}, _joint(joint), _axis(axes) {
+  if (axes) {
     _axisMin = 100;
     _axisMax = 0;
-    for(unsigned int i=0; i < _axis->size(); i++)
-    {
-      if((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
-      if((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
+    for (size_t i = 0; i < _axis->size(); i++) {
+      if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
+      if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
     }
-  }
-  else
-  {
+  } else {
     _axisMin = _axisMax = 0;
-    _axis = std::make_shared< std::vector<unsigned int> >();
+    _axis = std::make_shared<std::vector<siconos::algebra::Index>>();
     _axis->push_back(0);
   }
 
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(siconos::algebra::to_index(_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
-void JointFrictionR::computeh(double time, const BlockVector& q0, SiconosVector& y)
-{
+void siconos::joints::JointFrictionR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Velocity-level constraint, no position-level h
-  y.zero();
+  y.setZero();
 }
 
-void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
-{
-  unsigned int n = _axisMax - _axisMin + 1;
-  assert(n==1); // For now, multi-axis support TODO
+void siconos::joints::JointFrictionR::computeH_NE_(double time,
+                                                   siconos::modeling::Interaction& inter,
+                                                   const siconos::algebra::BlockVector& q0) {
+  auto n = siconos::algebra::to_index(_axisMax - _axisMin + 1);
+  assert(n == 1);  // For now, multi-axis support TODO
 
-  if(!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
-                     _jachqTmp->size(0) == n))
-  {
-    _jachqTmp = std::make_shared<SimpleMatrix>(n, q0->size());
+  if (!jacobianhOver_q_Tmp ||
+      !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
+    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0.size());
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
+  if (q0.numberOfBlocks() > 1) {
+    _joint->computeJachqDoF(inter, *q0.vector(0), *q0.vector(1), *jacobianhOver_q_Tmp,
+                            _axisMin);
+  } else {
+    _joint->computeJachqDoF(inter, *q0.vector(0), std::nullopt, *jacobianhOver_q_Tmp,
+                            _axisMin);
+  }
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(_jachq->size(0)==1);
-  for(unsigned int i=0; i<1; i++)
-    for(unsigned int j=0; j<_jachq->size(1); j++)
-    {
-      _jachq->setValue(i,j,_jachqTmp->getValue((*_axis)[i]-_axisMin,j) * (i==1?1:-1));
-    }
+  assert(H_NE_view_->rows() == 1);
+  for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++) {
+    (*H_NE_view_)(0, j) = -(*jacobianhOver_q_Tmp)((*_axis)[0] - _axisMin, j);
+  }
 }
 
-unsigned int JointFrictionR::numberOfConstraints()
-{
-  return _axis->size();
+size_t siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }
+siconos::algebra::Index siconos::joints::JointFrictionR::axis(size_t _index) {
+  return _axis->at(_index);
 }
+
+size_t siconos::joints::JointFrictionR::numberOfAxes() { return _axis->size(); }

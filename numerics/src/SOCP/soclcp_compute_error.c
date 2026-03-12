@@ -29,12 +29,13 @@
 /* #define DEBUG_MESSAGES */
 #include "NSSTools.h"          // for max
 #include "SiconosBlas.h"       // for cblas_dcopy
-#include "numerics_verbose.h"  // for numerics_error
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"  // for projectionO...
 #include "siconos_debug.h"     // for DEBUG_PRINTF
 
-void soclcp_unitary_compute_and_add_error(double *z, double *w, unsigned int dim, double mu,
-                                          double *error, double *worktmp) {
+void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim,
+                                          double mu, double *error, double *worktmp) {
   double rho = 1.0;
   for (unsigned int i = 0; i < dim; ++i) {
     worktmp[i] = z[i] - rho * w[i];
@@ -58,10 +59,10 @@ void soclcp_unitary_compute_and_add_error(double *z, double *w, unsigned int dim
 }
 int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, double *z,
                          double *w, double tolerance, SolverOptions *options, double *error) {
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

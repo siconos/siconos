@@ -32,7 +32,11 @@
 #include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
 #include "lcp_cst.h"
 #include "mlcp_cst.h"          // for SICONOS_MLCP_PGS_SBM
-#include "numerics_verbose.h"  // for numerics_error, verbose
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
                                            SparseBlockStructuredMatrix* const blmat,
@@ -102,8 +106,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
   if (nbOfNonNullBlocks < 1) {
-    fprintf(stderr, "Numerics::mlcp_PGS_SBM error: empty M matrix (all blocks = NULL).\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* Local problem initialization */
@@ -232,6 +235,39 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
 }
 
 void mlcp_pgs_sbm_set_default(SolverOptions* options) {
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PGS);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_PGS_SBM in the global solver registry.
+ */
+
+static int mlcp_pgs_sbm_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_pgs_sbm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_pgs_SBM((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
+                "Projected Gauss-Seidel for MLCP with Sparse Block Matrix",
+                mlcp_pgs_sbm_init_wrap,
+                mlcp_pgs_sbm_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                mlcp_pgs_sbm_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

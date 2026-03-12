@@ -1,0 +1,192 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*! \file
+  Fricton-Contact Non-Smooth Problem
+*/
+#ifndef FrictionContact_H
+#define FrictionContact_H
+
+#include <FrictionContact_options.h>  // contains only enum. Ok.
+
+#include "LinearOSNS.hpp"
+
+struct FrictionContactProblem;
+struct SolverOptions;
+
+namespace siconos::nonsmooth_formulations {
+
+/** Pointer to function of the type used for drivers for FrictionContact
+ * problems in Numerics */
+
+/**
+   Formalization and Resolution of a Friction-Contact Problem
+
+   This class is devoted to the formalization and the resolution of
+   friction contact problems defined by :
+
+   \f[
+
+     velocity =  q + M reaction \\
+     \\
+     velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
+
+   \f]
+
+   and a Coulomb friction law.
+
+   With:
+   - \f$ velocity \in R^{m} \f$  and \f$ reaction \in R^{m} \f$ the unknowns,
+   - \f$ M \in R^{m \times m } \f$  and \f$ q \in R^{m} \f$
+   - \f$ m = numberOfContacts * dimension \f$
+
+   m is saved into _sizeOutput attribute.
+   velocity is accessed with "w()" method of LinearOSNS and reaction with "z()" method.
+
+   The dimension of the problem (2D or 3D) is given by the variable
+   contactProblemDim and the proper Numerics driver will be called according to
+   this value.
+
+   \b Construction: just set Numerics Solver id
+
+   Main functions:
+
+   \b Usage:
+   - compute(time) formalize, solve and post-process the problem.
+
+   pre- and post-pro are common to all LinearOSNS and defined in this class.
+
+   For details regarding the available options, see Nonsmooth problems formulations and
+   available solvers in users' guide.
+
+ */
+class FrictionContact : public LinearOSNS {
+ protected:
+  ACCEPT_SERIALIZATION(FrictionContact);
+
+  typedef int (*Driver)(FrictionContactProblem *, double *, double *, SolverOptions *);
+
+  /** Type (dimension) of the contact problem (2D or 3D) */
+  int _contactProblemDim{3};
+
+  /** * friction coefficients */
+  std::shared_ptr<std::vector<double>> _mu{nullptr};
+
+  /** Pointer to the function used to call the Numerics driver to solve the
+   * problem */
+  Driver _frictionContact_driver;
+
+  // std::shared_ptr<FrictionContactProblem> _numerics_problem{nullptr};
+
+ public:
+  /** constructor (solver id and dimension)
+   *
+   *  \param dimPb dimension (2D or 3D) of the friction-contact problem (default: 3)
+   *  \param numericsSolverId id of the solver to be used default (default:
+   * SICONOS_FRICTION_3D_NSGS)
+   */
+  FrictionContact(int dimPb = 3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
+
+  /** constructor from a pre-defined solver options set
+   *
+   *  \param options the options set
+   */
+  FrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
+
+  /** destructor
+   */
+  virtual ~FrictionContact() noexcept = default;
+
+  /** get the type of FrictionContact problem (2D or 3D)
+   *
+   *  \return an int (2 or 3)
+   */
+  inline int getFrictionContactDim() const { return _contactProblemDim; }
+
+  // --- Mu ---
+  /** get the vector mu, list of the friction coefficients
+   *
+   *  \return a vector of double
+   */
+  inline const std::vector<double> getMu() const { return *_mu; }
+
+  /** get a pointer to mu, the list of the friction coefficients
+   *
+   *  \return pointer on a std::vector<double>
+   */
+
+  inline std::shared_ptr<std::vector<double>> mu() const { return _mu; }
+
+  /** get the value of the component number i of mu, the vector of the friction
+   *  coefficients \param i the component number (starting from 0) \return double
+   *  value of mu
+   */
+  inline double getMu(unsigned int i) const { return (*_mu)[i]; }
+
+  /** update mu vector
+   */
+  void updateMu();
+
+  /**
+     set the driver-function used to solve the problem
+
+     \param newFunction function of prototype Driver
+  */
+  inline void setNumericsDriver(Driver newFunction) { _frictionContact_driver = newFunction; };
+
+  // --- Others functions ---
+
+  /**
+     initialize the FrictionContact problem(compute topology ...)
+
+     \param simulation the simulation, owner of this OSNSPB
+   */
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> simulation) override;
+
+  /** \return the friction contact problem from Numerics
+   */
+  std::shared_ptr<FrictionContactProblem> frictionContactProblem();
+
+  // /** \return the friction contact problem from Numerics (raw ptr, do not free)
+  //  */
+  // FrictionContactProblem *frictionContactProblemPtr();
+
+  /** solve a friction contact problem
+   *
+   *  \param problem the friction contact problem
+   *  \return info solver information result
+   */
+  // int solve(std::shared_ptr<FrictionContactProblem> problem = nullptr);
+  int solve();
+
+  /** Compute the unknown reaction and velocity and update the Interaction (y
+   *  and lambda )
+   *
+   *  \param time the current time
+   *  \return int information about the
+   *  solver convergence (0: ok, >0 problem, see Numerics documentation)
+   */
+  int compute(double time) override;
+
+  /** print the data to the screen */
+  void display() const override;
+
+  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+};
+}  // namespace siconos::nonsmooth_formulations
+#endif  // FrictionContact_H

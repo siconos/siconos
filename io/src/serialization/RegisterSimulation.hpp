@@ -25,10 +25,10 @@
 #include <fstream>
 #include <SiconosFwd.hpp>
 
-void RegisterSimulationOxml(std::ofstream& ofs, SP::Simulation&);
-void RegisterSimulationObin(std::ofstream& ofs, SP::Simulation&);
-void RegisterSimulationIxml(std::ifstream& ifs, SP::Simulation&);
-void RegisterSimulationIbin(std::ifstream& ifs, SP::Simulation&);
+void RegisterSimulationOxml(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationObin(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationIxml(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationIbin(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>&);
 
 #endif
 

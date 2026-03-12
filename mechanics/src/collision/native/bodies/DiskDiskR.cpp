@@ -14,42 +14,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <cmath>
 #include "DiskDiskR.hpp"
-#include "BlockVector.hpp"
-#include "SimpleMatrix.hpp"
 
-DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
-{
+#include <cmath>  // for hypot
+
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
+siconos::collision::native::bodies::DiskDiskR::DiskDiskR(double r, double rr)
+    : CircularR(r, rr) {
   r1pr2 = r + rr;
 }
 
-double DiskDiskR::distance(double x1, double y1, double r1,
-                           double x2, double y2, double r2)
-{
+double siconos::collision::native::bodies::DiskDiskR::distance(double x1, double y1, double r1,
+                                                               double x2, double y2,
+                                                               double r2) {
   return (hypot(x1 - x2, y1 - y2) - r1pr2);
 }
 
-void DiskDiskR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
-{
-
+void siconos::collision::native::bodies::DiskDiskR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double q_0 = q(0);
   double q_1 = q(1);
   double q_3 = q(3);
   double q_4 = q(4);
 
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
-
 }
 
-
-void DiskDiskR::computeJachq(const BlockVector& q, BlockVector& z)
-{
-
-  assert(_jachq);
-  SiconosMatrix& g = *_jachq;
+void siconos::collision::native::bodies::DiskDiskR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& q) {
+  assert(jacobianhOver_q_view_);
 
   double x1 = q(0);
   double y1 = q(1);
@@ -74,18 +72,22 @@ void DiskDiskR::computeJachq(const BlockVector& q, BlockVector& z)
   [d     d         d   d      ]
   */
 
-  g(0, 0) = -dxsd;
-  g(1, 0) = dysd;
-  g(0, 1) = -dysd;
-  g(1, 1) = -dxsd;
-  g(0, 2) = 0.;
-  g(1, 2) = -_r1;
-  g(0, 3) = dxsd;
-  g(1, 3) = -dysd;
-  g(0, 4) = dysd;
-  g(1, 4) = dxsd;
-  g(0, 5) = 0.;
-  g(1, 5) = -_r2;
-
+  jacobianhOver_q_view_->setValue(0, 0, -dxsd);
+  jacobianhOver_q_view_->setValue(1, 0, dysd);
+  jacobianhOver_q_view_->setValue(0, 1, -dysd);
+  jacobianhOver_q_view_->setValue(1, 1, -dxsd);
+  jacobianhOver_q_view_->setValue(0, 2, 0.);
+  jacobianhOver_q_view_->setValue(1, 2, -_r1);
+  jacobianhOver_q_view_->setValue(0, 3, dxsd);
+  jacobianhOver_q_view_->setValue(1, 3, -dysd);
+  jacobianhOver_q_view_->setValue(0, 4, dysd);
+  jacobianhOver_q_view_->setValue(1, 4, dxsd);
+  jacobianhOver_q_view_->setValue(0, 5, 0.);
+  jacobianhOver_q_view_->setValue(1, 5, -_r2);
 }
 
+void siconos::collision::native::bodies::DiskDiskR::display() const {
+  std::cout << "=====> Disk-Disk relation \n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
+}

@@ -27,8 +27,12 @@
 #include "SolverOptions.h"                                      // for Solve...
 #include "VariationalInequality.h"                              // for Varia...
 #include "VariationalInequality_Solvers.h"                      // for varia...
-#include "numerics_verbose.h"                                   // for verbose
-#include "soclcp_compute_error.h"                               // for soclc...
+#include "numerics_verbose.h"
+#include "soclcp_compute_error.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"                               // for soclc...
 
 void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *problem,
                              double *reaction, double *velocity, int *info,
@@ -79,3 +83,45 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *proble
 
   free(soclcp_as_vi);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_SOCLCP_VI_EG in the global solver registry.
+ */
+
+static void soclcp_vi_eg_set_default(SolverOptions* options) {
+  /* Call VI_EG set_default for proper initialization */
+  variationalInequality_ExtraGradient_set_default(options);
+}
+
+static int soclcp_vi_eg_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  /* set_default already called by solver_options_create */
+  return NUMERICS_OK;
+}
+
+static int soclcp_vi_eg_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  soclcp_VI_ExtraGradient(
+      (SecondOrderConeLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void soclcp_vi_eg_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_SOCLCP_VI_EG, "SOCLCP_VI_EG",
+                "Variational Inequality Extra Gradient for SOCLCP",
+                soclcp_vi_eg_init_wrap,
+                soclcp_vi_eg_solve_wrap,
+                soclcp_vi_eg_free_wrap,
+                NULL,  /* error function */
+                soclcp_vi_eg_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

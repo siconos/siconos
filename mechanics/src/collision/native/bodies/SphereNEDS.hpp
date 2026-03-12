@@ -14,10 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SphereNEDS.hpp
-  
+
   \brief Definition of a 3D Sphere as a NewtonEulerDS (with
   quaternions).
 
@@ -25,43 +25,38 @@
 #ifndef SphereNEDS_h
 #define SphereNEDS_h
 
-#include <MechanicsFwd.hpp>
 #include "NewtonEulerDS.hpp"
 
-
-class SphereNEDS : public NewtonEulerDS, public std::enable_shared_from_this<SphereNEDS>
-{
-protected:
+namespace siconos::collision::native::bodies {
+class SphereNEDS : public siconos::modeling::NewtonEulerDS,
+                   public std::enable_shared_from_this<SphereNEDS> {
+ protected:
   ACCEPT_SERIALIZATION(SphereNEDS);
 
-  double radius;
+  double radius{0.};
 
-  SphereNEDS() {};
+ public:
+  SphereNEDS(double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+             Eigen::Ref<siconos::algebra::SiconosVector7> position,
+             Eigen::Ref<siconos::algebra::SiconosVector6> twist, siconos::algebra::AliasTag);
 
-public:
+  SphereNEDS(double r, double m, const siconos::algebra::SiconosMatrix33& inertia,
+             const siconos::algebra::SiconosVector7& position,
+             const siconos::algebra::SiconosVector6& twist, siconos::algebra::CopyTag);
 
-  SphereNEDS(double, double, SP::SiconosMatrix, SP::SiconosVector, SP::SiconosVector);
+  ~SphereNEDS() noexcept = default;
 
-  ~SphereNEDS();
+  double getQ(siconos::algebra::Index pos);
 
-  inline double getQ(unsigned int pos)
-  {
-    assert(pos < 7);
-    return (_q->getValue(pos));
-  };
+  double getTwist(siconos::algebra::Index pos);
 
-  inline double getVelocity(unsigned int pos)
-  {
-    assert(pos < 6);
-    return (_twist->getValue(pos));
-  };
-
-  inline double getRadius() const
-  {
-    return radius;
-  };
-
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
-
+  inline double getRadius() const { return radius; };
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDS_h */

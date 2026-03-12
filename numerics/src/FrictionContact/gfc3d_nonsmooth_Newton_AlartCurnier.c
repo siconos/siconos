@@ -34,8 +34,8 @@
 #include <string.h>  // for memcpy
 
 #include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
-#include "CSparseMatrix.h"              // for CSparseMatrix, CSpar...
-#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "CSparseMatrix.h"                       // for CSparseMatrix, CSpar...
+#include "FrictionContact_options.h"                        // for SICONOS_FRICTION_3D_...
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "NumericsMatrix.h"                      // for NM_triplet, Numerics...
 #include "NumericsSparseMatrix.h"                // for NSM_new, NumericsSpa...
@@ -45,8 +45,13 @@
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
 #include "gfc3d_Solvers.h"                       // for gfc3d_nonsmooth_Newt...
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
-#include "numerics_verbose.h"                    // for numerics_printf_verbose
+#include "fc3d_short_names.h"                    // for GFC3D_NSN_AC
+#include "numerics_verbose.h"
 #include "sanitizer.h"                           // for cblas_dcopy_msan
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* compute psi function */
 void ACPsi(GlobalFrictionContactProblem *problem, AlartCurnierFun3x3Ptr computeACFun3x3,
@@ -721,3 +726,43 @@ void gfc3d_nsn_ac_set_default(SolverOptions *options) {
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_NSN_AC in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default is now called by the registry before init_wrap */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_nsn_ac_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  return info;
+}
+
+static void gfc3d_nsn_ac_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER_3VAR(GFC3D_NSN_AC, "GFC3D_NSN_AC",
+                "Non-smooth Newton Alart-Curnier for 3D Global Friction Contact",
+                gfc3d_nsn_ac_init_wrap,
+                gfc3d_nsn_ac_solve_wrap,
+                gfc3d_nsn_ac_free_wrap,
+                NULL,  /* error function */
+                gfc3d_nsn_ac_set_default,  /* set_default */
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

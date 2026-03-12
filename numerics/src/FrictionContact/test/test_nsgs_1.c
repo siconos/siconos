@@ -18,7 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
+#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_ONECONTA...
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection
@@ -108,6 +108,9 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
     current++;
   }
+
+  // ProjectionOnConeWithLocalIteration fails on Rover11211.dat (test #63)
+  //collection[63].will_fail = 1;
 
   return collection;
 }

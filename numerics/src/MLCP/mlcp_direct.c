@@ -51,7 +51,11 @@ happen:
 #include "SolverOptions.h"     // for SolverOptions
 #include "mlcp_cst.h"          // for SICONOS_IPARAM_MLCP_N...
 #include "mlcp_enum_tool.h"    // for mlcp_enum_build_M, mlcp_fil...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -362,3 +366,30 @@ void mlcp_direct_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 0;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_DIRECT_ENUM (direct solver base) in the global solver registry.
+ */
+
+static int mlcp_direct_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_direct_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_direct_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_direct((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void mlcp_direct_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_direct_reset();
+}
+
+/* Note: This solver implementation (mlcp_direct) is used by SICONOS_MLCP_DIRECT_SIMPLEX,
+   SICONOS_MLCP_DIRECT_PATH, and SICONOS_MLCP_DIRECT_FB. It is NOT registered under
+   SICONOS_MLCP_DIRECT_ENUM (107) because that ID is used by mlcp_direct_enum.c */

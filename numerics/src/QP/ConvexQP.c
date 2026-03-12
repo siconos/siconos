@@ -22,6 +22,7 @@
 
 #include "NumericsMatrix.h"  // for NM_display, NM_clear
 #include "NumericsVector.h"  // for NV_display
+#include "numerics_errors.h"
 
 void convexQP_display(ConvexQP* cqp) {
   assert(cqp);
@@ -53,10 +54,8 @@ void convexQP_display(ConvexQP* cqp) {
 }
 
 int convexQP_printInFile(ConvexQP* cqp, FILE* file) {
-  if (!cqp) {
-    fprintf(stderr, "Numerics, ConvexQP printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+  CHECK_NULL(cqp);
+  CHECK_NULL(file);
 
   return 0;
 }

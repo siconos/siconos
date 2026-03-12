@@ -14,132 +14,128 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file PrismaticJointR.hpp
 
 */
 #ifndef PrismaticJointRELATION_H
 #define PrismaticJointRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerJointR.hpp>
+#include "NewtonEulerJointR.hpp"
 
+namespace siconos::modeling {
+class NewtonEulerDS;
+}
+
+namespace siconos::joints {
 /**
    This class implements a prismatic joint between one or two Newton/Euler Dynamical system
- 
+
    From a given axis, we construct two unit othorgonal vectors to the axis V1 and V2 such that
    (axis,V1,V2) is an orthogonal frame
-   
-*/
-class PrismaticJointR : public NewtonEulerJointR
-{
-protected:
 
+*/
+class PrismaticJointR : public NewtonEulerJointR {
+ protected:
   ACCEPT_SERIALIZATION(PrismaticJointR);
 
-  /** Axis of the prismatic point in the q1 frame of reference
-   */
-  SP::SiconosVector _axis0;
-
-  /** _V1 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis1_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  SP::SiconosVector _V1;
+  siconos::algebra::SiconosVector3 axis1_;
 
-  /** _V2 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis2_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  SP::SiconosVector _V2;
+  siconos::algebra::SiconosVector3 axis2_;
 
-  /** Convenient storage of the components of _V1 and _V2
-   */
-  double _V1x;
-  double _V1y;
-  double _V1z;
-  double _V2x;
-  double _V2y;
-  double _V2z;
+  double _G10G20d1x{0.};
+  double _G10G20d1y{0.};
+  double _G10G20d1z{0.};
 
-  double _G10G20d1x;
-  double _G10G20d1y;
-  double _G10G20d1z;
+  double _cq2q101{0.};
+  double _cq2q102{0.};
+  double _cq2q103{0.};
+  double _cq2q104{0.};
 
-  double _cq2q101;
-  double _cq2q102;
-  double _cq2q103;
-  double _cq2q104;
-
-  /** Return the normal of the linear DoF axis.
+  /** compute the jacobian of h w.r.t. q
    *
-   *  \param ans
-   *  \param q0
-   *  \param axis must be 0
-   *  \param absoluteRef
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                          bool absoluteRef=true);
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
-public:
+  // void computeOrthonormalBaseFromAxis();
 
-  /** Empty constructor. The relation may be initialized later by
-   *  setPoint, setAbsolute, and setBasePositions. */
-  PrismaticJointR();
-
+ public:
   /** Constructor based on one or two dynamical systems and an axis.
    *
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *  for absolute frame.
-   *  \param axis SiconosVector of size 3 that defines the prismatic axis.
+   *  \param axis siconos::algebra::SiconosVector of size 3 that defines the prismatic axis.
    *  \param absoluteRef if true, A is in the absolute frame,
    *  otherwise A is in d1 frame.
    */
-  PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
-                  SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
-                  SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
+  PrismaticJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& axis, bool absoluteRef,
+                  std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
+                  std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
+
+  /** Default constructor */
+  PrismaticJointR();
+
+  /** destructor */
+  virtual ~PrismaticJointR() noexcept = default;
 
   /** Initialize the joint constants based on the provided base positions.
-   * 
-   *  \param q1 A SiconosVector of size 7 indicating translation and
-   *  orientation in inertial coordinates.
-   *  \param q2 An optional SiconosVector of size 7 indicating
-   *  translation and orientation; if null, the inertial
-   *  frame will be considered as the second base. */
-  virtual void setBasePositions(SP::SiconosVector q1,
-                                SP::SiconosVector q2 = SP::SiconosVector());
+   *
+   *  \param[in] q1 a vector of size 7 indicating translation and orientation in inertial
+   * coordinates.
+   *  \param[in] q2 an optional vector of size 7 indicating translation and orientation; if
+   * null, the inertial frame will be considered as the second base.
+   */
+  virtual void setBasePositions(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+          std::nullopt) override;
+
+  /** \return the axis of rotation.
+   *  Retrieve a normal in the direction of a 0-indexed free
+   *  axis. Useful for calculating velocities in the axis, or for
+   *  calculating axis-aligned forces applied to connected bodies.  If
+   *  axis is of angular type (see typeOfDoF), then the returned normal
+   *  is the axis of rotation.
+   *
+   *  \param[in] q0 The state q of the first NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS (optional)
+   *  \param[in] axis
+   *  \param[in] absoluteRef If true, ans is in the inertial frame,
+   *  otherwise the q1 frame is assumed.
+   */
+  virtual siconos::algebra::SiconosVector3 normalDoF(
+      const siconos::algebra::SiconosVector& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      int axis = 0, bool absoluteRef = true) override;
 
   void displayInitialPosition();
 
-  void computeV1V2FromAxis();
-
-  /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
-                           unsigned int axis);
-
-  /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, Interaction& inter,
-                               SP::BlockVector q0, SimpleMatrix& jachq,
-                               unsigned int axis);
-
-  /** destructor
-   */
-  virtual ~PrismaticJointR() {};
-
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0 );
-
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+     to compute the output y = h(q) of the Relation
 
-  virtual void computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot);
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* The options were    : operatorarrow */
   double H1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
@@ -165,35 +161,45 @@ public:
 
   void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
-  void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
-                double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
+  void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11,
+                double qdot12, double qdot13, double Xdot2, double Ydot2, double Zdot2,
+                double qdot20, double qdot21, double qdot22, double qdot23);
 
-  void DotJd2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
-              double X2, double Y2, double Z2, double qdot20, double qdot21, double qdot22, double qdot23);
+  void DotJd2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11,
+              double qdot12, double qdot13, double X2, double Y2, double Z2, double qdot20,
+              double qdot21, double qdot22, double qdot23);
 
+  /** \return the number of constraints */
+  siconos::algebra::Index numberOfConstraints() const override { return 5; }
 
-  /**
-     Get the number of constraints defined in the joint
-   
-     \return the number of constraints
-  */
-  virtual unsigned int numberOfConstraints() { return 5; }
-  
-  /**
-     Return the number of degrees of freedom of this joint.
-     
-     \return the number of degrees of freedom (DoF)
-   */
-  virtual unsigned int numberOfDoF() { return 2; }
+  /** \return the number of degrees of freedom (DoF) */
+  siconos::algebra::Index numberOfDoF() const override { return 2; }
 
-  /**
-     Return the type of a degree of freedom of this joint.
-     
-     \return the type of the degree of freedom (DoF)
-  */
-  virtual DoF_Type typeOfDoF(unsigned int axis) {
-    if (axis==0) return DOF_TYPE_LINEAR;
-    else return DOF_TYPE_INVALID;
+  /** \return the type of the degree of freedom (DoF) */
+  DofType typeOfDoF(siconos::algebra::Index axis) const override {
+    if (axis == 0)
+      return DofType::LINEAR;
+    else
+      return DofType::INVALID;
   };
+
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y,
+      siconos::algebra::Index axis = 0) override;
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(
+      siconos::modeling::Interaction& inter,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      siconos::algebra::Index axis = 0) override;
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-#endif  //PrismaticJointRELATION_H
+}  // namespace siconos::joints
+#endif  // PrismaticJointRELATION_H

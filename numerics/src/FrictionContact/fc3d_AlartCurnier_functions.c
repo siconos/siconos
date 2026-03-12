@@ -25,6 +25,7 @@
 #include "NumericsMatrix.h"                            // for NumericsMatrix
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
 #include "numerics_verbose.h"                          // for numerics_printf
+#include "numerics_errors.h"
 #include "op3x3.h"                                     // for SET3, eig_3x3
 #include "siconos_debug.h"                             // for DEBUG_PRINTF
 
@@ -512,8 +513,8 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   SET3(velocity);
   SET3(rho);
   SET3(F);
-  SET3X3(A);
-  SET3X3(B);
+  SET3X3MAYBE(A);
+  SET3X3MAYBE(B);
 
   double RVN, RVT, RVS;
   double RhoN = *rho0;

@@ -92,7 +92,7 @@ function(doxy2rst_sphinx COMPONENT)
     add_dependencies(rst_api ${COMPONENT}-xml2rst)
   
     add_custom_command(TARGET  ${COMPONENT}-xml2rst POST_BUILD
-      COMMENT "${COMPONENT} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
+      COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green  "${COMPONENT} : rst files, for c++ API, have been generated in ${SPHINX_DIR}/reference/cpp.")
   endif()
 endfunction()
 
@@ -128,21 +128,26 @@ macro(finalize_doc)
     set(DOXYGEN_INPUTS)
     foreach(COMP IN LISTS COMPONENTS)
       if(EXISTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
-	list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
+	      list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
       endif()
     endforeach()
     
+    # -- Read doxygen default options --
     include(doxycommon)
+    
+    # - Doxygen to generate html -
+    # --- Set doxygen options for html outputs ---
     set(DOXYGEN_GENERATE_HTML YES)
     set(DOXYGEN_HTML_OUTPUT ${DOC_ROOT_DIR}/html/doxygen)
     set(DOXYGEN_GENERATE_XML NO)
+    # --- Create the target ---
     doxygen_add_docs(
       doxygen-html ${DOXYGEN_INPUTS}
       COMMENT "Generate doxygen html doc ...")
     
-    add_custom_command(TARGET doxygen-html POST_BUILD
-      COMMENT "Doxygen documentation has been built in : \n - ${DOXYGEN_OUTPUT} (xml) \n - ${DOC_ROOT_DIR}/html/doxygen (html).")
-    
+  add_custom_command(
+    TARGET doxygen-html POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Doxygen documentation has been built in ${DOC_ROOT_DIR}/html/doxygen")
     # --- Target : create class diagrams from doxygen outputs, for sphinx. ---
     # run : make doxypng2sphinx
     # depends : doxygen-html
@@ -155,13 +160,13 @@ macro(finalize_doc)
       COMMENT "Browse doxygen outputs (graphs ...)")
 
     add_custom_command(TARGET doxypng2sphinx POST_BUILD
-      COMMENT "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
+      COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green  "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
 
     add_dependencies(html doxypng2sphinx)
 
     foreach(COMP ${COMPONENTS})
       if(TARGET ${COMP}-xml2rst)
-	add_dependencies(html ${COMP}-xml2rst)
+	      add_dependencies(html ${COMP}-xml2rst)
       endif()
     endforeach()
 
@@ -174,35 +179,3 @@ macro(finalize_doc)
 
   endif()
 endmacro()
-
-
-# create a target to generate sphinx (rst) documentation
-# from docstrings in python files (sphinx autodoc stuff)
-# Note that docstrings are automatically generated using -doxygen option from swig.
-function(docstrings2rst)
-  set(oneValueArgs PATH NAME)
-
-  cmake_parse_arguments(module "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-
-  set(pymodule_fullname ${SICONOS_SWIG_ROOT_DIR}/${module_PATH}/${module_NAME}.py)
-  
-  message("Start setup for generation of rst files from python docstrings for ${pymodule_fullname}")
-  
-  # Path where rst files (docstrings --> rst) will be written.
-  set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/)
-  
-  # A new target to convert python/swig docstrings (swig outputs) into rst files (sphinx inputs)
-  # Calls a python function defined in gendoctools (module_docstrings2rst)
-  # --> make <comp>_autodoc
-  add_custom_target(${module_NAME}_autodoc
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${Python_EXECUTABLE} -c
-    "from gendoctools.python2rst import docstrings2rst as f; f('${module_PATH}', '${module_NAME}', '${SPHINX_OUTPUT_DIR}')"
-    VERBATIM
-    DEPENDS ${SWIG_MODULE_${module_NAME}_REAL_NAME}
-    COMMENT "Create rst files from python docstrings for module siconos..${module_NAME}")
-
-  # rst_api needs autodoc.
-  add_dependencies(rst_api ${module_NAME}_autodoc)
-  
-endfunction()
-  

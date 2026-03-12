@@ -18,23 +18,24 @@
 # - create a library from test-utils files (if any), named <COMPONENT>-test,
 #   linked (PUBLIC) with <COMPONENT> lib.
 #
+
 function(begin_tests SOURCE_DIR)
-  
+
   set(multiValueArgs DEPS)
-  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # Fix current test dir in parent scope.
   set(CURRENT_TEST_DIR ${SOURCE_DIR} PARENT_SCOPE)
-  
+
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
     set(DRIVE_LETTER "Z:")
   else()
     set(EMULATOR "")
   endif()
-  
+
   # find and copy data files in SOURCE_DIR (*.mat, *.dat and *.xml, ...) into test directory
-  file(GLOB_RECURSE _DATA_FILES 
+  file(GLOB_RECURSE _DATA_FILES
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.mat
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.dat
@@ -43,7 +44,9 @@ function(begin_tests SOURCE_DIR)
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.DAT
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.INI
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref)
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.msh)
 
   # Copy data files from source to binary
   foreach(_F IN LISTS _DATA_FILES)
@@ -57,7 +60,7 @@ function(begin_tests SOURCE_DIR)
   # to create/expand the <COMPONENT>-tests-utils library.
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
     file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
-    if(NOT TARGET ${COMPONENT}-tests-utils) 
+    if(NOT TARGET ${COMPONENT}-tests-utils)
       # Create the target ...
       add_library(${COMPONENT}-tests-utils SHARED ${TEST_UTILS_SOURCES})
     else()
@@ -67,7 +70,7 @@ function(begin_tests SOURCE_DIR)
 
     # local includes, to build <component>-tests-utils only
     target_include_directories(${COMPONENT}-tests-utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
-    target_link_libraries(${COMPONENT}-tests-utils PUBLIC ${COMPONENT})
+    target_link_libraries(${COMPONENT}-tests-utils PRIVATE ${COMPONENT})
     # All include dirs from component are taken into account in ${COMPONENT}-lib (and so propagated to tests)
     foreach(dir IN LISTS ${COMPONENT}_DIRS)
       target_include_directories(${COMPONENT}-tests-utils PRIVATE
@@ -112,10 +115,10 @@ macro(test_windows_setup test_name test_sources)
       # What was it used for??
     endif()
     # Linker flags to be used to create executables.
-    SET(CMAKE_EXE_LINKER_FLAGS "")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
-    SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "")
+    set(CMAKE_EXE_LINKER_FLAGS "")
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+    set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "")
   endif()
 
 endmacro()
@@ -140,8 +143,8 @@ endmacro()
 # ========================================
 function(new_test)
   set(oneValueArgs NAME HDF5)
-  set(multiValueArgs SOURCES DATA DEPS)
-  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  set(multiValueArgs SOURCES DATA DEPS COMPILE_DEFINITIONS)
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # -- set test name --
   # If not set in input args, we choose first source file name without extension.
@@ -161,16 +164,16 @@ function(new_test)
       configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile}
         ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${_datafile} COPYONLY
-        )
+      )
     endforeach()
   endif()
- 
+
   # ---- Build test executable and set its properties ----
   # Req : test sources
   # !!! WARNING !!!
   # Consider known limitations for Windows written
   # here https://cmake.org/cmake/help/v3.13/prop_dir/COMPILE_DEFINITIONS.html
-  
+
   foreach(source_file IN LISTS TEST_SOURCES)
     # If source file path is not absolute, prepend current dir
     if(NOT IS_ABSOLUTE ${source_file})
@@ -178,7 +181,7 @@ function(new_test)
     endif()
     list(APPEND TEST_SOURCES_ABSPATH ${source_file})
   endforeach()
-  
+
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     add_executable(${TEST_NAME} WIN32 ${TEST_SOURCES_ABSPATH})
   else()
@@ -188,11 +191,15 @@ function(new_test)
   if(TEST_HDF5)
     target_compile_definitions(${TEST_NAME} PRIVATE "TEST_HDF5")
   endif()
-  
-  
+
+  # Add def. options in compile command (-D ...)
+  foreach(comp_def IN LISTS TEST_COMPILE_DEFINITIONS)
+    target_compile_definitions(${TEST_NAME} PRIVATE ${comp_def})
+  endforeach()
+
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
-  
+
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -234,7 +241,7 @@ function(new_test)
     add_dependencies(${COMPONENT}-tests ${TEST_NAME})
   endif()
   if(TARGET ${COMPONENT}-tests-utils)
-    target_link_libraries(${TEST_NAME} PUBLIC ${COMPONENT}-tests-utils)
+    target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT}-tests-utils)
   endif()
 
   if(WITH_CXX)
@@ -246,8 +253,8 @@ function(new_test)
     target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
   endif()
 
-  
-  if (LDLIBPATH)
+
+  if(LDLIBPATH)
     set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
   endif()
 
@@ -261,42 +268,42 @@ function(new_test)
   # Add the test in the pipeline
   add_test(NAME ${TEST_NAME} COMMAND ${command} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
   set_siconos_test_properties(NAME ${TEST_NAME})
-  
+
 endfunction()
 
 function(set_siconos_test_properties)
   set(oneValueArgs NAME)
   set(multiValueArgs PROPERTIES)
-  cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # if the test output matches one of specified expressions below, the test will fail
   #set_tests_properties(${TEST_NAME} PROPERTIES
   #  FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
-  if (LDLIBPATH)
+  if(LDLIBPATH)
     set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
   endif()
-  
+
   set(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
   if(LOCAL_USE_SANITIZER MATCHES "asan")
     set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS})
     set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS})
   endif()
-  
+
   # Extra tests properties (set in <component>_tests.cmake)
   if(TEST_PROPERTIES)
     set_tests_properties(${TEST_NAME} PROPERTIES "${TEST_PROPERTIES}")
   endif()
-  
+
   # Test timer
   set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
-  
+
   # set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
   set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
 
   # env variables (mostly for plugins : the test must be able to find TestPlugin.so if required)
   set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{LD_LIBRARY_PATH};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
-  
-  
+
+
 endfunction()
 
 # ================================================
@@ -317,7 +324,7 @@ endfunction()
 function(new_tests_collection)
   set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION HDF5)
   set(multiValueArgs EXTRA_SOURCES)
-  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
   # This value is replaced in solver call in .c file.
@@ -336,9 +343,9 @@ function(new_tests_collection)
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
     HDF5 ${PROBLEM_HDF5}
-    )
-  
- 
+  )
+
+
 endfunction()
 
 # Specialisation of tests_collection to lcp formulation.
@@ -346,19 +353,19 @@ function(new_lcp_tests_collection)
   set(options)
   set(oneValueArgs COLLECTION SUFFIX)
   set(multiValueArgs EXTRA_SOURCES)
-  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION ${PROBLEM_COLLECTION}
     EXTRA_SOURCES ${PROBLEM_EXTRA_SOURCES})
-  
+
 endfunction()
 
 # Build plugins required for python tests
 function(build_plugin)
   set(oneValueArgs FILE)
   set(multiValueArgs DEPS)
-  cmake_parse_arguments(plug "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(plug "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   get_filename_component(plug_name ${plug_FILE} NAME_WE)
 
@@ -370,7 +377,7 @@ function(build_plugin)
   foreach(dep IN LISTS plug_DEPS)
     target_link_libraries(${plug_name} PRIVATE ${dep})
   endforeach()
-  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
+  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS__BINARY_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   if(NOT WITH_CXX)
     set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
@@ -386,56 +393,36 @@ macro(set_ldlibpath)
   # In certain cases, ex. no rpath, or running tests with plugins,
   # libraries cannot be found at link or test time, so we add the
   # LD_LIBRARY_PATH variable.
-  SET(LDLIBPATH)
-  if (CMAKE_SKIP_RPATH)
+  set(LDLIBPATH)
+  if(CMAKE_SKIP_RPATH)
     foreach(_C IN LISTS COMPONENTS)
-      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
-    ENDFOREACH()
+      list(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+    endforeach()
   else()
     # Otherwise, still need the path to current component dir for tests
     # that load plugins.
-    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
+    list(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
   endif()
-  LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
-  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+  list(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
+  if(NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+    string(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
   endif()
-  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
-    if ($ENV{DYLD_LIBRARY_PATH})
+  if(CMAKE_SYSTEM_NAME MATCHES APPLE)
+    if($ENV{DYLD_LIBRARY_PATH})
       set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
     endif()
-    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
+    set(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
   else()
-    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
+    if(CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+      set(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
     else()
-      if ($ENV{LD_LIBRARY_PATH})
+      if($ENV{LD_LIBRARY_PATH})
         set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
       endif()
-      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+      set(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
     endif()
   endif()
 endmacro()
-
-# ----------------------------------------
-# Declaration of a siconos test run with python.
-#
-# Usage :
-#
-#  add_pythons_test(<name> <file>)
-#
-# Result :
-#
-#  Add a test :
-#  - named <name>
-#  - that will be run using python
-#  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
-# 
-function(add_python_test test_name test_file)
-  add_test(${test_name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
-  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
-  set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-endfunction()
 
 
 # ----------------------------------------
@@ -446,9 +433,6 @@ endfunction()
 #
 # path_to_tests is relative to the current source dir.
 # Most of the time, path_to_tests = 'tests'.
-# For instance, in mechanics, tests are called in CMakeLists.txt
-# in swig, current source dir is thus source_dir/mechanics/swig
-# and source_dir/mechanics/swig/tests contains all the python files for tests.
 #
 # This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
 # 
@@ -470,37 +454,28 @@ endfunction()
 # both DEPS and EXCLUDE are optional.
 #
 function(build_python_tests)
-  set(multiValueArgs DEPS EXCLUDE)
-  cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  
-  # build plugins, if any
-  # Note : all built libraries are saved in SICONOS_SWIG_BINARY_DIR/tests/plugins
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
-    file(GLOB plugfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/*.cpp)
-    foreach(plug IN LISTS plugfiles)
-      build_plugin(FILE ${plug} DEPS ${test_DEPS})
-    endforeach()
+  set(multiValueArgs DEPS EXCLUDE)
+  cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  add_library(${COMPONENT}-pytests INTERFACE)
+  target_link_libraries(${COMPONENT}-pytests INTERFACE ${COMPONENT})
+
+  # Ensure build dir is in the include path for SiconosConfig.h
+  target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+  if(TARGET ${COMPONENT}-tests)
+    add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
   endif()
-    
-  # copy test dir to binary dir (tests dir inside swig working dir)
-  # ---> allows py.test run in binary dir
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
-    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
-    foreach(datafile IN LISTS data4tests)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	${SICONOS_SWIG_BINARY_DIR}/tests/data/${datafile} COPYONLY)
-    endforeach()
-  endif()
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
-    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
-    foreach(datafile IN LISTS data4tests)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
-	${SICONOS_SWIG_BINARY_DIR}/tests/CAD/${datafile} COPYONLY)
-    endforeach()
-  endif()
+
+  # Where tests will be executed
+  set(RUNDIR ${SICONOS_PB11_BINARY_DIR}/tests/${COMPONENT})
+
+  # Copy input data, step files, ...
+  copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/data"
+    "${RUNDIR}/data")
+
+  copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD"
+    "${RUNDIR}/CAD")
 
   # windows stuff, probably obsolete ...
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
@@ -508,6 +483,19 @@ function(build_python_tests)
     set(DRIVE_LETTER "Z:")
   else()
     set(EMULATOR "")
+  endif()
+
+  # addons
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/addons)
+    copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/addons"
+      "${RUNDIR}/addons")
+    file(GLOB ADDONS_SRCS ${RUNDIR}/addons/*.cpp)
+
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/pyproject.toml)
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/pyproject.toml ${RUNDIR}/pyproject.toml)
+    endif()
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/CMakeLists_fo_addons.txt.in ${RUNDIR}/CMakeLists.txt @ONLY)
+    add_subdirectory(${RUNDIR} ${RUNDIR})
   endif()
 
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -519,11 +507,15 @@ function(build_python_tests)
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
       # Each file is copied into siconos/tests.
-      configure_file(${file} ${SICONOS_SWIG_BINARY_DIR}/tests COPYONLY)
+      configure_file(${file} ${RUNDIR}/${exename} COPYONLY)
       set(name "python_${testname}")
-      set(exename ${SICONOS_SWIG_BINARY_DIR}/tests/${exename})
+      set(exename ${RUNDIR}/${exename})
       # set_ldlibpath()
-      add_python_test(${name} ${exename})
+
+      add_test(${name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${exename})
+      set_tests_properties(${name} PROPERTIES WORKING_DIRECTORY ${RUNDIR})
+      set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
+      set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
     endforeach()
   endif()
 endfunction()

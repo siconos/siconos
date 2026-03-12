@@ -19,37 +19,46 @@
 #ifndef MBTB_CONTACTRELATION
 #define MBTB_CONTACTRELATION
 
-#include "MechanismsFwd.hpp"
-#include <SiconosKernel.hpp>
-#include "MBTB_Contact.hpp"
-//! It is a relation dedicated for the simple unilateral (ie: without  Coulomb friction).
+#include "NewtonEuler1DR.hpp"  // Base class
+
+namespace siconos::mechanisms {
+
+class MBTB_Contact;
+
+//! It is a relation dedicated for the simple unilateral (ie: without  Coulomb
+//! friction).
 /*!
-  Aggregation to the class MBTB_Contact, the member _pContact contains the CAD information.
-  It derivates from siconos::NewtonEuler1DR. This class does the link between CAD and Siconos.
+  Aggregation to the class MBTB_Contact, the member _pContact contains the CAD
+  information. It derivates from Siconos::NewtonEuler1DR. This class does the
+  link between CAD and Siconos.
  */
-class MBTB_ContactRelation : public NewtonEuler1DR
-{
+class MBTB_ContactRelation : public siconos::modeling::NewtonEuler1DR {
+ protected:
+  std::shared_ptr<MBTB_Contact> _pContact{nullptr};
 
-protected:
-  MBTB_Contact * _pContact;
-  MBTB_ContactRelation();
-public:
+ public:
   /** Constructor
-   *  \param pC [in] a pointer to the MBTB_Contact. Must be allocated/free by the caller.
+   *  \param pC [in] a pointer to the MBTB_Contact. Must be allocated/free by
+   * the caller.
    */
-  MBTB_ContactRelation(MBTB_Contact * pC);
-  /** This function has to compute the distance between the objects.
-   * \param time  the given time
-   * \param q0 the position
-   * \param y the output
-   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
-  //! Doing nothing.
-  virtual ~MBTB_ContactRelation();
+  MBTB_ContactRelation(std::shared_ptr<MBTB_Contact> pC);
 
-  ACCEPT_STD_VISITORS();
+  /**
+     to compute the output y = h(q) of the Relation
 
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+
+  virtual ~MBTB_ContactRelation() noexcept = default;
 };
 
-
+}  // namespace siconos::mechanisms
 #endif

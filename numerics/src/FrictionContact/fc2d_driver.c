@@ -15,293 +15,198 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <assert.h>  // for assert
-#include <stdio.h>   // for printf, NULL, fprintf, stderr
-#include <stdlib.h>  // for exit, malloc, EXIT_FAILURE
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS, SICONO...
-#include "NonSmoothDrivers.h"        // for fc2d_driver
-#include "NumericsFwd.h"             // for FrictionContactProblem, SolverOp...
-#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
-#include "SiconosConfig.h"           // for SICONOS_OMP, SICONOS_PETSC...
-#include "SolverOptions.h"           // for SolverOptions, solver_options_id...
-#include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBM...
-#include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
-#include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
+/*!\file fc2d_driver.c
+ * \brief FC2D driver using the solver registration system
+ */
 
-const char* const SICONOS_FRICTION_2D_NSGS_STR = "FC2D_NSGS";
-const char* const SICONOS_FRICTION_2D_CPG_STR = "FC2D_CPG";
-const char* const SICONOS_FRICTION_2D_LEMKE_STR = "FC2D_LEMKE";
-const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
-#if defined SICONOS_OMP && defined SICONOS_PETSC
-const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR = "FC2D_NSGS_GRAPH";
-const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR = "FC2D_NSGS_GRAPH_OPTI";
-const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR = "FC2D_NSGS_GRAPH_PERMUT";
-const char* const SICONOS_FRICTION_2D_NSGS_PERMUT_STR = "FC2D_NSGS_PERMUT";
-#endif
-#if defined SICONOS_CUDA && defined SICONOS_PETSC
-const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_STR =
-    "FC2D_NSGS_GRAPH_PERMUT_CUDA";
-const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY_STR =
-    "FC2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY";
-#endif
-// #define DUMP_PROBLEM
-#ifdef DUMP_PROBLEM
-static int fccounter = 0;
-#endif
-// #define DUMP_PROBLEM_IF_INFO
-#ifdef DUMP_PROBLEM_IF_INFO
-static int fccounter = 0;
-#endif
+#include "FrictionContactProblem.h"
+#include "FrictionContact_options.h"
+#include "fc2d_Solvers.h"
+#include "fc3d_short_names.h"
+#include "numerics_verbose.h"
 
-int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
-                SolverOptions* options) {
-#ifdef DUMP_PROBLEM
-  char fname[256];
-  int ncc = problem->numberOfContacts;
-  snprintf(fname, sizeof(fname), "fc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
-  printf("Dump %s file\n", fname);
+/* Registration-based headers */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
-  FILE* foutput = fopen(fname, "w");
-  frictionContact_printInFile(problem, foutput);
-  fclose(foutput);
-#endif
+#include <stdio.h>
+#include <stdlib.h>
 
-  if (options == NULL) numerics_error("fc2d_driver", "null input for solver options");
+/* ===========================================================================
+ * Registration-Based Driver
+ * =========================================================================== */
 
-  /* Checks inputs */
-  if (problem == NULL || reaction == NULL || velocity == NULL)
-    numerics_error(
-        "fc2d_driver",
-        "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
+int fc2d_driver(FrictionContactProblem* problem, double* reaction,
+                double* velocity, SolverOptions* options) {
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(reaction);
+  CHECK_NULL(velocity);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
+  CHECK_ARG(problem->numberOfContacts > 0, "Number of contacts must be positive");
 
-  assert(options->isSet);
+  /* Check dimension */
+  CHECK_DIMENSION(problem->dimension, 2);
 
-  if (verbose > 0) solver_options_print(options);
+  /* Initialize output */
+  SET_SOLVER_ITER_DONE(options, 0);
+  SET_SOLVER_RESIDUAL(options, 0.0);
 
-  /* Solver name */
-  /*const char* const  name = options->solverName;*/
-
-  int info = -1;
-
-  if (problem->dimension != 2)
-    numerics_error(
-        "fc2d_driver",
-        "Dimension of the problem : problem-> dimension is not compatible or is not set");
-
-  /* Non Smooth Gauss Seidel (NSGS) */
-
-  if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
-    switch (options->solverId) {
-      case SICONOS_FRICTION_2D_NSGS: {
-        if (verbose)
-          printf(
-              " ========================== Call NLGS solver for Friction-Contact 2D problem "
-              "==========================\n");
-        fc2d_nsgs(problem, reaction, velocity, &info, options);
-        break;
-      }
-#if defined SICONOS_OMP && defined SICONOS_PETSC
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_opti(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Sequential NSGS ******/
-      case SICONOS_FRICTION_2D_NSGS_PERMUT: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
-        break;
-      }
-#endif
-#if defined SICONOS_CUDA && defined SICONOS_PETSC
-      /****** GPU solver ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut_cuda(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** GPU solver with block format ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut_cuda_blocklegacy(problem, reaction, velocity, &info, options);
-        break;
-      }
-#endif
-      default: {
-        NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
-        NM_to_dense(problem->M, M_dense);
-        NumericsMatrix* M_original = problem->M;
-        problem->M = M_dense;
-
-        info = fc2d_driver(problem, reaction, velocity, options);
-
-        NM_free(M_dense);
-        problem->M = M_original;
-      }
-    }
-  } else if (problem->M->storageType == NM_DENSE) {
-    switch (options->solverId) {
-      /****** NLGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS: {
-        if (verbose)
-          printf(
-              " ========================== Call NLGS solver for Friction-Contact 2D problem "
-              "==========================\n");
-        fc2d_nsgs_dense(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** CPG algorithm ******/
-      case SICONOS_FRICTION_2D_CPG: {
-        if (verbose)
-          printf(
-              " ========================== Call CPG solver for Friction-Contact 2D problem "
-              "==========================\n");
-        fc2d_cpg(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Lexicolemke algorithm ******/
-      case SICONOS_FRICTION_2D_LEMKE: {
-        if (verbose)
-          printf(
-              " ========================== Call Lemke solver for Friction-Contact 2D problem "
-              "==========================\n");
-        fc2d_lexicolemke(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Enum algorithm ******/
-      case SICONOS_FRICTION_2D_ENUM: {
-        if (verbose)
-          printf(
-              " ========================== Call Enumerative solver for Friction-Contact 2D "
-              "problem ==========================\n");
-        fc2d_enum(problem, reaction, velocity, &info, options);
-        break;
-      }
-#if defined SICONOS_OMP && defined SICONOS_PETSC
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_opti(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Parallel Graph NSGS algorithm ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** Sequential NSGS ******/
-      case SICONOS_FRICTION_2D_NSGS_PERMUT: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_permut(problem, reaction, velocity, &info, options);
-        break;
-      }
-#endif
-#if defined SICONOS_CUDA && defined SICONOS_PETSC
-      /****** GPU solver ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut_cuda(problem, reaction, velocity, &info, options);
-        break;
-      }
-      /****** GPU solver with block format ******/
-      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY: {
-        if (verbose)
-          printf(
-              " ========================== Call parallel graph NSGS solver for "
-              "Friction-Contact 2D problem "
-              "problem ==========================\n");
-        fc2d_nsgs_graph_permut_cuda_blocklegacy(problem, reaction, velocity, &info, options);
-        break;
-      }
-#endif
-      /*error */
-      default: {
-        fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n",
-                solver_options_id_to_name(options->solverId));
-        exit(EXIT_FAILURE);
-      }
-    }
-#ifdef DUMP_PROBLEM_IF_INFO
-    if (info) {
-      char fname[256];
-      snprintf(fname, sizeof(fname), "FrictionContactProblem%.5d.dat", fccounter++);
-      printf("Dump of FrictionContactProblem%.5d.dat\n", fccounter);
-
-      FILE* foutput = fopen(fname, "w");
-      frictionContact_printInFile(problem, foutput);
-      fclose(foutput);
-    }
-#endif
-  } else {
-    numerics_error("fc2d_driver", " error: unknown storagetype named");
-    exit(EXIT_FAILURE);
+  /* Handle sparse matrices - convert to dense for non-NSGS solvers */
+  NumericsMatrix* M_original = NULL;
+  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS) {
+    numerics_printf_verbose(1, "fc2d_driver: converting sparse matrix to dense for solver %d",
+                            options->solverId);
+    M_original = problem->M;
+    problem->M = NM_create(NM_DENSE, M_original->size0, M_original->size1);
+    NM_to_dense(M_original, problem->M);
   }
 
-  return info;
+  /* Lookup solver in registry */
+  const SolverEntry* solver = solver_registry_lookup(options->solverId);
+  if (!solver) {
+    numerics_printf("fc2d_driver: solver ID %d not found in registry", options->solverId);
+    /* Restore original matrix if converted */
+    if (M_original) {
+      NM_free(problem->M);
+      problem->M = M_original;
+    }
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  numerics_printf_verbose(1, "fc2d_driver: using solver '%s' (%s)",
+                          solver->name, solver->description);
+
+  /* Validate solver is appropriate for this problem type */
+  if (solver->is_local_solver) {
+    numerics_printf("fc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+                    solver->name);
+    /* Restore original matrix if converted */
+    if (M_original) {
+      NM_free(problem->M);
+      problem->M = M_original;
+    }
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  /* Check solve function exists */
+  if (!solver->solve) {
+    numerics_printf("fc2d_driver: solver '%s' has no solve function", solver->name);
+    /* Restore original matrix if converted */
+    if (M_original) {
+      NM_free(problem->M);
+      problem->M = M_original;
+    }
+    return NUMERICS_ERR_INVALID_SOLVER;
+  }
+
+  /* Initialize solver if init function provided */
+  if (solver->init) {
+    int init_status = solver->init(problem, options);
+    if (init_status != NUMERICS_OK) {
+      numerics_printf("fc2d_driver: solver initialization failed with error %d", init_status);
+      /* Restore original matrix if converted */
+      if (M_original) {
+        NM_free(problem->M);
+        problem->M = M_original;
+      }
+      return init_status;
+    }
+  }
+
+  /* Call the solver */
+  numerics_printf_verbose(1, "fc2d_driver: calling solver...");
+  int solve_status = solver->solve(problem, reaction, velocity, options);
+
+  /* Cleanup if needed */
+  if (solver->free) {
+    solver->free(problem, options);
+  }
+
+  /* Restore original matrix if converted */
+  if (M_original) {
+    NM_free(problem->M);
+    problem->M = M_original;
+  }
+
+  /* Log result */
+  if (solve_status == NUMERICS_OK) {
+    numerics_printf_verbose(1, "fc2d_driver: solver converged successfully");
+  } else {
+    numerics_printf_verbose(1, "fc2d_driver: solver returned status %d", solve_status);
+  }
+
+  return solve_status;
+}
+
+/* ===========================================================================
+ * Convenience Functions
+ * =========================================================================== */
+
+SolverOptions* fc2d_solver_options_create(solver_id_t solver_id) {
+  const SolverEntry* solver = solver_registry_lookup(solver_id);
+  
+  if (!solver) {
+    fprintf(stderr, "fc2d_solver_options_create: solver ID %d not registered\n", solver_id);
+    return NULL;
+  }
+  
+  if (solver->is_local_solver) {
+    fprintf(stderr, "fc2d_solver_options_create: solver '%s' is a local solver\n", solver->name);
+    return NULL;
+  }
+  
+  SolverOptions* options = solver_options_create(solver_id);
+  if (!options) {
+    fprintf(stderr, "fc2d_solver_options_create: failed to create options\n");
+    return NULL;
+  }
+  
+  if (solver->init) {
+    int init_status = solver->init(NULL, options);
+    if (init_status != NUMERICS_OK) {
+      fprintf(stderr, "fc2d_solver_options_create: init failed with status %d\n", init_status);
+      solver_options_delete(options);
+      return NULL;
+    }
+  }
+  
+  return options;
+}
+
+void fc2d_list_available_solvers(void) {
+  printf("\nAvailable FC2D Solvers:\n");
+  printf("%-8s %-20s %-12s %-12s\n", "ID", "Name", "Max Iter", "Tolerance");
+  printf("%-8s %-20s %-12s %-12s\n", "--------", "--------------------", "------------", "------------");
+  
+  size_t count;
+  const SolverEntry** solvers = solver_registry_get_all(&count);
+  
+  for (size_t i = 0; i < count; i++) {
+    const SolverEntry* s = solvers[i];
+    if (s->id >= 400 && s->id < 500) {
+      printf("%-8d %-20s %-12d %-12.2e\n",
+             s->id, s->name, s->default_max_iter, s->default_tol);
+    }
+  }
+  printf("\n");
+}
+
+void fc2d_print_solver_info(solver_id_t solver_id) {
+  const SolverEntry* solver = solver_registry_lookup(solver_id);
+  
+  if (!solver) {
+    printf("Solver ID %d not found in registry.\n", solver_id);
+    return;
+  }
+  
+  printf("\nSolver: %s (ID: %d)\n", solver->name, solver->id);
+  printf("Description: %s\n", solver->description);
+  printf("Max iterations: %d\n", solver->default_max_iter);
+  printf("Tolerance: %.2e\n", solver->default_tol);
+  printf("\n");
 }

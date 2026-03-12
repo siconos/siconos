@@ -18,6 +18,7 @@
 #include <stdlib.h>  // for free, malloc, calloc
 
 #include "LCP_Solvers.h"                   // for lcp_qp, linearComplementar...
+#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
@@ -134,3 +135,45 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
   free(iwar);
   free(Q);
 }
+
+static void lcp_qp_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_QP in the global solver registry.
+ */
+
+#include "solver_registry.h"
+#include "numerics_errors.h"
+
+static int lcp_qp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_qp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_qp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_qp((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_qp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_QP, "LCP_QP",
+                       "Quadratic Programming solver for LCP",
+                       lcp_qp_init_wrap,
+                       lcp_qp_solve_wrap,
+                       lcp_qp_free_wrap,
+                       NULL,  /* error function */
+                       lcp_qp_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0      /* is_local_solver */)

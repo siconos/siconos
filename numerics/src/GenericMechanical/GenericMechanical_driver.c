@@ -25,7 +25,7 @@
 #include <string.h>  // for NULL, memcpy
 
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ONECON...
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ONECON...
 #include "GMPReduced.h"                    // for gmp_as_mlcp, gmp_reduced_e...
 #include "GenericMechanicalProblem.h"      // for listNumericsProblem, Gener...
 #include "GenericMechanical_Solvers.h"     // for gmp_compute_error, gmp_driver
@@ -42,8 +42,12 @@
 #include "fc2d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "numerics_verbose.h"              // for verbose
-#include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "Relay_options.h"                     // for SICONOS_RELAY_LEMKE
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -53,8 +57,6 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-
-const char* const SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
 
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       double tol, SolverOptions* options, double* err) {
@@ -272,6 +274,12 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     pPrevReaction = (double*)malloc(gmp_get_nb_dwork(pGMP, options) * sizeof(double));
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
+
+
+
+
+
+  
   while (it < iterMax && tolViolate) {
 #ifdef GENERICMECHANICAL_DEBUG_CMP
     SScmpTotal++;
@@ -364,17 +372,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           fcProblem->M->matrix0 = diagBlock;
           memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
 
-          DEBUG_EXPR_WE(NV_display(curProblem->q, 3);
-                        for (int i = 0; i < 3; i++) numerics_printf(
-                            "curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
-                            curProblem->q[i], i, fcProblem->q[i]););
-
           NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
                               fcProblem->q, NULL, 0);
-
-          DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) numerics_printf(
-                            "reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
-                            reaction[i], i, fcProblem->q[i]););
 
           /* We call the generic driver (rather than the specific) since we may choose between
            * various local solvers */
@@ -557,6 +556,14 @@ void gmp_set_default(SolverOptions* options) {
   /*Useful parameter for LS*/
   options->dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.0;
 
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 4;
+    options->internalSolvers = calloc(4, sizeof(SolverOptions*));
+  }
+  assert(options->numberOfInternalSolvers == 4);
+
+
+  
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
   // options->internalSolvers[1] =
   // solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
@@ -595,3 +602,42 @@ void gmp_working_memory_free(GenericMechanicalProblem* pGMP, SolverOptions* opti
 int gmp_get_nb_dwork(GenericMechanicalProblem* pGMP, SolverOptions* options) {
   return 2 * pGMP->size;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_GENERIC_MECHANICAL_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gmp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  /* set_default already called by solver_options_create */
+  return NUMERICS_OK;
+}
+
+static int gmp_solve_wrap(void* problem, double* reaction, double* velocity,
+                          SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gmp_driver((GenericMechanicalProblem*)problem, reaction, velocity, options);
+  return info;
+}
+
+static void gmp_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_GENERIC_MECHANICAL_NSGS, "GMP_NSGS",
+                "Non-smooth Gauss-Seidel for Generic Mechanical Problem",
+                gmp_init_wrap,
+                gmp_solve_wrap,
+                gmp_free_wrap,
+                NULL,  /* error function */
+                gmp_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

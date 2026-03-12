@@ -29,7 +29,8 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_verbose.h"      // for numerics_error
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
@@ -38,7 +39,7 @@
 #endif
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
-void fc3d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double mu,
+void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
                                         double *restrict error, double *worktmp) {
   // double normUT;
   // double worktmp[3];
@@ -54,13 +55,28 @@ void fc3d_unitary_compute_and_add_error(double *restrict r, double *restrict u, 
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
+void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restrict u, double mu,
+                                             double *restrict error, double *worktmp) {
+  worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - r[0];
+  worktmp[1] = u[1] - r[1];
+  worktmp[2] = u[2] - r[2];
+  projectionOnDualCone(worktmp, mu);
+  worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - worktmp[0];
+  worktmp[1] = u[1] - worktmp[1];
+  worktmp[2] = u[2] - worktmp[2];
+  *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+}
+
 int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error) {
   DEBUG_BEGIN("fc3d_compute_error(...)\n");
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
@@ -101,6 +117,45 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
   DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
   DEBUG_END("fc3d_compute_error(...)\n");
   if (*error > tolerance) return 1;
+
+  return 0;
+}
+
+int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, double *z,
+                                           double *w, double tolerance, SolverOptions *options,
+                                           double norm, double *error, int on_dual_cone) {
+  DEBUG_BEGIN("fc3d_compute_error_norm_infinity_conic(...)\n");
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
+
+  /* Computes w = Mz + q */
+  int incx = 1, incy = 1;
+  int nc = problem->numberOfContacts;
+  int n = nc * 3;
+  double *mu = problem->mu;
+  double error_unitary = 0.;
+
+  /* Compute the current velocity */
+  cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
+  NM_prod_mv_3x3(n, n, problem->M, z, w);     // w = Mz +q
+
+  *error = -1.;
+  int ic, ic3;
+  double worktmp[3];
+  for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
+    error_unitary = 0.;
+    if (on_dual_cone) {
+      fc3d_unitary_compute_dual_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary,
+                                              worktmp);
+    } else {
+      fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary, worktmp);
+    }
+
+    *error = fmax(*error, error_unitary);
+  }
+  *error = sqrt(*error);
 
   return 0;
 }
@@ -153,8 +208,8 @@ int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, doub
     return 0;
 }
 
-void fc3d_Tresca_unitary_compute_and_add_error(double *z, double *w, double R, double *error,
-                                               double *worktmp) {
+void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R,
+                                               double *error, double *worktmp) {
   /* Compute the modified local velocity */
   worktmp[0] = z[0] - w[0];
   worktmp[1] = z[1] - w[1];

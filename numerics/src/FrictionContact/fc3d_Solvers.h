@@ -24,51 +24,13 @@
 
 */
 
-#include "FrictionContactProblem.h"
-#include "Friction_cst.h"
-#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
-#include "SolverOptions.h"
-#include "fc3d_2NCP_Glocker.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_NCPGlockerFixedPoint.h"
-#include "fc3d_local_problem_tools.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include "fc3d_nonsmooth_Newton_natural_map.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_projection.h"
-#include "fc3d_unitary_enumerative.h"
-
-/** pointer to function used to call local solver */
-typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions*);
-
-/** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*,
-                          SolverOptions*);
-
-/** pointer to function used to post-processed results after a call to the
- * (local) solver */
-typedef void (*PostSolverPtr)(int, double*);
-
-/** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double,
-                                SolverOptions*, double, double*);
-
-/** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)(void);
-
-/** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*,
-                                  SolverOptions*);
-
-/** pointer to function used to call internal solver for proximal point solver
- */
-typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int*,
-                                  SolverOptions*);
-
+#include "NumericsFwd.h"
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
+
+#include "FrictionContactProblem.h"
+#include "SolverOptions.h"
 
 /**
     Non-Smooth Gauss Seidel solver for friction-contact 3D problem
@@ -124,16 +86,23 @@ extern "C" {
 */
 void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);
+void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
+                      FrictionContactProblem* localproblem, double* reaction,
+                      SolverOptions* options);
+void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double* velocity,
+                       int* info, SolverOptions* options);
+
 #if defined SICONOS_OMP && defined SICONOS_PETSC
 void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* velocity,
                      int* info, SolverOptions* options);
 #endif
-void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
-                                       FreeSolverNSGSPtr* freeSolver,
-                                       ComputeErrorPtr* computeError,
-                                       FrictionContactProblem* problem,
-                                       FrictionContactProblem* localproblem,
-                                       SolverOptions* options);
+
+void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
+                                       FreeSolverNSGSPtr *freeSolver,
+                                       ComputeErrorPtr *computeError,
+                                       FrictionContactProblem *problem,
+                                       FrictionContactProblem *localproblem,
+                                       SolverOptions *options);
 
 void fc3d_admm(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);
@@ -361,23 +330,23 @@ void fc3d_lcp_gams_path(FrictionContactProblem* problem, double* reaction, doubl
 void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
                           int* info, SolverOptions* options);
 
-/**
-    Check for trivial solution in the friction-contact 3D problem
+void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, double* reaction,
+                                            double* velocity, int* info,
+                                            SolverOptions* options);
 
-    \param problem FrictionContactProblem*  the problem
-    \param velocity global vector (n), in-out parameter
-    \param reaction global vector (n), in-out parameters
-    \param options the pointer to the array of options to set
-    \return info  =0 if a trivial solution has been found, else = -1
-*/
-int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* reaction,
-                          SolverOptions* options);
+void fc3d_nsn_ac_new_set_default(SolverOptions* options);
 
-void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double* reaction,
-                                         double* velocity, int* info, SolverOptions* options);
+/*
+ * Info to complete
+ */
+void fc3d_IPM_SNM(FrictionContactProblem* problem, double* reaction, double* velocity,
+                  int* info, SolverOptions* options);
 
-void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOptions* options,
-                                       SolverOptions* internalsolver_options, double error);
+void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options);
+
+void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options);
+
+void fc3d_ipm_snm_set_default(SolverOptions* options);
 
 /** \addtogroup SetSolverOptions
  * @{
@@ -400,6 +369,16 @@ void fc3d_onecontact_nsn_set_default(SolverOptions* options);
 void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);
 void fc3d_poc_set_default(SolverOptions* options);
 /** @} */
+
+/* Driver and convenience functions */
+int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options);
+
+SolverOptions* fc3d_solver_options_create(solver_id_t solver_id);
+
+void fc3d_list_available_solvers(void);
+
+void fc3d_print_solver_info(solver_id_t solver_id);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

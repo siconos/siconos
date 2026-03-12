@@ -62,8 +62,7 @@ extern "C" {
    \param problem the global problem
    \param localproblem the local problem
 */
-void NCPGlocker_initialize(FrictionContactProblem* problem,
-                           FrictionContactProblem* localproblem);
+void NCPGlocker_initialize(FrictionContactProblem* problem);
 
 /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
    operators required for the Glocker formulation
@@ -119,7 +118,8 @@ double Compute_NCP_error2(int contact, double error);
 void compute_Z_GlockerFixedP(int contact, double* reactionstep);
 
 /** free memory for friction contact to NCP-Glocker */
-void NCPGlocker_free(void);
+void NCPGlocker_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                     SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

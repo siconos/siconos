@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -61,8 +59,8 @@ target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCAS
 target_compile_options(${COMPONENT} PRIVATE "-Wno-zero-as-null-pointer-constant")
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----

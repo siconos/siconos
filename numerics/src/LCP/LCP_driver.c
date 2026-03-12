@@ -29,44 +29,9 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
-#include "numerics_verbose.h"  // for numerics_error, verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_END, DEBUG_BEGIN
-
-const char* const SICONOS_LCP_LEMKE_STR = "Lemke";
-const char* const SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";
-const char* const SICONOS_LCP_PGS_STR = "PGS";
-const char* const SICONOS_LCP_CPG_STR = "CPG";
-const char* const SICONOS_LCP_LATIN_STR = "Latin";
-const char* const SICONOS_LCP_LATIN_W_STR = "Latin_w";
-const char* const SICONOS_LCP_QP_STR = "QP";
-const char* const SICONOS_LCP_NSQP_STR = "NSQP";
-const char* const SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
-const char* const SICONOS_LCP_NEWTON_FB_FBLSA_STR = "NewtonFB";
-const char* const SICONOS_LCP_NEWTON_MIN_FBLSA_STR = "NewtonMinFB";
-const char* const SICONOS_LCP_PSOR_STR = "PSOR";
-const char* const SICONOS_LCP_RPGS_STR = "RPGS";
-const char* const SICONOS_LCP_PATH_STR = "PATH";
-const char* const SICONOS_LCP_ENUM_STR = "ENUM";
-const char* const SICONOS_LCP_AVI_CAOFERRIS_STR = "AVI CaoFerris";
-const char* const SICONOS_LCP_PIVOT_STR = "Pivot based method";
-const char* const SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
-const char* const SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
-const char* const SICONOS_LCP_PATHSEARCH_STR =
-    "For testing only: solver used in the Pathsearch algorithm";
-const char* const SICONOS_LCP_PIVOT_LUMOD_STR =
-    "Pivot based method with BLU updates using LUMOD";
-const char* const SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
-const char* const SICONOS_LCP_CONVEXQP_PG_STR = "Convex QP Projected Gradient";
-#if defined SICONOS_OMP && defined SICONOS_PETSC
-const char* const SICONOS_LCP_PGS_PARALLEL_STR = "Parallel PGS";
-const char* const SICONOS_LCP_PGS_GRAPH_STR = "Parallel Graph PGS";
-const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_STR = "Parallel Graph PGS with permutation";
-const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR =
-    "Parallel Graph PGS with permutation and equitable coloring";
-const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR =
-    "Parallel Graph PGS with permutation and equitable coloring, optimized";
-const char* const SICONOS_LCP_PGS_OPTI_STR = "PGS optimized";
-#endif
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);

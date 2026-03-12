@@ -22,6 +22,7 @@
 
 #include "FischerBurmeister.h"  // for jacobianPhi_FB, phi_FB
 #include "fc3d_2NCP_Glocker.h"  // for computeFGlocker, computeJacobianFGlocker
+#include "numerics_errors.h"
 
 /* size of a block */
 /* static int Fsize; */

@@ -1,0 +1,405 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "FirstOrderNonLinearDS.hpp"
+
+#include <iostream>
+#include <memory>
+
+#include "FirstOrderR.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
+#include "siconos_debug.h"
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+
+// From a minimum set of data
+siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
+    Eigen::Ref<siconos::algebra::SiconosVector> initial_state, siconos::algebra::AliasTag)
+    : DynamicalSystem(initial_state.size()) {
+  // Memory allocation only for required parts of the DS:
+  // state (initial and current). All other operators are optional and
+  // allocated with 'set'-like methods.
+  assert(x_size_ > 0 && "dynamical system dimension should be greater than 0.");
+  // Set initial conditions
+  x0_storage_ =
+      std::make_shared<siconos::algebra::MapVectorType>(initial_state.data(), x_size_);
+
+  // == Current state ==
+  // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
+  // x[0] initialized with x0.
+  // _x.resize(2); done in base class constructor.
+  state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x0());
+  state_x_[1] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  state_x_[1]->setZero();
+
+  rVector_ = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  // FP: move this to initializeNonSmoothInput?
+
+  rVector_->setZero();
+  // dot x = r
+}
+
+siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
+    const siconos::algebra::SiconosVector& initial_state, siconos::algebra::CopyTag)
+    : DynamicalSystem(initial_state.size()) {
+  // Memory allocation only for required parts of the DS:
+  // state (initial and current). All other operators are optional and
+  // allocated with 'set'-like methods.
+  assert(x_size_ > 0 && "dynamical system dimension should be greater than 0.");
+  // Set initial conditions
+  x0_storage_ = std::make_unique<siconos::algebra::SiconosVector>(initial_state);
+
+  // == Current state ==
+  // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
+  // x[0] initialized with x0.
+  // _x.resize(2); done in base class constructor.
+  state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x0());
+  state_x_[1] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  state_x_[1]->setZero();
+
+  rVector_ = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  // FP: move this to initializeNonSmoothInput?
+
+  rVector_->setZero();
+  // dot x = r
+}
+
+// Copy constructor
+siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
+    const FirstOrderNonLinearDS& ds)
+    : DynamicalSystem(ds) {
+  if (ds.hasMMatrix()) {
+    setConstantMMatrix(ds.MMatrix(), siconos::algebra::copy_t);
+    if (ds.computeMMatrix_) {
+      setComputeMMatrixFunction(ds.computeMMatrix_);
+    }
+  }
+
+  if (ds.hasfVector()) {
+    setConstantfVector(ds.fVector(), siconos::algebra::copy_t);
+    if (ds.computefVector_) {
+      setComputefVectorFunction(ds.computefVector_);
+    }
+  }
+
+  if (ds.hasJacobianfOver_x()) {
+    setConstantJacobianfOver_x(ds.jacobianfOver_x(), siconos::algebra::copy_t);
+    if (ds.computejacobianfOver_x_) {
+      setComputeJacobianfOver_xFunction(ds.computejacobianfOver_x_);
+    }
+  }
+
+  if (ds.LU_M()) {
+    LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(MMatrix());
+    hasLU_M_ = true;
+  }
+  // Memory stuff to me moved to graph/osi
+  if (ds.fbuffer_)
+    fbuffer_ = std::make_shared<siconos::algebra::SiconosVector>(*(ds.fbuffer_));
+  rMemory_ = ds.rMemory_;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time) {
+  computeRhs(time);
+  jacobianRhsOver_x_.resize(x_size_ * x_size_);
+  if (hasJacobianfOver_x()) {
+    computeJacobianRhsOver_x(time);
+  } else  // else no resize, jacobian of rhs is equal to 0.
+    jacobianRhsOver_x_.setZero();
+
+  is_jacobianRhsOver_x_uptodate_ = true;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
+  // second argument is useless at the time - Used in derived classes
+
+  // compute rhs = M-1*( f + r ).
+
+  *state_x_[1] = *rVector_;  // Warning: r update is done in Interactions/Relations
+
+  if (hasfVector()) {
+    use_fVector([&](auto& f) {
+      if (computefVector_) computefVector_(*state_x_[0], time, f);
+      *(state_x_[1]) += f;
+    });
+  }
+
+  if (hasMMatrix()) {
+    computeMMatrix(time);
+    if (!hasLU_M_) {
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(MMatrix());
+      *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
+      hasLU_M_ = true;
+    }
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsOver_x(double time) {
+  // second argument is useless here but used in derived classes
+
+  // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
+  // At the time, second term is set to zero.
+
+  // Cases:
+  // 1- M not defined then jacobianRhsOver_x_ contains a flat version of
+  // jacobianfOver_x_view_ 2- M is defined then jacobianRhsOver_x_ contains a flat version of
+  // M-1.jacobianfOver_x_view_
+
+  if (!hasJacobianfOver_x_) return;
+
+  if (computejacobianfOver_x_)  // if plugged, update
+    use_jacobianfOver_x([&](auto& jac) { computejacobianfOver_x_(*state_x_[0], time, jac); });
+
+  // If M is defined ...
+  if (hasMMatrix()) {
+    computeMMatrix(time);
+    if (!hasLU_M_) {
+      // When? If M has been updated or if it's the first call
+      is_jacobianRhsOver_x_uptodate_ = false;
+      // #ifdef SICONOS_SPARSE
+      //       LU_M_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>();
+      //       LU_M_->analysePattern(*MMatrix_view_);
+      //       LU_M_->factorize(*MMatrix_view_);
+      // #else
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(MMatrix());
+      // #endif
+      hasLU_M_ = true;
+    }
+    // solve M*jacobianXRhS = jacobianfx
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      // Solve M-1.jacobianfOver_x_view_ in temp result matrix
+      use_jacobianfOver_x([&](auto& jac) {
+        siconos::algebra::SiconosDenseMatrix result = LU_M_->solve(jac);
+        // and keep it as a flattened vector
+        jacobianRhsOver_x_.noalias() =
+            Eigen::Map<const Eigen::VectorXd>(result.data(), jacobianRhsOver_x_.size());
+        is_jacobianRhsOver_x_uptodate_ = true;
+      });
+    }
+  } else {
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      use_jacobianfOver_x([&](auto& jac) {
+        // No M. Just copy jacobianfOver_x_view_ into jacobianRhsOver_x_ (flat)
+        jacobianRhsOver_x_.noalias() =
+            Eigen::Map<const Eigen::VectorXd>(jac.data(), jacobianRhsOver_x_.size());
+        is_jacobianRhsOver_x_uptodate_ = true;
+      });
+    }
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix(
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  MMatrix_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasMMatrix_ = true;
+  hasConstantMMatrix_ = true;
+  computeMMatrix_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  MMatrix_storage_ =
+      std::make_shared<siconos::algebra::MapType>(newValue.data(), x_size_, x_size_);
+  hasMMatrix_ = true;
+  hasConstantMMatrix_ = true;
+  computeMMatrix_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setComputeMMatrixFunction(
+    const siconos::modeling::func_prototypes::FunctionS_M& new_func) {
+  // Ensure that memory is properly allocated for MMatrix_
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(MMatrix_storage_)) {
+    MMatrix_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(x_size_, x_size_);
+  }
+  hasMMatrix_ = true;
+  hasConstantMMatrix_ = false;
+  computeMMatrix_ = new_func;
+  isTimeInvariant_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computeMMatrix(double time) {
+  if (computeMMatrix_) {
+    use_MMatrix([&](auto& M) { computeMMatrix_(time, M); });
+    hasLU_M_ = false;  // M has changed, LUM needs to be updated.
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantfVector(
+    const siconos::algebra::SiconosVector& newValue, siconos::algebra::CopyTag tag) {
+  if (newValue.size() != x_size_)
+    throw std::invalid_argument("setConstantfVector(copy): input vector has wrong size");
+
+  // Deep copy into Owned storage
+  fVector_storage_ = std::make_unique<siconos::algebra::SiconosVector>(newValue);
+  hasfVector_ = true;
+  hasConstantfVector_ = true;
+  computefVector_ = nullptr;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantfVector(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue, siconos::algebra::AliasTag tag) {
+  if (newValue.size() != x_size_)
+    throw std::invalid_argument("setConstantfVector(alias): input vector has wrong size");
+
+  // Aliasing: shared_ptr to a Map (view over external memory)
+  fVector_storage_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
+  hasfVector_ = true;
+  hasConstantfVector_ = true;
+  computefVector_ = nullptr;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setComputefVectorFunction(
+    const siconos::modeling::func_prototypes::FunctionVS_V& func) {
+  // Ensure that memory is properly allocated for fVector
+  if (!std::holds_alternative<siconos::algebra::OwnedDenseVector>(fVector_storage_)) {
+    fVector_storage_ = std::make_unique<siconos::algebra::SiconosVector>(x_size_);
+  }
+  hasfVector_ = true;
+  computefVector_ = func;
+  isTimeInvariant_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computefVector(
+    const Eigen::Ref<siconos::algebra::SiconosVector>& state, double time) {
+  if (computefVector_) {
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    use_fVector([&](auto& fv) { computefVector_(state, time, fv); });
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfOver_x(
+    const siconos::algebra::SiconosDenseMatrix& newValue, siconos::algebra::CopyTag tag) {
+  jacobianfOver_x_storage_ = std::make_unique<siconos::algebra::SiconosDenseMatrix>(newValue);
+  hasJacobianfOver_x_ = true;
+  hasConstantJacobianfOver_x_ = true;
+  computejacobianfOver_x_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfOver_x(
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue,
+    siconos::algebra::AliasTag tag) {
+  jacobianfOver_x_storage_ =
+      std::make_shared<siconos::algebra::MapType>(newValue.data(), x_size_, x_size_);
+  hasJacobianfOver_x_ = true;
+  hasConstantJacobianfOver_x_ = true;
+  computejacobianfOver_x_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfOver_xFunction(
+    const siconos::modeling::func_prototypes::FunctionVS_M& new_func) {
+  if (!std::holds_alternative<siconos::algebra::OwnedDense>(jacobianfOver_x_storage_)) {
+    jacobianfOver_x_storage_ =
+        std::make_unique<siconos::algebra::SiconosDenseMatrix>(x_size_, x_size_);
+  }
+  hasJacobianfOver_x_ = true;
+  hasConstantJacobianfOver_x_ = false;
+  computejacobianfOver_x_ = new_func;
+  isTimeInvariant_ = false;
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computeJacobianfOver_x(
+    const Eigen::Ref<siconos::algebra::SiconosVector>& state, double time) {
+  if (computejacobianfOver_x_) {
+    use_jacobianfOver_x([&](auto& jac) { computejacobianfOver_x_(state, time, jac); });
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::updatePlugins(double time) {
+  computeMMatrix(time);
+  if (computefVector_) use_fVector([&](auto& fv) { computefVector_(*state_x_[0], time, fv); });
+
+  if (computejacobianfOver_x_)
+    use_jacobianfOver_x([&](auto& jac) { computejacobianfOver_x_(*state_x_[0], time, jac); });
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(
+    siconos::algebra::blocks::size_type level) {
+  /**\warning V.A. rVector_ should be initialized here and not in  the constructor
+   * The level should also be used if we need more that one rVector_
+   */
+  if (!rVector_) rVector_ = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+}
+
+// ===== MEMORY MANAGEMENT FUNCTIONS =====
+
+void siconos::modeling::FirstOrderNonLinearDS::initMemory(
+    siconos::algebra::blocks::size_type steps) {
+  DynamicalSystem::initMemory(steps);
+
+  if (hasfVector() && !fbuffer_)
+    fbuffer_ = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+
+  if (steps == 0)
+    std::cout << "Warning : siconos::modeling::FirstOrderNonLinearDS::initMemory with size "
+                 "equal to zero"
+              << std::endl;
+  else
+    rMemory_.setMemorySize(steps, x_size_);
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::swapInMemory() {
+  DEBUG_BEGIN("void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()\n");
+  xMemory_.swap(*state_x_[0]);
+  rMemory_.swap(*rVector_);
+  if (hasfVector()) {
+    assert(fbuffer_);
+    use_fVector([&](const auto& fv) { *fbuffer_ = fv; });
+  }
+  DEBUG_EXPR(siconos::algebra::print(xMemory_));
+  DEBUG_END("void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()\n");
+}
+
+// ===== MISCELLANEOUS ====
+
+void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const {
+  std::cout << " =====> First Order Non Linear DS (number: " << number_ << ").\n";
+  std::cout << "- dimension : " << x_size_ << std::endl;
+  std::cout << "- state :\n" << *state_x_[0] << "\n";
+  std::cout << "- initial state : \n";
+  use_x0([&](const auto& v) { siconos::algebra::print(v); });
+
+  std::cout << "- M matrix: \n";
+  if (hasMMatrix())
+    use_MMatrix([&](const auto& M) { siconos::algebra::print(M); });
+  else
+    std::cout << "-> nullptr\n";
+  std::cout << " ============================================\n";
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() {
+  rVector_->setZero();
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
+  // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
+  // assert(0);
+  rVector_->setZero();
+}

@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 set(COMPONENT control)
@@ -68,9 +66,13 @@ target_link_libraries(control PUBLIC numerics)
 target_link_libraries(control PUBLIC kernel)
 # Links with non-Siconos libraries
 
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----
@@ -90,6 +92,3 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
 
 siconos_component_install_setup(${COMPONENT})
 
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)

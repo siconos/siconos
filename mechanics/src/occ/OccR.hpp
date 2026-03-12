@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file OccR.hpp
     \brief A Siconos Newton Euler 3D friction relation between
     two BRep contact points.
@@ -23,31 +23,55 @@
 #ifndef OccR_hpp
 #define OccR_hpp
 
-#include "MechanicsFwd.hpp"
-#include "Geometer.hpp"
+#include "Geometer.hpp"        // For  DistanceCalculator
+#include "NewtonEuler3DR.hpp"  // Base class
 
-#include <SiconosFwd.hpp>
-#include <NewtonEuler3DR.hpp>
+namespace siconos::mechanics::occ {
 
-class OccR : public NewtonEuler3DR
-{
-public:
+struct ContactPoint;
+
+class OccR : public siconos::modeling::NewtonEuler3DR {
+ protected:
+  const ContactPoint& _contact1;
+  const ContactPoint& _contact2;
+
+  DistanceCalculator dt{CadmbtbDistanceType{}};
+
+  //  std::shared_ptr<Geometer> _geometer{nullptr};
+
+  double _offset1{0.};
+  double _offset2{0.};
+
+ public:
   /** Constructor from contact points.
    *
    *  \param contact1 : the first contact.
    *  \param contact2 : the second contact.
    */
-  OccR(const ContactPoint& contact1,
-       const ContactPoint& contact2,
-       const DistanceCalculatorType& distance_calculator = CadmbtbDistanceType());
+  OccR(const ContactPoint& contact1, const ContactPoint& contact2,
+       const DistanceCalculator& distance_calculator);
 
-  /** Compute h.
-   *
-   *  \param time : the time.
-   *  \param q0 : the state vector.
-   *  \param y : output vector.
-   */
-  void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  // Rule of 5
+  OccR() = delete;
+  OccR(const OccR&) = delete;
+  OccR(OccR&&) = delete;
+  OccR& operator=(const OccR&) = delete;
+  OccR& operator=(OccR&&) = delete;
+  ~OccR() noexcept = default;
+
+  /**
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Set offset1, offset from first contact.
    *
@@ -61,28 +85,17 @@ public:
    */
   void setOffset2(double val) { _offset2 = val; };
 
-  /** Get geometer.
-   *
-   *  \return a SP::Geometer object.
-   */
-  SP::Geometer geometer() { return _geometer; }
+  // /** Get geometer.
+  //  *
+  //  *  \return a std::shared_ptr<Geometer> object.
+  //  */
+  // std::shared_ptr<Geometer> geometer() { return _geometer; }
 
-  /** Set geometer.
-   *
-   *  \param geometer the new geometer
-   */
-  void setGeometer(SP::Geometer geometer) { _geometer = geometer; }
-
-  ACCEPT_STD_VISITORS();
-
-protected:
-  const ContactPoint& _contact1;
-  const ContactPoint& _contact2;
-
-  SP::Geometer _geometer;
-
-  double _offset1;
-  double _offset2;
+  // /** Set geometer.
+  //  *
+  //  *  \param geometer the new geometer
+  //  */
+  // void setGeometer(std::shared_ptr<Geometer> geometer) { _geometer = geometer; }
 };
-
+}  // namespace siconos::mechanics::occ
 #endif

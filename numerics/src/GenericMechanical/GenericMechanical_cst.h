@@ -50,6 +50,4 @@ enum GENERIC_MECHANICAL_ISREDUCED {
   SICONOS_GENERIC_MECHANICAL_MLCP_LIKE = 3,  // Try to solve like a MLCP (==> No FC3d)
 };
 
-extern const char* const SICONOS_GENERIC_MECHANICAL_NSGS_STR;
-
 #endif

@@ -20,7 +20,8 @@
 #include <stdlib.h>  // for calloc, free
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_EG
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_EG
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
@@ -29,9 +30,13 @@
 #include "SiconosBlas.h"         // for cblas_dcopy, cblas_dnrm2, cblas_...
 #include "fc3d_Solvers.h"        // for fc3d_ExtraGradient, fc3d_ExtraGr...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "numerics_verbose.h"    // for verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"    // for projectionOnCone
 #include "siconos_debug.h"       // for DEBUG_PRINTF, DEBUG_EXPR_WE
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, double* velocity,
                         int* info, SolverOptions* options) {
@@ -309,3 +314,37 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
 void fc3d_eg_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = -1.0;  // rho is variable by default
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_eg_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_eg_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_ExtraGradient((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_eg_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_EG,
+                "FC3D_EG",
+                "Extra Gradient for 3D Friction Contact",
+                fc3d_eg_init_wrap,
+                fc3d_eg_solve_wrap,
+                fc3d_eg_free_wrap,
+                NULL,
+                fc3d_eg_set_default,  /* set_default */
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

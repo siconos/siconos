@@ -1,0 +1,171 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*! \file
+  Time-Stepping simulation with projections on constraints
+*/
+#ifndef TIMESTEPPINGCOMBINEDPROJECTION_H
+#define TIMESTEPPINGCOMBINEDPROJECTION_H
+
+#include "TimeStepping.hpp"
+#include "Topology.hpp"
+
+namespace siconos::simulation {
+
+/** Time-Stepping scheme
+ *
+ */
+class TimeSteppingCombinedProjection : public TimeStepping {
+ protected:
+  ACCEPT_SERIALIZATION(TimeSteppingCombinedProjection);
+
+  /** level of IndexSet on which we project
+   *  (default =2 (subset of activated constraint with positive reactions))
+   */
+  unsigned int _indexSetLevelForProjection{2};
+
+  /** Cumulated Number of steps performed is the Newton Loop */
+  unsigned int _cumulatedNewtonNbIterations{0};
+
+  /** Number of iteration of projection
+   */
+  unsigned int _nbProjectionIteration{0};
+
+  /** Number of cumulated iteration of projection
+   */
+  unsigned int _nbCumulatedProjectionIteration{0};
+
+  /** Number of iteration for stabilizating indexsets
+   */
+  unsigned int _nbIndexSetsIteration{0};
+
+  /** tolerance for the violation of the equality
+   *  constraints at the  position level.
+   */
+  double _constraintTol{1.e-8};
+
+  /** tolerance for the violation of the unilateral
+   *  constraints at the  position level.
+   */
+  double _constraintTolUnilateral{1.e-8};
+
+  /** maximum violation for the violation of the unilateral
+   *  constraints at the  position level.
+   */
+  double _maxViolationUnilateral{0.};
+
+  /** maximum violation for the violation of the equality
+   *  constraints at the  position level.
+   */
+  double _maxViolationEquality{0.};
+
+  /** Default maximum number of projection iteration*/
+  unsigned int _projectionMaxIteration{50};
+
+  /** Default maximum number of index set activation iteration*/
+  unsigned int _kIndexSetMax{50};
+
+  /** disabled or enabled projection (Debug Projection) */
+  bool _doCombinedProj{true};
+
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral
+   * constraints */
+  bool _doCombinedProjOnEquality{true};
+
+  /** Boolean to check if the index sets are stabilized in the Combined
+   * Projection Algorithm */
+  bool _isIndexSetsStable{false};
+
+  /** update indexSets[i] of the topology, using current y and lambda values of Interactions
+   *
+   *  \param level unsigned int: the level of the set to be updated
+   */
+  void updateIndexSet(siconos::simulation::Topology::size_type level) override;
+
+  // struct _SimulationEffectOnOSNSP;
+
+ public:
+  void initializeOneStepNSProblem() override;
+
+  /** Constructor with the time-discretisation.
+   *
+   *  \param nsds the nsds that we want to simulate
+   *  \param td a pointer to a timeDiscretisation (linked to the model
+   *  that owns this simulation)
+   *  \param osi a one step integrator
+   *  \param osnspb_velo a one step non smooth problem for the velocity
+   *  formulation \param osnspb_pos a one step non smooth problem for the
+   *  position formulation \param _level
+   */
+  TimeSteppingCombinedProjection(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td,
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+      unsigned int _level = 2);
+
+  // /** default constructor
+  //  */
+  // TimeSteppingCombinedProjection() = default;
+
+  virtual ~TimeSteppingCombinedProjection() noexcept = default;
+
+  /** get the Number of iteration of projection
+   *
+   *  \return unsigned int nbProjectionIteration
+   */
+  inline unsigned int nbProjectionIteration() { return _nbProjectionIteration; }
+  /** get the Number of cumulated iteration of projection
+   *
+   *  \return unsigned int
+   */
+  inline unsigned int nbCumulatedProjectionIteration() {
+    return _nbCumulatedProjectionIteration;
+  }
+
+  /** get the  Cumulated Number of steps performed in the Newton Loop
+   *
+   *  \return unsigned int
+   */
+  inline unsigned int cumulatedNewtonNbIterations() { return _cumulatedNewtonNbIterations; }
+
+  /** get the Number of iteration for stabilizating indexsets
+   *
+   *  \return unsigned int
+   */
+  inline unsigned int nbIndexSetsIteration() { return _nbIndexSetsIteration; }
+
+  inline void setConstraintTol(double v) { _constraintTol = v; }
+
+  inline void setConstraintTolUnilateral(double v) { _constraintTolUnilateral = v; }
+
+  inline double maxViolationUnilateral() { return _maxViolationUnilateral; }
+  inline double maxViolationEquality() { return _maxViolationEquality; }
+
+  inline void setProjectionMaxIteration(unsigned int v) { _projectionMaxIteration = v; }
+
+  inline void setDoCombinedProj(unsigned int v) { _doCombinedProj = v; }
+
+  inline bool doCombinedProjOnEquality() { return _doCombinedProjOnEquality; }
+
+  void advanceToEvent() override;
+
+  void computeCriteria(bool *runningProjection);
+};
+}  // namespace siconos::simulation
+#endif  // TIMESTEPPINGCOMBINEDPROJECTION_H

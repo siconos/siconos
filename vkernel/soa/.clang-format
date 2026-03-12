@@ -1,0 +1,6 @@
+# Doc: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+# Rules: https://llvm.org/docs/CodingStandards.html 
+BasedOnStyle: Google
+BreakBeforeBraces: Stroustrup
+IncludeBlocks: Regroup
+ColumnLimit: 78

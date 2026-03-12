@@ -14,52 +14,45 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Circle.hpp
  */
 /** \class Circle
  * \brief Definition of a 2D Circle - Inherits from CircularDS
-*/
+ */
 
 #ifndef Circle_H
 #define Circle_H
 
-#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
 
-class Circle : public CircularDS, public std::enable_shared_from_this<Circle>
-{
-private:
+namespace siconos::collision::native::bodies {
 
+class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
+ private:
   ACCEPT_SERIALIZATION(Circle);
 
-
-  void MassSetup();
-
-
-protected:
-
-  Circle() : CircularDS() {};
-
-public:
-
-  /** Constructor
+ public:
+  /** constructor from initial state and velocity
    *
-   *  \param radius
-   *  \param mass
-   *  \param position vector
-   *  \param velocity vector
+   *  \param R radius
+   *  \param m mass
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
    */
-  
-  Circle(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
+  Circle(double radius, double mass, const siconos::algebra::SiconosVector3& qinit,
+         const siconos::algebra::SiconosVector3& vinit);
 
-  /** destructor
-   */
-  virtual ~Circle();
+  /** destructor */
+  virtual ~Circle() noexcept = default;
 
-  ACCEPT_BASE_SP_VISITORS(LagrangianDS);
-
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* Circle_H */
-

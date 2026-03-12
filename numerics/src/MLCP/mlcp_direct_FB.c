@@ -28,12 +28,15 @@ dim(v)=nn
 
 #include "mlcp_direct_FB.h"
 
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
+
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_FB.h"                            // for mlcp_FB_getNbDWork
 #include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
-
 static int sN;
 static int sM;
 
@@ -91,3 +94,42 @@ void mlcp_direct_FB(MixedLinearComplementarityProblem* problem, double* z, doubl
     }
   }
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_DIRECT_FB in the global solver registry.
+ */
+
+static void mlcp_direct_FB_set_default(SolverOptions* options) {
+  /* Use mlcp_direct defaults as the base (for NUMBER_OF_CONFIGURATIONS, etc.) */
+  mlcp_direct_set_default(options);
+}
+
+static int mlcp_direct_FB_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_direct_FB_init((MixedLinearComplementarityProblem*)problem, options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_direct_FB_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_direct_FB((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void mlcp_direct_FB_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_direct_FB_reset();
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_DIRECT_FB, "MLCP_DIRECT_FB",
+                "Direct-Fischer-Burmeister hybrid solver for Mixed Linear Complementarity Problems",
+                mlcp_direct_FB_init_wrap,
+                mlcp_direct_FB_solve_wrap,
+                mlcp_direct_FB_free_wrap,
+                NULL,  /* error function */
+                mlcp_direct_FB_set_default,
+                1000,  /* default_max_iter */
+                1e-12, /* default_tol */
+                0      /* is_local_solver */);

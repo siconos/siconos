@@ -20,11 +20,16 @@
 
 #include "FischerBurmeister.h"            // for jacobianPhi_Mixed_FB, phi_M...
 #include "MCP_Solvers.h"                  // for mcp_old_compute_error, mcp_...
+#include "MCP_cst.h"
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
 #include "NonSmoothNewton.h"              // for nonSmoothNewton, nonSmoothN...
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem...
 #include "SolverOptions.h"                // for SolverOptions, solver_optio...
-#include "numerics_verbose.h"             // for numerics_printf
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -123,3 +128,37 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double*
 
   return;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers MCP_OLD_FB in the global solver registry.
+ */
+
+static void mcp_old_fb_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int mcp_old_fb_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int mcp_old_fb_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  MixedComplementarityProblem_old* mcp = (MixedComplementarityProblem_old*)problem;
+  mcp_old_FischerBurmeister(mcp, z, w, &info, options);
+  return info;
+}
+
+static void mcp_old_fb_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_MCP_OLD_FB, "MCP_OLD_FB",
+                       "Old Fischer-Burmeister solver for Mixed Complementarity Problems",
+                       mcp_old_fb_init_wrap, mcp_old_fb_solve_wrap, mcp_old_fb_free_wrap, NULL,
+                       mcp_old_fb_set_default, 1000, 1e-4, 0);

@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
+#include "fc3d_short_names.h"
 #include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
 
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "Friction_cst.h"       // for SICONOS_FRICTION_3D_NCPGlocke...
+#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_NCPGlocke...
 #include "NCP_FixedP.h"         // for Fixe
 #include "NumericsFwd.h"        // for SolverOptions, FrictionContac...
 #include "SiconosBlas.h"        // for cblas_dcopy
@@ -29,13 +30,13 @@
 #include "fc3d_2NCP_Glocker.h"  // for NCPGlocker_initialize, comput...
 #include "fc3d_Solvers.h"       // for FreeSolverPtr, PostSolverPtr
 
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
+
 /* Pointer to function used to update the solver, to formalize the local problem for example.
  */
 typedef void (*UpdateSolverPtr)(int, double*);
-
-static UpdateSolverPtr updateSolver = NULL;
-static PostSolverPtr postSolver = NULL;
-static FreeSolverPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
@@ -67,15 +68,11 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
   */
 
   /* Glocker formulation */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint) {
+  if (localsolver_options->solverId == FC3D_NCPG_FP) {
     Fsize = 5;
-    NCPGlocker_initialize(problem, localproblem);
-    /*     updateSolver = &NCPGlocker_update; */
-    postSolver = &NCPGlocker_post;
-    freeSolver = &NCPGlocker_free;
+    NCPGlocker_initialize(problem);
   } else {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 }
 
@@ -89,11 +86,7 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
   int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
   if (info > 0) {
-    fprintf(stderr,
-            "Numerics, fc3d_FixedP failed, reached max. number of iterations without "
-            "convergence. Residual = %f\n",
-            dparam[SICONOS_DPARAM_RESIDU]);
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, fc3d_FixedP failed, reached max. number of iterations without ");
   }
   return info;
 
@@ -101,11 +94,7 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
 }
 
 void fc3d_FixedP_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                      SolverOptions* localsolver_option) {
-  updateSolver = NULL;
-  postSolver = NULL;
-  (*freeSolver)();
-}
+                      SolverOptions* localsolver_option) {}
 
 /*
 double fc3d_FixedP_computeError(int contact, int dimReaction, double* reaction, double * error)
@@ -113,3 +102,36 @@ double fc3d_FixedP_computeError(int contact, int dimReaction, double* reaction, 
   return 0.0;
 }
 */
+
+/* ===========================================================================
+ * Solver Registration - Local Solver
+ * ===========================================================================
+ * This is a one-contact solver used within NSGS
+ */
+
+static void fc3d_ncpg_fp_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_ncpg_fp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_ncpg_fp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_FixedP_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(FC3D_NCPG_FP,
+                "FC3D_NCPG_FP",
+                "NCP Glocker Fixed Point (local solver)",
+                fc3d_ncpg_fp_init_wrap,
+                fc3d_ncpg_fp_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_ncpg_fp_set_default,
+                100,    /* default_max_iter */
+                1e-4,   /* default_tol */
+                1)      /* is_local */

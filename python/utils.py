@@ -1,0 +1,92 @@
+"""
+Tools used during configuration and build process
+(most of them used in CMake files, during build or runtime).
+
+This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
+
+ Siconos is a program dedicated to modeling, simulation and control
+ of non smooth dynamical systems.
+
+ Copyright 2025 INRIA.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+
+def parse_cmake_list(var):
+    """Transform cmake list-like variables
+    into python lists.
+
+    Parameters
+    ----------
+    var : string
+        like "a;b;c"
+
+    Returns python list
+
+    If var is already a list, does nothing.
+
+    Example::
+
+        a = parse_cmake_list("var1;var2;var3;")
+        # --> a = ['var', 'var2', 'var3']
+
+    """
+    if isinstance(var, list):
+        return var
+    if var != "":
+        res = list(set(var.split(";")))
+        # list/set stuff to avoid duplicates
+        # remove empty strings to avoid '-I -I' things leading to bugs
+        if res.count(""):
+            res.remove("")
+        return res
+
+    return []
+
+
+def parse_cmake_info(path):
+    """
+    Parse a CMake-generated info file
+
+    into a Python dictionary.
+
+    Each line of the file has the format:
+        KEY=val1;val2;val3
+    Empty values are filtered out.
+
+    Example output:
+        {
+            "INCLUDE_DIRS": ["/usr/include", "/usr/local/include"],
+            "LIBS": ["siconos_mechanics", "siconos_kernel"],
+            ...
+        }
+    """
+    data = {}
+    with open(path) as f:
+        for line in f:
+            if "=" in line:
+                key, val = line.strip().split("=", 1)
+                data[key] = [v for v in val.split(";") if v]
+    return data
+
+
+def format_list_multiline(values, indent=4, comment=False):
+    """Format a python list in a more readable way (new lines and so on)"""
+    if not values:
+        return "[]"
+    pad = " " * indent
+    prefix = "#" if comment else ""
+    joined = ",\n".join(f'{prefix}{pad}"{v}"' for v in values)
+    closing = f"{prefix}]"
+    return f"[\n{joined}\n{closing}"

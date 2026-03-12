@@ -20,7 +20,14 @@
 #include <stdio.h>   // for fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "fc3d_short_names.h"
+#include "fc3d_Solvers.h"                  // for fc3d_nsgs_set_default
+#include "gfc3d_Solvers.h"
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv
@@ -28,7 +35,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "gfc3d_Solvers.h"                 // for ComputeErrorGlobalPtr, gfc...
 #include "gfc3d_compute_error.h"           // for gfc3d_compute_error
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"              // for projectionOnCone
 #include "sanitizer.h"                     // for cblas_dcopy_msan
 #include "siconos_debug.h"                 // for DEBUG_EXPR, DEBUG_PRINTF
@@ -52,7 +59,7 @@ static void gfc3d_nsgs_initialize_local_solver(int n, SolverGlobalPtr* solve,
     /*       fc3d_projection_initialize(n,M,q,mu); */
   } else {
     fprintf(stderr, "Numerics, gfc3d_nsgs failed. Unknown local solver set by iparam[4]\n");
-    exit(EXIT_FAILURE);
+    return;
   }
 }
 
@@ -85,7 +92,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   SolverGlobalPtr local_solver = NULL;
   FreeSolverGlobalPtr freeSolver = NULL;
@@ -104,10 +111,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   if (H->storageType != M->storageType) {
     //     if(verbose==1)
-    fprintf(stderr,
-            "Numerics, gfc3d_nsgs. H->storageType != M->storageType :This case is not taken "
-            "into account.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double norm_q = cblas_dnrm2(n, problem->q, 1);
@@ -185,3 +189,53 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /***** Free memory *****/
   (*freeSolver)(problem);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_NSGS in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+void gfc3d_nsgs_set_default(SolverOptions* options) {
+  /* Allocate internal solver if needed */
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = (SolverOptions**)calloc(1, sizeof(SolverOptions*));
+  }
+  /* Use FC3D NSGS set_default for internal solver setup */
+  fc3d_nsgs_set_default(options);
+}
+
+static int gfc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_nsgs_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_nsgs((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  return info;
+}
+
+static void gfc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER_3VAR(GFC3D_NSGS, "GFC3D_NSGS",
+                "Non-smooth Gauss-Seidel for 3D Global Friction Contact",
+                gfc3d_nsgs_init_wrap,
+                gfc3d_nsgs_solve_wrap,
+                gfc3d_nsgs_free_wrap,
+                NULL,  /* error function */
+                gfc3d_nsgs_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

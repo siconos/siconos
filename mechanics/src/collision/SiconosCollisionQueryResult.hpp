@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosCollisionQueryResult.hpp
 \brief Holds one result of a query against the graph of body
@@ -24,35 +24,47 @@ contactors maintained by a SiconosCollisionManager.
 #ifndef SiconosCollisionQueryResult_h
 #define SiconosCollisionQueryResult_h
 
-#include <MechanicsFwd.hpp>
+#include "SiconosVector.hpp"
+#include <memory>
+
+#include "SiconosSerialization.hpp"
+
+
+namespace siconos::modeling {
+class SecondOrderDS;
+}
+
+namespace siconos::collision {
+
+class SiconosShape;
+class SiconosContactor;
 
 /**
    Holds one result of a line segment intersection query
    against the graph of body contactors maintained by a
    SiconosCollisionManager
 */
-class SiconosCollisionQueryResult
-{
-protected:
+class SiconosCollisionQueryResult {
+ protected:
   ACCEPT_SERIALIZATION(SiconosCollisionQueryResult);
 
-public:
-
+ public:
   /** Distance from reference point (start of line segment or query center) */
-  double distance;
+  double distance{0.};
 
   /** Body owning the contactor that was intersected, may be null for
    *  static contactors. */
-  SP::SecondOrderDS body;
+  std::shared_ptr<siconos::modeling::SecondOrderDS> body{nullptr};
 
   /** The shape that was intersected. */
-  SP::SiconosShape shape;
+  std::shared_ptr<SiconosShape> shape{nullptr};
 
   /** The contactor that was intersected. */
-  SP::SiconosContactor contactor;
+  std::shared_ptr<SiconosContactor> contactor{nullptr};
 
   /** Closest point on contactor in world coordinates. */
-  SiconosVector point;
+  std::shared_ptr<siconos::algebra::SiconosVector> point{nullptr};
 };
 
+}  // namespace siconos::collision
 #endif /* SiconosCollisionQueryResult.hpp */

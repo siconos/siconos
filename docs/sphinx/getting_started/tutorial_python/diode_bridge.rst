@@ -7,7 +7,7 @@ Tutorial: A 4-diodes bridge wave rectifier
 
 .. highlight:: python
 
-.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/master/siconos-notebooks/st01_diode_bridge.ipynb>`_.
+.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/siconos-notebooks/st01_diode_bridge.ipynb>`_.
 
 Preamble
 --------
@@ -148,13 +148,13 @@ we get a first order linear system
 
 with the unknowns :math:`x` and :math:`r`.
 
-To represent this kind of ordinary differential equations, siconos has a class :class:`FirstOrderLinearTIDS` (TIDS stands for time-invariant coefficients dynamical system)
+To represent this kind of ordinary differential equations, siconos has a class :class:`FirstOrderLinearDS` (TIDS stands for time-invariant coefficients dynamical system)
 which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
 
 ::
 
    # import siconos package
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    # numpy for vectors and matrices
    import numpy as np
    
@@ -169,7 +169,7 @@ which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to 
    A.flat[...] = [0., -1.0/Cvalue, 1.0/Lvalue, 0.]
    
    # build the dynamical system
-   ds = sk.FirstOrderLinearTIDS(x0, A)
+   ds = sk.FirstOrderLinearDS(x0, A)
 
 A few remarks:
 
@@ -177,7 +177,7 @@ A few remarks:
 * help can be found on siconos objects with the standard python help function. For example, to find how
   the system can be build::
 
-    help(sk.FirstOrderLinearTIDS)
+    help(sk.FirstOrderLinearDS)
 
  or by checking the :ref:`siconos_api_reference` or :ref:`siconos_python_reference` documention.
 
@@ -278,7 +278,7 @@ which inherits from :class:`Relation`. Check :ref:`relations` to find a complete
 
    # set relation type
    relation= sk.FirstOrderLinearTIR(C, B)
-   relation.setDPtr(D)
+   relation.setConstantD(D)
 
    # set nonsmooth law
    nonsmooth_law = sk.ComplementarityConditionNSL(interaction_size)
@@ -418,7 +418,7 @@ To each formulation, one must associate a solver, picked from the list given in 
 
   import siconos.numerics as sn
   #  Non smooth problem
-  osnspb = sk.LCP(sn.SICONOS_LCP_NSQP)
+  osnspb = sk.LCP(sn.solver_ids.SICONOS_LCP_NSQP)
 
 Notice that solvers come from siconos numerics and are identified thanks to an id. The connection between ids and solvers is given in :ref:`lcp_solvers`.
   

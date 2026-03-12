@@ -17,8 +17,13 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "fc3d_short_names.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_AVI_gams_path, fc3d_AVI_gams_pathvi
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_GAMS_C_API
 
@@ -45,8 +50,8 @@
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #define NB_APPROX 10
@@ -65,7 +70,7 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 #define LAST_MODEL_STATUS 3
 #define LAST_SOLVE_STATUS 4
 
-//#define SMALL_APPROX
+// #define SMALL_APPROX
 
 #include <errno.h>
 #include <fcntl.h>
@@ -355,7 +360,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
 static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
                               double* velocity, SolverOptions* options,
                               const char* solverName) {
-  assert(problem);
+  CHECK_NULL(problem);
   assert(problem->numberOfContacts > 0);
   assert(problem->M);
   assert(problem->q);
@@ -686,7 +691,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
         DEBUG_EXPR_WE(if ((ri[1] * ri[1] + ri[2] * ri[2]) < mu * mu * ri[0] * ri[0]) {
           printf("||r_t||^2 = %g < %g = mu^2 r_n^2; diff = %g\n",
                  (ri[1] * ri[1] + ri[2] * ri[2]), mu * mu * ri[0] * ri[0],
-                 (ri[1] * ri[1] + ri[2] * ri[2]) - (mu * mu * ri[0] * ri[0]));
+                 (ri[1] * ri[1] + ri[2] * ri[2]) - mu * mu * ri[0] * ri[0]);
         });
         /* 3 hyperplanes (because we don't want a lineality space for now */
         cs_entry(Ak_triplet, offset_row, i3, mu);
@@ -893,7 +898,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
                 free(pts);*/
 
       } else  // r = 0, or r in int(cone) but other interactions moved u
-      bad_angle : {
+      bad_angle: {
         double offset_angle = atan2(ri[2], ri[1]);
         if (offset_angle >= 0.) {
           offset_angle -= M_PI;
@@ -1151,3 +1156,97 @@ void fc3d_AVI_gams_pathvi(FrictionContactProblem *problem, double *reaction, dou
   exit(EXIT_FAILURE);
 }
 #endif
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static void fc3d_gams_path_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+}
+
+static void fc3d_gams_pathvi_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+}
+
+#ifdef HAVE_GAMS_C_API
+
+static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_AVI_gams_path((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_GAMS_PATH,
+                             "FC3D_GAMS_PATH",
+                             "GAMS PATH solver for 3D Friction Contact (AVI formulation)",
+                             NULL,   /* init_wrap */
+                             fc3d_gams_path_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_gams_path_set_default,
+                             1000,   /* default_max_iter */
+                             1e-6,   /* default_tol */
+                             0)      /* is_local_solver */
+
+static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_AVI_gams_pathvi((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(FC3D_GAMS_PATHVI,
+                             "FC3D_GAMS_PATHVI",
+                             "GAMS PATHVI solver for 3D Friction Contact (AVI formulation)",
+                             NULL,   /* init_wrap */
+                             fc3d_gams_pathvi_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_gams_pathvi_set_default,
+                             1000,   /* default_max_iter */
+                             1e-6,   /* default_tol */
+                             0)      /* is_local_solver */
+
+#else
+
+/* Stub registrations when GAMS is not available */
+static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)problem; (void)reaction; (void)velocity; (void)options;
+  printf("fc3d_gams :: gams was not enabled at compile time!\n");
+  return NUMERICS_ERR_UNKNOWN;
+}
+
+REGISTER_SOLVER(FC3D_GAMS_PATH,
+                             "FC3D_GAMS_PATH",
+                             "GAMS PATH solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
+                             NULL,   /* init_wrap */
+                             fc3d_gams_path_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_gams_path_set_default,
+                             1000,   /* default_max_iter */
+                             1e-6,   /* default_tol */
+                             0)      /* is_local_solver */
+
+static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)problem; (void)reaction; (void)velocity; (void)options;
+  printf("fc3d_gams :: gams was not enabled at compile time!\n");
+  return NUMERICS_ERR_UNKNOWN;
+}
+
+REGISTER_SOLVER(FC3D_GAMS_PATHVI,
+                             "FC3D_GAMS_PATHVI",
+                             "GAMS PATHVI solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
+                             NULL,   /* init_wrap */
+                             fc3d_gams_pathvi_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_gams_pathvi_set_default,
+                             1000,   /* default_max_iter */
+                             1e-6,   /* default_tol */
+                             0)      /* is_local_solver */
+
+#endif /* HAVE_GAMS_C_API */

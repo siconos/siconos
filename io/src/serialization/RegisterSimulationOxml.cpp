@@ -14,23 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
-#include "SiconosFull.hpp"
-
-#include "RegisterSimulation.hpp"
-
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
-#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
-
 #include <boost/archive/xml_oarchive.hpp>
 
-void RegisterSimulationOxml(std::ofstream& ofs, SP::Simulation& sim)
-{
+#include "RegisterSimulation.hpp"
+#include "SiconosFull.hpp"
+
+void RegisterSimulationOxml(std::ofstream& ofs,
+                            std::shared_ptr<siconos::simulation::Simulation>& sim) {
   boost::archive::xml_oarchive ar(ofs);
   siconos_io_register_Numerics(ar);
   siconos_io_register_Kernel(ar);

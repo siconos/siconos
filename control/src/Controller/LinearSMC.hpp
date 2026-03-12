@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file LinearSMC.hpp
  *
@@ -25,54 +25,47 @@
 #define LinearSMC_H
 
 #include "CommonSMC.hpp"
-
+namespace siconos::control {
 
 /**
    Linear sliding mode controller
-   
+
    This controller implements the following sliding mode control strategy:
    \f[
-   \begin{equation} u = u_{\mathrm{eq}} + u_s\qquad\text{where}\begin{cases} u_{\mathrm{eq}} \text{is the equivalent control input}\\u_s = -sgn(\sigma)\end{cases},\end{equation}
-   \f]
-   
+   \begin{equation} u = u_{\mathrm{eq}} + u_s\qquad\text{where}\begin{cases} u_{\mathrm{eq}}
+   \text{is the equivalent control input}\\u_s = -sgn(\sigma)\end{cases},\end{equation} \f]
+
    where \f$ \sigma = Cx \f$ is the user-defined sliding variable.
-   
+
 */
-class LinearSMC : public CommonSMC
-{
-private:
-  
+class LinearSMC : public CommonSMC {
+ private:
   ACCEPT_SERIALIZATION(LinearSMC);
 
-
-protected:
-  /** default constructor */
-  LinearSMC() {};
-
-
-public:
-
+ public:
   /** Constructor for the ActuatorFactory
    *
    *  \param sensor the ControlSensor feeding the Actuator
    *  \param type do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::ControlSensor sensor, unsigned int type = LINEAR_SMC);
+  LinearSMC(std::shared_ptr<ControlSensor> sensor,
+            ActuatorType type = ActuatorType::LinearSMC);
 
   /** Constructor with all the data
    *
    *  \param sensor the ControlSensor feeding the Actuator
-   *  \param B the matrix 
+   *  \param B the matrix
    *  \param D the D matrix in the FirstOrderLinearR
    *  \param type do not set this yourself ! this is used in derived classes
    */
-  LinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B,
-            SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>(),
-            unsigned int type = LINEAR_SMC);
+  LinearSMC(std::shared_ptr<ControlSensor> sensor,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr,
+            ActuatorType type = ActuatorType::LinearSMC);
 
   /** destructor
    */
-  virtual ~LinearSMC();
+  virtual ~LinearSMC() noexcept = default;
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
@@ -84,11 +77,10 @@ public:
    *
    *  \param D the new D matrix
    */
-  inline void setDPtr(SP::SimpleMatrix D)
-  {
-    _D = D;
-  };
-
-  
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> D) { _D = D; };
 };
+// Register the observer into the factory
+static ActuatorRegistration<LinearSMC> reg_ALSMC(ActuatorType::LinearSMC);
+
+}  // namespace siconos::control
 #endif

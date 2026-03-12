@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ExplicitLinearSMC.hpp
   \brief General interface to define an actuator
@@ -25,49 +25,51 @@
 
 #include "CommonSMC.hpp"
 
-class ExplicitLinearSMC : public CommonSMC
-{
-private:
-  /** default constructor */
-  ExplicitLinearSMC() {};
+namespace siconos::control {
 
-  
+class ExplicitLinearSMC : public CommonSMC {
+ private:
   ACCEPT_SERIALIZATION(ExplicitLinearSMC);
 
   /** \f$ \sigma = Cx \f$ */
-  SP::SiconosVector _sigma;
+  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr};
 
-public:
-
+ public:
   /** Constructor
    *
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  ExplicitLinearSMC(SP::ControlSensor sensor);
+  ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor);
 
   /** Constructor.with all data
    *
    *  \param sensor the ControlSensor feeding the Actuator
    *  \param B the B matrix
    */
-  ExplicitLinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B);
+  ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
-  */
-  virtual ~ExplicitLinearSMC();
+   */
+  virtual ~ExplicitLinearSMC() noexcept = default;
 
   /** Initializer
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
    *  TODO
    */
   void actuate();
-
 };
+
+// Register the observer into the factory
+static ActuatorRegistration<ExplicitLinearSMC> reg_AELSMC(ActuatorType::ExplicitLinearSMC);
+
+}  // namespace siconos::control
 #endif

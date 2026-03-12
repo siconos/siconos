@@ -25,7 +25,8 @@
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_NSGS_LOCAL...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_NSGS_LOCAL...
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContact...
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
 #include "SiconosBlas.h"             // for cblas_ddot
@@ -34,7 +35,7 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"        // for fc3d_Tresca_unitary_compute_an...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
-#include "numerics_verbose.h"          // for numerics_printf, numerics_prin...
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"          // for projectionOnCone
 #include "projectionOnCylinder.h"      // for projectionOnCylinder
 /* #define DEBUG_NOCOLOR */
@@ -44,6 +45,10 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* Static variables */
 
@@ -63,8 +68,7 @@
 /* static double qLocal[3]; */
 /* static double mu_i = 0.0; */
 
-void fc3d_projection_initialize(FrictionContactProblem* problem,
-                                FrictionContactProblem* localproblem) {}
+void fc3d_projection_initialize(FrictionContactProblem* main_problem) {}
 
 void fc3d_projection_update(int contact, FrictionContactProblem* problem,
                             FrictionContactProblem* localproblem, double* reaction,
@@ -112,7 +116,7 @@ void fc3d_projection_update_parallel(int contact, FrictionContactProblem* proble
   localproblem->mu[0] = problem->mu[contact];
 }
 
-void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProblem* problem,
+void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProblem* main_problem,
                                                FrictionContactProblem* localproblem,
                                                double* reaction, SolverOptions* options) {
   /* Build a local problem for a specific contact
@@ -125,17 +129,17 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_local_problem_fill_M(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(main_problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
 
-  NumericsMatrix* MGlobal = problem->M;
+  NumericsMatrix* MGlobal = main_problem->M;
   double* MLocal = localproblem->M->matrix0;
 
   double* qLocal = localproblem->q;
-  double* qGlobal = problem->q;
-  int n = 3 * problem->numberOfContacts;
+  double* qGlobal = main_problem->q;
+  int n = 3 * main_problem->numberOfContacts;
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */
@@ -166,22 +170,20 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
     qLocal[2] -= MLocal[8] * reaction[is];
 
   } else {
-    fprintf(stderr,
-            "fc3d_projectionWithDiagonalization_update :: Unsupported matrix storage)");
-    exit(EXIT_FAILURE);
+    assert(0);;
   }
   /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
 
   /* Friction coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->mu[0] = main_problem->mu[contact];
 }
 
-void fc3d_projection_initialize_with_regularization(FrictionContactProblem* problem,
+void fc3d_projection_initialize_with_regularization(FrictionContactProblem* main_problem,
                                                     FrictionContactProblem* localproblem) {
   if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
 }
 
-void fc3d_projection_update_with_regularization(int contact, FrictionContactProblem* problem,
+void fc3d_projection_update_with_regularization(int contact, FrictionContactProblem* main_problem,
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options) {
   /* Build a local problem for a specific contact
@@ -195,11 +197,11 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NM_copy_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+  NM_copy_diag_block3(main_problem->M, contact, &localproblem->M->matrix0);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
-  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(main_problem, localproblem, reaction, contact);
 
   double rho = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
   for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
@@ -213,8 +215,38 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
   qLocal[2] -= rho * reaction[is];
 
   /* Friction coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->mu[0] = main_problem->mu[contact];
 }
+void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
+                                              FrictionContactProblem* localproblem,
+                                              SolverOptions* localsolver_options) {
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
+}
+static int fc3d_proj_cone_with_regularization_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_cone_with_regularization_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCone_solve((FrictionContactProblem*)problem, reaction, options);
+}
+/* Projection on Cone _with_regularization*/
+static void fc3d_proj_cone_with_regularization_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+REGISTER_SOLVER(OC_PROJ_REG,
+                "OC_PROJ_REG",
+                "Projection on Cone (local solver) with regularization",
+                fc3d_proj_cone_with_regularization_init_wrap,
+                fc3d_proj_cone_with_regularization_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_cone_with_regularization_set_default,
+                100, 1e-4, 1)
+
 
 void fc3d_projection_update_with_regularization_parallel(int contact, FrictionContactProblem* problem,
                                                          FrictionContactProblem* localproblem,
@@ -274,8 +306,7 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
   } else {
     if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON ||
         MLocal[2 * nLocal + 2] < DBL_EPSILON) {
-      fprintf(stderr, "fc3d_projection error: null term on MLocal diagonal.\n");
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "fc3d_projection error: null term on MLocal diagonal.\n");
     }
 
     reaction[0] = -qLocal[0] / MLocal[0];
@@ -293,10 +324,9 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
   return 0;
 }
 
-void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* problem,
-                                                        FrictionContactProblem* localproblem,
+void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* main_problem,
                                                         SolverOptions* localsolver_options) {
-  size_t nc = problem->numberOfContacts;
+  size_t nc = main_problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork || localsolver_options->dWorkSize < nc) {
     localsolver_options->dWork =
@@ -308,7 +338,7 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* 
   }
 }
 
-void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* problem,
+void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* main_problem,
                                                   FrictionContactProblem* localproblem,
                                                   SolverOptions* localsolver_options) {
   free(localsolver_options->dWork);
@@ -481,7 +511,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   return 0;
 }
 
-void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* main_problem,
                                           FrictionContactProblem* localproblem,
                                           SolverOptions* options) {
   assert(localproblem);
@@ -489,7 +519,7 @@ void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* problem,
   localproblem->mu = options->dWork;
 }
 
-void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* main_problem,
                                       FrictionContactProblem* localproblem, double* reaction,
                                       SolverOptions* options) {
   /* Build a local problem for a specific contact
@@ -502,11 +532,11 @@ void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* probl
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_local_problem_fill_M(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(main_problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
-  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(main_problem, localproblem, reaction, contact);
 }
 
 void fc3d_projectionOnCylinder_update_parallel(int contact, FrictionContactProblem* problem,
@@ -570,16 +600,10 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
   return 0;
 }
 
-void fc3d_projection_free(FrictionContactProblem* problem,
+void fc3d_projection_free(FrictionContactProblem* main_problem,
                           FrictionContactProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
-void fc3d_projection_with_regularization_free(FrictionContactProblem* problem,
-                                              FrictionContactProblem* localproblem,
-                                              SolverOptions* localsolver_options) {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
-}
 
 int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
                                          double* velocity, SolverOptions* options) {
@@ -669,9 +693,9 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double
 }
 
 void fc3d_projectionOnCylinderWithLocalIteration_initialize(
-    FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+    FrictionContactProblem* main_problem, FrictionContactProblem* localproblem,
     SolverOptions* options, SolverOptions* localsolver_options) {
-  int nc = problem->numberOfContacts;
+  int nc = main_problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (localproblem->mu) {
     free(localproblem->mu);
@@ -683,16 +707,13 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
     localsolver_options->dWork = (double*)malloc(nc * sizeof(double));
     localsolver_options->dWorkSize = nc;
   } else {
-    fprintf(stderr,
-            "Numerics, fc3d_projectionOnCylinderWithLocalIteration_initialize failed. "
-            "localsolver_options->dWork is different from NULL.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
   for (int i = 0; i < nc; i++) {
     localsolver_options->dWork[i] = 1.0;
   }
 }
-void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* main_problem,
                                                       FrictionContactProblem* localproblem,
                                                       SolverOptions* localsolver_options) {
   localproblem->mu = NULL;
@@ -700,7 +721,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* pr
   localsolver_options->dWork = NULL;
 }
 
-void fc3d_projectionOnCylinder_free(FrictionContactProblem* problem,
+void fc3d_projectionOnCylinder_free(FrictionContactProblem* main_problem,
                                     FrictionContactProblem* localproblem,
                                     SolverOptions* localsolver_options) {
   localproblem->mu = NULL;
@@ -869,3 +890,141 @@ void fc3d_poc_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] =
       0.;  // Used only for ProjectionOnConeWithRegularization
 }
+
+/* ===========================================================================
+ * Solver Registration - Local Projection Solvers
+ * ===========================================================================
+ * These are one-contact solvers used within NSGS (Non-Smooth Gauss-Seidel)
+ */
+
+/* Projection on Cone with diagonalization */
+static void fc3d_proj_diag_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_proj_diag_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_diag_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionWithDiagonalization_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(OC_PROJ_DIAG,
+                "OC_PROJ_DIAG",
+                "Projection on Cone with Diagonalization (local solver)",
+                fc3d_proj_diag_init_wrap,
+                fc3d_proj_diag_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_diag_set_default,
+                1000, 1e-14, 1)
+
+/* Projection on Cone */
+static void fc3d_proj_cone_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_proj_cone_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_cone_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCone_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(OC_PROJ,
+                "OC_PROJ",
+                "Projection on Cone (local solver)",
+                fc3d_proj_cone_init_wrap,
+                fc3d_proj_cone_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_cone_set_default,
+                1000, 1e-14, 1)
+
+/* Projection on Cone with Local Iteration */
+static void fc3d_proj_li_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_proj_li_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  /* this initialize is called when the onde contact solver is called directly by the driver */
+  fc3d_projectionOnConeWithLocalIteration_initialize(problem, options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_li_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnConeWithLocalIteration_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(OC_PROJ_LI,
+                "OC_PROJ_LI",
+                "Projection on Cone with Local Iteration (local solver)",
+                fc3d_proj_li_init_wrap,
+                fc3d_proj_li_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_li_set_default,
+                1000, 1e-14, 1)
+
+/* Projection on Cylinder */
+static void fc3d_proj_cyl_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_proj_cyl_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_cyl_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCylinder_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(OC_CYLINDER,
+                "OC_CYLINDER",
+                "Projection on Cylinder (local solver)",
+                fc3d_proj_cyl_init_wrap,
+                fc3d_proj_cyl_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_cyl_set_default,
+                1000, 1e-14, 1)
+
+/* Projection on Cylinder with Local Iteration */
+static void fc3d_proj_cyl_li_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_proj_cyl_li_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_proj_cyl_li_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return fc3d_projectionOnCylinderWithLocalIteration_solve((FrictionContactProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(OC_CYLINDER_LI,
+                "OC_CYLINDER_LI",
+                "Projection on Cylinder with Local Iteration (local solver)",
+                fc3d_proj_cyl_li_init_wrap,
+                fc3d_proj_cyl_li_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_proj_cyl_li_set_default,
+                1000, 1e-14, 1)

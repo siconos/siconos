@@ -39,14 +39,16 @@ extern "C" {
 
 FrictionContactProblem *from_fclib_local(const fclib_local *fclib_problem);
 
+FrictionContactProblem *from_fclib_local_sparse(const fclib_local *fclib_problem);
+
 FrictionContactProblem *frictionContact_fclib_read(const char *path);
 
 int frictionContact_fclib_write_csr(FrictionContactProblem *problem, char *title,
                                     char *description, char *mathInfo, const char *path,
                                     int ndof);
 
-int frictionContact_fclib_write(FrictionContactProblem *problem, char *title,
-                                char *description, char *mathInfo, const char *path, int ndof);
+int frictionContact_fclib_write(FrictionContactProblem *problem, const char *title,
+                                const char *description, const char *mathInfo, const char *path, int ndof);
 
 int frictionContact_fclib_write_guess(double *reaction, double *velocity, const char *path);
 

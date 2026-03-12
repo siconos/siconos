@@ -24,7 +24,7 @@
 #include "ConvexQP.h"                                  // for ConvexQP
 #include "ConvexQP_Solvers.h"                          // for convexQP_ADMM_...
 #include "ConvexQP_cst.h"                              // for SICONOS_CONVEX...
-#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "FrictionContact_options.h"                              // for SICONOS_FRICTI...
 #include "GlobalFrictionContactProblem.h"              // for GlobalFriction...
 #include "GlobalFrictionContactProblem_as_ConvexQP.h"  // for GlobalFriction...
 #include "NumericsFwd.h"                               // for ConvexQP, Solv...
@@ -33,8 +33,13 @@
 #include "SolverOptions.h"                             // for SolverOptions
 #include "gfc3d_Solvers.h"                             // for gfc3d_set_inte...
 #include "gfc3d_compute_error.h"                       // for gfc3d_compute_...
-#include "numerics_verbose.h"                          // for numerics_print...
+#include "fc3d_short_names.h"                          // for GFC3D_ACLMFP
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                             // for DEBUG_EXPR
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*internalSolverPtr)(ConvexQP *, double *, double *, double *, double *, int *,
@@ -112,8 +117,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
     internalsolver = &convexQP_ADMM;
     convexQP_ADMM_init(cqp, options->internalSolvers[0]);
   } else {
-    fprintf(stderr, "Numerics, gfc3d_ACLMFixedPoint failed. Unknown internal solver.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double normUT;
@@ -141,27 +145,24 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
     gfc3d_compute_error(problem, reaction, velocity, globalVelocity, tolerance, options,
                         norm_q, norm_b, &error);
 
-    numerics_printf_verbose(1, "---- GFC3D - ACLMFP - Iteration %i Residual = %14.7e", iter,
-                            error);
+    numerics_printf_verbose(1, "---- GFC3D - ACLMFP - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
-  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - # Iteration %i Final Residual = %14.7e",
-                          iter, error);
-  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - #              internal iteration = %i",
-                          cumul_iter);
+  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+  numerics_printf_verbose(1, "---- GFC3D - ACLMFP - internal iteration = %i", cumul_iter);
 
   NM_clear(cqp->A);
   free(cqp->b);
   free(cqp->q);
   free(w);
-  free(cqp);
 
   if (internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM) {
     convexQP_ADMM_free(cqp, options->internalSolvers[0]);
   }
+  free(cqp);
 
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -172,7 +173,50 @@ void gfc3d_aclmfp_set_default(SolverOptions *options) {
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 2.0;
 
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_ACLMFP in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
+  gfc3d_aclmfp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gfc3d_aclmfp_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_ACLMFixedPoint((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  return info;
+}
+
+static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER_3VAR(GFC3D_ACLMFP, "GFC3D_ACLMFP",
+                "Alart-Curnier Lemke Fixed Point for 3D Global Friction Contact",
+                gfc3d_aclmfp_init_wrap,
+                gfc3d_aclmfp_solve_wrap,
+                gfc3d_aclmfp_free_wrap,
+                NULL,  /* error function */
+                gfc3d_aclmfp_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

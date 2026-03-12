@@ -23,8 +23,10 @@
 #define _NUMERICS_VERBOSE_INTERNAL_H_
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "NumericsVerbose.h"
 #include "SiconosConfig.h"
@@ -57,35 +59,20 @@ extern "C" {
     }                                                                                  \
   } while (0)
 
-/** check IO
+/** @rbrief Check validity of an io expression
+ *  @return true when everything is fine
  */
-#define CHECK_IO(EXPR, ...)                                                                 \
-  do {                                                                                      \
-    if (!EXPR) {                                                                            \
-      int* _arr_[] = {NULL, __VA_ARGS__};                                                   \
-      if (errno != 0) {                                                                     \
-        perror(#EXPR);                                                                      \
-        fprintf(stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__,    \
-                __LINE__);                                                                  \
-        if (sizeof(_arr_) == 2 * sizeof(intptr_t)) {                                        \
-          *_arr_[sizeof(_arr_) / sizeof(intptr_t) - 1] = errno;                             \
-        }                                                                                   \
-      } else {                                                                              \
-        fprintf(stderr, "Siconos Numerics: Unknown error for %s, %s:%d\n", #EXPR, __FILE__, \
-                __LINE__);                                                                  \
-        if (sizeof(_arr_) == 2 * sizeof(intptr_t)) {                                        \
-          *_arr_[sizeof(_arr_) / sizeof(intptr_t) - 1] = 1;                                 \
-        }                                                                                   \
-      }                                                                                     \
-    }                                                                                       \
-  } while (0)
+static inline bool check_io(int expr) {
+  if (expr) return true;
 
-/* ignore IO. Think carefully before using this ...*/
-#define IGNORE_IO(EXPR) \
-  do {                  \
-    if (EXPR) {         \
-    };                  \
-  } while (0)
+  if (errno != 0) {
+    perror("check_io");
+    fprintf(stderr, "Siconos Numerics: Warning failed, %s:%d\n", __FILE__, __LINE__);
+  } else {
+    fprintf(stderr, "Siconos Numerics: Unknown error, %s:%d\n", __FILE__, __LINE__);
+  }
+  return false;
+}
 
 #ifdef __clang_analyzer__
 #define NO_RETURN __attribute__((analyzer_noreturn))

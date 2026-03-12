@@ -15,22 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file SiconosKernel.hpp
-Include files related to Siconos Mechanics joints interface
+/*! \file SiconosJoints.hpp
+All headers required for Siconos Mechanics joints interface (namespace siconos::joints)
 */
 
 #ifndef SiconosJoints_hpp
 #define SiconosJoints_hpp
 
-#include "NewtonEulerJointR.hpp"
 #include "CouplerJointR.hpp"
 #include "CylindricalJointR.hpp"
 #include "FixedJointR.hpp"
-#include "KneeJointR.hpp"
-#include "PivotJointR.hpp"
-#include "PrismaticJointR.hpp"
-
 #include "JointFrictionR.hpp"
 #include "JointStopR.hpp"
+#include "KneeJointR.hpp"
+#include "NewtonEulerJointR.hpp"
+#include "PivotJointR.hpp"
+#include "PrismaticJointR.hpp"
 
 #endif

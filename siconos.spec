@@ -4,7 +4,7 @@ Release:        2%{?dist}
 Summary:        Simulation platform dedicated to non-smooth dynamical systems
 
 License:        Apache2.0
-URL:            http://siconos.gforge.inria.fr
+URL:            http://siconos.org
 #Source0:        https://github.com/siconos/siconos/archive/master.tar.gz
 Source0:        master.tar.gz
 
@@ -34,7 +34,7 @@ BuildRequires: MUMPS-devel
 BuildRequires:  suitesparse-devel
 BuildRequires:  python-devel
 BuildRequires:  numpy
-BuildRequires:  swig
+BuildRequires:  pybind11
 BuildRequires:  lpsolve-devel
 BuildRequires:  bullet-devel
 

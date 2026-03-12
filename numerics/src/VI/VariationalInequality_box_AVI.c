@@ -29,10 +29,13 @@
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_Newton.h"                      // for VI_compute_F, VI_compute_...
 #include "VariationalInequality.h"          // for VariationalInequality
+#include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
+#include "Relay_options.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
 #include "sanitizer.h"                      // for cblas_dcopy_msan
-
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "numerics_errors.h"
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
@@ -125,3 +128,37 @@ void variationalInequality_BOX_AVI_set_default(SolverOptions* options) {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_RELAY_AVI_CAOFERRIS);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int vi_box_avi_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  /* set_default already called by solver_options_create */
+  return NUMERICS_OK;
+}
+
+static int vi_box_avi_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  vi_box_AVI_LSA((VariationalInequality*)problem, x, F, &info, options);
+  return info;
+}
+
+static void vi_box_avi_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_VI_BOX_AVI_LSA,
+                "VI_BOX_AVI_LSA",
+                "Box VI solver based on AVI and Line Search",
+                vi_box_avi_init_wrap,
+                vi_box_avi_solve_wrap,
+                vi_box_avi_free_wrap,
+                NULL,
+                variationalInequality_BOX_AVI_set_default,  /* set_default */
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

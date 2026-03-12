@@ -43,5 +43,5 @@ std::complex<double> random_value<std::complex<double> >() {
 }
 
 }  // namespace algebra
-}  // namespace siconos
+}  // namespace Siconos
 #endif

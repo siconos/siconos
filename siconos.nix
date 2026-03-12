@@ -45,12 +45,12 @@ stdenv.mkDerivation rec {
   ++ optional (numerics_only != true) [ boost ];
   
   propagatedNativeBuildInputs = with pythonX.pkgs;
-    if enable_python then [ cmake swig gfortran pythonenv]
+    if enable_python then [ cmake gfortran pythonenv]
     else [cmake gfortran];
 
  cmakeFlags = [ "-DBLA_VENDOR=${blas_name}" ]
     ++ optional (numerics_only == true) [ "-DCOMPONENTS=externals;numerics -DWITH_CXX=OFF" ]
-    ++ optional (enable_python != true) [ "-DWITH_PYTHON_WRAPPER=OFF" ]
+    ++ optional (enable_python != true) [ "-DWITH_PYB11_WRAPPER=OFF" ]
     ++ optional (enable_openmp == true) [ "-DWITH_OPENMP=ON" ];
 
     
@@ -70,7 +70,7 @@ stdenv.mkDerivation rec {
 
  
   meta = with stdenv.lib; {
-    homepage = http://siconos.gforge.inria.fr/;
+    homepage = http://siconos.org/;
     description = "Nonsmooth dynamical systems simulator";
     license = licenses.asl20;
     platforms = platforms.all;

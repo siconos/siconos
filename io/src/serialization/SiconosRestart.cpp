@@ -29,7 +29,7 @@
 namespace siconos
 {
 
-void save(SP::Simulation s, const std::string& filename)
+void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename)
 {
   boost::filesystem::path tempf =
     boost::filesystem::path(filename + ".tmp");
@@ -57,10 +57,9 @@ void save(SP::Simulation s, const std::string& filename)
 /** load Siconos model from file
  * \param filename
  */
-SP::Simulation load(const std::string& filename)
+std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename)
 {
-  //SP::Simulation s(new Simulation());
-  SP::Simulation s;
+  std::shared_ptr<siconos::simulation::Simulation> s;
 
   std::ifstream ifs(filename.c_str());
   {
@@ -82,12 +81,12 @@ SP::Simulation load(const std::string& filename)
 namespace siconos
 {
 
-void save(SP::Simulation s, const std::string& filename)
+void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename)
 {
   THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
 }
 
-SP::Simulation load(const std::string& filename)
+std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename)
 {
   THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
   /* Dummy return to make every compiler happy  */

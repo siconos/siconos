@@ -1,0 +1,372 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "LagrangianDSTest.hpp"
+
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
+
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+
+// test suite registration
+CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianDSTest);
+
+void LagrangianDSTest::setUp() {
+  q0 << 1, 2, 3;
+  velocity0 << 4, 5, 6;
+
+  mass.setZero();
+  mass(0, 0) = 1;
+  mass(1, 1) = 2;
+  mass(2, 2) = 3;
+}
+
+void LagrangianDSTest::tearDown() {}
+
+void LagrangianDSTest::testBuildLagrangianDS_copy() {
+  std::cout << "--> Test: constructor 1 (copy)." << std::endl;
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0,
+                                                              siconos::algebra::copy_t);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 1: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 2: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 3: ", ds->velocity0() == velocity0,
+                               true);
+
+  q0(0) += 3;
+  velocity0(1) += 4;
+
+  // Change in external vectors should not affect internal attributes
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 2: ", ds->q0() == q0, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 3: ", ds->velocity0() == velocity0,
+                               false);
+  q0(0) -= 3;
+  velocity0(1) -= 4;
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 4: ", ds->p_read(1).isZero(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 5: ", ds->p(0) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 6: ", ds->p(2) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 1 (copy) - 7: ", ds->computeKineticEnergy() == 38.5, true);
+
+  double time = 1.;
+
+  // Try to compute forces and jacobians, even if not set, just to check
+  // that nothing happens and that no exception is raised
+  ds->computeTotalForces(ds->velocity_read(), ds->q_read(), time);
+  ds->computeJacobianTotalForcesOver_q(ds->velocity_read(), ds->q_read(), time);
+  ds->computeJacobianTotalForcesOver_velocity(ds->velocity_read(), ds->q_read(), time);
+
+  // Init and compute RHS (First-order formulation)
+  ds->initRhs(time);
+  siconos::algebra::SiconosVector x0;
+  siconos::algebra::SiconosVector rhs0;
+  siconos::algebra::concatenateVectors(x0, q0, velocity0);
+  siconos::algebra::SiconosVector zero = siconos::algebra::SiconosVector::Zero(3);
+  siconos::algebra::concatenateVectors(rhs0, velocity0, zero);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 8: ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 9: ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 10: ", *(ds->rhs()) == rhs0, true);
+
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
+  const auto& jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 1 (copy) - 11: ", jacoref.isApprox(jaco_rhs, 1e-12), true);
+  std::cout << "✅ Constructor 1 (copy mode) test ended with success." << std::endl;
+}
+
+// constructor from initial state only
+void LagrangianDSTest::testBuildLagrangianDS_alias() {
+  std::cout << "--> Test: constructor 1." << std::endl;
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0,
+                                                              siconos::algebra::alias_t);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
+  //     "testBuildLagrangianDS1: ", Type::value(*ds) == Type::LagrangianDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (alias) - 1: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (alias) - 2: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (alias) - 3: ", ds->velocity0() == velocity0,
+                               true);
+
+  q0(0) += 3;
+  velocity0(1) += 4;
+  // Change in external vectors must change internal attributes (shared mem)
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 2: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 1 (copy) - 3: ", ds->velocity0() == velocity0,
+                               true);
+
+  std::cout << "✅ Constructor 1 (alias mode) test ended with success." << std::endl;
+}
+
+// A DS with all operators (mass, fext, fint), alias mode
+void LagrangianDSTest::testBuildLagrangianDS2_alias() {
+  std::cout << "--> Test: constructor 2." << std::endl;
+
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0,
+                                                              siconos::algebra::alias_t);
+  ds->setConstantMass(mass, siconos::algebra::alias_t);
+
+  siconos::algebra::SiconosVector3 fext;
+  fext << 1, 2, 3;
+  ds->setConstantFext(fext, siconos::algebra::alias_t);
+
+  siconos::algebra::SiconosVector3 ref;
+  ref << 1, 2, 3;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->mass() == mass, true);
+  mass *= 3;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->mass() == mass, true);
+
+  auto Ecref = 0.5 * (mass * velocity0).dot(velocity0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->computeKineticEnergy() == Ecref, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->fext().isApprox(ref), true);
+
+  auto computefint = [](const siconos::algebra::SiconosVector& velocity,
+                        const siconos::algebra::SiconosVector& q, double time,
+                        Eigen::Ref<siconos::algebra::MapVectorType> result) {
+    auto ndof = result.size();
+    for (size_t i = 0; i < ndof; ++i) result[i] = velocity(i) * time + q(i);
+  };
+
+  ds->setComputeFintFunction(computefint);
+
+  siconos::algebra::SiconosVector3 q;
+  q << 1, 2, 3;
+  siconos::algebra::SiconosVector3 vel;
+  vel << 4, 5, 6;
+  double time = 2.;
+  ds->computeFint(vel, q, time);
+
+  siconos::algebra::SiconosMatrix33 jacq, jacvel;
+  // set 'random' value for jacobians, whatever fint is, just for tests
+  jacq.setConstant(1.);
+  jacvel.setConstant(2.);
+  ds->setConstantJacobianFintOver_q(jacq, siconos::algebra::alias_t);
+  ds->setConstantJacobianFintOver_velocity(jacvel, siconos::algebra::alias_t);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->jacobianFintOver_q().isApprox(jacq), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->jacobianFintOver_velocity().isApprox(jacvel), true);
+  jacq *= 1.2;
+  jacvel *= 1.3;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->jacobianFintOver_q().isApprox(jacq), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->jacobianFintOver_velocity().isApprox(jacvel), true);
+
+  siconos::algebra::SiconosVector3 reffint;
+  computefint(vel, q, time, reffint);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->fint().isApprox(reffint),
+                               true);
+
+  ds->computeTotalForces(vel, q, time);
+  ds->computeJacobianTotalForcesOver_q(vel, q, time);
+  ds->computeJacobianTotalForcesOver_velocity(vel, q, time);
+
+  siconos::algebra::SiconosMatrix33 refjac;
+  refjac = -jacq;
+  siconos::algebra::SiconosVector3 refforces;
+  refforces = fext - reffint;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->totalForces().isApprox(refforces), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias): ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
+  refjac = -jacvel;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ",
+                               ds->jacobianTotalForcesOver_velocity().isApprox(refjac), true);
+
+  ds->initRhs(time);
+  siconos::algebra::SiconosVector x0;
+  siconos::algebra::SiconosVector rhs0;
+  siconos::algebra::concatenateVectors(x0, q0, velocity0);
+  siconos::algebra::SiconosVector3 ref0;
+  ref0 = mass.inverse() * refforces;
+  siconos::algebra::concatenateVectors(rhs0, velocity0, ref0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (alias): ", ds->rhs()->isApprox(rhs0), true);
+
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
+  siconos::algebra::SiconosMatrix33 refj2;
+  refjac = -jacq;
+
+  refj2 = mass.inverse() * refjac;
+  for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) jacoref(j * 6 + i + 3) = refj2(i, j);
+  }
+  refjac = -jacvel;
+  refj2 = mass.inverse() * refjac;
+  for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) jacoref((j + 3) * 6 + i + 3) = refj2(i, j);
+  }
+
+  const auto& jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (alias) - 11: ", jacoref.isApprox(jaco_rhs, 1e-12), true);
+  std::cout << "✅ Constructor 2 (alias mode) test ended with success." << std::endl;
+}
+
+// A DS with all operators (mass, fext, fint), copy mode
+void LagrangianDSTest::testBuildLagrangianDS2_copy() {
+  std::cout << "--> Test: constructor 2 (copy)." << std::endl;
+
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0,
+                                                              siconos::algebra::alias_t);
+  ds->setConstantMass(mass, siconos::algebra::copy_t);
+
+  siconos::algebra::SiconosVector3 fext;
+  fext << 1, 2, 3;
+  ds->setConstantFext(fext, siconos::algebra::copy_t);
+
+  siconos::algebra::SiconosVector3 ref;
+  ref << 1, 2, 3;
+  auto Ecref = 0.5 * (mass * q0).dot(q0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (copy): ", ds->mass() == mass, true);
+  mass *= 3;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - constr 2 (copy): ", ds->mass() == mass, false);
+
+  siconos::algebra::SiconosMatrix33 jacq, jacvel;
+  // set 'random' value for jacobians, whatever fint is, just for tests
+  jacq.setConstant(1.);
+  jacvel.setConstant(2.);
+  ds->setConstantJacobianFintOver_q(jacq, siconos::algebra::copy_t);
+  ds->setConstantJacobianFintOver_velocity(jacvel, siconos::algebra::copy_t);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (copy): ", ds->jacobianFintOver_q().isApprox(jacq), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (copy): ", ds->jacobianFintOver_velocity().isApprox(jacvel), true);
+  jacq *= 1.2;
+  jacvel *= 1.3;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (copy): ", ds->jacobianFintOver_q().isApprox(jacq), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 2 (copy): ", ds->jacobianFintOver_velocity().isApprox(jacvel), false);
+
+  std::cout << "✅ Constructor 2 (copy mode) test ended with success." << std::endl;
+}
+
+// A DS with all operators (mass, fext, fint, fgyr and jacobians) as user-defined functions
+void LagrangianDSTest::testBuildLagrangianDS3() {
+  std::cout << "--> Test: constructor 3." << std::endl;
+
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0,
+                                                              siconos::algebra::alias_t);
+
+  auto mass_func = [](const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
+                      Eigen::Ref<siconos::algebra::MapType> result) {
+    result.setZero();
+    result(0, 0) = 0. * pos(0);  // just to check that pos is callable ...
+    result(0, 0) = 1;
+    result(1, 1) = 2.;
+    result(2, 2) = 3.;
+  };
+
+  ds->setComputeMassFunction(mass_func);
+
+  ds->setComputeFextFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        auto i = 0;
+        for (auto& v : result) v = time;
+      });
+
+  ds->setComputeFgyrFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& vel,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+         Eigen::Ref<siconos::algebra::MapVectorType> result) { result = vel + q; });
+
+  // set 'random' value for jacobians, whatever fgyr is, just for tests
+  ds->setComputeJacobianFgyrOver_qFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(2.); });
+
+  ds->setComputeJacobianFgyrOver_velocityFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(3.); });
+
+  ds->setComputeFintFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector>& v,
+                                const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+                                double time,
+                                Eigen::Ref<siconos::algebra::MapVectorType> result) {
+    result = v + q;
+    result *= time;
+  });
+
+  ds->setComputeJacobianFintOver_qFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(4.); });
+
+  ds->setComputeJacobianFintOver_velocityFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(5.); });
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->velocity0() == velocity0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p_read(1).isZero(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p(0) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p(2) == nullptr, true);
+
+  siconos::algebra::SiconosVector3 q;
+  q << 1, 2, 3;
+  siconos::algebra::SiconosVector3 vel;
+  vel << 4, 5, 6;
+  double time = 2.;
+
+  ds->computeMass(q);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->mass() == mass, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->computeKineticEnergy() == 87.0, true);
+
+  ds->computeTotalForces(vel, q, time);
+  ds->computeJacobianTotalForcesOver_q(vel, q, time);
+  ds->computeJacobianTotalForcesOver_velocity(vel, q, time);
+
+  siconos::algebra::SiconosVector3 refforces;
+  refforces.setConstant(time);
+  refforces -= (time + 1) * (vel + q);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->totalForces().isApprox(refforces),
+                               true);
+
+  siconos::algebra::SiconosMatrix33 jacq, jacvel;
+
+  siconos::algebra::SiconosMatrix33 refjac;
+  refjac.setConstant(-6);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 3: ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
+  refjac.setConstant(-8);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - constr 3: ", ds->jacobianTotalForcesOver_velocity().isApprox(refjac), true);
+
+  std::cout << "✅ Constructor 3 test ended with success." << std::endl;
+}

@@ -36,7 +36,9 @@
 #include "SiconosBlas.h"               // for cblas_dcopy, cblas_dgemv, Cbla...
 #include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
-#include "numerics_verbose.h"          // for numerics_error
+#include "numerics_verbose.h"
+#include "naming_conventions.h"  // Standardized naming conventions
+#include "numerics_errors.h"
 
 /*Static variables */
 
@@ -191,8 +193,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem* problem,
                    "unknown storage type for matrix M");
 }
 
-void NCPGlocker_initialize(FrictionContactProblem* problem,
-                           FrictionContactProblem* localproblem) {
+void NCPGlocker_initialize(FrictionContactProblem* problem) {
   /*
     INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction
     coefficients. In initialize, these operators are "connected" to their corresponding static
@@ -202,7 +203,6 @@ void NCPGlocker_initialize(FrictionContactProblem* problem,
     Fill vectors/matrices of parameters: Ip, Ipinv ...
   */
 
-  localFC3D = localproblem;
   globalFC3D = problem;
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
@@ -401,4 +401,5 @@ void compute_Z_GlockerFixedP(int i, double* reactionstep) {
   }
 }
 
-void NCPGlocker_free() {}
+void NCPGlocker_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                     SolverOptions* localsolver_options) {}

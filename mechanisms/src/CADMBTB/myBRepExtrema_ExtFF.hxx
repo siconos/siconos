@@ -53,6 +53,8 @@ class gp_Pnt;
 #include <Standard_Macro.hxx>
 #endif
 
+namespace siconos::mechanisms {
+
 /**
  * \brief This class has been built from OCC in view of overloding the distance
  * computation between CAD objects.
@@ -139,5 +141,6 @@ class myBRepExtrema_ExtFF {
 
 // other Inline functions and methods (like "C++: function call" methods)
 //
+}  // namespace siconos::mechanisms
 
 #endif

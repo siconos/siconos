@@ -35,7 +35,8 @@
 #include "mlcp_enum.h"                          // for mlcp_enum_alloc_worki...
 #include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
 #include "mlcp_simplex.h"                       // for mlcp_simplex_init
-#include "numerics_verbose.h"                   // for numerics_error, verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for mlcp_driver
@@ -43,24 +44,6 @@
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
-
-const char* const SICONOS_NONAME_STR = "NONAME";
-const char* const SICONOS_MLCP_PGS_STR = "MLCP_PGS";
-const char* const SICONOS_MLCP_RPGS_STR = "MLCP_RPGS";
-const char* const SICONOS_MLCP_PSOR_STR = "MLCP_PSOR";
-const char* const SICONOS_MLCP_RPSOR_STR = "MLCP_RPSOR";
-const char* const SICONOS_MLCP_PATH_STR = "MLCP_PATH";
-const char* const SICONOS_MLCP_ENUM_STR = "MLCP_ENUM";
-const char* const SICONOS_MLCP_SIMPLEX_STR = "MLCP_SIMPLEX";
-const char* const SICONOS_MLCP_DIRECT_ENUM_STR = "MLCP_DIRECT_ENUM";
-const char* const SICONOS_MLCP_PATH_ENUM_STR = "MLCP_PATH_ENUM";
-const char* const SICONOS_MLCP_DIRECT_SIMPLEX_STR = "MLCP_DIRECT_SIMPLEX";
-const char* const SICONOS_MLCP_DIRECT_PATH_STR = "MLCP_DIRECT_PATH";
-const char* const SICONOS_MLCP_DIRECT_PATH_ENUM_STR = "MLCP_DIRECT_PATH_ENUM";
-const char* const SICONOS_MLCP_FB_STR = "MLCP_FB";
-const char* const SICONOS_MLCP_DIRECT_FB_STR = "MLCP_DIRECT_FB";
-const char* const SICONOS_MLCP_PGS_SBM_STR = "MLCP_PGS_SBM";
-const char* const SICONOS_MLCP_LCP_LEMKE_STR = "MLCP_LCP_LEMKE";
 
 /** Compute the size of internal work arrays (for SolverOptions struct) and allocate them.
 
@@ -198,12 +181,12 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w
       "mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, "
       "SolverOptions* options)\n");
   /* verbose=1; */
-  if (options == NULL) numerics_error("mlcp_driver ", "null input for solver options.\n");
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mlcp_driver",
-                   "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
+  
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   //  if(verbose)
@@ -325,8 +308,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w
 
     /*error */
     default: {
-      fprintf(stderr, "mlcp_driver error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "mlcp_driver error: unknown solver id: %d\n");
     }
   }
   DEBUG_END(

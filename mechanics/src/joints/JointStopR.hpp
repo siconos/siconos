@@ -14,95 +14,110 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file JointStopR.hpp
 
 */
 #ifndef JointStopRELATION_H
 #define JointStopRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
-#include <NewtonEulerJointR.hpp>
-#include <Tools.hpp>
-#include <SiconosVector.hpp>
+#include <vector>
+
+#include "NewtonEulerR.hpp"
+
+namespace siconos::joints {
+
+class NewtonEulerJointR;
 
 /**
    This class implements a stop on a DoF for any NewtonEulerJointR.
 */
-class JointStopR : public NewtonEulerR
-{
-protected:
-
+class JointStopR : public siconos::modeling::NewtonEulerR {
+ protected:
   ACCEPT_SERIALIZATION(JointStopR);
-  JointStopR() : NewtonEulerR() {}
 
-  SP::NewtonEulerJointR _joint;
+  std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
 
-  SP::UnsignedIntVector _axis;
-  SP::SiconosVector _pos;
-  SP::SiconosVector _dir;
+  std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _pos{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _dir{nullptr};
 
-  unsigned int _axisMin, _axisMax;
-  SP::SimpleMatrix _jachqTmp;
+  siconos::algebra::Index _axisMin{0}, _axisMax{0};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
-public:
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
+ public:
   /** Initialize a joint stop for a common case: a single axis with a
    *  single stop, either positive or negative. For use with
    *  NewtonImpactNSL. */
-  JointStopR(SP::NewtonEulerJointR joint, double pos, bool dir,
-             unsigned int axis=0);
+  JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos, bool dir,
+             siconos::algebra::Index axis = 0);
 
   /** Initialize a multidimensional joint stop, e.g. the cone stop on
    *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
-  JointStopR(SP::NewtonEulerJointR joint, SP::SiconosVector pos,
-             SP::SiconosVector dir, SP::UnsignedIntVector axes);
+  JointStopR(std::shared_ptr<NewtonEulerJointR> joint,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& dir,
+             std::shared_ptr<std::vector<siconos::algebra::Index>> axes);
 
+#if 0
   /* The following constructor is disabled for now.  In fact
    * JointStopR is designed to support multiple stops, but it does not
    * work in practice since only the first value of y is examined to
    * determine whether to put the Interaction into indexSet1,
    * c.f. MoreauJeanOSI::addInteractionInIndexSet(). Use an individual
    * instance of JointStopR for each stop instead.*/
-#if 0
+
   /** Initialize a joint stop for a common case: a single axis with a
    * double stop, one positive and one negative. */
-  JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
-             unsigned int axis=0);
+  JointStopR(std::shared_ptr<NewtonEulerJointR> joint, double pos, double neg,
+             siconos::algebra::Index axis=0);
 #endif
+  /** destructor */
+  virtual ~JointStopR() noexcept = default;
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
-
-  virtual unsigned int numberOfConstraints();
+  virtual std::size_t numberOfConstraints() const;
 
   /** Return the joint axis number assigned to a stop index. */
-  unsigned int axis(unsigned int _index) { return _axis->at(_index); }
+  auto axis(size_t _index);
 
   /** Return the joint position assigned to a stop index. */
-  double position(unsigned int _index) { return _pos->getValue(_index); }
+  double position(siconos::algebra::Index _index);
 
   /** Return the direction (1 or -1) assigned to a stop index. */
-  double direction(unsigned int _index) { return _dir->getValue(_index); }
+  double direction(siconos::algebra::Index _index);
 
   /** Return the joint assigned to this joint stop relation. */
-  SP::NewtonEulerJointR joint() { return _joint; }
+  std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }
 
   /** Return the number of joint axes indexed by this relation. */
-  unsigned int numberOfAxes() { return _axis->size(); }
+  auto numberOfAxes();
 
-  /** destructor
-   */
-  virtual ~JointStopR() {};
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-#endif  //JointStopRELATION_H
+}  // namespace siconos::joints
+#endif  // JointStopRELATION_H

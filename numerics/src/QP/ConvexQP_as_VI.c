@@ -25,6 +25,7 @@
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"    // for cblas_dcopy
 #include "siconos_debug.h"  // for DEBUG_PRINT
+#include "numerics_errors.h"
 
 void Function_VI_CQP(void *self, int n_notused, double *x, double *F) {
   DEBUG_PRINT("Function_VI_CQP(void * self, double *x, double *F)\n")

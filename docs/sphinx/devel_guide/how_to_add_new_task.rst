@@ -3,6 +3,7 @@
 How to add and test a new continuous integration task for Siconos project
 =========================================================================
 
+WARNING: this documentation is outdated. CI is now handled by gitlab-ci.
 
 What is a "Continuous integration task"?
 ----------------------------------------

@@ -17,6 +17,7 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "fc3d_short_names.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
 
@@ -66,7 +67,8 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include "naming_conventions.h"  // Standardized naming conventions
+#include "numerics_errors.h"
 static int cp(const char *to, const char *from)
 {
   int fd_to, fd_from;
@@ -447,10 +449,10 @@ fail:
 static size_t fc3d_lcp_data_generation_one_reaction_force(double mu, size_t nb_angles, size_t nb_extra, size_t i3, size_t offset_row, unsigned char* indx_basis, double* restrict angles, double* restrict extra_hyperplanes, double* restrict omega_i, double* restrict tilde_omega_i, double* restrict tilde_omegat_i, double* restrict inv_change_basis_ii, CSparseMatrix* restrict Ak_triplet, CSparseMatrix* restrict E_triplet)
 {
   assert(nb_angles >= 3);
-  assert(omega_i);
-  assert(tilde_omega_i);
-  assert(tilde_omegat_i);
-  assert(inv_change_basis_ii);
+  CHECK_NULL(omega_i);
+  CHECK_NULL(tilde_omega_i);
+  CHECK_NULL(tilde_omegat_i);
+  CHECK_NULL(inv_change_basis_ii);
 
   double theta1 = angles[indx_basis[0]];
   double theta2 = angles[indx_basis[1]];
@@ -724,7 +726,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, Numerics
 static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction, double *velocity, SolverOptions* options, const char* solverName)
 {
 
-  assert(problem);
+  CHECK_NULL(problem);
   assert(problem->numberOfContacts > 0);
   assert(problem->M);
   assert(problem->q);

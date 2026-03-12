@@ -25,6 +25,7 @@
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "numerics_verbose.h"              // for numerics_error, numerics_p...
+#include "numerics_errors.h"
 
 /* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double*
  * restrict error) */
@@ -58,9 +59,13 @@ void lcp_compute_error_only(unsigned int n, double* restrict z, double* restrict
 
 int lcp_compute_error(LinearComplementarityProblem* problem, double* z, double* w,
                       double tolerance, double* error) {
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("lcp_compute_error", "null input for problem and/or z and/or w");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

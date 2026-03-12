@@ -14,57 +14,44 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file RigidBody2dDS.hpp
   \brief Definition of an abstract 3D rigid body above NewtonEulerDS
 */
 
-
 #ifndef RigidBody2dDS_h
 #define RigidBody2dDS_h
 
-#include <MechanicsFwd.hpp>
 #include <LagrangianLinearTIDS.hpp>
-#include <SiconosVisitor.hpp>
-#include <SiconosContactor.hpp>
 
-class RigidBody2dDS : public LagrangianLinearTIDS,
-                      public std::enable_shared_from_this<RigidBody2dDS>
-{
-protected:
+#include "SiconosContactor.hpp"
+#include "StorageTools.hpp"
+
+namespace siconos::collision {
+
+class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
+                      public std::enable_shared_from_this<RigidBody2dDS> {
+ protected:
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
-  RigidBody2dDS() : LagrangianLinearTIDS() {};
-
   /** a scalar mass in the case of RigidBody2dDS */
-  double _scalarMass;
+  double scalarMass_{0.};
 
-  SP::SiconosContactorSet _contactors;
-  bool _useContactorInertia;
+  std::shared_ptr<siconos::collision::SiconosContactorSet> _contactors{nullptr};
+  bool _useContactorInertia{true};
 
   /** If false, bodies connected to this body by a joint will not
    * collide. See also NewtonEulerJointR::_allowSelfCollide */
-  bool _allowSelfCollide = true;
+  bool _allowSelfCollide{true};
 
-public:
+ public:
+  RigidBody2dDS(const siconos::algebra::SiconosVector3& position,
+                const siconos::algebra::SiconosVector3& velocity, double mass, double inertia);
 
-  RigidBody2dDS(SP::SiconosVector position,
-                SP::SiconosVector velocity,
-                SP::SiconosMatrix mass = SP::SimpleMatrix());
+  virtual ~RigidBody2dDS() noexcept = default;
 
-  RigidBody2dDS(SP::SiconosVector position,
-		SP::SiconosVector velocity,
-		double mass,
-		double inertia);
-
-  virtual ~RigidBody2dDS();
-
-  double scalarMass()
-  {
-    return _scalarMass;
-  };
-
+  double scalarMass() const { return scalarMass_; };
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
@@ -77,20 +64,25 @@ public:
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
   /** \return the contactor set associated with this body */
-  SP::SiconosContactorSet contactors() const { return _contactors; }
+  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const {
+    return _contactors;
+  }
 
   /** Provide a set of contactors to the body.
    *
-   *  \param c A SP::SiconosContactorSet */
-  void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
+   *  \param c A std::shared_ptr<SiconosContactorSet> */
+  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
+    _contactors = c;
+  }
 
   /** Make the base position of the contactors equal to the DS q vector.
    *
-   *  \return a SP::SiconosVector */
-  virtual SP::SiconosVector base_position() { return q(); }
+   *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
+  virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  ACCEPT_BASE_VISITORS(LagrangianLinearTIDS);
-  
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-
+}  // namespace siconos::collision
 #endif /* RigidBody2dDS_h */

@@ -24,9 +24,10 @@
 #include <stdio.h>   // for printf, NULL, fprintf, fscanf, FILE
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
-#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
-#include "SiconosSets.h"       // for polyhedron_set, free_polyhedron, free_...
-#include "numerics_verbose.h"  // for CHECK_IO
+#include "NumericsMatrix.h"  // for NM_display, NM_clear, NM_new_from_file
+#include "SiconosSets.h"     // for polyhedron_set, free_polyhedron, free_...
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 
 void AVI_display(AffineVariationalInequalities* avi) {
   assert(avi);
@@ -55,9 +56,7 @@ void AVI_display(AffineVariationalInequalities* avi) {
 
 int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file) {
   if (!avi) {
-    fprintf(stderr,
-            "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
   }
   int i;
   size_t n = avi->size;
@@ -73,13 +72,13 @@ int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file) {
   size_t n = 0;
   int i;
 
-  CHECK_IO(fscanf(file, "%zu\n", &n));
+  check_io(fscanf(file, "%zu\n", &n));
   avi->size = n;
   avi->M = NM_new_from_file(file);
 
   avi->q = (double*)malloc(avi->M->size1 * sizeof(double));
   for (i = 0; i < avi->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(avi->q[i])));
+    check_io(fscanf(file, "%lf ", &(avi->q[i])));
   }
   return 1;
 }

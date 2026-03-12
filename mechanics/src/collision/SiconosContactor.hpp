@@ -14,58 +14,74 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosContactor.hpp
-  \brief Definition of an abstract contactor
+  \brief Definition of an abstract contactor and a set of such objects.
 */
-
 
 #ifndef SiconosContactor_h
 #define SiconosContactor_h
 
+#include <memory>
 #include <vector>
-#include <utility>
 
-#include "MechanicsFwd.hpp"
+#include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
-#include <SiconosSerialization.hpp>
+namespace siconos::collision {
 
-#include "SiconosShape.hpp"
+class SiconosShape;
 
 /** Class to hold the shape assigned to a body, and to associate each
  *  shape with an offset and collision group. */
 
-class SiconosContactor
-{
-private:
-  SiconosContactor() {};
+class SiconosContactor {
+ private:
+  // Rule of five
+  SiconosContactor() = delete;
+  SiconosContactor(const SiconosContactor&) = delete;
+  SiconosContactor(SiconosContactor&&) = delete;
+  SiconosContactor& operator=(const SiconosContactor&) = delete;
+  SiconosContactor& operator=(SiconosContactor&&) = delete;
 
-protected:
+ protected:
   ACCEPT_SERIALIZATION(SiconosContactor);
 
-public:
-  SiconosContactor(SP::SiconosShape _shape,
-                   SP::SiconosVector _offset = SP::SiconosVector(),
-                   int _collision_group = 0);
+ public:
+  SiconosContactor(std::shared_ptr<SiconosShape> shape);
 
-  SP::SiconosShape shape;
-  SP::SiconosVector offset;
-  int collision_group;
+  SiconosContactor(std::shared_ptr<SiconosShape> shape,
+                   const siconos::algebra::SiconosVector& input_offset,
+                   int collision_group = 0);
+
+  std::shared_ptr<SiconosShape> shape{nullptr};
+  const siconos::algebra::SiconosVector offset;
+  int collision_group{0};
+
+  virtual ~SiconosContactor() noexcept = default;
 };
 
-class SiconosContactorSet : public std::vector< SP::SiconosContactor >
-{
-protected:
+class SiconosContactorSet {
+ protected:
   ACCEPT_SERIALIZATION(SiconosContactorSet);
+  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> _vector;
+  // using iterator = std::vector<std::shared_ptr<SiconosContactor>>::iterator;
 
-public:
-  typedef std::vector< SP::SiconosContactor >::iterator iterator;
-
-  void append(SP::SiconosContactor b) { push_back(b); }
-  void append(std::vector<SP::SiconosContactor> b) { insert(end(), b.begin(), b.end()); }
-  void append(const SiconosContactorSet& b) { insert(end(), b.begin(), b.end()); }
-  void append(const SP::SiconosContactorSet& b) { insert(end(), b->begin(), b->end()); }
+ public:
+  SiconosContactorSet()
+      : _vector(std::make_shared<std::vector<std::shared_ptr<SiconosContactor>>>()) {}
+  void append(std::shared_ptr<SiconosContactor> b) { _vector->push_back(b); }
+  void append(std::vector<std::shared_ptr<SiconosContactor>> b) {
+    _vector->insert(_vector->end(), b.begin(), b.end());
+  }
+  void append(const SiconosContactorSet& b) {
+    _vector->insert(_vector->end(), b._vector->begin(), b._vector->end());
+  }
+  // void append(const std::shared_ptr<SiconosContactorSet>& b) {
+  //   insert(end(), b->begin(), b->end());
+  // }
+  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> vector() { return _vector; }
 };
-
+}  // namespace siconos::collision
 #endif /* SiconosContactor_h */

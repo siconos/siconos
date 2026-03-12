@@ -16,154 +16,168 @@
  * limitations under the License.
  */
 
-#include "CADMBTB_API.hpp"
 #include "MBTB_DATA.hpp"
 #include "MBTB_PYTHON_API.hpp"
-#include "MBTB_TimeSteppingCombinedProj.hpp"
-#include "MBTB_TimeSteppingProj.hpp"
-#include "NewtonEulerJointR.hpp"
-#include "RotationQuaternion.hpp"
-#include "SiconosAlgebraProd.hpp"  // for prod
-#include "SiconosKernel.hpp"
-#include "SolverOptions.h"  // for SolverOptions struct
+// #include "SiconosKernel.hpp"
+#include "CADMBTB_API.hpp"
+#include "MBTB_Body.hpp"
+#include "MBTB_Contact.hpp"
+#include "MBTB_JointR.hpp"
+#include "MBTB_internalTool.hpp"
 #include "ace.h"
-void _MBTB_updateContactFromDS() {
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-#ifdef PRINT_FORCE_CONTACTS
-    printf("....> contact force of %s :", sContacts[numC]->contactName());
-    sContacts[numC]->relation()->contactForce()->display();
-#endif
-    int index1 = sContacts[numC]->_indexBody1;
-    int index2 = sContacts[numC]->_indexBody2;
+// #include "MBTB_TimeSteppingProj.hpp"
+#include "Interaction.hpp"
+#include "MBTB_TimeSteppingCombinedProj.hpp"
+#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerJointR.hpp"
+#include "OneStepNSProblem.hpp"
+#include "RotationQuaternion.hpp"
+#include "SolverOptions.h"  // for SolverOptions struct
+#include "TimeStepping.hpp"
+#include "Topology.hpp"
 
-    CADMBTB_moveModelFromModel(sContacts[numC]->_indexCAD1, index1);
-    if (index2 != -1) CADMBTB_moveModelFromModel(sContacts[numC]->_indexCAD2, index2);
+void siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS() {
+  for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {
+#ifdef PRINT_FORCE_CONTACTS
+    std::cout << "....> contact force of %s :"
+              << siconos::mechanisms::mbtb::data::sContacts[numC]->contactName() << "\n";
+
+    siconos::algebra::print(mbtb::data::sContacts[numC]->relation()->contactForce());
+#endif
+    int index1 = mbtb::data::sContacts[numC]->indexBody1();
+    int index2 = mbtb::data::sContacts[numC]->indexBody2();
+
+    CADMBTB_moveModelFromModel(mbtb::data::sContacts[numC]->indexCAD1(), index1);
+    if (index2 != -1)
+      CADMBTB_moveModelFromModel(mbtb::data::sContacts[numC]->indexCAD2(), index2);
 
 #ifdef DRAW_CONTACT_FORCES
 
 #endif
-    CADMBTB_moveGraphicalModelFromModel(sContacts[numC]->_indexCAD1, index1);
-    if (index2 != -1) CADMBTB_moveGraphicalModelFromModel(sContacts[numC]->_indexCAD2, index2);
+    CADMBTB_moveGraphicalModelFromModel(mbtb::data::sContacts[numC]->indexCAD1(), index1);
+    if (index2 != -1)
+      CADMBTB_moveGraphicalModelFromModel(mbtb::data::sContacts[numC]->indexCAD2(), index2);
   }
 }
 
-void _MBTB_updateContactFromDS(int numDS) {
-  for (int numC = 0; numC < (int)sNbOfContacts; numC++) {
-    if ((int)(sContacts[numC]->_indexBody1) == numDS) {
-      CADMBTB_moveModelFromModel(sContacts[numC]->_indexCAD1, numDS);
-      CADMBTB_moveGraphicalModelFromModel(sContacts[numC]->_indexCAD1, numDS);
+void siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS(int numDS) {
+  for (int numC = 0; numC < (int)mbtb::data::sNbOfContacts; numC++) {
+    if ((int)(mbtb::data::sContacts[numC]->indexBody1()) == numDS) {
+      CADMBTB_moveModelFromModel(mbtb::data::sContacts[numC]->indexCAD1(), numDS);
+      CADMBTB_moveGraphicalModelFromModel(mbtb::data::sContacts[numC]->indexCAD1(), numDS);
     }
-    if (sContacts[numC]->_indexBody2 == numDS) {
-      CADMBTB_moveModelFromModel(sContacts[numC]->_indexCAD2, numDS);
-      CADMBTB_moveGraphicalModelFromModel(sContacts[numC]->_indexCAD2, numDS);
+    if (mbtb::data::sContacts[numC]->indexBody2() == numDS) {
+      CADMBTB_moveModelFromModel(mbtb::data::sContacts[numC]->indexCAD2(), numDS);
+      CADMBTB_moveGraphicalModelFromModel(mbtb::data::sContacts[numC]->indexCAD2(), numDS);
     }
   }
 }
 
-void _MBTB_DRAW_STEP() {
+void siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP() {
   /*delete previous*/
-  if (sDrawMode) {
-    for (unsigned int nC = 0; nC < 3 * sNbOfContacts; nC++) {
+  if (mbtb::data::sDrawMode) {
+    for (unsigned int nC = 0; nC < 3 * mbtb::data::sNbOfContacts; nC++) {
       CADMBTB_buildLineArtefactLine(nC, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     }
   }
-  if (sDrawMode & MBTB_FACE_NORMAL1) {
-    // for(unsigned int nC=0; nC<sNbOfContacts; nC++)
-    //{
-    // double x1,x2,y1,y2,z1,z2;//,nx,ny,nz,MinDist;
-    // int index1=sContacts[nC]->_indexBody1;
-    // int index2=sContacts[nC]->_indexBody2;
+  //  if (mbtb::data::sDrawMode & MBTBConstant::FaceNormal1 > 0) {
+  if (mbtb::draw::FaceNormal1) {
+    //   for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
+    //    double x1, x2, y1, y2, z1, z2;  //,nx,ny,nz,MinDist;
+    // int index1=mbtb::data::sContacts[nC]->indexBody1();
+    // int index2=mbtb::data::sContacts[nC]->indexBody2();
     // int normalFromFace1;
 
-    // x2=sContacts[nC]->relation()->pc2()->getValue(0);
-    // y2=sContacts[nC]->relation()->pc2()->getValue(1);
-    // z2=sContacts[nC]->relation()->pc2()->getValue(2);
-    //  x1=x2+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(0);
-    //  y1=y2+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(1);
-    //  z1=z2+1.1*sArtefactLength*sContacts[nC]->relation()->nc()->getValue(2);
+    // x2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(0);
+    // y2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(1);
+    // z2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(2);
+    // x1 = x2 + 1.1 * mbtb::data::sArtefactLength *
+    //               (*mbtb::data::sContacts[nC]->relation()->nc())(0);
+    // y1 = y2 + 1.1 * mbtb::data::sArtefactLength *
+    //               (*mbtb::data::sContacts[nC]->relation()->nc())(1);
+    // z1 = z2 + 1.1 * mbtb::data::sArtefactLength *
+    //               (*mbtb::data::sContacts[nC]->relation()->nc())(2);
     /*  CADMBTB_getMinDistance(nC,index1,index2,
         x1,y1,z1,
         x2,y2,z2,
         nx,ny,nz,
         normalFromFace1,
         MinDist);
-        printf ("second point of contact : x2=%lf ,y2=%lf,z2=%lf\n",x2,y2,z2);*/
-    //  CADMBTB_buildOrientedLineArtefactLine(nC+sNbOfContacts,&x2,&y2,&z2,&x1,&y1,&z1);
+        printf ("second point of contact : x2=%lf
+       ,y2=%lf,z2=%lf\n",x2,y2,z2);*/
+    //  CADMBTB_buildOrientedLineArtefactLine(nC+mbtb::data::sNbOfContacts,&x2,&y2,&z2,&x1,&y1,&z1);
     //}
   }
 
-  if (sDrawMode & MBTB_ARTEFACT_P1P2) {
-    for (unsigned int nC = 0; nC < sNbOfContacts; nC++) {
+  //  if (mbtb::data::sDrawMode & MBTBConstant::ArtefactP1P2) {
+  if (mbtb::draw::ArtefactP1P2) {
+    for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
       double x1, x2, y1, y2, z1, z2;
-      x1 = sContacts[nC]->relation()->pc1()->getValue(0);
-      y1 = sContacts[nC]->relation()->pc1()->getValue(1);
-      z1 = sContacts[nC]->relation()->pc1()->getValue(2);
-      x2 = sContacts[nC]->relation()->pc2()->getValue(0);
-      y2 = sContacts[nC]->relation()->pc2()->getValue(1);
-      z2 = sContacts[nC]->relation()->pc2()->getValue(2);
+      x1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(0);
+      y1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(1);
+      z1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(2);
+      x2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(0);
+      y2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(1);
+      z2 = (*mbtb::data::sContacts[nC]->relation()->pc2())(2);
       // printf ("second point of contact : x2=%lf ,y2=%lf,z2=%lf\n",x2,y2,z2);
       CADMBTB_buildLineArtefactLine(nC, &x1, &y1, &z1, &x2, &y2, &z2);
     }
   }
 
-  if (sDrawMode & MBTB_ARTEFACT_NORMAL) {
-    for (unsigned int nC = 0; nC < sNbOfContacts; nC++) {
+  // if (mbtb::data::sDrawMode & MBTBConstant::ArtefactNormal) {
+  if (mbtb::draw::ArtefactNormal) {
+    for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
       double x1, x2, y1, y2, z1, z2;
-      x1 = sContacts[nC]->relation()->pc1()->getValue(0);
-      y1 = sContacts[nC]->relation()->pc1()->getValue(1);
-      z1 = sContacts[nC]->relation()->pc1()->getValue(2);
-      x2 = x1 + 1.1 * sArtefactLength * sContacts[nC]->relation()->nc()->getValue(0);
-      y2 = y1 + 1.1 * sArtefactLength * sContacts[nC]->relation()->nc()->getValue(1);
-      z2 = z1 + 1.1 * sArtefactLength * sContacts[nC]->relation()->nc()->getValue(2);
-      CADMBTB_buildOrientedLineArtefactLine(nC + sNbOfContacts, &x1, &y1, &z1, &x2, &y2, &z2);
+      x1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(0);
+      y1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(1);
+      z1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(2);
+      x2 = x1 + 1.1 * mbtb::data::sArtefactLength *
+                    (*mbtb::data::sContacts[nC]->relation()->nc())(0);
+      y2 = y1 + 1.1 * mbtb::data::sArtefactLength *
+                    (*mbtb::data::sContacts[nC]->relation()->nc())(1);
+      z2 = z1 + 1.1 * mbtb::data::sArtefactLength *
+                    (*mbtb::data::sContacts[nC]->relation()->nc())(2);
+      CADMBTB_buildOrientedLineArtefactLine(nC + mbtb::data::sNbOfContacts, &x1, &y1, &z1, &x2,
+                                            &y2, &z2);
     }
   }
 
-  if (sDrawMode & MBTB_ARTEFACT_REACTION) {
+  // if (mbtb::data::sDrawMode & MBTBConstant::ArtefactReaction) {
+  if (mbtb::draw::ArtefactReaction) {
     // printf("MBTB_DRAW_STEP REACTION\n");
-    SP::Topology topo = sSimu->nonSmoothDynamicalSystem()->topology();
-    double h = sSimu->timeStep();
-    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+    auto topo = mbtb::data::sSimu->nonSmoothDynamicalSystem()->topology();
+    double h = mbtb::data::sSimu->timeStep();
+    auto indexSet1 = topo->indexSet(1);
 
     double FMax = 0;
     double aux, normF;
-    // int nbUR = 0;
-    int nbR = 0;
-    InteractionsGraph::VIterator ui1, ui1end;
+    siconos::graphs::InteractionsGraph::VIterator ui1, ui1end;
     boost::tie(ui1, ui1end) = indexSet1->vertices();
 
-    if (sNominalForce > 1e-12)
-      FMax = sNominalForce;
+    if (mbtb::data::sNominalForce > 1e-12)
+      FMax = mbtb::data::sNominalForce;
     else
       for (; ui1 != ui1end; ++ui1) {
-        // nbUR++;
-        SP::Interaction inter1 = indexSet1->bundle(*ui1);
-        SP::Relation R = inter1->relation();
-        for (unsigned int nC = 0; nC < sNbOfContacts; nC++) {
-          if (sContacts[nC]->relation() == R) {
-            nbR++;
-            SP::SiconosVector F = sContacts[nC]->relation()->contactForce();
-            aux = sqrt(F->getValue(0) * F->getValue(0) + F->getValue(1) * F->getValue(1) +
-                       F->getValue(2) * F->getValue(2)) /
-                  h;
+        auto inter1 = indexSet1->bundle(*ui1);
+        auto R = inter1->relation();
+        for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
+          if (mbtb::data::sContacts[nC]->relation() == R) {
+            auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
+            aux = sqrt(cF(0) * cF(0) + cF(1) * cF(1) + cF(2) * cF(2)) / h;
             if (aux > FMax) FMax = aux;
           }
         }
       }
-    //    printf("MBTB_DRAW_STEP REACTION nb Ur=%i, nb Rcontact=%i.\n",nbUR,nbR);
-
-    // printf("_MBTB_DRAW_STEP FMAX=%e \n",FMax);
 
     boost::tie(ui1, ui1end) = indexSet1->vertices();
 
     for (; ui1 != ui1end; ++ui1) {
-      SP::Interaction inter1 = indexSet1->bundle(*ui1);
-      SP::Relation R = inter1->relation();
-      for (unsigned int nC = 0; nC < sNbOfContacts; nC++) {
-        if (sContacts[nC]->relation() == R) {
-          SP::SiconosVector F = sContacts[nC]->relation()->contactForce();
-          normF = sqrt(F->getValue(0) * F->getValue(0) + F->getValue(1) * F->getValue(1) +
-                       F->getValue(2) * F->getValue(2));
+      auto inter1 = indexSet1->bundle(*ui1);
+      auto R = inter1->relation();
+      for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
+        if (mbtb::data::sContacts[nC]->relation() == R) {
+          auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
+          normF = sqrt(cF(0) * cF(0) + cF(1) * cF(1) + cF(2) * cF(2));
           aux = normF / h;
           aux = aux / FMax;
           if (aux > 1)
@@ -172,20 +186,21 @@ void _MBTB_DRAW_STEP() {
             aux = 1.0 / (-log(aux) + 1.0);
           if (aux > 5) aux = 5;
 
-          // printf("_MBTB_DRAW_STEP aux=%e \n",aux);
-          if (aux > sArtefactThreshold) {
-            SP::SiconosVector F = sContacts[nC]->relation()->contactForce();
+          // printf("siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP aux=%e
+          // \n",aux);
+          if (aux > mbtb::data::sArtefactThreshold) {
+            auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
             double x1, x2, y1, y2, z1, z2;
-            x1 = sContacts[nC]->relation()->pc1()->getValue(0);
-            y1 = sContacts[nC]->relation()->pc1()->getValue(1);
-            z1 = sContacts[nC]->relation()->pc1()->getValue(2);
+            x1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(0);
+            y1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(1);
+            z1 = (*mbtb::data::sContacts[nC]->relation()->pc1())(2);
 
-            x2 = x1 + aux * (sArtefactLength / normF) * F->getValue(0);
-            y2 = y1 + aux * (sArtefactLength / normF) * F->getValue(1);
-            z2 = z1 + aux * (sArtefactLength / normF) * F->getValue(2);
-            double radius = 0.03 * aux * sArtefactLength;
-            CADMBTB_buildCylinderArtefactLine(nC + 2 * sNbOfContacts, &x1, &y1, &z1, &x2, &y2,
-                                              &z2, &radius);
+            x2 = x1 + aux * (mbtb::data::sArtefactLength / normF) * cF(0);
+            y2 = y1 + aux * (mbtb::data::sArtefactLength / normF) * cF(1);
+            z2 = z1 + aux * (mbtb::data::sArtefactLength / normF) * cF(2);
+            double radius = 0.03 * aux * mbtb::data::sArtefactLength;
+            CADMBTB_buildCylinderArtefactLine(nC + 2 * mbtb::data::sNbOfContacts, &x1, &y1,
+                                              &z1, &x2, &y2, &z2, &radius);
           }
         }
       }
@@ -193,134 +208,114 @@ void _MBTB_DRAW_STEP() {
   }
   CADMBTB_updateGraphic();
 }
-void _MBTB_STEP() {
-  MBTB_updateDSFromSiconos();
-  _MBTB_updateContactFromDS();
-  ACE_times[ACE_TIMER_SICONOS].start();
-  sSimu->setNewtonTolerance(sDParams[2]);
-  sSimu->setNewtonMaxIteration(sDParams[3]);
-  sSimu->advanceToEvent();
 
-  double* dd = sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
-  int* ii = sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
+void siconos::mechanisms::mbtb::internal::MBTB_STEP() {
+  MBTB_updateDSFromSiconos();
+  siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS();
+  ACE_times[ACE_TIMER_SICONOS].start();
+  mbtb::data::sSimu->setNewtonTolerance(mbtb::data::sDParams[2]);
+  mbtb::data::sSimu->setNewtonMaxIteration(mbtb::data::sDParams[3]);
+  mbtb::data::sSimu->advanceToEvent();
+
+  double* dd = mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
+  int* ii = mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
 
   std::cout << "        OSNS solver info :: reached accuracy = " << dd[SICONOS_DPARAM_RESIDU]
             << " < " << dd[SICONOS_DPARAM_TOL];
   std::cout << "     nb iterations =" << ii[SICONOS_IPARAM_ITER_DONE] << " < "
-            << ii[SICONOS_IPARAM_MAX_ITER] << std::endl;
-  std::cout << "        Newton loop info ::  iterations = " << sSimu->getNewtonNbIterations()
-            << " < " << sSimu->newtonMaxIteration()
-            << " residu = " << sSimu->newtonResiduDSMax() << " < " << sSimu->newtonTolerance()
-            << std::endl;
+            << ii[SICONOS_IPARAM_MAX_ITER] << "\n";
+  std::cout << "        Newton loop info ::  iterations = "
+            << mbtb::data::sSimu->getNewtonNbIterations() << " < "
+            << mbtb::data::sSimu->newtonMaxIteration()
+            << " residu = " << mbtb::data::sSimu->newtonResiduDSMax() << " < "
+            << mbtb::data::sSimu->newtonTolerance() << "\n";
 
-  Type::Siconos simuType;
-  simuType = Type::value(*sSimu);
-  if (simuType == Type::TimeStepping) {
-  } else if (simuType == Type::TimeSteppingDirectProjection) {
-  } else if (simuType == Type::TimeSteppingCombinedProjection) {
-    std::cout << "     Number of projection iterations = "
-              << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))
-                     ->nbProjectionIteration()
-              << std::endl;
+  if (auto ts_simu =
+          std::dynamic_pointer_cast<siconos::mechanisms::MBTB_TimeSteppingCombinedProj>(
+              mbtb::data::sSimu)) {
+    std::cout << "     Number of projection iterations = " << ts_simu->nbProjectionIteration()
+              << "\n";
     std::cout << "     Number of cumulated Newton iterations = "
-              << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))
-                     ->cumulatedNewtonNbIterations()
-              << std::endl;
-    std::cout << "     Number of set  iterations = "
-              << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))
-                     ->nbIndexSetsIteration()
-              << std::endl;
-    std::cout << "     Max violation unilateral = "
-              << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))
-                     ->maxViolationUnilateral()
-              << std::endl;
-    std::cout << "     Max violation equality = "
-              << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))
-                     ->maxViolationEquality()
-              << std::endl;
+              << ts_simu->cumulatedNewtonNbIterations() << "\n";
+    std::cout << "     Number of set  iterations = " << ts_simu->nbIndexSetsIteration()
+              << "\n";
+    std::cout << "     Max violation unilateral = " << ts_simu->maxViolationUnilateral()
+              << "\n";
+    std::cout << "     Max violation equality = " << ts_simu->maxViolationEquality() << "\n";
   }
 
-  // sSimu->oneStepNSProblem(0)->display();
+  // mbtb::data::sSimu->oneStepNSProblem(0)->display();
   ACE_times[ACE_TIMER_SICONOS].stop();
 
-  if (sTimerCmp % sFreqGraphic == 0) {
-    _MBTB_DRAW_STEP();
+  if (mbtb::data::sTimerCmp % mbtb::data::sFreqGraphic == 0) {
+    siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP();
   }
-  sSimu->nextStep();
+  mbtb::data::sSimu->nextStep();
 }
 
-void _MBTB_displayStep() {
-  // fprintf(fp,"_MBTB_printStep ");
-  // printf("%d\t",sTimerCmp);
-
+void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
   // Bodies display output
-  if (sDisplayStepBodies) {
-    printf("[mechanisms] Time step  Number %d\t", sTimerCmp);
-    for (unsigned int numDS = 0; numDS < sNbOfBodies; numDS++) {
+  if (mbtb::data::sDisplayStepBodies) {
+    printf("[mechanisms] Time step  Number %d\t", mbtb::data::sTimerCmp);
+    for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++) {
       printf("Body number %i\n", numDS);
       printf("Position of body %i\n", numDS);
-      for (unsigned int ii = 0; ii < sDS[numDS]->q()->size(); ii++) {
-        printf("%e", sDS[numDS]->q()->getValue(ii));
+      for (siconos::algebra::Index ii = 0; ii < mbtb::data::sDS[numDS]->q()->size(); ii++) {
+        printf("%e", (*mbtb::data::sDS[numDS]->q())(ii));
         printf("\t");
       }
       printf("\n");
       printf("Velocity of body %i\n", numDS);
-      for (unsigned int ii = 0; ii < sDS[numDS]->twist()->size(); ii++) {
-        printf("%e", sDS[numDS]->twist()->getValue(ii));
+      for (siconos::algebra::Index ii = 0; ii < mbtb::data::sDS[numDS]->twist()->size();
+           ii++) {
+        printf("%e", (*mbtb::data::sDS[numDS]->twist())(ii));
         printf("\t");
       }
       printf("\n");
       printf("Kinetic Energy of body %i\n", numDS);
       /*Ec of the DS*/
       //   printf("MBTB Ec computattiom masse matrix:\n");
-      //    (sDS[numDS]->M())->display();
-      //    (sDS[numDS]->twist())->display();
-      SiconosVector res(6);
-      prod(*(sDS[numDS]->mass()), *(sDS[numDS]->twist()), res);
+      //    (mbtb::data::siconos::algebra::print(*sDS[numDS]->M()));
+      //    (mbtb::data::siconos::algebra::print(*sDS[numDS]->twist()));
+      siconos::algebra::SiconosVector res(6);
+      res =
+          mbtb::data::sDS[numDS]->totalInertiaMatrix() * mbtb::data::sDS[numDS]->twist_read();
       double ec = 0.0;
-      for (int i = 0; i < 6; i++) ec += res.getValue(i) * sDS[numDS]->twist()->getValue(i);
+      for (int i = 0; i < 6; i++) ec += res(i) * (*mbtb::data::sDS[numDS]->twist())(i);
       printf("%e\t", ec * 0.5);
       printf("\n");
     }
   }
 
   // Joints display output
-  if (sDisplayStepJoints) {
-    printf("STEP Number = %d\t", sTimerCmp);
-    for (unsigned int numJ = 0; numJ < sNbOfJoints; numJ++) {
+  if (mbtb::data::sDisplayStepJoints) {
+    printf("STEP Number = %d\t", mbtb::data::sTimerCmp);
+    for (unsigned int numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
       printf("Joint number %i\n", numJ);
       printf("interactionjointR->display  %i\n", numJ);
-      sJointRelations[numJ]->_interaction->display();
+      mbtb::data::sJointRelations[numJ]->_interaction->display();
       printf("\n");
       printf("Forces in Joint  %i\n", numJ);
-      for (int ii = 0; ii < 3; ii++) {
-        printf("%e", sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
-        printf("\t");
-      }
-      printf("\n");
-      printf("Moments in Joint  %i\n", numJ);
+      std::cout << mbtb::data::sJointRelations[numJ]->_jointR->contactForce() << "\n";
 
-      SP::SiconosVector vaux(new SiconosVector(3));
-      for (int ii = 3; ii < 6; ii++) {
-        vaux->setValue(ii - 3, sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
-        printf("%e", vaux->getValue(ii - 3));
-        printf("\t");
-      }
+      printf("Moments in Joint  %i\n", numJ);
+      siconos::algebra::SiconosVector3 vaux;
+      vaux = mbtb::data::sJointRelations[numJ]->_jointR->contactForce().tail(3);
+      std::cout << vaux << "\n";
+
       /*convert momentum in abs frame*/
       printf("\n");
 
       printf("Moments in Joint %i in absolute frame \n", numJ);
-      changeFrameBodyToAbs(sJointRelations[numJ]->_ds1->q(), vaux);
-      for (int ii = 0; ii < 3; ii++) {
-        printf("%e", vaux->getValue(ii));
-        printf("\t");
-      }
+      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+          *mbtb::data::sJointRelations[numJ]->_ds1->q(), vaux);
+      std::cout << vaux << "\n";
       printf("\n");
       printf("Equivalent Forces to moments in Joint %i in absolute frame \n", numJ);
-      if (sJointRelations[numJ]->_G0C1) {
-        sJointRelations[numJ]->computeEquivalentForces();
+      if (mbtb::data::sJointRelations[numJ]->_G0C1) {
+        mbtb::data::sJointRelations[numJ]->computeEquivalentForces();
         for (int ii = 0; ii < 6; ii++) {
-          printf("%e", sJointRelations[numJ]->_F->getValue(ii));
+          printf("%e", (*mbtb::data::sJointRelations[numJ]->_F)(ii));
           printf("\t");
         }
       } else {
@@ -330,40 +325,30 @@ void _MBTB_displayStep() {
     }
   }
   // Contacts display output
-  if (sDisplayStepContacts) {
-    printf("STEP Number = %d\t", sTimerCmp);
-    for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
+  if (mbtb::data::sDisplayStepContacts) {
+    printf("STEP Number = %d\t", mbtb::data::sTimerCmp);
+    for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {
       printf("Contact number %i\n", numC);
       printf("Contact forces in contact  %i\n", numC);
-      for (int ii = 0; ii < 3; ii++) {
-        printf("%e", sContacts[numC]->relation()->contactForce()->getValue(ii));
-        printf("\t");
-      }
-
-      SP::SiconosVector vaux(new SiconosVector(3));
-      for (int ii = 3; ii < 6; ii++) {
-        vaux->setValue(ii - 3, sContacts[numC]->relation()->contactForce()->getValue(ii));
-      }
+      std::cout << mbtb::data::sContacts[numC]->relation()->contactForce() << "\n";
+      siconos::algebra::SiconosVector3 vaux;
+      vaux = mbtb::data::sContacts[numC]->relation()->contactForce().tail(3);
       /*convert momentum in abs frame*/
-      changeFrameBodyToAbs(sDS[sContacts[numC]->_indexBody1]->q(), vaux);
+      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+          *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), vaux);
       printf("\n");
       printf("Moments of contact forces in contact  %i in absolute frame \n", numC);
-      for (int ii = 0; ii < 3; ii++) {
-        printf("%e", vaux->getValue(ii));
-        printf("\t");
-      }
+      std::cout << vaux << "\n";
 
-      printf("\n");
-
-      SP::InteractionsGraph indexSet1 = myNsds->topology()->indexSet(1);
-      InteractionsGraph::VIterator ui1, ui1end, v1next;
+      auto indexSet1 = siconos::mechanisms::mbtb::data::myNsds->topology()->indexSet(1);
+      siconos::graphs::InteractionsGraph::VIterator ui1, ui1end, v1next;
       boost::tie(ui1, ui1end) = indexSet1->vertices();
       // Remove interactions from the indexSet1
       int find = 0;
       for (v1next = ui1; ui1 != ui1end; ui1 = v1next) {
         ++v1next;
-        SP::Interaction urI = indexSet1->bundle(*ui1);
-        if (&(*urI) == &(*(sInterContacts[numC]))) {
+        auto urI = indexSet1->bundle(*ui1);
+        if (&(*urI) == &(*(mbtb::data::sInterContacts[numC]))) {
           find = 1;
         }
       }
@@ -371,201 +356,194 @@ void _MBTB_displayStep() {
       printf("Contact status %d\n", find);
       printf("Coordinates of first contact point for contact %i", numC);
 
-      printf("%e\t%e\t%e\t", sContacts[numC]->relation()->pc1()->getValue(0),
-             sContacts[numC]->relation()->pc1()->getValue(1),
-             sContacts[numC]->relation()->pc1()->getValue(2));
+      printf("%e\t%e\t%e\t", (*mbtb::data::sContacts[numC]->relation()->pc1())(0),
+             (*mbtb::data::sContacts[numC]->relation()->pc1())(1),
+             (*mbtb::data::sContacts[numC]->relation()->pc1())(2));
       printf("\n");
-      if (sContacts[numC]->relation()->pc2()) {
+      if (mbtb::data::sContacts[numC]->relation()->pc2()) {
         printf("Coordinates of second contact point for contact %i", numC);
-        printf("%e\t%e\t%e\t", sContacts[numC]->relation()->pc2()->getValue(0),
-               sContacts[numC]->relation()->pc2()->getValue(1),
-               sContacts[numC]->relation()->pc2()->getValue(2));
+        printf("%e\t%e\t%e\t", (*mbtb::data::sContacts[numC]->relation()->pc2())(0),
+               (*mbtb::data::sContacts[numC]->relation()->pc2())(1),
+               (*mbtb::data::sContacts[numC]->relation()->pc2())(2));
         printf("\n");
       }
       printf("Gap  for contact %i\t =\t ", numC);
-      printf("%e\n", sContacts[numC]->interaction()->y(0)->getValue(0));
+      printf("%e\n", (*mbtb::data::sContacts[numC]->interaction()->y(0))(0));
       printf("vitess  for contact %i\t =\t ", numC);
-      printf("%e\n", sContacts[numC]->interaction()->y(1)->getValue(0));
+      printf("%e\n", (*mbtb::data::sContacts[numC]->interaction()->y(1))(0));
     }
   }
   // printf("\n");
 }
-FILE* _MBTB_open(std::string filename, std::string args) {
-  FILE* fp = fopen(filename.c_str(), args.c_str());
-  return fp;
+auto siconos::mechanisms::mbtb::internal::MBTB_open(std::string& filename) {
+  return std::ofstream(filename, std::ios::app);
 }
 
-void _MBTB_close(FILE* fp) { fclose(fp); }
+void siconos::mechanisms::mbtb::internal::MBTB_close(std::ofstream& fp) { fp.close(); }
 
-void _MBTB_printStep(FILE* fp) {
-  // fprintf(fp,"_MBTB_printStep ");
-  fprintf(fp, "%d\t", sTimerCmp);
-  for (unsigned int numDS = 0; numDS < sNbOfBodies; numDS++) {
-    for (unsigned int ii = 0; ii < sDS[numDS]->q()->size(); ii++) {
-      fprintf(fp, "%e", sDS[numDS]->q()->getValue(ii));
-      fprintf(fp, "\t");
+void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) {
+  assert(myfile);
+
+  myfile << mbtb::data::sTimerCmp << "\t";
+  for (decltype(mbtb::data::sNbOfBodies) numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++) {
+    auto ref = mbtb::data::sDS[numDS]->q()->size();
+    decltype(ref) ii;
+    for (ii = 0; ii < ref; ii++) {
+      myfile << (*mbtb::data::sDS[numDS]->q())(ii) << "\t";
     }
-    for (unsigned int ii = 0; ii < sDS[numDS]->twist()->size(); ii++) {
-      fprintf(fp, "%e", sDS[numDS]->twist()->getValue(ii));
-      fprintf(fp, "\t");
+    for (ii = 0; ii < mbtb::data::sDS[numDS]->twist()->size(); ii++) {
+      myfile << (*mbtb::data::sDS[numDS]->twist())(ii) << "\t";
     }
-    /*Ec of the DS*/
-    //   printf("MBTB Ec computattiom masse matrix:\n");
-    //    (sDS[numDS]->M())->display();
-    //    (sDS[numDS]->twist())->display();
-    SiconosVector res(6);
-    prod(*(sDS[numDS]->mass()), *(sDS[numDS]->twist()), res);
+
+    siconos::algebra::SiconosVector res(6);
+    res = mbtb::data::sDS[numDS]->totalInertiaMatrix() * mbtb::data::sDS[numDS]->twist_read();
     double ec = 0.0;
-    for (int i = 0; i < 6; i++) ec += res.getValue(i) * sDS[numDS]->twist()->getValue(i);
-    fprintf(fp, "%e\t", ec * 0.5);
-    //    printf("ec=%e",ec*0.5);
+    for (int i = 0; i < 6; i++) ec += res(i) * (*mbtb::data::sDS[numDS]->twist())(i);
+    myfile << ec * 0.5 << "\t";
   }
-  for (unsigned int numJ = 0; numJ < sNbOfJoints; numJ++) {
-    for (unsigned int ii = 0; ii < 3; ii++) {
-      fprintf(fp, "%e", sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
-      fprintf(fp, "\t");
-    }
-    SP::SiconosVector vaux(new SiconosVector(3));
-    for (unsigned int ii = 3; ii < 6; ii++) {
-      vaux->setValue(ii - 3, sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
-    }
+  for (decltype(mbtb::data::sNbOfJoints) numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
+    std::cout << mbtb::data::sJointRelations[numJ]->_jointR->contactForce().head(3) << "\n";
+    siconos::algebra::SiconosVector3 vaux;
+    vaux = mbtb::data::sJointRelations[numJ]->_jointR->contactForce().tail(3);
     /*convert momentum in abs frame*/
-    changeFrameBodyToAbs(sJointRelations[numJ]->_ds1->q(), vaux);
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+        *mbtb::data::sJointRelations[numJ]->_ds1->q(), vaux);
     for (int ii = 0; ii < 3; ii++) {
-      fprintf(fp, "%e", vaux->getValue(ii));
-      fprintf(fp, "\t");
+      myfile << vaux(ii) << "\t";
     }
 
-    if (sJointRelations[numJ]->_G0C1) {
-      sJointRelations[numJ]->computeEquivalentForces();
-      for (int ii = 0; ii < 6; ii++) {
-        fprintf(fp, "%e", sJointRelations[numJ]->_F->getValue(ii));
-        fprintf(fp, "\t");
-      }
+    if (mbtb::data::sJointRelations[numJ]->_G0C1) {
+      mbtb::data::sJointRelations[numJ]->computeEquivalentForces();
+      myfile << mbtb::data::sJointRelations[numJ]->_F;
     }
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    for (unsigned int ii = 0; ii < 3; ii++) {
-      fprintf(fp, "%e", sContacts[numC]->relation()->contactForce()->getValue(ii));
-      fprintf(fp, "\t");
-    }
-    SP::SiconosVector vaux(new SiconosVector(3));
-    for (unsigned int ii = 3; ii < 6; ii++) {
-      vaux->setValue(ii - 3, sContacts[numC]->relation()->contactForce()->getValue(ii));
-    }
+
+  auto numref = mbtb::data::sNbOfContacts;
+  decltype(numref) numC;
+
+  for (numC = 0; numC < numref; numC++) {
+    myfile << mbtb::data::sContacts[numC]->relation()->contactForce().head(3);
+    siconos::algebra::SiconosVector3 vaux;
+    vaux = mbtb::data::sContacts[numC]->relation()->contactForce().tail(3);
+
     /*convert momentum in abs frame*/
-    changeFrameBodyToAbs(sDS[sContacts[numC]->_indexBody1]->q(), vaux);
-    for (int ii = 0; ii < 3; ii++) {
-      fprintf(fp, "%e", vaux->getValue(ii));
-      fprintf(fp, "\t");
-    }
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+        *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), vaux);
+    myfile << vaux;
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    SP::InteractionsGraph indexSet1 = myNsds->topology()->indexSet(0);
-    InteractionsGraph::VIterator ui1, ui1end, v1next;
+
+  for (numC = 0; numC < numref; numC++) {
+    auto indexSet1 = siconos::mechanisms::mbtb::data::myNsds->topology()->indexSet(0);
+    siconos::graphs::InteractionsGraph::VIterator ui1, ui1end, v1next;
     boost::tie(ui1, ui1end) = indexSet1->vertices();
     // Remove interactions from the indexSet1
     int find = 0;
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next) {
       ++v1next;
-      SP::Interaction urI = indexSet1->bundle(*ui1);
-      if (&(*urI) == &(*(sInterContacts[numC]))) {
+      auto urI = indexSet1->bundle(*ui1);
+      if (&(*urI) == &(*(mbtb::data::sInterContacts[numC]))) {
         find = 1;
       }
     }
-    fprintf(fp, "%d\t", find);
+    myfile << find << "\t";
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    fprintf(fp, "%e\t%e\t%e\t", sContacts[numC]->relation()->pc1()->getValue(0),
-            sContacts[numC]->relation()->pc1()->getValue(1),
-            sContacts[numC]->relation()->pc1()->getValue(2));
+  for (numC = 0; numC < numref; numC++) {
+    myfile << (*mbtb::data::sContacts[numC]->relation()->pc1())(0) << "\t"
+           << (*mbtb::data::sContacts[numC]->relation()->pc1())(1) << "\t"
+           << (*mbtb::data::sContacts[numC]->relation()->pc1())(2) << "\t";
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
+  for (numC = 0; numC < numref; numC++) {
+    auto sizeY = mbtb::data::sContacts[numC]->interaction()->y(0)->size();
     if (sizeY == 1) {
-      fprintf(fp, "%e\t0.\t0.\t", sContacts[numC]->interaction()->y(0)->getValue(0));
+      myfile << (*mbtb::data::sContacts[numC]->interaction()->y(0))(0) << "\t0.\t0.\t";
     } else {
-      fprintf(fp, "%e\t%e\t%e\t", sContacts[numC]->interaction()->y(0)->getValue(0),
-              sContacts[numC]->interaction()->y(0)->getValue(1),
-              sContacts[numC]->interaction()->y(0)->getValue(2));
+      myfile << (*mbtb::data::sContacts[numC]->interaction()->y(0))(0) << "\t"
+             << (*mbtb::data::sContacts[numC]->interaction()->y(0))(1) << "\t"
+             << (*mbtb::data::sContacts[numC]->interaction()->y(0))(2) << "\t";
     }
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
+  for (numC = 0; numC < numref; numC++) {
+    auto sizeY = mbtb::data::sContacts[numC]->interaction()->y(0)->size();
     if (sizeY == 1) {
-      fprintf(fp, "%e\t0.\t0.\t", sContacts[numC]->interaction()->y(1)->getValue(0));
+      myfile << (*mbtb::data::sContacts[numC]->interaction()->y(1))(0) << "\t0.\t0.\t";
     } else {
-      fprintf(fp, "%e\t%e\t%e\t", sContacts[numC]->interaction()->y(1)->getValue(0),
-              sContacts[numC]->interaction()->y(1)->getValue(1),
-              sContacts[numC]->interaction()->y(1)->getValue(2));
+      myfile << (*mbtb::data::sContacts[numC]->interaction()->y(1))(0) << "\t"
+             << (*mbtb::data::sContacts[numC]->interaction()->y(1))(1) << "\t"
+             << (*mbtb::data::sContacts[numC]->interaction()->y(1))(2) << "\t";
     }
   }
 
-  fprintf(fp, "\n");
+  myfile << "\n";
 }
-void _MBTB_printHeader(FILE* fp) {
-  unsigned int cmp = 1;
-  // fprintf(fp,"_MBTB_printStep\t");
-  fprintf(fp, "stepNum1\t");
+void siconos::mechanisms::mbtb::internal::MBTB_printHeader(std::ofstream& myfile) {
+  assert(myfile);
+  auto cmp = 1;
+
+  myfile << "stepNum1\t";
   cmp++;
-  for (unsigned int numDS = 0; numDS < sNbOfBodies; numDS++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 7 - 1; ++icmp) {
-      fprintf(fp, "position%d_ds_%d\t", icmp, numDS);
+  for (auto numDS = 0; numDS < 3; numDS++) {
+    for (auto icmp = cmp; icmp <= cmp + 7 - 1; ++icmp) {
+      myfile << "position" << icmp << "_ds_" << numDS << "\t";
     }
     cmp += 7;
-    for (unsigned int icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
-      fprintf(fp, "velocity%d_ds_%d\t", icmp, numDS);
+    for (auto icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
+      myfile << "velocity" << icmp << "_ds_" << numDS << "\t";
     }
     cmp += 6;
-    fprintf(fp, "EC%d_ds_%d\t", cmp, numDS);
+    myfile << "EC" << cmp << "_ds_" << numDS << "\t";
     cmp++;
   }
-  for (unsigned int numJ = 0; numJ < sNbOfJoints; numJ++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
-      fprintf(fp, "jointF%d_%d\t", icmp, numJ);
+
+  for (decltype(mbtb::data::sNbOfJoints) numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
+    for (auto icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
+      myfile << "jointF" << icmp << "d_" << numJ << "\t";
     }
     cmp += 6;
-    if (sJointRelations[numJ]->_G0C1) {
-      for (unsigned int icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
-        fprintf(fp, "jointEquiF%d_%d\t", icmp, numJ);
+    if (mbtb::data::sJointRelations[numJ]->_G0C1) {
+      for (auto icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
+        myfile << "jointEquiF" << icmp << "d_" << numJ << "\t";
       }
-      cmp += 6;
-    }
-  }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
-      fprintf(fp, "ContactForce_%s_%d,%d\t", sContacts[numC]->contactName(), icmp, numC);
     }
     cmp += 6;
   }
-  /*  for(int numC=0; numC<sNbOfContacts; numC++)
-  {
-    fprintf(fp,"MomentsOfContactForce_%s_%d_%d\t",sContacts[numC]->contactName(),cmp,cmp+6-1,numC);
-    cmp+=6;
-    }*/
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    fprintf(fp, "ContactState_%s_%d\t", sContacts[numC]->contactName(), cmp);
+  auto numref = mbtb::data::sNbOfContacts;
+  decltype(numref) numC;
+
+  for (numC = 0; numC < numref; numC++) {
+    for (auto icmp = cmp; icmp <= cmp + 6 - 1; ++icmp) {
+      myfile << "ContactForce_" << mbtb::data::sContacts[numC]->contactName() << "_" << icmp
+             << "," << numC << "\t";
+    }
+    cmp += 6;
+  }
+
+  for (numC = 0; numC < numref; numC++) {
+    myfile << "ContactState_" << mbtb::data::sContacts[numC]->contactName() << "_" << cmp
+           << "\t";
     cmp++;
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 2; ++icmp) {
-      fprintf(fp, "ContactPoint_%s_%d\t", sContacts[numC]->contactName(), icmp);
+  for (numC = 0; numC < numref; numC++) {
+    for (auto icmp = cmp; icmp <= cmp + 2; ++icmp) {
+      myfile << "ContactPoint_" << mbtb::data::sContacts[numC]->contactName() << "_" << icmp
+             << "\t";
     }
     cmp += 3;
   }
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 2; ++icmp) {
-      fprintf(fp, "ContactGap_%s_%d\t", sContacts[numC]->contactName(), icmp);
+  for (numC = 0; numC < numref; numC++) {
+    for (auto icmp = cmp; icmp <= cmp + 2; ++icmp) {
+      myfile << "ContactGap_" << mbtb::data::sContacts[numC]->contactName() << "_" << icmp
+             << "\t";
     }
     cmp += 3;
   }
 
-  for (unsigned int numC = 0; numC < sNbOfContacts; numC++) {
-    for (unsigned int icmp = cmp; icmp <= cmp + 2; ++icmp) {
-      fprintf(fp, "ContactVitess_%s_%d\t", sContacts[numC]->contactName(), icmp);
+  for (numC = 0; numC < numref; numC++) {
+    for (auto icmp = cmp; icmp <= cmp + 2; ++icmp) {
+      myfile << "ContactVelocity_" << mbtb::data::sContacts[numC]->contactName() << "_" << icmp
+             << "\t";
     }
     cmp += 3;
   }
-  fprintf(fp, "\n");
-  _MBTB_printStep(fp);
+  myfile << "\n";
+  siconos::mechanisms::mbtb::internal::MBTB_printStep(myfile);
 }

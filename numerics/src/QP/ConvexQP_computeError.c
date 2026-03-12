@@ -31,15 +31,16 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
 
 int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, double tolerance,
                                    SolverOptions *options, double norm, double *error) {
-  assert(problem);
-  assert(z);
-  assert(w);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
 
   int incx = 1;
   int n = problem->size;
@@ -83,11 +84,11 @@ int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, 
                            double tolerance, double scaling, SolverOptions *options,
                            double norm_q, double norm_b, double *error) {
   DEBUG_BEGIN("convexQP_compute_error(...)\n");
-  assert(problem);
-  assert(z);
-  assert(u);
-  assert(xi);
-  assert(error);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(u);
+  CHECK_NULL(xi);
+  CHECK_NULL(error);
 
   int incx = 1;
   size_t n = problem->size;

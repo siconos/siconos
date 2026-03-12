@@ -45,7 +45,11 @@ dim(v)=nn
 #include "mlcp_cst.h"  // for SICONOS_IPARAM_MLCP_E...
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"    //
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
@@ -124,6 +128,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
   unsigned long long int nbCase = enum_compute_nb_cases(problem->m);
 
   if (itermax < (int)nbCase) {
+    printf("mlcp_enum_block itermax %i nbCase %llu ", itermax, nbCase);
     numerics_warning("mlcp_enum_block",
                      "all the cases will not be enumerated since itermax < nbCase)");
   }
@@ -229,12 +234,12 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
 /** End of static functions **/
 
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
-  if (!problem) return 0;
+  CHECK_NULL(problem);
   return 2 * (problem->n + problem->m) + problem->m;
 }
 
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
-  if (!problem) return 0;
+  CHECK_NULL(problem);
   assert(problem->M);
   int LWORK = 0;
   if (options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS]) {
@@ -391,3 +396,33 @@ void mlcp_enum_set_default(SolverOptions* options) {
   options->dparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS] = 0;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_ENUM in the global solver registry.
+ */
+
+static int mlcp_enum_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int mlcp_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_enum((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
+                "Enumerative solver for Mixed Linear Complementarity Problems",
+                mlcp_enum_init_wrap,
+                mlcp_enum_solve_wrap,
+                NULL,    /* free function */
+                NULL,    /* error function */
+                mlcp_enum_set_default,  /* set_default */
+                100000000, /* default_max_iter */
+                1e-6,    /* default_tol */
+                0        /* is_local_solver */);

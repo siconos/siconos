@@ -9,5 +9,6 @@ wheel
 vtk
 packaging
 bullet
-swig
 setuptools
+trimesh
+numpy-stl

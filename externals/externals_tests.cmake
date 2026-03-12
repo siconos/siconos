@@ -19,10 +19,9 @@ if(WITH_TESTING)
       new_test(NAME odepacktest10 SOURCES test-funcC-inC.cpp# funC.cpp
         DEPS "LAPACK::LAPACK")
       target_compile_options(odepacktest10 PRIVATE "-w")
-      #target_compile_features(odepacktest10 PUBLIC cxx_std_20)
+      target_compile_features(odepacktest10 PUBLIC cxx_std_20)
       set_property(TARGET odepacktest10 PROPERTY LINKER_LANGUAGE CXX)
     endif(WITH_CXX)
-
     begin_tests(hairer/test)
     set(hairertests
       dr_iso

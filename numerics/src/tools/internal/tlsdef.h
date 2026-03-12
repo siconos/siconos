@@ -43,7 +43,7 @@
 
 #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))
 #define tlsvar __thread
-#elif defined(__ICC) && defined(_WIN32)
+#elif defined(_WIN32)
 #define tlsvar __declspec(thread)
 #elif defined(SICONOS_ALLOW_GLOBAL)
 #define tlsvar

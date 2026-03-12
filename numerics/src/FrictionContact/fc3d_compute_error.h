@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /**
-    Error computation (using the normal map residual) for friction-contact 3D problem
+    Error computation using the norm infinity conic for friction-contact 3D problem
 
     \param problem the structure which defines the friction-contact problem
     \param z vector
@@ -43,6 +43,49 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
+int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, double *z,
+                                           double *w, double tolerance, SolverOptions *options,
+                                           double norm, double *error, int on_dual_cone);
+
+/**
+    Error computation on dual cone (using the normal map residual) for one friction-contact 3D
+   problem
+
+    \param r the reaction force
+    \param u the local velocity
+    \param mu coeficient of friction
+    \param worktmp work vector
+    \param[in,out] error value
+ */
+void fc3d_unitary_compute_dual_and_add_error(double r[3], double u[3], double mu,
+                                             double *error, double *worktmp);
+
+/**
+    Error computation for a friction-contact 3D problem
+
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param options
+    \param tolerance value for error computation
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
+                                double tolerance, SolverOptions *options, double *error);
+
+/**
+    Error computation for a friction-contact 3D problem
+
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param tolerance value for error computation
+    \param options
+    \param norm norm of a vector (problem->q) for relative error
+    \param[in,out] error value
+    \return 0 if ok
+*/
 int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
                        SolverOptions *options, double norm, double *error);
 

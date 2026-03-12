@@ -14,41 +14,38 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "CircleCircleR.hpp"
 
 #include <cmath>
-#include "CircleCircleR.hpp"
-#include <BlockVector.hpp>
-#include "SimpleMatrix.hpp"
 
-CircleCircleR::CircleCircleR(double r, double rr): CircularR(r, rr)
-{
-}
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
-double CircleCircleR::distance(double x1, double y1, double r1, double x2, double y2, double r2)
-{
 
+
+
+
+double siconos::collision::native::bodies::CircleCircleR::distance(double x1, double y1,
+                                                                   double r1, double x2,
+                                                                   double y2, double r2) {
   return (fabs(r1 - r2) - hypot(x1 - x2, y1 - y2));
-
 }
 
-void CircleCircleR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
-{
-
+void siconos::collision::native::bodies::CircleCircleR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double q_0 = q(0);
   double q_1 = q(1);
   double q_3 = q(3);
   double q_4 = q(4);
 
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
-
 }
 
-void CircleCircleR::computeJachq(const BlockVector& q, BlockVector& z)
-{
-
-  SimpleMatrix *g = (SimpleMatrix *) _jachq.get();
-
+void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& q) {
   double x1 = q(0);
   double y1 = q(1);
   double x2 = q(3);
@@ -62,16 +59,22 @@ void CircleCircleR::computeJachq(const BlockVector& q, BlockVector& z)
   double dxsd = dx / d;
   double dysd = dy / d;
 
-  (*g)(0, 0) = dxsd;
-  (*g)(1, 0) = -dysd;
-  (*g)(0, 1) = dysd;
-  (*g)(1, 1) = dxsd;
-  (*g)(0, 2) = 0.;
-  (*g)(1, 2) = -_r1;
-  (*g)(0, 3) = -dxsd;
-  (*g)(1, 3) = dysd;
-  (*g)(0, 4) = -dysd;
-  (*g)(1, 4) = -dxsd;
-  (*g)(0, 5) = 0.;
-  (*g)(1, 5) = -_r2;
+  jacobianhOver_q_view_->setValue(0, 0, dxsd);
+  jacobianhOver_q_view_->setValue(1, 0, -dysd);
+  jacobianhOver_q_view_->setValue(0, 1, dysd);
+  jacobianhOver_q_view_->setValue(1, 1, dxsd);
+  jacobianhOver_q_view_->setValue(0, 2, 0.);
+  jacobianhOver_q_view_->setValue(1, 2, -_r1);
+  jacobianhOver_q_view_->setValue(0, 3, -dxsd);
+  jacobianhOver_q_view_->setValue(1, 3, dysd);
+  jacobianhOver_q_view_->setValue(0, 4, -dysd);
+  jacobianhOver_q_view_->setValue(1, 4, -dxsd);
+  jacobianhOver_q_view_->setValue(0, 5, 0.);
+  jacobianhOver_q_view_->setValue(1, 5, -_r2);
+}
+
+void siconos::collision::native::bodies::CircleCircleR::display() const {
+  std::cout << "=====> Circle-Circle relation \n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }

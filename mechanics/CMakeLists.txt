@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -35,6 +33,9 @@ set(${COMPONENT}_DIRS
   src/collision/native
   src/collision/native/bodies
   src/joints
+  src/fem
+  src/fem/native
+  src/fem/cable
   )
 
 # Then, optional parts ---
@@ -49,6 +50,7 @@ endif()
 # - add extra mechanics sources, depending on opencascade, to the build process
 if(WITH_OpenCASCADE)
   list(APPEND ${COMPONENT}_DIRS src/occ)
+
 endif()
 
 # -- Documentation --
@@ -79,14 +81,6 @@ target_link_libraries(mechanics PUBLIC
   numerics  # for debug.h ...
   kernel)
 
-# Links with non-Siconos libraries
-# dependency upon boost because of line 140 in SiconosPointers.hpp
-# --> need boost::shared_array for HEM5 and lsodar.
-# This should be reviewed (?)
-
-target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
-
-
 # Bullet setup
 # Different options are available. Check BulletSetup.cmake file
 include(bullet_setup)
@@ -94,15 +88,20 @@ include(bullet_setup)
 # -- Open Cascade --
 if(WITH_OpenCASCADE)
   include(occ_setup)
+  set(SICONOS_HAS_MECHANICS_OCC TRUE CACHE INTERNAL "True if OpenCASCADE API has been found and is activated for mechanics.)")
+
   # Add opencascade headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
   target_link_libraries(${COMPONENT} PUBLIC $<INSTALL_INTERFACE:OpenCASCADE::OpenCASCADE>)
 endif()
 
 
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----
@@ -119,6 +118,3 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)

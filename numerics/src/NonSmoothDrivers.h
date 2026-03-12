@@ -27,36 +27,10 @@
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
 
-#include "SiconosConfig.h"
+#include <stddef.h>  // size_t
 
-/* #include "mlcp_cst.h" */
-/* #include "MCP_cst.h" */
-/* #include "NCP_cst.h" */
-/* #include "lcp_cst.h" */
-/* #include "relay_cst.h" */
-/* #include "Friction_cst.h" */
-/* #include "VI_cst.h" */
-/* #include "AVI_cst.h" */
-/* #include "SOCLCP_cst.h" */
-//#include "VariationalInequality.h"
-//#include "VariationalInequality_Solvers.h"
-//#include "SecondOrderConeLinearComplementarityProblem.h"
-/* #include "SOCLCP_Solvers.h" */
-/* #include "Relay_Solvers.h" */
-/* #include "LCP_Solvers.h" */
-/* #include "AVI_Solvers.h" */
-/* #include "MLCP_Solvers.h" */
-/* #include "NCP_Solvers.h" */
-/* #include "MCP_Solvers.h" */
-//#include "SolverOptions.h"
 #include "NumericsFwd.h"
-//#include "MixedComplementarityProblem.h"
-/* #include "fc2d_Solvers.h" */
-/* #include "fc3d_Solvers.h" */
-/* #include "gfc3d_Solvers.h" */
-//#include "GenericMechanical_Solvers.h"
-
-//#include "NonSmoothNewton.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -125,7 +99,7 @@ int fc3d_driver(FrictionContactProblem *problem, double *reaction, double *veloc
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_fc3d_driver(RollingFrictionContactProblem *problem, double *reaction,
+int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *reaction,
                         double *velocity, SolverOptions *options);
 
 /**
@@ -137,7 +111,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem *problem, double *reaction
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_fc2d_driver(RollingFrictionContactProblem *problem, double *reaction,
+int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *reaction,
                         double *velocity, SolverOptions *options);
 
 /**
@@ -175,7 +149,7 @@ int gfc3d_driver(GlobalFrictionContactProblem *problem, double *reaction, double
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem *problem, double *reaction,
+int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *problem, double *reaction,
                           double *velocity, double *globalVelocity, SolverOptions *options);
 
 /**
@@ -273,6 +247,19 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *
    involved in contact (for output in file.) \return result (0 if successful otherwise 1).
 
 */
+
+/**
+    General interface to solvers for Mohr Coulomb 2D problem
+
+    \param[in] problem the structure which handles the Friction-Contact problem
+    \param[in,out] stress global vector (n)
+    \param[in,out] plastic_strain_rate global vector (n)
+    \param[in,out] options structure used to define the solver(s) and their parameters
+    \return result (0 if successful otherwise 1).
+*/
+int mc2d_driver(MohrCoulomb2DProblem *problem, double *stress, double *plastic_strain_rate,
+                SolverOptions *options);
+
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
                     unsigned int *row, unsigned int *column, unsigned int nc, unsigned int nb,
                     int solver_id, double tolerance, int itermax, int verbose, int outputFile,
@@ -311,7 +298,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
                      double *b, double *mu, double *Mdata, unsigned int nzM,
                      unsigned int *rowM, unsigned int *colM, double *Hdata, unsigned int nzH,
                      unsigned int *rowH, unsigned int *colH, unsigned int n, unsigned int nc,
-                     int solver_id, int isize, int *iparam, int dsize, double *dparam,
+                     int solver_id, size_t isize, int *iparam, size_t dsize, double *dparam,
                      int verbose, int outputFile, int freq_output);
 
 /**

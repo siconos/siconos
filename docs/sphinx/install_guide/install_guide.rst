@@ -79,7 +79,7 @@ The easiest way to handle Siconos options is to save them in a config file and t
 
    cmake -S path_to_sources -B build-siconos -DUSER_OPTIONS_FILE=option_file.cmake
 
-Examples of options files are available in the directory `config_samples <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/config_samples?ref_type=heads>`_ of Siconos source dir. To write your own file, just copy the file default.cmake somewhere and modify it according to your needs.
+Examples of options files are available in the directory `config_samples <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/config_samples?ref_type=heads>`_ of Siconos source dir. To write your own file, just copy the file default.cmake somewhere and modify it according to your needs.
 
 Choose any place/name for build-siconos, the only requirement is that it must be different from path_to_sources. This is a temporary directory that can be removed once the installation is done.
 

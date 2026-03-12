@@ -10,7 +10,7 @@ These libraries are linked together into a library called
 `libsiconos_externals`, which is used principally by numerics, but may
 also be needed in other parts of Siconos.
 
-Directories `tools`, `swig`, and `renderer` are native to the Siconos
+Directories `tools` and `renderer` are native to the Siconos
 project.
 
 Directories `PATH_SDK`, `sort`, and `optim_misc` contain sources that

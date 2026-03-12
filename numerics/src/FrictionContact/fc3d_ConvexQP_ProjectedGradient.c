@@ -23,12 +23,18 @@
 #include "ConvexQP_cst.h"                        // for SICONOS_CONVEXQP_PG
 #include "FrictionContactProblem.h"              // for FrictionContactProblem
 #include "FrictionContactProblem_as_ConvexQP.h"  // for FrictionContactProbl...
+#include "FrictionContact_options.h"                                                 // 
 #include "NumericsFwd.h"                         // for ConvexQP, SolverOptions
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "fc3d_Solvers.h"                        // for fc3d_ConvexQP_Projec...
 #include "fc3d_compute_error.h"                  // for fc3d_Tresca_compute_...
-#include "numerics_verbose.h"                    // for verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
                                               double *reaction, double *velocity, int *info,
@@ -95,3 +101,32 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
   free(cqp);
   free(fc3d_as_cqp);
 }
+
+
+static void fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  int info = NUMERICS_OK;
+  fc3d_ConvexQP_ProjectedGradient_Cylinder((FrictionContactProblem *)problem, reaction,
+                                                  velocity, &info, options);
+  return info;  
+}
+
+REGISTER_SOLVER(SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER,
+                "SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER",
+                "Projection on Cylinder with Local Iteration (local solver)",
+                fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap,
+                fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap,
+                NULL,
+                NULL,
+                fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default,
+                1000, 1e-4, 1)

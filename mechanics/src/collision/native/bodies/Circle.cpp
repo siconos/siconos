@@ -14,25 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "Circle.hpp"
 
-void Circle::MassSetup()
-{
-  _mass.reset(new SimpleMatrix(_ndof, _ndof));
-  _mass->zero();
-  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
-  (*_mass)(2, 2) = massValue * radius * radius;
-}
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
-Circle::Circle(double r, double m,
-               SP::SiconosVector qinit,
-               SP::SiconosVector vinit)
-  : CircularDS(r, m, qinit, vinit)
-{
-  MassSetup();
+siconos::collision::native::bodies::Circle::Circle(
+    double r, double m, const siconos::algebra::SiconosVector3& qinit,
+    const siconos::algebra::SiconosVector3& vinit)
+    : CircularDS(r, m, qinit, vinit) {
+  mass_storage_ = std::make_unique<siconos::algebra::SiconosMatrix>(3, 3);
+  use_mass([&](auto& M) {
+    M.setZero();
+    M(0, 0) = massValue_;
+    M(1, 1) = massValue_;
+    M(2, 2) = massValue_ * radius_ * radius_;
+  });
+  hasMass_ = true;
+  hasConstantMass_ = true;
+  computemass_ = nullptr;
 }
-
-Circle::~Circle()
-{}

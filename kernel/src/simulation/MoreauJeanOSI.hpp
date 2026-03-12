@@ -1,0 +1,538 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*! \file  MoreauJeanOSI.hpp */
+
+#ifndef MoreauJeanOSI_H
+#define MoreauJeanOSI_H
+
+#include <limits>
+
+#include "NonSmoothLaw.hpp"
+#include "OneStepIntegrator.hpp"
+#include "SimulationGraphs.hpp"
+namespace siconos::modeling {
+
+class SecondOrderDS;
+class LagrangianDS;
+class NewtonEulerDS;
+
+}  // namespace siconos::modeling
+
+namespace siconos::integrators {
+
+constexpr auto MOREAUSTEPSINMEMORY = 1;
+
+/**
+   One Step time Integrator, Moreau-Jean algorithm.
+   This integrator is the work horse of the event--capturing time stepping
+   schemes
+   for mechanical systems.  It is mainly based on the pioneering works of M.
+   Jean and
+   J.J. Moreau for the time integration of mechanical systems
+   with unilateral contact, impact and Coulomb's friction with \f$ \theta \f$
+   scheme
+
+   For the linear Lagrangian system, the scheme reads as
+
+   \f[
+
+   \begin{cases}
+   M (v_{k+1}-v_k)
+   + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G
+   P_{k+1},\label{eq:MoreauTS-motion}\\[1mm] q_{k+1} = q_{k} + h v_{k+\theta},
+   \quad \\[1mm] U_{k+1} = G^\top\, v_{k+1}, \\[1mm] \begin{array}{lcl} 0 \leq
+   U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha
+   \in \mathcal I_1, \\[1mm] P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I
+   \setminus \mathcal I_1, \end{array} \end{cases}
+
+   \f]
+
+   with  \f$ \theta \in [0,1] \f$. The index set \f$ \mathcal I_1 \f$ is the
+   discrete equivalent
+   to the rule that allows us to apply the Signorini  condition at the velocity
+   level.
+   In the numerical practice, we choose to define this set by
+
+   \f[
+   \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and }
+   U_k \leq 0 \}. \f]
+
+   For more details, we refer to
+
+   M. Jean and J.J. Moreau. Dynamics in the presence of unilateral contacts and
+   dry friction: a numerical approach.
+   In G. Del Pietro and F. Maceri, editors, Unilateral problems in structural
+   analysis.
+   II, pages 151–196. CISM 304, Spinger Verlag, 1987.
+
+   J.J. Moreau. Unilateral contact and dry friction in finite freedom dynamics.
+   In J.J. Moreau and Panagiotopoulos P.D., editors, Nonsmooth Mechanics and
+   Applications,
+   number 302 in CISM, Courses and lectures, pages 1–82. CISM 302, Spinger
+   Verlag, Wien- New York, 1988a.
+
+   J.J. Moreau. Numerical aspects of the sweeping process.
+   Computer Methods in Applied Mechanics and Engineering, 177:329–349, 1999.
+
+   M. Jean. The non smooth contact dynamics method.
+   Computer Methods in Applied Mechanics and Engineering, 177:235–257, 1999.
+
+   and for a review :
+
+   V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems:
+   Applications in Mechanics and Electronics, volume 35 of Lecture Notes in
+   Applied and Computational Mechanics. Springer Verlag, 2008.
+
+   MoreauJeanOSI class is used to define some time-integrators methods for a
+   list of dynamical systems. A MoreauJeanOSI instance is defined by the value
+   of theta and the list of concerned dynamical systems.
+
+   Each DynamicalSystem is associated to a SiconosMatrix, named "W", the
+   "teration" matrix"
+   W matrices are initialized and computed in initializeIterationMatrix and
+   computeIterationMatrix. Depending on the DS type, they may depend on time t and DS state x.
+
+   For mechanical systems, the implementation uses _p for storing the
+   the input due to the nonsmooth law. This MoreauJeanOSI scheme assumes that
+   the relative degree is two.
+
+   For Lagrangian systems, the implementation uses p[1] for storing the discrete impulse.
+
+   Main functions:
+
+   - computeFreeState(): computes xfree (or vfree), dynamical systems
+   state without taking non-smooth part into account \n
+
+   - updateState(): computes x (q,v), the complete dynamical systems
+   states.
+   See User's guide for details.
+
+*/
+class MoreauJeanOSI : public OneStepIntegrator {
+ protected:
+  ACCEPT_SERIALIZATION(MoreauJeanOSI);
+
+  /** theta-scheme parameter */
+  double _theta{0.};
+
+  /** A gamma parameter for the forecast of activation of constraints
+   *  leap-frog estimation of the constraints
+   *  \f$ \tilde y_k =  y_k + \gamma * h * ydot \f$
+   */
+  double _gamma{1. / 2.};
+
+  /** a boolean to know if the gamma-parameter must be used or not
+   */
+  bool _useGamma{false};
+
+  /** Constraint activation threshold
+   *
+   */
+  double _constraintActivationThreshold{0.};
+
+  /** a boolean to know if the parameter must be used or not
+   */
+  bool _useGammaForRelation{false};
+
+  /** a boolean to force the evaluation of T in an explicit way
+   */
+  bool _explicitNewtonEulerDSOperators{false};
+
+  /** a boolean to know if the matrix W is symmetric definite positive
+   */
+  bool _isWSymmetricDefinitePositive{false};
+
+  /** a boolean to perform activation with negative relative velocity
+   */
+  bool _activateWithNegativeRelativeVelocity{false};
+
+  /** Constraint activation threshold
+   *
+   */
+  double _constraintActivationThresholdVelocity;
+
+  /**
+      A set of work indices for the selected coordinates when
+      we subprod in computeFreeOuput
+  */
+  std::vector<std::size_t> _selected_coordinates = {0, 0, 0, 0, 0, 0, 0, 0};
+
+ protected:
+  // visitor stuff to handle properly nslaw effects.
+  struct _NSLEffectOnFreeOutput : public siconos::modeling::nonsmooth_laws::Visitor {
+    using siconos::modeling::nonsmooth_laws::Visitor::visit;
+
+    siconos::nonsmooth_formulations::OneStepNSProblem& _osnsp;
+    siconos::modeling::Interaction& _inter;
+    siconos::graphs::InteractionProperties& _interProp;
+    double _theta{0.};
+
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
+                           siconos::modeling::Interaction& inter,
+                           siconos::graphs::InteractionProperties& interProp, double theta);
+
+    void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
+
+    void visit(const siconos::modeling::RelayNSL& nslaw) override{};
+    void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::FremondImpactFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nslaw) override;
+    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
+  };
+
+  /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI
+   *
+   *  @param ds a pointer to DynamicalSystem
+   *  @param dsv a descriptor of the ds on the graph (redundant)
+   */
+  virtual void initializeIterationMatrixBoundaryConditions(
+      const siconos::modeling::SecondOrderDS& ds,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const;
+
+  /** compute IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
+   *
+   *  @param[in] ds a pointer to DynamicalSystem
+   *  @param[in,out] IterationMatrixBoundaryConditions
+   *  @param[in,out] iteration_matrix
+   */
+  void computeIterationMatrixBoundaryConditions(
+      const siconos::modeling::SecondOrderDS& ds,
+      siconos::algebra::SiconosMatrix& IterationMatrixBoundaryConditions,
+      siconos::algebra::SiconosMatrix& iteration_matrix) const;
+
+ public:
+  /** This enum is used to get access to work vectors relared to DS
+   *  It corresponds to:
+   *  - a container saved in the graph of ds
+   *  - a container associated to a specific ds
+   */
+  enum class wk_ds : std::size_t { residu_free, vfree, v_iter, buffer, size };
+
+  /** This enum is used to get access to work vectors relared to an Interaction
+   *  It corresponds to:
+   *  - a container saved in the graph of interactions
+   *  - a container associated to a specific interaction
+   */
+  enum class wk_inter : std::size_t { osnsp_rhs, size };
+
+  /** This enum is used to get access to work block vectors relared to an Interaction
+   *  It corresponds to:
+   *  - a container saved in the graph of interactions
+   *  - a container associated to a specific interaction
+   */
+  enum class wkb_inter : std::size_t { xfree, size };
+
+  /** constructor from theta value only
+   *
+   *  @param theta value for all linked DS (default = 0.5).
+   *  @param gamma value for all linked DS (default = NaN and gamma is not
+   *  used).
+   */
+  MoreauJeanOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
+
+  /** destructor
+   */
+  virtual ~MoreauJeanOSI() noexcept = default;
+
+  inline bool isWSymmetricDefinitePositive() const { return _isWSymmetricDefinitePositive; };
+
+  inline void setIsWSymmetricDefinitePositive(bool b) { _isWSymmetricDefinitePositive = b; };
+
+  /** \return theta parameter of the osi */
+  inline double theta() { return _theta; };
+
+  /** set the value of theta
+   *
+   *  @param newTheta a double
+   */
+  inline void setTheta(double newTheta) { _theta = newTheta; };
+
+  /** \return gamma parameter of the osi */
+  inline double gamma() { return _gamma; };
+
+  /** set the value of gamma
+   *
+   *  @param newGamma a double
+   */
+  inline void setGamma(double newGamma) {
+    _gamma = newGamma;
+    _useGamma = true;
+  };
+
+  /** \return true if gamma paremeter is set and used for the OSI */
+  inline bool useGamma() { return _useGamma; };
+
+  /** set the Boolean to indicate that we use gamma
+   *
+   *  @param newUseGamma  a  Boolean variable
+   */
+  inline void setUseGamma(bool newUseGamma) { _useGamma = newUseGamma; };
+
+  /** \return  true if gamma paremeter is set and used for the relation */
+  inline bool useGammaForRelation() { return _useGammaForRelation; };
+
+  /** set the boolean to indicate that we use gamma for the relation
+   *
+   *  @param newUseGammaForRelation a Boolean
+   */
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
+    _useGammaForRelation = newUseGammaForRelation;
+    if (_useGammaForRelation) _useGamma = false;
+  };
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThreshold(double v) {
+    _constraintActivationThreshold = v;
+  }
+
+  /** get the constraint activation threshold */
+  inline double constraintActivationThreshold() { return _constraintActivationThreshold; }
+
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThresholdVelocity(double v) {
+    _constraintActivationThresholdVelocity = v;
+  }
+
+  /** get the constraint activation threshold */
+  inline double constraintActivationThresholdVelocity() {
+    return _constraintActivationThresholdVelocity;
+  }
+
+  /** get boolean _explicitNewtonEulerDSOperators for the relation
+   *
+   *  \return a Boolean
+   */
+  inline bool explicitNewtonEulerDSOperators() { return _explicitNewtonEulerDSOperators; };
+
+  /** set the boolean to indicate that we use gamma for the relation
+   *
+   *  @param newExplicitNewtonEulerDSOperators a Boolean
+   */
+  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators) {
+    _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
+  };
+
+  /** get boolean _activateWithNegativeRelativeVelocity
+   *
+   *  \return a Boolean
+   */
+  inline bool activateWithNegativeRelativeVelocity() {
+    return _activateWithNegativeRelativeVelocity;
+  };
+
+  /** set the boolean to perform activation with negative relative velocity
+   *
+   *  @param newActivateWithNegativeRealtiveVelocity a Boolean
+   */
+  inline void setActivateWithNegativeRelativeVelocity(
+      bool newActivateWithNegativeRelativeVelocity) {
+    _activateWithNegativeRelativeVelocity = newActivateWithNegativeRelativeVelocity;
+  };
+
+  // --- OTHER FUNCTIONS ---
+
+  /**
+     initialization of the MoreauJeanOSI integrator; for linear time
+     invariant systems, we compute time invariant operator (example :
+     W)
+   */
+  // virtual void initialize(Model& m);
+
+  /**
+     Initialization process of the nonsmooth problems
+      linked to this OSI*/
+  void initialize_nonsmooth_problems() override;
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   *
+   *  @param t time of initialization
+   *  @param ds the dynamical system
+   */
+  virtual void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   *
+   *  @param inter the interaction
+   *  @param interProp the properties on the graph
+   *  @param DSG the dynamical systems graph
+   */
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
+
+  /** get the number of index sets required for the simulation
+   *
+   *  \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const override { return 2; };
+
+  /** initialize iteration matrix W MoreauJeanOSI matrix at time t
+   *
+   *  @param time
+   *  @param ds a pointer to DynamicalSystem
+   */
+  virtual void initializeIterationMatrix(
+      double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const;
+
+  /** \return the inverse of the iteration matrix
+   *  @param ds the concerned dynamical system
+   *  @param LUW the LU-factorisation of W
+   */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse(
+      std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
+      const siconos::algebra::SiconosDenseLUMatrix& LUW);
+
+  virtual void applyBoundaryConditions(const siconos::modeling::SecondOrderDS& d,
+                                       siconos::algebra::SiconosVector& residu,
+                                       siconos::graphs::DynamicalSystemsGraph::VIterator dsi,
+                                       double t,
+                                       const siconos::algebra::SiconosVector& v) const;
+
+  /** compute the initial state of the Newton loop.
+   */
+  virtual void computeInitialNewtonState() override;
+
+  /**
+     return the maximum of all norms for the "MoreauJeanOSI-discretized"
+     residus of DS
+
+     \return a double
+   */
+  double computeResidu() override;
+
+  /** Perform the integration of the dynamical systems linked to this integrator
+   *  without taking into account the nonsmooth input (_r or _p)
+   */
+  virtual void computeFreeState() override;
+
+  /** integrates the Interaction linked to this integrator, without taking
+   *  non-smooth effects into account
+   *
+   *  @param vertex_inter vertex of the interaction graph
+   *  @param osnsp pointer to OneStepNSProblem
+   */
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
+
+  /** \return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   *  problem
+   */
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
+    return *(*indexSet.properties(vertex_inter)
+                  .workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
+  };
+
+  /** Apply the rule to one Interaction to know if it should be included in the
+   *  IndexSet of level i
+   *
+   *  @param inter the Interaction to test
+   *  @param i level of the IndexSet
+   *  \return Boolean
+   */
+  virtual bool addInteractionInIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::graphs::InteractionsGraph::size_type i) override;
+
+  /** Apply the rule to one Interaction to know if it should be removed from the
+   *  IndexSet of level i
+   *
+   *  @param inter the Interaction to test
+   *  @param i level of the IndexSet
+   *  \return Boolean
+   */
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                     siconos::graphs::InteractionsGraph::size_type i) override;
+
+  /** method to prepare the fist Newton iteration
+   *  @param time
+   */
+  void prepareNewtonIteration(double time) override;
+
+  /** integrate the system, between tinit and tend (->iout=true), with possible
+   *  stop at tout (->iout=false)
+   *
+   *  @param tinit the initial time
+   *  @param tend the end time
+   *  @param tout the real end time
+   *  @param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
+   */
+  virtual void integrate(double& tinit, double& tend, double& tout, int& notUsed) override;
+
+  /** update the state of the dynamical systems
+   *
+   *  @param level the level of interest for the dynamics: not used at the time
+   */
+  virtual void updateState(const unsigned int level) override;
+
+  /** compute the current iteration
+   *
+   */
+  void computeIteration() override;
+
+  /** \return the  work of forces by ds
+   */
+  siconos::algebra::SiconosMatrix computeWorkForces();
+
+  /** Displays the data of the MoreauJeanOSI's integrator
+   */
+  void display() const override;
+};
+
+/////// Free Functions ///////
+namespace moreau_jean {
+
+/** compute Moreau-Jean W iteration matrix for Newton-Euler systems
+ *
+ *  @param time current time
+ *  @param h current time-step
+ *  @param theta theta parameter of the integrator
+ *  @param ds a Lagrangian dynamical system
+ *  @param[in,out] W the result in W
+ *  @param[in,out] LUW the LU factorisation of W (updated)
+ */
+void computeIterationMatrix_NewtonEuler(
+    double time, double h, double theta, siconos::modeling::NewtonEulerDS& ds,
+    Eigen::Ref<siconos::algebra::SiconosMatrix66> W,
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& LUW);
+
+/** Update the state vector of a given dynamical system
+ *  @param time_step current time step
+ *  @param theta integrator theta parameter
+ *  @param ds the dynamical system to update
+ */
+void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem& ds);
+
+/** Update the state vector of a given dynamical system
+ *  \param time_step current time step
+ *  \param theta integrator theta parameter
+ *  \param ds the dynamical system to update
+ */
+void updateVelocity(double time_step, double theta, siconos::modeling::DynamicalSystem& ds,
+                    siconos::algebra::SiconosVector& v_iter);
+
+}  // namespace moreau_jean
+}  // namespace siconos::integrators
+#endif  // MoreauJeanOSI_H

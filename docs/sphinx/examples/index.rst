@@ -24,39 +24,39 @@ Gallery
    .. image:: /figures/mechanics/BouncingBall/BouncingBall.*
       :height: 100px
       :class: gallery
-      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/BouncingBall/BouncingBallTS.cpp
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/BouncingBall/BouncingBallTS.cpp
    .. image:: /figures/electronics/CircuitRLCD/SchemaCircuitRLCD.*
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/CircuitRLCD/CircuitRLCD.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/electronics/CircuitRLCD/CircuitRLCD.cpp
    .. image:: /figures/electronics/DiodeBridge/SchemaDiodeBridge.*
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/DiodeBridge/DiodeBridge.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/electronics/DiodeBridge/DiodeBridge.cpp
    .. image:: /figures/mechanics/Woodpecker/woodpeckerphoto.png
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/Woodpecker/WoodPecker.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/Woodpecker/WoodPecker.cpp
 
    .. image:: /figures/mechanics/MultiBeads/BeadsColumn.*
       :height: 100px
       :class: gallery
-      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp 
    .. image:: /figures/control/Two-linkManipulator/two-linkManipulatorResults2.*
       :height: 100px
       :class: gallery
-      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/control/TwoLinkManipulator/TwoLinkManipulator.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/control/TwoLinkManipulator/TwoLinkManipulator.cpp 
    .. image:: /figures/electronics/PowerConverter/PRC_fig2.*
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/PowerConverter/PRC.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/electronics/PowerConverter/PRC.cpp
    .. image:: /figures/control/ObserverLCS/ObserverLCS.*
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/control/ObserverLCS/ObserverLCS.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/control/ObserverLCS/ObserverLCS.cpp
    .. image:: /figures/mechanics/slider_crank/slider_crank.*
       :height: 100px
       :class: gallery
-      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/SliderCrank/SliderCrankMoreauJeanOSI.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/SliderCrank/SliderCrankMoreauJeanOSI.cpp
 
                

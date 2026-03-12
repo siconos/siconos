@@ -22,23 +22,16 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
 set(${COMPONENT}_DIRS
   src/.
+  src/algebra
   src/utils
-  src/utils/SiconosAlgebra
-  src/utils/SiconosMemory
-  src/utils/SiconosSharedLibrary
-  src/utils/SiconosTools
-  src/utils/ProgressBar
-  src/plugin
-  src/modelingTools
-  src/simulationTools
+  src/modeling
+  src/simulation
 )
 
 # -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
-set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools
-  # if included, it breaks swig process for mechanics
-  )
+set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools)
 
 # ---- Final setup for the library ----
 
@@ -53,21 +46,19 @@ foreach(dir IN LISTS kernel_DIRS)
   target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
 endforeach()
 
-# We require C++ 17. PUBLIC to propagate to other components.
-target_compile_features(kernel PUBLIC cxx_std_17)
+# We require C++ 20. PUBLIC to propagate to other components.
+target_compile_features(kernel PUBLIC cxx_std_20)
 
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes
-set_source_files_properties(
+#set_source_files_properties(
   #${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixMisc.cpp # many warnings due to boost bindings headers
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
+  # PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
 
 
 
 # Links with other Siconos components
-target_link_libraries(kernel PRIVATE externals numerics)
+target_link_libraries(kernel PUBLIC externals numerics)
 if(WITH_FORTRAN)
   target_link_libraries(kernel PRIVATE externals_fortran) # lsodar and hem5
 endif()
@@ -92,9 +83,34 @@ if(WITH_BOOST_LOG)
   target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
 endif()
 
+if(WITH_JSON OR WITH_JSON_INSTALL)
+ include(json_nlohmann_setup)
+  # Do not use implicit conversion from a json file
+  # This is a recommandation from nlohmann doc.
+ target_compile_definitions(kernel PUBLIC JSON_ImplicitConversions=OFF)
+ target_link_libraries(kernel PUBLIC nlohmann_json::nlohmann_json)
+endif()
+
+# Eigen
+find_package(Eigen3 REQUIRED)
+# Should we propagate Eigen dep? Check this later ...
+target_link_libraries (kernel PUBLIC Eigen3::Eigen) 
+target_compile_definitions(kernel PUBLIC EIGEN_DEFAULT_DENSE_INDEX_TYPE=int) # To be complient with scipy sparse
+target_compile_definitions(kernel PUBLIC SICONOS_SPARSE_STORAGE_INDEX_TYPE=int)
+# Sparse storage
+if(SICONOS_SPARSE)
+  message("Activate sparse storage (Eigen) for all matrices in Siconos. Warning: expermimental setup, still under test!")
+  target_compile_definitions(kernel PUBLIC SICONOS_SPARSE)
+endif()
+
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
+
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----
@@ -111,10 +127,6 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)
-
 
 # CHECK THIS LATER :
 # --- set linked libraries and linker language ---

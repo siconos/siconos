@@ -27,27 +27,25 @@
 #include "NumericsMatrix.h"                 // for NM_DENSE, NumericsMatrix
 #include "SolverOptions.h"                  // for solver_options_id_to_name
 #include "assert.h"                         // for assert
-#include "numerics_verbose.h"               // for numerics_error_nonfatal
-
-const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
-const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
                SolverOptions* options) {
-  assert(options && "avi_driver : null input for solver options");
-  /* Checks inputs */
-  assert(problem && z && w &&
-         "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
-
-  assert(problem->M->storageType == NM_DENSE &&
-         "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
 
   assert(options->isSet);
-
-  if (!problem || !problem->M || !problem->q || !options) {
-    numerics_error_nonfatal(
-        "avi_driver", "Problem data is incomplete: you need to set at least M, q and poly");
-    return -1;
+  
+  /* Check storage type */
+  if (problem->M->storageType != NM_DENSE) {
+    fprintf(stderr, "avi_driver: forbidden type of storage for the matrix M of the AVI\n");
+    return NUMERICS_ERR_INVALID_ARGUMENT;
   }
 
   if (verbose > 0) {

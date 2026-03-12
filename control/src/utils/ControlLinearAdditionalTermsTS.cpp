@@ -14,38 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SimulationGraphs.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "ControlLinearAdditionalTermsTS.hpp"
 
-#include "Topology.hpp"
-#include "MatrixIntegrator.hpp"
-#include "SimpleMatrix.hpp"
-void ControlLinearAdditionalTermsTS::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem &, const TimeDiscretisation &)
-{
-  // Do nothing here
-}
 
-
-void ControlLinearAdditionalTermsTS::addSmoothTerms(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosVector& xfree)
-{
+void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
+    siconos::algebra::SiconosVector& xfree) {
   // check whether we have a system with a control input
-  if(DSG0.u.hasKey(dsgVD))
-  {
+  if (DSG0.u.hasKey(dsgVD)) {
     assert(DSG0.B.hasKey(dsgVD));
-    prod(h, *DSG0.B[dsgVD], *DSG0.u[dsgVD], xfree, false); // xfree += h*B*u
+    xfree.noalias() += h * *DSG0.B[dsgVD] * *DSG0.u[dsgVD];  // xfree += h*B*u
   }
   // check whether the DynamicalSystem is an Observer
-  if(DSG0.e.hasKey(dsgVD))
-  {
+  if (DSG0.e.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    prod(h, *DSG0.L[dsgVD], *DSG0.e[dsgVD], xfree, false); // xfree += -h*L*e
+    xfree.noalias() += h * *DSG0.L[dsgVD] * *DSG0.e[dsgVD];  // xfree += -h*L*e
   }
 }
 
-void ControlLinearAdditionalTermsTS::addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double t, SiconosMatrix& jacRhs)
-{
+void siconos::control::ControlLinearAdditionalTermsTS::addJacobianRhsContribution(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
+    siconos::algebra::SiconosVector& jacRhs) {
   // nothing to be done here
 }

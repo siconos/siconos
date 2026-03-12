@@ -39,7 +39,7 @@ struct GlobalFrictionContactProblem {
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
   /** \f$ M \in {\mathrm{I\!R}}^{n \times n} \f$,
-      a matrix with \f$ n\f$ stored in NumericsMatrix structure */
+      a matrix with \f$ n\f$ the number of dof in the system */
   NumericsMatrix *M;
   /**  \f$ {H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
        a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
@@ -57,9 +57,11 @@ struct GlobalFrictionContactProblem {
       (\f$ n_c = \f$ numberOfContacts) */
   double *mu;
 
-  /** \f$ M^{-1} \in {\mathrm{I\!R}}^{n \times n} \f$,
-      a matrix with \f$ n \f$ stored in NumericsMatrix structure */
+  /** \f$ M^{-1} \in {\mathrm{I\!R}}^{n \times n} \f$ */
   NumericsMatrix *M_inverse;
+
+  /** name of the problem **/
+  char *name;
 
   /** opaque environment, solver specific */
   void *env;

@@ -28,6 +28,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
+#include "numerics_errors.h"
 
 void Function_VI_GFC3D(void *self, int n_notused, double *x, double *F) {
   DEBUG_BEGIN("Function_VI_FC3D(void * self, double *x, double *F)\n")

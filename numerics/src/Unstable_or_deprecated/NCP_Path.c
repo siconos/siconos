@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include "Standalone_Path.h"
+#include "numerics_errors.h"
 
 static int fill_structure; /* Do we need to fill in the structure of    */
 /* the Jacobian?                             */

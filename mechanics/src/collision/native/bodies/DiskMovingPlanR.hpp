@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 /*! \file DiskMovingPlanR.hpp
  */
@@ -26,168 +25,147 @@
 #ifndef DiskMovingPlanR_h
 #define DiskMovingPlanR_h
 
-#include "MechanicsFwd.hpp"
+#include <memory>
+
 #include "LagrangianRheonomousR.hpp"
-#include "PluggedObject.hpp"
 
-typedef double(*FTime)(double);
-
-
-#define COMPUTE(X) \
-  { if (_##X##Function->fPtr) _##X=((FTime)(_##X##Function->fPtr))(t); else _##X=0.; }
-
-
-
-class DiskMovingPlanR : public LagrangianRheonomousR,
-  public std::enable_shared_from_this<DiskMovingPlanR>
-{
-private:
-
+namespace siconos::collision::native::bodies {
+class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
+                        public std::enable_shared_from_this<DiskMovingPlanR> {
+ private:
   ACCEPT_SERIALIZATION(DiskMovingPlanR);
 
-  double _time, _A, _B, _C, _ADot, _BDot, _CDot, _sqrA2pB2, _r, _AADot, _BBDot, _cubsqrA2pB2;
+  double _time{0.}, A_{0.}, B_{0.}, C_{0.}, Adot_{0.}, Bdot_{0.}, Cdot_{0.}, sqrA2pB2_{0.},
+      radius_{0.}, AAdot_{0.}, BBdot_{0.}, cubsqrA2pB2_{0.};
 
+  siconos::modeling::func_prototypes::FunctionS_S computeA_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_S computeB_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_S computeC_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_S computeAdot_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_S computeBdot_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_S computeCdot_{nullptr};
 
-  SP::PluggedObject _AFunction{nullptr};
-  SP::PluggedObject _BFunction{nullptr};
-  SP::PluggedObject _CFunction{nullptr};
+  DiskMovingPlanR() = delete;
 
-  SP::PluggedObject _ADotFunction{nullptr};
-  SP::PluggedObject _BDotFunction{nullptr};
-  SP::PluggedObject _CDotFunction{nullptr};
-
-  DiskMovingPlanR() : LagrangianRheonomousR() {};
-
-public:
-
-  DiskMovingPlanR(FTime, FTime, FTime, FTime, FTime, FTime, double);
+ public:
+  /** default and only constructor
+   * \param rad radius
+   */
+  DiskMovingPlanR(double rad);
 
   ~DiskMovingPlanR() noexcept = default;
 
   void init(double);
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
-  */
-  void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y);
+    to compute the output y = h(q, t) of the Relation
 
-  /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
+    \param q coordinates of the dynamical systems involved in the relation
+    \param time current time value
+    \param y the resulting vector
   */
-  void computeJachq(double time, const BlockVector& q, BlockVector& z);
+  void computeh(const siconos::algebra::BlockVector &q, double time,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computehDot(double time, const BlockVector& q, BlockVector& z);
+  /** Computes \f$ \nabla^\top_q h(q, t) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q, double time) override;
+
+  /** Update \f$ \frac{\partial }{\partial t}h(q,t) \f$
+   *  \param position 'list' of state vectors (for all ds involved in the interaction)
+   *  \param time the current time
+   */
+  void computehdot(const siconos::algebra::BlockVector &position, double time) override;
 
   double distance(double, double, double);
 
-  void setComputeAFunction(FTime f)
-  {
-    _AFunction.reset(new PluggedObject());
-    _AFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute A(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  void setComputeBFunction(FTime f)
-  {
-    _BFunction.reset(new PluggedObject());
-    _BFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute B(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  void setComputeCFunction(FTime f)
-  {
-    _CFunction.reset(new PluggedObject());
-    _CFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute C(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  void setComputeADotFunction(FTime f)
-  {
-    _ADotFunction.reset(new PluggedObject());
-    _ADotFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} A(t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeAdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  void setComputeBDotFunction(FTime f)
-  {
-    _BDotFunction.reset(new PluggedObject());
-    _BDotFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} B(t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeBdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  void setComputeCDotFunction(FTime f)
-  {
-    _CDotFunction.reset(new PluggedObject());
-    _CDotFunction->setComputeFunction((void*) f);
-  }
+  /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} C(t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeCdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
 
-  bool equal(FTime, FTime, FTime, double) const;
+  bool equal(const siconos::modeling::func_prototypes::FunctionS_S &pA,
+             const siconos::modeling::func_prototypes::FunctionS_S &pB,
+             const siconos::modeling::func_prototypes::FunctionS_S &pC, double) const;
 
   /**
      compute A
-     
+
      \param t the time
   */
-  void computeA(double t)
-  COMPUTE(A)
+  void computeA(double t);
 
   /**
      compute B
-     
+
      \param t the time
   */
-  void computeB(double t)
-  COMPUTE(B)
+  void computeB(double t);
 
   /**
      compute C
-     
+
      \param t the time
   */
-  void computeC(double t)
-  COMPUTE(C)
-    
+  void computeC(double t);
+
   /**
      compute ADot
-    
+
      \param t the time
   */
-  inline void computeADot(double t)
-  COMPUTE(ADot)
+  inline void computeADot(double t);
 
   /**
      compute BDot
-     
+
      \param t the time
   */
-  inline void computeBDot(double t)
-  COMPUTE(BDot)
-
+  inline void computeBDot(double t);
 
   /**
      compute CDot
-     
+
      \param t the time
   */
-  inline void computeCDot(double t)
-  COMPUTE(CDot)
+  inline void computeCDot(double t);
 
-  ACCEPT_VISITORS();
-
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
 
 };
-#undef COMPUTE
+}  // namespace siconos::collision::native::bodies
 
 #endif /* DiskMovingPlanR */
-

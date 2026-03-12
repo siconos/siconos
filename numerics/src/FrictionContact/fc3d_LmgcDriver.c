@@ -18,15 +18,20 @@
 #include <stdio.h>   // for fprintf, fclose, fopen, printf
 #include <stdlib.h>  // for free, malloc
 
+#include "fc3d_short_names.h"
 #include "FrictionContactProblem.h"  // for frictionContactProblem_new_with_...
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_IPARAM_ERROR...
+#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_IPARAM_ERROR...
 #include "NonSmoothDrivers.h"        // for fc3d_driver, fc3d_LmgcDriver
 #include "NumericsFwd.h"             // for SolverOptions, SparseBlockStruct...
 #include "NumericsMatrix.h"          // for NM_new_SBM
 #include "NumericsVerbose.h"         // for numerics_set_verbose
+#include "numerics_errors.h"
 #include "SiconosConfig.h"           // for WITH_FCLIB // IWYU pragma: keep
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
+
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES  */
 #include "siconos_debug.h"           // for DEBUG_EXPR
 
 // avoid a conflict with old csparse.h in case fclib includes it
@@ -57,10 +62,10 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
 
   SolverOptions *numerics_solver_options = solver_options_create(solver_id);
 
-  if (solver_id == SICONOS_FRICTION_3D_NSGS) {
+  if (solver_id == FC3D_NSGS) {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] =
         SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-  } else if (solver_id == SICONOS_FRICTION_3D_NSN_AC) {
+  } else if (solver_id == FC3D_NSN_AC) {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
         SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
@@ -80,8 +85,8 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     for (unsigned int k = 0; k < 3 * nc; k++) reaction_guess[k] = reaction[k];
     for (unsigned int k = 0; k < 3 * nc; k++) velocity_guess[k] = velocity[k];
   }
-
   DEBUG_EXPR(frictionContact_display(FC););
+  DEBUG_EXPR(solver_options_print(numerics_solver_options););
 
   int info = fc3d_driver(FC, reaction, velocity, numerics_solver_options);
 
@@ -129,7 +134,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
   } else if (outputFile == 2) {
     char fname[256];
     snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%i-%.5d.dat",
-            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
+             numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     printf("LMGC_FC3D-i%.5d-%i-%.5d.dat",
            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     FILE *foutput = fopen(fname, "w");
@@ -141,7 +146,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     if (fccounter % freq_output == 0) {
       char fname[256];
       snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%i-%.5d.hdf5",
-              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
+               numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
       printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n",
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */

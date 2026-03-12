@@ -55,32 +55,4 @@ enum SICONOS_IPARAM_SOCLCP {
   SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX = 4,
 };
 
-extern const char* const SICONOS_SOCLCP_NSGS_STR;
-extern const char* const SICONOS_SOCLCP_NSGSV_STR;
-extern const char* const SICONOS_SOCLCP_PROX_STR;
-extern const char* const SICONOS_SOCLCP_TFP_STR;
-extern const char* const SICONOS_SOCLCP_NSN_AC_STR;
-extern const char* const SICONOS_SOCLCP_NSN_FB_STR;
-extern const char* const SICONOS_SOCLCP_DSFP_STR;
-extern const char* const SICONOS_SOCLCP_VI_EG_STR;
-extern const char* const SICONOS_SOCLCP_VI_FPP_STR;
-extern const char* const SICONOS_SOCLCP_EG_STR;
-extern const char* const SICONOS_SOCLCP_FPP_STR;
-extern const char* const SICONOS_SOCLCP_HP_STR;
-extern const char* const SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR;
-extern const char* const SICONOS_SOCLCP_AlartCurnierNewton_STR;
-extern const char* const SICONOS_SOCLCP_DampedAlartCurnierNewton_STR;
-extern const char* const SICONOS_SOCLCP_NCPGlockerFBNewton_STR;
-extern const char* const SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR;
-extern const char* const SICONOS_SOCLCP_ProjectionOnCone_STR;
-extern const char* const SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR;
-extern const char* const SICONOS_SOCLCP_ProjectionOnConeWithRegularization_STR;
-extern const char* const SICONOS_SOCLCP_NCPGlockerFBPATH_STR;
-extern const char* const SICONOS_SOCLCP_projectionOnCylinder_STR;
-extern const char* const SICONOS_SOCLCP_ProjectionOnCone_velocity_STR;
-extern const char* const SICONOS_SOCLCP_PGoC_STR;
-extern const char* const SICONOS_SOCLCP_DeSaxceFixedPoint_STR;
-extern const char* const SICONOS_SOCLCP_QUARTIC_STR;
-extern const char* const SICONOS_SOCLCP_QUARTIC_NU_STR;
-
 #endif

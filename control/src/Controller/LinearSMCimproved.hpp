@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file LinearSMCimproved.hpp
   \brief General interface to define an actuator
@@ -23,55 +23,53 @@
 #ifndef LinearSMCimproved_H
 #define LinearSMCimproved_H
 
+#include <boost/circular_buffer_fwd.hpp>
+#include <limits>  // for std::numeric_limits<double>::quiet_NaN()
+
 #include "LinearSMC.hpp"
 
-#include <boost/circular_buffer_fwd.hpp>
+namespace siconos::control {
 
-typedef std::shared_ptr<boost::circular_buffer<SP::SiconosVector> > BufferOfVectors;
-
-class LinearSMCimproved : public LinearSMC
-{
-private:
+class LinearSMCimproved : public LinearSMC {
+ private:
   ACCEPT_SERIALIZATION(LinearSMCimproved);
 
-  /** default constructor */
-  LinearSMCimproved() {};
+  using BufferOfVectors = std::shared_ptr<
+      boost::circular_buffer<std::shared_ptr<siconos::algebra::SiconosVector>>>;
 
-protected:
-
+ protected:
   /** try to predict the perturbation */
-  bool _predictionPerturbation;
+  bool _predictionPerturbation{false};
 
   /** boolean to determine if we are in the discrete-time sliding phase */
-  bool _inDisceteTimeSlidingPhase;
+  bool _inDisceteTimeSlidingPhase{false};
 
   /** Vector to store previous values of the perturbation */
-  BufferOfVectors _measuredPert;
+  BufferOfVectors _measuredPert{nullptr};
 
   /** Vector of predicted values for the perturbation */
-  BufferOfVectors _predictedPert;
+  BufferOfVectors _predictedPert{nullptr};
 
   /** Upper bound on the norm2 of the perturbation */
-  double _ubPerturbation;
+  double _ubPerturbation{0.};
 
   /** Control input to counteract the effect of the perturbation */
-  SP::SiconosVector _up;
+  std::shared_ptr<siconos::algebra::SiconosVector> _up{nullptr};
 
   /** Predict the effect of the perturnation during the next timestep
    *
    *  \param xTk available state at the current time instant
-   *  \param CBstar matrix  \f$ CB^{*} \f$ 
+   *  \param CBstar matrix  \f$ CB^{*} \f$
    */
-  void predictionPerturbation(const SiconosVector& xTk, SimpleMatrix& CBstar);
+  void predictionPerturbation(const siconos::algebra::SiconosVector& xTk,
+                              const siconos::algebra::SiconosDenseLUMatrix& CBstar);
 
-
-public:
-
+ public:
   /** Constructor
    *
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  LinearSMCimproved(SP::ControlSensor sensor);
+  LinearSMCimproved(std::shared_ptr<ControlSensor> sensor);
 
   /** Constructor with all the data
    *
@@ -79,18 +77,21 @@ public:
    *  \param B the B matrix in the FirstOrderLinearR
    *  \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>());
+  LinearSMCimproved(std::shared_ptr<ControlSensor> sensor,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr);
 
   /** destructor
    */
-  virtual ~LinearSMCimproved();
+  virtual ~LinearSMCimproved() noexcept = default;
 
   /** Initialize Controller
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
@@ -99,8 +100,7 @@ public:
   virtual void actuate();
 
   /** Enable perturbation prediction */
-  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN())
-  {
+  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN()) {
     _ubPerturbation = ub;
     _predictionPerturbation = true;
   }
@@ -109,15 +109,20 @@ public:
    *
    *  \return a reference to _up
    */
-  inline const SiconosVector& up() const { return *_up; };
+  inline const siconos::algebra::SiconosVector& up() const { return *_up; };
 
   /** Set the order of the prediction
    *  - 0 -> the predicted value is the same as the one we measured
-   *  - 1 ->  \f$ \widetilde{Cp_{k+1}} = 2Cp_k - Cp_{k-1} \f$ 
-   *  - 2 ->  \f$ \widetilde{Cp_{k+1}} = 3Cp_k - 3Cp_{k-1} + Cp_{k-2} \f$ 
+   *  - 1 ->  \f$ \widetilde{Cp_{k+1}} = 2Cp_k - Cp_{k-1} \f$
+   *  - 2 ->  \f$ \widetilde{Cp_{k+1}} = 3Cp_k - 3Cp_{k-1} + Cp_{k-2} \f$
    *
    *  \param order the order of the prediction
    */
   void setPredictionOrder(unsigned int order);
 };
+
+// Register the observer into the factory
+static ActuatorRegistration<LinearSMCimproved> reg_LSMCI(ActuatorType::LinearSMCimproved);
+
+}  // namespace siconos::control
 #endif

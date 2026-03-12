@@ -21,6 +21,7 @@
 #include <stdlib.h>  // for free, NULL, malloc
 
 #include "NumericsMatrix.h"  // for NM_clear
+#include "numerics_errors.h"
 
 void freeNCP(NonlinearComplementarityProblem* ncp) {
   if (ncp->nabla_F) {

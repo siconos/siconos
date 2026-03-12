@@ -14,90 +14,105 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file CouplerJointR.hpp
-*/
+ */
 #ifndef CouplerJointRELATION_H
 #define CouplerJointRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
 #include <NewtonEulerJointR.hpp>
-#include <Tools.hpp>
+
+namespace siconos::modeling {
+class NewtonEulerDS;
+}
+
+namespace siconos::joints {
 
 /**
-   This class implements a coupling (equality) between two
-   DoFs of any NewtonEulerJointR.  Can be used e.g. to implement a
-   screw relation (coupled rotation and translation) based on
-   CylindricalJointR.
+ This class implements a coupling (equality) between two
+ DoFs of any NewtonEulerJointR.  Can be used e.g. to implement a
+ screw relation (coupled rotation and translation) based on
+ CylindricalJointR.
 */
-class CouplerJointR : public NewtonEulerJointR
-{
-protected:
-
+class CouplerJointR : public NewtonEulerJointR {
+ protected:
   ACCEPT_SERIALIZATION(CouplerJointR);
 
-  SP::NewtonEulerJointR _joint1, _joint2;
-  SP::SiconosVector _ref1, _ref2;
+  std::shared_ptr<NewtonEulerJointR> _joint1{nullptr};
+  std::shared_ptr<NewtonEulerJointR> _joint2{nullptr};
 
-  unsigned int _dof1, _dof2;
-  unsigned int _ref1_index, _ref2_index;
-  double _ratio, _offset;
+  std::shared_ptr<siconos::algebra::SiconosVector> _ref1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _ref2{nullptr};
 
-  /** Return the normal of the linear DoF axis.  \param axis must be 0 */
-  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                          bool absoluteRef=true);
+  siconos::algebra::Index _dof1{0}, _dof2{0};
+  siconos::algebra::Index _ref1_index{0}, _ref2_index{0};
+  double _ratio{0.}, _offset{0.};
 
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
-  void makeBlockVectors(SP::SiconosVector q1, SP::SiconosVector q2,
-                        BlockVector& q01, BlockVector& q02);
+  void resolveVectors(const siconos::algebra::SiconosVector* q1,
+                      const siconos::algebra::SiconosVector* q2,
+                      const siconos::algebra::SiconosVector*& v1_1,
+                      const siconos::algebra::SiconosVector*& v1_2,
+                      const siconos::algebra::SiconosVector*& v2_1,
+                      const siconos::algebra::SiconosVector*& v2_2) const;
 
-public:
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
-  /** Empty constructor. The relation may be initialized later by
-   *  setPoint, setAbsolute, and setBasePositions. */
-  CouplerJointR();
+ public:
+  /** Initialize a coupler. See setReferences() for an explanation of
+   *  the parameters. */
+  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                double ratio,
+                std::optional<siconos::algebra::SiconosVector> ref1 = std::nullopt,
+                siconos::algebra::Index ref1_index = 0,
+                std::optional<siconos::algebra::SiconosVector> ref2 = std::nullopt,
+                siconos::algebra::Index ref2_index = 0);
 
   /** Initialize a coupler. See setReferences() for an explanation of
    *  the parameters. */
-  CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
-                SP::NewtonEulerJointR joint2, unsigned int dof2,
-                double ratio,
-                SP::SiconosVector ref1=SP::SiconosVector(), unsigned int ref1_index=0,
-                SP::SiconosVector ref2=SP::SiconosVector(), unsigned int ref2_index=0);
+  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                double ratio, std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
+                siconos::algebra::Index ref1_index,
+                std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
+                siconos::algebra::Index ref2_index);
 
-  /** Initialize a coupler. See setReferences() for an explanation of
-   *  the parameters. */
-  CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
-                SP::NewtonEulerJointR joint2, unsigned int dof2,
-                double ratio,
-                SP::NewtonEulerDS refds1, unsigned int ref1_index,
-                SP::NewtonEulerDS refds2, unsigned int ref2_index);
+  ~CouplerJointR() noexcept = default;
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+     to compute the output y = h(q) of the Relation
 
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
+  */
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* Return the joint DoF index assigned to the first DoF. */
-  unsigned int dof1() { return _dof1; }
+  siconos::algebra::Index dof1() { return _dof1; }
 
   /* Return the joint DoF index assigned to the second DoF. */
-  unsigned int dof2() { return _dof2; }
+  siconos::algebra::Index dof2() { return _dof2; }
 
   /* Return the first reference joint assigned to this friction relation. */
-  SP::NewtonEulerJointR joint1() { return _joint1; }
+  auto joint1() { return _joint1; }
 
   /* Return the second reference joint assigned to this friction relation. */
-  SP::NewtonEulerJointR joint2() { return _joint2; }
+  auto joint2() { return _joint2; }
 
   /** Set reference joints and vectors.  This constraint maintains the
    *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
@@ -123,10 +138,12 @@ public:
    *  \param ref2_index Must be 0 or 1, depending on where ref2
    *                    appears in joint2.
    */
-  void setReferences(SP::NewtonEulerJointR joint1, unsigned int dof1,
-                     SP::NewtonEulerJointR joint2, unsigned int dof2,
-                     SP::SiconosVector ref1, unsigned int ref1_index,
-                     SP::SiconosVector ref2, unsigned int ref2_index);
+  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                     std::shared_ptr<siconos::algebra::SiconosVector> ref1,
+                     siconos::algebra::Index ref1_index,
+                     std::shared_ptr<siconos::algebra::SiconosVector> ref2,
+                     siconos::algebra::Index ref2_index);
 
   /** Set reference joints and vectors.  This constraint maintains the
    *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
@@ -155,54 +172,72 @@ public:
    *  \param ref2_index Must be 0 or 1, depending on where ref2
    *                    appears in joint2.
    */
-  void setReferences(SP::NewtonEulerJointR joint1, unsigned int dof1,
-                     SP::NewtonEulerJointR joint2, unsigned int dof2,
-                     SP::NewtonEulerDS refds1, unsigned int ref1_index,
-                     SP::NewtonEulerDS refds2, unsigned int ref2_index);
+  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                     std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
+                     siconos::algebra::Index ref1_index,
+                     std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
+                     siconos::algebra::Index ref2_index);
 
   /* Set the gear ratio. */
   void setRatio(double ratio);
 
-  /* From provided position vectors, calculate initial offsets to be
-   * maintained in the relation. */
-  void setBasePositions(SP::SiconosVector q1,
-                        SP::SiconosVector q2=SP::SiconosVector());
+  /** Initialize the joint constants based on the provided base positions.
+   *
+   *  \param[in] q1 a vector of size 7 indicating translation and orientation in inertial
+   * coordinates.
+   *  \param[in] q2 an optional vector of size 7 indicating translation and orientation; if
+   * null, the inertial frame will be considered as the second base.
+   */
+  virtual void setBasePositions(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+          std::nullopt) override;
 
   /**
      Get the number of constraints defined in the joint
-     
+
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() { return 1; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 1; }
 
   /**
      Get the number of degrees of freedom defined in the joint
-     
+
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() { return 1; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 1; }
 
   /**
      Return the type of a degree of freedom of this joint.
-     
+
      \return the type of the degree of freedom (DoF)
   */
-  virtual DoF_Type typeOfDoF(unsigned int axis) {
-    if (axis<1) return DOF_TYPE_LINEAR;
-    else return DOF_TYPE_INVALID;
+  virtual DofType typeOfDoF(siconos::algebra::Index axis) const override {
+    if (axis < 1)
+      return DofType::LINEAR;
+    else
+      return DofType::INVALID;
   };
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
-                           unsigned int axis);
+  virtual void computehDoF(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y,
+      siconos::algebra::Index axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, Interaction& inter,
-                               SP::BlockVector q0, SimpleMatrix& jachq,
-                               unsigned int axis);
+  virtual void computeJachqDoF(
+      siconos::modeling::Interaction& inter,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      siconos::algebra::Index axis = 0) override;
 
-  /** destructor
-   */
-  virtual ~CouplerJointR() {};
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-#endif  //CouplerJointRELATION_H
+}  // namespace siconos::joints
+#endif  // CouplerJointRELATION_H

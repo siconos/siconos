@@ -1,0 +1,148 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*! \file SiconosMemory.hpp
+  \brief class SiconosMemory
+
+*/
+
+#ifndef SICONOSMEMORY_H
+#define SICONOSMEMORY_H
+
+#include <memory>
+#include <vector>
+
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+
+namespace siconos::algebra {
+
+// class SiconosVector;
+
+/**
+   Interface to stl container of SiconosVector.
+
+   This class is used as a backup during simulation, to save vectors (e.g. state) computed
+   during previous time steps.
+
+   - The size of the container is fixed, with a first-in first-out mechanism
+   used through swap method.
+   - All saved vectors must have the same dimension.
+
+   This class must be reviewed and backup should probably be moved to graph rather than in this
+   object.
+
+*/
+class SiconosMemory : public siconos::algebra::blocks::Vector {
+ private:
+  ACCEPT_SERIALIZATION(SiconosMemory);
+
+  /** the real number of siconos::algebra::SiconosVectors saved in the Memory (ie the ones for
+   * which memory has been allocated) */
+  siconos::algebra::blocks::size_type _nbVectorsInMemory{0};
+
+  /** index to avoid removal and creation of vectors.
+   this[_indx] is to the oldest element in the set */
+  siconos::algebra::blocks::size_type _indx{0};
+
+  SiconosMemory(const siconos::algebra::blocks::Vector&) = delete;
+  SiconosMemory& operator=(const siconos::algebra::blocks::Vector& V) = delete;
+
+ public:
+  /** creates an empty SiconosMemory. */
+  SiconosMemory() = default;
+
+  /** creates a SiconosMemory
+   *
+   *  \param size number of elements in the container
+   *  \param vectorSize size of each vector in the container
+   */
+  SiconosMemory(const siconos::algebra::blocks::size_type size,
+                const siconos::algebra::blocks::size_type vectorSize);
+
+  /** creates a SiconosMemory, copy constructor
+   *  Required because of resize call in DS initMemory function.
+   *
+   *  \param mem a SiconosMemory
+   */
+  SiconosMemory(const SiconosMemory& mem);
+
+  /** Assignment
+   */
+  SiconosMemory& operator=(const SiconosMemory&);
+
+  // To complete rule of 5
+  SiconosMemory(SiconosMemory&& mem) = default;
+  SiconosMemory& operator=(SiconosMemory&&) = default;
+
+  ~SiconosMemory() noexcept = default;
+
+  /** Return the vector number i from the memory
+   *
+   *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
+   */
+  const siconos::algebra::SiconosVector& getSiconosVector(
+      const siconos::algebra::blocks::size_type) const;
+
+  /** return vector number if from the memory, as a mutable reference.
+   *  Use should be avoided whenever possible.
+   *  (Used in LinearSMC::actuate)
+   *
+   *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
+   */
+  siconos::algebra::SiconosVector& getSiconosVectorMutable(
+      const siconos::algebra::blocks::size_type);
+
+  /** set size of the SiconosMemory (number of vectors and size of vector)
+   *
+   *  \param steps the max size for this SiconosMemory, size of the container
+   *  \param vectorSize size of each vector of the container
+   */
+  void setMemorySize(const siconos::algebra::blocks::size_type steps,
+                     const siconos::algebra::Index vectorSize);
+
+  /** gives the numbers of siconos::algebra::SiconosVectors currently stored in the memory
+   *
+   *  \return int >= 0
+   */
+  inline siconos::algebra::blocks::size_type nbVectorsInMemory() const {
+    return _nbVectorsInMemory;
+  };
+
+  /** puts a siconos::algebra::SiconosVector into the memory
+   *
+   *  \param v the siconos::algebra::SiconosVector we want to put in memory
+   */
+  void swap(const siconos::algebra::SiconosVector& v);
+
+  /** puts a siconos::algebra::SiconosVector into the memory
+   *
+   *  \param v the siconos::algebra::SiconosVector we want to put in memory, or do nothing if v
+   * is null
+   */
+  void swap(std::shared_ptr<siconos::algebra::SiconosVector> v);
+};
+
+// Free functions
+
+/** displays the data of the memory object */
+void print(const SiconosMemory&);
+
+}  // namespace siconos::algebra
+
+#endif

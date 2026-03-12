@@ -14,32 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 #include "Contact2d3DR.hpp"
-#include <RigidBodyDS.hpp>
-#include <Interaction.hpp>
-#include <BlockVector.hpp>
 
-Contact2d3DR::Contact2d3DR()
-  : Lagrangian2d3DR()
-{
-}
+#include "SiconosVector.hpp"
 
-// void Contact2d3DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
+// void Contact2d3DR::computeh(const siconos::algebra::BlockVector& q,
+// siconos::algebra::BlockVector& z, siconos::algebra::SiconosVector& y)
 // {
 //   DEBUG_BEGIN("Contact2d3DR::computeh(...)\n");
 
 //   // Update contact points and distance if necessary
 //   Lagrangian2d3DR::computeh(q, z, y);
 
-//   y.setValue(0, distance());
-
+//   y(0) = distance();
 
 //   DEBUG_PRINTF("distance : %g \n", distance());
 //   DEBUG_PRINTF("position on A : %g,%g\n", (*pc1())(0), (*pc1())(1));
@@ -49,9 +42,9 @@ Contact2d3DR::Contact2d3DR()
 //   DEBUG_END("Contact2d3DR::computeh(...)\n");
 // }
 
-// void Contact2d3DR::updateContactPoints(const SiconosVector& pos1,
-//                                        const SiconosVector& pos2,
-//                                        const SiconosVector& normal)
+// void Contact2d3DR::updateContactPoints(const siconos::algebra::SiconosVector& pos1,
+//                                        const siconos::algebra::SiconosVector& pos2,
+//                                        const siconos::algebra::SiconosVector& normal)
 // {
 //   // Copy relative positions
 //   *_relPc1 = pos1;
@@ -63,9 +56,9 @@ Contact2d3DR::Contact2d3DR()
 //   assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0)
 //          && "nc = 0, problems..\n");
 // }
-void Contact2d3DR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
-                                                      const SiconosVector& pos2,
-                                                      const SiconosVector& normal)
+void siconos::collision::Contact2d3DR::updateContactPointsInAbsoluteFrame(
+    const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
+    const siconos::algebra::SiconosVector& normal)
 {
   // Copy  positions
   *_Pc1 = pos1;
@@ -74,6 +67,5 @@ void Contact2d3DR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
   // Update normal
   *_Nc = normal;
 
-  assert(!((*_Nc)(0)==0 && (*_Nc)(1)==0)
-         && "nc = 0, problems..\n");
+  assert(!((*_Nc)(0) == 0 && (*_Nc)(1) == 0) && "nc = 0, problems..\n");
 }

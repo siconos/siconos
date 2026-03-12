@@ -14,25 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Utils.hpp
- *Include files related to utils directory
+ *  Include files related to utils directory
+ *  Must be used only by final user.
  */
 
-
-#include "BlockMatrix.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "BlockVector.hpp"
-#include "ioMatrix.hpp"
-#include "ioVector.hpp"
-
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
-
+#include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
-
-#include "SSLH.hpp"
-
+#include "SiconosVector.hpp"
 #include "Tools.hpp"
-
-#include "ProgressBar.hpp"
+#include "io.hpp"

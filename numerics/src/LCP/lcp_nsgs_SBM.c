@@ -26,8 +26,12 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
-#include "numerics_verbose.h"              // for numerics_error, verbose
+#include "numerics_verbose.h"
 #include "sanitizer.h"                     // for cblas_dcopy_msan
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -80,8 +84,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
        with no null row (ie no rows with all blocks equal to null)
   */
   if (problem->M->matrix1 == NULL) {
-    fprintf(stderr, "lcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /*
@@ -100,8 +103,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
   if (nbOfNonNullBlocks < 1) {
-    fprintf(stderr, "Numerics::lcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   /* Local problem initialization */
@@ -215,6 +217,44 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
 }
 
 void lcp_nsgs_sbm_set_default(SolverOptions* options) {
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_NSGS_SBM in the global solver registry.
+ */
+
+static int lcp_nsgs_sbm_init_wrap(void* problem, SolverOptions* options) {
+  lcp_nsgs_sbm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_nsgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_nsgs_SBM((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_nsgs_sbm_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
+                "Non-smooth Gauss-Seidel for LCP with Sparse Block Matrix",
+                lcp_nsgs_sbm_init_wrap,
+                lcp_nsgs_sbm_solve_wrap,
+                lcp_nsgs_sbm_free_wrap,
+                NULL,  /* error function */
+                lcp_nsgs_sbm_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

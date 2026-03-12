@@ -31,9 +31,13 @@
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
-#include "numerics_verbose.h"                             // for verbose
+#include "numerics_verbose.h"
 #include "soclcp_compute_error.h"                         // for soclcp_comp...
 #include "soclcp_projection.h"                            // for soclcp_proj...
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem,
@@ -230,7 +234,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("soclcp_nsgs",
@@ -277,8 +281,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
       localproblem->M = NM_new();
     }
   } else {
-    fprintf(stderr, "soclcp_nsgs error: not yet implemented.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   soclcp_initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
@@ -528,8 +531,50 @@ void soclcp_nsgs_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
   options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
   options->dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1.;
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] =
       solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_SOCLCP_NSGS in the global solver registry.
+ */
+
+static int soclcp_nsgs_init_wrap(void* problem, SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+  return NUMERICS_OK;
+}
+
+static int soclcp_nsgs_solve_wrap(void* problem, double* reaction,
+                                  double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  soclcp_nsgs((SecondOrderConeLinearComplementarityProblem*)problem, reaction, velocity, &info,
+              options);
+  return info;
+}
+
+static void soclcp_nsgs_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup is handled internally by soclcp_nsgs */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_SOCLCP_NSGS, "SOCLCP_NSGS",
+                "Non-Smooth Gauss-Seidel for SOCLCP",
+                soclcp_nsgs_init_wrap,
+                soclcp_nsgs_solve_wrap,
+                soclcp_nsgs_free_wrap,
+                NULL,  /* error function */
+                soclcp_nsgs_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

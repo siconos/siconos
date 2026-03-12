@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -28,15 +26,17 @@ set(${COMPONENT}_DIRS)
 # - serialization/generation part : sources in serialization and generation
 # - mechanicsIO : sources in mechanics 
 
+list(APPEND ${COMPONENT}_DIRS src)
+
 if(HAVE_SICONOS_MECHANICS)
-  list(APPEND ${COMPONENT}_DIRS src/mechanics) 
+  list(APPEND ${COMPONENT}_DIRS src/mechanics)
 endif()
 
 # --- Serialization setup ---
 
 if(WITH_SERIALIZATION)
   list(APPEND ${COMPONENT}_DIRS src/serialization)
-  
+
   if(NOT WITH_GENERATION)
     # in that case, we use headers in src/generation.
     # Warning : they must regularly updated (build siconos with generation ON!)
@@ -66,7 +66,7 @@ if(WITH_SERIALIZATION)
     if(SuiteSparse_CXSparse_INCLUDE_DIR)
       list(APPEND GENERATED_INCLUDES -I${SuiteSparse_CXSparse_INCLUDE_DIR})
     endif()
-    
+
     if(MPI_FOUND)
       foreach(_DIR IN LISTS MPI_CXX_INCLUDE_PATH)
         list(APPEND GENERATED_INCLUDES -I${_DIR})
@@ -77,13 +77,13 @@ if(WITH_SERIALIZATION)
       ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
 
-		## CMake >= 3.12
+    ## CMake >= 3.12
     # set(io_targets_doxy2xml "${io_targets}")
     # list(TRANSFORM io_targets_doxy2xml APPEND "-doxy2xml")
     set(io_targets_doxy2xml)
-		foreach(_T IN LISTS io_targets)
-			list(APPEND io_targets_doxy2xml "${_T}-doxy2xml")
-		endforeach()
+    foreach(_T IN LISTS io_targets)
+      list(APPEND io_targets_doxy2xml "${_T}-doxy2xml")
+    endforeach()
 
     add_custom_command(
       OUTPUT ${GENERATED_HEADER}
@@ -92,7 +92,7 @@ if(WITH_SERIALIZATION)
       ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
 
-    SET(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+    set(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
       --targets=kernel ${GENERATED_INCLUDES}
       --output=${GENERATED_HEADER_KERNEL}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
@@ -109,18 +109,6 @@ endif()
 # By default all directories matching "test" are excluded.
 # set(${COMPONENT}_EXCLUDE_DOXY)
 
-# ------ include interface ------
-# What is needed at build time
-# by other targets to compile with current component.
-# 
-# It means that a call to
-#  target_link_libraries(truc PRIVATE io)
-# will imply -I<dirs> with dirs listed in
-# ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
-#
-# If all dirs are required, just set
-# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
 
 # ---- Final setup for the library ----
 if(io_DIRS) # the component may be empty if mechanics and serialization are off
@@ -167,20 +155,6 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     target_link_libraries(io PUBLIC mechanisms)
     # This will bring the links with Opencascade, if required ...
   endif()
-
-  # Links with non-Siconos libraries
-  # if(SICONOS_HAS_OpenCASCADE)
-  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-  #     target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
-  #   endif()
-  # endif()
-  
-  # # Links with non-Siconos libraries
-  # if(SICONOS_HAS_OCC)
-  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-  #     target_link_libraries(io PRIVATE ${OpenCASCADE_LIBRARIES})
-  #   endif()
-  # endif()
   
   # --- Search component dependencies ---
   if(WITH_SERIALIZATION)
@@ -197,15 +171,18 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     endif()
   endif()
   
-  if(WITH_VTK)
-    # https://cmake.org/cmake/help/latest/module/FindVTK.html
-    find_package(VTK )
-    target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
-  endif()
+  # if(WITH_VTK)
+  #   # https://cmake.org/cmake/help/latest/module/FindVTK.html
+  #   find_package(VTK)
+  #   target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
+  # endif()
+ 
+  # --- tests ---
+  include(${COMPONENT}_tests.cmake)
 
   # --- python bindings ---
-  if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-    add_subdirectory(swig)
+  if(WITH_PYB11_WRAPPER)
+    add_subdirectory(python)
   endif()
   
   # ---- Installation ----
@@ -225,14 +202,16 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     endif()
   endif()
   
-  if(HAVE_SICONOS_MECHANICS)
-    list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
-  endif()
+  # if(HAVE_SICONOS_MECHANICS)
+  #   list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
+  # endif()
+
+  set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+    ${${COMPONENT}_DIRS} # All .hpp are installed
+  )
+
   siconos_component_install_setup(${COMPONENT})
-  
-  # --- tests ---
-  include(${COMPONENT}_tests.cmake)
-endif()
+ endif()
 
 
 

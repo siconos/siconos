@@ -19,30 +19,37 @@
 #ifndef BulletR_hpp
 #define BulletR_hpp
 
-#include "BulletSiconosFwd.hpp"
+#include "BulletDeclarations.h"
 #include "ContactR.hpp"
 
-class BulletR : public ContactR {
-private:
+namespace siconos::modeling {
+class NewtonEulerDS;
+}
 
+namespace siconos::collision::bullet {
+
+class BulletR : public siconos::collision::ContactR {
+ private:
   ACCEPT_SERIALIZATION(BulletR);
 
-public:
-  BulletR();
-
-  virtual ~BulletR() {}
+ public:
+  virtual ~BulletR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
-  SP::btCollisionObject btObject[2];
-  SP::btCollisionShape btShape[2];
+  std::shared_ptr<btCollisionObject> btObject[2] = {nullptr, nullptr};
+  std::shared_ptr<btCollisionShape> btShape[2] = {nullptr, nullptr};
 
   virtual void updateContactPointsFromManifoldPoint(
-      const btPersistentManifold &manifold, const btManifoldPoint &point,
-      bool flip, double scaling, SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
+      const btPersistentManifold &manifold, const btManifoldPoint &point, bool flip,
+      double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
+      std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
 
   void display() const override;
 
-  ACCEPT_STD_VISITORS();
+  virtual void accept(modeling::relations::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
 };
+}  // namespace siconos::collision::bullet
 
 #endif

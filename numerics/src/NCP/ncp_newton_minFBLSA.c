@@ -17,12 +17,16 @@
  */
 
 #include "NCP_Solvers.h"                      // for ncp_newton_minFBLSA
+#include "NCP_cst.h"
 #include "Newton_methods.h"                   // for functions_LSA, init_lsa...
 #include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
 #include "NumericsFwd.h"                      // for NonlinearComplementarit...
 #include "min_merit.h"                        // for F_min, Jac_F_min
 #include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
 
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin) {
   NonlinearComplementarityProblem* data = (NonlinearComplementarityProblem*)data_opaque;
 
@@ -50,3 +54,37 @@ void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double* z, do
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->n, z, F, info, (void*)problem, options, &functions_minFBLSA_ncp);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers NCP_NEWTON_MIN_FBLSA in the global solver registry.
+ */
+
+static void ncp_newton_minfblsa_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int ncp_newton_minfblsa_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int ncp_newton_minfblsa_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
+  ncp_newton_minFBLSA(ncp, z, w, &info, options);
+  return info;
+}
+
+static void ncp_newton_minfblsa_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_NCP_NEWTON_MIN_FBLSA, "NCP_NEWTON_MIN_FBLSA",
+                       "Newton minFBLSA solver for Nonlinear Complementarity Problems",
+                       ncp_newton_minfblsa_init_wrap, ncp_newton_minfblsa_solve_wrap, ncp_newton_minfblsa_free_wrap, NULL,
+                       ncp_newton_minfblsa_set_default, 1000, 1e-4, 0);

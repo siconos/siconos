@@ -23,20 +23,19 @@
 #ifndef SphereNEDSSphereNEDSR_h
 #define SphereNEDSSphereNEDSR_h
 
-#include "MechanicsFwd.hpp"
 #include "NewtonEuler3DR.hpp"
-class SphereNEDSSphereNEDSR
-    : public NewtonEuler3DR,
-      public std::enable_shared_from_this<SphereNEDSSphereNEDSR> {
-private:
 
+namespace siconos::collision::native::bodies {
+class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
+                              public std::enable_shared_from_this<SphereNEDSSphereNEDSR> {
+ private:
   ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);
 
   double r1, r2, r1pr2;
 
-  SphereNEDSSphereNEDSR(){};
+ public:
+  ~SphereNEDSSphereNEDSR() noexcept = default;
 
-public:
   /** Constructor
    *
    *  \param r1 disk1 radius
@@ -44,20 +43,25 @@ public:
    */
   SphereNEDSSphereNEDSR(double r1, double r2);
 
-  double distance(double, double, double, double, double, double, double,
-                  double);
+  double distance(double, double, double, double, double, double, double, double);
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
   */
-  void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  // void computeJachq(double);
-
-  ACCEPT_VISITORS();
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDSSphereNEDSR_h */

@@ -14,76 +14,63 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SphereLDS.hpp
   \brief Definition of a 3D sphere as a LagrangianDS (with Euler
          Angles)
 */
 
-
 #ifndef SphereLDS_h
 #define SphereLDS_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
-class SphereLDS : public LagrangianDS, public std::enable_shared_from_this<SphereLDS>
-{
-protected:
+namespace siconos::collision::native::bodies {
 
+class SphereLDS : public siconos::modeling::LagrangianDS,
+                  public std::enable_shared_from_this<SphereLDS> {
+ protected:
   ACCEPT_SERIALIZATION(SphereLDS);
 
-  double radius;
-  double massValue;
-  double I;
+  double radius_{0.};
+  double massValue_{0.};
+  double inertia_{0.};
 
-  SphereLDS() {};
+ public:
+  /** constructor from initial state and velocity
+   *
+   *  \param R radius of the sphere
+   *  \param m mass of the sphere
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   */
 
-public:
+  SphereLDS(double, double, const siconos::algebra::SiconosVector6& position,
+            const siconos::algebra::SiconosVector6& velocity);
 
-  SphereLDS(double, double, SP::SiconosVector, SP::SiconosVector);
+  ~SphereLDS() noexcept = default;
 
-  ~SphereLDS();
+  /** to compute the mass matrix operator \f$ M(q) \f$
+   *
+   *  \param position q vector
+   */
+  void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position) override;
 
-  inline double getQ(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[0])(pos);
-  };
-  inline double getVelocity(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[1])(pos);
-  };
+  double getQ(unsigned int pos);
 
-  inline double getMassValue() const
-  {
-    return massValue;
-  };
+  double getVelocity(unsigned int pos);
 
-  inline double getRadius() const
-  {
-    return radius;
-  };
+  inline double getMassValue() const { return massValue_; };
 
-  void computeMass();
-  void computeMass(SP::SiconosVector)
-  {
-    THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
+  inline double getRadius() const { return radius_; };
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
   }
-
-  void computeFGyr(SP::SiconosVector, SP::SiconosVector);
-
-  void computeFGyr();
-
-  void computeJacobianFGyrq();
-  void computeJacobianFGyrqDot();
-
-  void computeJacobianFGyrq(SP::SiconosVector, SP::SiconosVector);
-  void computeJacobianFGyrqDot(SP::SiconosVector, SP::SiconosVector);
-
-  ACCEPT_BASE_VISITORS(LagrangianDS);
-
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+
+}  // namespace siconos::collision::native::bodies
 #endif /* SphereLDS_h */

@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - swig
   - jupyterlab
   - numpy
   - wheel
@@ -30,6 +29,6 @@ dependencies:
   - black
   - flake8
   - autopep8
-  - pyhull
   - eigen
+  - sphinxcontrib-youtube
 

@@ -14,99 +14,101 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SiconosException.hpp"
 #include "Actuator.hpp"
-#include "ActuatorEvent.hpp"
+
 #include "ControlSensor.hpp"
-#include "TimeDiscretisation.hpp"
-#include "EventFactory.hpp"
-#include "Simulation.hpp"
-#include <iostream>
 #include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "Tools.hpp"
+#include "Topology.hpp"
 
-Actuator::Actuator(): _type(0), _id("none")
-{
-}
+siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor)
+    : _type(type), _sensor(sensor) {}
 
-Actuator::Actuator(unsigned int type, SP::ControlSensor sensor): _type(type), _id("none"), _sensor(sensor)
-{
-}
-
-Actuator::Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B): _type(type), _id("none"), _B(B), _sensor(sensor)
-{
-  if(B)
-  {
-    _u = std::make_shared<SiconosVector>(B->size(1), 0);
+siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
+                                     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
+    : _type(type), _B(B), _sensor(sensor) {
+  if (B) {
+    _u = std::make_shared<siconos::algebra::SiconosVector>(B->cols());
+    _u->setZero();
   }
 }
 
-Actuator::~Actuator()
-{
-}
-
-void Actuator::addSensorPtr(SP::ControlSensor newSensor)
-{
+void siconos::control::Actuator::addSensorPtr(std::shared_ptr<ControlSensor> newSensor) {
   _sensor = newSensor;
 }
 
-void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
-{
-  if(!_sensor)
-  {
-    THROW_EXCEPTION("Actuator::initialize - No Sensor given to the Actuator");
+void siconos::control::Actuator::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    const siconos::simulation::Simulation& s) {
+  if (!_sensor) {
+    THROW_EXCEPTION(
+        "siconos::control::Actuator::initialize - No Sensor given to the Actuator");
   }
 
   // Init the control variable and add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
-  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
-  if(_B)
-  {
+  auto& DSG0 = *nsds.topology()->dSG(0);
+  auto dsgVD = DSG0.descriptor(_sensor->getDS());
+  if (_B) {
     DSG0.B[dsgVD] = _B;
-  }
-  else if(!_plugingName.empty())
-  {
-    DSG0.pluginU[dsgVD].reset(new PluggedObject(_plugingName));
-    if(!_pluginJacgxName.empty())
-    {
-      DSG0.pluginJacgx[dsgVD].reset(new PluggedObject(_plugingName));
+  } else if (computeg_) {  // i.e. if setComputegFunction has been called ...
+    DSG0.pluginU[dsgVD] = computeg_;
+    if (computejacobiangOver_state_) {  // if setComputeJacobiangOver_stateFunction has been
+                                        // called ...
+      DSG0.pluginJacgx[dsgVD] = computejacobiangOver_state_;
     }
-    if(!_u)
-    {
-      THROW_EXCEPTION("Actuator::initialize - u should have already been initialized");
+    if (!_u) {
+      THROW_EXCEPTION(
+          "siconos::control::Actuator::initialize - u should have already been initialized");
     }
-  }
-  else
-  {
-    THROW_EXCEPTION("Actuator::initialize - neither the matrix B or the plugin g are not initialized");
+  } else {
+    THROW_EXCEPTION(
+        "siconos::control::Actuator::initialize - neither the matrix B nor the plugin g are "
+        "initialized");
   }
 
   DSG0.u[dsgVD] = _u;
 }
 
-void Actuator::setSizeu(unsigned size)
-{
-  if(_B && size != _B->size(1))
-  {
-
+void siconos::control::Actuator::setSizeu(siconos::algebra::Index size) {
+  if (_B && size != _B->cols()) {
   }
-  _u.reset(new SiconosVector(size, 0));
+  _u = std::make_shared<siconos::algebra::SiconosVector>(size);
+  _u->setZero();
 }
 
-SP::NonSmoothDynamicalSystem Actuator::getInternalNSDS() const
-{
-  return std::shared_ptr<NonSmoothDynamicalSystem>();
+std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
+siconos::control::Actuator::getInternalNSDS() const {
+  return std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>();
 }
 
-void Actuator::display() const
-{
-  std::cout << "=====> Actuator of type " << _type << ", named " << _id << std::endl;;
+void siconos::control::Actuator::setComputegFunction(
+    const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct) {
+  computeg_ = fct;
+  isRelationLinear_ = false;
+
+  // Note FP - It seems that this function might be used for computeU (saved in the graph
+  // during initialize) or through a build-in interaction, as in the CommonSMC actuator.
+}
+
+void siconos::control::Actuator::setComputeJacobiangOver_stateFunction(
+    const siconos::modeling::func_prototypes::FunctionBVSV_M& fct) {
+  computejacobiangOver_state_ = fct;
+  isRelationLinear_ = false;
+}
+
+void siconos::control::Actuator::display() const {
+  std::cout << "=====> Actuator of type " << siconos::tools::enum_to_string(_type)
+            << ", named " << _id << std::endl;
+  ;
   std::cout << "The associated Sensor is: " << std::endl;
-  if(_sensor)
-    _sensor->display();
-  std::cout << "======" <<std::endl;
+  if (_sensor) _sensor->display();
+  std::cout << "======" << std::endl;
   std::cout << "The value of the control is: " << std::endl;
-  _u->display();
-  std::cout <<std::endl;
+  siconos::algebra::print(*_u);
+  std::cout << std::endl;
 }

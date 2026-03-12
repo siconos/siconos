@@ -19,9 +19,11 @@
 #include <math.h>    // for fabs, sqrt, fmax, INFINITY
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
+#include <time.h>
 
 #include "CSparseMatrix.h"
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
+#include "fc3d_short_names.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "NumericsMatrix.h"                // for NM_gemv, NumericsMatrix
@@ -31,10 +33,15 @@
 #include "fc3d_Solvers.h"
 #include "float.h"          // for DBL_EPSILON
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
-#include "numerics_verbose.h"     // for numerics_printf_verbose
-#include "projectionOnCone.h"     // for projectionOnDualCone
+#include "gfc3d_ipm.h"
+#include "numerics_verbose.h"
+#include "projectionOnCone.h"  // for projectionOnDualCone
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -45,7 +52,10 @@
 #include "NumericsVector.h"
 #endif
 
-const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
+// Short name for solver ID
+#ifndef GFC3D_ADMM
+#define GFC3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
+#endif
 
 typedef struct {
   double* reaction_hat;
@@ -278,6 +288,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
                 double* restrict globalVelocity, int* restrict info,
                 SolverOptions* restrict options) {
   /* verbose=1; */
+
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   size_t nc = problem_original->numberOfContacts;
@@ -332,6 +343,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   /**************************************************************************/
 
   DEBUG_PRINT("Strategies for dealing with symmetry \n");
+
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
       SICONOS_FRICTION_3D_ADMM_SYMMETRIZE;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
@@ -437,7 +449,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   double norm_q = cblas_dnrm2(n, q, 1);
   problem->norm_q = norm_q;
@@ -927,6 +939,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       }
       // getchar();
     }
+
     *info = hasNotConverged;
   }
 
@@ -1006,4 +1019,44 @@ void gfc3d_admm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE] =
       SICONOS_FRICTION_3D_RESCALING_CONE_NO;
+  options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] =
+      SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_ADMM in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+static int gfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
+  gfc3d_admm_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int gfc3d_admm_solve_wrap(void* problem, double* reaction,
+                                 double* velocity, double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_ADMM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  return info;
+}
+
+static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER_3VAR(GFC3D_ADMM, "GFC3D_ADMM",
+                "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
+                gfc3d_admm_init_wrap,
+                gfc3d_admm_solve_wrap,
+                gfc3d_admm_free_wrap,
+                NULL,   /* error function */
+                gfc3d_admm_set_default,
+                20000,  /* default_max_iter */
+                1e-6,   /* default_tol */
+                0       /* is_local_solver */);

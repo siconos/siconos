@@ -14,51 +14,46 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LinearSensor.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SensorFactory.hpp"
-#include "SiconosVector.hpp"
+
 #include "DynamicalSystem.hpp"
-#include "TimeDiscretisation.hpp"
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+siconos::control::LinearSensor::LinearSensor(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
+    : ControlSensor(SensorType::Linear, ds) {}
 
+siconos::control::LinearSensor::LinearSensor(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> matC,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> matD)
+    : ControlSensor(SensorType::Linear, ds), _matC(matC), _matD(matD) {}
 
-LinearSensor::LinearSensor(SP::DynamicalSystem ds): ControlSensor(LINEAR_SENSOR, ds), _k(0), _nSteps(0)
-{}
-
-LinearSensor::LinearSensor(SP::DynamicalSystem ds, SP::SimpleMatrix matC, SP::SimpleMatrix matD):
-  ControlSensor(LINEAR_SENSOR, ds), _k(0), _matC(matC), _matD(matD), _nSteps(0)
-{}
-
-LinearSensor::~LinearSensor()
-{
-}
-
-void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
-{
+void siconos::control::LinearSensor::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds) {
   // Call initialize of base class
   ControlSensor::initialize(nsds);
 
   // consistency checks
-  if(!_matC)
-  {
+  if (!_matC) {
     THROW_EXCEPTION("LinearSensor::initialize - no C matrix was given");
   }
 
-  unsigned int colC = _matC->size(1);
-  unsigned int rowC = _matC->size(0);
+  auto colC = _matC->cols();
+  auto rowC = _matC->rows();
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
-  if(colC != _DS->n())
-  {
-    THROW_EXCEPTION(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
+  if (colC != _DS->dimension()) {
+    THROW_EXCEPTION(
+        " LinearSensor::initialize - The number of column of the C matrix must be equal to "
+        "the length of x");
   }
-  if(_matD)
-  {
-    unsigned int rowD = _matD->size(0);
-    if(rowC != rowD)
-    {
+  if (_matD) {
+    auto rowD = _matD->rows();
+    if (rowC != rowD) {
       THROW_EXCEPTION("C and D must have the same number of rows");
     }
   }
@@ -66,34 +61,26 @@ void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
   // --- Get the values ---
   // -> saved in a matrix data
   // -> event
-  _storedY.reset(new SiconosVector(rowC));
+  _storedY = std::make_shared<siconos::algebra::SiconosVector>(rowC);
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
-  *_storedY = prod(*_matC, *_DSx);
+  *_storedY = *_matC * *_DSx;
 }
 
-void LinearSensor::capture()
-{
-  *_storedY = prod(*_matC, *_DSx);
-  // untested
-  if(_matD)
-//    *_storedY += prod(*_matD, *_DS->z());
-    //  _dataPlot->setSubRow(_k, 1, _storedY);
-    _k++;
+void siconos::control::LinearSensor::capture() {
+  *_storedY = *_matC * *_DSx;
 
-  if(_delay > 0)
-  {
+  // untested
+  if (_matD) _k++;
+
+  if (_delay > 0) {
     _bufferY.push_back(_storedY);
   }
 }
-void  LinearSensor::setC(const SimpleMatrix& C)
-{
+void siconos::control::LinearSensor::setC(const siconos::algebra::SiconosMatrix& C) {
   *_matC = C;
 }
 
-void  LinearSensor::setD(const SimpleMatrix& D)
-{
+void siconos::control::LinearSensor::setD(const siconos::algebra::SiconosMatrix& D) {
   *_matD = D;
 }
-
-AUTO_REGISTER_SENSOR(LINEAR_SENSOR, LinearSensor)

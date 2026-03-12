@@ -23,6 +23,8 @@
 
 #include "JordanAlgebra.h"
 
+#include <stdlib.h>
+
 #include "NumericsVector.h"
 #include "math.h"
 

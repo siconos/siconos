@@ -14,83 +14,111 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file RigidBodyDS.hpp
   \brief Definition of an abstract 3D rigid body above NewtonEulerDS
 */
 
-
 #ifndef RigidBodyDS_h
 #define RigidBodyDS_h
 
-#include <MechanicsFwd.hpp>
-#include <NewtonEulerDS.hpp>
-#include <SiconosVisitor.hpp>
-#include <SiconosContactor.hpp>
+#include "NewtonEulerDS.hpp"
 
-class RigidBodyDS : public NewtonEulerDS,
-               public std::enable_shared_from_this<RigidBodyDS>
-{
-protected:
+namespace siconos::collision {
+class SiconosContactorSet;
+}
 
+namespace siconos::collision {
+
+class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
+                    public std::enable_shared_from_this<RigidBodyDS> {
+ protected:
   ACCEPT_SERIALIZATION(RigidBodyDS);
 
-  RigidBodyDS() : NewtonEulerDS() {};
+  std::shared_ptr<siconos::collision::SiconosContactorSet> _contactors{nullptr};
 
-  SP::SiconosContactorSet _contactors;
-  bool _useContactorInertia;
+  bool _useContactorInertia{true};
 
   /** If false, bodies connected to this body by a joint will not
    *  collide. See also NewtonEulerJointR::_allowSelfCollide */
   bool _allowSelfCollide = true;
 
+  std::shared_ptr<siconos::algebra::SiconosVector> _qExtrapolated{nullptr};
 
-  SP::SiconosVector _qExtrapolated;
+ public:
+  // /** constructor from initial state and velocity with memory alias
+  //  *
+  //  * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
+  //  * pointing directly to the memory provided by the argument.
+  //  *
+  //  * This means that for initial position and velocity
+  //  *  - ownership stays external
+  //  *  - modifications to the original vector are reflected inside the class
+  //  *
+  //  *  @param[in] position initial coordinates
+  //  *  @param[in] twist initial twist
+  //  *  @param[in] mass scalar mass value
+  //  *  @param[in] inertia matrix of inertia
+  //  *  @param tag Pass siconos::algebra::alias_t to select this overload
+  //  * (rather than copy version)
+  //  */
+  // RigidBodyDS(Eigen::Ref<siconos::algebra::SiconosVector7> position,
+  //             Eigen::Ref<siconos::algebra::SiconosVector6> twist, double mass,
+  //             Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia,
+  //             siconos::algebra::AliasTag);
+  /** constructor from initial state and velocity with copy
+   *
+   *  all attributes will be initialised (deep copy)
+   *  from the input vectors/matrices
+   *  @param[in] position initial coordinates
+   *  @param[in] twist initial twist
+   *  @param[in] mass scalar mass value
+   *  @param[in] inertia matrix of inertia
+   */
+  RigidBodyDS(const siconos::algebra::SiconosVector7& position,
+              const siconos::algebra::SiconosVector6& twist, double mass,
+              const siconos::algebra::SiconosMatrix33& inertia);
 
-public:
-
-  RigidBodyDS(SP::SiconosVector position,
-         SP::SiconosVector velocity,
-         double mass,
-         SP::SimpleMatrix inertia = SP::SimpleMatrix());
-
-  virtual ~RigidBodyDS();
+  virtual ~RigidBodyDS() noexcept = default;
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
-  bool useContactorInertia() { return _useContactorInertia; }
+  bool useContactorInertia() const { return _useContactorInertia; }
 
   /** Return the value of the _allowSelfCollide flag. */
-  bool allowSelfCollide() { return _allowSelfCollide; }
+  bool allowSelfCollide() const { return _allowSelfCollide; }
 
   /** Set the value of the _allowSelfCollide flag. */
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
   /** Access the contactor set associated with this body.
    *
-   *  \return A SP::SiconosContactorSet */
-  SP::SiconosContactorSet contactors() const { return _contactors; }
+   *  \return A std::shared_ptr<SiconosContactorSet> */
+  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const {
+    return _contactors;
+  }
 
   /** Provide a set of contactors to the body.
    *
-   *  \param c A SP::SiconosContactorSet */
-  void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
+   *  \param c A std::shared_ptr<SiconosContactorSet> */
+  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
+    _contactors = c;
+  }
 
   /** Make the base position of the contactors equal to the DS q vector.
    *
-   *  \return a SP::SiconosVector */
-  virtual SP::SiconosVector base_position() { return q(); }
+   *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
+  virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-
-  virtual SP::SiconosVector base_extrapolated_position(){return _qExtrapolated;};
+  virtual std::shared_ptr<siconos::algebra::SiconosVector> base_extrapolated_position() {
+    return _qExtrapolated;
+  };
   virtual void compute_extrapolated_position(double extrapolationCoefficient);
 
-
-
-
-
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-
+}  // namespace siconos::collision
 #endif /* RigidBodyDS_h */

@@ -1,0 +1,292 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "SiconosGraphTest.hpp"
+
+// test suite registration
+CPPUNIT_TEST_SUITE_REGISTRATION(SiconosGraphTest);
+
+void SiconosGraphTest::setUp() {}
+
+void SiconosGraphTest::tearDown() {}
+
+using G = siconos::graphs::SiconosGraph<std::string, int, boost::no_property,
+                                        boost::no_property, boost::no_property>;
+
+using AG = siconos::graphs::SiconosGraph<int, std::string, boost::no_property,
+                                         boost::no_property, boost::no_property>;
+
+// Default constructor
+void SiconosGraphTest::t1() {
+  G g;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+
+  CPPUNIT_ASSERT(g.size() == 2);
+
+  CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
+  CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
+}
+
+void SiconosGraphTest::t2() {
+  G g;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+
+  CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
+  CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
+
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd1))) == "hello");
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd2))) == "goodbye");
+}
+
+void SiconosGraphTest::t3() {
+  G g;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+
+  g.remove_vertex("hello");
+
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd2))) == "goodbye");
+  g.remove_vertex("goodbye");
+
+  CPPUNIT_ASSERT(g.size() == 0);
+
+  vd1 = g.add_vertex("one");
+  vd2 = g.add_vertex("two");
+
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd1))) == "one");
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd2))) == "two");
+
+  g.remove_vertex("two");
+  CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd1))) == "one");
+
+  g.remove_vertex("one");
+
+  CPPUNIT_ASSERT(g.size() == 0);
+}
+
+void SiconosGraphTest::t4() {
+  G g;
+  AG ag;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+
+  g.add_edge(vd1, vd2, 1, ag);
+  g.add_edge(vd1, vd2, 2, ag);
+  g.add_edge(vd1, vd3, 3, ag);
+
+  CPPUNIT_ASSERT(ag.size() == 3);
+  CPPUNIT_ASSERT(ag.bundle(ag.descriptor(1)) == 1);
+  CPPUNIT_ASSERT(ag.bundle(ag.descriptor(2)) == 2);
+  CPPUNIT_ASSERT(ag.bundle(ag.descriptor(3)) == 3);
+}
+
+template <class SicGraph, class AdjointSicGraph>
+struct num_inf {
+  num_inf(int n, SicGraph& sg, AdjointSicGraph& asg) : _n(n), _sg(sg), _asg(asg) {}
+  bool operator()(typename SicGraph::EDescriptor e) {
+    std::cout << _sg.bundle(e) << "<?" << _n << std::endl;
+    if ((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e))) {
+      CPPUNIT_ASSERT(_asg.bundle(_asg.descriptor(_sg.bundle(e))) == _sg.bundle(e));
+
+      std::cout << "removing adjoint vertex :" << _sg.bundle(e) << " <" << _n << std::endl;
+      _asg.remove_vertex(_sg.bundle(e));
+
+      CPPUNIT_ASSERT(!_asg.is_vertex(_sg.bundle(e)));
+      return true;
+    } else {
+      return (_sg.bundle(e) < _n);
+    }
+  }
+  int _n;
+  SicGraph& _sg;
+  AdjointSicGraph& _asg;
+};
+
+void SiconosGraphTest::t5() {
+  G g;
+  AG ag;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+
+  std::cout << "t5:g\n";
+
+  g.display();
+
+  std::cout << "----\n";
+
+  g.add_edge(vd1, vd2, 1, ag);
+  g.add_edge(vd1, vd2, 2, ag);
+  g.add_edge(vd1, vd3, 3, ag);
+
+  std::cout << "t5:g+edges\n";
+
+  g.display();
+
+  std::cout << "----\n";
+
+  ag.display();
+
+  CPPUNIT_ASSERT(g.edges_number() == 3);
+  CPPUNIT_ASSERT(ag.size() == 3);
+
+  g.remove_out_edge_if(vd1, num_inf<G, AG>(3, g, ag));
+
+  std::cout << "t5:g+remove_edge_if\n";
+  g.display();
+  std::cout << "----\n";
+  std::cout << "t5:ag+remove_edge_if\n";
+  ag.display();
+  std::cout << "----\n";
+
+  std::cout << g.edges_number() << std::endl;
+  CPPUNIT_ASSERT(ag.size() == g.edges_number());
+
+  CPPUNIT_ASSERT(g.edges_number() == 1);
+
+  CPPUNIT_ASSERT(ag.size() == 1);
+}
+
+void SiconosGraphTest::t6() {
+  G g;
+  AG ag;
+
+  auto vd1 = g.add_vertex("hello");
+
+  std::cout << "t6:g\n";
+
+  g.display();
+
+  std::cout << "---\n";
+
+  g.add_edge(vd1, vd1, 2, ag);
+  g.add_edge(vd1, vd1, 3, ag);
+  g.add_edge(vd1, vd1, 4, ag);
+  g.add_edge(vd1, vd1, 5, ag);
+  g.add_edge(vd1, vd1, 6, ag);
+  g.add_edge(vd1, vd1, 7, ag);
+  g.add_edge(vd1, vd1, 8, ag);
+  g.add_edge(vd1, vd1, 9, ag);
+  g.add_edge(vd1, vd1, 10, ag);
+  g.add_edge(vd1, vd1, 11, ag);
+
+  std::cout << "t6:add_edges\n";
+
+  g.display();
+
+  std::cout << "---\n";
+
+  ag.display();
+
+  std::cout << "---\n";
+
+  CPPUNIT_ASSERT(ag.size() == g.edges_number());
+  CPPUNIT_ASSERT(ag.size() == 10);
+  //  CPPUNIT_ASSERT(ag.edges_number() == 1);
+
+  AG::EIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi) {
+    std::string& str = ag.bundle(*dsi);
+    std::cout << "t6:found edge " << str << std::endl;
+  }
+
+  g.remove_out_edge_if(vd1, num_inf<G, AG>(10, g, ag));
+
+  std::cout << "t6:remove_out_edge_if < 10\n";
+
+  g.display();
+
+  std::cout << "---\n";
+
+  ag.display();
+
+  std::cout << "---\n";
+
+  CPPUNIT_ASSERT(ag.size() == g.edges_number());
+
+  g.remove_out_edge_if(vd1, num_inf<G, AG>(3, g, ag));
+
+  CPPUNIT_ASSERT(ag.size() == g.edges_number());
+}
+
+void SiconosGraphTest::t7() {
+  G g;
+  AG ag;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+  auto vd4 = g.add_vertex("one");
+  auto vd5 = g.add_vertex("two");
+  auto vd6 = g.add_vertex("three");
+
+  g.add_edge(vd1, vd2, 1, ag);
+  g.add_edge(vd2, vd3, 2, ag);
+  g.add_edge(vd3, vd4, 3, ag);
+  g.add_edge(vd4, vd5, 4, ag);
+  g.add_edge(vd5, vd6, 5, ag);
+  g.add_edge(vd1, vd5, 100, ag);
+  g.add_edge(vd2, vd6, 200, ag);
+  g.add_edge(vd3, vd5, 300, ag);
+
+#ifndef NDEBUG
+  CPPUNIT_ASSERT(g.state_assert());
+#endif
+
+  std::cout << "g:\n";
+  g.display();
+
+  std::cout << "ag:\n";
+  ag.display();
+
+  AG::AVIterator ui, uiend;
+  std::cout << "adjacent to 100:\n";
+  int tot = 0, k = 1;
+  for (std::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend;
+       ++ui, k *= 10) {
+    std::cout << "yo " << ag.bundle(*ui) << std::endl;
+    tot += k * ag.bundle(*ui);
+  }
+
+  CPPUNIT_ASSERT(tot == 300541);
+}
+
+void SiconosGraphTest::t8() {
+  G g;
+
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+  auto vd4 = g.add_vertex("one");
+  auto vd5 = g.add_vertex("two");
+  auto vd6 = g.add_vertex("three");
+
+  CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
+  CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
+  CPPUNIT_ASSERT(g.bundle(vd3) == "bye");
+  CPPUNIT_ASSERT(g.bundle(vd4) == "one");
+  CPPUNIT_ASSERT(g.bundle(vd5) == "two");
+  CPPUNIT_ASSERT(g.bundle(vd6) == "three");
+}

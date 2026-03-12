@@ -29,22 +29,17 @@
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-#include "numerics_verbose.h"                    // for numerics_printf_verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF
-
-const char* const SICONOS_VI_EG_STR = "VI_EG";
-const char* const SICONOS_VI_FPP_STR = "VI_FPP";
-const char* const SICONOS_VI_HP_STR = "VI_HP";
-const char* const SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
-const char* const SICONOS_VI_BOX_AVI_LSA_STR =
-    "Box VI solver based on the Newton-Josephy method";
-const char* const SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
 
 int variationalInequality_driver(VariationalInequality* problem, double* x, double* w,
                                  SolverOptions* options) {
-  if (options == NULL)
-    numerics_error("variationalInequality_driver",
-                   "null input for solver and/or global options");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(x);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
 
   assert(options->isSet);
   if (verbose > 0) solver_options_print(options);
@@ -101,8 +96,7 @@ int variationalInequality_driver(VariationalInequality* problem, double* x, doub
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, variationalInequality_driver failed. Unknown solver.\n");
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, variationalInequality_driver failed. Unknown solver.\n");
     }
   }
 

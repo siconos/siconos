@@ -65,7 +65,7 @@ int gmp_test_function(TestCase* current) {
   printf("GMP TEST: Nb GS it=%i\n", current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   free(reaction);
   free(velocity);
-  genericMechanicalProblem_free(problem, NUMERICS_GMP_FREE_MATRIX);
+  genericMechanicalProblem_free(problem, GMP_FREE_MATRIX);
   free(problem);
   return info;
 }

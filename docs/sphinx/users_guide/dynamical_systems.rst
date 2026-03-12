@@ -47,7 +47,7 @@ The aim of this class is to provide some members and functions for all dynamical
 
 Each system is identified thanks to a number and the current state of the system is saved as a vector :func:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
 
-All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :func:`DynamicalSystem::jacobianRhsx` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
+All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :func:`DynamicalSystem::jacobianRhsOver_x` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
 
 The common rules for all members are, 'name' being the required variable:
 
@@ -67,7 +67,7 @@ For instance, if you want to use the internal forces operators in Lagrangian sys
 First case::
 
   // we suppose that ds is an existing pointer to a LagrangianDS
-  SP::SiconosMatrix myF(new SimpleVector(3));
+  auto myF = std::make_shared<siconos::algebra::SimpleVector>(3);
   // fill my G in ...		
   ds->setFInt(*myF); // copy myF values into fInt
   // OR
@@ -80,7 +80,7 @@ Second case::
   // and that myFunction is a c function implemented in myPlugin.cpp
   ds->setComputeFInt("myPlugin", "myFunction");
   // ...
-  ds->computeFInt(time); 
+  ds->computeFint(qdot, q, time); 
   // compute fInt value at time for the current state
 
 Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
@@ -95,7 +95,7 @@ The following functions are (and must) be present in any class derived from Dyna
 
 * :func:`DynamicalSystem::icomputeRhs()`
 
-* :func:`DynamicalSystem::computeJacobianRhsx()`
+* :func:`DynamicalSystem::computeJacobianRhsOver_x()`
   
 * :func:`DynamicalSystem::initializeNonSmoothInput()`
 
@@ -178,20 +178,6 @@ And we have:
    
    rhs &= M^{-1}(A(t,z)x(t)+b(t,z)) \\
    \nabla_x rhs&= M^{-1}(A(t,z)
-
-Linear and time-invariant
-"""""""""""""""""""""""""
-
- class FirstOrderLinearTIDS
-
-Derived from FirstOrderLinearDS, described by the set of n equations and initial conditions: 
-
-.. math::
-   
-   \dot x(t) &= Ax(t)+ b + r \\
-   x(t_0)&=x_0 
-
-Same as for FirstOrderLinearDS but with A and b constant (ie no plug-in).
 
 Second order (Lagrangian) systems
 ---------------------------------

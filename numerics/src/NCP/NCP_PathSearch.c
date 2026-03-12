@@ -28,6 +28,7 @@
 #include "LCP_Solvers.h"                      // for lcp_compute_error, lcp_...
 #include "LinearComplementarityProblem.h"     // for LinearComplementarityPr...
 #include "NCP_Solvers.h"                      // for ncp_compute_error, ncp_...
+#include "NCP_cst.h"
 #include "NMS.h"                              // for NMS_data, NMS, NMS_best...
 #include "NSSTools.h"                         // for pos_part
 #include "Newton_methods.h"                   // for functions_LSA, init_lsa...
@@ -46,6 +47,9 @@
 #include "sanitizer.h"                        // for cblas_dcopy_msan
 #include "siconos_debug.h"                    // for DEBUG_PRINT, DEBUG_PRINTF
 
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /** update the lcp subproblem: M, q and r
  * \param problem the NCP problem to solve
  * \param lcp_subproblem the lcp problem to fill
@@ -435,3 +439,37 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     ncp_pathsearch_free(options);
   }
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers NCP_PATHSEARCH in the global solver registry.
+ */
+
+static void ncp_pathsearch_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int ncp_pathsearch_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int ncp_pathsearch_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
+  ncp_pathsearch(ncp, z, w, &info, options);
+  return info;
+}
+
+static void ncp_pathsearch_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_NCP_PATHSEARCH, "NCP_PATHSEARCH",
+                       "Path search solver for Nonlinear Complementarity Problems",
+                       ncp_pathsearch_init_wrap, ncp_pathsearch_solve_wrap, ncp_pathsearch_free_wrap, NULL,
+                       ncp_pathsearch_set_default, 1000, 1e-4, 0);

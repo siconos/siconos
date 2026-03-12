@@ -23,6 +23,7 @@
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem
 #include "SiconosBlas.h"                  // for cblas_dnrm2
 #include "numerics_verbose.h"             // for numerics_error
+#include "numerics_errors.h"
 
 int mcp_compute_error(MixedComplementarityProblem *problem, double *z, double *w,
                       double *error) {

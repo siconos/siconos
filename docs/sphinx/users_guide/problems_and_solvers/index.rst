@@ -34,15 +34,15 @@ The simplest way to create and use a solver is to select the corresponding id (c
 
    // -- C++ API --
    // use solver id as a parameter for the one-step nonsmooth problem constructor
-   SP::OneStepNSProblem problem(new LCP(SICONOS_LCP_LEMKE));
+   auto problem = std::make_shared<siconos::nonsmooth_formulations::LCP>(SICONOS_LCP_LEMKE);
    // get options :
-   SP::SolverOptions options = problem->numericsSolverOptions() 
+   auto options = problem->numericsSolverOptions() 
 
 
 .. code-block:: python
 
    // -- Python API --
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    lcp = sk.LCP(sk.SICONOS_LCP_LEMKE)
    
 **Numerics (low-level) interface:**
@@ -57,7 +57,7 @@ The simplest way to create and use a solver is to select the corresponding id (c
 
    // -- Python API --
    import siconos.numerics as sn
-   options = sn.SolverOptions(sn.SICONOS_LCP_LEMKE)
+   options = sn.SolverOptions(sn.solver_ids.SICONOS_LCP_LEMKE)
 
 In any case, the id is the only required input. All the other parameters have default values.
 
@@ -82,9 +82,9 @@ e.g.:
 .. code-block:: python
 
    // -- Python API --
-   options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-12;
-   options.update_internal(0, sn.SICONOS_FRICTION_3D_NSN_AC);
-   options.internalSolvers[0].iparam[sn.SICONOS_IPARAM_MAX_ITER] = 1000
+   options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-12;
+   options.update_internal(0, sn.solver_ids.SICONOS_FRICTION_3D_NSN_AC);
+   options.internalSolvers[0].iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 1000
 
 
 
@@ -135,7 +135,7 @@ Solve a problem
 
    // -- Python API --
    import siconos.numerics as sn
-   options = sn.SolverOptions(sn.SICONOS_LCP_LEMKE)
+   options = sn.SolverOptions(sn.solver_ids.SICONOS_LCP_LEMKE)
    // ...
    sn.lcp_lexicolemke(problem, z, w, info, options)
    

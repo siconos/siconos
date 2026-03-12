@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_utils.h"
 #include "gfc3d_Solvers.h"

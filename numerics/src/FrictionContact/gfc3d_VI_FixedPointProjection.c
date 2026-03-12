@@ -22,6 +22,7 @@
 
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
+#include "gfc3d_Solvers.h"
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
 #include "SiconosBlas.h"                         // for cblas_dnrm2
@@ -30,8 +31,13 @@
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "gfc3d_Solvers.h"                       // for gfc3d_VI_FixedPointP...
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
-#include "numerics_verbose.h"                    // for verbose
+#include "fc3d_short_names.h"                    // for GFC3D_VI_FPP
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_BEGIN
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -134,3 +140,48 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
 
   DEBUG_END("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n")
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers GFC3D_VI_FPP in the global solver registry, enabling:
+ * - Dynamic solver lookup by ID
+ * - Runtime solver introspection
+ * - Elimination of giant switch statements in drivers
+ */
+
+void gfc3d_vi_fpp_set_default(SolverOptions* options) {
+  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper initialization */
+  variationalInequality_FixedPointProjection_set_default(options);
+}
+
+static int gfc3d_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_vi_fpp_solve_wrap(void* problem, double* reaction,
+                                   double* velocity, double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_VI_FixedPointProjection((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  return info;
+}
+
+static void gfc3d_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER_3VAR(GFC3D_VI_FPP, "GFC3D_VI_FPP",
+                "Variational Inequality Fixed Point Projection for 3D Global Friction Contact",
+                gfc3d_vi_fpp_init_wrap,
+                gfc3d_vi_fpp_solve_wrap,
+                gfc3d_vi_fpp_free_wrap,
+                NULL,  /* error function */
+                gfc3d_vi_fpp_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-4,  /* default_tol */
+                0      /* is_local_solver */);

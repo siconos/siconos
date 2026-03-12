@@ -40,7 +40,7 @@ For example, start a jupyter container including siconos, all running examples a
 .. code-block:: bash
 
 
-   docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
+   docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main
 
    # Then, access in your browser at http://localhost:8888/...
    # The exact address will be printed on your screen as a result of the command above.
@@ -67,7 +67,7 @@ There are two ways to use Siconos
   and then run siconos to build and execute your program.
 * As a Python package.
 
-Python API is generated (swig) from C++ and thus both API are quite equivalent although C++ might be more complete. 
+Python API is generated (pybind11) from C++ and thus both API are quite equivalent although C++ might be more complete. 
  
 Anyway, for new users we recommend the Python API which is easier to understand.
 
@@ -79,7 +79,7 @@ system (See :class:`FirstOrderLinearDS`).
 .. code-block:: python
 
    # import siconos package
-   import siconos.kernel as sk
+   import siconos.modeling as sm
    # import numpy package
    import numpy as np
 
@@ -99,11 +99,11 @@ Write a c++ file, e.g. run.cpp
    int main()
    {
     unsigned int size = 10;
-    SP::SiconosVector x0(new SiconosVector(size));
-    SP::SimpleMatrix A(new SimpleMatrix(size, size));
+    auto x0 = std::make_shared<siconos::algebra::SiconosVector>(size);
+    auto A = std::make_shared<(siconos::algebra::SimpleMatrix>(size, size);
     A->randomize();
 
-    SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(x0, A));
+    auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS(x0, A);
     ds->display();
    }
 

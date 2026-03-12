@@ -45,11 +45,11 @@ def parse_cmake_list(var):
     if isinstance(var, list):
         return var
     if var != "":
-        res = list(set(var.split(';')))
+        res = list(set(var.split(";")))
         # list/set stuff to avoid duplicates
         # remove empty strings to avoid '-I -I' things leading to bugs
-        if res.count(''):
-            res.remove('')
+        if res.count(""):
+            res.remove("")
         return res
 
     return []

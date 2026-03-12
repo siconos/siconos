@@ -26,7 +26,8 @@
 #include "SiconosLapack.h"    // for DGESV, lapack_int
 #include "SolverOptions.h"
 #include "math.h"              // for fabs, pow
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
 #include "stdlib.h"            // for exit, rand, EXIT_FAILURE
 static int sN;
@@ -377,7 +378,7 @@ int nonSmoothNewtonNeigh_getNbDWork(int n, int m) { return (11 + 2 * (n + m)) * 
 double *nonSmoothNewtonNeighInitMemory(int n, double *dWork, int *iWork) {
   if (dWork == NULL || iWork == NULL) {
     fprintf(stderr, "nonSmoothNewtonNeighInitMemory, memory allocation failed.\n");
-    exit(EXIT_FAILURE);
+    return NULL;
   }
   sN = n;
   sN2 = n * n;

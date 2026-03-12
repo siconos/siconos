@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file OccBody.hpp
     \brief A Siconos Newton Euler dynamical system with
     associated contact shapes
@@ -23,54 +23,81 @@
 #ifndef OccBody_hpp
 #define OccBody_hpp
 
-#include "MechanicsFwd.hpp"
+#include <TopoDS_Shape.hxx>
+#include <optional>
 
-#include "SiconosFwd.hpp"
-#include "NewtonEulerDS.hpp"
+#include "NewtonEulerDS.hpp"  // Base class
+#include "OccContactShape.hpp"
 
-class OccBody : public NewtonEulerDS
-{
-public:
-  //  Note: with c++11 =>
-  //  using NewtonEulerDS::NewtonEulerDS;
+// From OpenCASCADE
+class TopoDS_Shape;
 
+namespace siconos::mechanics::occ {
 
-  /* Default constructor.
+// class OccContactShape;
+
+class OccBody : public siconos::modeling::NewtonEulerDS {
+ private:
+  using OffSet = std::array<double, 7>;
+  using ContactShape_vector = std::vector<std::tuple<OccContactShapeV&, OffSet, int>>;
+  using TopoDS_Shape_vector = std::vector<std::tuple<std::shared_ptr<TopoDS_Shape>, OffSet>>;
+
+  /** Vector of shapes. Each element is a tuple with:
+      - the shape (a variant indeed, might be edge or face)
+      - its offset
+      - an id to identify the group of the shape
    */
-  OccBody() : NewtonEulerDS() {};
+  std::shared_ptr<ContactShape_vector> _contactShapes{nullptr};
 
+  /** Vector of TopoDS_Shape. Each element is a tuple with:
+      - a pointer to a TopoDS_Shape
+      - its offset
+  */
+  std::shared_ptr<TopoDS_Shape_vector> _shapes{nullptr};
 
-  //! Constructor from a minimum set of data.
-  //  \param position initial coordinates of this DynamicalSystem.
-  //  \param velocity initial velocity of this DynamicalSystem.
-  //  \param mass the mass.
-  //  \param inertia the inertia matrix.
-  //
-  OccBody(SP::SiconosVector position,
-          SP::SiconosVector velocity,
-          double mass ,
-          SP::SiconosMatrix inertia);
+ public:
+  virtual ~OccBody() noexcept = default;
+
+  /** Constructor from a minimum set of data.
+
+      \param position initial coordinates of this DynamicalSystem.
+      \param velocity initial velocity of this DynamicalSystem.
+      \param mass the mass.
+      \param inertia the inertia matrix.
+  */
+  OccBody(Eigen::Ref<siconos::algebra::SiconosVector> position,
+          Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+          Eigen::Ref<siconos::algebra::SiconosMatrix> inertia);
 
   /** Association of a contact shape.
-   * \param shape the contact shape.
-   * \param position relative position (x, y, z).
-   * \param orientation relative orientation quaternion w, x, y, z
-   * \param group contact group default 0
-   */
-  void addContactShape(SP::OccContactShape shape,
-                       SP::SiconosVector position = SP::SiconosVector(),
-                       SP::SiconosVector orientation = SP::SiconosVector(),
-                       unsigned int group=0);
 
+      \param shape the contact shape.
+      \param position relative position (x, y, z).
+      \param orientation relative orientation quaternion w, x, y, z
+      \param group contact group default 0
+  */
+  void addContactShape(
+      OccContactShapeV& shape,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
+          std::nullopt,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
+          std::nullopt,
+      int group = 0);
 
   /** Association of a shape without contact.
-   * \param shape the shape
-   * \param position relative position (x, y, z).
-   * \param orientation relative orientation quaternion w, x, y, z
-   */
-  void addShape(SP::TopoDS_Shape shape,
-                SP::SiconosVector position = SP::SiconosVector(),
-                SP::SiconosVector orientation = SP::SiconosVector());
+
+      \param shape the shape
+      \param position relative position (x, y, z).
+      \param orientation relative orientation quaternion w, x, y, z
+  */
+  void addShape(
+      OccContactShape& shape,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
+          std::nullopt,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
+          std::nullopt);
+
+
 
   /** Update positions and orientations of contact shapes.
    */
@@ -80,23 +107,20 @@ public:
    */
   void updateShapes();
 
-  /** Get an associated contact shape by its rank of association.
+  /** \return an associated contact shape (variant!) by its rank of association.
    *  \param id the number of the shape.
    */
-  const OccContactShape& contactShape(unsigned int id) const;
+  const OccContactShapeV& contactShape(int id) const;
 
-  /** Get an associated shape by its rank of association.
+  /** \return an associated shape by its rank of association.
    *  \param id the number of the shape.
    */
-  const TopoDS_Shape& shape(unsigned int id) const;
+  const TopoDS_Shape& shape(int id) const;
 
-  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
-
-protected:
-  SP::ContactShapes _contactShapes;
-  SP::TopoDS_Shapes _shapes;
-
-  ACCEPT_SERIALIZATION(OccBody);
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+}  // namespace siconos::mechanics::occ
 
 #endif

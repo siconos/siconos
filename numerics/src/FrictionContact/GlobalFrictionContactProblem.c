@@ -17,10 +17,10 @@
  */
 #include "GlobalFrictionContactProblem.h"
 
-#include <assert.h>     // for assert
-#include <stdlib.h>     // for free, malloc, exit, EXIT_FAILURE
-#include <string.h>     // for memcpy
-#include <sys/errno.h>  // for errno
+#include <assert.h>  // for assert
+#include <errno.h>   // for errno
+#include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
+#include <string.h>  // for memcpy
 
 #include "FrictionContactProblem.h"
 #include "NumericsMatrix.h"        // for NumericsMatrix, NM_display, NM_clear
@@ -28,14 +28,15 @@
 #include "SiconosBlas.h"           // for cblas_dscal, cblas_dcopy
 #include "SparseBlockMatrix.h"     // for SBM_gemv, SBM_free
 #include "io_tools.h"
-#include "numerics_verbose.h"  // for CHECK_IO
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 #include "sanitizer.h"         // for cblas_dcopy_msan
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
 #endif
 
-//#define OUTPUT_DEBUG 1
+// #define OUTPUT_DEBUG 1
 #ifdef OUTPUT_DEBUG
 #include "NumericsVector.h"
 #endif
@@ -49,6 +50,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void) {
   problem->mu = NULL;
   problem->M_inverse = NULL;
   problem->env = NULL;
+  problem->name = NULL;
   problem->numberOfContacts = 0;
   problem->dimension = 0;
   return problem;
@@ -56,9 +58,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void) {
 
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr,
-            "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -86,10 +86,9 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FIL
 GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file) {
   GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();
   int nc = 0, d = 0;
-  int info = 0;
-  CHECK_IO(fscanf(file, "%d\n", &d), &info);
+  int info = check_io(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  CHECK_IO(fscanf(file, "%d\n", &nc), &info);
+  info = check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
@@ -97,19 +96,19 @@ GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file) {
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (int i = 0; i < problem->M->size1; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
   problem->b = (double*)malloc(problem->H->size1 * sizeof(double));
   for (int i = 0; i < problem->H->size1; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->b[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
   for (int i = 0; i < nc; ++i) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])), &info);
+    info = check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
 
-  if (info) {
+  if (!info) {
     problem = NULL;
   }
   return problem;
@@ -237,7 +236,7 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem) {
 
 GlobalFrictionContactProblem* globalFrictionContact_copy(
     GlobalFrictionContactProblem* problem) {
-  assert(problem);
+  if (!problem) return NULL;
 
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
@@ -258,6 +257,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   if (problem->M_inverse) {
     NM_copy(problem->M_inverse, new->M_inverse);
   }
+  if (problem->name) new->name = problem->name;
   new->env = NULL;
   return new;
 }
@@ -356,7 +356,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     // Compute W <-  H^T M^1 H
 
     assert(H->matrix0);
-    assert(Htmp);
+    if (!Htmp) return NULL;
     assert(Wnum->matrix0);
 
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n,
@@ -459,18 +459,40 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
 
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
+
     NumericsMatrix* Minv;
     if (problem->M_inverse) {
       numerics_printf_verbose(1, "use the given inverse of the matrix M ...");
       Minv = problem->M_inverse;
     } else {
-      numerics_printf_verbose(1, "inversion of the matrix M ...");
-      Minv = NM_LU_inv(M);
+      unsigned int block_number;
+      unsigned int* blocksizes = NULL;
+      int is_diagonal_block_matrix =
+          NM_is_diagonal_block_matrix(problem->M, &block_number, &blocksizes);
+
+      if (is_diagonal_block_matrix) {
+        numerics_printf_verbose(1, "the matrix is block diagonal\n");
+        numerics_printf_verbose(1, "block_number = %i\n", block_number);
+        /* for (unsigned int k = 0; k < block_number; k++) */
+        /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
+        block_number = M->size0 / 3;
+        for (unsigned int k = 0; k < block_number; k++) blocksizes[k] = 3;
+        Minv = NM_inverse_diagonal_block_matrix(M, block_number, blocksizes);
+        free(blocksizes);
+        blocksizes = NULL;
+      } else {
+        numerics_printf_verbose(1, "the matrix is not block diagonal\n");
+        numerics_printf_verbose(1, "inversion of the matrix M ...");
+        Minv = NM_LU_inv(M);
+      }
     }
     DEBUG_EXPR(NM_display(Minv););
-
+    // printf("\nNSGS: M = \n"); NM_display(problem->M);
+    // printf("\nNSGS: H = \n"); NM_display(problem->H);
+    // printf("\nNSGS: Minv = \n"); NM_display(Minv);
     numerics_printf_verbose(1, "multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv, H);
+
     DEBUG_EXPR(NM_display(MinvH););
 
     // Product H^T M^-1 H

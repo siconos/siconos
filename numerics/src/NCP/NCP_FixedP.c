@@ -22,7 +22,8 @@
 #include "SiconosBlas.h"  // for cblas_dnrm2
 #include "SolverOptions.h"
 #include "fc3d_2NCP_Glocker.h"  // for compute_Z_GlockerFixedP
-#include "numerics_verbose.h"   // for verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "stdio.h"              // for printf
 
 /*============================ Fixed point Solver ==================================*/

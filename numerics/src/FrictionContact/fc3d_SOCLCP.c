@@ -29,9 +29,14 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SiconosBlas.h"                                  // for cblas_dnrm2
 #include "SolverOptions.h"                                // for SolverOptions
-#include "fc3d_Solvers.h"                                 // for fc3d_SOCLCP
+#include "fc3d_Solvers.h"
+#include "fc3d_short_names.h"                                 // for fc3d_SOCLCP
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
-#include "numerics_verbose.h"                             // for verbose
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem *,
@@ -114,3 +119,34 @@ void fc3d_SOCLCP(FrictionContactProblem *problem, double *reaction, double *velo
   dparam[SICONOS_DPARAM_RESIDU] = error;
   dparam[2] = fabs(real_error - error);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_soclcp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_SOCLCP((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_soclcp_set_default(SolverOptions* options) {
+  /* Set up internal solver for SOCLCP NSGS */
+  options->numberOfInternalSolvers = 1;
+  options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
+}
+
+REGISTER_SOLVER(FC3D_SOCLCP,
+                             "FC3D_SOCLCP",
+                             "Second Order Cone LCP for 3D Friction Contact",
+                             NULL,   /* init_wrap */
+                             fc3d_soclcp_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_soclcp_set_default,
+                             1000,   /* default_max_iter */
+                             1e-4,   /* default_tol */
+                             0)      /* is_local_solver */

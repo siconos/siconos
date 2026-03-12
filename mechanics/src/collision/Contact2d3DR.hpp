@@ -14,54 +14,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef Contact2d3DR_hpp
 #define Contact2d3DR_hpp
 
-#include "MechanicsFwd.hpp"
-#include "SiconosVector.hpp"
 #include "Lagrangian2d3DR.hpp"
 
-class Contact2d3DR : public Lagrangian2d3DR
-{
-private:
+namespace siconos::collision {
+class BodyShapeRecord;
 
+class Contact2d3DR : public siconos::modeling::Lagrangian2d3DR {
+ private:
   ACCEPT_SERIALIZATION(Contact2d3DR);
 
-public:
-  Contact2d3DR();
-  virtual ~Contact2d3DR() = default;
-
+ public:
+  virtual ~Contact2d3DR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
-  SP::BodyShapeRecord bodyShapeRecordA;
-  SP::BodyShapeRecord bodyShapeRecordB;
-
-
-  // /** to compute the output y = h(q,z) of the Relation
-  //     \param q coordinates of the dynamical systems involved in the relation
-  //     \param z user defined parameters (optional)
-  //     \param y the resulting vector
-  // */
-  // virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordA{nullptr};
+  std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordB{nullptr};
 
   /** Update this contact point information.
-   * 
+   *
    *  \param pos1 Position on ds1 in ds1 frame.
    *  \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
    *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  // virtual void updateContactPoints(const SiconosVector& pos1,
-  //                                  const SiconosVector& pos2,
-  //                                  const SiconosVector& normal);
-  virtual void updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
-                                   const SiconosVector& pos2,
-                                   const SiconosVector& normal);
+  virtual void updateContactPointsInAbsoluteFrame(
+      const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
+      const siconos::algebra::SiconosVector& normal);
 
   virtual void preDelete() {}
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
 
-  ACCEPT_STD_VISITORS();
 };
-
+}  // namespace siconos::collision
 #endif

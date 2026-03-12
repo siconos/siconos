@@ -19,16 +19,14 @@
 #include "myExtrema_FuncExtSS.hxx"
 
 #include <Adaptor3d_Surface.hxx>
-#include <Extrema_POnSurf.hxx>
 #include <Standard_TypeMismatch.hxx>
-#include <gp_Vec.hxx>
 #include <math_Matrix.hxx>
-#include <math_Vector.hxx>
 
 #include "ace.h"
+#include "mymath_FunctionSetRoot.hxx"
+
 /*----------------------------------------------------------------------------
  Si on note Du1s et Dv1s, les derivees en u1 et v1, les 2 fonctions a annuler sont:
- Si on note Du2s et Dv2s, les derivees en u2 et v2, les 2 fonctions a annuler sont:
 
  { F1(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Du1s1(u1,v1) }
  { F2(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Dv1s1(u1,v1) }
@@ -66,7 +64,7 @@
 // purpose  :
 //=======================================================================
 
-myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
+siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
   myS1init = Standard_False;
   myS2init = Standard_False;
 }
@@ -76,8 +74,8 @@ myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
 // purpose  :
 //=======================================================================
 
-myExtrema_FuncExtSS::myExtrema_FuncExtSS(const Adaptor3d_Surface& S1,
-                                         const Adaptor3d_Surface& S2) {
+siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(const Adaptor3d_Surface& S1,
+                                                              const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -89,8 +87,8 @@ myExtrema_FuncExtSS::myExtrema_FuncExtSS(const Adaptor3d_Surface& S1,
 // purpose  :
 //=======================================================================
 
-void myExtrema_FuncExtSS::Initialize(const Adaptor3d_Surface& S1,
-                                     const Adaptor3d_Surface& S2) {
+void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(const Adaptor3d_Surface& S1,
+                                                          const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -105,21 +103,22 @@ void myExtrema_FuncExtSS::Initialize(const Adaptor3d_Surface& S1,
 // purpose  :
 //=======================================================================
 
-Standard_Integer myExtrema_FuncExtSS::NbVariables() const { return 4; }
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbVariables() const { return 4; }
 
 //=======================================================================
 // function : NbEquations
 // purpose  :
 //=======================================================================
 
-Standard_Integer myExtrema_FuncExtSS::NbEquations() const { return 4; }
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbEquations() const { return 4; }
 
 //=======================================================================
 // function : Value
 // purpose  :
 //=======================================================================
 
-Standard_Boolean myExtrema_FuncExtSS::Value(const math_Vector& UV, math_Vector& F) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(const math_Vector& UV,
+                                                                 math_Vector& F) {
   ACE_times[ACE_TIMER_CAD_VALUE].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -146,7 +145,8 @@ Standard_Boolean myExtrema_FuncExtSS::Value(const math_Vector& UV, math_Vector& 
 // purpose  :
 //=======================================================================
 
-Standard_Boolean myExtrema_FuncExtSS::Derivatives(const math_Vector& UV, math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(const math_Vector& UV,
+                                                                       math_Matrix& Df) {
   math_Vector F(1, 4);
   return Values(UV, F, Df);
 }
@@ -156,8 +156,9 @@ Standard_Boolean myExtrema_FuncExtSS::Derivatives(const math_Vector& UV, math_Ma
 // purpose  :
 //=======================================================================
 
-Standard_Boolean myExtrema_FuncExtSS::Values(const math_Vector& UV, math_Vector& F,
-                                             math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Values(const math_Vector& UV,
+                                                                  math_Vector& F,
+                                                                  math_Matrix& Df) {
   ACE_times[ACE_TIMER_CAD_VALUES].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -204,7 +205,7 @@ Standard_Boolean myExtrema_FuncExtSS::Values(const math_Vector& UV, math_Vector&
 // purpose  :
 //=======================================================================
 
-Standard_Integer myExtrema_FuncExtSS::GetStateNumber() {
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::GetStateNumber() {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
 #if 0
   math_Vector Sol(1, 4), UVSol(1, 4);
@@ -224,14 +225,16 @@ Standard_Integer myExtrema_FuncExtSS::GetStateNumber() {
 // purpose  :
 //=======================================================================
 
-Standard_Integer myExtrema_FuncExtSS::NbExt() const { return myValue.Length(); }
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbExt() const {
+  return myValue.Length();
+}
 
 //=======================================================================
 // function : Value
 // purpose  :
 //=======================================================================
 
-Standard_Real myExtrema_FuncExtSS::Value(const Standard_Integer N) const {
+Standard_Real siconos::mechanisms::myExtrema_FuncExtSS::Value(const Standard_Integer N) const {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   return myValue.Value(N);
 }
@@ -241,7 +244,8 @@ Standard_Real myExtrema_FuncExtSS::Value(const Standard_Integer N) const {
 // purpose  :
 //=======================================================================
 
-Extrema_POnSurf myExtrema_FuncExtSS::PointOnS1(const Standard_Integer N) const {
+Extrema_POnSurf siconos::mechanisms::myExtrema_FuncExtSS::PointOnS1(
+    const Standard_Integer N) const {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   return myPoint1.Value(N);
 }
@@ -250,7 +254,8 @@ Extrema_POnSurf myExtrema_FuncExtSS::PointOnS1(const Standard_Integer N) const {
 // purpose  :
 //=======================================================================
 
-Extrema_POnSurf myExtrema_FuncExtSS::PointOnS2(const Standard_Integer N) const {
+Extrema_POnSurf siconos::mechanisms::myExtrema_FuncExtSS::PointOnS2(
+    const Standard_Integer N) const {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   return myPoint2.Value(N);
 }

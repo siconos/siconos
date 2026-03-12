@@ -23,9 +23,12 @@
 #include "SolverOptions.h"                       // for SolverOptions
 #include "VI_Newton.h"                           // for VI_compute_F, VI_com...
 #include "VariationalInequality.h"               // for VariationalInequality
+#include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "numerics_errors.h"
 void VI_compute_F(void* data_opaque, double* x, double* F) {
   VariationalInequality* problem = (VariationalInequality*)data_opaque;
   problem->F(problem, problem->size, x, F);
@@ -73,3 +76,37 @@ void variationalInequality_BOX_QI_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
   options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int vi_box_qi_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  /* set_default already called by solver_options_create */
+  return NUMERICS_OK;
+}
+
+static int vi_box_qi_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  variationalInequality_box_newton_QiLSA((VariationalInequality*)problem, x, F, &info, options);
+  return info;
+}
+
+static void vi_box_qi_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_VI_BOX_QI,
+                "VI_BOX_QI",
+                "Box VI solver based on Qi C-function",
+                vi_box_qi_init_wrap,
+                vi_box_qi_solve_wrap,
+                vi_box_qi_free_wrap,
+                NULL,
+                variationalInequality_BOX_QI_set_default,  /* set_default */
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

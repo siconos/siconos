@@ -41,9 +41,12 @@ dim(v)=nn
 #include "SiconosCompat.h"
 /*import external implementation*/
 #include "external_mlcp_simplex.h"
-
 static int sIsInitialize = 0;
 #endif
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
 #ifdef HAVE_MLCPSIMPLEX
@@ -85,3 +88,41 @@ void mlcp_simplex(MixedLinearComplementarityProblem* problem, double* z, double*
   if (!sIsInitialize) extern_mlcp_simplex_stop();
 #endif
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_SIMPLEX in the global solver registry.
+ */
+
+static void mlcp_simplex_set_default(SolverOptions* options) {
+  /* No specific defaults for simplex solver */
+}
+
+static int mlcp_simplex_init_wrap(void* problem, SolverOptions* options) {
+  mlcp_simplex_init((MixedLinearComplementarityProblem*)problem, options);
+  return NUMERICS_OK;
+}
+
+static int mlcp_simplex_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_simplex((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void mlcp_simplex_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  mlcp_simplex_reset();
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_SIMPLEX, "MLCP_SIMPLEX",
+                "Simplex solver for Mixed Linear Complementarity Problems",
+                mlcp_simplex_init_wrap,
+                mlcp_simplex_solve_wrap,
+                mlcp_simplex_free_wrap,
+                NULL,  /* error function */
+                mlcp_simplex_set_default,
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

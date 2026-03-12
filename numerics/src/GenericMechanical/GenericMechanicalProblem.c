@@ -22,12 +22,12 @@
 #include <stdlib.h>  // for malloc, free, exit, EXIT_F...
 
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "GenericMechanical_Solvers.h"     // for NUMERICS_GMP_FREE_GMP, NUM...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
 #include "RelayProblem.h"                  // for RelayProblem
 #include "SparseBlockMatrix.h"             // for SBMfree, SparseBlockStruct...
-#include "numerics_verbose.h"              // for CHECK_IO
+#include "numerics_verbose.h"              // for check_io
+#include "numerics_errors.h"
 
 GenericMechanicalProblem* genericMechanicalProblem_new() {
   GenericMechanicalProblem* paux =
@@ -71,7 +71,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int 
     pGMP->lastListElem = pElem->prevProblem;
     free(pElem);
   }
-  if (level & NUMERICS_GMP_FREE_MATRIX) {
+  if (level == GMP_FREE_MATRIX) {
     assert(pGMP->M);
     NM_types storageType = pGMP->M->storageType;
     if (storageType == NM_DENSE)
@@ -82,8 +82,9 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int 
     free(pGMP->M);
   }
 
-  if (level & NUMERICS_GMP_FREE_GMP) free(pGMP);
+  if (level == GMP_FREE_GMP) free(pGMP);
 }
+
 void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
   listNumericsProblem* newProblem = (listNumericsProblem*)malloc(sizeof(listNumericsProblem));
   newProblem->nextProblem = 0;
@@ -218,17 +219,17 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", problem->q + i));
+    check_io(fscanf(file, "%lf ", problem->q + i));
   }
   nsubProb = m->filled1 - 1;
   posInX = 0;
   for (size_t ii = 0; ii < nsubProb; ii++) {
     if (ii) posInX = m->blocksize0[ii - 1];
     localSize = m->blocksize0[ii] - posInX;
-    CHECK_IO(fscanf(file, "%d\n", &prbType));
+    check_io(fscanf(file, "%d\n", &prbType));
     prb = gmp_add(problem, prbType, localSize);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D) {
-      CHECK_IO(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
+      check_io(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
     }
   }
 

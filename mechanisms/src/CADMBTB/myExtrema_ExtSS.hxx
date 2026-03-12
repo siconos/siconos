@@ -55,6 +55,9 @@ class Extrema_POnSurf;
 #ifndef _Standard_Macro_HeaderFile
 #include <Standard_Macro.hxx>
 #endif
+
+namespace siconos::mechanisms {
+
 // FP: TEMP to fit with occt 7.7 Should be reviewed.
 using Adaptor3d_SurfacePtr = Adaptor3d_Surface*;
 
@@ -156,4 +159,5 @@ class myExtrema_ExtSS {
 // other Inline functions and methods (like "C++: function call" methods)
 //
 
+}  // namespace siconos::mechanisms
 #endif

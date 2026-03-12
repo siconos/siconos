@@ -71,6 +71,8 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE {
   SICONOS_NUMERICS_PROBLEM_RELAY = 9,
 };
 
+enum NUMERICS_GMP_FREE { GMP_FREE_MATRIX = 4, GMP_FREE_GMP = 8 };
+
 /** \struct GenericMechanicalProblem GenericMechanicalProblem.h
  * \param numberOfBlockLine The number of  line of blocks.
  * \param M : NumericsMatrix sparseblock matrix set by the user

@@ -40,9 +40,13 @@
 #include "lcp_cst.h"           // for SICONOS_LCP_PIVOT_LEMKE
 #include "lcp_pivot.h"         // for LCP_PATHSEARCH_LEAVING_T
 #include "lumod_wrapper.h"     // for SN_lumod_dense_solve, SN_l...
-#include "numerics_verbose.h"  // for verbose
+#include "numerics_verbose.h"
 #include "pivot-utils.h"       // for do_pivot_lumod
 #include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #define BASIS_OFFSET 1
 
@@ -575,3 +579,36 @@ exit_lcp_pivot:
 void lcp_pivot_lumod_set_default(SolverOptions* options) {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PIVOT_LUMOD in the global solver registry.
+ */
+
+static int lcp_pivot_lumod_init_wrap(void* problem, SolverOptions* options) {
+  lcp_pivot_lumod_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_pivot_lumod_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_pivot_lumod((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_pivot_lumod_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD",
+                "Pivot solver with LUMOD for LCP",
+                lcp_pivot_lumod_init_wrap,
+                lcp_pivot_lumod_solve_wrap,
+                lcp_pivot_lumod_free_wrap,
+                NULL,  /* error function */
+                lcp_pivot_lumod_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0);     /* is_local_solver */

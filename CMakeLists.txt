@@ -24,7 +24,7 @@
 # Set minimum version for cmake
 # We advise the most recent version of cmake.
 # Use python3 -m pip install cmake to get it.
-cmake_minimum_required(VERSION 3.14) 
+cmake_minimum_required(VERSION 3.19)
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
@@ -44,8 +44,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 include(new_cmake_functions)
 
 # Force out-of-source build
-if ("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
-  message (SEND_ERROR "In source building not supported (not recommanded indeed). You need to :
+if("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
+  message(SEND_ERROR "In source building not supported (not recommanded indeed). You need to :
     * cleanup your source directory :  \"rm -rf ./CMakeFiles/ ./CMakeCache.txt\"
     * try configure process again in a new directory
     (e.g. mkdir <anywhere>/build ; cd <anywhere>/build ; cmake ${CMAKE_SOURCE_DIR}) ...")
@@ -54,7 +54,11 @@ endif()
 
 # If not given, turn build type to release mode.
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  if(WITH_ASAN) # asan conf will be done at component level (in ComponentSetup.cmake)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  else()
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
+  endif()
 endif()
 
 # Some useful macros and functions
@@ -102,7 +106,7 @@ if(NOT COMPONENTS)
   message(WARNING "Components list is empty - Nothing will be built.")
 endif()
 
-set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io")
+set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io vkernel")
 foreach(component_name IN LISTS COMPONENTS)
   # Check and set components list
   string(TOUPPER ${component_name} upname)
@@ -115,7 +119,7 @@ endforeach()
 if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
   message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
 endif()
-  
+
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)
@@ -129,7 +133,27 @@ list(GET COMPONENTS -1 last_component)
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 20) # Default standard
+  #set(CMAKE_C_STANDARD 17) # Default C standard. Unfortunately 23 is not guaranteed in all current compilers.
+  # check if the compiler has the required features ...
+  include(CheckCXXSourceCompiles)
+  check_cxx_source_compiles(
+    "
+#include <ranges>
+
+void print(std::ranges::range auto const& container) {
+}
+
+int
+main()
+{}
+"    HAS_RANGE)
+  if(NOT HAS_RANGE)
+    message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
+  endif()
+
+  # set(BUILD_AS_CPP ON)
+
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -169,16 +193,16 @@ if(WITH_FCLIB)
   include(fclib_setup)
 endif()
 
+# # -- New version, with pybind11
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
 endforeach()
-
-# ========= Python bindings =========
-if(WITH_PYTHON_WRAPPER)
-  add_subdirectory(wrap)
-endif()
 
 # ========= Documentation setup =========
 # Finalize documentation setups.
@@ -186,7 +210,7 @@ endif()
 if(WITH_DOCUMENTATION)
   finalize_doc()
 endif()
-  
+
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 
@@ -234,13 +258,13 @@ message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
 if(WITH_FCLIB)
   message(STATUS "Use fclib installed in ${fclib_ROOT}.")
 endif()
-  message(STATUS "Use system-provided SuiteSparse library, with:")
-  message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
-  message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
-  message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
-  message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
+message(STATUS "Use system-provided SuiteSparse library, with:")
+message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
+message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
+message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
+message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
 message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   message(STATUS "Python libraries are ${Python_LIBRARIES}")
 else()
   message("Siconos Python API is off\n")
@@ -258,7 +282,7 @@ if(SICONOS_CUSTOM_INSTALL AND ISOLATED_INSTALL)
   message(WARNING "You asked for a fully isolated installation in ${SICONOS_CUSTOM_INSTALL} at your own risks.\n")
 endif()
 message("    - The binaries, libraries and headers will be installed in ${CMAKE_INSTALL_PREFIX} \n")
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYB11_WRAPPER)
   message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR}\n")
   message("    with the command ${Python_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
   message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")

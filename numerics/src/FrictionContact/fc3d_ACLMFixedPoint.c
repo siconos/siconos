@@ -22,7 +22,9 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "FrictionContactProblem.h"                       // for FrictionCon...
-#include "Friction_cst.h"                                 // for SICONOS_FRI...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"                                 // for SICONOS_FRI...
+#include "Friction_tools.h"                                                          // 
 #include "NumericsFwd.h"                                  // for SolverOptions
 #include "SOCLCP_Solvers.h"                               // for soclcp_VI_E...
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
@@ -30,12 +32,17 @@
 #include "SiconosBlas.h"                                  // for cblas_dnrm2
 #include "SolverOptions.h"                                // for SolverOptions
 #include "VI_cst.h"                                       // for SICONOS_VI_...
+
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
 #include "fc3d_Solvers.h"        // for fc3d_set_in...
 #include "fc3d_compute_error.h"  // for fc3d_comput...
-#include "numerics_verbose.h"    // for verbose
+#include "numerics_verbose.h"
 #include "siconos_debug.h"       // lines 32-32
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem*, double*,
@@ -110,8 +117,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doub
           "==========================\n");
     internalsolver = &soclcp_VI_ExtraGradient;
   } else {
-    fprintf(stderr, "Numerics, fc3d_ACLMFixedPoint failed. Unknown internal solver.\n");
-    exit(EXIT_FAILURE);
+    assert(0);
   }
 
   double normUT;
@@ -141,16 +147,14 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doub
     }
 
     if (verbose > 0)
-      printf("---- FC3D - ACLMFP - Iteration %i Residual = %14.7e\n", iter, error);
+      numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   if (verbose > 0) {
-    printf("--------------- FC3D - ACLMFP - # Iteration %i Final Residual = %14.7e\n", iter,
-           error);
-    printf("--------------- FC3D - ACLMFP - #              internal iteration = %i\n",
-           cumul_iter);
+    numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+    numerics_printf("---- FC3D - ACLMFP - internal iteration = %i", cumul_iter);
   }
   free(soclcp->q);
   free(soclcp->coneIndex);
@@ -166,7 +170,46 @@ void fc3d_aclmfp_set_default(SolverOptions* options) {
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
 
+  // Internal solver - allocate if needed
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_NSGS);
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_aclmfp_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int fc3d_aclmfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_ACLMFixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(FC3D_ACLMFP,
+                "FC3D_ACLMFP",
+                "Augmented Cone Linear Mapping Fixed Point for 3D Friction Contact",
+                fc3d_aclmfp_init_wrap,
+                fc3d_aclmfp_solve_wrap,
+                fc3d_aclmfp_free_wrap,
+                NULL,
+                fc3d_aclmfp_set_default,  /* set_default */
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

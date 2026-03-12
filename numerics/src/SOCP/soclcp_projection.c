@@ -29,11 +29,15 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SiconosBlas.h"                                  // for cblas_dgemv
 #include "SolverOptions.h"                                // for SolverOptions
-#include "numerics_verbose.h"                             // for verbose
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"                             // for projectionO...
 #include "projectionOnCylinder.h"                         // for projectionO...
 #include "sanitizer.h"                                    // for cblas_dcopy...
 #include "soclcp_compute_error.h"                         // for soclcp_unit...
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 #define VERBOSE_DEBUG
 
@@ -335,3 +339,66 @@ int soclcp_projectionOnCylinder_solve(
 void soclcp_projection_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
+
+/* ===========================================================================
+ * Solver Registration (Local Solvers)
+ * ===========================================================================
+ * These register SOCLCP projection-based local solvers in the global registry.
+ */
+
+static void soclcp_projectionOnCone_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int soclcp_projectionOnCone_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int soclcp_projectionOnCone_solve_wrap(void* problem, double* reaction,
+                                              double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return soclcp_projectionOnCone_solve((SecondOrderConeLinearComplementarityProblem*)problem,
+                                       reaction, options);
+}
+
+REGISTER_SOLVER(SICONOS_SOCLCP_ProjectionOnCone, "SOCLCP_ProjectionOnCone",
+                "Projection on Second Order Cone (local solver)",
+                soclcp_projectionOnCone_init_wrap,
+                soclcp_projectionOnCone_solve_wrap,
+                NULL,
+                NULL,
+                soclcp_projectionOnCone_set_default,
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                1);    /* is_local */
+
+static void soclcp_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
+  /* No specific defaults */
+}
+
+static int soclcp_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int soclcp_projectionOnConeWithLocalIteration_solve_wrap(
+    void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity;
+  return soclcp_projectionOnConeWithLocalIteration_solve(
+      (SecondOrderConeLinearComplementarityProblem*)problem, reaction, options);
+}
+
+REGISTER_SOLVER(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration,
+                "SOCLCP_ProjectionOnConeWithLocalIteration",
+                "Projection on Second Order Cone with Local Iteration (local solver)",
+                soclcp_projectionOnConeWithLocalIteration_init_wrap,
+                soclcp_projectionOnConeWithLocalIteration_solve_wrap,
+                NULL,
+                NULL,
+                soclcp_projectionOnConeWithLocalIteration_set_default,
+                100,   /* default_max_iter */
+                1e-6,  /* default_tol */
+                1);    /* is_local */

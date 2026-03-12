@@ -54,6 +54,9 @@ class Extrema_POnSurf;
 #ifndef _Standard_Macro_HeaderFile
 #include <Standard_Macro.hxx>
 #endif
+
+namespace siconos::mechanisms {
+
 /**
  * \brief This class has been built from OCC in view of overloding the distance
  * computation between CAD objects.
@@ -177,4 +180,5 @@ class myExtrema_GenExtSS {
 // other Inline functions and methods (like "C++: function call" methods)
 //
 
+}  // namespace siconos::mechanisms
 #endif

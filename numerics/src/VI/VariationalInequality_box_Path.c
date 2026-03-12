@@ -50,7 +50,7 @@ extern "C" {
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"
-
+#include "numerics_errors.h"
 #if defined(__cplusplus)
 #undef restrict
 #define restrict __restrict

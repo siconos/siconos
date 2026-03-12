@@ -19,9 +19,9 @@
 #define __PIDTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <SiconosFwd.hpp>
-#include "SiconosControlFwd.hpp"
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
+#include <PID.hpp>
+#include <LinearSensor.hpp>
 
 class PIDTest : public CppUnit::TestFixture
 {
@@ -51,13 +51,13 @@ private:
   double _T;
   double _tol;
   double _xFinal;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::SiconosMatrix _A;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
-  SP::SiconosVector _K;
-  SP::LinearSensor _sensor;
-  SP::PID _PIDcontroller;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;
+  std::shared_ptr<siconos::algebra::SiconosVector> _K;
+  std::shared_ptr<siconos::control::LinearSensor> _sensor;
+  std::shared_ptr<siconos::control::PID> _PIDcontroller;
 
 
 

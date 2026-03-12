@@ -42,6 +42,8 @@ thanks to  lcp solvers.
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
+
+#include "numerics_errors.h"
 #endif
 /* int lcp_solver_pred(double *vec, double *q , int *n , method_lcp *pt , double *z , double *w
  * , */

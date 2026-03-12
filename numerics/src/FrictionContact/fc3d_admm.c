@@ -21,9 +21,11 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
 
-#include "CSparseMatrix.h"  // for CSparseMatrix_zentry, CSparseMatrix
+#include "CSparseMatrix.h"           // for CSparseMatrix_zentry, CSparseMatrix
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
+#include "FrictionContact_options.h"
+#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
+#include "Friction_tools.h"          //
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"          // for NM_gemv, NM_clear, NM_copy, NM_new
 #include "NumericsSparseMatrix.h"    // for NSM_diag_indices
@@ -31,14 +33,16 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "SiconosBlas.h"         // for cblas_dcopy, cblas_daxpy, cblas_...
-#include "fc3d_Solvers.h"        // for fc3d_checkTrivialCase, fc3d_admm
+#include "SiconosBlas.h"  // for cblas_dcopy, cblas_daxpy, cblas_...
+#include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "numerics_verbose.h"    // for numerics_printf_verbose, numeric...
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"    // for projectionOnCone, projectionOnDu...
 #include "siconos_debug.h"       // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 
-const char* const SICONOS_FRICTION_3D_ADMM_STR = "FC3D ADMM";
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 typedef struct {
   double* xi;
@@ -959,7 +963,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   /* Check for trivial case */
   *info = fc3d_checkTrivialCase(problem, velocity, reaction, options);
 
-  if (*info == 0) return;
+  /* Solver initialization continues below */
 
   double norm_q = cblas_dnrm2(m, problem->q, 1);
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
@@ -1081,3 +1085,37 @@ void fc3d_admm_set_default(SolverOptions* options) {
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_admm_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int fc3d_admm_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_admm((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_admm_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  fc3d_admm_free((FrictionContactProblem*)problem, options);
+}
+
+REGISTER_SOLVER(FC3D_ADMM,
+                "FC3D_ADMM",
+                "Alternating Direction Method of Multipliers for 3D Friction Contact",
+                fc3d_admm_init_wrap,
+                fc3d_admm_solve_wrap,
+                fc3d_admm_free_wrap,
+                NULL,
+                fc3d_admm_set_default,  /* set_default */
+                20000,  /* default_max_iter - from set_default */
+                1e-6,   /* default_tol - from set_default */
+                0       /* is_local_solver */)

@@ -25,6 +25,7 @@
 #include "Relay_Solvers.h"     // for project_on_box, relay_compute_error
 #include "SiconosBlas.h"       // for cblas_daxpy, cblas_dnrm2, cblas_dcopy
 #include "numerics_verbose.h"  // for verbose
+#include "numerics_errors.h"
 #include "sanitizer.h"         // for cblas_dcopy_msan
 
 void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub) {
@@ -39,9 +40,9 @@ void project_on_box(int n, double* restrict z, double* restrict lb, double* rest
 int relay_compute_error(RelayProblem* problem, double* restrict z, double* restrict w,
                         double tolerance, double* restrict error) {
   /* Checks inputs */
-  assert(problem);
-  assert(z);
-  assert(w);
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
 
   /* Computes w = Mz + q */
   int n = problem->size;

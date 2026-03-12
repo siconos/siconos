@@ -17,8 +17,12 @@
  */
 
 #include "AVI_Solvers.h"       // for avi_pathavi
+#include "AVI_cst.h"           // for SICONOS_AVI_PATHAVI
 #include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
-#include "numerics_verbose.h"  // for numerics_error_nonfatal
+#include "numerics_verbose.h"
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef HAVE_PATHVI
 
@@ -112,7 +116,7 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
 
 static int pathavi_get_jacobian_nnz(struct vi_desc *desc, int *nnz) {
   SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  *nnz = (int)NM_nnz(((AffineVariationalInequalities *)env->problem)->M);
+  *nnz = NM_nnz(((AffineVariationalInequalities *)env->problem)->M);
   return 0;
 }
 
@@ -150,7 +154,7 @@ int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
 
   if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED) {
     nb_cstr = problem->poly.unif->A->size0;
-    nnz_H = (int)NM_nnz(problem->poly.unif->A);
+    nnz_H = NM_nnz(problem->poly.unif->A);
     lambda = (double *)calloc(nb_cstr, sizeof(double));
   } else {
     numerics_error_nonfatal("avi_pathavi", "unsupported set type %d", problem->poly.set->id);
@@ -271,3 +275,40 @@ int avi_pathavi(AffineVariationalInequalities* problem, double* z, double* w,
 }
 
 #endif /*  HAVE_PATHVI */
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static void avi_pathavi_set_default(SolverOptions* options) {
+  /* No AVI-specific parameters to set */
+  (void)options;
+}
+
+static int avi_pathavi_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  avi_pathavi_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int avi_pathavi_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  return avi_pathavi((AffineVariationalInequalities*)problem, z, w, options);
+}
+
+static void avi_pathavi_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_AVI_PATHAVI,
+                "AVI_PATHAVI",
+                "PATHVI solver for AVI",
+                avi_pathavi_init_wrap,
+                avi_pathavi_solve_wrap,
+                avi_pathavi_free_wrap,
+                NULL,
+                avi_pathavi_set_default,
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

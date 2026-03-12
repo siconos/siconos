@@ -26,9 +26,14 @@
 #include "SolverOptions.h"                  // for SolverOptions, SICONOS_DP...
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
-#include "fc3d_Solvers.h"                   // for fc3d_VI_ExtraGradient
+#include "fc3d_Solvers.h"
+#include "fc3d_short_names.h"                   // for fc3d_VI_ExtraGradient
 #include "fc3d_compute_error.h"             // for fc3d_compute_error
-#include "numerics_verbose.h"               // for verbose
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
                            int *info, SolverOptions *options) {
@@ -73,3 +78,32 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, do
   free(vi);
   free(fc3d_as_vi);
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  fc3d_VI_ExtraGradient((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  return info;
+}
+
+static void fc3d_vi_eg_set_default(SolverOptions* options) {
+  (void)options;
+  /* No special defaults needed - uses standard SolverOptions */
+  variationalInequality_ExtraGradient_set_default(options);  
+}
+
+REGISTER_SOLVER(FC3D_VI_EG,
+                             "FC3D_VI_EG",
+                             "VI Extra Gradient for 3D Friction Contact",
+                             NULL,   /* init_wrap */
+                             fc3d_vi_eg_solve_wrap,
+                             NULL,   /* free_wrap */
+                             NULL,   /* err_fn */
+                             fc3d_vi_eg_set_default,
+                             1000,   /* default_max_iter */
+                             1e-4,   /* default_tol */
+                             0)      /* is_local_solver */

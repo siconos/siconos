@@ -28,7 +28,11 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
-#include "numerics_verbose.h"              // for verbose
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *info,
@@ -170,3 +174,36 @@ void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *
 void lcp_psor_set_default(SolverOptions *options) {
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 0.1;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PSOR in the global solver registry.
+ */
+
+static int lcp_psor_init_wrap(void* problem, SolverOptions* options) {
+  lcp_psor_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_psor_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_psor((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_psor_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PSOR, "LCP_PSOR",
+                "Projected Successive Over-Relaxation for LCP",
+                lcp_psor_init_wrap,
+                lcp_psor_solve_wrap,
+                lcp_psor_free_wrap,
+                NULL,  /* error function */
+                lcp_psor_set_default,  /* set_default */
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */)

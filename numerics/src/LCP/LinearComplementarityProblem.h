@@ -30,7 +30,7 @@
    Structure that contains and defines a LCP Problem.
 */
 struct LinearComplementarityProblem {
-  int size;          /**<  size of the problem */
+  int size;          /**< size of the problem */
   NumericsMatrix *M; /**< M matrix of the LCP (see the mathematical description)*/
   double *q;         /**< vector of the LCP (see the mathematical description)*/
 };

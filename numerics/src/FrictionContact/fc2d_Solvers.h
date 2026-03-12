@@ -23,7 +23,7 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "LinearComplementarityProblem.h"
 #include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"
@@ -218,6 +218,16 @@ void fc2d_enum(FrictionContactProblem* problem, double* reaction, double* veloci
 void fc2d_nsgs_set_default(SolverOptions* options);
 
 /** @} */
+
+/* Driver and convenience functions */
+int fc2d_driver(FrictionContactProblem* problem, double* reaction,
+                double* velocity, SolverOptions* options);
+
+SolverOptions* fc2d_solver_options_create(solver_id_t solver_id);
+
+void fc2d_list_available_solvers(void);
+
+void fc2d_print_solver_info(solver_id_t solver_id);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

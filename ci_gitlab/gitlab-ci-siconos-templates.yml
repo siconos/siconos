@@ -19,8 +19,7 @@ variables:
   # Default option file
   CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_ci_default.cmake
   # By default we allow builds to run in parallel, but certain
-  # configurations may require non-parallel builds (cf. swig +
-  # serialization requires too much memory)
+  # configurations may require non-parallel builds (cf. serialization that requires too much memory)
   PARALLEL_BUILD: 1
   GIT_DEPTH: 1
   #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
@@ -86,7 +85,7 @@ stages:
 # Based on Kaniko stuff. For details, see https://docs.gitlab.com/ee/ci/docker/using_kaniko.html.
 .docker-create-image:
   # Created if the commit message starts with [docker-build] or
-  # when the master branch is updated.
+  # when the main branch is updated.
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -131,7 +130,7 @@ workflow:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
       when: never
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
       when: never  # avoid duplicate pipeline: ci with main branch  only for public siconos
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
@@ -142,7 +141,7 @@ workflow:
 
 .full-rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # If changes are pushed to the default branch
+    - if: $CI_COMMIT_BRANCH == "master" # If changes are pushed to the default branch
     - if: $CI_COMMIT_TAG   # If changes are pushed for a tag.
     - if: $CI_COMMIT_MESSAGE =~ /^\[all-jobs\]/
 
@@ -276,6 +275,7 @@ workflow:
     - /kaniko/executor
       --build-arg BUILD_DIR=$BUILD_DIR
       --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
+      --build-arg EXAMPLES_BRANCH_NAME=$CI_COMMIT_REF_NAME
       --context $CI_PROJECT_DIR
       --dockerfile  $DOCKERFILE_PATH/Dockerfile
       --target=$SICONOS_DOCKER_TARGET

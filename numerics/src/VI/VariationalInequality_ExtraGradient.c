@@ -28,8 +28,11 @@
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-#include "numerics_verbose.h"                    // for verbose, numerics_error
+#include "numerics_verbose.h"
 #include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "solver_registry.h"
+#include "numerics_errors.h"
+#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -462,3 +465,38 @@ void variationalInequality_ExtraGradient_set_default(SolverOptions *options) {
   options->dparam[SICONOS_VI_DPARAM_LS_L] = 0.9;            /* L */
   options->dparam[SICONOS_VI_DPARAM_LS_LMIN] = 0.3;         /* Lmin */
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ */
+
+static int vi_eg_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default already called by solver_options_create */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int vi_eg_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  variationalInequality_ExtraGradient((VariationalInequality*)problem, x, F, &info, options);
+  return info;
+}
+
+static void vi_eg_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_VI_EG,
+                "VI_EG",
+                "Extra Gradient for Variational Inequality",
+                vi_eg_init_wrap,
+                vi_eg_solve_wrap,
+                vi_eg_free_wrap,
+                NULL,
+                variationalInequality_ExtraGradient_set_default,  /* set_default */
+                1000,   /* default_max_iter */
+                1e-4,   /* default_tol */
+                0       /* is_local_solver */)

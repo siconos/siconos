@@ -24,19 +24,16 @@
 #include "NonSmoothDrivers.h"  // for mcp_driver, mcp_old_driver
 #include "NumericsFwd.h"       // for SolverOptions, MixedComplementarityPro...
 #include "SolverOptions.h"     // for SolverOptions
-#include "numerics_verbose.h"  // for numerics_error
-
-const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
-const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";
-const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR = "MCP Newton minFBLSA";
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 int mcp_driver(MixedComplementarityProblem* problem, double* z, double* Fmcp,
                SolverOptions* options) {
-  assert(options != NULL);
-  /* Checks inputs */
-  assert(problem != NULL);
-  assert(z != NULL);
-  assert(Fmcp != NULL);
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(Fmcp);
+  CHECK_OPTIONS(options);
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 
@@ -50,8 +47,7 @@ int mcp_driver(MixedComplementarityProblem* problem, double* z, double* Fmcp,
       break;
 
     default:
-      fprintf(stderr, "mcp_driver error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "mcp_driver error: unknown solver id: %d\n");
   }
 
   return info;
@@ -59,12 +55,11 @@ int mcp_driver(MixedComplementarityProblem* problem, double* z, double* Fmcp,
 
 int mcp_old_driver(MixedComplementarityProblem_old* problem, double* z, double* w,
                    SolverOptions* options) {
-  if (options == NULL) numerics_error("mcp_old_driver ", "null input for solver options.\n");
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mcp_old_driver",
-                   "null input for MixedComplementarityProblem_old and/or unknowns (z,w)");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_OPTIONS(options);
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 
@@ -74,8 +69,7 @@ int mcp_old_driver(MixedComplementarityProblem_old* problem, double* z, double* 
       break;
 
     default:
-      fprintf(stderr, "mcp_old_driver error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "mcp_old_driver error: unknown solver id: %d\n");
   }
 
   return info;
@@ -87,8 +81,7 @@ void mcp_old_driver_init(MixedComplementarityProblem_old* problem, SolverOptions
       mcp_old_FischerBurmeister_init(problem, options);
       break;
     default:
-      fprintf(stderr, "mcp_old_driver_init error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      assert(0);
   }
 }
 
@@ -98,7 +91,6 @@ void mcp_old_driver_reset(MixedComplementarityProblem_old* problem, SolverOption
       mcp_old_FischerBurmeister_reset(problem, options);
       break;
     default:
-      fprintf(stderr, "mcp_old_driver_init error: unknown solver id: %d\n", options->solverId);
-      exit(EXIT_FAILURE);
+      assert(0);
   }
 }

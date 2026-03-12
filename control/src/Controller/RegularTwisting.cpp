@@ -16,28 +16,17 @@
  * limitations under the License.
 */
 
-#include <AVI.hpp>
-#include <NormalConeNSL.hpp>
-#include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
-
-#include "ActuatorFactory.hpp"
 #include "RegularTwisting.hpp"
 
 
-RegularTwisting::RegularTwisting(SP::ControlSensor sensor, double gain, double beta):
+siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor, double gain, double beta):
   Twisting(sensor, gain, beta, 0.)
 {
-  _type = REGULAR_TWISTING;
+  _type = ActuatorType::RegularTwisting;
 }
 
-RegularTwisting::RegularTwisting(SP::ControlSensor sensor):
+siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor):
   Twisting(sensor, 0.)
 {
-  _type = REGULAR_TWISTING;
+  _type = ActuatorType::RegularTwisting;
 }
-
-RegularTwisting::~RegularTwisting()
-{
-}
-AUTO_REGISTER_ACTUATOR(REGULAR_TWISTING, RegularTwisting)

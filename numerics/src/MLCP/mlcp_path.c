@@ -28,8 +28,12 @@
 #include "NumericsMatrix.h"
 #include "SiconosCompat.h"
 #include "numerics_verbose.h"
-#include "tools/InterfaceToPathFerris/SimpleLCP.h"
+#include "SimpleLCP.h"
 #endif
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {
@@ -171,3 +175,37 @@ void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
 
   return;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_PATH in the global solver registry.
+ */
+
+static void mlcp_path_set_default(SolverOptions* options) {
+  /* No specific defaults for PATH solver */
+}
+
+static int mlcp_path_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  /* PATH solver uses external library initialization */
+  return NUMERICS_OK;
+}
+
+static int mlcp_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_path((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_PATH, "MLCP_PATH",
+                "PATH solver for Mixed Linear Complementarity Problems",
+                mlcp_path_init_wrap,
+                mlcp_path_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                mlcp_path_set_default,
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

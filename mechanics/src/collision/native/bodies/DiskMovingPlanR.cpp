@@ -14,31 +14,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "DiskMovingPlanR.hpp"
 
 #include <cmath>
-#include "DiskMovingPlanR.hpp"
-#include <BlockVector.hpp>
-#include "SimpleMatrix.hpp"
 
-DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,
-                                 FTime FAD, FTime FBD, FTime FCD,
-                                 double radius) : LagrangianRheonomousR()
-{
-  setComputeAFunction(FA);
-  setComputeBFunction(FB);
-  setComputeCFunction(FC);
-  setComputeADotFunction(FAD);
-  setComputeBDotFunction(FBD);
-  setComputeCDotFunction(FCD);
-  _r = radius;
-}
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
+siconos::collision::native::bodies::DiskMovingPlanR::DiskMovingPlanR(double radius)
+    : siconos::modeling::LagrangianRheonomousR{}, radius_{radius} {}
 
-void DiskMovingPlanR::init(double time)
-{
-  if(time != _time)
-  {
+void siconos::collision::native::bodies::DiskMovingPlanR::init(double time) {
+  if (time != _time) {
     _time = time;
     computeA(time);
     computeB(time);
@@ -47,65 +37,137 @@ void DiskMovingPlanR::init(double time)
     computeBDot(time);
     computeCDot(time);
 
-    _sqrA2pB2 = hypot(_A, _B);
-    _AADot = _A * _ADot;
-    _BBDot = _B * _BDot;
-    _cubsqrA2pB2 = _sqrA2pB2 * _sqrA2pB2 * _sqrA2pB2;
+    sqrA2pB2_ = hypot(A_, B_);
+    AAdot_ = A_ * Adot_;
+    BBdot_ = B_ * Bdot_;
+    cubsqrA2pB2_ = sqrA2pB2_ * sqrA2pB2_ * sqrA2pB2_;
   }
 }
 
-double DiskMovingPlanR::distance(double x, double y, double rad)
-{
-  return (fabs(_A * x + _B * y + _C) / _sqrA2pB2 - rad);
+double siconos::collision::native::bodies::DiskMovingPlanR::distance(double x, double y,
+                                                                     double rad) {
+  return (fabs(A_ * x + B_ * y + C_) / sqrA2pB2_ - rad);
 }
 
 /* Called compute h, but only the gap function is needed! */
-void DiskMovingPlanR::computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y)
-{
+void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
+    const siconos::algebra::BlockVector &q, double time,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
   init(time);
 
   double q_0 = q(0);
   double q_1 = q(1);
 
-  y(0) = distance(q_0, q_1, _r);
-
+  y(0) = distance(q_0, q_1, radius_);
 }
 
-void DiskMovingPlanR::computeJachq(double time, const BlockVector& q, BlockVector& z)
-{
-  init(time);
-
-  SimpleMatrix *g = (SimpleMatrix *) _jachq.get();
-
-  double x = q(0);
-  double y = q(1);
-
-  double D1 = _A * x + _B * y + _C;
-  double signD1 = copysign(1, D1);
-
-  (*g)(0, 0) = _A * signD1 / _sqrA2pB2;
-  (*g)(1, 0) = -_B * signD1 / _sqrA2pB2;
-  (*g)(0, 1) = _B * signD1 / _sqrA2pB2;
-  (*g)(1, 1) = _A * signD1 / _sqrA2pB2;
-  (*g)(0, 2) = 0;
-  (*g)(1, 2) = -_r;
-}
-
-void DiskMovingPlanR::computehDot(double time, const BlockVector& q, BlockVector& z)
-{
+void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector &q, double time) {
   init(time);
 
   double x = q(0);
   double y = q(1);
 
-  double D1 = _A * x + _B * y + _C;
+  double D1 = A_ * x + B_ * y + C_;
   double signD1 = copysign(1, D1);
-  (*_hDot)(0) = (-_AADot - _BBDot) * fabs(D1) / _cubsqrA2pB2 + (_ADot * x + _BDot * y + _CDot) * signD1 / _sqrA2pB2;
+
+  jacobianhOver_q_view_->setValue(0, 0, A_ * signD1 / sqrA2pB2_);
+  jacobianhOver_q_view_->setValue(1, 0, -B_ * signD1 / sqrA2pB2_);
+  jacobianhOver_q_view_->setValue(0, 1, B_ * signD1 / sqrA2pB2_);
+  jacobianhOver_q_view_->setValue(1, 1, A_ * signD1 / sqrA2pB2_);
+  jacobianhOver_q_view_->setValue(0, 2, 0);
+  jacobianhOver_q_view_->setValue(1, 2, -radius_);
 }
 
-bool DiskMovingPlanR::equal(FTime pA, FTime pB, FTime pC, double pr) const
-{
-  return ((FTime)_AFunction->fPtr == pA && (FTime)_BFunction->fPtr == pB &&
-          (FTime)_CFunction->fPtr == pC && _r == pr);
+void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
+    const siconos::algebra::BlockVector &q, double time) {
+  init(time);
+
+  double x = q(0);
+  double y = q(1);
+
+  double D1 = A_ * x + B_ * y + C_;
+  double signD1 = copysign(1, D1);
+  (*hdot_)(0) = (-AAdot_ - BBdot_) * fabs(D1) / cubsqrA2pB2_ +
+                (Adot_ * x + Bdot_ * y + Cdot_) * signD1 / sqrA2pB2_;
 }
 
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeAFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeA_ = fct;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeBFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeB_ = fct;
+}
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeCFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeC_ = fct;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeAdotFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeAdot_ = fct;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeBdotFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeBdot_ = fct;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::setComputeCdotFunction(
+    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+  computeCdot_ = fct;
+}
+
+bool siconos::collision::native::bodies::DiskMovingPlanR::equal(
+    const siconos::modeling::func_prototypes::FunctionS_S &pA,
+    const siconos::modeling::func_prototypes::FunctionS_S &pB,
+    const siconos::modeling::func_prototypes::FunctionS_S &pC, double pr) const {
+  // Note FP How can we compare user-defined functions ???
+  // And why ... ?
+  return false;  // (computeC_ == pA && computeB_ == pB && computeC_ == pC && radius_ == pr);
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeA(double t) {
+  if (computeA_)
+    A_ = computeA_(t);
+  else
+    A_ = 0.;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeB(double t) {
+  if (computeB_)
+    B_ = computeB_(t);
+  else
+    B_ = 0.;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeC(double t) {
+  if (computeC_)
+    C_ = computeC_(t);
+  else
+    C_ = 0.;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeADot(double t) {
+  if (computeAdot_)
+    Adot_ = computeAdot_(t);
+  else
+    Adot_ = 0.;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeBDot(double t) {
+  if (computeBdot_)
+    Bdot_ = computeBdot_(t);
+  else
+    Bdot_ = 0.;
+}
+
+void siconos::collision::native::bodies::DiskMovingPlanR::computeCDot(double t) {
+  if (computeCdot_)
+    Cdot_ = computeCdot_(t);
+  else
+    Cdot_ = 0.;
+}

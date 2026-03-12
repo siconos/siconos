@@ -1,0 +1,274 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*! \file OSNSMatrix.hpp
+  Specific storage for matrices used in OneStepNSProblem
+*/
+
+#ifndef OSNSM_H
+#define OSNSM_H
+
+#include <memory>
+
+#include "NM_types.h"  // for NM_DENSE etc
+#include "NumericsFwd.h"
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
+
+namespace siconos::graphs {
+
+struct InteractionsGraph;
+struct DynamicalSystemsGraph;
+
+}  // namespace siconos::graphs
+
+namespace siconos::simulation {
+class BlockCSRMatrix;
+}
+
+namespace siconos::nonsmooth_formulations {
+
+/**
+ Interface to some specific storage types for matrices used in
+ OneStepNSProblem
+
+ This class is used to define an interface for various storage methods used
+ for matrices in OneStepNSProblem. Its aim is to fill the
+ Numerics structure NumericsMatrix, required in many XXX_problem
+ structures of Numerics as input argument for drivers.
+
+ The idea is to remove all matrix storage management problems from
+ OSNS classes (LCP ...) and to leave it into this class.
+
+ Two main functions:
+ - fill(indexSet, interactionBlocks): fill the matrix using a list of
+ "active" Interaction, in indexSet, and a
+ MapOfMapOfInteractionMatrices, interactionBlocks, which determines
+ which Interaction are connected or not (ie have common DynamicalSystem).
+ - convert(): fill the NumericsMatrix structure (indeed only
+ pointers links to the components of the present class)
+
+ Note that OSNSMatrix are square.
+
+ For example, if in a LCP, constraints of interest are
+ indexSet={inter2,inter3,inter8,inter12}, whith common DynamicalSystem between
+ 2 and 3, 2 and 8 and 8 and 12.
+
+ interactionBlocks contains matrices for all (interi,interj) which have
+ common DS, for (interi,interj) in I0, the set of all Interaction.
+
+ (for details on how interactionBlocks is computed see OneStepNSProblem.h).
+
+ We denote interactionBlocks[interi][interj] = mij.
+
+ Then, a call to
+ fill(indexSet, interactionBlock) results in a matrix which looks like:
+
+ \f[
+
+ M=\left\lbrace\begin{array}{cccc}
+ m22 & m23 & m28 &  0 \\
+ m32 & m33 & 0   &  0 \\
+ 0  &  0  & m88 & m812 \\
+ 0  &  0  & m128& m1212
+ \end{array}\right.
+
+ \f]
+
+ Note: at the time the available storage types are:
+
+ - full matrix in a SiconosMatrix (_storageType = NM_DENSE). In this case,
+ for each call to fill(), the SiconosMatrix M is resized
+ according  to the sizes of the Interaction present in indexSet and then
+ all the required interactionBlocks mij are COPIED into M.
+
+ - Sparse Block Storage (_storageType = NM_SPARSE_BLOCK): corresponds to
+ SparseBlockStructuredMatrix structure of Numerics. Only non-null
+ interactionBlocks are saved in the matrix M and there is no copy of
+ sub-interactionBlocks, only links thanks to pointers.
+
+ - Sparse matrix (_storageType = NM_SPARSE): at the time of writting, only
+ csc (compressed-sparse column). Could also be triplet (coo or coordinate) or csr
+ (compressed-sparse row).
+*/
+class OSNSMatrix {
+ protected:
+  ACCEPT_SERIALIZATION(OSNSMatrix);
+
+  /** number of rows */
+  siconos::algebra::Index _dimRow{0};
+
+  /** number of columns */
+  siconos::algebra::Index _dimColumn{0};
+
+  /** Storage type used for the present matrix */
+  NM_types _storageType{NM_DENSE};
+
+  /** _triplet_nzmax for memory allocation of NM_SPARSE */
+  std::size_t _triplet_nzmax{0};
+
+  /** Numerics structure to be filled  */
+  std::shared_ptr<NumericsMatrix> _numericsMatrix{nullptr};
+
+  /** Matrix used for default storage type (_storageType = NM_DENSE) */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _M1{nullptr};
+
+  /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
+      (_storageType = NM_SPARSE_BLOCK) */
+  std::shared_ptr<siconos::simulation::BlockCSRMatrix> _M2{nullptr};
+
+  /** For each Interaction in the graph, compute its absolute position
+   *
+   *  \param indexSet the index set ot the concerned interactions.
+   *  \return the dimension of the problem (or size of the matrix),
+   *  computed as the sum of the nslaw of all the Interaction in the indexSet
+   */
+  virtual siconos::algebra::Index updateSizeAndPositions(
+      siconos::graphs::InteractionsGraph& indexSet);
+
+  /** For each DynamicalSystem in the graph, compute its absolute position
+   *
+   *  \param DSG the index set of the dynamical systems
+   *  \return the dimension of the problem (or size of the matrix),
+   *  computed as the sum of the size of all DS in the indexSet
+   */
+  virtual siconos::algebra::Index updateSizeAndPositions(
+      siconos::graphs::DynamicalSystemsGraph& DSG);
+
+ private:
+  // Rule of five
+  OSNSMatrix(const OSNSMatrix&) = delete;
+  OSNSMatrix(OSNSMatrix&&) = delete;
+  OSNSMatrix& operator=(const OSNSMatrix&) = delete;
+  OSNSMatrix& operator=(OSNSMatrix&&) = delete;
+
+ public:
+  /** Default constructor -> empty matrix
+   */
+  OSNSMatrix() = default;
+
+  /** Constructor with _dimRow and DimColumn of the matrix
+   *
+   *  \param n row sizes of the rectangle matrix
+   *  \param m column size of the rectangle matrix
+   *  \param stor storage type (NM_DENSE or
+   * NM_SPARSE_BLOCK)
+   */
+  OSNSMatrix(siconos::algebra::Index n, siconos::algebra::Index m, NM_types stor);
+
+  /** Constructor from index set and map
+   *
+   *  \param indexSet InteractionsGraph* the index set of the active constraints
+   *  \param stor storage type
+   */
+  OSNSMatrix(siconos::graphs::InteractionsGraph& indexSet, NM_types stor);
+
+  /** Constructor with copy of a SiconosMatrix => _storageType = NM_DENSE
+   *
+   *  \param MSource matrix to be copied
+   */
+  OSNSMatrix(const siconos::algebra::SiconosMatrix& MSource);
+
+  /** destructor
+   */
+  virtual ~OSNSMatrix() noexcept = default;
+
+  /** \return number of rows */
+  inline siconos::algebra::Index rows() const { return _dimRow; };
+
+  /** set dimension of the square matrix
+   *  \param size the dimension
+   */
+  inline void setSize(siconos::algebra::Index size) { _dimRow = size; };
+
+  /** \return number of columns of the matrix */
+  inline siconos::algebra::Index cols() const { return _dimColumn; };
+
+  /** \return the type of storage for current matrix */
+  inline NM_types storagetype() const { return _storageType; };
+
+  /** set which type of storage will be used for current matrix
+   *
+   *  \param i the type of storage
+   */
+  inline void setStorageType(NM_types i) { _storageType = i; };
+
+  /** \return the numerics-readable structure */
+  inline std::shared_ptr<NumericsMatrix> numericsMatrix() { return _numericsMatrix; };
+
+  /** get the matrix used for default storage
+   *
+   *  \return std::shared_ptr<NumericsMatrix>
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> defaultMatrix() { return _M1; };
+
+  /** fill the current class using an index set
+   *
+   *  \param indexSet the index set of the active constraints
+   *  \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillM(siconos::graphs::InteractionsGraph& indexSet, bool update = true);
+
+  /** Compute the M matrix given the inverse of W and H
+   *
+   *  \param Winverse the NumericsMatrix that contains the inverse of W
+   *  \param Winverse the NumericsMatrix that contains H
+   */
+  void computeM(std::shared_ptr<NumericsMatrix> Winverse, std::shared_ptr<NumericsMatrix> H);
+
+  /** fill the current class using an index set with the W matrix of DS
+   *
+   *  \param DSG the index set of the dynamicalSystems
+   *  \param update if true update the size of the Matrix (default true)
+   */
+
+  virtual void fillW(siconos::graphs::DynamicalSystemsGraph& DSG, bool update = true);
+
+  /** fill the current class using an index set with the inverse of W matrix of DS
+   *
+   *  \param DSG the index set of the dynamicalSystems
+   *  \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillWinverse(siconos::graphs::DynamicalSystemsGraph& DSG, bool update = true);
+
+  /** fill the current class using an index set
+   *
+   *  \param DSG the index set of the dynamicalSystems
+   *  \param indexSet the index set of the Interactions
+   *  \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillH(siconos::graphs::DynamicalSystemsGraph& DSG,
+                     siconos::graphs::InteractionsGraph& indexSet, bool update = true);
+
+  /** fill the current class using an index set
+   *
+   *  \param DSG the index set of the dynamicalSystems
+   *  \param indexSet the index set of the Interactions
+   *  \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillHtrans(siconos::graphs::DynamicalSystemsGraph& DSG,
+                          siconos::graphs::InteractionsGraph& indexSet, bool update = true);
+
+  /** fill the numerics structure _numericsMatSparse using MBlockCSR */
+  void convert();
+
+  /** display the current matrix
+   */
+  void display() const;
+};
+}  // namespace siconos::nonsmooth_formulations
+#endif

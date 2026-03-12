@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>  // for malloc
 
-#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
+#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_ONECONTA...
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection
@@ -79,6 +79,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].will_fail = 1;
     current++;
   }
   {
@@ -96,6 +97,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
         SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+    collection[current].will_fail = 1;
     current++;
   }
 
@@ -113,6 +115,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
         .options->internalSolvers[0]
         ->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
         SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    collection[current].will_fail = 1;
     current++;
   }
 

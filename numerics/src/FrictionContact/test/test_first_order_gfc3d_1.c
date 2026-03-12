@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>  // for malloc
 
-#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
+#include "FrictionContact_options.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
@@ -35,6 +35,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
     current++;
   }
 

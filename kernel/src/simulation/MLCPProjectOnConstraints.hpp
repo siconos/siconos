@@ -1,0 +1,151 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*! \file MLCPProjectOnConstraints.hpp
+\brief Linear Complementarity Problem formulation and solving
+*/
+
+#ifndef MLCPProjectOnConstraints_H
+#define MLCPProjectOnConstraints_H
+
+#include "MLCP.hpp"
+
+namespace siconos::nonsmooth_formulations {
+/**
+   Formalization and Resolution of a Mixed Linear Complementarity Problem
+   (MLCP)
+
+   This class is devoted to the formalization and the resolution of the
+   Mixed Linear Complementarity Problem (MLCP) for the specific problem
+   of the projection onto the constraints in Mechanics
+
+*/
+class MLCPProjectOnConstraints : public MLCP {
+ protected:
+  ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
+
+  /** ?? */
+  double _alpha{1.};
+
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral
+   * constraints */
+  bool _doProjOnEquality{false};
+
+  bool _useMassNormalization{false};
+
+ public:
+  /** compute the number of inequality and equality for a given tuple of
+   *  Interactions update the global number of equality(_n) and inequality (_m)
+   *  set up _numerics_problem parameters (blocksRows and blocksIsComp )
+   *
+   *  \param inter1 first interaction considered
+   *  \param inter2 second interaction
+   */
+  void computeOptions(std::shared_ptr<siconos::modeling::Interaction> inter1,
+                      std::shared_ptr<siconos::modeling::Interaction> inter2) override;
+
+  /** constructor from data
+   *
+   *  \param numericsSolverId solver id
+   *  \param alpha alpha parameter value
+   */
+  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
+
+  /**  constructor from a pre-defined solver options set.
+   *
+   *   \param options the options set,
+   *   \param alpha alpha parameter value
+   */
+  MLCPProjectOnConstraints(std::shared_ptr<SolverOptions> options, double alpha = 1.0);
+
+  /** destructor
+   */
+  ~MLCPProjectOnConstraints() noexcept = default;
+
+  /**
+     \return alpha value
+  */
+  double alpha() { return _alpha; };
+
+  /** setter for alpha
+      \param[in] newval new value for alpha parameter
+  */
+  void setAlpha(double newval) { _alpha = newval; };
+
+  inline void setDoProjOnEquality(bool v) { _doProjOnEquality = v; }
+
+  /** Display the set of blocks for  a given indexSet
+      \param indexSet the graph of interactions
+   */
+  void displayBlocks(std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) override;
+
+  /** print the data to the screen
+   */
+  void display() const override;
+
+  void initOSNSMatrix() override;
+
+  /** compute interactionBlocks if necessary (this depends on the type of
+   *  OSNS, on the indexSets ...)
+   */
+  void updateInteractionBlocks() override;
+
+  /** compute diagonal Interaction block
+      \param vd a vertex (interaction) descriptor
+  */
+  void computeDiagonalInteractionBlock(
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) override;
+
+  /** compute diagonal Interaction block
+      \param vd a vertex (interaction) descriptor
+  */
+  void computeInteractionBlock(
+      const siconos::graphs::InteractionsGraph::EDescriptor& vd) override;
+
+  /** To compute a part of the "q" vector of the OSNS
+      \param vd vertex (interaction) which corresponds to the considered block
+      \param pos the position of the first element of yOut to be set
+  */
+  void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor& vd,
+                     unsigned int pos) override;
+
+  /** compute vector q
+   *
+   *  \param time the current time
+   */
+  void compute_q() override;
+
+  /** post-treatment for  MLCPProjectOnConstraints
+   */
+  void postCompute() override;
+
+  /** post-treatment for  MLCPProjectOnConstraints for LagrangianR
+      \param inter the considered interaction
+      \param pos interaction position in the global vector
+  */
+  virtual void postComputeLagrangianR(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                      unsigned int pos);
+
+  /** post-treatment for  MLCPProjectOnConstraints for NewtonEulerR
+      \param inter the considered interaction
+      \param pos interaction position in the global vector
+   */
+  virtual void postComputeNewtonEulerR(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                       unsigned int pos);
+};
+}  // namespace siconos::nonsmooth_formulations
+#endif  // MLCPProjectOnConstraints_H

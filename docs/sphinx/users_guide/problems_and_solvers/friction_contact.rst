@@ -322,7 +322,7 @@ Nonsmooth Newton/ Alart-Curnier (:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1
 
 
-Nonsmooth Newton/ Alart-Curnier (test) (:enumerator:`SICONOS_FRICTION_3D_NSN_AC_TEST`)
+Nonsmooth Newton/ Alart-Curnier (test) (:enumerator:`SICONOS_FRICTION_3D_NSN_AC_NEW`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :func:`fc3d_nonsmooth_Newton_AlartCurnier2`

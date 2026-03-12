@@ -24,8 +24,15 @@ from gendoctools import cpp2rst
 from gendoctools import python2rst
 
 
-siconos_components = {'externals': 0, 'numerics': 1, 'kernel': 2, 'control': 3,
-                      'mechanics': 4, 'mechanisms': 5, 'io': 6}
+siconos_components = {
+    "externals": 0,
+    "numerics": 1,
+    "kernel": 2,
+    "control": 3,
+    "mechanics": 4,
+    "mechanisms": 5,
+    "io": 6,
+}
 
 
 def build_rst_api(sphinx_directory):
@@ -41,38 +48,38 @@ def build_rst_api(sphinx_directory):
     """
 
     # Place where files will be written
-    outputdir = Path(sphinx_directory, 'reference')
+    outputdir = Path(sphinx_directory, "reference")
 
     # Top file comments
-    label = '.. _siconos_api:\n\n'
-    title = 'API reference'
-    title += '\n' + len(title) * '=' + '\n\n'
+    label = ".. _siconos_api:\n\n"
+    title = "API reference"
+    title += "\n" + len(title) * "=" + "\n\n"
     remark = (
         "Writing and running a simulation with Siconos may be achieved "
         "either with C++ language or with the python interface.\n"
         "Although those two APIs are quite similar, two different documentations "
         "(both generated from sources) are available. "
         "Please pick the one corresponding to the interface you choose.\n"
-        )
-    introduction = 'Below you will find links to documentation '
-    introduction += 'for all classes and files in Siconos, '
-    introduction += 'sorted  by component or module name.\n\n'
+    )
+    introduction = "Below you will find links to documentation "
+    introduction += "for all classes and files in Siconos, "
+    introduction += "sorted  by component or module name.\n\n"
     common_header = label + title + remark + introduction
-    
-    mainrst_filename = Path(outputdir, 'index.rst')
-    with open(mainrst_filename, 'w') as f:
+
+    mainrst_filename = Path(outputdir, "index.rst")
+    with open(mainrst_filename, "w") as f:
         f.write(common_header)
-    
+
     # Write rst for C/C++ API
     cpp2rst.build_cpp_api_main(outputdir, siconos_components)
     # Write rst for for Python API
     python2rst.build_python_api_main(outputdir, siconos_components)
 
-    post = '\n*If a file or a class you know does not appear in this page, '
-    post += 'it means it has not been (properly) documented or is not '
-    post += 'available in the high level API. Please contact us '
-    post += 'if you think it is an error.*\n\n'
-    with open(mainrst_filename, 'a') as f:
+    post = "\n*If a file or a class you know does not appear in this page, "
+    post += "it means it has not been (properly) documented or is not "
+    post += "available in the high level API. Please contact us "
+    post += "if you think it is an error.*\n\n"
+    with open(mainrst_filename, "a") as f:
         f.write(post)
 
 
@@ -96,25 +103,25 @@ def find_doxygen_diagrams(doxygen_path, output_directory):
 
     # Scan doxygen output path and create a list with
     # files matching requirements
-    class_diagram_match = 'inherit_graph*.png'
+    class_diagram_match = "inherit_graph*.png"
     doxygen_path = Path(doxygen_path).resolve()
-    ref = '.. _api_class_diagrams:\n\n'
-    header = 'C++ Class diagrams'
-    header += '\n' + len(header) * '=' + '\n\n'
+    ref = ".. _api_class_diagrams:\n\n"
+    header = "C++ Class diagrams"
+    header += "\n" + len(header) * "=" + "\n\n"
     header = ref + header
     files = [f for f in doxygen_path.glob(class_diagram_match)]
-    realfiles = [Path('../doxygen', f.name) for f in files]
-    realfiles = [Path('/', f) for f in realfiles]
-    outputfile = Path(output_directory, 'class_diagrams.rst')
-    with open(outputfile, 'w') as file:
+    realfiles = [Path("../doxygen", f.name) for f in files]
+    realfiles = [Path("/", f) for f in realfiles]
+    outputfile = Path(output_directory, "class_diagrams.rst")
+    with open(outputfile, "w") as file:
         file.writelines(header)
-        #params = [':height: 190 px', ':class: gallery']
-        params = [':class: gallery']
-        img_prefix = '.. image:: '
+        # params = [':height: 190 px', ':class: gallery']
+        params = [":class: gallery"]
+        img_prefix = ".. image:: "
 
         for f in realfiles:
             line = img_prefix + f.as_posix()
             for p in params:
-                line += '\n    ' + p
-            line += '\n\n'
+                line += "\n    " + p
+            line += "\n\n"
             file.writelines(line)

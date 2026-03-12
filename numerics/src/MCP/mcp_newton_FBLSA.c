@@ -22,11 +22,16 @@
 
 #include "FischerBurmeister.h"            // for Jac_F_FB, phi_Mixed_FB
 #include "MCP_Solvers.h"                  // for mcp_compute_error, mcp_newt...
+#include "MCP_cst.h"
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
 #include "Newton_methods.h"               // for functions_LSA, init_lsa_fun...
 #include "SiconosBlas.h"                  // for cblas_dnrm2
 #include "SolverOptions.h"                // for SolverOptions, SICONOS_DPAR...
-#include "numerics_verbose.h"             // for numerics_printf
+#include "numerics_verbose.h"
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp) {
   // Computation of the new value F(z)
@@ -98,3 +103,37 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double* z, double
 
   numerics_printf("mcp_newton_FB_FBLSA. ends");
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers MCP_NEWTON_FB_FBLSA in the global solver registry.
+ */
+
+static void mcp_newton_fb_fblsa_set_default(SolverOptions* options) {
+  SOLVER_MAX_ITER(options) = 1000;
+  SOLVER_TOL(options) = 1e-4;
+}
+
+static int mcp_newton_fb_fblsa_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int mcp_newton_fb_fblsa_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*)problem;
+  mcp_newton_FB_FBLSA(mcp, z, w, &info, options);
+  return info;
+}
+
+static void mcp_newton_fb_fblsa_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_MCP_NEWTON_FB_FBLSA, "MCP_NEWTON_FB_FBLSA",
+                       "Newton FBLSA solver for Mixed Complementarity Problems",
+                       mcp_newton_fb_fblsa_init_wrap, mcp_newton_fb_fblsa_solve_wrap, mcp_newton_fb_fblsa_free_wrap, NULL,
+                       mcp_newton_fb_fblsa_set_default, 1000, 1e-4, 0);

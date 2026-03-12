@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Actuator.hpp
   \brief General interface to define an actuator
@@ -23,15 +23,41 @@
 #ifndef Actuator_H
 #define Actuator_H
 
+#include <cassert>
+#include <functional>
+#include <map>
+#include <memory>
 #include <string>
-#include "SiconosPointers.hpp"
 
-#include "SiconosFwd.hpp"
+#include "FunctionTypes.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
-#include "SiconosAlgebraTypeDef.hpp"
+namespace siconos::modeling {
+class NonSmoothDynamicalSystem;
+}
 
-#include "ControlTypeDef.hpp"
-#include "SiconosControlFwd.hpp"
+namespace siconos::simulation {
+class TimeDiscretisation;
+class Simulation;
+}  // namespace siconos::simulation
+
+namespace siconos::control {
+
+class ControlSensor;
+
+enum class ActuatorType {
+
+  PID,
+  LinearSMC,
+  ExplicitLinearSMC,
+  LinearSMCOT2,
+  LinearSMCimproved,
+  Twisting,
+  RegularTwisting,
+  ExplicitTwisting
+};
 
 /**
    Actuators Base Class
@@ -60,10 +86,7 @@
    TimeDiscretisation:
 
    \code
-   // Get the registry
-   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-   // Build an Actuator of type "myType" with t as a TimeDiscretisation.
-   regActuator.instantiate(myType, t);
+   ActuatorFactory::instance()->create(sensor, type)
    \endcode
 
    The best way is to use the controlManager:
@@ -74,137 +97,131 @@
    cm->addAndRecordActuator(myType,t)
    \endcode
 */
-class Actuator
-{
-
-private:
-
-  
+class Actuator {
+ private:
   ACCEPT_SERIALIZATION(Actuator);
 
-protected:
-
+ protected:
   /** type of the Actuator */
-  unsigned int _type;
+  ActuatorType _type{ActuatorType::PID};
 
   /** id of the Actuator */
-  std::string _id;
+  std::string _id{"none"};
 
   /** Control variable */
-  SP::SiconosVector  _u;
+  std::shared_ptr<siconos::algebra::SiconosVector> _u{nullptr};
 
   /** B Matrix */
-  SP::SimpleMatrix _B;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
 
-  /** name of the plugin for g (nonlinear affine in control system)*/
-  std::string _plugingName;
+  /** function wrapper used to compute \f$ h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_x g \f$ for the nonlinear case*/
-  std::string _pluginJacgxName;
+  /** function wrapper used to compute  \f$ \nabla_x g(x,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_state_{nullptr};
+
+  /** true if the relation is linear. This is deduced from the set... functions above
+   * Mostly used in CommonSMC derived class.
+   */
+  bool isRelationLinear_{true};
 
   /** ControlSensor feeding the Controller */
-  SP::ControlSensor _sensor;
+  std::shared_ptr<ControlSensor> _sensor{nullptr};
 
-  /** default constructor
-   */
-  Actuator();
+  // Rule of five
+  Actuator() = delete;
+  Actuator(const Actuator&) = delete;
+  Actuator(Actuator&&) = delete;
+  Actuator& operator=(const Actuator&) = delete;
+  Actuator& operator=(Actuator&&) = delete;
 
-public:
-
+ public:
   /** General Constructor
    *
    *  \param type the type of the Actuator, which corresponds to the class type
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  Actuator(unsigned int type, SP::ControlSensor sensor);
+  Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor);
 
   /** General Constructor with dynamics affine in control
    *
    *  \param type the type of the Actuator, which corresponds to the class type
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B);
+  Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
+           std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
    */
-  virtual ~Actuator();
+  virtual ~Actuator() noexcept = default;
 
   /** set id of the Actuator
    *
    *  \param newId the new id.
    */
-  inline void setId(const std::string& newId)
-  {
-    _id = newId;
-  };
+  inline void setId(const std::string& newId) { _id = newId; };
 
   /** get id of the Actuator
    *
    *  \return a std::string
    */
-  inline const std::string getId() const
-  {
-    return _id;
-  };
+  inline const std::string getId() const { return _id; };
 
   /** get the type of the Actuator (ie class name)
    *
    *  \return an integer
    */
-  inline unsigned int getType() const
-  {
-    return _type;
-  };
+  inline ActuatorType getType() const { return _type; };
 
-  /** Get the control value
-   *
-   *  \return current control value u
+  /** \return current control value u
    */
-  inline const SiconosVector& u() const { return *_u; };
+  inline const siconos::algebra::SiconosVector& u() const { return *_u; };
 
   /** Set the control size
    *
    *  \param size dimension of the control input u
    */
-  void setSizeu(unsigned size);
+  void setSizeu(siconos::algebra::Index size);
 
   /** Set the B matrix
    *
    *  \param B the new B matrix
    */
-  inline void setB(SP::SimpleMatrix B)
-  {
-    _B = B;
-  };
+  inline void setB(std::shared_ptr<siconos::algebra::SiconosMatrix> B) { _B = B; };
 
-  /** Set the name of the plugin for computing g
+  /** set a user-defined function to compute g
    *
-   *  \param g the name of the plugin to compute g
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  inline void setg(const std::string& g)
-  {
-    _plugingName = g;
-  };
+  void setComputegFunction(const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_x g(x, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
 
   /** add a Sensor in the actuator.
    *
    *  \param newSensor a Sensor that will be connected to the Actuator
    */
-  void addSensorPtr(SP::ControlSensor newSensor);
+  void addSensorPtr(std::shared_ptr<ControlSensor> newSensor);
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    *  associated with this Actuator
    *
    *  \param td the TimeDiscretisation for this Actuator
    */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td) {};
 
   /** initialize actuator data.
    *
-   *  \param nsds the NonSmoothDynamicalSystem
+   *  \param nsds the siconos::modeling::NonSmoothDynamicalSystem
    *  \param s the simulation
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /** capture data when the ActuatorEvent is processed
    */
@@ -219,6 +236,66 @@ public:
    *  \return "NULL" shared_ptr if there is no internal simulation, otherwise
    *  it returns the Model hoding the simulation
    */
-  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const;
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const;
 };
+
+/** A class to handle actuators creation
+
+  Requirements:
+  - the Actuator type must be known and register
+
+  For a XXXXActuator, add in the file describing the XXXXActuator class:
+
+  static siconos::simulation::ActuatorRegistration<siconos::simulation::XXXActuator>
+ reg(siconos::simulation::ActuatorType::XXXX);
+
+  See ActuatorType enum for the available names.
+
+  Usage:
+
+  auto actuator = ActuatorFactory::instance()->create(sensor, ActuatorType::XXXX)
+
+*/
+class ActuatorFactory {
+  // Signature of Actuator constructor
+  using ActuatorCreator =
+      std::function<std::shared_ptr<Actuator>(std::shared_ptr<ControlSensor>)>;
+
+  /** map to connect actuator type and the function used to create them */
+  std::map<ActuatorType, ActuatorCreator> m_factories;
+
+ public:
+  /** Factory function which creates and returns an actuator
+
+      \param sensor the ControlSensor used by the Actuator
+      \param type type of the actuator (must be a ActuatorType (enum))
+      \return a pointer to actuator
+  */
+  std::shared_ptr<Actuator> create(std::shared_ptr<ControlSensor> sensor, ActuatorType type) {
+    assert(m_factories.contains(type) && "unknown Actuator type");
+    return m_factories[type](sensor);
+  }
+
+  /** access to the (singleton) factory instance */
+  static ActuatorFactory* instance() {
+    static ActuatorFactory factory;
+    return &factory;
+  }
+
+  void registerCreator(ActuatorType newtype, ActuatorCreator caller) {
+    m_factories[newtype] = caller;
+  }
+};
+
+template <class T>
+class ActuatorRegistration {
+ public:
+  ActuatorRegistration(ActuatorType newtype) {
+    ActuatorFactory::instance()->registerCreator(
+        newtype,
+        [](std::shared_ptr<ControlSensor> sensor) { return std::make_shared<T>(sensor); });
+  }
+};
+
+}  // namespace siconos::control
 #endif

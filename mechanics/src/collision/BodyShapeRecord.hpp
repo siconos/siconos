@@ -18,52 +18,48 @@
 
 /*! \file BodyShapeRecord.hpp
   \brief Definition of an abstract Body shape record
-  The objective of this class is to keep associate ds and static body woth the
+  The objective of this class is to keep associate ds and static body with the
 shape in a contactor.
 */
 
 #ifndef BodyShapeRecord_h
 #define BodyShapeRecord_h
 
-// We need to maintain a record associating each body with a shape,
-// contactor, and collision object for each shape type.  We also need
+#include <memory>
+#include "SiconosVector.hpp"
+
+namespace siconos::modeling {
+
+class SecondOrderDS;
+}
+
+namespace siconos::collision {
+
+class SiconosShape;
+class SiconosContactor;
+class StaticBody;
+
+// We need to maintain a record to associate each body with a shape,
+// a contactor, and a collision object for each shape type.  We also need
 // to access generic shape stuff (group, margin) by a pointer from the
 // collision callback, so we need a record base class.
 class BodyShapeRecord {
-public:
-  BodyShapeRecord(SP::SiconosVector b, SP::SecondOrderDS d, SP::SiconosShape sh,
-                  SP::SiconosContactor con, SP::StaticBody staticCSR)
-      : base(b), ds(d), sshape(sh), contactor(con),
-        shape_version(sh->version()), staticBody(staticCSR)
-  {
-  }
-  virtual ~BodyShapeRecord() {}
+ public:
+  BodyShapeRecord(std::shared_ptr<siconos::algebra::SiconosVector> b,
+                  std::shared_ptr<siconos::modeling::SecondOrderDS> d,
+                  std::shared_ptr<SiconosShape> sh, std::shared_ptr<SiconosContactor> con,
+                  std::shared_ptr<StaticBody> staticCSR);
 
-  SP::SiconosVector base;
-  SP::SecondOrderDS ds;
-  SP::SiconosShape sshape;
-  SP::SiconosContactor contactor;
-  unsigned int shape_version;
-  SP::StaticBody staticBody;
+  virtual ~BodyShapeRecord() noexcept = default;
 
+  std::shared_ptr<siconos::algebra::SiconosVector> base{nullptr};
+  std::shared_ptr<siconos::modeling::SecondOrderDS> ds{nullptr};
+  std::shared_ptr<SiconosShape> sshape{nullptr};
+  std::shared_ptr<SiconosContactor> contactor{nullptr};
+  unsigned int shape_version{0};
+  std::shared_ptr<StaticBody> staticBody{nullptr};
 
-  void display() const
-  {
-    std::cout << "BodyShapeRecord display" << std::endl;
-
-    if (ds)
-    {
-      std::cout << "ds number: " << ds->number() << std::endl;
-    }
-    if (staticBody)
-    {
-      std::cout << "static Body number :" << staticBody->number << std::endl;
-    }
-
-  };
-
-
-  VIRTUAL_ACCEPT_VISITORS();
+  void display() const;
 };
-
+}  // namespace siconos::collision
 #endif /* BodyShapeRecord_h */

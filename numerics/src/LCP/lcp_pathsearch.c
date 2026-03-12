@@ -34,6 +34,9 @@
 #include "lcp_pivot.h"      // for LCP_PATHSEARCH_LEAVING_T
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_EXPR_WE
 
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                     SolverOptions* options) {
@@ -121,3 +124,37 @@ void lcp_pathsearch_set_default(SolverOptions* options) {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_PATHSEARCH in the global solver registry.
+ */
+
+static int lcp_pathsearch_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_pathsearch_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_pathsearch_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_pathsearch((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_pathsearch_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_PATHSEARCH, "LCP_PATHSEARCH",
+                       "Path search solver for LCP",
+                       lcp_pathsearch_init_wrap,
+                       lcp_pathsearch_solve_wrap,
+                       lcp_pathsearch_free_wrap,
+                       NULL,  /* error function */
+                       lcp_pathsearch_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

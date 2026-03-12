@@ -1,0 +1,539 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "D1MinusLinearOSI.hpp"
+
+#include "BlockVector.hpp"
+#include "Interaction.hpp"
+#include "LagrangianDS.hpp"
+#include "LagrangianR.hpp"
+#include "LagrangianSparseDS.hpp"
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "OneStepNSProblem.hpp"
+#include "SecondOrderDS.hpp"
+#include "SiconosVector.hpp"
+#include "Simulation.hpp"
+#include "Tools.hpp"  // For enum_to_string
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "siconos_debug.h"
+
+siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
+    siconos::nonsmooth_formulations::OneStepNSProblem* p,
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionProperties& interProp)
+    : _osnsp(p), _inter(inter), _interProp(interProp){};
+
+void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
+    const siconos::modeling::NewtonImpactNSL& nslaw) {
+  double e = nslaw.e();
+  std::size_t nsl_size = _inter->nonSmoothLaw()->size();
+  std::vector<std::size_t> subCoord = {0, nsl_size, 0, nsl_size};
+  siconos::algebra::SiconosVector& osnsp_rhs =
+      *(*_interProp.workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
+  osnsp_rhs += e * osnsp_rhs;
+}
+
+siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(Type type)
+    : OneStepIntegrator{IntegratorType::D1MINUSLINEAROSI, 2, 0, 2, 1, 2},
+      _typeOfD1MinusLinearOSI{type} {}
+
+unsigned int siconos::integrators::D1MinusLinearOSI::numberOfIndexSets() const {
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      return 4;
+    case Type::halfexplicit_acceleration_level_full:
+      return 4;
+    case Type::halfexplicit_velocity_level:
+      return 3;
+  }
+  THROW_EXCEPTION(
+      "siconos::integrators::D1MinusLinearOSI::numberOfIndexSet - not implemented for "
+      "D1minusLinear of type: " +
+      siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  return 0;
+}
+void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  // Get work buffers from the graph
+  auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
+
+  // Check dynamical system type
+
+  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    lds->initMemoryForGeneralizedCoordinates(2);  // acceleration is required for the ds
+    lds->init_lu_mass();  // invMass required to update post-impact velocity
+
+    ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+    // Update dynamical system components (for memory swap).
+    lds->computeTotalForces(*lds->velocity(), *lds->q(), t);
+    lds->swapInMemory();
+  }
+
+  else if (auto lsds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+    lsds->initMemoryForGeneralizedCoordinates(2);  // acceleration is required for the ds
+    lsds->init_lu_mass();  // invMass required to update post-impact velocity
+
+    ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
+        std::make_shared<siconos::algebra::SiconosVector>(lsds->dimension());
+    // Update dynamical system components (for memory swap).
+    lsds->computeTotalForces(*lsds->velocity(), *lsds->q(), t);
+    lsds->swapInMemory();
+  }
+
+  else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    neds->init_lu_mass();  // invMass required to update post-impact velocity
+    ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE] =
+        std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
+    ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
+        std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
+    // Compute a first value of the forces to store it in totalForcesMemory
+    neds->computeWrench(*neds->twist(), *neds->q(), t);
+    neds->swapInMemory();
+  } else {
+    THROW_EXCEPTION(
+        "siconos::integrators::D1MinusLinearOSI::initialize - Only implemented for Lagrangian "
+        "or NewtonEuler dynamical systems.");
+  }
+
+  for (siconos::algebra::blocks::size_type k = _levelMinForInput; k < _levelMaxForInput + 1;
+       k++) {
+    ds->initializeNonSmoothInput(k);
+  }
+}
+
+void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
+  auto allOSNSP = _simulation->oneStepNSProblems();  // all OSNSP
+
+  bool isOSNSPinitialized = false;
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      // set evaluation levels (first is of velocity, second of acceleration type)
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      isOSNSPinitialized = true;
+      DEBUG_EXPR(siconos::algebra::print(
+          *((*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1])));
+      break;
+    case Type::halfexplicit_acceleration_level_full:
+      // set evaluation levels (first is of velocity, second of acceleration type)
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      isOSNSPinitialized = true;
+      break;
+    case Type::halfexplicit_velocity_level:
+      // set evaluation levels (first is of velocity, second of acceleration type)
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(
+          1); /** !!! */
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      isOSNSPinitialized = true;
+      break;
+  }
+
+  if (!isOSNSPinitialized) {
+    THROW_EXCEPTION(
+        "siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() - not "
+        "implemented for type of "
+        "D1MinusLinearOSI: " +
+        siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  }
+}
+
+void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(
+    siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
+  DEBUG_BEGIN(
+      "siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::"
+      "modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, "
+      "siconos::graphs::DynamicalSystemsGraph & DSG)\n");
+  auto ds1 = interProp.source;
+  auto ds2 = interProp.target;
+  assert(ds1);
+  assert(ds2);
+  DEBUG_PRINTF("interaction number %i\n", inter.number());
+
+  if (!interProp.workVectors) {
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
+  }
+  if (!interProp.workBlockVectors) {
+    interProp.workBlockVectors =
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>(
+            siconos::integrators::D1MinusLinearOSI::BLOCK_WORK_LENGTH);
+  }
+
+  auto& inter_work = *interProp.workVectors;
+  auto& inter_work_block = *interProp.workBlockVectors;
+
+  auto& relation = *inter.relation();
+  auto relationType = relation.getType();
+
+  inter_work[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS] =
+      std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
+
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
+  inter.initializeMemory(_steps);
+
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2)))) {
+    std::cout << "checkOSI(DSG.descriptor(ds1)): " << std::boolalpha
+              << checkOSI(DSG.descriptor(ds1)) << std::endl;
+    std::cout << "checkOSI(DSG.descriptor(ds2)): " << std::boolalpha
+              << checkOSI(DSG.descriptor(ds2)) << std::endl;
+
+    THROW_EXCEPTION(
+        "siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction. The "
+        "implementation is not correct for two different OSI for one interaction");
+  }
+
+  /* allocate and set work vectors for the osi */
+  auto xfree = siconos::integrators::D1MinusLinearOSI::xfree;
+  DEBUG_PRINTF("ds1->number() %i\n", ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n", ds2->number());
+
+  if (ds1 != ds2) {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() != 2))
+      inter_work_block[xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
+  } else {
+    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() != 1))
+      inter_work_block[xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
+  }
+
+  if (checkOSI(DSG.descriptor(ds1))) {
+    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
+    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+    auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+    inter_work_block[xfree]->setVectorPtr(
+        0, workVds1[siconos::integrators::D1MinusLinearOSI::FREE]);
+  }
+  if (ds1 != ds2) {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if (checkOSI(DSG.descriptor(ds2))) {
+      DEBUG_PRINTF("ds2->number() %i is taken into account\n", ds2->number());
+      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+      auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      inter_work_block[xfree]->setVectorPtr(
+          1, workVds2[siconos::integrators::D1MinusLinearOSI::FREE]);
+    }
+  }
+
+  DEBUG_EXPR(siconos::algebra::print(*inter_work_block[xfree]););
+
+  if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    // Must take both Lagrangian and LagrangianSparse DS into account
+    // --> Second Order
+    auto& lds = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds1);
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 0,
+                                                lds.p(2));
+    inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 0,
+                                                lds.acceleration());
+
+    if (ds1 != ds2) {
+      auto& lds2 = *std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds2);
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::p2, 1,
+                                                  lds2.p(2));
+      inter.append_to_dynamical_systems_variables(modeling::LagrangianR::ds_var::q2, 1,
+                                                  lds2.acceleration());
+    }
+  }
+  DEBUG_END(
+      "siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::"
+      "modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, "
+      "siconos::graphs::DynamicalSystemsGraph & DSG)\n");
+}
+
+double siconos::integrators::D1MinusLinearOSI::computeResidu() {
+  DEBUG_PRINT("\n ******************************************************************\n");
+  DEBUG_PRINT(" ******************************************************************\n");
+  DEBUG_PRINT(" ******************************************************************\n");
+
+  DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
+
+  DEBUG_PRINTF("nextTime %f\n", _simulation->nextTime());
+  DEBUG_PRINTF("startingTime %f\n", _simulation->startingTime());
+  DEBUG_PRINTF("time step size %f\n", _simulation->timeStep());
+
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
+      return computeResiduHalfExplicitAccelerationLevel();
+    case Type::halfexplicit_velocity_level:
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
+      return computeResiduHalfExplicitVelocityLevel();
+    case Type::halfexplicit_acceleration_level_full:
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for "
+          "type "
+          "of "
+          "D1MinusLinearOSI: " +
+          siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+      // return computeResiduHalfExplicitAccelerationLevelFull(); // obsolete
+  }
+  THROW_EXCEPTION(
+      "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type "
+      "of "
+      "D1MinusLinearOSI: " +
+      siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
+  return 1;
+}
+
+void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
+  DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::computeFreeState()\n");
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+    auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    /* \warning the following conditional statement should be removed with a MechanicalDS
+     * class
+     */
+
+    auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      // get left state from memory
+      const auto& vold = d->velocityMemory().getSiconosVector(0);  // right limit
+      // POINTER CONSTRUCTOR : contains free velocity
+      auto& vfree = *d->velocity();
+      // get right information
+      vfree = -residuFree + vold;
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+      // d->computeMass();
+      // M->resetFactorizationFlags();
+      // M->Solve(vfree);
+      // DEBUG_EXPR(siconos::algebra::print(*M));
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      // get left state from memory
+      const auto& vold = d->velocityMemory().getSiconosVector(0);  // right limit
+      // POINTER CONSTRUCTOR : contains free velocity
+      auto& vfree = *d->velocity();
+      // get right information
+      vfree = -residuFree + vold;
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+      // d->computeMass();
+      // M->resetFactorizationFlags();
+      // M->Solve(vfree);
+      // DEBUG_EXPR(siconos::algebra::print(*M));
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      // get left state from memory
+      const auto& vold = d->twistMemory().getSiconosVector(0);  // right limit
+      DEBUG_EXPR(siconos::algebra::print(vold));
+
+      // get right information
+      // auto M = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()))); // we
+      // copy the mass matrix to avoid its factorization;
+      auto& vfree = *d->twist();  // POINTER CONSTRUCTOR : contains free velocity
+
+      vfree = -residuFree + vold;
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+    } else
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::computeResidu - only implemented for "
+          "Lagrangian or Newton Euler dynamical systems.");
+  }
+  DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeState()\n");
+}
+
+void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
+  DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)\n");
+
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    /* \warning the following conditional statement should be removed with a MechanicalDS
+     * class
+     */
+    /* Lagrangian DS*/
+    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      auto v = d->velocity();
+
+      DEBUG_PRINT("Position and velocity before update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+
+      /* Add the contribution of the impulse if any */
+      if (d->p(1)) {
+        DEBUG_EXPR(siconos::algebra::print(*d->p(1)));
+        /* copy the value of the impulse */
+        auto dummy = *d->p(1);
+        /* Compute the velocity jump due to the impulse */
+        if (d->hasLUMass()) {
+          d->init_lu_mass();
+          dummy = d->LUMass()->solve(dummy);
+        }
+        /* Add the velocity jump to the free velocity */
+        *v += dummy;
+      }
+
+      DEBUG_PRINT("Position and velocity after update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      auto v = d->velocity();
+
+      DEBUG_PRINT("Position and velocity before update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+
+      /* Add the contribution of the impulse if any */
+      if (d->p(1)) {
+        DEBUG_EXPR(siconos::algebra::print(*d->p(1)));
+        /* copy the value of the impulse */
+        auto dummy = *d->p(1);
+        /* Compute the velocity jump due to the impulse */
+        if (d->hasLUMass()) {
+          d->init_lu_mass();
+          dummy = d->LUMass()->solve(dummy);
+        }
+        /* Add the velocity jump to the free velocity */
+        *v += dummy;
+      }
+
+      DEBUG_PRINT("Position and velocity after update\n");
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+    }
+
+    /*  NewtonEuler Systems */
+    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      if (d->p(1)) {
+        // Update the velocity
+        auto dummy = *d->p(1);  // copy
+        if (d->hasLUMass()) {
+          dummy = d->LUMass()->solve(dummy);
+        }
+        *d->twist() += dummy;  // add free velocity
+        // update \f$ \dot q \f$
+        *d->dotq() = d->T() * *d->twist();
+        DEBUG_PRINT("\nRIGHT IMPULSE\n");
+        DEBUG_EXPR(siconos::algebra::print(*d->p(1)));
+      }
+      DEBUG_EXPR(siconos::algebra::print(*d->q()));
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()));
+    } else
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::computeResidu - only implemented for "
+          "Lagrangian or Newton Euler dynamical systems.");
+  }
+
+  DEBUG_END("\n siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int )\n");
+}
+
+void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
+    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
+  DEBUG_PRINT("siconos::integrators::D1MinusLinearOSI::computeFreeOutput(), start\n");
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter, osnsp);
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
+      return;
+    case Type::halfexplicit_acceleration_level_full:
+      computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter, osnsp);
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
+      return;
+    case Type::halfexplicit_velocity_level:
+      computeFreeOutputHalfExplicitVelocityLevel(vertex_inter, osnsp);
+      DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
+      return;
+  }
+  THROW_EXCEPTION(
+      "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type "
+      "of "
+      "D1MinusLinearOSI: " +
+      siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
+}
+
+bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
+  DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
+  DEBUG_END("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      return addInteractionInIndexSetHalfExplicitAccelerationLevel(inter, i);
+    case Type::halfexplicit_velocity_level:
+      return addInteractionInIndexSetHalfExplicitVelocityLevel(inter, i);
+    default:
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet() - not "
+          "implemented "
+          "for type of D1MinusLinearOSI: " +
+          siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  }
+  return 0;
+}
+
+bool siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet(
+    std::shared_ptr<siconos::modeling::Interaction> inter,
+    siconos::graphs::InteractionsGraph::size_type i) {
+  DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
+  DEBUG_END("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
+  switch (_typeOfD1MinusLinearOSI) {
+    case Type::halfexplicit_acceleration_level:
+      return removeInteractionFromIndexSetHalfExplicitAccelerationLevel(inter, i);
+    case Type::halfexplicit_velocity_level:
+      return removeInteractionFromIndexSetHalfExplicitVelocityLevel(inter, i);
+    default:
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet() - not "
+          "implemented for type of D1MinusLinearOSI: " +
+          siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
+  }
+  return 0;
+}

@@ -14,23 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "Bullet1DR.hpp"
 
-#include <Interaction.hpp>
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-Bullet1DR::Bullet1DR(SP::btManifoldPoint point) : NewtonEuler1DR(), _contactPoints(point)
-{
-}
+#include "SiconosVector.hpp"
 
-void Bullet1DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
-{
-  y.setValue(0, _contactPoints->getDistance());
-  btVector3 posa = _contactPoints->getPositionWorldOnA();
-  btVector3 posb = _contactPoints->getPositionWorldOnB();
+siconos::collision::bullet::Bullet1DR::Bullet1DR(std::shared_ptr<btManifoldPoint> point)
+    : siconos::modeling::NewtonEuler1DR{}, _contactPoints{point} {}
+
+void siconos::collision::bullet::Bullet1DR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  y(0) = _contactPoints->getDistance();
+  auto posa = _contactPoints->getPositionWorldOnA();
+  auto posb = _contactPoints->getPositionWorldOnB();
   (*pc1())(0) = posa[0];
   (*pc1())(1) = posa[1];
   (*pc1())(2) = posa[2];
@@ -40,6 +41,6 @@ void Bullet1DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 
   (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
-  (*nc())(2) = _contactPoints->m_normalWorldOnB[2];;
-
+  (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+  ;
 }

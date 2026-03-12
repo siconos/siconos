@@ -18,15 +18,15 @@ include(SiconosTools)
 #
 function(create_siconos_component COMPONENT)
 
-  set(multiValueArgs SRCDIRS  EXCLUDE)
-  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-  
+  set(multiValueArgs SRCDIRS EXCLUDE)
+  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
   # --- Collect source files from given directories ---
 
   # --> Scan source directories and return a list of files
   # to be compiled.
   get_sources(${COMPONENT} DIRS ${${COMPONENT}_DIRS} EXCLUDE ${component_EXCLUDE})
-  
+
   # Create the library
   if(BUILD_SHARED_LIBS)
     add_library(${COMPONENT} SHARED ${${COMPONENT}_SRCS})
@@ -39,7 +39,7 @@ function(create_siconos_component COMPONENT)
   # reminder : WARNINGS_LEVEL=0 -> no warnings, =1, developers mininmal set of warnings,
   # =2 : strict mode, warnings to errors.
   apply_compiler_options(${COMPONENT} DIAGNOSTICS_LEVEL ${WARNINGS_LEVEL})
-  
+
   # Append component source dirs to include directories
   # (Private : only to build current component).
   foreach(dir IN LISTS ${COMPONENT}_DIRS)
@@ -55,7 +55,7 @@ function(create_siconos_component COMPONENT)
     target_include_directories(${COMPONENT} INTERFACE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
   endforeach()
-    
+
   include(SiconosVersion)
 
   set_target_properties(${COMPONENT} PROPERTIES
@@ -66,7 +66,7 @@ function(create_siconos_component COMPONENT)
   # windows stuff : this should be reviewed.
   include(WindowsLibrarySetup)
   windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
-  
+
   if(WITH_GENERATION)
     # includes to be sent to python script for serialization/generation ...
     # Unstable and to be reviewed.
@@ -76,8 +76,23 @@ function(create_siconos_component COMPONENT)
     set(GENERATED_INCLUDES "${GENERATED_INCLUDES};${${COMPONENT}_GENERATED_INCLUDES}"
       CACHE INTERNAL "")
   endif()
-  
-  
+
+
+  # === Sanitizer
+  # Add option(WITH_ASAN "Activate asan sanitizer" ON) in config file to activate it
+  if(WITH_ASAN AND NOT (${COMPONENT} STREQUAL "externals" OR ${COMPONENT} STREQUAL "externals_fortran"))
+    target_compile_options(${COMPONENT} PUBLIC "-fsanitize=address")
+    target_compile_options(${COMPONENT} PUBLIC "-fsanitize=undefined")
+    target_compile_options(${COMPONENT} PUBLIC "-fno-omit-frame-pointer")
+    target_compile_options(${COMPONENT} PUBLIC "-fno-common")
+    target_link_options(${COMPONENT} PUBLIC "-fsanitize=address")
+    target_link_options(${COMPONENT} PUBLIC "-fsanitize=undefined")
+    target_link_options(${COMPONENT} PUBLIC "-fno-omit-frame-pointer")
+    target_link_options(${COMPONENT} PUBLIC "-fno-common")
+
+  endif()
+
+
 endfunction()
 
 
@@ -100,14 +115,14 @@ endfunction()
 function(configure_component_documentation COMPONENT)
 
   set(multiValueArgs HEADERS)
-  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
-  
+
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)
+  if(WITH_DOCUMENTATION OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT} HEADERS ${component_HEADERS})
   endif()
@@ -124,9 +139,9 @@ endfunction()
 #
 #
 function(siconos_component_install_setup COMPONENT)
-  
+
   set(options NODOC)
-  cmake_parse_arguments(component_install "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(component_install "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # libraries
   install(TARGETS ${COMPONENT}
@@ -135,7 +150,7 @@ function(siconos_component_install_setup COMPONENT)
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     INCLUDES DESTINATION include/siconos
-    )
+  )
 
   # Required for SiconosConfig.h
   target_include_directories(${COMPONENT} INTERFACE
@@ -147,7 +162,7 @@ function(siconos_component_install_setup COMPONENT)
     file(GLOB _headers CONFIGURE_DEPENDS
       LIST_DIRECTORIES false ${_FILE} ${dir}/*.h ${dir}/*.hpp)
     list(APPEND _all_headers ${_headers})
-    
+
     # And each include path in install interface must obviously be installed ...
     # Note FP :  maybe we should have an explicit list of headers to be installed,
     # for each component, instead of a list of dirs?
@@ -162,8 +177,8 @@ function(siconos_component_install_setup COMPONENT)
     install(
       FILES ${_all_headers}
       DESTINATION include/siconos/${COMPONENT}
-      )
-    
+    )
+
     # Add include dirs in target interface 
     target_include_directories(${COMPONENT} INTERFACE
       $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
@@ -178,7 +193,7 @@ function(siconos_component_install_setup COMPONENT)
   list(REMOVE_DUPLICATES installed_targets)
   set(installed_targets ${installed_targets}
     CACHE INTERNAL "List of all exported components (targets).")
-  
+
 endfunction()
 
 

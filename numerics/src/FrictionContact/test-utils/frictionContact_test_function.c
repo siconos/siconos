@@ -18,13 +18,16 @@
 #include <math.h>    // for isfinite
 #include <stdio.h>   // for printf, fclose, fopen, FILE
 #include <stdlib.h>  // for calloc, free, rand, srand
+#include <time.h>
 
 #include "FrictionContactProblem.h"  // for frictionContactProblem_free
 #include "NonSmoothDrivers.h"        // for fc2d_driver, fc3d_driver
 #include "NumericsFwd.h"             // for SolverOptions, FrictionConta...
-#include "SiconosConfig.h"           // for WITH_FCLIB
-#include "SiconosConfig.h"           // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
-#include "SolverOptions.h"           // for SolverOptions, solver_option...
+#include "SiconosBlas.h"
+#include "SiconosConfig.h"  // for WITH_FCLIB
+#include "SiconosConfig.h"  // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
+#include "SolverOptions.h"  // for SolverOptions, solver_option...
+#include "fc3d_short_names.h"            // for short solver ID names
 #include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
 
@@ -43,31 +46,31 @@
 #include "GAMSlink.h"  // for SN_GAMSparams
 void frictionContact_test_gams_opts(SolverOptions* options) {
   int solverId = options->solverId;
-  if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI) {
+  if (solverId == FC3D_GAMS_PATH ||
+      solverId == FC3D_GAMS_LCP_PATH ||
+      solverId == GFC3D_GAMS_PATH ||
+      solverId == FC3D_GAMS_PATH ||
+      solverId == FC3D_GAMS_LCP_PATH ||
+      solverId == GFC3D_GAMS_PATH ||
+      solverId == GFC3D_GAMS_PATH ||
+      solverId == GFC3D_GAMS_PATHVI) {
     assert(options->solverParameters);
     SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
     GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
     GP->filename = current->filename;
 
-    if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
-        solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
-        solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI) {
+    if (solverId == FC3D_GAMS_PATHVI ||
+        solverId == FC3D_GAMS_LCP_PATHVI ||
+        solverId == GFC3D_GAMS_PATHVI) {
       add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
       add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
       add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
       add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
       //    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
       //    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
-    } else if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-               solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-               solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH) {
+    } else if (solverId == FC3D_GAMS_PATH ||
+               solverId == FC3D_GAMS_LCP_PATH ||
+               solverId == GFC3D_GAMS_PATH) {
       add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
       add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
       add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
@@ -125,6 +128,8 @@ int frictionContact_test_function(TestCase* current) {
   double* reaction = (double*)calloc(dim * NC, sizeof(double));
   double* velocity = (double*)calloc(dim * NC, sizeof(double));
 
+  long clk_tck = CLOCKS_PER_SEC;
+
   solver_options_print(current->options);
 
 // --- Extra setup for options when the solver belongs to GAMS family ---
@@ -132,6 +137,7 @@ int frictionContact_test_function(TestCase* current) {
   frictionContact_test_gams_opts(current->options);
 #endif
 
+  clock_t t1 = clock();
   if (dim == 2) {
     info = fc2d_driver(problem, reaction, velocity, current->options);
   } else if (dim == 3) {
@@ -139,9 +145,30 @@ int frictionContact_test_function(TestCase* current) {
   } else
     info = 1;
 
+  int print_size = 10;
+
   for (int k = 0; k < dim * NC; ++k) {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
+
+  clock_t t2 = clock();
+
+  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC * dim, velocity, 1));
+  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC * dim, reaction, 1));
+
+  if (dim * NC >= print_size) {
+    printf("First values (%i)\n", print_size);
+    for (int k = 0; k < print_size; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
+    }
+  } else {
+    for (int k = 0; k < dim * NC; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
+    }
+  }
+  printf(" ..... \n");
 
   if (!info)
     printf("test success, residual = %9.2e, info = %d, nb iter = %i\n",
@@ -151,6 +178,11 @@ int frictionContact_test_function(TestCase* current) {
     printf("test failure, residual = %9.2e, info = %d, nb iter = %i\n",
            current->options->dparam[SICONOS_DPARAM_RESIDU], info,
            current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+
+  printf(
+      "\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU],
+      current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2 - t1) / (double)clk_tck);
+  printf("%3i %5i     %s\n\n", dim, NC, current->filename);
 
   free(reaction);
   free(velocity);

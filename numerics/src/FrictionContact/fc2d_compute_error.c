@@ -17,6 +17,7 @@
  */
 #include "fc2d_compute_error.h"
 
+#include <assert.h>
 #include <float.h>  // for DBL_EPSILON
 #include <math.h>   // for fabs, sqrt
 #include <stdio.h>  // for printf
@@ -25,6 +26,7 @@
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SiconosBlas.h"             // for cblas_dcopy
 #include "numerics_verbose.h"        // for numerics_error, verbose
+#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -105,11 +107,14 @@ void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
 int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, double tolerance,
                        double norm, double* error) {
   DEBUG_BEGIN("fc2d_compute_error(...)\n");
-  /* Checks inputs */
-  assert(z);
-  assert(w);
-  assert(problem);
-  assert(error);
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(z);
+  CHECK_NULL(w);
+  CHECK_NULL(error);
+  CHECK_MATRIX(problem->M);
+  CHECK_NULL(problem->q);
+  CHECK_NULL(problem->mu);
 
   int nc = problem->numberOfContacts;
   int n = nc * 2;

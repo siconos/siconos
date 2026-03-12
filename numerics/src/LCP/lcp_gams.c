@@ -14,8 +14,9 @@
 /* GAMS stuff */
 
 #include "LCP_Solvers.h"       // for lcp_gams
+#include "lcp_cst.h"
 #include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOptions
-#include "numerics_verbose.h"  // for numerics_error
+#include "numerics_verbose.h"
 
 #ifdef HAVE_GAMS_C_API
 
@@ -144,3 +145,45 @@ TERMINATE:
 
 #endif  // HAVE_GAMS_C_API
 }
+
+static void lcp_gams_set_default(SolverOptions* options) {
+  /* No specific defaults needed */
+  (void)options;
+}
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_GAMS in the global solver registry.
+ */
+
+#include "solver_registry.h"
+#include "numerics_errors.h"
+
+static int lcp_gams_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  lcp_gams_set_default(options);
+  return NUMERICS_OK;
+}
+
+static int lcp_gams_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_gams((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_gams_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_GAMS, "LCP_GAMS",
+                       "GAMS solver for LCP",
+                       lcp_gams_init_wrap,
+                       lcp_gams_solve_wrap,
+                       lcp_gams_free_wrap,
+                       NULL,  /* error function */
+                       lcp_gams_set_default,  /* set_default */
+                       1000,  /* default_max_iter */
+                       1e-6,  /* default_tol */
+                       0);     /* is_local_solver */

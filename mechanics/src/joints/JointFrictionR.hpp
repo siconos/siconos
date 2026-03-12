@@ -14,70 +14,84 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file JointFrictionR.hpp
 
 */
 #ifndef JointFrictionRELATION_H
 #define JointFrictionRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
-#include <NewtonEulerJointR.hpp>
-#include <Tools.hpp>
+#include <vector>
+
+#include "NewtonEulerR.hpp"
+
+namespace siconos::joints {
+
+class NewtonEulerJointR;
 
 /**
    This class implements a friction on a DoF for any NewtonEulerJointR.
 */
-class JointFrictionR : public NewtonEulerR
-{
-protected:
-
+class JointFrictionR : public siconos::modeling::NewtonEulerR {
+ protected:
   ACCEPT_SERIALIZATION(JointFrictionR);
-  JointFrictionR() : NewtonEulerR() {}
 
-  SP::NewtonEulerJointR _joint;
+  std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
 
-  SP::UnsignedIntVector _axis;
+  std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
 
-  unsigned int _axisMin, _axisMax;
-  SP::SimpleMatrix _jachqTmp;
+  siconos::algebra::Index _axisMin{0}, _axisMax{0};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
-public:
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
+ public:
   /** Initialize a joint friction for a common case: a single axis with a
    *  single friction, either positive or negative. For use with
    *  NewtonImpactNSL. */
-  JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis);
+  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint, siconos::algebra::Index axis);
 
   /** Initialize a multidimensional joint friction, e.g. the cone friction on
    *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
-  JointFrictionR(SP::NewtonEulerJointR joint,
-                 SP::UnsignedIntVector axes=SP::UnsignedIntVector());
+  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint,
+                 std::shared_ptr<std::vector<siconos::algebra::Index>> axes = nullptr);
+
+  virtual ~JointFrictionR() noexcept = default;
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
-
-  virtual unsigned int numberOfConstraints();
+  virtual size_t numberOfConstraints() const;
 
   /** Return the joint axis number assigned to a friction axis. */
-  unsigned int axis(unsigned int _index) { return _axis->at(_index); }
+  siconos::algebra::Index axis(size_t _index);
 
   /** Return the joint assigned to this friction relation. */
-  SP::NewtonEulerJointR joint() { return _joint; }
+  std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }
 
-  /** Return the number of joint axes indexed by this relation. */
-  unsigned int numberOfAxes() { return _axis->size(); }
+  size_t numberOfAxes();
 
-  virtual ~JointFrictionR() {};
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-#endif  //JointFrictionRELATION_H
+}  // namespace siconos::joints
+#endif  // JointFrictionRELATION_H

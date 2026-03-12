@@ -22,6 +22,11 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
 set(${COMPONENT}_DIRS
   src/.
+  src/core
+  src/linalg
+  src/optimization
+  src/io
+  src/utils
   src/tools
   src/tools/InterfaceToPathFerris
   src/tools/internal
@@ -32,11 +37,15 @@ set(${COMPONENT}_DIRS
   src/QP
   src/Relay
   src/FrictionContact
-  src/FrictionContact/Generated
+  src/FrictionContact/nsn_formulation
+  src/FrictionContact/nsn_formulation/Generated
+  src/RollingFrictionContact
   src/NCP
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity
+  src/NonSmoothSolvers
 )
 
 # - Extras, optional -
@@ -65,6 +74,11 @@ set(${COMPONENT}_EXCLUDE_DOXY src/Unstable_or_deprecated)
 # ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
 set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src
+  src/core
+  src/linalg
+  src/optimization
+  src/io
+  src/utils
   src/tools
   src/tools/InterfaceToPathFerris
   src/tools/internal
@@ -76,10 +90,13 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/Relay
   src/FrictionContact
   src/FrictionContact/Generated
+  src/RollingFrictionContact
+  src/NonSmoothSolvers
   src/NCP
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity	
   )
 
 # ---- Final setup for the library ----
@@ -150,7 +167,6 @@ if(LPSOLVE_FOUND)
   # to add more tests in numerics
   set(HAS_ONE_LP_SOLVER TRUE CACHE INTERNAL "True if a LP Solver has been found and is activated.")
   # to add more tests in kernel and control
-  set(HAS_EXTREME_POINT_ALGO TRUE CACHE INTERNAL "True if lpsolve has been found and is activated.")
   target_link_libraries(numerics PRIVATE LPSOLVE::LPSOLVE)
 endif()
 
@@ -165,31 +181,10 @@ endif()
 include(FetchContent)
 
 if(WITH_FCLIB)
-  target_link_libraries(numerics PUBLIC FCLIB::fclib)
+  target_link_libraries(numerics PRIVATE fclib::fclib)
 endif()
 
 # - SuiteSparse -
-# numerics possibly needs suite sparse installed on the system.
-# -- Check size_t value --> choice of CSparse/CXSparse integer size
-if(NOT DEFINED SICONOS_INT64)
-  if(NOT SIZE_OF_CSI)
-    include(CheckTypeSize)
-    check_type_size("size_t" SIZE_OF_CSI LANGUAGE C)
-    # check_type_size("size_t" SIZE_OF_CSIX LANGUAGE CXX)
-
-    if(NOT SIZE_OF_CSI) # This won't happen with c11
-      message(FATAL_ERROR
-        "Could not get size of size_t, please specify SICONOS_INT64.")
-    endif()
-  endif()
-
-  if("${SIZE_OF_CSI}" EQUAL 8)
-    set(SICONOS_INT64 TRUE CACHE INTERNAL "")
-  else()
-    set(SICONOS_INT64 FALSE CACHE INTERNAL "")
-  endif()
-endif()
-
 if(WITH_PETSC)
   include(PetscSetup)
   set(SICONOS_PETSC ON PARENT_SCOPE)
@@ -210,14 +205,19 @@ target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXS
 find_package(SuiteSparse COMPONENTS LDL REQUIRED)
 target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
 target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
-
-if(DEFINED SICONOS_INT64) 
-  # Use CS_LONG 
+# numerics possibly needs suite sparse installed on the system.
+# -- Check size_t value --> choice of CSparse/CXSparse integer size
+include(CheckTypeSize)
+check_type_size(size_t SIZE_OF_SIZE_T LANGUAGE C)
+# check_type_size("size_t" SIZE_OF_CSIX LANGUAGE CXX)
+if("${SIZE_OF_SIZE_T}" EQUAL 8)
+  # Use CS_LONG
   target_compile_definitions(numerics PUBLIC CS_LONG) # used to select CXSparse version (depends on int size), for CS_INT and so on
-  # set(CS_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
-  # set(LDL_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
   target_compile_definitions(numerics PUBLIC LDL_LONG) # we use long interface of ldl (see ldl.h from suitesparse)
+else()
+
 endif()
+
 target_compile_definitions(numerics PUBLIC NCOMPLEX) # We don't need the complex interface of CXSparse
 #  set(NCOMPLEX 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
 
@@ -273,7 +273,7 @@ if(WITH_MUMPS)
   else()
     find_package(MUMPS REQUIRED COMPONENTS SEQ)
   endif()
-  target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
+  target_link_libraries(numerics PUBLIC MUMPS::MUMPS)
 endif()
 
 if(WITH_OPENSSL)
@@ -282,12 +282,17 @@ if(WITH_OPENSSL)
 endif()
 
 # -- HDF5 --
-# For logging
 if(WITH_HDF5)
   find_package(HDF5 REQUIRED COMPONENTS C HL)
-  target_include_directories(numerics PRIVATE ${HDF5_C_INCLUDE_DIRS})
-  target_link_libraries(numerics PRIVATE ${HDF5_C_LIBRARIES})
-  target_link_libraries(numerics PRIVATE ${HDF5_HL_LIBRARIES})
+  if(HDF5_IS_PARALLEL)
+      message(STATUS "HDF5 was built with MPI support")
+      find_package(MPI REQUIRED)
+      target_link_libraries(numerics PRIVATE MPI::MPI_C HDF5::HDF5)
+  else()
+      target_link_libraries(numerics PRIVATE HDF5::HDF5)
+  endif()
+  target_compile_definitions(numerics PRIVATE WITH_HDF5)
+
 endif()
 
 # -- OpenMP --
@@ -345,11 +350,21 @@ if(WITH_CUDA)
   message(STATUS "  CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 
-# --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
+if(WITH_MPI AND WITH_TESTING)
+  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+  # This will be reviewed later.
+  target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})
+  target_link_libraries(numerics-tests PUBLIC ${MPI_C_LIBRARIES})
 endif()
 
+# --- python bindings ---
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)
@@ -360,32 +375,26 @@ endif()
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
 # 
+# set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+#   src
+#   src/tools
+#   #   src/tools/internal
+#   src/AVI
+#   src/LCP
+#   src/MCP
+#   src/MLCP
+#   src/Relay
+#   src/FrictionContact
+#   # src/FrictionContact/Generated
+#   src/GenericMechanical
+#   src/FrictionContact
+#   )
+
 set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
-  src
-  src/tools
-  #   src/tools/internal
-  src/AVI
-  src/LCP
-  src/MCP
-  src/MLCP
-  src/Relay
-  src/FrictionContact
-  # src/FrictionContact/Generated
-  src/GenericMechanical
-  )
+${${COMPONENT}_DIRS} # All .hpp are installed
+)
 
 # List header files (in dir above) that must not be installed 
 set(${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)
-
-if(WITH_MPI AND WITH_TESTING)
-  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
-  # This will be reviewed later.
-  target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(numerics-test PUBLIC ${MPI_C_LIBRARIES})
-endif()
-

@@ -17,20 +17,21 @@
  */
 #include "FrictionContactProblem.h"
 
-#include <assert.h>     // for assert
-#include <math.h>       // for fabs
-#include <stdio.h>      // for printf, fprintf, fscanf, NULL, fclose
-#include <stdlib.h>     // for malloc, free, exit, EXIT_FAILURE
-#include <string.h>     // for memcpy
-#include <sys/errno.h>  // for errno
+#include <assert.h>  // for assert
+#include <errno.h>   // for errno
+#include <math.h>    // for fabs
+#include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>  // for malloc, free, exit, EXIT_FAILURE
+#include <string.h>  // for memcpy
 
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SiconosBlas.h"        // for cblas_dscal
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "io_tools.h"
-#include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_pr...
+#include "numerics_errors.h"
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
@@ -64,8 +65,7 @@ void frictionContact_display(FrictionContactProblem* problem) {
 
 int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   if (!problem) {
-    fprintf(stderr, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
-    exit(EXIT_FAILURE);
+    CHECK_ARG(0, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -101,27 +101,27 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
 
 FrictionContactProblem* frictionContact_newFromFile(FILE* file) {
   FrictionContactProblem* problem = frictionContactProblem_new();
-  assert(file);
+  if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* "
       "file)\n");
   int nc = 0, d = 0;
   int i;
-  CHECK_IO(fscanf(file, "%d\n", &d));
+  check_io(fscanf(file, "%d\n", &d));
   problem->dimension = d;
   DEBUG_PRINTF("problem->dimension = %i \n", problem->dimension);
-  CHECK_IO(fscanf(file, "%d\n", &nc));
+  check_io(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
   problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
+    check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
   DEBUG_PRINT(
       "End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* "
@@ -201,7 +201,7 @@ FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
   return fcp;
 }
 
-//#define SN_SBM_TO_DENSE
+// #define SN_SBM_TO_DENSE
 
 void createSplittedFrictionContactProblem(FrictionContactProblem* problem,
                                           SplittedFrictionContactProblem* splitted_problem) {
@@ -345,7 +345,7 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
 }
 
 FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem) {
-  assert(problem);
+  if (!problem) return NULL;
 
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;

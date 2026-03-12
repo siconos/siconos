@@ -14,146 +14,165 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file KneeJointR.hpp
  */
 #ifndef KneeJointRELATION_H
 #define KneeJointRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
 #include <NewtonEulerJointR.hpp>
+
+namespace siconos::modeling {
+class NewtonEulerDS;
+}
+
+namespace siconos::joints {
 
 /**
    This class implements a knee joint between one or two Newton/Euler Dynamical system
 */
-class KneeJointR : public NewtonEulerJointR
-{
-protected:
-
+class KneeJointR : public NewtonEulerJointR {
+ protected:
   ACCEPT_SERIALIZATION(KneeJointR);
 
-  /** Coordinate of the knee point in the body frame of the first dynamical system _d1
-   */
-  SP::SiconosVector _P0;
+  // For this joint, points_[0] corresponds to the coordinate of the knee point
+  // in the body frame of the first dynamical system _d1
 
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
-   * i.e. P0 in the body frame of d1.
+   * i.e. points_[0] in the body frame of d1.
    * These values are computed when the constructor is called.
    */
-  double _G1P0x;
-  double _G1P0y;
-  double _G1P0z;
+  siconos::algebra::SiconosVector3 G1P0_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Absolute coodinates of the vector G2P0 when d2 is located in q=(0,0,0,1,0,0,0)
-   *  i.e. P0 in the body frame of d2.
+   *  i.e. points_[0] in the body frame of d2.
    * These values are computed when the constructor is called.
    */
-  double _G2P0x;
-  double _G2P0y;
-  double _G2P0z;
+  siconos::algebra::SiconosVector3 G2P0_ = siconos::algebra::SiconosVector3::Zero();
 
+  /** compute H_NE matrix
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
-public:
-
-
-  /** Empty constructor. The relation may be initialized later by
-   *  setPoint, setAbsolute, and setBasePositions. */
+ public:
+  /** Default constructor
+   */
   KneeJointR();
 
   /** Constructor based on one or two dynamical systems and a point.
    *
+   *  \param P SiconosVector of size 3 that defines the point around
+   *   which rotation is allowed.
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *  for absolute frame.
-   *  \param P SiconosVector of size 3 that defines the point around
-   *  which rotation is allowed.
    *  \param absoluteRef if true, P is in the absolute frame,
-   *  otherwise P is in d1 frame.
+   *   otherwise P is in d1 frame.
    */
-  KneeJointR(SP::SiconosVector P, bool absoluteRef,
-             SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
-             SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
+  KneeJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& P, bool absoluteRef,
+             std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
+             std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
-  /** destructor
-   */
-  virtual ~KneeJointR() {};
-
-  virtual void initialize(Interaction& inter);
+  /** destructor */
+  virtual ~KneeJointR() noexcept = default;
 
   /** Initialize the joint constants based on the provided base positions.
    *
-   *  \param q1 A SiconosVector of size 7 indicating translation and
-   *  orientation in inertial coordinates.
-   *  \param q2 An optional SiconosVector of size 7 indicating
-   *  translation and orientation; if null, the inertial
-   *  frame will be considered as the second base. */
-  virtual void setBasePositions(SP::SiconosVector q1,
-                                SP::SiconosVector q2 = SP::SiconosVector());
+   *  \param[in] q1 a vector of size 7 indicating translation and orientation in inertial
+   * coordinates.
+   *  \param[in] q2 an optional vector of size 7 indicating translation and orientation; if
+   * null, the inertial frame will be considered as the second base.
+   */
+  virtual void setBasePositions(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+          std::nullopt) override;
 
   /** Perform some checks on the initial conditions. */
-  void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
+  void checkInitPos(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+                    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&
+                        q2 = std::nullopt);
 
   /**
      Get the number of constraints defined in the joint
-     
+
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() { return 3; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 3; }
 
   /**
      Get the number of degrees of freedom defined in the joint
-     
+
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() { return 3; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 3; }
 
   /**
      Return the type of a degree of freedom of this joint.
-     
+
      \return the type of the degree of freedom (DoF)
   */
-  virtual DoF_Type typeOfDoF(unsigned int axis) {
-    if (axis<3) return DOF_TYPE_ANGULAR;
-    else return DOF_TYPE_INVALID;
+  virtual DofType typeOfDoF(siconos::algebra::Index axis) const override {
+    if (axis < 3)
+      return DofType::ANGULAR;
+    else
+      return DofType::INVALID;
   };
 
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
-
-
   /**
-     to compute the output y = h(t,q,z) of the Relation
-     
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+     to compute the output y = h(q) of the Relation
+
+      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+      in the relation
+      \param[in] q2 generalized coordinates vector of the second dynamical system
+      involved in the relation
+      \param[in,out] y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual void computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot);
-
-  virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
-
-  SP::SiconosVector P() { return _P0; }
-
-protected:
-
-  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-                     double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
-
-  /* \warning, the following function should also depend on q */
-  virtual void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
-                        double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
-  virtual void DotJd1(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13);
-
-
-//public:
-  double Hx(double X1, double Y1, double Z1, double  q10, double q11, double q12, double q13,
-            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hy(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  double Hz(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-            double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
-#endif // KneeJointRELATION_H
+
+// Free functions for knee joints
+
+namespace knee {
+void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+               const siconos::algebra::SiconosVector3& coords1,
+               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
+               const siconos::algebra::SiconosVector3& coords2,
+               Eigen::Ref<siconos::algebra::SiconosVector> result);
+
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+                      const siconos::algebra::SiconosVector3& coords1,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+                      const siconos::algebra::SiconosVector3& coords2,
+                      Eigen::Ref<siconos::algebra::MapType> result);
+
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+                      const siconos::algebra::SiconosVector3& coords1,
+                      Eigen::Ref<siconos::algebra::MapType> result);
+
+void computeH_dot_for1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+                         const siconos::algebra::SiconosVector3& coords1,
+                         Eigen::Ref<siconos::algebra::MapType> result);
+
+void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+                         const siconos::algebra::SiconosVector3& coords1,
+                         const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot2,
+                         const siconos::algebra::SiconosVector3& coords2,
+                         Eigen::Ref<siconos::algebra::MapType> result);
+
+}  // namespace knee
+
+}  // namespace siconos::joints
+#endif  // KneeJointRELATION_H

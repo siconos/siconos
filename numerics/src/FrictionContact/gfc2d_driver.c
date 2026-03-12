@@ -19,14 +19,16 @@
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "FrictionContact_options.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "fc3d_short_names.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"                 // for DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
@@ -75,11 +77,11 @@
 
 /* } */
 
-//#define DUMP_PROBLEM
+// #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
-//#define DUMP_PROBLEM_IF_INFO
+// #define DUMP_PROBLEM_IF_INFO
 #ifdef DUMP_PROBLEM_IF_INFO
 static int fccounter = 0;
 #endif
@@ -100,7 +102,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   fclose(foutput);
 #endif
 
-  /* verbose=1; */
+  //  verbose=1;
 
   if (verbose > 0) solver_options_print(options);
 
@@ -125,12 +127,13 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
-    case SICONOS_FRICTION_2D_NSGS: {
+    case FC2D_NSGS: {
+      printf("SICONOS_FRICTION_2D_NSGS");
       numerics_printf_verbose(
           1,
           " ========================== Call NSGS solver with reformulation into "
           "Friction-Contact 3D problem ==========================\n");
-      /* verbose=1; */
+      verbose = 1;
       // We compute only if the local problem has contacts
       DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
       if (problem->H->size1 > 0) {
@@ -166,9 +169,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       break;
     }
     default: {
-      fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n",
-              options->solverId);
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, gfc3d_driver failed. Unknown solver %d.\n");
     }
   }
 

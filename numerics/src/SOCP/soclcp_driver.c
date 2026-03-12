@@ -26,45 +26,18 @@
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
-#include "numerics_verbose.h"                             // for numerics_pr...
-
-const char* const SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
-const char* const SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
-const char* const SICONOS_SOCLCP_TFP_STR = "SOCLCP_TFP";
-const char* const SICONOS_SOCLCP_NSN_AC_STR = "SOCLCP_NSN_AC";
-const char* const SICONOS_SOCLCP_NSN_FB_STR = "SOCLCP_NSN_FB";
-const char* const SICONOS_SOCLCP_DSFP_STR = "SOCLCP_DeSaxceFixedPoint";
-const char* const SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR = "SOCLCP_NCPGlockerFBFixedPoint";
-const char* const SICONOS_SOCLCP_AlartCurnierNewton_STR = "SOCLCP_AlartCurnierNewton";
-const char* const SICONOS_SOCLCP_DampedAlartCurnierNewton_STR =
-    "SOCLCP_DampedAlartCurnierNewton";
-const char* const SICONOS_SOCLCP_NCPGlockerFBNewton_STR = "SOCLCP_NCPGlockerFBNewton";
-const char* const SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR =
-    "SOCLCP_ProjectionOnConeWithDiagonalization";
-const char* const SICONOS_SOCLCP_ProjectionOnCone_STR = "SOCLCP_ProjectionOnCone";
-const char* const SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR =
-    "SOCLCP_ProjectionOnConeWithLocalIteration";
-const char* const SICONOS_SOCLCP_ProjectionOnConeWithRegularization_STR =
-    "SOCLCP_ProjectionOnConeWithRegularization";
-const char* const SICONOS_SOCLCP_NCPGlockerFBPATH_STR = "SOCLCP_NCPGlockerFBPATH";
-const char* const SICONOS_SOCLCP_projectionOnCylinder_STR = "SOCLCP_projectionOnCylinder";
-const char* const SICONOS_SOCLCP_ProjectionOnCone_velocity_STR =
-    "SOCLCP_ProjectionOnCone_velocity";
-const char* const SICONOS_SOCLCP_PGoC_STR = "SOCLCP_PGoC";
-const char* const SICONOS_SOCLCP_DeSaxceFixedPoint_STR = "SOCLCP_DeSaxceFixedPoint";
-const char* const SICONOS_SOCLCP_EG_STR = "SOCLCP_ExtraGradient";
-const char* const SICONOS_SOCLCP_FPP_STR = "SOCLCP_FixedPointProjection";
-const char* const SICONOS_SOCLCP_VI_EG_STR = "SOCLCP_VI_ExtraGradient";
-const char* const SICONOS_SOCLCP_VI_FPP_STR = "SOCLCP_VI_FixedPointProjection";
-const char* const SICONOS_SOCLCP_HP_STR = "SOCLCP_HyperplaneProjection";
-const char* const SICONOS_SOCLCP_PROX_STR = "SOCLCP_PROX";
-const char* const SICONOS_SOCLCP_QUARTIC_STR = "SOCLCP_QUARTIC";
-const char* const SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
                   SolverOptions* options) {
-  if (options == NULL)
-    numerics_error("soclcp_driver", "null input for solver and/or global options");
+  /* Input validation using standardized macros */
+  CHECK_NULL(problem);
+  CHECK_NULL(r);
+  CHECK_NULL(v);
+  CHECK_OPTIONS(options);
+  CHECK_NULL(problem->M);
+  CHECK_NULL(problem->q);
 
   assert(options->isSet);
 
@@ -175,10 +148,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* 
     /*   break; */
     /* } */
     default: {
-      fprintf(
-          stderr,
-          "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
-      exit(EXIT_FAILURE);
+      CHECK_ARG(0, "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
     }
   }
 

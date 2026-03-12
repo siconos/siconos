@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 void mlcp_enum_build_M(int *zw, double *M, double *Mref, int n, int m, int NbLines) {
   /*First, copy the n first collums.*/

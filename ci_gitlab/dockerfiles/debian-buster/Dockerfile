@@ -9,7 +9,6 @@ RUN apt update  && apt install -y -qq \
         libboost-chrono-dev \
         libgmp-dev \
         libhdf5-mpi-dev \
-        swig \
         gcc \
         gfortran \
         g++ \

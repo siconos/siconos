@@ -15,12 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "fc3d_short_names.h"
+#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SolverOptions.h"                 // for SolverOptions
 #include "gfc3d_Solvers.h"                 // for gfc3d_set_internalsolver_t...
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                         SolverOptions* options,

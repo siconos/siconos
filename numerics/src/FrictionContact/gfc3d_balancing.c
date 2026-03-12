@@ -19,19 +19,20 @@
 
 #include <assert.h>  // for assert
 
-#include "CSparseMatrix.h"        // for NSM_TRIPLET ...
-#include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "CSparseMatrix.h"                 // for NSM_TRIPLET ...
+#include "FrictionContact_options.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "NumericsMatrix.h"                // for BalancingMatrices
 #include "NumericsSparseMatrix.h"          // for NSM_TRIPLET ...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "numerics_verbose.h"
+#include "numerics_errors.h"
 
 /* #define DEWBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_EXPR
 #ifdef DEBUG_MESSAGES
+#include "NumericsMatrix.h"
 #include "NumericsVector.h"
 #endif
 
@@ -339,7 +340,10 @@ void gfc3d_balancing_back_to_original_variables(GlobalFrictionContactProblem* ba
 
 GlobalFrictionContactProblem* gfc3d_balancing_free(
     GlobalFrictionContactProblem* balanced_problem, SolverOptions* options) {
-  assert(balanced_problem);
+  if (!balanced_problem) {
+    fprintf(stderr, "gfc3d_balancing_free: balanced_problem is NULL\n");
+    return NULL;
+  }
   GlobalFrictionContactProblem_balancing_data* balancing_data =
       (GlobalFrictionContactProblem_balancing_data*)balanced_problem->env;
   if (balancing_data) {

@@ -14,134 +14,123 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "ModelingTools.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SimulationTools.hpp"
 #include "LuenbergerObserver.hpp"
-#include "ControlSensor.hpp"
-#include "ObserverFactory.hpp"
-#include "ControlZOHAdditionalTerms.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#include "ControlSensor.hpp"
+#include "ControlZOHAdditionalTerms.hpp"
+#include "FirstOrderLinearDS.hpp"
+#include "SiconosVector.hpp"
+#include "TimeStepping.hpp"
+#include "ZeroOrderHoldOSI.hpp"
+// #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)
-{
-  DEBUG_BEGIN("void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
-  if(!_C)
-  {
-    THROW_EXCEPTION("LuenbergerObserver::initialize - you have to set C before initializing the Observer");
-  }
-  else
-  {
+void siconos::control::LuenbergerObserver::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    const siconos::simulation::Simulation& s) {
+  DEBUG_BEGIN(
+      "void siconos::control::LuenbergerObserver::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
+  if (!_C) {
+    THROW_EXCEPTION(
+        "siconos::control::LuenbergerObserver::initialize - you have to set C before "
+        "initializing the Observer");
+  } else {
     Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
-  DynamicalSystemsGraph& originalDSG0 = *nsds.topology()->dSG(0);
-  DynamicalSystemsGraph::VDescriptor originaldsgVD;
-  if(!_DS)  // No DynamicalSystem was given
+  auto& originalDSG0 = *nsds.topology()->dSG(0);
+  siconos::graphs::DynamicalSystemsGraph::VDescriptor originaldsgVD;
+  if (!_DS)  // No DynamicalSystem was given
   {
-    // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
+    // We can only work with FirstOrderNonLinearDS and FirstOrderLinearDS
     // We can use the Visitor mighty power to check if we have the right type
-    DynamicalSystem& observedDS = *_sensor->getDS();
-    Type::Siconos dsType;
-    dsType = Type::value(observedDS);
+    auto observedDS = _sensor->getDS();
     // create the DS for the controller
     // if the DS we use is different from the DS we are controlling
     // when we want for instant to see how well the controller behaves
     // if the plant model is not exact, we can use the setSimulatedDS
     // method
-    if(dsType == Type::FirstOrderLinearDS)
-    {
-      _DS.reset(new FirstOrderLinearDS(static_cast<FirstOrderLinearDS&>(observedDS)));
-    }
-    else if(dsType == Type::FirstOrderLinearTIDS)
-    {
-      _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
-    }
-    else
-      THROW_EXCEPTION("LuenbergerObserver is not yet implemented for system of type" + std::to_string(dsType));
-
+    if (auto folds =
+            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(observedDS)) {
+      _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
+    } else
+      THROW_EXCEPTION("LuenbergerObserver is only implemented for FirstOrderLinearDS");
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());
-  }
-  else
-  {
+  } else {
     // is it controlled ?
-    if(originalDSG0.is_vertex(_DS))
+    if (originalDSG0.is_vertex(_DS))
       originaldsgVD = originalDSG0.descriptor(_DS);
     else
       isDSinDSG0 = false;
   }
 
   // Initialize with the guessed state
-  _DS->setX0Ptr(_xHat);
+  _DS->setX0(*_xHat, siconos::algebra::copy_t);
   _DS->resetToInitialState();
   DEBUG_EXPR(_DS->display(););
-  _e.reset(new SiconosVector(_C->size(0)));
-  _y.reset(new SiconosVector(_C->size(0)));
+  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
+  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
 
-  double t0 = nsds.t0();
-  double h = s.currentTimeStep();
-  double T = nsds.finalT() + h;
-  _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
-  _integrator.reset(new ZeroOrderHoldOSI());
+  auto t0 = nsds.t0();
+  auto h = s.currentTimeStep();
+  auto T = nsds.finalT() + h;
+  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
+  _integrator = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
 
-  std::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
-    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integrator)
+      ->setExtraAdditionalTerms(std::make_shared<ControlZOHAdditionalTerms>());
+
   _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *_nsds->topology()->dSG(0);
-  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_DS);
+  auto& DSG0 = *_nsds->topology()->dSG(0);
+  auto dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
   DSG0.e[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
-  if(isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
-  {
+  if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD)) {
     DSG0.B[dsgVD] = originalDSG0.B[originaldsgVD];
-    assert(originalDSG0.u[originaldsgVD] && "A DynamicalSystem is controlled but its control input has not been initialized yet");
+    assert(
+        originalDSG0.u[originaldsgVD] &&
+        "A DynamicalSystem is controlled but its control input has not been initialized yet");
     DSG0.u[dsgVD] = originalDSG0.u[originaldsgVD];
   }
 
   // all necessary things for simulation
-  _simulation.reset(new TimeStepping(_nsds, _td, 0));
+  _simulation = std::make_shared<siconos::simulation::TimeStepping>(_nsds, _td, 0);
   _simulation->associate(_integrator, _DS);
 
   // initialize error
   *_y = _sensor->y();
-  DEBUG_END("void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
+  DEBUG_END(
+      "void siconos::control::LuenbergerObserver::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
 }
 
-void LuenbergerObserver::process()
-{
-  if(!_pass)
+void siconos::control::LuenbergerObserver::process() {
+  if (!_pass)
     _pass = true;
-  else
-  {
-    prod(*_C, *_xHat, *_e); // e = C*xhat_k
-
-    *_e -= *_y; // e -= y_k
-
+  else {
+    *_e = *_C * *_xHat - *_y;
 
     // get measurement from sensor
-    const SiconosVector& y = _sensor->y();
+    const auto& y = _sensor->y();
 
     // TODO theta method on the error
     _simulation->computeOneStep();
-//    _simulation->nextStep();
+    //    _simulation->nextStep();
 
     // update the current measured value
     *_y = y;
-    *_xHat = _DS->getx();
+    *_xHat = _DS->x_read();  // Copy
   }
 }
-
-AUTO_REGISTER_OBSERVER(LUENBERGER, LuenbergerObserver);

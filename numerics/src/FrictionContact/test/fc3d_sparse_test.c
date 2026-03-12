@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "FrictionContactProblem.h"
-#include "Friction_cst.h"
+#include "FrictionContact_options.h"
 #include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
@@ -166,7 +166,7 @@ int main(void) {
   NM_copy_to_sparse(tmpM, W);
 
   int solvers_to_test[] = {
-      SICONOS_FRICTION_3D_NSGS,   SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_TEST,
+      SICONOS_FRICTION_3D_NSGS,   SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_NEW,
       SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM, SICONOS_FRICTION_3D_SOCLCP,
       SICONOS_FRICTION_3D_ACLMFP, SICONOS_FRICTION_3D_PROX,   SICONOS_FRICTION_3D_HP,
       SICONOS_FRICTION_3D_FPP,    SICONOS_FRICTION_3D_EG,     SICONOS_FRICTION_3D_VI_FPP,

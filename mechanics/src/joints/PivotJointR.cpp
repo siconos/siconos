@@ -14,20 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file PivotJointR.cpp
 
 */
 
 #include "PivotJointR.hpp"
-#include <NewtonEulerDS.hpp>
+
+#include <RotationQuaternion.hpp>  // for posquat, rotquat ...
 #include <boost/math/quaternion.hpp>
-#include <RotationQuaternion.hpp>
-#include <BlockVector.hpp>
+#include <numbers>  // for pi
 
-#include <iostream>
-
-#include <op3x3.h>
+#include "BlockVector.hpp"
+#include "NewtonEulerDS.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "op3x3.h"  // for orthoBaseFromVector
 
 /*
  * This file contains some code generated using sympy.  The following
@@ -36,12 +38,12 @@
  * from sympy import Symbol
  * import numpy as np
  *
- * A1 = np.array([0, Symbol('_A1x'), Symbol('_A1y'), Symbol('_A1z')])
- * A2 = np.array([0, Symbol('_A2x'), Symbol('_A2y'), Symbol('_A2z')])
+ * A1 = np.array([0, Symbol('axis1_(0)'), Symbol('axis1_(1)'), Symbol('axis1_(2)')])
+ * A2 = np.array([0, Symbol('axis2_(0)'), Symbol('axis2_(1)'), Symbol('axis2_(2)')])
  * q1 = np.array([Symbol('q10'), Symbol('q11'), Symbol('q12'), Symbol('q13')])
  * q2 = np.array([Symbol('q20'), Symbol('q21'), Symbol('q22'), Symbol('q23')])
- * cq2q10 = np.array([Symbol('_cq2q101'),Symbol('_cq2q102'),
- *                    Symbol('_cq2q103'),Symbol('_cq2q104')])
+ * cq2q10 = np.array([Symbol('cq2q_(0)'),Symbol('cq2q_(1)'),
+ *                    Symbol('cq2q_(2)'),Symbol('cq2q_(3)')])
  *
  * qinv = lambda q: np.array([q[0],-q[1],-q[2],-q[3]])
  * qmul = lambda a,b: np.array([
@@ -51,496 +53,190 @@
  *          a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]])
  */
 
-// Wrap value in interval [-pi,pi]
-static double piwrap(double x)
-{
-  return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
+namespace {  // anonymous namespace for local impl
+double piwrap(double x) {
+  return std::fmod(x + 3 * std::numbers::pi, 2 * std::numbers::pi) - std::numbers::pi;
+}
+}  // namespace
+
+siconos::joints::PivotJointR::PivotJointR() : KneeJointR{} {
+  axes_.resize(1);
+  axes_[0].setZero();
 }
 
-PivotJointR::PivotJointR()
-  : KneeJointR()
-  , _A(std::make_shared<SiconosVector>(3))
-{
-  _axes.resize(1);
+siconos::joints::PivotJointR::PivotJointR(
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
+    : KneeJointR{P, absoluteRef, d1, d2} {
+  axes_.emplace_back(A);
+  axes_[0].normalize();
+  if (d1) {
+    if (d2)
+      setBasePositions(d1->q_read(), d2->q_read());
+    else {
+      setBasePositions(d1->q_read());
+    }
+  }
 }
 
-PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
-                         SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
-  : KneeJointR(P, absoluteRef, d1, d2)
-  , _A(std::make_shared<SiconosVector>(3))
-{
-  _axes.resize(1);
-
-  setAxis(0, A);
-  if(d1)
-    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
-}
-
-static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
-{
-  if(v)
-    return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
-  else
-    return ::boost::math::quaternion<double>(1, 0, 0, 0);
-}
-
-// static ::boost::math::quaternion<double> rotquat(const SiconosVector& v)
-// {
-//   return ::boost::math::quaternion<double>(v(3),v(4),v(5),v(6));
-// }
-
-static ::boost::math::quaternion<double> posquat(const SP::SiconosVector& v)
-{
-  return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
-}
-
-// static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
-// {
-//   return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
-// }
-
-void PivotJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
-{
+void siconos::joints::PivotJointR::setBasePositions(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
   KneeJointR::setBasePositions(q1, q2);
+
+  // Assume that axes_[0] has been properly set (by constructor or setAxis)
 
   // The provided axis is the basis for the orthogonal plane
   // constraint relative to q1.
-  *_A = *_axes[0];
-
   // If provided in absolute coordinates, must be rotated to q1 frame.
-  if(_absoluteRef)
-  {
-    boost::math::quaternion<double> rot1(rotquat(q1)), quatBuff;
+  if (absoluteRef_) {
+    boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff;
 
     // Move to q1 frame by unapplying q1 frame rotation
-    quatBuff = (1.0/rot1) * posquat(_A) * rot1;
-    _A->setValue(0, quatBuff.R_component_2());
-    _A->setValue(1, quatBuff.R_component_3());
-    _A->setValue(2, quatBuff.R_component_4());
+    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(axes_[0]) * rot1;
+    axes_[0] << quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4();
   }
+  boost::math::quaternion<double> cq2q10;
+  if (q2)
+    // Initial orientation offset between q2 and q1.
+    cq2q10 = 1.0 / siconos::geometry::rotquat(*q2) * siconos::geometry::rotquat(q1);
+  else
+    cq2q10 = 1. / boost::math::quaternion<double>(1, 0, 0, 0) * siconos::geometry::rotquat(q1);
 
-  // Initial orientation offset between q2 and q1.
-  ::boost::math::quaternion<double> cq2q10(1.0 / rotquat(q2) * rotquat(q1));
-
-  _cq2q101 = cq2q10.R_component_1();
-  _cq2q102 = cq2q10.R_component_2();
-  _cq2q103 = cq2q10.R_component_3();
-  _cq2q104 = cq2q10.R_component_4();
+  cq2q_ << cq2q10.R_component_1(), cq2q10.R_component_2(), cq2q10.R_component_3(),
+      cq2q10.R_component_4();
 
   // Initialize the two orthogonal vectors that define the constraint plane.
-  buildA1A2();
+  buildOrthonormalBase();
 
   // Get initial offsets relative to plane constraints.
-  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
-  if(q2)
-    rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),
-            (*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6),
-            &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+  siconos::algebra::SiconosVector rot221{4};
+  if (q2)
+    pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
   else
-    rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),
-            1, 0, 0, 0,
-            &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+    pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
-  _initial_AscalA1 = AscalA1(rot2to1x, rot2to1y, rot2to1z);
-  _initial_AscalA2 = AscalA2(rot2to1x, rot2to1y, rot2to1z);
+  _initial_AscalA1 = axis1_.dot(rot221.head(3));
+  _initial_AscalA2 = axis2_.dot(rot221.head(3));
 
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
-  _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
+  double Adot2to1 = axes_[0].dot(rot221.head(3));
+  _initial_AscalA = 2 * atan2(rot221(3), Adot2to1);
 
   _twistCount = 0;
   _previousAngle = 0;
 }
 
-void PivotJointR::buildA1A2()
-{
-  double Ax = (*_A)(0);
-  double Ay = (*_A)(1);
-  double Az = (*_A)(2);
-  if(orthoBaseFromVector(&Ax, &Ay, &Az,
-                         &_A1x, &_A1y, &_A1z,
-                         &_A2x, &_A2y, &_A2z))
-    THROW_EXCEPTION("PivotJointR::initializeWorkVectorsAndMatrices. Problem in calling orthoBaseFromVector");
+void siconos::joints::PivotJointR::buildOrthonormalBase() {
+  // Update axes_[0], A1 and A2 and check
 
-  assert(fabs(_A1x * Ax + _A1y * Ay + _A1z * Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
-  assert(fabs(_A2x * Ax + _A2y * Ay + _A2z * Az) < 1e-9 && "PivotJoint, _A2 wrong\n");
-  assert(fabs(_A1x * _A2x + _A1y * _A2y + _A1z * _A2z) < 1e-9 && "PivotJoint, _A12 wrong\n");
-  // std::cout << "JointPivot: _A1x _A1y _A1z :" << _A1x << " " << _A1y << " " << _A1z << std::endl;
-  // std::cout << "JointPivot: _A2x _A2y _A2z :" << _A2x << " " << _A2y << " " << _A2z << std::endl;
-}
-void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
-{
-  KneeJointR::Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
-
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-
-  // sympy expression: [AscalA1.diff(x) for x in q1]
-  _jachq->setValue(3, 3,
-                   _A1x*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-                   + _A1y*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-                   + _A1z*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
-  _jachq->setValue(3, 4,
-                   _A1x*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-                   + _A1y*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-                   + _A1z*(_cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21));
-  _jachq->setValue(3, 5,
-                   _A1x*(_cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20)
-                   + _A1y*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-                   + _A1z*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
-  _jachq->setValue(3, 6,
-                   _A1x*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-                   + _A1y*(_cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22)
-                   + _A1z*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
-
-  _jachq->setValue(3, 7, 0);
-  _jachq->setValue(3, 8, 0);
-  _jachq->setValue(3, 9, 0);
-
-  // sympy expression: [AscalA1.diff(x) for x in q2]
-  _jachq->setValue(3, 10,
-                   _A1x*(_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 + _cq2q104*q12)
-                   + _A1y*(_cq2q101*q12 + _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11)
-                   + _A1z*(_cq2q101*q13 - _cq2q102*q12 + _cq2q103*q11 - _cq2q104*q10));
-  _jachq->setValue(3, 11,
-                   _A1x*(-_cq2q101*q10 - _cq2q102*q11 + _cq2q103*q12 + _cq2q104*q13)
-                   + _A1y*(_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 + _cq2q104*q10)
-                   + _A1z*(-_cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11));
-  _jachq->setValue(3, 12,
-                   _A1x*(-_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10)
-                   + _A1y*(-_cq2q101*q10 + _cq2q102*q11 - _cq2q103*q12 + _cq2q104*q13)
-                   + _A1z*(_cq2q101*q11 + _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12));
-  _jachq->setValue(3, 13,
-                   _A1x*(_cq2q101*q12 - _cq2q102*q13 + _cq2q103*q10 - _cq2q104*q11)
-                   + _A1y*(-_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12)
-                   + _A1z*(-_cq2q101*q10 + _cq2q102*q11 + _cq2q103*q12 - _cq2q104*q13));
-
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
-
-  // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(4, 3,
-                   _A2x*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-                   + _A2y*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-                   + _A2z*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
-  _jachq->setValue(4, 4,
-                   _A2x*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-                   + _A2y*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-                   + _A2z*(_cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21));
-  _jachq->setValue(4, 5,
-                   _A2x*(_cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20)
-                   + _A2y*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-                   + _A2z*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
-  _jachq->setValue(4, 6,
-                   _A2x*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-                   + _A2y*(_cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22)
-                   + _A2z*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
-
-  _jachq->setValue(4, 7, 0);
-  _jachq->setValue(4, 8, 0);
-  _jachq->setValue(4, 9, 0);
-
-  // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(4, 10,
-                   _A2x*(_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 + _cq2q104*q12)
-                   + _A2y*(_cq2q101*q12 + _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11)
-                   + _A2z*(_cq2q101*q13 - _cq2q102*q12 + _cq2q103*q11 - _cq2q104*q10));
-  _jachq->setValue(4, 11,
-                   _A2x*(-_cq2q101*q10 - _cq2q102*q11 + _cq2q103*q12 + _cq2q104*q13)
-                   + _A2y*(_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 + _cq2q104*q10)
-                   + _A2z*(-_cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11));
-  _jachq->setValue(4, 12,
-                   _A2x*(-_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10)
-                   + _A2y*(-_cq2q101*q10 + _cq2q102*q11 - _cq2q103*q12 + _cq2q104*q13)
-                   + _A2z*(_cq2q101*q11 + _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12));
-  _jachq->setValue(4, 13,
-                   _A2x*(_cq2q101*q12 - _cq2q102*q13 + _cq2q103*q10 - _cq2q104*q11)
-                   + _A2y*(-_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12)
-                   + _A2z*(-_cq2q101*q10 + _cq2q102*q11 + _cq2q103*q12 - _cq2q104*q13));
-
-  /*proj_with_q
-  for (unsigned int ii=0; ii <_jachq->size(0); ii++)
-    for (unsigned int jj=0; jj <_jachq->size(1); jj++)
-  _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
-
-  _jachqProj->setValue(5,0,0);
-  _jachqProj->setValue(5,1,0);
-  _jachqProj->setValue(5,2,0);
-  _jachqProj->setValue(5,3,2.0*q10);
-  _jachqProj->setValue(5,4,2.0*q11);
-  _jachqProj->setValue(5,5,2.0*q12);
-  _jachqProj->setValue(5,6,2.0*q13);
-  _jachqProj->setValue(6,0+7,0);
-  _jachqProj->setValue(6,1+7,0);
-  _jachqProj->setValue(6,2+7,0);
-  _jachqProj->setValue(6,3+7,2.0*q20);
-  _jachqProj->setValue(6,4+7,2.0*q21);
-  _jachqProj->setValue(6,5+7,2.0*q22);
-  _jachqProj->setValue(6,6+7,2.0*q23);
-  */
-
-  //_jachq->display();
+  // Compute orthonormal basis (axes_[0],A1,A2) from axes_[0]
+  auto base_ok = siconos::geometry::orthoBaseFromVector(axes_[0], axis1_, axis2_);
+  if (!base_ok)
+    THROW_EXCEPTION(
+        "siconos::joints::PivotJointR::buildOrthonormalBase. Can not compute orthonormal "
+        "vectors.")
 }
 
-void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13)
-{
-
-  KneeJointR::Jd1(X1, Y1, Z1, q10, q11, q12, q13);
-
-
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-
-  // sympy expression: [AscalA1.diff(x) for x in q1]
-  _jachq->setValue(3, 3,
-                   _A1x*(- _cq2q102)
-                   + _A1y*(- _cq2q103)
-                   + _A1z*(- _cq2q104));
-  _jachq->setValue(3, 4,
-                   _A1x*(_cq2q101)
-                   + _A1y*(- _cq2q104)
-                   + _A1z*(_cq2q103));
-  _jachq->setValue(3, 5,
-                   _A1x*(_cq2q104)
-                   + _A1y*(_cq2q101)
-                   + _A1z*(- _cq2q102));
-  _jachq->setValue(3, 6,
-                   _A1x*(- _cq2q103)
-                   + _A1y*(_cq2q102)
-                   + _A1z*(_cq2q101));
-
-
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
-
-  // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(4, 3,
-                   _A2x*(- _cq2q102)
-                   + _A2y*(- _cq2q103)
-                   + _A2z*(- _cq2q104));
-  _jachq->setValue(4, 4,
-                   _A2x*(_cq2q101)
-                   + _A2y*(- _cq2q104)
-                   + _A2z*(_cq2q103));
-  _jachq->setValue(4, 5,
-                   _A2x*(_cq2q104)
-                   + _A2y*(_cq2q101)
-                   + _A2z*(- _cq2q102));
-  _jachq->setValue(4, 6,
-                   _A2x*(- _cq2q103)
-                   + _A2y*(_cq2q102)
-                   + _A2z*(_cq2q101));
-
-  /*proj_with_q
-      for (unsigned int ii=0; ii <_jachq->size(0); ii++)
-        for (unsigned int jj=0; jj <_jachq->size(1); jj++)
-    _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
-
-      _jachqProj->setValue(5,0,0);
-      _jachqProj->setValue(5,1,0);
-      _jachqProj->setValue(5,2,0);
-      _jachqProj->setValue(5,3,2.0*q10);
-      _jachqProj->setValue(5,4,2.0*q11);
-      _jachqProj->setValue(5,5,2.0*q12);
-      _jachqProj->setValue(5,6,2.0*q13);
-  */
-
+void siconos::joints::PivotJointR::computeH_NE_(double time,
+                                                siconos::modeling::Interaction& inter,
+                                                const siconos::algebra::BlockVector& q0) {
+  H_NE_view_->setZero();
+  auto q1 = q0.vector(0);
+  // Only the quaternion part of q is required to compute H (last 4 components)
+  if (q0.numberOfBlocks() > 1) {
+    auto q2 = q0.vector(1);
+    pivot::computeH_for_2DS(q1->tail<4>(), G1P0_, q2->tail<4>(), G2P0_, axis1_, axis2_, cq2q_,
+                            *H_NE_view_);
+  } else
+    pivot::computeH_for_1DS(q1->tail<4>(), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
 }
 
-void PivotJointR::rot2to1(double q10, double q11, double q12, double q13,
-                          double q20, double q21, double q22, double q23,
-                          double *rot2to1w, double *rot2to1x,
-                          double *rot2to1y, double *rot2to1z)
-{
-  /*
-   * The current rotation vector taking into account initial rotation
-   * difference.
-   *
-   * sympy expression:
-   * rot2to1 = qmul(qinv(qmul(q2,cq2q10)),q1)
-   */
+void siconos::joints::PivotJointR::computeh(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  KneeJointR::computeh(q1, q2, y);
 
-  if(rot2to1w)
-    *rot2to1w = (q10*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-                 - q11*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-                 - q12*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-                 - q13*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
-  *rot2to1x = (q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21));
-  *rot2to1y = (q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-               + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-               + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-               - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
-  *rot2to1z = (q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-               - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-               + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-               + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
-}
-
-double PivotJointR::AscalA1(double rot2to1x, double rot2to1y, double rot2to1z)
-{
-  /*
-   * The angle between A1 and rotation q2-to-q1 must be zero,
-   * (taking into account original difference in orientation rot2to1).
-   *
-   * sympy expression:
-   * AscalA1 = np.dot(A1,rot2to1) - initial_AscalA1
-   */
-
-  return _A1x*rot2to1x + _A1y*rot2to1y + _A1z*rot2to1z;
-}
-
-double PivotJointR::AscalA2(double rot2to1x, double rot2to1y, double rot2to1z)
-{
-  /*
-   * The angle between A2 and rotation q2-to-q1 must be zero,
-   * (taking into account original difference in orientation rot2to1).
-   *
-   * sympy expression:
-   * AscalA2 = np.dot(A2,rot2to1) - initial_AscalA2
-   */
-
-  return _A2x*rot2to1x + _A2y*rot2to1y + _A2z*rot2to1z;
-}
-
-double PivotJointR::AscalA(double rot2to1x, double rot2to1y, double rot2to1z)
-{
-  /*
-   * The angle between A and rotation q2-to-q1 must be zero,
-   * (taking into account original difference in orientation rot2to1).
-   *
-   * sympy expression:
-   * AscalA = np.dot(A,rot2to1) - initial_AscalA
-   */
-
-  return _A->getValue(0)*rot2to1x
-         + _A->getValue(1)*rot2to1y
-         + _A->getValue(2)*rot2to1z;
-}
-
-void PivotJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
-{
-
-  KneeJointR::computeh(time, q0,  y);
-
-  double q10 = q0.getValue(3);
-  double q11 = q0.getValue(4);
-  double q12 = q0.getValue(5);
-  double q13 = q0.getValue(6);
-  double q20 = 1;
-  double q21 = 0;
-  double q22 = 0;
-  double q23 = 0;
-  if(q0.numberOfBlocks()>1)
-  {
-    q20 = q0.getValue(10);
-    q21 = q0.getValue(11);
-    q22 = q0.getValue(12);
-    q23 = q0.getValue(13);
+  siconos::algebra::SiconosVector3 rot221;
+  if (q2) {
+    pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
+  } else {
+    pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
   }
 
-  double rot2to1x, rot2to1y, rot2to1z;
-  rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
-          nullptr, &rot2to1x, &rot2to1y, &rot2to1z);
-
-  y.setValue(3, AscalA1(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA1);
-  y.setValue(4, AscalA2(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA2);
+  y(3) = axis1_.dot(rot221) - _initial_AscalA1;
+  y(4) = axis2_.dot(rot221) - _initial_AscalA2;
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void PivotJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
-                              unsigned int axis)
-{
+void siconos::joints::PivotJointR::computehDoF(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if(axis != 0)
-    return;
+  if (axis != 0) return;
 
-  SP::SiconosVector q1 = (q0.getAllVect())[0];
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
-
-  double q20 = 1;
-  double q21 = 0;
-  double q22 = 0;
-  double q23 = 0;
-
-  if(q0.numberOfBlocks()>1)
-  {
-    SP::SiconosVector q2 = (q0.getAllVect())[1];
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
-  }
-
-  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
-  rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
-          &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+  siconos::algebra::SiconosVector rot221{4};
+  if (q2) {
+    pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
+  } else
+    pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
-  double wrappedAngle = piwrap(2*atan2(rot2to1w, Adot2to1) - _initial_AscalA);
+  double Adot2to1 = axes_[0].dot(rot221.head(3));
+  double wrappedAngle = piwrap(2 * atan2(rot221(3), Adot2to1) - _initial_AscalA);
 
   // Count the number of twists around the angle, and report the
   // unwrapped angle.  Needed to implement joint stops near pi.
-  if(wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
-    _twistCount ++;
-  else if(wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
-    _twistCount --;
+  if (wrappedAngle < -std::numbers::pi * 3 / 4 && _previousAngle > std::numbers::pi * 3 / 4)
+    _twistCount++;
+  else if (wrappedAngle > std::numbers::pi * 3 / 4 &&
+           _previousAngle < -std::numbers::pi * 3 / 4)
+    _twistCount--;
   _previousAngle = wrappedAngle;
-  double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
+  double unwrappedAngle = wrappedAngle + 2 * std::numbers::pi * _twistCount;
 
-  y.setValue(0, unwrappedAngle);
+  y(0) = unwrappedAngle;
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
-void PivotJointR::computeJachqDoF(double time, Interaction& inter,
-                                  SP::BlockVector q0, SimpleMatrix& jachq,
-                                  unsigned int axis)
-{
+void siconos::joints::PivotJointR::computeJachqDoF(
+    siconos::modeling::Interaction& inter,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if(axis != 0)
-    return;
+  if (axis != 0) return;
 
-  SP::SiconosVector q1 = (q0->getAllVect())[0];
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
 
   double q20 = 1;
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
 
-  if(q0->numberOfBlocks()>1)
-  {
-    SP::SiconosVector q2 = (q0->getAllVect())[1];
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
+  if (q2) {
+    q20 = (*q2)(3);
+    q21 = (*q2)(4);
+    q22 = (*q2)(5);
+    q23 = (*q2)(6);
   }
 
-  jachq.setValue(0, 0, 0);
-  jachq.setValue(0, 1, 0);
-  jachq.setValue(0, 2, 0);
+  jachq.setZero();
 
   /*
    * sympy expression:
@@ -557,58 +253,60 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
    * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+3,e[i]))
    */
 
-  double x0 = _cq2q103*q23;
-  double x1 = _cq2q101*q21;
-  double x2 = _cq2q102*q20;
-  double x3 = _cq2q104*q22;
+  double x0 = cq2q_(2) * q23;
+  double x1 = cq2q_(0) * q21;
+  double x2 = cq2q_(1) * q20;
+  double x3 = cq2q_(3) * q22;
   double x4 = x0 - x1 - x2 - x3;
-  double x5 = _cq2q104*q21;
-  double x6 = _cq2q101*q22;
-  double x7 = _cq2q102*q23;
-  double x8 = _cq2q103*q20;
+  double x5 = cq2q_(3) * q21;
+  double x6 = cq2q_(0) * q22;
+  double x7 = cq2q_(1) * q23;
+  double x8 = cq2q_(2) * q20;
   double x9 = x5 - x6 - x7 - x8;
-  double x10 = _cq2q102*q22;
-  double x11 = _cq2q101*q23;
-  double x12 = _cq2q103*q21;
-  double x13 = _cq2q104*q20;
+  double x10 = cq2q_(1) * q22;
+  double x11 = cq2q_(0) * q23;
+  double x12 = cq2q_(2) * q21;
+  double x13 = cq2q_(3) * q20;
   double x14 = x10 - x11 - x12 - x13;
-  double x15 = q11*x4;
-  double x16 = q12*x9;
-  double x17 = q13*x14;
-  double x18 = _cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23;
-  double x19 = q10*x18;
-  double x20 = _A->getValue(0)*(q10*x4 + q11*x18 - q12*x14 + q13*x9) + _A->getValue(1)*(q10*x9 + q11*x14 + q12*x18 - q13*x4) + _A->getValue(2)*(q10*x14 - q11*x9 + q12*x4 + q13*x18);
-  double x21 = 1.0/(pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
-  double x22 = 2*x21*(x15 + x16 + x17 - x19);
-  double x23 = 2*x20*x21;
+  double x15 = q11 * x4;
+  double x16 = q12 * x9;
+  double x17 = q13 * x14;
+  double x18 = cq2q_(0) * q20 - cq2q_(1) * q21 - cq2q_(2) * q22 - cq2q_(3) * q23;
+  double x19 = q10 * x18;
+  double x20 = axes_[0](0) * (q10 * x4 + q11 * x18 - q12 * x14 + q13 * x9) +
+               axes_[0](1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
+               axes_[0](2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
+  double x21 = 1.0 / (pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
+  double x22 = 2 * x21 * (x15 + x16 + x17 - x19);
+  double x23 = 2 * x20 * x21;
   double x24 = -x5 + x6 + x7 + x8;
   double x25 = -x0 + x1 + x2 + x3;
   double x26 = -x10 + x11 + x12 + x13;
-  double x27 = _cq2q101*q11;
-  double x28 = _cq2q102*q10;
+  double x27 = cq2q_(0) * q11;
+  double x28 = cq2q_(1) * q10;
   double x29 = -x28;
   double x30 = x27 + x29;
-  double x31 = _cq2q104*q12;
-  double x32 = _cq2q103*q13;
+  double x31 = cq2q_(3) * q12;
+  double x32 = cq2q_(2) * q13;
   double x33 = -x32;
-  double x34 = _cq2q101*q12;
-  double x35 = _cq2q102*q13;
-  double x36 = _cq2q103*q10;
+  double x34 = cq2q_(0) * q12;
+  double x35 = cq2q_(1) * q13;
+  double x36 = cq2q_(2) * q10;
   double x37 = -x36;
-  double x38 = _cq2q104*q11;
+  double x38 = cq2q_(3) * q11;
   double x39 = -x38;
   double x40 = x37 + x39;
-  double x41 = _cq2q101*q13;
-  double x42 = _cq2q102*q12;
+  double x41 = cq2q_(0) * q13;
+  double x42 = cq2q_(1) * q12;
   double x43 = -x42;
   double x44 = x41 + x43;
-  double x45 = _cq2q103*q11;
-  double x46 = _cq2q104*q10;
+  double x45 = cq2q_(2) * q11;
+  double x46 = cq2q_(3) * q10;
   double x47 = -x46;
-  double x48 = _cq2q101*q10;
-  double x49 = _cq2q102*q11;
-  double x50 = _cq2q103*q12;
-  double x51 = _cq2q104*q13;
+  double x48 = cq2q_(0) * q10;
+  double x49 = cq2q_(1) * q11;
+  double x50 = cq2q_(2) * q12;
+  double x51 = cq2q_(3) * q13;
   double x52 = x50 + x51;
   double x53 = -x48;
   double x54 = -x45;
@@ -619,42 +317,269 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   double x59 = x47 + x54;
   double x60 = x34 + x55;
 
-  jachq.setValue(0, 3, x18*x23 + x22*(_A->getValue(0)*x4 + _A->getValue(1)*x9 + _A->getValue(2)*x14));
-  jachq.setValue(0, 4, x22*(_A->getValue(0)*x18 + _A->getValue(1)*x14 + _A->getValue(2)*x24) + x23*x25);
-  jachq.setValue(0, 5, x22*(_A->getValue(0)*x26 + _A->getValue(1)*x18 + _A->getValue(2)*x4) + x23*x24);
-  jachq.setValue(0, 6, x22*(_A->getValue(0)*x9 + _A->getValue(1)*x25 + _A->getValue(2)*x18) + x23*x26);
+  jachq.setValue(0, 3,
+                 x18 * x23 + x22 * (axes_[0](0) * x4 + axes_[0](1) * x9 + axes_[0](2) * x14));
+  jachq.setValue(
+      0, 4, x22 * (axes_[0](0) * x18 + axes_[0](1) * x14 + axes_[0](2) * x24) + x23 * x25);
+  jachq.setValue(0, 5,
+                 x22 * (axes_[0](0) * x26 + axes_[0](1) * x18 + axes_[0](2) * x4) + x23 * x24);
+  jachq.setValue(0, 6,
+                 x22 * (axes_[0](0) * x9 + axes_[0](1) * x25 + axes_[0](2) * x18) + x23 * x26);
 
-  if(q0->numberOfBlocks()<2)
+  if (!q2) {
     return;
-
-  jachq.setValue(0, 7, 0);
-  jachq.setValue(0, 8, 0);
-  jachq.setValue(0, 9, 0);
+  }
 
   /*
    * sympy expression:
    *
    * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+10,e[i+4]))
-  */
+   */
 
-  jachq.setValue(0, 10, x22*(_A->getValue(0)*(x30 + x31 + x33) + _A->getValue(1)*(x34 + x35 + x40) + _A->getValue(2)*(x44 + x45 + x47)) + x23*(x48 + x49 + x52));
-  jachq.setValue(0, 11, x22*(_A->getValue(0)*(-x49 + x52 + x53) + _A->getValue(1)*(x44 + x46 + x54) + _A->getValue(2)*(-x34 + x40 + x55)) + x23*(x30 + x32 + x56));
-  jachq.setValue(0, 12, x22*(_A->getValue(0)*(-x41 + x43 + x59) + _A->getValue(1)*(-x50 + x51 + x57) + _A->getValue(2)*(x27 + x28 + x58)) + x23*(x37 + x38 + x60));
-  jachq.setValue(0, 13, x22*(_A->getValue(0)*(x36 + x39 + x60) + _A->getValue(1)*(-x27 + x29 + x58) + _A->getValue(2)*(x50 - x51 + x57)) + x23*(x41 + x42 + x59));
+  jachq.setValue(0, 10,
+                 x22 * (axes_[0](0) * (x30 + x31 + x33) + axes_[0](1) * (x34 + x35 + x40) +
+                        axes_[0](2) * (x44 + x45 + x47)) +
+                     x23 * (x48 + x49 + x52));
+  jachq.setValue(0, 11,
+                 x22 * (axes_[0](0) * (-x49 + x52 + x53) + axes_[0](1) * (x44 + x46 + x54) +
+                        axes_[0](2) * (-x34 + x40 + x55)) +
+                     x23 * (x30 + x32 + x56));
+  jachq.setValue(0, 12,
+                 x22 * (axes_[0](0) * (-x41 + x43 + x59) + axes_[0](1) * (-x50 + x51 + x57) +
+                        axes_[0](2) * (x27 + x28 + x58)) +
+                     x23 * (x37 + x38 + x60));
+  jachq.setValue(0, 13,
+                 x22 * (axes_[0](0) * (x36 + x39 + x60) + axes_[0](1) * (-x27 + x29 + x58) +
+                        axes_[0](2) * (x50 - x51 + x57)) +
+                     x23 * (x41 + x42 + x59));
 }
 
-
-/** Return the normal of the angular DoF axis of rotation.
- * \param axis must be 0 */
-void PivotJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                             bool absoluteRef)
-{
+siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
+    const siconos::algebra::SiconosVector& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    bool absoluteRef) {
   assert(axis == 0);
-  if(axis != 0) return;
+  if (axis != 0) return siconos::algebra::SiconosVector3{};
 
   // We assume that A is normalized.
-  ans = *_A;
+  auto result = axes_[0];
 
-  if(absoluteRef)
-    changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
+  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q0, result);
+  return result;  // RVO
+}
+
+// Free functions
+
+void siconos::joints::pivot::computeH_for_2DS(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const siconos::algebra::SiconosVector3& coords1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+    const siconos::algebra::SiconosVector3& coords2,
+    const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
+    const siconos::algebra::SiconosVector& cq2q,
+    Eigen::Ref<siconos::algebra::MapType> result) {
+  knee::computeH_for_2DS(qp1, coords1, qp2, coords2, result.topRows(3));
+
+  // sympy expression: [AscalA1.diff(x) for x in q1]
+  result.setValue(
+      3, 3,
+      A1(0) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
+          A1(1) *
+              (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A1(2) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+  result.setValue(
+      3, 4,
+      A1(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
+          A1(1) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+          A1(2) * (cq2q(0) * qp2(2) + cq2q(1) * qp2(3) + cq2q(2) * qp2(0) - cq2q(3) * qp2(1)));
+  result.setValue(
+      3, 5,
+      A1(0) * (cq2q(0) * qp2(3) - cq2q(1) * qp2(2) + cq2q(2) * qp2(1) + cq2q(3) * qp2(0)) +
+          A1(1) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
+          A1(2) *
+              (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
+  result.setValue(
+      3, 6,
+      A1(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A1(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
+          A1(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
+
+  result.setValue(3, 7, 0);
+  result.setValue(3, 8, 0);
+  result.setValue(3, 9, 0);
+
+  // sympy expression: [AscalA1.diff(x) for x in q2]
+  result.setValue(
+      3, 10,
+      A1(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
+          A1(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A1(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
+  result.setValue(
+      3, 11,
+      A1(0) * (-cq2q(0) * qp1(0) - cq2q(1) * qp1(1) + cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A1(1) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) + cq2q(3) * qp1(0)) +
+          A1(2) *
+              (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
+  result.setValue(
+      3, 12,
+      A1(0) * (-cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) - cq2q(3) * qp1(0)) +
+          A1(1) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A1(2) * (cq2q(0) * qp1(1) + cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)));
+  result.setValue(
+      3, 13,
+      A1(0) * (cq2q(0) * qp1(2) - cq2q(1) * qp1(3) + cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A1(1) *
+              (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
+          A1(2) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
+
+  // sympy expression: [AscalA2.diff(x) for x in q1]
+  result.setValue(
+      4, 3,
+      A2(0) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
+          A2(1) *
+              (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A2(2) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+  result.setValue(
+      4, 4,
+      A2(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
+          A2(1) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+          A2(2) * (cq2q(0) * qp2(2) + cq2q(1) * qp2(3) + cq2q(2) * qp2(0) - cq2q(3) * qp2(1)));
+  result.setValue(
+      4, 5,
+      A2(0) * (cq2q(0) * qp2(3) - cq2q(1) * qp2(2) + cq2q(2) * qp2(1) + cq2q(3) * qp2(0)) +
+          A2(1) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
+          A2(2) *
+              (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
+  result.setValue(
+      4, 6,
+      A2(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A2(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
+          A2(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
+
+  // sympy expression: [AscalA2.diff(x) for x in q1]
+  result.setValue(
+      4, 10,
+      A2(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
+          A2(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A2(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
+  result.setValue(
+      4, 11,
+      A2(0) * (-cq2q(0) * qp1(0) - cq2q(1) * qp1(1) + cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A2(1) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) + cq2q(3) * qp1(0)) +
+          A2(2) *
+              (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
+  result.setValue(
+      4, 12,
+      A2(0) * (-cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) - cq2q(3) * qp1(0)) +
+          A2(1) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A2(2) * (cq2q(0) * qp1(1) + cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)));
+  result.setValue(
+      4, 13,
+      A2(0) * (cq2q(0) * qp1(2) - cq2q(1) * qp1(3) + cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A2(1) *
+              (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
+          A2(2) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
+
+  /*proj_with_q
+  for (siconos::algebra::Index ii=0; ii <result.rows(); ii++)
+    for (siconos::algebra::Index jj=0; jj <result.cols(); jj++)
+  H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
+
+  H_NE_view_Proj->setValue(5,0,0);
+  H_NE_view_Proj->setValue(5,1,0);
+  H_NE_view_Proj->setValue(5,2,0);
+  H_NE_view_Proj->setValue(5,3,2.0*q10);
+  H_NE_view_Proj->setValue(5,4,2.0*q11);
+  H_NE_view_Proj->setValue(5,5,2.0*q12);
+  H_NE_view_Proj->setValue(5,6,2.0*q13);
+  H_NE_view_Proj->setValue(6,0+7,0);
+  H_NE_view_Proj->setValue(6,1+7,0);
+  H_NE_view_Proj->setValue(6,2+7,0);
+  H_NE_view_Proj->setValue(6,3+7,2.0*q20);
+  H_NE_view_Proj->setValue(6,4+7,2.0*q21);
+  H_NE_view_Proj->setValue(6,5+7,2.0*q22);
+  H_NE_view_Proj->setValue(6,6+7,2.0*q23);
+  */
+
+  // siconos::algebra::print(result);
+}
+
+void siconos::joints::pivot::computeH_for_1DS(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const siconos::algebra::SiconosVector3& coords1,
+    const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
+    const siconos::algebra::SiconosVector& cq2q,
+    Eigen::Ref<siconos::algebra::MapType> result) {
+  knee::computeH_for_1DS(qp1, coords1, result.topRows(3));
+  // sympy expression: [AscalA1.diff(x) for x in q1]
+  result.setValue(3, 3, A1(0) * (-cq2q(1)) + A1(1) * (-cq2q(2)) + A1(2) * (-cq2q(3)));
+  result.setValue(3, 4, A1(0) * (cq2q(0)) + A1(1) * (-cq2q(3)) + A1(2) * (cq2q(2)));
+  result.setValue(3, 5, A1(0) * (cq2q(3)) + A1(1) * (cq2q(0)) + A1(2) * (-cq2q(1)));
+  result.setValue(3, 6, A1(0) * (-cq2q(2)) + A1(1) * (cq2q(1)) + A1(2) * (cq2q(0)));
+  // sympy expression: [AscalA2.diff(x) for x in q1]
+  result.setValue(4, 3, A2(0) * (-cq2q(1)) + A2(1) * (-cq2q(2)) + A2(2) * (-cq2q(3)));
+  result.setValue(4, 4, A2(0) * (cq2q(0)) + A2(1) * (-cq2q(3)) + A2(2) * (cq2q(2)));
+  result.setValue(4, 5, A2(0) * (cq2q(3)) + A2(1) * (cq2q(0)) + A2(2) * (-cq2q(1)));
+  result.setValue(4, 6, A2(0) * (-cq2q(2)) + A2(1) * (cq2q(1)) + A2(2) * (cq2q(0)));
+
+  /*proj_with_q
+      for (siconos::algebra::Index ii=0; ii <result.rows(); ii++)
+        for (siconos::algebra::Index jj=0; jj <result.cols(); jj++)
+    H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
+
+      H_NE_view_Proj->setValue(5,0,0);
+      H_NE_view_Proj->setValue(5,1,0);
+      H_NE_view_Proj->setValue(5,2,0);
+      H_NE_view_Proj->setValue(5,3,2.0*q10);
+      H_NE_view_Proj->setValue(5,4,2.0*q11);
+      H_NE_view_Proj->setValue(5,5,2.0*q12);
+      H_NE_view_Proj->setValue(5,6,2.0*q13);
+  */
+}
+
+void siconos::joints::pivot::rot2to1(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+    const siconos::algebra::SiconosVector& cq2q,
+    Eigen::Ref<siconos::algebra::SiconosVector> result) {
+  /*
+   * The current rotation vector taking into account initial rotation
+   * difference.
+   *
+   * sympy expression:
+   * rot2to1 = qmul(qinv(qmul(q2,cq2q10)),q1)
+   */
+
+  result(0) =
+      (qp1(0) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
+       qp1(1) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) -
+       qp1(2) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+       qp1(3) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)));
+  result(1) =
+      (qp1(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+       qp1(1) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+       qp1(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) -
+       qp1(3) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
+  result(2) =
+      (qp1(0) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) -
+       qp1(1) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+       qp1(2) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
+       qp1(3) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
+  if (result.size() == 4)
+    result(3) =
+        (qp1(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) -
+         qp1(1) *
+             (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) -
+         qp1(2) *
+             (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) -
+         qp1(3) *
+             (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
 }

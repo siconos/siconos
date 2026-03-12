@@ -26,9 +26,6 @@
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 
-#define NUMERICS_GMP_FREE_MATRIX 4
-#define NUMERICS_GMP_FREE_GMP 8
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif

@@ -14,89 +14,97 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "PIDTest.hpp"
-#include "ControlZOHSimulation.hpp"
+
 #include "ControlLsodarSimulation.hpp"
-#include <FirstOrderLinearTIDS.hpp>
+#include "ControlZOHSimulation.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSensor.hpp"
 #include "PID.hpp"
-#include "ioMatrix.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
+#include "io.hpp"
 
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(PIDTest);
 
-
-void PIDTest::setUp()
-{
-  _A.reset(new SimpleMatrix(_n, _n, 0));
+void PIDTest::setUp() {
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
-  _x0.reset(new SiconosVector(_n, 0));
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 0.0;
   _xFinal = 0.0;
 
-  _K.reset(new SiconosVector(3, 0));
+  _K = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*_K)(0) = .25;
   (*_K)(1) = .125;
   (*_K)(2) = 2.0;
 }
 
-void PIDTest::init()
-{
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
-  SP::SimpleMatrix C(new SimpleMatrix(1, 2, 0));
+void PIDTest::init() {
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
+  C->setZero();
   (*C)(0, 0) = 1;
-  _sensor.reset(new LinearSensor(_DS, C));
-  SP::SimpleMatrix B(new SimpleMatrix(2, 1));
+  _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, C);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
+  B->setZero();
   (*B)(1, 0) = 1;
-  _PIDcontroller.reset(new PID(_sensor, B));
+  _PIDcontroller = std::make_shared<siconos::control::PID>(_sensor, B);
   _PIDcontroller->setRef(_xFinal);
   _PIDcontroller->setK(_K);
   _PIDcontroller->setDeltaT(_h);
-
 }
 
-void PIDTest::tearDown()
-{}
+void PIDTest::tearDown() {}
 
-void PIDTest::testPIDZOH()
-{
+void PIDTest::testPIDZOH() {
   init();
-  SP::ControlZOHSimulation simZOH(new ControlZOHSimulation(_t0, _T, _h));
+  auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_PIDcontroller, _h);
   simZOH->initialize();
   simZOH->run();
-  SimpleMatrix& data = *simZOH->data();
-  ioMatrix::write("PIDZOH.dat", "ascii", data, "noDim");
+  auto data = simZOH->data();
+  siconos::algebra::io::write("PIDZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("PID.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (data - dataRef).normInf() < _tol, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("PID.ref");
+
+  // std::cout << diff << std::endl;
+  auto diff = *data - dataRef;
+  auto error = siconos::algebra::normInf(diff);
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", error < _tol, true);
 }
 
-void PIDTest::testPIDLsodar()
-{
+void PIDTest::testPIDLsodar() {
   init();
-  SP::ControlLsodarSimulation simLsodar(new ControlLsodarSimulation(_t0, _T, _h));
+  auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_PIDcontroller, _h);
   simLsodar->initialize();
   simLsodar->run();
-  SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("PIDLsodar.dat", "ascii", data, "noDim");
+  auto& data = *simLsodar->data();
+  siconos::algebra::io::write("PIDLsodar.dat", data, siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("PID.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", (data - dataRef).normInf() < _tol, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("PID.ref");
+  auto diff = data - dataRef;
+  std::cout << "------- Integration done, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }

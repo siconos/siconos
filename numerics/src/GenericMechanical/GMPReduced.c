@@ -41,7 +41,7 @@
 #include "lcp_cst.h"                            // for SICONOS_LCP_ENUM
 #include "mlcp_cst.h"                           // for SICONOS_MLCP_ENUM
 #include "pinv.h"                               // for pinv
-
+#include "numerics_errors.h"
 void _GMPReducedEquality(GenericMechanicalProblem *pInProblem, double *reducedProb,
                          double *Qreduced, int *Me_size, int *Mi_size);
 void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, int *Me_size, int *Mi_size);
@@ -412,7 +412,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem *pInProblem, double *re
 #endif
   free(Rreduced);
   free(Vreduced);
-  genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
+  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   free(Qreduced);
   free(reducedProb);
 }
@@ -568,7 +568,7 @@ void gmp_reduced_solve(GenericMechanicalProblem *pInProblem, double *reaction,
 #endif
   free(Rreduced);
   free(Vreduced);
-  genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
+  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   free(Me);
   free(Mi);
   free(Qe);

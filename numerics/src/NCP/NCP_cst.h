@@ -35,9 +35,4 @@ enum NCP_SOLVER {
   SICONOS_NCP_PATH = 903
 };
 
-extern const char* const SICONOS_NCP_NEWTON_FB_FBLSA_STR;
-extern const char* const SICONOS_NCP_NEWTON_MIN_FBLSA_STR;
-extern const char* const SICONOS_NCP_PATHSEARCH_STR;
-extern const char* const SICONOS_NCP_PATH_STR;
-
 #endif

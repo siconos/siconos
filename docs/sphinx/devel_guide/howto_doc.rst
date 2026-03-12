@@ -21,21 +21,21 @@ Below some examples on how to write internal links to siconos objects in sphinx 
 
   .. code-block:: rst
 
-     Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
+     Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
       
   **Result** : 
 
-  Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
+  Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
 
 * Link to a file (documentation): 
 
   .. code-block:: rst
 
-     Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
+     Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
       
   **Result** : 
 
-  Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
+  Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
 
 
 * Link to a class method : 

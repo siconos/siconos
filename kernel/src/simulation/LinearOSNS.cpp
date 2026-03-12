@@ -1,0 +1,958 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "LinearOSNS.hpp"
+
+#include <memory>
+#ifdef WITH_TIMER
+#include <chrono>
+#endif
+#include <Eigen/src/Core/util/Constants.h>
+
+#include "BoundaryCondition.hpp"
+#include "DynamicalSystem.hpp"
+#include "EulerMoreauOSI.hpp"
+#include "Interaction.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "NonSmoothLaw.hpp"
+#include "NumericsMatrix.h"  // NM_scal
+#include "OSNSMatrix.hpp"
+#include "OneStepIntegrator.hpp"
+#include "Relation.hpp"
+#include "SecondOrderDS.hpp"
+#include "SiconosConst.hpp"
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "Simulation.hpp"
+#include "ZeroOrderHoldOSI.hpp"
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "siconos_debug.h"
+// #define WITH_TIMER
+
+void siconos::nonsmooth_formulations::LinearOSNS::initVectorsMemory() {
+  // Memory allocation for _w, M, z and q.
+  // If one of them has already been allocated, nothing is done.
+  // We suppose that user has chosen a correct size.
+  if (!_w)
+    _w = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
+  else {
+    if (_w->size() != maxSize()) _w->resize(maxSize());
+  }
+
+  if (!_z)
+    _z = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
+  else {
+    if (_z->size() != maxSize()) _z->resize(maxSize());
+  }
+
+  if (!_q)
+    _q = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
+  else {
+    if (_q->size() != maxSize()) _q->resize(maxSize());
+  }
+}
+void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
+  // Default size for M = maxSize()
+  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK or
+      _assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
+    if (!_M) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE:
+        case NM_SPARSE: {
+          _M = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          // = number of Interactionin the largest considered indexSet
+          if (indexSetLevel() != siconos::internal::LEVELMAX &&
+              simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() >
+                  indexSetLevel()) {
+            auto mSize = simulation()->indexSet(indexSetLevel())->size();
+            _M = std::make_shared<OSNSMatrix>(mSize, mSize, _numericsMatrixStorageType);
+          } else {
+            _M = std::make_shared<OSNSMatrix>(1, 1, _numericsMatrixStorageType);
+          }
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+  }
+
+  if (_assemblyType == LinearOSNSAssemblyType::GLOBAL) {
+    if (!_W) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          // Default number of rows for W = _maxSize
+          _W = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _W = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          auto wSize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W = std::make_shared<OSNSMatrix>(wSize, wSize, NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+
+    if (!_H) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _H = std::make_shared<OSNSMatrix>(0, simulation()->indexSet(_indexSetLevel)->size(),
+                                            NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          _H = std::make_shared<OSNSMatrix>(
+              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
+              simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+  }
+  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
+    // Default size for M = _maxSize
+    if (!_W_inverse) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _W_inverse = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W_inverse = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+
+    if (!_H) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _H = std::make_shared<OSNSMatrix>(0, simulation()->indexSet(_indexSetLevel)->size(),
+                                            NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          _H = std::make_shared<OSNSMatrix>(
+              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
+              simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+  }
+  if (_assemblyType == LinearOSNSAssemblyType::GLOBAL_REDUCED) {
+    // Default size for M = _maxSize
+    if (!_W) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _W = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _W = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+    // Default size for M = _maxSize
+    if (!_W_inverse) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _W_inverse = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W_inverse = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+
+    if (!_H) {
+      switch (_numericsMatrixStorageType) {
+        case NM_DENSE: {
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
+          break;
+        }
+        case NM_SPARSE: {
+          _H = std::make_shared<OSNSMatrix>(0, simulation()->indexSet(_indexSetLevel)->size(),
+                                            NM_SPARSE);
+          break;
+        }
+        case NM_SPARSE_BLOCK: {
+          _H = std::make_shared<OSNSMatrix>(
+              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
+              simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION(
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown "
+                  "_storageType");
+          }
+      }
+    }
+  }
+}
+void siconos::nonsmooth_formulations::LinearOSNS::initialize(
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
+  // - Checks memory allocation for main variables (_M,q,_w,z)
+  // - Formalizes the problem if the topology is time-invariant
+
+  // This function performs all steps that are time-invariant
+
+  // General initialize for OneStepNSProblem
+  OneStepNSProblem::initialize(sim);
+
+  initVectorsMemory();
+
+  // Note that _interactionBlocks is up to date since updateInteractionBlocks
+  // has been called during OneStepNSProblem::initialize()
+
+  initOSNSMatrix();
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(
+    const siconos::graphs::InteractionsGraph::VDescriptor& vd) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(...)\n");
+
+  // Compute diagonal block (graph property) for a given interaction.
+  // - How  blocks are computed depends explicitely on the nonsmooth law, the relation and the
+  // dynamical system types.
+  // - No memory allocation there : blocks should be previously (updateInteractionBlocks) and
+  // properly allocated.
+
+  // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);
+  // Get osi property from interaction
+
+  // At most 2 DS are linked by an Interaction
+  std::shared_ptr<siconos::modeling::DynamicalSystem> ds1;
+  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2;
+  unsigned int pos1, pos2;
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex)
+  // ---
+  if (indexSet->properties(vd).source != indexSet->properties(vd).target) {
+    DEBUG_PRINT("a two DS Interaction\n");
+    ds1 = indexSet->properties(vd).source;
+    ds2 = indexSet->properties(vd).target;
+  } else {
+    DEBUG_PRINT("a single DS Interaction\n");
+    ds1 = indexSet->properties(vd).source;
+    ds2 = ds1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
+    siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
+    for (std::tie(oei, oeiend) = indexSet->out_edges(vd); oei != oeiend; ++oei) {
+      // note : at most 4 edges
+      ds2 = indexSet->bundle(*oei);
+      if (ds2 != ds1) {
+        assert(false);
+        break;
+      }
+    }
+  }
+  assert(ds1);
+  assert(ds2);
+  pos1 = indexSet->properties(vd).source_pos;
+  pos2 = indexSet->properties(vd).target_pos;
+
+  auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  auto nslaw = inter->nonSmoothLaw();
+
+  // --- Check compatible nslaws ----
+  checkCompatibleNSLaw(*nslaw);
+
+  // --- Check block size ---
+  assert(indexSet->properties(vd).block->rows() == nslaw->size());
+  assert(indexSet->properties(vd).block->cols() == nslaw->size());
+
+  // --- Compute diagonal block ---
+  // Block to be set in OSNS Matrix, corresponding to
+  // the current interaction
+  auto currentInteractionBlock = indexSet->properties(vd).block;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock, rightInteractionBlock;
+
+  auto relationType = inter->relation()->getType();
+  auto relationSubType = inter->relation()->getSubType();
+  double h = simulation()->currentTimeStep();
+
+  // General form of the interactionBlock is : interactionBlock =
+  // a*extraInteractionBlock + b * leftInteractionBlock * centralInteractionBlocks
+  // * rightInteractionBlock a and b are scalars, centralInteractionBlocks a
+  // matrix depending on the integrator (and on the DS), the
+  // simulation type ...  left, right and extra depend on the relation
+  // type and the non smooth law.
+  relationType = inter->relation()->getType();
+
+  inter->getExtraInteractionBlock(currentInteractionBlock);
+
+  auto nslawSize = nslaw->size();
+  // loop over the DS connected to the interaction.
+  bool endl = false;
+  auto pos = pos1;
+  for (auto ds = ds1; !endl; ds = ds2) {
+    assert(ds == ds1 || ds == ds2);
+    endl = (ds == ds2);
+
+    auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+    auto osiType = osi.getType();
+    auto sizeDS = ds->real_size();
+
+    // get _interactionBlocks corresponding to the current DS
+    // These _interactionBlocks depends on the relation type.
+    leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
+    DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
+    // Computing depends on relation type -> move this in Interaction method?
+    if (relationType == siconos::modeling::RelationType::FirstOrder) {
+      rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
+
+      if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
+        if ((static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGamma() ||
+            (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGammaForRelation()) {
+          *rightInteractionBlock *=
+              (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
+        }
+      }
+      // for ZOH, we have a different formula ...
+      if ((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
+          indexSet->properties(vd).forControl) {
+        *rightInteractionBlock =
+            static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
+        *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
+      } else {
+        // centralInteractionBlock contains a lu-factorized matrix and we solve
+        // centralInteractionBlock * X = rightInteractionBlock with PLU
+        auto centralInteractionBlock = getOSIMatrix(osi, ds);
+        *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
+        auto& workMInter = *indexSet->properties(vd).workMatrices;
+        static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(
+            *inter, *rightInteractionBlock, workMInter, h);
+
+        //      integration of r with theta method removed
+        //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
+        // (*rightInteractionBlock);  // left = C, right = W.B
+        // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
+        *currentInteractionBlock += h * *leftInteractionBlock * *rightInteractionBlock;
+        // left = C, right = inv(W).B
+      }
+    } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
+               relationType == siconos::modeling::RelationType::NewtonEuler) {
+      // Applying boundary conditions
+      auto d = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+      assert(d);
+      if (auto bc = d->boundaryConditions()) {
+        for (auto itindex : bc->velocityIndices()) {
+          leftInteractionBlock->col(itindex).setZero();
+        }
+      }
+
+      if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
+          std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(
+            leftInteractionBlock->rows(), leftInteractionBlock->cols());
+
+        // Get inverse of the iteration matrix
+        auto inv_iteration_matrix = osi.iterationMatrix(ds);
+        // work = HW (remind that W contains the inverse of the iteration matrix)
+        *work = *leftInteractionBlock * *inv_iteration_matrix;
+        leftInteractionBlock->transposeInPlace();
+        *currentInteractionBlock = *work * *leftInteractionBlock;
+        if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
+          if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
+            *currentInteractionBlock *=
+                (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+            *currentInteractionBlock +=
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
+                simulation()->timeStep();
+          }
+        }
+      } else {
+        DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
+        DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
+        // (inter1 == inter2)
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
+        work->transposeInPlace();
+        auto centralInteractionBlock = getOSIMatrix(osi, ds);
+        if (centralInteractionBlock) {  // else it means centralInteractionBlock = identity
+          *work = centralInteractionBlock->solve(*work);
+        }
+        //*currentInteractionBlock +=  *leftInteractionBlock ** work;
+        DEBUG_EXPR(siconos::algebra::print(*work););
+        *currentInteractionBlock += *leftInteractionBlock * *work;
+        //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
+        //*currentInteractionBlock *=h;
+        DEBUG_EXPR(siconos::algebra::print(*currentInteractionBlock););
+        // assert(currentInteractionBlock->isSymmetric(1e-10));
+        if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
+          if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
+            *currentInteractionBlock *=
+                (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+            *currentInteractionBlock +=
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
+                simulation()->timeStep();
+          }
+        }
+      }
+    } else
+      THROW_EXCEPTION(
+          "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock not "
+          "yet "
+          "implemented for relation of type " +
+          std::to_string(
+              static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
+                  relationType)));
+    // Set pos for next loop.
+    pos = pos2;
+  }
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(const "
+      "siconos::graphs::InteractionsGraph::VDescriptor& vd) ends \n");
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
+    const siconos::graphs::InteractionsGraph::EDescriptor& ed) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
+      "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
+
+  // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
+  // necessary) if inter1 and inter2 have common DynamicalSystem.  How
+  // _interactionBlocks are computed depends explicitely on the type of
+  // Relation of each Interaction.
+
+  // Warning: we suppose that at this point, all non linear
+  // operators (G for lagrangian relation for example) have been
+  // computed through plug-in mechanism.
+
+  // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  auto ds = indexSet->bundle(ed);
+  auto inter1 = indexSet->bundle(indexSet->source(ed));
+  auto inter2 = indexSet->bundle(indexSet->target(ed));
+  // Once again we assume that inter1 and inter2 have the same osi ...
+  // auto Osi = indexSet->properties(indexSet->source(ed)).osi;
+  auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+  auto osiType = osi.getType();
+
+  // For the edge 'ds', we need to find relative position of this ds
+  // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
+  // - find if ds is source or target in inter_i
+  siconos::graphs::InteractionsGraph::VDescriptor vertex_inter;
+  // - get the corresponding position
+  unsigned int pos1, pos2;
+  // source of inter1 :
+  vertex_inter = indexSet->source(ed);
+  std::shared_ptr<siconos::modeling::DynamicalSystem> tmpds =
+      indexSet->properties(vertex_inter).source;
+  if (tmpds == ds)
+    pos1 = indexSet->properties(vertex_inter).source_pos;
+  else {
+    tmpds = indexSet->properties(vertex_inter).target;
+    pos1 = indexSet->properties(vertex_inter).target_pos;
+  }
+  // now, inter2
+  vertex_inter = indexSet->target(ed);
+  tmpds = indexSet->properties(vertex_inter).source;
+  if (tmpds == ds)
+    pos2 = indexSet->properties(vertex_inter).source_pos;
+  else {
+    tmpds = indexSet->properties(vertex_inter).target;
+    pos2 = indexSet->properties(vertex_inter).target_pos;
+  }
+
+  auto index1 = indexSet->index(indexSet->source(ed));
+  auto index2 = indexSet->index(indexSet->target(ed));
+  auto nslawSize1 = inter1->nonSmoothLaw()->size();
+  auto nslawSize2 = inter2->nonSmoothLaw()->size();
+
+  std::shared_ptr<siconos::algebra::SiconosMatrix> currentInteractionBlock;
+
+  assert(index1 != index2);
+
+  if (index2 > index1)  // upper block
+  {
+    assert(indexSet->properties(ed).upper_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).upper_block->cols() == nslawSize2);
+
+    currentInteractionBlock = indexSet->properties(ed).upper_block;
+  } else  // lower block
+  {
+    assert(indexSet->properties(ed).lower_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).lower_block->cols() == nslawSize2);
+
+    currentInteractionBlock = indexSet->properties(ed).lower_block;
+  }
+
+  std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock, rightInteractionBlock;
+
+  auto h = simulation()->currentTimeStep();
+
+  // General form of the interactionBlock is : interactionBlock =
+  // a*extraInteractionBlock + b * leftInteractionBlock * centralInteractionBlocks
+  // * rightInteractionBlock a and b are scalars, centralInteractionBlocks a
+  // matrix depending on the integrator (and on the DS), the
+  // simulation type ...  left, right and extra depend on the relation
+  // type and the non smooth law.
+  auto relationType1 = inter1->relation()->getType();
+  auto relationType2 = inter2->relation()->getType();
+
+  // ==== First Order Relations - Specific treatment for diagonal
+  // _interactionBlocks ===
+  assert(inter1 != inter2);
+  //  currentInteractionBlock->setZero();
+
+  // loop over the common DS
+  auto sizeDS = ds->real_size();
+
+  // get _interactionBlocks corresponding to the current DS
+  // These _interactionBlocks depends on the relation type.
+  leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, nslawSize1, sizeDS);
+
+  // Computing depends on relation type -> move this in Interaction method?
+  if (relationType1 == siconos::modeling::RelationType::FirstOrder &&
+      relationType2 == siconos::modeling::RelationType::FirstOrder) {
+    rightInteractionBlock = inter2->getRightInteractionBlockForDS(pos2, sizeDS, nslawSize2);
+    // centralInteractionBlock contains a lu-factorized matrix and we solve
+    // centralInteractionBlock * X = rightInteractionBlock with PLU
+    auto centralInteractionBlock = getOSIMatrix(osi, ds);
+    *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
+    //      integration of r with theta method removed
+    //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
+    //      (*rightInteractionBlock); //left = C, right = W.B
+    // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
+    *leftInteractionBlock *= h;
+    *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
+
+    // left = C, right = inv(W).B
+  } else if (relationType1 == siconos::modeling::RelationType::Lagrangian ||
+             relationType2 == siconos::modeling::RelationType::Lagrangian ||
+             relationType1 == siconos::modeling::RelationType::NewtonEuler ||
+             relationType2 == siconos::modeling::RelationType::NewtonEuler) {
+    // Applying boundary conditions
+    std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
+    auto d = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
+    assert(d);
+    if (d->boundaryConditions()) bc = d->boundaryConditions();
+    if (bc) {
+      for (auto itindex : bc->velocityIndices()) {
+        std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
+            std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);
+        coltmp->setZero();
+        leftInteractionBlock->col(itindex) = *coltmp;
+      }
+    }
+
+    auto dsType = siconos::types::type_value(*ds);
+
+    if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
+        dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      // Rightinteractionblock used first as buffer to save left * W-1
+      rightInteractionBlock =
+          std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS);
+      // auto work(new SiconosMatrix(*leftInteractionBlock));
+      //  Get inverse of the iteration matrix
+      auto inv_iteration_matrix = osi.iterationMatrix(ds);
+      // remind that W contains the inverse of the iteration matrix
+      *rightInteractionBlock = *leftInteractionBlock * *inv_iteration_matrix;
+      // Then save block corresponding to the 'right' interaction into leftInteractionBlock
+      leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
+      leftInteractionBlock->transposeInPlace();
+      // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into
+      // currentInteractionBlock
+      *currentInteractionBlock += *rightInteractionBlock * *leftInteractionBlock;
+    } else {
+      // inter1 != inter2
+      rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize2, sizeDS);
+      rightInteractionBlock->transposeInPlace();
+      // Warning: we use getLeft for Right interactionBlock
+      // because right = transpose(left) and because of
+      // size checking inside the getBlock function, a
+      // getRight call will fail.
+      auto centralInteractionBlock = getOSIMatrix(osi, ds);
+      *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
+      //*currentInteractionBlock +=  *leftInteractionBlock ** work;
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
+    }
+  } else
+    THROW_EXCEPTION(
+        "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock not yet "
+        "implemented for "
+        "relation of type " +
+        std::to_string(
+            static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
+                relationType1)));
+
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
+      "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
+    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos) {
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(...)\n");
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+
+  auto& osi1 = *indexSet->properties(vertex_inter).osi1;
+  // auto& osi2 = *indexSet->properties(vertex_inter).osi2;
+
+  auto inter = indexSet->bundle(vertex_inter);
+  auto sizeY = inter->nonSmoothLaw()->size();
+
+  auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
+  osi1.computeFreeOutput(vertex_inter, this);  // Update osnsp_rhs
+  _q->segment(pos, sizeY) = osnsp_rhs;
+
+  DEBUG_EXPR(siconos::algebra::print(*_q));
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::"
+      "modeling::"
+      "Interaction> inter, unsigned int pos)\n");
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::compute_q() {
+  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::compute_q()\n");
+  if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
+  _q->setZero();
+
+  // === Get index set from Simulation ===
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  // === Loop through "active" Interactions (ie present in
+  // indexSets[level]) ===
+
+  unsigned int pos = 0;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
+    // Compute q, this depends on the type of non smooth problem, on
+    // the relation type and on the non smooth law
+    pos = indexSet->properties(*ui).absolute_position;
+    computeqBlock(*ui, pos);  // free output is saved in y
+  }
+  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::compute_q()\n");
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
+  auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
+    // Computes new _interactionBlocks if required
+    updateInteractionBlocks();
+
+    _M->fillM(indexSet, !_hasBeenUpdated);
+
+  } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
+#ifdef WITH_TIMER
+    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+    start = std::chrono::system_clock::now();
+#endif
+    // fill _Winverse
+    _W_inverse->fillWinverse(*DSG0);
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "\nLinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
+#endif
+    // fill H
+    _H->fillHtrans(*DSG0, indexSet);
+#ifdef WITH_TIMER
+    end_old = end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
+    std::cout << "LinearOSNS: FillH " << elapsed << " ms" << std::endl;
+#endif
+    // ComputeM
+    _M->computeM(_W_inverse->numericsMatrix(), _H->numericsMatrix());
+
+#ifdef WITH_TIMER
+    end_old = end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
+    std::cout << "LinearOSNS: _computeM " << elapsed << " ms" << std::endl;
+#endif
+  } else
+    THROW_EXCEPTION(
+        "siconos::nonsmooth_formulations::LinearOSNS::computeM unknown _assemblyTYPE");
+
+  // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
+  // Get first vertex in the graph to access to theta value from the integrator ...
+  auto vs = indexSet.vertices().first;
+  auto& inter = *indexSet.bundle(*vs);
+  auto& nslaw = *inter.nonSmoothLaw();
+  if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
+    auto ds1 = indexSet.properties(*vs).source;
+    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+    double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+    NM_scal(theta, &*_M->numericsMatrix());
+  }
+
+  DEBUG_EXPR(_M->display(););
+  // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
+  // if (M_NM )
+  //   NM_display(M_NM);
+  // NumericsMatrix * M = &*_M->numericsMatrix();
+  // CSparseMatrix * A = NM_csc(M);
+  // CSparseMatrix_print(A, 0);
+  // getchar();
+}
+
+bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
+  DEBUG_BEGIN("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
+  // This function is used to prepare data for the
+  // LinearComplementarityProblem
+
+  // - computation of M and q
+  // - set _sizeOutput
+  // - check dim. for _z,_w
+
+  // If the topology is time-invariant, only q needs to be computed at
+  // each time step.  M, _sizeOutput have been computed in initialize
+  // and are uptodate.
+
+  // Get topology
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
+  // auto elapsed =0;
+  //    std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
+
+  // nothing to do
+  if (indexSetLevel() == siconos::internal::LEVELMAX) {
+    DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
+    return false;
+  }
+
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
+
+  if (indexSet.size() == 0) {
+    DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
+    return false;
+  }
+#ifdef WITH_TIMER
+  std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+  start = std::chrono::system_clock::now();
+#endif
+  if (!_hasBeenUpdated || !isLinear) {
+    computeM();
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "\nLinearOSNS: ComputeM " << elapsed << " ms" << std::endl;
+#endif
+    //      updateOSNSMatrix();
+    _sizeOutput = _M->rows();
+
+    // Checks z and _w sizes and reset if necessary
+
+    if (_z->size() != _sizeOutput) {
+      _z->resize(_sizeOutput, Eigen::NoChange);
+      _z->setZero();
+    }
+
+    if (_w->size() != _sizeOutput) {
+      _w->resize(_sizeOutput);
+      _w->setZero();
+    }
+
+    // Reset _w and _z with previous values of y and lambda
+    // VA 31/05/2021. Values was before the one of the Newton Loop
+    // (i.e. values saved in yOutputOld and lambdaOld of the interaction)
+    // should be better but needs memory comsumption
+
+    // Note : sizeOuput can be unchanged, but positions may have changed. (??)
+    if (_keepLambdaAndYState) {
+      siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+      for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
+        auto& inter = *indexSet.bundle(*ui);
+        // Get the position of inter-interactionBlock in the vector w
+        // or z
+        auto pos = indexSet.properties(*ui).absolute_position;
+        // VA 30/08/2021  : Warning. the values of y_k and lambda_k that are stored in Memory
+        // may be undefined at the first time step.
+        const auto& yOutput_k = inter.y_k(inputOutputLevel());
+        const auto& lambda_k = inter.lambda_k(inputOutputLevel());
+
+        if (_sizeOutput >= yOutput_k.size() + pos) {
+          _w->segment(pos, yOutput_k.size()) = yOutput_k;
+          _z->segment(pos, lambda_k.size()) = lambda_k;
+        }
+      }
+    } else {
+      _w->setZero();
+      _z->setZero();
+    }
+  }
+  // else
+  // nothing to do (IsLinear and not changed)
+#ifdef WITH_TIMER
+  end_old = end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
+  std::cout << "LinearOSNS: init w and z " << elapsed << " ms" << std::endl;
+#endif
+  // Computes q of LinearOSNS
+  compute_q();
+#ifdef WITH_TIMER
+  end_old = end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
+  std::cout << "LinearOSNS: compute q " << elapsed << " ms" << std::endl;
+#endif
+  DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
+  return true;
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
+  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
+  // This function is used to set lambda values using output from
+  // lcp_driver (w,z).  Only Interactions of indexSet(leveMin) are concerned.
+  // === Get index set from Topology ===
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
+
+  // lambda vector
+  std::shared_ptr<siconos::algebra::SiconosVector> lambda;
+
+  // === Loop through "active" Interactions (ie present in
+  // indexSets[1]) ===
+
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
+    auto& inter = *indexSet.bundle(*ui);
+    // Get the  position of inter-interactionBlock in the vector w or z
+    auto pos = indexSet.properties(*ui).absolute_position;
+
+    // Get lambda for the current Interaction
+    // y = inter.y(inputOutputLevel());
+    lambda = inter.lambda(inputOutputLevel());
+    // Copy _z values, starting from index pos into lambda.
+    lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
+    DEBUG_EXPR(siconos::algebra::print(*lambda););
+  }
+  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
+}
+
+void siconos::nonsmooth_formulations::LinearOSNS::display() const {
+  std::cout << "==========================" << std::endl;
+  std::cout << "this : " << this << std::endl;
+  std::cout << "_M  ";
+  if (_M)
+    _M->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << std::endl << "q : ";
+  if (_q)
+    siconos::algebra::print(*_q);
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << std::endl;
+  std::cout << "w : ";
+  if (_w)
+    siconos::algebra::print(*_w);
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << std::endl << "z : ";
+  if (_z)
+    siconos::algebra::print(*_z);
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << std::endl;
+  std::cout << "The linearOSNSP works on the index set of level  " << _indexSetLevel
+            << std::endl;
+  std::cout << "==========================" << std::endl;
+}

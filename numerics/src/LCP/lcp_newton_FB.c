@@ -22,12 +22,12 @@
 
 #include "FischerBurmeister.h"             // for Jac_F_FB, phi_FB
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
+#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
 #include "SolverOptions.h"
-
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w) {
   // Computation of the new val w = F(z) = Mz + q
   // q --> w
@@ -75,3 +75,40 @@ void lcp_newton_FB_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
   options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_LCP_NEWTON_FB_FBLSA in the global solver registry.
+ */
+
+#include "solver_registry.h"
+#include "numerics_errors.h"
+
+static int lcp_newton_FB_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int lcp_newton_FB_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  lcp_newton_FB((LinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+static void lcp_newton_FB_free_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+}
+
+REGISTER_SOLVER(SICONOS_LCP_NEWTON_FB_FBLSA, "LCP_NEWTON_FB",
+                "Newton Fischer-Burmeister solver for LCP",
+                lcp_newton_FB_init_wrap,
+                lcp_newton_FB_solve_wrap,
+                lcp_newton_FB_free_wrap,
+                NULL,  /* error function */
+                lcp_newton_FB_set_default,
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0);     /* is_local_solver */

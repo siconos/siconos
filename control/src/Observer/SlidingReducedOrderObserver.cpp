@@ -14,182 +14,179 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "ModelingTools.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SimulationTools.hpp"
 #include "SlidingReducedOrderObserver.hpp"
-#include "ControlSensor.hpp"
-#include "ObserverFactory.hpp"
-#include "ControlZOHAdditionalTerms.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#include "ControlSensor.hpp"
+#include "ControlZOHAdditionalTerms.hpp"
+#include "FirstOrderLinearDS.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
+#include "TimeStepping.hpp"
+#include "ZeroOrderHoldOSI.hpp"
+
+// #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds,
-    const Simulation& s)
-{
-  DEBUG_BEGIN(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
-  if(!_C)
-  {
-    THROW_EXCEPTION("SlidingReducedOrderObserver::initialize - you have to set C before initializing the Observer");
-  }
-  else
-  {
+void siconos::control::SlidingReducedOrderObserver::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    const siconos::simulation::Simulation& s) {
+  DEBUG_BEGIN(
+      " siconos::control::SlidingReducedOrderObserver::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
+  if (!_C) {
+    THROW_EXCEPTION(
+        "siconos::control::SlidingReducedOrderObserver::initialize - you have to set C before "
+        "initializing the Observer");
+  } else {
     Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
-  DynamicalSystemsGraph& originalDSG0 = *nsds.topology()->dSG(0);
-  DynamicalSystemsGraph::VDescriptor originaldsgVD;
-  if(!_DS)  // No DynamicalSystem was given
+  auto& originalDSG0 = *nsds.topology()->dSG(0);
+  siconos::graphs::DynamicalSystemsGraph::VDescriptor originaldsgVD;
+  if (!_DS)  // No DynamicalSystem was given
   {
-    // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
+    // We can only work with FirstOrderNonLinearDS and FirstOrderLinearDS
     // We can use the Visitor mighty power to check if we have the right type
-    DynamicalSystem& observedDS = *_sensor->getDS();
-    Type::Siconos dsType;
-    dsType = Type::value(observedDS);
+    auto observedDS = _sensor->getDS();
     // create the DS for the controller
     // if the DS we use is different from the DS we are controlling
     // when we want for instant to see how well the controller behaves
     // if the plant model is not exact, we can use the setSimulatedDS
     // method
-    if(dsType == Type::FirstOrderLinearDS)
-    {
+    if (auto folds =
+            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(observedDS)) {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
-      _DS.reset(new FirstOrderLinearDS(static_cast<FirstOrderLinearDS&>(observedDS)));
-    }
-    else if(dsType == Type::FirstOrderLinearTIDS)
-    {
-      DEBUG_PRINT("dsType == Type::FirstOrderLinearTIDS\n");
-      _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
-    }
-    else
-      THROW_EXCEPTION("SlidingReducedOrderObserver is not yet implemented for system of type" + std::to_string(dsType));
+      _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
+    } else
+      THROW_EXCEPTION(
+          "SlidingReducedOrderObserver is only implemented for FirstOrderLinearDS");
 
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());
-  }
-  else
-  {
+  } else {
     // is it controlled ?
-    if(originalDSG0.is_vertex(_DS))
+    if (originalDSG0.is_vertex(_DS))
       originaldsgVD = originalDSG0.descriptor(_DS);
     else
       isDSinDSG0 = false;
   }
 
   // Initialize with the guessed state
-  _DS->setX0Ptr(_xHat);
+  _DS->setX0(*_xHat, siconos::algebra::alias_t);  // Shared memory view
   _DS->resetToInitialState();
-  _e.reset(new SiconosVector(_C->size(0)));
-  _y.reset(new SiconosVector(_C->size(0)));
+  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
+  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
 
-  double t0 = nsds.t0();
-  double h = s.currentTimeStep();
-  double T = nsds.finalT() + h;
-  _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
-  _integrator.reset(new ZeroOrderHoldOSI());
-  std::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
-    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  auto t0 = nsds.t0();
+  auto h = s.currentTimeStep();
+  auto T = nsds.finalT() + h;
+  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
+  _integrator = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
+
+  std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integrator)
+      ->setExtraAdditionalTerms(std::make_shared<ControlZOHAdditionalTerms>());
+
   _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *_nsds->topology()->dSG(0);
-  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_DS);
+  auto& DSG0 = *_nsds->topology()->dSG(0);
+  auto dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
   DSG0.e[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
-  if(isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
-  {
+  if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD)) {
     DSG0.B[dsgVD] = originalDSG0.B[originaldsgVD];
-    assert(originalDSG0.u[originaldsgVD] && "A DynamicalSystem is controlled but its control input has not been initialized yet");
+    assert(
+        originalDSG0.u[originaldsgVD] &&
+        "A DynamicalSystem is controlled but its control input has not been initialized yet");
     DSG0.u[dsgVD] = originalDSG0.u[originaldsgVD];
   }
 
   // all necessary things for simulation
-  _simulation.reset(new TimeStepping(_nsds, _td, 0));
+  _simulation = std::make_shared<siconos::simulation::TimeStepping>(_nsds, _td, 0);
   _simulation->setName("Internal simultion of SlidingReducedOrderObserver");
   _simulation->associate(_integrator, _DS);
 
   // initialize error
   *_y = _sensor->y();
-  DEBUG_END(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
+  DEBUG_END(
+      " siconos::control::SlidingReducedOrderObserver::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
 }
 
-void SlidingReducedOrderObserver::process()
-{
-  DEBUG_BEGIN("void SlidingReducedOrderObserver::process()\n");
-  if(!_pass)
-  {
+void siconos::control::SlidingReducedOrderObserver::process() {
+  DEBUG_BEGIN("void siconos::control::SlidingReducedOrderObserver::process()\n");
+  if (!_pass) {
     DEBUG_PRINT("First pass \n ");
     _pass = true;
-    //update the estimate using the first value of y, such that C\hat{x}_0 = y_0
-    const SiconosVector& y = _sensor->y();
-    _e->zero();
-    prod(*_C, *_xHat, *_e);
+    // update the estimate using the first value of y, such that C\hat{x}_0 = y_0
+    const auto& y = _sensor->y();
+    *_e = *_C * *_xHat;
     *_e -= y;
 
-    SiconosVector tmpV(_DS->n());
-    SimpleMatrix tmpC(*_C);
-    for(unsigned int i = 0; i < _e->size(); ++i)
-      tmpV(i) = (*_e)(i);
+    siconos::algebra::SiconosVector tmpV{_e->size()};
+    siconos::algebra::SiconosMatrix tmpC{*_C};
+    for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
-    tmpC.SolveByLeastSquares(tmpV);
-    *(_xHat) -= tmpV;
-    *(_DS->x()) -= tmpV;
+    Eigen::BDCSVD<siconos::algebra::SiconosMatrix> svd(
+        tmpC, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    siconos::algebra::SiconosVector result = svd.solve(tmpV);
+    *(_xHat) -= result;
+    *(_DS->x()) -= result;
     _DS->initMemory(1);
     _DS->swapInMemory();
     DEBUG_EXPR(_DS->display(););
-    DEBUG_EXPR(_DS->xMemory().display(););
-  }
-  else
-  {
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
+  } else {
     DEBUG_PRINT("Second pass\n");
     // get measurement from sensor
-    const SiconosVector& y = _sensor->y();
+    const auto& y = _sensor->y();
     // update the current measured value
     *_y = y;
 
-////    prod(*_C, _DS->getx(), *_e);
-//    *_e -= y;
-//
-//    SiconosVector tmpV(_DS->n());
-//    SimpleMatrix tmpC(*_C);
-//    for (unsigned int i = 0; i < _e->size(); ++i)
-//      tmpV(i) = (*_e)(i);
-//
-//    tmpC.SolveByLeastSquares(tmpV);
-//    *(_DS->x()) -= tmpV;
+    // *_e = *_C *  _DS->x_read();
+    //    *_e -= y;
+    //
+    //    SiconosVector tmpV(_DS->dimension());
+    //    SiconosMatrix tmpC(*_C);
+    //    for (unsigned int i = 0; i < _e->size(); ++i)
+    //      tmpV(i) = (*_e)(i);
+    //
+    //    tmpC.SolveByLeastSquares(tmpV);
+    //    *(_DS->x()) -= tmpV;
     // First pass, set _e to 0, integrate the system
     // and get the innovation term
-    _e->zero();
+    _e->setZero();
     _simulation->computeOneStep();
 
     // e = C*xhat_{k+1} - y_{k+1}
-    prod(*_C, _DS->getx(), *_e);
+    *_e = *_C * _DS->x_read();
     *_e -= *_y;
 
     // Second pass, now we update the state
     //
     // But first we need to reset the state to the
     // previous value (at t_k)
-    DEBUG_EXPR(_DS->xMemory().display(););
-    _DS->setX(_DS->xMemory().getSiconosVector(0));
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
+    auto current_x = _DS->x();                        // Pointer
+    *current_x = _DS->xMemory().getSiconosVector(0);  // Copy
     // integrate with the new innovation term
     _simulation->computeOneStep();
 
     // We can go one step forward
     _simulation->nextStep();
 
-    *_xHat = _DS->getx();
+    *_xHat = _DS->x_read();
   }
-  DEBUG_END("void SlidingReducedOrderObserver::process()\n");
+  DEBUG_END("void siconos::control::SlidingReducedOrderObserver::process()\n");
 }
-
-AUTO_REGISTER_OBSERVER(SLIDING_REDUCED_ORDER, SlidingReducedOrderObserver);

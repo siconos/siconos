@@ -29,8 +29,11 @@
 #include "SiconosBlas.h"                        // for cblas_ddot
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_O...
-
 #define EPSDIAG DBL_EPSILON
+
+/* Solver registration system */
+#include "solver_registry.h"
+#include "numerics_errors.h"
 /*
  *
  * double *z : size n+m
@@ -189,3 +192,32 @@ void mlcp_rpsor_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2.;
   options->filterOn = false;
 }
+
+/* ===========================================================================
+ * Solver Registration
+ * ===========================================================================
+ * This registers SICONOS_MLCP_RPSOR in the global solver registry.
+ */
+
+static int mlcp_rpsor_init_wrap(void* problem, SolverOptions* options) {
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int mlcp_rpsor_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  mlcp_rpsor((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+  return info;
+}
+
+REGISTER_SOLVER(SICONOS_MLCP_RPSOR, "MLCP_RPSOR",
+                "Regularized Projected Successive Over-Relaxation for Mixed Linear Complementarity Problems",
+                mlcp_rpsor_init_wrap,
+                mlcp_rpsor_solve_wrap,
+                NULL,  /* free function */
+                NULL,  /* error function */
+                mlcp_rpsor_set_default,
+                1000,  /* default_max_iter */
+                1e-6,  /* default_tol */
+                0      /* is_local_solver */);

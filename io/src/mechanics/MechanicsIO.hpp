@@ -14,86 +14,121 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef MechanicsIO_hpp
 #define MechanicsIO_hpp
 
-#include <MechanicsFwd.hpp>
-#ifdef HAVE_SICONOS_MECHANISMS
-#include <MechanismsFwd.hpp>
-#endif
-#include <SiconosPointers.hpp>
-#include <SiconosFwd.hpp>
+#include <memory>
+#include <optional>
 
-class MechanicsIO
-{
-protected:
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
-  template<typename T, typename G>
-  SP::SimpleMatrix visitAllVerticesForVector(const G& graph) const;
+// #include <MechanicsFwd.hpp>
 
-  template<typename T, typename G>
-  SP::SiconosVector visitAllVerticesForDouble(const G& graph) const;
+// #ifdef HAVE_SICONOS_MECHANISMS
+// #include <MechanismsFwd.hpp>
+// #endif
+// #include <SiconosFwd.hpp>
+// #include <SiconosPointers.hpp>
 
-public:
+namespace siconos::modeling {
+
+class NonSmoothDynamicalSystem;
+}
+
+namespace siconos::io {
+
+struct GetPosition;
+struct GetVelocity;
+struct ForMu;
+struct ForE;
+struct ContactPointVisitor;
+struct ContactPointDomainVisitor;
+struct ContactContactWorkVisitor;
+
+class MechanicsIO {
+ protected:
+  template <typename T, typename G>
+  siconos::algebra::SiconosMatrix visitAllVerticesForVector(const G& graph) const;
+
+  template <typename T, typename G>
+  siconos::algebra::SiconosVector visitAllVerticesForDouble(const G& graph) const;
+
+  MechanicsIO(const MechanicsIO&) = delete;
+  MechanicsIO& operator=(const MechanicsIO&) = delete;
+  MechanicsIO(MechanicsIO&&) = delete;
+  MechanicsIO& operator=(MechanicsIO&&) = delete;
+
+ public:
   /** default constructor
    */
-  MechanicsIO() {};
+  MechanicsIO() = default;
+  ~MechanicsIO() noexcept = default;
 
-  /** get all positions: translation (x,y,z) + orientation quaternion
-   * (qw, qx, qy, qz)
-   * \param nsds current nonsmooth dynamical system
-   * \return a SP::SimpleMatrix where the columns are
-   *          id, x, y, z, qw, qx, qy, qz
-   *   id is the DynamicalSystem number + 1
+  /** Collect  positions from all dynamical systems and save them in a matrix
+   *
+   *  \param nsds the nonsmooth dynamical system
+   *  \return a matrix whith column(i) = [ds(i).number, ds(i).q_read()].T
    */
-  SP::SimpleMatrix positions(const NonSmoothDynamicalSystem& nsds) const;
+  siconos::algebra::SiconosMatrix positions(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
-  /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities
-   * ox, oy, oz
-   * \param nsds current nonsmooth dynamical system
-   *   \return a matrix where the columns are id, xdot, ydot, zdot,
-   *   ox, oy, oz
-   * id is the DynamicalSystem number + 1
+  /** Collect velocities/twists from all dynamical systems and save them in a matrix
+   *  \param nsds current nonsmooth dynamical system
+   *  \return  a matrix whith column(i) = [ds(i).number, ds(i).velocity_read()].T
    */
-  SP::SimpleMatrix velocities(const NonSmoothDynamicalSystem& nsds) const;
+  siconos::algebra::SiconosMatrix velocities(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
-  /** get the coordinates of all contact points, normals, reactions and velocities
-   * \param nsds current nonsmooth dynamical system
-   * \param index_set the index set number.
-   \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
-  */
-  SP::SimpleMatrix contactPoints(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
+  /** \return the coordinates of all contact points, normals, reactions and velocities as
+   * matrix where
+   *   - each line corresponds to a contact/Interaction
+   *   - line = mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
+   *   Empty (shape (0,0)) matrix when there are no contacts.
+   *  \param nsds current nonsmooth dynamical system
+   *  \param index_set id of the index set of interest
+   */
+  siconos::algebra::SiconosMatrix contactPoints(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+      unsigned int index_set = 1) const;
 
   /** get the contact information that is the ds linked by the interaction
-   * \param nsds current nonsmooth dynamical system
-   * \param index_set the index set number.
-   \return a matrix where the columns are interaction id, ds1 number, ds2 number, static object number (if possible)
-  */
+   *  \param nsds current nonsmooth dynamical system
+   *  \param index_set the index set number.
+   *  \return a matrix where the columns are interaction id, ds1 number, ds2 number, static
+   *   object number (if possible)
+   */
 
-  SP::SimpleMatrix contactInfo(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
+  std::optional<siconos::algebra::SiconosMatrix> contactInfo(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+      unsigned int index_set = 1) const;
 
-  /** get the dissipation values  of all contact points
-   * \param nsds current nonsmooth dynamical system
-   * \param index_set the index set number.
-   * \param omega the value of the weigth for the weight in the computaion of the contact work
-   *  by default omega =1/2 and the contact work corresponds to the theoretical formula
-   *        1/2 (v^+ + v^-)^\top p
-   * otherwise it corresponds to v_{k+omega} p 
-   * \param tol double for the computation of contact status
-   \return a matrix where the columns are id, normal contact work, tangent contact work, friction dissipation, contact status
+  /** \return the dissipation values  of all contact points as a matrix where:
+       - each row corresponds to a contact.
+       - row[i] = id, normal contact work, tangent contact work, friction dissipation, contact
+     status
+
+      \param nsds current nonsmooth dynamical system
+      \param index_set the index set number.
+      \param omega the value of the weigth for the weight in the computaion of the contact work
+      by default omega =1/2 and the contact work corresponds to the theoretical formula
+      1/2 (v^+ + v^-)^\top p
+      otherwise it corresponds to v_{k+omega} p
+      \param tol double for the computation of contact status
   */
-  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds,
-				      unsigned int index_set=1,
-				      double omega = 0.5) const;
+  siconos::algebra::SiconosMatrix contactContactWork(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set = 1,
+      double omega = 0.5, double tol = 1e-08) const;
 
   /** get the domain of each contact point
-   * \param nsds current nonsmooth dynamical system
-   * \return a matrix where the columns are domain, id
-  */
-  SP::SimpleMatrix domains(const NonSmoothDynamicalSystem& nsds) const;
+   *  \param nsds current nonsmooth dynamical system
+   *  \return a matrix where the columns are domain, id
+   */
+  siconos::algebra::SiconosMatrix domains(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 };
 
-
+}  // namespace siconos::io
 #endif

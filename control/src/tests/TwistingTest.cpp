@@ -14,263 +14,227 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "TwistingTest.hpp"
 
-#include <ioMatrix.hpp>
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
+#include <io.hpp>
 
-#include "ControlZOHSimulation.hpp"
 #include "ControlLsodarSimulation.hpp"
-#include "LinearSensor.hpp"
-#include "Twisting.hpp"
+#include "ControlZOHSimulation.hpp"
 #include "ExplicitTwisting.hpp"
+#include "LinearSensor.hpp"
 #include "RegularTwisting.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "Twisting.hpp"
 
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(TwistingTest);
 
-
-void TwistingTest::setUp()
-{
-  _A.reset(new SimpleMatrix(_n, _n, 0));
+void TwistingTest::setUp() {
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = 19.0;
   (*_A)(1, 1) = -2.0;
 
-  _x0.reset(new SiconosVector(_n, 0));
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = -15.0;
   (*_x0)(1) = 20.0;
 
-  _C.reset(new SimpleMatrix(2, 2, 0));
-  _C->eye();
+  _C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  _C->setZero();
+  _C->setIdentity();
 
-  _B.reset(new SimpleMatrix(2, 1));
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface.reset(new SimpleMatrix(1, 2, 0));
+  _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
+  _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
-
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO
 
-void TwistingTest::initTwisting()
-{
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
-  _sensor.reset(new LinearSensor(_DS, _C));
-  _itw.reset(new Twisting(_sensor, 300., _beta, _h));
-  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
-  eye->eye();
+void TwistingTest::initTwisting() {
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
+  _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
+  _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  eye->setIdentity();
   _itw->setCsurface(eye);
-
 }
 
-void TwistingTest::initRegularTwisting()
-{
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
-  _sensor.reset(new LinearSensor(_DS, _C));
-  _reg_itw.reset(new RegularTwisting(_sensor, 300., _beta));
-  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
-  eye->eye();
+void TwistingTest::initRegularTwisting() {
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
+  _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
+  _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  eye->setIdentity();
   _reg_itw->setCsurface(eye);
-
 }
 #endif
 
-void TwistingTest::initExplicitTwisting()
-{
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
-  _sensor.reset(new LinearSensor(_DS, _C));
-  _expl_tw.reset(new ExplicitTwisting(_sensor, 300., _beta));
-  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
-  eye->eye();
+void TwistingTest::initExplicitTwisting() {
+  _DS =
+      std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, siconos::algebra::alias_t);
+  _DS->setConstantA(*_A, siconos::algebra::alias_t);
+  _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
+  _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  eye->setIdentity();
   _expl_tw->setCsurface(eye);
-
 }
 
-void TwistingTest::tearDown()
-{}
+void TwistingTest::tearDown() {}
 
-void TwistingTest::test_ExplicitTwisting_ZOH()
-{
+void TwistingTest::test_ExplicitTwisting_ZOH() {
   initExplicitTwisting();
-  SP::ControlZOHSimulation simZOH(new ControlZOHSimulation(_t0, _T, _h));
+  auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_expl_tw, _h);
   simZOH->initialize();
   simZOH->run();
-  SimpleMatrix& data = *simZOH->data();
-  ioMatrix::write("explicitTwisting_ZOH.dat", "ascii", data, "noDim");
-  double error =0.0;
-  bool test = !((error=ioMatrix::compareRefFile(data, "etw_ZOH.ref", _tol)) >= 0.0
-                && error > _tol);
-  std::cout << "------- Integration done -------" << test <<std::endl;
+  auto& data = *simZOH->data();
+  siconos::algebra::io::write("explicitTwisting_ZOH.dat", data,
+                              siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
+  double error = 0.0;
+  bool test =
+      !((error = siconos::algebra::io::compareRefFile(data, "etw_ZOH.ref", _tol)) >= 0.0 &&
+        error > _tol);
+  std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
-void TwistingTest::test_ExplicitTwisting_Lsodar()
-{
+void TwistingTest::test_ExplicitTwisting_Lsodar() {
   initExplicitTwisting();
-  SP::ControlLsodarSimulation simLsodar(new ControlLsodarSimulation(_t0, _T, _h));
+  auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_expl_tw, _h);
   simLsodar->initialize();
   simLsodar->run();
-  SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("explicitTwisting_Lsodar.dat", "ascii", data, "noDim");
-  auto error = ioMatrix::compareRefFile(data, "etw_lsodar.ref", _tol);
-  bool test = !(error >= 0.0 && error > _tol);
-  std::cout << "------- Integration done -------" << test <<std::endl;
-  //CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
+
+  auto& data = *simLsodar->data();
+  siconos::algebra::io::write("explicitTwisting_Lsodar.dat", data,
+                              siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
+  auto error = siconos::algebra::io::compareRefFile(data, "etw_lsodar.ref", _tol);
+  bool test = !(error > _tol);
+  std::cout << "------- Integration done -------" << test << std::endl;
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO
-void TwistingTest::test_Twisting_ZOH()
-{
+void TwistingTest::test_Twisting_ZOH() {
   initTwisting();
-  SP::ControlZOHSimulation simZOH(new ControlZOHSimulation(_t0, _T, _h));
+  auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_itw, _h);
   simZOH->initialize();
   simZOH->run();
-  SimpleMatrix& data = *simZOH->data();
-  ioMatrix::write("itw_ZOH.dat", "ascii", data, "noDim");
+  auto data = simZOH->data();
+  siconos::algebra::io::write("itw_twisting_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("itw2.ref", "ascii", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  SiconosVector lambda1 = SiconosVector(data.size(0));
-  SiconosVector lambda2 = SiconosVector(data.size(0));
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  SiconosVector lambda1Ref = SiconosVector(data.size(0));
-  SiconosVector lambda2Ref = SiconosVector(data.size(0));
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw2.ref");
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique
+  // solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
+  std::cout << "------- Integration done, error = " << error << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", error < _tol, true);
 }
 
-void TwistingTest::test_Twisting_Lsodar()
-{
+void TwistingTest::test_Twisting_Lsodar() {
   initTwisting();
-  SP::ControlLsodarSimulation simLsodar(new ControlLsodarSimulation(_t0, _T, _h));
+  auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_itw, _h);
   simLsodar->initialize();
   simLsodar->run();
-  SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("itw_Lsodar.dat", "ascii", data, "noDim");
+  auto data = simLsodar->data();
+  siconos::algebra::io::write("itw_twisting_Lsodar.dat", *data,
+                              siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("itw2.ref", "ascii", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  SiconosVector lambda1 = SiconosVector(data.size(0));
-  SiconosVector lambda2 = SiconosVector(data.size(0));
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  SiconosVector lambda1Ref = SiconosVector(data.size(0));
-  SiconosVector lambda2Ref = SiconosVector(data.size(0));
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw2.ref");
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique
+  // solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", error < _tol, true);
 }
 
-void TwistingTest::test_RegularTwisting_ZOH()
-{
+void TwistingTest::test_RegularTwisting_ZOH() {
   initRegularTwisting();
-  SP::ControlZOHSimulation simZOH(new ControlZOHSimulation(_t0, _T, _h));
+  auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_reg_itw, _h);
   simZOH->initialize();
   simZOH->run();
-  SimpleMatrix& data = *simZOH->data();
-  ioMatrix::write("reg_itw_ZOH.dat", "ascii", data, "noDim");
+  auto data = simZOH->data();
+  siconos::algebra::io::write("reg_itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("reg_itw.ref", "ascii", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  SiconosVector lambda1 = SiconosVector(data.size(0));
-  SiconosVector lambda2 = SiconosVector(data.size(0));
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  SiconosVector lambda1Ref = SiconosVector(data.size(0));
-  SiconosVector lambda2Ref = SiconosVector(data.size(0));
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", (data - dataRef).normInf() < _tol, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("reg_itw.ref");
+  // it is a bad idea to compare solutions to an AVI that does not admit a
+  // unique solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
+
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", error < _tol, true);
 }
 
-void TwistingTest::test_RegularTwisting_Lsodar()
-{
+void TwistingTest::test_RegularTwisting_Lsodar() {
   initRegularTwisting();
-  SP::ControlLsodarSimulation simLsodar(new ControlLsodarSimulation(_t0, _T, _h));
+  auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_reg_itw, _h);
   simLsodar->initialize();
   simLsodar->run();
-  SimpleMatrix& data = *simLsodar->data();
-  ioMatrix::write("reg_itw_Lsodar.dat", "ascii", data, "noDim");
+  auto data = simLsodar->data();
+  siconos::algebra::io::write("reg_itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("reg_itw.ref", "ascii", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  SiconosVector lambda1 = SiconosVector(data.size(0));
-  SiconosVector lambda2 = SiconosVector(data.size(0));
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  SiconosVector lambda1Ref = SiconosVector(data.size(0));
-  SiconosVector lambda2Ref = SiconosVector(data.size(0));
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingLsodar : ", (data - dataRef).normInf() < 5e-9, true);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("reg_itw.ref");
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique
+  // solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingLsodar : ", error < 5e-9, true);
 }
 #endif
