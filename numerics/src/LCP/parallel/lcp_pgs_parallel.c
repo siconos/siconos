@@ -27,15 +27,6 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
   /* Number of OpenMP threads available */
   int g = omp_get_max_threads();
 
-  /* If one thread, this method is like Jacobi
-   * and it will not pass the 106th test...
-   * so in that case, default to non-parallel version
-   */
-  /* if (g == 1) {
-    lcp_pgs(problem, z, w, info, options);
-    return;
-  } */
-
   NumericsMatrix* M = problem->M;
   double* q = problem->q;
 
@@ -55,7 +46,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Preparation of the diagonal of the inverse matrix */
-  double* diag = (double*)malloc(n * sizeof(double));
+  double* diag = (double*)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
   /* double diag_i = 0.0;
   for (int i = 0; i < n; ++i) {
@@ -89,7 +80,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
   double err = 0.;
 
   /* Blocks will have size (n / g) or (n / g + 1) */
-  block_sizes = (int*)malloc(g * sizeof(int));
+  block_sizes = (int*)malloc((size_t)g * sizeof(int));
   for (int i = 0; i < g; i++) {
     if (i < n % g) {
       block_sizes[i] = n / g + 1;
@@ -98,7 +89,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
     }
   }
 
-  start_indexes = (int*)malloc(g * sizeof(int));
+  start_indexes = (int*)malloc((size_t)g * sizeof(int));
   start_indexes[0] = 0;
   for (int i = 1; i < g; i++) {
     start_indexes[i] = start_indexes[i - 1] + block_sizes[i - 1];
@@ -133,7 +124,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 
   // double time = omp_get_wtime();
 
-  double *thread_errors = (double *)calloc(g, sizeof(double));
+  double *thread_errors = (double *)calloc((size_t)g, sizeof(double));
 
   /* Start solving */
 #pragma omp parallel default(none) shared(n, g, itermax, counter, err, flag, block_sizes, \
@@ -152,26 +143,15 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 
     /* Array to store sums, for blocks above the diagonal */
     double* t_right = NULL;
-    t_right = (double*)malloc(size_i * sizeof(double));
+    t_right = (double*)malloc((size_t)size_i * sizeof(double));
     /* Array to store sums, for blocks below the diagonal */
     double* t_left = NULL;
-    t_left = (double*)malloc(size_i * sizeof(double));
-
-    /* Flag for last thread:
-    when the last thread checks that err < tol,
-    it needs to do one last iteration to synchronize
-    with the other threads, so we need a specific flag for it
-    */
-    int flag_last_thread = 0; /* For all other threads, we don't need this flag */
-    if (rank == g - 1) flag_last_thread = 1; /* Only last thread needs it */
+    t_left = (double*)malloc((size_t)size_i * sizeof(double));
 
     /* Initialize left sums to 0 */
     for (int i = 0; i < size_i; i++) {
       t_left[i] = 0.;
     }
-
-    /* To store z_i when diagonal block */
-    double zsave = 0.;
 
     /* Number of iterations of current thread */
     int iter = 0;
@@ -384,4 +364,4 @@ REGISTER_SOLVER(SICONOS_LCP_PGS_PARALLEL, "SICONOS_LCP_PGS_PARALLEL",
                 lcp_pgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+                0)     /* is_local_solver */

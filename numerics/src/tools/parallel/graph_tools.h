@@ -56,14 +56,14 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
  *  \param[out] set_indices pointers to arrays containing the elements of each color set
  *  \return 0 if succeed
  */
-int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices);
+int color_graph_block(size_t nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices);
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t *inv_permutation);
+int color_graph_block_permut(size_t nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t *inv_permutation);
 
 #ifdef __cplusplus
 }

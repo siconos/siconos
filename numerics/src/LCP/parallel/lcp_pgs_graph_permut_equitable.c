@@ -258,4 +258,4 @@ REGISTER_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE, "SICONOS_LCP_PGS_GRAPH_P
                 lcp_pgs_set_default,  /* set_default */
                 1000,  /* default_max_iter */
                 1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+                0)     /* is_local_solver */

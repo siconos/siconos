@@ -281,7 +281,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
 static unsigned int* allocShuffledContacts(FrictionContactProblem* problem,
                                            SolverOptions* options) {
   unsigned int* scontacts = 0;
-  unsigned int nc = problem->numberOfContacts;
+  unsigned int nc = (unsigned int)problem->numberOfContacts;
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
           SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
       options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -301,7 +301,7 @@ static unsigned int* allocShuffledContacts(FrictionContactProblem* problem,
 static unsigned int* allocfreezingContacts(FrictionContactProblem* problem,
                                            SolverOptions* options) {
   unsigned int* fcontacts = 0;
-  unsigned int nc = problem->numberOfContacts;
+  unsigned int nc = (unsigned int)problem->numberOfContacts;
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
     fcontacts = (unsigned int*)malloc(nc * sizeof(unsigned int));
     for (unsigned int i = 0; i < nc; ++i) {
@@ -316,38 +316,17 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
                               FrictionContactProblem* problem,
                               FrictionContactProblem* localproblem, double* reaction,
                               SolverOptions* local_opts, double localreaction[3]) {
-  (*update_localproblem)(contact, problem, localproblem, reaction, local_opts);
+  (*update_localproblem)((int)contact, problem, localproblem, reaction, local_opts);
 
-  local_opts->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
+  local_opts->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = (int)contact;
 
-  copyLocalReaction(&(reaction[contact * problem->dimension]), localreaction);
+  copyLocalReaction(&(reaction[contact * (unsigned int)problem->dimension]), localreaction);
 
   return (*local_solver)(localproblem, localreaction, local_opts);
 }
 
-static void performRelaxation(double localreaction[3], double* oldreaction, double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
-}
-
-static double light_error_squared(double localreaction[3], double* oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
-}
-
 static double squared_norm(double localreaction[3]) {
   return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
-}
-
-static int file_exists(const char* fname) {
-  FILE* file;
-  if ((file = fopen(fname, "r"))) {
-    fclose(file);
-    return 1;
-  }
-  return 0;
 }
 
 static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,
@@ -411,7 +390,7 @@ static void acceptLocalReactionUnconditionally(unsigned int contact, double* rea
 static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
                                   double* norm_r) {
   double error = sqrt(light_error_sum);
-  *norm_r = cblas_dnrm2(nc * 3, reaction, 1);
+  *norm_r = cblas_dnrm2((int32_t)nc * 3, reaction, 1);
   // printf("error = %e, norm_r = %e\n", error, *norm_r);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
   return error;
@@ -544,13 +523,13 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   /* verbose=1; */
 
   /* Number of contacts */
-  unsigned int nc = problem->numberOfContacts;
+  unsigned int nc = (unsigned int)problem->numberOfContacts;
 
   /* Maximum number of iterations */
   int itermax = SOLVER_MAX_ITER(options);
 
   /* Tolerance */
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
+  double norm_q = cblas_dnrm2((int32_t)nc * 3, problem->q, 1);
   double omega = options->dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
   double norm_r[] = {1e24};
@@ -593,7 +572,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, (size_t)problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -639,7 +618,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   size_t n_colors = 0;
   size_t* partition_size = NULL;
   size_t** partitions = NULL;
-  color_graph_block(problem->numberOfContacts, problem->M, &n_colors, &partition_size,
+  color_graph_block((size_t)problem->numberOfContacts, problem->M, &n_colors, &partition_size,
                     &partitions);
 
   /*****  NSGS Iterations *****/
@@ -675,7 +654,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
         for (size_t color = 0; color < n_colors; color++) {
 #pragma omp for schedule(static) reduction(+ : light_error_sum)
           for (int v = 0; v < partition_size[color]; v++) {
-            contact = partitions[color][v];
+            contact = (unsigned int)partitions[color][v];
 
             solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
                                localProblemFunctionToolkit->local_solver,
@@ -685,7 +664,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
             light_error_sum += localProblemFunctionToolkit->light_error_squared(localreaction, &reaction[contact * 3]);
 
             /* #if 0 */
-            acceptLocalReactionFiltered(localproblem, local_opts, contact, iter,
+            acceptLocalReactionFiltered(localproblem, local_opts, contact, (unsigned int)iter,
                                         reaction, localreaction);
           }
         }
@@ -716,7 +695,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
     double light_error_sum = 0.;
     double light_error_2;
     double tmp_criteria1, tmp_criteria2;
-    int number_of_freezed_contact;
+    unsigned int number_of_freezed_contact;
 
 #pragma omp parallel default(none)                                                          \
     private(contact, localproblem, localreaction, light_error_2, local_opts)       \
@@ -757,7 +736,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
         for (size_t color = 0; color < n_colors; color++) {
 #pragma omp for schedule(static) reduction(+ : light_error_sum)
           for (int v = 0; v < partition_size[color]; v++) {
-            int i = partitions[color][v];
+            unsigned int i = (unsigned int)partitions[color][v];
 
             if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
                     SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
@@ -812,7 +791,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
               /*     && iter >=10) */
               {
                 /* we  freeze the contact for n iterations*/
-                freeze_contacts[contact] = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
+                freeze_contacts[contact] = (unsigned int)options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
 
                 DEBUG_EXPR(
                     printf("first criteria : light_error_2*squared_norm(localreaction) <= "
@@ -831,7 +810,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
 
             if (options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] ==
                 SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-              acceptLocalReactionFiltered(localproblem, local_opts, contact, iter,
+              acceptLocalReactionFiltered(localproblem, local_opts, contact, (unsigned int)iter,
                                           reaction, localreaction);
             else
               acceptLocalReactionUnconditionally(contact, reaction, localreaction);

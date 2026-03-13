@@ -149,7 +149,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
   iparam[7] = iter;
 
   /***** Free memory *****/
-  (*freeSolver)();
+  (*freeSolver)(problem, localproblem, options);
 }
 
 void fc3d_nsgs_velocity_set_default(SolverOptions* options) {

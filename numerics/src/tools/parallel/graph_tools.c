@@ -554,8 +554,8 @@ Inlined for better performance, is it necessary?
 */
 static inline bool block_is_full_of_zeros(double* block, size_t n_row, size_t n_col,
                                           size_t col_offset) {
-  for (int j = 0; j < n_col; j++) {
-    for (int i = 0; i < n_row; i++) {
+  for (size_t j = 0; j < n_col; j++) {
+    for (size_t i = 0; i < n_row; i++) {
       /* Perhaps I should compare to a threshold here instead of 0 */
       if (block[i + j * col_offset] != 0) return false;
     }
@@ -563,18 +563,18 @@ static inline bool block_is_full_of_zeros(double* block, size_t n_row, size_t n_
   return true;
 }
 
-int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
+int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
                       size_t*** set_indices) {
   assert(M->size0 == M->size1);  // Check M is a squared matrix
-  int n = M->size0;
-  int d = n / nc;  // dimension of contact space
+  size_t n = (size_t)M->size0;
+  size_t d = n / nc;  // dimension of contact space
 
   Mat A;
 
   PetscFunctionBeginUser;
 
   // Pointers for sparse storage of matrix to be colored.
-  int64_t* Mp = NULL;
+  int64_t* Mp = NULL; // int64_t is PetscInt
   int64_t* Mi = NULL;
   double* Mx = NULL;
 
@@ -585,8 +585,8 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
 
       /* Count non zero blocks */
       size_t nnz = 0;
-      for (int contact_i = 0; contact_i < nc; contact_i++) {
-        for (int contact_j = 0; contact_j < nc; contact_j++) {
+      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+        for (size_t contact_j = 0; contact_j < nc; contact_j++) {
           /* Check if block is 0 */
           if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) ==
               false)
@@ -594,28 +594,28 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
         }
       }
 
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (int contact_i = 0; contact_i < nc; contact_i++) {
+      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
         Mp[contact_i + 1] = Mp[contact_i];
-        for (int contact_j = 0; contact_j < nc; contact_j++) {
+        for (size_t contact_j = 0; contact_j < nc; contact_j++) {
           /* Check if block is 0 */
           if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) ==
               false) {
             Mp[contact_i + 1]++;
-            Mi[current_index] = contact_j;
+            Mi[current_index] = (int64_t)contact_j;
             Mx[current_index] = 1.;
             current_index++;
           }
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -648,7 +648,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
+            while (((size_t)Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -660,8 +660,8 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       }
 
       // Initialize sparse storage
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
@@ -676,7 +676,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
+            while (((size_t)Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -685,14 +685,14 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
 
           if (block_is_zero == false) {
             Mp[contact_i + 1]++;
-            Mi[current_index] = current_contact_col;
+            Mi[current_index] = (int64_t)current_contact_col;
             Mx[current_index] = 1.;
             current_index++;
           }
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
@@ -722,35 +722,34 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       size_t nnz = 0;  // Number of non zero blocks
 
       // Number of rows and columns in each block
-      int* nb_row_blocks = (int*)malloc(sbm->blocknumber0 * sizeof(int));
-      int* nb_col_blocks = (int*)malloc(sbm->blocknumber1 * sizeof(int));
-      int tmp = 0;
+      unsigned int* nb_row_blocks = (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
+      unsigned int* nb_col_blocks = (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
+      unsigned int tmp = 0;
 
-      for (int i = 0; i < sbm->blocknumber0; i++) {
+      for (unsigned int i = 0; i < sbm->blocknumber0; i++) {
         nb_row_blocks[i] = sbm->blocksize0[i] - tmp;
         tmp = sbm->blocksize0[i];
       }
 
       tmp = 0;
-      for (int i = 0; i < sbm->blocknumber1; i++) {
+      for (unsigned int i = 0; i < sbm->blocknumber1; i++) {
         nb_col_blocks[i] = sbm->blocksize1[i] - tmp;
         tmp = sbm->blocksize1[i];
       }
 
       /* Count number of non zero blocks */
 
-      int nb_row_block, nb_col_block;
-      int i_start_block, j_start_block;
+      unsigned int nb_row_block, nb_col_block;
+      unsigned int j_start_block;
 
       // Iterate through lines of blocks
-      for (int row_block_number = 0; row_block_number < sbm->blocknumber0;
+      for (unsigned int row_block_number = 0; row_block_number < sbm->blocknumber0;
            row_block_number++) {
         nb_row_block = nb_row_blocks[row_block_number];
         // Iterate through blocks of a line of blocks
-        for (int block_number = sbm->index1_data[row_block_number];
+        for (size_t block_number = sbm->index1_data[row_block_number];
              block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
           nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
-          // Inline function in if statement, is it good?
           if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block,
                                      nb_col_block) == false)
             nnz++;
@@ -758,20 +757,19 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       }
 
       // Allocations
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (int row_block_number = 0; row_block_number < sbm->blocknumber0;
+      for (unsigned int row_block_number = 0; row_block_number < sbm->blocknumber0;
            row_block_number++) {
         nb_row_block = nb_row_blocks[row_block_number];
-        i_start_block = sbm->blocksize0[row_block_number] - nb_row_block;
         Mp[row_block_number + 1] = Mp[row_block_number];
         // Iterate through blocks of a line of blocks
-        for (int block_number = sbm->index1_data[row_block_number];
+        for (size_t block_number = sbm->index1_data[row_block_number];
              block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
           nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
           j_start_block = sbm->blocksize1[sbm->index2_data[block_number]] - nb_col_block;
@@ -779,7 +777,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
           if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block,
                                      nb_col_block) == false) {
             Mp[row_block_number + 1]++;
-            Mi[current_index] = j_start_block / d;
+            Mi[current_index] = (int64_t)(j_start_block / d);
             Mx[current_index] = 1.;
             current_index++;
           }
@@ -789,7 +787,7 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
       free(nb_row_blocks);
       free(nb_col_blocks);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -863,11 +861,11 @@ int color_graph_block(int nc, NumericsMatrix* M, size_t* n_colors, size_t** set_
   return 0;
 }
 
-int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t** sum_sizes,
+int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** sum_sizes,
                              size_t* inv_permutation) {
   assert(M->size0 == M->size1);  // Check M is a squared matrix
-  int n = M->size0;
-  int d = n / nc;  // dimension of contact space
+  size_t n = (size_t)M->size0;
+  size_t d = n / nc;  // dimension of contact space
 
   Mat A;
 
@@ -885,8 +883,8 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
 
       /* Count non zero blocks */
       size_t nnz = 0;
-      for (int contact_i = 0; contact_i < nc; contact_i++) {
-        for (int contact_j = 0; contact_j < nc; contact_j++) {
+      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+        for (size_t contact_j = 0; contact_j < nc; contact_j++) {
           /* Check if block is 0 */
           if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) ==
               false)
@@ -894,28 +892,28 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
         }
       }
 
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (int contact_i = 0; contact_i < nc; contact_i++) {
+      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
         Mp[contact_i + 1] = Mp[contact_i];
-        for (int contact_j = 0; contact_j < nc; contact_j++) {
+        for (size_t contact_j = 0; contact_j < nc; contact_j++) {
           /* Check if block is 0 */
           if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) ==
               false) {
             Mp[contact_i + 1]++;
-            Mi[current_index] = contact_j;
+            Mi[current_index] = (int64_t)contact_j;
             Mx[current_index] = 1.;
             current_index++;
           }
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -948,7 +946,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
+            while (((size_t)Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -960,8 +958,8 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       }
 
       // Initialize sparse storage
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
@@ -976,7 +974,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
           block_is_zero = true;
 
           for (size_t i = 0; i < d; i++) {
-            while ((Mi_[ps[i]] / d < current_contact_col + 1) &&
+            while (((size_t)Mi_[ps[i]] / d < current_contact_col + 1) &&
                    (ps[i] < Mp_[d * contact_i + i + 1])) {
               if (Mx_[ps[i]] != 0) block_is_zero = false;
               ps[i]++;
@@ -985,14 +983,14 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
 
           if (block_is_zero == false) {
             Mp[contact_i + 1]++;
-            Mi[current_index] = current_contact_col;
+            Mi[current_index] = (int64_t)current_contact_col;
             Mx[current_index] = 1.;
             current_index++;
           }
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
@@ -1022,32 +1020,32 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       size_t nnz = 0;  // Number of non zero blocks
 
       // Number of rows and columns in each block
-      int* nb_row_blocks = (int*)malloc(sbm->blocknumber0 * sizeof(int));
-      int* nb_col_blocks = (int*)malloc(sbm->blocknumber1 * sizeof(int));
-      int tmp = 0;
+      unsigned int* nb_row_blocks = (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
+      unsigned int* nb_col_blocks = (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
+      unsigned int tmp = 0;
 
-      for (int i = 0; i < sbm->blocknumber0; i++) {
+      for (unsigned int i = 0; i < sbm->blocknumber0; i++) {
         nb_row_blocks[i] = sbm->blocksize0[i] - tmp;
         tmp = sbm->blocksize0[i];
       }
 
       tmp = 0;
-      for (int i = 0; i < sbm->blocknumber1; i++) {
+      for (unsigned int i = 0; i < sbm->blocknumber1; i++) {
         nb_col_blocks[i] = sbm->blocksize1[i] - tmp;
         tmp = sbm->blocksize1[i];
       }
 
       /* Count number of non zero blocks */
 
-      int nb_row_block, nb_col_block;
-      int i_start_block, j_start_block;
+      unsigned int nb_row_block, nb_col_block;
+      unsigned int j_start_block;
 
       // Iterate through lines of blocks
-      for (int row_block_number = 0; row_block_number < sbm->blocknumber0;
+      for (unsigned int row_block_number = 0; row_block_number < sbm->blocknumber0;
            row_block_number++) {
         nb_row_block = nb_row_blocks[row_block_number];
         // Iterate through blocks of a line of blocks
-        for (int block_number = sbm->index1_data[row_block_number];
+        for (size_t block_number = sbm->index1_data[row_block_number];
              block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
           nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
 
@@ -1058,20 +1056,19 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       }
 
       // Allocations
-      Mp = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      Mi = (size_t*)malloc(nnz * sizeof(size_t));
+      Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
+      Mi = (int64_t*)malloc(nnz * sizeof(int64_t));
       Mx = (double*)malloc(nnz * sizeof(double));
 
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (int row_block_number = 0; row_block_number < sbm->blocknumber0;
+      for (unsigned int row_block_number = 0; row_block_number < sbm->blocknumber0;
            row_block_number++) {
         nb_row_block = nb_row_blocks[row_block_number];
-        i_start_block = sbm->blocksize0[row_block_number] - nb_row_block;
         Mp[row_block_number + 1] = Mp[row_block_number];
         // Iterate through blocks of a line of blocks
-        for (int block_number = sbm->index1_data[row_block_number];
+        for (size_t block_number = sbm->index1_data[row_block_number];
              block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
           nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
           j_start_block = sbm->blocksize1[sbm->index2_data[block_number]] - nb_col_block;
@@ -1079,7 +1076,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
           if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block,
                                      nb_col_block) == false) {
             Mp[row_block_number + 1]++;
-            Mi[current_index] = j_start_block / d;
+            Mi[current_index] = (int64_t)(j_start_block / d);
             Mx[current_index] = 1.;
             current_index++;
           }
@@ -1089,7 +1086,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
       free(nb_row_blocks);
       free(nb_col_blocks);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
+      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -1131,7 +1128,7 @@ int color_graph_block_permut(int nc, NumericsMatrix* M, size_t* n_colors, size_t
 
   for (int i = 0; i < (int)nn; i++) {
     PetscCall(ISGetLocalSize(is[i], &size_petsc));
-    sum_size[i + 1] = sum_size[i] + size_petsc;
+    sum_size[i + 1] = sum_size[i] + (size_t)size_petsc;
     PetscCall(ISGetIndices(is[i], &idxin));  // Get indices for i-th color
 
     // Copy index sets
