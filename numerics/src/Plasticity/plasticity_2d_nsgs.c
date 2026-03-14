@@ -27,7 +27,7 @@
 #include "NumericsFwd.h"           // for SolverOptions
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "Plasticity_cst.h"  // for SICONOS_FRICTI...
+#include "Plasticity_options.h"  // for SICONOS_FRICTI...
 #include "SiconosBlas.h"     // for cblas_dnrm2
 #include "SolverOptions.h"   // for SolverOptions
 #include "SparseBlockMatrix.h"

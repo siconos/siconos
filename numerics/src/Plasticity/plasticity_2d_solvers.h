@@ -23,7 +23,7 @@
 */
 
 #include "PlasticityProblem.h"
-#include "Plasticity_cst.h"
+#include "Plasticity_options.h"
 #include "SolverOptions.h"
 
 /** pointer to function used to update plastic_strain_rate and compute error */
@@ -96,6 +96,19 @@ extern "C" {
 */
 void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *plastic_strain_rate,
                int *info, SolverOptions *options);
+
+/**
+    Non-Smooth Gauss Seidel solver for Mohr Coulomb 2D problem using generic NSGS framework
+
+    \param problem the Mohr Coulomb 2D problem to solve
+    \param stress global vector (n), in-out parameters
+    \param plastic_strain_rate global vector (n), in-out parameter
+    \param info return 0 if the solution is found
+    \param options the solver options
+*/
+void plasticity_2d_nsgs_generic(PlasticityProblem *problem, double *stress, 
+                                 double *plastic_strain_rate, int *info, 
+                                 SolverOptions *options);
 
 /**
     Check for trivial solution in the Mohr Coulomb 2D problem

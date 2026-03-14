@@ -21,7 +21,7 @@
 #include <pybind11/operators.h>
 
 #include "PlasticityProblem.h"
-#include "Plasticity_cst.h"
+#include "Plasticity_options.h"
 #include "NumericsMatrix.h"
 
 namespace py = pybind11;
@@ -180,6 +180,7 @@ void wrap_plasticity(py::module_& m) {
   // Solver IDs enum
   py::enum_<PLASTICITY_SOLVER>(m, "PLASTICITY_SOLVER", "Plasticity solver IDs")
       .value("PLASTICITY_2D_NSGS", PLASTICITY_2D_NSGS, "Non-smooth Gauss-Seidel")
+      .value("PLASTICITY_2D_NSGS_GENERIC", PLASTICITY_2D_NSGS_GENERIC, "Non-smooth Gauss-Seidel (generic)")
       .value("PLASTICITY_2D_ONECONE_NSN", PLASTICITY_2D_ONECONE_NSN, "Non-smooth Newton")
       .value("PLASTICITY_2D_ONECONE_NSN_GP", PLASTICITY_2D_ONECONE_NSN_GP, "Non-smooth Newton GP")
       .value("PLASTICITY_2D_ONECONE_NSN_GP_HYBRID", PLASTICITY_2D_ONECONE_NSN_GP_HYBRID, "Hybrid NSN")
@@ -191,6 +192,7 @@ void wrap_plasticity(py::module_& m) {
 
   // Also export as module attributes for convenience
   m.attr("PLASTICITY_2D_NSGS") = (int)PLASTICITY_2D_NSGS;
+  m.attr("PLASTICITY_2D_NSGS_GENERIC") = (int)PLASTICITY_2D_NSGS_GENERIC;
   m.attr("PLASTICITY_2D_ONECONE_NSN") = (int)PLASTICITY_2D_ONECONE_NSN;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP") = (int)PLASTICITY_2D_ONECONE_NSN_GP;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP_HYBRID") = (int)PLASTICITY_2D_ONECONE_NSN_GP_HYBRID;

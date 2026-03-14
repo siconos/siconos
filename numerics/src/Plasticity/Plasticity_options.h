@@ -7,6 +7,8 @@
 enum PLASTICITY_SOLVER {
   /** 2D Mohr Coulomb solvers */
   PLASTICITY_2D_NSGS = 20000,
+  /** 2D Mohr Coulomb solvers using generic NSGS framework */
+  PLASTICITY_2D_NSGS_GENERIC = 20001,
 
   /* 2D Mohr Coulomb  solvers for one cone (used mainly inside NSGS solvers) */
 

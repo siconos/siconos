@@ -21,7 +21,7 @@
  */
 
 #include "PlasticityProblem.h"
-#include "Plasticity_cst.h"
+#include "Plasticity_options.h"
 #include "numerics_verbose.h"
 #include "plasticity_2d_solvers.h"
 

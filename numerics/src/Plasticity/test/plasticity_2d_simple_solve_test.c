@@ -26,7 +26,7 @@
 #include "PlasticityProblem.h"
 #include "NonSmoothDrivers.h"
 #include "NumericsMatrix.h"
-#include "Plasticity_cst.h"
+#include "Plasticity_options.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
@@ -137,59 +137,80 @@ int main(void) {
   total_info += test_unit("./data/plasticity_2d_example1.dat", options);
   total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options);
   total_info += test_unit("./data/plasticity_2d_footing_1.dat", options);
-
-  numerics_set_verbose(0);
-  printf("#######\ntest with projection on Cone with local iteration solver \n");
-  solver_options_update_internal(
-      options, 0, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration);
-
-  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
-  options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  total_info += test_unit("./data/plasticity_2d_example1.dat", options);
-  total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options);
-  total_info += test_unit("./data/plasticity_2d_footing_1.dat", options);
-
-  printf("#######\n test on a larger problem");
-  SolverOptions* options_2 = solver_options_create(PLASTICITY_2D_NSGS);
-  options_2->dparam[SICONOS_DPARAM_TOL] = 1e-04;
-  options_2->iparam[SICONOS_IPARAM_MAX_ITER] = 5000;
-
-  printf("#######\ntest with default options\n");
-  numerics_set_verbose(0);
-  total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2);
   
-  printf("#######\n test with pure Newton local solver \n");
-  numerics_set_verbose(0);
-  solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN);
-  /* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP); */
-  /* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP_HYBRID); */
-  /* parameters for hybrid solvers */
-  options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] =
-      PLASTICITY_NSN_HYBRID_STRATEGY_NO;
-  // options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] =
-  // PLASTICITY_NSN_FORMULATION_ALARTCURNIER_STD;
-  options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] =
-      PLASTICITY_NSN_FORMULATION_NATURALMAP;
-  options_2->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-  options_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2);
+
+
+  /* numerics_set_verbose(0); */
+  /* printf("#######\ntest with projection on Cone with local iteration solver \n"); */
+  /* solver_options_update_internal( */
+  /*     options, 0, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration); */
+
+  /* options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16; */
+  /* options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
+  /* total_info += test_unit("./data/plasticity_2d_example1.dat", options); */
+  /* total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_1.dat", options); */
+
+  /* printf("#######\n test on a larger problem"); */
+  /* SolverOptions* options_2 = solver_options_create(PLASTICITY_2D_NSGS); */
+  /* options_2->dparam[SICONOS_DPARAM_TOL] = 1e-04; */
+  /* options_2->iparam[SICONOS_IPARAM_MAX_ITER] = 5000; */
+
+  /* printf("#######\ntest with default options\n"); */
+  /* numerics_set_verbose(0); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
+  
+  /* printf("#######\n test with pure Newton local solver \n"); */
+  /* numerics_set_verbose(0); */
+  /* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN); */
+  /* /\* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP); *\/ */
+  /* /\* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP_HYBRID); *\/ */
+  /* /\* parameters for hybrid solvers *\/ */
+  /* options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] = */
+  /*     PLASTICITY_NSN_HYBRID_STRATEGY_NO; */
+  /* // options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] = */
+  /* // PLASTICITY_NSN_FORMULATION_ALARTCURNIER_STD; */
+  /* options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] = */
+  /*     PLASTICITY_NSN_FORMULATION_NATURALMAP; */
+  /* options_2->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14; */
+  /* options_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
 
   
-  numerics_set_verbose(0);
-  printf("#######\ntest with projection on Cone with local iteration solver \n");
-  solver_options_update_internal(
-      options_2, 0, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration);
+  /* numerics_set_verbose(0); */
+  /* printf("#######\ntest with projection on Cone with local iteration solver \n"); */
+  /* solver_options_update_internal( */
+  /*     options_2, 0, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration); */
 
-  options_2->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
-  options_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2);
-  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2);
+  /* options_2->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16; */
+  /* options_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
+  /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
 
+
+  printf("#######\n GENERIC test with pure Newton local solver \n");
+  numerics_set_verbose(3);
+
+  printf("#######\ntest with default options GENERIC\n");
+ 
+  SolverOptions* options_generic = solver_options_create(PLASTICITY_2D_NSGS_GENERIC);
+  options_generic->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options_generic->iparam[SICONOS_IPARAM_MAX_ITER] = 5000;
+  solver_options_print(options_generic);
+  total_info += test_unit("./data/plasticity_2d_example1.dat", options_generic);
+  total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options_generic);
+  total_info += test_unit("./data/plasticity_2d_footing_1.dat", options_generic);
+  total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_generic);
+  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_generic);
+  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_generic);
+
+
+  
   /* ============================================================================
    * Von Mises Model Tests
    * ============================================================================ */

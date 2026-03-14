@@ -27,7 +27,7 @@
 #include "NonSmoothNewton.h"  // for nonSmoothDirec...
 #include "NumericsFwd.h"      // for SolverOptions
 #include "NumericsMatrix.h"   // for NumericsMatrix
-#include "Plasticity_cst.h"
+#include "Plasticity_options.h"
 #include "SiconosBlas.h"                  // for cblas_ddot
 #include "SolverOptions.h"                // for SolverOptions
 #include "plasticity_2d_AlartCurnier_functions.h"  // for compute_rho_sp...
