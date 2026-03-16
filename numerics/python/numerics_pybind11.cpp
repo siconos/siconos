@@ -65,6 +65,9 @@ void wrap_generic_mechanical(py::module_& m, py::module_& params, py::module_& s
 // Plasticity
 void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_ids);
 
+// Mixed Problems
+void wrap_mixed_problems(py::module_& m);
+
 py::array_t<int> get_iparam(SolverOptions& options) {
   return py::array_t<int>({options.iSize}, {sizeof(int)}, options.iparam, py::cast(&options));
 }
@@ -232,4 +235,6 @@ PYBIND11_MODULE(_numerics, m) {
   wrap_generic_mechanical(m, params, solver_ids);
 
   wrap_plasticity(m, params, solver_ids);
+
+  wrap_mixed_problems(m);
 }

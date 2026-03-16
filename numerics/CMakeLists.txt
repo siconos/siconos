@@ -53,6 +53,7 @@ set(${COMPONENT}_DIRS
   src/GenericMechanical
   src/VI
   src/Plasticity
+  src/MixedProblems
   src/NonSmoothSolvers
 )
 
@@ -107,6 +108,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/GenericMechanical
   src/VI
   src/Plasticity
+  src/MixedProblems
   )
 
 # ---- Final setup for the library ----

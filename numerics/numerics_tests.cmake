@@ -566,6 +566,12 @@ if(WITH_TESTING)
     EXTRA_SOURCES data_collection_1.c test_nsgs_compare.c)
 
   #===========================================
+  # MixedProblems tests
+  #===========================================
+  begin_tests(src/MixedProblems/test)
+  new_test(SOURCES mixed_problem_simple_test.c)
+
+  #===========================================
   # Generic mechanical tests
   #===========================================
   begin_tests(src/GenericMechanical/test)

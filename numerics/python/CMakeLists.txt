@@ -13,6 +13,7 @@ create_pybind11_module(
   ${CMAKE_CURRENT_SOURCE_DIR}/lcp_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mlcp_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/friction_contact_pybind11.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/relay_pybind11.cpp ${CMAKE_CURRENT_SOURCE_DIR}/generic_mechanical_pybind11.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/plasticity_pybind11.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/mixed_problems_pybind11.cpp
   DEPENDENCIES kernel numerics
   PARENT_NAME numerics
 )
