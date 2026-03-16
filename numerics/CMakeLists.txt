@@ -308,11 +308,17 @@ if(WITH_CUDA)
 
   # CUDA architectures (adjust based on target GPU)
   # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
-  # if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  #   set(CMAKE_CUDA_ARCHITECTURES 80 90)
-  # endif()
-  # set(SICONOS_HAS_CUDA TRUE)
-
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+      message(FATAL_ERROR 
+      " CMAKE_CUDA_ARCHITECTURES is not defined!\n"
+      " Please specify the target GPU architecture(s) using:\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=native (for local machine, if CMake version >= 3.24)\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=80     (for Ampere/A100)\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=\"80;90\" (for multiple)\n"
+      " See: https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html"
+      )
+  endif()
+  
   enable_language(CUDA)
 
   # PARENT_SCOPE so that the variable is defined in siconos/CMakeLists.txt
@@ -320,13 +326,6 @@ if(WITH_CUDA)
   
   # Required for cuSPARSE
   find_package(CUDAToolkit REQUIRED)
-
-  set_target_properties(${COMPONENT} PROPERTIES CUDA_ARCHITECTURES "80;90")
-  # set_property(TARGET ${COMPONENT} PROPERTY CUDA_ARCHITECTURES "80;90")
-
-  # CUDA compilation options
-  target_compile_options(${COMPONENT} PRIVATE
-    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fPIC>)
 
   # Link CUDA libraries
   target_link_libraries(${COMPONENT} PRIVATE
@@ -336,14 +335,14 @@ if(WITH_CUDA)
 
   # Set CUDA standard
   set_target_properties(${COMPONENT} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
     CUDA_STANDARD ${CMAKE_CXX_STANDARD}
     CUDA_STANDARD_REQUIRED ON
     CUDA_SEPARABLE_COMPILATION ON)
 
-  # target_compile_definitions(${COMPONENT} PUBLIC WITH_CUDA)
-
-  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/parallel/gpu/fc2d_nsgs_graph_permut_cuda.cu")
-  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/parallel/gpu/fc2d_nsgs_graph_permut_cuda_blocklegacy.cu")
+  # Add CUDA files
+  add_subdirectory(src/FrictionContact/parallel/gpu)
+  target_sources(${COMPONENT} PRIVATE ${CUDA_FILES}) 
 
   message(STATUS "CUDA support enabled for numerics")
   message(STATUS "  CUDA Toolkit version: ${CUDAToolkit_VERSION}")
