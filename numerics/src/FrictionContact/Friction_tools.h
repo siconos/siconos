@@ -42,7 +42,7 @@ typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, 
 typedef void (*FreeSolverPtr)(FrictionContactProblem *, FrictionContactProblem *, SolverOptions *);
 
 
-void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,
+int fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);
 
 /**

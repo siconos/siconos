@@ -39,19 +39,19 @@ tlsvar FILE* logger_f = NULL;
 tlsvar void* numerics_logger = NULL;
 tlsvar enum numerics_loggers numerics_logger_type = NUMERICS_LOG_TO_SCREEN;
 
-static void numerics_printf_internal(int level, const char* fmt, const char* extra_qual,
+static int numerics_printf_internal(int level, const char* fmt, const char* extra_qual,
                                      va_list argp) {
   switch (numerics_logger_type) {
     case NUMERICS_EXTERNAL_LOGGER: {
       //    if (!numerics_logger)
       //    {
-      numerics_error("numerics_printf_internal", "unsupported custom logger");
+      return numerics_error("numerics_printf_internal", "unsupported custom logger");;
       //    }
       break;
     }
     case NUMERICS_LOG_TO_FILE: {
       if (!logger_f) {
-        numerics_error("numerics_printf_internal", "no logger file opened!");
+        return numerics_error("numerics_printf_internal", "no logger file opened!");;
       }
       fputs("[Numerics]", logger_f);
       //    fprintf(logger_f, "[%d]", level);
@@ -71,12 +71,13 @@ static void numerics_printf_internal(int level, const char* fmt, const char* ext
       printf("\n");
     }
   }
+  return 0;
 }
 
 void numerics_set_verbose(int newVerboseMode) { verbose = newVerboseMode; }
 
-void numerics_error(const char* fn_name, const char* msg, ...) {
-  char output[2048] = "[Numerics][fatal error] ";
+int numerics_error(const char* fn_name, const char* msg, ...) {
+  char output[2048] = "[Numerics][error] ";
   size_t cur_len = strlen(output);
   strncat(output, fn_name, 2048 - cur_len - 1);
   cur_len = strlen(output);
@@ -88,7 +89,8 @@ void numerics_error(const char* fn_name, const char* msg, ...) {
   vsnprintf(&output[cur_len], 2048 - cur_len - 4, msg, args);
   va_end(args);
   strncat(output, ".\n", 2048 - cur_len);
-  sn_fatal_error(SN_UNKOWN_ERROR, output);
+  fprintf(stderr, "%s", output);
+  return NUMERICS_ERR_INVALID_ARGUMENT;
 }
 
 void numerics_error_nonfatal(const char* fn_name, const char* msg, ...) {

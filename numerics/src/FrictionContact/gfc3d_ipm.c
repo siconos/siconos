@@ -259,7 +259,8 @@ double complemResidualNorm_type(const double* const velocity, const double* cons
   }
 
   else {
-    numerics_error("complemResidualNorm_type", "unknown norm type");
+    int error = numerics_error("complemResidualNorm_type", "unknown norm type");
+    return NAN;
   }
 
   if (resid) free(resid);

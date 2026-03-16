@@ -64,7 +64,7 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
                 double* strainrate, SolverOptions* options) {
   /* Input validation */
   if (!problem || !stress || !strainrate || !options) {
-    numerics_error("plasticity_2d_driver", "null input argument");
+    int error =  numerics_error("plasticity_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
 

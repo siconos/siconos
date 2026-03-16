@@ -66,7 +66,7 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* r
                         double* velocity, SolverOptions* options) {
   /* Input validation */
   if (!problem || !reaction || !velocity || !options) {
-    numerics_error("rolling_friction_2d_driver", "null input argument");
+    int error = numerics_error("rolling_friction_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
 

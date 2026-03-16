@@ -214,7 +214,10 @@ int triplet_to_dense(void) {
   NumericsMatrix *B = NM_create(NM_DENSE, A->size0, A->size1);
 
   info = NM_to_dense(A, B);
-  if (info != 0) numerics_error("triplet_to_dense", "conversion error.");
+  if (info != 0) {
+    return numerics_error("triplet_to_dense", "conversion error.");
+    }
+    
 
   /* NM_display(B); */
 
@@ -242,7 +245,8 @@ int csc_to_dense(void) {
 
   NumericsMatrix *B = NM_create(NM_DENSE, A->size0, A->size1);
   info = NM_to_dense(A, B);
-  if (info != 0) numerics_error("csc_to_dense", "conversion error.\n");
+  if (info != 0) return numerics_error("csc_to_dense", "conversion error.\n");
+
 
   /* NM_display(B);   */
 

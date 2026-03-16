@@ -189,7 +189,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
     newton_LSA(problemSize, reaction, velocity, info, (void*)&opaque_data, options,
                &functions_AC);
   } else {
-    numerics_error("fc3d_nonsmooth_Newton_AlartCurnier", "Unknown nsn hybrid solver");
+    *info = numerics_error("fc3d_nonsmooth_Newton_AlartCurnier", "Unknown nsn hybrid solver");
   }
 
   free(opaque_data.rho);

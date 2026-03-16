@@ -539,8 +539,7 @@ int gmp_driver(GenericMechanicalProblem* problem, double* reaction, double* velo
       strcat(msg, solver_options_id_to_name(options->solverId));
       strcat(msg, "\n");
       numerics_warning("gmp_driver", msg);
-      numerics_error("gmp_driver", msg);
-      info = 1;
+      return numerics_error("gmp_driver", msg);
     }
   }
   DEBUG_END("gmp_driver(...)\n");

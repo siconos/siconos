@@ -711,7 +711,7 @@ SparseBlockStructuredMatrix* SBM_add(SparseBlockStructuredMatrix* A,
   /*     Check the compatibility of the number and the sizes of blocks */
   int compat = SBM_check_compatibility_for_add(A, B);
   if (!compat) {
-    numerics_error("SBM_add", "Non compatible matrices or blocks sizes.\n");
+    int error = numerics_error("SBM_add", "Non compatible matrices or blocks sizes.\n");
     return NULL;
   }
   SparseBlockStructuredMatrix* C = SBM_calloc_for_add(A, B);
@@ -914,7 +914,7 @@ SparseBlockStructuredMatrix* SBM_zero_matrix_for_multiply(
   /*     Check the compatibility of the number and the sizes of blocks */
   int compat = SBM_check_compatibility_for_multiply(A, B);
   if (!compat) {
-    numerics_error("SBM_zero_matrix_for_multiply",
+    int error = numerics_error("SBM_zero_matrix_for_multiply",
                    "Non compatible matrices or blocks sizes.\n");
     return NULL;
   }
@@ -941,7 +941,7 @@ SparseBlockStructuredMatrix* SBM_multiply(const SparseBlockStructuredMatrix* con
   /*     Check the compatibility of the number and the sizes of blocks */
   int compat = SBM_check_compatibility_for_multiply(A, B);
   if (!compat) {
-    numerics_error("SBM_multiply", "Non compatible matrices or blocks sizes.\n");
+    int error = numerics_error("SBM_multiply", "Non compatible matrices or blocks sizes.\n");
     return NULL;
   }
 

@@ -51,7 +51,7 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void rolling_friction_3d_nsgs_initialize_local_solver(
+int rolling_friction_3d_nsgs_initialize_local_solver(
     RollingSolverPtr *solve, RollingUpdatePtr *update, RollingFreeSolverNSGSPtr *freeSolver,
     RollingComputeErrorPtr *computeError, RollingFrictionContactProblem *problem,
     RollingFrictionContactProblem *localproblem, SolverOptions *options) {
@@ -86,11 +86,12 @@ void rolling_friction_3d_nsgs_initialize_local_solver(
       break;
     }
     default: {
-      numerics_error("rolling_friction_3d_nsgs_initialize_local_solver",
+      return numerics_error("rolling_friction_3d_nsgs_initialize_local_solver",
                      "Numerics, rolling_friction_3d_nsgs failed. Unknown internal solver : %s.\n",
                      solver_options_id_to_name(local_opts->solverId));
     }
   }
+  return 0;
 }
 
 // Never used ...
@@ -393,9 +394,10 @@ void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *re
   /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("rolling_friction_3d_nsgs",
+    *info = numerics_error("rolling_friction_3d_nsgs",
                    "The NSGS method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >= 1");
+    return;
   }
   SolverOptions *local_opts = options->internalSolvers[0];
 
@@ -413,7 +415,7 @@ void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *re
         iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
         iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
-    numerics_error("rolling_friction_3d_nsgs",
+    *info = numerics_error("rolling_friction_3d_nsgs",
                    "iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
                    "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
                    "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
@@ -429,7 +431,7 @@ void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *re
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
         iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
-    numerics_error("rolling_friction_3d_nsgs",
+    *info = numerics_error("rolling_friction_3d_nsgs",
                    "iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
                    "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
                    "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "

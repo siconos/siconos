@@ -98,8 +98,9 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
       NM_to_dense(problem->M, M_dense);
       M = M_dense->matrix0;
     }
-  else
-    numerics_error("lcp_lexicolemke", "not implemented for this storage type");
+  else {
+    *info = numerics_error("lcp_lexicolemke", "not implemented for this storage type");
+  }
 
   double z0, zb, delta_lexico;
   double pivot, tovip, ratio;

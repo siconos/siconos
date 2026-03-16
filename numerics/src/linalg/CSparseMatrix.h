@@ -284,7 +284,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
  *  \param[in] A a CSparseMatrix
  *  \param[in,out] B a CSparseMatrix
  */
-void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
+int CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
 
 /** Multiply a matrix with a double alpha*A --> A
  *

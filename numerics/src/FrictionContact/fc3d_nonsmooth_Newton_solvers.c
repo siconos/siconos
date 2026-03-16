@@ -471,7 +471,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
         break;
       }
       default: {
-        numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown linear solver.\n");
+        *info =  numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown linear solver.\n");
       }
     }
   }
@@ -508,10 +508,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
       rho[3 * contact + 2] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
     } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
                SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+      *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
                      "Adaptive strategy for computing rho not yet implemented");
     } else
-      numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+      *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
                      "unknown strategy for computing rho");
     numerics_printf_verbose(2,
                             "fc3d_AC_initialize"
@@ -605,7 +605,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
             AWpB, direction, reaction_ls_tmp, &alpha, options->iparam[12]);
         break;
       default: {
-        numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown line search option.\n");
+        *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown line search option.\n");
       }
     }
 

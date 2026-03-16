@@ -145,8 +145,10 @@ FrictionContactProblem* frictionContact_new_from_filename(const char* filename) 
 #endif
   } else {
     FILE* file = fopen(filename, "r");
-    if (!file) numerics_error("FrictionContactProblem", "Can not open file ", filename);
-
+    if (!file) {
+      int error = numerics_error("FrictionContactProblem", "Can not open file ", filename);
+      return NULL;
+    }
     problem = frictionContact_newFromFile(file);
     fclose(file);
   }
@@ -203,7 +205,7 @@ FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
 
 // #define SN_SBM_TO_DENSE
 
-void createSplittedFrictionContactProblem(FrictionContactProblem* problem,
+int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
                                           SplittedFrictionContactProblem* splitted_problem) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
@@ -289,9 +291,10 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       break;
     }
     default:
-      numerics_error("createSplittedFrictionContactProblem",
+      return numerics_error("createSplittedFrictionContactProblem",
                      "storageType value %d not implemented yet !", storageType);
   }
+  return 0;  
 }
 void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
                                                double* reaction, double* velocity,

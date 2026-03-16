@@ -57,7 +57,7 @@ static NewtonFunctionPtr jacobianF = NULL;
 
 /* size of a block */
 static int Fsize;
-static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptions* options) {
+static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
    * that will be used to build local problem for each considered contact.
    * Local problem is built during call to update (which depends on the storage type for M).
@@ -137,10 +137,10 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       rho[2] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
     } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
                SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      numerics_error("fc3d_AC_initialize",
+      return numerics_error("fc3d_AC_initialize",
                      "Adaptive strategy for computing rho not yet implemented");
     } else
-      numerics_error("fc3d_AC_initialize", "unknown strategy for computing rho");
+      return numerics_error("fc3d_AC_initialize", "unknown strategy for computing rho");
 
     if (verbose > 0) {
       avg_rho[0] += rho[0];
@@ -180,6 +180,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       avg_rho[0] / nc, avg_rho[1] / nc, avg_rho[2] / nc);
 
   fc3d_local_problem_free(local_p, main_problem);
+  return 0;  
 }
 
 static void fc3d_AC_free(FrictionContactProblem* main_problem,
@@ -191,7 +192,7 @@ static void fc3d_AC_free(FrictionContactProblem* main_problem,
   localsolver_options->dWork = NULL;
 }
 
-void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(
+int fc3d_onecontact_nonsmooth_Newton_solvers_initialize(
     FrictionContactProblem* global_problem, SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
    * formulation. */
@@ -208,9 +209,10 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(
     F = &F_GlockerFischerBurmeister;
     jacobianF = &jacobianF_GlockerFischerBurmeister;
   } else {
-    numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_initialize",
+    return numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
   }
+  return 0;  
 }
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem,
@@ -253,7 +255,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
       info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(localproblem,
                                                                    local_reaction, options);
     } else {
-      numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve",
+      return numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve",
                      "Unknown local nsn hybrid solver");
     }
   } else {
@@ -297,10 +299,8 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* main_
   else if (localsolver_options->solverId == FC3D_NCPG_NEWTON) {
     NCPGlocker_free(main_problem, localproblem, localsolver_options);
     ;
-  } else {
-    numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_initialize",
-                   "Unknown formulation type.");
   }
+  
 }
 
 /* Forward declaration */
@@ -936,7 +936,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
             SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
         options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
             SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)) {
-    numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid",
+    return  numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid",
                    "Unknown local nsn hybrid solver");
   }
 

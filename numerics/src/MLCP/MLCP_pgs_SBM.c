@@ -144,7 +144,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] = 0.0;
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("mlcp_nsgs_SBM",
+    * info = numerics_error("mlcp_nsgs_SBM",
                    "The MLCP_PGS_SBM method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >1");
   }

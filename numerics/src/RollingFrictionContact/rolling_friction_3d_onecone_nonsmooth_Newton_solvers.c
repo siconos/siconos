@@ -209,7 +209,7 @@ static void rolling_friction_3d_free(RollingFrictionContactProblem* problem,
   localsolver_options->dWork = NULL;
 }
 
-void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(
     RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem,
     SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
@@ -218,9 +218,10 @@ void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(
   if (localsolver_options->solverId == SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN) {
     rolling_friction_3d_onecone_nonsmooth_Newton_initialize(problem, localsolver_options);
   } else {
-    numerics_error("rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize",
+    return numerics_error("rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
   }
+  return 0;  
 }
 
 int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve(
@@ -310,10 +311,8 @@ void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_free(
       localsolver_options->solverId == SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP ||
       localsolver_options->solverId == SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID) {
     rolling_friction_3d_free(problem, localproblem, localsolver_options);
-  } else {
-    numerics_error("rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize",
-                   "Unknown formulation type.");
-  }
+  } 
+    
 }
 
 void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* velocity,

@@ -85,13 +85,13 @@ static double profile_get_time(void) {
 #define PROFILE_RESET()
 #endif
 
-extern void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem,
+extern int plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem,
                                                        SolverOptions* options,
                                                        SolverOptions* localsolver_options,
                                                        double error);
 
 /* Forward declaration for the update function */
-static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
+static int  plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
                                       PlasticityProblem* localproblem, double* stress,
                                       SolverOptions* options);
 
@@ -159,7 +159,7 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
         break;
       default:
         plasticity_2d_local_problem_free(localproblem, problem);
-        numerics_error("plasticity_2d_nsgs_local_problem_new", 
+        int error  = numerics_error("plasticity_2d_nsgs_local_problem_new", 
                        "Unknown internal solver: %s",
                        solver_options_id_to_name(localsolver_options->solverId));
         return NULL;
@@ -177,14 +177,14 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
         break;
       default:
         plasticity_2d_local_problem_free(localproblem, problem);
-        numerics_error("plasticity_2d_nsgs_local_problem_new", 
+        int error = numerics_error("plasticity_2d_nsgs_local_problem_new", 
                        "Unknown internal solver for Von Mises: %s",
                        solver_options_id_to_name(localsolver_options->solverId));
         return NULL;
     }
   } else {
     plasticity_2d_local_problem_free(localproblem, problem);
-    numerics_error("plasticity_2d_nsgs_local_problem_new", 
+    int error = numerics_error("plasticity_2d_nsgs_local_problem_new", 
                    "Unknown plasticity model type");
     return NULL;
   }
@@ -202,20 +202,20 @@ static void plasticity_2d_nsgs_local_problem_free(PlasticityProblem* localproble
 }
 
 /** Update local problem wrapper - maps generic NSGS to plasticity_2d */
-static void plasticity_2d_nsgs_update_wrapper(unsigned int block, void* problem, void* local_problem,
+static int plasticity_2d_nsgs_update_wrapper(unsigned int block, void* problem, void* local_problem,
                                                double* var_z, SolverOptions* options) {
   if (!local_problem) {
-    numerics_error("plasticity_2d_nsgs_update_wrapper", "Local problem is NULL");
-    return;
+    return numerics_error("plasticity_2d_nsgs_update_wrapper", "Local problem is NULL");
   }
   PROFILE_START();
-  plasticity_2d_nsgs_update(block, (PlasticityProblem*)problem,
+  int info = plasticity_2d_nsgs_update(block, (PlasticityProblem*)problem,
                             (PlasticityProblem*)local_problem, var_z, options);
   PROFILE_END(profile_update_time, profile_update_calls);
+  return info;
 }
 
 /** Solve local problem wrapper */
-static void plasticity_2d_nsgs_solve_local_wrapper(void* local_problem, 
+static int  plasticity_2d_nsgs_solve_local_wrapper(void* local_problem, 
                                                     SolverOptions* localsolver_options,
                                                     double* var_z_local, 
                                                     double* localsolver_options_data) {
@@ -232,9 +232,10 @@ static void plasticity_2d_nsgs_solve_local_wrapper(void* local_problem,
     }
     PROFILE_END(profile_solve_time, profile_solve_calls);
   } else {
-    numerics_error("plasticity_2d_nsgs_solve_local_wrapper", 
+    return numerics_error("plasticity_2d_nsgs_solve_local_wrapper", 
                    "Local solver or local problem not initialized");
   }
+  return 0;
 }
 
 /** Compute error wrapper - maps generic to plasticity_2d */
@@ -256,7 +257,7 @@ static void plasticity_2d_nsgs_set_tol_wrapper(void* problem, SolverOptions* opt
 }
 
 /** Accept local solution wrapper with filtering */
-static void plasticity_2d_nsgs_accept_local_wrapper(void* local_problem, 
+static int  plasticity_2d_nsgs_accept_local_wrapper(void* local_problem, 
                                                      SolverOptions* options,
                                                      unsigned int block, int iter,
                                                      double* var_z_global, 
@@ -270,22 +271,23 @@ static void plasticity_2d_nsgs_accept_local_wrapper(void* local_problem,
     numerics_printf("Discard local stress for block %i at iteration %i with local_error = %e",
                     block, iter, local_residual);
     PROFILE_END(profile_accept_time, profile_accept_calls);
-    return;
+    return 0;
   }
 
   var_z_global[block * 3 + 0] = var_z_local[0];
   var_z_global[block * 3 + 1] = var_z_local[1];
   var_z_global[block * 3 + 2] = var_z_local[2];
   PROFILE_END(profile_accept_time, profile_accept_calls);
+  return 0;  
 }
 
 /** Update local problem for a specific cone/block
  * 
  * This is the same implementation as in plasticity_2d_nsgs.c
  */
-static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
-                                      PlasticityProblem* localproblem, double* stress,
-                                      SolverOptions* options) {
+static int plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
+				     PlasticityProblem* localproblem, double* stress,
+				     SolverOptions* options) {
   (void)options;
   
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
@@ -302,6 +304,7 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[cone];
   }
+  return 0;  
 }
 
 /** Main solver using generic NSGS framework */
@@ -309,14 +312,13 @@ void plasticity_2d_nsgs_generic(PlasticityProblem* problem, double* stress,
                                  double* plastic_strain_rate, int* info, 
                                  SolverOptions* options) {
   if (!problem || !stress || !info || !options) {
-    numerics_error("plasticity_2d_nsgs_generic", "Invalid input arguments");
+    *info = numerics_error("plasticity_2d_nsgs_generic", "Invalid input arguments");
     return;
   }
   
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("plasticity_2d_nsgs_generic",
+    *info = numerics_error("plasticity_2d_nsgs_generic",
                    "The NSGS method needs options for the internal solvers");
-    *info = 1;
     return;
   }
 

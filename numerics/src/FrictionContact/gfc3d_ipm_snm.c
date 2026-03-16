@@ -381,29 +381,31 @@ int* read_fricprob_block(const char* path, int type, int blk_index) {
     H5Fclose(file_id);
 
 #else
-    numerics_error("gfc3d_IPM_SNM",
+    int error = numerics_error("gfc3d_IPM_SNM",
                    "Try to read an hdf5 file, while fclib interface is not active. Recompile "
                    "Siconos with fclib.",
                    path);
+    return NULL ;
 #endif
   } else
-    numerics_error("gfc3d_IPM_SNM", "Not a hdf5 file ", path);
-
+    {    
+      int error = numerics_error("gfc3d_IPM_SNM", "Not a hdf5 file ", path);
+      return NULL ;
+    }
   return out;
 }
 
-static void NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const unsigned int start_i,
+static int NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const unsigned int start_i,
                                        const unsigned int start_j, const double* const vec,
                                        const unsigned int vecSize, const size_t varsCount) {
   size_t dimension = (size_t)(vecSize / varsCount);
   size_t pos;
   size_t total_element = (dimension * 3 - 2) * varsCount;
   if (!(total_element <= LLONG_MAX))  // To detect bad conversion with nzmax type
-    numerics_error("NM_insert_Arrow_to_Triplet", "value too large for an int64_t");
+    return numerics_error("NM_insert_Arrow_to_Triplet", "value too large for an int64_t");
 
   if (triplet->nzmax < ((int64_t)total_element + triplet->nz)) {
-    fprintf(stderr, "NM_insert_Arrow_to_Triplet: Size of allocated triplet memory is not sufficient.\n");
-    return;
+    return numerics_error("NM_insert_Arrow_to_Triplet", " Size of allocated triplet memory is not sufficient.");
   }
 
   for (size_t i = 0; i < varsCount; ++i) {
@@ -427,6 +429,7 @@ static void NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const unsigned in
       triplet->p[triplet->nz++] = start_j + pos + j;
     }
   }
+  return 0;  
 }
 
 /* --------------------------- Interior-point method implementation

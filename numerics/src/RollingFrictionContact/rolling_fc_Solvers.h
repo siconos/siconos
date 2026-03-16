@@ -117,7 +117,7 @@ extern "C" {
 void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
                        double *velocity, int *info, SolverOptions *options);
 
-void rolling_friction_3d_nsgs_initialize_local_solver(
+int rolling_friction_3d_nsgs_initialize_local_solver(
     RollingSolverPtr *solve, RollingUpdatePtr *update, RollingFreeSolverNSGSPtr *freeSolver,
     RollingComputeErrorPtr *computeError, RollingFrictionContactProblem *problem,
     RollingFrictionContactProblem *localproblem, SolverOptions *options);
@@ -135,7 +135,7 @@ void rolling_friction_3d_nsgs_initialize_local_solver(
 int rolling_friction_3d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
                                   double *reaction, SolverOptions *options);
 
-void rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
+int rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
                                                SolverOptions *options,
                                                SolverOptions *internalsolver_options,
                                                double error);
@@ -147,8 +147,6 @@ void rolling_friction_3d_nsgs_set_default(SolverOptions *options);
 void rolling_friction_3d_poc_withLocalIteration_set_default(SolverOptions *options);
 void rolling_friction_3d_poc_set_default(SolverOptions *options);
 void rolling_friction_3d_poc_set_default(SolverOptions *options);
-void rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem, SolverOptions *options,
-                                       SolverOptions *internalsolver_options, double error);
 /** @} */
 
 void rolling_friction_3d_admm(RollingFrictionContactProblem *problem, double *reaction,
@@ -213,7 +211,7 @@ void rolling_friction_3d_admm_set_default(SolverOptions *options);
 void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
                        double *velocity, int *info, SolverOptions *options);
 
-void rolling_friction_2d_nsgs_initialize_local_solver(
+int rolling_friction_2d_nsgs_initialize_local_solver(
     RollingSolverPtr *solve, RollingUpdatePtr *update, RollingFreeSolverNSGSPtr *freeSolver,
     RollingComputeErrorPtr *computeError, RollingFrictionContactProblem *problem,
     RollingFrictionContactProblem *localproblem, SolverOptions *options);
@@ -231,7 +229,7 @@ void rolling_friction_2d_nsgs_initialize_local_solver(
 int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem *problem, double *velocity,
                                   double *reaction, SolverOptions *options);
 
-void rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
+int rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem *problem,
                                                SolverOptions *options,
                                                SolverOptions *internalsolver_options,
                                                double error);

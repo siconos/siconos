@@ -84,7 +84,7 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
 }
 
 
-static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* problem,
+static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* problem,
                                                       PlasticityProblem* localproblem,
                                                       SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
@@ -162,10 +162,10 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
       rho[2] = options->dparam[PLASTICITY_NSN_RHO];
     } else if (options->iparam[PLASTICITY_NSN_RHO_STRATEGY] ==
                PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
+      return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
                      "Adaptive strategy for computing rho not yet implemented");
     } else
-      numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
+      return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
                      "unknown strategy for computing rho");
 
     plasticity_2d_local_problem_fill_M(problem, localproblem, cone);
@@ -196,6 +196,7 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
       "plasticity_2d_onecone_nonsmooth_Newton_initialize"
       " Avg. rho value = %e\t%e\t%e\t",
       avg_rho[0] / (double)nc, avg_rho[1] / (double)nc, avg_rho[2] / (double)nc);
+  return 0;  
 }
 
 static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
@@ -206,7 +207,7 @@ static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem*
   localsolver_options->dWork = NULL;
 }
 
-void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
                                                       PlasticityProblem* localproblem,
                                                       SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
@@ -214,9 +215,11 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
-    plasticity_2d_onecone_nonsmooth_Newton_initialize(problem, localproblem, localsolver_options);
+    plasticity_2d_onecone_nonsmooth_Newton_initialize(problem, localproblem,
+                                                      localsolver_options);
+    return 0;
   } else {
-    numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize",
+    return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
   }
 }
@@ -260,7 +263,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
       info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction,
                                                                 options);
     } else {
-      numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
+      return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
                      "Unknown local nsn hybrid solver");
     }
   } else {
@@ -300,9 +303,6 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_free(PlasticityProblem* prob
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
     plasticity_2d_AC_free(problem, localproblem, localsolver_options);
-  } else {
-    numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize",
-                   "Unknown formulation type.");
   }
 }
 
@@ -889,7 +889,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
             PLASTICITY_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
         options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
             PLASTICITY_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)) {
-    numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid",
+    return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid",
                    "Unknown local nsn hybrid solver");
   }
 

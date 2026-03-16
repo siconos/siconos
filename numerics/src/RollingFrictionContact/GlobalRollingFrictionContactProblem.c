@@ -213,9 +213,10 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filen
 
   else {
     FILE* file = fopen(filename, "r");
-    if (!file)
-      numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
-
+    if (!file) {
+      int error = numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
+      return NULL;
+    }
     problem = globalRollingFrictionContact_newFromFile(file);
     fclose(file);
   }

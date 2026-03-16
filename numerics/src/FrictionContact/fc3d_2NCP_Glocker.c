@@ -160,7 +160,7 @@ void computeGGlocker() {
                  4 * mu_i * reactionGlocker[0] * reactionGlocker[2] - tmp;
 }
 
-void NCPGlocker_fillMLocal(FrictionContactProblem* problem,
+int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
                            FrictionContactProblem* localproblem, int contact) {
   NumericsMatrix* MGlobal = problem->M;
   int n = 3 * problem->numberOfContacts;
@@ -189,8 +189,9 @@ void NCPGlocker_fillMLocal(FrictionContactProblem* problem,
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   } else
-    numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -",
-                   "unknown storage type for matrix M");
+    return numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -",
+                          "unknown storage type for matrix M");
+  return 0;  
 }
 
 void NCPGlocker_initialize(FrictionContactProblem* problem) {

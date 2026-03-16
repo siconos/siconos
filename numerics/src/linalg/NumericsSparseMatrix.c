@@ -77,7 +77,8 @@ static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1, NSM_t ty
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M) {
   if (!M) {
-    numerics_error("NSM_latest_id", "Null pointer Matrix");
+    int error = numerics_error("NSM_latest_id", "Null pointer Matrix");
+    return NSM_UNKNOWN;
   }
 
   return (nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET, NSM_HALF_TRIPLET), NSM_CSC), NSM_CSR));
@@ -100,9 +101,11 @@ CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M) {
     case NSM_CSC:
       return M->csc;
     default:
-      numerics_error("NSM_latest", "unknown matrix type");
-  }
-  return 0;
+      {
+	int error = numerics_error("NSM_latest", "unknown matrix type");
+	return NULL;
+      }
+      }
 }
 
 void NSM_reset_version(NumericsSparseMatrix* M, NSM_t id) { NDV_reset(&(M->versions[id])); }
@@ -208,7 +211,7 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A) {
   return NULL;
 }
 
-void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* B) {
+int NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* B) {
   assert(A);
   assert(B);
   switch (A->origin) {
@@ -229,10 +232,11 @@ void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix*
       break;
     }
     default: {
-      numerics_error("NSM_version_copy", "unknown id");
-      assert(false);
+      return numerics_error("NSM_version_copy", "unknown id");
+      ;
     }
   }
+  return 0;
 }
 
 void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B) {
@@ -428,7 +432,7 @@ size_t NSM_nnz(const CSparseMatrix* const A) {
   } else if (A->nz == NSM_CS_CSR) {
     return csint_to_size_t(A->p[A->m]);
   } else {
-    numerics_error("NSM_nnz", "unsupported nz number");
+    int error = numerics_error("NSM_nnz", "unsupported nz number");
     return 0;
   }
 }
@@ -517,7 +521,8 @@ int NSM_to_dense(const NumericsSparseMatrix* const A, double* B) {
 
 NSM_t NSM_origin(const NumericsSparseMatrix* M) {
   if (!M) {
-    numerics_error("NSM_latest_id", "Null pointer Matrix");
+    int error = numerics_error("NSM_latest_id", "Null pointer Matrix");
+    return NSM_UNKNOWN;
   }
   assert(NSM_version(M, NSM_latest_id(M)) == NSM_version(M, M->origin));
   return M->origin;

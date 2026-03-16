@@ -463,11 +463,13 @@ MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(
   mlcp->m = problem->m; /* Inequalities */
 
   if ((size_t)problem->m > SIZE_MAX / sizeof(double)) {
-    numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    int error = numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    return NULL;
   }
 
   if ((size_t)problem->n > SIZE_MAX / sizeof(double)) {
-    numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    int error = numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    return NULL;
   }
 
   size_t m = (size_t)problem->m;

@@ -188,7 +188,7 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
       break;
     default:
       fc3d_local_problem_free(localproblem, problem);
-      numerics_error("fc3d_nsgs_local_problem_new", "Unknown internal solver: %s",
+      int error = numerics_error("fc3d_nsgs_local_problem_new", "Unknown internal solver: %s",
                      solver_options_id_to_name(localsolver_options->solverId));
       return NULL;
   }
@@ -206,31 +206,32 @@ static void fc3d_nsgs_local_problem_free(FrictionContactProblem* localproblem,
 }
 
 /** Update local problem wrapper - maps generic NSGS to fc3d */
-static void fc3d_nsgs_update_wrapper(unsigned int block, void* problem, void* local_problem,
+static int  fc3d_nsgs_update_wrapper(unsigned int block, void* problem, void* local_problem,
                                      double* var_z, SolverOptions* options) {
   if (!local_problem) {
-    numerics_error("fc3d_nsgs_update_wrapper", "Local problem is NULL");
-    return;
+    return numerics_error("fc3d_nsgs_update_wrapper", "Local problem is NULL");
   }
   PROFILE_START();
   fc3d_nsgs_update(block, (FrictionContactProblem*)problem,
                    (FrictionContactProblem*)local_problem, var_z, options);
   PROFILE_END(profile_update_time, profile_update_calls);
+  return 0;  
 }
 
 /** Solve local problem wrapper */
-static void fc3d_nsgs_solve_local_wrapper(void* local_problem, SolverOptions* localsolver_options,
+static int fc3d_nsgs_solve_local_wrapper(void* local_problem, SolverOptions* localsolver_options,
                                           double* var_z_local, double* localsolver_options_data) {
   (void)localsolver_options_data;
   
   SolverPtr local_solver = (SolverPtr)localsolver_options->solverData;
   if (local_solver && local_problem) {
     PROFILE_START();
-    local_solver((FrictionContactProblem*)local_problem, var_z_local, localsolver_options);
+    int info = local_solver((FrictionContactProblem*)local_problem, var_z_local, localsolver_options);
     PROFILE_END(profile_solve_time, profile_solve_calls);
+    return info;
   } else {
-    numerics_error("fc3d_nsgs_solve_local_wrapper", "Local solver or local problem not initialized");
-  }
+    return numerics_error("fc3d_nsgs_solve_local_wrapper", "Local solver or local problem not initialized");
+  } 
 }
 
 /** Compute error wrapper - maps generic to fc3d */
@@ -251,7 +252,7 @@ static void fc3d_nsgs_set_tol_wrapper(void* problem, SolverOptions* options,
 }
 
 /** Accept local solution wrapper with filtering */
-static void fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* options,
+static int fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* options,
                                            unsigned int block, int iter,
                                            double* var_z_global, double* var_z_local) {
   (void)local_problem;
@@ -263,27 +264,27 @@ static void fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* o
     numerics_printf("Discard local reaction for block %i at iteration %i with local_error = %e",
                     block, iter, local_residual);
     PROFILE_END(profile_accept_time, profile_accept_calls);
-    return;
+    return 0;
   }
 
   var_z_global[block * 3 + 0] = var_z_local[0];
   var_z_global[block * 3 + 1] = var_z_local[1];
   var_z_global[block * 3 + 2] = var_z_local[2];
   PROFILE_END(profile_accept_time, profile_accept_calls);
+  return 0;  
 }
 
 /** Main solver using generic NSGS framework */
 void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double* velocity,
                        int* info, SolverOptions* options) {
   if (!problem || !reaction || !info || !options) {
-    numerics_error("fc3d_nsgs_generic", "Invalid input arguments");
+    *info =  numerics_error("fc3d_nsgs_generic", "Invalid input arguments");
     return;
   }
   
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("fc3d_nsgs_generic",
+    *info = numerics_error("fc3d_nsgs_generic",
                    "The NSGS method needs options for the internal solvers");
-    *info = 1;
     return;
   }
 

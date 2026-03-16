@@ -45,8 +45,9 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double, doubl
  * \param problem to solve
  * \param localproblem to solve
  * \param options of the solver
+ * \return error code
  */
-void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(RollingFrictionContactProblem* problem,
+int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(RollingFrictionContactProblem* problem,
                                                       RollingFrictionContactProblem* localproblem,
                                                       SolverOptions* options);
 

@@ -45,11 +45,11 @@
 #include "numerics_verbose.h"
 
 /** Callback type for updating local problem for a given block */
-typedef void (*NSGSUpdateLocalProblem)(unsigned int block, void* problem, void* local_problem,
+typedef int (*NSGSUpdateLocalProblem)(unsigned int block, void* problem, void* local_problem,
                                        double* var_z_global, SolverOptions* options);
 
-/** Callback type for solving the local problem */
-typedef void (*NSGSSolveLocal)(void* local_problem, SolverOptions* options,
+/** Callbavk type for solving the local problem */
+typedef int (*NSGSSolveLocal)(void* local_problem, SolverOptions* options,
                                double* var_z_local, double* localsolver_options_data);
 
 /** Callback type for computing global error */
@@ -64,7 +64,7 @@ typedef void (*NSGSCopyLocal)(unsigned int block, double* var_z_global, double* 
 typedef double (*NSGSIncrError)(double* var_z_local_new, double* var_z_local_old);
 
 /** Callback type for accepting local solution into global solution */
-typedef void (*NSGSAcceptLocal)(void* local_problem, SolverOptions* options,
+typedef int (*NSGSAcceptLocal)(void* local_problem, SolverOptions* options,
                                 unsigned int block, int iter, double* var_z_global,
                                 double* var_z_local);
 
@@ -273,7 +273,7 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
  * \param[in] var_z_global Global solution vector
  * \param[in] options Solver options (contains problem_data in solverData)
  */
-static inline void nsgs_generic_update_local_problem_callback(unsigned int block,
+static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
                                                               void* problem,
                                                               void* local_problem,
                                                               double* var_z_global,
@@ -282,13 +282,13 @@ static inline void nsgs_generic_update_local_problem_callback(unsigned int block
 
   NSGSProblemData* problem_data = (NSGSProblemData*)options->solverData;
   if (!problem_data) {
-    numerics_error("nsgs_generic_update_local_problem_callback",
+    return numerics_error("nsgs_generic_update_local_problem_callback",
                    "options->solverData must contain NSGSProblemData pointer");
-    return;
   }
 
   nsgs_generic_update_local_problem(block, problem_data, (NSGSLocalProblem*)local_problem,
                                     var_z_global, problem_data->dimension);
+  return 0;
 }
 
 /** Extract diagonal blocks from matrix for efficient access
@@ -772,8 +772,7 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
   if (toolkit->alloc_local) {
     local_problem = toolkit->alloc_local(problem);
     if (!local_problem) {
-      numerics_error("nsgs_solve", "Failed to allocate local problem");
-      *info = 1;
+      *info = numerics_error("nsgs_solve", "Failed to allocate local problem");
       goto nsgs_cleanup;
     }
   } else if (toolkit->localproblem) {
@@ -1079,8 +1078,7 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
   if (toolkit->alloc_local) {
     local_problem = toolkit->alloc_local(problem);
     if (!local_problem) {
-      numerics_error("nsgs_solve", "Failed to allocate local problem");
-      *info = 1;
+      *info = numerics_error("nsgs_solve", "Failed to allocate local problem");
       goto nsgs_cleanup;
     }
   } else if (toolkit->localproblem) {

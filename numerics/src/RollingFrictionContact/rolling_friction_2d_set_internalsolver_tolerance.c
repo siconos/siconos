@@ -26,7 +26,7 @@
 #include "numerics_errors.h"
 #include "rolling_fc_Solvers.h"             // for rolling_friction_3d_set_internal...
 
-void rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
+int rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
                                                SolverOptions* options,
                                                SolverOptions* internalsolver_options,
                                                double error) {
@@ -57,7 +57,8 @@ void rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProb
                             "tolerance is set to %e",
                             internalsolver_options->dparam[0]);
   } else {
-    numerics_error("rolling_friction_3d__set_internalsolver_tolerance",
+    return numerics_error("rolling_friction_3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
+  return 0;  
 }

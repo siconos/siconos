@@ -73,7 +73,7 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL || velocity == NULL || reaction == NULL ||
       error == NULL)
-    numerics_error("global_rolling_friction_3d_compute_error", "null input");
+    return numerics_error("global_rolling_friction_3d_compute_error", "null input");
   // printf("\n\nglobal_rolling_friction_3d_compute_error\n\n");
   int nc = problem->numberOfContacts;
   assert(nc > 0);

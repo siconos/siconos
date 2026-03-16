@@ -35,7 +35,7 @@
 #include "solver_registry.h"
 #include "numerics_errors.h"
 
-void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
+int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                            int* info, SolverOptions* options) {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -51,7 +51,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, do
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("fc3d_TrescaFixedpoint",
+    return numerics_error("fc3d_TrescaFixedpoint",
                    "The Tresca Fixed Point method needs options for the internal solvers; "
                    "please check your options.");
   }
@@ -92,7 +92,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, do
           "==========================\n");
     internalsolver = &fc3d_VI_FixedPointProjection_Cylinder;
   } else {
-    numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver.");
+    return numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver.");
   }
 
   int cumul_internal = 0;
@@ -134,6 +134,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, do
   internalsolver_options->dWork = NULL;
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  return 0;  
 }
 
 void fc3d_tfp_set_default(SolverOptions* options) {

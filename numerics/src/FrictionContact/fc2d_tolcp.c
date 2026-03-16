@@ -29,10 +29,9 @@
 
 int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem* lcp_problem) {
   if (problem->dimension != 2) {
-    numerics_error(
+    return numerics_error(
         "fc2d_tolcp",
         "Dimension of the problem : problem-> dimension is not compatible or is not set");
-    return 1;
   }
   int nc = problem->numberOfContacts;
   lcp_problem->size = 3 * nc;

@@ -112,7 +112,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
   /* Checks inputs */
   if (reaction == NULL || velocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+    return numerics_error("gfc3d_compute_error", "null input");
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
@@ -157,7 +157,7 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
   DEBUG_BEGIN("gfc3d_compute_error(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+    return numerics_error("gfc3d_compute_error", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
@@ -217,7 +217,7 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
 
   /* Checks inputs */
   if (reaction == NULL || velocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+    return numerics_error("gfc3d_compute_error", "null input");
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
@@ -269,7 +269,7 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
 {
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL || reaction == NULL)
-    numerics_error("gfc3d_compute_error_norm_infinity_conic", "null input");
+    return numerics_error("gfc3d_compute_error_norm_infinity_conic", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
@@ -327,7 +327,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
   DEBUG_BEGIN("gfc3d_compute_error_convex(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+    return numerics_error("gfc3d_compute_error", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
@@ -387,7 +387,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
 
   /* Checks inputs */
   if (reaction == NULL || velocity == NULL)
-    numerics_error("gfc3d_compute_error", "null input");
+    return numerics_error("gfc3d_compute_error", "null input");
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */

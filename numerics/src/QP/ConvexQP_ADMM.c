@@ -171,8 +171,10 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   int is_rho_variable = 0;
   double rho = convexQP_ADMM_select_rho(M, A, &is_rho_variable, options);
 
-  if (rho <= DBL_EPSILON)
-    numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be positive");
+  if (rho <= DBL_EPSILON) {
+    *info = numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be positive");
+    return;
+  }
 
   /* double tau=1; */
   int internal_allocation = 0;
@@ -187,7 +189,8 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   NumericsMatrix* Atrans = 0;
   if (!A) {
     if (M->storageType != A->storageType) {
-      numerics_error("ConvexQP_ADMM", "M and A must have the same storage");
+      *info = numerics_error("ConvexQP_ADMM", "M and A must have the same storage");
+      return;
     }
   }
 
@@ -388,9 +391,10 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       cblas_dcopy(m, xi_k, 1, xi_hat, 1);
       cblas_dcopy(m, u_k, 1, u_hat, 1);
     } else {
-      numerics_error("convexqp_admm",
+      *info = numerics_error("convexqp_admm",
                      " options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] value is "
                      "not recognize");
+      return;
     }
 
     rho_k = rho;
@@ -406,11 +410,9 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       } else if (s_scaled > br_phi * r_scaled) {
         rho = rho_k / br_tau;
         has_rho_changed = 1;
-      } else {
         /* keep the value of rho */
         has_rho_changed = 0;
       }
-    } else {
       has_rho_changed = 0;
     }
     numerics_printf_verbose(2, "convexQP_admm. rho = %5.2e\t, rho_k = %5.2e\t ", rho, rho_k);
@@ -464,7 +466,6 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
         numerics_printf_verbose(
             1, "---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e",
             iter, rho, error);
-      } else {
         numerics_printf_verbose(1,
                                 "---- ConvexQP - ADMM  - The tolerance on the  residual is "
                                 "not sufficient to reach accuracy (error =  %14.7e)",
@@ -527,7 +528,6 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   if (AisIdentity) {
     NM_free(A);
     free(b);
-  } else {
     if (Atrans) NM_free(Atrans);
   }
 

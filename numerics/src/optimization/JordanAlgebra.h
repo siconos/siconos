@@ -39,7 +39,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
  * This is an alternative of Arrow_repr, without creation of matrix
  * (not allocation of memory)
  */
-void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
+int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
                         const size_t varsCount);
 
 /**

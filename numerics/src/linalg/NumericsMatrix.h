@@ -150,16 +150,18 @@ RawNumericsMatrix* NM_create_from_file(FILE* file);
  *
  *  \param[in] A a NumericsMatrix
  *  \param[in,out] B a NumericsMatrix
+ *  \return error code
  */
-void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+int NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B);
 
 /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
  *  Reallocations are performed if B cannot hold a copy of A
  *
  *  \param[in] A a NumericsMatrix
  *  \param[in,out] B a NumericsMatrix
+ *  \return error code
  */
-void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+int NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
 
 /** Copy a NumericsMatrix to s sparse one.
  *  Allocation or reallocation are performed on B
@@ -371,7 +373,7 @@ NumericsMatrix* NM_free_not_SBM(NumericsMatrix* m);
     \param m the matrix to be deleted.
     \param storageType to be kept.
  */
-void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
+int NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
 
 /** insert an non zero entry into a NumericsMatrix.
  *  for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in
@@ -385,7 +387,7 @@ void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
  *  \param threshold a threshold to filter the small value in magnitude (useful for dense to
  * sparse conversion)
  */
-void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
+int NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
 
 /** insert an entry into a NumericsMatrix.
  *  for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in
@@ -397,7 +399,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
  *  \param j column index
  *  \param val the value to be inserted.
  */
-void NM_entry(NumericsMatrix* M, int i, int j, double val);
+int NM_entry(NumericsMatrix* M, int i, int j, double val);
 
 /** get the value of a NumericsMatrix.
  *
@@ -491,7 +493,7 @@ void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
  *  \param[in] start_i a start row index
  *  \param[in] start_j a start column index
  */
-void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned int start_i,
+int NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned int start_i,
                const unsigned int start_j);
 
 //  Matrix - vector product
@@ -505,7 +507,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
     \param[in] x the vector to be multiplied
     \param[in,out] y the resulting vector
 */
-void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, double* y);
+int NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, double* y);
 
 /**
     Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A
@@ -975,7 +977,7 @@ RawNumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, Numerics
  *  \param alpha the  coefficient
  *  \param A the   matrix
  */
-void NM_scal(double alpha, NumericsMatrix* A);
+int NM_scal(double alpha, NumericsMatrix* A);
 
 /** assert that a NumericsMatrix has the right structure given its type
  *
@@ -1071,7 +1073,7 @@ BalancingMatrices* NM_BalancingMatrices_free(BalancingMatrices* A);
  *  \param M the NumericsMatrix,
  *  \param id the NM_types storage
  */
-void NM_reset_version(NumericsMatrix* M, NM_types id);
+int NM_reset_version(NumericsMatrix* M, NM_types id);
 
 /** Reset versions of all storages.
  *
@@ -1082,7 +1084,7 @@ void NM_reset_versions(NumericsMatrix* M);
 /* Sync storageType from version.
  * \param M the NumericsMatrix
  */
-void NM_version_sync(NumericsMatrix* M);
+int NM_version_sync(NumericsMatrix* M);
 
 /* Check if an entry in the matrix is NaN .
  *\param M the NumericsMatrix

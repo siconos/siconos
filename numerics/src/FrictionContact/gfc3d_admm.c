@@ -155,9 +155,10 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int* i
 
     rho = sqrt(lambda_max * lambda_min);
   } else {
-    numerics_error(
+    int error = numerics_error(
         "gfc3d_admm_select_rho",
         "options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] unknow value");
+    return INFINITY;
   }
 
   /* rho adaptive from initial rho */
@@ -356,7 +357,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
           SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY ||
       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
           SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY) {
-    numerics_error("gfc3d_admm",
+    *info = numerics_error("gfc3d_admm",
                    "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not "
                    "implemented\n only the forced symmetry is implemented",
                    options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
@@ -391,7 +392,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
      *  that the data are symmetric */
     linear_solver = &NM_Cholesky_solve;
   } else
-    numerics_error("gfc3d_admm",
+    *info = numerics_error("gfc3d_admm",
                    "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
                    options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 
@@ -470,7 +471,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   int is_rho_variable = 0;
   double rho = gfc3d_admm_select_rho(problem->M, problem->H, &is_rho_variable, options);
   if (rho <= DBL_EPSILON)
-    numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
+    *info = numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -768,7 +769,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       cblas_dcopy(m, reaction_k, 1, reaction_hat, 1);
       cblas_dcopy(m, u_k, 1, u_hat, 1);
     } else {
-      numerics_error("gfc3d_admm",
+      *info = numerics_error("gfc3d_admm",
                      " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
                      "not recognized");
     }

@@ -32,7 +32,8 @@
 void lcp_gams(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
 #ifndef HAVE_GAMS_C_API
-  numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
+  *info = numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
+  return;
 #else
 
   if (!options->solverParameters)

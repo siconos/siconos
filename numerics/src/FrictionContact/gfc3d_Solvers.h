@@ -41,7 +41,7 @@ typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, do
 extern "C" {
 #endif
 
-void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
+int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                         SolverOptions* options,
                                         SolverOptions* internalsolver_options, double error);
 

@@ -237,9 +237,10 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
   /* Solver initialization continues below */
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("soclcp_nsgs",
+    *info = numerics_error("soclcp_nsgs",
                    "The NSGS method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >1");
+    return;
   }
   assert(&options[1]);
 

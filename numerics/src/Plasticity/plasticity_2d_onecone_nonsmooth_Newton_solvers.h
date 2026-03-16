@@ -45,8 +45,9 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double, doubl
  * \param problem to solve
  * \param localproblem to solve
  * \param options of the solver
- */
-void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
+ * \return error code
+ */ 
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
                                                       PlasticityProblem* localproblem,
                                                       SolverOptions* options);
 

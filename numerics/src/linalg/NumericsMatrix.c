@@ -122,13 +122,15 @@ static version_t NM_version(const NumericsMatrix* M, NM_types id) {
       }
     }
     default:
-      numerics_error("NM_version", "unknown id");
+      {      
+      int error = numerics_error("NM_version", "unknown id");
       return 0;
+      }      
   }
   assert(false);
 }
 
-void NM_reset_version(NumericsMatrix* M, NM_types id) {
+int NM_reset_version(NumericsMatrix* M, NM_types id) {
   switch (id) {
     case NM_DENSE: {
       NDV_reset(&(M->version));
@@ -145,8 +147,9 @@ void NM_reset_version(NumericsMatrix* M, NM_types id) {
       break;
     }
     default:
-      numerics_error("NM_reset_version", "unknown id");
+      return numerics_error("NM_reset_version", "unknown id");
   }
+  return 0;  
 }
 
 void NM_reset_versions(NumericsMatrix* M) {
@@ -155,7 +158,7 @@ void NM_reset_versions(NumericsMatrix* M) {
   NM_reset_version(M, NM_SPARSE);
 }
 
-static void NM_set_version(NumericsMatrix* M, NM_types id, version_t value) {
+static int NM_set_version(NumericsMatrix* M, NM_types id, version_t value) {
   switch (id) {
     case NM_DENSE: {
       NDV_set_value(&(M->version), value);
@@ -166,13 +169,13 @@ static void NM_set_version(NumericsMatrix* M, NM_types id, version_t value) {
       break;
     }
     case NM_SPARSE: {
-      numerics_error("NM_set_version",
+      return numerics_error("NM_set_version",
                      "cannot set version of sparse matrix, use NSM_set_version");
-      break;
     }
     default:
-      numerics_error("NM_set_version", "unknown id");
+      return numerics_error("NM_set_version", "unknown id");
   }
+  return 0;  
 }
 
 /* internal compare function */
@@ -189,7 +192,7 @@ static version_t NM_max_version(const NumericsMatrix* M) {
   return NM_version(M, NM_latest_id(M));
 }
 
-static void NM_inc_version(NumericsMatrix* M, NM_types id) {
+static int NM_inc_version(NumericsMatrix* M, NM_types id) {
   version_t new_version = NM_max_version(M) + 1;
 
   switch (id) {
@@ -199,16 +202,16 @@ static void NM_inc_version(NumericsMatrix* M, NM_types id) {
       break;
     }
     case NM_SPARSE: {
-      numerics_error("NM_inc_version",
+      return numerics_error("NM_inc_version",
                      "cannot increment version of sparse matrix, use NSM_inc_version instead");
-      break;
     }
     default:
-      numerics_error("NM_inc_version", "unknown storage");
+      return numerics_error("NM_inc_version", "unknown storage");
   }
+  return 0;  
 }
 
-void NM_version_sync(NumericsMatrix* M) {
+int NM_version_sync(NumericsMatrix* M) {
   if (M->matrix2) {
     NSM_version_sync(M->matrix2);
   }
@@ -247,22 +250,23 @@ void NM_version_sync(NumericsMatrix* M) {
           }
           case NSM_UNKNOWN:
           default: {
-            numerics_error("NM_version_sync", "unknown matrix type");
-            break;
+            return numerics_error("NM_version_sync", "unknown matrix type");
           }
         }
       } break;
       case NM_UNKNOWN:
       default: {
-        numerics_error("NM_version_sync", "unknown matrix type");
-        break;
+        return numerics_error("NM_version_sync", "unknown matrix type");
+        
       }
     }
+    return 0;
 #endif
   }
+  return 0;  
 }
 
-void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, double* y) {
+int NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, double* y) {
   assert(A);
   assert(x);
   assert(y);
@@ -291,13 +295,13 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A, double* const x, do
       break;
 
     default:
-      fprintf(stderr,
-              "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown "
-              "storage\n");
+      return numerics_error("NM_prod_mv_3x3",
+			    " vector prod(A,x,y) failed, unknown storage\n");
       exit(EXIT_FAILURE);
   }
 
   NM_version_sync(A);
+  return 0;  
 }
 
 void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
@@ -1011,7 +1015,7 @@ NumericsMatrix* NM_free_not_SBM(NumericsMatrix* m) {
   return NULL;
 }
 
-void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType) {
+int NM_clear_other_storages(NumericsMatrix* M, NM_types storageType) {
   assert(M && "NM_clear, M == NULL");
 
   switch (storageType) {
@@ -1034,11 +1038,12 @@ void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType) {
       break;
     }
     default:
-      numerics_error("NM_clear_other_storages ", "unknown storageType %d for matrix\n",
+      return numerics_error("NM_clear_other_storages ", "unknown storageType %d for matrix\n",
                      M->storageType);
   }
 
   NM_version_sync(M);
+  return 0;  
 }
 
 void NM_dense_display_matlab(double* m, int nRow, int nCol, int lDim) {
@@ -1094,7 +1099,8 @@ void NM_dense_display(double* m, int nRow, int nCol, int lDim) {
     printf("Matrix : NULL\n");
 }
 
-void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold) {
+
+int NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold) {
   int insertion = 0;
   switch (M->storageType) {
     case NM_DENSE: {
@@ -1144,15 +1150,15 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold) {
           break;
         }
         default: {
-          numerics_error("NM_zentry", "unknown origin %d for sparse matrix\n",
+          return numerics_error("NM_zentry", "unknown origin %d for sparse matrix\n",
                          M->matrix2->origin);
-          break;
         }
       }
       break;
     }
     default:
-      numerics_error("NM_zentry  ", "unknown storageType %d for matrix\n", M->storageType);
+      return numerics_error("NM_zentry  ", "unknown storageType %d for matrix\n", M->storageType);
+
   }
   if (insertion) {
     if (i > M->size0 - 1) {
@@ -1164,9 +1170,10 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold) {
   }
 
   NM_version_sync(M);
+  return 0;  
 }
 
-void NM_entry(NumericsMatrix* M, int i, int j, double val) {
+int NM_entry(NumericsMatrix* M, int i, int j, double val) {
   switch (M->storageType) {
     case NM_DENSE: {
       // column major
@@ -1202,15 +1209,15 @@ void NM_entry(NumericsMatrix* M, int i, int j, double val) {
           break;
         }
         default: {
-          numerics_error("NM_entry", "unknown origin %d for sparse matrix\n",
+          return numerics_error("NM_entry", "unknown origin %d for sparse matrix\n",
                          M->matrix2->origin);
-          break;
         }
       }
       break;
     }
     default:
-      numerics_error("NM_entry  ", "unknown storageType %d for matrix\n", M->storageType);
+      return numerics_error("NM_entry  ", "unknown storageType %d for matrix\n", M->storageType);
+
   }
 
   if (i > M->size0 - 1) {
@@ -1221,6 +1228,7 @@ void NM_entry(NumericsMatrix* M, int i, int j, double val) {
   }
 
   NM_version_sync(M);
+  return 0;  
 }
 
 double NM_get_value(const NumericsMatrix* const M, int i, int j) {
@@ -2113,9 +2121,8 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
           break;
         }
         default: {
-          numerics_error("NM_add", "Unsupported storage type %d, exiting!\n", B->storageType);
-          exit(EXIT_FAILURE);
-          break;
+          int error= numerics_error("NM_add", "Unsupported storage type %d, exiting!\n", B->storageType);
+	  return NULL;
         }
       }
       break;
@@ -2136,7 +2143,8 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
       break;
     }
     default: {
-      numerics_error("NM_add:", "unsupported matrix storage %d", A->storageType);
+      int error = numerics_error("NM_add:", "unsupported matrix storage %d", A->storageType);
+      return NULL;
     }
   }
 
@@ -2144,7 +2152,7 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
   return C;
 }
 
-void NM_scal(double alpha, NumericsMatrix* A) {
+int NM_scal(double alpha, NumericsMatrix* A) {
   switch (A->storageType) {
     case NM_DENSE: {
       int nm = A->size0 * A->size1;
@@ -2169,12 +2177,12 @@ void NM_scal(double alpha, NumericsMatrix* A) {
       break;
     }
     default: {
-      numerics_error("NM_scal:", "unsupported matrix storage %d", A->storageType);
+      return numerics_error("NM_scal:", "unsupported matrix storage %d", A->storageType);
     }
   }
 
   NM_version_sync(A);
-  return;
+  return 0;
 }
 
 NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data) {
@@ -2258,7 +2266,8 @@ NumericsMatrix* NM_create(NM_types storageType, int size0, int size1) {
       break;
     default:
       data = NULL;
-      numerics_error("NM_create", "storageType value %d not implemented yet !", storageType);
+      int error =  numerics_error("NM_create", "storageType value %d not implemented yet !", storageType);
+      return NULL;
   }
 
   NM_fill(M, storageType, size0, size1, data);
@@ -2344,8 +2353,8 @@ NumericsMatrix* NM_transpose(NumericsMatrix* A) {
       break;
     }
     default: {
-      numerics_error("NM_to_dense", "Unsupported storage type %d, exiting!\n", A->storageType);
-      exit(EXIT_FAILURE);
+      int error = numerics_error("NM_transpose", "Unsupported storage type %d, exiting!\n", A->storageType);
+      return NULL;
     }
   }
   NM_MPI_copy(A, Atrans);
@@ -2555,8 +2564,7 @@ int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B) {
       break;
     }
     default: {
-      numerics_error("NM_to_dense", "Unsupported storage type %d, exiting!\n", A->storageType);
-      exit(EXIT_FAILURE);
+     return  numerics_error("NM_to_dense", "Unsupported storage type %d, exiting!\n", A->storageType);
     }
   }
   /* invalidations */
@@ -2627,7 +2635,7 @@ void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold) {
   NM_version_sync(A);
 }
 
-void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
+int NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
   assert(A);
   assert(B);
   switch (A->storageType) {
@@ -2646,13 +2654,13 @@ void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
       break;
     }
     default: {
-      numerics_error("NM_version_copy", "unknown id");
-      assert(false);
+      return numerics_error("NM_version_copy", "unknown id");      
     }
   }
+  return 0;  
 }
 
-void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
+int NM_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
   assert(A);
   assert(B);
   int sizeA = A->size0 * A->size1;
@@ -2726,7 +2734,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
       break;
     }
     default:
-      numerics_error("NM_copy", "The type of the source matrix is unknown.");
+      return numerics_error("NM_copy", "The type of the source matrix is unknown.");
   }
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
@@ -2738,6 +2746,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
     B->destructible = B;
   } else {
     /* A is preserved, so B must be preserved */
+    
     /* assert(!NM_destructible(B));  VA. 22-09-2020 I do not understand B must be destructible.
      * It the case by default if B is created with NM_new */
     NM_preserve(B);
@@ -2747,6 +2756,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
   assert(NM_max_version(B) == NM_max_version(A));
 
   NM_version_sync(B);
+  return 0;  
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A) {
@@ -3003,8 +3013,8 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
         break;
       }
       case NSM_HALF_TRIPLET: {
-        numerics_error("NM_csc", "cannot get csc from half triplet");
-        break;
+        int error = numerics_error("NM_csc", "cannot get csc from half triplet");
+        return NULL;
       }
       default: {
         NSM_UNKNOWN_ERR("NM_csc", A->matrix2->origin);
@@ -3071,8 +3081,8 @@ CSparseMatrix* NM_csr(NumericsMatrix* A) {
         break;
       }
       case NSM_HALF_TRIPLET: {
-        numerics_error("NM_csr", "cannot get csr from half triplet");
-        break;
+         int error =numerics_error("NM_csr", "cannot get csr from half triplet");
+	 return NULL;
       }
       default: {
         NSM_UNKNOWN_ERR("NM_csr", A->matrix2->origin);
@@ -3148,7 +3158,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double* x, const doub
 /* Insert the submatrix B into the matrix A on the position defined in
  * (start_i, start_j) position.
  */
-void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned int start_i,
+int NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned int start_i,
                const unsigned int start_j) {
   DEBUG_BEGIN("NM_insert\n");
 
@@ -3171,7 +3181,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
     /* version managed in NM_copy */
     NM_copy(B, A);
     DEBUG_END("NM_insert\n");
-    return;
+    return 0;
   }
   /* DEBUG_PRINTF("NM_insert -- A->storageType = %i\n", A->storageType); */
   /* check the case when A is sparse block matrix */
@@ -3193,7 +3203,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
           break;
         }
         default: {
-          numerics_error("NM_insert", "unknown origin %d for matrix A\n", A->matrix2->origin);
+          return numerics_error("NM_insert", "unknown origin %d for matrix A\n", A->matrix2->origin);
         }
       }
       A->matrix2->origin = NSM_TRIPLET;
@@ -3203,7 +3213,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
       break;
     }
     default: {
-      numerics_error("NM_insert", "unknown storageType %d for numerics matrix A\n",
+      return numerics_error("NM_insert", "unknown storageType %d for numerics matrix A\n",
                      A->storageType);
     }
   }
@@ -3229,7 +3239,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
           break;
         }
         default: {
-          numerics_error("NM_insert", "unknown origin %d for matrix B\n", B->matrix2->origin);
+          return numerics_error("NM_insert", "unknown origin %d for matrix B\n", B->matrix2->origin);
         }
       }
 
@@ -3258,13 +3268,13 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned 
       break;
     }
     default: {
-      numerics_error("NM_insert", "unknown storageType %d for numerics matrix B\n",
+      return numerics_error("NM_insert", "unknown storageType %d for numerics matrix B\n",
                      B->storageType);
     }
   }
   DEBUG_END("NM_insert\n");
   NM_version_sync(A);
-  return;
+  return 0;
 }
 
 NumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B) {
@@ -3826,11 +3836,10 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
     } else if ((B->storageType == NM_SPARSE) || (B->storageType == NM_SPARSE_BLOCK)) {
       switch (A->storageType) {
         case NM_DENSE: {
-          numerics_error(
+          return numerics_error(
               "NM_LU_solve_matrix_rhs",
               "Solving Linear system with a dense matrix and a sparse matrix rhs is not "
               "implemented since it requires to copy the rhs into dense matrix.");
-          break;
         }
 
         case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
@@ -5205,6 +5214,7 @@ void NM_compute_values_sha1(NumericsMatrix* A, unsigned char* digest) {
     default: {
       numerics_error("NM_compute_values_sha1", "Unsupported matrix type %d in %s",
                      A->storageType);
+      return;
     }
   }
 }
@@ -5251,7 +5261,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao) {
 #ifdef FACTORIZATION_DEBUG
     if (NM_internalData(Ao)->values_sha1_count > 0) {
       if (NM_check_values_sha1(Ao)) {
-        numerics_error("NM_Cholesky_factorize", "this matrix is already factorized");
+        return numerics_error("NM_Cholesky_factorize", "this matrix is already factorized");
       }
     }
 
@@ -5513,11 +5523,10 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
     } else if ((B->storageType == NM_SPARSE) || (B->storageType == NM_SPARSE_BLOCK)) {
       switch (A->storageType) {
         case NM_DENSE: {
-          numerics_error(
+          return numerics_error(
               "NM_Cholesky_solve_matrix_rhs",
               "Solving Linear system with a dense matrix and a sparse matrix rhs is not "
               "implemented since it requires to copy the rhs into dense matrix.");
-          break;
         }
 
         case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
@@ -5614,7 +5623,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao) {
 #ifdef FACTORIZATION_DEBUG
     if (NM_internalData(Ao)->values_sha1_count > 0) {
       if (NM_check_values_sha1(Ao)) {
-        numerics_error("NM_LDLT_factorize", "this matrix is already factorized");
+        return numerics_error("NM_LDLT_factorize", "this matrix is already factorized");
       }
     }
 
