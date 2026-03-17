@@ -186,7 +186,7 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc) {
 
   return csr;
 #else
-  
+
   // Ugly
   CSparseMatrix* triplet = NM_csc_to_triplet(csc);
   CSparseMatrix* csr = NM_triplet_to_csr(triplet);

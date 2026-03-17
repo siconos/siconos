@@ -2262,12 +2262,14 @@ int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix
   for (unsigned int i = 0; i < M->filled1 - 1; i++) {
     size_t numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
     if (numberofblockperrow != 1) {
-      CHECK_ARG(0, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block ");
+      CHECK_ARG(
+          0, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block ");
     }
   }
   for (unsigned int i = 0; i < M->filled2; i++) {
     if (M->index2_data[i] != i) {
-      CHECK_ARG(0, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block ");
+      CHECK_ARG(
+          0, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block ");
     }
   }
 
@@ -2895,6 +2897,7 @@ int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
   } */
 
   free(blocks_again);
+  cs_spfree(sparseMatcsr);
 
   return 0;
 }

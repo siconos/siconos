@@ -631,11 +631,28 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
       CS_INT* Mp_ = sparse->p;
       CS_INT* Mi_ = sparse->i;
       double* Mx_ = sparse->x;
-
-      bool block_is_zero = true;
-
-      // Can I use sparse->nz ???
+      
       size_t nnz = 0;
+
+      bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
+
+      for (size_t contact = 0; contact < nc; contact++) {
+        for (size_t i = 0; i < nc; i++) {
+          block_is_zero[i] = true;
+        }
+        // Loop over three consecutive line
+        for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
+          size_t col = Mi_[k] / d;
+          if (block_is_zero[col] == true) {
+            if (Mx_[k] > DBL_EPSILON) {
+              block_is_zero[col] = false;
+              nnz += 1;
+            }
+          }
+        }
+      }
+
+      /* bool block_is_zero = true;
 
       CS_INT* ps = (CS_INT*)malloc(d * sizeof(CS_INT));
 
@@ -657,7 +674,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
 
           if (block_is_zero == false) nnz += 1;
         }
-      }
+      } */
 
       // Initialize sparse storage
       Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
@@ -667,7 +684,29 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+      for (size_t contact = 0; contact < nc; contact++) {
+        Mp[contact + 1] = Mp[contact];
+
+        for (size_t i = 0; i < nc; i++) {
+          block_is_zero[i] = true;
+        }
+
+        // Loop over three consecutive line
+        for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
+          size_t col = Mi_[k] / d;
+          if (block_is_zero[col] == true) {
+            if (Mx_[k] > DBL_EPSILON) {
+              block_is_zero[col] = false;
+              Mp[contact + 1]++;
+              Mi[current_index] = (int64_t)col;
+              Mx[current_index] = 1.;
+              current_index++;
+            }
+          }
+        }
+      }
+
+      /* for (size_t contact_i = 0; contact_i < nc; contact_i++) {
         Mp[contact_i + 1] = Mp[contact_i];
         // Initialize pointers to go trhough lines
         for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
@@ -690,13 +729,15 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
             current_index++;
           }
         }
-      }
+      } */
+
+      free(block_is_zero);
 
       PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
-      free(ps);
+      // free(ps);
       break;
     }
     case NM_SPARSE_BLOCK: {
@@ -929,11 +970,28 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
       CS_INT* Mp_ = sparse->p;
       CS_INT* Mi_ = sparse->i;
       double* Mx_ = sparse->x;
-
-      bool block_is_zero = true;
-
-      // Can I use sparse->nz ???
+      
       size_t nnz = 0;
+
+      bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
+
+      for (size_t contact = 0; contact < nc; contact++) {
+        for (size_t i = 0; i < nc; i++) {
+          block_is_zero[i] = true;
+        }
+        // Loop over three consecutive line
+        for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
+          size_t col = Mi_[k] / d;
+          if (block_is_zero[col] == true) {
+            if (Mx_[k] > DBL_EPSILON) {
+              block_is_zero[col] = false;
+              nnz += 1;
+            }
+          }
+        }
+      }
+
+      /* bool block_is_zero = true;
 
       CS_INT* ps = (CS_INT*)malloc(d * sizeof(CS_INT));
 
@@ -955,7 +1013,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
 
           if (block_is_zero == false) nnz += 1;
         }
-      }
+      } */
 
       // Initialize sparse storage
       Mp = (int64_t*)malloc((nc + 1) * sizeof(int64_t));
@@ -965,7 +1023,29 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
       Mp[0] = 0;
       size_t current_index = 0;
 
-      for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+      for (size_t contact = 0; contact < nc; contact++) {
+        Mp[contact + 1] = Mp[contact];
+
+        for (size_t i = 0; i < nc; i++) {
+          block_is_zero[i] = true;
+        }
+
+        // Loop over three consecutive line
+        for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
+          size_t col = Mi_[k] / d;
+          if (block_is_zero[col] == true) {
+            if (Mx_[k] > DBL_EPSILON) {
+              block_is_zero[col] = false;
+              Mp[contact + 1]++;
+              Mi[current_index] = (int64_t)col;
+              Mx[current_index] = 1.;
+              current_index++;
+            }
+          }
+        }
+      }
+
+      /* for (size_t contact_i = 0; contact_i < nc; contact_i++) {
         Mp[contact_i + 1] = Mp[contact_i];
         // Initialize pointers to go trhough lines
         for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
@@ -988,13 +1068,15 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
             current_index++;
           }
         }
-      }
+      } */
+
+      free(block_is_zero);
 
       PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, (int64_t)nc, (int64_t)nc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
-      free(ps);
+      // free(ps);
       break;
     }
     case NM_SPARSE_BLOCK: {
