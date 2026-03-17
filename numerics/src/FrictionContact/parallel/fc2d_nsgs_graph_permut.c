@@ -767,7 +767,7 @@ static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
 static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
                                 SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc2d_nsgs((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc2d_nsgs_graph_permut((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 

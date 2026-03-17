@@ -8,19 +8,20 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 #include <unistd.h>
+
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "lcp_cst.h"
+#include "numerics_verbose.h"  // for verbose
 #include "siconos_debug.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                       SolverOptions* options) {
@@ -124,11 +125,12 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 
   // double time = omp_get_wtime();
 
-  double *thread_errors = (double *)calloc((size_t)g, sizeof(double));
+  double* thread_errors = (double*)calloc((size_t)g, sizeof(double));
 
   /* Start solving */
-#pragma omp parallel default(none) shared(n, g, itermax, counter, err, flag, block_sizes, \
-                                              start_indexes, M, diag, tol, q, norm_q, w, z, thread_errors,stdout)
+#pragma omp parallel default(none)                                                         \
+    shared(n, g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, \
+               norm_q, w, z, thread_errors, stdout)
   {
     /* Thread number */
     int rank = omp_get_thread_num();
@@ -176,11 +178,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
       /* Blocks after diagonal blocks */
       for (int j_g = rank + 1; j_g < g; j_g++) {
         /* Wait for diagonal block to be computed */
-	while (counter <= (iter - 1) * g + j_g) {
-            #pragma omp flush(counter)
-            // printf("[%d] (before)  Waiting for counter (%d) to be > %d\n", rank, counter, (iter - 1) * g + j_g);
-	    // fflush(stdout);
-	    // sleep(0.5);
+        while (counter <= (iter - 1) * g + j_g) {
+#pragma omp flush(counter)
+          // printf("[%d] (before)  Waiting for counter (%d) to be > %d\n", rank, counter,
+          // (iter - 1) * g + j_g); fflush(stdout); sleep(0.5);
         }
 
         NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_right, 0);
@@ -199,26 +200,25 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
       /* Blocks before diagonal blocks */
       for (int j_g = 0; j_g < rank; j_g++) {
         /* Wait for diagonal block to be computed */
-	while (counter <= iter * g + j_g) {
-            #pragma omp flush(counter)
-	    // printf("[%d] (after) Waiting for counter (%d) to be > %d\n", rank, counter, iter * g + j_g);
-	    // fflush(stdout);
-	    // sleep(0.5); 
+        while (counter <= iter * g + j_g) {
+#pragma omp flush(counter)
+          // printf("[%d] (after) Waiting for counter (%d) to be > %d\n", rank, counter, iter *
+          // g + j_g); fflush(stdout); sleep(0.5);
         }
 
         NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_left, 0);
       }
 
       /* Reset error when first group is back */
-      //if (rank == 0) {
-      //  err = 0.;
-      //}
+      // if (rank == 0) {
+      //   err = 0.;
+      // }
 
       // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
 
       if (stopping == 1) {
-	      // printf("[%d] Entering flag == 0 region", rank);
-	      // fflush(stdout);
+        // printf("[%d] Entering flag == 0 region", rank);
+        // fflush(stdout);
         /* Last update of w and error, without
         updating z so that w = Mz + q when we exit the while loop */
 
@@ -229,7 +229,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
           NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right,
                                         0);
           w[i] += t_right[i - start_i];
-          
+
           local_err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
           // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, z, 1) -
           // q[i]);
@@ -248,7 +248,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 
           /* Update error between z_{iter} and w_{iter} */
           // #pragma omp atomic update
-	  local_err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
+          local_err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
 
           /* Compute z_{iter + 1} */
           z[i] = -(t_right[i - start_i] + t_left[i - start_i]) * diag[i];
@@ -263,8 +263,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
       /* Last thread: z_{iter+1} is fully computed
       check if error is good */
       if (rank == g - 1) {
-	double total_err = 0.;
-	for (int k = 0; k < g; k++) total_err += thread_errors[k];
+        double total_err = 0.;
+        for (int k = 0; k < g; k++) total_err += thread_errors[k];
         /* CHECK IF W_i = Q_i + M_ij Z_j*/
         /* for (int i = 0; i < n; i++)
           printf("[%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, old_z, 1) -
@@ -272,15 +272,15 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 
         total_err = sqrt(total_err) / norm_q;
         // err /= norm_q;
-	err = total_err;
-	// printf("err = %e\n", err);
-	// fflush(stdout);
+        err = total_err;
+        // printf("err = %e\n", err);
+        // fflush(stdout);
         /* If flag is 0, the last thread already did its last iteration
         so we can update the second flag to stop this thread */
         if (total_err < tol) {
-		#pragma omp atomic write
-		flag = 0;
-	}
+#pragma omp atomic write
+          flag = 0;
+        }
       }
 
       iter += 1;
@@ -290,9 +290,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
       counter += 1;
       // printf("[%d] Increased counter to %d\n", rank, counter);
 
-
       // sleep(1);
-
     }
 
     free(t_right);
@@ -346,7 +344,7 @@ static int lcp_pgs_init_wrap(void* problem, SolverOptions* options) {
 
 static int lcp_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_pgs((LinearComplementarityProblem*)problem, z, w, &info, options);
+  lcp_pgs_parallel((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
@@ -356,12 +354,9 @@ static void lcp_pgs_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_LCP_PGS_PARALLEL, "SICONOS_LCP_PGS_PARALLEL",
-                "SICONOS_LCP_PGS_PARALLEL",
-                lcp_pgs_init_wrap,
-                lcp_pgs_solve_wrap,
-                lcp_pgs_free_wrap,
-                NULL,  /* error function */
-                lcp_pgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0)     /* is_local_solver */
+                "SICONOS_LCP_PGS_PARALLEL", lcp_pgs_init_wrap, lcp_pgs_solve_wrap,
+                lcp_pgs_free_wrap, NULL, /* error function */
+                lcp_pgs_set_default,     /* set_default */
+                1000,                    /* default_max_iter */
+                1e-6,                    /* default_tol */
+                0)                       /* is_local_solver */

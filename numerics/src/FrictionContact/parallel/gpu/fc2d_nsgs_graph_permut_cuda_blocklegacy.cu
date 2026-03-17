@@ -38,8 +38,8 @@
 #include "op3x3.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -833,10 +833,11 @@ static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction,
-                                double* velocity, SolverOptions* options) {
+static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
+                                SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc2d_nsgs((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc2d_nsgs_graph_permut_cuda_blocklegacy((FrictionContactProblem*)problem, reaction, velocity,
+                                          &info, options);
   return info;
 }
 
@@ -846,13 +847,12 @@ static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY, "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY",
+REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY,
+                "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY",
                 "GPU implementation of FC2D_NSGS (uses legacy API for block format)",
-                fc2d_nsgs_init_wrap,
-                fc2d_nsgs_solve_wrap,
-                fc2d_nsgs_free_wrap,
-                NULL,  /* error function */
-                fc2d_nsgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0);     /* is_local_solver */
+                fc2d_nsgs_init_wrap, fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap,
+                NULL,                  /* error function */
+                fc2d_nsgs_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-4,                  /* default_tol */
+                0);                    /* is_local_solver */

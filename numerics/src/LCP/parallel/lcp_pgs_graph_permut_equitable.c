@@ -8,26 +8,24 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
-#include "siconos_debug.h"  
-
 #include "graph_tools.h"
+#include "lcp_cst.h"
+#include "numerics_verbose.h"  // for verbose
+#include "siconos_debug.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                                    SolverOptions *options) {
-
-  NumericsMatrix *M = problem->M;
-  double *q = problem->q;
+void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, double* z,
+                                    double* w, int* info, SolverOptions* options) {
+  NumericsMatrix* M = problem->M;
+  double* q = problem->q;
 
   assert(M);
   assert(q);
@@ -44,7 +42,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Precompute all 1 / M_{i,i} */
-  double *diag = (double *)malloc((size_t)n * sizeof(double));
+  double* diag = (double*)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
 
   /* Check if diagonal has a zero */
@@ -55,10 +53,11 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   /* Graph coloring + permutation */
   int err_not_symmetric;
   size_t n_colors = 0;
-  size_t *sum_sizes = NULL;
-  size_t *inv_permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
-  
-  err_not_symmetric = color_graph_permut_equitable(n, M, &n_colors, &sum_sizes, inv_permutation);
+  size_t* sum_sizes = NULL;
+  size_t* inv_permutation = (size_t*)malloc((size_t)n * sizeof(size_t));
+
+  err_not_symmetric =
+      color_graph_permut_equitable(n, M, &n_colors, &sum_sizes, inv_permutation);
 
   /* Matrix not symmetric */
   if (err_not_symmetric == 1) {
@@ -75,7 +74,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   }
   printf("]\n"); */
 
-  size_t *permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
+  size_t* permutation = (size_t*)malloc((size_t)n * sizeof(size_t));
   for (size_t i = 0; i < (size_t)n; i++) {
     permutation[inv_permutation[i]] = i;
   }
@@ -95,7 +94,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   printf("]\n"); */
 
   /* TO CHECK COLORING
-  
+
   CSparseMatrix *sparse;
   if (M->matrix2->origin == NSM_CSR)
   {
@@ -118,13 +117,13 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
     {
       if (Mi[p] == row) printf("Same vertex\n");
       else if (colors[row] == colors[Mi[p]]) printf("ERROR: %d %d\n", row, Mi[p]);
-      
+
     }
 
   } */
 
   /* 2-norm of q, to normalize error */
-  double norm_q = cblas_dnrm2(n, q, 1); 
+  double norm_q = cblas_dnrm2(n, q, 1);
   if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
 
   /* Solver variables */
@@ -134,21 +133,20 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   double zi;
   double right = 0.;
   size_t i, row;
-  double *lefts = (double *)malloc((size_t)n * sizeof(double));
+  double* lefts = (double*)malloc((size_t)n * sizeof(double));
   int is_last = 0;
 
   /* Start solving */
   while ((iter < itermax) && (is_last == 0)) {
-
     if (err < tol) {
       is_last = 1;
     }
 
     err = 0.;
-    
-    for (size_t color = 0; color < n_colors; color++) {
 
-      #pragma omp parallel for reduction(+:err) default(none) private(zi, right, i, row) shared(q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
+    for (size_t color = 0; color < n_colors; color++) {
+#pragma omp parallel for reduction(+ : err) default(none) private(zi, right, i, row) shared( \
+        q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
       for (size_t i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
         row = inv_permutation[i];
         right = q[row];
@@ -158,7 +156,8 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
 
         lefts[row] = 0.;
 
-        NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1], M, permutation, z, &lefts[row], &right, false);
+        NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1], M,
+                          permutation, z, &lefts[row], &right, false);
 
         w[row] += right + z[row] / diag[row];
 
@@ -167,7 +166,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
         /* If err < tol, do not execute this (= do not update z)
            So that we have w = Mz + q when we exit the loop */
         if (is_last == 0) {
-          zi = lefts[row] + right;      
+          zi = lefts[row] + right;
 
           DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
           zi = -(zi)*diag[row];
@@ -190,7 +189,6 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
     }
 
     iter += 1;
-
   }
 
   // time = omp_get_wtime() - time;
@@ -218,7 +216,6 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
   free(permutation);
   free(diag);
   free(lefts);
-
 }
 
 static void lcp_pgs_set_default(SolverOptions* options) {
@@ -240,7 +237,7 @@ static int lcp_pgs_init_wrap(void* problem, SolverOptions* options) {
 
 static int lcp_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_pgs((LinearComplementarityProblem*)problem, z, w, &info, options);
+  lcp_pgs_graph_permut_equitable((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
@@ -249,13 +246,11 @@ static void lcp_pgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE, "SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE",
+REGISTER_SOLVER(SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE,
                 "SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE",
-                lcp_pgs_init_wrap,
-                lcp_pgs_solve_wrap,
-                lcp_pgs_free_wrap,
-                NULL,  /* error function */
-                lcp_pgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0)     /* is_local_solver */
+                "SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE", lcp_pgs_init_wrap,
+                lcp_pgs_solve_wrap, lcp_pgs_free_wrap, NULL, /* error function */
+                lcp_pgs_set_default,                         /* set_default */
+                1000,                                        /* default_max_iter */
+                1e-6,                                        /* default_tol */
+                0)                                           /* is_local_solver */
