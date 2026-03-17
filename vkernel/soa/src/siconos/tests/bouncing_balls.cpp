@@ -76,8 +76,8 @@ int main(int argc, char* argv[])
   auto relation_b = storage::add<config::relation>(data);
   relation_f.h_matrix() << 1., 0., 0., 0., 1., -radius;
   relation_b.h_matrix() << -1., 0., 0., 0., 1., -radius;
-  relation_f.b() = -radius;
-  relation_b.b() = -2 * radius;
+  relation_f.b()(0) = -radius;
+  relation_b.b()(0) = -2 * radius;
 
   // -- nslaw --
   double e = 0.9;

@@ -121,7 +121,24 @@ struct topology : item {
       prop<"nds">(inter) = 2;
 
       prop<"ds1">(inter) = ds1;
-      prop<"dds2">(inter) = ds2;
+      prop<"ds2">(inter) = ds2;
+
+      return inter;
+    };
+
+    template <match::handle<dsystem> Hdds>
+    decltype(auto) link(Hdds ds)
+    {
+      auto &data = self()->data();
+
+      auto inter = storage::add<dinteraction>(data);
+
+      attr<"y">(inter).setZero();
+      attr<"ydot">(inter).setZero();
+      attr<"lambda">(inter).setZero();
+
+      prop<"nds">(inter) = 1;
+      prop<"ds2">(inter) = ds;
 
       return inter;
     };

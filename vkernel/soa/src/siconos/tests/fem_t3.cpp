@@ -1,9 +1,17 @@
 
+
+#include <FENode.hpp>
+#include <FemTools.hpp>
+#include <FiniteElementModel.hpp>
+#include <Material.hpp>
+#include <Mesh.hpp>
+#include <MeshUtils.hpp>
+
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-
 #include "siconos/model/fem.hpp"
 #include "siconos/siconos.hpp"
+#include "siconos/storage/handle.hpp"
 #include "siconos/utils/print.hpp"
 
 namespace siconos::config {
@@ -11,17 +19,17 @@ using fem = model::finite_element_linear_tids;
 using fem_ds = model::rt_lagrangian_ds;
 using material = model::material;
 using ball = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<lcp>;
+struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
 using nslaw = model::newton_impact;
-using relation = model::lagrangian_r<nslaw::size>;
-using interaction = simul::interaction<nslaw, relation>;
-using fem_interaction = simul::rt_interaction<nslaw, relation>;
-using topo =
-    simul::topology<ball, interaction, fem_ds, fem_interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
-using simulation = simul::time_stepping<td, osi, osnspb>;
+struct relation : model::lagrangian_r<nslaw::size> {};
+struct rt_relation : model::rt_lagrangian_r {};
+struct interaction : simul::interaction<nslaw, relation> {};
+struct fem_interaction : simul::rt_interaction<nslaw, rt_relation> {};
+struct topo : simul::topology<ball, interaction, fem_ds, fem_interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
+struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 using params = map<iparam<"dof", 3>>;
 
@@ -31,74 +39,173 @@ struct make
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-              storage::assembled_diagonal<
-                storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+              storage::assembled_diagonal<storage::attr_t<
+                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
+};
 
 }  // namespace siconos::config
 
 int main(int args, char* argv[])
 {
-  using namespace siconos;
-  using namespace mechanics::fem;
-
-  using Matrix = siconos::algebra::SiconosMatrix;
-  using Vector = siconos::algebra::SiconosVector;
-
-  auto gmsh_filename = "./data/square_200.msh";
-
-  auto mesh = createMeshFromGMSH2(gmsh_filename);
-
-  writeMeshforPython(mesh);
-
   double Ly = 1.0;
-  int bulk_material_tag = 1;
-  int boundary_condition_tag = 2;
-  int applied_force_tag = 3;
-  double density = 7800.;
+  //  std::shared_ptr<Mesh> mesh = create2dMesh2x1();
+  //  std::shared_ptr<Mesh> mesh = create2dMeshnxm(50, 15 , 3., Ly);
+  // string gmsh_filename = "./mesh_data/triangle_felippa.msh";
+  // string gmsh_filename = "./mesh_data/triangle_reference.msh";
+  // string gmsh_filename = "./mesh_data/square_6.msh";
+  auto gmsh_filename = "./mesh_data/square_200.msh";
+  // string gmsh_filename = "./mesh_data/square_2720.msh";
 
-  auto data = config::make();
+  // Applied forces
+  siconos::algebra::SiconosVector nodal_forces{2};
+  nodal_forces << 0., -1e7;
+  // Boundary Conditions
+  std::vector<int> node_dof_index(2);
+  node_dof_index[0] = 0;
+  node_dof_index[1] = 1;
 
-  auto mat1 = storage::add<config::material>(data);
-  mat1.instance().reset(new Material(density, 210e9, 1 / 3.));
+  siconos::mechanics::fem::Tags tags;
+  tags[siconos::mechanics::fem::MeshTags::bulk_material] = 1;
+  tags[siconos::mechanics::fem::MeshTags::boundary_conditions] = 2;
+  tags[siconos::mechanics::fem::MeshTags::applied_forces] = 3;
 
-  std::map<unsigned int, std::shared_ptr<Material>> materials = {
-      {bulk_material_tag, mat1.instance()}};
+  siconos::mechanics::fem::Material mat{7800, 210e9, 1. / 3};
 
-  auto fe_solid = storage::add<config::fem>(data);
-  fe_solid.instance().reset(new FiniteElementLinearTIDS(
-      mesh, materials));
-  auto fe_model = fe_solid.instance()->FEModel();
+  auto FEsolid = siconos::mechanics::fem::build_dynamicalsystem_from_gmsh(
+      gmsh_filename, tags, mat, nodal_forces, node_dof_index);
 
-  auto nodal_forces = std::make_shared<Vector>(2);
-  nodal_forces->setZero();
-  (*nodal_forces)(1) = -1e7;
-  fe_solid.instance()->applyNodalForces(applied_force_tag, nodal_forces);
+  double t0 = 0;     // initial computation time
+  double T = 1e-02;  // final computation time
+  auto solid =
+      std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
+  // add the dynamical system in the non smooth dynamical system
+  solid->insertDynamicalSystem(FEsolid);
+  // Contact Conditions
+  auto femodel = FEsolid->FEModel();
+  double e = 0.0;
+  auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
+  siconos::algebra::SiconosVector initial_gap{1};
+  initial_gap << Ly * 5e-4;
+  std::vector<siconos::algebra::SiconosDenseMatrix> Hv;
 
-  auto node_dof_index = std::make_shared<std::vector<int>>(0);
-  node_dof_index->push_back(0);
-  node_dof_index->push_back(1);
+  namespace storage = siconos::storage;
+  namespace config = siconos::config;
+  using storage::handle;
 
-  fe_solid.instance()->applyDirichletBoundaryConditions(
-      boundary_condition_tag, node_dof_index);
-  //  fe_solid.instance()->boundaryConditions()->display();
+  auto data = siconos::config::make();
+  handle fe_solid = storage::add<config::fem_ds>(data);
+  handle soa_nslaw = storage::add<config::nslaw>(data);
+  soa_nslaw.e() = e;
 
-  double t0 = 0;       // initial computation time
-  double T = 1e-02;    // final computation time
+  // -- one step integrator + time discretisation + one step nonsmooth
+  // -- problem + simulation
+  handle simul = storage::add<config::simulation>(data);
+
+  for (auto node : femodel->nodes()) {
+    if (fabs(node->y()) <= 1e-16 and fabs(node->x()) >= 1e-16) {
+      std::cout << "contact node number : " << node->num() << " " << node->y()
+                << "\n";
+      auto idx_y = node->global_dof_index()[1];
+      Hv.emplace_back(1, FEsolid->dimension());
+      Hv.back().setZero();
+      Hv.back()(0, idx_y) = 1.0;
+
+      handle rt_rel = storage::add<config::rt_relation>(data);
+      storage::attr<"h_matrix">(rt_rel) = Hv.back();  // Copy H matrix from AOS
+      storage::attr<"b">(rt_rel) = initial_gap;        // Copy gap/e vector from AOS
+
+//      handle rt_inter = storage::add<config::fem_interaction>(data);
+//      rt_inter.nslaw() = soa_nslaw;
+//      rt_inter.relation() = rt_rel;
+
+      auto topo = simul.topology();
+      topo.link(fe_solid);
+    }
+  }
+
+
+
+  const auto& massMatrix = FEsolid->mass();
+  const auto& stiffnessMatrix = FEsolid->stiffnessMatrix();
+
+  // Print dimensions
+  std::cout << "Mass matrix size: " << massMatrix.rows() << " x "
+            << massMatrix.cols() << std::endl;
+  std::cout << "Stiffness matrix size: " << stiffnessMatrix.rows() << " x "
+            << stiffnessMatrix.cols() << std::endl;
+
+  fe_solid.mass_matrix() = massMatrix;
+  fe_solid.k_matrix() = stiffnessMatrix;
+
+  // ------------------
+  // --- Simulation ---
+  // ------------------
   double h = 1e-05;    // time step
   double theta = 1.0;  // theta for MoreauJeanOSI integrator
 
-  /*------------------------------------------------- Contact Conditions  */
-  double e = 0.0;
+  int N = ceil((T - t0) / h);  // Number of time steps
 
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
+  // --- Get the values to be plotted ---
+  // -> saved in a matrix dataPlot
+  siconos::algebra::Index outputSize = 6;
+  siconos::algebra::SiconosDenseMatrix dataPlot(N + 1, outputSize);
 
-  // Create the vector with the size only
-  auto initial_gap = std::make_shared<Vector>(1);
+  /// OLD AOS CODE
+  // SOA/vkernel style computation using handles
+  // SOA/vkernel style computation using handles
+  simul.initialize();
 
-  // Set the value using the provided value
-  (*initial_gap)(0) = Ly * 5e-4;
+  // Access initial state at step 0
+  auto q = storage::attr<"q">(fe_solid, 0);
+  auto v = storage::attr<"velocity">(fe_solid, 0);
+  auto dim = q.size();  // Get DOF dimension from state vector
 
-  auto inter = storage::add<config::fem_interaction>(data);
+  dataPlot(0, 0) = simul.time_discretization().t0();
+  dataPlot(0, 1) = q(dim - 1);
+  dataPlot(0, 2) = v(dim - 1);
+  dataPlot(0, 3) = 0.0;  // Initial impulse
+  dataPlot(0, 4) = q(169);
+  dataPlot(0, 5) = v(169);
 
+  auto filename = siconos::mechanics::fem::prepareWriteDisplacementforPython(
+      "T3_square_200.ref");
+  auto mesh = femodel->mesh();
+  siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q,
+                                                      filename);
+  // --- Time loop ---
+  std::cout << "====> Start computation ... \n";
+  int k = 1;
+  auto start = std::chrono::system_clock::now();
+  while (simul.has_next_event()) {
+    // compute_one_step returns the number of involved dynamical systems
+    uint ninvds = simul.compute_one_step();
+
+    auto step = simul.current_step();
+
+    // Access current state from SOA storage
+    auto q_current = storage::attr<"q">(fe_solid, step);
+    auto v_current = storage::attr<"velocity">(fe_solid, step);
+
+    // Get reaction impulse from assembled vectors only if there are active
+    // interactions
+    double p_val = 0.0;
+    if (ninvds > 0) {
+      handle osi = simul.one_step_integrator();
+      p_val = get_vector(osi.lambda_vector_assembled(), 0)(0);
+    }
+
+    dataPlot(k, 0) = step * simul.time_step();
+    dataPlot(k, 1) = q_current(dim - 1);
+    dataPlot(k, 2) = v_current(dim - 1);
+    dataPlot(k, 3) = p_val;
+    dataPlot(k, 4) = q_current(169);
+    dataPlot(k, 5) = v_current(169);
+
+    if (k % 1 == 0)
+      siconos::mechanics::fem::writeDisplacementforPython(
+          *mesh, *femodel, q_current, filename);
+
+    k++;
+    siconos::tools::progressBar((double)k / N);
+  }
 }

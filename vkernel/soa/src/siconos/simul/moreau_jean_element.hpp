@@ -459,6 +459,8 @@ struct moreau_jean_element : item {
 
       using env = typename info_t::env;
       using indice = typename env::indice;
+      using scalar = typename env::scalar;
+      using vector = typename env::template vector<scalar, nslaw_size_t{}.value>;
 
       auto &ys = storage::attr_values<y>(data, step + 1);
       auto &ydots = storage::attr_values<ydot>(data, step + 1);
@@ -492,12 +494,12 @@ struct moreau_jean_element : item {
                   return real_relation.b();
                 },
                 // no b() present
-                [](auto) { return 0.; }));
+                [](auto) { vector b; b(0)=0.; return b;}));
         // on normal component
         // std::cout << "y:" << y[0] << " ydot:" << ydot[0]
         //           << "ACTIVATION:" << (y + gamma_v * h * ydot)(0)
         //           << std::endl;
-        activation = ((y + gamma_v * h * ydot)(0) + b <=
+        activation = ((y + gamma_v * h * ydot)(0) + b(0) <=
                       self()->constraint_activation_threshold());
 
         if (activation) {
