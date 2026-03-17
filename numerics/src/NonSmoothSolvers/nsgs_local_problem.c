@@ -210,15 +210,15 @@ const NSGSLocalProblemOps* nsgs_rfc3d_local_ops(void) {
   return &rfc3d_ops;
 }
 
-static const NSGSLocalProblemOps mc2d_ops = {
+static const NSGSLocalProblemOps plasticity_2d_ops = {
   .update = default_update,
   .extract = default_extract,
   .solve = NULL,
-  .type = NSGS_LP_MC2D,
+  .type = NSGS_LP_PLASTICITY_2D,
   .dimension = 2,
   .default_solver = "PROJECTION"
 };
 
-const NSGSLocalProblemOps* nsgs_mc2d_local_ops(void) {
-  return &mc2d_ops;
+const NSGSLocalProblemOps* nsgs_plasticity_2d_local_ops(void) {
+  return &plasticity_2d_ops;
 }

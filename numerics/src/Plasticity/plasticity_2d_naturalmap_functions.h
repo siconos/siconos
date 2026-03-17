@@ -15,26 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROLLING_FRICTION_naturalmap_functions_H
-#define ROLLING_FRICTION_naturalmap_functions_H
+#ifndef PLASTICITY2D_naturalmap_functions_H
+#define PLASTICITY2D_naturalmap_functions_H
 
-/*!\file rolling_naturalmap_functions.h
+/*!\file fc3d_AlartCurnier_functions.h
 
   Typedef and functions declarations related to naturalmap map
-  formulation for rolling friction contact problems.
+  formulation for Mohr Coulomb 2D contact problems.
 
 
  */
-#include "NumericsFwd.h"    // for Plasticity2DProblem
+#include "NumericsFwd.h"    // for PlasticityProblem
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
-void rolling_friction_3D_computeNaturalMap(double reaction[5], double velocity[5], double mu,
-                                           double mur, double rho[1], double result[5],
-                                           double A[25], double B[25]);
+void plasticity_2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double theta,
+                            double rho[3], double result[3], double A[9], double B[9]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

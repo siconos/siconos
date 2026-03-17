@@ -20,12 +20,12 @@
 
 #include "rolling_naturalmap_functions.h"
 
-/* #include "MohrCoulomb2DProblem.h"         // for MohrCoulomb2D... */
+/* #include "Plasticity2DProblem.h"         // for MohrCoulomb2D... */
 /* #include "NumericsFwd.h"                  // for MohrCoulomb2D... */
 /* #include "NumericsMatrix.h"               // for NumericsMatrix */
-/* #include "mc2d_AlartCurnier_functions.h"  // for mc2d_computeAlartCu... */
-/* #include "mc2d_naturalmap_functions.h" */
-/* #include "mc2d_onecone_nonsmooth_Newton_solvers.h"  // for mc2d_computeNonsmoo... */
+/* #include "plasticity_2d_AlartCurnier_functions.h"  // for plasticity_2d_computeAlartCu... */
+/* #include "plasticity_2d_naturalmap_functions.h" */
+/* #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  // for plasticity_2d_computeNonsmoo... */
 /* #include "numerics_verbose.h"                       // for numerics_printf */
 #include "op5x5.h"  // for SET3, eig_3x3
 #include "projectionOnRollingCone.h"
