@@ -1177,20 +1177,14 @@ void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
  * Same as NM_row_prod_no_diag2 but usable in parallel (does not modify x)
  */
 void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, const double* x, double* y, bool init);
+                                   NumericsMatrix* A, double* x, double* y, bool init);
 
 /**
  * Same as NM_row_prod_no_diag3 but usable in parallel (does not modify x)
  */
 void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, const double* x, double* y, bool init);
+                                   NumericsMatrix* A, double* x, double* y, bool init);
 
-/** Same as NM_row_prod_no_diag2_parallel but allows to choose which column is ignored.
- * Only implemented for SBM format.
- */
-void NM_row_prod_no_diag2_parallel_permut(size_t sizeX, int block_start, size_t row_start,
-                                          unsigned int ignoredCol, NumericsMatrix* A,
-                                          const double* x, double* y, bool init);
 /** Delete absolute values less than tol.
  *
  *  \param[in] A a NumericsMatrix

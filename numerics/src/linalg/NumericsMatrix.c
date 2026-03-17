@@ -344,7 +344,7 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
     CS_INT* Mi = M->i;
     double* Mx = M->x;
 
-    for (size_t i = 0; i < sizeY; ++i) {
+    for (int i = 0; i < sizeY; ++i) {
       for (CS_INT p = Mp[currentRowNumber + i]; p < Mp[currentRowNumber + i + 1]; ++p) {
         y[i] += Mx[p] * x[Mi[p]];
       }
@@ -582,7 +582,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
 }
 
 void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, const double* x, double* y, bool init) {
+                                   NumericsMatrix* A, double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -629,7 +629,8 @@ void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_sta
         y[2] = 0.;
       }
 
-      size_t in = row_start, it = row_start + 1, is = row_start + 2;
+      int64_t in = (int64_t)row_start, it = (int64_t)row_start + 1,
+              is = (int64_t)row_start + 2;
 
       CSparseMatrix* M;
       if (A->matrix2->origin == NSM_CSR) {
@@ -735,7 +736,7 @@ void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, Numer
 }
 
 void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, const double* x, double* y, bool init) {
+                                   NumericsMatrix* A, double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -784,74 +785,7 @@ void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_sta
         M = NM_csc_trans(A);
       }
 
-      CS_INT* Mp = M->p;
-      CS_INT* Mi = M->i;
-      double* Mx = M->x;
-
-      for (size_t i = 0, j = row_start; i < 2; ++i, ++j) {
-        for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
-          if ((Mi[p] != row_start) && (Mi[p] != row_start + 1)) y[i] += Mx[p] * x[Mi[p]];
-        }
-      }
-      break;
-    }
-    default: {
-      fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-
-void NM_row_prod_no_diag2_parallel_permut(size_t sizeX, int block_start, size_t row_start,
-                                          unsigned int ignoredCol, NumericsMatrix* A,
-                                          const double* x, double* y, bool init) {
-  assert(A);
-  assert(x);
-  assert(y);
-  assert((size_t)A->size0 >= 2);
-  assert((size_t)A->size1 == sizeX);
-
-  switch (A->storageType) {
-    case NM_DENSE: {
-      if (init) {
-        y[0] = 0.;
-        y[1] = 0.;
-      }
-      double* M = A->matrix0;
-      assert(M);
-      int incx = sizeX, incy = 1;
-      size_t in = row_start, it = row_start + 1;
-      /* Before diagonal */
-      // Maybe i can use cblas_dgemv() here
-      y[0] += cblas_ddot(row_start, &M[in], incx, x, incy);
-      y[1] += cblas_ddot(row_start, &M[it], incx, x, incy);
-      /* After diagonal */
-      y[0] += cblas_ddot(sizeX - row_start - 2, &M[in + (row_start + 2) * sizeX], incx,
-                         &x[row_start + 2], incy);
-      y[1] += cblas_ddot(sizeX - row_start - 2, &M[it + (row_start + 2) * sizeX], incx,
-                         &x[row_start + 2], incy);
-      break;
-    }
-    case NM_SPARSE_BLOCK: {
-      /* qLocal += rowMB * x
-       * with rowMB the row of blocks of MGlobal which corresponds
-       * to the current contact
-       */
-      SBM_row_prod_no_diag_2x2_permut(sizeX, 2, block_start, ignoredCol, A->matrix1, x, y);
-      break;
-    }
-    case NM_SPARSE: {
-      if (init) {
-        y[0] = 0.;
-        y[1] = 0.;
-      }
-
-      CSparseMatrix* M;
-      if (A->matrix2->origin == NSM_CSR) {
-        M = NM_csr(A);
-      } else {
-        M = NM_csc_trans(A);
-      }
+      int64_t in = (int64_t)row_start, it = (int64_t)row_start + 1;
 
       CS_INT* Mp = M->p;
       CS_INT* Mi = M->i;
@@ -859,7 +793,7 @@ void NM_row_prod_no_diag2_parallel_permut(size_t sizeX, int block_start, size_t 
 
       for (size_t i = 0, j = row_start; i < 2; ++i, ++j) {
         for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
-          if ((Mi[p] != row_start) && (Mi[p] != row_start + 1)) y[i] += Mx[p] * x[Mi[p]];
+          if ((Mi[p] != in) && (Mi[p] != it)) y[i] += Mx[p] * x[Mi[p]];
         }
       }
       break;

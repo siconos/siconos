@@ -2612,7 +2612,6 @@ int SBM_from_dense(int blocksize, size_t n, size_t m, const double* const denseM
 
   size_t R = blocksize;
   size_t C = blocksize;
-  size_t RC = R * C;
 
   // Number of rows and columns of blocks
   size_t n_brow = m / R;  // m = nb of rows
@@ -2722,7 +2721,7 @@ int SBM_from_dense(int blocksize, size_t n, size_t m, const double* const denseM
   return 0;
 }
 
-int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
+int SBM_from_csparse_2(int blocksize, CSparseMatrix* sparseMat,
                        SparseBlockStructuredMatrix* A) {
   assert(sparseMat);
   assert(sparseMat->p);
@@ -2749,7 +2748,6 @@ int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
 
   size_t R = blocksize;
   size_t C = blocksize;
-  size_t RC = R * C;
 
   // Number of rows and columns of blocks
   size_t n_brow = sparseMatcsr->m / R;
@@ -2771,10 +2769,9 @@ int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
     for (size_t r = 0; r < R; r++) {
       size_t i = R * bi + r;  // global row index
       /* Go through row nb i */
-      for (size_t jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1]; jj++) {
+      for (CS_INT jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1]; jj++) {
         size_t j = sparseMatcsr->i[jj];  // global column index
         size_t bj = j / C;               // block index
-        size_t c = j % C;                // local column index
 
         /* If it's the first time we see this block */
         if (blocks[bj] != bi + 1) {
@@ -2840,7 +2837,7 @@ int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
   for (size_t bi = 0; bi < n_brow; bi++) {
     for (size_t r = 0; r < R; r++) {
       size_t i = R * bi + r;  // row index
-      for (size_t jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1];
+      for (CS_INT jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1];
            jj++) {                       // go through row i
         size_t j = sparseMatcsr->i[jj];  // column index
         size_t bj = j / C;
@@ -2859,7 +2856,7 @@ int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
       // printf("\n");
     }
 
-    for (size_t jj = sparseMatcsr->p[R * bi]; jj < sparseMatcsr->p[R * (bi + 1)]; jj++) {
+    for (CS_INT jj = sparseMatcsr->p[R * bi]; jj < sparseMatcsr->p[R * (bi + 1)]; jj++) {
       blocks_again[sparseMatcsr->i[jj] / C] = NULL;
     }
 

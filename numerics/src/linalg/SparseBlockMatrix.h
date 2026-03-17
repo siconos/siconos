@@ -643,7 +643,7 @@ Copy a Sparse Matrix into a SBM, with fixed blocksize, without big mallocs.
    \param[in,out] outSBM pointer on an empty SparseBlockStructuredMatrix
    \return 0 in ok
 */
-int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
+int SBM_from_csparse_2(int blocksize, CSparseMatrix* sparseMat,
                        SparseBlockStructuredMatrix* A);
 
 /**
