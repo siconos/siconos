@@ -218,21 +218,6 @@ void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem* problem, 
  */
 void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, double* w,
                          int* info, SolverOptions* options);
-
-/** \brief Optimized sequential Projected Gauss-Seidel
- *
- *  \param[in] problem structure that represents the LCP (M, q...)
- *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- *  solution of the problem.
- *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
- *  \param[out] info an integer which returns the termination value:
- *  0 : convergence
- *  1 : iter = itermax
- *  2 : negative diagonal term
- *  \param[in,out] options structure used to define the solver and its parameters.
- */
-void lcp_pgs_opti(LinearComplementarityProblem* problem, double* z, double* w, int* info,
-                  SolverOptions* options);
 #endif
 void lcp_jacobi(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                 SolverOptions* options);

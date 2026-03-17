@@ -28,10 +28,10 @@
 #include "SolverOptions.h"  // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
-#include "numerics_verbose.h"
+#include "lcp_cst.h"  // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_errors.h"
-#include "siconos_debug.h"     // for DEBUG_END, DEBUG_BEGIN
+#include "numerics_verbose.h"
+#include "siconos_debug.h"  // for DEBUG_END, DEBUG_BEGIN
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);
@@ -226,13 +226,6 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
        OUT: iter, error */
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI:
       lcp_pgs_graph_permut_equitable_opti(problem, z, w, &info, options);
-      break;
-    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver
-     * ******/
-    /* IN: itermax, tolerance
-       OUT: iter, error */
-    case SICONOS_LCP_PGS_OPTI:
-      lcp_pgs_opti(problem, z, w, &info, options);
       break;
 #endif
     /****** CPG Solver ******/
