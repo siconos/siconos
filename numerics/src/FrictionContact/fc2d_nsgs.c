@@ -208,25 +208,14 @@ static int determine_convergence_with_full_final(FrictionContactProblem *problem
     double absolute_error = calculateFullErrorFinal(
         problem, options, reaction, velocity, SOLVER_TOL(options), norm_q);
     if (absolute_error > SOLVER_TOL(options)) {
-      if (error < DBL_EPSILON) {
-        /* in this case, the relative error is very small
-           (meaning that the nsgs loop does not
-           improve accuracy).
-           We try to tighten the local solver tolerance */
-        SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100.);
-        numerics_printf(
-            "------- FC2D - NSGS - We modify the local solver tolerance precision to reach "
-            "accuracy to %e",
-            LOCAL_SOLVER_TOL(options->internalSolvers[0]));
-	
-      } else {
+      
         *tolerance = error / absolute_error * SOLVER_TOL(options);
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
             "------- FC2D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
             *tolerance);
-      }
+      
       has_not_converged = 1;
     } else {
       numerics_printf(

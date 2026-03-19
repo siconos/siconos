@@ -119,6 +119,8 @@ PYBIND11_MODULE(modeling, m) {
 
       .def("setTitle", &siconos::modeling::NonSmoothDynamicalSystem::setTitle, "set DS title")
 
+      .def("setTitle", &siconos::modeling::NonSmoothDynamicalSystem::setTitle)
+
       .def("topology", &siconos::modeling::NonSmoothDynamicalSystem::topology,
            "display the topology of the system")
       .def("interaction", &siconos::modeling::NonSmoothDynamicalSystem::interaction,
