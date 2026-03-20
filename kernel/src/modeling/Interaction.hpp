@@ -292,9 +292,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
       const siconos::algebra::blocks::size_type i) const;
 
   /** \return vector of output derivatives */
-  inline const siconos::algebra::blocks::SharedVector y() const {
-    return _y;
-  }
+  inline const siconos::algebra::blocks::SharedVector y() const { return _y; }
 
   /** get y[i], derivative number i of output
    *
@@ -365,10 +363,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \return a siconos::algebra::blocks::SharedVector
    */
-  inline const siconos::algebra::blocks::SharedVector getLambda()
-      const {
-    return _lambda;
-  }
+  inline const siconos::algebra::blocks::SharedVector getLambda() const { return _lambda; }
 
   /** get _lambda[i], derivative number i of input
    *

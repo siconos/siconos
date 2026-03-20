@@ -21,9 +21,18 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include "BodyShapeRecord.hpp"
 #include "Circle.hpp"
+#include "Contact2d3DR.hpp"
+#include "Contact2dR.hpp"
+#include "Contact5DR.hpp"
+#include "ContactR.hpp"
 #include "Disk.hpp"
 #include "InteractionManager.hpp"
+#include "Lagrangian2d2DR.hpp"
+#include "Lagrangian2d3DR.hpp"
+#include "NewtonEuler3DR.hpp"
+#include "NewtonEuler5DR.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -45,117 +54,104 @@ PYBIND11_MODULE(_collision, m) {
   py::module_ bullet_module =
       m.def_submodule("bullet", "submodule bullet for mechanics.collision module");
 
-  py::class_<siconos::collision::SiconosShape,
-             std::shared_ptr<siconos::collision::SiconosShape>>(m, "SiconosShape")
+  py::class_<siconos::collision::SiconosShape, py::smart_holder>(m, "SiconosShape")
       .def("setInsideMargin", &siconos::collision::SiconosShape::setInsideMargin)
       .def("setOutsideMargin", &siconos::collision::SiconosShape::setOutsideMargin);
 
-  py::class_<siconos::collision::SiconosSphere,
-             std::shared_ptr<siconos::collision::SiconosSphere>,
-             siconos::collision::SiconosShape>(m, "SiconosSphere")
+  py::class_<siconos::collision::SiconosSphere, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosSphere")
       .def(py::init<float>(), py::arg("radius"))
       .def("radius", &siconos::collision::SiconosSphere::radius)
       .def("setRadius", &siconos::collision::SiconosSphere::setRadius);
 
-  py::class_<siconos::collision::SiconosBox, std::shared_ptr<siconos::collision::SiconosBox>,
-             siconos::collision::SiconosShape>(m, "SiconosBox")
+  py::class_<siconos::collision::SiconosBox, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosBox")
       .def(py::init<double, double, double>(), py::arg("width"), py::arg("height"),
            py::arg("depth"))
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>>(), py::arg("dimensions"));
 
-  py::class_<siconos::collision::SiconosCylinder,
-             std::shared_ptr<siconos::collision::SiconosCylinder>,
-             siconos::collision::SiconosShape>(m, "SiconosCylinder")
+  py::class_<siconos::collision::SiconosCylinder, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosCylinder")
       .def(py::init<float, float>(), py::arg("radius"), py::arg("length"))
       .def("radius", &siconos::collision::SiconosCylinder::radius)
       .def("setRadius", &siconos::collision::SiconosCylinder::setRadius)
       .def("length", &siconos::collision::SiconosCylinder::length)
       .def("setLength", &siconos::collision::SiconosCylinder::setLength);
 
-  py::class_<siconos::collision::SiconosCone, std::shared_ptr<siconos::collision::SiconosCone>,
-             siconos::collision::SiconosShape>(m, "SiconosCone")
+  py::class_<siconos::collision::SiconosCone, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosCone")
       .def(py::init<float, float>(), py::arg("radius"), py::arg("length"))
       .def("radius", &siconos::collision::SiconosCone::radius)
       .def("setRadius", &siconos::collision::SiconosCone::setRadius)
       .def("length", &siconos::collision::SiconosCone::length)
       .def("setLength", &siconos::collision::SiconosCone::setLength);
 
-  py::class_<siconos::collision::SiconosCapsule,
-             std::shared_ptr<siconos::collision::SiconosCapsule>,
-             siconos::collision::SiconosShape>(m, "SiconosCapsule")
+  py::class_<siconos::collision::SiconosCapsule, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosCapsule")
       .def(py::init<float, float>(), py::arg("radius"), py::arg("length"))
       .def("radius", &siconos::collision::SiconosCapsule::radius)
       .def("setRadius", &siconos::collision::SiconosCapsule::setRadius)
       .def("length", &siconos::collision::SiconosCapsule::length)
       .def("setLength", &siconos::collision::SiconosCapsule::setLength);
 
-  py::class_<siconos::collision::SiconosPlane,
-             std::shared_ptr<siconos::collision::SiconosPlane>,
-             siconos::collision::SiconosShape>(m, "SiconosPlane")
+  py::class_<siconos::collision::SiconosPlane, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosPlane")
       .def(py::init());
 
-  py::class_<siconos::collision::SiconosConvexHull,
-             std::shared_ptr<siconos::collision::SiconosConvexHull>,
-             siconos::collision::SiconosShape>(m, "SiconosConvexHull")
+  py::class_<siconos::collision::SiconosConvexHull, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosConvexHull")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
            py::arg("vertices"));  // TODO : WARNING with vertices argument, it is shard ptr
 
-  py::class_<siconos::collision::SiconosDisk, std::shared_ptr<siconos::collision::SiconosDisk>,
-             siconos::collision::SiconosShape>(m, "SiconosDisk")
+  py::class_<siconos::collision::SiconosDisk, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosDisk")
       .def(py::init<float>(), py::arg("radius"))
       .def("radius", &siconos::collision::SiconosDisk::radius)
       .def("setRadius", &siconos::collision::SiconosDisk::setRadius);
 
-  py::class_<siconos::collision::SiconosBox2d,
-             std::shared_ptr<siconos::collision::SiconosBox2d>,
-             siconos::collision::SiconosShape>(m, "SiconosBox2d")
+  py::class_<siconos::collision::SiconosBox2d, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosBox2d")
       .def(py::init<double, double>(), py::arg("width"), py::arg("height"));
 
-  py::class_<siconos::collision::SiconosConvexHull2d,
-             std::shared_ptr<siconos::collision::SiconosConvexHull2d>,
-             siconos::collision::SiconosShape>(m, "SiconosConvexHull2d")
+  py::class_<siconos::collision::SiconosConvexHull2d, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosConvexHull2d")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
            py::arg("vertices"));  // TODO : WARNING with vertices argument, it is shard ptr
 
-  py::class_<siconos::collision::SiconosContactor,
-             std::shared_ptr<siconos::collision::SiconosContactor>>(m, "SiconosContactor")
+  py::class_<siconos::collision::SiconosContactor, py::smart_holder>(m, "SiconosContactor")
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>>(), py::arg("shape"))
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>,
                     const siconos::algebra::SiconosVector &, int>(),
            py::arg("shape"), py::arg("offset"), py::arg("collision_group") = 0);
 
-  py::class_<siconos::collision::SiconosContactorSet,
-             std::shared_ptr<siconos::collision::SiconosContactorSet>>(m,
-                                                                       "SiconosContactorSet")
+  py::class_<siconos::collision::SiconosContactorSet, py::smart_holder>(m,
+                                                                        "SiconosContactorSet")
       .def(py::init<>())
       .def("append",
            py::overload_cast<std::shared_ptr<siconos::collision::SiconosContactor>>(
                &siconos::collision::SiconosContactorSet::append),
            py::arg("contactor"));
 
-  py::class_<siconos::collision::SiconosMesh, std::shared_ptr<siconos::collision::SiconosMesh>,
-             siconos::collision::SiconosShape>(m, "SiconosMesh")
+  py::class_<siconos::collision::SiconosMesh, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosMesh")
       .def(py::init<std::vector<unsigned int>, Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
            py::keep_alive<1, 2>(), py::arg("indices"), py::arg("vertices"));
 
-  py::class_<siconos::collision::SiconosHeightMap,
-             std::shared_ptr<siconos::collision::SiconosHeightMap>,
-             siconos::collision::SiconosShape>(m, "SiconosHeightMap")
+  py::class_<siconos::collision::SiconosHeightMap, siconos::collision::SiconosShape,
+             py::smart_holder>(m, "SiconosHeightMap")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>, double, double>(),
            py::keep_alive<1, 1>(), py::arg("height_data"), py::arg("length_x"),
            py::arg("length_y"));
 
-  py::class_<siconos::collision::native::SpaceFilter,
-             std::shared_ptr<siconos::collision::native::SpaceFilter>,
-             siconos::simulation::InteractionManager>(m, "SpaceFilter")
+  py::class_<siconos::collision::native::SpaceFilter, siconos::simulation::InteractionManager,
+             py::smart_holder>(m, "SpaceFilter")
       .def(py::init<>())
       .def("setBBoxfactor", &siconos::collision::native::SpaceFilter::setBBoxfactor)
       .def("setCellsize", &siconos::collision::native::SpaceFilter::setCellsize)
       .def("insertLine", &siconos::collision::native::SpaceFilter::insertLine);
 
-  py::class_<siconos::collision::native::bodies::CircularDS,
-             std::shared_ptr<siconos::collision::native::bodies::CircularDS>,
-             siconos::modeling::LagrangianDS>(m, "CircularDS")
+  py::class_<siconos::collision::native::bodies::CircularDS, siconos::modeling::LagrangianDS,
+             py::smart_holder>(m, "CircularDS")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
@@ -163,33 +159,41 @@ PYBIND11_MODULE(_collision, m) {
       .def("getMassValue", &siconos::collision::native::bodies::CircularDS::getMassValue);
 
   py::class_<siconos::collision::native::bodies::Circle,
-             std::shared_ptr<siconos::collision::native::bodies::Circle>,
-             siconos::collision::native::bodies::CircularDS>(m, "Circle")
+             siconos::collision::native::bodies::CircularDS, py::smart_holder>(m, "Circle")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
            py::arg("q0"), py::arg("v0"));
 
   py::class_<siconos::collision::native::bodies::Disk,
-             std::shared_ptr<siconos::collision::native::bodies::Disk>,
-             siconos::collision::native::bodies::CircularDS>(m, "Disk")
+             siconos::collision::native::bodies::CircularDS, py::smart_holder>(m, "Disk")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
            py::arg("q0"), py::arg("v0"));
 
   py::class_<siconos::collision::SiconosCollisionManager,
-             std::shared_ptr<siconos::collision::SiconosCollisionManager>,
-             siconos::simulation::InteractionManager>(m, "SiconosCollisionManager")
+             siconos::simulation::InteractionManager, py::smart_holder>(
+      m, "SiconosCollisionManager")
       .def("insertNonSmoothLaw",
            &siconos::collision::SiconosCollisionManager::insertNonSmoothLaw);
 
-  py::class_<siconos::collision::StaticBody, std::shared_ptr<siconos::collision::StaticBody>>(
-      m, "StaticBody")
-      .def(py::init<>());
+  py::class_<siconos::collision::StaticBody, py::smart_holder>(m, "StaticBody")
+      .def(py::init<>())
+      .def_readonly("number", &siconos::collision::StaticBody::number);
 
-  py::class_<siconos::collision::RigidBodyDS, std::shared_ptr<siconos::collision::RigidBodyDS>,
-             siconos::modeling::NewtonEulerDS>(m, "RigidBodyDS")
+  py::class_<siconos::collision::BodyShapeRecord>(m, "BodyShapeRecord")
+      .def("display", &siconos::collision::BodyShapeRecord::display)
+      .def("__repr__",
+           [](const siconos::collision::BodyShapeRecord &a) {
+             a.display();
+             return "\n";
+           })
+      .def_readonly("staticBody", &siconos::collision::BodyShapeRecord::staticBody)
+      .def_readonly("ds", &siconos::collision::BodyShapeRecord::ds);
+
+  py::class_<siconos::collision::RigidBodyDS, siconos::modeling::NewtonEulerDS,
+             py::smart_holder>(m, "RigidBodyDS")
       //       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector7>,
       //                     Eigen::Ref<siconos::algebra::SiconosVector6>, double,
       //                     Eigen::Ref<siconos::algebra::SiconosMatrix33>>(),
@@ -210,9 +214,8 @@ PYBIND11_MODULE(_collision, m) {
            py::arg("contactors"))
       .def("contactors", &siconos::collision::RigidBodyDS::contactors);
 
-  py::class_<siconos::collision::RigidBody2dDS,
-             std::shared_ptr<siconos::collision::RigidBody2dDS>,
-             siconos::modeling::LagrangianLinearTIDS>(m, "RigidBody2dDS")
+  py::class_<siconos::collision::RigidBody2dDS, siconos::modeling::LagrangianLinearTIDS,
+             py::smart_holder>(m, "RigidBody2dDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, double, double>(),
@@ -226,7 +229,25 @@ PYBIND11_MODULE(_collision, m) {
                              &siconos::collision::RigidBody2dDS::useContactorInertia)
       .def_property_readonly("allowSelfCollide",
                              &siconos::collision::RigidBody2dDS::allowSelfCollide)
-      .def_property_readonly("scalarMass", &siconos::collision::RigidBody2dDS::scalarMass)
+      .def_property_readonly("scalarMass", &siconos::collision::RigidBody2dDS::scalarMass);
 
-      ;
+  py::class_<siconos::collision::ContactR, siconos::modeling::NewtonEuler3DR,
+             py::smart_holder>(m, "ContactR")
+      .def_readonly("bodyShapeRecordA", &siconos::collision::ContactR::bodyShapeRecordA)
+      .def_readonly("bodyShapeRecordB", &siconos::collision::ContactR::bodyShapeRecordB);
+
+  py::class_<siconos::collision::Contact5DR, siconos::modeling::NewtonEuler5DR,
+             py::smart_holder>(m, "Contact5DR")
+      .def_readonly("bodyShapeRecordA", &siconos::collision::Contact5DR::bodyShapeRecordA)
+      .def_readonly("bodyShapeRecordB", &siconos::collision::Contact5DR::bodyShapeRecordB);
+
+  py::class_<siconos::collision::Contact2d3DR, siconos::modeling::Lagrangian2d3DR,
+             py::smart_holder>(m, "Contact2d3DR")
+      .def_readonly("bodyShapeRecordA", &siconos::collision::Contact2d3DR::bodyShapeRecordA)
+      .def_readonly("bodyShapeRecordB", &siconos::collision::Contact2d3DR::bodyShapeRecordB);
+
+  py::class_<siconos::collision::Contact2dR, siconos::modeling::Lagrangian2d2DR,
+             py::smart_holder>(m, "Contact2dR")
+      .def_readonly("bodyShapeRecordA", &siconos::collision::Contact2dR::bodyShapeRecordA)
+      .def_readonly("bodyShapeRecordB", &siconos::collision::Contact2dR::bodyShapeRecordB);
 }

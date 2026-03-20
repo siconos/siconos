@@ -34,7 +34,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+// // PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 void wrap_dynamical_systems(py::module_& m);
 void wrap_nonsmoothlaws(py::module_& m);
@@ -69,7 +69,8 @@ PYBIND11_MODULE(modeling, m) {
   wrap_boundaryconditions(m);
 
   // CLASSES with no Derived classes
-  py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(
+  py::class_<siconos::modeling::Interaction,
+             py::smart_holder>(  // std::shared_ptr<siconos::modeling::Interaction>>(
       m, "Interaction")
       .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothLaw>,
                     std::shared_ptr<siconos::modeling::Relation>>())
@@ -95,8 +96,7 @@ PYBIND11_MODULE(modeling, m) {
   m.def("interactions", &interactions, py::arg("graph"),
         "Return a list of Interaction objects from an InteractionsGraph");
 
-  py::class_<siconos::modeling::NonSmoothDynamicalSystem,
-             std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>>(
+  py::class_<siconos::modeling::NonSmoothDynamicalSystem, py::smart_holder>(
       m, "NonSmoothDynamicalSystem")
       .def(py::init<double, double>())
       .def("insertDynamicalSystem",

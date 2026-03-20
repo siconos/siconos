@@ -28,14 +28,13 @@
 
 namespace py = pybind11;
 
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+// PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 PYBIND11_MODULE(pb11_template, m) {
   // Optional docstring
   m.doc() = "Reference for developpers - How to write a pybind11 wrapper for Siconos";
 
-  py::class_<siconos::internal::devel_model::ClassA,
-             std::shared_ptr<siconos::internal::devel_model::ClassA>>(m, "ClassA")
+  py::class_<siconos::internal::devel_model::ClassA, py::smart_holder>(m, "ClassA")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced

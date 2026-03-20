@@ -53,7 +53,7 @@ py::array_t<double> get_dparam(SolverOptions &options) {
 PYBIND11_MODULE(_numerics, m) {
   m.doc() = "Siconos numerics - Nonsmooth problems solvers toolbox";
 
-  py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
+  py::class_<SolverOptions, py::smart_holder>(m, "SolverOptions")
       .def(py::init<>())
       .def_readwrite("solverId", &SolverOptions::solverId)
       .def_readonly("iSize", &SolverOptions::iSize)
@@ -105,7 +105,8 @@ PYBIND11_MODULE(_numerics, m) {
              SICONOS_IPARAM::SICONOS_IPARAM_PATHSEARCH_STACKSIZE, "Path search stack size")
       .export_values();
 
-  py::enum_<SICONOS_DPARAM>(params, "SICONOS_DPARAM_enum", "Some values for double parameter index")
+  py::enum_<SICONOS_DPARAM>(params, "SICONOS_DPARAM_enum",
+                            "Some values for double parameter index")
       .value("SICONOS_DPARAM_TOL", SICONOS_DPARAM::SICONOS_DPARAM_TOL, "Tolerance parameter")
       .value("SICONOS_DPARAM_RESIDU", SICONOS_DPARAM::SICONOS_DPARAM_RESIDU,
              "Residual parameter")

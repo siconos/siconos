@@ -21,7 +21,6 @@
 #include "SiconosMatrix.hpp"
 
 namespace py = pybind11;
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 using namespace pybind11::literals;  // to use "_a"
 
 /**

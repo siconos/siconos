@@ -30,8 +30,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(_io, m) {
   m.doc() = "Siconos io module";
 
-  py::class_<siconos::io::MechanicsIO, std::shared_ptr<siconos::io::MechanicsIO>>(
-      m, "MechanicsIO")
+  py::class_<siconos::io::MechanicsIO, py::smart_holder>(m, "MechanicsIO")
       .def(py::init<>())
       .def("contactInfo", &siconos::io::MechanicsIO::contactInfo)
       .def("positions", &siconos::io::MechanicsIO::positions, py::return_value_policy::move)

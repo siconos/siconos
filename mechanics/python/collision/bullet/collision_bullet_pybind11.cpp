@@ -23,11 +23,13 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include "BulletR.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosBulletCollisionManager.hpp"
 #include "SiconosBulletOptions.hpp"
 #include "SiconosCollisionQueryResult.hpp"
 #include "SiconosContactor.hpp"
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(_bullet, m) {
@@ -52,8 +54,7 @@ PYBIND11_MODULE(_bullet, m) {
       });
   ;
 
-  py::class_<siconos::collision::bullet::SiconosBulletOptions,
-             std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(
+  py::class_<siconos::collision::bullet::SiconosBulletOptions, py::smart_holder>(
       m, "SiconosBulletOptions")
       .def(py::init<>())
       .def_readwrite("dimension", &siconos::collision::bullet::SiconosBulletOptions::dimension,
@@ -97,7 +98,8 @@ PYBIND11_MODULE(_bullet, m) {
           &siconos::collision::bullet::SiconosBulletOptions::extrapolationCoefficient,
           "Extrapolation coefficient");
 
-  py::class_<siconos::collision::bullet::SiconosBulletStatistics>(m, "SiconosBulletStatistics")
+  py::class_<siconos::collision::bullet::SiconosBulletStatistics, py::smart_holder>(
+      m, "SiconosBulletStatistics")
       .def(py::init<>())  // Constructeur par défaut
       .def_readwrite(
           "new_interactions_created",
@@ -117,8 +119,8 @@ PYBIND11_MODULE(_bullet, m) {
           "Interaction destroyed");
 
   py::class_<siconos::collision::bullet::SiconosBulletCollisionManager,
-             std::shared_ptr<siconos::collision::bullet::SiconosBulletCollisionManager>,
-             siconos::collision::SiconosCollisionManager>(m, "SiconosBulletCollisionManager")
+             siconos::collision::SiconosCollisionManager, py::smart_holder>(
+      m, "SiconosBulletCollisionManager")
       .def(py::init<std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(),
            py::arg("options"))
       .def(py::init<>())
@@ -137,4 +139,7 @@ PYBIND11_MODULE(_bullet, m) {
            &siconos::collision::bullet::SiconosBulletCollisionManager::statistics)
       .def("lineIntersectionQuery",
            &siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery);
+
+  py::class_<siconos::collision::bullet::BulletR, siconos::collision::ContactR,
+             py::smart_holder>(m, "BulletR");
 }

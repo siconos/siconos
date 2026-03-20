@@ -35,9 +35,8 @@ PYBIND11_MODULE(_joints, m) {
   m.doc() = "Siconos mechanics.joints module";
 
   // Base, abstract, class
-  py::class_<siconos::joints::NewtonEulerJointR,
-             std::shared_ptr<siconos::joints::NewtonEulerJointR>,
-             siconos::modeling::NewtonEulerR>(m, "NewtonEulerJointR")
+  py::class_<siconos::joints::NewtonEulerJointR, siconos::modeling::NewtonEulerR,
+             py::smart_holder>(m, "NewtonEulerJointR")
       .def("setAbsolute", &siconos::joints::NewtonEulerJointR::setAbsolute,
            "To set the absolute reference frame for the joint")
       .def("setBasePositions", &siconos::joints::NewtonEulerJointR::setBasePositions,
@@ -71,32 +70,30 @@ PYBIND11_MODULE(_joints, m) {
            py::arg("q2") = std::nullopt, py::arg("y"),
            "to compute the output y = h(q) of the Relation");
 
-  py::class_<siconos::joints::CylindricalJointR,
-             std::shared_ptr<siconos::joints::CylindricalJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "CylindricalJointR")
+  py::class_<siconos::joints::CylindricalJointR, siconos::joints::NewtonEulerJointR,
+             py::smart_holder>(m, "CylindricalJointR")
       .def(py::init<>(), "Default constructor for CylindricalJointR");
 
-  py::class_<siconos::joints::PrismaticJointR,
-             std::shared_ptr<siconos::joints::PrismaticJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "PrismaticJointR")
+  py::class_<siconos::joints::PrismaticJointR, siconos::joints::NewtonEulerJointR,
+             py::smart_holder>(m, "PrismaticJointR")
       .def(py::init<>(), "Default constructor for PrismaticJointR")
       .def("numberOfConstraints", &siconos::joints::PrismaticJointR::numberOfConstraints,
            "To get the number of constraints in the joint");
 
-  py::class_<siconos::joints::FixedJointR, std::shared_ptr<siconos::joints::FixedJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "FixedJointR")
+  py::class_<siconos::joints::FixedJointR, siconos::joints::NewtonEulerJointR,
+             py::smart_holder>(m, "FixedJointR")
       .def(py::init<>(), "Default constructor for FixedJointR");
 
-  py::class_<siconos::joints::KneeJointR, std::shared_ptr<siconos::joints::KneeJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "KneeJointR")
+  py::class_<siconos::joints::KneeJointR, siconos::joints::NewtonEulerJointR,
+             py::smart_holder>(m, "KneeJointR")
       .def(py::init<>(), "Default constructor for KneeJointR");
 
-  py::class_<siconos::joints::PivotJointR, std::shared_ptr<siconos::joints::PivotJointR>,
-             siconos::joints::KneeJointR>(m, "PivotJointR")
+  py::class_<siconos::joints::PivotJointR, siconos::joints::KneeJointR, py::smart_holder>(
+      m, "PivotJointR")
       .def(py::init<>(), "Default constructor for PivotJointR");
 
-  py::class_<siconos::joints::CouplerJointR, std::shared_ptr<siconos::joints::CouplerJointR>,
-             siconos::joints::NewtonEulerJointR>(m, "CouplerJointR")
+  py::class_<siconos::joints::CouplerJointR, siconos::joints::NewtonEulerJointR,
+             py::smart_holder>(m, "CouplerJointR")
       .def(py::init<
                std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
                std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
@@ -107,14 +104,14 @@ PYBIND11_MODULE(_joints, m) {
            py::arg("ratio"), py::arg("refds1") = nullptr, py::arg("ref1_index") = 0,
            py::arg("refds2") = nullptr, py::arg("ref2_index") = 0);
 
-  py::class_<siconos::joints::JointStopR, std::shared_ptr<siconos::joints::JointStopR>,
-             siconos::modeling::NewtonEulerR>(m, "JointStopR")
+  py::class_<siconos::joints::JointStopR, siconos::modeling::NewtonEulerR, py::smart_holder>(
+      m, "JointStopR")
       .def(py::init<std::shared_ptr<siconos::joints::NewtonEulerJointR>, double, bool,
                     siconos::algebra::Index>(),
            py::arg("joint"), py::arg("pos"), py::arg("dir"), py::arg("axis") = 0);
 
-  py::class_<siconos::joints::JointFrictionR, std::shared_ptr<siconos::joints::JointFrictionR>,
-             siconos::modeling::NewtonEulerR>(m, "JointFrictionR")
+  py::class_<siconos::joints::JointFrictionR, siconos::modeling::NewtonEulerR,
+             py::smart_holder>(m, "JointFrictionR")
       .def(py::init<std::shared_ptr<siconos::joints::NewtonEulerJointR>,
                     siconos::algebra::Index>(),
            py::arg("joint"), py::arg("axis"));
