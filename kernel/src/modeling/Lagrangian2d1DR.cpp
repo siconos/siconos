@@ -44,6 +44,7 @@ void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter) {
   }
   jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
       jacobianhOver_q_internal_storage_->data(), 1, qSize);
+  jacobianhOver_q_view_->setZero();
 }
 
 void siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(
@@ -52,25 +53,22 @@ void siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(
       "siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
 
-  double Nx = (*_Nc)(0);
-  double Ny = (*_Nc)(1);
-  double Px = (*_Pc1)(0);
-  double Py = (*_Pc1)(1);
   double G1x = q(0);
   double G1y = q(1);
 
-  jacobianhOver_q_view_->setValue(0, 0, Nx);
-  jacobianhOver_q_view_->setValue(0, 1, Ny);
-  jacobianhOver_q_view_->setValue(0, 2, (G1y - Py) * Nx - (G1x - Px) * Ny);
+  jacobianhOver_q_view_->row(0).segment(0, 2) = nc_;
+
+  (*jacobianhOver_q_view_)(0, 2) =
+      (G1y - contactPoint1_.y()) * nc_.x() - (G1x - contactPoint1_.x()) * nc_.y();
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q(3);
     double G2y = q(4);
 
-    jacobianhOver_q_view_->setValue(0, 3, -Nx);
-    jacobianhOver_q_view_->setValue(0, 4, -Ny);
-    jacobianhOver_q_view_->setValue(0, 5, -((G2y - Py) * Nx - (G2x - Px) * Ny));
+    jacobianhOver_q_view_->row(0).segment(3, 2) = -nc_;
+    (*jacobianhOver_q_view_)(0, 5) =
+        (G2y - contactPoint1_.y()) * nc_.x() - (G2x - contactPoint1_.x()) * nc_.y();
   }
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
   DEBUG_END(
@@ -80,9 +78,9 @@ void siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(
 
 double siconos::modeling::Lagrangian2d1DR::distance() const {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
-  siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
+  siconos::algebra::SiconosVector2 dpc = contactPoint2_ - contactPoint1_;
   DEBUG_END("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
-  return dpc.norm() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (nc_.dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::Lagrangian2d1DR::computeh(
@@ -100,25 +98,11 @@ void siconos::modeling::Lagrangian2d1DR::display() const {
   LagrangianR::display();
 
   std::cout << " _Pc1 :" << std::endl;
-  if (_Pc1)
-    siconos::algebra::print(*_Pc1);
-  else
-    std::cout << " nullptr :" << std::endl;
-
+  siconos::algebra::print(contactPoint1_);
   std::cout << " _Pc2 :" << std::endl;
-  if (_Pc2)
-    siconos::algebra::print(*_Pc2);
-  else
-    std::cout << " nullptr :" << std::endl;
+
+  siconos::algebra::print(contactPoint2_);
 
   std::cout << " _Nc :" << std::endl;
-  if (_Nc)
-    siconos::algebra::print(*_Nc);
-  else
-    std::cout << " nullptr :" << std::endl;
-  std::cout << " _relNc :" << std::endl;
-  if (_relNc)
-    siconos::algebra::print(*_relNc);
-  else
-    std::cout << " nullptr :" << std::endl;
+  siconos::algebra::print(nc_);
 }

@@ -52,7 +52,7 @@ class ContactR : public siconos::modeling::NewtonEuler3DR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Update this contact point information.
@@ -61,9 +61,9 @@ class ContactR : public siconos::modeling::NewtonEuler3DR {
    *  \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
    *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  virtual void updateContactPoints(const siconos::algebra::SiconosVector& pos1,
-                                   const siconos::algebra::SiconosVector& pos2,
-                                   const siconos::algebra::SiconosVector& normal);
+  virtual void updateContactPoints(const siconos::algebra::SiconosVector3& pos1,
+                                   const siconos::algebra::SiconosVector3& pos2,
+                                   const siconos::algebra::SiconosVector3& normal);
 
   virtual void preDelete() {}
 

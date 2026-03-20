@@ -42,9 +42,8 @@ SICONOS_IO_REGISTER(
     (_BVP)(_T)(_author)(_changeLog)(_date)(_description)(_mIsLinear)(_t)(_t0)(_title)(_topology))
 SICONOS_IO_REGISTER(BoundaryCondition, (prescribedVelocityOld_)(velocityIndices_))
 SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL, (NonSmoothLaw), (_e))
-SICONOS_IO_REGISTER_WITH_BASES(
-    NewtonEuler1DR, (NewtonEulerR),
-    (_AUX1)(_AUX2)(_NPG1)(_NPG2)(_Nc)(_Pc1)(_Pc2)(_RotationAbsToContactFrame)(_isOnContact)(_relNc)(_relPc1)(_relPc2)(_rotationMatrixAbsToBody))
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR, (NewtonEulerR),
+                               (_Nc)(_Pc1)(_Pc2)(_isOnContact)(_relNc)(_relPc1)(_relPc2))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR, (LagrangianR), (_F)(_e))
 SICONOS_IO_REGISTER_WITH_BASES(NormalConeNSL, (NonSmoothLaw), (_H)(_K))
 SICONOS_IO_REGISTER_WITH_BASES(

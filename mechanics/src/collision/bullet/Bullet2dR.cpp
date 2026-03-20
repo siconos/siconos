@@ -19,7 +19,6 @@
 #include "Bullet2dR.hpp"
 
 #include "RigidBody2dDS.hpp"
-#include "SiconosVector.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
@@ -31,8 +30,7 @@
 void siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint(
     const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
     double scaling, std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
-    std::shared_ptr<siconos::collision::RigidBody2dDS> ds2)
-{
+    std::shared_ptr<siconos::collision::RigidBody2dDS> ds2) {
   DEBUG_BEGIN(
       "siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
   // Get new world positions of contact points and calculate relative
@@ -156,21 +154,20 @@ void siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint
   const auto& pt_B = point.getPositionWorldOnB() / scaling;
 
   if (flip) {
-    (*_Pc1)(0) = pt_B.x();
-    (*_Pc1)(1) = pt_B.y();
-    (*_Pc2)(0) = pt_A.x();
-    (*_Pc2)(1) = pt_A.y();
-  }
-  else {
-    (*_Pc1)(0) = pt_A.x();
-    (*_Pc1)(1) = pt_A.y();
-    (*_Pc2)(0) = pt_B.x();
-    (*_Pc2)(1) = pt_B.y();
+    contactPoint1_(0) = pt_B.x();
+    contactPoint1_(1) = pt_B.y();
+    contactPoint2_(0) = pt_A.x();
+    contactPoint2_(1) = pt_A.y();
+  } else {
+    contactPoint1_(0) = pt_A.x();
+    contactPoint1_(1) = pt_A.y();
+    contactPoint2_(0) = pt_B.x();
+    contactPoint2_(1) = pt_B.y();
   }
 
   const auto& normal = point.m_normalWorldOnB * (flip ? -1 : 1);
-  (*_Nc)(0) = normal.x();
-  (*_Nc)(1) = normal.y();
+  nc_(0) = normal.x();
+  nc_(1) = normal.y();
 
   //  Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
 

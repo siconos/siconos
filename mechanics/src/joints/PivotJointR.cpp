@@ -29,7 +29,6 @@
 #include "NewtonEulerDS.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "op3x3.h"  // for orthoBaseFromVector
 
 /*
  * This file contains some code generated using sympy.  The following
@@ -82,8 +81,8 @@ siconos::joints::PivotJointR::PivotJointR(
 }
 
 void siconos::joints::PivotJointR::setBasePositions(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2) {
   KneeJointR::setBasePositions(q1, q2);
 
   // Assume that axes_[0] has been properly set (by constructor or setAxis)
@@ -112,14 +111,14 @@ void siconos::joints::PivotJointR::setBasePositions(
   buildOrthonormalBase();
 
   // Get initial offsets relative to plane constraints.
-  siconos::algebra::SiconosVector rot221{4};
+  siconos::algebra::SiconosVector4 rot221;
   if (q2)
     pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
   else
     pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
-  _initial_AscalA1 = axis1_.dot(rot221.head(3));
-  _initial_AscalA2 = axis2_.dot(rot221.head(3));
+  _initial_AscalA1 = axis1_.dot(rot221.head<3>());
+  _initial_AscalA2 = axis2_.dot(rot221.head<3>());
 
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
@@ -158,32 +157,32 @@ void siconos::joints::PivotJointR::computeH_NE_(double time,
 
 void siconos::joints::PivotJointR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   KneeJointR::computeh(q1, q2, y);
 
-  siconos::algebra::SiconosVector3 rot221;
+  siconos::algebra::SiconosVector4 rot221;
   if (q2) {
     pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
   } else {
     pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
   }
 
-  y(3) = axis1_.dot(rot221) - _initial_AscalA1;
-  y(4) = axis2_.dot(rot221) - _initial_AscalA2;
+  y(3) = axis1_.dot(rot221.head<3>()) - _initial_AscalA1;
+  y(4) = axis2_.dot(rot221.head<3>()) - _initial_AscalA2;
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::PivotJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
 
-  siconos::algebra::SiconosVector rot221{4};
+  siconos::algebra::SiconosVector4 rot221;
   if (q2) {
     pivot::rot2to1(q1.tail(4), q2->tail(4), cq2q_, rot221);
   } else
@@ -192,7 +191,7 @@ void siconos::joints::PivotJointR::computehDoF(
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = axes_[0].dot(rot221.head(3));
+  double Adot2to1 = axes_[0].dot(rot221.head<3>());
   double wrappedAngle = piwrap(2 * atan2(rot221(3), Adot2to1) - _initial_AscalA);
 
   // Count the number of twists around the angle, and report the
@@ -212,8 +211,8 @@ void siconos::joints::PivotJointR::computehDoF(
 void siconos::joints::PivotJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq, siconos::algebra::Index axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
@@ -355,8 +354,8 @@ void siconos::joints::PivotJointR::computeJachqDoF(
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
-    const siconos::algebra::SiconosVector& q0,
-    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    const siconos::algebra::SiconosVector7& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis,
     bool absoluteRef) {
   assert(axis == 0);
   if (axis != 0) return siconos::algebra::SiconosVector3{};
@@ -371,12 +370,12 @@ siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
 // Free functions
 
 void siconos::joints::pivot::computeH_for_2DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+    const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp2,
     const siconos::algebra::SiconosVector3& coords2,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
-    const siconos::algebra::SiconosVector& cq2q,
+    const siconos::algebra::SiconosVector4& cq2q,
     Eigen::Ref<siconos::algebra::MapType> result) {
   knee::computeH_for_2DS(qp1, coords1, qp2, coords2, result.topRows(3));
 
@@ -513,10 +512,10 @@ void siconos::joints::pivot::computeH_for_2DS(
 }
 
 void siconos::joints::pivot::computeH_for_1DS(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
-    const siconos::algebra::SiconosVector& cq2q,
+    const siconos::algebra::SiconosVector4& cq2q,
     Eigen::Ref<siconos::algebra::MapType> result) {
   knee::computeH_for_1DS(qp1, coords1, result.topRows(3));
   // sympy expression: [AscalA1.diff(x) for x in q1]
@@ -546,10 +545,10 @@ void siconos::joints::pivot::computeH_for_1DS(
 }
 
 void siconos::joints::pivot::rot2to1(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
-    const siconos::algebra::SiconosVector& cq2q,
-    Eigen::Ref<siconos::algebra::SiconosVector> result) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp2,
+    const siconos::algebra::SiconosVector4& cq2q,
+    Eigen::Ref<siconos::algebra::SiconosVector4> result) {
   /*
    * The current rotation vector taking into account initial rotation
    * difference.
@@ -573,13 +572,9 @@ void siconos::joints::pivot::rot2to1(
        qp1(1) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
        qp1(2) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
        qp1(3) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
-  if (result.size() == 4)
-    result(3) =
-        (qp1(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) -
-         qp1(1) *
-             (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) -
-         qp1(2) *
-             (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) -
-         qp1(3) *
-             (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+  result(3) =
+      (qp1(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) -
+       qp1(1) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) -
+       qp1(2) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) -
+       qp1(3) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
 }

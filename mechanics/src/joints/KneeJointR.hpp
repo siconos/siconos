@@ -89,13 +89,13 @@ class KneeJointR : public NewtonEulerJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
 
   /** Perform some checks on the initial conditions. */
   void checkInitPos(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-                    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&
+                    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>&
                         q2 = std::nullopt);
 
   /**
@@ -135,7 +135,7 @@ class KneeJointR : public NewtonEulerJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {
@@ -148,27 +148,27 @@ class KneeJointR : public NewtonEulerJointR {
 namespace knee {
 void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
                const siconos::algebra::SiconosVector3& coords1,
-               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
+               const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2opt,
                const siconos::algebra::SiconosVector3& coords2,
-               Eigen::Ref<siconos::algebra::SiconosVector> result);
+               Eigen::Ref<siconos::algebra::SiconosVector3> result);
 
-void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
-                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp2,
                       const siconos::algebra::SiconosVector3& coords2,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_dot_for1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+void computeH_dot_for1DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qpdot1,
                          const siconos::algebra::SiconosVector3& coords1,
                          Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot1,
+void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qpdot1,
                          const siconos::algebra::SiconosVector3& coords1,
-                         const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot2,
+                         const Eigen::Ref<const siconos::algebra::SiconosVector4>& qpdot2,
                          const siconos::algebra::SiconosVector3& coords2,
                          Eigen::Ref<siconos::algebra::MapType> result);
 

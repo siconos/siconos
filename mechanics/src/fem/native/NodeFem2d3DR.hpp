@@ -20,10 +20,7 @@
  */
 #ifndef NodeFem2d3DR_H
 #define NodeFem2d3DR_H
-
-#include "LagrangianDS.hpp"
 #include "LagrangianScleronomousR.hpp"
-
 
 /** NodeFem2d3DR
  *
@@ -36,40 +33,36 @@
  *
  */
 namespace siconos::mechanics::fem {
-  class NodeFem2d3DR : public siconos::modeling::LagrangianScleronomousR {
-protected:
-
+class NodeFem2d3DR : public siconos::modeling::LagrangianScleronomousR {
+ protected:
   //  ACCEPT_SERIALIZATION(NodeFem2d3DR);
 
   /* index of the node of the Fem cable involved in this relation */
   unsigned int _node_index;
 
-  /* Current Contact Points, may be updated within Newton loop based
-   * on _relPc1, _relPc2. */
-    std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;
-    std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;
+  /* Current Contact Points */
+  siconos::algebra::SiconosVector3 contactPoint1_ = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 contactPoint2_ = siconos::algebra::SiconosVector3::Zero();
 
-  /* Normal vector at contact.
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Normal;
+  /* Normal vector at contact */
+  siconos::algebra::SiconosVector3 nc_ = siconos::algebra::SiconosVector3::Zero();
 
-  /* Tangent vector at contact.
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Tangent;
+  /** Tangent vector at contact */
+  siconos::algebra::SiconosVector3 tangent_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Set the coordinates of first contact point.  Must only be done
    *  in a computeh() override.
    *
    *  \param npc new coordinates
    */
-  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
+  void setpc1(const siconos::algebra::SiconosVector3 &npc) { contactPoint1_ = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
    *  in a computeh() override.
    *
    *  \param npc new coordinates
    */
-  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
+  void setpc2(const siconos::algebra::SiconosVector3 &npc) { contactPoint2_ = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
 
@@ -77,42 +70,32 @@ protected:
    *
    *  \param nnc new coordinates
    */
-  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Normal = nnc; };
+  void setnc(const siconos::algebra::SiconosVector3 &nnc) { nc_ = nnc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
    *  Must only be done in a computeh() override.
    *
    *  \param nnc new coordinates
    */
-  void settc(std::shared_ptr<siconos::algebra::SiconosVector> ntc) { _Tangent = ntc; };
+  void settc(const siconos::algebra::SiconosVector3 &ntc) { tangent_ = ntc; };
 
-public:
+ public:
+  /** constructor
+   */
+  NodeFem2d3DR(unsigned int node_index) : LagrangianScleronomousR(), _node_index(node_index) {}
 
   /** constructor
    */
-  NodeFem2d3DR(unsigned int node_index)
-    : LagrangianScleronomousR()
-    , _node_index(node_index)
-    , _Pc1(new siconos::algebra::SiconosVector(3))
-    , _Pc2(new siconos::algebra::SiconosVector(3))
-    , _Normal(new siconos::algebra::SiconosVector(3))
-    , _Tangent(new siconos::algebra::SiconosVector(3))
-  {
-  }
-  
-  /** constructor
-   */
-  NodeFem2d3DR(unsigned int node_index,
-	     std::shared_ptr<siconos::algebra::SiconosVector> pc1, std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-	     std::shared_ptr<siconos::algebra::SiconosVector> normal, std::shared_ptr<siconos::algebra::SiconosVector> tangent )
-      : LagrangianScleronomousR()
-      , _node_index(node_index)	
-      , _Pc1(pc1)
-      , _Pc2(pc2)
-      , _Normal(normal)
-      , _Tangent(tangent)
-  {
-  }
+  NodeFem2d3DR(unsigned int node_index, const siconos::algebra::SiconosVector3 &pc1,
+               const siconos::algebra::SiconosVector3 &pc2,
+               const siconos::algebra::SiconosVector3 &normal,
+               const siconos::algebra::SiconosVector3 &tangent)
+      : LagrangianScleronomousR(),
+        _node_index(node_index),
+        contactPoint1_(pc1),
+        contactPoint2_(pc2),
+        nc_(normal),
+        tangent_(tangent) {}
 
   /** destructor
    */
@@ -122,7 +105,7 @@ public:
 
   /**
      to compute the output y = h(q,z) of the Relation
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
      \param y the resulting vector
@@ -131,7 +114,7 @@ public:
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
   /**
      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
@@ -140,57 +123,36 @@ public:
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return _Normal; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> tangent() const { return _Tangent; }
+  inline const siconos::algebra::SiconosVector3 &pc1() const { return contactPoint1_; }
 
+  inline const siconos::algebra::SiconosVector3 &pc2() const { return contactPoint2_; }
 
-  /** update the contact points
-   * this method is a bit useless if the relation has been constructed with
-   * shared pointer
-   */
-  void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector> pc1, std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-			  std::shared_ptr<siconos::algebra::SiconosVector> normal, std::shared_ptr<siconos::algebra::SiconosVector> tangent)
-  {
-    setpc1(pc1);
-    setpc2(pc2);
-    setnc(normal);
-    settc(tangent);
-  };
-  
+  inline const siconos::algebra::SiconosVector3 &nc() const { return nc_; }
+  inline const siconos::algebra::SiconosVector3 &tangent() const { return tangent_; }
+
   /** update the contact points from references
    */
-  void updateContactPoint(siconos::algebra::SiconosVector& pc1, siconos::algebra::SiconosVector& pc2,
-			  siconos::algebra::SiconosVector& normal, siconos::algebra::SiconosVector& tangent)
-  {
-    *_Pc1 = pc1;
-    *_Pc2= pc2;
-    *_Normal = normal;
-    *_Tangent = tangent;
+  void updateContactPoints(const siconos::algebra::SiconosVector3 &pc1,
+                          const siconos::algebra::SiconosVector3 &pc2,
+                          const siconos::algebra::SiconosVector3 &normal,
+                          const siconos::algebra::SiconosVector3 &tangent) {
+    contactPoint1_ = pc1;
+    contactPoint2_ = pc2;
+    nc_ = normal;
+    tangent_ = tangent;
   };
-  
+
   /** update the contact points from array
    */
-  void updateContactPoint(double pc1[3], double pc2[3],
-			  double normal[3], double tangent[3])
-  {
-    (*_Pc1)(0) = pc1[0];
-    (*_Pc1)(1) = pc1[1];
-    (*_Pc1)(2) = pc1[2];
-    (*_Pc2)(0) = pc2[0];
-    (*_Pc2)(1) = pc2[1];
-    (*_Pc2)(2) = pc2[2];
-    (*_Normal)(0) = normal[0];
-    (*_Normal)(1) = normal[1];
-    (*_Normal)(2) = normal[2];
-    (*_Tangent)(0) = tangent[0];
-    (*_Tangent)(1) = tangent[1];
-    (*_Tangent)(2) = normal[2];
+  void updateContactPoints(double pc1[3], double pc2[3], double normal[3], double tangent[3]) {
+    contactPoint1_ << pc1[0], pc1[1], pc1[2];
+    contactPoint2_ << pc2[0], pc2[1], pc2[2];
+    nc_ << normal[0], normal[1], normal[2];
+    tangent_ << tangent[0], tangent[1], tangent[2];
   };
   void display() const override;
 
-  //ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 };
-}
-#endif // NodeFem2d3DR_H
+}  // namespace siconos::mechanics::fem
+#endif  // NodeFem2d3DR_H

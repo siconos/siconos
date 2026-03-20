@@ -34,7 +34,7 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>&,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>&,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_PRINT("siconos::mechanisms::MBTB_ContactRelation::computeh()\n");
 
@@ -74,12 +74,9 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   // nz=-nz;
 
   if (_pContact->offset_to_P1()) {
-    (*_Pc1)(0) = X1 + _pContact->offset() * nx;
-    (*_Pc1)(1) = Y1 + _pContact->offset() * ny;
-    (*_Pc1)(2) = Z1 + _pContact->offset() * nz;
-    (*_Pc2)(0) = X2;
-    (*_Pc2)(1) = Y2;
-    (*_Pc2)(2) = Z2;
+    contactPoint1_ << X1 + _pContact->offset() * nx, Y1 + _pContact->offset() * ny,
+        Z1 + _pContact->offset() * nz;
+    contactPoint2_ << X2, Y2, Z2;
     if (mbtb::data::sPrintDist) {
       printf(
           "    OffSet is added from contact point PC1 : newPC1 =  PC1 + "
@@ -87,12 +84,10 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
       printf("    OffSet %lf\n ", _pContact->offset());
     }
   } else {
-    (*_Pc1)(0) = X1;
-    (*_Pc1)(1) = Y1;
-    (*_Pc1)(2) = Z1;
-    (*_Pc2)(0) = X2 - _pContact->offset() * nx;
-    (*_Pc2)(1) = Y2 - _pContact->offset() * ny;
-    (*_Pc2)(2) = Z2 - _pContact->offset() * nz;
+    contactPoint1_ << X1, Y1, Z1;
+    contactPoint2_ << X2 - _pContact->offset() * nx, Y2 - _pContact->offset() * ny,
+        Z2 - _pContact->offset() * nz;
+
     if (mbtb::data::sPrintDist) {
       printf(
           "    OffSet is substracted from contact point PC2 : newPC1 =  PC2 - "
@@ -102,14 +97,14 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   }
   /** Because in CAD model, the normal is going outside of the body .*/
   /** V.A. 11/01/2012 Which Body ?  */
-  // (*_Nc)(0) = -nx;
-  // (*_Nc)(1) = -ny;
-  // (*_Nc)(2) = -nz;
+  // nc_(0) = -nx;
+  // nc_(1) = -ny;
+  // nc_(2) = -nz;
 
   DEBUG_EXPR(display(););
-  DEBUG_EXPR(siconos::algebra::print(*_Nc););
-  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
-  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(nc_););
+  DEBUG_EXPR(siconos::algebra::print(contactPoint1_););
+  DEBUG_EXPR(siconos::algebra::print(contactPoint2_););
 
   ACE_times[ACE_TIMER_DIST].stop();
   /** V.A. Is the following lin always true ? */
@@ -126,13 +121,13 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
     printf("    Gap : Signed contact distance after Offset correction : %lf \n",
            _pContact->_dist);
     printf("    Coordinates of contact points  after Offset corrections :\n");
-    siconos::algebra::print(*_Pc1);
-    siconos::algebra::print(*_Pc2);
+    siconos::algebra::print(contactPoint1_);
+    siconos::algebra::print(contactPoint2_);
     auto deltaPC(new siconos::algebra::SiconosVector(3));
-    *deltaPC = *_Pc1 - *_Pc2;
+    *deltaPC = contactPoint1_ - contactPoint2_;
     double realdist = (deltaPC->norm());
     printf("    Distance between contact points =%lf \n", realdist);
-    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", (*_Nc)(0), (*_Nc)(1), (*_Nc)(2));
+    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", nc_(0), nc_(1), nc_(2));
   }
   //}
   y(0) = _pContact->_dist;

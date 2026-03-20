@@ -41,13 +41,13 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
+  siconos::algebra::SiconosVector2 contactPoint1_ = siconos::algebra::SiconosVector2::Zero();
+  siconos::algebra::SiconosVector2 contactPoint2_ = siconos::algebra::SiconosVector2::Zero();
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Nc{nullptr};
+  siconos::algebra::SiconosVector2 nc_ = siconos::algebra::SiconosVector2::Zero();
 
   /** parametrize the projection algorithm
    *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
@@ -55,17 +55,9 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   bool _isOnContact = false;
 
  public:
-  /** constructor */
-  Lagrangian2d2DR()
-      : LagrangianScleronomousR(),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)} {
-    /*_ds1=nullptr;_ds2=nullptr;*/
-  }
+  using LagrangianScleronomousR::LagrangianScleronomousR;
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~Lagrangian2d2DR() noexcept = default;
 
   void initialize(Interaction &inter) override;
@@ -87,9 +79,27 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline auto pc1() const { return _Pc1; }
-  inline auto pc2() const { return _Pc2; }
-  inline auto nc() const { return _Nc; }
+  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
+
+  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
+
+  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
+
+  /** @brief Update contact point info.
+   *
+   *  @param pos1 Position on ds1 in ds1 frame.
+   *  @param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   *  @param normal Normal in ds2 frame (or world frame if ds2=null).
+   */
+  inline void updateContactPoints(const siconos::algebra::SiconosVector2 &pos1,
+                                  const siconos::algebra::SiconosVector2 &pos2,
+                                  const siconos::algebra::SiconosVector2 &normal) {
+    assert(normal.norm() != 0);
+    contactPoint1_ = pos1;
+    contactPoint2_ = pos2;
+    nc_ = normal;
+  }
+
   void display() const override;
   virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };

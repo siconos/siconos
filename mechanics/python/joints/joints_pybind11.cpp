@@ -100,29 +100,22 @@ PYBIND11_MODULE(_joints, m) {
       .def(py::init<
                std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
                std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
-               double, std::optional<siconos::algebra::SiconosVector>, siconos::algebra::Index,
-               std::optional<siconos::algebra::SiconosVector>, siconos::algebra::Index>(),
-           py::arg("joint1"), py::arg("dof1"), py::arg("joint2"), py::arg("dof2"),
-           py::arg("ratio"), py::arg("ref1") = std::nullopt, py::arg("ref1_index") = 0,
-           py::arg("ref2") = std::nullopt, py::arg("ref2_index") = 0)
-      .def(py::init<
-               std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
-               std::shared_ptr<siconos::joints::NewtonEulerJointR>, siconos::algebra::Index,
                double, std::shared_ptr<siconos::modeling::NewtonEulerDS>,
                siconos::algebra::Index, std::shared_ptr<siconos::modeling::NewtonEulerDS>,
                siconos::algebra::Index>(),
            py::arg("joint1"), py::arg("dof1"), py::arg("joint2"), py::arg("dof2"),
-           py::arg("ratio"), py::arg("refds1"), py::arg("ref1_index") = 0, py::arg("refds2"),
-           py::arg("ref2_index") = 0);
+           py::arg("ratio"), py::arg("refds1") = nullptr, py::arg("ref1_index") = 0,
+           py::arg("refds2") = nullptr, py::arg("ref2_index") = 0);
 
   py::class_<siconos::joints::JointStopR, std::shared_ptr<siconos::joints::JointStopR>,
              siconos::modeling::NewtonEulerR>(m, "JointStopR")
       .def(py::init<std::shared_ptr<siconos::joints::NewtonEulerJointR>, double, bool,
-                    unsigned int>(),
+                    siconos::algebra::Index>(),
            py::arg("joint"), py::arg("pos"), py::arg("dir"), py::arg("axis") = 0);
 
   py::class_<siconos::joints::JointFrictionR, std::shared_ptr<siconos::joints::JointFrictionR>,
              siconos::modeling::NewtonEulerR>(m, "JointFrictionR")
-      .def(py::init<std::shared_ptr<siconos::joints::NewtonEulerJointR>, unsigned int>(),
+      .def(py::init<std::shared_ptr<siconos::joints::NewtonEulerJointR>,
+                    siconos::algebra::Index>(),
            py::arg("joint"), py::arg("axis"));
 }

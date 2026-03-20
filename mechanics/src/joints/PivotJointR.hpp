@@ -39,7 +39,7 @@ class PivotJointR : public KneeJointR {
 
   /*Initial conditions*/
   double _initial_AscalA{0.}, _initial_AscalA1{0.}, _initial_AscalA2{0.};
-  siconos::algebra::SiconosVector cq2q_{siconos::algebra::SiconosVector::Zero(4)};
+  siconos::algebra::SiconosVector4 cq2q_ = siconos::algebra::SiconosVector4::Zero();
 
   /** Cumulative number of twists around the joint relative to initial
    * angular difference. */
@@ -85,8 +85,8 @@ class PivotJointR : public KneeJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
 
   /** \return the axis of rotation.
@@ -103,8 +103,8 @@ class PivotJointR : public KneeJointR {
    *  otherwise the q1 frame is assumed.
    */
   virtual siconos::algebra::SiconosVector3 normalDoF(
-      const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      const siconos::algebra::SiconosVector7& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1 = std::nullopt,
       int axis = 0, bool absoluteRef = true) override;
 
   /**
@@ -118,7 +118,7 @@ class PivotJointR : public KneeJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
   /**
        Get the number of constraints defined in the joint
@@ -148,7 +148,7 @@ class PivotJointR : public KneeJointR {
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y,
       siconos::algebra::Index axis = 0) override;
 
@@ -156,8 +156,8 @@ class PivotJointR : public KneeJointR {
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq,
       siconos::algebra::Index axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
@@ -166,26 +166,26 @@ class PivotJointR : public KneeJointR {
 
 // Free functions for pivot joints
 namespace pivot {
-void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
-                      const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
+                      const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp2,
                       const siconos::algebra::SiconosVector3& coords2,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,
-                      const siconos::algebra::SiconosVector& c2q,
+                      const siconos::algebra::SiconosVector4& c2q,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
+void computeH_for_1DS(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
                       const siconos::algebra::SiconosVector3& A1,
                       const siconos::algebra::SiconosVector3& A2,
-                      const siconos::algebra::SiconosVector& c2q,
+                      const siconos::algebra::SiconosVector4& c2q,
                       Eigen::Ref<siconos::algebra::MapType> result);
 
-void rot2to1(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
-             const Eigen::Ref<const siconos::algebra::SiconosVector>& qp2,
-             const siconos::algebra::SiconosVector& cq2q,
-             Eigen::Ref<siconos::algebra::SiconosVector> result);
+void rot2to1(const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp1,
+             const Eigen::Ref<const siconos::algebra::SiconosVector4>& qp2,
+             const siconos::algebra::SiconosVector4& cq2q,
+             Eigen::Ref<siconos::algebra::SiconosVector4> result);
 
 }  // namespace pivot
 

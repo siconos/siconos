@@ -44,33 +44,23 @@ class NodeFem1d2DR : public siconos::modeling::LagrangianScleronomousR {
 
   /* Current Contact Points */
 
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
+  siconos::algebra::SiconosVector2 contactPoint1_ = siconos::algebra::SiconosVector2::Zero();
+  siconos::algebra::SiconosVector2 contactPoint2_ = siconos::algebra::SiconosVector2::Zero();
 
   /* Normal vector at contact.
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Normal{nullptr};
+  siconos::algebra::SiconosVector2 nc_ = siconos::algebra::SiconosVector2::Zero();
 
  public:
   /** constructor
    */
-  NodeFem1d2DR(std::shared_ptr<FENode> node)
-      : LagrangianScleronomousR(),
-        node_(node),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Normal{std::make_shared<siconos::algebra::SiconosVector>(2)} {}
+  NodeFem1d2DR(std::shared_ptr<FENode> node) : LagrangianScleronomousR(), node_(node) {}
 
   /** constructor
    */
-  NodeFem1d2DR(std::shared_ptr<FENode> node,
-               std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-               std::shared_ptr<siconos::algebra::SiconosVector> normal)
-      : LagrangianScleronomousR(),
-        node_(node),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2{pc2},
-        _Normal(normal) {}
+  NodeFem1d2DR(std::shared_ptr<FENode> node, const siconos::algebra::SiconosVector &pc2,
+               const siconos::algebra::SiconosVector &normal)
+      : LagrangianScleronomousR(), node_(node), contactPoint2_{pc2}, nc_(normal) {}
 
   /** destructor
    */
@@ -96,24 +86,16 @@ class NodeFem1d2DR : public siconos::modeling::LagrangianScleronomousR {
   double distance() const;
 
   inline std::shared_ptr<FENode> node() const { return node_; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return _Normal; }
+  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
 
-  /** update the contact points
-   * this method is a bit useless if the relation has been constructed with
-   * shared pointer
-   */
-  void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-                          std::shared_ptr<siconos::algebra::SiconosVector> normal) {
-    _Pc2 = pc2;
-    _Normal = normal;
-  };
+  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
+
+  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
 
   /** update the contact points from references
    */
-  void updateContactPoint(siconos::algebra::SiconosVector &pc2,
-                          siconos::algebra::SiconosVector &normal);
+  void updateContactPoint(const siconos::algebra::SiconosVector2 &pc2,
+                          const siconos::algebra::SiconosVector2 &normal);
 
   /** update the contact points from array
    */

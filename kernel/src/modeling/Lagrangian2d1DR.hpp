@@ -41,34 +41,13 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
+  siconos::algebra::SiconosVector2 contactPoint1_ = siconos::algebra::SiconosVector2::Zero();
+  siconos::algebra::SiconosVector2 contactPoint2_ = siconos::algebra::SiconosVector2::Zero();
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Nc{nullptr};
-
-  /* _Nc must be calculated relative to q2 */
-  std::shared_ptr<siconos::algebra::SiconosVector> _relNc{nullptr};
-
-  /* Rotation matrix converting the absolute coordinate to the contact frame
-   * coordinate. This matrix contains the unit vector(s)of the contact frame in
-   * row.
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _RotationAbsToContactFrame{nullptr};
-
-  /* Matrix converting */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationMatrixAbsToBody{nullptr};
-
-  /* Cross product matrices that correspond the lever arm from
-   * contact point to center of mass*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG2{nullptr};
-
-  /*buffer matrices*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2{nullptr};
+  siconos::algebra::SiconosVector2 nc_ = siconos::algebra::SiconosVector2::Zero();
 
  public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
@@ -77,18 +56,9 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
    */
   bool _isOnContact = false;
 
-  /** constructorx
-   */
-  Lagrangian2d1DR()
-      : LagrangianScleronomousR(),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)} {
-    /*_ds1=nullptr;_ds2=nullptr;*/
-  }
+  using LagrangianScleronomousR::LagrangianScleronomousR;
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~Lagrangian2d1DR() noexcept {};
 
   void initialize(Interaction &inter) override;
@@ -110,17 +80,27 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> nc() const { return _Nc; }
+  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc() const { return _relNc; }
+  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
 
-  /** Set the coordinates of inside normal vector at the contact point in ds2
-   * frame. It will be used to compute _Nc during computeh(). \param nnc new
-   * coordinates
+  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
+
+  /** @brief Update contact point info.
+   *
+   *  @param pos1 Position on ds1 in ds1 frame.
+   *  @param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   *  @param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  void setRelNc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _relNc = nnc; };
+  inline void updateContactPoints(const siconos::algebra::SiconosVector2 &pos1,
+                                  const siconos::algebra::SiconosVector2 &pos2,
+                                  const siconos::algebra::SiconosVector2 &normal) {
+    assert(normal.norm() != 0);
+    contactPoint1_ = pos1;
+    contactPoint2_ = pos2;
+    nc_ = normal;
+  }
+
   void display() const override;
 };
 }  // namespace siconos::modeling

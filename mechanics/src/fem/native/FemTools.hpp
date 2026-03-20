@@ -76,10 +76,10 @@ class ContactDetection : public siconos::simulation::InteractionManager {
   double initial_gap_{0.};
 
   /** Normal vector at contact */
-  std::shared_ptr<siconos::algebra::SiconosVector> normal_{nullptr};
+  siconos::algebra::SiconosVector normal_;
 
   /** Tangent vector at contact */
-  std::shared_ptr<siconos::algebra::SiconosVector> tangent_{nullptr};
+  siconos::algebra::SiconosVector tangent_;
 
   /** Non smooth law  */
   std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw_{nullptr};
@@ -122,7 +122,7 @@ class ContactDetection : public siconos::simulation::InteractionManager {
    *  @param[in, optional] contact_condition_tag tag (in gmsh file) to identify nodes where
    *   contact could occur If not set, use all nodes of the FE model.
    */
-  ContactDetection(double initial_gap, std::shared_ptr<siconos::algebra::SiconosVector> normal,
+  ContactDetection(double initial_gap, const siconos::algebra::SiconosVector& normal,
                    std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw,
                    std::shared_ptr<siconos::mechanics::fem::FiniteElementLinearTIDS> fesolid,
                    const ContactConditionFunction& func,

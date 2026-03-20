@@ -42,42 +42,31 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
   /** index of the node of the Fem cable involved in this relation */
   std::shared_ptr<FENode> node_{nullptr};
 
-  /** Current Contact Points, may be updated within Newton loop based
-   * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
+  /* Current Contact Points */
+  siconos::algebra::SiconosVector2 contactPoint1_ = siconos::algebra::SiconosVector2::Zero();
+  siconos::algebra::SiconosVector2 contactPoint2_ = siconos::algebra::SiconosVector2::Zero();
 
-  /** Normal vector at contact.
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Normal{nullptr};
+  /* Normal vector at contact */
+  siconos::algebra::SiconosVector2 nc_ = siconos::algebra::SiconosVector2::Zero();
 
-  /** Tangent vector at contact.
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Tangent{nullptr};
+  /** Tangent vector at contact */
+  siconos::algebra::SiconosVector2 tangent_ = siconos::algebra::SiconosVector2::Zero();
 
  public:
   /** constructor
    */
-  NodeFem2d2DR(std::shared_ptr<FENode> node)
-      : LagrangianScleronomousR(),
-        node_(node),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Normal{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Tangent{std::make_shared<siconos::algebra::SiconosVector>(2)} {}
+  NodeFem2d2DR(std::shared_ptr<FENode> node) : LagrangianScleronomousR(), node_(node) {}
 
   /** constructor
    */
-  NodeFem2d2DR(std::shared_ptr<FENode> node,
-               std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-               std::shared_ptr<siconos::algebra::SiconosVector> normal,
-               std::shared_ptr<siconos::algebra::SiconosVector> tangent)
+  NodeFem2d2DR(std::shared_ptr<FENode> node, const siconos::algebra::SiconosVector2 &pc2,
+               const siconos::algebra::SiconosVector2 &normal,
+               const siconos::algebra::SiconosVector2 &tangent)
       : LagrangianScleronomousR(),
         node_(node),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Pc2(pc2),
-        _Normal(normal),
-        _Tangent(tangent) {}
+        contactPoint2_(pc2),
+        nc_(normal),
+        tangent_(tangent) {}
 
   /** destructor
    */
@@ -99,30 +88,18 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
   double distance() const;
 
   inline std::shared_ptr<FENode> node() const { return node_; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return _Normal; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> tangent() const { return _Tangent; }
+  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
 
-  /** update the contact points
-   * this method is a bit useless if the relation has been constructed with
-   * shared pointer
-   */
-  void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector> pc1,
-                          std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-                          std::shared_ptr<siconos::algebra::SiconosVector> normal,
-                          std::shared_ptr<siconos::algebra::SiconosVector> tangent) {
-    _Pc1 = pc1;
-    _Pc2 = pc2;
-    _Normal = normal;
-    _Tangent = tangent;
-  };
+  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
+
+  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
+  inline const siconos::algebra::SiconosVector2 &tangent() const { return tangent_; }
 
   /** update the contact points from references
    */
-  void updateContactPoint(siconos::algebra::SiconosVector &pc2,
-                          siconos::algebra::SiconosVector &normal,
-                          siconos::algebra::SiconosVector &tangent);
+  void updateContactPoint(const siconos::algebra::SiconosVector2 &pc2,
+                          const siconos::algebra::SiconosVector2 &normal,
+                          const siconos::algebra::SiconosVector2 &tangent);
 
   /** update the contact points from array
    */

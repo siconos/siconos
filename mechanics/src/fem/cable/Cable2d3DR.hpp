@@ -43,35 +43,29 @@ class Cable2d3DR : public siconos::modeling::LagrangianScleronomousR {
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _Pc1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector3> _Pc2{nullptr};
+  siconos::algebra::SiconosVector3 contactPoint1_ = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 contactPoint2_ = siconos::algebra::SiconosVector3::Zero();
 
   /**  Normal vector at contact */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _Normal{nullptr};
+  siconos::algebra::SiconosVector3 nc_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Tangent vector at contact */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _Tangent{nullptr};
+  siconos::algebra::SiconosVector3 tangent_ = siconos::algebra::SiconosVector3::Zero();
 
  public:
   /** constructor */
   Cable2d3DR(unsigned int node_index)
-      : LagrangianScleronomousR(),
-        _node_dof_index{node_index},
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector3>()},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector3>()},
-        _Normal{std::make_shared<siconos::algebra::SiconosVector3>()},
-        _Tangent{std::make_shared<siconos::algebra::SiconosVector3>()} {}
+      : LagrangianScleronomousR(), _node_dof_index{node_index} {}
 
   /** constructor */
-  Cable2d3DR(unsigned int node_index, std::shared_ptr<siconos::algebra::SiconosVector3> pc2,
-             std::shared_ptr<siconos::algebra::SiconosVector3> normal,
-             std::shared_ptr<siconos::algebra::SiconosVector3> tangent)
+  Cable2d3DR(unsigned int node_index, const siconos::algebra::SiconosVector3 &pc2,
+             const siconos::algebra::SiconosVector3 &normal,
+             const siconos::algebra::SiconosVector3 &tangent)
       : LagrangianScleronomousR(),
         _node_dof_index{node_index},
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector3>()},
-        _Pc2(pc2),
-        _Normal(normal),
-        _Tangent(tangent) {}
+        contactPoint2_(pc2),
+        nc_(normal),
+        tangent_(tangent) {}
 
   /** destructor */
   virtual ~Cable2d3DR() noexcept = default;
@@ -94,31 +88,21 @@ class Cable2d3DR : public siconos::modeling::LagrangianScleronomousR {
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
-
-  inline auto pc1() const { return _Pc1; }
-  inline auto pc2() const { return _Pc2; }
-  inline auto normal() const { return _Normal; }
-  inline auto tangent() const { return _Tangent; }
-
-  /** update the contact points
-   * this method is a bit useless if the relation has been constructed with
-   * shared pointer
-   */
-  void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector3> pc1,
-                          std::shared_ptr<siconos::algebra::SiconosVector3> pc2,
-                          std::shared_ptr<siconos::algebra::SiconosVector3> normal,
-                          std::shared_ptr<siconos::algebra::SiconosVector3> tangent);
+  inline const siconos::algebra::SiconosVector3 &pc1() const { return contactPoint1_; }
+  inline const siconos::algebra::SiconosVector3 &pc2() const { return contactPoint2_; }
+  inline const siconos::algebra::SiconosVector3 &normal() const { return nc_; }
+  inline const siconos::algebra::SiconosVector3 &tangent() const { return tangent_; }
 
   /** update the contact points from references
    */
-  void updateContactPoint(siconos::algebra::SiconosVector3 &pc1,
-                          siconos::algebra::SiconosVector3 &pc2,
-                          siconos::algebra::SiconosVector3 &normal,
-                          siconos::algebra::SiconosVector3 &tangent);
+  void updateContactPoints(const siconos::algebra::SiconosVector3 &pc1,
+                          const siconos::algebra::SiconosVector3 &pc2,
+                          const siconos::algebra::SiconosVector3 &normal,
+                          const siconos::algebra::SiconosVector3 &tangent);
 
   /** update the contact points from array
    */
-  void updateContactPoint(double pc1[3], double pc2[3], double normal[3], double tangent[3]);
+  void updateContactPoints(double pc1[3], double pc2[3], double normal[3], double tangent[3]);
 
   void display() const override;
 };

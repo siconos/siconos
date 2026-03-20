@@ -148,9 +148,9 @@ struct siconos::io::ContactPointVisitor : public siconos::modeling::relations::V
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::modeling::NewtonEuler3DR& rel) {
-  const auto& posa = *rel.pc1();
-  const auto& posb = *rel.pc2();
-  const auto& nc = *rel.nc();
+  const auto& posa = rel.pc1();
+  const auto& posb = rel.pc2();
+  const auto& nc = rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
@@ -190,9 +190,9 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::modeling::NewtonEuler5DR& rel) {
-  const auto& posa = *rel.pc1();
-  const auto& posb = *rel.pc2();
-  const auto& nc = *rel.nc();
+  const auto& posa = rel.pc1();
+  const auto& posb = rel.pc2();
+  const auto& nc = rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
@@ -405,9 +405,9 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::modeling::Lagrangian2d2DR& rel) {
-  const auto& posa = *rel.pc1();
-  const auto& posb = *rel.pc2();
-  const auto& nc = *rel.nc();
+  const auto& posa = rel.pc1();
+  const auto& posb = rel.pc2();
+  const auto& nc = rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
@@ -446,9 +446,9 @@ void siconos::io::ContactPointVisitor::operator()(
 template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::modeling::Lagrangian2d3DR& rel) {
-  const auto& posa = *rel.pc1();
-  const auto& posb = *rel.pc2();
-  const auto& nc = *rel.nc();
+  const auto& posa = rel.pc1();
+  const auto& posb = rel.pc2();
+  const auto& nc = rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
@@ -501,7 +501,7 @@ void siconos::io::ContactPointDomainVisitor::operator()(
    * TODO: contact point domain coloring (e.g. based on broadphase).
    * currently, domain = (x>0):1?0
    */
-  answer(0) = (*rel.pc1())(0) > 0;
+  answer(0) = rel.pc1()(0) > 0;
 
   answer(1) = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
 }

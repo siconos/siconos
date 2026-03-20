@@ -40,13 +40,13 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
     if (contactItr != contacts_map_.end()) {
       contact = contactItr->second;
     }
-    auto pc1 = std::make_shared<siconos::algebra::SiconosVector3>();
-    (*pc1)(0) = q(i);
-    (*pc1)(1) = q(i + 1);
-    (*pc1)(2) = q(i + 2);
+    siconos::algebra::SiconosVector3 pc1;
+    pc1(0) = q(i);
+    pc1(1) = q(i + 1);
+    pc1(2) = q(i + 2);
 
     for (auto &s : supports_) {
-      if (s->isContact(*pc1, tolAtContact_)) {
+      if (s->isContact(pc1, tolAtContact_)) {
         // If the current point is in contact with the support then
         // we get it's projection (pc2) on the obstacle, the normal and the tangent.
         auto pc2 = s->pc2();
@@ -56,10 +56,10 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
         if (contact) {  // The interaction already exists
           auto relation = std::dynamic_pointer_cast<Cable2d3DR>(contact->relation());
           assert(relation);
-          relation->updateContactPoint(pc1, pc2, normal, tangent);
+          relation->updateContactPoints(pc1, *pc2, *normal, *tangent);
         } else {
           // create relation
-          auto relation = std::make_shared<Cable2d3DR>(node_idx, pc2, normal, tangent);
+          auto relation = std::make_shared<Cable2d3DR>(node_idx, *pc2, *normal, *tangent);
 
           // create interaction
           auto inter = std::make_shared<siconos::modeling::Interaction>(s->nslaw(), relation);

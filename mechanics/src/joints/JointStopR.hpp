@@ -36,14 +36,14 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
  protected:
   ACCEPT_SERIALIZATION(JointStopR);
 
-  std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
+  std::shared_ptr<NewtonEulerJointR> joint_{nullptr};
 
-  std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _pos{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _dir{nullptr};
+  std::vector<siconos::algebra::Index> axis_ = {};
+  siconos::algebra::SiconosVector pos_;
+  siconos::algebra::SiconosVector dir_;
 
-  siconos::algebra::Index _axisMin{0}, _axisMax{0};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
+  siconos::algebra::Index axisMin_{0}, axisMax_{0};
+  siconos::algebra::SiconosMatrix jacobian_buffer_;
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -66,7 +66,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   JointStopR(std::shared_ptr<NewtonEulerJointR> joint,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& pos,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& dir,
-             std::shared_ptr<std::vector<siconos::algebra::Index>> axes);
+             const std::vector<siconos::algebra::Index>& axes);
 
 #if 0
   /* The following constructor is disabled for now.  In fact
@@ -95,7 +95,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual std::size_t numberOfConstraints() const;
@@ -110,7 +110,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   double direction(siconos::algebra::Index _index);
 
   /** Return the joint assigned to this joint stop relation. */
-  std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }
+  std::shared_ptr<NewtonEulerJointR> joint() { return joint_; }
 
   /** Return the number of joint axes indexed by this relation. */
   auto numberOfAxes();

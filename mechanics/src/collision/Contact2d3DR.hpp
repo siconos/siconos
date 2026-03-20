@@ -42,12 +42,14 @@ class Contact2d3DR : public siconos::modeling::Lagrangian2d3DR {
    *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
   virtual void updateContactPointsInAbsoluteFrame(
-      const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
-      const siconos::algebra::SiconosVector& normal);
+      const siconos::algebra::SiconosVector2& pos1,
+      const siconos::algebra::SiconosVector2& pos2,
+      const siconos::algebra::SiconosVector2& normal);
 
   virtual void preDelete() {}
-  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
-
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif

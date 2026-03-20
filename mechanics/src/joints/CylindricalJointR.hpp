@@ -45,13 +45,13 @@ class CylindricalJointR : public NewtonEulerJointR {
    * axes_[0].  It forms with axis2_ and axes_[0] a base such that
    * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
-  siconos::algebra::SiconosVector3 axis1_;
+  siconos::algebra::SiconosVector3 axis1_ = siconos::algebra::SiconosVector3::Zero();
 
   /** axis2_ is a unit vector that is orthogonal to the cylindrical axis
    * axes_[0].  It forms with axis2_ and axes_[0] a base such that
    * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
-  siconos::algebra::SiconosVector3 axis2_;
+  siconos::algebra::SiconosVector3 axis2_ = siconos::algebra::SiconosVector3::Zero();
 
   double _cq2q101{0.};
   double _cq2q102{0.};
@@ -61,10 +61,10 @@ class CylindricalJointR : public NewtonEulerJointR {
   /** P is the point defining the location of the line created by
    * axes_[0].  It is stored in the q1 frame, i.e. the vector from
    * initial G1 to P, called _G1P0. */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _G1P0{nullptr};
+  siconos::algebra::SiconosVector3 G1P0_ = siconos::algebra::SiconosVector3::Zero();
 
   /** _G2P0 is the vector from initial G1 to P */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _G2P0{nullptr};
+  siconos::algebra::SiconosVector3 G2P0_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Cumulative number of twists around the joint relative to initial
    * angular difference. */
@@ -112,8 +112,8 @@ class CylindricalJointR : public NewtonEulerJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
 
   /** \return the axis of rotation.
@@ -130,8 +130,8 @@ class CylindricalJointR : public NewtonEulerJointR {
    *  otherwise the q1 frame is assumed.
    */
   virtual siconos::algebra::SiconosVector3 normalDoF(
-      const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      const siconos::algebra::SiconosVector7& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1 = std::nullopt,
       int axis = 0, bool absoluteRef = true) override;
 
   int twistCount() { return _twistCount; }
@@ -147,7 +147,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
@@ -185,7 +185,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y,
       siconos::algebra::Index axis = 0) override;
 
@@ -193,8 +193,8 @@ class CylindricalJointR : public NewtonEulerJointR {
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq,
       siconos::algebra::Index axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);

@@ -18,16 +18,11 @@
 
 #include "SphereNEDSSphereNEDSR.hpp"
 
-#include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 
 siconos::collision::native::bodies::SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR::
     SphereNEDSSphereNEDSR(double r, double rr)
-    : siconos::modeling::NewtonEuler3DR{} {
-  r1 = r;
-  r2 = rr;
-  r1pr2 = r1 + r2;
-}
+    : siconos::modeling::NewtonEuler3DR{}, radius1_{r}, radius2_{rr}, radius_sum{r + rr} {}
 
 double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
     double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2) {
@@ -35,34 +30,17 @@ double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
   double dy = y1 - y2;
   double dz = z1 - z2;
 
-  return (sqrt(dx * dx + dy * dy + dz * dz) - r1pr2);
+  return (sqrt(dx * dx + dy * dy + dz * dz) - radius_sum);
 }
 
 void siconos::collision::native::bodies::SphereNEDSSphereNEDSR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   assert(q2);
-  double q_0 = q1(0);
-  double q_1 = q1(1);
-  double q_2 = q1(2);
-  double q_7 = 0;
-  double q_8 = 0;
-  double q_9 = 0;
-  if (q2) {
-    q_7 = (*q2)(0);
-    q_8 = (*q2)(1);
-    q_9 = (*q2)(2);
-  }
-  y(0) = distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2);
+  y(0) = distance(q1(0), q1(1), q1(2), radius1_, (*q2)(0), (*q2)(1), (*q2)(2), radius2_);
   // Approximation _Pc1=_Pc2
-  (*_Pc1)(0) = (r1 * q_0 + r2 * q_7) / (r1 + r2);
-  (*_Pc1)(1) = (r1 * q_1 + r2 * q_8) / (r1 + r2);
-  (*_Pc1)(2) = (r1 * q_2 + r2 * q_9) / (r1 + r2);
-  (*_Pc2)(0) = (r1 * q_0 + r2 * q_7) / (r1 + r2);
-  (*_Pc2)(1) = (r1 * q_1 + r2 * q_8) / (r1 + r2);
-  (*_Pc2)(2) = (r1 * q_2 + r2 * q_9) / (r1 + r2);
-  (*_Nc)(0) = (q_0 - q_7) / (y(0) + r1pr2);
-  (*_Nc)(1) = (q_1 - q_8) / (y(0) + r1pr2);
-  (*_Nc)(2) = (q_2 - q_9) / (y(0) + r1pr2);
+  contactPoint1_ = (radius1_ * q1.head<3>() + radius2_ * q2->head<3>()) / radius_sum;
+  contactPoint2_ = contactPoint1_;
+  nc_ = (q1.head<3>() - q2->head<3>()) / (y(0) + radius_sum);
 }

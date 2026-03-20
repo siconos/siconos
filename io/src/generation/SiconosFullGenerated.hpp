@@ -3,212 +3,87 @@
 #define SiconosFullGenerated_hpp
 #include <SiconosConfig.h>
 #ifdef WITH_SERIALIZATION
-#include "MechanicsFwd.hpp"
-#include "SpaceFilter.hpp"
-#include "SpaceFilter_impl.hpp"
-#include "ExternalBody.hpp"
-#include "Disk.hpp"
 #include "Circle.hpp"
+#include "CircleCircleR.hpp"
+#include "CircularDS.hpp"
+#include "Disk.hpp"
 #include "DiskDiskR.hpp"
 #include "DiskMovingPlanR.hpp"
 #include "DiskPlanR.hpp"
+#include "ExternalBody.hpp"
+#include "FirstOrderLinearDS.hpp"
+#include "FirstOrderNonLinearDS.hpp"
+#include "MechanicsFwd.hpp"
+#include "SiconosBodies.hpp"
+#include "SiconosCollision.hpp"
+#include "SiconosControl.hpp"
+#include "SiconosJoints.hpp"
+#include "SiconosKernel.hpp"
+#include "SpaceFilter.hpp"
+#include "SpaceFilter_impl.hpp"
 #include "SphereLDS.hpp"
 #include "SphereLDSPlanR.hpp"
 #include "SphereLDSSphereLDSR.hpp"
 #include "SphereNEDS.hpp"
 #include "SphereNEDSPlanR.hpp"
 #include "SphereNEDSSphereNEDSR.hpp"
-#include "SiconosBodies.hpp"
-#include "CircleCircleR.hpp"
-#include "CircularDS.hpp"
-#include "SiconosJoints.hpp"
-#include "SiconosCollision.hpp"
-#include "SiconosKernel.hpp"
-#include "FirstOrderNonLinearDS.hpp"
-#include "FirstOrderLinearDS.hpp"
-#include "SiconosControl.hpp"
-SICONOS_IO_REGISTER(SiconosException,
-  (_reportMsg))
-SICONOS_IO_REGISTER(SiconosMemory,
-  (_indx)
-  (_nbVectorsInMemory))
-SICONOS_IO_REGISTER(BlockVector,
-  (_sizeV)
-  (_tabIndex)
-  (_vect))
-SICONOS_IO_REGISTER(SiconosMatrix,
-  (_num))
-SICONOS_IO_REGISTER(GraphProperties,
-  (symmetric))
-SICONOS_IO_REGISTER(DynamicalSystemProperties,
-  (W)
-  (IterationMatrixBoundaryConditions)
-  (absolute_position)
-  (lower_block)
-  (osi)
-  (upper_block)
-  (workMatrices)
-  (workVectors))
-SICONOS_IO_REGISTER(InteractionProperties,
-  (absolute_position)
-  (absolute_position_proj)
-  (block)
-  (forControl)
-  (source)
-  (source_pos)
-  (target)
-  (target_pos)
-  (workBlockVectors)
-  (workMatrices)
-  (workVectors))
+SICONOS_IO_REGISTER(SiconosException, (_reportMsg))
+SICONOS_IO_REGISTER(SiconosMemory, (_indx)(_nbVectorsInMemory))
+SICONOS_IO_REGISTER(BlockVector, (_sizeV)(_tabIndex)(_vect))
+SICONOS_IO_REGISTER(SiconosMatrix, (_num))
+SICONOS_IO_REGISTER(GraphProperties, (symmetric))
+SICONOS_IO_REGISTER(
+    DynamicalSystemProperties,
+    (W)(IterationMatrixBoundaryConditions)(absolute_position)(lower_block)(osi)(upper_block)(workMatrices)(workVectors))
+SICONOS_IO_REGISTER(
+    InteractionProperties,
+    (absolute_position)(absolute_position_proj)(block)(forControl)(source)(source_pos)(target)(target_pos)(workBlockVectors)(workMatrices)(workVectors))
 SICONOS_IO_REGISTER(MatrixIntegrator,
-  (_DS)
-  (_E)
-  (_OSI)
-  (_TD)
-  (_isConst)
-  (_mat)
-  (_nsds)
-  (_plugin)
-  (_sim))
-SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph,(_DynamicalSystemsGraph),
-  (Ad)
-  (AdInt)
-  (B)
-  (Bd)
-  (L)
-  (Ld)
-  (dummy)
-  (e)
-  (groupId)
-  (jacgx)
-  (name)
-  (pluginB)
-  (pluginJacgx)
-  (pluginL)
-  (pluginU)
-  (tmpXdot)
-  (u))
-SICONOS_IO_REGISTER_WITH_BASES(InteractionsGraph,(_InteractionsGraph),
-  (blockProj)
-  (dummy)
-  (lower_blockProj)
-  (name)
-  (upper_blockProj))
-SICONOS_IO_REGISTER(Topology,
-  (_DSG)
-  (_IG)
-  (_hasChanged)
-  (_numberOfConstraints)
-  (_symmetric))
-SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL,(NonSmoothLaw),
-  (_ElasCof)
-  (_ResCof)
-  (_Stiff))
-SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL,(NonSmoothLaw),
-)
-SICONOS_IO_REGISTER_WITH_BASES(HarmonicBC,(BoundaryCondition),
-  (_a)
-  (aVector_)
-  (_b)
-  (bVector_)
-  (_omega)
-  (omega_)
-  (_phi)
-  (phi_))
-SICONOS_IO_REGISTER(NSLawMatrix,
-)
-SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
-)
-SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactFrictionNSL,(NonSmoothLaw),
-  (_en)
-  (_et)
-  (_mu))
-SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
-  (_equalitySize))
-SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonEuler3DR,(NewtonEuler1DR),
-)
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
-  (_e))
-SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem,
-  (_BVP)
-  (_T)
-  (_author)
-  (_changeLog)
-  (_date)
-  (_description)
-  (_mIsLinear)
-  (_t)
-  (_t0)
-  (_title)
-  (_topology))
-SICONOS_IO_REGISTER(BoundaryCondition,
-  (_pluginPrescribedVelocity)
-  (prescribedVelocity_)
-  (prescribedVelocityOld_)
-  (velocityIndices_))
-SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL,(NonSmoothLaw),
-  (_e))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR,(NewtonEulerR),
-  (_AUX1)
-  (_AUX2)
-  (_NPG1)
-  (_NPG2)
-  (_Nc)
-  (_Pc1)
-  (_Pc2)
-  (_RotationAbsToContactFrame)
-  (_isOnContact)
-  (_relNc)
-  (_relPc1)
-  (_relPc2)
-  (_rotationMatrixAbsToBody))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR,(LagrangianR),
-  (_F)
-  (_e))
-SICONOS_IO_REGISTER_WITH_BASES(NormalConeNSL,(NonSmoothLaw),
-  (_H)
-  (_K))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR,(Relation),
-  (_T)
-  (_contactForce)
-  (jacobianhOver_q_dot_)
-  (_e)
-  (_jacglambda)
-  (jacobianhOver_lambda_)
-  (jacobianhOver_q_)
-  (jacobianhOver_q_T)
-  (_plugindotjacqh)
-  (_secondOrderTimeDerivativeTerms))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR,(LagrangianR),
-  (_F)
-  (_e))
-SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change,
-  (ds)
-  (i)
-  (typeOfChange))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR,(FirstOrderR),
-  (_e))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderLinearDS),
-)
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R,(FirstOrderR),
-)
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R,(FirstOrderR),
-)
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderNonLinearDS),
-  (_A)
-  (_b)
-  (_hasConstantA)
-  (hasConstantbVector_)
-  (_pluginA)
-  (_pluginb))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
-  (_pluginJachlambda))
-SICONOS_IO_REGISTER(NonSmoothLaw,
-  (_size))
-SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
-  (_lb)
-  (_ub))
+                    (_DS)(_E)(_OSI)(_TD)(_isConst)(_mat)(_nsds)(_plugin)(_sim))
+SICONOS_IO_REGISTER_WITH_BASES(
+    DynamicalSystemsGraph, (_DynamicalSystemsGraph),
+    (Ad)(AdInt)(B)(Bd)(L)(Ld)(dummy)(e)(groupId)(jacgx)(name)(pluginB)(pluginJacgx)(pluginL)(pluginU)(tmpXdot)(u))
+SICONOS_IO_REGISTER_WITH_BASES(InteractionsGraph, (_InteractionsGraph),
+                               (blockProj)(dummy)(lower_blockProj)(name)(upper_blockProj))
+SICONOS_IO_REGISTER(Topology, (_DSG)(_IG)(_hasChanged)(_numberOfConstraints)(_symmetric))
+SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw), (_ElasCof)(_ResCof)(_Stiff))
+SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL, (NonSmoothLaw), )
+SICONOS_IO_REGISTER_WITH_BASES(HarmonicBC, (BoundaryCondition),
+                               (_a)(aVector_)(_b)(bVector_)(_omega)(omega_)(_phi)(phi_))
+SICONOS_IO_REGISTER(NSLawMatrix, )
+SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL, (NonSmoothLaw), )
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactFrictionNSL, (NonSmoothLaw),
+                               (_en)(_et)(_mu))
+SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL, (NonSmoothLaw),
+                               (_equalitySize))
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonEuler3DR, (NewtonEuler1DR), )
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR), (_e))
+SICONOS_IO_REGISTER(
+    siconos::modeling::NonSmoothDynamicalSystem,
+    (_BVP)(_T)(_author)(_changeLog)(_date)(_description)(_mIsLinear)(_t)(_t0)(_title)(_topology))
+SICONOS_IO_REGISTER(
+    BoundaryCondition,
+    (_pluginPrescribedVelocity)(prescribedVelocity_)(prescribedVelocityOld_)(velocityIndices_))
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL, (NonSmoothLaw), (_e))
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR, (NewtonEulerR),
+                               (_Nc)(_Pc1)(_Pc2)(_isOnContact)(_relNc)(_relPc1)(_relPc2))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR, (LagrangianR), (_F)(_e))
+SICONOS_IO_REGISTER_WITH_BASES(NormalConeNSL, (NonSmoothLaw), (_H)(_K))
+SICONOS_IO_REGISTER_WITH_BASES(
+    NewtonEulerR, (Relation),
+    (_T)(_contactForce)(jacobianhOver_q_dot_)(_e)(_jacglambda)(jacobianhOver_lambda_)(jacobianhOver_q_)(jacobianhOver_q_T)(_plugindotjacqh)(_secondOrderTimeDerivativeTerms))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR, (LagrangianR), (_F)(_e))
+SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change, (ds)(i)(typeOfChange))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR, (FirstOrderR), (_e))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderLinearDS), )
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR), )
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R, (FirstOrderR), )
+SICONOS_IO_REGISTER_WITH_BASES(
+    FirstOrderLinearDS, (FirstOrderNonLinearDS),
+    (_A)(_b)(_hasConstantA)(hasConstantbVector_)(_pluginA)(_pluginb))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR), (_pluginJachlambda))
+SICONOS_IO_REGISTER(NonSmoothLaw, (_size))
+SICONOS_IO_REGISTER_WITH_BASES(RelayNSL, (NonSmoothLaw), (_lb)(_ub))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
   (_B)
   (_C)

@@ -72,7 +72,7 @@ siconos::mechanics::fem::build_dynamicalsystem_from_gmsh(
 }
 
 siconos::mechanics::fem::ContactDetection::ContactDetection(
-    double initial_gap, std::shared_ptr<siconos::algebra::SiconosVector> normal,
+    double initial_gap, const siconos::algebra::SiconosVector& normal,
     std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw,
     std::shared_ptr<siconos::mechanics::fem::FiniteElementLinearTIDS> fesolid,
     const siconos::mechanics::fem::ContactConditionFunction& func,
@@ -99,9 +99,9 @@ siconos::mechanics::fem::ContactDetection::ContactDetection(
 
   if (contact_frame_dimension_ == 2)  // create tangent vertor
   {
-    tangent_ = std::make_shared<siconos::algebra::SiconosVector>(2);
-    (*tangent_)(0) = -(*normal_)(1);
-    (*tangent_)(1) = (*normal_)(0);
+    tangent_.resize(2);
+    tangent_(0) = -normal_(1);
+    tangent_(1) = normal_(0);
   }
 }
 
@@ -144,31 +144,28 @@ void siconos::mechanics::fem::ContactDetection::updateInteractions(
   for (auto cn : contacting_nodes_) {
     auto node = cn->node_;
     auto node_idx = node->global_dof_index()[0];
+    siconos::algebra::SiconosVector2 pc2;
+    pc2(0) = cn->node_->x() + displacement(node_idx);
+    pc2(1) = -initial_gap_;
     if (cn->inter_)  // update interaction->relation
     {
       // std::cout << "update interaction" << std::endl;
 
-      std::shared_ptr<siconos::algebra::SiconosVector> pc2;
       if (contact_frame_dimension_ == 2) {
         auto r = std::dynamic_pointer_cast<siconos::mechanics::fem::NodeFem2d2DR>(
             cn->inter_->relation());
         assert(r);
-        pc2 = r->pc2();
+        r->updateContactPoint(pc2, normal_, tangent_);
       } else {
         auto r = std::dynamic_pointer_cast<siconos::mechanics::fem::NodeFem1d2DR>(
             cn->inter_->relation());
         assert(r);
-        pc2 = r->pc2();
+        r->updateContactPoint(pc2, normal_);
       }
 
-      (*pc2)(0) = cn->node_->x() + displacement(node_idx);
-      (*pc2)(1) = -initial_gap_;
     } else  // create an interaction and link
     {
       // std::cout << "create interaction" << std::endl;
-      auto pc2 = std::make_shared<siconos::algebra::SiconosVector>(2);
-      (*pc2)(0) = cn->node_->x() + displacement(node_idx);
-      (*pc2)(1) = -initial_gap_;
       std::shared_ptr<siconos::modeling::Relation> relation;
       if (contact_frame_dimension_ == 2) {
         relation = std::make_shared<siconos::mechanics::fem::NodeFem2d2DR>(cn->node_, pc2,

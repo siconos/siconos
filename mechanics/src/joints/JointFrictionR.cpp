@@ -27,7 +27,7 @@
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 /** Initialize a joint friction for a common case: a single axis with a
  * single friction, either positive or negative. For use with
@@ -67,7 +67,7 @@ siconos::joints::JointFrictionR::JointFrictionR(
 
 void siconos::joints::JointFrictionR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Velocity-level constraint, no position-level h
   y.setZero();
@@ -81,7 +81,8 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
 
   if (!jacobianhOver_q_Tmp ||
       !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
-    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0.size());
+    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosDenseMatrix>(n, q0.size());
+    jacobianhOver_q_Tmp->setZero();
   }
 
   // Compute the jacobian for the required range of axes
@@ -96,9 +97,8 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
   assert(H_NE_view_->rows() == 1);
-  for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++) {
-    (*H_NE_view_)(0, j) = -(*jacobianhOver_q_Tmp)((*_axis)[0] - _axisMin, j);
-  }
+  //  (*H_NE_view_) = -jacobianhOver_q_Tmp->row((*_axis)[0] - _axisMin);
+  (*H_NE_view_) = -*jacobianhOver_q_Tmp;
 }
 
 size_t siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }

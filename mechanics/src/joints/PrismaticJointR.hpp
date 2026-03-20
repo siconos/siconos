@@ -43,13 +43,13 @@ class PrismaticJointR : public NewtonEulerJointR {
    * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  siconos::algebra::SiconosVector3 axis1_;
+  siconos::algebra::SiconosVector3 axis1_ = siconos::algebra::SiconosVector3::Zero();
 
   /** axis2_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
    * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  siconos::algebra::SiconosVector3 axis2_;
+  siconos::algebra::SiconosVector3 axis2_ = siconos::algebra::SiconosVector3::Zero();
 
   double _G10G20d1x{0.};
   double _G10G20d1y{0.};
@@ -99,8 +99,8 @@ class PrismaticJointR : public NewtonEulerJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
 
   /** \return the axis of rotation.
@@ -117,8 +117,8 @@ class PrismaticJointR : public NewtonEulerJointR {
    *  otherwise the q1 frame is assumed.
    */
   virtual siconos::algebra::SiconosVector3 normalDoF(
-      const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      const siconos::algebra::SiconosVector7& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1 = std::nullopt,
       int axis = 0, bool absoluteRef = true) override;
 
   void displayInitialPosition();
@@ -134,7 +134,7 @@ class PrismaticJointR : public NewtonEulerJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* The options were    : operatorarrow */
@@ -186,7 +186,7 @@ class PrismaticJointR : public NewtonEulerJointR {
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y,
       siconos::algebra::Index axis = 0) override;
 
@@ -194,8 +194,8 @@ class PrismaticJointR : public NewtonEulerJointR {
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq,
       siconos::algebra::Index axis = 0) override;
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);

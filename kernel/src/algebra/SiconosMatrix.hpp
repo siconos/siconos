@@ -143,8 +143,8 @@ inline void print(const SiconosSparseMatrix& mat) {
 //   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 // }
 template <typename Derived>
-requires(Derived::ColsAtCompileTime == 1 ||
-         Derived::RowsAtCompileTime == 1) void print(const Eigen::MatrixBase<Derived>& vec) {
+  requires(Derived::ColsAtCompileTime == 1 || Derived::RowsAtCompileTime == 1)
+void print(const Eigen::MatrixBase<Derived>& vec) {
   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 }
 

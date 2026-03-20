@@ -22,6 +22,7 @@
 #define NEWTONEULERRELATIONFC3D_H
 
 #include "NewtonEuler1DR.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 
@@ -45,6 +46,13 @@ class NewtonEuler3DR : public NewtonEuler1DR {
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
 
+  /** Rotation matrix converting the absolute coordinate to the contact frame^
+   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
+   *  row. Internal bufer.
+   */
+  siconos::algebra::SiconosMatrix33 rotationAbsoluteToContactFrame_ =
+      siconos::algebra::SiconosMatrix33::Zero();
+
  public:
   /** destructor */
   virtual ~NewtonEuler3DR() noexcept = default;
@@ -67,7 +75,6 @@ class NewtonEuler3DR : public NewtonEuler1DR {
 
   void display() const override {}
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
-
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATIONFC3D_H

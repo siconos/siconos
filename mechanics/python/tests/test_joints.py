@@ -67,17 +67,19 @@ def test_joints():
     joints[6].setAxis(0, axis1)
     joints[6].setBasePositions(pos1, None)
 
-    cj = mj.CouplerJointR(joints[0], 0, joints[6], 1, 0.5, np.ones(7), 1, np.ones(7), 1)
-    ck = mj.CouplerJointR(joints[4], 0, joints[5], 1, 0.5)
     q0 = np.ones(7, dtype=np.float64)
     twist0 = np.ones(6, dtype=np.float64)
     mass = 2.0
     inertia = np.zeros((3, 3), dtype=np.float64, order="F")
     inertia[0, 0] = inertia[1, 1] = inertia[2, 2] = 1.0
-    neds = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
+    neds1 = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
+    neds2 = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
+    cj = mj.CouplerJointR(joints[0], 0, joints[6], 1, 0.5, neds1, 1, neds2, 1)
+    ck = mj.CouplerJointR(joints[4], 0, joints[5], 1, 0.5)
+    cl = mj.CouplerJointR(joints[0], 0, joints[6], 1, 0.5, neds1)
 
-    q1 = neds.q()
+    q1 = neds1.q()
     q2 = None
     ck.setBasePositions(q1, q2)
-    neds2 = sm.NewtonEulerDS(q0, twist0, mass, inertia, sm.alias_t)
-    cj.setBasePositions(q1, neds2.q())
+    cj.setBasePositions(neds1.q(), neds2.q())
+    cl.setBasePositions(neds1.q(), q2)

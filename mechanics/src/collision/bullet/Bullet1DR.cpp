@@ -27,20 +27,13 @@ siconos::collision::bullet::Bullet1DR::Bullet1DR(std::shared_ptr<btManifoldPoint
 
 void siconos::collision::bullet::Bullet1DR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   y(0) = _contactPoints->getDistance();
   auto posa = _contactPoints->getPositionWorldOnA();
   auto posb = _contactPoints->getPositionWorldOnB();
-  (*pc1())(0) = posa[0];
-  (*pc1())(1) = posa[1];
-  (*pc1())(2) = posa[2];
-  (*pc2())(0) = posb[0];
-  (*pc2())(1) = posb[1];
-  (*pc2())(2) = posb[2];
-
-  (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
-  (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
-  (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
-  ;
+  contactPoint1_ << posa[0], posa[1], posa[2];
+  contactPoint1_ << posb[0], posb[1], posb[2];
+  nc_ << _contactPoints->m_normalWorldOnB[0], _contactPoints->m_normalWorldOnB[1],
+      _contactPoints->m_normalWorldOnB[2];
 }

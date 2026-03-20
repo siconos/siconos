@@ -23,7 +23,6 @@
 #define ROTATIONQUATERNION_H
 
 #include <boost/math_fwd.hpp>  // for quaternion
-#include <memory>
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"

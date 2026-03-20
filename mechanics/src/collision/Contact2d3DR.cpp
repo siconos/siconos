@@ -57,15 +57,14 @@
 //          && "nc = 0, problems..\n");
 // }
 void siconos::collision::Contact2d3DR::updateContactPointsInAbsoluteFrame(
-    const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
-    const siconos::algebra::SiconosVector& normal)
-{
+    const siconos::algebra::SiconosVector2& pos1, const siconos::algebra::SiconosVector2& pos2,
+    const siconos::algebra::SiconosVector2& normal) {
   // Copy  positions
-  *_Pc1 = pos1;
-  *_Pc2 = pos2;
+  contactPoint1_ = pos1;
+  contactPoint2_ = pos2;
 
   // Update normal
-  *_Nc = normal;
+  nc_ = normal;
 
-  assert(!((*_Nc)(0) == 0 && (*_Nc)(1) == 0) && "nc = 0, problems..\n");
+  assert(!(nc_(0) == 0 && nc_(1) == 0) && "nc = 0, problems..\n");
 }

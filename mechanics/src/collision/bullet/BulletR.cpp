@@ -26,7 +26,6 @@
 #include <iostream>
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatPos etc
-#include "SiconosVector.hpp"
 // #include "siconos_debug.h"
 
 void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(
@@ -34,13 +33,17 @@ void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(
     double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {
   if (flip) {
-    siconos::collision::bullet::copyBtVector3(-1.0 * point.m_normalWorldOnB, *_Nc);
-    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling, *_Pc2);
-    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling, *_Pc1);
+    siconos::collision::bullet::copyBtVector3(-1.0 * point.m_normalWorldOnB, nc_);
+    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling,
+                                              contactPoint2_);
+    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling,
+                                              contactPoint1_);
   } else {
-    siconos::collision::bullet::copyBtVector3(point.m_normalWorldOnB, *_Nc);
-    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling, *_Pc1);
-    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling, *_Pc2);
+    siconos::collision::bullet::copyBtVector3(point.m_normalWorldOnB, nc_);
+    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling,
+                                              contactPoint1_);
+    siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling,
+                                              contactPoint2_);
   }
 }
 

@@ -68,8 +68,8 @@ siconos::joints::FixedJointR::FixedJointR(std::shared_ptr<siconos::modeling::New
 }
 
 void siconos::joints::FixedJointR::setBasePositions(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2) {
   boost::math::quaternion<double> quat1(q1(3), q1(4), q1(5), q1(6));
   boost::math::quaternion<double> quat2(q2 ? (*q2)(3) : 1, q2 ? (*q2)(4) : 0,
                                         q2 ? (*q2)(5) : 0, q2 ? (*q2)(6) : 0);
@@ -94,7 +94,7 @@ void siconos::joints::FixedJointR::setBasePositions(
 
 void siconos::joints::FixedJointR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double X1 = q1(0);
   double Y1 = q1(1);
