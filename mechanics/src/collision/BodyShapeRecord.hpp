@@ -26,6 +26,7 @@ shape in a contactor.
 #define BodyShapeRecord_h
 
 #include <memory>
+
 #include "SiconosVector.hpp"
 
 namespace siconos::modeling {

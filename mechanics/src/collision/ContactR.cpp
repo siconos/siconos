@@ -22,6 +22,7 @@
 
 #include <iostream>
 
+#include "BodyShapeRecord.hpp"
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
@@ -61,9 +62,11 @@ void siconos::collision::ContactR::updateContactPoints(
 void siconos::collision::ContactR::display() const {
   std::cout << "ContactR display()\n";
   if (bodyShapeRecordA) {
-    std::cout << "bodyShapeRecordA : " << bodyShapeRecordA << "\n";
+    std::cout << "bodyShapeRecordA: \n";
+    bodyShapeRecordA->display();
   }
   if (bodyShapeRecordB) {
-    std::cout << "bodyShapeRecordB : " << bodyShapeRecordB << "\n";
+    std::cout << "bodyShapeRecordB: \n";
+    bodyShapeRecordB->display();
   }
 }

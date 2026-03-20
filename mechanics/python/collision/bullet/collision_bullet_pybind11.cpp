@@ -23,6 +23,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include "BodyBulletShapeRecord.hpp"
 #include "BulletR.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosBulletCollisionManager.hpp"
@@ -140,6 +141,10 @@ PYBIND11_MODULE(_bullet, m) {
       .def("lineIntersectionQuery",
            &siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery);
 
-  py::class_<siconos::collision::bullet::BulletR, siconos::collision::ContactR,
-             py::smart_holder>(m, "BulletR");
+  auto bulletr_py = py::class_<siconos::collision::bullet::BulletR,
+                               siconos::collision::ContactR, py::smart_holder>(m, "BulletR");
+
+  py::class_<siconos::collision::bullet::BodyBulletShapeRecord,
+             siconos::collision::BodyShapeRecord, py::smart_holder>(m,
+                                                                    "BodyBulletShapeRecord");
 }

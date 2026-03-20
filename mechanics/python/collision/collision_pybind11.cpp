@@ -182,7 +182,7 @@ PYBIND11_MODULE(_collision, m) {
       .def(py::init<>())
       .def_readonly("number", &siconos::collision::StaticBody::number);
 
-  py::class_<siconos::collision::BodyShapeRecord>(m, "BodyShapeRecord")
+  py::class_<siconos::collision::BodyShapeRecord, py::smart_holder>(m, "BodyShapeRecord")
       .def("display", &siconos::collision::BodyShapeRecord::display)
       .def("__repr__",
            [](const siconos::collision::BodyShapeRecord &a) {
