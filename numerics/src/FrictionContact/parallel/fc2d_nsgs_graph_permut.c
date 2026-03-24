@@ -428,6 +428,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,    \
                blocks_contiguous)
     {
+      // Allocate local problem
       local_problem =
           (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
       local_problem->M = NM_new();
@@ -436,18 +437,24 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       local_problem->M->size1 = 2;
       local_problem->q = (double*)malloc(2 * sizeof(double));
 
+      // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
       index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-
       memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
       memcpy(index2_data, problem->M->matrix1->index2_data,
              problem->M->matrix1->nbblocks * sizeof(size_t));
 
+      double* blocks_contiguous_local =
+          (double*)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+      memcpy(blocks_contiguous_local, blocks_contiguous,
+             problem->M->matrix1->nbblocks * 4 * sizeof(double));
+      double* diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
+
+      double local_light_error_sum = 0.0;
+      double local_norm_r = 0.0;
+
       while ((iter < itermax) && has_not_converged) {
-        // light_error_sum = 0.0;
         light_error_2 = 0.0;
-        /* Loop over the rows of blocks in blmat */
-        /* contact: current row (of blocks) number */
 
 #pragma omp single
         {
@@ -480,19 +487,17 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, blocks_contiguous,
-                                                 diagonal_blocks, index1_data, index2_data,
-                                                 local_problem, z);
+            fc2d_nsgs_buildLocalProblem_parallel(
+                permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local,
+                index1_data, index2_data, local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
                 local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
-            light_error_2 = light_error_squared(localreaction, &z[pos]);
-
-            // #pragma omp atomic update
-            light_error_sum += light_error_2;
+            local_light_error_sum += light_error_squared(localreaction, &z[pos]);
+            local_norm_r += squared_norm(localreaction);
 
             int relative_convergence_criteria =
                 light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
@@ -519,6 +524,16 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
             z[pos + 1] = localreaction[1];
           }
         }  // end for loop
+
+#pragma omp atomic
+        light_error_sum += local_light_error_sum;
+#pragma omp atomic
+        norm_r += local_norm_r;
+
+#pragma omp barrier
+
+        local_light_error_sum = 0.0;
+        local_norm_r = 0.0;
 
 #pragma omp single
         {
@@ -548,6 +563,10 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       free(local_problem->q);
       free(local_problem->M);
       free(local_problem);
+      free(index1_data);
+      free(index2_data);
+      free(blocks_contiguous_local);
+      free(diagonal_blocks_local);
     }  // end parallel region
 
     /***********************/
@@ -565,6 +584,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
                has_not_converged, norm_q, w, itermax)
     {
+      // Allocate local problem
       local_problem = (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
       local_problem->M = NM_new();
       local_problem->M->storageType = NM_DENSE;
@@ -572,9 +592,9 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       local_problem->M->size1 = 2;
       local_problem->q = (double*)malloc(2 * sizeof(double));
 
+      // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
       index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-
       memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
       memcpy(index2_data, problem->M->matrix1->index2_data,
              problem->M->matrix1->nbblocks * sizeof(size_t));
@@ -587,8 +607,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       double local_light_error_sum = 0.0;
       double local_norm_r = 0.0;
-
-      // unsigned int n_thread = omp_get_thread_num();
 
       while ((iter < itermax) && has_not_converged) {
         for (size_t color = 0; color < n_colors; color++) {
@@ -619,9 +637,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
         }  // end for loop
 
-        // manual_reduction[2 * n_thread] = local_light_error_sum;
-        // manual_reduction[2 * n_thread + 1] = local_norm_r;
-
 #pragma omp atomic
         light_error_sum += local_light_error_sum;
 #pragma omp atomic
@@ -632,20 +647,9 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
         local_light_error_sum = 0.0;
         local_norm_r = 0.0;
 
-/*
-#pragma omp atomic
-light_error_sum += local_light_error_sum;
-#pragma omp atomic
-norm_r += local_norm_r;
-
-local_light_error_sum = 0.0;
-local_norm_r = 0.0;
-*/
-
 /*  error evaluation */
 #pragma omp single
         {
-          // error = calculateLightError(light_error_sum, nc, z, norm_r);
           error = sqrt(light_error_sum);
           norm_r = sqrt(norm_r);
           if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
@@ -738,7 +742,6 @@ local_norm_r = 0.0;
     SBM_problem = NULL;
     problem->M->matrix1 = NULL;
   }
-  // free(SBM_problem);
 
   SBMfree(SBM_col_permuted, 0);  // do not free blocks on this one
   SBM_clear(SBM_permuted);       // free blocks because they were copied
@@ -746,32 +749,30 @@ local_norm_r = 0.0;
   free(SBM_permuted);
   free(q_permuted);
   free(mu_permuted);
-
-  /* DO NOT FORGET TO FREE THE REST */
 }
 
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers FC2D_NSGS_GRAPH_PERMUT in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_init_wrap(void* problem, SolverOptions* options) {
   fc2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
-                                SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_solve_wrap(void* problem, double* reaction, double* velocity,
+                                             SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph_permut((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_graph_permut_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -779,9 +780,9 @@ static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT, "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT",
                 "Parallel version of FC2D_NSGS (OpenMP, with permutation)",
-                fc2d_nsgs_init_wrap, fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap,
-                NULL,                  /* error function */
-                fc2d_nsgs_set_default, /* set_default */
-                1000,                  /* default_max_iter */
-                1e-4,                  /* default_tol */
-                0)                     /* is_local_solver */
+                fc2d_nsgs_graph_permut_init_wrap, fc2d_nsgs_graph_permut_solve_wrap,
+                fc2d_nsgs_graph_permut_free_wrap, NULL, /* error function */
+                fc2d_nsgs_set_default,                  /* set_default */
+                1000,                                   /* default_max_iter */
+                1e-4,                                   /* default_tol */
+                0)                                      /* is_local_solver */

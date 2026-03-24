@@ -651,7 +651,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
 
         for (size_t color = 0; color < n_colors; color++) {
 #pragma omp for schedule(static) reduction(+ : light_error_sum)
-          for (int v = 0; v < partition_size[color]; v++) {
+          for (size_t v = 0; v < partition_size[color]; v++) {
             contact = (unsigned int)partitions[color][v];
 
             solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
@@ -678,11 +678,12 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
           ++iter;
           light_error_sum = 0.;
         }
-      }
-      /* Free stuff allocated at the beginning of parallel ?
-      Or don't care because it's done automatically since the parallel region finishes right
-      after ?
-      */
+      }  // end of while loop
+
+      // Clear memory
+      solver_options_delete(local_opts);
+      fc3d_local_problem_free(localproblem, problem);
+      free(local_opts);
     }
   }
 
@@ -696,13 +697,12 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
     double tmp_criteria1, tmp_criteria2;
     unsigned int number_of_freezed_contact;
 
-#pragma omp parallel default(none)                                                         \
-    private(contact, localproblem, localreaction, light_error_2, local_opts)               \
-    shared(problem, localProblemFunctionToolkit, computeError, options, iter, itermax,     \
-               hasNotConverged, error, number_of_freezed_contact, tmp_criteria1,           \
-               tmp_criteria2, norm_r, nc, n_colors, light_error_sum, partition_size,       \
-               partitions, reaction, freeze_contacts, scontacts, norm_q, omega, tolerance, \
-               velocity)
+#pragma omp parallel default(none)                                                     \
+    private(contact, localproblem, localreaction, light_error_2, local_opts)           \
+    shared(problem, localProblemFunctionToolkit, computeError, options, iter, itermax, \
+               hasNotConverged, error, number_of_freezed_contact, tmp_criteria1,       \
+               tmp_criteria2, norm_r, nc, n_colors, light_error_sum, partition_size,   \
+               partitions, reaction, freeze_contacts, norm_q, omega, tolerance, velocity)
     {
       /* Allocate localproblem for each thread */
       localproblem = fc3d_local_problem_allocate(problem);
@@ -732,22 +732,13 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
           }
         }
 
+        /* Inside each color group, update contacts in parallel */
         for (size_t color = 0; color < n_colors; color++) {
 #pragma omp for schedule(static) reduction(+ : light_error_sum)
           for (int v = 0; v < partition_size[color]; v++) {
             unsigned int i = (unsigned int)partitions[color][v];
 
-            if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
-                options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
-              if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
-                uint_shuffle(scontacts, nc);
-              }
-              contact = scontacts[i];
-            } else
-              contact = i;
+            contact = i;
 
             if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
               if (freeze_contacts[contact] > 0) {
@@ -779,7 +770,8 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
             /* } */
 
             if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
-              double squared_norm_localreaction = squared_norm(localreaction);
+              double squared_norm_localreaction =
+                  localProblemFunctionToolkit->squared_norm(localreaction);
               int relative_convergence_criteria =
                   light_error_2 <= tmp_criteria1 * squared_norm_localreaction;
               int small_reaction_criteria = squared_norm_localreaction <= tmp_criteria2;
@@ -928,7 +920,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC3D_NSGS in the global solver registry, enabling:
+ * This registers FC3D_NSGS_GRAPH in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -955,7 +947,7 @@ static void fc3d_nsgs_graph_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_FRICTION_3D_NSGS_GRAPH, "SICONOS_FRICTION_3D_NSGS_GRAPH",
-                "Non-smooth Gauss-Seidel for 3D Friction Contact", fc3d_nsgs_graph_init_wrap,
+                "Parallel FC3D_NSGS using graph coloring", fc3d_nsgs_graph_init_wrap,
                 fc3d_nsgs_graph_solve_wrap, fc3d_nsgs_graph_free_wrap,
                 NULL,                  /* error function */
                 fc3d_nsgs_set_default, /* set_default */

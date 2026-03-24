@@ -300,14 +300,6 @@ __global__ void fc2d_nsgs_local_solve_kernel_range_reduce(
 
 void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, double* w,
                                  int* info, SolverOptions* options) {
-  /* Notes:
-     - we suppose that the trivial solution case has been checked before,
-     and that all inputs differs from NULL since this function is
-     supposed to be called from lcp_driver_global().
-  */
-
-  // double time = omp_get_wtime();
-
   // Get solver parameters
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -317,23 +309,12 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
 
-  // time = omp_get_wtime() - time;
-  // printf("time getting parameters: %es\n", time);
-  // time = omp_get_wtime();
-
   // Initialize cusparse
   cusparseHandle_t handle = NULL;
   CHECK_CUSPARSE(cusparseCreate(&handle))
   cudaStream_t stream;
   CHECK_CUDA(cudaStreamCreate(&stream));
   CHECK_CUSPARSE(cusparseSetStream(handle, stream));
-  // int cusparse_version = -1;
-  // CHECK_CUSPARSE( cusparseGetVersion(handle, &cusparse_version) )
-  // printf("cusparse version: %d\n", cusparse_version);
-
-  // time = omp_get_wtime() - time;
-  // printf("time initializing cusparse handle: %es\n", time);
-  // time = omp_get_wtime();
 
   // Start coloring and permutation
   size_t n_colors = 0;
@@ -386,11 +367,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   SparseBlockStructuredMatrix* old_matrix1 = problem->M->matrix1;
   problem->M->matrix1 = SBM_permuted;
 
-  // time = omp_get_wtime() - time;
-  // printf("time permutating: %e\n", time);
-
-  // time = omp_get_wtime();
-
   /* Get diagonal blocks and determinants */
   double* diagonal_blocks = fc2d_extract_diagonal_blocks(problem);
   double* diagonal_block_determinant =
@@ -410,10 +386,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   problem->mu = mu_permuted;
   // Permutation done
 
-  // time = omp_get_wtime() - time;
-  // printf("time extracting diagonal + determinants: %e\n", time);
-  // time = omp_get_wtime();
-
   SparseBlockStructuredMatrix* SBM_permuted_with_diag = SBM_new();
   SBM_copy(SBM_permuted, SBM_permuted_with_diag, 1);
   problem->M->matrix1 = SBM_permuted_with_diag;
@@ -431,59 +403,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   CSparseMatrix* SBM_permuted_csr_nodiag = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
   size_t res = SBM_to_sparse_init_memory(SBM_permuted, SBM_permuted_csr_nodiag);
   res = SBM_to_sparse(SBM_permuted, SBM_permuted_csr_nodiag);
-  /* if (res != 0) {
-    printf("Error converting SBM to CSparse.\n");
-    return;
-  } else {
-    printf("Conversion SBM->CSparse done\n");
-  } */
-
-  /*
-    // Maximum number of elements in a line
-    size_t max_nnz_row = 0;
-    size_t nnz_row;
-    for (size_t row = 0; row < 2 * nc; row++) {
-      nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
-      if (nnz_row > max_nnz_row) max_nnz_row = nnz_row;
-    }
-    printf("maximum number of elements in a row = %d\n", max_nnz_row);
-
-    // Create sliced ELLpack matrices
-    int64_t sliceSize = 8; // number of lines in a slice
-    int64_t n_full_slices = (2 * nc) / sliceSize;
-    int64_t last_slice_size = (2 * nc) % sliceSize;
-    int64_t n_slices = n_full_slices + ((last_slice_size == 0) ? 0 : 1);
-
-    int64_t nnz_sliced = 0;
-    int64_t sellValuesSize = 0;
-
-
-    for (unsigned int slice = 0; slice < n_full_slices; slice++) {
-      // Get maximum number of elements in the slice
-      size_t max = 0;
-      size_t n_el;
-
-      // Find max number of nonzero elements in a row for this slice
-      for (unsigned int row = sliceSize * slice; row < sliceSize * (slice + 1); row++) {
-        nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
-        nnz_sliced += nnz_row;
-        if (max < nnz_row) max = nnz_row;
-      }
-
-      sellValuesSize += max * sliceSize
-    }
-
-    // Last slice, possibly
-    size_t max = 0;
-    size_t n_el;
-
-    for (unsigned int row = sliceSize * slice; row < sliceSize * (slice + 1); row++) {
-        nnz_row = SBM_permuted_csr_nodiag->p[row + 1] - SBM_permuted_csr_nodiag->p[row];
-        nnz_sliced += nnz_row;
-        if (max < nnz_row) max = nnz_row;
-      }
-
-      sellValuesSize += max * sliceSize */
 
   // Create an array storing, for each color, the row offsets of the corresponding CSR
   // submatrix
@@ -534,8 +453,6 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
     n_rows = end_line - start_line;
     current_nnz =
         SBM_permuted_csr_nodiag->p[end_line] - SBM_permuted_csr_nodiag->p[start_line];
-
-    // printf("%d\n", h_all_RowOffsets[start_line + color]);
 
     CHECK_CUSPARSE(cusparseCreateConstCsr(
         &all_cusparse_csrmat[color], n_rows, 2 * nc, current_nnz,
@@ -615,142 +532,14 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   CHECK_CUDA(
       cudaMemcpy(d_q_const, problem->q, (2 * nc) * sizeof(double), cudaMemcpyHostToDevice))
 
-  // time = omp_get_wtime() - time;
-  // printf("time initializing cusparse stuff: %es\n", time);
-
   /*****  Gauss-Seidel iterations *****/
   int iter = 0;            /* Current iteration number */
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
-  // double time = omp_get_wtime();
-
   // FREEZING CONTACTS
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
     printf("freezing contacts not supported yet\n");
-    return;
-    /* unsigned int contact;
-    unsigned int pos;
-    double light_error_sum;
-    double light_error_2;
-    double localreaction[2];
-    unsigned int number_of_freezed_contact = 0;
-    double tmp_criteria1, tmp_criteria2;
-
-    freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
-
-#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2,
-\
-                                               index1_data, index2_data) \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter) \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
-               has_not_converged, norm_q, w, itermax) \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact, \
-               blocks_contiguous)
-    {
-      local_problem =
-          (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
-      local_problem->M = NM_new();
-      local_problem->M->storageType = NM_DENSE;
-      local_problem->M->size0 = 2;
-      local_problem->M->size1 = 2;
-      local_problem->q = (double*)malloc(2 * sizeof(double));
-
-      while ((iter < itermax) && has_not_converged) {
-        // light_error_sum = 0.0;
-        light_error_2 = 0.0;
-
-#pragma omp single
-        {
-          number_of_freezed_contact = 0;
-          tmp_criteria1 = tolerance * tolerance / (nc * nc * 10);
-          tmp_criteria2 = norm_r * norm_r / (nc * nc * 1000);
-          if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
-            for (unsigned int i = 0; i < nc; ++i) {
-              if (freeze_contacts[i] > 0) number_of_freezed_contact++;
-            }
-            if (number_of_freezed_contact >= nc - 1) {
-              // printf("number of freezed contact too large\n");
-              for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
-            }
-          }
-        }
-
-        for (size_t color = 0; color < n_colors; color++) {
-#pragma omp for reduction(+ : light_error_sum)
-          for (unsigned int permuted_contact = sum_sizes[color];
-               permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
-            if (freeze_contacts[permuted_contact] > 0) {
-              freeze_contacts[permuted_contact] -= 1;
-              continue;
-            }
-
-            pos = 2 * permuted_contact;
-            localreaction[0] = z[pos];
-            localreaction[1] = z[pos + 1];
-
-            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem,
-blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
-
-            fc2d_nsgs_local_solve(
-                local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
-                local_problem->q, problem->mu[permuted_contact], localreaction);
-
-            light_error_2 = light_error_squared(localreaction, &z[pos]);
-
-            // #pragma omp atomic update
-            light_error_sum += light_error_2;
-
-            int relative_convergence_criteria =
-                light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
-            int small_reaction_criteria = squared_norm(localreaction) <= tmp_criteria2;
-            if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
-              freeze_contacts[permuted_contact] =
-                  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-              DEBUG_EXPR(
-                  printf("first criteria : light_error_2*squared_norm(localreaction) <= "
-                         "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                         light_error_2 * squared_norm(localreaction),
-                         tolerance * tolerance / (nc * nc * 10),
-                         relative_convergence_criteria);
-                  printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
-                         "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                         squared_norm(localreaction), norm_r * norm_r / (nc * nc * 1000),
-                         small_reaction_criteria);
-                  printf("Contact % i is freezed for %i steps\n", permuted_contact,
-                         iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
-            }
-            z[pos] = localreaction[0];
-            z[pos + 1] = localreaction[1];
-          }
-        }  // end for loop
-
-#pragma omp single
-        {
-          DEBUG_EXPR(int frozen_contact = 0;
-                     for (unsigned int ii = 0; ii < nc; ++ii) if (freeze_contacts[ii] > 0)
-                         frozen_contact++;
-                     numerics_printf_verbose(1, "number of frozen contacts %i at iter : %i",
-                                             frozen_contact, iter););
-
-          if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-              SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-            error = calculateLightError(light_error_sum, nc, z, &norm_r);
-            has_not_converged = determine_convergence(error, tolerance, iter, options);
-          } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                     SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-            error = calculateLightError(light_error_sum, nc, z, &norm_r);
-            has_not_converged = determine_convergence_with_full_final(
-                problem, options, z, w, &tolerance, norm_q, error, iter);
-          }
-          light_error_sum = 0.;
-          ++iter;
-        }
-      }  // end while loop
-      free(local_problem->q);
-      free(local_problem->M);
-      free(local_problem);
-    }  // end parallel region */
 
     /***********************/
     /* NO FREEZING CONTACT */
@@ -785,7 +574,6 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
           int blocks = (rangeSize + threadsPerBlock - 1) / threadsPerBlock;
           size_t shmemSize = 2 * threadsPerBlock * sizeof(double);
 
-          // cuSPARSE calls are capture-friendly
           CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
                                       all_cusparse_csrmat[color], vec_z, &beta,
                                       all_q_new[color], CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT,
@@ -805,30 +593,6 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
 
       // 3. Execute the Graph
       CHECK_CUDA(cudaGraphLaunch(instance, stream));
-
-      // Set local problems q to q
-      // CHECK_CUDA(
-      //    cudaMemcpy(d_q_new, d_q_const, (2 * nc) * sizeof(double),
-      //    cudaMemcpyDeviceToDevice))
-      /* CHECK_CUDA(cudaMemset(d_sumP2, 0, sizeof(double)))
-      CHECK_CUDA(cudaMemset(d_sumErr2, 0, sizeof(double)))
-
-      for (size_t color = 0; color < n_colors; color++) {
-        int rangeSize = sum_sizes[color + 1] - sum_sizes[color];
-        int threadsPerBlock = 256;
-        int blocks = (rangeSize + threadsPerBlock - 1) / threadsPerBlock;
-        size_t shmemSize = 2 * threadsPerBlock * sizeof(double);
-
-        // Build local problems in parallel
-        CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
-                                    all_cusparse_csrmat[color], vec_z, &beta, all_q_new[color],
-                                    CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT,
-                                    d_all_Buffer[color]))
-
-        fc2d_nsgs_local_solve_kernel_range_reduce<<<blocks, threadsPerBlock, shmemSize>>>(
-            d_diagonal_blocks, d_determinants, d_q_new, d_q_const, d_mu, d_z, d_sumP2,
-            d_sumErr2, sum_sizes[color], sum_sizes[color + 1]);
-      } */
 
       CHECK_CUDA(
           cudaMemcpy(&light_error_sum, d_sumErr2, sizeof(double), cudaMemcpyDeviceToHost))
@@ -855,15 +619,8 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
     CHECK_CUDA(cudaFree(d_sumErr2))
   }
 
-  /* time = omp_get_wtime() - time;
-  printf("time in loop: %es\n", time); */
-
   // Copy z back to host
   CHECK_CUDA(cudaMemcpy(z, d_z, (2 * nc) * sizeof(double), cudaMemcpyDeviceToHost))
-
-  /* If we are using SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT, then w has never been
-   updated. This is the same behavior as fc2d_nsgs, which is a bit weird.
-  */
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -941,33 +698,31 @@ blocks_contiguous, diagonal_blocks, index1_data, index2_data, local_problem, z);
   CHECK_CUDA(cudaFree(d_q_const))
 
   problem->M->storageType = old_storageType;
-
-  // Free other stuff
 }
 
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers FC2D_NSGS_GRAPH_PERMUT_CUDA in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_cuda_init_wrap(void* problem, SolverOptions* options) {
   fc2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
-                                SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_cuda_solve_wrap(void* problem, double* reaction,
+                                                  double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph_permut_cuda((FrictionContactProblem*)problem, reaction, velocity, &info,
                               options);
   return info;
 }
 
-static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_graph_permut_cuda_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -975,9 +730,10 @@ static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA,
                 "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA",
-                "GPU implementation of FC2D_NSGS", fc2d_nsgs_init_wrap, fc2d_nsgs_solve_wrap,
-                fc2d_nsgs_free_wrap, NULL, /* error function */
-                fc2d_nsgs_set_default,     /* set_default */
-                1000,                      /* default_max_iter */
-                1e-4,                      /* default_tol */
-                0);                        /* is_local_solver */
+                "GPU implementation of FC2D_NSGS", fc2d_nsgs_graph_permut_cuda_init_wrap,
+                fc2d_nsgs_graph_permut_cuda_solve_wrap, fc2d_nsgs_graph_permut_cuda_free_wrap,
+                NULL,                  /* error function */
+                fc2d_nsgs_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-4,                  /* default_tol */
+                0);                    /* is_local_solver */

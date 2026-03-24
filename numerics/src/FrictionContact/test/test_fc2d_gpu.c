@@ -33,7 +33,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  *number_of_tests = n_data * (n_solvers + 1);
+  *number_of_tests = n_data * n_solvers;
   TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;

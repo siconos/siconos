@@ -618,34 +618,35 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers FC2D_NSGS_GRAPH_OPTI in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_nsgs_graph_opti_init_wrap(void* problem, SolverOptions* options) {
   fc2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
-                                SolverOptions* options) {
+static int fc2d_nsgs_graph_opti_solve_wrap(void* problem, double* reaction, double* velocity,
+                                           SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph_opti((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_graph_opti_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI, "SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI",
-                "Parallel version of FC2D_NSGS (OpenMP optimized)", fc2d_nsgs_init_wrap,
-                fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap, NULL, /* error function */
-                fc2d_nsgs_set_default,                           /* set_default */
-                1000,                                            /* default_max_iter */
-                1e-4,                                            /* default_tol */
-                0)                                               /* is_local_solver */
+                "Parallel version of FC2D_NSGS (OpenMP optimized)",
+                fc2d_nsgs_graph_opti_init_wrap, fc2d_nsgs_graph_opti_solve_wrap,
+                fc2d_nsgs_graph_opti_free_wrap, NULL, /* error function */
+                fc2d_nsgs_set_default,                /* set_default */
+                1000,                                 /* default_max_iter */
+                1e-4,                                 /* default_tol */
+                0)                                    /* is_local_solver */

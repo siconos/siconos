@@ -360,7 +360,8 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
 
     while ((iter < itermax) && has_not_converged) {
       ++iter;
-
+      unsigned int pos;
+      unsigned int contact;
       double light_error_sum = 0.0;
       double light_error_2 = 0.0;
       /* Loop over the rows of blocks in blmat */
@@ -378,7 +379,10 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
           for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
         }
       }
-      for (unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos) {
+      for (unsigned int i = 0; i < nc; i++) {
+        contact = (unsigned int)inv_permutation[i];
+        pos = 2 * contact;
+
         if (freeze_contacts[contact] > 0) {
           /* we skip freeze contacts */
           freeze_contacts[contact] -= 1;
@@ -524,25 +528,25 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers FC2D_NSGS_PERMUT in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_nsgs_permut_init_wrap(void* problem, SolverOptions* options) {
   fc2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
-                                SolverOptions* options) {
+static int fc2d_nsgs_permut_solve_wrap(void* problem, double* reaction, double* velocity,
+                                       SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_permut((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_permut_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -550,9 +554,9 @@ static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_PERMUT, "SICONOS_FRICTION_2D_NSGS_PERMUT",
                 "Test solver: sequential FC2D_NSGS with the parallel contact order",
-                fc2d_nsgs_init_wrap, fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap,
-                NULL,                  /* error function */
-                fc2d_nsgs_set_default, /* set_default */
-                1000,                  /* default_max_iter */
-                1e-4,                  /* default_tol */
-                0)                     /* is_local_solver */
+                fc2d_nsgs_permut_init_wrap, fc2d_nsgs_permut_solve_wrap,
+                fc2d_nsgs_permut_free_wrap, NULL, /* error function */
+                fc2d_nsgs_set_default,            /* set_default */
+                1000,                             /* default_max_iter */
+                1e-4,                             /* default_tol */
+                0)                                /* is_local_solver */

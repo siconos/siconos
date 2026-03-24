@@ -339,20 +339,6 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
 
   local_problem->q = (double*)malloc(2 * sizeof(double));
 
-  /* SparseBlockStructuredMatrix* SBM_problem = NULL;
-  if (problem->M->storageType == NM_SPARSE) {
-    CSparseMatrix* sparse;
-    if (problem->M->matrix2->origin == NSM_CSR) {
-      sparse = NM_csr(problem->M);
-    } else {
-      sparse = NM_csc_trans(problem->M);
-    }
-    SBM_problem = SBM_new();
-    SBM_from_csparse(2, sparse, SBM_problem);
-    problem->M->storageType = 1;
-    problem->M->matrix1 = SBM_problem;
-  } */
-
   /* Coloring */
   size_t n_colors = 0;
   size_t* partition_size = NULL;
@@ -402,15 +388,16 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
                diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions,    \
                iparam)
         {
+          // Allocate local problem for each thread
           local_problem = (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
           local_problem->M = NM_new();
           local_problem->M->storageType = NM_DENSE;
           local_problem->M->size0 = 2;
           local_problem->M->size1 = 2;
           local_problem->q = (double*)malloc(2 * sizeof(double));
-
+// Parallel update of contacts
 #pragma omp for
-          for (int v = 0; v < partition_size[color]; v++) {
+          for (size_t v = 0; v < partition_size[color]; v++) {
             contact = (unsigned int)partitions[color][v];
 
             if (freeze_contacts[contact] > 0) {
@@ -434,7 +421,6 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
 
             light_error_2 = light_error_squared(localreaction, &z[pos]);
 
-            // #pragma omp atomic update
             light_error_sum += light_error_2;
 
             int relative_convergence_criteria =
@@ -498,21 +484,16 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
     double light_error_sum = 0.;
     double localreaction[2];
 
-    /* Not optimal, how can I should use a reduction here  can create an array of size 2 for
-    each thread, without having to reallocate everytime I should use a reduction here  re-enter
-    the for loop? but does it really reallocate everytime???
-
-    */
-
     while ((iter < itermax) && has_not_converged) {
       light_error_sum = 0.0;
-      /* Loop over the rows of blocks in blmat */
+      /* Inside each color group, update contacts in parallel */
       for (size_t color = 0; color < n_colors; color++) {
 #pragma omp parallel reduction(+ : light_error_sum) default(none)                          \
     private(contact, pos, local_problem, localreaction)                                    \
     shared(color, problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, \
                partitions, iparam)
         {
+          // Allocate local problem
           local_problem = (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
           local_problem->M = NM_new();
           local_problem->M->storageType = NM_DENSE;
@@ -520,8 +501,9 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
           local_problem->M->size1 = 2;
           local_problem->q = (double*)malloc(2 * sizeof(double));
 
+// Update contacts in parallel
 #pragma omp for
-          for (int v = 0; v < partition_size[color]; v++) {
+          for (size_t v = 0; v < partition_size[color]; v++) {
             contact = (unsigned int)partitions[color][v];
             pos = 2 * contact;
             localreaction[0] = z[pos];
@@ -537,36 +519,16 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
                                   problem->mu[contact], localreaction);
 
             light_error_sum += light_error_squared(localreaction, &z[pos]);
-            // light_error_sum += (z[pos] - localreaction[0]) * (z[pos] - localreaction[0]) +
-            // (z[pos + 1] - localreaction[1]) * (z[pos + 1] - localreaction[1]);
 
-            /* Why do we need the "if" here ?
-               If the condition is not true we don't even evaluate the error so it does not
-               make sense... So I guess the condition will always be met and therefore I should
-               use a reduction here  can remove the "if"
-               SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL seems to be the
-               default
-
-               I should use a reduction in the OMP pragma to aggregate light_error_sum without
-               #pragma omp atomic update
-            */
-
-            /* if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-            SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
-                iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-            SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) { #pragma omp
-            atomic update light_error_sum += (z[pos] - localreaction[0]) * (z[pos] -
-            localreaction[0]) + (z[pos + 1] - localreaction[1]) * (z[pos + 1] -
-            localreaction[1]);
-            } */
             z[pos] = localreaction[0];
             z[pos + 1] = localreaction[1];
-          }
+          }  // end of one color
           free(local_problem->q);
           free(local_problem->M);
           free(local_problem);
-        }
-      }  // end for loop
+        }  // end parallel section
+      }  // all colors done
+
       /*  error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
@@ -620,34 +582,35 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers FC2D_NSGS_GRAPH in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
  */
 
-static int fc2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_nsgs_graph_init_wrap(void* problem, SolverOptions* options) {
   fc2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
-                                SolverOptions* options) {
+static int fc2d_nsgs_graph_solve_wrap(void* problem, double* reaction, double* velocity,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_graph_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH, "SICONOS_FRICTION_2D_NSGS_GRAPH",
-                "Parallel version of FC2D_NSGS (OpenMP)", fc2d_nsgs_init_wrap,
-                fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap, NULL, /* error function */
-                fc2d_nsgs_set_default,                           /* set_default */
-                1000,                                            /* default_max_iter */
-                1e-4,                                            /* default_tol */
-                0)                                               /* is_local_solver */
+                "Parallel FC2D_NSGS using graph coloring", fc2d_nsgs_graph_init_wrap,
+                fc2d_nsgs_graph_solve_wrap, fc2d_nsgs_graph_free_wrap,
+                NULL,                  /* error function */
+                fc2d_nsgs_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-4,                  /* default_tol */
+                0)                     /* is_local_solver */
