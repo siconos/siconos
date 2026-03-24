@@ -39,11 +39,11 @@ struct time_stepping : item {
     void __del__()
     {
       // not implemented
-        throw std::runtime_error("Stable pointers need to be implemented");
-        storage::remove(time_discretization());
-        storage::remove(one_step_integrator());
-        storage::remove(one_step_nonsmooth_problem());
-        storage::remove(topology());
+      throw std::runtime_error("Stable pointers need to be implemented");
+      storage::remove(time_discretization());
+      storage::remove(one_step_integrator());
+      storage::remove(one_step_nonsmooth_problem());
+      storage::remove(topology());
     }
 
     decltype(auto) time_discretization()
@@ -99,9 +99,6 @@ struct time_stepping : item {
         // vfree stored in v(step+1)
         elem.compute_free_state(step, time_step());
 
-        // xfree stored in positions(step+1)
-        elem.update_positions(step, time_step());
-
         // -> y & ydot (step & step+1)
         elem.compute_output(step);
         elem.compute_output(step + 1);
@@ -147,7 +144,10 @@ struct time_stepping : item {
       }
 
       else {
-        print(".");
+        mp::for_each(osi.elements(), [&](auto elem) {
+          // from free velocity
+          elem.update_positions(step, time_step());
+        });
       }
 
       current_step() += 1;

@@ -462,8 +462,8 @@ struct moreau_jean_element : item {
       using scalar = typename env::scalar;
       using vector = typename env::template vector<scalar, nslaw_size_t{}.value>;
 
-      auto &ys = storage::attr_values<y>(data, step + 1);
-      auto &ydots = storage::attr_values<ydot>(data, step + 1);
+      auto &ys = storage::attr_values<y>(data, step);
+      auto &ydots = storage::attr_values<ydot>(data, step);
 
       auto &ids1s = storage::prop_values<interaction, "ds1">(data, step);
       auto &ids2s = storage::prop_values<interaction, "ds2">(data, step);
