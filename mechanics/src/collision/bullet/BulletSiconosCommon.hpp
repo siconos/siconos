@@ -24,21 +24,20 @@
 #ifndef BulletSiconosCommon_hpp
 #define BulletSiconosCommon_hpp
 
-#include "SiconosVector.hpp"
 #include <boost/math_fwd.hpp>  // for quaternion
 
 #include "BulletDeclarations.h"  // for btVector3
-
+#include "SiconosVector.hpp"
 
 namespace siconos::collision::bullet {
 
 void copyQuatPos(const btVector3& from, boost::math::quaternion<double>& to);
 
-void copyBtVector3(const btVector3& from, siconos::algebra::SiconosVector& to);
+void copyBtVector3(const btVector3& from, siconos::algebra::SiconosVector3& to);
 
 void copyQuatPos2d(const btVector3& from, boost::math::quaternion<double>& to);
 
-void copyBtVector32d(const btVector3& from, siconos::algebra::SiconosVector& to);
+void copyBtVector32d(const btVector3& from, siconos::algebra::SiconosVector2& to);
 
 }  // namespace siconos::collision::bullet
 #endif

@@ -33,7 +33,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 /*
  * This file contains some code generated using sympy.  The following
@@ -46,10 +46,10 @@
  * q2 = np.array([Symbol('q20'), Symbol('q21'), Symbol('q22'), Symbol('q23')])
  * cq2q10 = np.array([Symbol('_cq2q101'),Symbol('_cq2q102'),
  *                   Symbol('_cq2q103'),Symbol('_cq2q104')])
- * G1P0 = np.array([0, Symbol('(*_G1P0)(0)'), Symbol('(*_G1P0)(1)'),
- *                  Symbol('(*_G1P0)(2)')])
- * G2P0 = np.array([0, Symbol('(*_G2P0)(0)'), Symbol('(*_G2P0)(1)'),
- *                  Symbol('(*_G2P0)(2)')])
+ * G1P0 = np.array([0, Symbol('G1P0_(0)'), Symbol('G1P0_(1)'),
+ *                  Symbol('G1P0_(2)')])
+ * G2P0 = np.array([0, Symbol('G2P0_(0)'), Symbol('G2P0_(1)'),
+ *                  Symbol('G2P0_(2)')])
  * G1 = np.array([0, Symbol('X1'), Symbol('Y1'), Symbol('Z1')])
  * G2 = np.array([0, Symbol('X2'), Symbol('Y2'), Symbol('Z2')])
  * V1 = np.array([0, Symbol('axis1_(0)'), Symbol('axis1_(1)'),
@@ -81,8 +81,6 @@ siconos::joints::CylindricalJointR::CylindricalJointR() : NewtonEulerJointR{} {
   points_[0].setZero();
   axes_.resize(1);
   axes_[0].setZero();
-  _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
-  _G2P0 = std::make_shared<siconos::algebra::SiconosVector3>();
 }
 
 siconos::joints::CylindricalJointR::CylindricalJointR(
@@ -91,8 +89,6 @@ siconos::joints::CylindricalJointR::CylindricalJointR(
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
     : NewtonEulerJointR{} {
-  _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
-
   setAbsolute(absoluteRef);
   points_.emplace_back(P);
   axes_.emplace_back(A);
@@ -106,30 +102,26 @@ siconos::joints::CylindricalJointR::CylindricalJointR(
 }
 
 void siconos::joints::CylindricalJointR::setBasePositions(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2) {
   // in the two-DS case, _P is unused.
 
   // Assume that axes_[0] has been properly set (by constructor or setAxis)
 
-  _G1P0->setZero();
-  *_G1P0 = points_[0];
+  G1P0_ = points_[0];
 
   if (absoluteRef_) {
-    (*_G1P0)(0) = (*_G1P0)(0) - q1(0);
-    (*_G1P0)(1) = (*_G1P0)(1) - q1(1);
-    (*_G1P0)(2) = (*_G1P0)(2) - q1(2);
+    G1P0_ -= q1.head<3>();
   }
 
   siconos::geometry::computeOrthonormalBaseFromAxis(axes_[0], axis1_, axis2_);
-  auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
-  q2i->setZero();
-  (*q2i)(3) = 1;
+  siconos::algebra::SiconosVector7 q2i = siconos::algebra::SiconosVector7::Zero();
+  q2i(3) = 1;
 
-  if (q2) *q2i = q2.value();
+  if (q2) q2i = q2.value();
 
   auto quat1{siconos::geometry::rotquat(q1)};
-  auto quat2{siconos::geometry::rotquat(*q2i)};
+  auto quat2{siconos::geometry::rotquat(q2i)};
 
   // Initial orientation offset
   auto tmp = 1.0 / quat2 * quat1;
@@ -141,34 +133,28 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   // Initial G1-P vector in G1 frame is just P.  Initial G2-P vector
   // in G1 frame is calculated by subtracting (P - G2) in the absolute
   // frame and un-rotating from the q2 frame.
-  auto quatG1P0{siconos::geometry::posquat(*_G1P0)};
+  auto quatG1P0{siconos::geometry::posquat(G1P0_)};
   tmp = quat1 * quatG1P0 / quat1;
 
-  siconos::algebra::SiconosVector P0_abs(3);
+  siconos::algebra::SiconosVector3 P0_abs;
   P0_abs(0) = tmp.R_component_2() + q1(0);
   P0_abs(1) = tmp.R_component_3() + q1(1);
   P0_abs(2) = tmp.R_component_4() + q1(2);
 
-  siconos::algebra::SiconosVector G2_abs(3);
-  G2_abs(0) = (*q2i)(0);
-  G2_abs(1) = (*q2i)(1);
-  G2_abs(2) = (*q2i)(2);
-
-  auto G2P0_abs = std::make_shared<siconos::algebra::SiconosVector3>();
-  *G2P0_abs = P0_abs - G2_abs;
-  auto quatG2P0_abs{siconos::geometry::posquat(*G2P0_abs)};
+  siconos::algebra::SiconosVector3 G2P0_abs = P0_abs - q2i.head<3>();
+  auto quatG2P0_abs{siconos::geometry::posquat(G2P0_abs)};
   tmp = 1.0 / quat2 * quatG2P0_abs * quat2;
 
-  _G2P0 = std::make_shared<siconos::algebra::SiconosVector3>();
-  (*_G2P0)(0) = tmp.R_component_2();
-  (*_G2P0)(1) = tmp.R_component_3();
-  (*_G2P0)(2) = tmp.R_component_4();
+  G2P0_(0) = tmp.R_component_2();
+  G2P0_(1) = tmp.R_component_3();
+  G2P0_(2) = tmp.R_component_4();
 
   /* Compute initial positions/angles of degrees of freedom */
   _previousAngle = 0.0;
   _twistCount = 0;
   _initialAngle = 0.0;
   siconos::algebra::SiconosVector tmpy(1);
+  tmpy << 0;
   if (q2) {
     computehDoF(q1, q2, tmpy, 1);
   } else {
@@ -179,28 +165,6 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   _twistCount = 0;
   _previousAngle = _initialAngle;
 }
-
-// void siconos::joints::CylindricalJointR::computeOrthonormalBaseFromAxis() {
-//   axis1_.setZero();
-//   // build axis1_
-//   if (axes_[0](0) > axes_[0](1))
-//     if (axes_[0](0) > axes_[0](2)) {
-//       axis1_(1) = -axes_[0](0);
-//       axis1_(0) = axes_[0](1);
-//     } else {
-//       axis1_(1) = -axes_[0](2);
-//       axis1_(2) = axes_[0](1);
-//     }
-//   else if (axes_[0](2) > axes_[0](1)) {
-//     axis1_(1) = -axes_[0](2);
-//     axis1_(2) = axes_[0](1);
-//   } else {
-//     axis1_(1) = -axes_[0](0);
-//     axis1_(0) = axes_[0](1);
-//   }
-//   axis1_.normalize();
-//   axis2_ = axes_[0].cross(axis1_);
-// }
 
 void siconos::joints::CylindricalJointR::computeH_NE_(
     double time, siconos::modeling::Interaction& inter,
@@ -230,7 +194,7 @@ void siconos::joints::CylindricalJointR::computeH_NE_(
 
 void siconos::joints::CylindricalJointR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double X1 = q1(0);
   double Y1 = q1(1);
@@ -262,14 +226,14 @@ void siconos::joints::CylindricalJointR::computeh(
   const double x2 = axis1_(0) * q13 + axis1_(1) * q10 - axis1_(2) * q11;
   const double x3 = -axis1_(0) * q12 + axis1_(1) * q11 + axis1_(2) * q10;
   const double x4 = -q10 * x0 + q11 * x1 + q12 * x2 + q13 * x3;
-  const double x5 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x6 = (*_G2P0)(0) * q21 + (*_G2P0)(1) * q22 + (*_G2P0)(2) * q23;
-  const double x7 = (*_G2P0)(0) * q20 - (*_G2P0)(1) * q23 + (*_G2P0)(2) * q22;
-  const double x8 = (*_G2P0)(0) * q23 + (*_G2P0)(1) * q20 - (*_G2P0)(2) * q21;
-  const double x9 = -(*_G2P0)(0) * q22 + (*_G2P0)(1) * q21 + (*_G2P0)(2) * q20;
-  const double x10 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
-  const double x11 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
-  const double x12 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
+  const double x5 = G1P0_(0) * q11 + G1P0_(1) * q12 + G1P0_(2) * q13;
+  const double x6 = G2P0_(0) * q21 + G2P0_(1) * q22 + G2P0_(2) * q23;
+  const double x7 = G2P0_(0) * q20 - G2P0_(1) * q23 + G2P0_(2) * q22;
+  const double x8 = G2P0_(0) * q23 + G2P0_(1) * q20 - G2P0_(2) * q21;
+  const double x9 = -G2P0_(0) * q22 + G2P0_(1) * q21 + G2P0_(2) * q20;
+  const double x10 = G1P0_(0) * q10 - G1P0_(1) * q13 + G1P0_(2) * q12;
+  const double x11 = G1P0_(0) * q13 + G1P0_(1) * q10 - G1P0_(2) * q11;
+  const double x12 = -G1P0_(0) * q12 + G1P0_(1) * q11 + G1P0_(2) * q10;
   const double x13 =
       q10 * x5 - q11 * x10 - q12 * x11 - q13 * x12 - q20 * x6 + q21 * x7 + q22 * x8 + q23 * x9;
   const double x14 = q10 * x1 + q11 * x0 + q12 * x3 - q13 * x2;
@@ -335,17 +299,17 @@ void siconos::joints::CylindricalJointR::Jd1d2(double X1, double Y1, double Z1, 
   const double x13 = q13 * x0;
   const double x14 = q10 * x6;
   const double x15 = q11 * x2;
-  const double x16 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
+  const double x16 = G1P0_(0) * q10 - G1P0_(1) * q13 + G1P0_(2) * q12;
   const double x17 = x1 - x3 + x5 + x7;
-  const double x18 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
+  const double x18 = -G1P0_(0) * q12 + G1P0_(1) * q11 + G1P0_(2) * q10;
   const double x19 = -x12 + x13 + x14 + x15;
-  const double x20 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
+  const double x20 = G1P0_(0) * q13 + G1P0_(1) * q10 - G1P0_(2) * q11;
   const double x21 = x10 + x11 - x8 + x9;
-  const double x22 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x23 = (*_G2P0)(0) * q21 + (*_G2P0)(1) * q22 + (*_G2P0)(2) * q23;
-  const double x24 = (*_G2P0)(0) * q23 + (*_G2P0)(1) * q20 - (*_G2P0)(2) * q21;
-  const double x25 = (*_G2P0)(0) * q20 - (*_G2P0)(1) * q23 + (*_G2P0)(2) * q22;
-  const double x26 = -(*_G2P0)(0) * q22 + (*_G2P0)(1) * q21 + (*_G2P0)(2) * q20;
+  const double x22 = G1P0_(0) * q11 + G1P0_(1) * q12 + G1P0_(2) * q13;
+  const double x23 = G2P0_(0) * q21 + G2P0_(1) * q22 + G2P0_(2) * q23;
+  const double x24 = G2P0_(0) * q23 + G2P0_(1) * q20 - G2P0_(2) * q21;
+  const double x25 = G2P0_(0) * q20 - G2P0_(1) * q23 + G2P0_(2) * q22;
+  const double x26 = -G2P0_(0) * q22 + G2P0_(1) * q21 + G2P0_(2) * q20;
   const double x27 = X1 - X2 + q10 * x16 + q11 * x22 + q12 * x18 - q13 * x20 - q20 * x25 -
                      q21 * x23 - q22 * x26 + q23 * x24;
   const double x28 = Z1 - Z2 + q10 * x18 + q11 * x20 - q12 * x16 + q13 * x22 - q20 * x26 -
@@ -518,16 +482,16 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
   const double x13 = q13 * x0;
   const double x14 = q10 * x6;
   const double x15 = q11 * x2;
-  const double x16 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
+  const double x16 = G1P0_(0) * q10 - G1P0_(1) * q13 + G1P0_(2) * q12;
   const double x17 = x1 - x3 + x5 + x7;
-  const double x18 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
+  const double x18 = -G1P0_(0) * q12 + G1P0_(1) * q11 + G1P0_(2) * q10;
   const double x19 = -x12 + x13 + x14 + x15;
-  const double x20 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
+  const double x20 = G1P0_(0) * q13 + G1P0_(1) * q10 - G1P0_(2) * q11;
   const double x21 = x10 + x11 - x8 + x9;
-  const double x22 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x23 = X1 - 1.0 * (*_G2P0)(0) + q10 * x16 + q11 * x22 + q12 * x18 - q13 * x20;
-  const double x24 = Z1 - 1.0 * (*_G2P0)(2) + q10 * x18 + q11 * x20 - q12 * x16 + q13 * x22;
-  const double x25 = Y1 - 1.0 * (*_G2P0)(1) + q10 * x20 - q11 * x18 + q12 * x22 + q13 * x16;
+  const double x22 = G1P0_(0) * q11 + G1P0_(1) * q12 + G1P0_(2) * q13;
+  const double x23 = X1 - 1.0 * G2P0_(0) + q10 * x16 + q11 * x22 + q12 * x18 - q13 * x20;
+  const double x24 = Z1 - 1.0 * G2P0_(2) + q10 * x18 + q11 * x20 - q12 * x16 + q13 * x22;
+  const double x25 = Y1 - 1.0 * G2P0_(1) + q10 * x20 - q11 * x18 + q12 * x22 + q13 * x16;
   const double x26 = axis2_(0) * q11 + axis2_(1) * q12 + axis2_(2) * q13;
   const double x27 = q11 * x26;
   const double x28 = axis2_(0) * q13 + axis2_(1) * q10 - axis2_(2) * q11;
@@ -628,7 +592,7 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::CylindricalJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   if (axis > 1) return;
 
@@ -677,14 +641,14 @@ void siconos::joints::CylindricalJointR::computehDoF(
   const double x2 = axes_[0](0) * q13 + axes_[0](1) * q10 - axes_[0](2) * q11;
   const double x3 = -axes_[0](0) * q12 + axes_[0](1) * q11 + axes_[0](2) * q10;
   const double x4 = -q10 * x0 + q11 * x1 + q12 * x2 + q13 * x3;
-  const double x5 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x6 = (*_G2P0)(0) * q21 + (*_G2P0)(1) * q22 + (*_G2P0)(2) * q23;
-  const double x7 = (*_G2P0)(0) * q20 - (*_G2P0)(1) * q23 + (*_G2P0)(2) * q22;
-  const double x8 = (*_G2P0)(0) * q23 + (*_G2P0)(1) * q20 - (*_G2P0)(2) * q21;
-  const double x9 = -(*_G2P0)(0) * q22 + (*_G2P0)(1) * q21 + (*_G2P0)(2) * q20;
-  const double x10 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
-  const double x11 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
-  const double x12 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
+  const double x5 = G1P0_(0) * q11 + G1P0_(1) * q12 + G1P0_(2) * q13;
+  const double x6 = G2P0_(0) * q21 + G2P0_(1) * q22 + G2P0_(2) * q23;
+  const double x7 = G2P0_(0) * q20 - G2P0_(1) * q23 + G2P0_(2) * q22;
+  const double x8 = G2P0_(0) * q23 + G2P0_(1) * q20 - G2P0_(2) * q21;
+  const double x9 = -G2P0_(0) * q22 + G2P0_(1) * q21 + G2P0_(2) * q20;
+  const double x10 = G1P0_(0) * q10 - G1P0_(1) * q13 + G1P0_(2) * q12;
+  const double x11 = G1P0_(0) * q13 + G1P0_(1) * q10 - G1P0_(2) * q11;
+  const double x12 = -G1P0_(0) * q12 + G1P0_(1) * q11 + G1P0_(2) * q10;
   const double x13 = q10 * x1 + q11 * x0 + q12 * x3 - q13 * x2;
   const double x14 = q10 * x3 + q11 * x2 - q12 * x1 + q13 * x0;
   const double x15 = q10 * x2 - q11 * x3 + q12 * x0 + q13 * x1;
@@ -750,8 +714,8 @@ void siconos::joints::CylindricalJointR::computehDoF(
 void siconos::joints::CylindricalJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq, siconos::algebra::Index axis) {
   if (axis > 1) return;
 
   double X1 = q1(0);
@@ -810,17 +774,17 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   const double x13 = q13 * x0;
   const double x14 = q10 * x6;
   const double x15 = q11 * x2;
-  const double x16 = (*_G1P0)(0) * q10 - (*_G1P0)(1) * q13 + (*_G1P0)(2) * q12;
+  const double x16 = G1P0_(0) * q10 - G1P0_(1) * q13 + G1P0_(2) * q12;
   const double x17 = x1 - x3 + x5 + x7;
-  const double x18 = -(*_G1P0)(0) * q12 + (*_G1P0)(1) * q11 + (*_G1P0)(2) * q10;
+  const double x18 = -G1P0_(0) * q12 + G1P0_(1) * q11 + G1P0_(2) * q10;
   const double x19 = -x12 + x13 + x14 + x15;
-  const double x20 = (*_G1P0)(0) * q13 + (*_G1P0)(1) * q10 - (*_G1P0)(2) * q11;
+  const double x20 = G1P0_(0) * q13 + G1P0_(1) * q10 - G1P0_(2) * q11;
   const double x21 = x10 + x11 - x8 + x9;
-  const double x22 = (*_G1P0)(0) * q11 + (*_G1P0)(1) * q12 + (*_G1P0)(2) * q13;
-  const double x23 = (*_G2P0)(0) * q21 + (*_G2P0)(1) * q22 + (*_G2P0)(2) * q23;
-  const double x24 = (*_G2P0)(0) * q23 + (*_G2P0)(1) * q20 - (*_G2P0)(2) * q21;
-  const double x25 = (*_G2P0)(0) * q20 - (*_G2P0)(1) * q23 + (*_G2P0)(2) * q22;
-  const double x26 = -(*_G2P0)(0) * q22 + (*_G2P0)(1) * q21 + (*_G2P0)(2) * q20;
+  const double x22 = G1P0_(0) * q11 + G1P0_(1) * q12 + G1P0_(2) * q13;
+  const double x23 = G2P0_(0) * q21 + G2P0_(1) * q22 + G2P0_(2) * q23;
+  const double x24 = G2P0_(0) * q23 + G2P0_(1) * q20 - G2P0_(2) * q21;
+  const double x25 = G2P0_(0) * q20 - G2P0_(1) * q23 + G2P0_(2) * q22;
+  const double x26 = -G2P0_(0) * q22 + G2P0_(1) * q21 + G2P0_(2) * q20;
   const double x27 = X1 - X2 + q10 * x16 + q11 * x22 + q12 * x18 - q13 * x20 - q20 * x25 -
                      q21 * x23 - q22 * x26 + q23 * x24;
   const double x28 = Z1 - Z2 + q10 * x18 + q11 * x20 - q12 * x16 + q13 * x22 - q20 * x26 -
@@ -963,8 +927,8 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
 
 // Return the normal of the angular DoF axis of rotation. axis must be 0
 siconos::algebra::SiconosVector3 siconos::joints::CylindricalJointR::normalDoF(
-    const siconos::algebra::SiconosVector& q0,
-    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    const siconos::algebra::SiconosVector7& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis,
     bool absoluteRef) {
   // Return the same axis for linear and rotational DoFs
   assert(axis == 0 || axis == 1);

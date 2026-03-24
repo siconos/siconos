@@ -93,8 +93,8 @@ void siconos::joints::PrismaticJointR::displayInitialPosition() {
 }
 
 void siconos::joints::PrismaticJointR::setBasePositions(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2) {
   // Assume that axes_[0] has been properly set (by constructor or setAxis)
 
   if (absoluteRef_) {
@@ -188,7 +188,7 @@ void siconos::joints::PrismaticJointR::computeH_NE_(double time,
 
 void siconos::joints::PrismaticJointR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double X1 = q1(0);
   double Y1 = q1(1);
@@ -636,7 +636,7 @@ void siconos::joints::PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double
 /** Compute the vector of linear and angular positions of the degrees of freedom */
 void siconos::joints::PrismaticJointR::computehDoF(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
@@ -679,8 +679,8 @@ void siconos::joints::PrismaticJointR::computehDoF(
 void siconos::joints::PrismaticJointR::computeJachqDoF(
     siconos::modeling::Interaction& inter,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis) {
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq, siconos::algebra::Index axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
@@ -764,8 +764,8 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::PrismaticJointR::normalDoF(
-    const siconos::algebra::SiconosVector& q0,
-    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    const siconos::algebra::SiconosVector7& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis,
     bool absoluteRef) {
   assert(axis == 0);
   if (axis != 0) return siconos::algebra::SiconosVector3{};

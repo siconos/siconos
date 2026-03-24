@@ -110,8 +110,8 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) = 0;
 
   /** \return the projection of a vector onto the given 0-indexed free axis. Useful for
@@ -127,8 +127,8 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  otherwise the q1 frame is assumed.
    */
   siconos::algebra::SiconosVector3 projectVectorDoF(
-      const siconos::algebra::SiconosVector& v, const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis = 0,
+      const siconos::algebra::SiconosVector6& v, const siconos::algebra::SiconosVector7& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis = 0,
       bool absoluteRef = true);
 
   /** \return the axis of rotation.
@@ -145,8 +145,8 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  otherwise the q1 frame is assumed.
    */
   virtual siconos::algebra::SiconosVector3 normalDoF(
-      const siconos::algebra::SiconosVector& q0,
-      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      const siconos::algebra::SiconosVector7& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1 = std::nullopt,
       int axis = 0, bool absoluteRef = true) {
     throw std::logic_error("normalDof  not implemented for this kind of joint");
   }
@@ -181,21 +181,16 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y, siconos::algebra::Index axis = 0) {}
-
-  // /** Compute the jacobian of linear and angular DoF with respect to some q */
-  // virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-  //                              const siconos::algebra::BlockVector& q0,
-  //                              Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
-  //                              siconos::algebra::Index axis = 0) {}
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, siconos::algebra::Index axis = 0) {}
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq,
+      siconos::algebra::Index axis = 0) {}
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);

@@ -23,33 +23,26 @@
 #include <boost/math/quaternion.hpp>
 
 #include "SiconosVector.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
-#include "siconos_debug.h"
 
 void siconos::collision::bullet::copyQuatPos(const btVector3& from,
-                                             boost::math::quaternion<double>& to)
-{
+                                             boost::math::quaternion<double>& to) {
   to = boost::math::quaternion<double>{0, from.x(), from.y(), from.z()};
 }
 
 void siconos::collision::bullet::copyBtVector3(const btVector3& from,
-                                               siconos::algebra::SiconosVector& to)
-{
+                                               siconos::algebra::SiconosVector3& to) {
   to(0) = from.x();
   to(1) = from.y();
   to(2) = from.z();
 }
 
 void siconos::collision::bullet::copyQuatPos2d(const btVector3& from,
-                                               boost::math::quaternion<double>& to)
-{
+                                               boost::math::quaternion<double>& to) {
   to = boost::math::quaternion<double>{0, from.x(), from.y(), 0.0};
 }
 
 void siconos::collision::bullet::copyBtVector32d(const btVector3& from,
-                                                 siconos::algebra::SiconosVector& to)
-{
+                                                 siconos::algebra::SiconosVector2& to) {
   to(0) = from.x();
   to(1) = from.y();
 }

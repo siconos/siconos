@@ -25,7 +25,7 @@
 
 
  */
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"    // for Plasticity2DProblem
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

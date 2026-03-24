@@ -47,7 +47,7 @@ class Bullet1DR : public siconos::modeling::NewtonEuler1DR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 };
 }  // namespace siconos::collision::bullet

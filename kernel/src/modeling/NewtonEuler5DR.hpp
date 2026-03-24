@@ -39,6 +39,13 @@ class NewtonEuler5DR : public NewtonEuler1DR {
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
 
+  /** Rotation matrix converting the absolute coordinate to the contact frame^
+   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
+   *  row. Internal bufer.
+   */
+  siconos::algebra::SiconosMatrix33 rotationAbsoluteToContactFrame_ =
+      siconos::algebra::SiconosMatrix33::Zero();
+
  protected:
  public:
   /** destructor

@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include <pybind11/detail/using_smart_holder.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -26,12 +27,11 @@
 
 namespace py = pybind11;
 
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+// PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 using Indices = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1>;
 void wrap_boundaryconditions(py::module_ &m) {
-  py::class_<siconos::modeling::BoundaryCondition,
-             std::shared_ptr<siconos::modeling::BoundaryCondition>>(m, "BoundaryCondition")
+  py::class_<siconos::modeling::BoundaryCondition, py::smart_holder>(m, "BoundaryCondition")
       .def(py::init<std::vector<siconos::algebra::Index>>(), py::arg("Indices"))
       .def(py::init<std::vector<siconos::algebra::Index>,
                     const Eigen::Ref<const siconos::algebra::SiconosVector> &>(),
@@ -57,8 +57,8 @@ void wrap_boundaryconditions(py::module_ &m) {
            &siconos::modeling::BoundaryCondition::computePrescribedVelocity,
            "Compute velocity values on prescribed indices");
 
-  py::class_<siconos::modeling::HarmonicBC, std::shared_ptr<siconos::modeling::HarmonicBC>,
-             siconos::modeling::BoundaryCondition>(m, "HarmonicBC")
+  py::class_<siconos::modeling::HarmonicBC, siconos::modeling::BoundaryCondition,
+             py::smart_holder>(m, "HarmonicBC")
       .def(py::init<std::vector<int>, double, double, double, double>(), py::arg("Indices"),
            py::arg("a"), py::arg("b"), py::arg("omega"), py::arg("phi"))
       .def(

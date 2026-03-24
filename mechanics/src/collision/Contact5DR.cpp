@@ -25,7 +25,7 @@
 
 void siconos::collision::Contact5DR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 
@@ -34,23 +34,24 @@ void siconos::collision::Contact5DR::computeh(
 
   y(0) = distance();
 
-  DEBUG_PRINTF("position on A : %g,%g,%g\n", (*pc1())(0), (*pc1())(1), (*pc1())(2));
-  DEBUG_PRINTF("position on B : %g,%g,%g\n", (*pc2())(0), (*pc2())(1), (*pc2())(2));
-  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1), (*nc())(2));
+  DEBUG_PRINTF("position on A : %g,%g,%g\n", contactPoint1_(0), contactPoint1_(1),
+               contactPoint1_(2));
+  DEBUG_PRINTF("position on B : %g,%g,%g\n", contactPoint2_(0), contactPoint2_(1),
+               contactPoint2_(2));
+  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", nc_(0), nc_(1), nc_(2));
 
   DEBUG_END("Contact5DR::computeh(...)\n");
 }
 
 void siconos::collision::Contact5DR::updateContactPoints(
-    const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
-    const siconos::algebra::SiconosVector& normal) {
+    const siconos::algebra::SiconosVector3& pos1, const siconos::algebra::SiconosVector3& pos2,
+    const siconos::algebra::SiconosVector3& normal) {
   // Copy relative positions
-  *_relPc1 = pos1;
-  *_relPc2 = pos2;
+  relPc1_ = pos1;
+  relPc2_ = pos2;
 
   // Update normal
-  *_relNc = normal;
+  relNc_ = normal;
 
-  assert(!((*_relNc)(0) == 0 && (*_relNc)(1) == 0 && (*_relNc)(2) == 0) &&
-         "nc = 0, problems..\n");
+  assert(!(relNc_(0) == 0 && relNc_(1) == 0 && relNc_(2) == 0) && "nc = 0, problems..\n");
 }

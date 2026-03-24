@@ -22,7 +22,7 @@
 #include "RotationQuaternion.hpp"
 
 #include <boost/math/quaternion.hpp>
-#include <numbers>  // pi
+// #include <numbers>  // pi
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -53,15 +53,15 @@ void siconos::geometry::computeRotationMatrix(
   // rotationMatrix->setValue(2, 2, quatBuff.R_component_4());
 
   /* direct computation https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation */
-  rotationMatrix.setValue(0, 0, q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3);
-  rotationMatrix.setValue(0, 1, 2.0 * (q1 * q2 - q0 * q3));
-  rotationMatrix.setValue(0, 2, 2.0 * (q1 * q3 + q0 * q2));
-  rotationMatrix.setValue(1, 0, 2.0 * (q1 * q2 + q0 * q3));
-  rotationMatrix.setValue(1, 1, q0 * q0 - q1 * q1 + q2 * q2 - q3 * q3);
-  rotationMatrix.setValue(1, 2, 2.0 * (q2 * q3 - q0 * q1));
-  rotationMatrix.setValue(2, 0, 2.0 * (q1 * q3 - q0 * q2));
-  rotationMatrix.setValue(2, 1, 2.0 * (q2 * q3 + q0 * q1));
-  rotationMatrix.setValue(2, 2, q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3);
+  rotationMatrix(0, 0) = q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3;
+  rotationMatrix(0, 1) = 2.0 * (q1 * q2 - q0 * q3);
+  rotationMatrix(0, 2) = 2.0 * (q1 * q3 + q0 * q2);
+  rotationMatrix(1, 0) = 2.0 * (q1 * q2 + q0 * q3);
+  rotationMatrix(1, 1) = q0 * q0 - q1 * q1 + q2 * q2 - q3 * q3;
+  rotationMatrix(1, 2) = 2.0 * (q2 * q3 - q0 * q1);
+  rotationMatrix(2, 0) = 2.0 * (q1 * q3 - q0 * q2);
+  rotationMatrix(2, 1) = 2.0 * (q2 * q3 + q0 * q1);
+  rotationMatrix(2, 2) = q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3;
 }
 
 void siconos::geometry::quaternionRotateVector(
@@ -398,6 +398,10 @@ bool siconos::geometry::orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
   double normA = A.norm();
   if (normA == 0.0) {
     // If A is null, we assign Nan to outputs  and return an error code
+    A = siconos::algebra::SiconosVector3(std::numeric_limits<double>::quiet_NaN(),
+                                         std::numeric_limits<double>::quiet_NaN(),
+                                         std::numeric_limits<double>::quiet_NaN());
+
     A1 = siconos::algebra::SiconosVector3(std::numeric_limits<double>::quiet_NaN(),
                                           std::numeric_limits<double>::quiet_NaN(),
                                           std::numeric_limits<double>::quiet_NaN());

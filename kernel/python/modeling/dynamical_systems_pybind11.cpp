@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include <pybind11/detail/using_smart_holder.h>
 #include <pybind11/eigen.h>
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
@@ -41,13 +42,12 @@
 
 namespace py = pybind11;
 
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+// PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 void wrap_dynamical_systems(py::module_& m) {
   m.doc() = "Siconos modeling library";
 
-  py::class_<siconos::modeling::DynamicalSystem,
-             std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem")
+  py::class_<siconos::modeling::DynamicalSystem, py::smart_holder>(m, "DynamicalSystem")
       .def("x", &siconos::modeling::DynamicalSystem::x_python,
            py::return_value_policy::reference_internal)
       .def("r", &siconos::modeling::DynamicalSystem::r_python,
@@ -78,9 +78,8 @@ void wrap_dynamical_systems(py::module_& m) {
       });
   // ============================== FIRST ORDER DS ==============================
 
-  py::class_<siconos::modeling::FirstOrderNonLinearDS,
-             std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>,
-             siconos::modeling::DynamicalSystem>(m, "FirstOrderNonLinearDS")
+  py::class_<siconos::modeling::FirstOrderNonLinearDS, siconos::modeling::DynamicalSystem,
+             py::smart_holder>(m, "FirstOrderNonLinearDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
@@ -107,9 +106,8 @@ void wrap_dynamical_systems(py::module_& m) {
       .def_property_readonly("MMatrix", &siconos::modeling::FirstOrderNonLinearDS::MMatrix,
                              "M matrix");
 
-  py::class_<siconos::modeling::FirstOrderLinearDS,
-             std::shared_ptr<siconos::modeling::FirstOrderLinearDS>,
-             siconos::modeling::FirstOrderNonLinearDS>(m, "FirstOrderLinearDS")
+  py::class_<siconos::modeling::FirstOrderLinearDS, siconos::modeling::FirstOrderNonLinearDS,
+             py::smart_holder>(m, "FirstOrderLinearDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
            py::keep_alive<1, 2>(), py::arg("x0"), py::arg("alias_t"))
       .def(py::init<const siconos::algebra::SiconosVector&, siconos::algebra::CopyTag>(),
@@ -173,16 +171,14 @@ void wrap_dynamical_systems(py::module_& m) {
 
   // ============================== SECOND ORDER DS ==============================
 
-  py::class_<siconos::modeling::SecondOrderDS,
-             std::shared_ptr<siconos::modeling::SecondOrderDS>,
-             siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
+  py::class_<siconos::modeling::SecondOrderDS, siconos::modeling::DynamicalSystem,
+             py::smart_holder>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal)
       .def("setBoundaryConditions", &siconos::modeling::SecondOrderDS::setBoundaryConditions);
 
-  py::class_<siconos::modeling::LagrangianSparseDS,
-             std::shared_ptr<siconos::modeling::LagrangianSparseDS>,
-             siconos::modeling::SecondOrderDS>(m, "LagrangianSparseDS", py::dynamic_attr())
+  py::class_<siconos::modeling::LagrangianSparseDS, siconos::modeling::SecondOrderDS,
+             py::smart_holder>(m, "LagrangianSparseDS", py::dynamic_attr())
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
@@ -760,8 +756,8 @@ void wrap_dynamical_systems(py::module_& m) {
            &siconos::modeling::LagrangianSparseDS::hasJacobianFgyrOver_velocity);
 
   py::class_<siconos::modeling::LagrangianSparseLinearTIDS,
-             std::shared_ptr<siconos::modeling::LagrangianSparseLinearTIDS>,
-             siconos::modeling::LagrangianSparseDS>(m, "LagrangianSparseLinearTIDS")
+             siconos::modeling::LagrangianSparseDS, py::smart_holder>(
+      m, "LagrangianSparseLinearTIDS")
 
       .def(py::init<const siconos::algebra::SiconosVector&,
                     const siconos::algebra::SiconosVector&,
@@ -948,8 +944,8 @@ void wrap_dynamical_systems(py::module_& m) {
           },
           nullptr, "View (shared memory) on the damping (scipy.sparse.csc_array).");
 
-  py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
-             siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
+  py::class_<siconos::modeling::LagrangianDS, siconos::modeling::SecondOrderDS,
+             py::smart_holder>(m, "LagrangianDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
@@ -1097,9 +1093,8 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 
-  py::class_<siconos::modeling::LagrangianLinearTIDS,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
-             siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
+  py::class_<siconos::modeling::LagrangianLinearTIDS, siconos::modeling::LagrangianDS,
+             py::smart_holder>(m, "LagrangianLinearTIDS")
       .def(py::init<const siconos::algebra::SiconosVector&,
                     const siconos::algebra::SiconosVector&,
                     const siconos::algebra::SiconosDenseMatrix&, siconos::algebra::CopyTag>(),
@@ -1163,9 +1158,8 @@ void wrap_dynamical_systems(py::module_& m) {
                              &siconos::modeling::LagrangianLinearTIDS::dampingMatrix,
                              "damping matrix");
 
-  py::class_<siconos::modeling::LagrangianLinearDiagonalDS,
-             std::shared_ptr<siconos::modeling::LagrangianLinearDiagonalDS>,
-             siconos::modeling::LagrangianDS>(m, "LagrangianLinearDiagonalDS")
+  py::class_<siconos::modeling::LagrangianLinearDiagonalDS, siconos::modeling::LagrangianDS,
+             py::smart_holder>(m, "LagrangianLinearDiagonalDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, siconos::algebra::AliasTag>(),
@@ -1239,9 +1233,8 @@ void wrap_dynamical_systems(py::module_& m) {
                              &siconos::modeling::LagrangianLinearDiagonalDS::massMatrix,
                              "mass matrix");
 
-  py::class_<siconos::modeling::NewtonEulerDS,
-             std::shared_ptr<siconos::modeling::NewtonEulerDS>,
-             siconos::modeling::SecondOrderDS>(m, "NewtonEulerDS")
+  py::class_<siconos::modeling::NewtonEulerDS, siconos::modeling::SecondOrderDS,
+             py::smart_holder>(m, "NewtonEulerDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector7>,
                     Eigen::Ref<siconos::algebra::SiconosVector6>, double,

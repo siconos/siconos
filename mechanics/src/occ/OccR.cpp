@@ -33,7 +33,7 @@ siconos::mechanics::occ::OccR::OccR(const ContactPoint& contact1, const ContactP
 
 void siconos::mechanics::occ::OccR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>&,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>&,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>&,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("siconos::mechanics::occ::OccR::computeh()\n");
   // std::shared_ptr<ContactShapeDistance> distance{nullptr};
@@ -56,22 +56,22 @@ void siconos::mechanics::occ::OccR::computeh(
                distance.point2.X(), distance.point2.Y(), distance.point2.Z(),
                distance.normal.X(), distance.normal.Y(), distance.normal.Z());
 
-  (*_Pc1)(0) = distance.point1.X() + _offset1 * distance.normal.X();
-  (*_Pc1)(1) = distance.point1.Y() + _offset1 * distance.normal.Y();
-  (*_Pc1)(2) = distance.point1.Z() + _offset1 * distance.normal.Z();
-  (*_Pc2)(0) = distance.point2.X() - _offset2 * distance.normal.X();
-  (*_Pc2)(1) = distance.point2.Y() - _offset2 * distance.normal.Y();
-  (*_Pc2)(2) = distance.point2.Z() - _offset2 * distance.normal.Z();
+  contactPoint1_(0) = distance.point1.X() + _offset1 * distance.normal.X();
+  contactPoint1_(1) = distance.point1.Y() + _offset1 * distance.normal.Y();
+  contactPoint1_(2) = distance.point1.Z() + _offset1 * distance.normal.Z();
+  contactPoint2_(0) = distance.point2.X() - _offset2 * distance.normal.X();
+  contactPoint2_(1) = distance.point2.Y() - _offset2 * distance.normal.Y();
+  contactPoint2_(2) = distance.point2.Z() - _offset2 * distance.normal.Z();
 
-  (*_Nc)(0) = distance.normal.X();
-  (*_Nc)(1) = distance.normal.Y();
-  (*_Nc)(2) = distance.normal.Z();
+  nc_(0) = distance.normal.X();
+  nc_(1) = distance.normal.Y();
+  nc_(2) = distance.normal.Z();
 
   distance.value -= (_offset1 + _offset2);
 
   y(0) = distance.value;
 
   DEBUG_EXPR(siconos::algebra::print(y););
-  DEBUG_EXPR(siconos::algebra::print(*_Nc););
+  DEBUG_EXPR(siconos::algebra::print(nc_););
   DEBUG_END("siconos::mechanics::occ::OccR::computeh()\n");
 }

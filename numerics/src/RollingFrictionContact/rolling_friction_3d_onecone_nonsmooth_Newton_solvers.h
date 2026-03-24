@@ -31,7 +31,7 @@
 
 */
 
-#include "NumericsFwd.h"    // for MohrCoulomb2DProblem, SolverOptions
+#include "NumericsFwd.h"    // for Plasticity2DProblem, SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

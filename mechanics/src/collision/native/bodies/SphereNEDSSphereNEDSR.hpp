@@ -31,7 +31,9 @@ class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
  private:
   ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);
 
-  double r1, r2, r1pr2;
+  double radius1_{0.};
+  double radius2_{0.};
+  double radius_sum{0.};
 
  public:
   ~SphereNEDSSphereNEDSR() noexcept = default;
@@ -56,7 +58,7 @@ class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {

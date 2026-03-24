@@ -41,7 +41,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   std::shared_ptr<std::vector<siconos::algebra::Index>> _axis{nullptr};
 
   siconos::algebra::Index _axisMin{0}, _axisMax{0};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobianhOver_q_Tmp{nullptr};
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -76,7 +76,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual size_t numberOfConstraints() const;

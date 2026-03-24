@@ -24,16 +24,16 @@
 
 #include <TopoDS_Shape.hxx>
 
+#include "ContactPoint.hpp"
+#include "Geometer.hpp"
+#include "NewtonEuler3DR.hpp"
 #include "OccBody.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
+#include "OccR.hpp"
 #include "OccSpaceFilter.hpp"
 #include "OccTimeStepping.hpp"
-#include "OccR.hpp"
-#include "NewtonEuler3DR.hpp"
-#include "Geometer.hpp"
-#include "ContactPoint.hpp"
 #include "OccUtils.hpp"
 #include "TimeDiscretisation.hpp"
 
@@ -60,21 +60,18 @@ PYBIND11_MODULE(_occ, m) {
 
   auto pyocc_module = py::module::import("OCC.Core.TopoDS");
 
-  py::class_<siconos::mechanics::occ::OccSpaceFilter,
-             std::shared_ptr<siconos::mechanics::occ::OccSpaceFilter>,
-             siconos::collision::native::SpaceFilter>(m, "OccSpaceFilter")
+  py::class_<siconos::mechanics::occ::OccSpaceFilter, siconos::collision::native::SpaceFilter,
+             py::smart_holder>(m, "OccSpaceFilter")
       .def(py::init<>());
 
-  py::class_<siconos::mechanics::occ::OccTimeStepping,
-             std::shared_ptr<siconos::mechanics::occ::OccTimeStepping>,
-             siconos::simulation::TimeStepping>(m, "OccTimeStepping")
+  py::class_<siconos::mechanics::occ::OccTimeStepping, siconos::simulation::TimeStepping,
+             py::smart_holder>(m, "OccTimeStepping")
       .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>,
                     std::shared_ptr<siconos::simulation::TimeDiscretisation>>(),
            py::arg("nsds"), py::arg("td"));
 
-  py::class_<siconos::mechanics::occ::OccBody,
-             std::shared_ptr<siconos::mechanics::occ::OccBody>,
-             siconos::modeling::NewtonEulerDS>(m, "OccBody")
+  py::class_<siconos::mechanics::occ::OccBody, siconos::modeling::NewtonEulerDS,
+             py::smart_holder>(m, "OccBody")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, double,
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
@@ -90,8 +87,7 @@ PYBIND11_MODULE(_occ, m) {
   m.def("occ_move", &py_occ_move, "Move a TopoDS_Shape using a translation and rotation array",
         py::arg("shape"), py::arg("q"));
 
-  py::class_<siconos::mechanics::occ::OccContactShape,
-             std::shared_ptr<siconos::mechanics::occ::OccContactShape>>(m, "OccContactShape")
+  py::class_<siconos::mechanics::occ::OccContactShape, py::smart_holder>(m, "OccContactShape")
       .def(py::init([](py::object shape_obj) {
              if (!py::hasattr(shape_obj, "this"))
                throw std::runtime_error(
@@ -118,38 +114,34 @@ PYBIND11_MODULE(_occ, m) {
              return std::make_shared<siconos::mechanics::occ::OccContactShape>(*native);
            }),
            py::arg("shape"))
-    .def("shape", &siconos::mechanics::occ::OccContactShape::shape);
+      .def("shape", &siconos::mechanics::occ::OccContactShape::shape);
 
-  py::class_<siconos::mechanics::occ::OccContactFace,
-             std::shared_ptr<siconos::mechanics::occ::OccContactFace>,
-             siconos::mechanics::occ::OccContactShape>(m, "OccContactFace")
+  py::class_<siconos::mechanics::occ::OccContactFace, siconos::mechanics::occ::OccContactShape,
+             py::smart_holder>(m, "OccContactFace")
       .def(py::init<const siconos::mechanics::occ::OccContactShape&, int>(), py::arg("shape"),
            py::arg("index"));
 
-  py::class_<siconos::mechanics::occ::OccContactEdge,
-             std::shared_ptr<siconos::mechanics::occ::OccContactEdge>,
-             siconos::mechanics::occ::OccContactShape>(m, "OccContactEdge")
+  py::class_<siconos::mechanics::occ::OccContactEdge, siconos::mechanics::occ::OccContactShape,
+             py::smart_holder>(m, "OccContactEdge")
       .def(py::init<const siconos::mechanics::occ::OccContactShape&, int>(), py::arg("shape"),
            py::arg("index"));
 
+  py::class_<siconos::mechanics::occ::CadmbtbDistanceType, py::smart_holder>(
+      m, "CadmbtbDistanceType")
+      .def(py::init<>());
 
-  py::class_<siconos::mechanics::occ::CadmbtbDistanceType>(m, "CadmbtbDistanceType")
-    .def(py::init<>());
+  py::class_<siconos::mechanics::occ::OccDistanceType, py::smart_holder>(m, "OccDistanceType")
+      .def(py::init<>());
 
-  py::class_<siconos::mechanics::occ::OccDistanceType>(m, "OccDistanceType")
-    .def(py::init<>());
+  py::class_<siconos::mechanics::occ::ContactPoint, py::smart_holder>(m, "ContactPoint")
+      .def(py::init<const siconos::mechanics::occ::OccContactShapeV&>(), py::arg("shape"));
 
-  py::class_<siconos::mechanics::occ::ContactPoint>(m, "ContactPoint")
-    .def(py::init< const siconos::mechanics::occ::OccContactShapeV& >(), py::arg("shape"));
-
-
-  py::class_<siconos::mechanics::occ::OccR, std::shared_ptr<siconos::mechanics::occ::OccR>,
-             siconos::modeling::NewtonEulerR>(m, "OccR")
+  py::class_<siconos::mechanics::occ::OccR, siconos::modeling::NewtonEulerR, py::smart_holder>(
+      m, "OccR")
       .def(py::init<const siconos::mechanics::occ::ContactPoint&,
                     const siconos::mechanics::occ::ContactPoint&,
                     const siconos::mechanics::occ::DistanceCalculator&>(),
            py::arg("contact1"), py::arg("contact2"), py::arg("indistance_calculator"))
       .def("setOffset1", &siconos::mechanics::occ::OccR::setOffset1)
       .def("setOffset2", &siconos::mechanics::occ::OccR::setOffset2);
-
-  }
+}

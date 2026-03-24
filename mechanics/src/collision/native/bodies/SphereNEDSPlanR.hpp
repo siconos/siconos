@@ -26,6 +26,7 @@
 #define SphereNEDSPlanR_h
 
 #include "NewtonEuler3DR.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::collision::native::bodies {
 class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
@@ -33,10 +34,10 @@ class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
  private:
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);
 
-  /* Ax + By + Cz + D = 0 */
-  double r, A, B, C, D, nN, nU;
-  /* u ^ v  = n */
-  double u1, u2, u3, v1, v2, v3, n1, n2, n3, ru1, ru2, ru3, rv1, rv2, rv3;
+  double sphere_radius_{0.};
+  /* ax + by + cz + d = 0 */
+  siconos::algebra::SiconosVector3 plane_normal_ = siconos::algebra::SiconosVector3::Zero();
+  double plane_d_{0};
 
  public:
   /** Constructor
@@ -64,11 +65,12 @@ class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  bool equal(double _A, double _B, double _C, double _D, double _r) const {
-    return (A == _A && B == _B && C == _C && D == _D && r == _r);
+  bool equal(double A, double B, double C, double D, double r) const {
+    return (A == plane_normal_.x() && B == plane_normal_.y() && C == plane_normal_.z() &&
+            D == plane_d_ && r == sphere_radius_);
   }
   virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);

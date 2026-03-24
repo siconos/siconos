@@ -21,7 +21,6 @@
 
 #include "NewtonEulerJointR.hpp"
 
-#include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 
 void siconos::joints::NewtonEulerJointR::setPoint(
@@ -37,12 +36,13 @@ void siconos::joints::NewtonEulerJointR::setAxis(
     size_t index, const Eigen::Ref<siconos::algebra::SiconosVector3>& axis) {
   assert(index < axes_.size());
   axes_[index] = axis;
+  assert(axis.norm() > 1e-12);
   axes_[index].normalize();
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::NewtonEulerJointR::projectVectorDoF(
-    const siconos::algebra::SiconosVector& v, const siconos::algebra::SiconosVector& q0,
-    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    const siconos::algebra::SiconosVector6& v, const siconos::algebra::SiconosVector7& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis,
     bool absoluteRef) {
   auto ax = normalDoF(q0, q1, axis, absoluteRef);
 

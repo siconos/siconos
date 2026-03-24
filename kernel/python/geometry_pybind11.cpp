@@ -21,14 +21,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <memory>
-
 #include "RotationQuaternion.hpp"
 #include "SiconosVector.hpp"
 
 namespace py = pybind11;
-
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 PYBIND11_MODULE(geometry, m) {
   m.doc() = "Siconos tools to deal with quaternions, rotations ...";

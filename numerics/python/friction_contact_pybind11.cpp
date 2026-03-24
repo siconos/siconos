@@ -510,7 +510,7 @@ struct GlobalRollingFrictionContactProblemWrapper {
 };
 
 void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& solver_ids) {
-  py::class_<FrictionContactProblemWrapper>(m, "FrictionContactProblem")
+  py::class_<FrictionContactProblemWrapper, py::smart_holder>(m, "FrictionContactProblem")
       .def(py::init<int, int, py::object, py::array_t<double>, py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("matrix"),
            py::arg("q"), py::arg("mu"))
@@ -552,7 +552,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .def("solve", &FrictionContactProblemWrapper::solve, py::arg("reactions"),
            py::arg("velocities"), py::arg("solver_options") = nullptr);
 
-  py::class_<RollingFrictionContactProblemWrapper>(m, "RollingFrictionContactProblem")
+  py::class_<RollingFrictionContactProblemWrapper, py::smart_holder>(
+      m, "RollingFrictionContactProblem")
       .def(py::init<int, int, py::object, py::array_t<double>, py::array_t<double>,
                     py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("matrix"),
@@ -593,7 +594,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
         return ss.str();
       });
 
-  py::class_<GlobalFrictionContactProblemWrapper>(m, "GlobalFrictionContactProblem")
+  py::class_<GlobalFrictionContactProblemWrapper, py::smart_holder>(
+      m, "GlobalFrictionContactProblem")
       .def(py::init<int, int, py::object, py::object, py::array_t<double>,
                     py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
@@ -638,8 +640,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
            })
       .def("somefunc", &GlobalFrictionContactProblemWrapper::somefunc);
 
-  py::class_<GlobalRollingFrictionContactProblemWrapper>(m,
-                                                         "GlobalRollingFrictionContactProblem")
+  py::class_<GlobalRollingFrictionContactProblemWrapper, py::smart_holder>(
+      m, "GlobalRollingFrictionContactProblem")
       .def(py::init<int, int, py::object, py::object, py::array_t<double>, py::array_t<double>,
                     py::array_t<double>>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
@@ -732,26 +734,32 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATHVI, "3D GAMS/Path VI formulation")
 
       // 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers)
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN", FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN,
+      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN",
+             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN,
              "3D One contact Non-smooth Newton Alart-Curnier")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP", FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
+      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP",
+             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
              "3D One contact Non-smooth Newton Alart-Curnier, damped")
       .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone",
              FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
              "3D One contact Projection on cone")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-             "3D One contact Projection on cone with local iteration")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
-             "3D One contact Projection on cone with regularization")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization,
-             "3D One contact Projection on cone with diagonalization")
+      .value(
+          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration",
+          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+          "3D One contact Projection on cone with local iteration")
+      .value(
+          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization",
+          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
+          "3D One contact Projection on cone with regularization")
+      .value(
+          "SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization",
+          FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization,
+          "3D One contact Projection on cone with diagonalization")
       .value("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity",
              FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity,
              "3D One contact Projection on cone, velocity")
-      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID", FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
+      .value("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID",
+             FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
              "3D Frictional contact hybrid solver for one contact")
       .value("SICONOS_FRICTION_3D_VI_FPP_Cylinder",
              FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP_Cylinder,
@@ -923,7 +931,6 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_3D_RESCALING_CONE_NO", SICONOS_FRICTION_3D_RESCALING_CONE_NO)
       .value("SICONOS_FRICTION_3D_RESCALING_CONE_YES", SICONOS_FRICTION_3D_RESCALING_CONE_YES)
       .export_values();
-
 
   py::enum_<SICONOS_NSGS_IPARAM>(params, "SICONOS_NSGS_IPARAM_enum")
       .value("SICONOS_NSGS_RELAXATION", SICONOS_NSGS_RELAXATION)

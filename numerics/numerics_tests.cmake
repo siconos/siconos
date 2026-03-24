@@ -473,15 +473,21 @@ if(WITH_TESTING)
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)
 
   #===========================================
-  # Mohr Coulomb platicity
+  # Plasticity 2D (Mohr-Coulomb)
   #===========================================
-  begin_tests(src/Plasticity/test)
-  new_test(SOURCES mc2d_read_write_test.c)
-  new_test(SOURCES mc2d_simple_solve_test.c)
+  begin_tests(src/Plasticity/test DEPS "SuiteSparse::CXSparse;externals")
+  new_test(SOURCES plasticity_2d_read_write_test.c)
+  new_test(SOURCES plasticity_2d_simple_solve_test.c)
+  new_test(SOURCES test_plasticity_2d_nsgs_generic.c)
   
-
-    
-
+  # Collection tests using new infrastructure
+  new_tests_collection(
+    DRIVER plasticity_test_collection.c.in FORMULATION plasticity_2d COLLECTION TEST_NSGS_COLLECTION_1
+    EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
+  
+  new_tests_collection(
+    DRIVER plasticity_test_collection.c.in FORMULATION plasticity_2d COLLECTION TEST_NSGS_COMPARE
+    EXTRA_SOURCES data_collection_1.c test_nsgs_compare.c)
 
   #===========================================
   # Generic mechanical tests

@@ -823,6 +823,10 @@ def build_project(args, configure=True, build=True):
         if args.generator and is_windows:
             cmake_configure_command += ["-G", args.generator]
         run_command(cmake_configure_command, args.quiet)
+        # copy compile_commands.json in dir which contains the source file
+        compile_commands_json = Path(args.build_dir, "compile_commands.json").as_posix()
+        move_compile_command = ["cp",compile_commands_json,args.driver_dir.as_posix()]
+        run_command(move_compile_command, args.quiet)
         msg = "✅ Configure done"
         logging.info(msg)
 

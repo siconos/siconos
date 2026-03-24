@@ -106,7 +106,7 @@ class NewtonEulerR : public Relation {
   bool haseVector_{false};
 
   /** vector of contact forces, ie: contactForce_ = B lambda. Useful for the end user.*/
-  std::shared_ptr<siconos::algebra::SiconosVector> contactForce_{nullptr};
+  siconos::algebra::SiconosVector contactForce_;
 
   /** Internal storage/buffer used to save H.T product.
      In the case of the bilateral constrains, it is H.T.
@@ -118,14 +118,14 @@ class NewtonEulerR : public Relation {
                0 &  \phi(p) \end{array}\right] \f]
       from dynamical systems
   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> T_buffer_{nullptr};
+  siconos::algebra::SiconosMatrix76 T_buffer_;
 
   /**  the additional  terms of the second order time derivative of y
    *
    *   \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}H_{NE}  T v \f$
    *
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> secondOrderTimeDerivativeTerms_{nullptr};
+  siconos::algebra::SiconosVector secondOrderTimeDerivativeTerms_;
 
   /** update H_NE matrix
    *
@@ -207,8 +207,8 @@ class NewtonEulerR : public Relation {
    *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
    */
   inline auto secondOrderTimeDerivativeTerms() {
-    return siconos::algebra::ConstMapVectorType(secondOrderTimeDerivativeTerms_->data(),
-                                                secondOrderTimeDerivativeTerms_->size());
+    return siconos::algebra::ConstMapVectorType(secondOrderTimeDerivativeTerms_.data(),
+                                                secondOrderTimeDerivativeTerms_.size());
   }
 
   /**
@@ -228,7 +228,7 @@ class NewtonEulerR : public Relation {
   /** \return  a read-only view on the vector of the forces due to this relation
    */
   inline auto contactForce() const {
-    return siconos::algebra::ConstMapVectorType(contactForce_->data(), contactForce_->size());
+    return siconos::algebra::ConstMapVectorType(contactForce_.data(), contactForce_.size());
   }
 
   /**
@@ -242,7 +242,7 @@ class NewtonEulerR : public Relation {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** default implementation consists in multiplying jachq and T
@@ -270,8 +270,9 @@ class NewtonEulerR : public Relation {
    *  \param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter,
-                             siconos::algebra::blocks::size_type derivativeNumber = 0) override;
+  virtual void computeOutput(
+      double time, Interaction& inter,
+      siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** to compute the input
    *
@@ -279,7 +280,8 @@ class NewtonEulerR : public Relation {
    *  \param inter the interaction using this relation
    *  \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, siconos::algebra::blocks::size_type level = 0) override;
+  virtual void computeInput(double time, Interaction& inter,
+                            siconos::algebra::blocks::size_type level = 0) override;
 
   void display() const override {}
 

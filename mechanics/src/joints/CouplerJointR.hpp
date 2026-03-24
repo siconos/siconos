@@ -38,24 +38,38 @@ class CouplerJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(CouplerJointR);
 
-  std::shared_ptr<NewtonEulerJointR> _joint1{nullptr};
-  std::shared_ptr<NewtonEulerJointR> _joint2{nullptr};
+  std::shared_ptr<NewtonEulerJointR> joint1_{nullptr};
+  std::shared_ptr<NewtonEulerJointR> joint2_{nullptr};
 
-  std::shared_ptr<siconos::algebra::SiconosVector> _ref1{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> _ref2{nullptr};
+  std::shared_ptr<const siconos::algebra::SiconosVector> ref1_{nullptr};
+  std::shared_ptr<const siconos::algebra::SiconosVector> ref2_{nullptr};
 
-  siconos::algebra::Index _dof1{0}, _dof2{0};
-  siconos::algebra::Index _ref1_index{0}, _ref2_index{0};
-  double _ratio{0.}, _offset{0.};
+  siconos::algebra::Index dof1_{0}, dof2_{0};
+  siconos::algebra::Index ref1_index_{0}, ref2_index_{0};
+  double ratio_{0.};
+  double offset_{0.};
+
+  // Types to handle the different cases (q2 or not, ref or not ...)
+  // when we need to call computehDoF or similar functions
+  using OptRef7 = std::optional<Eigen::Map<const siconos::algebra::SiconosVector7>>;
+  // std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>;
+  using VArray = std::array<OptRef7, 2>;
+
+  VArray v1_;  // for joint1
+  VArray v2_;  // for joint2
 
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
-  void resolveVectors(const siconos::algebra::SiconosVector* q1,
-                      const siconos::algebra::SiconosVector* q2,
-                      const siconos::algebra::SiconosVector*& v1_1,
-                      const siconos::algebra::SiconosVector*& v1_2,
-                      const siconos::algebra::SiconosVector*& v2_1,
-                      const siconos::algebra::SiconosVector*& v2_2) const;
+  void build_vectors(
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2);
+
+  // // void resolveVectors(const siconos::algebra::SiconosVector7* q1,
+  // //                     const siconos::algebra::SiconosVector7* q2,
+  // //                     const siconos::algebra::SiconosVector7*& v1_1,
+  // //                     const siconos::algebra::SiconosVector7*& v1_2,
+  // //                     const siconos::algebra::SiconosVector7*& v2_1,
+  // //                     const siconos::algebra::SiconosVector7*& v2_2) const;
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -67,24 +81,32 @@ class CouplerJointR : public NewtonEulerJointR {
                             const siconos::algebra::BlockVector& q0) override;
 
  public:
-  /** Initialize a coupler. See setReferences() for an explanation of
-   *  the parameters. */
+  /** Set reference joints and vectors.  This constraint maintains the
+   *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
+   *  reference to some vector ref1 which must replace either the
+   *  first or second DS of the current relation being defined.  If
+   *  ref1 and ref2 are null, then no reference is used.  Typically
+   *  ref1 and ref2 will be equal in order to implement gear ratios
+   *  for example.  joint1 must be between ref1 and ds1 specified in
+   *  setBasePositions(), while joint2 must be between ref2 and ds2.
+   */
+
+  /** Initialize a coupler*/
+  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                double ratio, siconos::algebra::Index ref1_index = 0,
+                std::shared_ptr<siconos::algebra::SiconosVector> ref1 = nullptr,
+                siconos::algebra::Index ref2_index = 0,
+                std::shared_ptr<siconos::algebra::SiconosVector> ref2 = nullptr);
+
+  /** Initialize a coupler */
   CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
                 std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
                 double ratio,
-                std::optional<siconos::algebra::SiconosVector> ref1 = std::nullopt,
+                std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1 = nullptr,
                 siconos::algebra::Index ref1_index = 0,
-                std::optional<siconos::algebra::SiconosVector> ref2 = std::nullopt,
+                std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2 = nullptr,
                 siconos::algebra::Index ref2_index = 0);
-
-  /** Initialize a coupler. See setReferences() for an explanation of
-   *  the parameters. */
-  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
-                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
-                double ratio, std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
-                siconos::algebra::Index ref1_index,
-                std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
-                siconos::algebra::Index ref2_index);
 
   ~CouplerJointR() noexcept = default;
 
@@ -99,88 +121,23 @@ class CouplerJointR : public NewtonEulerJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* Return the joint DoF index assigned to the first DoF. */
-  siconos::algebra::Index dof1() { return _dof1; }
+  siconos::algebra::Index dof1() { return dof1_; }
 
   /* Return the joint DoF index assigned to the second DoF. */
-  siconos::algebra::Index dof2() { return _dof2; }
+  siconos::algebra::Index dof2() { return dof2_; }
 
   /* Return the first reference joint assigned to this friction relation. */
-  auto joint1() { return _joint1; }
+  auto joint1() { return joint1_; }
 
   /* Return the second reference joint assigned to this friction relation. */
-  auto joint2() { return _joint2; }
-
-  /** Set reference joints and vectors.  This constraint maintains the
-   *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
-   *  reference to some vector ref1 which must replace either the
-   *  first or second DS of the current relation being defined.  If
-   *  ref1 and ref2 are null, then no reference is used.  Typically
-   *  ref1 and ref2 will be equal in order to implement gear ratios
-   *  for example.  joint1 must be between ref1 and ds1 specified in
-   *  setBasePositions(), while joint2 must be between ref2 and ds2.
-   *
-   *  \param joint1 The joint for the first reference measurement theta1.
-   *  \param dof1 The degree of freedom index of joint1 to use for
-   *              the first reference measurement theta1.
-   *  \param ref1 The optional reference position for the first
-   *              reference measurement theta1.
-   *  \param ref1_index Must be 0 or 1, depending on where ref1
-   *                    appears in joint1.
-   *  \param joint2 The joint for the second reference measurement theta2.
-   *  \param dof2 The degree of freedom index of joint2 to use for
-   *              the second reference measurement theta2.
-   *  \param ref2 The optional reference position for the second
-   *              reference measurement theta2.
-   *  \param ref2_index Must be 0 or 1, depending on where ref2
-   *                    appears in joint2.
-   */
-  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
-                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
-                     std::shared_ptr<siconos::algebra::SiconosVector> ref1,
-                     siconos::algebra::Index ref1_index,
-                     std::shared_ptr<siconos::algebra::SiconosVector> ref2,
-                     siconos::algebra::Index ref2_index);
-
-  /** Set reference joints and vectors.  This constraint maintains the
-   *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
-   *  reference to some vector ref1 which must replace either the
-   *  first or second DS of the current relation being defined.  If
-   *  ref1 and ref2 are null, then no reference is used.  Typically
-   *  ref1 and ref2 will be equal in order to implement gear ratios
-   *  for example.  joint1 must be between ref1 and ds1 specified in
-   *  setBasePositions(), while joint2 must be between ref2 and ds2.
-   *  This alternative setReferences() takes NewtonEulerDS as
-   *  parameters, but the reference vectors will be taken as
-   *  refds1->q() and refds2->q() respectively.
-   *
-   *  \param joint1 The joint for the first reference measurement theta1.
-   *  \param dof1 The degree of freedom index of joint1 to use for
-   *              the first reference measurement theta1.
-   *  \param refds1 The optional reference vector for the first
-   *                reference measurement theta1.
-   *  \param ref1_index Must be 0 or 1, depending on where ref1
-   *                    appears in joint1.
-   *  \param joint2 The joint for the second reference measurement theta2.
-   *  \param dof2 The degree of freedom index of joint2 to use for
-   *              the second reference measurement theta2.
-   *  \param refds2 The optional reference vector for the second
-   *                reference measurement theta2.
-   *  \param ref2_index Must be 0 or 1, depending on where ref2
-   *                    appears in joint2.
-   */
-  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
-                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
-                     std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
-                     siconos::algebra::Index ref1_index,
-                     std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
-                     siconos::algebra::Index ref2_index);
+  auto joint2() { return joint2_; }
 
   /* Set the gear ratio. */
-  void setRatio(double ratio);
+  void setRatio(double ratio) { ratio_ = ratio; };
 
   /** Initialize the joint constants based on the provided base positions.
    *
@@ -190,8 +147,8 @@ class CouplerJointR : public NewtonEulerJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
 
   /**
@@ -223,7 +180,7 @@ class CouplerJointR : public NewtonEulerJointR {
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y,
       siconos::algebra::Index axis = 0) override;
 
@@ -231,8 +188,8 @@ class CouplerJointR : public NewtonEulerJointR {
   virtual void computeJachqDoF(
       siconos::modeling::Interaction& inter,
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-      Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq,
       siconos::algebra::Index axis = 0) override;
 
   virtual void accept(modeling::relations::Visitor& tourist) const override {

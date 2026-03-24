@@ -29,26 +29,25 @@
 
 namespace py = pybind11;
 
-PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+// PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 PYBIND11_MODULE(integrators, m) {
   // Optional docstring
   m.doc() = "Siconos one-step integrators";
 
   // OSI base class
-  py::class_<siconos::integrators::OneStepIntegrator,
-             std::shared_ptr<siconos::integrators::OneStepIntegrator>>(m, "OneStepIntegrator");
+  auto osipy = py::class_<siconos::integrators::OneStepIntegrator, py::smart_holder>(
+      m, "OneStepIntegrator");
 
   // MoreauJean
-  py::class_<siconos::integrators::MoreauJeanOSI,
-             std::shared_ptr<siconos::integrators::MoreauJeanOSI>,
-             siconos::integrators::OneStepIntegrator>(m, "MoreauJeanOSI")
+  py::class_<siconos::integrators::MoreauJeanOSI, siconos::integrators::OneStepIntegrator,
+             py::smart_holder>(m, "MoreauJeanOSI")
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       .def("setConstraintActivationThreshold",
            &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
       .def("computeWorkForces", &siconos::integrators::MoreauJeanOSI::computeWorkForces,
-	   py::return_value_policy::move)      
+           py::return_value_policy::move)
       .def_property("theta",
                     &siconos::integrators::MoreauJeanOSI::theta,    // getter
                     &siconos::integrators::MoreauJeanOSI::setTheta  // setter
@@ -62,15 +61,13 @@ PYBIND11_MODULE(integrators, m) {
         return "\n";
       });
 
-  py::class_<siconos::integrators::MoreauJeanGOSI,
-             std::shared_ptr<siconos::integrators::MoreauJeanGOSI>,
-             siconos::integrators::MoreauJeanOSI>(m, "MoreauJeanGOSI")
+  py::class_<siconos::integrators::MoreauJeanGOSI, siconos::integrators::MoreauJeanOSI,
+             py::smart_holder>(m, "MoreauJeanGOSI")
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN());
 
-  py::class_<siconos::integrators::EulerMoreauOSI,
-             std::shared_ptr<siconos::integrators::EulerMoreauOSI>,
-             siconos::integrators::OneStepIntegrator>(m, "EulerMoreauOSI")
+  py::class_<siconos::integrators::EulerMoreauOSI, siconos::integrators::OneStepIntegrator,
+             py::smart_holder>(m, "EulerMoreauOSI")
       .def(py::init<double>(), py::arg("theta"))
       .def(py::init<double, double>(), py::arg("theta"), py::arg("gamma"))
       .def_property("theta",
@@ -93,8 +90,8 @@ PYBIND11_MODULE(integrators, m) {
       });
 
   py::class_<siconos::integrators::MoreauJeanDirectProjectionOSI,
-             std::shared_ptr<siconos::integrators::MoreauJeanDirectProjectionOSI>,
-             siconos::integrators::MoreauJeanOSI>(m, "MoreauJeanDirectProjectionOSI")
+             siconos::integrators::MoreauJeanOSI, py::smart_holder>(
+      m, "MoreauJeanDirectProjectionOSI")
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       .def(py::init<double>(), py::arg("theta"));

@@ -73,8 +73,8 @@ class FixedJointR : public NewtonEulerJointR {
    * null, the inertial frame will be considered as the second base.
    */
   virtual void setBasePositions(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2 =
           std::nullopt) override;
   /**
      Get the number of constraints defined in the joint
@@ -94,7 +94,7 @@ class FixedJointR : public NewtonEulerJointR {
   */
   virtual void computeh(
       const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual siconos::algebra::Index numberOfDoF() const override { return 0; }
