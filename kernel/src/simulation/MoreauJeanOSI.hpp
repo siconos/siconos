@@ -23,7 +23,7 @@
 
 #include <limits>
 
-#include "NonSmoothLaw.hpp"
+#include "NonSmoothLaw.hpp"  // IWYU pragma: keep.
 #include "OneStepIntegrator.hpp"
 #include "SimulationGraphs.hpp"
 namespace siconos::modeling {
@@ -189,13 +189,13 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
     void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
 
-    void visit(const siconos::modeling::RelayNSL& nslaw) override{};
+    void visit(const siconos::modeling::RelayNSL& nslaw) override {};
     void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override;
     void visit(const siconos::modeling::FremondImpactFrictionNSL& nslaw) override;
     void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nslaw) override;
-    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override{};
-    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override{};
-    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override{};
+    void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override {};
+    void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {};
     void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
   };
 
@@ -216,8 +216,8 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void computeIterationMatrixBoundaryConditions(
       const siconos::modeling::SecondOrderDS& ds,
-      siconos::algebra::SiconosMatrix& IterationMatrixBoundaryConditions,
-      siconos::algebra::SiconosMatrix& iteration_matrix) const;
+      siconos::algebra::SiconosDenseMatrix& IterationMatrixBoundaryConditions,
+      siconos::algebra::SiconosDenseMatrix& iteration_matrix) const;
 
  public:
   /** This enum is used to get access to work vectors relared to DS
@@ -399,7 +399,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  @param ds the concerned dynamical system
    *  @param LUW the LU-factorisation of W
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse(
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> iterationMatrixInverse(
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
       const siconos::algebra::SiconosDenseLUMatrix& LUW);
 
@@ -494,7 +494,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** \return the  work of forces by ds
    */
-  siconos::algebra::SiconosMatrix computeWorkForces();
+  siconos::algebra::SiconosDenseMatrix computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

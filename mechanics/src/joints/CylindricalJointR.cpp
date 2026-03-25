@@ -22,6 +22,7 @@
 #include "CylindricalJointR.hpp"
 
 #include <boost/math/quaternion.hpp>
+#include <cmath>
 #include <numbers>  // for pi
 
 #include "BlockVector.hpp"
@@ -283,6 +284,7 @@ void siconos::joints::CylindricalJointR::Jd1d2(double X1, double Y1, double Z1, 
 
   /* Prismatic constraints (H1, H2)
    */
+  H_NE_view_->setZero();  // optim --> 0 only for required components.
   const double x0 = axis1_(0) * q11 + axis1_(1) * q12 + axis1_(2) * q13;
   const double x1 = q11 * x0;
   const double x2 = axis1_(0) * q13 + axis1_(1) * q10 - axis1_(2) * q11;
@@ -466,6 +468,8 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
 
   /* Cylindrical constraints (H1, H2)
    */
+  H_NE_view_->setZero();  // optim --> 0 only for required components.
+
   const double x0 = axis1_(0) * q11 + axis1_(1) * q12 + axis1_(2) * q13;
   const double x1 = q11 * x0;
   const double x2 = axis1_(0) * q13 + axis1_(1) * q10 - axis1_(2) * q11;
@@ -718,6 +722,8 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
     Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq, siconos::algebra::Index axis) {
   if (axis > 1) return;
 
+  jachq.setZero();  // optim --> 0 only for required components.
+
   double X1 = q1(0);
   double Y1 = q1(1);
   double Z1 = q1(2);
@@ -841,6 +847,7 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   const double x76 = -x17 * (-x48 + x50 + x52 + x54) - x19 * (-x56 + x57 + x58 + x59) -
                      x21 * (-x61 + x62 + x63 + x64) + x66 * x72;
   const double x77 = 2 / (pow(x72, 2) + pow(x76, 2));
+  assert(!std::isnan(x77));
   const double x78 = -x68 + x69 + x70 + x71;
   const double x79 = 2 * axes_[0](0) * q11 + 2 * axes_[0](1) * q12 + 2 * axes_[0](2) * q13;
   const double x80 = _cq2q101 * q10 + _cq2q102 * q11 + _cq2q103 * q12 + _cq2q104 * q13;
@@ -891,6 +898,7 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
                        (-x51 * x67 + x72 * (-x17 * x49 - x19 * x53 - x21 * x47 + x51 * x66 +
                                             x55 * x73 + x60 * x74 + x65 * x75)) /
                        (pow(x46, 2) + pow(x67, 2)));
+    assert(!std::isnan(jachq(i, 3)));
     jachq.setValue(i, 4,
                    x77 * (x49 * x76 + x78 * (x17 * x51 + x19 * x47 - x21 * x53 + x49 * x66 -
                                              x55 * x79 - x60 * x75 + x65 * x74)));

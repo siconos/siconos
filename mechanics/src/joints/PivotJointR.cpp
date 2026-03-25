@@ -276,6 +276,7 @@ void siconos::joints::PivotJointR::computeJachqDoF(
                axes_[0](1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
                axes_[0](2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
   double x21 = 1.0 / (pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
+  assert(!std::isnan(x21));
   double x22 = 2 * x21 * (x15 + x16 + x17 - x19);
   double x23 = 2 * x20 * x21;
   double x24 = -x5 + x6 + x7 + x8;

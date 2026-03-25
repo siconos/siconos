@@ -25,9 +25,9 @@
 #include "EigenInclude.hpp"  // IWYU pragma: keep - Must be included before Eigen/Core
 //
 #include <Eigen/Core>
+#include <cassert>
 #include <memory>
 #include <utility>  // in_range
-
 namespace siconos::algebra {
 
 using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor>;

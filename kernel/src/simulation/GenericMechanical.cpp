@@ -33,18 +33,13 @@
 
 siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(int FC3D_Solver_Id)
     : GenericMechanical(std::shared_ptr<SolverOptions>(
-          solver_options_create(
-              SICONOS_GENERIC_MECHANICAL_NSGS),
-          solver_options_delete))
-{
-  solver_options_update_internal(_numerics_solver_options.get(), 1,
-                                                    FC3D_Solver_Id);
+          solver_options_create(SICONOS_GENERIC_MECHANICAL_NSGS), solver_options_delete)) {
+  solver_options_update_internal(_numerics_solver_options.get(), 1, FC3D_Solver_Id);
 }
 
 siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
     std::shared_ptr<SolverOptions> options)
-    : LinearOSNS(options)
-{
+    : LinearOSNS(options) {
   DEBUG_BEGIN(
       "siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(std::shared_ptr<"
       "siconos::"
@@ -59,15 +54,13 @@ siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
       "numerics::SolverOptions> options)\n");
 }
 
-siconos::nonsmooth_formulations::GenericMechanical::~GenericMechanical() noexcept
-{
+siconos::nonsmooth_formulations::GenericMechanical::~GenericMechanical() noexcept {
   genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   _pnumerics_GMP = nullptr;
 }
 
 void siconos::nonsmooth_formulations::GenericMechanical::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
 
@@ -78,16 +71,14 @@ void siconos::nonsmooth_formulations::GenericMechanical::initialize(
 }
 
 bool siconos::nonsmooth_formulations::GenericMechanical::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw& nslaw)
-{
+    siconos::modeling::NonSmoothLaw& nslaw) {
   // do nothoing since it is check in
   // siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteractionBlock
   return true;
 }
 
 void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteractionBlock(
-    const siconos::graphs::InteractionsGraph::VDescriptor& vd)
-{
+    const siconos::graphs::InteractionsGraph::VDescriptor& vd) {
   auto indexSet = simulation()->indexSet(indexSetLevel());
   // bool isTimeInvariant =
   // simulation()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
@@ -106,21 +97,17 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
     auto size = inter->nonSmoothLaw()->size();
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
-      gmp_add(_pnumerics_GMP,
-                                 SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+      gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
       DEBUG_PRINT("siconos::modeling::Type::EqualityConditionNSL\n");
       // pAux->size= inter->nonSmoothLaw()->size();
-    }
-    else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-             siconos::modeling::Type::NewtonImpactNSL) {
-      gmp_add(_pnumerics_GMP,
-                                 SICONOS_NUMERICS_PROBLEM_LCP, size);
+    } else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+               siconos::modeling::Type::NewtonImpactNSL) {
+      gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
       DEBUG_PRINT(" siconos::modeling::Type::NewtonImpactNSL\n");
-    }
-    else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-             siconos::modeling::Type::RelayNSL) {
-      auto* pAux = static_cast<RelayProblem*>(gmp_add(
-          _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size));
+    } else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+               siconos::modeling::Type::RelayNSL) {
+      auto* pAux = static_cast<RelayProblem*>(
+          gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size));
       auto nsLaw =
           std::static_pointer_cast<siconos::modeling::RelayNSL>(inter->nonSmoothLaw());
       for (decltype(size) i = 0; i < size; i++) {
@@ -128,13 +115,11 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
         pAux->ub[i] = nsLaw->ub();
       }
       DEBUG_PRINT(" siconos::modeling::Type::RelayNSL\n");
-    }
-    else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-             siconos::modeling::Type::NewtonImpactFrictionNSL) {
+    } else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+               siconos::modeling::Type::NewtonImpactFrictionNSL) {
       if (size == 3) {
-        auto* pAux =
-            static_cast<FrictionContactProblem*>(gmp_add(
-                _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size));
+        auto* pAux = static_cast<FrictionContactProblem*>(
+            gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size));
         auto nsLaw = std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw());
         pAux->dimension = 3;
@@ -142,11 +127,9 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
         *(pAux->mu) = nsLaw->mu();
 
         DEBUG_PRINT(" siconos::modeling::Type::NewtonImpactFrictionNSL\n");
-      }
-      else if (size == 2) {
-        auto* pAux =
-            static_cast<FrictionContactProblem*>(gmp_add(
-                _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC2D, size));
+      } else if (size == 2) {
+        auto* pAux = static_cast<FrictionContactProblem*>(
+            gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC2D, size));
         auto nsLaw = std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw());
         pAux->dimension = 2;
@@ -155,8 +138,7 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
 
         DEBUG_PRINT(" siconos::modeling::Type::NewtonImpactFrictionNSL\n");
       }
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::GenericMechanical::"
           "computeDiagonalInteractionBlock- not yet "
@@ -168,13 +150,11 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
 }
 
 void siconos::nonsmooth_formulations::GenericMechanical::computeInteractionBlock(
-    const siconos::graphs::InteractionsGraph::EDescriptor& ed)
-{
+    const siconos::graphs::InteractionsGraph::EDescriptor& ed) {
   LinearOSNS::computeInteractionBlock(ed);
 }
 
-int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
-{
+int siconos::nonsmooth_formulations::GenericMechanical::compute(double time) {
   DEBUG_BEGIN("siconos::nonsmooth_formulations::GenericMechanical::compute(double time)\n");
   int info = 0;
   // --- Prepare data for GenericMechanical computing ---
@@ -214,13 +194,11 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
     DEBUG_EXPR(display(););
     // Call Numerics Driver for GenericMechanical
     //    display();
-    info = gmp_driver(_pnumerics_GMP, &*_z->data(), &*_w->data(),
-                                         &*_numerics_solver_options);
+    info = gmp_driver(_pnumerics_GMP, &*_z->data(), &*_w->data(), &*_numerics_solver_options);
     // printf("siconos::nonsmooth_formulations::GenericMechanical::compute : R:\n");
-    //siconos::algebra::print(*_z);
+    // siconos::algebra::print(*_z);
     postCompute();
-  }
-  else {
+  } else {
     DEBUG_PRINT(
         "siconos::nonsmooth_formulations::GenericMechanical::compute : sizeoutput is null\n");
   }
@@ -228,15 +206,12 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
   return info;
 }
 
-void siconos::nonsmooth_formulations::GenericMechanical::display() const
-{
-  std::cout << "===== "
-            << "Generic mechanical Problem " << std::endl;
+void siconos::nonsmooth_formulations::GenericMechanical::display() const {
+  std::cout << "===== " << "Generic mechanical Problem " << std::endl;
   LinearOSNS::display();
 }
 
-void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks()
-{
+void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks() {
   if (!_hasBeenUpdated) {
     //    printf("siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks :
     //    must be updated\n");

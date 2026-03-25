@@ -18,13 +18,13 @@
 #include "MoreauJeanDirectProjectionOSI.hpp"
 
 #include "Interaction.hpp"
-#include "LagrangianDS.hpp"
+#include "LagrangianDS.hpp"  // IWYU pragma: keep
 #include "LagrangianR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
-#include "Simulation.hpp"
+#include "Simulation.hpp"  // IWYU pragma: keep
 // #define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION
 // #define SECONDWAY_ACTIVATION

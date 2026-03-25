@@ -18,6 +18,7 @@
 
 #include "SiconosAlgebraAddons.hpp"
 
+#include <cassert>
 #include <random>
 #include <utility>
 

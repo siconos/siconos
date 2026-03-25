@@ -41,15 +41,19 @@ siconos::collision::RigidBodyDS::RigidBodyDS(const siconos::algebra::SiconosVect
 void siconos::collision::RigidBodyDS::compute_extrapolated_position(
     double extrapolationCoefficient) {
   // we compute an extrapolation of the position
-  if (!_qExtrapolated)
+  if (!_qExtrapolated) {
     _qExtrapolated = std::make_shared<siconos::algebra::SiconosVector>(state_q_->size());
+  }
 
-  auto velocityIncrement = std::make_shared<siconos::algebra::SiconosVector>(twist_->size());
-
-  (*_qExtrapolated)(0) = (*velocityIncrement)(0);
-  (*_qExtrapolated)(1) = (*velocityIncrement)(1);
-  (*_qExtrapolated)(2) = (*velocityIncrement)(2);
-  siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
+  // auto velocityIncrement =
+  // std::make_shared<siconos::algebra::SiconosVector>(twist_->size()); all the following is
+  // useless since velocityIncrement = 0 ...
+  //     _qExtrapolated->setZero() will do the job
+  // (*_qExtrapolated)(0) = (*velocityIncrement)(0);
+  // (*_qExtrapolated)(1) = (*velocityIncrement)(1);
+  // (*_qExtrapolated)(2) = (*velocityIncrement)(2);
+  // siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
+  _qExtrapolated->setZero();
   const siconos::algebra::SiconosVector7& qold = qMemory().getSiconosVector(0);
   siconos::geometry::compositionLawLieGroup(qold, *_qExtrapolated);
 }

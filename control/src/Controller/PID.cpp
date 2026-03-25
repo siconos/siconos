@@ -27,20 +27,18 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
 siconos::control::PID::PID(std::shared_ptr<ControlSensor> sensor,
                            std::shared_ptr<siconos::algebra::SiconosMatrix> B)
-    : Actuator(ActuatorType::PID, sensor, B)
-{
+    : Actuator(ActuatorType::PID, sensor, B) {
   _u = std::make_shared<siconos::algebra::SiconosVector>(1);
   _u->setZero();
 }
 
 void siconos::control::PID::initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-                                       const siconos::simulation::Simulation& s)
-{
+                                       const siconos::simulation::Simulation& s) {
   Actuator::initialize(nsds, s);
 
   _curDeltaT = s.currentTimeStep();
@@ -50,8 +48,7 @@ void siconos::control::PID::initialize(const siconos::modeling::NonSmoothDynamic
   for (auto i = 0; i < 3; ++i) (*_err).push_front(0.0);
 }
 
-void siconos::control::PID::actuate()
-{
+void siconos::control::PID::actuate() {
   DEBUG_BEGIN("void siconos::control::PID::actuate()\n");
   /** \todo We have to distinguish two cases : linear or nonlinear
    *  support the nonlinear case
@@ -63,7 +60,8 @@ void siconos::control::PID::actuate()
   DEBUG_PRINTF("_curDeltaT = %g\n", _curDeltaT);
   DEBUG_PRINTF("_ref = %g\n", _ref);
   DEBUG_EXPR(siconos::algebra::print(_sensor->y()););
-  DEBUG_EXPR(siconos::algebra::print(*_u));;
+  DEBUG_EXPR(siconos::algebra::print(*_u));
+  ;
   DEBUG_PRINTF("added term  = %g\n",
                ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
                    (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] +
@@ -72,28 +70,24 @@ void siconos::control::PID::actuate()
   (*_u)(0) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] +
               (*_K)(2) / _curDeltaT * (*_err)[2];
-  DEBUG_EXPR(siconos::algebra::print(*_u));;
+  DEBUG_EXPR(siconos::algebra::print(*_u));
+  ;
   DEBUG_END("void siconos::control::PID::actuate()\n");
 }
 
-void siconos::control::PID::setK(std::shared_ptr<siconos::algebra::SiconosVector> K)
-{
+void siconos::control::PID::setK(std::shared_ptr<siconos::algebra::SiconosVector> K) {
   // check dimensions ...
   if (K->size() != 3) {
     THROW_EXCEPTION("siconos::control::PID::setK - the size of K should be 3");
-  }
-  else {
+  } else {
     _K = K;
   }
 }
 
 void siconos::control::PID::setTimeDiscretisation(
-    const siconos::simulation::TimeDiscretisation& td)
-{
-}
+    const siconos::simulation::TimeDiscretisation& td) {}
 
-void siconos::control::PID::display() const
-{
+void siconos::control::PID::display() const {
   Actuator::display();
   std::cout << "current error vector: ";
   std::cout << (*_err)[0] << " " << (*_err)[1] << " " << (*_err)[2] << std::endl;

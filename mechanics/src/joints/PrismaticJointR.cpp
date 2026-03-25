@@ -685,6 +685,7 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
+  jachq.setZero();  // optim --> 0 only for required components.
 
   double X1 = q1(0);
   double Y1 = q1(1);

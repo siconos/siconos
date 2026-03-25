@@ -23,7 +23,7 @@
 #ifndef SICOALGEBRA_ADDONS_HPP
 #define SICOALGEBRA_ADDONS_HPP
 
-#include <concepts>
+// #include <concepts>
 #include <optional>
 
 #include "BlockVector.hpp"
@@ -147,6 +147,110 @@ SiconosSparseMatrix generateRandomSparseMatrix(siconos::algebra::Index rows,
                                                siconos::algebra::Index cols,
                                                siconos::algebra::Index nnz,
                                                std::optional<double> density = std::nullopt);
+
+// Tools to solve linear systems (wrap around eigen functions)
+// Objective: be able to activate/deactivate residu verification after
+// LU solve.
+
+/**  Default signature for 'solving' functions */
+using SolveLuFunction = std::function<void(
+    const SiconosDenseLUMatrix&, const Eigen::Ref<const SiconosDenseMatrix>&,
+    const Eigen::Ref<const SiconosDenseMatrix>&, Eigen::Ref<SiconosDenseMatrix>)>;
+
+/** Default tolerance LU solvers */
+inline constexpr double solver_tol = 1e-12;
+
+inline void solve_lu(const SiconosDenseLUMatrix& luw,
+                     const Eigen::Ref<const SiconosDenseMatrix>& original,
+                     const Eigen::Ref<const SiconosDenseMatrix>& rhs,
+                     Eigen::Ref<SiconosDenseMatrix> result) {
+  if (result.data() != rhs.data())
+    result.noalias() = luw.solve(rhs);
+  else
+    result = luw.solve(rhs);
+}
+
+inline void solve_and_check(const SiconosDenseLUMatrix& luw,
+                            const Eigen::Ref<const SiconosDenseMatrix>& original,
+                            const Eigen::Ref<const SiconosDenseMatrix>& rhs,
+                            Eigen::Ref<SiconosDenseMatrix> result) {
+  double residu = 0.;
+  if (result.data() != rhs.data()) {
+    result.noalias() = luw.solve(rhs);
+    // To avoid division by 0
+    auto nb = std::max(rhs.norm(), std::sqrt(std::numeric_limits<double>::epsilon()));
+    residu = (original * result - rhs).norm() / nb;
+  } else {  // we need a copy of the rhs ...
+    siconos::algebra::SiconosVector rhs_2 = rhs;
+    result.noalias() = luw.solve(rhs_2);
+
+    // if original is not provided. Test purpose.
+    //  auto residu = (luw.reconstructedMatrix() * result - rhs).norm();
+    // To avoid division by 0
+    auto nb = std::max(rhs_2.norm(), std::sqrt(std::numeric_limits<double>::epsilon()));
+    residu = (original * result - rhs_2).norm() / nb;
+  }
+  if (residu > solver_tol) {
+    std::cerr << "WARNING: LU solve error exceed the given tolerance. Error=" << residu
+              << "\n";
+  }
+}
+/**  Default signature for 'solving' functions */
+using SolveInverseFunction =
+    std::function<void(const SiconosDenseLUMatrix&,
+                       const Eigen::Ref<const SiconosDenseMatrix>&, SiconosDenseMatrix&)>;
+
+inline void inverse_with_check(const SiconosDenseLUMatrix& luw,
+                               const Eigen::Ref<const SiconosDenseMatrix>& original,
+                               SiconosDenseMatrix& result) {
+  result.noalias() = luw.inverse();  // noalias : result != LUw (types différents)
+
+  // Check
+  Index n = original.rows();
+  double residu = (original * result - SiconosDenseMatrix::Identity(n, n)).norm() / n;
+  if (residu > solver_tol)
+    std::cerr << "WARNING:: inverse computation results in a residu which exceeds the "
+                 "tolerance, error="
+              << residu << "\n";
+}
+inline void inverse_std(const SiconosDenseLUMatrix& luw,
+                        const Eigen::Ref<const SiconosDenseMatrix>& original,
+                        SiconosDenseMatrix& result) {
+  result.noalias() = luw.inverse();  // noalias : result != LUw (types différents)
+}
+
+/** @brief solve Ax=b with LU decomposition
+ *  @param luw LU factorisation of the matrix
+ *  @param original A matrix, not factorized. Unused with "no check" mode
+ *  @param rhs righ-hand side
+ *  @param result solution
+ */
+inline SolveLuFunction solve = solve_lu;
+
+/** @brief compute the inverse of a matrix (from LU dec)
+ *  @param luw LU factorisation of the matrix
+ *  @param original matrix, not factorized. Unused with "no check" mode
+ *  @param result inverse
+ */
+inline SolveInverseFunction inverse = inverse_std;
+
+/** True to activate result check in linear system solve */
+inline bool is_solver_check_activated = false;
+
+/** Activate solver checking */
+inline void enable_solver_check() {
+  is_solver_check_activated = true;
+  solve = solve_and_check;
+  inverse = inverse_with_check;
+}
+
+/** De-activate solver checking */
+inline void disable_solver_check() {
+  is_solver_check_activated = false;
+  solve = solve_lu;
+  inverse = inverse_std;
+}
+
 }  // namespace siconos::algebra
 
 #endif

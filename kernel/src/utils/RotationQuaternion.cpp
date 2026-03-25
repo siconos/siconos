@@ -24,6 +24,7 @@
 #include <boost/math/quaternion.hpp>
 // #include <numbers>  // pi
 
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
@@ -182,7 +183,7 @@ double siconos::geometry::axisAngleFromQuaternion(
   double angle = acos(q0) * 2.0;
   // double f = sin( angle *0.5);
   double f = sqrt(1 - q0 * q0);  // cheaper than sin ?
-  if (f != 0.0) {
+  if (f > std::numeric_limits<double>::epsilon()) {
     axis(0) = q1 / f;
     axis(1) = q2 / f;
     axis(2) = q3 / f;
@@ -269,13 +270,12 @@ double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector7 
 }
 
 void siconos::geometry::normalizeq(Eigen::Ref<siconos::algebra::SiconosVector7> q) {
-  double normq = sqrt(q(3) * q(3) + q(4) * q(4) + q(5) * q(5) + q(6) * q(6));
-  assert(normq > 0);
-  normq = 1.0 / normq;
-  q(3) = q(3) * normq;
-  q(4) = q(4) * normq;
-  q(5) = q(5) * normq;
-  q(6) = q(6) * normq;
+  auto quat = q.tail<4>();
+  double norm = quat.norm();
+  if (norm > std::numeric_limits<double>::epsilon())
+    quat /= norm;
+  else
+    THROW_EXCEPTION("normalizeq: quaternion part has zero norm");
 }
 
 void siconos::geometry::quaternionFromTwistVector(

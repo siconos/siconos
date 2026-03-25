@@ -17,7 +17,6 @@
  */
 #include "MoreauJeanGOSI.hpp"
 
-#include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
@@ -35,7 +34,6 @@
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
-
 
 double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   DEBUG_PRINT("\nsiconos::integrators::MoreauJeanGOSI::computeResidu(), start\n");
@@ -502,13 +500,11 @@ void siconos::integrators::MoreauJeanGOSI::display() const {
       auto ds = _dynamicalSystemsGraph->bundle(*dsi);
 
       std::cout << "--------------------------------\n";
-      std::cout << "--> W of dynamical system number " << ds->number() << ": "
-                << "\n";
+      std::cout << "--> W of dynamical system number " << ds->number() << ": " << "\n";
       if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
         siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
       else
-        std::cout << "-> nullptr"
-                  << "\n";
+        std::cout << "-> nullptr" << "\n";
       std::cout << "--> and corresponding theta is: " << _theta << "\n";
     }
   }

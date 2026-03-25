@@ -18,23 +18,18 @@
 
 #include "MBTB_DATA.hpp"
 #include "MBTB_PYTHON_API.hpp"
-// #include "SiconosKernel.hpp"
 #include "CADMBTB_API.hpp"
 #include "MBTB_Body.hpp"
 #include "MBTB_Contact.hpp"
 #include "MBTB_JointR.hpp"
 #include "MBTB_internalTool.hpp"
 #include "ace.h"
-// #include "MBTB_TimeSteppingProj.hpp"
-#include "Interaction.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RotationQuaternion.hpp"
 #include "SolverOptions.h"  // for SolverOptions struct
-#include "TimeStepping.hpp"
-#include "Topology.hpp"
 
 void siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS() {
   for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {

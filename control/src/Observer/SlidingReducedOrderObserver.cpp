@@ -18,7 +18,9 @@
 
 #include "SlidingReducedOrderObserver.hpp"
 
-#include "ControlSensor.hpp"
+#include <Eigen/SVD>
+
+#include "ControlSensor.hpp"  // IWYU pragma: keep
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

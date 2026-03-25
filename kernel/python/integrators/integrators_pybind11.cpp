@@ -20,12 +20,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <memory>
-
 #include "EulerMoreauOSI.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "SiconosAlgebraAddons.hpp"
 
 namespace py = pybind11;
 
@@ -34,6 +33,9 @@ namespace py = pybind11;
 PYBIND11_MODULE(integrators, m) {
   // Optional docstring
   m.doc() = "Siconos one-step integrators";
+
+  m.def("enable_solver_check", &siconos::algebra::enable_solver_check);
+  m.def("disable_solver_check", &siconos::algebra::disable_solver_check);
 
   // OSI base class
   auto osipy = py::class_<siconos::integrators::OneStepIntegrator, py::smart_holder>(

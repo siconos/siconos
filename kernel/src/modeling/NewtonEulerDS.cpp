@@ -22,10 +22,11 @@
 
 #include "NewtonEulerR.hpp"
 #include "RotationQuaternion.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
-#include "Tools.hpp"
+// #include "Tools.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -57,7 +58,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   /** \todo lazy Memory allocation */
   p_.resize(3);
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);  // Needed in NewtonEulerR
-
+  p_[1]->setZero();
   //  -- Total Inertia Matrix --
   //   Remind that inertial matrix is accessed with inertialMatrix() method, a view on
   //   the block
@@ -91,6 +92,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
 
   jacobianWrenchOver_twist_ =
       std::make_shared<siconos::algebra::SiconosMatrix66>();  // ndof_, ndof_);
+  jacobianWrenchOver_twist_->setZero();
   // jacobianWrenchOver_q_ will be allocated only if required
   // (if fint and/or mint are defined or if mext is expressed in the inertial frame.)
 
@@ -119,7 +121,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   /** \todo lazy Memory allocation */
   p_.resize(3);
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);  // Needed in NewtonEulerR
-
+  p_[1]->setZero();
   //  -- Total Inertia Matrix --
   //   Remind that inertial matrix is accessed with inertialMatrix() method, a view on
   //   the bloxk
@@ -153,6 +155,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
 
   jacobianWrenchOver_twist_ =
       std::make_shared<siconos::algebra::SiconosMatrix66>();  // ndof_, ndof_);
+  jacobianWrenchOver_twist_->setZero();
   // jacobianWrenchOver_q_ will be allocated only if required
   // (if fint and/or mint are defined or if mext is expressed in the inertial frame.)
 }
@@ -177,7 +180,10 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
   *(state_x_[0]) << *state_q_, *twist_;
 
-  if (!acceleration_) acceleration_ = std::make_shared<siconos::algebra::SiconosVector>(6);
+  if (!acceleration_) {
+    acceleration_ = std::make_shared<siconos::algebra::SiconosVector>(6);
+    acceleration_->setZero();
+  }
 
   // Compute dotq_
   siconos::modeling::newton_euler::computeT(*state_q_, *T_);
@@ -191,7 +197,10 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX
   // related functions.
 
-  if (!p_[2]) p_[2] = std::make_shared<siconos::algebra::SiconosVector>(6);
+  if (!p_[2]) {
+    p_[2] = std::make_shared<siconos::algebra::SiconosVector>(6);
+    p_[2]->setZero();
+  }
 
   init_lu_mass();
 
@@ -226,7 +235,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
     // View onto left part of buffer_
     Eigen::Map<siconos::algebra::SiconosMatrix67> jacq(buffer_.data(), ndof_, qDim_);
     // Solve MjacobianX(1,0) = jacobianFL[0]
-    jacq = LUMass_->solve(*jacobianWrenchOver_q_);
+    siconos::algebra::solve(*LUMass_, *totalInertiaMatrix_, *jacobianWrenchOver_q_, jacq);
     for (siconos::algebra::Index j = 0; j < qDim_; ++j) {
       for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
@@ -242,7 +251,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
     Eigen::Map<siconos::algebra::SiconosMatrix66> jacv(buffer_.data() + 6 * qDim_, ndof_,
                                                        ndof_);
     // Solve MjacobianX(1,1) = jacobianFL[1]
-    jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
+    siconos::algebra::solve(*LUMass_, *totalInertiaMatrix_, *jacobianWrenchOver_twist_, jacv);
     for (siconos::algebra::Index j = 0; j < 6; ++j) {
       for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
@@ -268,6 +277,7 @@ void siconos::modeling::NewtonEulerDS::initializeNonSmoothInput(
     } else
       p_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
+  p_[level]->setZero();
 }
 
 void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
@@ -278,7 +288,8 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
   *acceleration_ += *wrench_;
   DEBUG_EXPR(siconos::algebra::print(*wrench_););
 
-  if (LUMass_) *acceleration_ = LUMass_->solve(*acceleration_);
+  if (LUMass_)
+    siconos::algebra::solve(*LUMass_, *totalInertiaMatrix_, *acceleration_, *acceleration_);
 
   // Compute dotq_
   siconos::modeling::newton_euler::computeT(*state_q_, *T_);
@@ -302,7 +313,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
     // View onto left part of buffer_
     Eigen::Map<siconos::algebra::SiconosMatrix67> jacq(buffer_.data(), ndof_, ndof_);
     // Solve MjacobianX(1,0) = jacobianFL[0]
-    jacq = LUMass_->solve(*jacobianWrenchOver_q_);
+    siconos::algebra::solve(*LUMass_, *totalInertiaMatrix_, *jacobianWrenchOver_q_, jacq);
+
     for (siconos::algebra::Index j = 0; j < qDim_; ++j) {
       for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
@@ -316,7 +328,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
     // View onto right part of buffer_
     Eigen::Map<siconos::algebra::SiconosMatrix66> jacv(buffer_.data(), ndof_, ndof_);
     // Solve MjacobianX(1,1) = jacobianFL[1]
-    jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
+    siconos::algebra::solve(*LUMass_, *totalInertiaMatrix_, *jacobianWrenchOver_twist_, jacv);
+
     for (siconos::algebra::Index j = 0; j < 6; ++j) {
       for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
@@ -364,6 +377,7 @@ void siconos::modeling::NewtonEulerDS::setComputeFextFunction(
     const func_prototypes::FunctionS_V& fext_func) {
   if (!std::holds_alternative<siconos::algebra::OwnedDenseVector3>(fext_storage_)) {
     fext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>();
+    use_fext([&](auto& vec) { vec.setZero(); });
   }
   hasFext_ = true;
   hasConstantFext_ = false;
@@ -396,6 +410,7 @@ void siconos::modeling::NewtonEulerDS::setComputeMextFunction(
     const func_prototypes::FunctionS_V& mext_func) {
   if (!std::holds_alternative<siconos::algebra::OwnedDenseVector3>(mext_storage_)) {
     mext_storage_ = std::make_unique<siconos::algebra::SiconosVector3>();
+    use_mext([&](auto& vec) { vec.setZero(); });
   }
   hasMext_ = true;
   hasConstantMext_ = false;
@@ -409,9 +424,11 @@ void siconos::modeling::NewtonEulerDS::setComputeFintFunction(
   // No need to ensure memory alloc -> computed directly into wrench_
   hasFint_ = true;
   computefint_ = fint_func;
-  if (!jacobianWrenchOver_q_)
+  if (!jacobianWrenchOver_q_) {
     jacobianWrenchOver_q_ =
         std::make_shared<siconos::algebra::SiconosMatrix67>();  // ndof_, qDim_);
+    jacobianWrenchOver_q_->setZero();
+  }
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeJacobianFintOver_qFunction(
@@ -420,9 +437,11 @@ void siconos::modeling::NewtonEulerDS::setComputeJacobianFintOver_qFunction(
   hasJacobianFintOver_q_ = true;
   computejacobianFintOver_q_ = new_func;
   computeJacobianFintOver_q_byFD_ = false;
-  if (!jacobianWrenchOver_q_)
+  if (!jacobianWrenchOver_q_) {
     jacobianWrenchOver_q_ =
         std::make_shared<siconos::algebra::SiconosMatrix67>();  // ndof_, qDim_);
+    jacobianWrenchOver_q_->setZero();
+  }
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeJacobianFintOver_twistFunction(
@@ -440,9 +459,10 @@ void siconos::modeling::NewtonEulerDS::setComputeMintFunction(
   // No need to ensure memory alloc -> computed directly into wrench_
   hasMint_ = true;
   computemint_ = mint_func;
-  if (!jacobianWrenchOver_q_)
-
-    std::make_shared<siconos::algebra::SiconosMatrix67>();  // ndof_, qDim_);
+  if (!jacobianWrenchOver_q_) {
+    jacobianWrenchOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix67>();
+    jacobianWrenchOver_q_->setZero();
+  }
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_qFunction(
@@ -450,9 +470,10 @@ void siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_qFunction(
   // No need to ensure memory alloc -> computed directly into jacobianWrenchOver_q_
   computejacobianMintOver_q_ = new_func;
   computeJacobianMintOver_q_byFD_ = false;
-  if (!jacobianWrenchOver_q_)
-    jacobianWrenchOver_q_ =
-        std::make_shared<siconos::algebra::SiconosMatrix67>();  // ndof_, qDim_);
+  if (!jacobianWrenchOver_q_) {
+    jacobianWrenchOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix67>();
+    jacobianWrenchOver_q_->setZero();
+  }
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_twistFunction(
@@ -492,7 +513,7 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
   // used to compute temp. values for fext, fint and so on
   // Warning: if parallel computation is in action, mind
   // competitive access to the memory
-  siconos::algebra::SiconosVector3 buffer;
+  siconos::algebra::SiconosVector3 buffer = siconos::algebra::SiconosVector3::Zero();
   if (hasFext_) {
     if (computefext_) {
       use_fext([&](auto& fext) {
@@ -574,7 +595,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
   if (hasMext_) {
     if (isMextExpressedInInertialFrame_) {
       // tmp value to compute mext. We do not update mext_ of the present object
-      siconos::algebra::SiconosVector3 mext;
+      siconos::algebra::SiconosVector3 mext = siconos::algebra::SiconosVector3::Zero();
       if (computemext_)
         computemext_(time, mext);
       else
@@ -675,9 +696,11 @@ void siconos::modeling::NewtonEulerDS::display(bool brief) const {
 
 void siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame(bool value) {
   isMextExpressedInInertialFrame_ = value;
-  if (!jacobianWrenchOver_q_)
+  if (!jacobianWrenchOver_q_) {
     jacobianWrenchOver_q_ =
         std::make_shared<siconos::algebra::SiconosMatrix67>();  // ndof_, qDim_);
+    jacobianWrenchOver_q_->setZero();
+  }
 }
 
 // --- Functions for memory handling ---
@@ -705,11 +728,10 @@ void siconos::modeling::NewtonEulerDS::swapInMemory() {
 }
 
 void siconos::modeling::NewtonEulerDS::resetAllNonSmoothParts() {
-  if (p_[1])
-    p_[1]->setZero();
-  else
-    p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  if (!p_[1]) p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  p_[1]->setZero();
 }
+
 void siconos::modeling::NewtonEulerDS::resetNonSmoothPart(
     siconos::algebra::blocks::size_type level) {
   if (p_[level]) p_[level]->setZero();
@@ -826,7 +848,7 @@ void siconos::modeling::newton_euler::computeMextForceAtPos(
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_frc);
   }
 
-  siconos::algebra::SiconosVector3 moment;
+  siconos::algebra::SiconosVector3 moment = siconos::algebra::SiconosVector3::Zero();
   if (posAbsRef) {
     siconos::algebra::SiconosVector3 local_pos = pos - q.head<3>();
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_pos);
@@ -895,7 +917,8 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     const siconos::modeling::func_prototypes::FunctionMV_V& mgyr_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result) {
-  siconos::algebra::SiconosVector3 mgyr0, mgyr;
+  siconos::algebra::SiconosVector3 mgyr0 = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 mgyr = siconos::algebra::SiconosVector3::Zero();
   mgyr_func(inertia, twist, mgyr0);
 
   result.setZero();
@@ -955,7 +978,8 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
    * is computed assuming that the quaternion is unit (see quaternionRotate...()
    */
 
-  siconos::algebra::SiconosVector3 mext, mext0;
+  siconos::algebra::SiconosVector3 mext = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 mext0 = siconos::algebra::SiconosVector3::Zero();
   mext_func(time, mext0);
   if (isMextExpressedInInertialFrame)
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext0);
@@ -978,7 +1002,8 @@ void siconos::modeling::newton_euler::computeJacobianFOver_twist_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& f_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result) {
-  siconos::algebra::SiconosVector3 mint0, mint;
+  siconos::algebra::SiconosVector3 mint0 = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 mint = siconos::algebra::SiconosVector3::Zero();
   f_func(twist, q, time, mint0);
   result.setZero();
   siconos::algebra::SiconosVector6 veps = twist;  // copy
@@ -996,7 +1021,8 @@ void siconos::modeling::newton_euler::computeJacobianFOver_q_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& f_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result) {
-  siconos::algebra::SiconosVector3 mint0, mint;
+  siconos::algebra::SiconosVector3 mint0 = siconos::algebra::SiconosVector3::Zero();
+  siconos::algebra::SiconosVector3 mint = siconos::algebra::SiconosVector3::Zero();
   f_func(twist, q, time, mint0);
   result.setZero();
   siconos::algebra::SiconosVector qeps = q;  // copy
