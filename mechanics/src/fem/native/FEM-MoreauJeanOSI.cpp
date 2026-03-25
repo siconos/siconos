@@ -19,11 +19,11 @@
 
 #include <memory>
 
-#include "BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"  // IWYU pragma: keep
 #include "MoreauJeanOSI.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Simulation.hpp"
+#include "Simulation.hpp"  // IWYU pragma: keep
 #include "SolidLinearTIDS.hpp"
 #include "StressLinearTIR.hpp"
 // // #define DEBUG_NOCOLOR
@@ -46,22 +46,29 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
 
   ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::vfree)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::vfree)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::buffer)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::buffer)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::v_iter)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::sigma_iter)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
-
+  ds_work_vectors[tools::enum_to_index(wk_ds::sigma_iter)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->stressDimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::sigma_free)]->setZero();
   ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)] =
       std::make_shared<siconos::algebra::SiconosVector>(solid->dimension() +
                                                         solid->stressDimension());
+  ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)]->setZero();
   // Update dynamical system components (for memory swap).
 
   solid->computeTotalForces(solid->velocity_read(), solid->q_read(), t);
@@ -81,9 +88,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
   bool is_ds2_integrated_by_this_osi = use_two_ds && checkOSI(DSG.descriptor(ds2));
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wk_inter::size));
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wk_inter::size));
   }
 
   if (!interProp.workBlockVectors) {
@@ -102,7 +108,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
     inter_work[tools::enum_to_index(
         siconos::integrators::MoreauJeanOSI::wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
-
+  inter_work[tools::enum_to_index(siconos::integrators::MoreauJeanOSI::wk_inter::osnsp_rhs)]
+      ->setZero();
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current
   // osi.
   _check_and_update_interaction_levels(inter);
@@ -196,6 +203,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
   _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
       std::make_shared<siconos::algebra::SiconosMatrix>(size_iteration_mat,
                                                         size_iteration_mat);
+  _dynamicalSystemsGraph->properties(dsv).iterationMatrix->setZero();
   // Get a link to the iteration matrix
   auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
 

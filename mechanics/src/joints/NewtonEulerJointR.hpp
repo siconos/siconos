@@ -127,7 +127,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  otherwise the q1 frame is assumed.
    */
   siconos::algebra::SiconosVector3 projectVectorDoF(
-      const siconos::algebra::SiconosVector6& v, const siconos::algebra::SiconosVector7& q0,
+      const siconos::algebra::SiconosVector3& v, const siconos::algebra::SiconosVector7& q0,
       const std::optional<Eigen::Ref<siconos::algebra::SiconosVector7>>& q1, int axis = 0,
       bool absoluteRef = true);
 

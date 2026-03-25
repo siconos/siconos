@@ -277,10 +277,11 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
 
   inter.relation()->checkSize(inter);
 
-  if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)])
+  if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)]) {
     inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
-  inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)]->setZero();
+    inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)]->setZero();
+  }
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with
   // the current osi.
@@ -314,7 +315,6 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     inter_work_block[label_xfree]->setVectorPtr(1,
                                                 workVds2[tools::enum_to_index(wk_ds::vfree)]);
   }
-  inter_work_block[label_xfree]->setZero();
 }
 
 void siconos::integrators::MoreauJeanOSI::initialize_nonsmooth_problems() {

@@ -159,7 +159,8 @@ void siconos::joints::PivotJointR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  KneeJointR::computeh(q1, q2, y);
+  assert(y.size() == 5);
+  KneeJointR::computeh(q1, q2, y.head(3));
 
   siconos::algebra::SiconosVector4 rot221;
   if (q2) {

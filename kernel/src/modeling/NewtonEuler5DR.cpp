@@ -108,7 +108,7 @@ void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
   H_NE_prod_T_->block(0, 3, 3, 3) =
       rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
   H_NE_prod_T_->block(3, 3, 2, 3) =
-      rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_;
+      (rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_).bottomRows(2);
 
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
   DEBUG_END(
@@ -129,7 +129,7 @@ void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
   H_NE_prod_T_->block(0, 9, 3, 3) =
       rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
   H_NE_prod_T_->block(3, 3, 2, 3) =
-      -rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_;
+      -(rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_).bottomRows(2);
 
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
 

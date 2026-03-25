@@ -1,15 +1,34 @@
-#!/usr/bin/env python
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2024 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 
 #
-# A circle with two disks inside under earth gravity
+# A circle container, with two disks inside, subject to gravity
 #
 
 
 import numpy
 from math import sqrt
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_run import MechanicsHdf5Runner
-
+from siconos.io.mechanics_run import (
+    MechanicsHdf5Runner,
+    MechanicsHdf5Runner_run_options,
+)
 import siconos.numerics as sn
 
 import siconos
@@ -93,6 +112,12 @@ options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100000
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-12
 
+run_options = MechanicsHdf5Runner_run_options()
+run_options["T"] = 2
+run_options["h"] = 0.005
+run_options["Newton_max_iter"] = 20
+run_options["solver_options"] = options
+
 
 def run():
 
@@ -102,20 +127,7 @@ def run():
         # of the International System of Units.
         # Because of fixed collision margins used in the collision detection,
         # sizes of small objects may need to be expressed in cm or mm.
-        io.run(
-            with_timer=False,
-            gravity_scale=1,
-            t0=0,
-            T=2,
-            h=0.005,
-            theta=0.50001,
-            Newton_max_iter=1000,
-            set_external_forces=None,
-            solver_options=options,
-            numerics_verbose=False,
-            output_contact_forces=True,
-            output_frequency=None,
-        )
+        io.run(run_options)
 
 
 def check():
