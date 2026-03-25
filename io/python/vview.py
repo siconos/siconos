@@ -697,8 +697,8 @@ class InputObserver:
                 self.vview.contact_pos_force[mu].Update()
                 self.vview.contact_pos_norm[mu].Update()
 
-        #self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
-        #self.vview.set_static_actors_visibility(self.vview.io_reader._time)
+        self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
+        self.vview.set_static_actors_visibility(self.vview.io_reader._time)
 
         pos_data = self.vview.io_reader.pos_data
 
