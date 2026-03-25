@@ -220,6 +220,12 @@ endif()
 #== == == == == = OpenMP == == == == ==
 option(WITH_OPENMP "Use OpenMP" OFF)
 
+#== == == == == = PETSc == == == == ==
+option(WITH_PETSC "Use PetSC" OFF)
+
+#== == == == == = CUDA == == == == ==
+option(WITH_CUDA "Use CUDA" OFF)
+
 #== == == == == = use ccache if available == == == == == =
 option(WITH_CCACHE "Use ccache" OFF)
 if(WITH_CCACHE)
@@ -243,6 +249,7 @@ if(WITH_MPI)
   #print_mpi_info(Fortran)
   #endif()
 endif()
+
 
 #== == == == == = Tests env == == == == ==
 if(WITH_TESTING)

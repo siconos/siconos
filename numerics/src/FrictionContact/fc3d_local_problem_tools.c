@@ -96,3 +96,19 @@ void fc3d_local_problem_free(FrictionContactProblem* localproblem,
   }
   frictionContactProblem_free(localproblem);
 }
+
+void fc3d_local_problem_compute_q_parallel(FrictionContactProblem* problem,
+                                           FrictionContactProblem* localproblem, double* reaction,
+                                           int contact) {
+  double* qLocal = localproblem->q;
+  int n = 3 * problem->numberOfContacts;
+
+  int in = 3 * contact, it = in + 1, is = it + 1;
+
+  /* qLocal computation*/
+  qLocal[0] = problem->q[in];
+  qLocal[1] = problem->q[it];
+  qLocal[2] = problem->q[is];
+
+  NM_row_prod_no_diag3_parallel(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
+}

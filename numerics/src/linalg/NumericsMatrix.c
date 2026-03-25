@@ -327,7 +327,29 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
   /* SparseBlock storage */
   else if (storage == NM_SPARSE_BLOCK)
     SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
-  else {
+  /* Sparse storage */
+  else if (storage == NM_SPARSE) {
+    if (init) {
+      memset(y, 0, sizeY * sizeof(double));
+    }
+
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NSM_CSR) {
+      M = NM_csr(A);
+    } else {
+      M = NM_csc_trans(A);
+    }
+
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
+    double* Mx = M->x;
+
+    for (int i = 0; i < sizeY; ++i) {
+      for (CS_INT p = Mp[currentRowNumber + i]; p < Mp[currentRowNumber + i + 1]; ++p) {
+        y[i] += Mx[p] * x[Mi[p]];
+      }
+    }
+  } else {
     fprintf(stderr,
             "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
             "unknown storage\n");
@@ -558,6 +580,84 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
 
   NM_version_sync(A);
 }
+
+void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
+                                   NumericsMatrix* A, double* x, double* y, bool init) {
+  assert(A);
+  assert(x);
+  assert(y);
+  assert((size_t)A->size0 >= 3);
+  assert((size_t)A->size1 == sizeX);
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      if (init) {
+        y[0] = 0.;
+        y[1] = 0.;
+        y[2] = 0.;
+      }
+      double* M = A->matrix0;
+      assert(M);
+      int incx = sizeX, incy = 1;
+      size_t in = row_start, it = row_start + 1, is = row_start + 2;
+      /* Before diagonal */
+      // Maybe i can use cblas_dgemv() here
+      y[0] += cblas_ddot(row_start, &M[in], incx, x, incy);
+      y[1] += cblas_ddot(row_start, &M[it], incx, x, incy);
+      y[2] += cblas_ddot(row_start, &M[is], incx, x, incy);
+      /* After diagonal */
+      y[0] += cblas_ddot(sizeX - row_start - 3, &M[in + (row_start + 3) * sizeX], incx,
+                         &x[row_start + 3], incy);
+      y[1] += cblas_ddot(sizeX - row_start - 3, &M[it + (row_start + 3) * sizeX], incx,
+                         &x[row_start + 3], incy);
+      y[2] += cblas_ddot(sizeX - row_start - 3, &M[is + (row_start + 3) * sizeX], incx,
+                         &x[row_start + 3], incy);
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      /* qLocal += rowMB * x
+       * with rowMB the row of blocks of MGlobal which corresponds
+       * to the current contact
+       */
+      SBM_row_prod_no_diag_3x3(sizeX, 3, block_start, A->matrix1, x, y);
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        y[0] = 0.;
+        y[1] = 0.;
+        y[2] = 0.;
+      }
+
+      int64_t in = (int64_t)row_start, it = (int64_t)row_start + 1,
+              is = (int64_t)row_start + 2;
+
+      CSparseMatrix* M;
+      if (A->matrix2->origin == NSM_CSR) {
+        M = NM_csr(A);
+      } else {
+        M = NM_csc_trans(A);
+      }
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
+      for (size_t i = 0, j = row_start; i < 3; ++i, ++j) {
+        for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
+          if ((Mi[p] != in) && (Mi[p] != it) && (Mi[p] != is)) y[i] += Mx[p] * x[Mi[p]];
+        }
+      }
+      break;
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3_parallel :: unknown matrix storage %d",
+              A->storageType);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
                           double* x, double* y, bool init) {
   assert(A);
@@ -631,6 +731,76 @@ void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, Numer
     default: {
       fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d\n", A->storageType);
       return;
+    }
+  }
+}
+
+void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
+                                   NumericsMatrix* A, double* x, double* y, bool init) {
+  assert(A);
+  assert(x);
+  assert(y);
+  assert((size_t)A->size0 >= 2);
+  assert((size_t)A->size1 == sizeX);
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      if (init) {
+        y[0] = 0.;
+        y[1] = 0.;
+      }
+      double* M = A->matrix0;
+      assert(M);
+      int incx = sizeX, incy = 1;
+      size_t in = row_start, it = row_start + 1;
+      /* Before diagonal */
+      // Maybe i can use cblas_dgemv() here
+      y[0] += cblas_ddot(row_start, &M[in], incx, x, incy);
+      y[1] += cblas_ddot(row_start, &M[it], incx, x, incy);
+      /* After diagonal */
+      y[0] += cblas_ddot(sizeX - row_start - 2, &M[in + (row_start + 2) * sizeX], incx,
+                         &x[row_start + 2], incy);
+      y[1] += cblas_ddot(sizeX - row_start - 2, &M[it + (row_start + 2) * sizeX], incx,
+                         &x[row_start + 2], incy);
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      /* qLocal += rowMB * x
+       * with rowMB the row of blocks of MGlobal which corresponds
+       * to the current contact
+       */
+      SBM_row_prod_no_diag_2x2(sizeX, 2, block_start, A->matrix1, x, y);
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        y[0] = 0.;
+        y[1] = 0.;
+      }
+
+      CSparseMatrix* M;
+      if (A->matrix2->origin == NSM_CSR) {
+        M = NM_csr(A);
+      } else {
+        M = NM_csc_trans(A);
+      }
+
+      int64_t in = (int64_t)row_start, it = (int64_t)row_start + 1;
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
+      for (size_t i = 0, j = row_start; i < 2; ++i, ++j) {
+        for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
+          if ((Mi[p] != in) && (Mi[p] != it)) y[i] += Mx[p] * x[Mi[p]];
+        }
+      }
+      break;
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
     }
   }
 }
@@ -2868,7 +3038,7 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A) {
                                                          * allocation */
   }
 
-  NM_version_sync(A);
+  // NM_version_sync(A);
   return A->matrix2->trans_csc;
 }
 
@@ -6091,6 +6261,378 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
   return info;
 }
 
+void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A,
+                   const double* x, double* y, int init) {
+  assert(A);
+  assert(x);
+  assert(y);
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      int incx = A->size0, incy = 1;
+      double* mat = A->matrix0;
+      if (init == 0) {
+        for (int row = 0; row < size_i; row++)
+          y[row] += cblas_ddot(size_j, &mat[start_i + row + incx * start_j], incx, &x[start_j],
+                               incy);
+      } else {
+        for (int row = 0; row < size_i; row++)
+          y[row] = cblas_ddot(size_j, &mat[start_i + row + incx * start_j], incx, &x[start_j],
+                              incy);
+      }
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        for (int row = 0; row < size_i; row++) {
+          y[row] = 0.;
+        }
+      }
+
+      CSparseMatrix* S = NULL;
+      if (A->storageType == NM_SPARSE) {
+        if (A->matrix2->origin == NSM_CSR) {
+          S = NM_csr(A);
+        } else {
+          S = NM_csc_trans(A);
+        }
+      }
+
+      CS_INT* Mp = S->p;
+      CS_INT* Mi = S->i;
+      double* Mx = S->x;
+
+      for (int row = 0; row < size_i; row++) {
+        for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
+          if ((start_j <= Mi[p]) && (Mi[p] < start_j + size_j)) {
+            y[row] += Mx[p] * x[Mi[p]];
+          }
+        }
+      }
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d",
+              A->storageType);
+      exit(EXIT_FAILURE);
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  NM_version_sync(A);
+}
+
+void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A,
+                                   const double* x, double* left, double* right, int init) {
+  assert(A);
+  assert(x);
+  assert(left);
+  assert(right);
+
+  int sizeX = size_i;
+  int sizeY = size_i;
+
+  // assert(A->size0 >= sizeY); // size0  = number of lines
+  // assert(A->size1 == sizeX); // size1 = number of columns
+
+  NM_types storage = A->storageType;
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      int incx = A->size0, incy = 1;
+      double* mat = A->matrix0;
+      if (init) {
+        right[local_row] = 0.;
+        left[local_row] = 0.;
+      }
+
+      left[local_row] += cblas_ddot(local_row, &mat[start_i + local_row + incx * start_i],
+                                    incx, &x[start_i], incy);
+      right[local_row] += cblas_ddot(
+          sizeX - local_row - 1, &mat[start_i + local_row + incx * (start_i + local_row + 1)],
+          incx, &x[start_i + local_row + 1], incy);
+
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        right[local_row] = 0.;
+        left[local_row] = 0.;
+      }
+
+      CSparseMatrix* S = NULL;
+      if (A->storageType == NM_SPARSE) {
+        if (A->matrix2->origin == NSM_CSR) {
+          S = NM_csr(A);
+        } else {
+          S = NM_csc_trans(A);
+        }
+      }
+
+      CS_INT* Mp = S->p;
+      CS_INT* Mi = S->i;
+      double* Mx = S->x;
+
+      for (CS_INT p = Mp[start_i + local_row]; p < Mp[start_i + local_row + 1]; ++p) {
+        if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
+          if (Mi[p] < start_i + local_row)
+            left[local_row] += Mx[p] * x[Mi[p]];
+          else if (Mi[p] > start_i + local_row)
+            right[local_row] += Mx[p] * x[Mi[p]];
+        }
+      }
+
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d",
+              A->storageType);
+      exit(EXIT_FAILURE);
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  NM_version_sync(A);
+}
+
+void NM_get_invdiag(int n, int* info, NumericsMatrix* M, double* diag) {
+  double diag_i = 0.0;
+  switch (M->storageType) {
+    case NM_DENSE: {
+      assert(M->matrix0);
+      for (int i = 0; i < n; ++i) {
+        diag_i = M->matrix0[i + i * M->size0];
+        if (fabs(diag_i) < DBL_EPSILON) {
+          if (verbose > 0) {
+            printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+            printf(" The problem cannot be solved with this method \n");
+          }
+
+          *info = 2;
+          free(diag);
+          return;
+        } else {
+          diag[i] = 1.0 / diag_i;
+        }
+      }
+      break;
+    }
+    case NM_SPARSE: {
+      assert(M->matrix2);
+      switch (M->matrix2->origin) {
+        case NSM_TRIPLET: {
+          assert(M->matrix2->triplet);
+          CS_INT* Mi = M->matrix2->triplet->i;
+          CS_INT* Mp = M->matrix2->triplet->p;
+          double* Mx = M->matrix2->triplet->x;
+
+          /* k counts the number of non-zero diagonal terms
+            assuming the triplet format has no redundancies */
+          int k = 0;
+          for (int idx = 0; idx < M->matrix2->triplet->nz; idx++) {
+            if (Mi[idx] == Mp[idx]) {
+              diag_i = Mx[idx];
+              if (fabs(diag_i) < DBL_EPSILON) {
+                if (verbose > 0) {
+                  printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+                  printf(" The problem cannot be solved with this method \n");
+                }
+                *info = 2;
+                free(diag);
+                return;
+              } else {
+                diag[Mi[idx]] = 1.0 / diag_i;
+                k += 1;
+              }
+            }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
+          }
+          break;
+        }
+        case NSM_HALF_TRIPLET: {
+          /* Not sure about this one */
+          assert(M->matrix2->triplet);
+          CS_INT* Mi = M->matrix2->triplet->i;
+          CS_INT* Mp = M->matrix2->triplet->p;
+          double* Mx = M->matrix2->triplet->x;
+
+          /* Same as NSM_TRIPLET */
+          int k = 0;
+          for (int idx = 0; idx < M->matrix2->triplet->nz; idx++) {
+            if (Mi[idx] == Mp[idx]) {
+              diag_i = Mx[idx];
+              if (fabs(diag_i) < DBL_EPSILON) {
+                if (verbose > 0) {
+                  printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+                  printf(" The problem cannot be solved with this method \n");
+                }
+
+                *info = 2;
+                free(diag);
+                return;
+              } else {
+                diag[Mi[idx]] = 1.0 / diag_i;
+                k += 1;
+              }
+            }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
+          }
+          break;
+        }
+        case NSM_CSC: {
+          assert(M->matrix2->csc);
+          CS_INT* Mi = M->matrix2->csc->i;
+          CS_INT* Mp = M->matrix2->csc->p;
+          double* Mx = M->matrix2->csc->x;
+
+          /* Same as NSM_TRIPLET */
+          int k = 0;
+          for (int j = 0; j < n; j++) {
+            for (CS_INT row = Mp[j]; row < Mp[j + 1]; row++) {
+              if (j == Mi[row]) {
+                diag_i = Mx[row];
+                if (fabs(diag_i) < DBL_EPSILON) {
+                  if (verbose > 0) {
+                    printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+                    printf(" The problem cannot be solved with this method \n");
+                  }
+
+                  *info = 2;
+                  free(diag);
+                  return;
+                } else {
+                  diag[j] = 1.0 / diag_i;
+                  k += 1;
+                }
+              }
+            }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
+          }
+          break;
+        }
+        default: {
+          fprintf(stderr, "NM_get_value ::  unknown origin %d for sparse matrix\n",
+                  M->matrix2->origin);
+        }
+      }
+      break;
+    }
+    default:
+      fprintf(stderr, "NM_get_value ::  unknown matrix storage = %d\n", M->storageType);
+  }
+}
+
+void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
+                       size_t col_start_right, NumericsMatrix* A, size_t* permutation,
+                       const double* x, double* left, double* right, bool init) {
+  assert(A);
+  assert(x);
+  assert(left);
+  assert(right);
+  assert((size_t)A->size0 >= 1);
+  assert((size_t)A->size1 == sizeX);
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      if (init) {
+        left[0] = 0.;
+        right[0] = 0.;
+      }
+      double* M = A->matrix0;
+      assert(M);
+      int incx = sizeX, incy = 1;
+
+      size_t col;
+
+      for (int j = 0; j < sizeX; j++) {
+        col = permutation[j];
+        if (col < size_left)
+          left[0] += M[row + incx * j] * x[j];
+        else if (col >= col_start_right)
+          right[0] += M[row + incx * j] * x[j];
+      }
+
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      /* qLocal += rowMB * x
+       * with rowMB the row of blocks of MGlobal which corresponds
+       * to the current contact
+       */
+
+      /* NOT IMPLEMENTED */
+      // SBM_row_prod_no_diag_1x1(sizeX, 1, block, A->matrix1, x, y);
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        left[0] = 0.;
+        right[0] = 0.;
+      }
+
+      CSparseMatrix* M;
+      if (A->matrix2->origin == NSM_CSR) {
+        M = NM_csr(A);
+      } else {
+        M = NM_csc_trans(A);
+      }
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
+      size_t col;
+
+      for (CS_INT p = Mp[row]; p < Mp[row + 1]; ++p) {
+        col = permutation[Mi[p]];
+        if (col < size_left)
+          left[0] += Mx[p] * x[Mi[p]];
+        else if (col >= col_start_right)
+          right[0] += Mx[p] * x[Mi[p]];
+      }
+      break;
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  // NM_version_sync(A);
+}
 NumericsMatrix* NM_clear_zero(NumericsMatrix* A, const double tol) {
   /* Currently, this routine is only useful for type NM_SPARSE */
   NumericsMatrix* B = NM_create(NM_SPARSE, A->size0, A->size1);

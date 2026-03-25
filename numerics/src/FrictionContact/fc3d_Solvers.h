@@ -92,6 +92,18 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
 void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double* velocity,
                        int* info, SolverOptions* options);
 
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* velocity,
+                     int* info, SolverOptions* options);
+#endif
+
+/* void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
+                                       FreeSolverNSGSPtr *freeSolver,
+                                       ComputeErrorPtr *computeError,
+                                       FrictionContactProblem *problem,
+                                       FrictionContactProblem *localproblem,
+                                       SolverOptions *options); */
+
 void fc3d_admm(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
                SolverOptions* options);
 

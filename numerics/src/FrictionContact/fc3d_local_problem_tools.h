@@ -75,7 +75,9 @@ void fc3d_local_problem_compute_q(FrictionContactProblem* problem,
                                   int contact);
 void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
                                FrictionContactProblem* localproblem, int contact);
-
+void fc3d_local_problem_compute_q_parallel(FrictionContactProblem* problem,
+                                           FrictionContactProblem* localproblem, double* reaction,
+                                           int contact);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

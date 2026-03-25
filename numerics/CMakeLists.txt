@@ -101,6 +101,19 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
 
 # ---- Final setup for the library ----
 
+# -- Add parallel solvers
+if(WITH_OPENMP AND WITH_PETSC)
+  # Add parallel tools (graph coloring with PETSc)
+  list(APPEND ${COMPONENT}_DIRS src/tools/parallel)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES src/tools/parallel)
+
+  # Add parallel LCP solvers
+  list(APPEND ${COMPONENT}_DIRS src/LCP/parallel)
+
+  # Add parallel FrictionContact solvers
+  list(APPEND ${COMPONENT}_DIRS src/FrictionContact/parallel)
+
+endif()
 
 # -- create/setup component target --
 include(ComponentSetup)
@@ -172,6 +185,13 @@ if(WITH_FCLIB)
 endif()
 
 # - SuiteSparse -
+if(WITH_PETSC)
+  include(PetscSetup)
+  set(SICONOS_PETSC ON PARENT_SCOPE)
+  target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
+  target_link_libraries(numerics PRIVATE MPI::MPI_C)
+endif()
+
 
 #   Note : the CSparse data structures are referred to in
 #   kernel, but the functions are only called from numerics, so it is
@@ -278,8 +298,55 @@ endif()
 # -- OpenMP --
 if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
+  set(SICONOS_OMP ON PARENT_SCOPE) # for SiconosConfig.h
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+# -- CUDA --
+if(WITH_CUDA)
+
+  # CUDA architectures (adjust based on target GPU)
+  # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+      message(FATAL_ERROR 
+      " CMAKE_CUDA_ARCHITECTURES is not defined!\n"
+      " Please specify the target GPU architecture(s) using:\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=native (for local machine, if CMake version >= 3.24)\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=80     (for Ampere/A100)\n"
+      "   -DCMAKE_CUDA_ARCHITECTURES=\"80;90\" (for multiple)\n"
+      " See: https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html"
+      )
+  endif()
+  
+  enable_language(CUDA)
+
+  # PARENT_SCOPE so that the variable is defined in siconos/CMakeLists.txt
+  set(SICONOS_CUDA ON PARENT_SCOPE)
+  
+  # Required for cuSPARSE
+  find_package(CUDAToolkit REQUIRED)
+
+  # Link CUDA libraries
+  target_link_libraries(${COMPONENT} PRIVATE
+    CUDA::cudart
+    CUDA::cusparse
+    CUDA::cublas)
+
+  # Set CUDA standard
+  set_target_properties(${COMPONENT} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    CUDA_STANDARD ${CMAKE_CXX_STANDARD}
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_SEPARABLE_COMPILATION ON)
+
+  # Add CUDA files
+  add_subdirectory(src/FrictionContact/parallel/gpu)
+  target_sources(${COMPONENT} PRIVATE ${CUDA_FILES}) 
+
+  message(STATUS "CUDA support enabled for numerics")
+  message(STATUS "  CUDA Toolkit version: ${CUDAToolkit_VERSION}")
+  message(STATUS "  CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 
 

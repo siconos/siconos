@@ -187,6 +187,13 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc) {
   return csr;
 #else
 
+  // Ugly
+  CSparseMatrix* triplet = NM_csc_to_triplet(csc);
+  CSparseMatrix* csr = NM_triplet_to_csr(triplet);
+  cs_spfree(triplet);
+
+  return csr;
+
   fprintf(stderr, "NM_csc_to_csr :: MKL not enabled\n");
   return NULL;
 #endif

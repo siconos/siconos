@@ -87,10 +87,10 @@ static inline double error_compute_incremental_blas(const double* z_new,
     diff[i] = z_new[i] - z_old[i];
   }
   
-  double error = cblas_dnrm2(dim, diff, 1);
+  double error = cblas_dnrm2((int32_t)dim, diff, 1);
   
   if (normalize) {
-    double norm = cblas_dnrm2(dim, z_new, 1);
+    double norm = cblas_dnrm2((int32_t)dim, z_new, 1);
     if (norm > DBL_EPSILON) {
       error /= norm;
     }
@@ -154,7 +154,7 @@ static inline double error_incr_finalize(double squared_sum,
                                          unsigned int dim,
                                          const double* z_full) {
   double error = sqrt(squared_sum);
-  double norm = cblas_dnrm2(dim, z_full, 1);
+  double norm = cblas_dnrm2((int32_t)dim, z_full, 1);
   
   if (norm > DBL_EPSILON) {
     error /= norm;

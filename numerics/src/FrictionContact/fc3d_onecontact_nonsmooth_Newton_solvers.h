@@ -90,6 +90,20 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int number, FrictionContactProbl
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
 
+/** Update friction-contact 3D problem, usable in parallel context: formalize local problem for one contact
+    \param problem the global problem to solve
+    \param localproblem the local problem to solve
+    \param number (position in global matrix) of the considered contact
+    \param reaction global reaction (only the block corresponding to the
+    current contact will be modified
+    \param options of the solver
+
+    the rest is used to formalize the local problem)
+*/
+void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int number, FrictionContactProblem* problem,
+                                                         FrictionContactProblem* localproblem,
+                                                         double* reaction, SolverOptions* options);
+
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
                                                           double* R, SolverOptions* options);
 

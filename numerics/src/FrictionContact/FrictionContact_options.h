@@ -51,6 +51,8 @@
  * Solvers are grouped by problem formulation (2D, 3D, global, rolling)
  * and solver family (NSGS, Proximal, Newton, etc.)
  */
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
+
 enum FRICTION_SOLVER {
   /* -----------------------------------------------------------------------
    * 2D Frictional Contact solvers (IDs 400-499)
@@ -61,6 +63,16 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_2D_LEMKE = 404,
   /** Enumerative solver for 2D friction contact */
   SICONOS_FRICTION_2D_ENUM = 405,
+// #if defined SICONOS_OMP && defined SICONOS_PETSC
+  SICONOS_FRICTION_2D_NSGS_GRAPH = 406,
+  SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI = 407,
+  SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT = 408,
+  SICONOS_FRICTION_2D_NSGS_PERMUT = 411,
+// #endif
+// #if defined SICONOS_CUDA && defined SICONOS_PETSC
+  SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA = 409,
+  SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY = 410,
+// #endif
 
   /* -----------------------------------------------------------------------
    * 3D Frictional Contact solvers - Local formulation (IDs 500-549)
@@ -114,6 +126,14 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_3D_PFP = 522,
   /** ADMM local formulation */
   SICONOS_FRICTION_3D_ADMM = 523,
+/** Parallel NSGS using graph coloring */
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+  SICONOS_FRICTION_3D_NSGS_GRAPH = 530,
+#endif
+
+  /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
+
+  /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
   /** IPM local formulation */
   SICONOS_FRICTION_3D_IPM = 524,
   /** IPM-SNM local formulation */

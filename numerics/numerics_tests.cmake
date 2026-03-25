@@ -82,6 +82,17 @@ if(WITH_TESTING)
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_5
     EXTRA_SOURCES data_collection_5.c)
 
+
+  # LCP with Petsc / MPI tests
+  if (WITH_OPENMP AND WITH_PETSC)
+    new_tests_collection(
+      DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_1
+      EXTRA_SOURCES data_collection_1.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_2
+      EXTRA_SOURCES data_collection_2.c DEPS "PkgConfig::PETSC")
+  endif()
+
   # ----------- Relay solvers tests -----------
   # Start tests for Relay dir.
   begin_tests(src/Relay/test)
@@ -208,11 +219,30 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_QUARTIC_COLLECTION_1
     EXTRA_SOURCES data_collection_5.c test_quartic_1.c)
-
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_ipm_snm_fc3d_1.c)
 
+  if (WITH_OPENMP AND WITH_PETSC)
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_1
+      EXTRA_SOURCES data_collection_1.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_2
+      EXTRA_SOURCES data_collection_2.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_FREEZE_2
+      EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1_parallel.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_3
+      EXTRA_SOURCES data_collection_3.c test_nsgs_3_parallel.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_QUARTIC
+      EXTRA_SOURCES rover_collection.c test_nsgs_quartic_parallel.c DEPS "PkgConfig::PETSC")
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_5
+      EXTRA_SOURCES data_collection_3.c test_nsgs_5_parallel.c DEPS "PkgConfig::PETSC")
+  endif()
 
   # --- LMGC driver ---
   new_test(SOURCES fc3d_newFromFortranData.c)
@@ -417,14 +447,27 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
-
-
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
     EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
+
+  if (WITH_OPENMP AND WITH_PETSC)
+
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c DEPS "PkgConfig::PETSC")
+
+  endif()
+
+  if (WITH_CUDA AND WITH_PETSC)
+
+    new_tests_collection(
+      DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_GPU_COLLECTION_1
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c DEPS "PkgConfig::PETSC")
+
+  endif()
+
   # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
-
-
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)

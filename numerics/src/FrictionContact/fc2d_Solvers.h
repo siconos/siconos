@@ -25,6 +25,7 @@
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "LinearComplementarityProblem.h"
+#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -40,8 +41,8 @@ extern "C" {
      \param[in,out] info termination value
      \param[in,out] options structure for options
 */
-void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-              SolverOptions *options);
+void fc2d_cpg(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+              SolverOptions* options);
 
 /**
      Non Linear Gauss Seidel solver (dense) for global contact problem with friction in 2D
@@ -53,8 +54,8 @@ void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocit
      \param[in,out] info termination value
      \param[in,out] options structure
 */
-void fc2d_nsgs_dense(FrictionContactProblem *problem, double *reaction, double *velocity,
-                     int *info, SolverOptions *options);
+void fc2d_nsgs_dense(FrictionContactProblem* problem, double* reaction, double* velocity,
+                     int* info, SolverOptions* options);
 
 /**
      Non Linear Gauss Seidel solver (sbm) for global contact problem with friction in 2D case.
@@ -65,8 +66,61 @@ void fc2d_nsgs_dense(FrictionContactProblem *problem, double *reaction, double *
      \param[in,out] info termination value
      \param[in,out] options structure
 */
-void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, int *info,
-               SolverOptions *options);
+void fc2d_nsgs(FrictionContactProblem* problem, double* z, double* w, int* info,
+               SolverOptions* options);
+#if defined SICONOS_OMP && defined SICONOS_PETSC
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
+   2D case.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int* info,
+                     SolverOptions* options);
+
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
+   2D case, optimized.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w, int* info,
+                          SolverOptions* options);
+
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
+   2D case. Permutates the problem to optimize the performance.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
+                            SolverOptions* options);
+/**
+Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
+permutation used by parallel solvers.
+
+\param[in] problem the friction-contact problem
+\param[out] reaction vector
+\param[out] velocity vector
+\param[in,out] info termination value
+\param[in,out] options structure
+*/
+void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
+                      SolverOptions* options);
+void test_solver(FrictionContactProblem* problem, double* z, double* w, int* info,
+                 SolverOptions* options);
 
 /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
  * algorithm for global contact problem with friction.
@@ -81,8 +135,37 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, int *info,
  *  \param[out] status  the new status.
  *
  */
-void fc2d_projc(double xi[], int *n, int statusi[], double p[], double fric[],
-                double *reaction, int *status);
+#endif
+#if defined SICONOS_CUDA && defined SICONOS_PETSC
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
+   2D case. Permutates the problem to optimize the performance.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, double* w,
+                                 int* info, SolverOptions* options);
+// #endif
+
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in
+   2D case. Permutates the problem to optimize the performance.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, double* z,
+                                             double* w, int* info, SolverOptions* options);
+#endif
+void fc2d_projc(double xi[], int* n, int statusi[], double p[], double fric[],
+                double* reaction, int* status);
 
 /** fc2d_projf is a specific projection operator related to CPG (conjugated projected gradient)
  * algorithm for global contact problem with friction.
@@ -95,7 +178,7 @@ void fc2d_projc(double xi[], int *n, int statusi[], double p[], double fric[],
  * projf1 parameter which contains the projected residue or descent direction.
  *
  */
-void fc2d_projf(int etat[], int *n, double y[], double fric[], double projf1[]);
+void fc2d_projf(int etat[], int* n, double y[], double fric[], double projf1[]);
 
 /** fc2d_lexicolemke is a Lemke solver for  frictionContact2D problems.
  *
@@ -105,8 +188,8 @@ void fc2d_projf(int etat[], int *n, double y[], double fric[], double projf1[]);
  * returns the solution of the problem. \param options \param[out] info an integer which
  * returns the termination value: 0 = convergence, 1 = no convergence, 2 = Null diagonal term
  */
-void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double *velocity,
-                      int *info, SolverOptions *options);
+void fc2d_lexicolemke(FrictionContactProblem* problem, double* reaction, double* velocity,
+                      int* info, SolverOptions* options);
 
 /** This function transform a FrictionContactProblem (2D) into a LinearComplementarityProblem
  *
@@ -115,7 +198,7 @@ void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double 
  * reformulation
  */
 
-int fc2d_tolcp(FrictionContactProblem *problem, LinearComplementarityProblem *lcp_problem);
+int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem* lcp_problem);
 
 /** fc2d_enum solver for  frictionContact2D problems.
  *
@@ -125,14 +208,14 @@ int fc2d_tolcp(FrictionContactProblem *problem, LinearComplementarityProblem *lc
  * returns the solution of the problem. \param options \param[out] info an integer which
  * returns the termination value: 0 = convergence, 1 = no convergence, 2 = Null diagonal term
  */
-void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-               SolverOptions *options);
+void fc2d_enum(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+               SolverOptions* options);
 
 /** @addtogroup SetSolverOptions
     @{
 */
 
-void fc2d_nsgs_set_default(SolverOptions *options);
+void fc2d_nsgs_set_default(SolverOptions* options);
 
 /** @} */
 

@@ -67,6 +67,13 @@ void fc3d_projection_update(int number, FrictionContactProblem* main_problem,
                             FrictionContactProblem* localproblem, double* reaction,
                             SolverOptions* options);
 
+/** Same as above but usable in parallel
+ * 
+ */
+void fc3d_projection_update_parallel(int number, FrictionContactProblem* problem,
+                                     FrictionContactProblem* localproblem, double* reaction,
+                                     SolverOptions* options);
+
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
  * \param number (position in main matrix) of the considered contact
  * \param problem :  the main problem to solve
@@ -78,6 +85,13 @@ void fc3d_projection_update(int number, FrictionContactProblem* main_problem,
 void fc3d_projection_update_with_regularization(int number, FrictionContactProblem* main_problem,
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
+
+/** Same as above but usable in parallel
+ * 
+ */
+void fc3d_projection_update_with_regularization_parallel(int contact, FrictionContactProblem* problem,
+                                                         FrictionContactProblem* localproblem,
+                                                         double* reaction, SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection assuming that M is diagonal
  * \param localproblem :  the local problem to initialize
@@ -120,6 +134,13 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
 void fc3d_projectionOnCylinder_update(int number, FrictionContactProblem* main_problem,
                                       FrictionContactProblem* localproblem, double* reaction,
                                       SolverOptions* options);
+
+/**
+ * Same as above but usable in parallel.
+ */
+void fc3d_projectionOnCylinder_update_parallel(int contact, FrictionContactProblem* problem,
+                                               FrictionContactProblem* localproblem, double* reaction,
+                                               SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection on the Cone with local
  *   iteration up to convergence of the local problem

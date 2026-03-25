@@ -39,7 +39,7 @@ typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, 
                                   SolverOptions *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverPtr)();
+typedef void (*FreeSolverPtr)(FrictionContactProblem *, FrictionContactProblem *, SolverOptions *);
 
 
 void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,

@@ -58,7 +58,13 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction,
 
   /* Handle sparse matrices - convert to dense for non-NSGS solvers */
   NumericsMatrix* M_original = NULL;
-  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS) {
+  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_PERMUT
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA
+                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY) {
     numerics_printf_verbose(1, "fc2d_driver: converting sparse matrix to dense for solver %d",
                             options->solverId);
     M_original = problem->M;
