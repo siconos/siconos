@@ -47,6 +47,8 @@ CTEST_BUILD_MODEL="${CTEST_BUILD_MODEL:=Experimental}"
 PARALLEL_BUILD="${PARALLEL_BUILD=:=1}"
 # Default: submit to cdash
 CDASH_SUBMIT="${CDASH_SUBMIT=:=1}"
+# Verbose mode
+CMAKE_VERBOSE_MODE="${CMAKE_VERBOSE_MODE:=-VV}"
 
 # Read conf file from previous step, if any
 # The name of the conf. file is required to set CTEST_BUILD_NAME and ensure proper cdash submissions
@@ -58,7 +60,7 @@ ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake \
      -Dmodel=$CTEST_BUILD_MODEL -DALLOW_PARALLEL_BUILD=$PARALLEL_BUILD -DCDASH_SUBMIT=$CDASH_SUBMIT \
      -DCTEST_MODE=$BUILD_MODE -DUSER_OPTIONS_FILE=$CONF_FILE --output-junit test_results.xml \
      -DCTEST_BINARY_DIRECTORY=$BUILD_DIR -DCTEST_SOURCE_DIRECTORY=$CI_PROJECT_DIR \
-    --output-log $BUILD_DIR/siconos-ctest-$BUILD_MODE.log -VV
+    --output-log $BUILD_DIR/siconos-ctest-$BUILD_MODE.log "${CMAKE_VERBOSE_MODE}"
 
 
 echo "\n\n============= CTEST Conf ==============\n"
