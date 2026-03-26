@@ -587,8 +587,10 @@ def generate_addons_python_project(args):
     # List cpp files in addons
     addons_files = collect_sources(args.addons)
     # Creates the __init__.py file in addons dir
-    init_path = os.path.join(args.addons, "__init__.py")
-    with open(init_path, "w", encoding="utf-8") as f:
+    args.addons_out = Path(args.build_dir).parent / "addons"
+    init_path = args.addons_out /  "__init__.py"
+    args.addons_out.mkdir(parents=True, exist_ok=True)
+    with init_path.open("w", encoding="utf-8") as f:
         for fname in addons_files:
             fname = Path(fname)
             module_name = fname.stem
@@ -757,6 +759,7 @@ def generate_cmakelists(args):
         srcfiles = collect_sources(args.addons)
         args.includes.append(args.addons)
         if srcfiles:
+            result += "set(pybind11_DIR @pybind11_DIR@)\n"
             result += "find_package(pybind11 CONFIG REQUIRED)\n"
             result += "find_package(Eigen3 REQUIRED)\n"
             for fname in srcfiles:
@@ -765,7 +768,7 @@ def generate_cmakelists(args):
                 result += f"pybind11_add_module({mod} {fname})\n"
                 result += prepare_target(mod, args)
                 result += f"set_target_properties({mod} PROPERTIES "
-                result += f"LIBRARY_OUTPUT_DIRECTORY {args.addons})\n"
+                result += f"LIBRARY_OUTPUT_DIRECTORY {args.addons_out})\n"
 
     filename = Path(args.build_dir, "CMakeLists.txt").as_posix()
     with open(filename, "w") as f:
@@ -824,9 +827,15 @@ def build_project(args, configure=True, build=True):
             cmake_configure_command += ["-G", args.generator]
         run_command(cmake_configure_command, args.quiet)
         # copy compile_commands.json in dir which contains the source file
-        compile_commands_json = Path(args.build_dir, "compile_commands.json").as_posix()
-        move_compile_command = ["cp",compile_commands_json,args.driver_dir.as_posix()]
-        run_command(move_compile_command, args.quiet)
+        # This may fails (e.g. when running from a mounted rep inside a container)
+        # so try/except.
+        try:
+            compile_commands_json = Path(args.build_dir, "compile_commands.json").as_posix()
+            move_compile_command = ["cp",compile_commands_json,args.driver_dir.as_posix()]
+            run_command(move_compile_command, args.quiet)
+        except Exception:
+            pass
+
         msg = "✅ Configure done"
         logging.info(msg)
 
