@@ -2,7 +2,7 @@
 
 # --- Script used to configure, build and test siconos software ---
 #
-# Warning: this script is call by CI jobs with default values set by CI (template or .gitlab-ci.yml)
+# Warning: this script is called by CI jobs with default values set by CI (template or .gitlab-ci.yml)
 #
 # Those values might be different from the default ones when this script is executed manualy, on the command line
 # 

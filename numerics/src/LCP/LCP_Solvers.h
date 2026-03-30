@@ -28,7 +28,6 @@
 */
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {

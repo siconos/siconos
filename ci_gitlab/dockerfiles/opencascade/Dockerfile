@@ -8,16 +8,16 @@ USER root
 RUN apt update  && apt upgrade -y && apt install --no-install-recommends -y -qq \
         git-core \
         make \
-	g++ \
+		g++ \
         gfortran \
-	libgl-dev \
-	libxrender1 \
-	bzip2 \
-	vim \
-	wget \
-	libglu1-mesa-dev libgl1-mesa-dev libxmu-dev libxi-dev \
-	libfreetype6-dev tk-dev rapidjson-dev libpcre2-dev \
-	&& apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
+		libgl-dev \
+		libxrender1 \
+		bzip2 \
+		vim \
+		wget \
+		libglu1-mesa-dev libgl1-mesa-dev libxmu-dev libxi-dev \
+		libfreetype6-dev tk-dev rapidjson-dev libpcre2-dev \
+		&& apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN micromamba config prepend channels conda-forge && micromamba self-update
 
 # Warning: works only of opencascade tgz is available in the Docker context dir

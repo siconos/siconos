@@ -51,7 +51,6 @@
  * Solvers are grouped by problem formulation (2D, 3D, global, rolling)
  * and solver family (NSGS, Proximal, Newton, etc.)
  */
-#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 
 enum FRICTION_SOLVER {
   /* -----------------------------------------------------------------------
