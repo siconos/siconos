@@ -1,0 +1,1 @@
+.guix/modules/siconos-package.scm
