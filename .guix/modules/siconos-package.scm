@@ -26,7 +26,6 @@
   #:use-module (gnu packages swig)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages xml)
-  #:use-module (guix-science packages physics)
   )
 
 
