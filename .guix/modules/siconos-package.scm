@@ -36,10 +36,10 @@
       (const #t)))                                ; pas dans un dépôt Git
 
 
-(define-public siconos
+(define-public siconos-devel
   (package
-    (name "siconos")
-    (version "devel")
+    (name "siconos-devel")
+    (version "x")
     (source
      (local-file "../.." "siconos-checkout"
                  #:recursive? #t
@@ -184,4 +184,4 @@ Optimization (Complementarity systems and Variational inequalities), Fluid
 Mechanics, and Computer Graphics.")
       (license license:asl2.0)))
 
-siconos
+siconos-devel
