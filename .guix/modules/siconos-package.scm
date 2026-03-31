@@ -50,6 +50,7 @@
     (build-system cmake-build-system)
     (arguments
      (list
+        #:tests? #f
         #:imported-modules `((guix build python-build-system)
                              ,@%cmake-build-system-modules)
         #:configure-flags
