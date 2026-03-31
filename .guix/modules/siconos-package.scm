@@ -1,6 +1,7 @@
 ;;; SPDX-License-Identifier: GPL-3.0-or-later
 
 (define-module (siconos-package)
+  #:use-module (guix)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
   #:use-module (guix build-system pyproject)
@@ -26,13 +27,14 @@
   #:use-module (gnu packages swig)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages xml)
+  #:use-module (guix-science packages physics)
   )
 
 
-(define vcs-file?
-  ;; Renvoie vrai lorsque le fichier donné est sous contrôle de version.
-  (or (git-predicate (dirname (dirname (current-source-directory))))
-      (const #t)))                                ; pas dans un dépôt Git
+;(define vcs-file?
+;  ;; Renvoie vrai lorsque le fichier donné est sous contrôle de version.
+;  (or (git-predicate (dirname (dirname (current-source-directory))))
+;      (const #t)))                                ; pas dans un dépôt Git
 
 
 (define-public siconos-devel
@@ -42,7 +44,8 @@
     (source
      (local-file "../.." "siconos-checkout"
                  #:recursive? #t
-                 #:select? vcs-file?))
+     ;            #:select? vcs-file?
+     ))
     
     (build-system cmake-build-system)
     (arguments
@@ -142,7 +145,7 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
                            cppunit
                            gfortran
                            git-minimal/pinned
-                           pybind11-3
+                           pybind11
                            python-lxml
                            python-pytest
                            swig))
