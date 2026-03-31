@@ -189,7 +189,7 @@ if(WITH_PETSC)
   include(PetscSetup)
   target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
   target_link_libraries(numerics PRIVATE MPI::MPI_C)
-  target_compile_definitions(numerics PRIVATE SICONOS_PETSC)
+  target_compile_definitions(numerics PUBLIC SICONOS_PETSC)
 endif()
 
 
@@ -300,7 +300,7 @@ if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
-  target_compile_definitions(numerics PRIVATE SICONOS_OMP)
+  target_compile_definitions(numerics PUBLIC SICONOS_OMP)
 endif()
 
 # -- CUDA --

@@ -87,9 +87,10 @@ if(WITH_TESTING)
   if (WITH_OPENMP AND WITH_PETSC)
     new_tests_collection(
       DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_1
-      EXTRA_SOURCES data_collection_1.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_1.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_2
+      COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC"
       EXTRA_SOURCES data_collection_2.c DEPS "PkgConfig::PETSC")
   endif()
 
@@ -226,22 +227,22 @@ if(WITH_TESTING)
   if (WITH_OPENMP AND WITH_PETSC)
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_1
-      EXTRA_SOURCES data_collection_1.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_1.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_2
-      EXTRA_SOURCES data_collection_2.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_2.c test_nsgs_1_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_FREEZE_2
-      EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_3
-      EXTRA_SOURCES data_collection_3.c test_nsgs_3_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_3.c test_nsgs_3_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_QUARTIC
-      EXTRA_SOURCES rover_collection.c test_nsgs_quartic_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES rover_collection.c test_nsgs_quartic_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc3d COLLECTION TEST_NSGS_PARALLEL_COLLECTION_5
-      EXTRA_SOURCES data_collection_3.c test_nsgs_5_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_3.c test_nsgs_5_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
   endif()
 
   # --- LMGC driver ---
@@ -455,7 +456,7 @@ if(WITH_TESTING)
 
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_PARALLEL_COLLECTION_1
-      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_parallel.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
 
   endif()
 
@@ -463,7 +464,7 @@ if(WITH_TESTING)
 
     new_tests_collection(
       DRIVER fc_test_collection_parallel.c.in FORMULATION fc2d COLLECTION TEST_FC2D_GPU_COLLECTION_1
-      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c DEPS "PkgConfig::PETSC")
+      EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_gpu.c DEPS "PkgConfig::PETSC" COMPILE_DEFINITIONS "SICONOS_OMP;SICONOS_PETSC")
 
   endif()
 
