@@ -60,8 +60,8 @@
                 "-DWITH_OCC=1"
                 "-DWITH_FCLIB=1"
                 "-DISOLATED_INSTALL=1"
-                "-DWITH_TESTING=1"
-                "-DWITH_vkernel_TESTING=1"
+                "-DWITH_TESTING=0"
+                "-DWITH_vkernel_TESTING=0"
                 (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
                 "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel")
         #:phases
