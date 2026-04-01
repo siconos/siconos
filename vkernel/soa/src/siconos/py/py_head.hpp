@@ -47,7 +47,7 @@ using solver_options = simul::solver_options;
 using trace_params = simul::trace_params;
 struct ct_interaction
     : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
-struct rt_interaction : simul::rt_interaction<nslaw, diskmesh_r> {};
+struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r> {};
 struct topo : simul::topology<disk, ct_interaction, mesh, rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};

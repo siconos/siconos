@@ -116,7 +116,7 @@ struct moreau_jean_assembled : item {
 
       transpose(h_matrix);
       prodt1(h_matrix, lambda, p0);
-      solve(mass_matrix, p0, velo);
+      solve_linear_system(mass_matrix, p0, velo);
     }
 
     auto methods()

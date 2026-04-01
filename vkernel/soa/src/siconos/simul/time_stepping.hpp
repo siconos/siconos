@@ -112,7 +112,7 @@ struct time_stepping : item {
 
       if (total_number_of_involved_ds > 0) {
         // resize assembled matrices and vectors
-        osi.assemble_setup();
+        osi.assemble_setup(step);
 
         mp::for_each(osi.elements(), [&](auto elem) {
           // a least one activated interaction
@@ -120,6 +120,7 @@ struct time_stepping : item {
 
           elem.assemble_h_matrix_for_involved_ds(step);
           elem.assemble_mass_matrix_for_involved_ds(step);
+          elem.assemble_k_matrix_for_involved_ds(step);
           elem.assemble_vectors(step);
 
           elem.nsl_effect_on_free_output(step);

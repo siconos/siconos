@@ -102,8 +102,13 @@ struct rt_lagrangian_ds : item {
   };
 };
 
-// Check if a k_matrix member function is present.
-static constexpr auto has_k_matrix =
-    mp::is_valid([](auto &&x) -> decltype(x.k_matrix()) {});
+static constexpr auto has_k_matrix = mp::is_valid(
+    [](auto t) -> decltype(&(decltype(t)::attributes::k_matrix)) {});
+
+static constexpr auto runtime_dof = mp::is_valid(
+    [](auto t) -> decltype(&(decltype(t)::attributes::dof)) {});
+
+static_assert(has_k_matrix(rt_lagrangian_ds{}));
+static_assert(!has_k_matrix(lagrangian_ds{}));
 
 }  // namespace siconos::model

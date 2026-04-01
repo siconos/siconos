@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 #include "siconos/algebra/linear_algebra.hpp"
 
@@ -87,6 +88,9 @@ template <typename T, size_t M>
 using diagonal_matrix = Eigen::DiagonalMatrix<T, M>;
 
 template <typename T>
+using sparse_matrix = Eigen::SparseMatrix<T>;
+
+template <typename T>
 struct value_type {
   using type = decltype([]<bool flag = false>() {
     if constexpr (requires(T m) { typename T::value_type; }) {
@@ -123,14 +127,13 @@ template <typename A, typename B>
 using prod_t = matrix<typename value_type<B>::type, A::RowsAtCompileTime,
                       B::ColsAtCompileTime>;
 
-
 template <typename T>
-static constexpr decltype(auto) nrows(T)
+static constexpr decltype(auto) nrows(T& value)
 {
   namespace match = siconos::storage::pattern::match;
 
   if constexpr (match::matrix<T> || match::diagonal_matrix<T>) {
-    return T::RowsAtCompileTime;  // specific to Eigen
+    return value.rows();  // specific to Eigen
   }
   else {
     []<typename Attr = T, bool flag = false>() {
@@ -140,12 +143,12 @@ static constexpr decltype(auto) nrows(T)
 }
 
 template <typename T>
-static constexpr decltype(auto) ncols(T)
+static constexpr decltype(auto) ncols(T& value)
 {
   namespace match = siconos::storage::pattern::match;
 
   if constexpr (match::matrix<T> || match::diagonal_matrix<T>) {
-    return T::ColsAtCompileTime;  // specific to Eigen
+    return value.cols();  // specific to Eigen
   }
   else {
     []<typename Attr = T, bool flag = false>() {
@@ -154,21 +157,23 @@ static constexpr decltype(auto) ncols(T)
   }
 }
 
-void set_zero(match::matrix auto& m) { m.setZero(); };
+void set_zero(match::matrix auto& m) { m.setZero(); }
 
 decltype(auto) dot(match::vector auto& v, match::vector auto& w)
 {
   return v.dot(w);
-};
+}
 
-void solve_in_place(match::diagonal_matrix auto& m, match::vector auto& b)
+void solve_in_place(match::diagonal_matrix auto& m, auto& b)
 {
   b = m.inverse() * b;
 }
 
-void solve_in_place(match::matrix auto& m, match::vector auto& b)
+void solve_in_place(match::matrix auto& m, auto& b) { assert(false); }
+
+void solve_linear_system(match::matrix auto& m, auto& b, auto& c)
 {
   auto lu = m.partialPivLu();
-  b = lu.solve(b);
+  c = lu.solve(b);
 }
 }  // namespace siconos::algebra

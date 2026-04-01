@@ -6,6 +6,7 @@
 #include <Material.hpp>
 #include <Mesh.hpp>
 #include <MeshUtils.hpp>
+#include <SiconosKernel.hpp>
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -25,36 +26,27 @@ using nslaw = model::newton_impact;
 struct relation : model::lagrangian_r<nslaw::size> {};
 struct rt_relation : model::rt_lagrangian_r {};
 struct interaction : simul::interaction<nslaw, relation> {};
-struct fem_interaction : simul::rt_interaction<nslaw, rt_relation> {};
-struct topo : simul::topology<ball, interaction, fem_ds, fem_interaction> {};
+struct rt_ct_interaction : simul::rt_ct_interaction<nslaw, rt_relation> {};
+struct rt_rt_interaction : simul::rt_rt_interaction<nslaw, rt_relation> {};
+struct topo
+    : simul::topology<ball, interaction, fem_ds, storage::pattern::empty_item,
+                      rt_rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 using params = map<iparam<"dof", 3>>;
 
-struct make
-    : storage::make<
-          standard_environment<params>, fem_ds, fem, material, simulation,
-          storage::with_properties<
-              storage::time_invariant<storage::attr_t<ball, "fext">>,
-              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-              storage::assembled_diagonal<storage::attr_t<
-                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+struct make : storage::make<standard_environment<params>, fem_ds, fem,
+                            material, simulation> {};
 
 }  // namespace siconos::config
 
 int main(int args, char* argv[])
 {
   double Ly = 1.0;
-  //  std::shared_ptr<Mesh> mesh = create2dMesh2x1();
-  //  std::shared_ptr<Mesh> mesh = create2dMeshnxm(50, 15 , 3., Ly);
-  // string gmsh_filename = "./mesh_data/triangle_felippa.msh";
-  // string gmsh_filename = "./mesh_data/triangle_reference.msh";
-  // string gmsh_filename = "./mesh_data/square_6.msh";
-  auto gmsh_filename = "./mesh_data/square_200.msh";
-  // string gmsh_filename = "./mesh_data/square_2720.msh";
+
+  auto gmsh_filename = "triangle_reference.msh";
 
   // Applied forces
   siconos::algebra::SiconosVector nodal_forces{2};
@@ -83,7 +75,7 @@ int main(int args, char* argv[])
   // Contact Conditions
   auto femodel = FEsolid->FEModel();
   double e = 0.0;
-  auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
+  //  auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
   siconos::algebra::SiconosVector initial_gap{1};
   initial_gap << Ly * 5e-4;
   std::vector<siconos::algebra::SiconosDenseMatrix> Hv;
@@ -94,12 +86,34 @@ int main(int args, char* argv[])
 
   auto data = siconos::config::make();
   handle fe_solid = storage::add<config::fem_ds>(data);
-  handle soa_nslaw = storage::add<config::nslaw>(data);
-  soa_nslaw.e() = e;
+  fe_solid.dof() = FEsolid->dimension();
+  handle nslaw = storage::add<config::nslaw>(data);
+  nslaw.e() = e;
 
+  handle lcp = storage::add<config::lcp>(data);
+  lcp.create(SICONOS_LCP_LEMKE);
+
+  // ------------------
+  // --- Simulation ---
+  // ------------------
+  double h = 1e-05;    // time step
+  double theta = 1.0;  // theta for MoreauJeanOSI integrator
   // -- one step integrator + time discretisation + one step nonsmooth
   // -- problem + simulation
+
   handle simul = storage::add<config::simulation>(data);
+  simul.one_step_integrator().theta() = theta;
+  simul.one_step_integrator().constraint_activation_threshold() = 0.;
+  simul.time_discretization().t0() = t0;
+  simul.time_discretization().h() = h;
+  simul.time_discretization().tmax() = T;
+
+  handle osnspb = simul.one_step_nonsmooth_problem();
+  osnspb.problem() = lcp;
+
+  handle so = storage::add<siconos::simul::solver_options>(data);
+  so.create(SICONOS_LCP_LEMKE);
+  osnspb.options() = so;
 
   for (auto node : femodel->nodes()) {
     if (fabs(node->y()) <= 1e-16 and fabs(node->x()) >= 1e-16) {
@@ -111,37 +125,29 @@ int main(int args, char* argv[])
       Hv.back()(0, idx_y) = 1.0;
 
       handle rt_rel = storage::add<config::rt_relation>(data);
-      storage::attr<"h_matrix">(rt_rel) = Hv.back();  // Copy H matrix from AOS
-      storage::attr<"b">(rt_rel) = initial_gap;        // Copy gap/e vector from AOS
+      rt_rel.h_matrix() = Hv.back();
+      rt_rel.b() = initial_gap;
 
-//      handle rt_inter = storage::add<config::fem_interaction>(data);
-//      rt_inter.nslaw() = soa_nslaw;
-//      rt_inter.relation() = rt_rel;
-
-      auto topo = simul.topology();
-      topo.link(fe_solid);
+      handle inter = simul.topology().link(fe_solid);
+      inter.nslaw() = nslaw;
+      inter.relation() = rt_rel;
     }
   }
 
+  fe_solid.mass_matrix() = FEsolid->mass();
+  fe_solid.k_matrix() = FEsolid->stiffnessMatrix();
+  fe_solid.fext() = FEsolid->fext();
+  fe_solid.q() = *FEsolid->q();
+  storage::attr<"q">(fe_solid, 1) = storage::attr<"q">(fe_solid, 0);
 
+  fe_solid.velocity() = *FEsolid->velocity();
 
-  const auto& massMatrix = FEsolid->mass();
-  const auto& stiffnessMatrix = FEsolid->stiffnessMatrix();
-
-  // Print dimensions
-  std::cout << "Mass matrix size: " << massMatrix.rows() << " x "
-            << massMatrix.cols() << std::endl;
-  std::cout << "Stiffness matrix size: " << stiffnessMatrix.rows() << " x "
-            << stiffnessMatrix.cols() << std::endl;
-
-  fe_solid.mass_matrix() = massMatrix;
-  fe_solid.k_matrix() = stiffnessMatrix;
-
-  // ------------------
-  // --- Simulation ---
-  // ------------------
-  double h = 1e-05;    // time step
-  double theta = 1.0;  // theta for MoreauJeanOSI integrator
+  auto indices = FEsolid->boundaryConditions()->velocityIndices();
+  auto& bc_vel = storage::prop<"bc_velocities_0">(fe_solid);
+  bc_vel.resize(indices.size());
+  for (size_t i = 0; i < indices.size(); ++i) {
+    bc_vel[i] = indices[i];
+  }
 
   int N = ceil((T - t0) / h);  // Number of time steps
 
@@ -150,9 +156,6 @@ int main(int args, char* argv[])
   siconos::algebra::Index outputSize = 6;
   siconos::algebra::SiconosDenseMatrix dataPlot(N + 1, outputSize);
 
-  /// OLD AOS CODE
-  // SOA/vkernel style computation using handles
-  // SOA/vkernel style computation using handles
   simul.initialize();
 
   // Access initial state at step 0
@@ -164,11 +167,11 @@ int main(int args, char* argv[])
   dataPlot(0, 1) = q(dim - 1);
   dataPlot(0, 2) = v(dim - 1);
   dataPlot(0, 3) = 0.0;  // Initial impulse
-  dataPlot(0, 4) = q(169);
-  dataPlot(0, 5) = v(169);
+  dataPlot(0, 4) = q(0);
+  dataPlot(0, 5) = v(0);
 
-  auto filename = siconos::mechanics::fem::prepareWriteDisplacementforPython(
-      "T3_square_200.ref");
+  auto filename =
+      siconos::mechanics::fem::prepareWriteDisplacementforPython("T3");
   auto mesh = femodel->mesh();
   siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q,
                                                       filename);
@@ -198,8 +201,8 @@ int main(int args, char* argv[])
     dataPlot(k, 1) = q_current(dim - 1);
     dataPlot(k, 2) = v_current(dim - 1);
     dataPlot(k, 3) = p_val;
-    dataPlot(k, 4) = q_current(169);
-    dataPlot(k, 5) = v_current(169);
+    dataPlot(k, 4) = q_current(0);
+    dataPlot(k, 5) = v_current(0);
 
     if (k % 1 == 0)
       siconos::mechanics::fem::writeDisplacementforPython(
@@ -208,4 +211,24 @@ int main(int args, char* argv[])
     k++;
     siconos::tools::progressBar((double)k / N);
   }
+
+  auto end = std::chrono::system_clock::now();
+  auto elapsed =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+  std::cout << "\nEnd of computation - Number of iterations done: " << k - 1;
+  std::cout << "\nComputation time : " << elapsed << " ms\n";
+
+  // --- Output files ---
+  std::cout << "====> Output file writing ...\n";
+  dataPlot.conservativeResize(k, outputSize);
+  siconos::algebra::io::write("fem_t3.dat", dataPlot,
+                              siconos::algebra::io::ASCII_OUT,
+                              siconos::algebra::io::WriteType::nodim);
+  double eps = 1e-11;
+  if (siconos::algebra::io::compareRefFile(dataPlot, "T3_triangle.ref",
+                                           eps) >= eps)
+    return 1;
+
+  return 0;
 }
