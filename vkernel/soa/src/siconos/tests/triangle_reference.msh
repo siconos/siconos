@@ -1,0 +1,20 @@
+$MeshFormat
+2.2 0 8
+$EndMeshFormat
+$PhysicalNames
+3
+0 3 "Applied Force"
+1 2 "Dirichlet BC"
+2 1 "Bulk Material"
+$EndPhysicalNames
+$Nodes
+3
+1 0 0 0
+2 1 0 0
+3 0 1 0
+$EndNodes
+$Elements
+2
+1 15 2 3 1 1
+2 2 2 1 7 1 2 3
+$EndElements
