@@ -119,6 +119,11 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
     return typename E::template unbounded_matrix<decltype(translate(
         E{}, typename T::type{}))>{};
   }
+  else if constexpr (std::derived_from<T, some::undefined_sparse_matrix>) {
+    return typename E::template sparse_matrix<decltype(translate(
+                                                         E{},
+                                                         typename T::type{}))>{};
+  }
   else if constexpr (std::derived_from<T, some::undefined_unbounded_vector>) {
     return typename E::template unbounded_vector<decltype(translate(
         E{}, typename T::type{}))>{};
