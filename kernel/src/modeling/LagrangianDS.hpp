@@ -457,6 +457,22 @@ class LagrangianDS : public SecondOrderDS {
   /** destructor */
   virtual ~LagrangianDS() noexcept = default;
 
+  /** @brief reset initial conditions (state)
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   */
+  void reset_q0(const siconos::algebra::SiconosVector& newValue);
+
+  /** @brief reset initial conditions (velocity)
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   */
+  void reset_velocity0(const siconos::algebra::SiconosVector& newValue);
+
   /** reset the state to the initial state */
   void resetToInitialState() override;
 

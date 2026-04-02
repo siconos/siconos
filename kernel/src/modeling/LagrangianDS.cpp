@@ -21,12 +21,10 @@
 #include <memory>
 
 #include "BlockVector.hpp"
-#include "LagrangianR.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
-#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -78,6 +76,20 @@ void siconos::modeling::LagrangianDS::initializeNonSmoothInput(
     p_[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     p_[level]->setZero();
   }
+}
+
+void siconos::modeling::LagrangianDS::reset_q0(
+    const siconos::algebra::SiconosVector& newValue) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("reset_q0(copy): input vector has wrong size");
+  use_q0([&newValue](auto& q0) { q0 = newValue; });
+}
+
+void siconos::modeling::LagrangianDS::reset_velocity0(
+    const siconos::algebra::SiconosVector& newValue) {
+  if (newValue.size() != ndof_)
+    throw std::invalid_argument("reset_velocity0(copy): input vector has wrong size");
+  use_velocity0([&newValue](auto& v0) { v0 = newValue; });
 }
 
 void siconos::modeling::LagrangianDS::resetToInitialState() {

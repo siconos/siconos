@@ -31,8 +31,8 @@ rng = np.random.default_rng(seed=42)
 
 
 # -- Dense storage Lagrangian DS --
-def test_LagrangianDS_alias():
-    print("start test_LagrangianDS")
+def test_lagrangianDS_alias():
+    print("start test_lagrangianDS")
     q0 = np.array([1, 0, 0], dtype=np.float64)
     v0 = np.zeros_like(q0)
     ball = sm.LagrangianDS(q0, v0, sm.alias_t)
@@ -56,11 +56,24 @@ def test_LagrangianDS_alias():
     fext = 453
     assert ball.fext[0] == ball.fext[2] == 122
     assert ball.fext[1] == 12
-    print("end test_LagrangianDS")
+
+    newq0 = np.array([1, 2, 3], dtype=np.float64)
+    newv0 = np.zeros_like(newq0)
+    ball.reset_q0(newq0)
+    ball.reset_velocity0(newv0)
+    ball.resetToInitialState()
+    assert np.allclose(newq0, ball.q0)
+    assert np.allclose(newv0, ball.velocity0)
+    assert np.allclose(newv0, v0)  # the memory alias still stands!
+    assert np.allclose(newq0, q0)
+    assert np.allclose(ball.q(), newq0)
+    assert np.allclose(ball.velocity(), newv0)
+
+    print("end test_lagrangianDS")
 
 
-def test_LagrangianDS_copy():
-    print("start test_LagrangianDS")
+def test_lagrangianDS_copy():
+    print("start test_lagrangianDS")
     q0 = np.array([1, 0, 0], dtype=np.float64)
     v0 = np.zeros_like(q0)
     ball = sm.LagrangianDS(q0, v0, sm.copy_t)
@@ -84,7 +97,18 @@ def test_LagrangianDS_copy():
     fext = 453
     assert ball.fext[0] == ball.fext[2] == 122
     assert ball.fext[1] == 12
-    print("end test_LagrangianDS")
+
+    newq0 = np.array([1, 2, 3], dtype=np.float64)
+    newv0 = np.zeros_like(newq0)
+    ball.reset_q0(newq0)
+    ball.reset_velocity0(newv0)
+    ball.resetToInitialState()
+    assert np.allclose(newq0, ball.q0)
+    assert np.allclose(newv0, ball.velocity0)
+    assert np.allclose(ball.q(), newq0)
+    assert np.allclose(ball.velocity(), newv0)
+
+    print("end test_lagrangianDS")
 
 
 def fint_func(vel, pos, time, result):
@@ -97,8 +121,8 @@ def mass_func(pos, result):
         result[:, i] = i * pos
 
 
-def test_LagrangianDS_compute_mass():
-    print("start test_LagrangianDS_compute_mass")
+def test_lagrangianDS_compute_mass():
+    print("start test_lagrangianDS_compute_mass")
     ndof = 3
     q0 = np.zeros(ndof, dtype=np.float64)
     v0 = np.zeros_like(q0)
@@ -123,8 +147,8 @@ def test_LagrangianDS_compute_mass():
     assert np.allclose(ball.mass, ref)
 
 
-def test_LagrangianDS_compute():
-    print("start test_LagrangianDS_compute")
+def test_lagrangianDS_compute():
+    print("start test_lagrangianDS_compute")
 
     ndof = 3
     q0 = np.zeros(ndof, dtype=np.float64)
@@ -243,6 +267,18 @@ def test_NewtonEulerDS():
     assert np.allclose(neds.q(), q0)
     assert np.allclose(neds.twist(), twist0)
 
+    newq0 = 3 * np.ones(7, dtype=np.float64)
+    newtwist0 = 2 * np.ones(6, dtype=np.float64)
+    neds.reset_q0(newq0)
+    neds.reset_twist0(newtwist0)
+    neds.resetToInitialState()
+    assert np.allclose(newq0, neds.q0)
+    assert np.allclose(newtwist0, neds.twist0)
+    assert np.allclose(newtwist0, twist0)  # the memory alias still stands!
+    assert np.allclose(newq0, q0)
+    assert np.allclose(neds.q(), newq0)
+    assert np.allclose(neds.twist(), newtwist0)
+
 
 # -- Sparse storage Lagrangian DS --
 def call_ds_compute(dstype, ndof):
@@ -305,7 +341,7 @@ def call_ds_alias(dstype, ndof):
     try:
         M = ds.mass_view
         assert False
-    except:
+    except Exception:
         print("ok")
         pass
 
@@ -334,7 +370,7 @@ def call_ds_copy(dstype, ndof):
         M = ds.mass_alias
         assert False
 
-    except:
+    except Exception:
         print("ok")
         pass
 
@@ -347,17 +383,17 @@ def call_ds_copy(dstype, ndof):
     assert not np.allclose(mass.toarray(), ds.mass_view.toarray())
 
 
-def test_LagrangianSparseDS_copy():
+def test_lagrangianSparseDS_copy():
     ndof = 3
     call_ds_copy(sm.LagrangianSparseDS, ndof)
 
 
-def test_LagrangianSparseDS_alias():
+def test_lagrangianSparseDS_alias():
     ndof = 3
     call_ds_alias(sm.LagrangianSparseDS, ndof)
 
 
-def test_LagrangianSparseDS_compute():
+def test_lagrangianSparseDS_compute():
     ndof = 3
     call_ds_compute(sm.LagrangianSparseDS, ndof)
 
@@ -430,15 +466,15 @@ def test_lagrangianSparseLinearTIDS_alias():
 
 
 if __name__ == "__main__":
-    test_LagrangianDS_alias()
-    test_LagrangianDS_copy()
-    test_LagrangianDS_compute()
-    test_LagrangianDS_compute_mass()
+    test_lagrangianDS_alias()
+    test_lagrangianDS_copy()
+    test_lagrangianDS_compute()
+    test_lagrangianDS_compute_mass()
     test_lagrangianLinearTIDS_alias()
     test_lagrangianLinearTIDS_copy()
-    test_LagrangianSparseDS_copy()
-    test_LagrangianSparseDS_alias()
-    test_LagrangianSparseDS_compute()
+    test_lagrangianSparseDS_copy()
+    test_lagrangianSparseDS_alias()
+    test_lagrangianSparseDS_compute()
     test_lagrangianSparseLinearTIDS_copy()
     test_lagrangianSparseLinearTIDS_alias()()
     test_NewtonEulerDS()

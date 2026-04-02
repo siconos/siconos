@@ -26,7 +26,6 @@
 #include <memory>
 
 #include "DynamicalSystem.hpp"
-#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 
