@@ -10,4 +10,15 @@
 	 (channel-introduction
       (version 0)
 	  (commit "b1fe5aaff3ab48e798a4cce02f0212bc91f423dc")
-	  (signer "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))))
+	  (signer "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
+    (channel
+     (name 'guix)
+     (url "https://git.guix.gnu.org/guix.git")
+     (branch "master")
+     (commit
+      "df23a503998a210697f49a169ab314039889515b")
+     (introduction
+      (make-channel-introduction
+       "9edb3f66fd807b096b48283debdcddccfea34bad"
+       (openpgp-fingerprint
+        "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
