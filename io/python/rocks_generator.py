@@ -57,6 +57,7 @@ class RockShapeConfig:
     z_aspect_ratio: float = 1.0
     volume_min: float = 1.0
     volume_max: float = 2.0
+    density: float = 2650.0
 
 
 @dataclass
@@ -267,7 +268,7 @@ def generate_random_blocks(io, drop_config, rock_config):
         # ch = ConvexHull(vertices)
         # cm = ch.centroid()
         inertia, area = ch.inertia(cm)
-        mass_block = 2650.0 * 2.0
+        mass_block = rock_config.density * rock_config.volume_max
 
         inertia = inertia * mass_block
         # random block shape
