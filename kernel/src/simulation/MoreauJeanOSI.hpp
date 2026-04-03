@@ -531,7 +531,7 @@ void updatePosition(double time_step, double theta, siconos::modeling::Dynamical
  *  \param ds the dynamical system to update
  */
 void updateVelocity(double time_step, double theta, siconos::modeling::DynamicalSystem& ds,
-                    siconos::algebra::SiconosVector& v_iter);
+                    const siconos::algebra::SiconosVector& v_iter);
 
 }  // namespace moreau_jean
 }  // namespace siconos::integrators

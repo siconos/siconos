@@ -1563,7 +1563,6 @@ void siconos::integrators::MoreauJeanOSI::computeIteration() {
         siconos::algebra::solve(*_dynamicalSystemsGraph->properties(*dsi).LUW,
                                 *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix,
                                 *v_iter, *v_iter);
-
         DEBUG_EXPR(std::cout << d.p_read(_levelMaxForInput));
         DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::ComputeIteration W CT lambda\n");
         DEBUG_EXPR(siconos::algebra::print(v));
@@ -1878,7 +1877,7 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
 
 void siconos::integrators::moreau_jean::updateVelocity(
     double time_step, double theta, siconos::modeling::DynamicalSystem& ds,
-    siconos::algebra::SiconosVector& v_iter) {
+    const siconos::algebra::SiconosVector& v_iter) {
   DEBUG_BEGIN("siconos::integrators::moreau_jean::updatePosition(...)\n");
 
   auto dsType = siconos::types::type_value(ds);
@@ -1925,7 +1924,6 @@ void siconos::integrators::moreau_jean::updatePosition(
     *(lds.q()) = time_step * theta * lds.velocity_read() +
                  time_step * (1. - theta) * lds.velocityMemory().getSiconosVector(0) +
                  lds.qMemory().getSiconosVector(0);
-
   } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
              dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
     auto& lds = static_cast<siconos::modeling::LagrangianSparseDS&>(ds);
@@ -1936,14 +1934,12 @@ void siconos::integrators::moreau_jean::updatePosition(
   } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     siconos::modeling::NewtonEulerDS& neds =
         static_cast<siconos::modeling::NewtonEulerDS&>(ds);
-
     siconos::algebra::SiconosVector6 velocityIncrement{neds.dimension()};
     velocityIncrement = time_step * theta * neds.twist_read() +
                         time_step * (1. - theta) * neds.twistMemory().getSiconosVector(0);
 
     neds.q()->head(3) = velocityIncrement.head(3);
     siconos::geometry::quaternionFromTwistVector(velocityIncrement, *neds.q());
-
     DEBUG_EXPR(siconos::algebra::print(q));
     siconos::geometry::compositionLawLieGroup(neds.qMemory().getSiconosVector(0), *neds.q());
     DEBUG_EXPR(siconos::algebra::print(q));

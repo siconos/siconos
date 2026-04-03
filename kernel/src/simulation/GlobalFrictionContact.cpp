@@ -63,16 +63,24 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::initVectorsMemory()
   // Memory allocation for reaction, and velocity
   LinearOSNS::initVectorsMemory();
 
-  if (!_globalVelocities)
+  if (!_globalVelocities) {
     _globalVelocities = std::make_shared<siconos::algebra::SiconosVector>(_maxSize);
-  else {
-    if (_globalVelocities->size() != _maxSize) _globalVelocities->resize(_maxSize);
+    _globalVelocities->setZero();
+  } else {
+    if (_globalVelocities->size() != _maxSize) {
+      _globalVelocities->resize(_maxSize);
+      _globalVelocities->setZero();
+    }
   }
 
-  if (!_b)
+  if (!_b) {
     _b = std::make_shared<siconos::algebra::SiconosVector>(_maxSize);
-  else {
-    if (_b->size() != _maxSize) _b->resize(_maxSize);
+    _b->setZero();
+  } else {
+    if (_b->size() != _maxSize) {
+      _b->resize(_maxSize);
+      _b->setZero();
+    }
   }
 }
 
@@ -201,7 +209,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contr
       mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
     } else {
       THROW_EXCEPTION(
-          "siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contribution:"
+          "siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_"
+          "contribution:"
           "only implemented for MoreauJeanGOSI integrators.")
     }
     auto& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
@@ -415,7 +424,6 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
     auto y = inter.y(inputOutputLevel());
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
-
     lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
     DEBUG_EXPR(siconos::algebra::print(*lambda););
   }

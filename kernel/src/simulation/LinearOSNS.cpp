@@ -53,22 +53,33 @@ void siconos::nonsmooth_formulations::LinearOSNS::initVectorsMemory() {
   // Memory allocation for _w, M, z and q.
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
-  if (!_w)
+  if (!_w) {
     _w = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
-  else {
-    if (_w->size() != maxSize()) _w->resize(maxSize());
+  } else {
+    if (_w->size() != maxSize()) {
+      _w->resize(maxSize());
+    }
   }
+  _w->setZero();
 
-  if (!_z)
+  if (!_z) {
     _z = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
-  else {
-    if (_z->size() != maxSize()) _z->resize(maxSize());
+    _z->setZero();
+  } else {
+    if (_z->size() != maxSize()) {
+      _z->resize(maxSize());
+      _z->setZero();
+    }
   }
 
-  if (!_q)
+  if (!_q) {
     _q = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
-  else {
-    if (_q->size() != maxSize()) _q->resize(maxSize());
+    _q->setZero();
+  } else {
+    if (_q->size() != maxSize()) {
+      _q->resize(maxSize());
+      _q->setZero();
+    }
   }
 }
 void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
@@ -448,7 +459,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         // Get inverse of the iteration matrix
         auto inv_iteration_matrix = osi.iterationMatrix(ds);
         // work = HW (remind that W contains the inverse of the iteration matrix)
-        *work = *leftInteractionBlock * *inv_iteration_matrix;
+        work->noalias() = *leftInteractionBlock * *inv_iteration_matrix;
         leftInteractionBlock->transposeInPlace();
         *currentInteractionBlock = *work * *leftInteractionBlock;
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
@@ -905,9 +916,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  // lambda vector
-  std::shared_ptr<siconos::algebra::SiconosVector> lambda;
-
   // === Loop through "active" Interactions (ie present in
   // indexSets[1]) ===
 
@@ -919,7 +927,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
 
     // Get lambda for the current Interaction
     // y = inter.y(inputOutputLevel());
-    lambda = inter.lambda(inputOutputLevel());
+    auto lambda = inter.lambda(inputOutputLevel());
     // Copy _z values, starting from index pos into lambda.
     lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
     DEBUG_EXPR(siconos::algebra::print(*lambda););
