@@ -262,7 +262,6 @@ struct moreau_jean_element : item {
            view::zip(vs_next, fexts, fexts_back)) {
         algebra::set_zero(v_next);
         fext_back = fext;
-
       }
 
       // useless at initialisation ?
@@ -350,7 +349,6 @@ struct moreau_jean_element : item {
                   rrel.compute_jachq(step, hds1, hds2, hhm1, hhm2);
                 },
                 [](auto rrel) { assert(false); }));
-
       }
     }
 
@@ -393,7 +391,6 @@ struct moreau_jean_element : item {
           storage::prop_values<system, "bc_velocities_0">(data, step);
 
       if constexpr (system_with_k_matrix()) {
-
         // free state with a stiffness matrix
         auto &mass_matrices =
             storage::attr_values<system, "mass_matrix">(data, step);
@@ -556,9 +553,16 @@ struct moreau_jean_element : item {
       for (auto [lambda, ydot_bck, activation] :
            view::zip(lambdas, ydots_bck, activations)) {
         if (activation) {
-          lambda = get_vector(lambda_assembled, k);
-          ydot_bck = get_vector(ydot_assembled, k);
-          k++;
+          if constexpr (match::fixed_size_vector<velocity>) {
+            lambda = get_vector(lambda_assembled, k);
+            ydot_bck = get_vector(ydot_assembled, k);
+            k++;
+          }
+          else {
+            lambda = get_vector(lambda_assembled, k, lambda.size());
+            ydot_bck = get_vector(ydot_assembled, k, ydot_bck.size());
+            k++;
+          }
         }
       }
     }
@@ -608,7 +612,6 @@ struct moreau_jean_element : item {
       for (auto [x, x_next, v, v_next, involved] :
            view::zip(xs, xs_next, vs, vs_next, involveds)) {
         x_next = x + h * (theta() * v_next + (1.0 - theta()) * v);
-
       }
     }
 
@@ -647,7 +650,6 @@ struct moreau_jean_element : item {
       indice inter_counter = 0;
       for (auto [y, ydot, activation, nds, ids1, ids2, inter] : view::zip(
                ys, ydots, activations, ndss, ids1s, ids2s, interactions)) {
-
         activation = ((y + gamma_v * h * ydot)(0) <=
                       self()->constraint_activation_threshold());
 
@@ -793,7 +795,6 @@ struct moreau_jean_element : item {
         if (involved) {
           set_value(mass_matrix_assembled(), index, index, mass_matrix);
         }
-
       }
     }
 
@@ -814,7 +815,6 @@ struct moreau_jean_element : item {
           if (involved) {
             set_value(k_matrix_assembled(), index, index, k_matrix);
           }
-
         }
       }
       // else the system is rigid and the sparse k_matrix is not filled.
