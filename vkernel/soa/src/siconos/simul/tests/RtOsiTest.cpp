@@ -11,7 +11,7 @@
 #include "siconos/simul/time_discretization.hpp"
 #include "siconos/simul/time_stepping.hpp"
 #include "siconos/storage/mp/mp.hpp"
-#include "siconos/utils/environment.hpp"
+#include "siconos/config/environment.hpp"
 
 namespace siconos::config {
 using fem = model::finite_element_linear_tids;

@@ -4,7 +4,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
-#include "siconos/utils/environment.hpp"
+#include "siconos/config/environment.hpp"
 
 namespace siconos::config {
 

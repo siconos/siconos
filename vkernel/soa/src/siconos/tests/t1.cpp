@@ -21,7 +21,7 @@ using env = standard_environment<config::params>;
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
-#include "siconos/utils/environment.hpp"
+#include "siconos/config/environment.hpp"
 
 namespace siconos {
 
