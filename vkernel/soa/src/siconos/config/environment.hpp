@@ -1,7 +1,8 @@
 #pragma once
 
 #include <array>
-#include <cstddef>  // std::size_t
+#include <boost/container/static_vector.hpp>  // c++26 std::inplace_vector
+#include <cstddef>                            // std::size_t
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
@@ -77,6 +78,6 @@ struct standard_environment {
   using variant = std::variant<Ts...>;
 
   template <typename T>
-  using default_storage = std::vector<T>;
+  using default_storage = boost::container::static_vector<T, 1>;
 };
 }  // namespace siconos
