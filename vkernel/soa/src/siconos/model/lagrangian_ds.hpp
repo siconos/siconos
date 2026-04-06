@@ -81,8 +81,8 @@ struct rt_lagrangian_ds : item {
     some::scalar dof;                        ///< Current degree of freedom
     some::unbounded_vector<some::scalar> q;  ///< Position vector
     some::unbounded_vector<some::scalar> velocity;     ///< Velocity vector
-    some::unbounded_matrix<some::scalar> mass_matrix;  ///< Mass matrix
-    some::unbounded_matrix<some::scalar> k_matrix;     // Rigidity matrix
+    some::sparse_matrix<some::scalar> mass_matrix;  ///< Mass matrix
+    some::sparse_matrix<some::scalar> k_matrix;     // Rigidity matrix
     some::unbounded_vector<some::scalar> fext;  ///< External forces vector
   };
 

@@ -48,7 +48,9 @@ struct text {
 
 struct any_symbol {};
 template <string_literal Symbol>
-struct symbol : text<Symbol>, any_symbol {};
+struct symbol : text<Symbol>, any_symbol {
+  using symbol_id = text<Symbol>;
+};
 
 template <string_literal Symbol>
 constexpr auto symb = symbol<Symbol>{};

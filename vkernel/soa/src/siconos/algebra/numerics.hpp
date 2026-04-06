@@ -296,6 +296,17 @@ void set_value(M&& m, match::indice auto i, match::indice auto j,
       }
     }
   }
+  else if constexpr (match::sparse_matrix<T>) {
+    for (typename T::Index k = 0; k < value.outerSize(); ++k) {
+
+      // /!\ specific to eigen
+      for (typename T::InnerIterator it(value, k); it; ++it) {
+        NM_zentry(m._m, i * m.vnrows + it.row() + m._offsets[0],
+                  j * m.vncols + it.col() + m._offsets[1], it.value(),
+                  zero_threshold);
+      }
+    }
+  }
   else {
     []<bool flag = false>() {
       static_assert(flag, "set_value: cannot insert this value");

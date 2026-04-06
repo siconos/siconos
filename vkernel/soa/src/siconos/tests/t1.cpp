@@ -229,12 +229,15 @@ static_assert(
 using namespace boost::hana::literals;
 
 using ball = model::lagrangian_ds;
+using fem = model::rt_lagrangian_ds;
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<lcp>;
 using nslaw = model::newton_impact;
 using relation = model::lagrangian_r<nslaw::size>;
+using rt_relation = model::rt_lagrangian_r;
 using interaction = simul::interaction<nslaw, relation>;
-using topo = simul::topology<ball, interaction>;
+using rt_interaction = simul::rt_rt_interaction<nslaw, rt_relation>;
+using topo = simul::topology<ball, interaction, fem, rt_interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using disk = collision::shape::disk;
@@ -268,6 +271,18 @@ static_assert(
                 simulation, ball, relation, interaction,
                 storage::with_properties<
                     storage::diagonal<attr_t<ball, "mass_matrix">>>>())))>);
+
+
+static_assert(
+    !match::diagonal_matrix<
+        decltype(storage::attr<"mass_matrix">(storage::add<fem>(
+            storage::make<
+                standard_environment<config::map<
+                    config::iparam<"dof", 3>, config::iparam<"ncgroups", 1>>>,
+                simulation, ball, relation, interaction,
+                storage::with_properties<
+                    storage::diagonal<attr_t<ball, "mass_matrix">>>>())))>);
+
 
 static_assert(
     match::index<std::decay_t<decltype(storage::prop<
