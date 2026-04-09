@@ -168,13 +168,15 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
       numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
                      "unknown strategy for computing rho");
 
-    plasticity_2d_local_problem_fill_M(problem, localproblem, cone);
 
     if (verbose > 0) {
       avg_rho[0] += rho[0];
       avg_rho[1] += rho[1];
       avg_rho[2] += rho[2];
-
+    }
+    if (verbose > 1) {
+      plasticity_2d_local_problem_fill_M(problem, localproblem, cone);
+      
       double m_row_norm = 0.0, sum;
       for (int i = 0; i < 3; i++) {
         sum = 0.0;
@@ -190,6 +192,7 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
                               cone, rho[0], rho[1], rho[2],
                               1.0 / hypot9(localproblem->M->matrix0), 1.0 / m_row_norm);
     }
+    
     DEBUG_EXPR(NM_display(localproblem->M););
   }
   numerics_printf(
@@ -276,10 +279,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
             SOLVER_RESIDUAL(options));
       } else {
         numerics_warning("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
-                         "no convergence for cone %i with error = %12.8e",
-                         SOLVER_MAX_ITER(options),
+                         "no convergence for cone %i with error = %12.8e and iterations =",
                          options->iparam[PLASTICITY_CURRENT_CONE_NUMBER],
-                         SOLVER_RESIDUAL(options));
+                         SOLVER_RESIDUAL(options),SOLVER_MAX_ITER(options));
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }

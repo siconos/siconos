@@ -113,7 +113,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       options->dWork[contact] = 1.0;  // for PLI algorithm.
       rho = &options->dWork[3 * contact + nc];
     }
-    numerics_printf(
+    numerics_printf_verbose(2,
         "fc3d_AC_initialize "
         " compute rho for contact = %i",
         contact);
@@ -147,32 +147,33 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       avg_rho[1] += rho[1];
       avg_rho[2] += rho[2];
     }
-
+    
     numerics_printf_verbose(2,
                             "fc3d_AC_initialize"
                             "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
                             contact, rho[0], rho[1], rho[2]);
+    if (verbose > 1) {
+      fc3d_local_problem_fill_M(main_problem, local_p, contact);
 
-    fc3d_local_problem_fill_M(main_problem, local_p, contact);
-
-    double m_row_norm = 0.0, sum;
-    for (int i = 0; i < 3; i++) {
-      sum = 0.0;
-      for (int j = 0; j < 3; j++) {
-        sum += fabs(local_p->M->matrix0[i + j * 3]);
+      double m_row_norm = 0.0, sum;
+      for (int i = 0; i < 3; i++) {
+        sum = 0.0;
+        for (int j = 0; j < 3; j++) {
+          sum += fabs(local_p->M->matrix0[i + j * 3]);
+        }
+        m_row_norm = max(sum, m_row_norm);
       }
-      m_row_norm = max(sum, m_row_norm);
-    }
-    numerics_printf_verbose(2,
-                            "fc3d_AC_initialize"
-                            " inverse of norm of M = %e",
-                            1.0 / hypot9(local_p->M->matrix0));
-    numerics_printf_verbose(2,
-                            "fc3d_AC_initialize"
-                            " inverse of row norm of M = %e",
-                            1.0 / m_row_norm);
+      numerics_printf_verbose(2,
+                              "fc3d_AC_initialize"
+                              " inverse of norm of M = %e",
+                              1.0 / hypot9(local_p->M->matrix0));
+      numerics_printf_verbose(2,
+                              "fc3d_AC_initialize"
+                              " inverse of row norm of M = %e",
+                              1.0 / m_row_norm);
 
-    DEBUG_EXPR(NM_display(local_p->M););
+      DEBUG_EXPR(NM_display(local_p->M););
+    }
   }
   numerics_printf(
       "fc3d_AC_initialize"
@@ -269,11 +270,12 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
             options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
             SOLVER_RESIDUAL(options));
       } else {
-        numerics_warning("fc3d_onecontact_nonsmooth_Newton_solvers_solve",
-                         "no convergence for contact %i with error = %12.8e",
-                         SOLVER_MAX_ITER(options),
-                         options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-                         SOLVER_RESIDUAL(options));
+        numerics_warning(
+            "fc3d_onecontact_nonsmooth_Newton_solvers_solve",
+            "no convergence for contact %i with error = %12.8e and iteration = %i",
+            options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
+            SOLVER_RESIDUAL(options),
+	    SOLVER_MAX_ITER(options));
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
