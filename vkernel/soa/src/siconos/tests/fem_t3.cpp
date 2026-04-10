@@ -10,15 +10,23 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "siconos/config/config.hpp"
+#include "siconos/config/environment.hpp"
 #include "siconos/model/fem.hpp"
-#include "siconos/siconos.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
+#include "siconos/model/lagrangian_r.hpp"
+#include "siconos/model/nslaws.hpp"
+#include "siconos/simul/interaction.hpp"
+#include "siconos/simul/one_step_integrator.hpp"
+#include "siconos/simul/one_step_nonsmooth_problem.hpp"
+#include "siconos/simul/time_discretization.hpp"
+#include "siconos/simul/time_stepping.hpp"
+#include "siconos/simul/topology.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/utils/print.hpp"
 
 namespace siconos::config {
-using fem = model::finite_element_linear_tids;
-using fem_ds = model::rt_lagrangian_ds;
-using material = model::material;
+struct fem_ds : model::elastic_lagrangian_ds {};
 using ball = model::lagrangian_ds;
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -35,10 +43,19 @@ struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
-using params = map<iparam<"dof", 3>>;
-
-struct make : storage::make<standard_environment<params>, fem_ds, fem,
-                            material, simulation> {};
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>>;
+};
+struct make
+    : storage::make<
+          env, fem_ds, simulation,
+          storage::with_properties<
+              storage::unbounded<storage::attr_t<fem_ds, "q">>,
+              storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
+              storage::unbounded<storage::attr_t<fem_ds, "fext">>,
+              storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
+              storage::sparse<storage::attr_t<fem_ds, "k_matrix">>>> {};
 
 }  // namespace siconos::config
 
@@ -86,7 +103,7 @@ int main(int args, char* argv[])
 
   auto data = siconos::config::make();
   handle fe_solid = storage::add<config::fem_ds>(data);
-  fe_solid.dof() = FEsolid->dimension();
+  // fe_solid.dof() = FEsolid->dimension();
   handle nslaw = storage::add<config::nslaw>(data);
   nslaw.e() = e;
 

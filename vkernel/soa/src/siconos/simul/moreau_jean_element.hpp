@@ -49,7 +49,9 @@ struct moreau_jean_element : item {
 
     static constexpr bool runtime_dof()
     {
-      return model::runtime_dof(system{});
+      using data_t = typename Handle::data_t;
+      return model::runtime_dof<decltype(storage::make_handle<system>(
+          data_t{}, storage::index<system, int>{0}))>();
     }
 
     decltype(auto) total_dofs(auto step)
@@ -155,7 +157,7 @@ struct moreau_jean_element : item {
 
     decltype(auto) w_matrix_assembled()
     {
-      auto w_matrix_storage = convert_storage_type(
+      auto w_matrix_storage = convert_storage_type(system{},
           self()->data(),
           some::matrix<some::scalar, nth_t<0, typename h_matrix1::sizes>,
                        nth_t<0, typename h_matrix1::sizes>>{});
@@ -192,7 +194,7 @@ struct moreau_jean_element : item {
     decltype(auto) p0_vector_assembled()
     {
       using env_t = decltype(self()->env());
-      if constexpr (!model::runtime_dof(system{})) {
+      if constexpr (!runtime_dof()) {
         using vec_t = traits::config<env_t>::template convert<
             some::vector<some::scalar, typename interaction::dof>>::type;
 
@@ -279,8 +281,7 @@ struct moreau_jean_element : item {
     void compute_iteration_matrix(auto step)
     {
       auto &data = self()->data();
-      using info_t = storage::get_info_t<decltype(data)>;
-      using env = typename info_t::env;
+      using env = decltype(self()->env());
       using scalar = typename env::scalar;
 
       auto &mass_matrices = storage::attr_memory<system, "mass_matrix">(data);
@@ -456,8 +457,7 @@ struct moreau_jean_element : item {
     void compute_output(auto step)
     {
       auto &data = self()->data();
-      using info_t = storage::get_info_t<decltype(data)>;
-      using env = typename info_t::env;
+      using env = decltype(self()->env());
       using scalar = typename env::scalar;
       using vector =
           typename env::template vector<scalar, nslaw_size_t{}.value>;
@@ -618,10 +618,7 @@ struct moreau_jean_element : item {
     auto compute_active_interactions(auto step, auto h)
     {
       auto &data = self()->data();
-
-      using info_t = storage::get_info_t<decltype(data)>;
-
-      using env = typename info_t::env;
+      using env = decltype(self()->env());
       using indice = typename env::indice;
 
       auto &ys = storage::attr_values<y>(data, step);

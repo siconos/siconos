@@ -19,7 +19,7 @@ decltype(auto) add(auto&& data) {
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
   using all_keeps_t = decltype(all_properties_as<property::keep>(data));
-  using indice = typename info_t::env::indice;
+  using indice = typename info_t::template env<Item>::indice;
 
   // get attached storages from all properties
   constexpr auto attached_storages = mp::filter(

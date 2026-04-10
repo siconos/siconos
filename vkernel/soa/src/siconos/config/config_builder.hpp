@@ -1,10 +1,10 @@
 #pragma once
 
 #include "siconos/config/config.hpp"
+#include "siconos/config/environment.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
-#include "siconos/config/environment.hpp"
 
 namespace siconos::config {
 
@@ -25,29 +25,28 @@ constexpr auto to_string_literal(S s)
 template <typename ParamsMap = boost::hana::map<>,
           typename ItemsList = mp::tuple<>,
           typename PropertiesList = mp::tuple<>>
-class ConfigBuilder {
+class config_builder {
  public:
   // parameters
   template <typename Value>
   auto with_param(auto str, Value) const
   {
     constexpr auto str_li = to_string_literal(str);
-    using KeyValue = assoc<param<str_li>, Value>;
-    auto new_params = boost::hana::insert(ParamsMap{}, KeyValue{});
+    using key_value = assoc<param<str_li>, Value>;
+    auto new_params = boost::hana::insert(ParamsMap{}, key_value{});
 
-    return ConfigBuilder<decltype(new_params), ItemsList, PropertiesList>{};
+    return config_builder<decltype(new_params), ItemsList, PropertiesList>{};
   }
 
   template <string_literal str, auto Value>
   auto with_param() const
   {
-    using KeyValue = assoc<param<str>, param_val<Value>>;
-    auto new_params = boost::hana::insert(ParamsMap{}, KeyValue{});
+    using key_value = assoc<param<str>, param_val<Value>>;
+    auto new_params = boost::hana::insert(ParamsMap{}, key_value{});
 
-    return ConfigBuilder<decltype(new_params), ItemsList, PropertiesList>{};
+    return config_builder<decltype(new_params), ItemsList, PropertiesList>{};
   }
 
-  
   // dof
   template <auto Value>
   auto with_dof() const
@@ -61,7 +60,7 @@ class ConfigBuilder {
   {
     using NewItems =
         decltype(mp::concat(ItemsList{}, mp::tuple<ItemTypes...>{}));
-    return ConfigBuilder<ParamsMap, NewItems, PropertiesList>{};
+    return config_builder<ParamsMap, NewItems, PropertiesList>{};
   }
 
   // properties
@@ -70,7 +69,7 @@ class ConfigBuilder {
   {
     using Prop = storage::time_invariant<storage::attr_t<Item, str>>;
     using NewProps = decltype(mp::prepend(PropertiesList{}, Prop{}));
-    return ConfigBuilder<ParamsMap, ItemsList, NewProps>{};
+    return config_builder<ParamsMap, ItemsList, NewProps>{};
   }
 
   template <typename Item, string_literal str>
@@ -78,7 +77,7 @@ class ConfigBuilder {
   {
     using Prop = storage::diagonal<storage::attr_t<Item, str>>;
     using NewProps = decltype(mp::prepend(PropertiesList{}, Prop{}));
-    return ConfigBuilder<ParamsMap, ItemsList, NewProps>{};
+    return config_builder<ParamsMap, ItemsList, NewProps>{};
   }
 
   template <typename OsiType, string_literal str>
@@ -87,7 +86,7 @@ class ConfigBuilder {
     using Prop = storage::assembled_diagonal<
         storage::attr_t<typename OsiType::assembled_osi_t, str>>;
     using NewProps = decltype(mp::prepend(PropertiesList{}, Prop{}));
-    return ConfigBuilder<ParamsMap, ItemsList, NewProps>{};
+    return config_builder<ParamsMap, ItemsList, NewProps>{};
   }
 
   // general chaining
@@ -101,28 +100,29 @@ class ConfigBuilder {
         ItemsList{}, typename OtherBuilder::items_list{}));
     using MergedProps = decltype(mp::concat(
         PropertiesList{}, typename OtherBuilder::properties_list{}));
-    return ConfigBuilder<MergedParams, MergedItems, MergedProps>{};
+    return config_builder<MergedParams, MergedItems, MergedProps>{};
   }
+
+  template <typename T>
+  struct env : standard_environment<T> {
+    using params = decltype(mp::unpack(ParamsMap{},
+                                       []<typename... Pairs>(Pairs... pairs) {
+                                         return mp::map<Pairs...>{};
+                                       }));
+  };
 
   // build
   auto build() const
   {
-    // mp::map
-    using ParamMap = decltype(mp::unpack(
-        ParamsMap{}, []<typename... Pairs>(Pairs... pairs) {
-          return mp::map<Pairs...>{};
-        }));
-
     return mp::unpack(
         mp::concat(
-            mp::concat(mp::tuple<standard_environment<ParamMap>>{},
-                       ItemsList{}),
+          mp::concat(mp::tuple<>{}, ItemsList{}),
             mp::unpack(
                 PropertiesList{},
                 []<typename... Props>(Props...) {
                   return mp::tuple<storage::with_properties<Props...>>{};
                 })),
-        []<typename... Ts>(Ts... ts) { return storage::make<Ts...>{}; });
+        []<typename... Ts>(Ts... ts) { return storage::make<env, Ts...>{}; });
   }
 
   // Type aliases for merging
@@ -132,6 +132,6 @@ class ConfigBuilder {
 };
 
 // Factory function
-inline auto storage() { return ConfigBuilder<>{}; }
+inline auto storage() { return config_builder<>{}; }
 
 }  // namespace siconos::config

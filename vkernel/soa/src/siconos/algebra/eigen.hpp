@@ -81,6 +81,9 @@ concept fixed_size_vector = fixed_size_matrix<T> && vector<T>;
 template <typename T>
 concept variable_size_vector = vector<T> && !fixed_size_matrix<T>;
 
+template <typename T>
+concept unbounded = variable_size_vector<T> || variable_size_matrix<T>;
+
 }  // namespace siconos::storage::pattern::match
 
 namespace siconos::algebra {

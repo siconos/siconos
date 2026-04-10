@@ -268,10 +268,7 @@ struct one_step_integrator {
       void compute_w_matrix_with_diagonal_mass_matrix()
       {
         // mass matrix is assumed to be diagonal
-        auto& data = self()->data();
-        using info_t = storage::get_info_t<decltype(data)>;
-
-        using env = typename info_t::env;
+        using env = decltype(self()->env());
 
         // xxx properties on h_matrix1, if any, are lost here
         auto tmp_matrix = typename traits::config<env>::template convert<

@@ -56,6 +56,11 @@ struct assembled_matrix : refine {
   using refine = some::assembled_matrix<typename A::type>;
 };
 
+struct sparse_matrix : refine {
+  template <match::attribute A>
+  using refine = some::sparse_matrix<typename A::type>;
+};
+
 }  // namespace property
 
 template <match::attribute A, typename T>
@@ -108,28 +113,40 @@ struct assembled_diagonal : property::assembled_diagonal {
   using assembled_diagonal_t = void;
 };
 
+template <typename T>
+struct unbounded;
+
 template <match::abstract_matrix M>
-struct unbounded_matrix : property::unbounded_matrix {
+struct unbounded<M> : property::unbounded_matrix {
   using type = M;
   using unbounded_matrix_t = void;
 };
 
 template <match::abstract_vector V>
-struct unbounded_vector : property::unbounded_vector {
+struct unbounded<V> : property::unbounded_vector {
   using type = V;
   using unbounded_vector_t = void;
 };
 
+template <typename T>
+struct assembled;
+
 template <match::abstract_matrix M>
-struct assembled_matrix : property::assembled_matrix {
+struct assembled<M> : property::assembled_matrix {
   using type = M;
   using assembled_matrix_t = void;
 };
 
 template <match::abstract_vector V>
-struct assembled_vector : property::assembled_vector {
+struct assembled<V> : property::assembled_vector {
   using type = V;
   using assembled_vector_t = void;
+};
+
+template <match::abstract_matrix M>
+struct sparse : property::sparse_matrix {
+  using type = M;
+  using sparse_matrix_t = void;
 };
 
 template <match::property K>

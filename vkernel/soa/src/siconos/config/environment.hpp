@@ -17,9 +17,8 @@
 
 namespace siconos {
 
-template <typename Params>
+template <typename Item>
 struct standard_environment {
-  using params = Params;
 
   using boolean = uint8_t;  // not bool => cf CompactNSearch sort.
   using scalar = double;
