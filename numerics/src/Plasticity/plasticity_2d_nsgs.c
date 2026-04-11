@@ -26,6 +26,8 @@
 #include "NumericsFwd.h"     // for SolverOptions
 #include "NumericsMatrix.h"
 #include "PlasticityProblem.h"   // for PlasticityProblem
+#include "NumericsVector.h"
+#include "NumericsSparseMatrix.h"
 #include "Plasticity_options.h"  // for SICONOS_FRICTI...
 #include "SiconosBlas.h"         // for cblas_dnrm2
 #include "SolverOptions.h"       // for SolverOptions
@@ -608,15 +610,16 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
   else {
+    double* light_error_2 = calloc(nc, sizeof(double));
+    
     /* verbose=1; */
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
-      double light_error_2 = 0.0;
       plasticity_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       unsigned int number_of_freezed_cone = 0;
-      double tmp_criteria1 = tolerance * tolerance * 100 * 100;
+      double tmp_criteria1 = tolerance * tolerance/ (nc * nc * 1000);
       double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
       if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
@@ -641,6 +644,9 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
           if (freeze_cones[cone] > 0) {
             /* we skip freeze cones */
             freeze_cones[cone] -= 1;
+	    light_error_sum += light_error_2[cone];
+            continue;
+             
             continue;
           }
         }
@@ -654,10 +660,10 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
           localProblemFunctionToolkit->perform_relaxation(localstress, &stress[cone * 3],
                                                           omega);
 
-        light_error_2 =
+        light_error_2[cone] =
             localProblemFunctionToolkit->light_error_squared(localstress, &stress[cone * 3]);
 
-        light_error_sum += light_error_2;
+        light_error_sum += light_error_2[cone];
 
         /* int test =100; */
         /* if (cone == test) */
@@ -670,7 +676,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
           double squared_norm_localstress =
               localProblemFunctionToolkit->squared_norm(localstress);
           int relative_convergence_criteria =
-              light_error_2 <= tmp_criteria1 * squared_norm_localstress;
+              light_error_2[cone] <= tmp_criteria1 * squared_norm_localstress;
           int small_stress_criteria = squared_norm_localstress <= tmp_criteria2;
 
           if ((relative_convergence_criteria || small_stress_criteria) && iter >= 10)
@@ -681,18 +687,20 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
           {
             /* we  freeze the cone for n iterations*/
             freeze_cones[cone] = iparam[PLASTICITY_NSGS_FREEZING_CONE];
-
-            DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localstress) <= "
-                              "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                              light_error_2 * squared_norm(localstress),
-                              tolerance * tolerance / (nc * nc * 10),
-                              relative_convergence_criteria);
-                       printf("second criteria :  squared_norm(localstress) <=  (*norm_r* "
-                              "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                              squared_norm(localstress), *norm_r * *norm_r / (nc * nc * 1000),
-                              small_stress_criteria);
-                       printf("Cone % i is freezed for %i steps\n", cone,
-                              iparam[PLASTICITY_NSGS_FREEZING_CONE]););
+            DEBUG_EXPR(
+                NV_display(localstress, 3); NV_display(&stress[cone * 3], 3);
+                printf("light_error_2 = %e\n", light_error_2[cone]);
+                printf("tmp_criteria1 = %e\n", tmp_criteria1);
+                printf("tmp_criteria2 = %e\n", tmp_criteria2);
+                printf("first criteria relative_convergence_criteria : light_error_2 <= "
+                       "tmp_criteria1 * squared_norm_localreaction ==> %e <= %e, bool =%i\n",
+                       light_error_2[cone], tmp_criteria1 * squared_norm_localstress,
+                       relative_convergence_criteria);
+                printf("second criteria :  squared_norm_localreaction <= tmp_criteria2 ==> %e "
+                       "<= %e, bool =%i \n",
+                       squared_norm_localstress, tmp_criteria2, small_stress_criteria);
+                printf("Contact % i is freezed for %i steps\n", cone,
+                       options->iparam[PLASTICITY_NSGS_FREEZING_CONE]););
           }
         }
 
@@ -755,6 +763,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
        * frozen_cone, iter, nc ); */
       /* } */
     }
+    free(light_error_2);
   }
 
   /* Full criterium */

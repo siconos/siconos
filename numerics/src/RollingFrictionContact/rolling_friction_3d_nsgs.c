@@ -545,24 +545,20 @@ void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *re
             freeze_contacts[contact] =
                 options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
 
-            // DEBUG_EXPR(
-            NV_display(r_local, 5);
-            NV_display(&reaction[contact * 5], 5);
-            printf("light_error_2 = %e\n", light_error_2[contact]);
-            printf("tmp_criteria1 = %e\n", tmp_criteria1);
-            printf("tmp_criteria2 = %e\n", tmp_criteria2);
-            printf(
-                "first criteria relative_convergence_criteria : light_error_2 <= "
-                "tmp_criteria1 * squared_norm_localreaction ==> %e <= %e, bool =%i\n",
-                light_error_2[contact], tmp_criteria1 * squared_norm_localreaction,
-                relative_convergence_criteria);
-            printf(
-                "second criteria :  squared_norm_localreaction <= tmp_criteria2 ==> %e "
-                "<= %e, bool =%i \n",
-                squared_norm_localreaction, tmp_criteria2, small_reaction_criteria);
-            printf("Contact % i is freezed for %i steps\n", contact,
-                   options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
-            //);
+            DEBUG_EXPR(
+                NV_display(r_local, 5); NV_display(&reaction[contact * 5], 5);
+                printf("light_error_2 = %e\n", light_error_2[contact]);
+                printf("tmp_criteria1 = %e\n", tmp_criteria1);
+                printf("tmp_criteria2 = %e\n", tmp_criteria2);
+                printf("first criteria relative_convergence_criteria : light_error_2 <= "
+                       "tmp_criteria1 * squared_norm_localreaction ==> %e <= %e, bool =%i\n",
+                       light_error_2[contact], tmp_criteria1 * squared_norm_localreaction,
+                       relative_convergence_criteria);
+                printf("second criteria :  squared_norm_localreaction <= tmp_criteria2 ==> %e "
+                       "<= %e, bool =%i \n",
+                       squared_norm_localreaction, tmp_criteria2, small_reaction_criteria);
+                printf("Contact % i is freezed for %i steps\n", contact,
+                       options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
           }
         }
         if (iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] ==
