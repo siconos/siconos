@@ -157,8 +157,8 @@ struct moreau_jean_element : item {
 
     decltype(auto) w_matrix_assembled()
     {
-      auto w_matrix_storage = convert_storage_type(system{},
-          self()->data(),
+      auto w_matrix_storage = convert_storage_type(
+          system{}, self()->data(),
           some::matrix<some::scalar, nth_t<0, typename h_matrix1::sizes>,
                        nth_t<0, typename h_matrix1::sizes>>{});
 

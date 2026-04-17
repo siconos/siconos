@@ -15,14 +15,17 @@ using osi = simul::one_step_integrator<topo>::moreau_jean;
 
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
-using params = map<iparam<"dof", 3>>;
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>>;
+};
 
 struct make
     : storage::make<
-          standard_environment<params>, simulation,
+          env, simulation,
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,
-              storage::unbounded_vector<storage::attr_t<ball, "q">>,
+              storage::unbounded<storage::attr_t<ball, "q">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<storage::attr_t<
                   typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {

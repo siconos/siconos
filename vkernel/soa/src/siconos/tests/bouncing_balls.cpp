@@ -18,7 +18,10 @@ using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using simulation = simul::time_stepping<td, osi, osnspb>;
 
-using params = map<iparam<"dof", 3>>;
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>>;
+};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -28,7 +31,7 @@ int main(int argc, char* argv[])
   using siconos::storage::pattern::wrap;
 
   auto data = storage::make<
-      standard_environment<config::params>, config::simulation,
+      config::env, config::simulation,
       wrap<some::unbounded_collection, config::ball>,
       wrap<some::bounded_collection, config::relation, some::indice_value<1>>,
       wrap<some::unbounded_collection, config::interaction>,
