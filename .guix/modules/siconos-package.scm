@@ -35,6 +35,32 @@
 ;  ;; Renvoie vrai lorsque le fichier donné est sous contrôle de version.
 ;  (or (git-predicate (dirname (dirname (current-source-directory))))
 ;      (const #t)))                                ; pas dans un dépôt Git
+(define-public fclib-devel
+  (package
+    (name "fclib-devel")
+    (version "3.1.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/FrictionalContactLibrary/fclib/")
+             (commit "f894f34f02093910ceb49943d69f4901142bb880")))
+       (sha256
+        (base32 "0dg2r54jl8sr8pkc0r0q5sx0bwm0z093dkfcfci67x51z5w8nz98"))))
+    (build-system cmake-build-system)
+    (arguments
+     (list
+      #:configure-flags
+      #~(list "-DFCLIB_HEADER_ONLY=OFF")))
+    (propagated-inputs (list hdf5))
+    (home-page "https://frictionalcontactlibrary.github.io/")
+    (synopsis "A collection of discrete 3D Frictional Contact (FC) problems")
+    (description
+     "FCLIB is an open source collection of Frictional
+Contact (FC) problems stored in a specific HDF5 format with a light
+implementation in C Language of Input/Output functions to read and write those
+problems.")
+    (license license:asl2.0)))
 
 
 (define-public siconos-devel
@@ -154,7 +180,7 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
       (propagated-inputs (list boost
                                bullet
                                eigen
-                               fclib
+                               fclib-devel
                                fmt
                                gmp
                                lapack
