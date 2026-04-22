@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -36,9 +37,13 @@
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosCollisionManager.hpp"
+#include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 #include "SpaceFilter.hpp"
 #include "StaticBody.hpp"
+
+// Required, see https://pybind11.readthedocs.io/en/stable/advanced/cast/stl.html
+PYBIND11_MAKE_OPAQUE(siconos::collision::SiconosContactorSet);
 
 namespace py = pybind11;
 
@@ -119,18 +124,18 @@ PYBIND11_MODULE(_collision, m) {
            py::arg("vertices"));  // TODO : WARNING with vertices argument, it is shard ptr
 
   py::class_<siconos::collision::SiconosContactor, py::smart_holder>(m, "SiconosContactor")
-      .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>>(), py::arg("shape"))
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>,
                     const siconos::algebra::SiconosVector &, int>(),
-           py::arg("shape"), py::arg("offset"), py::arg("collision_group") = 0);
+           py::arg("shape"), py::arg("offset") = siconos::algebra::SiconosVector::Unit(7, 3),
+           py::arg("collision_group") = 0)
+      .def_property_readonly("id", &siconos::collision::SiconosContactor::id)
+      .def_property_readonly("offset", &siconos::collision::SiconosContactor::offset)
+      .def_property_readonly("collision_group",
+                             &siconos::collision::SiconosContactor::collision_group)
+      .def_property_readonly("shape", &siconos::collision::SiconosContactor::shape);
 
-  py::class_<siconos::collision::SiconosContactorSet, py::smart_holder>(m,
-                                                                        "SiconosContactorSet")
-      .def(py::init<>())
-      .def("append",
-           py::overload_cast<std::shared_ptr<siconos::collision::SiconosContactor>>(
-               &siconos::collision::SiconosContactorSet::append),
-           py::arg("contactor"));
+  py::bind_vector<siconos::collision::SiconosContactorSet>(m, "SiconosContactorSet");
+  // See https://pybind11.readthedocs.io/en/stable/advanced/cast/stl.html
 
   py::class_<siconos::collision::SiconosMesh, siconos::collision::SiconosShape,
              py::smart_holder>(m, "SiconosMesh")
@@ -180,7 +185,8 @@ PYBIND11_MODULE(_collision, m) {
 
   py::class_<siconos::collision::StaticBody, py::smart_holder>(m, "StaticBody")
       .def(py::init<>())
-      .def_readonly("number", &siconos::collision::StaticBody::number);
+      .def_readonly("number", &siconos::collision::StaticBody::number)
+      .def("contactors", &siconos::collision::StaticBody::contactors);
 
   py::class_<siconos::collision::BodyShapeRecord, py::smart_holder>(m, "BodyShapeRecord")
       .def("display", &siconos::collision::BodyShapeRecord::display)
@@ -210,8 +216,14 @@ PYBIND11_MODULE(_collision, m) {
 
       .def("setUseContactorInertia", &siconos::collision::RigidBodyDS::setUseContactorInertia,
            py::arg("useContactorInertia"))
-      .def("setContactors", &siconos::collision::RigidBodyDS::setContactors,
-           py::arg("contactors"))
+      .def(
+          "setContactors",
+          [](siconos::collision::RigidBodyDS &self,
+             siconos::collision::SiconosContactorSet &cs) {
+            self.setContactors(std::make_shared<siconos::collision::SiconosContactorSet>(cs));
+          },
+          py::arg("contactors"))
+
       .def("contactors", &siconos::collision::RigidBodyDS::contactors);
 
   py::class_<siconos::collision::RigidBody2dDS, siconos::modeling::LagrangianLinearTIDS,
@@ -223,7 +235,14 @@ PYBIND11_MODULE(_collision, m) {
            py::arg("mass"), py::arg("inertia"))
       .def("setUseContactorInertia",
            &siconos::collision::RigidBody2dDS::setUseContactorInertia)
-      .def("setContactors", &siconos::collision::RigidBody2dDS::setContactors)
+      .def(
+          "setContactors",
+          [](siconos::collision::RigidBody2dDS &self,
+             siconos::collision::SiconosContactorSet &cs) {
+            self.setContactors(std::make_shared<siconos::collision::SiconosContactorSet>(cs));
+          },
+          py::arg("contactors"))
+
       .def("setAllowSelfCollide", &siconos::collision::RigidBody2dDS::setAllowSelfCollide)
       .def_property_readonly("useContactorInertia",
                              &siconos::collision::RigidBody2dDS::useContactorInertia)

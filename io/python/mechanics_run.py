@@ -1213,6 +1213,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # a static object
             # ---------------
             if mass is None:
+                print("CREATE CONTACTORS ....")
+
                 cset = siconos.mechanics.collision.SiconosContactorSet()
                 csetpos = np.concatenate([translation, orientation], axis=0)
                 for c in contactors:
@@ -1254,8 +1256,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             "at relative position",
                             pos,
                         )
-
+                print("STATIC BODY ....")
                 staticBody = self._interman.addStaticBody(cset, csetpos, number)
+                print("STATIC BODY OK ....")
 
                 self._static[name] = {
                     "number": number,
@@ -1356,8 +1359,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         "at relative position",
                         pos,
                     )
+                print("DYN BODY ....")
 
                 body.setContactors(cset)
+                print("DYN BODY OK....")
 
             if body:
                 # set id number

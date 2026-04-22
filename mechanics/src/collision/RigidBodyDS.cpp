@@ -28,7 +28,7 @@
 //     Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia, siconos::algebra::AliasTag)
 //     : siconos::modeling::NewtonEulerDS{position, twist, mass, inertia,
 //                                        siconos::algebra::alias_t},
-//       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
+//       contactors_(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
 siconos::collision::RigidBodyDS::RigidBodyDS(const siconos::algebra::SiconosVector7& position,
                                              const siconos::algebra::SiconosVector6& twist,
@@ -36,7 +36,7 @@ siconos::collision::RigidBodyDS::RigidBodyDS(const siconos::algebra::SiconosVect
                                              const siconos::algebra::SiconosMatrix33& inertia)
     : siconos::modeling::NewtonEulerDS{position, twist, mass, inertia,
                                        siconos::algebra::copy_t},
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
+      contactors_(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
 void siconos::collision::RigidBodyDS::compute_extrapolated_position(
     double extrapolationCoefficient) {

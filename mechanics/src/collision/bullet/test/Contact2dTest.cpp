@@ -99,13 +99,13 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     disk = std::make_shared<siconos::collision::SiconosDisk>(params.size);
     disk->setInsideMargin(params.insideMargin);
     disk->setOutsideMargin(params.outsideMargin);
-    contactors->append(std::make_shared<siconos::collision::SiconosContactor>(disk));
+    contactors->emplace_back(std::make_shared<siconos::collision::SiconosContactor>(disk));
   } else if (moving == "box") {
     auto box = std::make_shared<siconos::collision::SiconosBox>(params.size, params.size,
                                                                 params.size);
     box->setInsideMargin(params.insideMargin);
     box->setOutsideMargin(params.outsideMargin);
-    contactors->append(std::make_shared<siconos::collision::SiconosContactor>(box));
+    contactors->emplace_back(std::make_shared<siconos::collision::SiconosContactor>(box));
   } else if (moving == "ch2d") {
     float siz = params.size;
     auto pts = std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
@@ -118,7 +118,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     auto ch2d = std::make_shared<siconos::collision::SiconosConvexHull2d>(pts);
     ch2d->setInsideMargin(params.insideMargin);
     ch2d->setOutsideMargin(params.outsideMargin);
-    contactors->append(std::make_shared<siconos::collision::SiconosContactor>(ch2d));
+    contactors->emplace_back(std::make_shared<siconos::collision::SiconosContactor>(ch2d));
   }
   body->setContactors(contactors);
 
@@ -134,7 +134,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     pos.setZero();
     pos(1) = -2.0;  //-params.size/2;
     pos(3) = 1.0;   // unit quaternion
-    static_contactors->append(
+    static_contactors->emplace_back(
         std::make_shared<siconos::collision::SiconosContactor>(floordisk, pos));
   } else if (ground == "box") {
     auto floorbox = std::make_shared<siconos::collision::SiconosBox2d>(100, 1.);
@@ -144,7 +144,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     pos.setZero();
     pos(1) = -2.0;  //-params.size/2;
     pos(3) = 1.0;
-    static_contactors->append(
+    static_contactors->emplace_back(
         std::make_shared<siconos::collision::SiconosContactor>(floorbox, pos));
   } else if (ground == "sphere") {
     auto floorsphere = std::make_shared<siconos::collision::SiconosSphere>(1.0);
@@ -154,7 +154,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     pos.setZero();
     pos(1) = -1.0 - params.size / 2;
     pos(3) = 1.0;
-    static_contactors->append(
+    static_contactors->emplace_back(
         std::make_shared<siconos::collision::SiconosContactor>(floorsphere, pos));
   }
 

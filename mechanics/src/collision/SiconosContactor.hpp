@@ -23,6 +23,7 @@
 #ifndef SiconosContactor_h
 #define SiconosContactor_h
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -33,11 +34,29 @@ namespace siconos::collision {
 
 class SiconosShape;
 
-/** Class to hold the shape assigned to a body, and to associate each
- *  shape with an offset and collision group. */
-
+/** @brief Class to hold the shape assigned to a body
+ *
+ * Associates each shape with an offset and a collision group
+ *
+ * Offset and collision group are immutable.
+ */
 class SiconosContactor {
  private:
+  /** global counter for contactors */
+  static inline std::atomic<uint32_t> counter_{0};
+
+  /** id of the current contactor */
+  const uint32_t id_{counter_++};
+
+  /** The collision shape associated with this contactor. */
+  std::shared_ptr<SiconosShape> shape_;
+
+  /** Offset in the body frame */
+  const siconos::algebra::SiconosVector offset_;
+
+  /** index to identify the collision group */
+  const int collision_group_{0};
+
   // Rule of five
   SiconosContactor() = delete;
   SiconosContactor(const SiconosContactor&) = delete;
@@ -49,39 +68,37 @@ class SiconosContactor {
   ACCEPT_SERIALIZATION(SiconosContactor);
 
  public:
-  SiconosContactor(std::shared_ptr<SiconosShape> shape);
-
+  /**
+   * @brief Constructs a SiconosContactor.
+   *
+   * @param shape The collision shape. Must not be nullptr.
+   * @param offset Position/orientation offset of the contactor relative to the body frame.
+               Defaults to identity (no translation, no rotation) = [0, 0, 0, 1, 0, 0, 0].
+   * @param collision_group Collision group index. Defaults to 0.
+   */
   SiconosContactor(std::shared_ptr<SiconosShape> shape,
-                   const siconos::algebra::SiconosVector& input_offset,
-                   int collision_group = 0);
+                   const siconos::algebra::SiconosVector& input_offset =
+                       siconos::algebra::SiconosVector::Unit(7, 3),
+                   int collision_gp = 0)
+      : shape_{std::move(shape)}, offset_{input_offset}, collision_group_{collision_gp} {}
 
-  std::shared_ptr<SiconosShape> shape{nullptr};
-  const siconos::algebra::SiconosVector offset;
-  int collision_group{0};
+  /** @returns the unique identifier of this contactor. */
+  uint32_t id() const { return id_; }
+
+  /** @returns the collision shape (shared_ptr) */
+  std::shared_ptr<SiconosShape> shape() { return shape_; }
+
+  // NoteFP : should we really allow that shape can be changed outside of this class?
 
   virtual ~SiconosContactor() noexcept = default;
+  /** @returns the offset of this contactor in the body frame */
+  const siconos::algebra::SiconosVector& offset() const { return offset_; }
+
+  /** @returns the collision group index */
+  int collision_group() const { return collision_group_; }
 };
 
-class SiconosContactorSet {
- protected:
-  ACCEPT_SERIALIZATION(SiconosContactorSet);
-  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> _vector;
-  // using iterator = std::vector<std::shared_ptr<SiconosContactor>>::iterator;
+using SiconosContactorSet = std::vector<std::shared_ptr<SiconosContactor>>;
 
- public:
-  SiconosContactorSet()
-      : _vector(std::make_shared<std::vector<std::shared_ptr<SiconosContactor>>>()) {}
-  void append(std::shared_ptr<SiconosContactor> b) { _vector->push_back(b); }
-  void append(std::vector<std::shared_ptr<SiconosContactor>> b) {
-    _vector->insert(_vector->end(), b.begin(), b.end());
-  }
-  void append(const SiconosContactorSet& b) {
-    _vector->insert(_vector->end(), b._vector->begin(), b._vector->end());
-  }
-  // void append(const std::shared_ptr<SiconosContactorSet>& b) {
-  //   insert(end(), b->begin(), b->end());
-  // }
-  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> vector() { return _vector; }
-};
 }  // namespace siconos::collision
 #endif /* SiconosContactor_h */

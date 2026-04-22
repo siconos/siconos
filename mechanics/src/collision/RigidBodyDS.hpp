@@ -24,10 +24,7 @@
 #define RigidBodyDS_h
 
 #include "NewtonEulerDS.hpp"
-
-namespace siconos::collision {
-class SiconosContactorSet;
-}
+#include "SiconosContactor.hpp"
 
 namespace siconos::collision {
 
@@ -36,7 +33,7 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
  protected:
   ACCEPT_SERIALIZATION(RigidBodyDS);
 
-  std::shared_ptr<siconos::collision::SiconosContactorSet> _contactors{nullptr};
+  std::shared_ptr<const siconos::collision::SiconosContactorSet> contactors_{nullptr};
 
   bool _useContactorInertia{true};
 
@@ -95,15 +92,15 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
   /** Access the contactor set associated with this body.
    *
    *  \return A std::shared_ptr<SiconosContactorSet> */
-  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const {
-    return _contactors;
+  std::shared_ptr<const siconos::collision::SiconosContactorSet> contactors() const {
+    return contactors_;
   }
 
   /** Provide a set of contactors to the body.
    *
    *  \param c A std::shared_ptr<SiconosContactorSet> */
   void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
-    _contactors = c;
+    contactors_ = std::move(c);
   }
 
   /** Make the base position of the contactors equal to the DS q vector.
