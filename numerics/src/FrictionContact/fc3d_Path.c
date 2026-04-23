@@ -19,14 +19,12 @@
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "FrictionContact_options.h"                     // for SICONOS_FRICTION_3D_NCP...
-#include "NCP_Solvers.h"                      // for ncp_path
-#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
-#include "NumericsFwd.h"                      // for FrictionContactProblem
-#include "SiconosBlas.h"                      // for cblas_dcopy
-#include "SolverOptions.h"                    // for SolverOptions
-#include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
-#include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
+#include "FrictionContact_options.h"    // for SICONOS_FRICTION_3D_NCP...
+#include "NCP_Solvers.h"                // for ncp_path
+#include "NumericsFwd.h"                // for FrictionContactProblem
+#include "SiconosBlas.h"                // for cblas_dcopy
+#include "fc3d_2NCP_Glocker.h"          // for computeFGlocker, NCPGlo...
+#include "fc3d_NCPGlockerFixedPoint.h"  // for fc3d_Path_computeError
 #include "numerics_errors.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -101,7 +99,8 @@ int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_Path_free() {}
+void fc3d_Path_free(FrictionContactProblem* dummy1, FrictionContactProblem* dummy2,
+                    SolverOptions* dummy3) {}
 
 void fc3d_Path_computeError(int n, double* velocity, double* reaction, double* error) {
   /*   int numberOfContacts = n/3; */

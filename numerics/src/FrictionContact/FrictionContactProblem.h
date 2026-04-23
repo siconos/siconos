@@ -25,7 +25,7 @@
 
 #include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
 #include "NumericsMatrix.h"  // for RawNumericsMatrix
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"   // for BUILD_AS_CPP
 
 /**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)

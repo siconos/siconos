@@ -11,7 +11,7 @@
 #ifdef FB_DEBUG
 #define DEBUG_MESSAGES 1
 #define DEBUG_WHERE_MESSAGES 1
-#include <stdio.h>  // for printf, siconos_debug.h does not include it
+// #include <stdio.h>  // for printf, siconos_debug.h does not include it
 #endif
 #ifdef FULL_FB_DEBUG
 #define XDEBUG_PRINT(X) DEBUG_PRINT(X)
@@ -11853,7 +11853,8 @@ void fc3d_FischerBurmeisterFunctionGenerated(double *reaction, double *velocity,
 }
 
 void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double *reaction, double *velocity,
-                                                      double mu, double *rho, double *gf) {
+                                                      double mu, double *rho, double *gf,
+                                                      double *dummy1, double *dummy2) {
   double result[3];
 
   assert(reaction);

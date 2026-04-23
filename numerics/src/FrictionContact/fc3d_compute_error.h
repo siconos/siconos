@@ -57,7 +57,7 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
     \param worktmp work vector
     \param[in,out] error value
  */
-void fc3d_unitary_compute_dual_and_add_error(double r[3], double u[3], double mu,
+void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restrict u, double mu,
                                              double *error, double *worktmp);
 
 /**
@@ -68,11 +68,13 @@ void fc3d_unitary_compute_dual_and_add_error(double r[3], double u[3], double mu
     \param w vector
     \param options
     \param tolerance value for error computation
+    \param norm norm of a vector (problem->q) for relative error
     \param[in,out] error value
     \return 0 if ok
  */
 int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double *error);
+                                double tolerance, SolverOptions *options, double norm,
+                                double *error);
 
 /**
     Error computation for a friction-contact 3D problem
@@ -99,21 +101,7 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
     \param[in,out] error value
  */
 void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu, double *error,
-                                        double *worktmp);
-
-/**
-    Error computation for a friction-contact 3D problem
-
-    \param problem the structure which defines the friction-contact problem
-    \param z vector
-    \param w vector
-    \param options
-    \param tolerance value for error computation
-    \param[in,out] error value
-    \return 0 if ok
- */
-int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double *error);
+                                        double worktmp[3]);
 
 /**
     Error computation for one friction-contact 3D problem

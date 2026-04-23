@@ -32,11 +32,11 @@
 #include "CSparseMatrix.h"           // for CSparseMatrix_z...
 #include "FrictionContactProblem.h"  // for FrictionContact...
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"            // for SICONOS_FRICTIO...
-#include "NumericsMatrix.h"          // for NumericsMatrix
-#include "NumericsSparseMatrix.h"    // for NSM_linearSolve...
-#include "SolverOptions.h"           // for SolverOptions
-#include "SparseBlockMatrix.h"       // for SparseBlockStru...
+#include "NumericsMatrix.h"        // for NumericsMatrix
+#include "NumericsSparseMatrix.h"  // for NSM_linearSolve...
+#include "SolverOptions.h"         // for SolverOptions
+#include "SparseBlockMatrix.h"     // for SparseBlockStru...
+#include "fc3d_short_names.h"      // for SICONOS_FRICTIO...
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "SiconosBlas.h"                              // for cblas_dcopy
@@ -45,15 +45,15 @@
 #include "fc3d_local_problem_tools.h"                 // for fc3d_local_prob...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_FischerBur...
 #include "float.h"                                    // for DBL_EPSILON
-#include "numerics_verbose.h"
-#include "op3x3.h"                                    // for extract3x3, add3x3
-#include "sanitizer.h"                                // for cblas_dcopy_msan
-#include "siconos_debug.h"                            // for DEBUG_EXPR_WE
-#include "solver_registry.h"
-#include "numerics_errors.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_natural_map.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "op3x3.h"          // for extract3x3, add3x3
+#include "sanitizer.h"      // for cblas_dcopy_msan
+#include "siconos_debug.h"  // for DEBUG_EXPR_WE
+#include "solver_registry.h"
 
 static void NM_dense_to_sparse_diag_t(double *A, NumericsMatrix *B, size_t block_row_size,
                                       size_t block_col_size) {
@@ -309,7 +309,7 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
 
   // F <- compute fb
   fc3d_FischerBurmeisterFunction(
-      problemSize, (FischerBurmeisterFun3x3Ptr)fc3d_FischerBurmeisterFunctionGenerated,
+      problemSize, fc3d_FischerBurmeisterFunctionGenerated,
       reaction, velocity, mu, rho, F, NULL, NULL);
 
   double thetafb0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
@@ -317,7 +317,7 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
   // F <- compute gradient of fb merit function (ugly)
   fc3d_FischerBurmeisterFunction(
       problemSize,
-      (FischerBurmeisterFun3x3Ptr)fc3d_FischerBurmeisterGradMeritFunctionGenerated, reaction,
+      fc3d_FischerBurmeisterGradMeritFunctionGenerated, reaction,
       velocity, mu, rho, F, NULL, NULL);
   double norm_dir_exp_p = pow(cblas_dnrm2(problemSize, direction, 1), p);
   double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, direction, 1);
@@ -351,7 +351,7 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
 
     // compute fb
     fc3d_FischerBurmeisterFunction(
-        problemSize, (FischerBurmeisterFun3x3Ptr)fc3d_FischerBurmeisterFunctionGenerated, tmp,
+        problemSize, fc3d_FischerBurmeisterFunctionGenerated, tmp,
         velocity, mu, rho, F, NULL, NULL);
 
     double thetafb = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
@@ -359,7 +359,7 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
     // compute grad merit fb (ugly)
     fc3d_FischerBurmeisterFunction(
         problemSize,
-        (FischerBurmeisterFun3x3Ptr)fc3d_FischerBurmeisterGradMeritFunctionGenerated, tmp,
+        fc3d_FischerBurmeisterGradMeritFunctionGenerated, tmp,
         velocity, mu, rho, F, NULL, NULL);
 
     // tmp <- scal*direction
@@ -416,8 +416,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 
   unsigned int iter = 0;
   unsigned int itermax = SOLVER_MAX_ITER(options);
-  unsigned int erritermax =
-      options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
+  // unsigned int erritermax =
+  //     options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
 
   assert(itermax > 0);
 
@@ -644,9 +644,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
       equation->function(equation->data, problemSize, reaction, velocity,
                          equation->problem->mu, rho, F, NULL, NULL);
       numerics_printf_verbose(1, "---- FC3D - NSN | %3i | %.1e | %.1e | %8i | %.1e | %.1e |",
-                              iter, SOLVER_RESIDUAL(options),
-                              cblas_dnrm2(problemSize, F, 1), info_ls, alpha,
-                              linear_solver_residual);
+                              iter, SOLVER_RESIDUAL(options), cblas_dnrm2(problemSize, F, 1),
+                              info_ls, alpha, linear_solver_residual);
       /* printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver
        * residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual,
        * options->dparam[SICONOS_DPARAM_RESIDU],cblas_dnrm2(problemSize, F, 1)); */
@@ -654,8 +653,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, problemSize, reaction,
-                                               velocity,
-                                               SOLVER_RESIDUAL(options), NULL);
+                                               velocity, SOLVER_RESIDUAL(options), NULL);
     }
 
     if (isnan(SOLVER_RESIDUAL(options))) {
@@ -705,64 +703,64 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 }
 
 /* Wrappers and registration for FC3D_NSN_AC */
-static int fc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
+static int fc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* velocity,
-                                   SolverOptions* options) {
+static int fc3d_nsn_ac_solve_wrap(void *problem, double *reaction, double *velocity,
+                                  SolverOptions *options) {
   int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_AlartCurnier((FrictionContactProblem*)problem, reaction, velocity, &info,
-                                      options);
+  fc3d_nonsmooth_Newton_AlartCurnier((FrictionContactProblem *)problem, reaction, velocity,
+                                     &info, options);
   return info;
 }
 
 REGISTER_SOLVER(FC3D_NSN_AC, "FC3D_NSN_AC",
                 "Nonsmooth Newton method based on Alart-Curnier formulation",
                 fc3d_nsn_ac_init_wrap, fc3d_nsn_ac_solve_wrap, NULL, NULL,
-                fc3d_nsn_ac_set_default,  /* set_default */
+                fc3d_nsn_ac_set_default, /* set_default */
                 200, 1e-6, 0);
 
 /* Wrappers and registration for FC3D_NSN_FB */
-static int fc3d_nsn_fb_init_wrap(void* problem, SolverOptions* options) {
+static int fc3d_nsn_fb_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_nsn_fb_solve_wrap(void* problem, double* reaction, double* velocity,
-                                   SolverOptions* options) {
+static int fc3d_nsn_fb_solve_wrap(void *problem, double *reaction, double *velocity,
+                                  SolverOptions *options) {
   int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_FischerBurmeister((FrictionContactProblem*)problem, reaction, velocity,
-                                          &info, options);
+  fc3d_nonsmooth_Newton_FischerBurmeister((FrictionContactProblem *)problem, reaction,
+                                          velocity, &info, options);
   return info;
 }
 
 REGISTER_SOLVER(FC3D_NSN_FB, "FC3D_NSN_FB",
                 "Nonsmooth Newton method based on Fischer-Burmeister formulation",
                 fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL,
-                fc3d_nsn_fb_set_default,  /* set_default */
+                fc3d_nsn_fb_set_default, /* set_default */
                 200, 1e-6, 0);
 
 /* Wrappers and registration for FC3D_NSN_NM */
-static int fc3d_nsn_nm_init_wrap(void* problem, SolverOptions* options) {
+static int fc3d_nsn_nm_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_nsn_nm_solve_wrap(void* problem, double* reaction, double* velocity,
-                                   SolverOptions* options) {
+static int fc3d_nsn_nm_solve_wrap(void *problem, double *reaction, double *velocity,
+                                  SolverOptions *options) {
   int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_NaturalMap((FrictionContactProblem*)problem, reaction, velocity, &info,
-                                   options);
+  fc3d_nonsmooth_Newton_NaturalMap((FrictionContactProblem *)problem, reaction, velocity,
+                                   &info, options);
   return info;
 }
 
 REGISTER_SOLVER(FC3D_NSN_NM, "FC3D_NSN_NM",
-                "Nonsmooth Newton method based on Natural Map formulation", fc3d_nsn_nm_init_wrap,
-                fc3d_nsn_nm_solve_wrap, NULL, NULL,
-                fc3d_nsn_nm_set_default,  /* set_default */
+                "Nonsmooth Newton method based on Natural Map formulation",
+                fc3d_nsn_nm_init_wrap, fc3d_nsn_nm_solve_wrap, NULL, NULL,
+                fc3d_nsn_nm_set_default, /* set_default */
                 200, 1e-6, 0);

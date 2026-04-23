@@ -20,19 +20,16 @@
 #include <stdio.h>   // for printf, fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_ONECONTACT_NSN
-#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"          // for NumericsMatrix
-#include "SiconosBlas.h"             // for cblas_dnrm2
-#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
-#include "Friction_tools.h"          // for ComputeErrorPtr, FreeSolverPtr
-#include "fc3d_local_problem_tools.h" // 
-#include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
-#include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
+#include "FrictionContact_options.h"   // for SICONOS_FRICTION_3D_ONECONTACT_NSN
+#include "Friction_tools.h"            // for ComputeErrorPtr, FreeSolverPtr
+#include "NumericsFwd.h"               // for SolverOptions, FrictionContactPr...
+#include "SiconosBlas.h"               // for cblas_dnrm2
+#include "SolverOptions.h"             // for SolverOptions, SICONOS_DPARAM_TOL
+#include "fc3d_compute_error.h"        // for fc3d_compute_error_velocity
+#include "fc3d_local_problem_tools.h"  //
+#include "fc3d_projection.h"           // for fc3d_projection_initialize, fc3d...
 #include "numerics_verbose.h"
-#include "numerics_errors.h"
-#include "pinv.h"                    // for pinv
+#include "pinv.h"  // for pinv
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -47,7 +44,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
       SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity) {
     *solve = &fc3d_projectionOnCone_velocity_solve;
     *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
-    *computeError = (ComputeErrorPtr)&fc3d_compute_error_velocity;
+    *computeError = &fc3d_compute_error_velocity;
     fc3d_projection_initialize(problem);
   } else {
     fprintf(stderr, "Numerics, fc3d_nsgs_velocity failed. Unknown internal solver : %s.\n",
@@ -138,12 +135,14 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
 
     if (verbose > 0)
-      numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e |", iter, error, tolerance);
+      numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e |", iter, error,
+                      tolerance);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+  numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e | (final)", iter, error,
+                  tolerance);
   dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[7] = iter;

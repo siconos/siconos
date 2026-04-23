@@ -30,8 +30,8 @@
   - free
 
 */
-#include "SolverOptions.h"
-#include "SparseBlockMatrix.h"
+
+#include "FrictionContactProblem.h"  // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -55,7 +55,7 @@ int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
                     SolverOptions* options);
 
 /** free memory for friction contact 3D Path solver */
-void fc3d_Path_free(void);
+void fc3d_Path_free(FrictionContactProblem*, FrictionContactProblem*, SolverOptions*);
 
 /**  compute error for  friction-contact 3D problem with Path
  * \param dimension of the global problem

@@ -36,7 +36,8 @@
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
-void fc3d_unitary_enumerative_free(FrictionContactProblem* problem);
+void fc3d_unitary_enumerative_free(FrictionContactProblem* problem,
+                                   FrictionContactProblem* dummy1, SolverOptions* dummy2);
 void fc3d_unitary_enumerative_initialize(FrictionContactProblem* problem);
 /*API for the nsgs*/
 int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double* reaction,

@@ -152,8 +152,6 @@ main()
     message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
   endif()
 
-  # set(BUILD_AS_CPP ON)
-
 else()
   # we may need to compile only numerics and only in C.
   # Really???

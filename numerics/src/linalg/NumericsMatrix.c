@@ -6333,12 +6333,6 @@ void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, Numer
   assert(right);
 
   int sizeX = size_i;
-  int sizeY = size_i;
-
-  // assert(A->size0 >= sizeY); // size0  = number of lines
-  // assert(A->size1 == sizeX); // size1 = number of columns
-
-  NM_types storage = A->storageType;
 
   switch (A->storageType) {
     case NM_DENSE: {
@@ -6573,11 +6567,11 @@ void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
       }
       double* M = A->matrix0;
       assert(M);
-      int incx = sizeX, incy = 1;
+      int incx = sizeX;
 
       size_t col;
 
-      for (int j = 0; j < sizeX; j++) {
+      for (size_t j = 0; j < sizeX; j++) {
         col = permutation[j];
         if (col < size_left)
           left[0] += M[row + incx * j] * x[j];
@@ -6657,6 +6651,7 @@ NumericsMatrix* NM_clear_zero(NumericsMatrix* A, const double tol) {
           }
         }
       }
+      break;
     }
 
     default: {
@@ -6768,6 +6763,8 @@ void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
         assert(0 &&
                "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown "
                "origin");
+
+      break;
     }
 
     default: {
@@ -6902,6 +6899,7 @@ NumericsMatrix* NM_extract(NumericsMatrix* A, int n_rows, int* target_rows, int 
       Ac->matrix2->triplet = Ac_triplet;
       Ac->matrix2->origin = NSM_TRIPLET;
       Ac->matrix2->triplet->nz = Ac_nz;
+      break;
     }
 
     default: {

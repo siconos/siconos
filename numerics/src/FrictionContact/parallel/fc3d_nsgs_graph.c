@@ -128,7 +128,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
     struct LocalProblemFunctionToolkit* local_function_toolkit, ComputeErrorPtr* computeError,
     FrictionContactProblem* problem, FrictionContactProblem* localproblem,
     SolverOptions* options, SolverOptions* local_opts) {
-  *computeError = (ComputeErrorPtr)&fc3d_compute_error;
+  *computeError = &fc3d_compute_error;
 
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
@@ -211,7 +211,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
     /* Path solver (Glocker Formulation) */
     case SICONOS_FRICTION_3D_NCPGlockerFBPATH: {
       local_function_toolkit->local_solver = &fc3d_Path_solve;
-      local_function_toolkit->free_local_solver = (FreeLocalSolverPtr)&fc3d_Path_free;
+      local_function_toolkit->free_local_solver = &fc3d_Path_free;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
 
       // *computeError = &fake_compute_error;
@@ -223,7 +223,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
     case FC3D_NCPG_FP: {
       local_function_toolkit->local_solver = &fc3d_FixedP_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
-      local_function_toolkit->free_local_solver = (FreeLocalSolverPtr)&fc3d_FixedP_free;
+      local_function_toolkit->free_local_solver = &fc3d_FixedP_free;
       /* *computeError = &fake_compute_error_nsgs; */
       fc3d_FixedP_initialize(problem, localproblem, local_opts);
       break;
@@ -232,9 +232,8 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       local_function_toolkit->local_solver = &fc3d_projectionOnCylinder_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_projectionOnCylinder_update_parallel;
-      local_function_toolkit->free_local_solver =
-          (FreeLocalSolverPtr)&fc3d_projectionOnCylinder_free;
-      *computeError = (ComputeErrorPtr)&fc3d_Tresca_compute_error;
+      local_function_toolkit->free_local_solver = &fc3d_projectionOnCylinder_free;
+      *computeError = &fc3d_Tresca_compute_error;
       fc3d_projectionOnCylinder_initialize(problem, localproblem, options);
       break;
     }
@@ -244,8 +243,8 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       local_function_toolkit->update_local_problem =
           &fc3d_projectionOnCylinder_update_parallel;
       local_function_toolkit->free_local_solver =
-          (FreeLocalSolverPtr)&fc3d_projectionOnCylinderWithLocalIteration_free;
-      *computeError = (ComputeErrorPtr)&fc3d_Tresca_compute_error;
+          &fc3d_projectionOnCylinderWithLocalIteration_free;
+      *computeError = &fc3d_Tresca_compute_error;
       fc3d_projectionOnCylinderWithLocalIteration_initialize(problem, localproblem, options,
                                                              local_opts);
       break;
@@ -253,16 +252,14 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
     case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC: {
       local_function_toolkit->local_solver = &fc3d_unitary_enumerative_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update_parallel;
-      local_function_toolkit->free_local_solver =
-          (FreeLocalSolverPtr)&fc3d_unitary_enumerative_free;
+      local_function_toolkit->free_local_solver = &fc3d_unitary_enumerative_free;
       fc3d_unitary_enumerative_initialize(localproblem);
       break;
     }
     case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU: {
       local_function_toolkit->local_solver = &fc3d_unitary_enumerative_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update_parallel;
-      local_function_toolkit->free_local_solver =
-          (FreeLocalSolverPtr)&fc3d_unitary_enumerative_free;
+      local_function_toolkit->free_local_solver = &fc3d_unitary_enumerative_free;
       fc3d_unitary_enumerative_initialize(localproblem);
       break;
     }
@@ -697,8 +694,8 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
     double tmp_criteria1, tmp_criteria2;
     unsigned int number_of_freezed_contact;
 
-#pragma omp parallel default(none)                                                     \
-    private(contact, localproblem, localreaction, light_error_2, local_opts)           \
+#pragma omp parallel default(none) private(contact, localproblem, localreaction,       \
+                                               light_error_2, local_opts)              \
     shared(problem, localProblemFunctionToolkit, computeError, options, iter, itermax, \
                hasNotConverged, error, number_of_freezed_contact, tmp_criteria1,       \
                tmp_criteria2, norm_r, nc, n_colors, light_error_sum, partition_size,   \

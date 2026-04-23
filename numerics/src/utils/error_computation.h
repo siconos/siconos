@@ -30,6 +30,8 @@
 
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include "SiconosBlas.h"
 
 /** Compute incremental (light) error
@@ -43,13 +45,11 @@
  * \param[in] normalize Whether to normalize by norm of z_new
  * \return Incremental error (relative if normalize=1, absolute otherwise)
  */
-static inline double error_compute_incremental(const double* z_new,
-                                               const double* z_old,
-                                               unsigned int dim,
-                                               int normalize) {
+static inline double error_compute_incremental(const double* z_new, const double* z_old,
+                                               unsigned int dim, int normalize) {
   double error_sum = 0.0;
   double norm_sum = 0.0;
-  
+
   for (unsigned int i = 0; i < dim; ++i) {
     double diff = z_new[i] - z_old[i];
     error_sum += diff * diff;
@@ -57,13 +57,13 @@ static inline double error_compute_incremental(const double* z_new,
       norm_sum += z_new[i] * z_new[i];
     }
   }
-  
+
   double error = sqrt(error_sum);
-  
+
   if (normalize && norm_sum > DBL_EPSILON) {
     error /= sqrt(norm_sum);
   }
-  
+
   return error;
 }
 
@@ -75,27 +75,25 @@ static inline double error_compute_incremental(const double* z_new,
  * \param[in] normalize Whether to normalize by norm of z_new
  * \return Incremental error
  */
-static inline double error_compute_incremental_blas(const double* z_new,
-                                                    const double* z_old,
-                                                    unsigned int dim,
-                                                    int normalize) {
+static inline double error_compute_incremental_blas(const double* z_new, const double* z_old,
+                                                    unsigned int dim, int normalize) {
   /* Use dnrm2 for diff = z_new - z_old */
   double* diff = (double*)malloc(dim * sizeof(double));
   if (!diff) return -1.0; /* Error */
-  
+
   for (unsigned int i = 0; i < dim; ++i) {
     diff[i] = z_new[i] - z_old[i];
   }
-  
+
   double error = cblas_dnrm2((int32_t)dim, diff, 1);
-  
+
   if (normalize) {
     double norm = cblas_dnrm2((int32_t)dim, z_new, 1);
     if (norm > DBL_EPSILON) {
       error /= norm;
     }
   }
-  
+
   free(diff);
   return error;
 }
@@ -130,8 +128,7 @@ static inline int error_is_converged(double error, double tolerance) {
  * \param[in] dim Dimension
  * \return Sum of squared differences
  */
-static inline double error_incr_squared_sum(const double* z_new,
-                                            const double* z_old,
+static inline double error_incr_squared_sum(const double* z_new, const double* z_old,
                                             unsigned int dim) {
   double sum = 0.0;
   for (unsigned int i = 0; i < dim; ++i) {
@@ -150,26 +147,25 @@ static inline double error_incr_squared_sum(const double* z_new,
  * \param[in] z_full Full solution vector (for normalization)
  * \return Relative incremental error
  */
-static inline double error_incr_finalize(double squared_sum,
-                                         unsigned int dim,
+static inline double error_incr_finalize(double squared_sum, unsigned int dim,
                                          const double* z_full) {
   double error = sqrt(squared_sum);
   double norm = cblas_dnrm2((int32_t)dim, z_full, 1);
-  
+
   if (norm > DBL_EPSILON) {
     error /= norm;
   }
-  
+
   return error;
 }
 
 /** Error statistics structure for tracking convergence history */
 typedef struct {
-  double initial_error;    /**< Error at first iteration */
-  double previous_error;   /**< Error at previous iteration */
-  double current_error;    /**< Error at current iteration */
-  double best_error;       /**< Best error seen so far */
-  int stagnation_count;    /**< Number of iterations with small improvement */
+  double initial_error;  /**< Error at first iteration */
+  double previous_error; /**< Error at previous iteration */
+  double current_error;  /**< Error at current iteration */
+  double best_error;     /**< Best error seen so far */
+  int stagnation_count;  /**< Number of iterations with small improvement */
 } ErrorStats;
 
 /** Initialize error statistics
@@ -192,11 +188,11 @@ static inline void error_stats_init(ErrorStats* stats) {
 static inline void error_stats_update(ErrorStats* stats, double new_error) {
   stats->previous_error = stats->current_error;
   stats->current_error = new_error;
-  
+
   if (stats->initial_error < 0.0) {
     stats->initial_error = new_error;
   }
-  
+
   if (new_error < stats->best_error) {
     stats->best_error = new_error;
     stats->stagnation_count = 0;
