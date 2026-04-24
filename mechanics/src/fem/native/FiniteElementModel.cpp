@@ -631,7 +631,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
   bendOnBend = E * I * 2 / length;
 
   if (dim == 2) {
-    siconos::algebra::SiconosMatrix66 Ke_loc;
+    siconos::algebra::SiconosMatrix66 Ke_loc = siconos::algebra::SiconosMatrix66::Zero();
 
     Ke_loc(0, 0) = axial;
     Ke_loc(0, 3) = -axial;
@@ -661,7 +661,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
     Ke.noalias() = Te_transpose * Ke_loc * Te;
 
   } else if (dim == 3) {
-    siconos::algebra::SiconosMatrix Ke_loc{12, 12};
+    siconos::algebra::SiconosMatrix Ke_loc = siconos::algebra::SiconosMatrix66::Zero(12,12);
 
     Ke_loc(0, 0) = axial;
     Ke_loc(0, 6) = -axial;
@@ -981,7 +981,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
         Dmat(5, 5) = coef * (1. - 2. * nu) / 2.;
         computeElementaryStiffnessMatrix(Ke, *fe, Dmat, mat.thickness());
       }
-
       assembleElementaryMatrix(K, Ke, *fe);
     }
   }
@@ -1181,6 +1180,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
       }
       elem_cnt++;
     }
+
   } else if (dim == 3) {
     /* loop over the elements */
     for (auto fe : elements()) {
@@ -1209,7 +1209,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
       elem_cnt++;
     }
   }
-
   DEBUG_END(
       "siconos::mechanics::fem::native::FiniteElementModel::computeElasticityMatrix(...)\n");
 }
