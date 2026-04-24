@@ -39,6 +39,7 @@
 
 #include "BodyBulletShapeRecord.hpp"
 #include "SiconosBulletDefines.h"
+#include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 
 namespace siconos::modeling {
@@ -56,7 +57,6 @@ namespace siconos::collision {
 class RigidBodyDS;
 class RigidBody2dDS;
 class StaticBody;
-class SiconosContactorSet;
 }  // namespace siconos::collision
 
 namespace siconos::collision::bullet {
@@ -249,7 +249,7 @@ class SiconosBulletCollisionManager_impl
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForStaticBodyContactorSet(
       const std::shared_ptr<StaticBody> staticBody,
-      const std::shared_ptr<siconos::collision::SiconosContactorSet> contactor);
+      const std::shared_ptr<const siconos::collision::SiconosContactorSet> contactor);
 
   void createCollisionObjectsForBodyContactorSetFromDS(
       const std::shared_ptr<siconos::modeling::SecondOrderDS> ds);

@@ -37,7 +37,8 @@ PYBIND11_MODULE(_nonos, m)
   using disks_info_t =
       siconos::storage::get_info_t<siconos::python::disks::idata_t>;
 
-  using indice_t = typename disks_info_t::env::indice;
+  using indice_t =
+      typename disks_info_t::template env<config::disks::disk>::indice;
 
   using disks_properties_t = typename disks_info_t::all_properties_t;
 
@@ -63,7 +64,7 @@ PYBIND11_MODULE(_nonos, m)
   auto disks_handles =
       mp::transform(named_disks_items, []<match::item I>(I item) constexpr {
         using indice_t = typename storage::get_info_t<
-            siconos::python::disks::idata_t>::env::indice;
+            siconos::python::disks::idata_t>::template env<I>::indice;
         using handle_t = storage::handle<storage::handle_base, I, indice_t,
                                          siconos::python::disks::idata_t>;
         return mp::type_c<handle_t>;

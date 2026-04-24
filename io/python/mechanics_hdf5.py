@@ -342,7 +342,11 @@ class MechanicsHdf5(object):
                 ] += " [2] : normal contact work,\n [3] : tangent contact work,\n"
                 self._cf_work.attrs[
                     "info"
-                ] += " [4] : normal contact work theta average,\n [5] : tangent contact work theta average,\n"
+                ] += " [4] : normal contact work theta average,\n"
+
+                self._cf_work.attrs[
+                    "info"
+                ] += " [5] : tangent contact work theta average,\n"
                 self._cf_work.attrs[
                     "info"
                 ] += " [6] : contact status,\n [7] : positive norma contact work,\n"
@@ -364,7 +368,12 @@ class MechanicsHdf5(object):
                 ] += " [3] : normal contact work,\n [4] : tangent contact work,\n"
                 self._energy_work.attrs[
                     "info"
-                ] += " [5] : normal contact work theta average,\n [6] tangent contact work theta average \n"
+                ] += " [5] : normal contact work theta average,\n"
+
+                self._energy_work.attrs[
+                    "info"
+                ] += " [6] tangent contact work theta average \n"
+
                 self._energy_work.attrs["info"] += "[7,8] only negative part "
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
@@ -1102,8 +1111,18 @@ class MechanicsHdf5(object):
 
         return obj
 
-    def add_objects(self, name, shapes, translations, orientations=None, velocities=None,
-                mass=None, inertia=None, time_of_birth=-1, time_of_death=-1):
+    def add_objects(
+        self,
+        name,
+        shapes,
+        translations,
+        orientations=None,
+        velocities=None,
+        mass=None,
+        inertia=None,
+        time_of_birth=-1,
+        time_of_death=-1,
+    ):
         """
         Add an aggregate of objects (e.g., granular material) with shared properties.
 
@@ -1162,11 +1181,19 @@ class MechanicsHdf5(object):
         # Store arrays
         translations = np.asarray(translations, dtype=np.float64)
         if self._dimension == 2 and translations.shape[-1] != 2:
-            raise ValueError(f"Expected Nx2 translations for 2D, got {translations.shape}")
+            raise ValueError(
+                f"Expected Nx2 translations for 2D, got {translations.shape}"
+            )
         if self._dimension == 3 and translations.shape[-1] != 3:
-            raise ValueError(f"Expected Nx3 translations for 3D, got {translations.shape}")
+            raise ValueError(
+                f"Expected Nx3 translations for 3D, got {translations.shape}"
+            )
 
-        obj.create_dataset("translations", data=translations, compression="gzip" if self._use_compression else None)
+        obj.create_dataset(
+            "translations",
+            data=translations,
+            compression="gzip" if self._use_compression else None,
+        )
         obj.attrs["count"] = len(translations)
 
         # Handle orientations
@@ -1174,12 +1201,19 @@ class MechanicsHdf5(object):
             if self._dimension == 2:
                 orientations = np.zeros(len(translations), dtype=np.float64)
             else:
-                orientations = np.tile(np.array([1., 0., 0., 0.], dtype=np.float64), (len(translations), 1))
+                orientations = np.tile(
+                    np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64),
+                    (len(translations), 1),
+                )
         else:
             orientations = np.asarray(orientations, dtype=np.float64)
             if self._dimension == 2 and orientations.ndim == 1:
                 orientations = orientations.reshape(-1, 1)
-        obj.create_dataset("orientations", data=orientations, compression="gzip" if self._use_compression else None)
+        obj.create_dataset(
+            "orientations",
+            data=orientations,
+            compression="gzip" if self._use_compression else None,
+        )
 
         # Handle velocities
         if velocities is None:
@@ -1189,7 +1223,11 @@ class MechanicsHdf5(object):
                 velocities = np.zeros((len(translations), 6), dtype=np.float64)
         else:
             velocities = np.asarray(velocities, dtype=np.float64)
-        obj.create_dataset("velocities", data=velocities, compression="gzip" if self._use_compression else None)
+        obj.create_dataset(
+            "velocities",
+            data=velocities,
+            compression="gzip" if self._use_compression else None,
+        )
 
         if time_of_birth >= 0:
             obj.attrs["time_of_birth"] = time_of_birth
@@ -1439,6 +1477,8 @@ class MechanicsHdf5(object):
                 boundary_condition.attrs["phi"] = phi
             elif bc_class == "BoundaryCondition":
                 if v is not None:
-                    boundary_condition.attrs["v"] = v  # Might be None for "fixed"(val=0) BC
+                    boundary_condition.attrs["v"] = (
+                        v  # Might be None for "fixed"(val=0) BC
+                    )
             else:
                 raise NotImplementedError

@@ -266,12 +266,14 @@ class MechanicsHdf5Runner_run_options(dict):
         #                      "face_class",
         #                      "?, optional",
         #                      None,
-        #                      """ class used for face definition (e.g. occ.OccContactFace) occ only?""")
+        #                      """ class used for face definition (e.g. occ.OccContactFace)
+        #                            occ only?""")
         # create_option(d,
         #                      "edge_class",
         #                      "?, optional",
         #                      None,
-        #                      """ class used for edge definition (e.g. occ.OccContactEdge) occ only?""")
+        #                      """ class used for edge definition (e.g. occ.OccContactEdge)
+        #                            occ only?""")
 
         # default osi options
         create_option(
@@ -436,7 +438,8 @@ class MechanicsHdf5Runner_run_options(dict):
             "siconos.nonsmooth_formulations.TYPE, optional",
             None,
             """  Assembly method for the Delassus operator. Possible value are:
-                      siconos.nonsmooth_formulations.REDUCED_BLOCK, GLOBAL, REDUCED_DIRECT, GLOBAL_REDUCED.
+                      siconos.nonsmooth_formulations.REDUCED_BLOCK, GLOBAL,
+                      REDUCED_DIRECT, GLOBAL_REDUCED.
                       if None, the osnspb uses thd default assembly type defined in LinearONSS.hpp""",
         )
 
@@ -506,7 +509,8 @@ class MechanicsHdf5Runner_run_options(dict):
             "output_energy_work",
             "boolean, optional",
             False,
-            """if True, the kinetic and work for each bodies are computed and written in the hdf5 file""",
+            """if True, the kinetic and work for each bodies are computed
+                and written in the hdf5 file""",
         )
 
         # default verbose and debug  options
@@ -567,8 +571,8 @@ class MechanicsHdf5Runner_run_options(dict):
             "explode_computeOneStep_in_python",
             "boolean, optional",
             False,
-            """ if True, the ComputeOneStep function of siconos.TimeStepping is exploded in a python version
-                      in order to add more log/trace during Newton loop. """,
+            """ if True, the ComputeOneStep function of siconos.TimeStepping is exploded
+                      in a python version in order to add more log/trace during Newton loop. """,
         )
 
         create_option(
@@ -576,8 +580,8 @@ class MechanicsHdf5Runner_run_options(dict):
             "explode_computeOneStepNSProblem_in_python",
             "boolean, optional",
             False,
-            """ if True, the ComputeOneStepNSProblem function of siconos.OneStepProblem is exploded in a python version
-                      in order to add more log/trace during Newton loop. """,
+            """ if True, the ComputeOneStepNSProblem function of siconos.OneStepProblem is exploded
+                     in a python version in order to add more log/trace during Newton loop. """,
         )
         create_option(
             d,
@@ -974,13 +978,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 alpha = orientation[0]  # 2D
 
                 x1a = xa0
-                y1a = ya0
+                y1a = ya0   # bottom left
                 x2a = xa0
-                y2a = yb0
+                y2a = yb0   # top left
                 x3a = xb0
-                y3a = yb0
+                y3a = yb0   # top right
                 x4a = xb0
-                y4a = yb0
+                y4a = ya0   # bottom right
 
                 x1r, y1r = rotate_point(x1a, y1a, alpha)
                 x2r, y2r = rotate_point(x2a, y2a, alpha)
@@ -1162,7 +1166,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     self.config.occ.occ_move(
                         reference_shape,
-                        list(contactor.translation) + list(contactor.orientation),
+                        np.concatenate([contactor.translation, contactor.orientation]),
                     )
                 ref_added[reference_shape] = True
 
@@ -1209,6 +1213,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # a static object
             # ---------------
             if mass is None:
+                print("CREATE CONTACTORS ....")
+
                 cset = siconos.mechanics.collision.SiconosContactorSet()
                 csetpos = np.concatenate([translation, orientation], axis=0)
                 for c in contactors:
@@ -1250,8 +1256,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             "at relative position",
                             pos,
                         )
-
+                print("STATIC BODY ....")
                 staticBody = self._interman.addStaticBody(cset, csetpos, number)
+                print("STATIC BODY OK ....")
 
                 self._static[name] = {
                     "number": number,
@@ -1352,8 +1359,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         "at relative position",
                         pos,
                     )
+                print("DYN BODY ....")
 
                 body.setContactors(cset)
+                print("DYN BODY OK....")
 
             if body:
                 # set id number
@@ -1696,29 +1705,37 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             "moving contactor {0} of static object {1} to {2}".format(
                                 contactor2_name,
                                 body2_name,
-                                list(
-                                    np.array(body2.attrs["translation"])
-                                    + np.array(ctr2.attrs["translation"])
-                                )
-                                + list(
-                                    siconos.mechanics.quaternions.quaternion_multiply(
-                                        ctr2.attrs["orientation"],
-                                        body2.attrs["orientation"],
-                                    )
+                                np.concatenate(
+                                    [
+                                        np.asarray(
+                                            body2.attrs["translation"], dtype=np.float64
+                                        )
+                                        + np.asarray(
+                                            ctr2.attrs["translation"], dtype=np.float64
+                                        ),
+                                        siconos.mechanics.quaternions.quaternion_multiply(
+                                            ctr2.attrs["orientation"],
+                                            body2.attrs["orientation"],
+                                        ),
+                                    ]
                                 ),
                             )
                         )
                         self.config.occ.occ_move(
                             cocs2,
-                            list(
-                                np.array(body2.attrs["translation"])
-                                + np.array(ctr2.attrs["translation"])
-                            )
-                            + list(
-                                siconos.mechanics.quaternions.quaternion_multiply(
-                                    ctr2.attrs["orientation"],
-                                    body2.attrs["orientation"],
-                                )
+                            np.concatenate(
+                                [
+                                    np.asarray(
+                                        body2.attrs["translation"], dtype=np.float64
+                                    )
+                                    + np.asarray(
+                                        ctr2.attrs["translation"], dtype=np.float64
+                                    ),
+                                    siconos.mechanics.quaternions.quaternion_multiply(
+                                        ctr2.attrs["orientation"],
+                                        body2.attrs["orientation"],
+                                    ),
+                                ]
                             ),
                         )
 
@@ -1782,12 +1799,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if mass is None:
             self.print_verbose("              static object")
             self.print_verbose(
-                "              position", list(translation) + list(orientation)
+                "              position", np.concatenate([translation, orientation])
             )
         else:
             self.print_verbose("              dynamic object")
             self.print_verbose(
-                "              position", list(translation) + list(orientation)
+                "              position", np.concatenate([translation, orientation])
             )
             self.print_verbose("              velocity", velocity)
 
@@ -1909,8 +1926,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 self._deaths[time_of_death] = [(name, obj, body, flag)]
 
-    def import_objects(self, name, body_class=None, shape_class=None,
-                       face_class=None, edge_class=None, birth=False):
+    def import_objects(
+        self,
+        name,
+        body_class=None,
+        shape_class=None,
+        face_class=None,
+        edge_class=None,
+        birth=False,
+    ):
         """
         Import several objects at once.
         """
@@ -1925,15 +1949,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         positions = np.concatenate([translations, orientations], axis=1)
         velocities = np.asarray(obj["velocities"][:], dtype=np.float64)
         mass = obj.attrs.get("mass", None)
-        inertia = obj.attrs.get("inertia", None)
-        base_id = obj.attrs["id"]
+        # inertia = obj.attrs.get("inertia", None)
+        # base_id = obj.attrs["id"]
         count = obj.attrs["count"]
 
         # Create contactor (same for all grains)
         import siconos.mechanics.collision.tools as smct_tools
+
         contactor = smct_tools.Contactor(
             shape_name=obj.attrs["shape_name"],
-            collision_group=obj.attrs.get("group", 0)
+            collision_group=obj.attrs.get("group", 0),
         )
 
         self.print_verbose(f"Importing aggregate {name} with {count} grains...")
@@ -2015,12 +2040,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 id_last = None
             self.print_verbose("import dynamical systems ...")
             for name, obj in sorted(self._input.items(), key=lambda x: x[0]):
-                 # Check if this is an aggregate object first
+                # Check if this is an aggregate object first
                 obj_type = obj.attrs.get("type", "")
 
                 if obj_type in ("dynamic_aggregate", "static_aggregate"):
                     # Import aggregate as individual bodies
-                    self.import_objects(name, body_class, shape_class, face_class, edge_class)
+                    self.import_objects(
+                        name, body_class, shape_class, face_class, edge_class
+                    )
                     continue
 
                 mass = obj.attrs.get("mass", None)
@@ -2284,10 +2311,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         velocities = self.get_io_array(self._io.velocities(self._nsds))
-
         if velocities.shape[0] > 0:
             number_of_ds = velocities.shape[0]
-            self._velocities_data.resize(current_line + number_of_ds, 0)
+            self._velocities_data.resize(current_line + number_of_ds, axis=0)
 
             times = np.empty((number_of_ds, 1))
             times.fill(time)
@@ -3129,7 +3155,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     3 * multipoints_iterations
                 )
 
-               
         # MB: this may be in conflict with 'dimension' attribute
         if bullet_options is not None and self.config.bullet is not None:
             # we are using bullet
@@ -3138,14 +3163,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose(
                         """Warning. The infered dimention in attrs["dimension"] is 2D
                         but the bullet_options are not consistent
-                        we impose bullet_options.dimension == self.config.bullet.TwoD""")
+                        we impose bullet_options.dimension == self.config.bullet.TwoD"""
+                    )
                     bullet_options.dimension == self.config.bullet.TwoD
         else:
             if self._out.attrs.get("dimension", None) is None:
                 # this is a second place to set the default
                 self._dimension = 3
 
-                
         if self.config.backend == "vnative":
             if vnative_options is None:
                 vnative_options = sio.SpaceFilterOptions()

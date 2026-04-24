@@ -152,7 +152,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   /// Data storage type
   using data_t = D;
   /// Index type from environment
-  using indice = typename info_t::env::indice;
+  using indice = typename info_t::template env<T>::indice;
   /// Type of attached storages for this item
   using attached_storages_t = decltype(mp::filter(
       typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
@@ -169,7 +169,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   constexpr decltype(auto) index() const { return base_t::_index; }
 
   /// @brief Get reference to the underlying data storage
-  decltype(auto) data() { return base_t::_data; };
+  constexpr decltype(auto) data() { return base_t::_data; };
 
   /// @brief Get all attributes for this item type
   constexpr decltype(auto) attributes()
@@ -300,7 +300,7 @@ auto make_full_handle(auto& data, const auto& ref)
 {
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
-  using indice = typename info_t::env::indice;
+  using indice = typename info_t::template env<T>::indice;
 
   return handle<handle_base, T, indice, data_t>{data, ref};
 }
@@ -327,10 +327,18 @@ auto make_handle(auto& h)
  * @return Handle object
  */
 template <typename T, typename R, typename D>
+auto make_handle(D&& data, index<T, R>&& indx)
+{
+  return handle<handle_base, T, R, D>{data, indx};
+}
+
+template <typename T, typename R, typename D>
 auto make_handle(D& data, index<T, R>& indx)
 {
   return handle<handle_base, T, R, D>{data, indx};
 }
+
+
 
 /**
  * @brief Create a handle from data and rvalue index
@@ -389,7 +397,7 @@ template <match::item I>
 static auto handles =
     [](auto& data, std::size_t step = 0) constexpr -> decltype(auto) {
   using info_t = get_info_t<decltype(data)>;
-  using env = typename info_t::env;
+  using env = typename info_t::template env<I>;
   using indice = typename env::indice;
 
   using attributes_t = std::decay_t<decltype(attributes(I{}))>;

@@ -24,8 +24,6 @@
   \rst Check the detailed documentation in :ref:`lcp_solvers`. \endrst
 */
 
-#include "SiconosConfig.h"
-
 /**\enum LCP_SOLVER
    Each SICONOS_LCP_XXX refers to number of the solver XXX for LCP.
  */

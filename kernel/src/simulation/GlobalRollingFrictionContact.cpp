@@ -24,9 +24,8 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "NonSmoothDrivers.h"
-#include "NumericsSolversNamespace.h"  // solver_options stuff
+#include "NumericsSolversNamespace.h"  // IWYU pragma: keep -  solver_options stuff
 #include "OSNSMatrix.hpp"
-// #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 // #include "Topology.hpp"
 //  #define DEBUG_NOCOLOR
@@ -44,7 +43,8 @@ siconos::nonsmooth_formulations::GlobalRollingFrictionContact::GlobalRollingFric
 // Constructor based on a pre-defined solver options set.
 siconos::nonsmooth_formulations::GlobalRollingFrictionContact::GlobalRollingFrictionContact(
     int dimPb, std::shared_ptr<SolverOptions> options)
-    : GlobalFrictionContact(dimPb, options), _global_rolling_driver(&global_rolling_friction_3d_driver) {
+    : GlobalFrictionContact(dimPb, options),
+      _global_rolling_driver(&global_rolling_friction_3d_driver) {
   // Only rolling fc3d for the moment.
   if (_contactProblemDim != 5)
     THROW_EXCEPTION("GlobalRollingFrictionContact No solver for 2 dimensional problems");
@@ -289,8 +289,8 @@ int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve(
   if (!problem) {
     problem = globalRollingFrictionContactProblem();
   }
-  return (*_global_rolling_driver)(&*problem, _z->data(), _w->data(), _globalVelocities->data(),
-                              &*_numerics_solver_options);
+  return (*_global_rolling_driver)(&*problem, _z->data(), _w->data(),
+                                   _globalVelocities->data(), &*_numerics_solver_options);
 }
 
 void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMur() {

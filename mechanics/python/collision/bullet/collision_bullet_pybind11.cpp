@@ -24,11 +24,15 @@
 #include <pybind11/stl_bind.h>
 
 #include "BodyBulletShapeRecord.hpp"
+#include "Bullet2d3DR.hpp"
+#include "Bullet2dR.hpp"
+#include "Bullet5DR.hpp"
 #include "BulletR.hpp"
-#include "SecondOrderDS.hpp"
+#include "Contact2d3DR.hpp"
+#include "SecondOrderDS.hpp"  // IWYU pragma: keep
 #include "SiconosBulletCollisionManager.hpp"
 #include "SiconosBulletOptions.hpp"
-#include "SiconosCollisionQueryResult.hpp"
+#include "SiconosCollisionQueryResult.hpp"  // IWYU pragma: keep
 #include "SiconosContactor.hpp"
 
 namespace py = pybind11;
@@ -125,9 +129,13 @@ PYBIND11_MODULE(_bullet, m) {
       .def(py::init<std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(),
            py::arg("options"))
       .def(py::init<>())
-      .def("addStaticBody",
-           &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
-           py::arg("cs"), py::arg("position"), py::arg("number") = 0)
+      .def(
+          "addStaticBody",
+          [](siconos::collision::bullet::SiconosBulletCollisionManager& self,
+             std::shared_ptr<const siconos::collision::SiconosContactorSet> cs,
+             const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position,
+             int number) { self.addStaticBody(cs, position, number); },
+          py::arg("contactor_set"), py::arg("position"), py::arg("number") = 0)
       .def("removeStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::removeStaticBody,
            py::arg("body") = 0)
@@ -143,6 +151,16 @@ PYBIND11_MODULE(_bullet, m) {
 
   auto bulletr_py = py::class_<siconos::collision::bullet::BulletR,
                                siconos::collision::ContactR, py::smart_holder>(m, "BulletR");
+
+  auto bullet5dr_py =
+      py::class_<siconos::collision::bullet::Bullet5DR, siconos::collision::Contact5DR,
+                 py::smart_holder>(m, "Bullet5DR");
+  auto bullet2d3dr_py =
+      py::class_<siconos::collision::bullet::Bullet2d3DR, siconos::collision::Contact2d3DR,
+                 py::smart_holder>(m, "Bullet2d3DR");
+  auto bullet2dr_py =
+      py::class_<siconos::collision::bullet::Bullet2dR, siconos::collision::Contact2dR,
+                 py::smart_holder>(m, "Bullet2dR");
 
   py::class_<siconos::collision::bullet::BodyBulletShapeRecord,
              siconos::collision::BodyShapeRecord, py::smart_holder>(m,

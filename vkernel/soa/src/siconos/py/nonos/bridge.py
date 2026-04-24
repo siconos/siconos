@@ -226,8 +226,11 @@ class Simulation(Stored):
         self._timedisc = timedisc
         t0 = timedisc.handle().t0()
         h = timedisc.handle().h()
-        # overwrite timedisc if time_discretization is not wrapped by unbounded collection
         self._handle = vkernel.disks.add_simulation(self.data())
+
+        # a time discretization is added during add_simulation: replace it
+        self._handle.set_time_discretization(self._timedisc.handle())
+
         self._timedisc.handle().set_tmax(self._nsds._T) # vkernel does not have nsds
         self._timedisc.handle().set_h(h)
         self._timedisc.handle().set_t0(t0)
@@ -349,7 +352,12 @@ class Body(BodyBase):
         self.handle().set_fext(array(fext))
 
     def setNumber(self, num):
-        self.handle().set_id(num)
+        # FIX: in mechanics_run insertDynamicalsystem is done before
+        # setNumber and as the map is handled in bridge.py by a python
+        # map, this is buggy.
+        # workaround: setNUmber is disabled
+        # self.handle().set_id(num)
+        pass
 
     def number(self):
         return self.handle().id()

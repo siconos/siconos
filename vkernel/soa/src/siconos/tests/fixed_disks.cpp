@@ -27,7 +27,11 @@ using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;
 using simulation = simul::time_stepping<td, osi, osnspb>;
 using io = io::io<osi>;
-using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
+
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
+};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -37,12 +41,11 @@ int main(int argc, char* argv[])
   using namespace storage;
 
   auto data = storage::make<
-      standard_environment<config::params>, config::simulation,
-      config::interaction_manager, config::neighborhood, config::space_filter,
-      config::io, config::disk, config::diskdisk_r, config::diskfdisk_r,
-      config::diskfsegment_r, config::pointl, config::pointd,
-      config::pointtds, config::interaction, config::segment_shape,
-      config::disk_shape,
+      config::env, config::simulation, config::interaction_manager,
+      config::neighborhood, config::space_filter, config::io, config::disk,
+      config::diskdisk_r, config::diskfdisk_r, config::diskfsegment_r,
+      config::pointl, config::pointd, config::pointtds, config::interaction,
+      config::segment_shape, config::disk_shape,
       storage::with_properties<
           storage::wrapped<config::disk_shape, some::unbounded_collection>,
           storage::wrapped<config::disk, some::unbounded_collection>,

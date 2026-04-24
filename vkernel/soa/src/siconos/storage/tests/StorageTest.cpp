@@ -5,10 +5,10 @@
 
 #include "siconos/storage/add.hpp"
 #include "siconos/storage/default_interface.hpp"
-#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/make.hpp"
 #include "siconos/storage/memory.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/properties.hpp"
 #include "siconos/storage/some/some.hpp"
@@ -39,9 +39,9 @@ struct item_b : item {
   };
 };
 
-template <typename Params>
+template <typename Item>
 struct env {
-  using params = Params;
+
   using boolean = bool;
   using scalar = float;
   using indice = std::size_t;
@@ -61,7 +61,7 @@ struct params {};
 
 struct make
     : storage::make<
-          env<params>, item_a, item_b,
+          env, item_a, item_b,
           with_properties<wrapped<item_a, some::unbounded_collection>,
                           wrapped<item_b, some::unbounded_collection>>> {};
 
@@ -109,5 +109,4 @@ void StorageTest::testStorage0()
 
   CPPUNIT_ASSERT(b1.ref().value() == a3.index().value());
   CPPUNIT_ASSERT(b2.ref().value() == a4.index().value());
-
 };

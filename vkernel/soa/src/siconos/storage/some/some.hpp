@@ -73,6 +73,7 @@ struct edescriptor : undefined_edescriptor {
 
 struct unbounded_storage : attribute<> {};
 struct bounded_storage : attribute<> {};
+struct sparse_storage : attribute<> {};
 
 struct undefined_unbounded_collection : unbounded_storage {};
 struct undefined_bounded_collection : bounded_storage {};
@@ -85,6 +86,8 @@ struct undefined_array : bounded_storage {};
 struct undefined_unbounded_matrix : unbounded_storage {};
 struct undefined_unbounded_vector : unbounded_storage {};
 struct undefined_unbounded_array : unbounded_storage {};
+
+struct undefined_sparse_matrix : sparse_storage {};
 
 template <typename... Sizes>
 struct with_sizes {
@@ -130,6 +133,9 @@ template <typename Type>
 struct unbounded_diagonal_matrix : unbounded_storage,
                                    undefined_diagonal_matrix,
                                    with_type<Type> {};
+
+template <typename Type>
+struct sparse_matrix : undefined_sparse_matrix, with_type<Type> {};
 
 struct structure_for_assembled_data {};
 

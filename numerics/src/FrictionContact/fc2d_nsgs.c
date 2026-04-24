@@ -34,6 +34,7 @@
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "fc3d_short_names.h"              // for FC2D_NSGS
 #include "numerics_verbose.h"
+#include "NumericsVector.h"
 
 
 /* Solver registration system */
@@ -208,14 +209,14 @@ static int determine_convergence_with_full_final(FrictionContactProblem *problem
     double absolute_error = calculateFullErrorFinal(
         problem, options, reaction, velocity, SOLVER_TOL(options), norm_q);
     if (absolute_error > SOLVER_TOL(options)) {
-      
+
         *tolerance = error / absolute_error * SOLVER_TOL(options);
 	assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
             "------- FC2D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
             *tolerance);
-      
+
       has_not_converged = 1;
     } else {
       numerics_printf(
@@ -359,16 +360,16 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
   unsigned int *freeze_contacts = NULL;
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
-
+    double *light_error_2 =  calloc(nc, sizeof(double));
     while ((iter < itermax) && has_not_converged) {
       ++iter;
 
+
       double light_error_sum = 0.0;
-      double light_error_2 = 0.0;
       /* Loop over the rows of blocks in blmat */
       /* contact: current row (of blocks) number */
       unsigned int number_of_freezed_contact = 0;
-      double tmp_criteria1 = tolerance * tolerance / (nc * nc * 10);
+      double tmp_criteria1 = tolerance * tolerance / (nc * nc * 1000);
       double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
       if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
@@ -376,7 +377,7 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
           if (freeze_contacts[i] > 0) number_of_freezed_contact++;
         }
         if (number_of_freezed_contact >= nc - 1) {
-          // printf("number of freezed contact too large\n");
+          numerics_printf_verbose(1,"number of freezed contact is too large : %i\n", number_of_freezed_contact);
           for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
         }
       }
@@ -384,6 +385,7 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
         if (freeze_contacts[contact] > 0) {
           /* we skip freeze contacts */
           freeze_contacts[contact] -= 1;
+	  light_error_sum += light_error_2[contact];
           continue;
         }
 
@@ -398,32 +400,37 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
         fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[contact],
                               local_problem->q, problem->mu[contact], localreaction);
 
-        light_error_2 = light_error_squared(localreaction, &reaction[pos]);
-        light_error_sum += light_error_2;
+        light_error_2[contact] = light_error_squared(localreaction, &reaction[pos]);
+        light_error_sum += light_error_2[contact];
         int relative_convergence_criteria =
-            light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
+            light_error_2[contact] <= tmp_criteria1 * squared_norm(localreaction);
         int small_reaction_criteria = squared_norm(localreaction) <= tmp_criteria2;
         if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
           /* we  freeze the contact for n iterations*/
           freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-          DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
-                            "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                            light_error_2 * squared_norm(localreaction),
-                            tolerance * tolerance / (nc * nc * 10),
-                            relative_convergence_criteria);
-                     printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
-                            "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                            squared_norm(localreaction), *norm_r * *norm_r / (nc * nc * 1000),
-                            small_reaction_criteria);
-                     printf("Contact % i is freezed for %i steps\n", contact,
-                            iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
+	  //DEBUG_EXPR(
+            NV_display(localreaction, 2);
+	    NV_display(&reaction[pos], 2);
+            printf("light_error_2 = %e\n", light_error_2[contact]);
+                printf("tmp_criteria1 = %e\n", tmp_criteria1);
+                printf("tmp_criteria2 = %e\n", tmp_criteria2);
+                printf("first criteria relative_convergence_criteria : light_error_2 <= "
+                       "tmp_criteria1 * squared_norm_localreaction ==> %e <= %e, bool =%i\n",
+                       light_error_2[contact], tmp_criteria1 * light_error_squared(localreaction, &reaction[pos]),
+                       relative_convergence_criteria);
+                printf("second criteria :  squared_norm_localreaction <= tmp_criteria2 ==> %e "
+                       "<= %e, bool =%i \n",
+                       light_error_squared(localreaction, &reaction[pos]), tmp_criteria2, small_reaction_criteria);
+                printf("Contact % i is freezed for %i steps\n", contact,
+                       options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+		//  );
         }
         /* reaction update */
         reaction[pos] = localreaction[0];
         reaction[pos + 1] = localreaction[1];
 
       }  // end for loop
-
+      
       DEBUG_EXPR(int frozen_contact = 0;
                  for (unsigned int ii = 0; ii < nc; ++ii) if (freeze_contacts[ii] > 0)
                      frozen_contact++;
@@ -441,8 +448,9 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
         has_not_converged = determine_convergence_with_full_final(
             problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
       }
+     
     }  // end while loop
-
+    free(light_error_2);      
   } else {
     while ((iter < itermax) && has_not_converged) {
       ++iter;

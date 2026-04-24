@@ -187,9 +187,9 @@ endif()
 # - SuiteSparse -
 if(WITH_PETSC)
   include(PetscSetup)
-  set(SICONOS_PETSC ON PARENT_SCOPE)
   target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
   target_link_libraries(numerics PRIVATE MPI::MPI_C)
+  target_compile_definitions(numerics PUBLIC SICONOS_PETSC)
 endif()
 
 
@@ -298,9 +298,9 @@ endif()
 # -- OpenMP --
 if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
-  set(SICONOS_OMP ON PARENT_SCOPE) # for SiconosConfig.h
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
+  target_compile_definitions(numerics PUBLIC SICONOS_OMP)
 endif()
 
 # -- CUDA --
@@ -321,9 +321,7 @@ if(WITH_CUDA)
   
   enable_language(CUDA)
 
-  # PARENT_SCOPE so that the variable is defined in siconos/CMakeLists.txt
-  set(SICONOS_CUDA ON PARENT_SCOPE)
-  
+
   # Required for cuSPARSE
   find_package(CUDAToolkit REQUIRED)
 
@@ -332,6 +330,8 @@ if(WITH_CUDA)
     CUDA::cudart
     CUDA::cusparse
     CUDA::cublas)
+
+  target_compile_definitions(numerics PRIVATE SICONOS_CUDA)
 
   # Set CUDA standard
   set_target_properties(${COMPONENT} PROPERTIES

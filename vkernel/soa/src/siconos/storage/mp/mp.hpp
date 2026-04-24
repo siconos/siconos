@@ -242,7 +242,7 @@ using map = hana::map<Pairs...>;
 template <typename... Pairs>
 struct database {
   using database_t = void;
-  database() : store{} {};
+  constexpr database() : store{} {};
   database(tuple<Pairs...> &&m)
       : store(to_map(static_cast<tuple<Pairs...> &&>(m))){};
   decltype(to_map(tuple<Pairs...>{})) store;

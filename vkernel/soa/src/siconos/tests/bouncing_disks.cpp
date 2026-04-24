@@ -28,7 +28,11 @@ using interaction_manager = simul::interaction_manager<space_filter>;
 using simulation = simul::time_stepping<td, osi, osnspb, topo>;
 
 using io = io::io<osi>;
-using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
+
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
+};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -38,9 +42,8 @@ int main(int argc, char* argv[])
   using namespace storage;
 
   auto data = storage::make<
-      standard_environment<config::params>, config::simulation,
-      config::interaction_manager, config::io, config::segment_shape,
-      config::disk_shape,
+      config::env, config::simulation, config::interaction_manager,
+      config::io, config::segment_shape, config::disk_shape,
       storage::with_properties<
           storage::wrapped<config::disk, some::unbounded_collection>,
           storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
@@ -91,7 +94,6 @@ int main(int argc, char* argv[])
   auto disks = storage::add<config::disk>(data, ndisks);
 
   for (auto [i, disk] : disks | view::enumerate) {
-
     storage::prop<"id">(disk) = static_cast<uint>(i + 1);
 
     disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
@@ -174,7 +176,7 @@ int main(int argc, char* argv[])
 
   //  auto fd = io::open<ascii>("result.dat");
 
-//  auto disks = storage::handles<config::disk>(data, 0);
+  //  auto disks = storage::handles<config::disk>(data, 0);
   auto disk1 = (disks | view::take(1)).front();
   auto disk2 = (disks | view::take(2)).back();
 

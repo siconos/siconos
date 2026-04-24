@@ -42,20 +42,22 @@ template <typename T>
 struct mat : any_mat {
   using mat_t = void;
   static constexpr auto vncols = []() {
-    if constexpr (match::matrix<T>) {
+    if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::ColsAtCompileTime;
     }
     else {
+      // runtime
       return 1;
     }
   }();
   static constexpr auto vnrows = []() {
-    if constexpr (match::matrix<T>) {
+    if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::RowsAtCompileTime;
     }
     else {
+      // runtime
       return 1;
     }
   }();
@@ -90,16 +92,24 @@ template <typename T>
 struct diag_mat : mat<T> {
   using any_mat_t = typename mat<T>::any_mat_t;
   using diag_mat_t = void;
-
-  static constexpr auto vncols = T::ColsAtCompileTime;
-  static constexpr auto vnrows = T::RowsAtCompileTime;
 };
 
 template <typename T>
 struct vec {
   using vec_t = void;
+
   static constexpr auto vncols = 1;
-  static constexpr auto vnrows = T::RowsAtCompileTime;
+
+  static constexpr auto vnrows = []() {
+    if constexpr (match::fixed_size_matrix<T>) {
+      // only eigen
+      return T::RowsAtCompileTime;
+    }
+    else {
+      // runtime
+      return 1;
+    }
+  }();
 
   NumericsMatrix* _v = nullptr;
 
@@ -280,7 +290,7 @@ void set_value(M&& m, match::indice auto i, match::indice auto j,
   }
   // diagonal block
   else if constexpr (match::diagonal_matrix<T>) {
-    for (decltype(i) k = 0; k < ncols(T{}); ++k) {
+    for (decltype(i) k = 0; k < ncols(value); ++k) {
       NM_zentry(m._m, i * m.vnrows + k + m._offsets[0],
                 j * m.vncols + k + m._offsets[1], value.diagonal()(k),
                 zero_threshold);
@@ -288,10 +298,20 @@ void set_value(M&& m, match::indice auto i, match::indice auto j,
   }
   // full block
   else if constexpr (match::matrix<T>) {
-    for (decltype(i) k = 0; k < nrows(T{}); ++k) {
-      for (decltype(j) l = 0; l < ncols(T{}); ++l) {
+    for (decltype(i) k = 0; k < nrows(value); ++k) {
+      for (decltype(j) l = 0; l < ncols(value); ++l) {
         NM_zentry(m._m, i * m.vnrows + k + m._offsets[0],
                   j * m.vncols + l + m._offsets[1], value(k, l),
+                  zero_threshold);
+      }
+    }
+  }
+  else if constexpr (match::sparse_matrix<T>) {
+    for (typename T::Index k = 0; k < value.outerSize(); ++k) {
+      // /!\ specific to eigen
+      for (typename T::InnerIterator it(value, k); it; ++it) {
+        NM_zentry(m._m, i * m.vnrows + it.row() + m._offsets[0],
+                  j * m.vncols + it.col() + m._offsets[1], it.value(),
                   zero_threshold);
       }
     }
@@ -311,7 +331,7 @@ void set_value(match::vec auto&& m, match::indice auto i, const T& value)
   }
   // vector block
   else if constexpr (match::vector<T>) {
-    for (decltype(i) k = 0; k < nrows(T{}); ++k) {
+    for (decltype(i) k = 0; k < nrows(value); ++k) {
       NM_zentry(m._v, i * m.vnrows + k + m._offset, 0, value(k),
                 zero_threshold);
     }
@@ -325,7 +345,7 @@ void set_value(match::vec auto&& m, match::indice auto i, const T& value)
 }
 
 template <match::diagonal_matrix A>
-void inverse(diag_mat<A>& a)
+void invert_matrix(diag_mat<A>& a)
 {
   if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
@@ -346,7 +366,7 @@ void add(const vec<T>& a, vec<T>& b)
   }
 }
 
-// c = alpha * A + beta * B
+// alpha * A + beta * B
 template <match::scalar scalar, match::any_matrix M>
 mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
 {
@@ -356,7 +376,15 @@ mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
   return rm;
 }
 
-
+// c = alpha * A + beta * B
+template <match::scalar scalar, match::any_matrix M>
+void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
+         mat<M>& C)
+{
+  C._m = NM_add(alpha, A._m, beta, B._m);
+  C._mt = nullptr;
+  C._view = false;
+}
 
 // b <- a
 template <typename V>
@@ -435,14 +463,14 @@ void prodt2(const diag_mat<A>& a, const mat<B>& b,
 
 // c <- a^-1 b
 template <match::diagonal_matrix A, typename B>
-void solve(diag_mat<A>& a, vec<B>& b, vec<B>& c)
+void solve_linear_system(diag_mat<A>& a, vec<B>& b, vec<B>& c)
 {
-  inverse(a);
+  invert_matrix(a);
   prod(a, b, c);
 }
 
 template <match::any_matrix A, typename B>
-void solve(const mat<A>& a, const vec<B>& b, vec<B>& c)
+void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c)
 {
   if (!NM_internalData(a._m)->isInversed) {
     copy(b, c);
@@ -467,11 +495,19 @@ void solve_in_place(const mat<A>& a, const vec<B>& b)
 }
 
 template <match::diagonal_matrix A, match::matrix B>
-void solvet(diag_mat<A>& a, mat<B>& b, mat<trans_t<B>>& c)
+void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
+                                        mat<trans_t<B>>& c)
 {
-  inverse(a);
+  invert_matrix(a);
   transpose(b);
   prodt2(a, b, c);
+}
+
+template <match::matrix A, match::matrix B>
+void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
+                                        mat<trans_t<B>>& c)
+{
+  assert(false);
 }
 
 template <match::any_matrix H, match::any_matrix M, typename W>

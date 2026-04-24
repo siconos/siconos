@@ -66,7 +66,7 @@
 static int fccounter = -1;
 #include "fclib_interface.h"
 #endif
-
+static int fccounter = -1;
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* static void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction,
@@ -221,7 +221,7 @@ void fc3d_nsgs_initialize_local_solver(
           &fc3d_onecontact_nonsmooth_Newton_AC_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, 
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,
                                                           local_opts);
       break;
     } /* Newton solver (Glocker-Fischer-Burmeister)*/
@@ -231,7 +231,7 @@ void fc3d_nsgs_initialize_local_solver(
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       // *computeError = &fake_compute_error;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, 
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,
                                                           local_opts);
       break;
     }
@@ -462,17 +462,38 @@ static int determine_convergence(double error, double tolerance, int iter,
   int hasNotConverged = 1;
   if (error < tolerance) {
     hasNotConverged = 0;
-    numerics_printf(
-        "--------------- FC3D - NSGS - Iteration %i "
-        "Residual = %14.7e < %7.3e\n",
-        iter, error, tolerance);
+    /* numerics_printf( */
+    /*     "--------------- FC3D - NSGS - Iteration %i " */
+    /*     "Residual = %14.7e < %7.3e\n", */
+    /*     iter, error, tolerance); */
   } else {
-    numerics_printf(
-        "--------------- FC3D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e\n",
-        iter, error, tolerance);
+    /* numerics_printf( */
+    /*     "--------------- FC3D - NSGS - Iteration %i " */
+    /*     "Residual = %14.7e > %7.3e\n", */
+    /*     iter, error, tolerance); */
   }
   return hasNotConverged;
+}
+
+static inline void nsgs_print_iteration_stats(int iter, double incremental_error,
+                                              double full_error, double tolerance,
+                                              double user_tolerance, int frozen,
+                                              int nc,
+                                              int hasNotConverged, int verbose) {
+  if (verbose <= 0 || iter % verbose != 0) return;
+
+  /* Print header on first iteration */
+  if (iter == 1) {
+    printf("\n--------------- FC3D - NSGS - %-8s %-12s %-12s %-12s %-12s %-8s %-8s %-8s\n", "Iter", "IncrError",
+           "WorkTol", "FullError", "UserTol", "Frozen", "nc", "Status");
+    printf("--------------- FC3D - NSGS - %-8s %-12s %-12s %-12s %-12s %-8s %-8s %-8s \n", "--------", "------------",
+           "------------", "------------", "------------", "--------", "--------", "--------");
+  }
+
+  const char* status = hasNotConverged ? "..." : "CONV";
+
+  printf("--------------- FC3D - NSGS - %-8d %-12.4e %-12.4e %-12.4e %-12.4e %-8d %-8d  %-8s\n", iter, incremental_error,
+          tolerance, full_error, user_tolerance, frozen, nc,  status);
 }
 
 /** Check convergence with full error verification and tolerance adaptation
@@ -495,41 +516,41 @@ static int determine_convergence(double error, double tolerance, int iter,
  */
 static int check_convergence_with_adaptation(FrictionContactProblem* problem,
                                              SolverOptions* options,
-                                             ComputeErrorPtr computeError,
-                                             double* reaction, double* velocity,
-                                             ToleranceManager* tm,
-                                             double norm_q,
-                                             double incr_error, int iter) {
+                                             ComputeErrorPtr computeError, double* reaction,
+                                             double* velocity, ToleranceManager* tm,
+                                             double norm_q, double incr_error,
+					     double * full_error,
+                                             int iter) {
   /* Check if incremental error is below working tolerance */
   if (incr_error >= tm->working_tolerance) {
-    numerics_printf(
-        "--------------- FC3D - NSGS - Iteration %i "
-        "Residual = %14.7e > %7.3e",
-        iter, incr_error, tm->working_tolerance);
+    /* numerics_printf( */
+    /*     "--------------- FC3D - NSGS - Iteration %i " */
+    /*     "Residual = %14.7e > %7.3e", */
+    /*     iter, incr_error, tm->working_tolerance); */
     return 1; /* Not converged */
   }
-  
+
   /* Incremental error converged - check full error */
-  numerics_printf(
-      "--------------- FC3D - NSGS - Iteration %i "
-      "Residual = %14.7e < %7.3e",
-      iter, incr_error, tm->working_tolerance);
-  
-  double full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
+  /* numerics_printf( */
+  /*     "--------------- FC3D - NSGS - Iteration %i " */
+  /*     "Residual = %14.7e < %7.3e", */
+  /*     iter, incr_error, tm->working_tolerance); */
+
+  *full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                               SOLVER_TOL(options), norm_q);
-  
+
   /* Use tolerance manager to handle adaptation logic */
-  SolverOptions* local_opts = (options->numberOfInternalSolvers > 0) ? 
+  SolverOptions* local_opts = (options->numberOfInternalSolvers > 0) ?
                                         options->internalSolvers[0] : NULL;
-  int converged = tolerance_manager_check_convergence(tm, local_opts, 
-                                                       full_error, incr_error, verbose);
-  
+  int converged = tolerance_manager_check_convergence(tm, local_opts,
+                                                      *full_error, incr_error, verbose);
+
   if (converged == 0) {
     numerics_printf(
         "------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy "
         "to %e", tm->working_tolerance);
   }
-  
+
   return converged;
 }
 
@@ -539,21 +560,21 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
                                                  ComputeErrorPtr computeError,
                                                  double* reaction, double* velocity,
                                                  double* tolerance, double norm_q,
-                                                 double error, int iter) {
+                                                 double error, double * full_error, int iter) {
   /* Create temporary tolerance manager for backward compatibility */
   ToleranceManager tm;
-  SolverOptions* local_opts = (options->numberOfInternalSolvers > 0) ? 
+  SolverOptions* local_opts = (options->numberOfInternalSolvers > 0) ?
                                         options->internalSolvers[0] : NULL;
   tolerance_manager_init(&tm, SOLVER_TOL(options), local_opts);
   tm.working_tolerance = *tolerance;
-  
+
   int result = check_convergence_with_adaptation(problem, options, computeError,
                                                  reaction, velocity, &tm, norm_q,
-                                                 error, iter);
-  
+                                                 error, full_error, iter);
+
   /* Sync back the adapted tolerance */
   *tolerance = tm.working_tolerance;
-  
+
   return result;
 }
 
@@ -580,14 +601,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
   /* Get local solver options - use consistent naming */
   SolverOptions* local_opts = options->internalSolvers[0];
-  
+
   /* Initialize tolerance manager for unified tolerance handling */
   ToleranceManager tol_manager;
   tolerance_manager_init(&tol_manager, SOLVER_TOL(options), local_opts);
-  
+
   /* Working tolerance (may be adapted during iterations) */
   double tolerance = tol_manager.working_tolerance;
-  
+
   ComputeErrorPtr computeError = NULL;
 
   struct LocalProblemFunctionToolkit* localProblemFunctionToolkit =
@@ -601,11 +622,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
 
-  double error = 1.; /* Current error */
+  double incr_error = INFINITY; /* Current error */
+  double full_error = INFINITY; /* Current error */
   int hasNotConverged = 1;
   unsigned int contact; /* Number of the current row of blocks in M */
   unsigned int* scontacts = NULL;
   unsigned int* freeze_contacts = NULL;
+  int frozen_contact = 0;
 
   SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
@@ -687,7 +710,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
       ++iter;
       double light_error_sum = 0.0;
 
-      fc3d_set_internalsolver_tolerance(problem, options, local_opts, error);
+      fc3d_set_internalsolver_tolerance(problem, options, local_opts, incr_error);
 
       for (unsigned int i = 0; i < nc; ++i) {
         contact = i;
@@ -705,11 +728,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
                                     localreaction);
       }
 
-      error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+      incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
 
-      hasNotConverged = determine_convergence(error, tolerance, iter, options);
+      hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);
 
-      statsIterationCallback(problem, options, reaction, velocity, error);
+      statsIterationCallback(problem, options, reaction, velocity, incr_error);
     }
   }
 
@@ -717,25 +740,34 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
   else {
+    double* light_error_2 = 
+	light_error_2 = calloc(nc, sizeof(double));
+
     //  verbose=1;
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
-      double light_error_2 = 0.0;
-      fc3d_set_internalsolver_tolerance(problem, options, local_opts, error);
+
+
+      fc3d_set_internalsolver_tolerance(problem, options, local_opts, incr_error);
+
 
       unsigned int number_of_freezed_contact = 0;
-      double tmp_criteria1 = tolerance * tolerance * 100 * 100;
+      double tmp_criteria1 = tolerance * tolerance/ (nc * nc * 1000);
       double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
       if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
         for (unsigned int i = 0; i < nc; ++i) {
           if (freeze_contacts[i] > 0) number_of_freezed_contact++;
         }
+	
         if (number_of_freezed_contact >= nc - 1) {
-          // printf("number of freezed contact too large\n");
+          numerics_printf_verbose(1,"number of freezed contact is too large : %i\n", number_of_freezed_contact);
           for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
+
         }
+
+
       }
       for (unsigned int i = 0; i < nc; ++i) {
         if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -753,11 +785,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           if (freeze_contacts[contact] > 0) {
             /* we skip freeze contacts */
             freeze_contacts[contact] -= 1;
+	    light_error_sum += light_error_2[contact];
             continue;
           }
         }
 
         solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
+
                            localProblemFunctionToolkit->local_solver,
                            localProblemFunctionToolkit->copy_local_reaction, contact, problem,
                            localproblem, reaction, local_opts, localreaction);
@@ -767,10 +801,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           localProblemFunctionToolkit->perform_relaxation(localreaction,
                                                           &reaction[contact * 3], omega);
 
-        light_error_2 = localProblemFunctionToolkit->light_error_squared(
+        light_error_2[contact] = localProblemFunctionToolkit->light_error_squared(
             localreaction, &reaction[contact * 3]);
 
-        light_error_sum += light_error_2;
+        light_error_sum += light_error_2[contact];
 
         /* int test =100; */
         /* if (contact == test) */
@@ -783,7 +817,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           double squared_norm_localreaction =
               localProblemFunctionToolkit->squared_norm(localreaction);
           int relative_convergence_criteria =
-              light_error_2 <= tmp_criteria1 * squared_norm_localreaction;
+              light_error_2[contact] <= tmp_criteria1 * squared_norm_localreaction;
           int small_reaction_criteria = squared_norm_localreaction <= tmp_criteria2;
 
           if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10)
@@ -796,17 +830,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
             freeze_contacts[contact] = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
 
-            DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
-                              "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                              light_error_2 * squared_norm(localreaction),
-                              tolerance * tolerance / (nc * nc * 10),
-                              relative_convergence_criteria);
-                       printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
-                              "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                              squared_norm(localreaction),
-                              *norm_r * *norm_r / (nc * nc * 1000), small_reaction_criteria);
-                       printf("Contact % i is freezed for %i steps\n", contact,
-                              options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
+            DEBUG_EXPR(
+            NV_display(localreaction, 3);
+	    NV_display(&reaction[contact * 3], 3);
+            printf("light_error_2 = %e\n", light_error_2[contact]);
+                printf("tmp_criteria1 = %e\n", tmp_criteria1);
+                printf("tmp_criteria2 = %e\n", tmp_criteria2);
+                printf("first criteria relative_convergence_criteria : light_error_2 <= "
+                       "tmp_criteria1 * squared_norm_localreaction ==> %e <= %e, bool =%i\n",
+                       light_error_2[contact], tmp_criteria1 * squared_norm_localreaction,
+                       relative_convergence_criteria);
+                printf("second criteria :  squared_norm_localreaction <= tmp_criteria2 ==> %e "
+                       "<= %e, bool =%i \n",
+                       squared_norm_localreaction, tmp_criteria2, small_reaction_criteria);
+                printf("Contact % i is freezed for %i steps\n", contact,
+                       options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+	     );
+
           }
         }
 
@@ -831,14 +871,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
       if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
-        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+        incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);
       } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
         hasNotConverged =
             determine_convergence_with_full_final(problem, options, computeError, reaction,
-                                                  velocity, &tolerance, norm_q, error, iter);
+                                                  velocity, &tolerance, norm_q, incr_error, &full_error, iter);
 
         if (!(tolerance > 0.0)) {
           numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
@@ -848,44 +888,58 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
       } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL) {
-        error = calculateFullErrorAdaptiveInterval(problem, computeError, options, iter,
-                                                   reaction, velocity, tolerance, norm_q);
-        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+        full_error = calculateFullErrorAdaptiveInterval(problem, computeError, options, iter,
+                                                        reaction, velocity, tolerance, norm_q);
+	incr_error =full_error;
+        hasNotConverged = determine_convergence(full_error, tolerance, iter, options);
       }
 
-      statsIterationCallback(problem, options, reaction, velocity, error);
-
-      /* if(options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
-      /* { */
-      /*   int frozen_contact=0; */
-      /*   for(unsigned int i = 0 ; i < nc ; ++i) */
-      /*   { */
-      /*     if (freeze_contacts[i] >0) */
-      /*     { */
-      /*       frozen_contact++; */
-      /*     } */
-      /*   } */
-      /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n",
-       * frozen_contact, iter, nc ); */
-      /* } */
+      statsIterationCallback(problem, options, reaction, velocity, incr_error);
+      if (verbose > 0) {
+        frozen_contact = 0 ;
+        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+          for (unsigned int i = 0; i < nc; ++i) {
+            if (freeze_contacts[i] > 0) {
+              frozen_contact++;
+            }
+          }
+        }
+      }
+    nsgs_print_iteration_stats(iter, incr_error, full_error,
+			       tolerance,
+                               SOLVER_TOL(options),
+			       frozen_contact, nc,
+			       hasNotConverged, verbose)    ;
     }
+    free(light_error_2);
+     
   }
   /* Full criterium */
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
+
+    full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                     tolerance, norm_q);
 
-    hasNotConverged = determine_convergence(error, SOLVER_TOL(options), iter, options);
-  }
+    hasNotConverged = determine_convergence(full_error, SOLVER_TOL(options), iter, options);
 
+  }
+  /* if (iter == itermax) */
+  /*   {             */
+  /*     char fname[256];           */
+  /*     fccounter++; */
+  /*     snprintf(fname, sizeof(fname), "problem_%i_%i.dat", nc,itermax); */
+  /*     FILE * file = fopen(fname, "w"); */
+  /*     frictionContact_printInFile(problem, file); */
+  /*     fclose(file); */
+  /*   }  */
   *info = hasNotConverged;
 
   /** return parameter values */
   /* SOLVER_TOL(options) = tolerance; */
-  SET_SOLVER_RESIDUAL(options, error);
+  SET_SOLVER_RESIDUAL(options, full_error);
   SET_SOLVER_ITER_DONE(options, iter);
-  
+
   /* Debug: Check output data for NaN */
 #ifdef DEBUG
   for (unsigned int i = 0; i < nc * 3; ++i) {
@@ -901,7 +955,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
     }
   }
 #endif
-  
+
   /* Restore original local solver tolerance */
   tolerance_manager_restore_local(&tol_manager, local_opts);
 

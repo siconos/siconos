@@ -1,5 +1,5 @@
 #include "siconos/utils/check.hpp"
-#include "siconos/utils/environment.hpp"
+#include "siconos/config/environment.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"

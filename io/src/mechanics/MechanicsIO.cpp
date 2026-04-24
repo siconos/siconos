@@ -512,7 +512,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::domains(
     return siconos::algebra::SiconosMatrix{};  // empty matrix
 
   auto& graph = *nsds.topology()->indexSet(1);
-  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 2};
+  siconos::algebra::SiconosMatrix result =
+      siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 2);
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   siconos::algebra::Index current_row;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
@@ -550,7 +551,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVec
     max_size = std::max(max_size, (ds->q_read()).size());
   }
 
-  siconos::algebra::SiconosMatrix results{max_size + 1, current_col};
+  siconos::algebra::SiconosMatrix results =
+      siconos::algebra::SiconosMatrix::Zero(max_size + 1, current_col);
 
   for (current_col = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
        ++vi, ++current_col) {
@@ -608,7 +610,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
   // if (nsds.topology()->numberOfIndexSet() > 0) {
   auto& graph = *nsds.topology()->indexSet(index_set);
   siconos::algebra::Index current_row;
-  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
+  siconos::algebra::SiconosMatrix result =
+      siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 25);
 
   int data_size = 0;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -742,7 +745,8 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
 
   auto& graph = *nsds.topology()->indexSet(index_set);
   siconos::algebra::Index current_row;
-  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 4};
+  siconos::algebra::SiconosMatrix result =
+      siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 4);
 
   int data_size = 0;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -848,9 +852,9 @@ static void compute_contact_work_and_status(
   answer(4) = tangent_contact_work_theta;
 
   // // Compute directly work dissipated by friction impulse
-  // double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
-  // double friction_dissipation = mu * norm_vt_average * pn;
-  // answer(3) = friction_dissipation;
+  // double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average *
+  // vt_2_average); double friction_dissipation = mu * norm_vt_average * pn; answer(3) =
+  // friction_dissipation;
 
   /* Compute contact status
    * Warning the status are consistent for the sticking and sliding
@@ -1064,7 +1068,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
   auto& graph = *nsds.topology()->indexSet(index_set);
 
   siconos::algebra::Index current_row;
-  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
+  siconos::algebra::SiconosMatrix result =
+      siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 25);
 
   int data_size = 0;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {

@@ -205,7 +205,7 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   // get lambda of the concerned interaction
-  auto& lambda = *inter.lambda(level);
+  const auto& lambda = *inter.lambda(level);
 
   DEBUG_EXPR(siconos::algebra::print(lambda););
   DEBUG_EXPR(

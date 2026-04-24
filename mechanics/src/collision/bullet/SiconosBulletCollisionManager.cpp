@@ -65,17 +65,15 @@
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
-#include "Topology.hpp"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 // #include "SiconosBulletDefines.h"
 
 #ifdef DEBUG_MESSAGES
-#include "BulletUtils.hpp"
+// #include "BulletUtils.hpp"
 #endif
-
 
 siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisionManager(
     std::shared_ptr<SiconosBulletOptions> options)
@@ -158,11 +156,11 @@ siconos::collision::bullet::SiconosBulletCollisionManager::
 
 std::shared_ptr<siconos::collision::StaticBody>
 siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody(
-    std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
+    std::shared_ptr<const siconos::collision::SiconosContactorSet> cs,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position,
     int number) {
   auto rec = std::make_shared<siconos::collision::StaticBody>();
-  rec->contactorSet = cs;
+  rec->setContactors(cs);
   if (!position) {
     rec->base = std::make_shared<siconos::algebra::SiconosVector>(7);
     rec->base->setZero();
@@ -243,8 +241,10 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp,
   DEBUG_BEGIN("siconosBulletAdjustInternalEdgeContacts \n");
 
   DEBUG_EXPR(siconos::collision::bullet::display_info_contact_point(cp);
-             siconos::collision::bullet::display_info_collision_object(colObj0Wrap->getCollisionObject());
-             siconos::collision::bullet::display_info_collision_object(colObj1Wrap->getCollisionObject()););
+             siconos::collision::bullet::display_info_collision_object(
+                 colObj0Wrap->getCollisionObject());
+             siconos::collision::bullet::display_info_collision_object(
+                 colObj1Wrap->getCollisionObject()););
 
   // btAssert(colObj0->getCollisionShape()->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
   //  if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
@@ -266,7 +266,6 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp,
     auto ch2d = std::dynamic_pointer_cast<siconos::collision::SiconosConvexHull2d>(sshape);
 
     if (ch2d && ch2d->avoidInternalEdgeContact()) {
-
       DEBUG_PRINT("a Siconos ch2d shape and ch2d->avoidInternalEdgeContact() true \n");
 
       // Retrieve the first two points assuming that it corresponds to the edge of interest
@@ -521,7 +520,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       int num_contact_points = 0;
 
-      for (auto it : t) { num_contact_points++; }
+      for (auto it
+           : t) { num_contact_points++; }
 
       std::cout
       << "Number of contacts points detected by bullet: " << num_contact_points << "\n";);
@@ -661,8 +661,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
       DEBUG_PRINT("SiconosBulletCollisionManager :: New interaction\n");
       std::shared_ptr<siconos::modeling::Interaction> inter;
 
-      auto g1 = pairA->contactor->collision_group;
-      auto g2 = pairB->contactor->collision_group;
+      auto g1 = pairA->contactor->collision_group();
+      auto g2 = pairB->contactor->collision_group();
       auto nslaw = nonSmoothLaw(g1, g2);
 
       /* test nslaw type and then deduce the type of relation to be created */

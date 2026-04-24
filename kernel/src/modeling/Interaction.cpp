@@ -279,6 +279,7 @@ void siconos::modeling::Interaction::reset() {
 
   for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     _lambda[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
+    _lambda[i]->setZero();
   }
 }
 

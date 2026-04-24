@@ -23,10 +23,9 @@
 #include <pybind11/pytypes.h>
 
 #include <Eigen/Sparse>
-#include <cstddef>
 #include <sstream>
 
-#include "BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"  // IWYU pragma: keep
 #include "FirstOrderLinearDS.hpp"
 #include "FunctionTypes.hpp"
 #include "LagrangianDS.hpp"
@@ -198,6 +197,11 @@ void wrap_dynamical_systems(py::module_& m) {
                              "current values of the initial velocity state")
       .def_property_readonly("q0", &siconos::modeling::LagrangianSparseDS::q0,
                              "current values of the initial state")
+
+      .def("reset_q0", &siconos::modeling::LagrangianSparseDS::reset_q0, py::arg("q0"),
+           "Reset initial state (q0).")
+      .def("reset_velocity0", &siconos::modeling::LagrangianSparseDS::reset_velocity0,
+           py::arg("v0"), "Reset initial state (velocity0).")
 
       .def("resetToInitialState", &siconos::modeling::LagrangianSparseDS::resetToInitialState,
            "reset the system to the current saved initial state")
@@ -968,6 +972,10 @@ void wrap_dynamical_systems(py::module_& m) {
                              "current values of the initial state")
       .def("resetToInitialState", &siconos::modeling::LagrangianDS::resetToInitialState,
            "reset the system to the current saved initial state")
+      .def("reset_q0", &siconos::modeling::LagrangianDS::reset_q0, py::arg("q0"),
+           "Reset initial state (q0).")
+      .def("reset_velocity0", &siconos::modeling::LagrangianDS::reset_velocity0, py::arg("q0"),
+           "Reset initial state (v0).")
 
       .def_property_readonly("fext", &siconos::modeling::LagrangianDS::fext,
                              "current values of the external forces vector")
@@ -1252,6 +1260,17 @@ void wrap_dynamical_systems(py::module_& m) {
       //       py::return_value_policy::reference_internal)
       .def("twist", &siconos::modeling::NewtonEulerDS::twist_python,
            py::return_value_policy::reference_internal)
+      .def_property_readonly("twist0", &siconos::modeling::NewtonEulerDS::twist0,
+                             "current values of the initial twist state")
+      .def_property_readonly("q0", &siconos::modeling::NewtonEulerDS::q0,
+                             "current values of the initial state")
+      .def("reset_q0", &siconos::modeling::NewtonEulerDS::reset_q0, py::arg("q0"),
+           "Reset initial state (q0).")
+      .def("reset_twist0", &siconos::modeling::NewtonEulerDS::reset_twist0, py::arg("v0"),
+           "Reset initial state (twist).")
+
+      .def("resetToInitialState", &siconos::modeling::NewtonEulerDS::resetToInitialState,
+           "reset the system to the current saved initial state")
       .def(
           "setConstantFext",
           [](siconos::modeling::NewtonEulerDS& self, const siconos::algebra::SiconosVector3& v,

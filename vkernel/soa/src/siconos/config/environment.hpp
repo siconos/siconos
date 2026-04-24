@@ -1,13 +1,13 @@
 #pragma once
 
 #include <array>
-#include <cstddef>  // std::size_t
+#include <boost/container/static_vector.hpp>  // c++26 std::inplace_vector
+#include <cstddef>                            // std::size_t
 #include <cstdint>
 #include <tuple>
+#include <unordered_map>
 #include <variant>
 #include <vector>
-#include <unordered_map>
-
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
@@ -16,11 +16,11 @@
 #include "siconos/storage/storage.hpp"
 
 namespace siconos {
-template <typename Params>
-struct standard_environment {
-  using params = Params;
 
-  using boolean = uint8_t; // not bool => cf CompactNSearch sort.
+template <typename Item>
+struct standard_environment {
+
+  using boolean = uint8_t;  // not bool => cf CompactNSearch sort.
   using scalar = double;
   using indice = std::size_t;
   using integer = std::int64_t;
@@ -45,6 +45,9 @@ struct standard_environment {
 
   template <typename T, indice M, indice N>
   using matrix = algebra::matrix<T, M, N>;
+
+  template <typename T>
+  using sparse_matrix = algebra::sparse_matrix<T>;
 
   template <typename T>
   using unbounded_vector = algebra::unbounded_vector<T>;
@@ -74,7 +77,6 @@ struct standard_environment {
   using variant = std::variant<Ts...>;
 
   template <typename T>
-  using default_storage = std::array<T, 1>;
-
+  using default_storage = boost::container::static_vector<T, 1>;
 };
 }  // namespace siconos

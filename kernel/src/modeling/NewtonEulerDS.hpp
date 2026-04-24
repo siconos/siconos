@@ -304,6 +304,23 @@ class NewtonEulerDS : public SecondOrderDS {
   /** destructor */
   virtual ~NewtonEulerDS() noexcept = default;
 
+  /** @brief reset initial conditions (state)
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   */
+  void reset_q0(const siconos::algebra::SiconosVector7& newValue);
+
+  /** @brief reset initial conditions (twist)
+   *
+   * Warning : deep copy of the provided vector into internal attribute
+   *
+   * @param newValue vector to be copied. Its size must match dimension()
+   */
+  void reset_twist0(const siconos::algebra::SiconosVector6& newValue);
+
+
   /** reset the state to the initial state */
   void resetToInitialState() override;
 

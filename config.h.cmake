@@ -24,10 +24,7 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine HAVE_SICONOS_IO
 
 // -- Global options --
-// openmp required and available -
-#cmakedefine WITH_OPENMP
 // Use c++ to build externals and numerics
-#cmakedefine BUILD_AS_CPP
 #cmakedefine SICONOS_USE_MAP_FOR_HASH
 // -- Blas Lapack config --
 // Where does cblas comes from? 
@@ -90,12 +87,6 @@ Example : if cmake is executed with WITH_MPI=ON
 // - mpi part -
 #cmakedefine SICONOS_HAS_MPI
 #cmakedefine WITH_MPI4PY
-// - OpenMP part
-#cmakedefine SICONOS_OMP
-// - PETSc part
-#cmakedefine SICONOS_PETSC
-// - gpu part -
-#cmakedefine SICONOS_CUDA
 // - mumps solver -
 #cmakedefine WITH_MUMPS
 // - fclib interface -

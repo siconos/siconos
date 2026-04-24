@@ -160,6 +160,16 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   // (if fint and/or mint are defined or if mext is expressed in the inertial frame.)
 }
 
+void siconos::modeling::NewtonEulerDS::reset_q0(
+    const siconos::algebra::SiconosVector7& newValue) {
+  use_q0([&newValue](auto& q0) { q0 = newValue; });
+}
+
+void siconos::modeling::NewtonEulerDS::reset_twist0(
+    const siconos::algebra::SiconosVector6& newValue) {
+  use_twist0([&newValue](auto& v0) { v0 = newValue; });
+}
+
 void siconos::modeling::NewtonEulerDS::resetToInitialState() {
   // set q and q[1] to q0 and Twist0
   *state_q_ = q0();

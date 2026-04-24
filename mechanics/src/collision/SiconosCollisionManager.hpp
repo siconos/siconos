@@ -27,7 +27,9 @@
 #define SiconosCollisionManager_h
 
 #include <optional>
+
 #include "InteractionManager.hpp"
+#include "SiconosContactor.hpp"
 #include "StaticBody.hpp"
 
 namespace siconos::modeling {
@@ -43,7 +45,6 @@ class InteractionManager;
 namespace siconos::collision {
 
 class StaticBody;
-class SiconosContactorSet;
 class SiconosCollisionQueryResult;
 
 class SiconosCollisionManager : public siconos::simulation::InteractionManager {
@@ -66,16 +67,16 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
   /** Add a static body in the collision detector.
    */
   virtual std::shared_ptr<siconos::collision::StaticBody> addStaticBody(
-      std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position = std::nullopt,
-      int number = 0)
-  {
+      std::shared_ptr<const siconos::collision::SiconosContactorSet> cs,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position =
+          std::nullopt,
+      int number = 0) {
     return std::make_shared<StaticBody>();
   }
 
   /** Remove a body from the collision detector.
    */
-  virtual void removeStaticBody(const std::shared_ptr<StaticBody>& body){};
+  virtual void removeStaticBody(const std::shared_ptr<StaticBody>& body) {};
 
   /**
      Perform an intersection test on all shapes in the contactors and
@@ -94,8 +95,7 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
   */
   virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> lineIntersectionQuery(
       const siconos::algebra::SiconosVector& start, const siconos::algebra::SiconosVector& end,
-      bool closestOnly = false, bool sorted = true)
-  {
+      bool closestOnly = false, bool sorted = true) {
     return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
   }
 
@@ -115,8 +115,7 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
   */
   virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inSphereQuery(
       const siconos::algebra::SiconosVector& center, double radius, bool closestOnly = false,
-      bool sorted = true)
-  {
+      bool sorted = true) {
     return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
   }
 
@@ -138,8 +137,7 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
   virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inBoxQuery(
       const siconos::algebra::SiconosVector& center,
       const siconos::algebra::SiconosVector& dimensions, bool closestOnly = false,
-      bool sorted = true)
-  {
+      bool sorted = true) {
     return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
   }
 
@@ -159,8 +157,7 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
   virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inHalfSpaceQuery(
       const siconos::algebra::SiconosVector& point,
       const siconos::algebra::SiconosVector& normal, bool closestOnly = false,
-      bool sorted = true)
-  {
+      bool sorted = true) {
     return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
   }
 };

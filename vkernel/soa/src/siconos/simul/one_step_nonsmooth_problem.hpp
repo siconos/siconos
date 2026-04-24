@@ -23,7 +23,9 @@ struct solver_options : storage::data_holder<SolverOptions> {
   template <typename Handle>
   struct interface : storage::data_holder<SolverOptions>::template interface<
                          Handle> {
-    using default_interface<Handle>::self;
+    using storage::data_holder<SolverOptions>::template interface<
+        Handle>::self;
+
     void create(int solver_id = SICONOS_FRICTION_2D_LEMKE)
     {
       // need to be fixed : solver_options_delete not called
@@ -84,7 +86,7 @@ struct nonsmooth_problem : storage::data_holder<Formulation> {
   template <typename Handle>
   struct interface : storage::data_holder<Formulation>::template interface<
                          Handle> {
-    using default_interface<Handle>::self;
+    using storage::data_holder<Formulation>::template interface<Handle>::self;
 
     void create(int solver_id = SICONOS_FRICTION_2D_LEMKE)
     {

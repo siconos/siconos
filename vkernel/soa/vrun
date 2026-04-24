@@ -81,6 +81,8 @@ while [ $# -gt 0 ]; do
  "strace"
  "swig"
  "time"
+ "tsl-sparse-map"
+ "robin-map"
  "valgrind"
  "vtk"
  "which"

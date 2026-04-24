@@ -1,5 +1,7 @@
 #pragma once
 
+#include "interaction.hpp"
+#include "moreau_jean_element.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/moreau_jean_assembled.hpp"
@@ -17,7 +19,12 @@ struct one_step_integrator {
   using indice_t = std::size_t;
 
   using ct_interaction = typename Topology::fixed_dof_interaction;
-  using rt_interaction = typename Topology::dynamic_dof_interaction;
+
+  using rt_ct_interaction =
+      typename Topology::dynamic_dof_fixed_dof_interaction;
+
+  using rt_rt_interaction =
+      typename Topology::dynamic_dof_dynamic_dof_interaction;
 
   using ct_system = typename Topology::fixed_dof_system;
   using rt_system = typename Topology::dynamic_dof_system;
@@ -26,19 +33,23 @@ struct one_step_integrator {
     using topology = Topology;
 
     using systems_t = gather<ct_system, rt_system>;
-    using interactions_t = gather<ct_interaction, rt_interaction>;
+    using interactions_t =
+        gather<ct_interaction, rt_ct_interaction, rt_rt_interaction>;
 
     using ct_osi_t =
         moreau_jean_element<ct_system, ct_interaction, moreau_jean_assembled>;
-    using rt_osi_t =
-        moreau_jean_element<rt_system, rt_interaction, moreau_jean_assembled>;
+    using rt_ct_osi_t = moreau_jean_element<rt_system, rt_ct_interaction,
+                                            moreau_jean_assembled>;
+    using rt_rt_osi_t = moreau_jean_element<rt_system, rt_rt_interaction,
+                                            moreau_jean_assembled>;
 
     using all_elements_t =
-        mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_osi_t>>;
+        mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_ct_osi_t>,
+                  some::item_ref<rt_rt_osi_t>>;
 
     using elements_t = decltype(mp::unpack(
         mp::filter(all_elements_t{},
-                   [](const auto& h) constexpr {
+                   [](const auto &h) constexpr {
                      using t = typename std::decay_t<decltype(h)>::type;
                      return mp::bool_c<!std::derived_from<t, empty_item>>;
                    }),
@@ -46,7 +57,8 @@ struct one_step_integrator {
 
     using assembled_osi_t = moreau_jean_assembled;
 
-    using items = gather<topology, ct_osi_t, rt_osi_t, moreau_jean_assembled>;
+    using items = gather<topology, ct_osi_t, rt_ct_osi_t, rt_rt_osi_t,
+                         moreau_jean_assembled>;
 
     using attributes =
         gather<attribute<"elements", elements_t>,
@@ -56,7 +68,7 @@ struct one_step_integrator {
     struct interface : default_interface<Handle> {
       using default_interface<Handle>::self;
 
-      auto assembled_osi()
+      decltype(auto) assembled_osi()
       {
         return storage::make_ref_handle(self()->data(),
                                         attr<"assembled_osi">(*self()));
@@ -108,7 +120,7 @@ struct one_step_integrator {
       }
 
       template <size_t N, typename Func>
-      decltype(auto) visit_element(Func&& func)
+      decltype(auto) visit_element(Func &&func)
       {
         return func(std::get<N>(elements()));
       }
@@ -117,6 +129,11 @@ struct one_step_integrator {
       {
         return assembled_osi().mass_matrix_assembled();
       };
+
+      decltype(auto) iteration_matrix_assembled()
+      {
+        return assembled_osi().iteration_matrix_assembled();
+      }
 
       decltype(auto) k_matrix_assembled()
       {
@@ -186,7 +203,7 @@ struct one_step_integrator {
             });
       }
 
-      void assemble_setup()
+      void assemble_setup(auto step)
       {
         using env_t = decltype(self()->env());
         using indice_t = typename env_t::indice;
@@ -196,23 +213,26 @@ struct one_step_integrator {
         indice_t num_fric =
             0;  // total number of friction nslaws for mu vector size.
 
-        mp::for_each(elements(), [&ods, &ointer, &num_fric](auto elem) {
-          elem.ds_offset() = ods;
-          elem.inter_offset() = ointer;
+        mp::for_each(
+            elements(), [&ods, &ointer, &num_fric, &step](auto elem) {
+              elem.ds_offset() = ods;
+              elem.inter_offset() = ointer;
+              ods += elem.total_dofs(step);
 
-          ods += elem.number_of_involved_ds() * elem.dof();
-          ointer += elem.number_of_interactions() * elem.nslaw_size();
+              ointer += elem.number_of_interactions() * elem.nslaw_size();
 
-          if constexpr (elem.nslaw_with_friction()) {
-            num_fric += elem.number_of_interactions();
-          }
-        });
+              if constexpr (elem.nslaw_with_friction()) {
+                num_fric += elem.number_of_interactions();
+              }
+            });
 
         indice_t raw_ds_size = ods;
         indice_t raw_inter_size = ointer;
 
         if constexpr (with_k_matrix()) {
           algebra::resize(k_matrix_assembled(), raw_ds_size, raw_ds_size);
+          algebra::resize(iteration_matrix_assembled(), raw_ds_size,
+                          raw_ds_size);
         }
         algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
         algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
@@ -233,52 +253,66 @@ struct one_step_integrator {
 
       void compute_w_matrix(auto step, auto time_step)
       {
-        auto& data = self()->data();
-
-        // get the number of interactions where dof is defined at
-        // runtime
-        auto runtime_inters =
-            storage::prop_values<rt_interaction, "nds">(data, step);
-
         if constexpr (with_k_matrix()) {
-          // only simulation with fem contains runtime inter
+          // stiffness matrix is present
+          algebra::add(1., mass_matrix_assembled(),
+                       time_step * time_step * theta() * theta(),
+                       k_matrix_assembled(), iteration_matrix_assembled());
 
-          if (std::size(runtime_inters) > 0) {
-            // general case: mass matrix is not diagonal
-            auto m_matrix =
-                algebra::add(1., mass_matrix_assembled(),
-                             time_step * time_step * theta() * theta(),
-                             k_matrix_assembled());
-
-            compute_kkt_matrix(h_matrix_assembled(), m_matrix,
-                               w_matrix_assembled());
-          }
+          // H (M+ h^2 \theta^2 K) H^t
+          compute_kkt_matrix(h_matrix_assembled(),
+                             iteration_matrix_assembled(),
+                             w_matrix_assembled());
         }
         else {
-          // mass matrix is assumed to be diagonal
-          auto& data = self()->data();
-          using info_t = storage::get_info_t<decltype(data)>;
-
-          using env = typename info_t::env;
-
-          // xxx properties on h_matrix1, if any, are lost here
-          auto tmp_matrix = typename traits::config<env>::template convert<
-              some::assembled_matrix<some::transposed_matrix<
-                  typename ct_osi_t::h_matrix1>>>::type{};
-
-          auto ct_elem = std::get<0>(elements());
-
-          auto&& h_mat = ct_elem.h_matrix_assembled();
-          auto&& m_mat = ct_elem.mass_matrix_assembled();
-          auto&& w_mat = ct_elem.w_matrix_assembled();
-
-          resize(tmp_matrix, size1(h_mat), size0(h_mat));
-          solvet(m_mat, h_mat, tmp_matrix);
-          prod(h_mat, tmp_matrix, w_mat);
+          // fem systems are not present in data
+          compute_w_matrix_with_diagonal_mass_matrix();
         }
       }
 
-      void compute_input() { assembled_osi().compute_input(); }
+      void compute_w_matrix_with_diagonal_mass_matrix()
+      {
+        // mass matrix is assumed to be diagonal
+        using env = decltype(self()->env());
+
+        // xxx properties on h_matrix1, if any, are lost here
+        auto tmp_matrix = typename traits::config<env>::template convert<
+            some::assembled_matrix<some::transposed_matrix<
+                typename ct_osi_t::h_matrix1>>>::type{};
+
+        // assumption: compile time element is the first one.
+        auto ct_elem = std::get<0>(elements());
+
+        auto &&h_mat = ct_elem.h_matrix_assembled();
+        auto &&m_mat = ct_elem.mass_matrix_assembled();
+        auto &&w_mat = ct_elem.w_matrix_assembled();
+
+        resize(tmp_matrix, size1(h_mat), size0(h_mat));
+        solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+        prod(h_mat, tmp_matrix, w_mat);
+      }
+
+      void compute_input(auto time_step)
+      {
+        auto &h_matrix = h_matrix_assembled();
+        auto &lambda = lambda_vector_assembled();
+        auto &p0 = p0_vector_assembled();
+        auto &velo = velocity_vector_assembled();
+        auto &mass_matrix = mass_matrix_assembled();
+
+        resize(p0, size1(h_matrix));
+        resize(velo, size1(h_matrix));
+
+        transpose(h_matrix);
+        prodt1(h_matrix, lambda, p0);
+
+        if constexpr (with_k_matrix()) {
+          solve_linear_system(iteration_matrix_assembled(), p0, velo);
+        }
+        else {
+          solve_linear_system(mass_matrix, p0, velo);
+        }
+      }
 
       auto methods()
       {
@@ -287,7 +321,8 @@ struct one_step_integrator {
         using scalar = typename env_t::scalar;
 
         return collect(
-            method("compute_input", &interface<Handle>::compute_input),
+            method("compute_input",
+                   &interface<Handle>::compute_input<scalar>),
             method("compute_w_matrix",
                    &interface<Handle>::compute_w_matrix<indice, scalar>));
       }

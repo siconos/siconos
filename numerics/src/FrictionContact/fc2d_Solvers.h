@@ -25,7 +25,6 @@
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "LinearComplementarityProblem.h"
-#include "SiconosConfig.h"  // for SICONOS_OMP, SICONOS_PETSC...
 #include "SolverOptions.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

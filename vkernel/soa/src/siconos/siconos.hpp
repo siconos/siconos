@@ -28,7 +28,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
-#include "siconos/utils/environment.hpp"
+#include "siconos/config/environment.hpp"
 #if defined(__clang__)
 #include <boost/hana/experimental/type_name.hpp>
 #endif

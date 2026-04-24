@@ -182,6 +182,9 @@ function(new_test)
     list(APPEND TEST_SOURCES_ABSPATH ${source_file})
   endforeach()
 
+  if(PROBLEM_COMPILE_DEFINITIONS)
+    message("KDLJKDSJLKDSJLKSDJLKDSJLKDS ${PROBLEM_COMPILE_DEFINITIONS}")
+endif()
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     add_executable(${TEST_NAME} WIN32 ${TEST_SOURCES_ABSPATH})
   else()
@@ -323,7 +326,7 @@ endfunction()
 # - create the test named <NAME>_<COLLECTION><SUFFIX> from sources and data set.
 function(new_tests_collection)
   set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION HDF5)
-  set(multiValueArgs EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES COMPILE_DEFINITIONS)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
@@ -343,6 +346,7 @@ function(new_tests_collection)
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
     HDF5 ${PROBLEM_HDF5}
+    COMPILE_DEFINITIONS ${PROBLEM_COMPILE_DEFINITIONS}
   )
 
 
@@ -352,12 +356,13 @@ endfunction()
 function(new_lcp_tests_collection)
   set(options)
   set(oneValueArgs COLLECTION SUFFIX)
-  set(multiValueArgs EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES COMPILE_DEFINITIONS)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION ${PROBLEM_COLLECTION}
-    EXTRA_SOURCES ${PROBLEM_EXTRA_SOURCES})
+    EXTRA_SOURCES ${PROBLEM_EXTRA_SOURCES}
+    COMPILE_DEFINITIONS ${PROBLEM_COMPILE_DEFINITIONS})
 
 endfunction()
 
