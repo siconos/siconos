@@ -36,8 +36,6 @@
 #include "op5x5.h"  // for cpy3, mvp3x3
 #include "rolling_friction_3d_compute_error.h"
 #include "rolling_friction_3d_local_problem_tools.h"
-// #include "rolling_friction_3d_projection.h"
-// #include "rolling_friction_3d_short_names.h"
 #include "rolling_naturalmap_functions.h"
 
 /* #define DEBUG_CHECK */

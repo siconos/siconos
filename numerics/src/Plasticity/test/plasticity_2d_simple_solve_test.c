@@ -15,24 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <errno.h>
+
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "FrictionContactProblem.h"
-#include "FrictionContact_options.h"
-#include "PlasticityProblem.h"
 #include "NonSmoothDrivers.h"
-#include "NumericsMatrix.h"
+#include "NumericsVerbose.h"
+#include "PlasticityProblem.h"
 #include "Plasticity_options.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
-#include "fc3d_Solvers.h"
-#include "frictionContact_test_utils.h"
 #include "plasticity_2d_solvers.h"
-#include "numerics_verbose.h"
 
 static int test_unit(char* filename, SolverOptions* options) {
   printf("start test unit on %s\n", filename);
@@ -73,12 +67,13 @@ static int test_unit(char* filename, SolverOptions* options) {
   }
   printf(" .....\n");
   if (info) {
-    printf("No Convergence after %i iterations at accuracy %6.4e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    printf("No Convergence after %i iterations at accuracy %6.4e\n",
+           options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+  } else {
+    printf("convergence after %i iterations at accuracy %6.4e\n",
+           options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
-  else{
-    printf("convergence after %i iterations at accuracy %6.4e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
-  }
-  
+
   plasticity2DProblem_free(problem);
   free(stress);
   free(plastic_strain_rate);
@@ -107,9 +102,6 @@ static int test_unit(char* filename, SolverOptions* options) {
 int main(void) {
   int total_info = 0;
 
-
-
-  
   SolverOptions* options = solver_options_create(PLASTICITY_2D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 5000;
@@ -119,7 +111,7 @@ int main(void) {
   total_info += test_unit("./data/plasticity_2d_example1.dat", options);
   total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options);
   total_info += test_unit("./data/plasticity_2d_footing_1.dat", options);
-  
+
   printf("#######\n test with pure Newton local solver \n");
   numerics_set_verbose(0);
   solver_options_update_internal(options, 0, PLASTICITY_2D_ONECONE_NSN);
@@ -137,8 +129,6 @@ int main(void) {
   total_info += test_unit("./data/plasticity_2d_example1.dat", options);
   total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options);
   total_info += test_unit("./data/plasticity_2d_footing_1.dat", options);
-  
-
 
   /* numerics_set_verbose(0); */
   /* printf("#######\ntest with projection on Cone with local iteration solver \n"); */
@@ -161,12 +151,13 @@ int main(void) {
   /* total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_2); */
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
-  
+
   /* printf("#######\n test with pure Newton local solver \n"); */
   /* numerics_set_verbose(0); */
   /* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN); */
   /* /\* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP); *\/ */
-  /* /\* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP_HYBRID); *\/ */
+  /* /\* solver_options_update_internal(options_2, 0, PLASTICITY_2D_ONECONE_NSN_GP_HYBRID); *\/
+   */
   /* /\* parameters for hybrid solvers *\/ */
   /* options_2->internalSolvers[0]->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] = */
   /*     PLASTICITY_NSN_HYBRID_STRATEGY_NO; */
@@ -180,7 +171,6 @@ int main(void) {
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
 
-  
   /* numerics_set_verbose(0); */
   /* printf("#######\ntest with projection on Cone with local iteration solver \n"); */
   /* solver_options_update_internal( */
@@ -192,12 +182,11 @@ int main(void) {
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_2); */
   /* total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_2); */
 
-
   printf("#######\n GENERIC test with pure Newton local solver \n");
   numerics_set_verbose(3);
 
   printf("#######\ntest with default options GENERIC\n");
- 
+
   SolverOptions* options_generic = solver_options_create(PLASTICITY_2D_NSGS_GENERIC);
   options_generic->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   options_generic->iparam[SICONOS_IPARAM_MAX_ITER] = 5000;
@@ -209,8 +198,6 @@ int main(void) {
   total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_generic);
   total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_generic);
 
-
-  
   /* ============================================================================
    * Von Mises Model Tests
    * ============================================================================ */
@@ -218,12 +205,13 @@ int main(void) {
   /* printf("#######\n test with Von Mises model and radial return projection \n"); */
   /* SolverOptions* options_vm = solver_options_create(PLASTICITY_2D_NSGS); */
   /* options_vm->dparam[SICONOS_DPARAM_TOL] = 1e-14; */
-  /* solver_options_update_internal(options_vm, 0, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration); */
+  /* solver_options_update_internal(options_vm, 0,
+   * PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration); */
   /* options_vm->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14; */
   /* options_vm->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
-  
+
   /* total_info += test_unit("./data/plasticity_2d_vonmises_example1.dat", options_vm); */
-  
+
   /* printf("#######\n test with Von Mises model on larger problem \n"); */
   /* SolverOptions* options_vm_2 = solver_options_create(PLASTICITY_2D_NSGS); */
   /* options_vm_2->dparam[SICONOS_DPARAM_TOL] = 1e-04; */
@@ -233,6 +221,6 @@ int main(void) {
   /* options_vm_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
 
   /* total_info += test_unit("./data/plasticity_2d_vonmises_footing_100.dat", options_vm_2); */
-  
+
   return total_info;
 }

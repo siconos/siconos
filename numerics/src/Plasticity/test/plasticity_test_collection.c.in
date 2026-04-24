@@ -21,7 +21,6 @@
 #include <string.h>                      // for strcmp
 #include "plasticity_test_utils.h"       // for plasticity_test_function
 #include "test_utils.h"                  // for data_collection, free_test_c...
-#include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

@@ -19,10 +19,9 @@
 #ifndef NM_MUMPS_h
 #define NM_MUMPS_h
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP, WITH_MUMPS // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -36,9 +35,9 @@ extern "C" {
 #define JOB_INIT -1
 #define JOB_END -2
 #define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#define RINFOG(I) rinfog[(I)-1]
+#define ICNTL(I) icntl[(I) - 1]
+#define CNTL(I) cntl[(I) - 1]
+#define RINFOG(I) rinfog[(I) - 1]
 
 void NM_MUMPS_set_irn_jcn(NumericsMatrix* A);
 
@@ -175,7 +174,7 @@ void NM_MUMPS_free(void* p);
  */
 void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

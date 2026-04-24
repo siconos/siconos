@@ -18,9 +18,7 @@
 #ifndef FischerBurmeisterGenerated_h
 #define FischerBurmeisterGenerated_h
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -51,7 +49,7 @@ void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double *reaction, double *
                                                       double mu, double *rho, double *gf,
                                                       double *, double *);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

@@ -33,21 +33,16 @@
  * - Runtime solver introspection
  */
 
-#include "FrictionContactProblem.h"
-#include "FrictionContact_options.h"
-#include "Friction_tools.h"
-#include "fc3d_Solvers.h"
-#include "numerics_verbose.h"
-
-/* Registration-based headers */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
 
-
+#include "Friction_tools.h"
+#include "fc3d_Solvers.h"
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /* ===========================================================================
  * Trivial Case Check
@@ -58,11 +53,11 @@ int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, dou
   (void)options;
   assert(problem);
   assert(problem->q);
-  
+
   int nc = problem->numberOfContacts;
   double* q = problem->q;
   int n = 3 * nc;
-  
+
   for (int i = 0; i < nc; i++) {
     if (q[3 * i] < -DBL_EPSILON) return NUMERICS_ERR_INFEASIBLE;
   }
@@ -70,7 +65,7 @@ int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, dou
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  
+
   numerics_printf("fc3d: trivial solution (take-off), reaction = 0, velocity = q.");
   return NUMERICS_OK;
 }
@@ -106,11 +101,10 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
-  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, 
-             "Solver ID not found in registry");
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver ID not found in registry");
 
-  numerics_printf_verbose(1, "fc3d_driver: using solver '%s' (%s)",
-                          solver->name, solver->description);
+  numerics_printf_verbose(1, "fc3d_driver: using solver '%s' (%s)", solver->name,
+                          solver->description);
 
   /* /\* Validate solver is appropriate for this problem type *\/ */
   /* CHECK_COND(!solver->is_local_solver, NUMERICS_ERR_INVALID_SOLVER, */
@@ -129,7 +123,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       return init_status;
     }
   }
-  
+
   /* Call the solver */
   numerics_printf_verbose(1, "fc3d_driver: calling solver...");
   int solve_status = solver->solve(problem, reaction, velocity, options);
@@ -143,8 +137,8 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
   if (solve_status == NUMERICS_OK) {
     numerics_printf_verbose(1, "fc3d_driver: solver converged successfully");
   } else {
-    fprintf(stderr, "[WARN] fc3d_driver: solver returned status %d (%s)\n",
-            solve_status, numerics_error_string(solve_status));
+    fprintf(stderr, "[WARN] fc3d_driver: solver returned status %d (%s)\n", solve_status,
+            numerics_error_string(solve_status));
   }
 
   return solve_status;
@@ -157,40 +151,41 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 SolverOptions* fc3d_solver_options_create(solver_id_t solver_id) {
   /* Lookup solver first to validate it exists and is appropriate */
   const SolverEntry* solver = solver_registry_lookup(solver_id);
-  
+
   if (!solver) {
-    fprintf(stderr, "[ERROR] fc3d_solver_options_create: solver ID %d not registered\n", 
+    fprintf(stderr, "[ERROR] fc3d_solver_options_create: solver ID %d not registered\n",
             solver_id);
     fprintf(stderr, "[INFO] Available FC3D solvers:\n");
     fc3d_list_available_solvers();
     return NULL;
   }
-  
+
   if (solver->is_local_solver) {
-    fprintf(stderr, "[ERROR] fc3d_solver_options_create: solver '%s' is a local solver, "
-                    "use it within NSGS instead\n", solver->name);
+    fprintf(stderr,
+            "[ERROR] fc3d_solver_options_create: solver '%s' is a local solver, "
+            "use it within NSGS instead\n",
+            solver->name);
     return NULL;
   }
-  
+
   /* Create options using registered defaults */
   SolverOptions* options = solver_options_create(solver_id);
-  
+
   if (!options) {
     fprintf(stderr, "[ERROR] fc3d_solver_options_create: failed to create options\n");
     return NULL;
   }
-  
+
   /* Initialize with solver defaults if available */
   if (solver->init) {
     int init_status = solver->init(NULL, options);
     if (init_status != NUMERICS_OK) {
-      fprintf(stderr, "fc3d_solver_options_create: init failed with status %d\n", 
-              init_status);
+      fprintf(stderr, "fc3d_solver_options_create: init failed with status %d\n", init_status);
       solver_options_delete(options);
       return NULL;
     }
   }
-  
+
   return options;
 }
 
@@ -203,28 +198,27 @@ void fc3d_list_available_solvers(void) {
   printf("+=============================================================================+\n");
   printf("| Available FC3D Solvers                                                       |\n");
   printf("+=============================================================================+\n");
-  printf("| %-20s | %-8s | %-12s | %-12s | %-5s |\n", 
-         "Name", "ID", "Max Iter", "Tolerance", "Type");
+  printf("| %-20s | %-8s | %-12s | %-12s | %-5s |\n", "Name", "ID", "Max Iter", "Tolerance",
+         "Type");
   printf("+----------------------+----------+--------------+--------------+-------+\n");
-  
+
   size_t count;
   const SolverEntry** solvers = solver_registry_get_all(&count);
-  
+
   int fc3d_count = 0;
   for (size_t i = 0; i < count; i++) {
     const SolverEntry* s = solvers[i];
     /* Show FC3D solvers (ID range 500-599 for 3D friction contact) */
-    if ((s->id >= 500 && s->id < 600) || 
-        (s->id >= 5000 && s->id < 6000)) {  /* Global formulation range */
-      printf("| %-20s | %-8d | %-12d | %-12.2e | %-5s |\n",
-             s->name, s->id, s->default_max_iter, s->default_tol,
-             s->is_local_solver ? "local" : "main");
+    if ((s->id >= 500 && s->id < 600) ||
+        (s->id >= 5000 && s->id < 6000)) { /* Global formulation range */
+      printf("| %-20s | %-8d | %-12d | %-12.2e | %-5s |\n", s->name, s->id,
+             s->default_max_iter, s->default_tol, s->is_local_solver ? "local" : "main");
       fc3d_count++;
     }
   }
-  
+
   printf("+----------------------+----------+--------------+--------------+-------+\n");
-  printf("| Total: %d solver(s) available                                               |\n", 
+  printf("| Total: %d solver(s) available                                               |\n",
          fc3d_count);
   printf("+=============================================================================+\n");
   printf("\n");
@@ -239,20 +233,21 @@ void fc3d_list_available_solvers(void) {
 
 void fc3d_print_solver_info(solver_id_t solver_id) {
   const SolverEntry* solver = solver_registry_lookup(solver_id);
-  
+
   if (!solver) {
     printf("Solver ID %d not found in registry.\n", solver_id);
     printf("Use fc3d_list_available_solvers() to see available solvers.\n");
     return;
   }
-  
+
   printf("\n");
   printf("Solver Information:\n");
   printf("===================\n");
   printf("  Name:        %s\n", solver->name);
   printf("  ID:          %d\n", solver->id);
   printf("  Description: %s\n", solver->description);
-  printf("  Type:        %s\n", solver->is_local_solver ? "Local (one-contact)" : "Main solver");
+  printf("  Type:        %s\n",
+         solver->is_local_solver ? "Local (one-contact)" : "Main solver");
   printf("\n");
   printf("Default Parameters:\n");
   printf("  Max iterations: %d\n", solver->default_max_iter);

@@ -25,6 +25,10 @@ option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only 
 option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details." OFF)
+option(WITH_TIMERS "Enable timers (numerics, details: timers_interf.h)" OFF)
+option(DUMP_PROBLEM "Friction contact specific dump option (numerics)" OFF)
+option(WITH_OPENSSL "Enable OpenSSL support for SHA1 matrix hashing (numerics)" OFF)
+option(WITH_FACTORISATION_DEBUG "Enable Debug for NumericsMatrix" OFF)
 
 # --- Documentation setup ---
 cmake_dependent_option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings if doc is ON" ON "WITH_DOCUMENTATION" OFF)

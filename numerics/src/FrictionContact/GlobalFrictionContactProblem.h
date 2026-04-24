@@ -25,9 +25,7 @@
 
 #include <stdio.h>  // for NULL, FILE
 
-#include "NumericsFwd.h"     // for GlobalFrictionContactProblem, NumericsMatrix
-#include "NumericsMatrix.h"  // for BalancingMatrices
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, NumericsMatrix
 
 /**
     The structure that defines a Friction-Contact (3D or 2D ) problem
@@ -67,7 +65,7 @@ struct GlobalFrictionContactProblem {
   void *env;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -141,7 +139,7 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem *pr
 /** Refomulation into local problem */
 FrictionContactProblem *globalFrictionContact_reformulation_FrictionContact(
     GlobalFrictionContactProblem *problem);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

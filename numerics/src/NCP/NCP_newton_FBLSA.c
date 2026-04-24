@@ -18,17 +18,16 @@
 
 #include "ncp_newton_FBLSA.h"  // for FB_compute_F_ncp, FB_co...
 
-#include "FischerBurmeister.h"                // for Jac_F_FB, phi_FB
-#include "NCP_Solvers.h"                      // for ncp_newton_FBLSA
+#include "FischerBurmeister.h"  // for Jac_F_FB, phi_FB
+#include "NCP_Solvers.h"        // for ncp_newton_FBLSA
 #include "NCP_cst.h"
-#include "Newton_methods.h"                   // for functions_LSA, init_lsa...
-#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
-#include "NumericsFwd.h"                      // for NonlinearComplementarit...
-#include "SiconosBlas.h"                      // for cblas_dnrm2
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "Newton_methods.h"  // for functions_LSA, init_lsa...
+#include "NumericsFwd.h"     // for NonlinearComplementarit...
+#include "SiconosBlas.h"     // for cblas_dnrm2
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
+
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB) {
   phi_FB(((NonlinearComplementarityProblem*)data_opaque)->n, z, F, F_FB);
 }
@@ -82,7 +81,8 @@ static int ncp_newton_fblsa_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int ncp_newton_fblsa_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int ncp_newton_fblsa_solve_wrap(void* problem, double* z, double* w,
+                                       SolverOptions* options) {
   int info = NUMERICS_OK;
   NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)problem;
   ncp_newton_FBLSA(ncp, z, w, &info, options);
@@ -95,6 +95,6 @@ static void ncp_newton_fblsa_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_NCP_NEWTON_FB_FBLSA, "NCP_NEWTON_FB_FBLSA",
-                       "Newton FBLSA solver for Nonlinear Complementarity Problems",
-                       ncp_newton_fblsa_init_wrap, ncp_newton_fblsa_solve_wrap, ncp_newton_fblsa_free_wrap, NULL,
-                       ncp_newton_fblsa_set_default, 1000, 1e-4, 0);
+                "Newton FBLSA solver for Nonlinear Complementarity Problems",
+                ncp_newton_fblsa_init_wrap, ncp_newton_fblsa_solve_wrap,
+                ncp_newton_fblsa_free_wrap, NULL, ncp_newton_fblsa_set_default, 1000, 1e-4, 0);

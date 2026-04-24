@@ -24,7 +24,7 @@
 */
 #include "FrictionContactProblem.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -58,7 +58,7 @@ int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity, dou
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

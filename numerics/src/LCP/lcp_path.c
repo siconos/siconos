@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-#include "LCP_Solvers.h"    // for lcp_path
-#include "NumericsFwd.h"    // for LinearComplementarityProblem, SolverOptions
-#include "SiconosConfig.h"  // for HAVE_PATHFERRIS // IWYU pragma: keep
+#include "LCP_Solvers.h"  // for lcp_path
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
 
 #ifdef HAVE_PATHFERRIS
 #include <math.h>
@@ -33,11 +32,9 @@
 #include "numerics_verbose.h"
 #endif /*HAVE_PATHFERRIS*/
 
-#include "lcp_cst.h"        // for SICONOS_LCP_PATH
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "lcp_cst.h"  // for SICONOS_LCP_PATH
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void lcp_path(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
@@ -100,7 +97,7 @@ void lcp_path(LinearComplementarityProblem *problem, double *z, double *w, int *
   return;
 }
 
-static void lcp_path_set_default(SolverOptions* options) {
+static void lcp_path_set_default(SolverOptions *options) {
   /* No specific defaults needed */
   (void)options;
 }
@@ -111,30 +108,26 @@ static void lcp_path_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_PATH in the global solver registry.
  */
 
-static int lcp_path_init_wrap(void* problem, SolverOptions* options) {
+static int lcp_path_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   lcp_path_set_default(options);
   return NUMERICS_OK;
 }
 
-static int lcp_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_path_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
   int info = NUMERICS_OK;
-  lcp_path((LinearComplementarityProblem*)problem, z, w, &info, options);
+  lcp_path((LinearComplementarityProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void lcp_path_free_wrap(void* problem, SolverOptions* options) {
+static void lcp_path_free_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PATH, "LCP_PATH",
-                       "PATH solver for LCP",
-                       lcp_path_init_wrap,
-                       lcp_path_solve_wrap,
-                       lcp_path_free_wrap,
-                       NULL,  /* error function */
-                       lcp_path_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_PATH, "LCP_PATH", "PATH solver for LCP", lcp_path_init_wrap,
+                lcp_path_solve_wrap, lcp_path_free_wrap, NULL, /* error function */
+                lcp_path_set_default,                          /* set_default */
+                1000,                                          /* default_max_iter */
+                1e-6,                                          /* default_tol */
+                0);                                            /* is_local_solver */

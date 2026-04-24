@@ -22,9 +22,7 @@
   \brief utilities to deal with files reading/writing in numerics.
 */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -35,7 +33,7 @@ extern "C" {
 */
 int check_hdf5_file(const char* filename);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

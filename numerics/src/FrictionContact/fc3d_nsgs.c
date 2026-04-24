@@ -27,10 +27,11 @@
 #include "Friction_tools.h"  // for ComputeErrorPtr                                     //
 #include "NumericsArrays.h"  // for uint_shuffle
 #include "NumericsMatrix.h"
-#include "SiconosBlas.h"                               // for cblas_dnrm2
-#include "SolverOptions.h"                             // for SolverOptions
-#include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
-#include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
+#include "SiconosBlas.h"    // for cblas_dnrm2
+#include "SolverOptions.h"  // for SolverOptions
+#include "SparseBlockMatrix.h"
+#include "fc3d_2NCP_Glocker.h"          // for NCPGlocker_update
+#include "fc3d_NCPGlockerFixedPoint.h"  // for fc3d_FixedP_in...
 #include "fc3d_Path.h"                                 // for fc3d_Path_init...
 #include "fc3d_compute_error.h"                        // for fc3d_compute_e...
 #include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
@@ -38,30 +39,20 @@
 #include "fc3d_projection.h"                           // for fc3d_projectio...
 #include "fc3d_short_names.h"                          // Short names for solver IDs
 #include "fc3d_unitary_enumerative.h"
-#include "numerics_verbose.h"  // for numerics_printf
-
-/* Solver registration system */
-#include "numerics_errors.h"
-#include "solver_registry.h"
-
-/* New utility headers for standardized error computation, tolerance management, and naming
- * conventions */
-// #include "error_computation.h"
-
-#include "tolerance_manager.h"
-// #include "NumericsVector.h"
 #include "gfc3d_ipm.h"
-#include "op3x3.h"  // For cpy3
-// #include "projectionOnCone.h"  // for projectionOnCone
-#include "siconos_debug.h"  // for DEBUG_EXPR
-
-// #define FCLIB_OUTPUT
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_printf
+#include "op3x3.h"             // For cpy3
+#include "siconos_debug.h"     // for DEBUG_EXPR
+#include "solver_registry.h"
+#include "tolerance_manager.h"
 
 #ifdef FCLIB_OUTPUT
-// static int fccounter = -1;
+static int fccounter = -1;
 #include "fclib_interface.h"
 #endif
-// static int fccounter = -1;
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* static void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction,
@@ -617,9 +608,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   unsigned int* freeze_contacts = NULL;
   int frozen_contact = 0;
 
-#ifdef DEBUG
   SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
-#endif
   if (problem->M->storageType == NM_SPARSE) {
     if (problem->M->matrix1) {
       printf("Warning matrix 1 different from NULL");
@@ -943,6 +932,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
 #ifdef DEBUG
 cleanup:
+#endif
   /** Free memory **/
 
   if (problem->M->storageType == NM_SPARSE) {
@@ -955,7 +945,6 @@ cleanup:
   fc3d_local_problem_free(localproblem, problem);
 
   if (scontacts) free(scontacts);
-#endif
 }
 
 void fc3d_nsgs_set_default(SolverOptions* options) {

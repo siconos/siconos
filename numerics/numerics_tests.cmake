@@ -122,7 +122,7 @@ if(WITH_TESTING)
   #   EXTRA_SOURCES data_collection_4.c)
 
 
-  if(HAVE_SYSTIMES_H AND WITH_CXX)
+  if(HAVE_SYS_TIMES_H AND WITH_CXX)
     new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()
   new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS externals)

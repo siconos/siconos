@@ -68,7 +68,7 @@ typedef void (*FreeSolverNSGS_soclcp_Ptr)(SecondOrderConeLinearComplementarityPr
 typedef void (*internalSolver_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem *,
                                           double *, double *, int *, SolverOptions *);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -209,7 +209,7 @@ void soclcp_projection_set_default(SolverOptions *options);
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

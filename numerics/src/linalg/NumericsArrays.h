@@ -24,15 +24,12 @@
 */
 
 #include <stddef.h>  // for size_t
-
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -64,7 +61,7 @@ void uint_swap(unsigned int *a, unsigned int *b);
 /* shuffle an unsigned array */
 void uint_shuffle(unsigned int *a, unsigned int n);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

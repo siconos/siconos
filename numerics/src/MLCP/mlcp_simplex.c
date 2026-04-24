@@ -27,9 +27,8 @@ dim(v)=nn
 **************************************************************************/
 #include "mlcp_simplex.h"  // for mlcp_simplex_init, mlcp_simplex_reset
 
-#include "MLCP_Solvers.h"   // for mixedLinearComplementarity_simplex_setDefa...
-#include "NumericsFwd.h"    // for MixedLinearComplementarityProblem, SolverO...
-#include "SiconosConfig.h"  // for HAVE_MLCPSIMPLEX  // IWYU pragma: keep
+#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_simplex_setDefa...
+#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
 
 #ifdef HAVE_MLCPSIMPLEX
 
@@ -45,8 +44,9 @@ static int sIsInitialize = 0;
 #endif
 
 /* Solver registration system */
-#include "solver_registry.h"
+#include "mlcp_cst.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
 #ifdef HAVE_MLCPSIMPLEX
@@ -104,7 +104,8 @@ static int mlcp_simplex_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_simplex_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_simplex_solve_wrap(void* problem, double* z, double* w,
+                                   SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_simplex((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -118,11 +119,8 @@ static void mlcp_simplex_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_MLCP_SIMPLEX, "MLCP_SIMPLEX",
                 "Simplex solver for Mixed Linear Complementarity Problems",
-                mlcp_simplex_init_wrap,
-                mlcp_simplex_solve_wrap,
-                mlcp_simplex_free_wrap,
-                NULL,  /* error function */
-                mlcp_simplex_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_simplex_init_wrap, mlcp_simplex_solve_wrap, mlcp_simplex_free_wrap,
+                NULL,                           /* error function */
+                mlcp_simplex_set_default, 1000, /* default_max_iter */
+                1e-6,                           /* default_tol */
+                0 /* is_local_solver */);

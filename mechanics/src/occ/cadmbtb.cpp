@@ -34,7 +34,6 @@
 #include "ContactShapeDistance.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
-#include "SiconosConfig.h"
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // For n2qn1
 // #define DEBUG_MESSAGES 1

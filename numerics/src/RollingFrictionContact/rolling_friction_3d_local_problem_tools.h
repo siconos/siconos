@@ -21,24 +21,23 @@
 /*!\file
 
  */
-#include "NumericsFwd.h"    // for RollingFrictionContactProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for RollingFrictionContactProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(
     RollingFrictionContactProblem* problem);
 void rolling_friction_3d_local_problem_free(RollingFrictionContactProblem* localproblem,
-                                     RollingFrictionContactProblem* problem);
+                                            RollingFrictionContactProblem* problem);
 void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
-                                          RollingFrictionContactProblem* localproblem,
-                                          double* reaction, int contact);
+                                                 RollingFrictionContactProblem* localproblem,
+                                                 double* reaction, int contact);
 void rolling_friction_3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
-                                       RollingFrictionContactProblem* localproblem,
-                                       int contact);
+                                              RollingFrictionContactProblem* localproblem,
+                                              int contact);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

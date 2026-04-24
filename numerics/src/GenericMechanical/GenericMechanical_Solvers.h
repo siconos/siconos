@@ -26,7 +26,7 @@
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -74,7 +74,7 @@ int gmp_get_nb_dwork(GenericMechanicalProblem* problem, SolverOptions* options);
 void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       int* info, SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

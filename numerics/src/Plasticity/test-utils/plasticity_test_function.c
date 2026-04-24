@@ -20,14 +20,13 @@
 #include <stdlib.h>  // for calloc, free
 #include <time.h>
 
-#include "NonSmoothDrivers.h"     // for plasticity_2d_driver
-#include "NumericsFwd.h"          // for SolverOptions
-#include "PlasticityProblem.h"    // for plasticity2D_new_from_filename, etc
+#include "NonSmoothDrivers.h"   // for plasticity_2d_driver
+#include "NumericsFwd.h"        // for SolverOptions
+#include "PlasticityProblem.h"  // for plasticity2D_new_from_filename, etc
 #include "SiconosBlas.h"
-#include "SiconosConfig.h"
-#include "SolverOptions.h"  // for SolverOptions
-#include "test_utils.h"     // for TestCase
+#include "SolverOptions.h"          // for SolverOptions
 #include "plasticity_test_utils.h"  // for plasticity_test_function
+#include "test_utils.h"             // for TestCase
 
 int plasticity_test_function(TestCase* current) {
   int info = -1;
@@ -65,13 +64,13 @@ int plasticity_test_function(TestCase* current) {
   if (dim * NC >= print_size) {
     printf("First values (%i)\n", print_size);
     for (int k = 0; k < print_size; k++) {
-      printf("plastic_strain_rate[%i] = %12.8e \t \t stress[%i] = %12.8e\n", 
-             k, plastic_strain_rate[k], k, stress[k]);
+      printf("plastic_strain_rate[%i] = %12.8e \t \t stress[%i] = %12.8e\n", k,
+             plastic_strain_rate[k], k, stress[k]);
     }
   } else {
     for (int k = 0; k < dim * NC; k++) {
-      printf("plastic_strain_rate[%i] = %12.8e \t \t stress[%i] = %12.8e\n", 
-             k, plastic_strain_rate[k], k, stress[k]);
+      printf("plastic_strain_rate[%i] = %12.8e \t \t stress[%i] = %12.8e\n", k,
+             plastic_strain_rate[k], k, stress[k]);
     }
   }
   printf(" ..... \n");
@@ -85,10 +84,9 @@ int plasticity_test_function(TestCase* current) {
            current->options->dparam[SICONOS_DPARAM_RESIDU], info,
            current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
-  printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, 
-         current->options->dparam[SICONOS_DPARAM_RESIDU],
-         current->options->iparam[SICONOS_IPARAM_ITER_DONE], 
-         (double)(t2 - t1) / (double)clk_tck);
+  printf(
+      "\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU],
+      current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2 - t1) / (double)clk_tck);
   printf("%3i %5i     %s\n\n", dim, NC, current->filename);
 
   free(stress);

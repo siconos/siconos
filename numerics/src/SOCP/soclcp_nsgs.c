@@ -31,18 +31,16 @@
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
-#include "numerics_verbose.h"
-#include "soclcp_compute_error.h"                         // for soclcp_comp...
-#include "soclcp_projection.h"                            // for soclcp_proj...
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "naming_conventions.h"
 #include "numerics_errors.h"
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#include "numerics_verbose.h"
+#include "soclcp_compute_error.h"  // for soclcp_comp...
+#include "soclcp_projection.h"     // for soclcp_proj...
+#include "solver_registry.h"
 
-void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem,
-                        SecondOrderConeLinearComplementarityProblem* localproblem, double* r,
-                        SolverOptions* options) {
+static void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem,
+                               SecondOrderConeLinearComplementarityProblem* localproblem,
+                               double* r, SolverOptions* options) {
   /* Build a local problem for a specific cone
      r corresponds to the global vector (size n) of the global problem.
   */
@@ -67,7 +65,8 @@ void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* p
   /* coefficient for current block*/
   localproblem->n = problem->coneIndex[cone + 1] - problem->coneIndex[cone];
 }
-void soclcp_initializeLocalSolver_nsgs(
+
+static void soclcp_initializeLocalSolver_nsgs(
     Solver_soclcp_Ptr* solve, Update_soclcp_Ptr* update, FreeSolverNSGS_soclcp_Ptr* freeSolver,
     ComputeError_soclcp_Ptr* computeError,
     SecondOrderConeLinearComplementarityProblem* problem,
@@ -554,8 +553,8 @@ static int soclcp_nsgs_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int soclcp_nsgs_solve_wrap(void* problem, double* reaction,
-                                  double* velocity, SolverOptions* options) {
+static int soclcp_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
+                                  SolverOptions* options) {
   int info = NUMERICS_OK;
   soclcp_nsgs((SecondOrderConeLinearComplementarityProblem*)problem, reaction, velocity, &info,
               options);
@@ -568,13 +567,10 @@ static void soclcp_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_SOCLCP_NSGS, "SOCLCP_NSGS",
-                "Non-Smooth Gauss-Seidel for SOCLCP",
-                soclcp_nsgs_init_wrap,
-                soclcp_nsgs_solve_wrap,
-                soclcp_nsgs_free_wrap,
-                NULL,  /* error function */
-                soclcp_nsgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(SICONOS_SOCLCP_NSGS, "SOCLCP_NSGS", "Non-Smooth Gauss-Seidel for SOCLCP",
+                soclcp_nsgs_init_wrap, soclcp_nsgs_solve_wrap, soclcp_nsgs_free_wrap,
+                NULL,                    /* error function */
+                soclcp_nsgs_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */);

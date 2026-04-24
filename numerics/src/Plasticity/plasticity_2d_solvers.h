@@ -36,7 +36,7 @@ typedef void (*plasticity_2d_internalSolverPtr)(PlasticityProblem *, double *, d
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverPtr)();
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -146,7 +146,7 @@ void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem *problem,
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -36,10 +36,9 @@
 
 
  */
-#include "NumericsFwd.h"    // for SolverOptions, FrictionContactProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions, FrictionContactProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -88,7 +87,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem *probl
  */
 void fc3d_nsn_nm_set_default(SolverOptions *options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

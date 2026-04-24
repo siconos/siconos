@@ -77,7 +77,6 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort.h")
 endif()
 
 # --- MA57  ---
-#SET(WITH_MA57 1)
 # - Extra setup for the component -
 if(WITH_MA57) 
   target_sources(externals PRIVATE
@@ -113,6 +112,9 @@ target_compile_features(externals PUBLIC c_std_11)
 # externals lib and tests need blas and lapack
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas_lapack>)
+if(HAS_MKL_CBLAS)
+  target_compile_definitions(externals PRIVATE HAS_MKL_CBLAS) # For SiconosBlas.h only
+endif()
 
 # ---- Installation ----
 if(WITH_FORTRAN)

@@ -24,8 +24,6 @@
 #include "FirstOrderLinearDS.hpp"
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
-#include "SiconosConfig.h"
-#include "Twisting.hpp"
 
 class SMCTest : public CppUnit::TestFixture {
  private:
@@ -86,7 +84,7 @@ class SMCTest : public CppUnit::TestFixture {
  public:
   SMCTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(1.5e-8), _beta(0.1) {}
   void setUp();
-  void tearDown(){};
+  void tearDown() {};
 };
 
 #endif

@@ -94,17 +94,6 @@ macro(test_windows_setup test_name test_sources)
 
   # Use the proper linker for the proper language
   # fortran -> gfortran; {c,cpp} -> link.exe
-  if(BUILD_AS_CPP)
-    set(EXE_FORTRAN FALSE) # Windows only
-    foreach(_file IN LISTS ${test_sources})
-      if(${_file} MATCHES "[.]c$")
-        set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
-      endif()
-      if(${_file} MATCHES "[.]f$")
-        set(EXE_FORTRAN TRUE) # Windows only
-      endif()
-    endforeach()
-  endif()
   # Windows stuff ...
   if(MSVC AND EXE_FORTRAN)
     target_link_options(${test_name} "LINKER:--as-needed")
@@ -208,6 +197,7 @@ endif()
   # -- link with current component and its dependencies --
   # --> add include and links
   target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT})
+  target_link_libraries(${TEST_NAME} PRIVATE siconos_config)
   foreach(dir IN LISTS ${COMPONENT}_DIRS)
     target_include_directories(${TEST_NAME} PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
@@ -333,9 +323,6 @@ function(new_tests_collection)
   # This value is replaced in solver call in .c file.
   # Generate source file
   set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
-  if(BUILD_AS_CPP)
-    set(generated_driver_name ${generated_driver_name}xx)
-  endif()
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
     ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})

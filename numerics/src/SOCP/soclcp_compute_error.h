@@ -23,10 +23,9 @@
   \brief functions related to error computation for SOCLCP
 
 */
-#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -65,7 +64,7 @@ void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int
 int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem, double *z,
                            double *w, double tolerance, SolverOptions *options, double *error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

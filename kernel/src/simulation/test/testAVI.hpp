@@ -18,16 +18,10 @@
 #ifndef __AVITest__
 #define __AVITest__
 
-#include <SiconosConfig.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "AVI.hpp"
-#include "EulerMoreauOSI.hpp"
 #include "FirstOrderLinearDS.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NormalConeNSL.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 

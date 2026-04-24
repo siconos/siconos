@@ -24,10 +24,9 @@
 
 */
 
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -131,7 +130,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem *problem, double *z, double
                               double tolerance, SolverOptions *options, double norm,
                               double *error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

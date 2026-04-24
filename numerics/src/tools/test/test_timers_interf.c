@@ -3,8 +3,6 @@
    valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes
    --simulate-cache=yes */
 
-#include "SiconosConfig.h"  // for WITH_TIMERS // IWYU pragma: keep
-
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif

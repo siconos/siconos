@@ -21,16 +21,18 @@
 #include <stdio.h>   // for fclose, fopen
 #include <stdlib.h>  // for calloc, malloc
 #include <string.h>  // for NULL, memcpy
+#include <time.h>
 
-#include "FrictionContactProblem.h"                    // for FrictionContac...
-#include "FrictionContact_options.h"                   // for SICONOS_FRICTI...
-#include "Friction_tools.h"                            // for ComputeErrorPtr
-#include "NumericsArrays.h"                            // for uint_shuffle
-#include "NumericsFwd.h"                               // for SolverOptions
-#include "SiconosBlas.h"                               // for cblas_dnrm2
-#include "SolverOptions.h"                             // for SolverOptions
-#include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
-#include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
+#include "FrictionContact_options.h"  // for SICONOS_FRICTI...
+#include "Friction_tools.h"           // for ComputeErrorPtr
+#include "NumericsArrays.h"           // for uint_shuffle
+#include "NumericsFwd.h"              // for SolverOptions
+#include "SiconosBlas.h"              // for cblas_dnrm2
+#include "SolverOptions.h"            // for SolverOptions
+#include "SparseBlockMatrix.h"
+#include "fc3d_2NCP_Glocker.h"          // for NCPGlocker_update
+#include "fc3d_NCPGlockerFixedPoint.h"  // for fc3d_FixedP_in...
+#include "fc3d_Path.h"
 #include "fc3d_Path.h"                                 // for fc3d_Path_init...
 #include "fc3d_Solvers.h"                              // for fc3d_nsgs_set_default
 #include "fc3d_compute_error.h"                        // for fc3d_compute_e...
@@ -39,28 +41,16 @@
 #include "fc3d_projection.h"                           // for fc3d_projectio...
 #include "fc3d_short_names.h"                          // Short names for solver IDs
 #include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
-#include "numerics_verbose.h"                          // for numerics_printf
-
-/* Solver registration system */
-#include "numerics_errors.h"
-#include "solver_registry.h"
-
-/* New utility headers for standardized error computation, tolerance management, and naming
- * conventions */
-#include "error_computation.h"
-#include "tolerance_manager.h"
-
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-
-#include <time.h>
-
-#include "NumericsVector.h"
 #include "gfc3d_ipm.h"
 #include "graph_tools.h"
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_printf
 #include "op3x3.h"
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "siconos_debug.h"     // for DEBUG_EXPR
+// #include "projectionOnCone.h"  // for projectionOnCone
+#include "siconos_debug.h"  // for DEBUG_EXPR
+#include "solver_registry.h"
+#include "tolerance_manager.h"
 
 // #define FCLIB_OUTPUT
 

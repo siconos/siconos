@@ -27,9 +27,8 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
-#include <iostream>
+// #include <iostream>
 
-#include "SiconosConfig.h"
 namespace siconos::modeling {
 class DynamicalSystem;
 class LagrangianDS;

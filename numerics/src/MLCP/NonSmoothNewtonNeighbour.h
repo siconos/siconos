@@ -19,7 +19,6 @@
 #define NONSMOOTHNEWTONNEIGH_H
 
 #include "NonSmoothNewton.h"  // for NewtonFunctionPtr
-#include "SiconosConfig.h"    // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file NonSmoothNewtonNeighbour.h
   Typedef and functions declarations related to non-smooth Newton solver
@@ -32,7 +31,7 @@
 
  */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -46,7 +45,7 @@ int nonSmoothNewtonNeigh_getNbDWork(int n, int m);
 /*only for debug*/
 void NSNN_thisIsTheSolution(int n, double* z);
 void NSNN_reset(void);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

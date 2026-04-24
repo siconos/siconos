@@ -19,13 +19,12 @@
 #include "mlcp_direct_simplex.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
+#include "MLCP_Solvers.h"  // for mixedLinearComplement...
+#include "mlcp_cst.h"
+#include "mlcp_direct.h"   // for mlcp_direct_addConfig...
+#include "mlcp_simplex.h"  // for mlcp_simplex_init
 #include "numerics_errors.h"
-
-#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
-#include "mlcp_simplex.h"                       // for mlcp_simplex_init
+#include "solver_registry.h"
 static int sN;
 static int sM;
 
@@ -80,7 +79,8 @@ static int mlcp_direct_simplex_init_wrap(void* problem, SolverOptions* options) 
   return NUMERICS_OK;
 }
 
-static int mlcp_direct_simplex_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_direct_simplex_solve_wrap(void* problem, double* z, double* w,
+                                          SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_direct_simplex((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -94,11 +94,8 @@ static void mlcp_direct_simplex_free_wrap(void* problem, SolverOptions* options)
 
 REGISTER_SOLVER(SICONOS_MLCP_DIRECT_SIMPLEX, "MLCP_DIRECT_SIMPLEX",
                 "Direct-Simplex hybrid solver for Mixed Linear Complementarity Problems",
-                mlcp_direct_simplex_init_wrap,
-                mlcp_direct_simplex_solve_wrap,
-                mlcp_direct_simplex_free_wrap,
-                NULL,  /* error function */
-                mlcp_direct_simplex_set_default,
-                1000,  /* default_max_iter */
-                1e-12, /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_direct_simplex_init_wrap, mlcp_direct_simplex_solve_wrap,
+                mlcp_direct_simplex_free_wrap, NULL,   /* error function */
+                mlcp_direct_simplex_set_default, 1000, /* default_max_iter */
+                1e-12,                                 /* default_tol */
+                0 /* is_local_solver */);

@@ -34,22 +34,18 @@ dim(v)=nn
 #include <stdio.h>   // for printf
 #include <string.h>  // for memcpy
 
-#include "MLCP_Solvers.h"                       // for mlcp_compute_error
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "NumericsMatrix.h"                     // for NM_dense_display, Num...
-#include "SiconosBlas.h"                        // for cblas_dnrm2
-#include "SiconosConfig.h"                      // for MLCP_DEBUG // IWYU pragma: keep
-#include "SiconosLapack.h"                      // for DGELS, DGESV, lapack_int
-#include "SolverOptions.h"                      // for SolverOptions, SICONO...
+#include "MLCP_Solvers.h"    // for mlcp_compute_error
+#include "NumericsMatrix.h"  // for NM_dense_display, Num...
+#include "SiconosBlas.h"     // for cblas_dnrm2
+#include "SiconosLapack.h"   // for DGELS, DGESV, lapack_int
+#include "SolverOptions.h"   // for SolverOptions, SICONO...
 #include "enum_tool.h"
 #include "mlcp_cst.h"  // for SICONOS_IPARAM_MLCP_E...
 #include "mlcp_enum.h"
-#include "mlcp_enum_tool.h"    //
-#include "numerics_verbose.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "mlcp_enum_tool.h"  //
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
@@ -418,11 +414,9 @@ static int mlcp_enum_solve_wrap(void* problem, double* z, double* w, SolverOptio
 
 REGISTER_SOLVER(SICONOS_MLCP_ENUM, "MLCP_ENUM",
                 "Enumerative solver for Mixed Linear Complementarity Problems",
-                mlcp_enum_init_wrap,
-                mlcp_enum_solve_wrap,
-                NULL,    /* free function */
-                NULL,    /* error function */
-                mlcp_enum_set_default,  /* set_default */
-                100000000, /* default_max_iter */
-                1e-6,    /* default_tol */
-                0        /* is_local_solver */);
+                mlcp_enum_init_wrap, mlcp_enum_solve_wrap, NULL, /* free function */
+                NULL,                                            /* error function */
+                mlcp_enum_set_default,                           /* set_default */
+                100000000,                                       /* default_max_iter */
+                1e-6,                                            /* default_tol */
+                0 /* is_local_solver */);

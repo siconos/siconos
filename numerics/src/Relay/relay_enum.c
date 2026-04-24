@@ -22,16 +22,14 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_enum
 #include "Relay_options.h"
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
-#include "Relay_options.h"                     // for SICONOS_RELAY_ENUM
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "Relay_options.h"  // for SICONOS_RELAY_ENUM
+#include "SolverOptions.h"  // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"        // for SICONOS_LCP_ENUM
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 void relay_enum(RelayProblem *problem, double *z, double *w, int *info,
                 SolverOptions *options) {
   int i;
@@ -93,35 +91,31 @@ void relay_enum(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_ENUM in the global solver registry.
  */
 
-static void relay_enum_set_default(SolverOptions* options) {
+static void relay_enum_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_enum_init_wrap(void* problem, SolverOptions* options) {
+static int relay_enum_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int relay_enum_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
   int info = NUMERICS_OK;
-  relay_enum((RelayProblem*)problem, z, w, &info, options);
+  relay_enum((RelayProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_enum_free_wrap(void* problem, SolverOptions* options) {
+static void relay_enum_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_RELAY_ENUM, "RELAY_ENUM",
-                "Enumerative solver for Relay problems",
-                relay_enum_init_wrap,
-                relay_enum_solve_wrap,
-                relay_enum_free_wrap,
-                NULL,  /* error function */
-                relay_enum_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(SICONOS_RELAY_ENUM, "RELAY_ENUM", "Enumerative solver for Relay problems",
+                relay_enum_init_wrap, relay_enum_solve_wrap, relay_enum_free_wrap,
+                NULL,                         /* error function */
+                relay_enum_set_default, 1000, /* default_max_iter */
+                1e-6,                         /* default_tol */
+                0 /* is_local_solver */);

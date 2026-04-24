@@ -24,8 +24,7 @@
 #define CONVEXQP_H
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for ConvexQP, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for ConvexQP, NumericsMatrix
 
 /** \struct ConvexQP ConvexQP.h
  *
@@ -49,7 +48,7 @@ struct ConvexQP {
   void* set;                /**< opaque struct that represent the set C (possibly empty) */
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** display a ConvexQPProblem
@@ -100,7 +99,7 @@ ConvexQP* convexQP_new(int size);
  */
 static inline void* convexQP_get_env(void* cqp) { return ((ConvexQP*)cqp)->env; }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

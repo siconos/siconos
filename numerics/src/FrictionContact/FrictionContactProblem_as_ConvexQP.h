@@ -22,9 +22,7 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"    // for ConvexQP, FrictionContactProblem, SolverOpt...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
+#include "NumericsFwd.h"  // for ConvexQP, FrictionContactProblem, SolverOpt...
 /** \struct FrictionContactProblem_as_ConvexQP FrictionContactProblem_as_ConvexQP.h
  *
  */
@@ -37,7 +35,7 @@ struct FrictionContactProblem_as_ConvexQP {
   SolverOptions *options;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -45,7 +43,7 @@ void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX);
 
 void Projection_ConvexQP_FC3D_Disk(void *cqpIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

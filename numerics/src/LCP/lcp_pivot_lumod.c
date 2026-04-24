@@ -29,24 +29,22 @@
 #include <string.h>  // for memset
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_piv...
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "NumericsMatrix.h"                // IWYU pragma: keep
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_daxpy
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_LEMKE
+#include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
+#include "lumod_wrapper.h"                 // for SN_lumod_dense_solve, SN_l...
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "pivot-utils.h"  // for do_pivot_lumod
+#include "solver_registry.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_NO_MATRIX
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_daxpy
-#include "lcp_cst.h"           // for SICONOS_LCP_PIVOT_LEMKE
-#include "lcp_pivot.h"         // for LCP_PATHSEARCH_LEAVING_T
-#include "lumod_wrapper.h"     // for SN_lumod_dense_solve, SN_l...
-#include "numerics_verbose.h"
-#include "pivot-utils.h"       // for do_pivot_lumod
-#include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
-
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_EXPR_WE, DEBUG_PRINT
 
 #define BASIS_OFFSET 1
 
@@ -400,6 +398,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
                 "The pivot column is nonpositive ! We are on ray !\n"
                 "It either means that the algorithm failed or that the LCP is infeasible\n"
                 "Check the class of the M matrix to find out the meaning of this\n");
+            __attribute__((fallthrough));
           default:
             bck_drive = drive < dim + 1 ? drive - 1 : drive - dim - 2;
         }
@@ -591,7 +590,8 @@ static int lcp_pivot_lumod_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_pivot_lumod_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_pivot_lumod_solve_wrap(void* problem, double* z, double* w,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_pivot_lumod((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -602,13 +602,10 @@ static void lcp_pivot_lumod_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD",
-                "Pivot solver with LUMOD for LCP",
-                lcp_pivot_lumod_init_wrap,
-                lcp_pivot_lumod_solve_wrap,
-                lcp_pivot_lumod_free_wrap,
-                NULL,  /* error function */
-                lcp_pivot_lumod_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_PIVOT_LUMOD, "LCP_PIVOT_LUMOD", "Pivot solver with LUMOD for LCP",
+                lcp_pivot_lumod_init_wrap, lcp_pivot_lumod_solve_wrap,
+                lcp_pivot_lumod_free_wrap, NULL, /* error function */
+                lcp_pivot_lumod_set_default,     /* set_default */
+                1000,                            /* default_max_iter */
+                1e-6,                            /* default_tol */
+                0);                              /* is_local_solver */

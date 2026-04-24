@@ -35,7 +35,7 @@
 #include "NonSmoothGaussSeidel_options.h"
 #include "solver_registry.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -130,7 +130,7 @@ const NSGSLocalProblemOps* nsgs_fc2d_local_ops(void);
 const NSGSLocalProblemOps* nsgs_rfc3d_local_ops(void);
 const NSGSLocalProblemOps* nsgs_plasticity_2d_local_ops(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

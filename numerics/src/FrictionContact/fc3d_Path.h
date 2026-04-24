@@ -33,7 +33,7 @@
 
 #include "FrictionContactProblem.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Initialize friction-contact 3D Path solver
@@ -66,7 +66,7 @@ void fc3d_Path_free(FrictionContactProblem*, FrictionContactProblem*, SolverOpti
 void fc3d_Path_computeError(int dimension, double* velocity, double* reaction,
                             double* output_error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

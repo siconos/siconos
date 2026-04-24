@@ -39,9 +39,7 @@ sum_{k=0:n} p[k] x^(n-k) =0
 Assume p[0]<>0 (overflows otherwise)
 **/
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Suite of procedures for finding the (complex) roots of the quadratic,
@@ -53,7 +51,7 @@ int QUADROOTS(double p[5], double r[3][5]);
 int CUBICROOTS(double p[5], double r[3][5]);
 int BIQUADROOTS(double p[5], double r[3][5]);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

@@ -55,13 +55,9 @@
 
 #include <cassert>
 
-#include "NonSmoothDrivers.h"
-#include "SiconosConfig.h"
-/*only for debug functions*/
 #include "MLCP_Solvers.h"
 #include "MixedLinearComplementarityProblem.h"
-#include "NonSmoothNewtonNeighbour.h"
-#include "NumericsMatrix.h"
+#include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
 #include "mlcp_cst.h"
 
@@ -70,7 +66,7 @@ static int verbose;
 #define NAX_NBTESTS 20
 
 #define BAVARD
-//#define NBTEST 19
+// #define NBTEST 19
 #define NBTEST 10
 
 #define ENUM_ID 0

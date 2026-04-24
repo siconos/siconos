@@ -27,7 +27,7 @@
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -228,7 +228,7 @@ void fc2d_list_available_solvers(void);
 
 void fc2d_print_solver_info(solver_id_t solver_id);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

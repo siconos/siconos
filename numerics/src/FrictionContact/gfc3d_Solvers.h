@@ -23,10 +23,7 @@
 
 */
 
-#include "FrictionContact_options.h"
-#include "GlobalFrictionContactProblem.h"
-#include "SolverOptions.h"
-#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
+#include "GlobalFrictionContactProblem.h"  // IWYU pragma: keep
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
@@ -34,10 +31,10 @@ typedef void (*PostSolverGlobalPtr)(int, double*);
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double*,
-                                      double, SolverOptions*, double, double, double*);
+typedef int (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double*,
+                                     double, SolverOptions*, double, double, double*);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -311,7 +308,7 @@ void gfc3d_vi_fpp_set_default(SolverOptions* options);
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

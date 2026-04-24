@@ -28,8 +28,7 @@
 
 #include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
 #include "NumericsDataVersion.h"
-#include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsSparseMatrix, NSM_linear_solver_p...
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations
@@ -41,7 +40,7 @@ typedef struct linalg_data_t {
 
 typedef enum { SN_LINALG_UNKNOWN, SN_LINALG_MKL } linalg_data_id;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -329,7 +328,7 @@ void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type);
  */
 void NSM_version_sync(NumericsSparseMatrix* M);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

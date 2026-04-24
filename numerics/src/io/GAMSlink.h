@@ -404,7 +404,7 @@ static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector,
   return 0;
 }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -458,7 +458,7 @@ void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned t
  */
 void deleteGAMSparams(SN_GAMSparams* GP);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

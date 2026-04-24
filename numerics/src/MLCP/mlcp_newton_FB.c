@@ -20,14 +20,12 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit
 
-#include "FischerBurmeister.h"                  // for phi_Mixed_FB
-#include "MLCP_Solvers.h"                       // for mlcp_compute_error
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "Newton_methods.h"                     // for functions_LSA, init_l...
-#include "NumericsFwd.h"                        // for MixedLinearComplement...
-#include "NumericsMatrix.h"                     // for NumericsMatrix
-#include "SiconosBlas.h"                        // for cblas_dgemv, cblas_dcopy
-#include "numerics_errors.h"
+#include "FischerBurmeister.h"  // for phi_Mixed_FB
+#include "MLCP_Solvers.h"       // for mlcp_compute_error
+#include "Newton_methods.h"     // for functions_LSA, init_l...
+#include "NumericsFwd.h"        // for MixedLinearComplement...
+#include "NumericsMatrix.h"     // IWYU pragma: keep
+#include "SiconosBlas.h"        // for cblas_dgemv, cblas_dcopy
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w) {
@@ -122,10 +120,17 @@ void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabl
   mlcp_compute_error((MixedLinearComplementarityProblem*)data_opaque, z, w, tol, err);
 }
 
+static void mlcp_FB_wrapper(void* data_opaque, double* z, double* F, double* F_merit) {
+  MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem*)data_opaque;
+  int info = 0;
+  mlcp_FB(problem, z, F_merit, &info, NULL); 
+};
+
 void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double* z, double* w,
                     int* info, SolverOptions* options) {
   functions_LSA functions_FBLSA_mlcp;
-  init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, (compute_F_merit_ptr)&mlcp_FB);
+  //  init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, &mlcp_FB);
+  init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, &mlcp_FB_wrapper);
   functions_FBLSA_mlcp.compute_H = &FB_compute_H_mlcp;
   functions_FBLSA_mlcp.compute_error = &FB_compute_error_mlcp;
 

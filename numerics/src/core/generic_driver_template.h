@@ -36,11 +36,11 @@
 #ifndef GENERIC_DRIVER_TEMPLATE_H
 #define GENERIC_DRIVER_TEMPLATE_H
 
-#include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_verbose.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "naming_conventions.h"
+#include "numerics_errors.h"
 
 /* ===========================================================================
  * Macro: GENERIC_DRIVER_IMPLEMENTATION
@@ -54,78 +54,78 @@
  *   aux         - Auxiliary variable name (e.g., "w", "velocity")
  */
 
-#define GENERIC_DRIVER_IMPLEMENTATION(prefix, ProblemType, sol, aux) \
-\
-int prefix##_driver_registered(ProblemType* problem, double* sol, \
-                               double* aux, SolverOptions* options) { \
-  NUMERICS_CHECK_NULL(problem); \
-  NUMERICS_CHECK_NULL(sol); \
-  NUMERICS_CHECK_NULL(aux); \
-  NUMERICS_CHECK_NULL(options); \
-  \
-  SET_SOLVER_ITER_DONE(options, 0); \
-  SET_SOLVER_RESIDUAL(options, 0.0); \
-  \
-  const SolverEntry* solver = solver_registry_lookup(options->solverId); \
-  if (!solver) { \
-    numerics_printf_verbose(0, #prefix "_driver_registered: solver ID %d not found", \
-                            options->solverId); \
-    return NUMERICS_ERR_INVALID_SOLVER; \
-  } \
-  \
-  numerics_printf_verbose(1, #prefix "_driver_registered: using solver '%s' (%s)", \
-                          solver->name, solver->description); \
-  \
-  if (solver->is_local_solver) { \
-    numerics_printf_verbose(0, #prefix "_driver_registered: '%s' is a local solver", \
-                            solver->name); \
-    return NUMERICS_ERR_INVALID_SOLVER; \
-  } \
-  \
-  if (solver->init) { \
-    int status = solver->init(problem, options); \
-    if (status != NUMERICS_OK) return status; \
-  } \
-  \
-  int status; \
-  if (solver->has_3var) { \
-    /* For 3-parameter solvers (e.g., GFC3D with globalVelocity) */ \
-    double* third_var = (double*)calloc(1, sizeof(double)); /* placeholder */ \
-    status = solver->solve3(problem, sol, aux, third_var, options); \
-    free(third_var); \
-  } else { \
-    status = solver->solve(problem, sol, aux, options); \
-  } \
-  \
-  if (solver->free) solver->free(problem, options); \
-  \
-  return status; \
-} \
-\
-SolverOptions* prefix##_solver_options_create(solver_id_t solver_id) { \
-  const SolverEntry* solver = solver_registry_lookup(solver_id); \
-  if (!solver || solver->is_local_solver) { \
-    fprintf(stderr, #prefix "_solver_options_create: invalid solver ID %d\n", solver_id); \
-    return NULL; \
-  } \
-  SolverOptions* options = solver_options_create(solver_id); \
-  if (!options) return NULL; \
-  if (solver->init) solver->init(NULL, options); \
-  return options; \
-} \
-\
-void prefix##_list_available_solvers(void) { \
-  printf("\nAvailable " #prefix " solvers:\n"); \
-  printf("------------------------\n"); \
-  size_t count; \
-  const SolverEntry** solvers = solver_registry_get_all(&count); \
-  for (size_t i = 0; i < count; i++) { \
-    const SolverEntry* s = solvers[i]; \
-    printf("  %-20s (ID=%d, max_iter=%d, tol=%.2e)\n", \
-           s->name, s->id, s->default_max_iter, s->default_tol); \
-  } \
-  printf("\n"); \
-}
+#define GENERIC_DRIVER_IMPLEMENTATION(prefix, ProblemType, sol, aux)                          \
+                                                                                              \
+  int prefix##_driver_registered(ProblemType* problem, double* sol, double* aux,              \
+                                 SolverOptions* options) {                                    \
+    NUMERICS_CHECK_NULL(problem);                                                             \
+    NUMERICS_CHECK_NULL(sol);                                                                 \
+    NUMERICS_CHECK_NULL(aux);                                                                 \
+    NUMERICS_CHECK_NULL(options);                                                             \
+                                                                                              \
+    SET_SOLVER_ITER_DONE(options, 0);                                                         \
+    SET_SOLVER_RESIDUAL(options, 0.0);                                                        \
+                                                                                              \
+    const SolverEntry* solver = solver_registry_lookup(options->solverId);                    \
+    if (!solver) {                                                                            \
+      numerics_printf_verbose(0, #prefix "_driver_registered: solver ID %d not found",        \
+                              options->solverId);                                             \
+      return NUMERICS_ERR_INVALID_SOLVER;                                                     \
+    }                                                                                         \
+                                                                                              \
+    numerics_printf_verbose(1, #prefix "_driver_registered: using solver '%s' (%s)",          \
+                            solver->name, solver->description);                               \
+                                                                                              \
+    if (solver->is_local_solver) {                                                            \
+      numerics_printf_verbose(0, #prefix "_driver_registered: '%s' is a local solver",        \
+                              solver->name);                                                  \
+      return NUMERICS_ERR_INVALID_SOLVER;                                                     \
+    }                                                                                         \
+                                                                                              \
+    if (solver->init) {                                                                       \
+      int status = solver->init(problem, options);                                            \
+      if (status != NUMERICS_OK) return status;                                               \
+    }                                                                                         \
+                                                                                              \
+    int status;                                                                               \
+    if (solver->has_3var) {                                                                   \
+      /* For 3-parameter solvers (e.g., GFC3D with globalVelocity) */                         \
+      double* third_var = (double*)calloc(1, sizeof(double)); /* placeholder */               \
+      status = solver->solve3(problem, sol, aux, third_var, options);                         \
+      free(third_var);                                                                        \
+    } else {                                                                                  \
+      status = solver->solve(problem, sol, aux, options);                                     \
+    }                                                                                         \
+                                                                                              \
+    if (solver->free) solver->free(problem, options);                                         \
+                                                                                              \
+    return status;                                                                            \
+  }                                                                                           \
+                                                                                              \
+  SolverOptions* prefix##_solver_options_create(solver_id_t solver_id) {                      \
+    const SolverEntry* solver = solver_registry_lookup(solver_id);                            \
+    if (!solver || solver->is_local_solver) {                                                 \
+      fprintf(stderr, #prefix "_solver_options_create: invalid solver ID %d\n", solver_id);   \
+      return NULL;                                                                            \
+    }                                                                                         \
+    SolverOptions* options = solver_options_create(solver_id);                                \
+    if (!options) return NULL;                                                                \
+    if (solver->init) solver->init(NULL, options);                                            \
+    return options;                                                                           \
+  }                                                                                           \
+                                                                                              \
+  void prefix##_list_available_solvers(void) {                                                \
+    printf("\nAvailable " #prefix " solvers:\n");                                             \
+    printf("------------------------\n");                                                     \
+    size_t count;                                                                             \
+    const SolverEntry** solvers = solver_registry_get_all(&count);                            \
+    for (size_t i = 0; i < count; i++) {                                                      \
+      const SolverEntry* s = solvers[i];                                                      \
+      printf("  %-20s (ID=%d, max_iter=%d, tol=%.2e)\n", s->name, s->id, s->default_max_iter, \
+             s->default_tol);                                                                 \
+    }                                                                                         \
+    printf("\n");                                                                             \
+  }
 
 /* ===========================================================================
  * Usage Examples:

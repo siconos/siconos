@@ -17,14 +17,13 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "fc3d_short_names.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_AVI_gams_path, fc3d_AVI_gams_pathvi
+#include "fc3d_short_names.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
-
+#include "solver_registry.h"
 #ifdef HAVE_GAMS_C_API
 
 #include <assert.h>
@@ -1144,14 +1143,14 @@ void fc3d_AVI_gams_pathvi(FrictionContactProblem* problem, double* reaction, dou
 
 #else
 
-void fc3d_AVI_gams_path(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options) {
+void fc3d_AVI_gams_path(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
 
-void fc3d_AVI_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
-                          int *info, SolverOptions *options) {
+void fc3d_AVI_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
+                          int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
@@ -1174,79 +1173,77 @@ static void fc3d_gams_pathvi_set_default(SolverOptions* options) {
 
 #ifdef HAVE_GAMS_C_API
 
-static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity,
+                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_AVI_gams_path((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATH,
-                             "FC3D_GAMS_PATH",
-                             "GAMS PATH solver for 3D Friction Contact (AVI formulation)",
-                             NULL,   /* init_wrap */
-                             fc3d_gams_path_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_gams_path_set_default,
-                             1000,   /* default_max_iter */
-                             1e-6,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_GAMS_PATH, "FC3D_GAMS_PATH",
+                "GAMS PATH solver for 3D Friction Contact (AVI formulation)",
+                NULL,                             /* init_wrap */
+                fc3d_gams_path_solve_wrap, NULL,  /* free_wrap */
+                NULL,                             /* err_fn */
+                fc3d_gams_path_set_default, 1000, /* default_max_iter */
+                1e-6,                             /* default_tol */
+                0)                                /* is_local_solver */
 
-static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity,
+                                       SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_AVI_gams_pathvi((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATHVI,
-                             "FC3D_GAMS_PATHVI",
-                             "GAMS PATHVI solver for 3D Friction Contact (AVI formulation)",
-                             NULL,   /* init_wrap */
-                             fc3d_gams_pathvi_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_gams_pathvi_set_default,
-                             1000,   /* default_max_iter */
-                             1e-6,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
+                "GAMS PATHVI solver for 3D Friction Contact (AVI formulation)",
+                NULL,                               /* init_wrap */
+                fc3d_gams_pathvi_solve_wrap, NULL,  /* free_wrap */
+                NULL,                               /* err_fn */
+                fc3d_gams_pathvi_set_default, 1000, /* default_max_iter */
+                1e-6,                               /* default_tol */
+                0)                                  /* is_local_solver */
 
 #else
 
 /* Stub registrations when GAMS is not available */
-static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
-  (void)problem; (void)reaction; (void)velocity; (void)options;
+static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* velocity,
+                                     SolverOptions* options) {
+  (void)problem;
+  (void)reaction;
+  (void)velocity;
+  (void)options;
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   return NUMERICS_ERR_UNKNOWN;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATH,
-                             "FC3D_GAMS_PATH",
-                             "GAMS PATH solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
-                             NULL,   /* init_wrap */
-                             fc3d_gams_path_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_gams_path_set_default,
-                             1000,   /* default_max_iter */
-                             1e-6,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_GAMS_PATH, "FC3D_GAMS_PATH",
+                "GAMS PATH solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
+                NULL,                             /* init_wrap */
+                fc3d_gams_path_solve_wrap, NULL,  /* free_wrap */
+                NULL,                             /* err_fn */
+                fc3d_gams_path_set_default, 1000, /* default_max_iter */
+                1e-6,                             /* default_tol */
+                0)                                /* is_local_solver */
 
-static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
-  (void)problem; (void)reaction; (void)velocity; (void)options;
+static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* velocity,
+                                       SolverOptions* options) {
+  (void)problem;
+  (void)reaction;
+  (void)velocity;
+  (void)options;
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   return NUMERICS_ERR_UNKNOWN;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATHVI,
-                             "FC3D_GAMS_PATHVI",
-                             "GAMS PATHVI solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
-                             NULL,   /* init_wrap */
-                             fc3d_gams_pathvi_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_gams_pathvi_set_default,
-                             1000,   /* default_max_iter */
-                             1e-6,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
+                "GAMS PATHVI solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
+                NULL,                               /* init_wrap */
+                fc3d_gams_pathvi_solve_wrap, NULL,  /* free_wrap */
+                NULL,                               /* err_fn */
+                fc3d_gams_pathvi_set_default, 1000, /* default_max_iter */
+                1e-6,                               /* default_tol */
+                0)                                  /* is_local_solver */
 
 #endif /* HAVE_GAMS_C_API */

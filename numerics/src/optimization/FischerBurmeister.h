@@ -51,14 +51,13 @@
 
 */
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 #ifdef __cplusplus
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -113,7 +112,7 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
               double* restrict workV2, NumericsMatrix* restrict nabla_F,
               NumericsMatrix* restrict H);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -20,8 +20,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
 
 /** The structure that defines a Second Order Cone Linear Complementarity Problem.
  */
@@ -44,7 +43,7 @@ struct SecondOrderConeLinearComplementarityProblem {
   double* tau;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C"
 
 {
@@ -114,7 +113,7 @@ void freeSecondOrderConeLinearComplementarityProblem(
 SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new(
     int n, int nc, NumericsMatrix* M, double* q, unsigned int* coneIndex, double* mu);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

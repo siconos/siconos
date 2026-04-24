@@ -23,7 +23,6 @@
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
-#include "NumericsVector.h"        // for NV_display
 
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>

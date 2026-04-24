@@ -22,13 +22,13 @@
 #ifndef MLCP_TO_LCP_H
 #define MLCP_TO_LCP_H
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

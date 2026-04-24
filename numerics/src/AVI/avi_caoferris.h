@@ -23,15 +23,14 @@
 #ifndef AVI_CAOFERRIS_H
 #define AVI_CAOFERRIS_H
 
-#include "NumericsFwd.h"    // for LinearComplementarityProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -48,7 +47,7 @@ extern "C" {
 int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* u, double* s,
                          double* d, unsigned size_x, unsigned* A, SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -35,9 +35,9 @@
  * ZERO=DBL_EPSILON*100 (too small) => test-3D_NSN_FB-NESpheres_30_1 fails (division by 0)
  * ZERO=1e-10 (too big) => test-3D_NSN_FB-OneObject-i100000-499.hdf5 fails (no convergence)
  */
-#define ZERO DBL_EPSILON * 500
 
-#define ZERO_SQR ZERO *ZERO
+static const double ZERO = DBL_EPSILON * 500.;
+static const double ZERO_SQR = DBL_EPSILON * 500. * DBL_EPSILON * 500.;
 
 #ifdef FB_ASSERT
 #define FB_WARN(M, X) assert(X &&M)
@@ -80,10 +80,13 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x)                                                                   \
-  ((((double)x >= 0. && x <= ZERO_SQR) || ((double)x < 0. && (double)x >= -ZERO)) \
-       ? 0.                                                                       \
-       : (FB_WARN("sqrt", x >= 0.), sqrt(x)))
+
+static inline double safe_sqrt(double x) {
+  if (x >= 0. && x <= ZERO_SQR) return 0.;
+  if (x < 0. && x >= -ZERO) return 0.;
+  assert(x >= 0.);
+  return sqrt(x);
+}
 
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
 void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, double un,
@@ -131,7 +134,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   POST_CHECK_POW(x2);
   /*@ assert (x2) >= 0.;*/
   /*@ assert (x1 + x2) >= 0.;*/
-  x3 = sqrt(x1 + x2);
+  x3 = safe_sqrt(x1 + x2);
   POST_CHECK_POW(x3);
   /*@ assert (x3) >= 0.;*/
   x4 = x3 * mu + un;
@@ -174,7 +177,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   x20 = x16 + x19;
   POST_CHECK_ADD(x20);
   /*@ assert (x20) >= 0.;*/
-  x21 = sqrt(x20);
+  x21 = safe_sqrt(x20);
   POST_CHECK_POW(x21);
   x22 = 2 * x21;
   POST_CHECK_MUL(x22);
@@ -246,10 +249,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   POST_CHECK(x177);
   if (x39) {
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -269,18 +272,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x36);
   } else if (x49) {
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -295,10 +298,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x48);
   } else if (x61) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     /*@ assert (x26) != 0.;*/
     x50 = 0.5 / x26;
@@ -321,10 +324,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x57);
   } else if (x100) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     /*@ assert (x26) != 0.;*/
     x50 = 0.5 / x26;
@@ -353,12 +356,12 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x99);
   } else if (x59) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     x25 = 0.5 * x24;
     POST_CHECK_MUL(x25);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     x27 = 0.5 * x26;
     POST_CHECK_MUL(x27);
@@ -371,12 +374,12 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x112);
   } else if (x37) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     x25 = 0.5 * x24;
     POST_CHECK_MUL(x25);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     x27 = 0.5 * x26;
     POST_CHECK_MUL(x27);
@@ -390,10 +393,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x114);
   } else if (x125) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     /*@ assert (x26) != 0.;*/
     x50 = 0.5 / x26;
@@ -422,10 +425,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x114);
   } else if (x177) {
     /*@ assert (x23) >= 0.;*/
-    x24 = sqrt(x23);
+    x24 = safe_sqrt(x23);
     POST_CHECK_POW(x24);
     /*@ assert (x13 + x22) >= 0.;*/
-    x26 = sqrt(x13 + x22);
+    x26 = safe_sqrt(x13 + x22);
     POST_CHECK_POW(x26);
     /*@ assert (x26) != 0.;*/
     x50 = 0.5 / x26;
@@ -461,12 +464,12 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   }
   /* Assignment result[0, 0]=-x25 - x27 + x4 + x5 */
   /*@ assert (x23) >= 0.;*/
-  x24 = sqrt(x23);
+  x24 = safe_sqrt(x23);
   POST_CHECK_POW(x24);
   x25 = 0.5 * x24;
   POST_CHECK_MUL(x25);
   /*@ assert (x13 + x22) >= 0.;*/
-  x26 = sqrt(x13 + x22);
+  x26 = safe_sqrt(x13 + x22);
   POST_CHECK_POW(x26);
   x27 = 0.5 * x26;
   POST_CHECK_MUL(x27);
@@ -572,10 +575,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -596,10 +599,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 1]=x31*(-x35*mu + x34 + x36) */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -622,18 +625,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -649,18 +652,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 1]=x43*x45*(-x44*x46 - x47 + x48) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -740,10 +743,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -762,10 +765,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 1]=x115 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -786,18 +789,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -830,18 +833,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     /* Assignment result[1, 1]=x117*(0.5*x118*x119*x44*x7*rt1*un - x118*x119*x47*x7*rt1 +
      * 0.5*x118*x119*x120*x44*un - x118*x119*x120*x47) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -1008,10 +1011,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -1030,10 +1033,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 1]=x115 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -1054,18 +1057,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -1098,18 +1101,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     /* Assignment result[2, 1]=x117*(0.5*x118*x119*x44*x6*rt2*un - x118*x119*x47*x6*rt2 +
      * 0.5*x118*x119*x169*x44*un - x118*x119*x169*x47) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -1291,7 +1294,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -1305,7 +1308,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 2]=x64 */
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -1321,18 +1324,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -1348,7 +1351,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
     /*@ assert (x65) >= 0.;*/
-    x66 = sqrt(x65);
+    x66 = safe_sqrt(x65);
     POST_CHECK_POW(x66);
     /*@ assert (x66) != 0.;*/
     x67 = x43 * x45 / x66;
@@ -1361,18 +1364,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 2]=x67*(0.5*x44*x8*rt1*rn*un - x47*x8*rt1*rn + x69) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -1388,7 +1391,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
     /*@ assert (x65) >= 0.;*/
-    x66 = sqrt(x65);
+    x66 = safe_sqrt(x65);
     POST_CHECK_POW(x66);
     /*@ assert (x66) != 0.;*/
     x67 = x43 * x45 / x66;
@@ -1526,10 +1529,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -1574,10 +1577,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 2]=x138 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -1624,15 +1627,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -1730,15 +1733,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
      * x136*x158 + x146 + x150 + x151 + x153 + x154 - x155*x156 + x159 + x160 - 2.0*x161
      * - 2.0*x162 - 4.0*x163 - 4.0*x164) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -2040,10 +2043,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -2083,10 +2086,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 2]=x167 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -2128,15 +2131,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -2218,15 +2221,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 2]=x142*(x170 + x192 + x193 + x194 + x195 + x196 + x197) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -2509,7 +2512,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -2523,7 +2526,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 3]=x64 */
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -2539,18 +2542,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -2566,7 +2569,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
     /*@ assert (x65) >= 0.;*/
-    x66 = sqrt(x65);
+    x66 = safe_sqrt(x65);
     POST_CHECK_POW(x66);
     /*@ assert (x66) != 0.;*/
     x67 = x43 * x45 / x66;
@@ -2579,18 +2582,18 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 3]=x67*(0.5*x44*x8*rt2*rn*un - x47*x8*rt2*rn + x69) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (x42) != 0.;*/
     x43 = 1.0 / x42;
     POST_CHECK_POW(x43);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     /*@ assert (x44) != 0.;*/
     x45 = 1.0 / x44;
@@ -2606,7 +2609,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
     /*@ assert (x65) >= 0.;*/
-    x66 = sqrt(x65);
+    x66 = safe_sqrt(x65);
     POST_CHECK_POW(x66);
     /*@ assert (x66) != 0.;*/
     x67 = x43 * x45 / x66;
@@ -2701,10 +2704,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -2744,10 +2747,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 3]=x167 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -2789,15 +2792,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -2879,15 +2882,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 3]=x142*(x150 + x151 + x153 + x154 + x159 + x160 + x170) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -3168,10 +3171,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -3216,10 +3219,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 3]=x138 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -3266,15 +3269,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   } else if (x49) {
     XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -3371,15 +3374,15 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
      * x136*x156 + x146 - x155*x158 - 4.0*x161 - 4.0*x162 - 2.0*x163 - 2.0*x164 + x192 + x193 +
      * x194 + x195 + x196 + x197) */
     /*@ assert (x6 + x7) >= 0.;*/
-    x40 = sqrt(x6 + x7);
+    x40 = safe_sqrt(x6 + x7);
     POST_CHECK_POW(x40);
     x41 = un * un + x6 + x7 + x10;
     POST_CHECK_ADD(x41);
     /*@ assert (-2.0*x40*x5 + x41) >= 0.;*/
-    x42 = sqrt(-2.0 * x40 * x5 + x41);
+    x42 = safe_sqrt(-2.0 * x40 * x5 + x41);
     POST_CHECK_POW(x42);
     /*@ assert (2.0*x40*mu*rn + x41) >= 0.;*/
-    x44 = sqrt(2.0 * x40 * mu * rn + x41);
+    x44 = safe_sqrt(2.0 * x40 * mu * rn + x41);
     POST_CHECK_POW(x44);
     x65 = x6 * x8 * x9 + x7 * x8 * x9;
     POST_CHECK_ADD(x65);
@@ -3669,10 +3672,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -3695,10 +3698,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 4]=x31*(-x28*x62 - x32*x8 - x33*x8 + x63 + x91) */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -3785,10 +3788,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -3809,10 +3812,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 4]=x174 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -3987,10 +3990,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4011,10 +4014,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 4]=x174 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4192,10 +4195,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4218,10 +4221,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 5]=x103 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4295,10 +4298,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -4328,10 +4331,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 5]=x181 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -4481,10 +4484,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -4518,10 +4521,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 5]=x184 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -4674,10 +4677,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4700,10 +4703,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[0, 6]=x103 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     /*@ assert (x29) != 0.;*/
     x30 = 1.0 / x29;
@@ -4772,10 +4775,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -4809,10 +4812,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[1, 6]=x184 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x35 = 1.4142135623730951454746218587388284504413604736328125 * x28;
     POST_CHECK_MUL(x35);
@@ -4964,10 +4967,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
   if (x39) {
     XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -4997,10 +5000,10 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 
     /* Assignment result[2, 6]=x181 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
-    x28 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
+    x28 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x8);
     POST_CHECK_POW(x28);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
-    x29 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
+    x29 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x8);
     POST_CHECK_POW(x29);
     x36 = x28 * x29;
     POST_CHECK_MUL(x36);
@@ -5170,7 +5173,7 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
   POST_CHECK_POW(x2);
   /*@ assert (x2) >= 0.;*/
   /*@ assert (x1 + x2) >= 0.;*/
-  x3 = mu * sqrt(x1 + x2) + un;
+  x3 = mu * safe_sqrt(x1 + x2) + un;
   POST_CHECK_ADD(x3);
   x4 = mu * rn;
   POST_CHECK_MUL(x4);
@@ -5185,7 +5188,7 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
   x10 = rt2 * x4 + x9 * x3;
   POST_CHECK_ADD(x10);
   /*@ assert (x10*x10 + x8*x8) >= 0.;*/
-  x11 = sqrt(x10 * x10 + x8 * x8);
+  x11 = safe_sqrt(x10 * x10 + x8 * x8);
   POST_CHECK_POW(x11);
   x18 = x11 > 0;
   POST_CHECK(x18);
@@ -5202,10 +5205,10 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
     x12 = 2 * x11;
     POST_CHECK_MUL(x12);
     /*@ assert (-x12 + x6) >= 0.;*/
-    x13 = 0.5 * sqrt(-x12 + x6);
+    x13 = 0.5 * safe_sqrt(-x12 + x6);
     POST_CHECK_MUL(x13);
     /*@ assert (x12 + x6) >= 0.;*/
-    x14 = 0.5 * sqrt(x12 + x6);
+    x14 = 0.5 * safe_sqrt(x12 + x6);
     POST_CHECK_MUL(x14);
     x15 = rt1 + x7;
     POST_CHECK_ADD(x15);
@@ -5222,10 +5225,10 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
     x12 = 2 * x11;
     POST_CHECK_MUL(x12);
     /*@ assert (-x12 + x6) >= 0.;*/
-    x13 = 0.5 * sqrt(-x12 + x6);
+    x13 = 0.5 * safe_sqrt(-x12 + x6);
     POST_CHECK_MUL(x13);
     /*@ assert (x12 + x6) >= 0.;*/
-    x14 = 0.5 * sqrt(x12 + x6);
+    x14 = 0.5 * safe_sqrt(x12 + x6);
     POST_CHECK_MUL(x14);
     x15 = rt1 + x7;
     POST_CHECK_ADD(x15);
@@ -5244,10 +5247,10 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
   x12 = 2 * x11;
   POST_CHECK_MUL(x12);
   /*@ assert (-x12 + x6) >= 0.;*/
-  x13 = 0.5 * sqrt(-x12 + x6);
+  x13 = 0.5 * safe_sqrt(-x12 + x6);
   POST_CHECK_MUL(x13);
   /*@ assert (x12 + x6) >= 0.;*/
-  x14 = 0.5 * sqrt(x12 + x6);
+  x14 = 0.5 * safe_sqrt(x12 + x6);
   POST_CHECK_MUL(x14);
   result[0] = x4 - x13 - x14 + x3;
 
@@ -5395,7 +5398,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   POST_CHECK_POW(x13);
   /*@ assert (x13) >= 0.;*/
   /*@ assert (x12 + x13) >= 0.;*/
-  x14 = sqrt(x12 + x13);
+  x14 = safe_sqrt(x12 + x13);
   POST_CHECK_POW(x14);
   x15 = mu * x14 + un;
   POST_CHECK_ADD(x15);
@@ -5412,7 +5415,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   x21 = x18 + x20;
   POST_CHECK_ADD(x21);
   /*@ assert (x21) >= 0.;*/
-  x22 = sqrt(x21);
+  x22 = safe_sqrt(x21);
   POST_CHECK_POW(x22);
   x23 = x22 <= ZERO;
   POST_CHECK(x23);
@@ -5497,10 +5500,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   POST_CHECK(x172);
   if (x34) {
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -5520,18 +5523,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     POST_CHECK_MUL(x10);
   } else if (x44) {
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -5544,7 +5547,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     POST_CHECK_MUL(x43);
   } else if (x60) {
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5565,7 +5568,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5574,7 +5577,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     POST_CHECK_MUL(x56);
   } else if (x97) {
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5587,7 +5590,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5606,7 +5609,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     POST_CHECK_MUL(x96);
   } else if (x120) {
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5627,7 +5630,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5642,7 +5645,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     POST_CHECK_MUL(x119);
   } else if (x172) {
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5655,7 +5658,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5685,10 +5688,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -5709,10 +5712,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 0]=x5*(-mu*x9 + x10 + x8) */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -5735,18 +5738,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -5760,18 +5763,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 0]=x38*x40*(-x39*x41 - x42 + x43) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -5787,7 +5790,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5808,7 +5811,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5818,7 +5821,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 0]=1 - x53 - x56 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -5839,7 +5842,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -5870,10 +5873,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -5892,10 +5895,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 0]=x108 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -5916,18 +5919,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -5958,18 +5961,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     /* Assignment result[1, 0]=x110*(0.5*x39*rt1*un*x111*x112*x25 - rt1*x111*x112*x25*x42 +
      * 0.5*x39*un*x111*x112*x113 - x111*x112*x113*x42) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -6003,7 +6006,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6024,7 +6027,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6044,7 +6047,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 0]=-x117*x53 + x117*x56 - x45*x116 + x54*x116 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6065,7 +6068,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6087,7 +6090,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6108,7 +6111,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6124,7 +6127,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 0]=-x119*x53 + x119*x56 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6145,7 +6148,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6172,10 +6175,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -6194,10 +6197,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 0]=x108 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -6218,18 +6221,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -6260,18 +6263,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     /* Assignment result[2, 0]=x110*(0.5*x39*rt2*un*x111*x112*x24 - rt2*x111*x112*x24*x42 +
      * 0.5*x39*un*x111*x112*x164 - x111*x112*x164*x42) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -6305,7 +6308,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6326,7 +6329,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6346,7 +6349,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 0]=-x183*x53 + x183*x56 - x45*x182 + x54*x182 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6367,7 +6370,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6389,7 +6392,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6410,7 +6413,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6426,7 +6429,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 0]=-x184*x53 + x184*x56 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6447,7 +6450,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x53 = x46 * (x15 + x52);
     POST_CHECK_MUL(x53);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6488,7 +6491,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -6502,7 +6505,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 1]=x63 */
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -6518,18 +6521,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -6543,7 +6546,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
     /*@ assert (x64) >= 0.;*/
-    x65 = sqrt(x64);
+    x65 = safe_sqrt(x64);
     POST_CHECK_POW(x65);
     /*@ assert (x65) != 0.;*/
     x66 = x38 * 1.0 / x65 * x40;
@@ -6556,18 +6559,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 1]=x66*(0.5*x39*rt1*x1*rn*un - rt1*x1*rn*x42 + x68) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -6581,7 +6584,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
     /*@ assert (x64) >= 0.;*/
-    x65 = sqrt(x64);
+    x65 = safe_sqrt(x64);
     POST_CHECK_POW(x65);
     /*@ assert (x65) != 0.;*/
     x66 = x38 * 1.0 / x65 * x40;
@@ -6596,7 +6599,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6605,7 +6608,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6638,7 +6641,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 1]=x71 - x79 - x80 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -6647,7 +6650,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -6732,10 +6735,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -6780,10 +6783,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 1]=x133 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -6830,15 +6833,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -6937,15 +6940,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
      * + 2.0*x39*x147*x111*x26*x140 - x131*x153 + x141 + x145 + x146 + x148 + x149 - x150*x151
      * + x154 + x155 - 2.0*x156 - 2.0*x157 - 4.0*x158 - 4.0*x159) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -7049,7 +7052,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7058,7 +7061,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7101,7 +7104,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 1]=mu - x117*x79 + x117*x80 - x45*x161 + x54*x161 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7110,7 +7113,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7155,7 +7158,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7164,7 +7167,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7203,7 +7206,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 1]=mu - x119*x79 + x119*x80 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7212,7 +7215,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7269,10 +7272,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -7312,10 +7315,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 1]=x162 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -7357,15 +7360,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -7449,15 +7452,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 1]=x137*(x165 + x185 + x186 + x187 + x188 + x189 + x190) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -7543,7 +7546,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7552,7 +7555,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7597,7 +7600,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 1]=-x183*x79 + x183*x80 - x45*x191 + x54*x191 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7606,7 +7609,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7653,7 +7656,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7662,7 +7665,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7701,7 +7704,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 1]=-x184*x79 + x184*x80 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7710,7 +7713,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7763,7 +7766,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -7777,7 +7780,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 2]=x63 */
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -7793,18 +7796,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -7818,7 +7821,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
     /*@ assert (x64) >= 0.;*/
-    x65 = sqrt(x64);
+    x65 = safe_sqrt(x64);
     POST_CHECK_POW(x65);
     /*@ assert (x65) != 0.;*/
     x66 = x38 * 1.0 / x65 * x40;
@@ -7831,18 +7834,18 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 2]=x66*(0.5*x39*rt2*x1*rn*un - rt2*x1*rn*x42 + x68) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (x37) != 0.;*/
     x38 = 1.0 / x37;
     POST_CHECK_POW(x38);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     /*@ assert (x39) != 0.;*/
     x40 = 1.0 / x39;
@@ -7856,7 +7859,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
     /*@ assert (x64) >= 0.;*/
-    x65 = sqrt(x64);
+    x65 = safe_sqrt(x64);
     POST_CHECK_POW(x65);
     /*@ assert (x65) != 0.;*/
     x66 = x38 * 1.0 / x65 * x40;
@@ -7871,7 +7874,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7880,7 +7883,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7913,7 +7916,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 2]=x81 - x87 - x88 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -7922,7 +7925,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -7964,10 +7967,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -8007,10 +8010,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 2]=x162 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -8052,15 +8055,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -8144,15 +8147,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 2]=x137*(x145 + x146 + x148 + x149 + x154 + x155 + x165) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -8238,7 +8241,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8247,7 +8250,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8292,7 +8295,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 2]=-x117*x87 + x117*x88 - x45*x168 + x54*x168 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8301,7 +8304,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8348,7 +8351,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8357,7 +8360,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8396,7 +8399,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 2]=-x119*x87 + x119*x88 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8405,7 +8408,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8456,10 +8459,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -8504,10 +8507,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 2]=x133 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -8554,15 +8557,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x44) {
     XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -8660,15 +8663,15 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
      * + 2.0*x39*x152*x111*x26*x140 - x131*x151 + x141 - x150*x153 - 4.0*x156 - 4.0*x157
      * - 2.0*x158 - 2.0*x159 + x185 + x186 + x187 + x188 + x189 + x190) */
     /*@ assert (x24 + x25) >= 0.;*/
-    x35 = sqrt(x24 + x25);
+    x35 = safe_sqrt(x24 + x25);
     POST_CHECK_POW(x35);
     x36 = un * un + x24 + x25 + x27;
     POST_CHECK_ADD(x36);
     /*@ assert (-2.0*x11*x35 + x36) >= 0.;*/
-    x37 = sqrt(-2.0 * x11 * x35 + x36);
+    x37 = safe_sqrt(-2.0 * x11 * x35 + x36);
     POST_CHECK_POW(x37);
     /*@ assert (2.0*mu*rn*x35 + x36) >= 0.;*/
-    x39 = sqrt(2.0 * mu * rn * x35 + x36);
+    x39 = safe_sqrt(2.0 * mu * rn * x35 + x36);
     POST_CHECK_POW(x39);
     x64 = x1 * x26 * x24 + x1 * x26 * x25;
     POST_CHECK_ADD(x64);
@@ -8771,7 +8774,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x60) {
     XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8780,7 +8783,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8823,7 +8826,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 2]=mu - x183*x87 + x183*x88 - x45*x193 + x54*x193 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8832,7 +8835,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8877,7 +8880,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x120) {
     XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8886,7 +8889,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8925,7 +8928,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 2]=mu - x184*x87 + x184*x88 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -8934,7 +8937,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -8980,10 +8983,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9006,10 +9009,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 3]=x5*(-x1*x6 - x1*x7 - x61*x2 + x62 + x90) */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9034,7 +9037,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9047,7 +9050,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9067,7 +9070,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 3]=mu - x95 - x96 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9080,7 +9083,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9109,10 +9112,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9133,10 +9136,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 3]=x169 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9159,7 +9162,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9172,7 +9175,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9202,7 +9205,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 3]=-x117*x95 + x117*x96 - x45*x171 + x54*x171 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9215,7 +9218,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9247,7 +9250,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9260,7 +9263,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9286,7 +9289,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 3]=-x119*x95 + x119*x96 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9299,7 +9302,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9332,10 +9335,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9356,10 +9359,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 3]=x169 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9382,7 +9385,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9395,7 +9398,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9425,7 +9428,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 3]=-x183*x95 + x183*x96 - x45*x194 + x54*x194 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9438,7 +9441,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9470,7 +9473,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9483,7 +9486,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9509,7 +9512,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 3]=-x184*x95 + x184*x96 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9522,7 +9525,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9558,10 +9561,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9584,10 +9587,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 4]=x100 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -9612,7 +9615,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9621,7 +9624,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9637,7 +9640,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 4]=-x103 - x104 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9646,7 +9649,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9674,10 +9677,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -9707,10 +9710,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 4]=x176 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -9742,7 +9745,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9751,7 +9754,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9777,7 +9780,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 4]=1 - x117*x103 + x117*x104 - x45*x178 + x54*x178 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9786,7 +9789,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9814,7 +9817,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9823,7 +9826,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9845,7 +9848,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 4]=1 - x119*x103 + x119*x104 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9854,7 +9857,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9885,10 +9888,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -9922,10 +9925,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 4]=x179 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -9961,7 +9964,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -9970,7 +9973,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -9996,7 +9999,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 4]=x181 - x183*x103 + x183*x104 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10005,7 +10008,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10033,7 +10036,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10042,7 +10045,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10064,7 +10067,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 4]=-x184*x103 + x184*x104 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10073,7 +10076,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10103,10 +10106,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -10129,10 +10132,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 5]=x100 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     /*@ assert (x3) != 0.;*/
     x4 = 1.0 / x3;
@@ -10157,7 +10160,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10166,7 +10169,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10182,7 +10185,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[0, 5]=-x106 - x107 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10191,7 +10194,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10214,10 +10217,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -10251,10 +10254,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 5]=x179 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x9 = 1.4142135623730951454746218587388284504413604736328125 * x2;
     POST_CHECK_MUL(x9);
@@ -10290,7 +10293,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10299,7 +10302,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10325,7 +10328,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 5]=-x117*x106 + x117*x107 + x181 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10334,7 +10337,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10362,7 +10365,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10371,7 +10374,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10393,7 +10396,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[1, 5]=-x119*x106 + x119*x107 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10402,7 +10405,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10431,10 +10434,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   if (x34) {
     XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -10464,10 +10467,10 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 5]=x176 */
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
-    x2 = sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
+    x2 = safe_sqrt(-2.828427124746190290949243717477656900882720947265625 * mu + 3.0 + x1);
     POST_CHECK_POW(x2);
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
-    x3 = sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
+    x3 = safe_sqrt(8.4852813742385695405801016022451221942901611328125 * mu + 3.0 + 9.0 * x1);
     POST_CHECK_POW(x3);
     x10 = x2 * x3;
     POST_CHECK_MUL(x10);
@@ -10499,7 +10502,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x97) {
     XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10508,7 +10511,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10534,7 +10537,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 5]=1 - x183*x106 + x183*x107 - x45*x195 + x54*x195 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10543,7 +10546,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10571,7 +10574,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
   } else if (x172) {
     XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10580,7 +10583,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10602,7 +10605,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 
     /* Assignment result[2, 5]=1 - x184*x106 + x184*x107 */
     /*@ assert (x30 + x31) >= 0.;*/
-    x45 = sqrt(x30 + x31);
+    x45 = safe_sqrt(x30 + x31);
     POST_CHECK_POW(x45);
     /*@ assert (x45) != 0.;*/
     x46 = 0.5 * 1.0 / x45;
@@ -10611,7 +10614,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     x51 = 1.0 / x22;
     POST_CHECK_POW(x51);
     /*@ assert (x32) >= 0.;*/
-    x54 = sqrt(x32);
+    x54 = safe_sqrt(x32);
     POST_CHECK_POW(x54);
     /*@ assert (x54) != 0.;*/
     x55 = 0.5 * 1.0 / x54;
@@ -10666,7 +10669,7 @@ void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, do
   POST_CHECK_POW(x2);
   /*@ assert (x2) >= 0.;*/
   /*@ assert (x1 + x2) >= 0.;*/
-  x3 = mu * sqrt(x1 + x2) + un;
+  x3 = mu * safe_sqrt(x1 + x2) + un;
   POST_CHECK_ADD(x3);
   x4 = mu * rn;
   POST_CHECK_MUL(x4);
@@ -10685,15 +10688,15 @@ void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, do
   x10 = rt2 * x4 + x9 * x3;
   POST_CHECK_ADD(x10);
   /*@ assert (x10*x10 + x8*x8) >= 0.;*/
-  x11 = sqrt(x10 * x10 + x8 * x8);
+  x11 = safe_sqrt(x10 * x10 + x8 * x8);
   POST_CHECK_POW(x11);
   x12 = 2 * x11;
   POST_CHECK_MUL(x12);
   /*@ assert (-x12 + x6) >= 0.;*/
-  x13 = 0.5 * sqrt(-x12 + x6);
+  x13 = 0.5 * safe_sqrt(-x12 + x6);
   POST_CHECK_MUL(x13);
   /*@ assert (x12 + x6) >= 0.;*/
-  x14 = 0.5 * sqrt(x12 + x6);
+  x14 = 0.5 * safe_sqrt(x12 + x6);
   POST_CHECK_MUL(x14);
   /*@ assert (x11) != 0.;*/
   x15 = 1.0 / x11;
@@ -10770,7 +10773,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
   POST_CHECK_POW(x2);
   /*@ assert (x2) >= 0.;*/
   /*@ assert (x1 + x2) >= 0.;*/
-  x3 = sqrt(x1 + x2);
+  x3 = safe_sqrt(x1 + x2);
   POST_CHECK_POW(x3);
   /*@ assert (x3) >= 0.;*/
   x5 = mu * x3 + un;
@@ -10788,7 +10791,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
   x12 = x11 + x9;
   POST_CHECK_ADD(x12);
   /*@ assert (x12) >= 0.;*/
-  x13 = sqrt(x12);
+  x13 = safe_sqrt(x12);
   POST_CHECK_POW(x13);
   x46 = x13 > 0;
   POST_CHECK(x46);
@@ -10810,10 +10813,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -10886,10 +10889,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -10960,10 +10963,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11038,10 +11041,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11118,10 +11121,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11187,10 +11190,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11271,10 +11274,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11343,10 +11346,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11417,10 +11420,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11478,10 +11481,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11550,10 +11553,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11622,10 +11625,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11696,10 +11699,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);
@@ -11757,10 +11760,10 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     x14 = 2 * x13;
     POST_CHECK_MUL(x14);
     /*@ assert (-x14 + x6) >= 0.;*/
-    x15 = sqrt(-x14 + x6);
+    x15 = safe_sqrt(-x14 + x6);
     POST_CHECK_POW(x15);
     /*@ assert (x14 + x6) >= 0.;*/
-    x16 = sqrt(x14 + x6);
+    x16 = safe_sqrt(x14 + x6);
     POST_CHECK_POW(x16);
     x17 = 0.5 * mu * rn + 0.5 * mu * x3 + 0.5 * un - 0.25 * x15 - 0.25 * x16;
     POST_CHECK_ADD(x17);

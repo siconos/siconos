@@ -18,21 +18,15 @@
 #ifndef RELAY_TEST_UTILS_H
 #define RELAY_TEST_UTILS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "SiconosConfig.h"  // for BUILD_AS_CPP
-#include "SolverOptions.h"
-#include "Relay_options.h"
 #include "test_utils.h"  // for TestCase
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 void relay_fillParamWithRespectToSolver(SolverOptions* options, char* solvername,
                                         RelayProblem* problem);
 int relay_test_function(TestCase*);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

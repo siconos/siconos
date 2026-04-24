@@ -23,15 +23,11 @@
  * \brief Functions for solving VI using Newton method
  */
 
-#include "NumericsMatrix.h"
-#include "SiconosConfig.h"
+#include "NumericsMatrix.h"  // IWYU pragma: keep
 
 #if defined(__cplusplus)
 #undef restrict
 #define restrict __restrict
-#endif
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
@@ -42,7 +38,7 @@ void VI_compute_F_box_Qi(void* data_opaque, double* x, double* F, double* Fbox);
 void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1,
                          double* workV2, NumericsMatrix* H);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

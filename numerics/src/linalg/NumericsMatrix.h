@@ -31,7 +31,6 @@
 #include "NumericsDataVersion.h"
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "NumericsSparseMatrix.h"  // for NSM_linear_solver typedef
-#include "SiconosConfig.h"         // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #ifndef __cplusplus
 #include <stdbool.h>  // for bool
 #endif
@@ -108,7 +107,7 @@ typedef enum {
   NM_PRESERVE      /**< keep the matrix as-is (useful for the dense case) */
 } NM_gesv_opts;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -1279,7 +1278,7 @@ bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B);
 
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

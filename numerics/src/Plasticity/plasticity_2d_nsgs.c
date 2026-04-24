@@ -25,26 +25,25 @@
 #include "NumericsArrays.h"  // for uint_shuffle
 #include "NumericsFwd.h"     // for SolverOptions
 #include "NumericsMatrix.h"
-#include "PlasticityProblem.h"  // for PlasticityProblem
-// #include "NumericsSparseMatrix.h"
+#include "PlasticityProblem.h"   // for PlasticityProblem
 #include "Plasticity_options.h"  // for SICONOS_FRICTI...
 #include "SiconosBlas.h"         // for cblas_dnrm2
 #include "SolverOptions.h"       // for SolverOptions
 #include "SparseBlockMatrix.h"
+#include "naming_conventions.h"
+#include "numerics_errors.h"  // for numerics_printf
 #include "numerics_verbose.h"
+#include "op3x3.h"
 #include "plasticity_2d_compute_error.h"                     // for fc3d_compute_e..
 #include "plasticity_2d_local_problem_tools.h"               // for fc3d_local_pro..
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  //
 #include "plasticity_2d_projection.h"                        // for fc3d_projectio...
 #include "plasticity_2d_solvers.h"
-
-/* Solver registration system */
-#include "numerics_errors.h"  // for numerics_printf
 #include "solver_registry.h"
+
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 
-#include "op3x3.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
 
 // #define FCLIB_OUTPUT

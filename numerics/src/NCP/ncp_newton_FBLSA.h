@@ -23,10 +23,9 @@
  * \brief functions for solving NCP using a Newton method on the nonsmooth
  * equation reformulation*/
 
-#include "NumericsMatrix.h"
-#include "SiconosConfig.h"
+#include "NumericsMatrix.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -67,7 +66,7 @@ void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* notus
  */
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

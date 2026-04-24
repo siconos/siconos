@@ -45,6 +45,7 @@
 #include "fc3d_local_problem_tools.h"                 // for fc3d_local_prob...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_FischerBur...
 #include "float.h"                                    // for DBL_EPSILON
+#include "naming_conventions.h"                       // SOLVER_MAX_ITER ...
 #include "nsn_formulation/fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "nsn_formulation/fc3d_nonsmooth_Newton_natural_map.h"
@@ -308,17 +309,14 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
   double scal = 1.;
 
   // F <- compute fb
-  fc3d_FischerBurmeisterFunction(
-      problemSize, fc3d_FischerBurmeisterFunctionGenerated,
-      reaction, velocity, mu, rho, F, NULL, NULL);
+  fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated,
+                                 reaction, velocity, mu, rho, F, NULL, NULL);
 
   double thetafb0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
   // F <- compute gradient of fb merit function (ugly)
-  fc3d_FischerBurmeisterFunction(
-      problemSize,
-      fc3d_FischerBurmeisterGradMeritFunctionGenerated, reaction,
-      velocity, mu, rho, F, NULL, NULL);
+  fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterGradMeritFunctionGenerated,
+                                 reaction, velocity, mu, rho, F, NULL, NULL);
   double norm_dir_exp_p = pow(cblas_dnrm2(problemSize, direction, 1), p);
   double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, direction, 1);
 
@@ -350,17 +348,15 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equati
     NM_gemv(1., W, tmp, 1., velocity);
 
     // compute fb
-    fc3d_FischerBurmeisterFunction(
-        problemSize, fc3d_FischerBurmeisterFunctionGenerated, tmp,
-        velocity, mu, rho, F, NULL, NULL);
+    fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated, tmp,
+                                   velocity, mu, rho, F, NULL, NULL);
 
     double thetafb = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
     // compute grad merit fb (ugly)
-    fc3d_FischerBurmeisterFunction(
-        problemSize,
-        fc3d_FischerBurmeisterGradMeritFunctionGenerated, tmp,
-        velocity, mu, rho, F, NULL, NULL);
+    fc3d_FischerBurmeisterFunction(problemSize,
+                                   fc3d_FischerBurmeisterGradMeritFunctionGenerated, tmp,
+                                   velocity, mu, rho, F, NULL, NULL);
 
     // tmp <- scal*direction
     cblas_dscal(problemSize, 0., tmp, 1);

@@ -25,15 +25,14 @@
 
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "NumericsMatrix.h"  // for RawNumericsMatrix
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     Enum to identify the type of plasticity model.
 */
 enum PlasticityModelType {
-  PLASTICITY_MODEL_UNKNOWN = 0,       /**< Unknown or uninitialized model */
-  PLASTICITY_MODEL_DRUCKER_PRAGER,    /**< Drucker-Prager model (eta, theta) */
-  PLASTICITY_MODEL_VON_MISES          /**< Von Mises model (yield stress) */
+  PLASTICITY_MODEL_UNKNOWN = 0,    /**< Unknown or uninitialized model */
+  PLASTICITY_MODEL_DRUCKER_PRAGER, /**< Drucker-Prager model (eta, theta) */
+  PLASTICITY_MODEL_VON_MISES       /**< Von Mises model (yield stress) */
 };
 
 typedef enum PlasticityModelType PlasticityModelType;
@@ -72,9 +71,9 @@ typedef struct Plasticity_VonMises_model Plasticity_VonMises_model;
     Use the model_type field in PlasticityProblem to determine which member is active.
 */
 union PlasticityModelUnion {
-  Plasticity_DruckerPrager_model *drucker_prager;  /**< Drucker-Prager model parameters */
-  Plasticity_VonMises_model *von_mises;            /**< Von Mises model parameters */
-  void *generic;                                   /**< Generic pointer for future models */
+  Plasticity_DruckerPrager_model *drucker_prager; /**< Drucker-Prager model parameters */
+  Plasticity_VonMises_model *von_mises;           /**< Von Mises model parameters */
+  void *generic;                                  /**< Generic pointer for future models */
 };
 
 typedef union PlasticityModelUnion PlasticityModelUnion;
@@ -106,13 +105,13 @@ typedef struct PlasticityProblem PlasticityProblem;
 /* Backward compatibility: Plasticity2DProblem is now PlasticityProblem */
 typedef PlasticityProblem Plasticity2DProblem;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 /**
     Create a new Drucker-Prager model with given parameters.
-    
+
     \param[in] eta vector of cone coefficients
     \param[in] theta vector of dilatancy coefficients
     \return a pointer to a new Plasticity_DruckerPrager_model structure
@@ -121,14 +120,14 @@ Plasticity_DruckerPrager_model *plasticity_DruckerPrager_model_new(double *eta, 
 
 /**
     Free a Drucker-Prager model.
-    
+
     \param[in] model the model to free
 */
 void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model *model);
 
 /**
     Create a new Von Mises model with given parameters.
-    
+
     \param[in] sigma_y vector of yield stresses
     \return a pointer to a new Plasticity_VonMises_model structure
 */
@@ -136,14 +135,14 @@ Plasticity_VonMises_model *plasticity_VonMises_model_new(double *sigma_y);
 
 /**
     Free a Von Mises model.
-    
+
     \param[in] model the model to free
 */
 void plasticity_VonMises_model_free(Plasticity_VonMises_model *model);
 
 /**
     Get a string representation of the model type.
-    
+
     \param[in] model_type the model type enum
     \return a string describing the model type
 */
@@ -163,7 +162,8 @@ PlasticityProblem *plasticityProblem_new(void);
  *  \return a pointer to a PlasticityProblem structure
  */
 PlasticityProblem *plasticityProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                    double *q, Plasticity_DruckerPrager_model *model);
+                                                   double *q,
+                                                   Plasticity_DruckerPrager_model *model);
 
 /** free a PlasticityProblem
  *
@@ -233,7 +233,7 @@ void plasticity_rescaling(PlasticityProblem *problem, double alpha, double gamma
 /* Backward compatibility function names (deprecated) */
 Plasticity2DProblem *plasticity2DProblem_new(void);
 Plasticity2DProblem *plasticity2DProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                         double *q, double *eta, double *theta);
+                                                       double *q, double *eta, double *theta);
 void plasticity2DProblem_free(Plasticity2DProblem *problem);
 void plasticity2D_display(Plasticity2DProblem *problem);
 int plasticity2D_printInFile(Plasticity2DProblem *problem, FILE *file);
@@ -243,7 +243,7 @@ Plasticity2DProblem *plasticity2D_new_from_filename(const char *filename);
 Plasticity2DProblem *plasticity2D_copy(Plasticity2DProblem *problem);
 void plasticity2D_rescaling(Plasticity2DProblem *problem, double alpha, double gamma);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

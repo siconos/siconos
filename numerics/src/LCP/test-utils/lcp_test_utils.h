@@ -18,14 +18,9 @@
 #ifndef LCP_TEST_UTILS_H
 #define LCP_TEST_UTILS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "SiconosConfig.h"  // for BUILD_AS_CPP
-#include "lcp_cst.h"
 #include "test_utils.h"  // for TestCase
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Solve lcp using parameters and reference from a pre-defined TestCase
@@ -33,7 +28,7 @@ extern "C" {
  */
 int lcp_test_function(TestCase *);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

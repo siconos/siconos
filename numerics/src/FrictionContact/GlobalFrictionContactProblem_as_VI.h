@@ -22,8 +22,7 @@
   \brief Definition of a structure to handle with global friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, VariationalIn...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, VariationalIn...
 
 /** \struct GlobalFrictionContactProblem_as_VI GlobalFrictionContactProblem_as_VI.h
  *
@@ -35,7 +34,7 @@ struct GlobalFrictionContactProblem_as_VI {
   GlobalFrictionContactProblem *gfc3d;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -43,7 +42,7 @@ void Function_VI_GFC3D(void *self, int n, double *x, double *F);
 
 void Projection_VI_GFC3D(void *viIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

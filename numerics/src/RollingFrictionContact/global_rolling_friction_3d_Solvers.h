@@ -32,7 +32,7 @@
 typedef void (*ComputeErrorGlobalRollingPtr)(GlobalRollingFrictionContactProblem*, double*,
                                              double*, double*, double, double*, int);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -79,7 +79,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* problem
 /* void grfc3d_nsgs_sr_set_default(SolverOptions* options); */
 /* /\** @} *\/ */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -28,15 +28,12 @@
 #include <stdio.h>   // for NULL, size_t, printf, fprintf, fscanf
 #include <stdlib.h>  // for free, exit, malloc, realloc, EXIT_FAILURE
 
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_csc, numericsSparse...
-#include "SiconosConfig.h"   // for HAVE_SORT
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_csc, numericsSparse...
+#include "numerics_verbose.h"  // for numerics_error_nonfatal, check_io
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_errors.h"   // CHECK_MATRIX
-#include "numerics_verbose.h"  // for numerics_error_nonfatal, check_io
-#include "siconos_debug.h"     // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
-#include "string.h"            // for memcpy, memset
+#include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 
 typedef struct {
   CS_INT i;

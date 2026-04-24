@@ -23,11 +23,9 @@
  * \brief function to project on cones
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 enum { PROJCONE_DUAL, PROJCONE_INSIDE, PROJCONE_BOUNDARY };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -74,7 +72,7 @@ unsigned projectionOnDualCone(double *u, double mu);
 */
 void projectionOnSecondOrderCone(double *r, double mu, int size);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

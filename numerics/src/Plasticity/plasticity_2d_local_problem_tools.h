@@ -21,10 +21,9 @@
 /*!\file
 
  */
-#include "NumericsFwd.h"    // for PlasticityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for PlasticityProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -78,7 +77,7 @@ void plasticity_2d_local_problem_compute_q(PlasticityProblem *problem,
 void plasticity_2d_local_problem_fill_M(PlasticityProblem *problem,
                                         PlasticityProblem *localproblem, int contact);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

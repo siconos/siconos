@@ -1,8 +1,4 @@
 #undef NDEBUG
-#include "SiconosConfig.h"  // for WITH_TIMERS // IWYU pragma: keep
-#ifdef WITH_TIMERS
-#define TIMER_FFTW_CYCLE
-#endif
 #include <assert.h>  // for assert
 #include <math.h>    // for NAN, isnan
 #include <stdio.h>   // for fscanf, fclose, fopen, FILE
@@ -12,6 +8,9 @@
 #include "fc3d_AlartCurnier_functions.h"  // for computeAlartCurnierSTD
 #include "op3x3.h"                        // for OP3X3, sub3x3, OP3, sub3
 #include "timers_interf.h"                // for DECL_TIMER, PRINT_ELAPSED
+#ifdef WITH_TIMERS
+#define TIMER_FFTW_CYCLE
+#endif
 
 void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3],
                                double F[3], double A[9], double B[9]);

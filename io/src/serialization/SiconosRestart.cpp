@@ -14,38 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "SiconosRestart.hpp"
 
 #include <boost/filesystem.hpp>
 
-#include "Simulation.hpp"
 #include "RegisterSimulation.hpp"
+#include "Simulation.hpp"
 
+namespace siconos {
 
-namespace siconos
-{
+void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename) {
+  boost::filesystem::path tempf = boost::filesystem::path(filename + ".tmp");
 
-void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename)
-{
-  boost::filesystem::path tempf =
-    boost::filesystem::path(filename + ".tmp");
-
-  boost::filesystem::path destf =
-    boost::filesystem::path(filename);
+  boost::filesystem::path destf = boost::filesystem::path(filename);
 
   std::ofstream ofs(tempf.c_str());
   {
-    if(destf.extension() == ".xml")
-    {
+    if (destf.extension() == ".xml") {
       RegisterSimulationOxml(ofs, s);
     }
 
-    else if(destf.extension() == ".bin")
-    {
+    else if (destf.extension() == ".bin") {
       RegisterSimulationObin(ofs, s);
     }
   }
@@ -57,40 +49,34 @@ void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string&
 /** load Siconos model from file
  * \param filename
  */
-std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename)
-{
+std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename) {
   std::shared_ptr<siconos::simulation::Simulation> s;
 
   std::ifstream ifs(filename.c_str());
   {
-    if(boost::filesystem::path(filename).extension() == ".xml")
-    {
+    if (boost::filesystem::path(filename).extension() == ".xml") {
       RegisterSimulationIxml(ifs, s);
-    }
-    else if(boost::filesystem::path(filename).extension() == ".bin")
-    {
+    } else if (boost::filesystem::path(filename).extension() == ".bin") {
       RegisterSimulationIbin(ifs, s);
     }
   }
   return s;
 }
-}
+}  // namespace siconos
 #else
-#include "SiconosRestart.hpp"
-#include <SiconosException.hpp>
-namespace siconos
-{
+// #include "SiconosRestart.hpp"
+#include "SiconosException.hpp"
+#include "Simulation.hpp"
+namespace siconos {
 
-void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename)
-{
+void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename) {
   THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
 }
 
-std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename)
-{
+std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename) {
   THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
   /* Dummy return to make every compiler happy  */
-  return std::shared_ptr<Simulation>();
+  return std::shared_ptr<siconos::simulation::Simulation>();
 }
-}
+}  // namespace siconos
 #endif

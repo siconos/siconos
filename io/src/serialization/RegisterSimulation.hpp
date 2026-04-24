@@ -14,21 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef RegisterModel_hpp
 #define RegisterModel_hpp
 
-#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 
-#include <fstream>
 #include <SiconosFwd.hpp>
+#include <fstream>
 
-void RegisterSimulationOxml(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>&);
-void RegisterSimulationObin(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>&);
-void RegisterSimulationIxml(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>&);
-void RegisterSimulationIbin(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationOxml(std::ofstream& ofs,
+                            std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationObin(std::ofstream& ofs,
+                            std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationIxml(std::ifstream& ifs,
+                            std::shared_ptr<siconos::simulation::Simulation>&);
+void RegisterSimulationIbin(std::ifstream& ifs,
+                            std::shared_ptr<siconos::simulation::Simulation>&);
 
 #endif
 

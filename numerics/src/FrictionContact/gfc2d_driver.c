@@ -17,19 +17,16 @@
  */
 #include <assert.h>  // for assert
 #include <stdio.h>   // for NULL, fprintf, stderr
-#include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "FrictionContact_options.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
-#include "fc3d_short_names.h"
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
-#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
-#include "numerics_verbose.h"
+#include "fc3d_short_names.h"
 #include "numerics_errors.h"
-#include "siconos_debug.h"                 // for DEBUG_EXPR
+#include "numerics_verbose.h"
+#include "siconos_debug.h"  // for DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
@@ -77,11 +74,10 @@
 
 /* } */
 
-// #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
-// #define DUMP_PROBLEM_IF_INFO
+
 #ifdef DUMP_PROBLEM_IF_INFO
 static int fccounter = 0;
 #endif

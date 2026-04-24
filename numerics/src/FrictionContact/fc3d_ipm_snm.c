@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "FrictionContact_options.h"
 #include "Friction_tools.h"  // for ComputeErrorPtr
 #include "JordanAlgebra.h"
@@ -32,19 +31,12 @@
 #include "NumericsVector.h"
 #include "SiconosLapack.h"  // IWYU pragma: keep
 #include "SolverOptions.h"
-#include "fc3d_short_names.h"  // for ComputeErrorPtr
-// #include "SparseBlockMatrix.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
-#include "numerics_verbose.h"
-// #include "projectionOnCone.h"
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+#include "fc3d_short_names.h"  // for ComputeErrorPtr
 #include "gfc3d_ipm.h"
-// #include "siconos_debug.h"
-
-/* Solver registration system */
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "solver_registry.h"
 
 /* ------------------------- Helper functions implementation ------------------------------ */

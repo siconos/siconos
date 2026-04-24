@@ -21,15 +21,12 @@
 #include <string.h>  // for strncpy, NULL, memcpy
 
 #include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // IWYU pragma: keep - for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
 #include "NumericsFwd.h"                   // for NumericsMatrix, GlobalFric...
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_clear
 #include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
-#include "SiconosConfig.h"                 // for WITH_FCLIB  // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-#include "fc3d_short_names.h"
-#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 

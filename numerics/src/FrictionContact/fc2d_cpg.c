@@ -20,18 +20,16 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
-#include "SiconosBlas.h"             // for cblas_dcopy, cblas_ddot, cblas_d...
-#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_RE...
-#include "fc2d_Solvers.h"            // for fc2d_projf, fc2d_projc, fc2d_cpg
-#include "fc3d_short_names.h"        // for FC2D_CPG
-#include "numerics_verbose.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "NumericsFwd.h"       // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"    // for NumericsMatrix, RawNumericsMatrix
+#include "SiconosBlas.h"       // for cblas_dcopy, cblas_ddot, cblas_d...
+#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RE...
+#include "fc2d_Solvers.h"      // for fc2d_projf, fc2d_projc, fc2d_cpg
+#include "fc3d_short_names.h"  // for FC2D_CPG
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
               SolverOptions *options) {
@@ -267,36 +265,33 @@ void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocit
  * - Elimination of giant switch statements in drivers
  */
 
-static void fc2d_cpg_set_default(SolverOptions* options) {
+static void fc2d_cpg_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int fc2d_cpg_init_wrap(void* problem, SolverOptions* options) {
+static int fc2d_cpg_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int fc2d_cpg_solve_wrap(void* problem, double* reaction,
-                               double* velocity, SolverOptions* options) {
+static int fc2d_cpg_solve_wrap(void *problem, double *reaction, double *velocity,
+                               SolverOptions *options) {
   int info = NUMERICS_OK;
-  fc2d_cpg((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc2d_cpg((FrictionContactProblem *)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_cpg_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_cpg_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(FC2D_CPG, "FC2D_CPG",
-                "Conjugated Projected Gradient for 2D Friction Contact",
-                fc2d_cpg_init_wrap,
-                fc2d_cpg_solve_wrap,
-                fc2d_cpg_free_wrap,
-                NULL,  /* error function */
-                fc2d_cpg_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(FC2D_CPG, "FC2D_CPG", "Conjugated Projected Gradient for 2D Friction Contact",
+                fc2d_cpg_init_wrap, fc2d_cpg_solve_wrap, fc2d_cpg_free_wrap,
+                NULL,                 /* error function */
+                fc2d_cpg_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-6,                 /* default_tol */
+                0 /* is_local_solver */);

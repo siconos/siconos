@@ -26,7 +26,7 @@
 #include "ConvexQP_cst.h"
 #include "SolverOptions.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -70,7 +70,7 @@ void convexQP_ADMM_set_default(SolverOptions* options);
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

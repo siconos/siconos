@@ -27,7 +27,7 @@
 #include "NumericsSolversNamespace.h"  // IWYU pragma: keep -  solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "Simulation.hpp"
-// #include "Topology.hpp"
+
 //  #define DEBUG_NOCOLOR
 //  #define DEBUG_STDOUT
 //  #define DEBUG_MESSAGES

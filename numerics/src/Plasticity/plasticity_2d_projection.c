@@ -24,24 +24,19 @@
 #include <stdio.h>   // for fprintf, printf, NULL, stderr
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
-#include "PlasticityProblem.h"      // for PlasticityProblem
-#include "NumericsFwd.h"               // for SolverOptions, MohrCoulomb2D...
-#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
-#include "Plasticity_options.h"            // for PLASTICITY_NSGS_LOCAL...
-#include "SiconosBlas.h"               // for cblas_ddot
-#include "SolverOptions.h"             // for SolverOptions, solver_options_...
-#include "SparseBlockMatrix.h"         // for SBM_row_prod
-#include "plasticity_2d_compute_error.h"        // for plasticity_2d_Tresca_unitary_compute_an...
+#include "NumericsFwd.h"         // for SolverOptions, MohrCoulomb2D...
+#include "NumericsMatrix.h"      // for NumericsMatrix, RawNumericsMatrix
+#include "PlasticityProblem.h"   // for PlasticityProblem
+#include "Plasticity_options.h"  // for PLASTICITY_NSGS_LOCAL...
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "plasticity_2d_compute_error.h"  // for plasticity_2d_Tresca_unitary_compute_an...
 #include "plasticity_2d_local_problem_tools.h"  // for plasticity_2d_local_problem_compute_q
 #include "plasticity_2d_solvers.h"
 #include "plasticity_2d_vonmises_projection.h"  // for Von Mises projection
-#include "numerics_verbose.h"
-
-/* Solver registration system */
+#include "projectionOnCone.h"                   // for projectionOnCone
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "projectionOnCone.h"      // for projectionOnCone
-#include "projectionOnCylinder.h"  // for projectionOnCylinder
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -68,11 +63,11 @@
 /* static double theta_i = 0.0; */
 
 void plasticity_2d_projection_initialize(PlasticityProblem* problem,
-                                PlasticityProblem* localproblem) {}
+                                         PlasticityProblem* localproblem) {}
 
 void plasticity_2d_projection_update(int contact, PlasticityProblem* problem,
-                            PlasticityProblem* localproblem, double* stress,
-                            SolverOptions* options) {
+                                     PlasticityProblem* localproblem, double* stress,
+                                     SolverOptions* options) {
   /* Build a local problem for a specific contact
      stress corresponds to the global vector (size n) of the global problem.
   */
@@ -92,17 +87,19 @@ void plasticity_2d_projection_update(int contact, PlasticityProblem* problem,
   /* coefficient for current block - handle both model types */
   if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER) {
     localproblem->model.drucker_prager->eta[0] = problem->model.drucker_prager->eta[contact];
-    localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[contact];
+    localproblem->model.drucker_prager->theta[0] =
+        problem->model.drucker_prager->theta[contact];
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[contact];
   }
 }
 
-void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProblem* problem,
-                                                        PlasticityProblem* localproblem,
-                                                        SolverOptions* localsolver_options) {
+void plasticity_2d_projectionOnConeWithLocalIteration_initialize(
+    PlasticityProblem* problem, PlasticityProblem* localproblem,
+    SolverOptions* localsolver_options) {
   size_t nc = problem->numberOfCones;
-  /* printf("plasticity_2d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
+  /* printf("plasticity_2d_projectionOnConeWithLocalIteration_initialize. Allocation of
+   * dwork\n"); */
   if (!localsolver_options->dWork || localsolver_options->dWorkSize < nc) {
     localsolver_options->dWork =
         (double*)realloc(localsolver_options->dWork, nc * sizeof(double));
@@ -112,15 +109,16 @@ void plasticity_2d_projectionOnConeWithLocalIteration_initialize(PlasticityProbl
     localsolver_options->dWork[i] = 1.0;
   }
 }
-void plasticity_2d_projectionOnConeWithLocalIteration_free(PlasticityProblem* problem,
-                                                  PlasticityProblem* localproblem,
-                                                  SolverOptions* localsolver_options) {
+void plasticity_2d_projectionOnConeWithLocalIteration_free(
+    PlasticityProblem* problem, PlasticityProblem* localproblem,
+    SolverOptions* localsolver_options) {
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
 }
 
 int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* localproblem,
-                                                  double* stress_local, SolverOptions* options) {
+                                                           double* stress_local,
+                                                           SolverOptions* options) {
   DEBUG_BEGIN("plasticity_2d_projectionOnConeWithLocalIteration_solve(...)\n");
 
   DEBUG_EXPR(plasticity2DProblem_display(localproblem););
@@ -172,11 +170,13 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 
   double tau = 2.0 / 3.0, tauinv = 3.0 / 2.0, L = 0.9, Lmin = 0.3;
 
-  numerics_printf_verbose(2, "--  plasticity_2d_projectionOnConeWithLocalIteration_solve contact = %i",
-                          options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
-  numerics_printf_verbose(2,
-                          "--  plasticity_2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
-                          "rho \t\t\t| error\t\t\t|");
+  numerics_printf_verbose(
+      2, "--  plasticity_2d_projectionOnConeWithLocalIteration_solve contact = %i",
+      options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
+  numerics_printf_verbose(
+      2,
+      "--  plasticity_2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
+      "rho \t\t\t| error\t\t\t|");
   numerics_printf_verbose(
       2, "--                                                | %i \t\t| %.10e\t| %.10e\t|",
       localiter, rho, localerror);
@@ -207,7 +207,8 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
      * incx, 1.0, strainrate_k, incy); */
     for (i = 0; i < 3; i++)
       strainrate_k[i] = MLocal[i + 0 * 3] * stress_local[0] + qLocal[i] +
-                      MLocal[i + 1 * 3] * stress_local[1] + +MLocal[i + 2 * 3] * stress_local[2];
+                        MLocal[i + 1 * 3] * stress_local[1] +
+                        +MLocal[i + 2 * 3] * stress_local[2];
     DEBUG_EXPR(NV_display(strainrate_k, 3););
     ls_iter = 0;
     success = 0;
@@ -233,11 +234,13 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 
       for (i = 0; i < 3; i++)
         strainrate_local[i] = MLocal[i + 0 * 3] * stress_local[0] + qLocal[i] +
-                      MLocal[i + 1 * 3] * stress_local[1] + +MLocal[i + 2 * 3] * stress_local[2];
+                              MLocal[i + 1 * 3] * stress_local[1] +
+                              +MLocal[i + 2 * 3] * stress_local[2];
 
-      a1 = sqrt((strainrate_k[0] - strainrate_local[0]) * (strainrate_k[0] - strainrate_local[0]) +
-                (strainrate_k[1] - strainrate_local[1]) * (strainrate_k[1] - strainrate_local[1]) +
-                (strainrate_k[2] - strainrate_local[2]) * (strainrate_k[2] - strainrate_local[2]));
+      a1 = sqrt(
+          (strainrate_k[0] - strainrate_local[0]) * (strainrate_k[0] - strainrate_local[0]) +
+          (strainrate_k[1] - strainrate_local[1]) * (strainrate_k[1] - strainrate_local[1]) +
+          (strainrate_k[2] - strainrate_local[2]) * (strainrate_k[2] - strainrate_local[2]));
 
       a2 = sqrt((stress_k[0] - stress_local[0]) * (stress_k[0] - stress_local[0]) +
                 (stress_k[1] - stress_local[1]) * (stress_k[1] - stress_local[1]) +
@@ -261,7 +264,8 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 
     /* compute local error */
     localerror = 0.0;
-    plasticity_2d_unitary_compute_and_add_error(stress_local, strainrate_local, eta_i, theta_i, &localerror, worktmp);
+    plasticity_2d_unitary_compute_and_add_error(stress_local, strainrate_local, eta_i, theta_i,
+                                                &localerror, worktmp);
 
     /*Update rho*/
     if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {
@@ -283,7 +287,7 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 }
 
 int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double* stress_local,
-                                SolverOptions* options) {
+                                         SolverOptions* options) {
   /*  /\* Builds local problem for the current contact *\/ */
   /*   plasticity_2d_projection_update(contact, stress_local); */
 
@@ -325,9 +329,7 @@ int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double
 }
 
 void plasticity_2d_projection_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
-                          SolverOptions* localsolver_options) {}
-
-
+                                   SolverOptions* localsolver_options) {}
 
 void plasticity_2d_poc_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = 0;  // this will be set by external solver
@@ -353,50 +355,46 @@ static int plasticity_2d_projectionOnCone_init_wrap(void* problem, SolverOptions
 }
 
 static int plasticity_2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
-                                            double* velocity, SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnCone_solve((PlasticityProblem*)localproblem, reaction, options);
+                                                     double* velocity,
+                                                     SolverOptions* options) {
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_projectionOnCone_solve((PlasticityProblem*)localproblem, reaction,
+                                              options);
 }
 
 /* Wrapper for projection on cone with local iteration (local solver) */
-static void plasticity_2d_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
+static void plasticity_2d_projectionOnConeWithLocalIteration_set_default(
+    SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int plasticity_2d_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_projectionOnConeWithLocalIteration_init_wrap(void* problem,
+                                                                      SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(void* localproblem,
-                                                               double* reaction,
-                                                               double* velocity,
-                                                               SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnConeWithLocalIteration_solve((PlasticityProblem*)localproblem,
-                                                        reaction, options);
+static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(
+    void* localproblem, double* reaction, double* velocity, SolverOptions* options) {
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_projectionOnConeWithLocalIteration_solve(
+      (PlasticityProblem*)localproblem, reaction, options);
 }
 
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnCone,
-                "PLASTICITY_2D_ONECONE_PROJECTION",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnCone, "PLASTICITY_2D_ONECONE_PROJECTION",
                 "Projection on cone for 2D Mohr Coulomb (one cone)",
                 plasticity_2d_projectionOnCone_init_wrap,
-                plasticity_2d_projectionOnCone_solve_wrap,
-                NULL,
-                NULL,
-                plasticity_2d_projectionOnCone_set_default,
-                100,   /* default_max_iter */
-                1e-14, /* default_tol */
-                1);    /* is_local */
+                plasticity_2d_projectionOnCone_solve_wrap, NULL, NULL,
+                plasticity_2d_projectionOnCone_set_default, 100, /* default_max_iter */
+                1e-14,                                           /* default_tol */
+                1);                                              /* is_local */
 
 REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
                 "PLASTICITY_2D_ONECONE_PROJECTION_LI",
                 "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
                 plasticity_2d_projectionOnConeWithLocalIteration_init_wrap,
-                plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap,
-                NULL,
-                NULL,
+                plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap, NULL, NULL,
                 plasticity_2d_projectionOnConeWithLocalIteration_set_default,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
@@ -408,14 +406,14 @@ REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
  * Simple radial return algorithm for Von Mises plasticity
  */
 
-int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem, double* stress_local,
-                                 SolverOptions* options) {
-  (void)options;  /* Unused for now - simple projection doesn't need options */
-  
+int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
+                                             double* stress_local, SolverOptions* options) {
+  (void)options; /* Unused for now - simple projection doesn't need options */
+
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
   double sigma_y = localproblem->model.von_mises->sigma_y[0];
-  
+
   /* Compute trial stress: sigma_trial = MLocal * stress_local + qLocal */
   double trial_stress[3];
   for (int i = 0; i < 3; i++) {
@@ -423,46 +421,40 @@ int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem, do
                       MLocal[i + 1 * 3] * stress_local[1] +
                       MLocal[i + 2 * 3] * stress_local[2];
   }
-  
+
   /* Project onto Von Mises yield surface */
   plasticity_2d_projectionOnVonMises(trial_stress, sigma_y);
-  
+
   /* Update stress_local */
   stress_local[0] = trial_stress[0];
   stress_local[1] = trial_stress[1];
   stress_local[2] = trial_stress[2];
-  
+
   return 0;
 }
 
-void plasticity_2d_vonmises_set_default(SolverOptions* options) {
-  (void)options;
-}
+void plasticity_2d_vonmises_set_default(SolverOptions* options) { (void)options; }
 
 /* Wrapper for Von Mises projection (local solver) */
-static int plasticity_2d_projectionOnVonMises_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_projectionOnVonMises_init_wrap(void* problem,
+                                                        SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_projectionOnVonMises_solve_wrap(void* localproblem,
-                                                         double* reaction,
+static int plasticity_2d_projectionOnVonMises_solve_wrap(void* localproblem, double* reaction,
                                                          double* velocity,
                                                          SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnVonMises_solve((PlasticityProblem*)localproblem,
-                                                  reaction, options);
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_projectionOnVonMises_solve((PlasticityProblem*)localproblem, reaction,
+                                                  options);
 }
 
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES,
-                "PLASTICITY_2D_ONECONE_VONMISES",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES, "PLASTICITY_2D_ONECONE_VONMISES",
                 "Radial return projection for Von Mises plasticity (one cone)",
                 plasticity_2d_projectionOnVonMises_init_wrap,
-                plasticity_2d_projectionOnVonMises_solve_wrap,
-                NULL,
-                NULL,
-                plasticity_2d_vonmises_set_default,
-                100,   /* default_max_iter */
-                1e-14, /* default_tol */
-                1);    /* is_local */
+                plasticity_2d_projectionOnVonMises_solve_wrap, NULL, NULL,
+                plasticity_2d_vonmises_set_default, 100, /* default_max_iter */
+                1e-14,                                   /* default_tol */
+                1);                                      /* is_local */

@@ -21,8 +21,7 @@
 /*!\file MixedComplementarityProblem.h
  */
 
-#include "NumericsFwd.h"    // for MixedComplementarityProblem, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for MixedComplementarityProblem, NumericsMatrix
 
 /**
     type for user defined function used to compute Fmcp and its jacobian.
@@ -85,7 +84,7 @@ struct MixedComplementarityProblem_old {
   double *nablaFmcp;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -105,7 +104,7 @@ MixedComplementarityProblem *mixedComplementarityProblem_new(void);
  */
 void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old *problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 
