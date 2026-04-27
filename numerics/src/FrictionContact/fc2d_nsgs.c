@@ -403,7 +403,7 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
         if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
           /* we  freeze the contact for n iterations*/
           freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-          // DEBUG_EXPR(
+          DEBUG_EXPR(
           NV_display(localreaction, 2);
           NV_display(&reaction[pos], 2);
           printf("light_error_2 = %e\n", light_error_2[contact]);
@@ -422,7 +422,7 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
               small_reaction_criteria);
           printf("Contact % i is freezed for %i steps\n", contact,
                  options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
-          //  );
+          );
         }
         /* reaction update */
         reaction[pos] = localreaction[0];
