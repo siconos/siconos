@@ -60,9 +60,10 @@ struct one_step_integrator {
     using items = gather<topology, ct_osi_t, rt_ct_osi_t, rt_rt_osi_t,
                          moreau_jean_assembled>;
 
-    using attributes =
-        gather<attribute<"elements", elements_t>,
-               attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
+    struct attributes {
+      elements_t elements;
+      some::item_ref<assembled_osi_t> assembled_osi;
+    };
 
     template <typename Handle>
     struct interface : default_interface<Handle> {
@@ -97,7 +98,8 @@ struct one_step_integrator {
 
       void initialize(auto step)
       {
-        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
+        mp::for_each(elements(),
+                     [&](auto elem) { elem.initialize(step); });
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }

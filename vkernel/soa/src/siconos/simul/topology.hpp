@@ -34,9 +34,9 @@ struct topology : item {
   using dfinteraction = dynamic_dof_fixed_dof_interaction;
   using ddinteraction = dynamic_dof_dynamic_dof_interaction;
 
-  using attributes =
-      gather<attribute<"system_id",
-                       some::map<some::indice, some::item_ref<fsystem>>>>;
+  struct attributes {
+    some::map<some::indice, some::item_ref<fsystem>> system_id;
+  };
 
   using properties = gather<
       storage::attached<fsystem, symbol<"involved">, some::boolean>,

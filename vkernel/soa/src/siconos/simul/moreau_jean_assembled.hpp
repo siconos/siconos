@@ -8,35 +8,35 @@ namespace siconos::simul {
 struct moreau_jean_assembled : item {
   using size_1_t = some::indice_value<1>;
 
-  using attributes = gather<
-      attribute<"theta", some::scalar>, attribute<"gamma", some::scalar>,
-      attribute<"constraint_activation_threshold", some::scalar>,
-      attribute<"mass_matrix_assembled",
-                some::assembled_matrix<
-                    some::matrix<some::scalar, size_1_t, size_1_t>>>,
-      attribute<"iteration_matrix_assembled",
-                some::assembled_matrix<
-                    some::matrix<some::scalar, size_1_t, size_1_t>>>,
-      attribute<"k_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"h_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"w_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"lambda_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"y_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"ydot_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"velocity_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"p0_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"q_nsp_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"mu_vector_assembled", some::assembled_vector<some::vector<
-                                           some::scalar, size_1_t>>>>;
+  struct attributes {
+    some::scalar theta;
+    some::scalar gamma;
+    some::scalar constraint_activation_threshold;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        mass_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        iteration_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        k_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        h_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        w_matrix_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        lambda_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        y_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        ydot_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        velocity_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        p0_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        q_nsp_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        mu_vector_assembled;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

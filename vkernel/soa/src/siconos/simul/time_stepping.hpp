@@ -15,12 +15,13 @@ struct time_stepping : item {
 
   using formulation_t =
       typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
-  using attributes = gather<
-      attribute<"time_discretization", some::item_ref<time_discretization_t>>,
-      attribute<"one_step_integrator", some::item_ref<one_step_integrator_t>>,
-      attribute<"one_step_nonsmooth_problem",
-                some::item_ref<one_step_nonsmooth_problem_t>>,
-      attribute<"topology", some::item_ref<topology_t>>>;
+
+  struct attributes {
+    some::item_ref<time_discretization_t> time_discretization;
+    some::item_ref<one_step_integrator_t> one_step_integrator;
+    some::item_ref<one_step_nonsmooth_problem_t> one_step_nonsmooth_problem;
+    some::item_ref<topology_t> topology;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -96,7 +97,7 @@ struct time_stepping : item {
         // do nothing if lagrangian_r is time_invariant
         elem.update_h_matrices(step);
 
-        // vfree stored in v(step+1)
+        // vfree stored in v(step+1) & q(step+1)
         elem.compute_free_state(step, time_step());
 
         // -> y & ydot (step & step+1)
