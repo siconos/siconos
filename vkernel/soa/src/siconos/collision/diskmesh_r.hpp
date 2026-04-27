@@ -6,7 +6,6 @@
 namespace siconos::collision {
 
 struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
-
   struct attributes {
     some::item_ref<shape::chained_segment> mesh;
     some::indice contact_index;
@@ -25,7 +24,8 @@ struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
     {
       return storage::attr<"contact_index">(*self());
     }
-    decltype(auto) compute_h(auto& ds1, auto& ds2)
+    decltype(auto) compute_h(match::handle<model::lagrangian_ds> auto& ds1,
+                             auto& ds2)
     {
       auto& q1 = storage::attr<"q">(ds1); /* disk */
 
@@ -39,7 +39,7 @@ struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
-              match::handle<model::rt_lagrangian_ds> DS2, typename M1,
+              match::handle<model::elastic_lagrangian_ds> DS2, typename M1,
               typename M2>
     void compute_jachq(I step, DS1& ds1, DS2& ds2, M1& h_matrix1,
                        M2& h_matrix2)
