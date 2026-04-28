@@ -18,6 +18,10 @@
 #include "NumericsFwd.h"    // for SolverOptions, RelayProblem
 #include "Relay_Solvers.h"  // for relay_path, relay_path_setDefaultSolverOp...
 #include "Relay_options.h"
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "solver_registry.h"
+
 #ifdef HAVE_PATHFERRIS
 #include <math.h>
 #include <stdio.h>
@@ -25,14 +29,10 @@
 #include <string.h>
 
 #include "NumericsMatrix.h"
-#include "numerics_verbose.h"
 #include "Relay_options.h"
 #include "SimpleLCP.h"
+#include "numerics_verbose.h"
 #endif /*HAVE_PATHFERRIS*/
-
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
 
 void relay_path(RelayProblem *problem, double *z, double *w, int *info,
                 SolverOptions *options) {
@@ -110,35 +110,31 @@ void relay_path(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_PATH in the global solver registry.
  */
 
-static void relay_path_set_default(SolverOptions* options) {
+static void relay_path_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_path_init_wrap(void* problem, SolverOptions* options) {
+static int relay_path_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int relay_path_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
   int info = NUMERICS_OK;
-  relay_path((RelayProblem*)problem, z, w, &info, options);
+  relay_path((RelayProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_path_free_wrap(void* problem, SolverOptions* options) {
+static void relay_path_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_RELAY_PATH, "RELAY_PATH",
-                "PATH solver for Relay problems (MCP formulation)",
-                relay_path_init_wrap,
-                relay_path_solve_wrap,
-                relay_path_free_wrap,
-                NULL,  /* error function */
-                relay_path_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                "PATH solver for Relay problems (MCP formulation)", relay_path_init_wrap,
+                relay_path_solve_wrap, relay_path_free_wrap, NULL, /* error function */
+                relay_path_set_default, 1000,                      /* default_max_iter */
+                1e-6,                                              /* default_tol */
+                0 /* is_local_solver */);

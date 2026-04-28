@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include <boost/archive/binary_iarchive.hpp>
 

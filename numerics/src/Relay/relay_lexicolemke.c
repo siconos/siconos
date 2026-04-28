@@ -21,16 +21,14 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_lexico...
 #include "Relay_options.h"
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "Relay_options.h"                     // for SICONOS_LCP_LEMKE
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "Relay_options.h"  // for SICONOS_LCP_LEMKE
+#include "SolverOptions.h"  // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"        // for SICONOS_LCP_LEMKE
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
                        SolverOptions *options) {
   int i;
@@ -91,35 +89,33 @@ void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_LEMKE in the global solver registry.
  */
 
-static void relay_lexicolemke_set_default(SolverOptions* options) {
+static void relay_lexicolemke_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
+static int relay_lexicolemke_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_lexicolemke_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int relay_lexicolemke_solve_wrap(void *problem, double *z, double *w,
+                                        SolverOptions *options) {
   int info = NUMERICS_OK;
-  relay_lexicolemke((RelayProblem*)problem, z, w, &info, options);
+  relay_lexicolemke((RelayProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_lexicolemke_free_wrap(void* problem, SolverOptions* options) {
+static void relay_lexicolemke_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_RELAY_LEMKE, "RELAY_LEMKE",
-                "Lexicographic Lemke solver for Relay problems",
-                relay_lexicolemke_init_wrap,
-                relay_lexicolemke_solve_wrap,
-                relay_lexicolemke_free_wrap,
-                NULL,  /* error function */
-                relay_lexicolemke_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                "Lexicographic Lemke solver for Relay problems", relay_lexicolemke_init_wrap,
+                relay_lexicolemke_solve_wrap, relay_lexicolemke_free_wrap,
+                NULL,                                /* error function */
+                relay_lexicolemke_set_default, 1000, /* default_max_iter */
+                1e-6,                                /* default_tol */
+                0 /* is_local_solver */);

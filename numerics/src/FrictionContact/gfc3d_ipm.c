@@ -30,17 +30,17 @@
 #include "CSparseMatrix.h"
 #include "FrictionContact_options.h"
 #include "JordanAlgebra.h"
-#include "fc3d_short_names.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
+#include "SolverOptions.h"
+#include "fc3d_short_names.h"
 #include "float.h"
 #include "gfc3d_Solvers.h"
-// #include "gfc3d_compute_error.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"
-#include "numerics_errors.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -216,7 +216,7 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
   }
 
   else {
-    fprintf(stderr, "xdoty_type: type = %d is undefined.\n", type);    
+    fprintf(stderr, "xdoty_type: type = %d is undefined.\n", type);
     return -1;
   }
 
@@ -2991,8 +2991,8 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 }
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void gfc3d_ipm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
@@ -3050,10 +3050,11 @@ static int gfc3d_ipm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int gfc3d_ipm_solve_wrap(void* problem, double* reaction,
-                                double* velocity, double* globalVelocity, SolverOptions* options) {
+static int gfc3d_ipm_solve_wrap(void* problem, double* reaction, double* velocity,
+                                double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_IPM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  gfc3d_IPM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info,
+            options);
   return info;
 }
 
@@ -3064,12 +3065,10 @@ static void gfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER_3VAR(GFC3D_IPM, "GFC3D_IPM",
-                "Interior Point Method for 3D Global Friction Contact",
-                gfc3d_ipm_init_wrap,
-                gfc3d_ipm_solve_wrap,
-                gfc3d_ipm_free_wrap,
-                NULL,  /* error function */
-                gfc3d_ipm_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-8,  /* default_tol */
-                0      /* is_local_solver */);
+                     "Interior Point Method for 3D Global Friction Contact",
+                     gfc3d_ipm_init_wrap, gfc3d_ipm_solve_wrap, gfc3d_ipm_free_wrap,
+                     NULL,                  /* error function */
+                     gfc3d_ipm_set_default, /* set_default */
+                     1000,                  /* default_max_iter */
+                     1e-8,                  /* default_tol */
+                     0 /* is_local_solver */);

@@ -22,7 +22,7 @@
 /*!\file SolverOptions_helpers.h
  * \brief Helper functions for setting common solver options*/
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -74,7 +74,7 @@ inline static void SN_set_nb_iters(int* iparam, int nb_iters) { iparam[1] = nb_i
  */
 inline static int SN_get_nb_iters(int* iparam) { return iparam[1]; }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -30,7 +30,7 @@ set(Siconos_DIR ${SICONOS_INSTALL_DIR})
 find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
-find_package(pybind11 CONFIG REQUIRED)
+find_package(pybind11 3.0.2  CONFIG REQUIRED)
 
 include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 

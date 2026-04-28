@@ -126,6 +126,11 @@ concept push_back = requires(T a) {
   { a.push_back(typename T::value_type{}) };
 };
 
+template <typename T>
+concept static_capacity = requires(T a) {
+  { a.static_capacity };
+};
+
 template <typename T, typename I>
 concept handle = std::derived_from<typename T::type, I> &&
                  requires { typename T::handle_t; };

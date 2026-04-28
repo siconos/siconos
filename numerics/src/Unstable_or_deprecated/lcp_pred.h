@@ -30,7 +30,7 @@
 typedef struct {
 } method_lcp;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -154,7 +154,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
                               int maxiterglob, double tolglob, double *q, method_lcp **ptvec,
                               double *z, double *w, int *it_end, int *itt_end, double *res);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

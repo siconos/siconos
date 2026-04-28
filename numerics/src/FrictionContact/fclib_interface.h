@@ -23,8 +23,6 @@
 #ifndef FCLIB_INTERFACE_H
 #define FCLIB_INTERFACE_H
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP, WITH_FCLIB
-
 #if defined(WITH_FCLIB)
 #include "NumericsFwd.h"  // for FrictionContactProblem, GlobalFrictionCon...
 
@@ -33,7 +31,7 @@ typedef struct fclib_global fclib_global;
 typedef struct fclib_global_rolling fclib_global_rolling;
 typedef struct fclib_solution fclib_solution;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -48,7 +46,8 @@ int frictionContact_fclib_write_csr(FrictionContactProblem *problem, char *title
                                     int ndof);
 
 int frictionContact_fclib_write(FrictionContactProblem *problem, const char *title,
-                                const char *description, const char *mathInfo, const char *path, int ndof);
+                                const char *description, const char *mathInfo,
+                                const char *path, int ndof);
 
 int frictionContact_fclib_write_guess(double *reaction, double *velocity, const char *path);
 
@@ -67,7 +66,7 @@ GlobalRollingFrictionContactProblem *globalRollingFrictionContact_fclib_read(con
 int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem *problem,
                                              char *title, char *description, char *mathInfo,
                                              const char *path);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

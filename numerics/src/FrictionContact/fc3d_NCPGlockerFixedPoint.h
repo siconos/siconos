@@ -28,10 +28,9 @@
   - free
 
 */
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -68,7 +67,7 @@ void fc3d_FixedP_free(FrictionContactProblem* problem, FrictionContactProblem* l
 void fc3d_Path_computeError(int dimension, double* velocity, double* reaction,
                             double* output_error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

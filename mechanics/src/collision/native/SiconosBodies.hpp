@@ -23,14 +23,10 @@
 #define SiconosBodies_hpp
 
 #include <memory>
-#include "SiconosMatrix.hpp"
 
 #include "FMatrix.hpp"  // For FMatrix
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
-
-// namespace siconos::algebra {
-// class SiconosMatrix;
-// }
 
 namespace siconos::simulation {
 class Simulation;
@@ -65,8 +61,7 @@ class SiconosBodies {
   std::shared_ptr<siconos::collision::native::FMatrix> movingPlans() { return _moving_plans; }
   std::shared_ptr<siconos::algebra::SiconosMatrix> plans() { return _plans; }
 
-  std::shared_ptr<siconos::collision::native::SpaceFilter> spaceFilter()
-  {
+  std::shared_ptr<siconos::collision::native::SpaceFilter> spaceFilter() {
     return _playground;
   };
 };

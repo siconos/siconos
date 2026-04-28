@@ -25,9 +25,7 @@
 #include <stdbool.h>  // for boolean type
 #include <stdio.h>    // for size_t
 
-#include "NumericsFwd.h"         // for SolverOptions
-#include "SiconosConfig.h"       // for BUILD_AS_CPP // IWYU pragma: keep
-#include "naming_conventions.h"  // Standardized naming conventions and macros
+#include "NumericsFwd.h"  // for SolverOptions
 
 /* Forward declaration for solver registry (avoid circular include) */
 typedef int solver_id_t;
@@ -119,7 +117,7 @@ enum SICONOS_DPARAM {
   SICONOS_DPARAM_RESIDU = 1,
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -244,7 +242,7 @@ SolverOptions *solver_options_create_and_init(int solver_id, void *problem);
  */
 void solver_options_reset_to_defaults(SolverOptions *options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

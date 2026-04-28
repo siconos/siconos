@@ -18,7 +18,6 @@
 
 #ifndef SiconosFull_hpp
 #define SiconosFull_hpp
-#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 
@@ -35,6 +34,7 @@
 #include <fc3d_Solvers.h>
 
 #include <SiconosVector.hpp>
+
 #include "SiconosFullNumerics.hpp"
 /* hand written */
 
@@ -257,21 +257,21 @@ void siconos_io(Archive& ar, SiconosMatrix& m, unsigned int version) {
     siconos_property_io(ar, p);                                                               \
   }
 
-namespace siconos {
-MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
-MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
-MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
-MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosVector>);
-MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
-MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
-MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
-MAKE_SICONOS_IO_SP_PROPERTIES(siconos::algebra::SiconosVector);
-MAKE_SICONOS_IO_PROPERTIES(std::string);
-MAKE_SICONOS_IO_PROPERTIES(unsigned int);
-MAKE_SICONOS_IO_PROPERTIES(double);
-MAKE_SICONOS_IO_PROPERTIES(int);
-MAKE_SICONOS_IO_PROPERTIES(bool);
-}  // namespace siconos
+  namespace siconos {
+  MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
+  MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
+  MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosVector>);
+  MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
+  MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
+  MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  MAKE_SICONOS_IO_SP_PROPERTIES(siconos::algebra::SiconosVector);
+  MAKE_SICONOS_IO_PROPERTIES(std::string);
+  MAKE_SICONOS_IO_PROPERTIES(unsigned int);
+  MAKE_SICONOS_IO_PROPERTIES(double);
+  MAKE_SICONOS_IO_PROPERTIES(int);
+  MAKE_SICONOS_IO_PROPERTIES(bool);
+  }  // namespace siconos
 
   namespace boost {
   namespace serialization {

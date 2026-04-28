@@ -25,7 +25,6 @@
  */
 
 #include "Newton_methods.h"
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct search_data line_search.h
  * Struct to hold together the data needed by the search
@@ -67,7 +66,7 @@ enum LSA_ALGO { SICONOS_LSA_ARMIJO, SICONOS_LSA_GOLDSTEIN };
 
 typedef double (*sn_ls_fn)(int n, double* theta, double preRHS, search_data* ls_data);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -137,7 +136,7 @@ void free_nm_data(nm_ref_struct* nm_ref_data);
  */
 void free_ls_data(search_data* ls_data);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

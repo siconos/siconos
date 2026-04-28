@@ -22,16 +22,15 @@
   Shared subroutines for the resolution of contact problems with friction
   (3-dimensional case).
 */
-#include "FrictionContactProblem.h"
+#include "FrictionContactProblem.h"  // IWYU pragma: keep
 
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
-  
+
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *, double,
-                                SolverOptions *, double, double *);
+typedef int (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *, double,
+                               SolverOptions *, double, double *);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
@@ -39,8 +38,8 @@ typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, 
                                   SolverOptions *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverPtr)(FrictionContactProblem *, FrictionContactProblem *, SolverOptions *);
-
+typedef void (*FreeSolverPtr)(FrictionContactProblem *, FrictionContactProblem *,
+                              SolverOptions *);
 
 void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);
@@ -57,11 +56,9 @@ void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOp
 int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity, double *reaction,
                           SolverOptions *options);
 
-  
-
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -30,15 +30,20 @@ struct moreau_jean_element : item {
   using velocity = attr_t<system, "velocity">;
   using fext = attr_t<system, "fext">;
 
-  using attributes =
-      gather<attribute<"assembled_osi", some::item_ref<osi_assembled_t>>,
-             attribute<"ds_offset", some::indice>,
-             attribute<"inter_offset", some::indice>,
-             attribute<"number_of_involved_ds", some::indice>,
-             attribute<"number_of_interactions", some::indice>>;
+  struct attributes {
+    some::item_ref<osi_assembled_t> assembled_osi;
+    some::indice ds_offset;
+    some::indice inter_offset;
+    some::indice number_of_involved_ds;
+    some::indice number_of_interactions;
+  };
 
-  using properties = gather<storage::attached<system, symbol<"fext_backup">,
-                                              attr_t<system, "fext">>,
+  using minv_storage_attachment =
+      storage::attached<system, symbol<"minv_f">, attr_t<system, "fext">>;
+
+  using properties = gather<minv_storage_attachment,
+                            storage::keep<minv_storage_attachment, 1>,
+                            storage::keep<attr_t<system, "fext">, 1>,
                             storage::keep<attr_t<system, "q">, 2>,
                             storage::keep<attr_t<system, "velocity">, 2>,
                             storage::keep<y, 2>, storage::keep<ydot, 2>>;
@@ -46,7 +51,6 @@ struct moreau_jean_element : item {
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
-
     static constexpr bool runtime_dof()
     {
       using data_t = typename Handle::data_t;
@@ -250,9 +254,6 @@ struct moreau_jean_element : item {
 
       auto &vs_next =
           storage::attr_values<system, "velocity">(data, step + 1);
-      auto &fexts = storage::attr_values<system, "fext">(data, step);
-      auto &fexts_back =
-          storage::prop_values<system, "fext_backup">(data, step);
 
       auto &lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
@@ -260,10 +261,8 @@ struct moreau_jean_element : item {
       auto &ydots_next =
           storage::attr_values<interaction, "ydot">(data, step + 1);
 
-      for (auto [v_next, fext, fext_back] :
-           view::zip(vs_next, fexts, fexts_back)) {
+      for (auto [v_next] : view::zip(vs_next)) {
         algebra::set_zero(v_next);
-        fext_back = fext;
       }
 
       // useless at initialisation ?
@@ -284,26 +283,31 @@ struct moreau_jean_element : item {
       using env = decltype(self()->env());
       using scalar = typename env::scalar;
 
-      auto &mass_matrices = storage::attr_memory<system, "mass_matrix">(data);
-      auto &external_forces = storage::attr_memory<fext>(data);
-
-      auto &mats = storage::memory(step, mass_matrices);
-      auto &fs = storage::memory(step, external_forces);
+      auto &mats = storage::attr_values<system, "mass_matrix">(data, step);
+      auto &fs = storage::attr_values<system, "fext">(data, step);
+      auto &fs_next = storage::attr_values<system, "fext">(data, step + 1);
+      auto &minv_fs = storage::prop_values<system, "minv_f">(data, step);
+      auto &minv_fs_next =
+          storage::prop_values<system, "minv_f">(data, step + 1);
 
       if constexpr (system_with_k_matrix()) {
         auto &ks = storage::attr_values<system, "k_matrix">(data, step);
         auto &qs = storage::attr_values<system, "q">(data, step);
-        auto &fs_back =
-            storage::prop_values<system, "fext_backup">(data, step);
+        for (auto [mat, k, q, f, f_next, minv_f, minv_f_next] :
+             view::zip(mats, ks, qs, fs, fs_next, minv_fs, minv_fs_next)) {
+          algebra::unbounded_vector<scalar> fmkq = f - k * q;
+          algebra::solve_linear_system(mat, fmkq, minv_f);
 
-        for (auto [mat, k, q, fb, f] : view::zip(mats, ks, qs, fs_back, fs)) {
-          algebra::unbounded_vector<scalar> fmkq = fb - k * q;
-          algebra::solve_linear_system(mat, fmkq, f);
+          // constant fext
+          minv_f_next = minv_f;
         }
       }
       else {
-        for (auto [mat, f] : view::zip(mats, fs)) {
-          algebra::solve_in_place(mat, f);
+        for (auto [mat, f, minv_f, minv_f_next] :
+             view::zip(mats, fs, minv_fs, minv_fs_next)) {
+          minv_f = f;
+          algebra::solve_in_place(mat, minv_f);
+          minv_f_next = minv_f;
         }
       }
     }
@@ -379,77 +383,87 @@ struct moreau_jean_element : item {
     void compute_free_state(auto step, auto h)
     {
       auto &data = self()->data();
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      scalar theta = self()->theta();
 
       auto &vs = storage::attr_values<system, "velocity">(data, step);
       auto &vs_next =
           storage::attr_values<system, "velocity">(data, step + 1);
 
-      auto &minv_fs = storage::attr_values<system, "fext">(data, step);
-      auto &minv_fs_next =
-          storage::attr_values<system, "fext">(data, step + 1);
+      auto &qs = storage::attr_values<system, "q">(data, step);
+      auto &qs_next = storage::attr_values<system, "q">(data, step + 1);
 
       auto &bc_indices =
           storage::prop_values<system, "bc_velocities_0">(data, step);
 
       if constexpr (system_with_k_matrix()) {
-        // free state with a stiffness matrix
+        // W = M + h^2*theta^2*K
+        // RHS = M*v - h^2*theta*(1-theta)*K*v + h*(f_ext - K*q)
+        // Note: for constant fext, F_k = f_ext
+
+        auto &fexts = storage::attr_values<system, "fext">(data, step);
+
         auto &mass_matrices =
             storage::attr_values<system, "mass_matrix">(data, step);
-
         auto &k_matrices =
             storage::attr_values<system, "k_matrix">(data, step);
+        auto &vs = storage::attr_values<system, "velocity">(data, step);
+        auto &vs_next =
+            storage::attr_values<system, "velocity">(data, step + 1);
+        auto &bc_indices =
+            storage::prop_values<system, "bc_velocities_0">(data, step);
 
-        // for all ds
-        for (auto [m_mat, k_mat, v, v_next, minv_f, minv_f_next, bc_indice] :
-             view::zip(mass_matrices, k_matrices, vs, vs_next, minv_fs,
-                       minv_fs_next, bc_indices)) {
-          using env_t = decltype(self()->env());
-          using scalar = typename env_t::scalar;
+        for (auto [m_mat, k_mat, q, q_next, v, v_next, f, bc_indice] :
+             view::zip(mass_matrices, k_matrices, qs, qs_next, vs, vs_next,
+                       fexts, bc_indices)) {
+          using vector = typename env_t::template unbounded_vector<scalar>;
 
-          auto h_val = h;
-          auto theta_val = theta();
+          // Force at step k: F_k = f_ext - K*q_k
+          vector tf = f - k_mat * q;
+          vector tf_next = f - k_mat * (q + h * v);
 
-          // should this be moved in compute_iteration_matrix ?
+          // W = M + h^2*theta^2*K
+          auto w_mat = m_mat;
+          w_mat += (h * h * theta * theta) * k_mat;
 
-          // M*minv_f = fext - K*q
-          algebra::unbounded_vector<scalar> eff_force_k = m_mat * minv_f;
-          algebra::unbounded_vector<scalar> eff_force_next =
-              m_mat * minv_f_next;
+          // rhs
+          vector rhs = h * theta * tf_next + h * (1 - theta) * tf;
 
-          // h^2*theta*K*v - h*((1-theta)*eff_force_k +
-          // theta*eff_force_next)
-          algebra::unbounded_vector<scalar> residual =
-              (h_val * h_val * theta_val) * (k_mat * v) -
-              h_val * ((1.0 - theta_val) * eff_force_k +
-                       theta_val * eff_force_next);
+          // W * dv = RHS
+          vector dv(v_next.size());
+          algebra::solve_linear_system(w_mat, rhs, dv);
+          v_next = v + dv;
 
-          // W = M + h^2*theta^2*K for this system.
-          auto w_mat = m_mat;  // copy
-          w_mat += (h_val * h_val * theta_val * theta_val) * k_mat;
-
-          // W * dv = residual for dv
-          algebra::unbounded_vector<scalar> dv(residual.size());
-          algebra::solve_linear_system(w_mat, residual, dv);
-
-          // free velocity: v_next = v - dv
-          v_next = v - dv;
-
-          // apply boundary conditions
+          // boundary conditions
           for (auto bc_idx : bc_indice) {
             v_next(bc_idx) = 0.0;
           }
+
+          // update q next:
+          q_next = q + h * theta * v_next + h * (1 - theta) * v;
         }
       }
+
       else {
         // K = 0
-        for (auto [v, v_next, minv_f, minv_f_next, bc_indice] :
-             view::zip(vs, vs_next, minv_fs, minv_fs_next, bc_indices)) {
-          v_next = v + h * theta() * minv_f + h * (1 - theta()) * minv_f_next;
+        auto &minv_fs = storage::prop_values<system, "minv_f">(data, step);
+        auto &minv_fs_next =
+            storage::prop_values<system, "minv_f">(data, step + 1);
+
+        for (auto [q, q_next, v, v_next, minv_f, minv_f_next, bc_indice] :
+             view::zip(qs, qs_next, vs, vs_next, minv_fs, minv_fs_next,
+                       bc_indices)) {
+          v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
 
           // apply boundary conditions
           for (auto bc_idx : bc_indice) {
             v_next(bc_idx) = 0.0;
           }
+
+          // update q next:
+          q_next = q + h * theta * v_next + h * (1 - theta) * v;
         }
       }
     }

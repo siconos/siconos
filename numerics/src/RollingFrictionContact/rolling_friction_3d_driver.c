@@ -20,22 +20,15 @@
  * \brief RFC3D driver using the solver registration system
  */
 
-#include "RollingFrictionContactProblem.h"
-#include "FrictionContact_options.h"
-#include "SolverOptions.h"
-#include "rolling_fc_Solvers.h"
-#include "rolling_friction_3d_short_names.h"
-#include "numerics_verbose.h"
-
-/* Registration-based headers */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <float.h>
 
-//#define FILE_OUTPUT
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "rolling_fc_Solvers.h"
+#include "solver_registry.h"
+
+// #define FILE_OUTPUT
 
 #ifdef FILE_OUTPUT
 static int fccounter = -1;
@@ -51,14 +44,13 @@ static int file_exists(const char* fname) {
 
 #endif
 
-
-
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */
 
-int rolling_friction_3d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
-                                  double* reaction, SolverOptions* options) {
+int rolling_friction_3d_checkTrivialCase(RollingFrictionContactProblem* problem,
+                                         double* velocity, double* reaction,
+                                         SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfContacts;
   double* q = problem->q;
@@ -81,7 +73,7 @@ int rolling_friction_3d_checkTrivialCase(RollingFrictionContactProblem* problem,
  * =========================================================================== */
 
 int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* reaction,
-                        double* velocity, SolverOptions* options) {
+                               double* velocity, SolverOptions* options) {
   /* Input validation using standardized macros */
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
@@ -100,7 +92,8 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
   SET_SOLVER_RESIDUAL(options, 0.0);
 
   /* Check for trivial case */
-  int trivial_status = rolling_friction_3d_checkTrivialCase(problem, velocity, reaction, options);
+  int trivial_status =
+      rolling_friction_3d_checkTrivialCase(problem, velocity, reaction, options);
   if (trivial_status == 0) {
     return NUMERICS_OK;
   }
@@ -109,7 +102,8 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
 
   if (!solver) {
-    numerics_printf("rolling_friction_3d_driver: solver ID %d not found in registry", options->solverId);
+    numerics_printf("rolling_friction_3d_driver: solver ID %d not found in registry",
+                    options->solverId);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
@@ -118,14 +112,17 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("rolling_friction_3d_driver: solver '%s' is a local solver, cannot be used as main solver",
-                    solver->name);
+    numerics_printf(
+        "rolling_friction_3d_driver: solver '%s' is a local solver, cannot be used as main "
+        "solver",
+        solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
   /* Check solve function exists */
   if (!solver->solve) {
-    numerics_printf("rolling_friction_3d_driver: solver '%s' has no solve function", solver->name);
+    numerics_printf("rolling_friction_3d_driver: solver '%s' has no solve function",
+                    solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
@@ -133,7 +130,8 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf("rolling_friction_3d_driver: solver initialization failed with error %d", init_status);
+      numerics_printf("rolling_friction_3d_driver: solver initialization failed with error %d",
+                      init_status);
       return init_status;
     }
   }
@@ -142,32 +140,29 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
   numerics_printf_verbose(1, "rolling_friction_3d_driver: calling solver...");
   int solve_status = solver->solve(problem, reaction, velocity, options);
 
-
 #ifdef FILE_OUTPUT
 
-    char fname[256];
-    fccounter++;
-    mkdir("data", 0777);  // create directory if not existing
+  char fname[256];
+  fccounter++;
+  mkdir("data", 0777);  // create directory if not existing
 
-    snprintf(fname, sizeof(fname), "./data/rockfall_%i_%i.dat", problem->numberOfContacts,
-             fccounter);
+  snprintf(fname, sizeof(fname), "./data/rockfall_%i_%i.dat", problem->numberOfContacts,
+           fccounter);
 
-    if (file_exists(fname)) {
-      /* printf(" %s already dumped\n", fname); */
-    } else {
-      if (problem->numberOfContacts > 0 && options->iparam[SICONOS_IPARAM_ITER_DONE] >= 40) {
-        printf("Dump %s\n", fname);
-        FILE* file = fopen(fname, "w");
-        rollingFrictionContact_printInFile(problem, file);
+  if (file_exists(fname)) {
+    /* printf(" %s already dumped\n", fname); */
+  } else {
+    if (problem->numberOfContacts > 0 && options->iparam[SICONOS_IPARAM_ITER_DONE] >= 40) {
+      printf("Dump %s\n", fname);
+      FILE* file = fopen(fname, "w");
+      rollingFrictionContact_printInFile(problem, file);
 
-        fclose(file);
-        printf("end of dump %s\n", fname);
-      }
+      fclose(file);
+      printf("end of dump %s\n", fname);
     }
+  }
 
 #endif
-
-
 
   /* Cleanup if needed */
   if (solver->free) {
@@ -178,7 +173,8 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* r
   if (solve_status == NUMERICS_OK) {
     numerics_printf_verbose(1, "rolling_friction_3d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "rolling_friction_3d_driver: solver returned status %d", solve_status);
+    numerics_printf_verbose(1, "rolling_friction_3d_driver: solver returned status %d",
+                            solve_status);
   }
 
   return solve_status;

@@ -22,25 +22,23 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, realloc
 
-#include "PlasticityProblem.h"
 #include "NSSTools.h"         // for max
 #include "NonSmoothNewton.h"  // for nonSmoothDirec...
 #include "NumericsFwd.h"      // for SolverOptions
 #include "NumericsMatrix.h"   // for NumericsMatrix
+#include "PlasticityProblem.h"
 #include "Plasticity_options.h"
-#include "SiconosBlas.h"                  // for cblas_ddot
-#include "SolverOptions.h"                // for SolverOptions
+#include "SiconosBlas.h"  // for cblas_ddot
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"                      // for numerics_print...
+#include "op3x3.h"                                 // for cpy3, mvp3x3
 #include "plasticity_2d_AlartCurnier_functions.h"  // for compute_rho_sp...
 #include "plasticity_2d_compute_error.h"           // for plasticity_2d_unitary_c...
 #include "plasticity_2d_local_problem_tools.h"     // for plasticity_2d_local_pro...
 #include "plasticity_2d_naturalmap_functions.h"    // for plasticity_2d_computeNaturalMap
 #include "plasticity_2d_projection.h"              // for plasticity_2d_projectio...
 #include "plasticity_2d_solvers.h"                 // for FreeSolverNSGSPtr
-#include "numerics_verbose.h"             // for numerics_print...
-#include "op3x3.h"                        // for cpy3, mvp3x3
-
-/* Solver registration system */
-#include "numerics_errors.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_CHECK */
@@ -60,7 +58,7 @@ static NewtonFunctionPtr jacobianF = NULL;
 static int Fsize;
 
 static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
-                                       double* local_reaction) {
+                                                double* local_reaction) {
   double* local_q = localproblem->q;
   double norm_q = cblas_dnrm2(3, localproblem->q, 1);
   double* local_M = localproblem->M->matrix0;
@@ -74,8 +72,9 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
 
   double current_error = 0.0;
 
-  plasticity_2d_unitary_compute_and_add_error(local_reaction, local_velocity, localproblem->model.drucker_prager->eta[0],
-                                     localproblem->model.drucker_prager->theta[0], &current_error, worktmp);
+  plasticity_2d_unitary_compute_and_add_error(
+      local_reaction, local_velocity, localproblem->model.drucker_prager->eta[0],
+      localproblem->model.drucker_prager->theta[0], &current_error, worktmp);
   current_error = sqrt(current_error);
   DEBUG_PRINTF("absolute local error = %e", current_error);
   if (fabs(norm_q) > DBL_EPSILON) current_error /= norm_q;
@@ -83,10 +82,9 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
   return current_error;
 }
 
-
 static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* problem,
-                                                      PlasticityProblem* localproblem,
-                                                      SolverOptions* options) {
+                                                              PlasticityProblem* localproblem,
+                                                              SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
    * that will be used to build local problem for each considered cone.
    * Local problem is built during call to update (which depends on the storage type for M).
@@ -168,7 +166,6 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
       numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
                      "unknown strategy for computing rho");
 
-
     if (verbose > 0) {
       avg_rho[0] += rho[0];
       avg_rho[1] += rho[1];
@@ -176,7 +173,7 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
     }
     if (verbose > 1) {
       plasticity_2d_local_problem_fill_M(problem, localproblem, cone);
-      
+
       double m_row_norm = 0.0, sum;
       for (int i = 0; i < 3; i++) {
         sum = 0.0;
@@ -192,7 +189,7 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
                               cone, rho[0], rho[1], rho[2],
                               1.0 / hypot9(localproblem->M->matrix0), 1.0 / m_row_norm);
     }
-    
+
     DEBUG_EXPR(NM_display(localproblem->M););
   }
   numerics_printf(
@@ -202,22 +199,23 @@ static void plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem*
 }
 
 static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
-                         SolverOptions* localsolver_options) {
+                                  SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
 }
 
-void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
-                                                      PlasticityProblem* localproblem,
-                                                      SolverOptions* localsolver_options) {
+void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(
+    PlasticityProblem* problem, PlasticityProblem* localproblem,
+    SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
    * formulation. */
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
-    plasticity_2d_onecone_nonsmooth_Newton_initialize(problem, localproblem, localsolver_options);
+    plasticity_2d_onecone_nonsmooth_Newton_initialize(problem, localproblem,
+                                                      localsolver_options);
   } else {
     numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
@@ -225,11 +223,11 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem
 }
 
 int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* localproblem,
-                                                double* local_reaction,
-                                                SolverOptions* options) {
+                                                         double* local_reaction,
+                                                         SolverOptions* options) {
   /* numerics_printf_verbose(
-      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve starts for cone %i",
-      options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]); */
+      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve starts for cone
+     %i", options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]); */
 
   int info = 1;
 
@@ -250,18 +248,18 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
   }
 
   if (options->solverId == PLASTICITY_2D_ONECONE_NSN) {
-    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(localproblem, local_reaction,
-                                                              options);
+    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
+        localproblem, local_reaction, options);
   } else if (options->solverId == PLASTICITY_2D_ONECONE_NSN_GP) {
-    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                              options);
+    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
+        localproblem, local_reaction, options);
   } else if (options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
     if (options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
             PLASTICITY_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
         options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
             PLASTICITY_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) {
-      info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction,
-                                                                options);
+      info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(
+          localproblem, local_reaction, options);
     } else {
       numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
                      "Unknown local nsn hybrid solver");
@@ -281,21 +279,22 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
         numerics_warning("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
                          "no convergence for cone %i with error = %12.8e and iterations =",
                          options->iparam[PLASTICITY_CURRENT_CONE_NUMBER],
-                         SOLVER_RESIDUAL(options),SOLVER_MAX_ITER(options));
+                         SOLVER_RESIDUAL(options), SOLVER_MAX_ITER(options));
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }
   /* numerics_printf_verbose(2,
-                          "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve ends"); */
+                          "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve
+     ends"); */
 
   return info;
   /*  (*postSolver)(cone,reaction); */
 }
 
 void plasticity_2d_onecone_nonsmooth_Newton_solvers_free(PlasticityProblem* problem,
-                                                PlasticityProblem* localproblem,
-                                                SolverOptions* localsolver_options) {
+                                                         PlasticityProblem* localproblem,
+                                                         SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
@@ -309,7 +308,8 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_free(PlasticityProblem* prob
 }
 
 void plasticity_2d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* velocity,
-                                                        double* reaction, double* error) {
+                                                                 double* reaction,
+                                                                 double* error) {
   /*   int numberOfCones = n/3; */
   /*   int sizeGlobal = numberOfCones*FSize; */
   /*   //  double * FGlobal = (double*)malloc(sizeGlobal*sizeof(*FGlobal));  */
@@ -333,10 +333,11 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* 
   /*   free(FGlobal); */
 }
 #ifdef DEBUG_CHECK
-static int plasticity_2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity, double theta,
-                                                  double* rho, double* MLocal, double* F,
-                                                  double* A, double* B, double* AWplusB,
-                                                  int* iparam) {
+static int plasticity_2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity,
+                                                           double theta, double* rho,
+                                                           double* MLocal, double* F,
+                                                           double* A, double* B,
+                                                           double* AWplusB, int* iparam) {
   double AWpB[9];
   if (iparam[PLASTICITY_NSN_FORMULATION] != PLASTICITY_NSN_FORMULATION_JEANMOREAU_GENERATED &&
       iparam[PLASTICITY_NSN_FORMULATION] != PLASTICITY_NSN_FORMULATION_NULL) {
@@ -349,7 +350,8 @@ static int plasticity_2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* ve
     }
 
     if (iparam[PLASTICITY_NSN_FORMULATION] == PLASTICITY_NSN_FORMULATION_JEANMOREAU_STD) {
-      plasticity_2d_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, theta, rho, Fg, Ag, Bg);
+      plasticity_2d_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, theta, rho, Fg, Ag,
+                                                            Bg);
     }
 
     sub3(F, Fg);
@@ -374,8 +376,9 @@ static int plasticity_2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* ve
 #endif
 
 void plasticity_2d_onecone_nonsmooth_Newton_AC_update(int cone, PlasticityProblem* problem,
-                                             PlasticityProblem* localproblem,
-                                             double* reaction, SolverOptions* options) {
+                                                      PlasticityProblem* localproblem,
+                                                      double* reaction,
+                                                      SolverOptions* options) {
   /* Build a local problem for a specific cone
      reaction corresponds to the global vector (size n) of the global problem.
   */
@@ -396,13 +399,14 @@ void plasticity_2d_onecone_nonsmooth_Newton_AC_update(int cone, PlasticityProble
   localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[cone];
 }
 
-int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProblem* localproblem,
-                                                       double* s_local, SolverOptions* options) {
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
+    PlasticityProblem* localproblem, double* s_local, SolverOptions* options) {
   int* iparam = options->iparam;
   // double* dparam = options->dparam;
 
   /* numerics_printf_verbose(
-      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct starts"); */
+      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct starts");
+   */
 
   double theta = localproblem->model.drucker_prager->theta[0];
   double eta = localproblem->model.drucker_prager->eta[0];
@@ -452,13 +456,12 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProble
   SET_SOLVER_RESIDUAL(options, sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative);
 
   if (iparam[PLASTICITY_CURRENT_CONE_NUMBER] == 0)
-    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver",
-                            "cone", "it", "|dR|", "residu", "error", "tol");
-  numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn",
-                          iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
-                          0.0,
-                          SOLVER_RESIDUAL(options),
-                          plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver", "cone",
+                            "it", "|dR|", "residu", "error", "tol");
+  numerics_printf_verbose(
+      2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn",
+      iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew, 0.0, SOLVER_RESIDUAL(options),
+      plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
   if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
     SET_SOLVER_ITER_DONE(options, inew);
     return 0;
@@ -475,8 +478,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProble
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A, B, AWplusB,
-                                           iparam);
+    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A,
+                                                    B, AWplusB, iparam);
 #endif
 
     /* Solve the linear system */
@@ -512,11 +515,11 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(PlasticityProble
       break;
     }
 
-    numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn",
-                            iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
-                            sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]),
-                            SOLVER_RESIDUAL(options),
-                            plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
+    numerics_printf_verbose(
+        2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn",
+        iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
+        sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]), SOLVER_RESIDUAL(options),
+        plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
 
     if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
       SET_SOLVER_ITER_DONE(options, inew);
@@ -680,13 +683,14 @@ static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunctio
   return -1;
 }
 #define DEBUG_MESSAGES
-int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProblem* localproblem,
-                                                       double* s_local, SolverOptions* options) {
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
+    PlasticityProblem* localproblem, double* s_local, SolverOptions* options) {
   int* iparam = options->iparam;
   // double* dparam = options->dparam;
 
   /* numerics_printf_verbose(
-      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped starts"); */
+      2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped starts");
+   */
 
   double eta = localproblem->model.drucker_prager->eta[0];
   double theta = localproblem->model.drucker_prager->theta[0];
@@ -739,13 +743,12 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProble
   SET_SOLVER_RESIDUAL(options, sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative);
 
   if (iparam[PLASTICITY_CURRENT_CONE_NUMBER] == 0)
-    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver",
-                            "cone", "it", "|dR|", "residu", "error", "tol");
-  numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn_gp",
-                          iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
-                          0.0,
-                          SOLVER_RESIDUAL(options),
-                          plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver", "cone",
+                            "it", "|dR|", "residu", "error", "tol");
+  numerics_printf_verbose(
+      2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn_gp",
+      iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew, 0.0, SOLVER_RESIDUAL(options),
+      plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
   if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
     SET_SOLVER_ITER_DONE(options, inew);
     return 0;
@@ -764,8 +767,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProble
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A, B, AWplusB,
-                                           iparam);
+    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A,
+                                                    B, AWplusB, iparam);
 #endif
 
     /* Solve the linear system */
@@ -808,11 +811,11 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProble
                          SOLVER_RESIDUAL(options));
       break;
     }
-    numerics_printf_verbose(2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn_gp",
-                            iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
-                            sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]),
-                            SOLVER_RESIDUAL(options),
-                            plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
+    numerics_printf_verbose(
+        2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "plasticity_2d_nsn_gp",
+        iparam[PLASTICITY_CURRENT_CONE_NUMBER], inew,
+        sqrt(dR[0] * dR[0] + dR[1] * dR[1] + dR[2] * dR[2]), SOLVER_RESIDUAL(options),
+        plasticity_2d_compute_local_error(localproblem, s_local), SOLVER_TOL(options));
 
     if (SOLVER_RESIDUAL(options) < SOLVER_TOL(options)) {
       SET_SOLVER_ITER_DONE(options, inew);
@@ -827,9 +830,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(PlasticityProble
   return 1;
 }
 
-static void keep_or_discard_solution(PlasticityProblem* localproblem,
-                                     double* local_reaction, double* local_reaction_backup,
-                                     SolverOptions* options, double* current_error) {
+static void keep_or_discard_solution(PlasticityProblem* localproblem, double* local_reaction,
+                                     double* local_reaction_backup, SolverOptions* options,
+                                     double* current_error) {
   double error = 0.0;
   /* error = SOLVER_RESIDUAL(options); */
 
@@ -867,9 +870,8 @@ static void keep_or_discard_solution(PlasticityProblem* localproblem,
   }
 }
 
-int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProblem* localproblem,
-                                                       double* local_reaction,
-                                                       SolverOptions* options) {
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(
+    PlasticityProblem* localproblem, double* local_reaction, SolverOptions* options) {
   numerics_printf_verbose(
       2, "--------------- plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid starts");
 
@@ -884,8 +886,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
   /* compute current_error */
   double current_error = plasticity_2d_compute_local_error(localproblem, local_reaction);
 
-  DEBUG_PRINTF("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid current_error= %e\n",
-               current_error);
+  DEBUG_PRINTF(
+      "plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid current_error= %e\n",
+      current_error);
 
   if (!(options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
             PLASTICITY_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
@@ -900,8 +903,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
   if (options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
       PLASTICITY_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP) {
     SOLVER_MAX_ITER(options) = newton_iteration_number;
-    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                              options);
+    info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
+        localproblem, local_reaction, options);
 
     DEBUG_PRINTF("NSN solver ended with residual = %e\n", SOLVER_RESIDUAL(options));
 
@@ -928,10 +931,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
       /*  1 - fixed point projection solver */
 
       SOLVER_MAX_ITER(options) = pli_iteration_number;
-      info =
-	plasticity_2d_projectionOnConeWithLocalIteration_solve(localproblem, local_reaction, options);
-      DEBUG_PRINTF("PLI solver ended with residual = %e\n",
-                   SOLVER_RESIDUAL(options));
+      info = plasticity_2d_projectionOnConeWithLocalIteration_solve(localproblem,
+                                                                    local_reaction, options);
+      DEBUG_PRINTF("PLI solver ended with residual = %e\n", SOLVER_RESIDUAL(options));
       keep_or_discard_solution(localproblem, local_reaction, local_reaction_backup, options,
                                &current_error);
       if (current_error < SOLVER_TOL(options)) {
@@ -942,8 +944,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
       /* 2 - nonsmooth Newton solver */
 
       SOLVER_MAX_ITER(options) = newton_iteration_number;
-      info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction,
-                                                                options);
+      info = plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
+          localproblem, local_reaction, options);
       DEBUG_PRINTF("NSN solver  ended with residual = %e\n", SOLVER_RESIDUAL(options));
 
       keep_or_discard_solution(localproblem, local_reaction, local_reaction_backup, options,
@@ -961,8 +963,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(PlasticityProble
   }
 
   SET_SOLVER_RESIDUAL(options, current_error);
-  DEBUG_PRINTF("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid END current_error= %e\n",
-               current_error);
+  DEBUG_PRINTF(
+      "plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid END current_error= %e\n",
+      current_error);
   DEBUG_END("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid\n")
   return info;
 }
@@ -1039,12 +1042,11 @@ static int plasticity_2d_onecone_nsn_init_wrap(void* problem, SolverOptions* opt
   return NUMERICS_OK;
 }
 
-
 static int plasticity_2d_onecone_nsn_solve_wrap(void* localproblem, double* reaction,
-                                       double* velocity, SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct((PlasticityProblem*)localproblem,
-                                                            reaction, options);
+                                                double* velocity, SolverOptions* options) {
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
+      (PlasticityProblem*)localproblem, reaction, options);
 }
 
 /* Wrapper for NSN GP (damped) solve (local solver) */
@@ -1074,10 +1076,10 @@ static int plasticity_2d_onecone_nsn_gp_init_wrap(void* problem, SolverOptions* 
 }
 
 static int plasticity_2d_onecone_nsn_gp_solve_wrap(void* localproblem, double* reaction,
-                                          double* velocity, SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped((PlasticityProblem*)localproblem,
-                                                            reaction, options);
+                                                   double* velocity, SolverOptions* options) {
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
+      (PlasticityProblem*)localproblem, reaction, options);
 }
 
 /* Wrapper for NSN GP hybrid solve (local solver) */
@@ -1086,52 +1088,41 @@ static void plasticity_2d_onecone_nsn_gp_hybrid_set_default(SolverOptions* optio
   plasticity_2d_onecone_nsn_gp_set_default_reg(options);
 }
 
-static int plasticity_2d_onecone_nsn_gp_hybrid_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_onecone_nsn_gp_hybrid_init_wrap(void* problem,
+                                                         SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
 static int plasticity_2d_onecone_nsn_gp_hybrid_solve_wrap(void* localproblem, double* reaction,
-                                                 double* velocity, SolverOptions* options) {
-  (void)velocity;  /* Local solvers don't use velocity parameter */
-  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid((PlasticityProblem*)localproblem,
-                                                            reaction, options);
+                                                          double* velocity,
+                                                          SolverOptions* options) {
+  (void)velocity; /* Local solvers don't use velocity parameter */
+  return plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(
+      (PlasticityProblem*)localproblem, reaction, options);
 }
 
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN,
-                "PLASTICITY_2D_ONECONE_NSN",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN, "PLASTICITY_2D_ONECONE_NSN",
                 "Nonsmooth Newton Alart-Curnier direct for 2D Mohr Coulomb (one cone)",
-                plasticity_2d_onecone_nsn_init_wrap,
-                plasticity_2d_onecone_nsn_solve_wrap,
-                NULL,
-                NULL,
-                plasticity_2d_onecone_nsn_set_default_reg,
+                plasticity_2d_onecone_nsn_init_wrap, plasticity_2d_onecone_nsn_solve_wrap,
+                NULL, NULL, plasticity_2d_onecone_nsn_set_default_reg,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */
 
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN_GP,
-                "PLASTICITY_2D_ONECONE_NSN_GP",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN_GP, "PLASTICITY_2D_ONECONE_NSN_GP",
                 "Nonsmooth Newton Alart-Curnier GP (damped) for 2D Mohr Coulomb (one cone)",
                 plasticity_2d_onecone_nsn_gp_init_wrap,
-                plasticity_2d_onecone_nsn_gp_solve_wrap,
-                NULL,
-                NULL,
-                plasticity_2d_onecone_nsn_gp_set_default_reg,
-                100,   /* default_max_iter */
-                1e-14, /* default_tol */
-                1);    /* is_local */
+                plasticity_2d_onecone_nsn_gp_solve_wrap, NULL, NULL,
+                plasticity_2d_onecone_nsn_gp_set_default_reg, 100, /* default_max_iter */
+                1e-14,                                             /* default_tol */
+                1);                                                /* is_local */
 
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN_GP_HYBRID,
-                "PLASTICITY_2D_ONECONE_NSN_GP_HYBRID",
+REGISTER_SOLVER(PLASTICITY_2D_ONECONE_NSN_GP_HYBRID, "PLASTICITY_2D_ONECONE_NSN_GP_HYBRID",
                 "Nonsmooth Newton Alart-Curnier GP hybrid for 2D Mohr Coulomb (one cone)",
                 plasticity_2d_onecone_nsn_gp_hybrid_init_wrap,
-                plasticity_2d_onecone_nsn_gp_hybrid_solve_wrap,
-                NULL,
-                NULL,
-                plasticity_2d_onecone_nsn_gp_hybrid_set_default,
-                100,   /* default_max_iter */
-                1e-14, /* default_tol */
-                1);    /* is_local */
-
+                plasticity_2d_onecone_nsn_gp_hybrid_solve_wrap, NULL, NULL,
+                plasticity_2d_onecone_nsn_gp_hybrid_set_default, 100, /* default_max_iter */
+                1e-14,                                                /* default_tol */
+                1);                                                   /* is_local */

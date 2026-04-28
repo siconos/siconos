@@ -23,7 +23,6 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SICONOS_DPARAM_RESIDU, Sol...
 #include "lcp_test_utils.h"                // for lcp_test_function
 #include "test_utils.h"                    // for TestCase

@@ -19,10 +19,9 @@
 #ifndef NUMERICSMATRIX_TEST_FUNCTION_H
 #define NUMERICSMATRIX_TEST_FUNCTION_H
 
-#include "NumericsFwd.h"    // for NumericsMatrix, SparseBlockStructuredMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix, SparseBlockStructuredMatrix
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 NumericsMatrix *test_matrix_1(void);
@@ -43,7 +42,7 @@ int test_build_first_4_NM(NumericsMatrix **MM);
 int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M);
 int test_SBM_row_permutation(SparseBlockStructuredMatrix *M);
 int test_SBM_column_permutation(SparseBlockStructuredMatrix *M);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

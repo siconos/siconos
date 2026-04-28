@@ -7,8 +7,6 @@
 #endif
 
 #include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
 
 #if defined(_POSIX_VERSION) && (_POSIX_VERSION >= 200112L)
 #elif _MSC_VER
@@ -21,10 +19,6 @@ static inline char* strdup(const char* src) {
   return dest;
 }
 #endif
-
-#include <math.h>
-
-#include "SiconosConfig.h"  // for HAVE_GAMS_C_API
 
 #ifdef HAVE_GAMS_C_API
 #include <assert.h>
@@ -40,8 +34,8 @@ static inline char* strdup(const char* src) {
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #define ETERMINATE 4242
@@ -52,7 +46,7 @@ static inline char* strdup(const char* src) {
 #define LAST_MODEL_STATUS 3
 #define LAST_SOLVE_STATUS 4
 
-//#define SMALL_APPROX
+// #define SMALL_APPROX
 
 #include <errno.h>
 #include <fcntl.h>
@@ -349,8 +343,8 @@ fail:
   new_opt->next_opt = NULL;
 
 #define GAMS_ADD_PREP(GP, name) \
-  assert(GP);                       \
-  assert(name);                     \
+  assert(GP);                   \
+  assert(name);                 \
   char* lname = strdup(name);
 
 void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type) {

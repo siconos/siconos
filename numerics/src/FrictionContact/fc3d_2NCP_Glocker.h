@@ -47,10 +47,9 @@
 
 
 */
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -121,7 +120,7 @@ void compute_Z_GlockerFixedP(int contact, double* reactionstep);
 void NCPGlocker_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
                      SolverOptions* localsolver_options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

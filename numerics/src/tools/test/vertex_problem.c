@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 #include "NumericsMatrix.h"
-#include "SiconosConfig.h"
-
-#ifdef HAS_ONE_LP_SOLVER
 #include "vertex_extraction.h"
 
 int main(void) {
@@ -41,8 +38,3 @@ int main(void) {
   printf("\n");
   return 0;
 }
-#else
-
-#error no LP solver configured
-
-#endif

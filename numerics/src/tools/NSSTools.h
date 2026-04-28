@@ -24,14 +24,9 @@
 
 */
 
-#include "SiconosConfig.h"
-
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
-#endif
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
@@ -88,7 +83,7 @@ void diffns(int* na, int* a, int* nb, int* b, int* nc, int* c);
 /** */
 void sortsn_(int* ddl_i, int* sort, int* n);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #include <algorithm>
 using std::max;

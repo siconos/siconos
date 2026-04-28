@@ -23,25 +23,23 @@
 #include <math.h>    // for sqrt, fabs
 #include <stddef.h>  // for NULL
 
+#include "NumericsMatrix.h"     // for NM_prod_mv_3x3, NM_gemv
 #include "PlasticityProblem.h"  // for Mohrcoulomb2dproblem
-#include "NumericsMatrix.h"        // for NM_prod_mv_3x3, NM_gemv
-#include "SolverOptions.h"         // for SolverOptions
+#include "SiconosBlas.h"        // for cblas_dcopy, cblas_dnrm2
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "projectionOnCone.h"  // for projectionOnCone
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_verbose.h"
-#include "numerics_errors.h"
-#include "projectionOnCone.h"      // for projectionOnCone
-#include "projectionOnCylinder.h"  // for projectionOnCylinder
-#include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-#include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
-void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double eta,
-                                        double theta, double *restrict error,
-                                        double *worktmp) {
+void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u,
+                                                 double eta, double theta,
+                                                 double *restrict error, double *worktmp) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
@@ -56,8 +54,9 @@ void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *res
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w, double tolerance,
-                       SolverOptions *options, double norm, double *error) {
+int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w,
+                                double tolerance, SolverOptions *options, double norm,
+                                double *error) {
   DEBUG_BEGIN("plasticity_2d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -66,7 +65,8 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
 
   /* Check model type - only Drucker-Prager supported for now */
   if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER) {
-    numerics_error("plasticity_2d_compute_error", "Only Drucker-Prager model is currently supported");
+    numerics_error("plasticity_2d_compute_error",
+                   "Only Drucker-Prager model is currently supported");
     *error = 0.0;
     DEBUG_END("plasticity_2d_compute_error(...)\n");
     return 1;
@@ -94,7 +94,8 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    plasticity_2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error, worktmp);
+    plasticity_2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error,
+                                                worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);

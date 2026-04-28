@@ -24,15 +24,14 @@
 
 */
 
-#include "NumericsFwd.h"    // for VariationalInequality, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for VariationalInequality, SolverOptions
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -62,7 +61,7 @@ int variationalInequality_compute_error_box(VariationalInequality* problem, doub
                                             double* restrict F, double tolerance,
                                             double* restrict error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

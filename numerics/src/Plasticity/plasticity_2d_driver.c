@@ -20,30 +20,28 @@
  * \brief PLASTICITY_2D driver using the solver registration system
  */
 
-#include "PlasticityProblem.h"
-#include "Plasticity_options.h"
-#include "numerics_verbose.h"
-#include "plasticity_2d_solvers.h"
-
-/* Registration-based headers */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
+
+#include "PlasticityProblem.h"
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "plasticity_2d_solvers.h"
+#include "solver_registry.h"
 
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */
 
 int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrate,
-                          double* stress, SolverOptions* options) {
+                                   double* stress, SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfCones;
   double* q = problem->q;
   int n = 3 * nc;
-  
+
   for (int i = 0; i < nc; i++) {
     if (q[3 * i] < -DBL_EPSILON) return -1;
   }
@@ -51,7 +49,7 @@ int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrat
     strainrate[i] = q[i];
     stress[i] = 0.;
   }
-  
+
   numerics_printf("mc2d: trivial solution, stress = 0, strainrate = q.");
   return 0;
 }
@@ -60,8 +58,8 @@ int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrat
  * Registration-Based Driver
  * =========================================================================== */
 
-int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
-                double* strainrate, SolverOptions* options) {
+int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* strainrate,
+                         SolverOptions* options) {
   /* Input validation */
   if (!problem || !stress || !strainrate || !options) {
     numerics_error("plasticity_2d_driver", "null input argument");
@@ -86,24 +84,27 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
 
   CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver not found");
 
-  numerics_printf_verbose(1, "plasticity_2d_driver: using solver '%s' (%s)",
-                          solver->name, solver->description);
+  numerics_printf_verbose(1, "plasticity_2d_driver: using solver '%s' (%s)", solver->name,
+                          solver->description);
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("plasticity_2d_driver: solver '%s' is a local solver, cannot be used as main solver",
-                    solver->name);
+    numerics_printf(
+        "plasticity_2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+        solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
   /* Check solve function exists */
-  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver has no solve function");
+  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER,
+             "Solver has no solve function");
 
   /* Initialize solver if init function provided */
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf("plasticity_2d_driver: solver initialization failed with error %d", init_status);
+      numerics_printf("plasticity_2d_driver: solver initialization failed with error %d",
+                      init_status);
       return init_status;
     }
   }
@@ -121,7 +122,8 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
   if (solve_status == NUMERICS_OK) {
     numerics_printf_verbose(1, "plasticity_2d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "plasticity_2d_driver: solver returned status %d", solve_status);
+    numerics_printf_verbose(1, "plasticity_2d_driver: solver returned status %d",
+                            solve_status);
   }
 
   return solve_status;

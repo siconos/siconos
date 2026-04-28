@@ -25,7 +25,6 @@
 #define PIVOT_UTILS_H
 
 #include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "lumod_wrapper.h"  // for SN_lumod_dense_data
 
 #ifdef __cplusplus
@@ -36,7 +35,7 @@
 
 #define PIVOT_PATHSEARCH_SUCCESS -2
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -184,7 +183,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat,
 const char* basis_to_name(unsigned nb, unsigned n);
 unsigned basis_to_number(unsigned nb, unsigned n);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

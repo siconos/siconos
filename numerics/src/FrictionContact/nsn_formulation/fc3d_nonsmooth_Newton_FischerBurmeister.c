@@ -24,15 +24,10 @@
 #include <stdlib.h>  // for calloc, free, malloc
 
 #include "FischerBurmeisterGenerated.h"  // for fc3d_FischerBurmeisterFun...
-#include "FrictionContactProblem.h"      // for FrictionContactProblem
-#include "FrictionContact_options.h"                // for FC3D_NSN_FB
-#include "../fc3d_short_names.h"
-#include "SolverOptions.h"               // for SolverOptions, solver_opt...
+#include "FrictionContact_options.h"     // for FC3D_NSN_FB
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
 #include "numerics_verbose.h"
-#include "solver_registry.h"
-#include "numerics_errors.h"
 
 void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
                                     FischerBurmeisterFun3x3Ptr computeACFun3x3,

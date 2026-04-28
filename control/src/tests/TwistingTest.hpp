@@ -18,13 +18,12 @@
 #ifndef __TwistingTest__
 #define __TwistingTest__
 
-#include <SiconosConfig.h>
 #include <cppunit/extensions/HelperMacros.h>
+
 #include <FirstOrderLinearDS.hpp>
 
 #include "ExplicitTwisting.hpp"
 #include "LinearSensor.hpp"
-#include "RegularTwisting.hpp"
 
 class TwistingTest : public CppUnit::TestFixture {
  private:

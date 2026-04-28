@@ -24,10 +24,9 @@
 
 */
 
-#include "NumericsFwd.h"    // for PlasticityProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for PlasticityProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -43,8 +42,9 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w, double tolerance,
-                       SolverOptions *options, double norm, double *error);
+int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w,
+                                double tolerance, SolverOptions *options, double norm,
+                                double *error);
 
 /**
     Error computation (using the normal map residual) for one Mohr Coulomb 2D plasticity
@@ -56,10 +56,11 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
     \param worktmp work vector
     \param[in,out] error value
  */
-void plasticity_2d_unitary_compute_and_add_error(double r[3], double u[3], double eta, double theta,
-                                        double *error, double *worktmp);
+void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u,
+                                                 double eta, double theta, double *error,
+                                                 double *worktmp);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

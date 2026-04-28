@@ -25,8 +25,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for VariationalInequality, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for VariationalInequality, NumericsMatrix
 
 typedef void*(FVIPtr)(void*, double*, double*);
 typedef void (*ptrFunctionVI)(void* self, int n, double* x, double* fx);
@@ -51,7 +50,7 @@ struct VariationalInequality {
   NumericsMatrix* nabla_F; /**< storage for \f$\nabla_x F\f$*/
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** display a VariationalInequalityProblem
@@ -108,7 +107,7 @@ VariationalInequality* newVI(void);
  */
 static inline void* VI_get_env(void* vi) { return ((VariationalInequality*)vi)->env; }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

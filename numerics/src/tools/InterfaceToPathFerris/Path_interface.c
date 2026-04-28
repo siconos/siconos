@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-#include "SiconosConfig.h"          // for HAVE_PATHFERRIS  // IWYU pragma: keep
-#include "SolverOptions_helpers.h"  // for SN_set..., SN_get...
 #ifdef HAVE_PATHFERRIS
 
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
+
+#include "SolverOptions_helpers.h"  // for SN_set..., SN_get...
 
 #if defined(__cplusplus)
 extern "C" {
@@ -42,11 +42,11 @@ extern "C" {
 #include "Path_interface.h"
 #include "SolverOptions.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
-#include "numerics_errors.h"
 
 #if defined(__cplusplus)
 #undef restrict

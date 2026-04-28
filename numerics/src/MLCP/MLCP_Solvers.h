@@ -26,23 +26,11 @@
   \endrst
 */
 
-#include "MixedLinearComplementarityProblem.h"
-#include "SolverOptions.h"
+#include "MixedLinearComplementarityProblem.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
-
-#include "mlcp_FB.h"
-#include "mlcp_cst.h"
-#include "mlcp_direct_FB.h"
-#include "mlcp_direct_enum.h"
-#include "mlcp_direct_path.h"
-#include "mlcp_direct_path_enum.h"
-#include "mlcp_direct_simplex.h"
-#include "mlcp_enum.h"
-#include "mlcp_path_enum.h"
-#include "mlcp_simplex.h"
 
 /**
    General interface to initialize a solver.
@@ -364,7 +352,7 @@ void mlcp_direct_enum_set_default(SolverOptions *options);
 void mlcp_enum_set_default(SolverOptions *options);
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

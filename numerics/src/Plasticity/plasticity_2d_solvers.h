@@ -23,22 +23,20 @@
 */
 
 #include "PlasticityProblem.h"
-#include "Plasticity_options.h"
-#include "SolverOptions.h"
 
 /** pointer to function used to update plastic_strain_rate and compute error */
-typedef void (*plasticity_2d_ComputeErrorPtr)(PlasticityProblem *, double *, double *, double,
-                                     SolverOptions *, double, double *);
+typedef int (*plasticity_2d_ComputeErrorPtr)(PlasticityProblem *, double *, double *, double,
+                                             SolverOptions *, double, double *);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
 typedef void (*plasticity_2d_internalSolverPtr)(PlasticityProblem *, double *, double *, int *,
-                                       SolverOptions *);
+                                                SolverOptions *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverPtr)();
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -94,8 +92,8 @@ extern "C" {
     The internal (local) solver must set by the SolverOptions options[1]
 
 */
-void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *plastic_strain_rate,
-               int *info, SolverOptions *options);
+void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress,
+                        double *plastic_strain_rate, int *info, SolverOptions *options);
 
 /**
     Non-Smooth Gauss Seidel solver for Mohr Coulomb 2D problem using generic NSGS framework
@@ -106,9 +104,9 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *plas
     \param info return 0 if the solution is found
     \param options the solver options
 */
-void plasticity_2d_nsgs_generic(PlasticityProblem *problem, double *stress, 
-                                 double *plastic_strain_rate, int *info, 
-                                 SolverOptions *options);
+void plasticity_2d_nsgs_generic(PlasticityProblem *problem, double *stress,
+                                double *plastic_strain_rate, int *info,
+                                SolverOptions *options);
 
 /**
     Check for trivial solution in the Mohr Coulomb 2D problem
@@ -120,7 +118,7 @@ void plasticity_2d_nsgs_generic(PlasticityProblem *problem, double *stress,
     \return info  =0 if a trivial solution has been found, else = -1
 */
 int plasticity_2d_checkTrivialCase(PlasticityProblem *problem, double *plastic_strain_rate,
-                          double *stress, SolverOptions *options);
+                                   double *stress, SolverOptions *options);
 
 /**
     Driver for Mohr Coulomb 2D problem
@@ -131,8 +129,8 @@ int plasticity_2d_checkTrivialCase(PlasticityProblem *problem, double *plastic_s
     \param options the solver options
     \return 0 if successful, otherwise error code
 */
-int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
-                double* plastic_strain_rate, SolverOptions* options);
+int plasticity_2d_driver(PlasticityProblem *problem, double *stress,
+                         double *plastic_strain_rate, SolverOptions *options);
 
 /** \addtogroup SetSolverOptions
  * @{
@@ -141,12 +139,14 @@ void plasticity_2d_nsgs_set_default(SolverOptions *options);
 void plasticity_2d_onecone_nsn_set_default(SolverOptions *options);
 void plasticity_2d_onecone_nsn_gp_set_default(SolverOptions *options);
 void plasticity_2d_poc_set_default(SolverOptions *options);
-void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem *problem, SolverOptions *options,
-                                       SolverOptions *internalsolver_options, double error);
+void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem *problem,
+                                                SolverOptions *options,
+                                                SolverOptions *internalsolver_options,
+                                                double error);
 
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

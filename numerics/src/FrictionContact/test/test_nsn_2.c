@@ -18,7 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_NSN_AC_NEW
+#include "FrictionContact_options.h"     // for SICONOS_FRICTION_3D_NSN_AC_NEW
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
@@ -62,10 +62,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  // #ifdef WITH_UMFPACK
   collection[current].will_fail =
       1;  // (FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
-  // #endif
   current++;
 
   for (int s = 0; s < 4; ++s) {
@@ -75,12 +73,10 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 500;
     current++;
   }
-  // #ifdef WITH_UMFPACK
   collection[5].will_fail =
       2;  //(FC3D_NSN_AC, on ./data/KaplasTower-i1061-4.hdf5.dat)  is unstable
   collection[6].will_fail =
       1;  //(FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
-  // #endif
   *number_of_tests = current;
   return collection;
 }

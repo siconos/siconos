@@ -30,7 +30,7 @@ typedef struct {
   void* problem; /**< problem data */
 } SN_generic_path_env;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -45,6 +45,6 @@ extern "C" {
 void SN_path_interface(MCP_Interface* mcp_interface, double* z, double* F, int* info,
                        double* dparam, int* iparam);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif

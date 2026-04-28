@@ -34,7 +34,6 @@
 
 #include "CADMBTB_API.hpp"
 #include "CADMBTB_DATA.hpp"
-#include "SiconosConfig.h"
 #include "SiconosFortran.h"  // For n2qn1
 #include "ace.h"
 // #include <Standard_Version.hxx>

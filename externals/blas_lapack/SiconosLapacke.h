@@ -19,11 +19,7 @@
 #ifndef SiconosLAPACKE_H
 #define SiconosLAPACKE_H
 
-// IWYU pragma: private, include "SiconosLapack.h"
-// #include "SiconosBlas.h"
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // -------- Headers and routines naming conventions for the different Lapack implementations
 // --------

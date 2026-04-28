@@ -1,7 +1,6 @@
 // generated with build_from_doxygen.py
 #ifndef SiconosFullGenerated_hpp
 #define SiconosFullGenerated_hpp
-#include <SiconosConfig.h>
 #ifdef WITH_SERIALIZATION
 #include "Circle.hpp"
 #include "CircleCircleR.hpp"

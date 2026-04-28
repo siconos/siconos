@@ -39,11 +39,11 @@ static inline void NDV_reset(NumericsDataVersion* v) { v->number = 0; }
 
 void NDV_inc(NumericsDataVersion* v);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -21,19 +21,18 @@
 #include <stdlib.h>  // for exit
 
 /* Solver registration system */
-#include "solver_registry.h"
+#include "FischerBurmeister.h"         // for jacobianPhi_Mixed_FB
+#include "MLCP_Solvers.h"              // for mixedLinearComplement...
+#include "NonSmoothNewton.h"           // for NewtonFunctionPtr
+#include "NonSmoothNewtonNeighbour.h"  // for NSNN_reset, nonSmooth...
+#include "NumericsFwd.h"               // for MixedLinearComplement...
+#include "NumericsMatrix.h"            // for NM_gemv, NumericsMatrix
+#include "SiconosBlas.h"               // for cblas_dcopy
+#include "SolverOptions.h"             // for SolverOptions
+#include "mlcp_cst.h"
 #include "numerics_errors.h"
-
-#include "FischerBurmeister.h"                  // for jacobianPhi_Mixed_FB
-#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "NonSmoothNewton.h"                    // for NewtonFunctionPtr
-#include "NonSmoothNewtonNeighbour.h"           // for NSNN_reset, nonSmooth...
-#include "NumericsFwd.h"                        // for MixedLinearComplement...
-#include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
-#include "SiconosBlas.h"                        // for cblas_dcopy
-#include "SolverOptions.h"                      // for SolverOptions
 #include "numerics_verbose.h"
+#include "solver_registry.h"
 
 static int sN = 0;
 static int sM = 0;
@@ -170,11 +169,8 @@ static void mlcp_FB_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_MLCP_FB, "MLCP_FB",
                 "Fischer-Burmeister solver for Mixed Linear Complementarity Problems",
-                mlcp_FB_init_wrap,
-                mlcp_FB_solve_wrap,
-                mlcp_FB_free_wrap,
-                NULL,  /* error function */
-                mlcp_FB_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_FB_init_wrap, mlcp_FB_solve_wrap, mlcp_FB_free_wrap,
+                NULL,                      /* error function */
+                mlcp_FB_set_default, 1000, /* default_max_iter */
+                1e-6,                      /* default_tol */
+                0 /* is_local_solver */);

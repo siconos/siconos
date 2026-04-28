@@ -18,11 +18,9 @@
 #ifndef FRICTIONCONTACT_TEST_UTILS_H
 #define FRICTIONCONTACT_TEST_UTILS_H
 
-#include "FrictionContact_options.h"
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-#include "test_utils.h"     // for TestCase
+#include "test_utils.h"  // for TestCase
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -67,7 +65,7 @@ int globalRollingFrictionContact_test_function(TestCase*);
 
 TestCase* build_test_collection(int n_data, const char** data_collection, int*);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -52,7 +52,7 @@ typedef struct {
   hid_t group;           /**< Handle to the current (top-level) group (e.g. "/foo") */
 } SN_logh5;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -128,7 +128,7 @@ static inline SN_loglevels SN_logh5_loglevel(SN_loglevels l) {
 #endif
 }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

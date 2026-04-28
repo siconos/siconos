@@ -23,16 +23,12 @@
 #include <stdio.h>   // for printf, NULL
 #include <stdlib.h>  // for calloc, free, malloc
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for FC3D_NSN_NM
-#include "../fc3d_short_names.h"
-#include "NaturalMapGenerated.h"     // for fc3d_NaturalMapFunctionGe...
-#include "SolverOptions.h"           // for SolverOptions, solver_opt...
+#include "FrictionContact_options.h"  // for FC3D_NSN_NM
+#include "NaturalMapGenerated.h"      // for fc3d_NaturalMapFunctionGe...
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
+#include "naming_conventions.h"
 #include "numerics_verbose.h"
-#include "solver_registry.h"
-#include "numerics_errors.h"
 
 void fc3d_NaturalMapFunction(unsigned int problemSize, NaturalMapFun3x3Ptr computeACFun3x3,
                              double* reaction, double* velocity, double* mu, double* rho,

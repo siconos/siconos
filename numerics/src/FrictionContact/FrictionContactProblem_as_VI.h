@@ -22,8 +22,7 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions, Vari...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions, Vari...
 
 /** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
  *
@@ -37,7 +36,7 @@ struct FrictionContactProblem_as_VI {
   SolverOptions *options;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -53,7 +52,7 @@ void Function_VI_FC3D_Disk(void *self, int n, double *x, double *F);
 
 void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

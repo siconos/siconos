@@ -31,8 +31,7 @@
 
 #include <stddef.h>  // for NULL, size_t
 
-#include "NumericsFwd.h"    // for SolverOptions, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions, NumericsMatrix
 #ifndef __cplusplus
 #include <stdbool.h>  // for bool
 #endif
@@ -152,7 +151,7 @@ enum SICONOS_NMS_DPARAM {
 #define NEWTON_STATS_NEWTON_STEP 1
 #define NEWTON_STATS_DESC_DIR 2
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -209,7 +208,7 @@ void newton_LSA_free_solverOptions(SolverOptions *options);
 void newton_lsa_set_default(SolverOptions *options);
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

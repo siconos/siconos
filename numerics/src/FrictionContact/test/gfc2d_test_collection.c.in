@@ -21,7 +21,6 @@
 #include <string.h>                               // for strcmp
 #include "frictionContact_test_utils.h"           // for build_test_collection
 #include "test_utils.h"                           // for data_collection
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API, SICONOS_HAS_MPI // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

@@ -43,10 +43,9 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsFwd.h"    // for SolverOptions, FrictionContactProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions, FrictionContactProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -97,7 +96,7 @@ void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr c
  */
 void fc3d_nsn_ac_set_default(SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

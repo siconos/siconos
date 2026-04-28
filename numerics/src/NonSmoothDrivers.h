@@ -27,15 +27,12 @@
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
 
-
 #include <stddef.h>  // size_t
-#include "SiconosConfig.h"
-#include "PlasticityProblem.h"
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "PlasticityProblem.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -103,7 +100,7 @@ int fc3d_driver(FrictionContactProblem *problem, double *reaction, double *veloc
    \return result (0 if successful otherwise 1).
 */
 int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *reaction,
-                        double *velocity, SolverOptions *options);
+                               double *velocity, SolverOptions *options);
 
 /**
    General interface to solvers for rolling friction-contact 2D problem
@@ -115,7 +112,7 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *r
    \return result (0 if successful otherwise 1).
 */
 int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *reaction,
-                        double *velocity, SolverOptions *options);
+                               double *velocity, SolverOptions *options);
 
 /**
    General interface to solvers for global friction-contact 2D problem
@@ -152,8 +149,9 @@ int gfc3d_driver(GlobalFrictionContactProblem *problem, double *reaction, double
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *problem, double *reaction,
-                          double *velocity, double *globalVelocity, SolverOptions *options);
+int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *problem,
+                                      double *reaction, double *velocity,
+                                      double *globalVelocity, SolverOptions *options);
 
 /**
     General interface to solvers for friction-contact 3D problem
@@ -260,8 +258,8 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return result (0 if successful otherwise 1).
 */
-int plasticity_2d_driver(PlasticityProblem *problem, double *stress, double *plastic_strain_rate,
-                SolverOptions *options);
+int plasticity_2d_driver(PlasticityProblem *problem, double *stress,
+                         double *plastic_strain_rate, SolverOptions *options);
 
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
                     unsigned int *row, unsigned int *column, unsigned int nc, unsigned int nb,
@@ -318,7 +316,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 */
 int relay_driver(RelayProblem *problem, double *z, double *w, SolverOptions *options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

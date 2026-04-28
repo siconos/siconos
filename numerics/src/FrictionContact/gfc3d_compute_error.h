@@ -18,14 +18,13 @@
 
 #ifndef gfc3d_compute_error_H
 #define gfc3d_compute_error_H
-#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, SolverOptions
 
 /*!\file gfc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
 */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -76,7 +75,7 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
                                             SolverOptions* options, double norm_q,
                                             double norm_b, double* error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -22,9 +22,7 @@
 
   \brief Typedef and functions declarations related GlockerFischerBurmeister
  */
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 typedef void (*UpdateSolverPtr)(int, double*);
@@ -34,7 +32,7 @@ void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, in
 void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jacobianFMatrix,
                                         int up2Date);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

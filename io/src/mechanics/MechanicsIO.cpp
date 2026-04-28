@@ -18,11 +18,10 @@
 
 #include "MechanicsIO.hpp"
 
-#include "SiconosConfig.h"
 #include "Tools.hpp"
 #ifdef SICONOS_HAS_BULLET
-#include "Bullet2d3DR.hpp"
-#include "Bullet2dR.hpp"
+#include "Bullet2d3DR.hpp"  // IWYU pragma: keep
+#include "Bullet2dR.hpp"    // IWYU pragma: keep
 #include "Bullet5DR.hpp"
 #include "BulletR.hpp"
 #else
@@ -30,7 +29,7 @@
 #include "NewtonEuler5DR.hpp"
 #include "SpaceFilter.hpp"
 #endif
-#include <concepts>
+// #include <concepts>
 
 #include "BlockVector.hpp"
 #include "BodyShapeRecord.hpp"

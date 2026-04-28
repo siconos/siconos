@@ -33,7 +33,6 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
-#include "SiconosConfig.h"
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
@@ -647,8 +646,8 @@ class SiconosGraph {
                 << ", index : " << index(*vi) << ", color : " << color(*vi);
       OEIterator oei, oeiend, next;
       for (std::tie(oei, oeiend) = out_edges(*vi); oei != oeiend; ++oei) {
-        std::cout << "---" << bundle(*oei) << "-->"
-                  << "bundle : " << bundle(target(*oei)) << ", index : " << index(target(*oei))
+        std::cout << "---" << bundle(*oei) << "-->" << "bundle : " << bundle(target(*oei))
+                  << ", index : " << index(target(*oei))
                   << ", color : " << color(target(*oei));
       }
       std::cout << std::endl;

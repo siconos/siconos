@@ -40,37 +40,30 @@ concept sparse_matrix = sparse_matrix_raw<std::decay_t<T>>;
 // Is there a better way to check if a matrix from the Eigen C++ library  is
 // diagonal :
 template <typename T>
-concept diagonal_matrix =
+concept diagonal_matrix_raw =
     !matrix<T> && !sparse_matrix<T> && requires(T m) { m.diagonal()[0]; };
 
-// template <typename T>
-// concept unbounded_matrix = requires(T m) {
-//   { m.rows() } -> std::convertible_to<int>;
-//   { m.cols() } -> std::convertible_to<int>;
-// };
-
-// template <typename T>
-// concept unbounded_vector = requires(T m) {
-//   { m.rows() } -> std::convertible_to<int>;
-// } && T::ColsAtCompileTime == 1;
+template <typename T>
+concept diagonal_matrix = diagonal_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
-concept any_matrix = (diagonal_matrix<T> || matrix<T> || sparse_matrix<T>);
-
-// template <typename T>
-// concept fixed_size_matrix = any_matrix<T> && requires {
-//   T::RowsAtCompileTime != Eigen::Dynamic;
-//   T::ColsAtCompileTime != Eigen::Dynamic;
-// };
+concept any_matrix_raw =
+    (diagonal_matrix<T> || matrix<T> || sparse_matrix<T>);
 
 template <typename T>
-concept fixed_size_matrix =
+concept any_matrix = any_matrix_raw<std::decay_t<T>>;
+
+template <typename T>
+concept fixed_size_matrix_raw =
     requires(T matrix) {
       // Check if the matrix has fixed rows and columns
       { matrix.rows() } -> std::convertible_to<std::size_t>;
       { matrix.cols() } -> std::convertible_to<std::size_t>;
     } && (T::RowsAtCompileTime != Eigen::Dynamic) &&
     (T::ColsAtCompileTime != Eigen::Dynamic);
+
+template <typename T>
+concept fixed_size_matrix = fixed_size_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
 concept variable_size_matrix = !fixed_size_matrix<T>;

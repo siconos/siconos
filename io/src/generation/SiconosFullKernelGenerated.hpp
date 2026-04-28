@@ -1,7 +1,6 @@
 // generated with build_from_doxygen.py
 #ifndef SiconosFullKernelGenerated_hpp
 #define SiconosFullKernelGenerated_hpp
-#include <SiconosConfig.h>
 #ifdef WITH_SERIALIZATION
 #include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER(SiconosException, (_reportMsg))

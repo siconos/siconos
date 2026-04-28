@@ -21,7 +21,6 @@
 #include <string.h>                        // for strcmp
 #include "genericMechanical_test_utils.h"  // for build_test_collection, gmp...
 #include "test_utils.h"                    // for data_collection, free_test...
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

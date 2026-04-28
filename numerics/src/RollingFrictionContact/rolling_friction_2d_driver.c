@@ -20,32 +20,29 @@
  * \brief RFC2D driver using the solver registration system
  */
 
-#include "RollingFrictionContactProblem.h"
-#include "FrictionContact_options.h"
-#include "rolling_friction_3d_short_names.h"
-#include "rolling_fc_Solvers.h"
-#include "numerics_verbose.h"
-
-/* Registration-based headers */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
 #include <string.h>
+
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "rolling_fc_Solvers.h"
+#include "solver_registry.h"
 
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */
 
-int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
-                                  double* reaction, SolverOptions* options) {
+int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem* problem,
+                                         double* velocity, double* reaction,
+                                         SolverOptions* options) {
   (void)options;
   int nc = problem->numberOfContacts;
   double* q = problem->q;
   int n = 3 * nc;
-  
+
   for (int i = 0; i < nc; i++) {
     if (q[3 * i] < -DBL_EPSILON) return -1;
   }
@@ -53,7 +50,7 @@ int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem* problem,
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  
+
   numerics_printf("rolling_fc2d: trivial solution (take-off), reaction = 0, velocity = q.");
   return 0;
 }
@@ -63,7 +60,7 @@ int rolling_friction_2d_checkTrivialCase(RollingFrictionContactProblem* problem,
  * =========================================================================== */
 
 int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* reaction,
-                        double* velocity, SolverOptions* options) {
+                               double* velocity, SolverOptions* options) {
   /* Input validation */
   if (!problem || !reaction || !velocity || !options) {
     numerics_error("rolling_friction_2d_driver", "null input argument");
@@ -78,7 +75,8 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* r
   SET_SOLVER_RESIDUAL(options, 0.0);
 
   /* Check for trivial case */
-  int trivial_status = rolling_friction_2d_checkTrivialCase(problem, velocity, reaction, options);
+  int trivial_status =
+      rolling_friction_2d_checkTrivialCase(problem, velocity, reaction, options);
   if (trivial_status == 0) {
     return NUMERICS_OK;
   }
@@ -93,19 +91,23 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* r
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("rolling_friction_2d_driver: solver '%s' is a local solver, cannot be used as main solver",
-                    solver->name);
+    numerics_printf(
+        "rolling_friction_2d_driver: solver '%s' is a local solver, cannot be used as main "
+        "solver",
+        solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
   /* Check solve function exists */
-  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver has no solve function");
+  CHECK_COND(solver->solve != NULL, NUMERICS_ERR_INVALID_SOLVER,
+             "Solver has no solve function");
 
   /* Initialize solver if init function provided */
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      numerics_printf("rolling_friction_2d_driver: solver initialization failed with error %d", init_status);
+      numerics_printf("rolling_friction_2d_driver: solver initialization failed with error %d",
+                      init_status);
       return init_status;
     }
   }
@@ -123,7 +125,8 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* r
   if (solve_status == NUMERICS_OK) {
     numerics_printf_verbose(1, "rolling_friction_2d_driver: solver converged successfully");
   } else {
-    numerics_printf_verbose(1, "rolling_friction_2d_driver: solver returned status %d", solve_status);
+    numerics_printf_verbose(1, "rolling_friction_2d_driver: solver returned status %d",
+                            solve_status);
   }
 
   return solve_status;

@@ -22,10 +22,9 @@
 
 #ifndef MCP_NEWTON_FB
 #define MCP_NEWTON_FB
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -66,7 +65,7 @@ void FB_compute_error_mcp(void* data_opaque, double* z, double* w, double* notus
  */
 void mcp_FB(void* data_opaque, double* z, double* F, double* F_FB);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

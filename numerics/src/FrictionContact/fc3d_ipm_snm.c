@@ -23,29 +23,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"    // for ComputeErrorPtr
 #include "Friction_tools.h"  // for ComputeErrorPtr
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
-#include "SiconosLapack.h"
+#include "SiconosLapack.h"  // IWYU pragma: keep
 #include "SolverOptions.h"
-// #include "SparseBlockMatrix.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
-#include "numerics_verbose.h"
-// #include "projectionOnCone.h"
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+#include "fc3d_short_names.h"  // for ComputeErrorPtr
 #include "gfc3d_ipm.h"
-// #include "siconos_debug.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
@@ -384,8 +376,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   }
 
   /* check the full criterion */
-  ComputeErrorPtr computeError = NULL;
-  computeError = (ComputeErrorPtr)&fc3d_compute_error;
+  ComputeErrorPtr computeError = &fc3d_compute_error;
 
   int load_starting_point = 0, save_sol_point = 0;
   if (load_starting_point) {
@@ -1034,7 +1025,8 @@ static int fc3d_ipm_snm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_ipm_snm_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_ipm_snm_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_IPM_SNM((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -1045,14 +1037,10 @@ static void fc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
   fc3d_IPM_SNM_free((FrictionContactProblem*)problem, options);
 }
 
-REGISTER_SOLVER(FC3D_IPM_SNM,
-                "FC3D_IPM_SNM",
+REGISTER_SOLVER(FC3D_IPM_SNM, "FC3D_IPM_SNM",
                 "Interior Point Method with Smoothing and Newton for 3D Friction Contact",
-                fc3d_ipm_snm_init_wrap,
-                fc3d_ipm_snm_solve_wrap,
-                fc3d_ipm_snm_free_wrap,
-                NULL,
-                fc3d_ipm_snm_set_default,  /* set_default */
-                500,    /* default_max_iter - from set_default */
-                1e-10,  /* default_tol - from set_default */
-                0       /* is_local_solver */)
+                fc3d_ipm_snm_init_wrap, fc3d_ipm_snm_solve_wrap, fc3d_ipm_snm_free_wrap, NULL,
+                fc3d_ipm_snm_set_default, /* set_default */
+                500,                      /* default_max_iter - from set_default */
+                1e-10,                    /* default_tol - from set_default */
+                0 /* is_local_solver */)

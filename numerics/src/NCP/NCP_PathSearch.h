@@ -24,14 +24,12 @@
  *
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 #if defined(__cplusplus)
 #undef restrict
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -54,7 +52,7 @@ static inline void ncp_pathsearch_compute_x_from_z(unsigned n, double* restrict 
   }
 }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

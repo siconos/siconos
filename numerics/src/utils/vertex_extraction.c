@@ -25,22 +25,20 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "SiconosConfig.h"  // for HAS_ONE_LP_SOLVER // IWYU pragma: keep
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
 #endif
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#include "siconos_debug.h"
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #include "siconos_debug.h"
 
 #ifdef HAS_ONE_LP_SOLVER
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#include "NumericsMatrix.h"
+#include "NumericsMatrix.h"  // IWYU pragma: keep
+#include "SiconosSets.h"     // For polyhedron
 #include "lp_lib.h"
-#include "numerics_errors.h"
+// #include "numerics_errors.h"
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis) {
   unsigned nrows = P->size_ineq;
@@ -100,8 +98,6 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis) 
   delete_lp(lp);
   free(rowno);
 }
-
-#pragma GCC diagnostic pop
 
 #else
 

@@ -42,23 +42,17 @@ happen:
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for malloc, exit, free
 
-#include "MLCP_Solvers.h"                       // for mlcp_direct, mlcp_dir...
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "NumericsMatrix.h"                     // for NM_dense_display, Num...
-#include "SiconosBlas.h"                        // for cblas_dgemv, CblasCol...
-#include "SiconosConfig.h"     // for DIRECT_SOLVER_USE_DGETRI // IWYU pragma: keep
-#include "SiconosLapack.h"     // for lapack_int, DGETRF
-#include "SolverOptions.h"     // for SolverOptions
-#include "mlcp_cst.h"          // for SICONOS_IPARAM_MLCP_N...
-#include "mlcp_enum_tool.h"    // for mlcp_enum_build_M, mlcp_fil...
+#include "MLCP_Solvers.h"    // for mlcp_direct, mlcp_dir...
+#include "NumericsMatrix.h"  // for NM_dense_display, Num...
+#include "SiconosBlas.h"     // for cblas_dgemv, CblasCol...
+#include "SiconosLapack.h"   // for lapack_int, DGETRF
+#include "SolverOptions.h"   // IWYU pragma: keep
+#include "mlcp_cst.h"        // for SICONOS_IPARAM_MLCP_N...
+#include "mlcp_enum_tool.h"  // for mlcp_enum_build_M, mlcp_fil...
 #include "numerics_verbose.h"
 
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
 #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 #define DIRECT_SOLVER_USE_DGETRI
 double* sVBuf;
@@ -370,25 +364,25 @@ void mlcp_direct_set_default(SolverOptions* options) {
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers SICONOS_MLCP_DIRECT_ENUM (direct solver base) in the global solver registry.
  */
 
-static int mlcp_direct_init_wrap(void* problem, SolverOptions* options) {
-  mlcp_direct_set_default(options);
-  return NUMERICS_OK;
-}
+// static int mlcp_direct_init_wrap(void* problem, SolverOptions* options) {
+//   mlcp_direct_set_default(options);
+//   return NUMERICS_OK;
+// }
 
-static int mlcp_direct_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
-  int info = NUMERICS_OK;
-  mlcp_direct((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
-  return info;
-}
+// static int mlcp_direct_solve_wrap(void* problem, double* z, double* w, SolverOptions*
+// options) {
+//   int info = NUMERICS_OK;
+//   mlcp_direct((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
+//   return info;
+// }
 
-static void mlcp_direct_free_wrap(void* problem, SolverOptions* options) {
-  (void)problem;
-  (void)options;
-  mlcp_direct_reset();
-}
+// static void mlcp_direct_free_wrap(void* problem, SolverOptions* options) {
+//   (void)problem;
+//   (void)options;
+//   mlcp_direct_reset();
+// }
 
 /* Note: This solver implementation (mlcp_direct) is used by SICONOS_MLCP_DIRECT_SIMPLEX,
    SICONOS_MLCP_DIRECT_PATH, and SICONOS_MLCP_DIRECT_FB. It is NOT registered under

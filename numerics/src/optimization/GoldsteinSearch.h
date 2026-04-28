@@ -30,8 +30,7 @@
 
 #include <stddef.h>  // for size_t
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-#include "line_search.h"    // for line_search_generic, search_data, ARCSEARCH
+#include "line_search.h"  // for line_search_generic, search_data, ARCSEARCH
 
 /** \struct goldstein_extra_params GoldsteinSearch.h
  * Struct to hold together the extra parameters needed by the Goldstein line search
@@ -42,7 +41,7 @@ typedef struct {
   double alpha_max; /**< maximum value of alpha*/
 } goldstein_extra_params;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -91,7 +90,7 @@ static inline double arcsearch_Goldstein2(int n, double theta, double preRHS,
  */
 void search_Goldstein_params_init(goldstein_extra_params* p);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

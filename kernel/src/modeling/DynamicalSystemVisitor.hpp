@@ -24,7 +24,6 @@
 
 #include <memory>
 
-#include "SiconosConfig.h"  // For HAVE_SICONOS ...
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 

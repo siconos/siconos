@@ -29,7 +29,7 @@
 
 #include "NumericsFwd.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -577,7 +577,7 @@ void lcp_pathsearch_set_default(SolverOptions* options);
 void lcp_pivot_lumod_set_default(SolverOptions* options);
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

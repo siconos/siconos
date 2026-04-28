@@ -23,9 +23,7 @@
 #ifndef OPEN_LIB_H
 #define OPEN_LIB_H
 
-#include "SiconosConfig.h"
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -41,7 +39,7 @@ void* open_library(const char* lib_name, const int flags);
  */
 void* get_function_address(void* plugin, const char* func);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

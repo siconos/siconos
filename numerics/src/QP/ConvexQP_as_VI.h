@@ -23,7 +23,6 @@
 */
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct ConvexQP_as_VI ConvexQP_as_VI.h
  *
@@ -37,7 +36,7 @@ struct ConvexQP_as_VI {
   SolverOptions *options;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -45,7 +44,7 @@ void Function_VI_CQP(void *self, int n, double *x, double *F);
 
 void Projection_VI_CQP(void *viIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

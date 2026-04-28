@@ -14,35 +14,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SiconosFullNumerics_hpp
 #define SiconosFullNumerics_hpp
 
-#include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
 #include "Register.hpp"
-
 #include "SolverOptions.h"
 
-
 template <class Archive>
-void siconos_io(Archive& ar, Callback&v, unsigned int version)
-{
-}
+void siconos_io(Archive &ar, Callback &v, unsigned int version) {}
 REGISTER_BOOST_SERIALIZATION(Callback);
 
 template <class Archive>
-void siconos_io(Archive& ar, SolverOptions&v, unsigned int version)
-{
+void siconos_io(Archive &ar, SolverOptions &v, unsigned int version) {
   SERIALIZE(v, (solverId)(isSet)(iSize)(dSize)(filterOn)(numberOfInternalSolvers), ar);
 
-  if (Archive::is_loading::value)
-  {
-    v.iparam = (int *) malloc(v.iSize * sizeof(int));
-    v.dparam = (double *) malloc(v.dSize * sizeof(double));
-    v.internalSolvers = (SolverOptions**)calloc(v.numberOfInternalSolvers, sizeof(SolverOptions*));
-    v.callback = (Callback *) malloc(sizeof(Callback));
+  if (Archive::is_loading::value) {
+    v.iparam = (int *)malloc(v.iSize * sizeof(int));
+    v.dparam = (double *)malloc(v.dSize * sizeof(double));
+    v.internalSolvers =
+        (SolverOptions **)calloc(v.numberOfInternalSolvers, sizeof(SolverOptions *));
+    v.callback = (Callback *)malloc(sizeof(Callback));
   }
   SERIALIZE(v, (callback), ar);
 
@@ -53,13 +47,11 @@ void siconos_io(Archive& ar, SolverOptions&v, unsigned int version)
 REGISTER_BOOST_SERIALIZATION(SolverOptions);
 
 template <class Archive>
-void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int version)
-{
+void siconos_io(Archive &ar, LinearComplementarityProblem &v, unsigned int version) {
   SERIALIZE(v, (size), ar);
 
-  if(Archive::is_loading::value)
-  {
-    v.q = (double *) malloc(v.size * sizeof(double));
+  if (Archive::is_loading::value) {
+    v.q = (double *)malloc(v.size * sizeof(double));
     v.M = NM_new();
   }
   SERIALIZE(v, (M), ar);
@@ -68,14 +60,12 @@ void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int versi
 REGISTER_BOOST_SERIALIZATION(LinearComplementarityProblem);
 
 template <class Archive>
-void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_version)
-{
+void siconos_io(Archive &ar, FrictionContactProblem &p, const unsigned int file_version) {
   SERIALIZE(p, (dimension)(numberOfContacts), ar);
 
-  if (Archive::is_loading::value)
-  {
-    p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
-    p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
+  if (Archive::is_loading::value) {
+    p.q = (double *)malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.mu = (double *)malloc(p.numberOfContacts * sizeof(double));
     p.M = NM_new();
   }
 
@@ -86,15 +76,14 @@ void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_
 REGISTER_BOOST_SERIALIZATION(FrictionContactProblem);
 
 template <class Archive>
-void siconos_io(Archive& ar, GlobalFrictionContactProblem& p, const unsigned int file_version)
-{
+void siconos_io(Archive &ar, GlobalFrictionContactProblem &p,
+                const unsigned int file_version) {
   SERIALIZE(p, (dimension)(numberOfContacts), ar);
 
-  if (Archive::is_loading::value)
-  {
-    p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
-    p.b = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
-    p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
+  if (Archive::is_loading::value) {
+    p.q = (double *)malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.b = (double *)malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.mu = (double *)malloc(p.numberOfContacts * sizeof(double));
     p.M = NM_new();
     p.H = NM_new();
   }
@@ -108,82 +97,68 @@ void siconos_io(Archive& ar, GlobalFrictionContactProblem& p, const unsigned int
 REGISTER_BOOST_SERIALIZATION(GlobalFrictionContactProblem);
 
 template <class Archive>
-void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
-{
+void siconos_io(Archive &ar, SparseBlockStructuredMatrix &v, unsigned int version) {
   SERIALIZE(v, (nbblocks)(blocknumber0)(blocknumber1)(filled1)(filled2), ar);
-  if (Archive::is_loading::value)
-  {
-    v.block = (double **) malloc(v.nbblocks * sizeof(double *));
-    v.blocksize1 = (unsigned int *) malloc (v.blocknumber1* sizeof(unsigned int));
-    v.blocksize0 = (unsigned int *) malloc (v.blocknumber0* sizeof(unsigned int));
+  if (Archive::is_loading::value) {
+    v.block = (double **)malloc(v.nbblocks * sizeof(double *));
+    v.blocksize1 = (unsigned int *)malloc(v.blocknumber1 * sizeof(unsigned int));
+    v.blocksize0 = (unsigned int *)malloc(v.blocknumber0 * sizeof(unsigned int));
     SERIALIZE_C_ARRAY(v.blocknumber1, v, blocksize1, ar);
     SERIALIZE_C_ARRAY(v.blocknumber0, v, blocksize0, ar);
-    int diagonalblocknumber  = v.blocknumber1 +
-      ((v.blocknumber0 - v.blocknumber1) & -(v.blocknumber0 < v.blocknumber1));
-    for (unsigned int i=0; i< diagonalblocknumber; ++i)
-    {
+    int diagonalblocknumber = v.blocknumber1 + ((v.blocknumber0 - v.blocknumber1) &
+                                                -(v.blocknumber0 < v.blocknumber1));
+    for (unsigned int i = 0; i < diagonalblocknumber; ++i) {
       unsigned int size0 = v.blocksize0[i];
       if (i != 0) size0 -= v.blocksize0[i - 1];
       unsigned int size1 = v.blocksize1[i];
       if (i != 0) size1 -= v.blocksize1[i - 1];
-      v.block[i] = (double*) malloc(size0 * size1 * sizeof(double));
+      v.block[i] = (double *)malloc(size0 * size1 * sizeof(double));
     }
-    v.index1_data = (size_t *) malloc (v.filled1 * sizeof(size_t));
-    v.index2_data = (size_t *) malloc (v.filled2 * sizeof(size_t));
-  }
-  else
-  {
+    v.index1_data = (size_t *)malloc(v.filled1 * sizeof(size_t));
+    v.index2_data = (size_t *)malloc(v.filled2 * sizeof(size_t));
+  } else {
     SERIALIZE_C_ARRAY(v.blocknumber1, v, blocksize1, ar);
     SERIALIZE_C_ARRAY(v.blocknumber0, v, blocksize0, ar);
   }
 
-  int diagonalblocknumber  = v.blocknumber1 +
-      ((v.blocknumber0 - v.blocknumber1) & -(v.blocknumber0 < v.blocknumber1));
+  int diagonalblocknumber = v.blocknumber1 + ((v.blocknumber0 - v.blocknumber1) &
+                                              -(v.blocknumber0 < v.blocknumber1));
 
-  for (unsigned int i=0; i< v.nbblocks; ++i)
-  {
-    ar & ::boost::serialization::make_nvp("block", (long&) v.block[i]);
+  for (unsigned int i = 0; i < v.nbblocks; ++i) {
+    ar & ::boost::serialization::make_nvp("block", (long &)v.block[i]);
   }
 
-  for (unsigned int i=0; i< diagonalblocknumber; ++i)
-  {
+  for (unsigned int i = 0; i < diagonalblocknumber; ++i) {
     unsigned int size0 = v.blocksize0[i];
     if (i != 0) size0 -= v.blocksize0[i - 1];
     unsigned int size1 = v.blocksize1[i];
     if (i != 0) size1 -= v.blocksize1[i - 1];
-    for (unsigned int k=0; k<size0 * size1; ++k)
-    {
+    for (unsigned int k = 0; k < size0 * size1; ++k) {
       ar & ::boost::serialization::make_nvp("item", v.block[i][k]);
     }
   }
 
-  SERIALIZE_C_ARRAY(v.filled1,  v, index1_data, ar);
-  SERIALIZE_C_ARRAY(v.filled2,  v, index2_data, ar);
+  SERIALIZE_C_ARRAY(v.filled1, v, index1_data, ar);
+  SERIALIZE_C_ARRAY(v.filled2, v, index2_data, ar);
 }
 REGISTER_BOOST_SERIALIZATION(SparseBlockStructuredMatrix);
 
 template <class Archive>
-void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
-{
+void siconos_io(Archive &ar, NumericsMatrix &v, unsigned int version) {
   SERIALIZE(v, (storageType)(size0)(size1), ar);
-  if (v.storageType == 0)
-  {
-    if (Archive::is_loading::value)
-    {
-      v.matrix0 = (double *) malloc(v.size0 * v.size1 * sizeof(double));
+  if (v.storageType == 0) {
+    if (Archive::is_loading::value) {
+      v.matrix0 = (double *)malloc(v.size0 * v.size1 * sizeof(double));
       v.matrix1 = nullptr;
       v.matrix2 = nullptr;
       v.internalData = nullptr;
     }
     SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
-  }
-  else
-  {
+  } else {
     {
-      if (Archive::is_loading::value)
-      {
+      if (Archive::is_loading::value) {
         v.matrix0 = nullptr;
-        v.matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+        v.matrix1 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
         v.matrix2 = nullptr;
         v.internalData = nullptr;
       }
@@ -194,14 +169,12 @@ void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
 REGISTER_BOOST_SERIALIZATION(NumericsMatrix);
 
 template <class Archive>
-void siconos_io_register_Numerics(Archive& ar)
-{
-  ar.register_type(static_cast<SolverOptions*>(nullptr));
-  ar.register_type(static_cast<LinearComplementarityProblem*>(nullptr));
-  ar.register_type(static_cast<NumericsMatrix*>(nullptr));
-  ar.register_type(static_cast<SparseBlockStructuredMatrix*>(nullptr));
-  ar.register_type(static_cast<FrictionContactProblem*>(nullptr));
-
+void siconos_io_register_Numerics(Archive &ar) {
+  ar.register_type(static_cast<SolverOptions *>(nullptr));
+  ar.register_type(static_cast<LinearComplementarityProblem *>(nullptr));
+  ar.register_type(static_cast<NumericsMatrix *>(nullptr));
+  ar.register_type(static_cast<SparseBlockStructuredMatrix *>(nullptr));
+  ar.register_type(static_cast<FrictionContactProblem *>(nullptr));
 }
 #endif
 #endif

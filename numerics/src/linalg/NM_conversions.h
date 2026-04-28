@@ -23,9 +23,8 @@
   \brief Conversion related functions for the various matrix storages in Numerics
 */
 #include "CSparseMatrix.h"  // for CSparseMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -65,7 +64,7 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc);
  */
 CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

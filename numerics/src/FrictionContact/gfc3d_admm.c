@@ -21,16 +21,16 @@
 #include <stdlib.h>  // for calloc, free, malloc
 #include <time.h>
 
-#include "CSparseMatrix.h"
+// #include "CSparseMatrix.h"
 #include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
 #include "fc3d_short_names.h"
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+// #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "NumericsMatrix.h"                // for NM_gemv, NumericsMatrix
 #include "NumericsSparseMatrix.h"          // for NSM_TRIPLET ...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "fc3d_Solvers.h"
+// #include "fc3d_Solvers.h"
 #include "float.h"          // for DBL_EPSILON
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
 
@@ -527,9 +527,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] ==
       SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES) {
-    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
+    computeError = &gfc3d_compute_error;
   } else {
-    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error_convex;
+    computeError = &gfc3d_compute_error_convex;
   }
 
   /* double * normUT_old  = (double *) malloc(nc*sizeof(double)); */

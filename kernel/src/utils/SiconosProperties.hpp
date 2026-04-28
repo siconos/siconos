@@ -32,15 +32,11 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
-#include "SiconosSerialization.hpp"
-
 #if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
 #else
 #include <boost/property_map.hpp>
 #endif
-
-#include <SiconosConfig.h>
 
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/eval_if.hpp>
@@ -48,23 +44,19 @@
 #include <boost/type_traits.hpp>
 #include <map>
 #include <memory>
-#include <queue>
 #include <vector>
 
 namespace siconos::graphs {
 
 /** some local type traits */
 template <typename T>
-struct IsSharedPtr : boost::mpl::false_ {
-};
+struct IsSharedPtr : boost::mpl::false_ {};
 
 template <typename T>
-struct IsSharedPtr<std::shared_ptr<T> > : boost::mpl::true_ {
-};
+struct IsSharedPtr<std::shared_ptr<T> > : boost::mpl::true_ {};
 
 template <typename T>
-struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {
-};
+struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {};
 
 template <typename T>
 struct RemovePointer {
@@ -104,8 +96,7 @@ struct EdgeAccess {
 
   static size_t size(const G& g) { return g.edges_number(); }
 
-  bool isElem(G& g, typename G::EDescriptor& ed)
-  {
+  bool isElem(G& g, typename G::EDescriptor& ed) {
     return g.is_edge(g.source(ed), g.target(ed), g.bundle(ed));
   }
 };
@@ -122,8 +113,7 @@ template <typename T>
 struct SwapPointedValues {
   typedef SwapPointedValues type;
 
-  void operator()(T a, T b)
-  {
+  void operator()(T a, T b) {
     // note: if T is abstract, swap(T& a, T&b) must be implemented
     using std::swap;
     swap(*a, *b);
@@ -134,8 +124,7 @@ template <typename T>
 struct SwapValues {
   typedef SwapValues type;
 
-  void operator()(T& a, T& b)
-  {
+  void operator()(T& a, T& b) {
     using std::swap;
     swap(a, b);
   }
@@ -315,8 +304,7 @@ class EdgeProperties : public Properties<T, G, typename G::EIndexAccess> {
   \param g the graph
 */
 template <typename T, typename G>
-VertexProperties<T, G> vertexProperties(G& g)
-{
+VertexProperties<T, G> vertexProperties(G& g) {
   return VertexProperties<T, G>(g);
 }
 
@@ -324,8 +312,7 @@ VertexProperties<T, G> vertexProperties(G& g)
   \param g the graph
 */
 template <typename T, typename G>
-EdgeProperties<T, G> edgeProperties(G& g)
-{
+EdgeProperties<T, G> edgeProperties(G& g) {
   return EdgeProperties<T, G>(g);
 }
 
@@ -395,8 +382,6 @@ class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess> {
   BOOST_PP_CAT(GraphType, Graph)                                                          \
   ()                                                                                      \
       : BOOST_PP_SEQ_FOR_EACH(I_CONS_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) \
-            dummy(true)                                                                   \
-  {                                                                                       \
-  }
+            dummy(true) {}
 
 #endif

@@ -55,7 +55,7 @@ struct AffineVariationalInequalities {
                           implemented yet) */
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Affine Variational Inequalities display
@@ -100,7 +100,7 @@ void freeAVI(AffineVariationalInequalities *avi);
  *  \return an empty AffineVariationalInequalities*/
 AffineVariationalInequalities *newAVI(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

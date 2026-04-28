@@ -760,7 +760,7 @@ def generate_cmakelists(args):
         args.includes.append(args.addons)
         if srcfiles:
             result += "set(pybind11_DIR @pybind11_DIR@)\n"
-            result += "find_package(pybind11 CONFIG REQUIRED)\n"
+            result += "find_package(pybind11 3.0.2 CONFIG REQUIRED)\n"
             result += "find_package(Eigen3 REQUIRED)\n"
             for fname in srcfiles:
                 fname = Path(fname)

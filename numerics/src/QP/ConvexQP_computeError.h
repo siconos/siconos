@@ -23,15 +23,11 @@
   \brief functions related to error computation for friction-contact
 */
 
-#include "NumericsFwd.h"    // for ConvexQP, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for ConvexQP, SolverOptions
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
-#endif
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
 
@@ -69,7 +65,7 @@ int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, 
                            double tolerance, double scaling, SolverOptions *options,
                            double norm_q, double norm_b, double *error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

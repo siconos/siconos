@@ -10,8 +10,6 @@
 #include "SiconosBlas.h"
 #include "SiconosLapack.h"
 
-//#define WITH_TIMERS
-
 #define TIMER_FFTW_CYCLE
 
 #include "op3x3.h"

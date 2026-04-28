@@ -24,8 +24,6 @@
 
 #include <setjmp.h>  // for jmp_buf
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 #define SN_SETJMP_INTERNAL_START setjmp(*sn_get_internal_jmp_buf())
 #define SN_SETJMP_INTERNAL_STOP sn_release_internal_jmp_buf();
 
@@ -41,7 +39,7 @@ typedef enum {
   SN_NOT_COMPILED_ERROR
 } SN_ERROR_T;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -86,7 +84,7 @@ void sn_fatal_error(SN_ERROR_T code, const char* msg);
  */
 const char* sn_fatal_error_msg(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

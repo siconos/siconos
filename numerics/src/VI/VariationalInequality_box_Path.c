@@ -19,7 +19,6 @@
 #include <stdio.h>  // for printf
 
 #include "NumericsFwd.h"                    // for SolverOptions, Variationa...
-#include "SiconosConfig.h"                  // for HAVE_PATHFERRIS // IWYU pragma: keep
 #include "VariationalInequality_Solvers.h"  // for vi_box_path
 
 #ifdef HAVE_PATHFERRIS
@@ -47,10 +46,10 @@ extern "C" {
 #include "Path_interface.h"
 #include "SiconosSets.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "numerics_errors.h"
+#include "siconos_debug.h"
 #if defined(__cplusplus)
 #undef restrict
 #define restrict __restrict

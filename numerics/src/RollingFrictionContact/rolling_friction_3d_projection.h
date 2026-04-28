@@ -36,10 +36,9 @@
 
 */
 
-#include "NumericsFwd.h"    // for RollingFrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for RollingFrictionContactProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
@@ -51,17 +50,17 @@ extern "C" {
  * \param options
  */
 void rolling_friction_3d_projection_update(int number, RollingFrictionContactProblem* problem,
-                                    RollingFrictionContactProblem* localproblem,
-                                    double* reaction, SolverOptions* options);
+                                           RollingFrictionContactProblem* localproblem,
+                                           double* reaction, SolverOptions* options);
 
 void rolling_friction_3d_projection_initialize(RollingFrictionContactProblem* problem,
-                                        RollingFrictionContactProblem* localproblem);
+                                               RollingFrictionContactProblem* localproblem);
 void rolling_friction_3d_projection_free(RollingFrictionContactProblem* problem,
-                                  RollingFrictionContactProblem* localproblem,
-                                  SolverOptions* localsolver_options);
+                                         RollingFrictionContactProblem* localproblem,
+                                         SolverOptions* localsolver_options);
 
 int rolling_friction_3d_projectionOnCone_solve(RollingFrictionContactProblem* localproblem,
-                                        double* reaction, SolverOptions* options);
+                                               double* reaction, SolverOptions* options);
 int rolling_friction_3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection on the Cone with local
@@ -82,7 +81,7 @@ void rolling_friction_3d_projectionOnConeWithLocalIteration_initialize(
 int rolling_friction_3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(
     SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

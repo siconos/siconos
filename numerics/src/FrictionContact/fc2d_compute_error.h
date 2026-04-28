@@ -24,10 +24,8 @@
 
 */
 
-#include "NumericsFwd.h"    // for FrictionContactProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#include "NumericsFwd.h"  // for FrictionContactProblem
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -44,7 +42,7 @@ void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
 int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, double tolerance,
                        double norm, double* error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

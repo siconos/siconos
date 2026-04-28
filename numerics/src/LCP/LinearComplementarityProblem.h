@@ -23,8 +23,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for LinearComplementarityProblem, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 /**
    Structure that contains and defines a LCP Problem.
@@ -35,7 +34,7 @@ struct LinearComplementarityProblem {
   double *q;         /**< vector of the LCP (see the mathematical description)*/
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -84,7 +83,7 @@ void freeLinearComplementarityProblem(LinearComplementarityProblem *problem);
  */
 LinearComplementarityProblem *newLCP(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

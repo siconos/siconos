@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 #include "CSparseMatrix.h"
-#include "SiconosConfig.h"  // for WITH_FCLIB // IWYU pragma: keep
 
 #ifdef WITH_FCLIB
 #define DEBUG_NOCOLOR
@@ -28,18 +27,17 @@
 #include <stdlib.h>  // for malloc, free, exit, EXIT_F...
 #include <string.h>  // for strdup
 
-#include "CSparseMatrix.h"                        // for CSparseMatrix, CS_INT, cs_...
-#include "FrictionContactProblem.h"               // for FrictionContactProblem
-#include "GlobalFrictionContactProblem.h"         // for GlobalFrictionContactProblem
-#include "GlobalRollingFrictionContactProblem.h"  // for GlobalRollingFrictionContactProblem
+#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT, cs_...
+#include "FrictionContactProblem.h"        // IWYU pragma: keep - for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // IWYU pragma: keep - for GlobalFrictionContactProblem
+#include "GlobalRollingFrictionContactProblem.h"  // IWYU pragma: keep - for GlobalRollingFrictionContactProblem
 #include "NumericsMatrix.h"                       // for NumericsMatrix, RawNumeric...
-#include "NumericsSparseMatrix.h"                 // for NumericsSparseMatrix, NSM_CSC
-#include "SiconosConfig.h"                        // for WITH_FCLIB
-#include "SparseBlockMatrix.h"                    // for SBM_from_csparse, SBM_to_s...
+#include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_CSC
+#include "SparseBlockMatrix.h"     // for SBM_from_csparse, SBM_to_s...
 #include "fclib_interface.h"
+#include "numerics_errors.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 #include "timers_interf.h"  // for MAYBE_UNUSED
-#include "numerics_errors.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

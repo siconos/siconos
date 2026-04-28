@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-#include "SiconosConfig.h"  // for WITH_SUPERLU, SUPERLU_MAJOR_VERSION ... // IWYU pragma: keep
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
 

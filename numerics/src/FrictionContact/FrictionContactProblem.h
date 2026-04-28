@@ -25,7 +25,6 @@
 
 #include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
 #include "NumericsMatrix.h"  // for RawNumericsMatrix
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
@@ -56,7 +55,7 @@ struct SplittedFrictionContactProblem {
   double *q_t;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -149,7 +148,7 @@ FrictionContactProblem *frictionContact_copy(FrictionContactProblem *problem);
 */
 void frictionContact_rescaling(FrictionContactProblem *problem, double alpha, double gamma);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

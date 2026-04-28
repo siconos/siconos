@@ -63,7 +63,7 @@ if(WITH_FORTRAN)
   target_link_libraries(kernel PRIVATE externals_fortran) # lsodar and hem5
 endif()
 # boost bindings
-target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/numeric_bindings>)
+# target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/numeric_bindings>)
 target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/boost_contribs>)
 # Mostly for the fortran API (empty if HAS_FORTRAN is off but required anyway)
 target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/tools>)

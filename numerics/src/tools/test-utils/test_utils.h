@@ -1,7 +1,6 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
-#include "NumericsFwd.h"    // for SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
 
 typedef struct {
   /** name of the data file used for the test*/
@@ -12,7 +11,7 @@ typedef struct {
   SolverOptions* options;
 } TestCase;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -42,7 +41,7 @@ int run_test_collection(TestCase* collection, int number_of_tests,
 /* void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file)
  */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

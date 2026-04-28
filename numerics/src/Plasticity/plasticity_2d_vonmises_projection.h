@@ -24,7 +24,7 @@
 
 #include "PlasticityProblem.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -61,7 +61,7 @@ double plasticity_2d_vonMises_equivalent_stress(const double stress[3]);
 */
 int plasticity_2d_vonMises_check_yield(const double stress[3], double sigma_y);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

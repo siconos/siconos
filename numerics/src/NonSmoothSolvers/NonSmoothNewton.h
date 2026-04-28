@@ -29,8 +29,7 @@
 
  */
 
-#include "NumericsFwd.h"    // for SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
 
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
@@ -39,7 +38,7 @@ enum NONSMOOTH_NEWTON_SOLVER { SICONOS_NONSMOOTH_NEWTON_LSA = 11000 };
 
 extern const char* const SICONOS_NONSMOOTH_NEWTON_LSA_STR;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** Armijo Linesearch
@@ -90,7 +89,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
 void nonSmoothNewton_set_default(SolverOptions* options);
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

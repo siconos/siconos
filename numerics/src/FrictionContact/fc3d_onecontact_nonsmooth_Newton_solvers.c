@@ -22,8 +22,7 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, realloc
 
-#include "AlartCurnierGenerated.h"   // for fc3d_AlartCurn...
-#include "FrictionContactProblem.h"  // for FrictionContac...
+#include "AlartCurnierGenerated.h"  // for fc3d_AlartCurn...
 #include "FrictionContact_options.h"
 #include "NSSTools.h"                                 // for max
 #include "NonSmoothNewton.h"                          // for nonSmoothDirec...
@@ -39,8 +38,9 @@
 #include "fc3d_local_problem_tools.h"                 // for fc3d_local_pro...
 #include "fc3d_projection.h"                          // for fc3d_projectio...
 #include "fc3d_short_names.h"                         // for SICONOS_FRICTI...
-#include "numerics_verbose.h"                         // for numerics_print...
-#include "op3x3.h"                                    // for cpy3, mvp3x3
+#include "naming_conventions.h"
+#include "numerics_verbose.h"  // for numerics_print...
+#include "op3x3.h"             // for cpy3, mvp3x3
 
 /* #define DEBUG_CHECK */
 /* #define DEBUG_NOCOLOR */
@@ -114,9 +114,9 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       rho = &options->dWork[3 * contact + nc];
     }
     numerics_printf_verbose(2,
-        "fc3d_AC_initialize "
-        " compute rho for contact = %i",
-        contact);
+                            "fc3d_AC_initialize "
+                            " compute rho for contact = %i",
+                            contact);
 
     if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
         SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND) {
@@ -147,7 +147,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       avg_rho[1] += rho[1];
       avg_rho[2] += rho[2];
     }
-    
+
     numerics_printf_verbose(2,
                             "fc3d_AC_initialize"
                             "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
@@ -274,8 +274,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
             "fc3d_onecontact_nonsmooth_Newton_solvers_solve",
             "no convergence for contact %i with error = %12.8e and iteration = %i",
             options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
-            SOLVER_RESIDUAL(options),
-	    SOLVER_MAX_ITER(options));
+            SOLVER_RESIDUAL(options), SOLVER_MAX_ITER(options));
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
@@ -401,9 +400,11 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact,
   localproblem->mu[0] = main_problem->mu[contact];
 }
 
-void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int contact, FrictionContactProblem* problem,
+void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int contact,
+                                                         FrictionContactProblem* problem,
                                                          FrictionContactProblem* localproblem,
-                                                         double* reaction, SolverOptions* options) {
+                                                         double* reaction,
+                                                         SolverOptions* options) {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
   */

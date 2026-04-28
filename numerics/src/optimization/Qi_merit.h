@@ -19,8 +19,7 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 #ifdef __cplusplus
 #include <sys/cdefs.h>  // for __restrict
@@ -34,7 +33,7 @@
 
 */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -64,7 +63,7 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict Fbox, double* restrict
               double* restrict workV2, NumericsMatrix* restrict nabla_F, double* restrict lb,
               double* restrict ub, NumericsMatrix* restrict H);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

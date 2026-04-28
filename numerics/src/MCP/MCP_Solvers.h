@@ -30,7 +30,7 @@
 #include "MixedComplementarityProblem.h"
 #include "SolverOptions.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -114,7 +114,7 @@ void mcp_old_FischerBurmeister_reset(MixedComplementarityProblem_old* problem,
 int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double* z, double* w,
                           double* error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

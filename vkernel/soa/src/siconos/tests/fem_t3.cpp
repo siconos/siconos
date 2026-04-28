@@ -165,11 +165,17 @@ int main(int args, char* argv[])
   fe_solid.mass_matrix() = FEsolid->mass();
   fe_solid.k_matrix() = FEsolid->stiffnessMatrix();
   fe_solid.fext() = FEsolid->fext();
-  fe_solid.q() = *FEsolid->q();
-  storage::attr<"q">(fe_solid, 1) = storage::attr<"q">(fe_solid, 0);
+  // storage::attr<"fext">(fe_solid, 1) = storage::attr<"fext">(fe_solid, 0);
 
   fe_solid.velocity() = *FEsolid->velocity();
-  storage::attr<"velocity">(fe_solid, 1) = storage::attr<"velocity">(fe_solid, 0);
+  // storage::attr<"velocity">(fe_solid, 1) =
+  //     storage::attr<"velocity">(fe_solid, 0);
+
+  fe_solid.q() = *FEsolid->q();
+  // storage::attr<"q">(fe_solid, 1) =
+  //     storage::attr<"q">(fe_solid, 0) +
+  //     h * storage::attr<"velocity">(fe_solid, 0);
+
 
   auto indices = FEsolid->boundaryConditions()->velocityIndices();
   auto& bc_vel = storage::prop<"bc_velocities_0">(fe_solid);

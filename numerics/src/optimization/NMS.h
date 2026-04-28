@@ -29,10 +29,9 @@
 
 #include "Newton_methods.h"  // for functions_LSA
 #include "NumericsFwd.h"     // for NumericsMatrix
-#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 #include "line_search.h"     // for search_data
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 /** \struct path_record NMS.h
@@ -77,7 +76,7 @@ typedef struct {
   search_data* ls_data;    /**< data for the line search */
 } NMS_data;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -215,7 +214,7 @@ static inline int check_nmd_criterion(double theta_iter, double ref_merit, doubl
   return 1;
 }
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -20,25 +20,23 @@
  * \brief FC2D driver using the solver registration system
  */
 
-#include "FrictionContactProblem.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "FrictionContact_options.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_short_names.h"
-#include "numerics_verbose.h"
-
-/* Registration-based headers */
-#include "solver_registry.h"
+#include "naming_conventions.h"
 #include "numerics_errors.h"
-
-#include <stdio.h>
-#include <stdlib.h>
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /* ===========================================================================
  * Registration-Based Driver
  * =========================================================================== */
 
-int fc2d_driver(FrictionContactProblem* problem, double* reaction,
-                double* velocity, SolverOptions* options) {
+int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options) {
   /* Input validation using standardized macros */
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
@@ -58,13 +56,13 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction,
 
   /* Handle sparse matrices - convert to dense for non-NSGS solvers */
   NumericsMatrix* M_original = NULL;
-  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_PERMUT
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA
-                                          && options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY) {
+  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_PERMUT &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY) {
     numerics_printf_verbose(1, "fc2d_driver: converting sparse matrix to dense for solver %d",
                             options->solverId);
     M_original = problem->M;
@@ -84,13 +82,14 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction,
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
-  numerics_printf_verbose(1, "fc2d_driver: using solver '%s' (%s)",
-                          solver->name, solver->description);
+  numerics_printf_verbose(1, "fc2d_driver: using solver '%s' (%s)", solver->name,
+                          solver->description);
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("fc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
-                    solver->name);
+    numerics_printf(
+        "fc2d_driver: solver '%s' is a local solver, cannot be used as main solver",
+        solver->name);
     /* Restore original matrix if converted */
     if (M_original) {
       NM_free(problem->M);
@@ -155,23 +154,24 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction,
 
 SolverOptions* fc2d_solver_options_create(solver_id_t solver_id) {
   const SolverEntry* solver = solver_registry_lookup(solver_id);
-  
+
   if (!solver) {
     fprintf(stderr, "fc2d_solver_options_create: solver ID %d not registered\n", solver_id);
     return NULL;
   }
-  
+
   if (solver->is_local_solver) {
-    fprintf(stderr, "fc2d_solver_options_create: solver '%s' is a local solver\n", solver->name);
+    fprintf(stderr, "fc2d_solver_options_create: solver '%s' is a local solver\n",
+            solver->name);
     return NULL;
   }
-  
+
   SolverOptions* options = solver_options_create(solver_id);
   if (!options) {
     fprintf(stderr, "fc2d_solver_options_create: failed to create options\n");
     return NULL;
   }
-  
+
   if (solver->init) {
     int init_status = solver->init(NULL, options);
     if (init_status != NUMERICS_OK) {
@@ -180,23 +180,24 @@ SolverOptions* fc2d_solver_options_create(solver_id_t solver_id) {
       return NULL;
     }
   }
-  
+
   return options;
 }
 
 void fc2d_list_available_solvers(void) {
   printf("\nAvailable FC2D Solvers:\n");
   printf("%-8s %-20s %-12s %-12s\n", "ID", "Name", "Max Iter", "Tolerance");
-  printf("%-8s %-20s %-12s %-12s\n", "--------", "--------------------", "------------", "------------");
-  
+  printf("%-8s %-20s %-12s %-12s\n", "--------", "--------------------", "------------",
+         "------------");
+
   size_t count;
   const SolverEntry** solvers = solver_registry_get_all(&count);
-  
+
   for (size_t i = 0; i < count; i++) {
     const SolverEntry* s = solvers[i];
     if (s->id >= 400 && s->id < 500) {
-      printf("%-8d %-20s %-12d %-12.2e\n",
-             s->id, s->name, s->default_max_iter, s->default_tol);
+      printf("%-8d %-20s %-12d %-12.2e\n", s->id, s->name, s->default_max_iter,
+             s->default_tol);
     }
   }
   printf("\n");
@@ -204,12 +205,12 @@ void fc2d_list_available_solvers(void) {
 
 void fc2d_print_solver_info(solver_id_t solver_id) {
   const SolverEntry* solver = solver_registry_lookup(solver_id);
-  
+
   if (!solver) {
     printf("Solver ID %d not found in registry.\n", solver_id);
     return;
   }
-  
+
   printf("\nSolver: %s (ID: %d)\n", solver->name, solver->id);
   printf("Description: %s\n", solver->description);
   printf("Max iterations: %d\n", solver->default_max_iter);
