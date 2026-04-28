@@ -33,8 +33,7 @@ execute_process(COMMAND
   OUTPUT_STRIP_TRAILING_WHITESPACE
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-find_package(pybind11 CONFIG REQUIRED)
-
+find_package(pybind11 3.0.2 CONFIG REQUIRED)
 set(SICONOS_PB11_BINARY_DIR ${CMAKE_BINARY_DIR}/python
   CACHE INTERNAL "Working/binary for pybind11 and python stuff.")
 
