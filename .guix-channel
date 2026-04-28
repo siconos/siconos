@@ -13,7 +13,7 @@
 	  (signer "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
     (channel
      (name guix)
-     (url "https://git.guix.gnu.org/guix.git")
+     (url "https://codeberg.org/guix/guix.git")
      (branch "master")
      (commit
       "3ce60cd35e7d9af529fa158c7a2feac67120316c")
