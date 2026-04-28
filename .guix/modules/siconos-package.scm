@@ -98,11 +98,6 @@ problems.")
                 (setenv "SOURCE_DATE_EPOCH" "315532800")))
             (add-after 'unpack 'some-quick-patches
               (lambda _
-                ;; wheel not found under guix, but it is here.
-                (substitute* "cmake/SiconosSetup.cmake"
-                  (("find_python_module\\(wheel REQUIRED\\)")
-                   "#find_python_module(wheel REQUIRED)"))
-
                 (substitute* "cmake/fclib_setup.cmake"
                   ;; compiler specfication fails under guix, but it is not needed.
                   (("target_compile_options\\(fclib INTERFACE")
@@ -168,7 +163,7 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
                                 (install-file file dirinst)))
                             (find-files "siconos" "\\.py$"))))))))
 
-      (native-inputs (list clang-toolchain-19
+      (native-inputs (list clang-toolchain-21
                            cppunit
                            gfortran
                            git-minimal/pinned
@@ -192,6 +187,7 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
                                python-packaging
                                python-scipy
                                python-occ-core
+                               python-wheel
                                range-v3
                                suitesparse))
       (home-page
