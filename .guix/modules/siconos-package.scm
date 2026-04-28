@@ -77,8 +77,13 @@ problems.")
     (arguments
      (list
         #:tests? #f
-        #:imported-modules `((guix build python-build-system)
-                             ,@%cmake-build-system-modules)
+	#:modules `(
+		    (guix build cmake-build-system)
+		    ((guix build pyproject-build-system) #:prefix py:)
+		    (guix build utils)
+		   )
+        #:imported-modules (append %cmake-build-system-modules
+				   %pyproject-build-system-modules)
         #:configure-flags
         #~(list "-DCMAKE_VERBOSE_MAKEFILE=1"
                 "-DWITH_PYB11_WRAPPER=1"
@@ -145,23 +150,9 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
                   (("new_test\\(SOURCES CableDSTest.cpp")
                    "# new_test(SOURCES CableDSTest.cpp"))))
 
-            ;; installation of python files with setup.py fails with
-            ;; recents python/numpy
-            (add-after 'install 'install-python-files
-              (lambda* (#:key inputs outputs #:allow-other-keys)
-                (let* ((python-version (@ (guix build python-build-system)
-                                          python-version))
-                       (out (assoc-ref outputs "out"))
-                       (version (python-version (assoc-ref inputs "python")))
-                       (pydir (string-append out "/lib/python" version
-                                             "/site-packages/")))
-                  (chdir "./python")
-                  (for-each (lambda (file)
-                              (let ((dirinst (string-append pydir "/"
-                                                            (dirname file))))
-                                (mkdir-p dirinst)
-                                (install-file file dirinst)))
-                            (find-files "siconos" "\\.py$"))))))))
+            	    (add-after 'install 'wrap-python
+              (assoc-ref py:%standard-phases 'wrap))
+	      	    )))
 
       (native-inputs (list clang-toolchain-21
                            cppunit
