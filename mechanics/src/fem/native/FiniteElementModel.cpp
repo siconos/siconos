@@ -629,7 +629,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
   shearOnBend = E * I * 6 / length2;
   shearOnshear = shearing;
   bendOnBend = E * I * 2 / length;
-
   if (dim == 2) {
     siconos::algebra::SiconosMatrix66 Ke_loc = siconos::algebra::SiconosMatrix66::Zero();
 
@@ -661,7 +660,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
     Ke.noalias() = Te_transpose * Ke_loc * Te;
 
   } else if (dim == 3) {
-    siconos::algebra::SiconosMatrix Ke_loc = siconos::algebra::SiconosMatrix66::Zero(12,12);
+    siconos::algebra::SiconosMatrix Ke_loc = siconos::algebra::SiconosMatrix1212::Zero();
 
     Ke_loc(0, 0) = axial;
     Ke_loc(0, 6) = -axial;
@@ -913,7 +912,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
 
   // We start to compute the D matrix. Warning:  to be adpated if several
   // materials.
-
   /* loop over the elements */
   for (auto fe : elements()) {
     if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3) {

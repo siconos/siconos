@@ -69,6 +69,7 @@ using SiconosMatrix37 = Eigen::Matrix<double_t, 3, 7, Eigen::ColMajor>;
 using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
 using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
 using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
+using SiconosMatrix1212 = Eigen::Matrix<double_t, 12, 12, Eigen::ColMajor>;
 using SiconosMatrix33Diagonal = Eigen::DiagonalMatrix<double_t, 3>;
 using SiconosMatrix66Diagonal = Eigen::DiagonalMatrix<double_t, 6>;
 
