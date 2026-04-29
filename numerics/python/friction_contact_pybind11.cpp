@@ -693,6 +693,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       // 2D Frictional Contact solvers
       .value("SICONOS_FRICTION_2D_NSGS", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS,
              "2D Non-smooth Gauss Seidel")
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH,
+             "Parallel FC2D_NSGS using graph coloring")
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI,
+             "Parallel version of FC2D_NSGS (OpenMP optimized)")
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
+             "Parallel version of FC2D_NSGS (OpenMP, with permutation)")
       .value("SICONOS_FRICTION_2D_CPG", FRICTION_SOLVER::SICONOS_FRICTION_2D_CPG,
              "2D CPG solver")
       .value("SICONOS_FRICTION_2D_LEMKE", FRICTION_SOLVER::SICONOS_FRICTION_2D_LEMKE,
