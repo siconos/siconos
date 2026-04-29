@@ -661,22 +661,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   // FILE *iterates = NULL;
   /*****  NSGS Iterations *****/
 
-  /* Debug: Check input data for NaN */
-#ifdef DEBUG
-  for (unsigned int i = 0; i < nc * 3; ++i) {
-    if (isnan(reaction[i])) {
-      numerics_error("fc3d_nsgs", "Input reaction[%u] contains NaN", i);
-      *info = NUMERICS_ERR_INVALID_ARGUMENT;
-      goto cleanup;
-    }
-    if (isnan(velocity[i])) {
-      numerics_error("fc3d_nsgs", "Input velocity[%u] contains NaN", i);
-      *info = NUMERICS_ERR_INVALID_ARGUMENT;
-      goto cleanup;
-    }
-  }
-#endif
-
   /* A special case for the most common options (should correspond
    * with mechanics_run.py **/
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -902,39 +886,20 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /*     frictionContact_printInFile(problem, file); */
   /*     fclose(file); */
   /*   }  */
+  
   *info = hasNotConverged;
+  if (iter == itermax && hasNotConverged > 0) *info = NUMERICS_ERR_MAX_ITER;
 
+  
   /** return parameter values */
   /* SOLVER_TOL(options) = tolerance; */
   SET_SOLVER_RESIDUAL(options, full_error);
   SET_SOLVER_ITER_DONE(options, iter);
 
-  /* Debug: Check output data for NaN */
-#ifdef DEBUG
-  for (unsigned int i = 0; i < nc * 3; ++i) {
-    if (isnan(reaction[i])) {
-      numerics_error("fc3d_nsgs", "Output reaction[%u] contains NaN after %d iterations", i,
-                     iter);
-      *info = NUMERICS_ERR_DIVERGENCE;
-      goto cleanup;
-    }
-    if (isnan(velocity[i])) {
-      numerics_error("fc3d_nsgs", "Output velocity[%u] contains NaN after %d iterations", i,
-                     iter);
-      *info = NUMERICS_ERR_DIVERGENCE;
-      goto cleanup;
-    }
-  }
-#endif
-
   /* Restore original local solver tolerance */
   tolerance_manager_restore_local(&tol_manager, local_opts);
 
-#ifdef DEBUG
-cleanup:
-#endif
   /** Free memory **/
-
   if (problem->M->storageType == NM_SPARSE) {
     SBM_clear_block(problem->M->matrix1);
     SBM_clear(problem->M->matrix1);
