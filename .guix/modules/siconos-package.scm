@@ -18,7 +18,9 @@
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages llvm)
   #:use-module (gnu packages maths)
+  #:use-module (gnu packages mpi)
   #:use-module (gnu packages multiprecision)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages pretty-print)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-build)
@@ -86,6 +88,14 @@ problems.")
 				   %pyproject-build-system-modules)
         #:configure-flags
         #~(list "-DCMAKE_VERBOSE_MAKEFILE=1"
+                "-DWITH_GUIX=1"
+                (string-append "-Dpetsc_ROOT="
+                               #$(this-package-input "petsc-openmpi"))
+                (string-append "-DHDF5_ROOT="
+                               #$(this-package-input "hdf5-parallel-openmpi") "/lib")
+                (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
+                "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel"
+                "-DCMAKE_BUILD_TYPE=Release"
                 "-DWITH_PYB11_WRAPPER=1"
                 "-DFCLIB_ROOT=1"
                 "-DWITH_BULLET=1"
@@ -94,8 +104,11 @@ problems.")
                 "-DISOLATED_INSTALL=1"
                 "-DWITH_TESTING=0"
                 "-DWITH_vkernel_TESTING=0"
-                (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
-                "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel")
+                "-DWITH_BULLET=1"
+                "-DWITH_HDF5=1"
+                "-DWITH_PETSC=1"
+                "-DWITH_MPI=1"
+                "-DWITH_OPENMP=1")
         #:phases
         #~(modify-phases %standard-phases
             (add-after 'check 'set-SOURCE-DATE-EPOCH
@@ -154,15 +167,16 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
               (assoc-ref py:%standard-phases 'wrap))
 	      	    )))
 
-      (native-inputs (list clang-toolchain-21
-                           cppunit
-                           gfortran
-                           git-minimal/pinned
-                           pybind11
-                           python-lxml
-                           python-pytest
-                           swig))
-      (inputs (list python))
+    (native-inputs (list clang-toolchain-21
+                         pkg-config
+                         cppunit
+                         gfortran
+                         git-minimal/pinned
+                         pybind11
+                         python-lxml
+                         python-pytest
+                         swig))
+      (inputs (list python hdf5-parallel-openmpi))
       (propagated-inputs (list boost
                                bullet
                                eigen
@@ -173,9 +187,12 @@ set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
                                nlohmann-json
                                openblas
                                opencascade-occt
+                               petsc-openmpi
+                               openmpi-4
                                python-h5py
                                python-numpy
                                python-packaging
+                               python-petsc4py
                                python-scipy
                                python-occ-core
                                python-wheel

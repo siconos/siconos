@@ -5,7 +5,7 @@
    (channel
     (name guix-science)
     (url "https://codeberg.org/guix-science/guix-science.git")
-    (commit "33aacc4fcad41456894fe2289660cd117ed73fad")
+    (commit "0cba59f29e1adb47e3b4cca4ec70b0f80fe0e180")
     (introduction
 	 (channel-introduction
       (version 0)
@@ -16,7 +16,7 @@
      (url "https://codeberg.org/guix/guix.git")
      (branch "master")
      (commit
-      "3ce60cd35e7d9af529fa158c7a2feac67120316c")
+      "d979b1b459a5be319e7af02f13abfa09b53fd617")
      (introduction
        (channel-introduction
          (version 0)
