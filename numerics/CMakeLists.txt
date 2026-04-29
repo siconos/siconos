@@ -382,7 +382,7 @@ endif()
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
-if(WITH_MPI AND WITH_TESTING)
+if(WITH_MPI AND WITH_TESTING AND NOT WITH_GUIX)
   # Note FP : temporary fix, to deal with PRIVATE deps of some components.
   # This will be reviewed later.
   target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})
