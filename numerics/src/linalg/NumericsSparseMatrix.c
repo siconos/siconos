@@ -854,6 +854,10 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       CSparseMatrix* Mcsc = NM_csc(M);
       if (!Mcsc) return NULL;
 
+      /* We ensure that the matrix is correclty ordered before extraction,
+	 otherwise it leads to uncorrect results    */
+      NSM_fix_csc(Mcsc);
+
       size_t n = csint_to_size_t(Mcsc->n);
       size_t m = csint_to_size_t(Mcsc->m);
 
@@ -870,6 +874,11 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
     case NSM_CSR: {
       CSparseMatrix* Mcsr = M->matrix2->csr;
       if (!Mcsr) return NULL;
+
+      /* We ensure that the matrix is correclty ordered before extraction,
+	 otherwise it leads to uncorrect results    */
+      NSM_fix_csc(Mcsr);
+
       size_t n = csint_to_size_t(Mcsr->n);
       size_t m = csint_to_size_t(Mcsr->m);
 
