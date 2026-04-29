@@ -24,10 +24,10 @@ struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
     {
       return storage::attr<"contact_index">(*self());
     }
-    decltype(auto) compute_h(match::handle<model::lagrangian_ds> auto& ds1,
+    decltype(auto) compute_h(auto step, match::handle<model::lagrangian_ds> auto& ds1,
                              auto& ds2)
     {
-      auto& q1 = storage::attr<"q">(ds1); /* disk */
+      auto& q1 = storage::attr<"q">(ds1, step); /* disk */
 
       // auto& mesh = storage::prop<"shape">(ds2);
       // assert ds2 mesh == mesh()
@@ -47,8 +47,8 @@ struct diskmesh_r : item, model::relation2, model::any_lagrangian_relation {
       auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
-      auto& q1 = storage::attr<"q">(ds1);
-      auto& q2 = storage::attr<"q">(ds2);
+      auto& q1 = storage::attr<"q">(ds1, step);
+      auto& q2 = storage::attr<"q">(ds2, step);
 
       auto& r =
           storage::make_handle(data, storage::prop<"shape">(ds1)).radius();

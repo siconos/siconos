@@ -536,10 +536,10 @@ struct moreau_jean_element : item {
                     return 0.;
                   },
                   [&](match::relation1 auto rrel) {
-                    return rrel.compute_h(hds1);
+                    return rrel.compute_h(step, hds1);
                   },
                   [&](match::relation2 auto rrel) {
-                    return rrel.compute_h(hds1, hds2);
+                    return rrel.compute_h(step, hds1, hds2);
                   }));
           ydot = hm1 * velocities[ds1.value()];
           if (nds == 2) {

@@ -280,9 +280,9 @@ struct rt_lagrangian_r : item, model::linear, model::relation1 {
      * equation. Positive values typically indicate penetration (for contact
      * constraints).
      */
-    auto compute_h(auto& ds)
+    auto compute_h(auto step, auto& ds)
     {
-      return h_matrix() * storage::attr<"q">(ds) + b();
+      return h_matrix() * storage::attr<"q">(ds, step) + b();
     }
 
     /**
