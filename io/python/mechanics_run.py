@@ -2061,6 +2061,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose("object", name, "already dead do not import")
                     # input()
                     # pass
+                elif (mass is not None
+                      and dpos_data is not None
+                      and len(dpos_data) >0 
+                      and xdpos_data.get(obj.attrs["id"],None) is None) :
+                    # object already dead do not import
+                    self.print_verbose("object", name, "Object", obj.attrs["id"],"have no initial position. Perhaps already removed from the simulation")
+                    # input()
+                    # pass
                 else:
                     #
                     # this is for now
