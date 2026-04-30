@@ -13,6 +13,7 @@
   #:use-module (gnu packages boost)
   #:use-module (gnu packages check)
   #:use-module (gnu packages cmake)
+  #:use-module (gnu packages commencement)
   #:use-module (gnu packages cpp)
   #:use-module ((gnu packages game-development) #:select (bullet))
   #:use-module (gnu packages gcc)
@@ -30,7 +31,7 @@
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages xml)
   #:use-module (guix-science packages physics)
-  )
+  #:use-module (guix-science-nonfree packages cuda))
 
 
 ;(define vcs-file?
@@ -216,5 +217,36 @@ differential inclusions, optimal control with state constraints),
 Optimization (Complementarity systems and Variational inequalities), Fluid
 Mechanics, and Computer Graphics.")
       (license license:asl2.0)))
+
+(define-public siconos-devel-cuda
+  (package
+    (inherit siconos-devel)
+    (name "siconos-devel-cuda")
+    (native-inputs (modify-inputs (package-native-inputs siconos-devel)
+                     ;; prepend gcc-toolchain-13 to ensure it takes
+                     ;; precedence for cuda compilation, as cuda
+                     ;; requires matching host compiler and standard
+                     ;; library versions, with append it fails here.
+                     (prepend gcc-toolchain-13)))
+    (inputs (modify-inputs (package-inputs siconos-devel)
+              (prepend cuda)))
+    (arguments
+     (substitute-keyword-arguments (package-arguments siconos-devel)
+       ((#:validate-runpath? _ #f)
+        #false)
+       ((#:configure-flags flags '())
+        #~(append (list
+                   "-DCMAKE_CXX_COMPILER=clang++"
+                   "-DWITH_CUDA=1"
+                   "-DCMAKE_CUDA_ARCHITECTURES=80;86;90"
+                   "-DCMAKE_CUDA_HOST_COMPILER=gcc")
+                  #$flags))
+       ((#:phases phases)
+        #~(modify-phases #$phases
+            (add-before 'configure 'set-cuda-host-compiler
+              (lambda* (#:key inputs #:allow-other-keys)
+                (setenv "CUDAHOSTCXX"
+                        (search-input-file inputs "/bin/g++"))))))))))
+
 
 siconos-devel
