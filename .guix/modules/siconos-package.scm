@@ -117,17 +117,6 @@ problems.")
                 (setenv "SOURCE_DATE_EPOCH" "315532800")))
             (add-after 'unpack 'some-quick-patches
               (lambda _
-                (substitute* "cmake/fclib_setup.cmake"
-                  ;; compiler specfication fails under guix, but it is not needed.
-                  (("target_compile_options\\(fclib INTERFACE")
-                   "message(STATUS \"pffff.\" ")
-                  (("\\$<\\$<CXX_COMPILER_ID")
-                   "#")
-                  ;; fclib config not found.
-                  (("find_package\\(FCLIB 3.0.0 CONFIG REQUIRED\\)")
-                   "find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})"))
-                
                 ;; compiler specification not needed.
                 (substitute* "siconos-config.cmake.in"
                   (("set\\(CMAKE_CXX_COMPILER @CMAKE_CXX_COMPILER@\\)")
@@ -232,21 +221,12 @@ Mechanics, and Computer Graphics.")
               (prepend cuda)))
     (arguments
      (substitute-keyword-arguments (package-arguments siconos-devel)
-       ((#:validate-runpath? _ #f)
-        #false)
        ((#:configure-flags flags '())
         #~(append (list
                    "-DCMAKE_CXX_COMPILER=clang++"
                    "-DWITH_CUDA=1"
                    "-DCMAKE_CUDA_ARCHITECTURES=80;86;90"
                    "-DCMAKE_CUDA_HOST_COMPILER=gcc")
-                  #$flags))
-       ((#:phases phases)
-        #~(modify-phases #$phases
-            (add-before 'configure 'set-cuda-host-compiler
-              (lambda* (#:key inputs #:allow-other-keys)
-                (setenv "CUDAHOSTCXX"
-                        (search-input-file inputs "/bin/g++"))))))))))
-
+                  #$flags))))))
 
 siconos-devel
