@@ -153,6 +153,7 @@ problems.")
                   (("new_test\\(SOURCES CableDSTest.cpp")
                    "# new_test(SOURCES CableDSTest.cpp"))))
 
+                ;; wrap siconos file
             	    (add-after 'install 'wrap-python
               (assoc-ref py:%standard-phases 'wrap))
 	      	    )))
