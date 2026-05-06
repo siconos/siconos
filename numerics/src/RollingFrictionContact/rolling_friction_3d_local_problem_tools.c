@@ -79,8 +79,6 @@ RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(
 void rolling_friction_3d_local_problem_free(RollingFrictionContactProblem* localproblem,
                                      RollingFrictionContactProblem* problem) {
 
-  printf("rolling_friction_3d_local_problem_free %i \n", problem->M->storageType);
-
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
