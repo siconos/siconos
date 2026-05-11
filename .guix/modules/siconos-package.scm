@@ -213,11 +213,11 @@ Mechanics, and Computer Graphics.")
     (inherit siconos-devel)
     (name "siconos-devel-cuda")
     (native-inputs (modify-inputs (package-native-inputs siconos-devel)
-                     ;; prepend gcc-toolchain-13 to ensure it takes
+                     ;; prepend gcc-toolchain-14 to ensure it takes
                      ;; precedence for cuda compilation, as cuda
                      ;; requires matching host compiler and standard
                      ;; library versions, with append it fails here.
-                     (prepend gcc-toolchain-13)))
+                     (prepend gcc-toolchain-14)))
     (inputs (modify-inputs (package-inputs siconos-devel)
               (prepend cuda)))
     (arguments
@@ -225,6 +225,7 @@ Mechanics, and Computer Graphics.")
        ((#:configure-flags flags '())
         #~(append (list
                    "-DCMAKE_CXX_COMPILER=clang++"
+                   "-DWITH_GPU=1"
                    "-DWITH_CUDA=1"
                    "-DCMAKE_CUDA_ARCHITECTURES=80;86;90"
                    "-DCMAKE_CUDA_HOST_COMPILER=gcc")

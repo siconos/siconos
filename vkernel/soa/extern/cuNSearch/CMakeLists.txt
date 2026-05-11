@@ -69,8 +69,7 @@ else()
 	add_library(cuNSearch STATIC ${INCLUDE_HEADERS} ${HEADER_FILES} ${SOURCE_FILES})
 endif()
 
-
-set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCHITECTURES}")
+set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}")
 
 include(GenerateExportHeader)
 generate_export_header(cuNSearch
