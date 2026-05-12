@@ -701,7 +701,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
              "Parallel version of FC2D_NSGS (OpenMP, with permutation)")
 #endif
-#if defined(SICONOS_CUDA) && defined(SICONOS_PETSC)
+#if defined(WITH_CUDA) && defined(SICONOS_PETSC)
     .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA,
            "GPU implementation of FC2D_NSGS")
     .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY,
