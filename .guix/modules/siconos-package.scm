@@ -167,13 +167,14 @@ problems.")
                          python-lxml
                          python-pytest
                          swig))
-      (inputs (list python hdf5-parallel-openmpi))
+      (inputs (list python))
       (propagated-inputs (list boost
                                bullet
                                eigen
                                fclib-devel
                                fmt
                                gmp
+                               hdf5-parallel-openmpi
                                lapack
                                nlohmann-json
                                openblas
