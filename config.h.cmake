@@ -75,6 +75,10 @@ Example : if cmake is executed with WITH_MPI=ON
 // - mpi part -
 #cmakedefine SICONOS_HAS_MPI
 
+// - cuda
+#cmakedefine WITH_GPU
+#cmakedefine WITH_CUDA
+
 // - mumps solver -
 #cmakedefine WITH_MUMPS
 
