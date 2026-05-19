@@ -413,7 +413,7 @@ int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_direct(
   // double error = rolling_friction_3d_compute_local_error(localproblem, R);
   // printf("New local error = %e\n", error);
   if (iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] == 0)
-    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver", "cone",
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "rolling_friction_3d_nsn", "cone",
                             "it", "|dR|", "residu", "error", "tol");
   numerics_printf_verbose(
       2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "rolling_friction_3d_nsn",
