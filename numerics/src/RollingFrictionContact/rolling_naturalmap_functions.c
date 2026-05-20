@@ -132,11 +132,12 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
       double H[25];
       /* //zero5x5(H); */
-      // unsigned int where2 =
+      //unsigned int where2 =
       subdifferentialProjectionOnRollingCone(H, RV, mu, mur);
+      //printf("where2 ");display_status_rolling_cone(where2);
       DEBUG_EXPR_WE(printf("H:"); display5x5(H););
 
-      // A = rho * (I+D) * H
+      // A =  H * rho * (I+D)
 
       // B = rho * (I+D) we use B for storage
       zero5x5(B00);
