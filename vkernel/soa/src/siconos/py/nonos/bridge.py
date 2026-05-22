@@ -9,6 +9,7 @@ def array(l):
     return np.array(l, dtype=np.float64)
 
 class Stored():
+    _data = None
 
     @classmethod
     def setStorage(cls, data):
