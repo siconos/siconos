@@ -135,10 +135,7 @@ class SpaceFilter(Stored):
 
             self._initialized = True
 
-        if step <= 2:
-            self._ngbh.update(step)
-        else:
-            self._ngbh.update(step+1)
+        self._ngbh.update(step)
 
         self._ngbh.search()
         self._handle.update_index_set0(step);
