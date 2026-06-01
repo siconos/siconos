@@ -1121,6 +1121,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
   for (std::shared_ptr<FiniteElement> fe : elements()) {
     if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3) {
       siconos::algebra::SiconosDenseMatrix Be{fe->dimStress(), fe->ndof()};
+      Be.setZero();
       computeBeamElementaryBMatrix_direct(*fe, Be, mat);
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
       elem_cnt++;
@@ -1128,6 +1129,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
       auto dimStress =
           siconos::algebra::to_index(fe->ndofPerNode() * (fe->ndofPerNode() + 1) / 2);
       siconos::algebra::SiconosDenseMatrix Be{dimStress, fe->ndof()};
+      Be.setZero();
       const Material& material = mat.at(fe->mElement()->tags(0));
       computeElementaryBMatrix_direct(*fe, Be, material.thickness());
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
@@ -1159,6 +1161,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         // D is diagonal
         double c1 = 1. / (E * A * length);
         double c2 = 1. / (0.5 * E * I * length);
+
         siconos::algebra::SiconosMatrix33Diagonal Dinv{c1, c2, c2};
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 
@@ -1178,7 +1181,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
       }
       elem_cnt++;
     }
-
   } else if (dim == 3) {
     /* loop over the elements */
     for (auto fe : elements()) {
