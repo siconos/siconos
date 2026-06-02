@@ -212,6 +212,8 @@ static decltype(auto) in_formatter(H&& h, T&& in_value)
 template <typename T>
 struct handles_wrap {
   T handles;
+
+  handles_wrap(T&& hs) : handles(std::move(hs)) {}
 };
 
 using namespace boost::hana::literals;

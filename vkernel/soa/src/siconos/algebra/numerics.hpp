@@ -82,7 +82,12 @@ struct mat : any_mat {
       }
     }
     if (_mt) {
-      _mt = NM_free(_mt);
+      if (_view) {
+        _mt = nullptr;
+      }
+      else {
+        _mt = NM_free(_mt);
+      }
     }
     _view = false;
   }
