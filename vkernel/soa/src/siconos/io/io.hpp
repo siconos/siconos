@@ -189,7 +189,7 @@ struct io : item {
         auto hds1 = storage::make_handle(data, ds1);
         auto hds2 = storage::make_handle(data, ds2);
 
-        using vect = std::decay_t<decltype(hds1.q())>; /* in 2D, 3 components:
+        using vect = std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
                                                           translation 2 +
                                                           orientation 1 */
 
@@ -202,8 +202,8 @@ struct io : item {
           auto p0 =
               algebra::get_vector(p0_v, index_ds1); /* in 2D, 2 components */
 
-          vect c1 = {hds1.q()[0], hds1.q()[1], 0.};
-          vect c2 = {hds2.q()[0], hds2.q()[1], 0.};
+          vect c1 = {hds1.q(step)[0], hds1.q(step)[1], 0.};
+          vect c2 = {hds2.q(step)[0], hds2.q(step)[1], 0.};
 
           vect cn;
 

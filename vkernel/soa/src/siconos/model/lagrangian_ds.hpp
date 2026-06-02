@@ -1,7 +1,7 @@
 #pragma once
 
-#include "siconos/model/model_head.hpp"
 #include "siconos/algebra/eigen.hpp"
+#include "siconos/model/model_head.hpp"
 
 namespace siconos::model {
 /**
@@ -45,16 +45,34 @@ struct lagrangian_ds : item {
     using default_interface<Handle>::self;  ///< Inherited self pointer
 
     /// @brief Access mass matrix attribute
-    decltype(auto) mass_matrix() { return attr<"mass_matrix">(*self()); }
+    decltype(auto) mass_matrix()
+    {
+      return attr<"mass_matrix">(*self());
+    }
+
+    decltype(auto) mass_matrix(auto step)
+    {
+      return attr<"mass_matrix">(*self(), step);
+    }
 
     /// @brief Access velocity attribute
-    decltype(auto) velocity() { return attr<"velocity">(*self()); }
+    decltype(auto) velocity()
+    {
+      return attr<"velocity">(*self());
+    }
+
+    decltype(auto) velocity(auto step)
+    {
+      return attr<"velocity">(*self(), step);
+    }
 
     /// @brief Access position attribute
     decltype(auto) q() { return attr<"q">(*self()); }
+    decltype(auto) q(auto step) { return attr<"q">(*self(), step); }
 
     /// @brief Access external forces attribute
     decltype(auto) fext() { return attr<"fext">(*self()); }
+    decltype(auto) fext(auto step) { return attr<"fext">(*self(), step); }
   };
 };
 
