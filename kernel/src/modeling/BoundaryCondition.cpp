@@ -25,7 +25,7 @@
 #include "Tools.hpp"
 
 siconos::modeling::BoundaryCondition::BoundaryCondition(
-    Indices newVelocityIndices,
+    Indices newVelocityIndices, 
     const Eigen::Ref<const siconos::algebra::SiconosVector>& newVelocityValues)
     : velocityIndices_{std::move(newVelocityIndices)},
       prescribedVelocity_(newVelocityValues),

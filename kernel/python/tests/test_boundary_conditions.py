@@ -79,8 +79,30 @@ def test_harmonic_bc_vector():
     assert np.allclose(bc.velocityIndices, [1, 2, 4, 8])
 
 
+def bc_func(time, result):
+    result[0] = time
+    result[:] = np.cos(time)
+
+
+def test_bc_user_defined_functions():
+    velo = np.asarray([1.0, 2.0, 3.0], dtype=np.float64)
+    bc = sm.BoundaryCondition([1, 2, 4], velo)
+    assert bc.size == 3
+    assert np.allclose(bc.prescribedVelocity, velo)
+    assert np.allclose(bc.velocityIndices, [1, 2, 4])
+    bc.setComputePrescribedVelocityFunction(bc_func)
+    bc.computePrescribedVelocity(2.0)
+
+    vec_ref = np.asarray(velo)
+    vec_ref[0] = 2.0
+    vec_ref[:] = np.cos(2.0)
+
+    assert np.allclose(bc.prescribedVelocity, vec_ref)
+
+
 if __name__ == "__main__":
     test_bc_fixed()
     test_bc_with_values()
     test_harmonic_bc_scalar()
     test_harmonic_bc_vector()
+    test_bc_user_defined_functions()
