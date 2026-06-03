@@ -258,6 +258,14 @@ class SecondOrderDS : public DynamicalSystem {
     return reactionToBoundaryConditions_;
   };
 
+  /** get Reaction to  Boundary Conditions
+   *
+   *  \return pointer on a BoundaryConditions
+   */
+  inline siconos::algebra::SiconosVector& reactionToBoundaryConditions_python() {
+    return *reactionToBoundaryConditions_;
+  };
+
   /**
       Allocate memory and lu-factorize the mass of the system.
       Useful for some integrators with system inversion involving the mass

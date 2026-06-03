@@ -174,7 +174,9 @@ void wrap_dynamical_systems(py::module_& m) {
              py::smart_holder>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal)
-      .def("setBoundaryConditions", &siconos::modeling::SecondOrderDS::setBoundaryConditions);
+      .def("setBoundaryConditions", &siconos::modeling::SecondOrderDS::setBoundaryConditions)
+      .def("reactionToBoundaryConditions", &siconos::modeling::SecondOrderDS::reactionToBoundaryConditions_python,
+           py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::LagrangianSparseDS, siconos::modeling::SecondOrderDS,
              py::smart_holder>(m, "LagrangianSparseDS", py::dynamic_attr())
