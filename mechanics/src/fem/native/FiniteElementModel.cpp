@@ -326,10 +326,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatri
 
   } else if (dim == 3) {
     siconos::algebra::SiconosMatrix Me_loc{12, 12};
+    Me_loc.setZero();
     // Axial
     Me_loc(0, 0) = massDensity * A * length * 2 / 6;
     Me_loc(0, 6) = massDensity * A * length * 1 / 6;
-    Me_loc(6, 0) = Me_loc(0, 3);
+    Me_loc(6, 0) = Me_loc(0, 6);
     Me_loc(6, 6) = Me_loc(0, 0);
 
     // Torsional
@@ -629,6 +630,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
   shearOnBend = E * I * 6 / length2;
   shearOnshear = shearing;
   bendOnBend = E * I * 2 / length;
+
   if (dim == 2) {
     siconos::algebra::SiconosMatrix66 Ke_loc = siconos::algebra::SiconosMatrix66::Zero();
 
@@ -1198,6 +1200,10 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         double c2 = 2. / (E * I * length);
         double c3 = 1. / (G * J * length);
         double c4 = 2. / (E * I * length);
+        // double c1 =  (E * A * length);
+        // double c2 = 1./2. * (E * I * length);
+        // double c3 =  (G * J * length);
+        // double c4 = 1./2. * (E * I * length);
         siconos::algebra::SiconosMatrix66Diagonal Dinv{c1, c2, c2, c3, c4, c4};
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 

@@ -115,15 +115,14 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     }
     if (solid->hasExternalForces()) {
       // double conditionningMagicCoeff = (time_step/solid->S()->normInf())/100000;
-      double conditionningMagicCoeff = 1.0;
       // computes Fext(ti)
       solid->computeFext(told);
-      auto coeff =  (1 - _theta);
+      auto coeff =  time_step * (1 - _theta);
       // free_rhs += time_step*(1-_theta) * fext(ti)
       free_rhs.noalias() += coeff * solid->fext();
       // computes Fext(ti+1)
       solid->computeFext(tend);
-      coeff =  _theta;
+      coeff =  time_step * _theta;
       // free_rhs += time_step*_theta * fext(ti+1)
       free_rhs.noalias() += coeff * solid->fext();
     }
