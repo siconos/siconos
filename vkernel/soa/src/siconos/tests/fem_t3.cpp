@@ -23,7 +23,6 @@
 #include "siconos/simul/time_stepping.hpp"
 #include "siconos/simul/topology.hpp"
 #include "siconos/storage/handle.hpp"
-#include "siconos/utils/print.hpp"
 
 namespace siconos::config {
 struct fem_ds : model::elastic_lagrangian_ds {};

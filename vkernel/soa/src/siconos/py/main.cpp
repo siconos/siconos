@@ -1,5 +1,7 @@
 #include "py_head.hpp"
 
+#include <format>
+
 namespace siconos::python::disks {
 data_t make_storage() { return data_t(); };
 }  // namespace siconos::python::disks
@@ -78,7 +80,7 @@ PYBIND11_MODULE(_nonos, m)
     using item_t = typename handle_t::type;
     using index_t = typename handle_t::index_t;
     auto base_index = py::class_<index_t>(
-        disks, fmt::format("index_{}",
+        disks, std::format("index_{}",
                            storage::bind_name<item_t, disks_properties_t>())
                    .c_str());
     if constexpr (match::batch_capable<item_t>) {
@@ -90,7 +92,7 @@ PYBIND11_MODULE(_nonos, m)
           mp::type_c<handle_t>,
           py::class_<handles_wrap<std::vector<handle_t>>>(
               disks,
-              fmt::format("multiple_{}",
+              std::format("multiple_{}",
                           storage::bind_name<item_t, disks_properties_t>())
                   .c_str()));
     }
@@ -126,13 +128,13 @@ PYBIND11_MODULE(_nonos, m)
 
             return dc
                 .def(
-                    fmt::format("{}", astor_name.str.value).c_str(),
+                    std::format("{}", astor_name.str.value).c_str(),
                     [&astor_name](handle_t& h) -> target_type {
                       return out_formatter(h,
                                            storage::prop<astor_name.str>(h));
                     },
                     py::return_value_policy::reference)
-                .def(fmt::format("set_{}", astor_name.str.value).c_str(),
+                .def(std::format("set_{}", astor_name.str.value).c_str(),
                      [&astor_name](handle_t& h, target_type val) {
                        in_formatter(h, storage::prop<astor_name.str>(h)) =
                            in_formatter(h, val);
@@ -156,7 +158,7 @@ PYBIND11_MODULE(_nonos, m)
 
             return hw
                 .def(
-                    fmt::format("multiple_{}", astor_name.str.value).c_str(),
+                    std::format("multiple_{}", astor_name.str.value).c_str(),
                     [&astor_name](
                         handles_wrap<std::vector<handle_t>>& h_multiple) {
                       return ranges::to_vector(
@@ -167,7 +169,7 @@ PYBIND11_MODULE(_nonos, m)
                           }));
                     },
                     py::return_value_policy::reference)
-                .def(fmt::format("set_{}", astor_name.str.value).c_str(),
+                .def(std::format("set_{}", astor_name.str.value).c_str(),
                      [&astor_name](
                          handles_wrap<std::vector<handle_t>>& h_multiple,
                          target_type val) {
@@ -177,7 +179,7 @@ PYBIND11_MODULE(_nonos, m)
                              in_formatter(h, val);
                        });
                      })
-                .def(fmt::format("multiple_set_{}", astor_name.str.value)
+                .def(std::format("multiple_set_{}", astor_name.str.value)
                          .c_str(),
                      [&astor_name](
                          handles_wrap<std::vector<handle_t>>& h_multiple,
@@ -208,13 +210,13 @@ PYBIND11_MODULE(_nonos, m)
                     handle_t{})))>;
             return dc
                 .def(
-                    fmt::format("{}", pattern::attribute_name(a)).c_str(),
+                    std::format("{}", pattern::attribute_name(a)).c_str(),
                     [](handle_t& h) -> attr_value_t {
                       return out_formatter(h, storage::get<A>(h.data(), h));
                     },
                     py::return_value_policy::reference)
                 .def(
-                    fmt::format("{}_at_step", pattern::attribute_name(a))
+                    std::format("{}_at_step", pattern::attribute_name(a))
                         .c_str(),
                     [](handle_t& h, indice_t step) -> attr_value_t {
                       return out_formatter(
@@ -223,12 +225,12 @@ PYBIND11_MODULE(_nonos, m)
                     py::return_value_policy::reference)
 
                 .def(
-                    fmt::format("set_{}", pattern::attribute_name(a)).c_str(),
+                    std::format("set_{}", pattern::attribute_name(a)).c_str(),
                     [](handle_t& h, attr_value_t v) {
                       in_formatter(h, storage::get<A>(h.data(), h)) =
                           in_formatter(h, v);
                     })
-                .def(fmt::format("set_{}_at_step", pattern::attribute_name(a))
+                .def(std::format("set_{}_at_step", pattern::attribute_name(a))
                          .c_str(),
                      [](handle_t& h, attr_value_t v, indice_t step) {
                        in_formatter(h, storage::get<A>(h.data(), step, h)) =
@@ -254,7 +256,7 @@ PYBIND11_MODULE(_nonos, m)
                        return h_multiple.handles;
                      })
                 .def(
-                    fmt::format("multipe_{}", pattern::attribute_name(a))
+                    std::format("multipe_{}", pattern::attribute_name(a))
                         .c_str(),
                     [](handles_wrap<std::vector<handle_t>>& h_multiple) {
                       return ranges::to_vector(
@@ -265,7 +267,7 @@ PYBIND11_MODULE(_nonos, m)
                     },
                     py::return_value_policy::reference)
                 .def(
-                    fmt::format("set_{}", pattern::attribute_name(a)).c_str(),
+                    std::format("set_{}", pattern::attribute_name(a)).c_str(),
                     [](handles_wrap<std::vector<handle_t>>& h_multiple,
                        attr_value_t val) {
                       ranges::for_each(h_multiple.handles, [&val](auto&& h) {
@@ -274,7 +276,7 @@ PYBIND11_MODULE(_nonos, m)
                       });
                     })
                 .def(
-                    fmt::format("multiple_set_{}", pattern::attribute_name(a))
+                    std::format("multiple_set_{}", pattern::attribute_name(a))
                         .c_str(),
                     [](handles_wrap<std::vector<handle_t>>& h_multiple,
                        std::vector<attr_value_t> vs) {
@@ -301,7 +303,7 @@ PYBIND11_MODULE(_nonos, m)
     auto item_name = storage::bind_name<item_t, disks_properties_t>();
 
     disks.def(
-        fmt::format("add_{}", item_name).c_str(),
+        std::format("add_{}", item_name).c_str(),
         [](siconos::python::disks::data_t& data) {
           return siconos::storage::add<item_t>(data());
         },
@@ -311,7 +313,7 @@ PYBIND11_MODULE(_nonos, m)
 
     if constexpr (match::batch_capable<item_t>) {
       disks.def(
-          fmt::format("multiple_add_{}", item_name).c_str(),
+          std::format("multiple_add_{}", item_name).c_str(),
           [](siconos::python::disks::data_t& data, indice_t count) {
             auto r = siconos::storage::add<item_t>(data(), count);
             return handles_wrap<std::vector<handle_t>>{

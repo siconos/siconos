@@ -3,7 +3,6 @@
 #include "siconos/config/config.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/pattern/base.hpp"
-#include "siconos/utils/print.hpp"
 
 using namespace siconos;
 

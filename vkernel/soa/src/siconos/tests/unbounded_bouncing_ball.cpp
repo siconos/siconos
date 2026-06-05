@@ -1,6 +1,8 @@
 
 #include "siconos/siconos.hpp"
-#include "siconos/utils/print.hpp"
+
+#include <fstream>
+#include <print>
 
 namespace siconos::config {
 using ball = model::lagrangian_ds;
@@ -49,7 +51,7 @@ int main(int argc, char* argv[])
   double m = 1.;               // Ball mass
   double g = 9.81;             // Gravity
 
-  print("====> Model loading ...\n");
+  std::print("====> Model loading ...\n");
 
   // --------------------------
   // -- The dynamical_system --
@@ -120,9 +122,9 @@ int main(int argc, char* argv[])
   // fix this for constant fext
   simulation.initialize();
 
-  auto out = fmt::output_file("result.dat");
+  std::ofstream result_file("result.dat");
 
-  out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
             simulation.current_step() * simulation.time_step(),
             storage::attr<"q">(ball, simulation.current_step())(0),
             storage::attr<"velocity">(ball, simulation.current_step())(0), 0.,
@@ -143,7 +145,7 @@ int main(int argc, char* argv[])
       lambda = 0;
     }
 
-    out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+    std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
               simulation.current_step() * simulation.time_step(),
               storage::attr<"q">(ball, simulation.current_step())(0),
               storage::attr<"velocity">(ball, simulation.current_step())(0),

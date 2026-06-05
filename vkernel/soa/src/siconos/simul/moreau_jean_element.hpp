@@ -1,12 +1,13 @@
 #pragma once
 
-#include <concepts>
 
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
-#include "siconos/model/lagrangian_r.hpp"
-#include "siconos/simul/topology.hpp"
 #include "siconos/utils/variant.hpp"
+#include "siconos/model/lagrangian_r.hpp"
+
+#include <fstream>
+#include <print>
 
 namespace siconos::simul {
 template <typename System, typename Inter, typename OsiAssembled>
@@ -685,13 +686,13 @@ struct moreau_jean_element : item {
         }
       }
 
-      print(
+      std::print(
           "  [compute_active_interactions] total number of ds: {}, total "
           "number of "
           "interactions: {}\n",
           std::size(involveds), std::size(activations));
 
-      print(
+      std::print(
           "  [compute_active_interactions] number of involved ds:{}, "
           "number of "
           "activated interactions: {}\n",

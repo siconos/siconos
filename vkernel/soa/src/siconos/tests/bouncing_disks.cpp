@@ -1,5 +1,7 @@
+#include <fstream>
+#include <print>
+
 #include "siconos/siconos.hpp"
-#include "siconos/utils/print.hpp"
 
 namespace siconos::config {
 using disk = model::lagrangian_ds;
@@ -81,7 +83,7 @@ int main(int argc, char* argv[])
 
   unsigned int ndisks = 3;
 
-  print("====> Model loading ...\n");
+  std::print("====> Model loading ...\n");
 
   // --------------------------
   // -- The dynamical_system --
@@ -105,10 +107,6 @@ int main(int argc, char* argv[])
     // -- Set external forces (weight) --
     disk.fext() = {0., -m * g, 0.};
     //  d2.fext() = {-m * g, 0., 0.};
-  }
-
-  for (auto disk : disks) {
-    print("disk:{} , disk.q()={}\n", disk.index().value(), disk.q()[0]);
   }
 
   // ------------------
@@ -180,23 +178,21 @@ int main(int argc, char* argv[])
   auto disk1 = (disks | view::take(1)).front();
   auto disk2 = (disks | view::take(2)).back();
 
-  print("disk1:{}, disk2:{} disk1.q()={}, disk2.q()={}\n",
-        disk1.index().value(), disk2.index().value(), disk1.q(), disk2.q());
-
   // fix this for constant fext
   simulation.initialize();
 
-  auto out = fmt::output_file("result-many.dat");
+  std::fstream result_file("result-many.dat");
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
   // std::ofstream cout("result.dat");
-  out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-            simulation.current_step() * simulation.time_step(),
-            storage::attr<"q">(disk1, simulation.current_step())(1),
-            storage::attr<"q">(disk2, simulation.current_step())(1),
-            storage::attr<"velocity">(disk1, simulation.current_step())(1),
-            storage::attr<"velocity">(disk2, simulation.current_step())(1),
-            0., 0.);
+  std::print(result_file,
+             "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+             simulation.current_step() * simulation.time_step(),
+             storage::attr<"q">(disk1, simulation.current_step())(1),
+             storage::attr<"q">(disk2, simulation.current_step())(1),
+             storage::attr<"velocity">(disk1, simulation.current_step())(1),
+             storage::attr<"velocity">(disk2, simulation.current_step())(1),
+             0., 0.);
 
   // auto& vds = storage::prop_values<config::interaction, "vd">(
   //     data, simulation.current_step());
@@ -222,13 +218,14 @@ int main(int argc, char* argv[])
       lambda = 0;
     }
 
-    out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(disk1, simulation.current_step())(1),
-              storage::attr<"q">(disk2, simulation.current_step())(1),
-              storage::attr<"velocity">(disk1, simulation.current_step())(1),
-              storage::attr<"velocity">(disk2, simulation.current_step())(1),
-              p0, lambda);
+    std::print(result_file,
+               "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+               simulation.current_step() * simulation.time_step(),
+               storage::attr<"q">(disk1, simulation.current_step())(1),
+               storage::attr<"q">(disk2, simulation.current_step())(1),
+               storage::attr<"velocity">(disk1, simulation.current_step())(1),
+               storage::attr<"velocity">(disk2, simulation.current_step())(1),
+               p0, lambda);
   }
   //  io::close(fd);
 }

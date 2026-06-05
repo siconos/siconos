@@ -1,5 +1,7 @@
 #include "siconos/siconos.hpp"
-#include "siconos/utils/print.hpp"
+
+#include <fstream>
+#include <print>
 
 namespace siconos::config {
 

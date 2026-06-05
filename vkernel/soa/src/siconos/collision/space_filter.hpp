@@ -14,7 +14,6 @@
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/storage.hpp"
-#include "siconos/utils/print.hpp"
 #include "siconos/utils/variant.hpp"
 
 namespace std {

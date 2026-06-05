@@ -1,7 +1,6 @@
 #pragma once
 
 #include "siconos/simul/simul_head.hpp"
-#include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
 
 namespace siconos::simul {

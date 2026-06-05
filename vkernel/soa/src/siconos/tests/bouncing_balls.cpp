@@ -1,9 +1,10 @@
 
 #include <chrono>
 #include <numeric>
+#include <fstream>
+#include <print>
 
 #include "siconos/siconos.hpp"
-#include "siconos/utils/print.hpp"
 
 namespace siconos::config {
 using ball = model::lagrangian_ds;
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
   double g = 9.81;             // Gravity
 
   unsigned int nballs = 10;
-  print("====> Model loading ...\n");
+  std::print("====> Model loading ...\n");
 
   // ---------------------------
   // -- The dynamical_systems --
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
   }
 
   for (auto ball : storage::handles<config::ball>(data, 0)) {
-    print("ball:{} , ball.q()={}\n", ball.index().value(), ball.q()[0]);
+    std::print("ball:{} , ball.q()={}\n", ball.index().value(), ball.q()[0]);
   }
   // ------------------
   // -- The relation --
@@ -129,8 +130,8 @@ int main(int argc, char* argv[])
   //    });
 
   for (auto [ball1, ball2] : view::zip(balls, balls | view::drop(1))) {
-    print("new interaction ball<->ball : {} {}\n", ball1.index().value(),
-          ball2.index().value());
+    std::print("new interaction ball<->ball : {} {}\n", ball1.index().value(),
+               ball2.index().value());
     auto interaction = simulation.topology().link(ball1, ball2);
     //    interaction.h_matrix1() << -1., 0., 0., 0., 1., -radius;
     //    interaction.h_matrix2() << 1., 0., 0., 0., 1., -radius;
@@ -148,21 +149,19 @@ int main(int argc, char* argv[])
   auto ball1 = (balls | view::take(1)).front();
   auto ball2 = (balls | view::take(2)).back();
 
-  print("ball1:{}, ball2:{} ball1.q()={}, ball2.q()={}\n",
-        ball1.index().value(), ball2.index().value(), ball1.q(), ball2.q());
-
   // iteration matrix & h_matrices
   simulation.initialize();
 
-  auto out = fmt::output_file("result-many.dat");
+  std::ofstream result_file("result-many.dat");
 
-  out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-            simulation.current_step() * simulation.time_step(),
-            storage::attr<"q">(ball1, simulation.current_step())(0),
-            storage::attr<"q">(ball2, simulation.current_step())(0),
-            storage::attr<"velocity">(ball1, simulation.current_step())(0),
-            storage::attr<"velocity">(ball2, simulation.current_step())(0),
-            0., 0.);
+  std::print(result_file,
+             "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+             simulation.current_step() * simulation.time_step(),
+             storage::attr<"q">(ball1, simulation.current_step())(0),
+             storage::attr<"q">(ball2, simulation.current_step())(0),
+             storage::attr<"velocity">(ball1, simulation.current_step())(0),
+             storage::attr<"velocity">(ball2, simulation.current_step())(0),
+             0., 0.);
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
@@ -199,21 +198,21 @@ int main(int argc, char* argv[])
       lambda2 = 0;
     }
 
-    out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(ball1, simulation.current_step())(0),
-              storage::attr<"q">(ball2, simulation.current_step())(0),
-              storage::attr<"velocity">(ball1, simulation.current_step())(0),
-              storage::attr<"velocity">(ball2, simulation.current_step())(0),
-              p01, p02, lambda1, lambda2);
+    std::print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+               simulation.current_step() * simulation.time_step(),
+               storage::attr<"q">(ball1, simulation.current_step())(0),
+               storage::attr<"q">(ball2, simulation.current_step())(0),
+               storage::attr<"velocity">(ball1, simulation.current_step())(0),
+               storage::attr<"velocity">(ball2, simulation.current_step())(0),
+               p01, p02, lambda1, lambda2);
   }
 
-  print("Computation Time \n");
+  std::print("Computation Time \n");
   end = std::chrono::system_clock::now();
   int elapsed =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
           .count();
-  print("Computation time : {} ms \n", elapsed);
+  std::print("Computation time : {} ms \n", elapsed);
 
   //  io::close(fd);
 }

@@ -10,4 +10,6 @@ if(WITH_TESTING)
   begin_tests(src/siconos/storage/tests DEPS "vkernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES StorageTest.cpp ${SIMPLE_TEST_MAIN})
   #end_tests()
+
+  set_target_properties(RtOsiTest PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
 endif()

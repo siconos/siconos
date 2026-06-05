@@ -8,7 +8,6 @@
 #include "siconos/simul/moreau_jean_element.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
-#include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
 #include "siconos/utils/variant.hpp"
 

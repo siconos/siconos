@@ -1,5 +1,8 @@
 #pragma once
 
+#include "siconos/algebra/algebra.hpp"
+#include "siconos/simul/simul_head.hpp"
+
 #include <FrictionContactProblem.h>
 #include <FrictionContact_options.h>
 #include <LinearComplementarityProblem.h>
@@ -8,10 +11,7 @@
 #include <SolverOptions.h>
 #include <fclib_interface.h>
 #include <lcp_cst.h>
-
-#include "siconos/algebra/algebra.hpp"
-#include "siconos/simul/simul_head.hpp"
-#include "siconos/utils/print.hpp"
+#include <format>
 
 namespace siconos {
 
@@ -163,8 +163,6 @@ struct one_step_nonsmooth_problem : item {
                algebra::vec<V>& z_vec, algebra::vec<V>& w_vec,
                algebra::vec<V>& mu_vec)  // mu_vec can be empty for LCP
     {
-      using fmt::print;
-
       numerics_set_verbose(storage::attr<"verbose">(*self()));
       if constexpr (std::derived_from<Formulation,
                                       LinearComplementarityProblem>) {
@@ -209,7 +207,8 @@ struct one_step_nonsmooth_problem : item {
             auto n_format_string = std::to_string(solver_maxiter).length();
 
             // format alone ambiguous for clang-19
-            auto iter_filename = fmt::format(
+            auto iter_filename =
+              std::format(
                 "{}-i{:0{}d}-{}-{}.hdf5", trace_params().filename(),
                 solver_maxiter, n_format_string, size0(w_mat),
                 trace_params().counter());
