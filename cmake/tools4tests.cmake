@@ -241,7 +241,7 @@ endif()
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
 
-  if(WITH_MPI)
+  if(SICONOS_HAS_MPI)
     target_include_directories(${TEST_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
     target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
   endif()
@@ -374,7 +374,7 @@ function(build_plugin)
   if(NOT WITH_CXX)
     set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
   endif(NOT WITH_CXX)
-  if(WITH_MPI)
+  if(SICONOS_HAS_MPI)
     # Note FP : temporary fix, to deal with PRIVATE deps of some components.
     # This will be reviewed later.
     target_include_directories(${plug_name} PRIVATE ${MPI_C_INCLUDE_DIRS})

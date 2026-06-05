@@ -24,30 +24,28 @@
 #include <stdlib.h>  // for free, malloc
 #include <string.h>  // for NULL, memcpy
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ONECON...
-#include "GMPReduced.h"                    // for gmp_as_mlcp, gmp_reduced_e...
-#include "GenericMechanicalProblem.h"      // for listNumericsProblem, Gener...
-#include "GenericMechanical_Solvers.h"     // for gmp_compute_error, gmp_driver
-#include "GenericMechanical_cst.h"         // for SICONOS_GENERIC_MECHANICAL...
-#include "LCP_Solvers.h"                   // for lcp_compute_error_only
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NonSmoothDrivers.h"              // for fc3d_driver, linearComplem...
-#include "NumericsFwd.h"                   // for listNumericsProblem, Solve...
-#include "NumericsMatrix.h"                // for NM_row_prod_no_diag, NM_ex...
-#include "RelayProblem.h"                  // for RelayProblem
-#include "Relay_Solvers.h"                 // for relay_compute_error
-#include "SiconosBlas.h"                   // for cblas_dnrm2, cblas_dgemv
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "fc2d_compute_error.h"            // for fc3d_unitary_compute_and_a...
-#include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
-#include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
+#include "FrictionContactProblem.h"     // IWYU pragma: keep
+#include "FrictionContact_options.h"    // for SICONOS_FRICTION_3D_ONECON...
+#include "GMPReduced.h"                 // for gmp_as_mlcp, gmp_reduced_e...
+#include "GenericMechanicalProblem.h"   // for listNumericsProblem, Gener...
+#include "GenericMechanical_Solvers.h"  // for gmp_compute_error, gmp_driver
+#include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICAL...
+#include "LCP_Solvers.h"                // for lcp_compute_error_only
+#include "NonSmoothDrivers.h"           // for fc3d_driver, linearComplem...
+#include "NumericsFwd.h"                // for listNumericsProblem, Solve...
+#include "NumericsMatrix.h"             // for NM_row_prod_no_diag, NM_ex...
+#include "Relay_Solvers.h"              // for relay_compute_error
+#include "SiconosBlas.h"                // for cblas_dnrm2, cblas_dgemv
+#include "SolverOptions.h"              // for SolverOptions, solver_opti...
+#include "fc2d_compute_error.h"         // for fc3d_unitary_compute_and_a...
+#include "fc3d_compute_error.h"         // for fc3d_unitary_compute_and_a...
+#include "lcp_cst.h"                    // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
+#include "Relay_options.h"  // for SICONOS_RELAY_LEMKE
 #include "numerics_errors.h"
-#include "Relay_options.h"                     // for SICONOS_RELAY_LEMKE
+#include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -227,8 +225,8 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
 static int SScmp = 0;
 static int SScmpTotal = 0;
 #endif
-//#define GMP_WRITE_PRB
-// static double sCoefLS=1.0;
+// #define GMP_WRITE_PRB
+//  static double sCoefLS=1.0;
 void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       int* info, SolverOptions* options) {
   DEBUG_BEGIN("gmp_gauss_seidel(...)\n");
@@ -275,11 +273,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
 
-
-
-
-
-  
   while (it < iterMax && tolViolate) {
 #ifdef GENERICMECHANICAL_DEBUG_CMP
     SScmpTotal++;
@@ -558,11 +551,11 @@ void gmp_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 4;
     options->internalSolvers = calloc(4, sizeof(SolverOptions*));
+  } else {
+    for (int i = 0; i < 4; ++i) solver_options_delete(options->internalSolvers[i]);
   }
   assert(options->numberOfInternalSolvers == 4);
 
-
-  
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
   // options->internalSolvers[1] =
   // solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
@@ -631,12 +624,9 @@ static void gmp_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_GENERIC_MECHANICAL_NSGS, "GMP_NSGS",
-                "Non-smooth Gauss-Seidel for Generic Mechanical Problem",
-                gmp_init_wrap,
-                gmp_solve_wrap,
-                gmp_free_wrap,
-                NULL,  /* error function */
-                gmp_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                "Non-smooth Gauss-Seidel for Generic Mechanical Problem", gmp_init_wrap,
+                gmp_solve_wrap, gmp_free_wrap, NULL, /* error function */
+                gmp_set_default,                     /* set_default */
+                1000,                                /* default_max_iter */
+                1e-4,                                /* default_tol */
+                0 /* is_local_solver */);

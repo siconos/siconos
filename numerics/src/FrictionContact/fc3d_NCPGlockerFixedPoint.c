@@ -16,23 +16,19 @@
  * limitations under the License.
  */
 
-#include "fc3d_short_names.h"
 #include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
 
+#include <assert.h>
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_NCPGlocke...
 #include "NCP_FixedP.h"         // for Fixe
 #include "NumericsFwd.h"        // for SolverOptions, FrictionContac...
 #include "SiconosBlas.h"        // for cblas_dcopy
-#include "SolverOptions.h"      // for SolverOptions
 #include "fc3d_2NCP_Glocker.h"  // for NCPGlocker_initialize, comput...
-#include "fc3d_Solvers.h"       // for FreeSolverPtr, PostSolverPtr
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "fc3d_short_names.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /* Pointer to function used to update the solver, to formalize the local problem for example.
  */
@@ -109,9 +105,7 @@ double fc3d_FixedP_computeError(int contact, int dimReaction, double* reaction, 
  * This is a one-contact solver used within NSGS
  */
 
-static void fc3d_ncpg_fp_set_default(SolverOptions* options) {
-  /* No specific defaults */
-}
+static void fc3d_ncpg_fp_set_default(SolverOptions* options) { /* No specific defaults */ }
 
 static int fc3d_ncpg_fp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -119,19 +113,14 @@ static int fc3d_ncpg_fp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_ncpg_fp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_ncpg_fp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   SolverOptions* options) {
   (void)velocity;
   return fc3d_FixedP_solve((FrictionContactProblem*)problem, reaction, options);
 }
 
-REGISTER_SOLVER(FC3D_NCPG_FP,
-                "FC3D_NCPG_FP",
-                "NCP Glocker Fixed Point (local solver)",
-                fc3d_ncpg_fp_init_wrap,
-                fc3d_ncpg_fp_solve_wrap,
-                NULL,
-                NULL,
-                fc3d_ncpg_fp_set_default,
-                100,    /* default_max_iter */
-                1e-4,   /* default_tol */
-                1)      /* is_local */
+REGISTER_SOLVER(FC3D_NCPG_FP, "FC3D_NCPG_FP", "NCP Glocker Fixed Point (local solver)",
+                fc3d_ncpg_fp_init_wrap, fc3d_ncpg_fp_solve_wrap, NULL, NULL,
+                fc3d_ncpg_fp_set_default, 100, /* default_max_iter */
+                1e-4,                          /* default_tol */
+                1)                             /* is_local */

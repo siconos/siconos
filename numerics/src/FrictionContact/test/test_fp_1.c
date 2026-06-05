@@ -18,7 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_ACLMFP
+#include "FrictionContact_options.h"     // for SICONOS_FRICTION_3D_ACLMFP
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SOCLCP_cst.h"                  // for SICONOS_SOCLCP_VI_EG, SICONO...
 #include "SolverOptions.h"               // for solver_options_create, Solve...

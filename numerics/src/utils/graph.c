@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "numerics_errors.h"
 
 struct node* create_node(int v) {
   struct node* newNode = malloc(sizeof(struct node));
@@ -36,8 +35,8 @@ struct connectedcomponent_node* create_node_connectedcomponent(struct node* v) {
   return newNode;
 }
 
-int len_connectedcomponent(struct node* connectedcomponent) {
-  int len = 0;
+size_t len_connectedcomponent(struct node* connectedcomponent) {
+  size_t len = 0;
   struct node* temp = connectedcomponent;
   while (temp != NULL) {
     temp = temp->next;

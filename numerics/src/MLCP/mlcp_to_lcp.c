@@ -22,11 +22,9 @@
 #include <stdlib.h>  // for malloc, exit, free
 #include <string.h>
 
-#include "LinearComplementarityProblem.h"       // for LinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_...
 #include "numerics_verbose.h"                   // for verbose */
-#include "numerics_errors.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -39,6 +37,7 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
     numerics_printf_verbose(0, "mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
     MixedLinearComplementarityProblem* mlcp_abcd =
         mixedLinearComplementarity_fromMtoABCD(problem);
+    mixedLinearComplementarity_free(problem);
     // mixedLinearComplementarity_display(mlcp_abcd);
     problem = mlcp_abcd;
     // exit(EXIT_FAILURE);
@@ -60,6 +59,7 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   if (info) {
     numerics_printf_verbose(0, "mlcp_to_lcp: NM_gesv_expert_multiple_rhs failed");
     free(AinvC);
+    NM_free(A);
     return NULL;
   }
 
@@ -95,10 +95,13 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   memcpy(lcp->q, problem->b, m * sizeof(double));
   NM_gemv(-1.0, D, Ainva, 1.0, lcp->q);
 
-  NM_clear(A);
   D->matrix0 = NULL;
-  NM_clear(D);
+  NM_free(D);
+  nm_AinvC->matrix0 = NULL;
+  NM_free(nm_AinvC);
+  NM_free(A);
+  free(AinvC);
+  free(Ainva);
 
-  NM_clear(nm_AinvC);
   return lcp;
 }

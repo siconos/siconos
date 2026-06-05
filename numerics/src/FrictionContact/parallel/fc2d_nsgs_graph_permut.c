@@ -420,12 +420,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
-#pragma omp parallel default(none)                                                      \
-    private(pos, local_problem, localreaction, light_error_2, index1_data, index2_data) \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)    \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,    \
-               has_not_converged, norm_q, w, itermax)                                   \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,    \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2, \
+                                               index1_data, index2_data)                     \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)         \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,         \
+               has_not_converged, norm_q, w, itermax)                                        \
+    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,         \
                blocks_contiguous)
     {
       // Allocate local problem
@@ -577,11 +577,11 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     double light_error_sum = 0.;
     double localreaction[2];
 
-#pragma omp parallel default(none)                                                   \
-    private(pos, local_problem, localreaction, index1_data, index2_data)             \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter, \
-               blocks_contiguous)                                                    \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, index1_data, \
+                                               index2_data)                                \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter,       \
+               blocks_contiguous)                                                          \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,       \
                has_not_converged, norm_q, w, itermax)
     {
       // Allocate local problem
@@ -737,18 +737,16 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   free(blocks_contiguous);
 
   if (SBM_problem != NULL) {
-    SBM_clear(SBM_problem);
-    free(SBM_problem);
-    SBM_problem = NULL;
+    SBM_free(SBM_problem, SBM_FREE_ALL);
     problem->M->matrix1 = NULL;
   }
 
-  SBMfree(SBM_col_permuted, 0);  // do not free blocks on this one
-  SBM_clear(SBM_permuted);       // free blocks because they were copied
+  SBM_free(SBM_col_permuted, SBM_FREE_NONE);  // do not free blocks on this one
+  SBM_free(SBM_permuted, SBM_FREE_ALL);      // free blocks because they were copied
   free(SBM_col_permuted);
-  free(SBM_permuted);
   free(q_permuted);
   free(mu_permuted);
+
 }
 
 /* ===========================================================================

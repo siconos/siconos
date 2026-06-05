@@ -25,9 +25,9 @@
 #include "NumericsArrays.h"  // for uint_shuffle
 #include "NumericsFwd.h"     // for SolverOptions
 #include "NumericsMatrix.h"
-#include "PlasticityProblem.h"   // for PlasticityProblem
-#include "NumericsVector.h"
 #include "NumericsSparseMatrix.h"
+#include "NumericsVector.h"
+#include "PlasticityProblem.h"   // for PlasticityProblem
 #include "Plasticity_options.h"  // for SICONOS_FRICTI...
 #include "SiconosBlas.h"         // for cblas_dnrm2
 #include "SolverOptions.h"       // for SolverOptions
@@ -615,8 +615,8 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
   else {
-    double* light_error_2 = calloc(nc, sizeof(double));
-    
+    double *light_error_2 = calloc(nc, sizeof(double));
+
     /* verbose=1; */
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
@@ -624,7 +624,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
       plasticity_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       unsigned int number_of_freezed_cone = 0;
-      double tmp_criteria1 = tolerance * tolerance/ (nc * nc * 1000);
+      double tmp_criteria1 = tolerance * tolerance / (nc * nc * 1000);
       double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
       if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
@@ -649,9 +649,9 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
           if (freeze_cones[cone] > 0) {
             /* we skip freeze cones */
             freeze_cones[cone] -= 1;
-	    light_error_sum += light_error_2[cone];
+            light_error_sum += light_error_2[cone];
             continue;
-             
+
             continue;
           }
         }
@@ -791,8 +791,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
   /** Free memory **/
 
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_clear_block(problem->M->matrix1);
-    SBM_clear(problem->M->matrix1);
+    SBM_clear(problem->M->matrix1, SBM_FREE_ALL);
     problem->M->matrix1 = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver(problem, localproblem, localsolver_options);
@@ -861,6 +860,8 @@ void plasticity_2d_nsgs_set_default(SolverOptions *options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions *));
+  }else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(PLASTICITY_2D_ONECONE_NSN_GP_HYBRID);

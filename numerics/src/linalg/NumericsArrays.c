@@ -21,6 +21,7 @@
 #include <limits.h>  // for rand
 #include <stdio.h>   // for size_t, printf
 #include <stdlib.h>  // for rand
+
 #include "numerics_errors.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -166,8 +167,26 @@ void uint_swap(unsigned int *a, unsigned int *b) {
 }
 
 /* shuffle an unsigned array */
-void uint_shuffle(unsigned int *a, unsigned int n) {
-  for (unsigned int i = 0; i < n - 1; i++) {
-    uint_swap(&a[i], &a[i + (unsigned int)rand() % (n - i)]);
+void uint_shuffle(unsigned int *a, size_t n) {
+  if (n < 2) return;
+  for (size_t i = 0; i < n - 1; i++) {
+    size_t j = i + (size_t)rand() % (n - i);
+    uint_swap(&a[i], &a[j]);
+  }
+}
+
+/* swap two indices */
+void size_t_swap(size_t *a, size_t *b) {
+  size_t temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+/* shuffle a size_t array */
+void size_t_shuffle(size_t *a, size_t n) {
+  if (n < 2) return;
+  for (size_t i = 0; i < n - 1; i++) {
+    size_t j = i + (size_t)rand() % (n - i);
+    size_t_swap(&a[i], &a[j]);
   }
 }

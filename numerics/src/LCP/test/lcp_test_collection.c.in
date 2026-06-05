@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include <stdio.h>           // for printf
+#include <stdlib.h>
 #include <string.h>          // for strcmp
 #include "lcp_cst.h"         // for SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP_BARD
 #include "lcp_test_utils.h"  // for lcp_test_function
@@ -130,7 +131,7 @@ int main(void)
   int number_of_tests = n_data * n_solvers;
   int out = run_test_collection(collection, number_of_tests, lcp_test_function);
   free_test_collection(collection, number_of_tests);
-
+  free(_data_collection);
   
   return out;
 }

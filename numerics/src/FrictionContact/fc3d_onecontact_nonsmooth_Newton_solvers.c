@@ -22,7 +22,8 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, realloc
 
-#include "AlartCurnierGenerated.h"  // for fc3d_AlartCurn...
+#include "AlartCurnierGenerated.h"   // for fc3d_AlartCurn...
+#include "FrictionContactProblem.h"  // IWYU pragma: keep
 #include "FrictionContact_options.h"
 #include "NSSTools.h"                                 // for max
 #include "NonSmoothNewton.h"                          // for nonSmoothDirec...
@@ -46,6 +47,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
+#include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 
 #ifdef DEBUG_MESSAGES
@@ -87,7 +89,7 @@ static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
   }
 
   /* Compute and store default value of rho value */
-  size_t nc = main_problem->numberOfContacts;
+  size_t nc = to_size_t(main_problem->numberOfContacts);
 
   double avg_rho[3] = {0.0, 0.0, 0.0};
 
@@ -178,7 +180,7 @@ static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
   numerics_printf(
       "fc3d_AC_initialize"
       " Avg. rho value = %e\t%e\t%e\t",
-      avg_rho[0] / nc, avg_rho[1] / nc, avg_rho[2] / nc);
+      avg_rho[0] / (double)nc, avg_rho[1] / (double)nc, avg_rho[2] / (double)nc);
 
   fc3d_local_problem_free(local_p, main_problem);
   return 0;  
@@ -460,7 +462,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   if (options->solverId == OC_NSN || options->solverId == OC_NSN_GP) {
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   } else {
-    int nc = options->dWorkSize / 4;
+    size_t nc = options->dWorkSize / 4;
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
   }
 
@@ -741,7 +743,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   if (options->solverId == OC_NSN || options->solverId == OC_NSN_GP) {
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   } else {
-    int nc = options->dWorkSize / 4;
+    size_t nc = options->dWorkSize / 4;
     rho = &options->dWork[3 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] + nc];
   }
 

@@ -157,7 +157,7 @@ void genericMechanicalProblem_display(GenericMechanicalProblem* pGMP);
  * dim of the linear system, 3 for the fc3d) \ return the localProblem (either lcp,
  * linearSystem of fc3d
  */
-void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size);
+void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, size_t size);
 
 /** returns nonsmooth problem formulation name, from its id number.
  \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE

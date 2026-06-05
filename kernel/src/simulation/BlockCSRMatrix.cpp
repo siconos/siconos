@@ -24,13 +24,10 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NonSmoothLaw.hpp"
-#include "NumericsToolsNamespace.h"  // for SparseBlockStructuredmatrix
+#include "NonSmoothLaw.hpp"          // IWYU pragma: keep
+#include "NumericsToolsNamespace.h"  // IWYU pragma: keep - For SparseBlockStructuredmatrix
 #include "SiconosException.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "Tools.hpp"  // For print
-#include "Topology.hpp"
+#include "Tools.hpp"     // For print
 #include "TypeName.hpp"  // for DS type visitor
 
 // #define DEBUG_STDOUT
@@ -48,10 +45,10 @@ siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(
     : _nr(nRow), _nc{_nr} {
   _blockCSR = std::make_shared<CompressedRowMat>(_nr, _nr);
   _sparseBlockStructuredMatrix = std::make_shared<SparseBlockStructuredMatrix>();
-  _diagsize0 = std::make_shared<std::vector<unsigned int>>(_nr);
-  _diagsize1 = std::make_shared<std::vector<unsigned int>>(_nr);
-  rowPos = std::make_shared<std::vector<unsigned int>>(_nr);
-  colPos = std::make_shared<std::vector<unsigned int>>(_nr);
+  _diagsize0 = std::make_shared<std::vector<std::size_t>>(_nr);
+  _diagsize1 = std::make_shared<std::vector<std::size_t>>(_nr);
+  rowPos = std::make_shared<std::vector<std::size_t>>(_nr);
+  colPos = std::make_shared<std::vector<std::size_t>>(_nr);
 }
 
 // Basic constructor
@@ -84,7 +81,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
-  unsigned int sizeV = 0;
+  std::size_t sizeV = 0;
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
@@ -92,7 +89,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
 
     assert(inter->nonSmoothLaw()->size() > 0);
 
-    sizeV += static_cast<unsigned int>(inter->nonSmoothLaw()->size());
+    sizeV += static_cast<std::size_t>(inter->nonSmoothLaw()->size());
     (*_diagsize0)[indexSet.index(*vi)] = sizeV;
     (*_diagsize1)[indexSet.index(*vi)] = sizeV;
     assert((*_diagsize0)[indexSet.index(*vi)] > 0);
@@ -158,7 +155,7 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
 
   /* here we suppose NewtonEuler with 6 dofs */
   /* it cannot be another case at this point */
-  unsigned int ac;
+  std::size_t ac;
   std::size_t index;
   for (index = 0, ac = 6; index < involvedDS.size(); ++index, ac += 6) {
     (*_diagsize0)[index] = ac;
@@ -230,10 +227,10 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
 // convert _blockCSR to numerics structure
 void siconos::simulation::BlockCSRMatrix::convert() {
   DEBUG_BEGIN("void siconos::simulation::BlockCSRMatrix::convert()\n");
-  _sparseBlockStructuredMatrix->blocknumber0 = static_cast<unsigned int>(_nr);
+  _sparseBlockStructuredMatrix->blocknumber0 = static_cast<std::size_t>(_nr);
   _sparseBlockStructuredMatrix->blocknumber1 =
-      static_cast<unsigned int>(_nr);  // nc not always set
-  _sparseBlockStructuredMatrix->nbblocks = static_cast<unsigned int>((*_blockCSR).nnz());
+      static_cast<std::size_t>(_nr);  // nc not always set
+  _sparseBlockStructuredMatrix->nbblocks = static_cast<std::size_t>((*_blockCSR).nnz());
   // Next copies: pointer links!!
   _sparseBlockStructuredMatrix->blocksize0 = _diagsize0->data();
   _sparseBlockStructuredMatrix->blocksize1 = _diagsize1->data();  // nr = nc

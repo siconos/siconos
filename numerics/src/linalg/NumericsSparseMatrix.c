@@ -173,7 +173,7 @@ NumericsSparseMatrix* NSM_new(void) {
   return p;
 }
 
-NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A) {
+void NSM_clear(NumericsSparseMatrix* A) {
   if (A->linearSolverParams) {
     NSM_linearSolverParams_free(A->linearSolverParams);
     A->linearSolverParams = NULL;
@@ -204,7 +204,13 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A) {
   }
 
   NSM_reset_versions(A);
+}
 
+NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A) {
+  if (A) {
+    NSM_clear(A);
+    free(A);
+  }
   return NULL;
 }
 
@@ -583,17 +589,14 @@ NumericsSparseMatrix* NSM_triplet_eye(size_t size) {
   NumericsSparseMatrix* out = NSM_new();
   out->origin = _origin;
 
-  CSparseMatrix* C = cs_spalloc(size, size, size, 1, 1);
+  out->triplet = cs_spalloc(size, size, size, 1, 1);
 
   for (CS_INT k = 0; k < to_csint(size); k++) {
-    C->nz++;
-    C->i[k] = k;
-    C->p[k] = k;
-    C->x[k] = 1.0;
+    out->triplet->nz++;
+    out->triplet->i[k] = k;
+    out->triplet->p[k] = k;
+    out->triplet->x[k] = 1.0;
   }
-  assert(out->origin == NSM_TRIPLET);
-  out->triplet = C;
-  out->origin = NSM_TRIPLET;
   NSM_inc_version(out, NSM_TRIPLET);
   return out;
 }
@@ -860,7 +863,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       if (!Mcsc) return NULL;
 
       /* We ensure that the matrix is correclty ordered before extraction,
-	 otherwise it leads to uncorrect results    */
+         otherwise it leads to uncorrect results    */
       NSM_fix_csc(Mcsc);
 
       size_t n = csint_to_size_t(Mcsc->n);
@@ -881,7 +884,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       if (!Mcsr) return NULL;
 
       /* We ensure that the matrix is correclty ordered before extraction,
-	 otherwise it leads to uncorrect results    */
+         otherwise it leads to uncorrect results    */
       NSM_fix_csc(Mcsr);
 
       size_t n = csint_to_size_t(Mcsr->n);

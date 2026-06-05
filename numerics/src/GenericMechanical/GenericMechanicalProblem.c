@@ -21,15 +21,15 @@
 #include <assert.h>  // for assert
 #include <stdlib.h>  // for malloc, free, exit, EXIT_F...
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "FrictionContactProblem.h"        // IWYU pragma: keep
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
-#include "RelayProblem.h"                  // for RelayProblem
-#include "SparseBlockMatrix.h"             // for SBMfree, SparseBlockStruct...
+#include "RelayProblem.h"                  // IWYU pragma: keep
+#include "SparseBlockMatrix.h"             // for SBM_free, SparseBlockStruct...
 #include "numerics_verbose.h"              // for check_io
-#include "numerics_errors.h"
+#include "safe_casts.h"
 
-GenericMechanicalProblem* genericMechanicalProblem_new() {
+GenericMechanicalProblem* genericMechanicalProblem_new(void) {
   GenericMechanicalProblem* paux =
       (GenericMechanicalProblem*)malloc(sizeof(GenericMechanicalProblem));
   paux->firstListElem = 0;
@@ -77,22 +77,20 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int 
     if (storageType == NM_DENSE)
       free(pGMP->M->matrix0);
     else
-      SBMfree(pGMP->M->matrix1, NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM);
+      SBM_free(pGMP->M->matrix1, SBM_FREE_ALL);
     free(pGMP->q);
     free(pGMP->M);
   }
-
-  if (level == GMP_FREE_GMP) free(pGMP);
 }
 
-void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
+void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, size_t size) {
   listNumericsProblem* newProblem = (listNumericsProblem*)malloc(sizeof(listNumericsProblem));
   newProblem->nextProblem = 0;
   newProblem->type = problemType;
-  newProblem->size = size;
+  newProblem->size = to_int(size);
   newProblem->error = 0;
   pGMP->size += size;
-  if (size > pGMP->maxLocalSize) pGMP->maxLocalSize = size;
+  if (size > to_size_t(pGMP->maxLocalSize)) pGMP->maxLocalSize = to_int(size);
   if (!pGMP->lastListElem) {
     pGMP->firstListElem = newProblem;
     pGMP->lastListElem = newProblem;
@@ -110,9 +108,9 @@ void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
       pLCP->q = (double*)malloc(size * sizeof(double));
       newProblem->q = pLCP->q;
       pLCP->M->storageType = 0; /*local prb is dense*/
-      pLCP->M->size0 = size;
-      pLCP->M->size1 = size;
-      pLCP->size = size;
+      pLCP->M->size0 = to_int(size);
+      pLCP->M->size1 = to_int(size);
+      pLCP->size = to_int(size);
 
       break;
     }
@@ -123,9 +121,9 @@ void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
       pRelay->q = (double*)malloc(size * sizeof(double));
       newProblem->q = pRelay->q;
       pRelay->M->storageType = 0; /*local prb is dense*/
-      pRelay->M->size0 = size;
-      pRelay->M->size1 = size;
-      pRelay->size = size;
+      pRelay->M->size0 = to_int(size);
+      pRelay->M->size1 = to_int(size);
+      pRelay->size = to_int(size);
       pRelay->lb = (double*)malloc(size * sizeof(double));
       pRelay->ub = (double*)malloc(size * sizeof(double));
 
@@ -143,8 +141,8 @@ void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
       pFC3D->mu = (double*)malloc(sizeof(double));
       pFC3D->M = NM_new();
       pFC3D->M->storageType = 0; /*Local prb is dense*/
-      pFC3D->M->size0 = size;
-      pFC3D->M->size1 = size;
+      pFC3D->M->size0 = to_int(size);
+      pFC3D->M->size1 = to_int(size);
       pFC3D->numberOfContacts = 1;
       pFC3D->q = (double*)malloc(size * sizeof(double));
       pFC3D->dimension = 3;
@@ -157,8 +155,8 @@ void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size) {
       pFC2D->mu = (double*)malloc(sizeof(double));
       pFC2D->M = NM_new();
       pFC2D->M->storageType = 0; /*Local prb is dense*/
-      pFC2D->M->size0 = size;
-      pFC2D->M->size1 = size;
+      pFC2D->M->size0 = to_int(size);
+      pFC2D->M->size1 = to_int(size);
       pFC2D->numberOfContacts = 1;
       pFC2D->q = (double*)malloc(size * sizeof(double));
       pFC2D->dimension = 3;
@@ -211,14 +209,14 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
   GenericMechanicalProblem* problem = genericMechanicalProblem_new();
   size_t nsubProb = 0;
   int prbType = 0;
-  int i, posInX, localSize;
+  size_t posInX, localSize;
   void* prb;
 
   problem->M = NM_new_from_file(file);
   SparseBlockStructuredMatrix* m = problem->M->matrix1;
 
-  problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++) {
+  problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
+  for (int i = 0; i < problem->M->size1; i++) {
     check_io(fscanf(file, "%lf ", problem->q + i));
   }
   nsubProb = m->filled1 - 1;

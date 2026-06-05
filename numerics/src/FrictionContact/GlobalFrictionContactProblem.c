@@ -30,7 +30,8 @@
 #include "io_tools.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for check_io
-#include "sanitizer.h"         // for cblas_dcopy_msan
+#include "safe_casts.h"
+#include "sanitizer.h"  // for cblas_dcopy_msan
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
@@ -85,26 +86,26 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FIL
 
 GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file) {
   GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();
-  int nc = 0, d = 0;
-  int info = check_io(fscanf(file, "%d\n", &d));
-  problem->dimension = d;
-  info = check_io(fscanf(file, "%d\n", &nc));
-  problem->numberOfContacts = nc;
+  size_t nc = 0, d = 0;
+  int info = check_io(fscanf(file, "%zu\n", &d));
+  problem->dimension = to_int(d);
+  info = check_io(fscanf(file, "%zu\n", &nc));
+  problem->numberOfContacts = to_int(nc);
   problem->M = NM_new_from_file(file);
 
   problem->H = NM_new_from_file(file);
 
-  problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
+  problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
   for (int i = 0; i < problem->M->size1; ++i) {
     info = check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
-  problem->b = (double*)malloc(problem->H->size1 * sizeof(double));
+  problem->b = (double*)malloc(to_size_t(problem->H->size1) * sizeof(double));
   for (int i = 0; i < problem->H->size1; ++i) {
     info = check_io(fscanf(file, "%lf ", &(problem->b[i])));
   }
 
   problem->mu = (double*)malloc(nc * sizeof(double));
-  for (int i = 0; i < nc; ++i) {
+  for (size_t i = 0; i < nc; ++i) {
     info = check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
 
@@ -242,9 +243,9 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
     GlobalFrictionContactProblem* problem) {
   if (!problem) return NULL;
 
-  int nc = problem->numberOfContacts;
-  int n = problem->M->size0;
-  int m = 3 * nc;
+  size_t nc = to_size_t(problem->numberOfContacts);
+  size_t n = to_size_t(problem->M->size0);
+  size_t m = 3 * nc;
   GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
@@ -270,11 +271,11 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* pr
                                                 double* reaction, double* globalVelocity) {
   int info = -1;
 
-  int n = problem->M->size0;
-  int m = problem->H->size1;
+  size_t n = to_size_t(problem->M->size0);
+  size_t m = to_size_t(problem->H->size1);
 
   /* globalVelocity <- problem->q */
-  cblas_dcopy(n, problem->q, 1, globalVelocity, 1);
+  cblas_dcopy(to_blasint(n), problem->q, 1, globalVelocity, 1);
 
   // We add the reaction part only if the problem has contacts
   if (m > 0) {
@@ -289,7 +290,7 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* pr
     double alpha = 1.0;
     double beta2 = 0.0;
     double* vtmp = (double*)calloc(n, sizeof(double));
-    cblas_dcopy_msan(n, globalVelocity, 1, vtmp, 1);
+    cblas_dcopy_msan(to_blasint(n), globalVelocity, 1, vtmp, 1);
     NM_gemv(alpha, problem->M_inverse, vtmp, beta2, globalVelocity);
     free(vtmp);
   } else {
@@ -305,14 +306,15 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
   NumericsMatrix* M = problem->M;
   NumericsMatrix* H = problem->H;
 
-  int n = M->size0;
-  int m = H->size1;
-
+  const size_t n = to_size_t(M->size0);
+  const size_t m = to_size_t(H->size1);
+  const blasint n_blas = to_blasint(n);
+  const blasint m_blas = to_blasint(m);
   FrictionContactProblem* localproblem = frictionContactProblem_new();
 
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension = problem->dimension;
-  localproblem->mu = (double*)calloc(problem->numberOfContacts, sizeof(double));
+  localproblem->mu = (double*)calloc(to_size_t(problem->numberOfContacts), sizeof(double));
   cblas_dcopy_msan(problem->numberOfContacts, problem->mu, 1, localproblem->mu, 1);
 
   if (H->storageType != M->storageType) {
@@ -324,12 +326,12 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
   FILE* fileout;
 #endif
   if (M->storageType == NM_DENSE) {
-    int nm = n * m;
+    const size_t nm = n * m;
 
     double* Htmp = (double*)calloc(nm, sizeof(double));
     // compute W = H^T M^-1 H
     // Copy Htmp <- H
-    cblas_dcopy_msan(nm, H->matrix0, 1, Htmp, 1);
+    cblas_dcopy_msan(to_blasint(nm), H->matrix0, 1, Htmp, 1);
 
     // Compute Htmp   <- M^-1 Htmp
 #ifdef USE_LAPACK_DGETRS
@@ -351,8 +353,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     localproblem->M = NM_new();
     NumericsMatrix* Wnum = localproblem->M;
     Wnum->storageType = 0;
-    Wnum->size0 = m;
-    Wnum->size1 = m;
+    Wnum->size0 = to_int(m);
+    Wnum->size1 = to_int(m);
     Wnum->matrix0 = (double*)calloc(m * m, sizeof(double));
     Wnum->matrix1 = NULL;
     Wnum->matrix2 = NULL;
@@ -363,18 +365,18 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     if (!Htmp) return NULL;
     assert(Wnum->matrix0);
 
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n,
-                0.0, Wnum->matrix0, m);
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m_blas, m_blas, n_blas, 1.0,
+                H->matrix0, n_blas, Htmp, n_blas, 0.0, Wnum->matrix0, m_blas);
     /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
 
     // compute localq = H^T M^(-1) q +b
 
     // Copy localq <- b
     localproblem->q = (double*)calloc(m, sizeof(double));
-    cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
+    cblas_dcopy_msan(m_blas, problem->b, 1, localproblem->q, 1);
 
     double* qtmp = (double*)calloc(n, sizeof(double));
-    cblas_dcopy_msan(n, problem->q, 1, qtmp, 1);
+    cblas_dcopy_msan(n_blas, problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
 #ifdef USE_LAPACK_DGETRS
@@ -384,8 +386,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     NM_LU_solve(M, qtmp, 1);
 #endif
 
-    cblas_dgemv(CblasColMajor, CblasTrans, n, m, 1.0, H->matrix0, n, qtmp, 1, 1.0,
-                localproblem->q, 1);
+    cblas_dgemv(CblasColMajor, CblasTrans, n_blas, m_blas, 1.0, H->matrix0, n_blas, qtmp, 1,
+                1.0, localproblem->q, 1);
 
     frictionContact_display(localproblem);
 
@@ -395,9 +397,6 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
   }
 
   else if (M->storageType == NM_SPARSE_BLOCK) {
-    int n = M->size0;
-    int m = H->size1;
-
     // compute W = H^T M^-1 H
     // compute MinvH   <- M^-1 H
     /* int infoMInv = 0; */
@@ -431,7 +430,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     localproblem->q = (double*)calloc(m, sizeof(double));
 
     // Copy localq<- b
-    cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
+    cblas_dcopy_msan(m_blas, problem->b, 1, localproblem->q, 1);
 
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)calloc(n, sizeof(double));
@@ -469,18 +468,18 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
       numerics_printf_verbose(1, "use the given inverse of the matrix M ...");
       Minv = problem->M_inverse;
     } else {
-      unsigned int block_number;
-      unsigned int* blocksizes = NULL;
+      size_t block_number;
+      size_t* blocksizes = NULL;
       int is_diagonal_block_matrix =
           NM_is_diagonal_block_matrix(problem->M, &block_number, &blocksizes);
 
       if (is_diagonal_block_matrix) {
         numerics_printf_verbose(1, "the matrix is block diagonal\n");
         numerics_printf_verbose(1, "block_number = %i\n", block_number);
-        /* for (unsigned int k = 0; k < block_number; k++) */
+        /* for (size_t k = 0; k < block_number; k++) */
         /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
-        block_number = M->size0 / 3;
-        for (unsigned int k = 0; k < block_number; k++) blocksizes[k] = 3;
+        block_number = to_size_t(M->size0) / 3;
+        for (size_t k = 0; k < block_number; k++) blocksizes[k] = 3;
         Minv = NM_inverse_diagonal_block_matrix(M, block_number, blocksizes);
         free(blocksizes);
         blocksizes = NULL;
@@ -520,8 +519,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     double* qtmp = (double*)calloc(n, sizeof(double));
     NM_gemv(1.0, Minv, problem->q, 0.0, qtmp); /* qtmp <- M^(-1) q  */
     localproblem->q = (double*)calloc(m, sizeof(double));
-    cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1); /*Copy localq <- b */
-    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q);       /* localq <- H^T qtmp + localq   */
+    cblas_dcopy_msan(m_blas, problem->b, 1, localproblem->q, 1); /*Copy localq <- b */
+    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q); /* localq <- H^T qtmp + localq   */
 
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataqloc.py", "w");

@@ -23,19 +23,16 @@
 
 #include "NSSTools.h"       // for min
 #include "SiconosLapack.h"  // for DGESVD, lapack_int
-#include "numerics_errors.h"
+#include "safe_casts.h"
 
-double cond(double *A, int n, int m) {
-  //#ifdef COMPLETE_LAPACK_LIBRARIES
-  int dimS = m < n ? m : n;
+double cond(double *A, size_t n, size_t m) {
+  size_t dimS = m < n ? m : n;
   double *S = (double *)malloc(dimS * sizeof(double));
 
   char JOBU = 'N';
   int LDU = 1;
-  double *U = NULL;
   char JOBVT = 'N';
   int LDVT = 1;
-  double *VT = NULL;
   size_t size = n * m * sizeof(double);
   double *Atmp = (double *)malloc(size);
   memcpy(Atmp, A, size);
@@ -43,37 +40,29 @@ double cond(double *A, int n, int m) {
   lapack_int InfoDGSVD = -1;
 
   double *superb = (double *)malloc((min(m, n) - 1) * sizeof(double));
-  DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
-
-  /* #else */
-  /*   int LWORK = -1; */
-  /*   double * WORK; */
-  /*   WORK = malloc(sizeof(*WORK)); */
-  /*   assert(WORK); */
-  /*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
-  /*   LWORK = (int)(WORK[0]); */
-  /*   WORK = realloc(WORK, LWORK * sizeof * WORK); */
-  /*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
-  /*   free(WORK); */
-  /* #endif */
-
-  printf("SVD of A :\n ");
-  printf("[\t ");
-  for (int i = 0; i < dimS; i++) {
-    printf("%14.7e\t", S[i]);
+  lapack_int n_la = to_blasint(n);
+  lapack_int m_la = to_blasint(m);
+  DGESVD(JOBU, JOBVT, n_la, m_la, Atmp, n_la, S, NULL, LDU, NULL, LDVT, superb, &InfoDGSVD);
+  if (InfoDGSVD != 0) {
+    fprintf(stderr, "cond: DGESVD failed (info=%d)\n", InfoDGSVD);
+    free(S);
+    free(Atmp);
+    free(superb);
+    return -1.0;
   }
-  printf("]\n ");
-  memcpy(A, Atmp, size);
+  // printf("SVD of A :\n ");
+  // printf("[\t ");
+  // for (size_t i = 0; i < dimS; i++) {
+  //   printf("%14.7e\t", S[i]);
+  // }
+  // printf("]\n ");
+  // memcpy(A, Atmp, size);
 
-  double conditioning = S[0] / S[dimS - 1];
+  double conditioning = (S[dimS - 1] > 0.0) ? S[0] / S[dimS - 1] : -1.0;
 
   free(superb);
   free(Atmp);
   free(S);
 
   return conditioning;
-  /* #else */
-  /*   fprintf(stderr, "Numerics. cond.c dgesvd not found\n"); */
-  /*   return 0.0; */
-  /* #endif */
 }

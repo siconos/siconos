@@ -53,13 +53,13 @@ void print_vector_norm(const char* desc, int m, int n, double* a, int lda) {
 }
 
 void free_test_collection(TestCase* collection, int nb_tests) {
-  for (int i = 0; i < nb_tests; ++i) {
-    solver_options_delete(collection[i].options);
-    free(collection[i].options);
-    collection[i].options = NULL;
+  if (collection) {
+    for (int i = 0; i < nb_tests; ++i) {
+      solver_options_delete(collection[i].options);
+      collection[i].options = NULL;
+    }
+    free(collection);
   }
-
-  free(collection);
 }
 
 void print_test_info(int test_id, TestCase* current, const char* msg) {

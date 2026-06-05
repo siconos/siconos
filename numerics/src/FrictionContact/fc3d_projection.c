@@ -24,6 +24,7 @@
 #include <stdio.h>   // for fprintf, printf, NULL, stderr
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
+#include "FrictionContactProblem.h"  // IWYU pragma: keep
 #include "FrictionContact_options.h"
 #include "NumericsFwd.h"        // for SolverOptions, FrictionContact...
 #include "NumericsMatrix.h"     // for NumericsMatrix, RawNumericsMatrix
@@ -38,6 +39,7 @@
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
+#include "safe_casts.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
@@ -694,7 +696,7 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double
 void fc3d_projectionOnCylinderWithLocalIteration_initialize(
     FrictionContactProblem* main_problem, FrictionContactProblem* localproblem,
     SolverOptions* options, SolverOptions* localsolver_options) {
-  int nc = main_problem->numberOfContacts;
+  size_t nc = to_size_t(main_problem->numberOfContacts);
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (localproblem->mu) {
     free(localproblem->mu);
@@ -708,7 +710,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
   } else {
     assert(0);
   }
-  for (int i = 0; i < nc; i++) {
+  for (size_t i = 0; i < nc; i++) {
     localsolver_options->dWork[i] = 1.0;
   }
 }

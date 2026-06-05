@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "NumericsMatrix.h"
+#include "SiconosSets.h"
 #include "vertex_extraction.h"
 
 int main(void) {
@@ -29,11 +30,11 @@ int main(void) {
   double K[] = {-2, -3, -7, -8};
 
   polyhedron P = {SICONOS_SET_POLYHEDRON, 4, 0, H, K, NULL, NULL};
-
   int basis[11] = {0};
 
   siconos_find_vertex(&P, 2, basis);
-
+  H->matrix0 = NULL;
+  NM_free(H);
   for (unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
   printf("\n");
   return 0;

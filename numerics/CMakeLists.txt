@@ -48,6 +48,7 @@ set(${COMPONENT}_DIRS
   src/NonSmoothSolvers
 )
 
+
 # - Extras, optional -
 # Static verifications (ACSL)
 if(WITH_FRAMA_C)
@@ -118,6 +119,7 @@ endif()
 # -- create/setup component target --
 include(ComponentSetup)
 
+
 create_siconos_component(${COMPONENT})
 
 # Windows stuff
@@ -147,6 +149,12 @@ set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
 
 if(HAVE_QL0001) # From externals setup
   set_source_files_properties(src/LCP/lcp_nsqp.c src/LCP/lcp_qp.c PROPERTIES COMPILE_DEFINITIONS "HAVE_QL0001")  
+endif()
+
+
+if(WITH_MA57)
+  target_sources(numerics PRIVATE src/linalg/NM_MA57.c)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE src/linalg/NM_MA57.h)
 endif()
 
 # - sort -
@@ -259,6 +267,7 @@ include(gams_path_setup)
 # - UMFPack -
 if(WITH_UMFPACK)
   find_package(UMFPACK REQUIRED)
+  target_sources(numerics PRIVATE src/linalg/NM_UMFPACK.c)
   target_link_libraries(numerics PUBLIC UMFPACK::UMFPACK)
 endif()
 
@@ -267,10 +276,13 @@ endif()
 # Serial version
 if(WITH_SUPERLU)
   find_package(SuperLU REQUIRED)
+  target_sources(numerics PRIVATE src/linalg/NM_SuperLU.c)
 endif()
+
 # Multithreaded version
 if(WITH_SUPERLU_MT)
   find_package(SuperLU_MT REQUIRED COMPONENTS MT)
+  target_sources(numerics PRIVATE src/linalg/NM_SuperLU_MT.c)
 endif()
 # MPI/OpenMP version
 if(WITH_SUPERLU_DIST)
@@ -282,7 +294,9 @@ if(SuperLU_FOUND)
 endif()
 
 # mumps and mpi
-if(WITH_MPI)
+
+if(SICONOS_HAS_MPI)
+  target_sources(numerics PRIVATE src/linalg/NM_MPI.c)
   target_include_directories(numerics PUBLIC ${MPI_C_INCLUDE_DIRS})
   # Note FP : PUBLIC for the moment since it's required by tests.
   # This will be improved later.
@@ -292,7 +306,8 @@ if(WITH_MPI)
 endif()
 
 if(WITH_MUMPS)
-  if(WITH_MPI)
+  target_sources(numerics PRIVATE src/linalg/NM_MUMPS.c)
+  if(SICONOS_HAS_MPI)
     find_package(MUMPS REQUIRED COMPONENTS PAR)
   else()
     find_package(MUMPS REQUIRED COMPONENTS SEQ)
@@ -382,7 +397,7 @@ endif()
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
-if(WITH_MPI AND WITH_TESTING AND NOT WITH_GUIX)
+if(SICONOS_HAS_MPI AND WITH_TESTING AND NOT WITH_GUIX)
   # Note FP : temporary fix, to deal with PRIVATE deps of some components.
   # This will be reviewed later.
   target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})
@@ -423,6 +438,6 @@ ${${COMPONENT}_DIRS} # All .hpp are installed
 )
 
 # List header files (in dir above) that must not be installed 
-set(${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
+list(APPEND ${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
 
 siconos_component_install_setup(${COMPONENT})

@@ -131,7 +131,6 @@ static int test_1(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   free(q);
   NM_free(M);
   return info;
@@ -212,7 +211,6 @@ static int test_2(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   free(q);
   NM_free(M);
   return info;
@@ -314,7 +312,6 @@ static int test_3(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   free(q);
   free(b);
   NM_free(A);
@@ -417,7 +414,6 @@ static int test_4(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   free(q);
   free(b);
   NM_free(M);
@@ -520,8 +516,6 @@ static int test_5(void) {
   }
 
   solver_options_delete(options);
-  free(options);
-  options = NULL;
   free(b);
   free(q);
   NM_free(A);

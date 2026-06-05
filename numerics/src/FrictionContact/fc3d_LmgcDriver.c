@@ -43,8 +43,8 @@
 static int fccounter = -1;
 
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
-                    unsigned int *row, unsigned int *column, unsigned int nc, unsigned int nb,
-                    int solver_id, double tolerance, int itermax, int verbose, int outputFile,
+                    size_t *row, size_t *column, size_t nc, size_t nb, int solver_id,
+                    double tolerance, int itermax, int verbose, int outputFile,
                     int freq_output, int ndof) {
   numerics_set_verbose(verbose);
 
@@ -95,45 +95,45 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
 
     fprintf(file, "int nc = %i ;\n ", (int)nc);
     fprintf(file, "int nb = %i ;\n ", (int)nb);
-    fprintf(file, "double mu[%i] ={\n", nc);
+    fprintf(file, "double mu[%zu] ={\n", nc);
     for (unsigned int i = 0; i < nc - 1; i++) {
       fprintf(file, "%32.24e, \t", mu[i]);
     }
     fprintf(file, "%32.24e };\n", mu[nc - 1]);
     fprintf(file, "int row[%i] ={\n", (int)nb);
     for (unsigned int i = 0; i < nb - 1; i++) {
-      fprintf(file, "%i,\t", row[i]);
+      fprintf(file, "%zu,\t", row[i]);
     }
 
-    fprintf(file, " %i};\n", row[nb - 1]);
-    fprintf(file, "int column[%i] ={\n", nb);
+    fprintf(file, " %zu};\n", row[nb - 1]);
+    fprintf(file, "int column[%zu] ={\n", nb);
     for (unsigned int i = 0; i < nb - 1; i++) {
-      fprintf(file, "%i,\t", column[i]);
+      fprintf(file, "%zu,\t", column[i]);
     }
-    fprintf(file, " %i};\n", column[nb - 1]);
-    fprintf(file, "double q[%i] ={\n", 3 * nc);
+    fprintf(file, " %zu};\n", column[nb - 1]);
+    fprintf(file, "double q[%zu] ={\n", 3 * nc);
     for (unsigned int i = 0; i < 3 * nc - 1; i++) {
       fprintf(file, "%32.24e,\t", q[i]);
     }
     fprintf(file, " %32.24e};\n", q[3 * nc - 1]);
 
-    fprintf(file, "double W[%i] ={\n", 3 * 3 * nb);
+    fprintf(file, "double W[%zu] ={\n", 3 * 3 * nb);
     for (unsigned int i = 0; i < nb - 1; i++) {
       for (unsigned int j = 0; j < 3 * 3; j++) {
         fprintf(file, "%32.24e, \t", W[i * 9 + j]);
       }
       fprintf(file, "\n");
     }
-    for (int j = 0; j < 3 * 3 - 1; j++) {
+    for (size_t j = 0; j < 3 * 3 - 1; j++) {
       fprintf(file, "%32.24e, \t", W[(nb - 1) * 9 + j]);
     }
     fprintf(file, "%32.24e};\n", W[(nb - 1) * 9 + 8]);
     fclose(file);
   } else if (outputFile == 2) {
     char fname[256];
-    snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%i-%.5d.dat",
+    snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%zu-%.5d.dat",
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
-    printf("LMGC_FC3D-i%.5d-%i-%.5d.dat",
+    printf("LMGC_FC3D-i%.5d-%zu-%.5d.dat",
            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     FILE *foutput = fopen(fname, "w");
     frictionContact_printInFile(FC, foutput);

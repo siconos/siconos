@@ -20,15 +20,13 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "LCP_Solvers.h"                   // for lcp_pivot, lcp_compute_error
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "NumericsMatrix.h"                // for NumericsMatrix
-#include "SolverOptions.h"  // for SolverOptions, solver_opti...
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "lcp_cst.h"  // for SICONOS_LCP_IPARAM_PIVOTIN...
-#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_END, DEBUG_BEGIN
 

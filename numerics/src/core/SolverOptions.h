@@ -36,7 +36,7 @@ typedef int solver_id_t;
 typedef struct {
   void *env; /**< general user environment */
   void (*collectStatsIteration)(
-      void *env, int size, double *reaction, double *velocity, double error,
+      void *env, size_t size, double *reaction, double *velocity, double error,
       void *extra_data); /**<pointer on a function
                           * Its signature is: user env, problem size, reaction,
                           * velocity, error at end of solver iteration (when

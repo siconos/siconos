@@ -360,6 +360,7 @@ void CSparseMatrix_free_lu_factors(CSparseMatrix_factors *cs_lu_A) {
 
     free(cs_lu_A);
   }
+  cs_lu_A = NULL;
 }
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
@@ -495,14 +496,13 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors *cs_chol_A, double *x, dou
 /* Solve Ax = B with the factorization of A stored in the cs_chol_A
  * B is a sparse matrix (CSparseMatrix_factors)
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatrix *X,
-                                  CSparseMatrix *B) {
+bool CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatrix *X,
+                                CSparseMatrix *B) {
   DEBUG_BEGIN("CSparseMatrix_chol_spsolve(...)\n");
 
-  if (!CS_CSC(X)) return 1; /* check inputs */
-  if (!CS_CSC(B)) return 1; /* check inputs */
+  if (!CS_CSC(X)) return false; /* check inputs */
+  if (!CS_CSC(B)) return false; /* check inputs */
 
-  CS_INT ok;
   CS_INT n = cs_chol_A->n;
   csn *N = cs_chol_A->N;
   CHECK_NULL(N);
@@ -525,6 +525,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
 
   /* for (i =0; i <n; i++) printf("pinv[%li] = %li\t", i, pinv[i]); */
   /* printf("\n"); */
+  bool ok = true;
 
   /* --- 1. First step X = L\B ---------------------------------------------- */
   for (k = 0; k < B->n; k++) {
@@ -541,7 +542,9 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
     if (Xp[k] + n - top > X->nzmax &&
         !cs_sprealloc(X, 2 * (X->nzmax) + n - top)) /* realloc X if need */
     {
-      return 1; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
+      ok = false;
+      cs_spfree(X);
+      goto clean_mem;
     }
     Xp = X->p;
     Xi = X->i;
@@ -569,7 +572,9 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
 
     /* store the result in B */
     if (Bp[k] + n - top > B->nzmax && !cs_sprealloc(B, 2 * (B->nzmax) + n - top)) {
-      return 1; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
+      ok = false;
+      cs_spfree(LT);
+      goto clean_mem; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
     }
     Bp = B->p;
     Bi = B->i;
@@ -586,12 +591,17 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
     Bp[k + 1] = Bp[k] + n - top;
   }
   DEBUG_EXPR(cs_print(B, 0));
-  ok = 1;
+
+  cs_spfree(LT);
+
+clean_mem:
+  N = NULL;
+  S = NULL;
   free(x);
   free(b);
   free(xi);
   DEBUG_END("CSparseMatrix_chol_spsolve(...)\n");
-  return (ok);
+  return ok;
 }
 
 CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors *cs_ldlt_A, double *x, double *b) {

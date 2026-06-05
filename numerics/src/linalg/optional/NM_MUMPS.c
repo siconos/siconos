@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-#include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
+#include "NM_MUMPS.h"
+
 #include <string.h>  // for memcpy
 
 #include "CSparseMatrix.h"
@@ -173,7 +174,7 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A) {
   } else {
     mumps_id->comm_fortran = (MUMPS_INT)MPI_Comm_c2f(NM_MPI_comm(A));
   }
-#endif /* WITH_MPI */
+#endif /* SICONOS_HAS_MPI */
 }
 
 void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity) {
@@ -208,7 +209,11 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A) {
 
 void NM_MUMPS_set_matrix(NumericsMatrix* A) {
   /* numerics matrices are not distributed */
-  if (NM_MPI_rank(A) == 0) {
+  int rank = 0;
+#ifdef SICONOS_HAS_MPI
+  rank = NM_MPI_RANK(A);
+#endif
+  if (rank == 0) {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     CSparseMatrix* triplet;
     if (mumps_id->sym) /* symmetry */
@@ -229,7 +234,12 @@ void NM_MUMPS_set_matrix(NumericsMatrix* A) {
 
 void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double* b) {
   /* numerics matrices are not distributed */
-  if (NM_MPI_rank(A) == 0) {
+  int rank = 0;
+#ifdef SICONOS_HAS_MPI
+  rank = NM_MPI_RANK(A);
+#endif
+
+  if (rank == 0) {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     mumps_id->nrhs = nrhs;
 
@@ -239,7 +249,12 @@ void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double* b) {
 
 void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B) {
   /* numerics matrices are not distributed */
-  if (NM_MPI_rank(A) == 0) {
+  int rank = 0;
+#ifdef SICONOS_HAS_MPI
+  rank = NM_MPI_RANK(A);
+#endif
+
+  if (rank == 0) {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
     CSparseMatrix* csc;
@@ -290,10 +305,8 @@ void NM_MUMPS_extra_display(NumericsMatrix* A) {
 void NM_MUMPS_set_par(NumericsMatrix* A, int par) { NM_MUMPS_id(A)->par = par; }
 
 void NM_MUMPS_set_sym(NumericsMatrix* A, int sym) { NM_MUMPS_id(A)->sym = sym; }
-#endif
 
 void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B) {
-#ifdef WITH_MUMPS
   if (A->matrix2 && A->matrix2->linearSolverParams &&
       A->matrix2->linearSolverParams->solver == NSM_MUMPS &&
       A->matrix2->linearSolverParams->linear_solver_data) {
@@ -301,5 +314,5 @@ void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B) {
     DMUMPS_STRUC_C* B_id = NM_MUMPS_id(B);
     memcpy(B_id, A->matrix2->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
   }
-#endif
 }
+#endif

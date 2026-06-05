@@ -144,8 +144,8 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, dou
  *  \param cs_chol_A contains the Cholesky factors of A, permutation information
  *  \param X a csc sparse matrix workspace
  *  \param[in,out] b on input sparse RHS of the linear system; on output the solution
- *  \return 0 if failed, 1 otherwise*/
-CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X,
+ *  \return false if failed, true otherwise*/
+bool CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X,
                                   CSparseMatrix* B);
 
 /** reuse a LDLT factorization (stored in the cs_ldlt_A) to solve a linear system Ax = b

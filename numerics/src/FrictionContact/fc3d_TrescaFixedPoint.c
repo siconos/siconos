@@ -30,6 +30,7 @@
 #include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_NSGS, SICONO...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "safe_casts.h"
 #include "solver_registry.h"
 
 int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
@@ -39,13 +40,13 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
   double* dparam = options->dparam;
 
   /* Number of contacts */
-  int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
+  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
     return numerics_error("fc3d_TrescaFixedpoint",
@@ -98,9 +99,9 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
     ++iter;
 
     /* Compute the value of the initial value friction threshold*/
-    for (int ic = 0; ic < nc; ic++) mu[ic] = fmax(0.0, problem->mu[ic] * reaction[ic * 3]);
+    for (size_t ic = 0; ic < nc; ic++) mu[ic] = fmax(0.0, problem->mu[ic] * reaction[ic * 3]);
 
-    if (verbose > 0) printf("norm of mu = %10.5e \n", cblas_dnrm2(nc, mu, 1));
+    if (verbose > 0) printf("norm of mu = %10.5e \n", cblas_dnrm2(to_blasint(nc), mu, 1));
 
     fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options, error);
 
@@ -143,6 +144,8 @@ void fc3d_tfp_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  } else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   // internal solver
   assert(options->numberOfInternalSolvers == 1);
@@ -151,6 +154,7 @@ void fc3d_tfp_set_default(SolverOptions* options) {
 
   // internal solver of the internal solver
   assert(options->internalSolvers[0]->numberOfInternalSolvers == 1);
+  solver_options_delete(options->internalSolvers[0]->internalSolvers[0]);
   options->internalSolvers[0]->internalSolvers[0] = solver_options_create(
       SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration);
   options->internalSolvers[0]->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;

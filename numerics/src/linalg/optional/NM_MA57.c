@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-#include "NM_MA57.h"
 #ifdef WITH_MA57
+#include "NM_MA57.h"
 
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 
 /*#define DEBUG_MESSAGES*/
-#include "siconos_debug.h"
 #include "numerics_errors.h"
+#include "siconos_debug.h"
 
 void NM_MA57_free(void* p) {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*)p;

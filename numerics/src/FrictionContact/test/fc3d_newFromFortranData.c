@@ -30,8 +30,8 @@ int main(void) {
   double q[] = {-1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[] = {0.1, 0.1, 0.1};
 
-  unsigned int row[] = {1, 2, 3};
-  unsigned int column[] = {1, 2, 3};
+  size_t row[] = {1, 2, 3};
+  size_t column[] = {1, 2, 3};
   int m = 3;
   int n = 3;
   double W[] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1,

@@ -10,7 +10,7 @@ dependencies:
   - packaging
   - lxml
   - pytest
-  - pybind11
+  - pybind11 >=3.0.2
   - vtk
   - boost
   - bullet

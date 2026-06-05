@@ -19,6 +19,7 @@
 #define _XOPEN_SOURCE 700
 #include <stdio.h>                       // for printf
 #include <string.h>                      // for strcmp
+#include <stdlib.h>
 #include "frictionContact_test_utils.h"  // for build_test_collection, frict...
 #include "test_utils.h"                  // for data_collection, free_test_c...
 
@@ -44,7 +45,6 @@ int main (int argc, char *argv[])
   printf("number of data = %i\n", n_data);
 
   int number_of_tests;
-
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
 #if defined(TEST_ADMM_COLLECTION_FCLIB)
@@ -58,9 +58,10 @@ int main (int argc, char *argv[])
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
   int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
-
   free_test_collection(collection, number_of_tests);
-
+  collection = NULL;
+  free(_data_collection);
+  _data_collection = NULL;
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif

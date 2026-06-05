@@ -26,15 +26,16 @@
 #include <stdio.h>  // for size_t, FILE, NULL
 
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
-#include "NM_MPI.h"
-#include "NM_types.h"  // NM_DENSE ...
+#include "NM_types.h"       // NM_DENSE ...
 #include "NumericsDataVersion.h"
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "NumericsSparseMatrix.h"  // for NSM_linear_solver typedef
 #ifndef __cplusplus
 #include <stdbool.h>  // for bool
 #endif
-
+#ifdef SICONOS_HAS_MPI
+#include "NM_MPI.h"
+#endif
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
 #endif
@@ -56,7 +57,7 @@ typedef struct {
   MPI_Comm mpi_comm; /**< optional mpi communicator */
 #endif
 #ifdef WITH_OPENSSL
-  unsigned int values_sha1_count;               /**< counter for sha1 */
+  size_t values_sha1_count;                     /**< counter for sha1 */
   unsigned char values_sha1[SHA_DIGEST_LENGTH]; /**< sha1 hash of
                                                  * values. Matrices of
                                                  * differents sizes may have
@@ -243,7 +244,7 @@ void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void
  *  \param[in] m1 the SparseBlockStructuredMatrix
  *  \return  a pointer to a NumericsMatrix
  */
-RawNumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
+RawNumericsMatrix* NM_new_SBM(size_t size0, size_t size1, SparseBlockStructuredMatrix* m1);
 
 /** new NumericsMatrix equal to the transpose of a given matrix
  *
@@ -353,7 +354,6 @@ NumericsMatrix* NM_free(NumericsMatrix* m);
 
     \param m the matrix to be cleared.
  */
-void NM_clear_not_dense(NumericsMatrix* m);
 NumericsMatrix* NM_free_not_dense(NumericsMatrix* m);
 /**
    Free memory for a NumericsMatrix except the SBM matrix that is assumed not to be owned.
@@ -361,7 +361,6 @@ NumericsMatrix* NM_free_not_dense(NumericsMatrix* m);
 
    \param m the matrix to be cleared.
  */
-void NM_clear_not_SBM(NumericsMatrix* m);
 NumericsMatrix* NM_free_not_SBM(NumericsMatrix* m);
 
 /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function
@@ -398,7 +397,7 @@ int NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
  *  \param j column index
  *  \param val the value to be inserted.
  */
-int NM_entry(NumericsMatrix* M, int i, int j, double val);
+int NM_entry(NumericsMatrix* M, size_t i, size_t j, double val);
 
 /** get the value of a NumericsMatrix.
  *
@@ -492,8 +491,8 @@ void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
  *  \param[in] start_i a start row index
  *  \param[in] start_j a start column index
  */
-int NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const unsigned int start_i,
-               const unsigned int start_j);
+int NM_insert(NumericsMatrix* A, const NumericsMatrix* const B, const size_t start_i,
+              const size_t start_j);
 
 //  Matrix - vector product
 
@@ -843,20 +842,19 @@ int NM_LDLT_factorize(NumericsMatrix* A);
  *  \param[in] nrhs the number of right hand side.
  *  \return 0 if the solve succeeded.
  */
-int NM_LU_solve(NumericsMatrix* A, double* b, unsigned int nrhs);
+int NM_LU_solve(NumericsMatrix* A, double* b, size_t nrhs);
 int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
 int NM_LU_refine(NumericsMatrix* A, double* x, double tol, int max_iter, double* residu);
-int NM_Cholesky_solve(NumericsMatrix* A, double* b, unsigned int nrhs);
+int NM_Cholesky_solve(NumericsMatrix* A, double* b, size_t nrhs);
 int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
-int NM_LDLT_solve(NumericsMatrix* A, double* b, unsigned int nrhs);
-int NM_LDLT_refine(NumericsMatrix* Ao, double* x, double* b, unsigned int nrhs, double tol,
+int NM_LDLT_solve(NumericsMatrix* A, double* b, size_t nrhs);
+int NM_LDLT_refine(NumericsMatrix* Ao, double* x, double* b, size_t nrhs, double tol,
                    int maxitref, int job);
 
 int NM_gesv_expert(NumericsMatrix* A, double* b, unsigned keep);
 int NM_posv_expert(NumericsMatrix* A, double* b, unsigned keep);
 
-int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double* b, unsigned int n_rhs,
-                                unsigned keep);
+int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double* b, size_t n_rhs, unsigned keep);
 
 int NM_Linear_solver_finalize(NumericsMatrix* Ao);
 
@@ -877,8 +875,8 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
  * \param[in] blocksize the sizes of diagonal blocks
  * \return the matrix inverse.
  */
-NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number,
-                                                 unsigned int* blocksizes);
+NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block_number,
+                                                 const size_t* blocksizes);
 
 // /** Direct computation of the solution of a real system of linear
 //  *  equations: A x = b.
@@ -1067,7 +1065,7 @@ BalancingMatrices* NM_BalancingMatrices_new(NumericsMatrix* A);
  */
 BalancingMatrices* NM_BalancingMatrices_free(BalancingMatrices* A);
 
-/** Reset the version of a NM_types storage.
+/** Set to zero the version for type 'id' of a given matrix
  *
  *  \param M the NumericsMatrix,
  *  \param id the NM_types storage
@@ -1202,8 +1200,7 @@ struct Triplet {
 
 int compareTriplets(const void* a, const void* b);
 void sortTriplets(struct Triplet* triplets, size_t num_triplets);
-void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
-                            int* cones_to_clear);
+void NM_clear_cone_matrix_H(NumericsMatrix* H, size_t n_cones_to_clear, int* cones_to_clear);
 
 struct HashSet {
   int capacity;
@@ -1230,8 +1227,7 @@ struct Graph* NM_create_adjacency_graph(NumericsMatrix* A);
 
 struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A);
 
-int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
-                                unsigned int** blocksizes);
+int NM_is_diagonal_block_matrix(NumericsMatrix* A, size_t* block_number, size_t** blocksizes);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same

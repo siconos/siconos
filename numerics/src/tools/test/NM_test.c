@@ -98,10 +98,8 @@ static int NM_read_write_test(void) {
   /* free memory */
 free:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
-    NM_clear(Mread[i]);
-    free(Mread[i]);
+    NM_free(NMM[i]);
+    NM_free(Mread[i]);
   }
 
   free(NMM);
@@ -139,13 +137,11 @@ static int NM_add_to_diag3_test(NumericsMatrix *M, double alpha) {
   cblas_daxpy(n * m, alpha, Id, 1, Cref->matrix0, 1);
   DEBUG_EXPR(NM_display(Cref););
   info = NM_dense_equal(C1, Cref->matrix0, 1e-14);
-
+  NM_free(C1);
   if (info == 0)
     printf("Step 0 ( C = C + alpha*I,  NM_SPARSE_BLOCK storage, square matrix) ok ...\n");
   else {
     printf("Step 0 (C = C + alpha*I, NM_SPARSE_BLOCK storage, square matrix) failed ...\n");
-    free(Id);
-    NM_clear(Cref);
   }
 
   /***********************************************************/
@@ -161,12 +157,11 @@ static int NM_add_to_diag3_test(NumericsMatrix *M, double alpha) {
     printf("Step 1 ( C = C + alpha*I,  NM_SPARSE storage, square matrix) ok ...\n");
   else {
     printf("Step 1 (C = C + alpha*I, NM_SPARSE storage, square matrix) failed ...\n");
-    NM_clear(C2);
   }
 
-  NM_clear(C2);
+  NM_free(C2);
   free(Id);
-  NM_clear(Cref);
+  NM_free(Cref);
 
   return info;
 }
@@ -178,23 +173,17 @@ static int NM_add_to_diag3_test_all(void) {
   SparseBlockStructuredMatrix *SBM = SBM_new_from_file(file);
   fclose(file);
 
-  NumericsMatrix *M = NM_create(NM_SPARSE_BLOCK, SBM->blocksize0[SBM->blocknumber0 - 1],
-                                SBM->blocksize1[SBM->blocknumber1 - 1]);
-  M->matrix1 = SBM;
+  NumericsMatrix *M = NM_new();
+  NM_fill(M, NM_SPARSE_BLOCK, SBM->blocksize0[SBM->blocknumber0 - 1],
+          SBM->blocksize1[SBM->blocknumber1 - 1], SBM);
 
   int info = NM_add_to_diag3_test(M, 1.0);
+  NM_free(M);
   if (info != 0) {
     printf("End of  : Numerics tests for NM_add_to_diag3unsucessfull\n");
-    return info;
+  } else {
+    printf("End of Numerics tests for NM_add_to_diag3 ...\n");
   }
-
-  printf("End of Numerics tests for NM_add_to_diag3 ...\n");
-  if (info != 0) return info;
-  /* free memory */
-
-  NM_clear(M);
-
-  printf("========= End Numerics tests for NM_add_to_diag3 ========= \n");
   return info;
 }
 
@@ -212,13 +201,16 @@ int triplet_to_dense(void) {
 
   info = NM_to_dense(A, B);
   if (info != 0) {
+    NM_free(A);
+    NM_free(B);
     return numerics_error("triplet_to_dense", "conversion error.");
-    }
-    
-
+  }
   /* NM_display(B); */
 
-  return (int)NM_equal(A, B) - 1;
+  bool res = NM_equal(A, B);
+  NM_free(A);
+  NM_free(B);
+  return !res;
 }
 
 int csc_to_dense(void) {
@@ -242,12 +234,16 @@ int csc_to_dense(void) {
 
   NumericsMatrix *B = NM_create(NM_DENSE, A->size0, A->size1);
   info = NM_to_dense(A, B);
-  if (info != 0) return numerics_error("csc_to_dense", "conversion error.\n");
-
-
+  if (info != 0) {
+    NM_free(A);
+    NM_free(B);
+    return numerics_error("csc_to_dense", "conversion error.\n");
+  }
   /* NM_display(B);   */
-
-  return (int)NM_equal(A, B) - 1;
+  bool res = NM_equal(A, B);
+  NM_free(A);
+  NM_free(B);
+  return !res;
 }
 
 static int to_dense_test(void) {
@@ -336,14 +332,11 @@ static double dense_comparison(double *C, int n, int m, double *Cref) {
   return err;
 }
 
-static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
+static int NM_gemm_test_1(NumericsMatrix **MM, double alpha, double beta) {
   printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
   printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
 
   NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M2 = MM[1];
-  NumericsMatrix *M3 = MM[2];
-  NumericsMatrix *M4 = MM[3];
 
   int info = -1;
   double tol = 1e-14;
@@ -365,12 +358,14 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
 
   NM_gemm(alpha, M1, M1, beta, &C);
 
-  NumericsMatrix *Cref = NM_create(NM_DENSE, C.size0, C.size1);
+  NumericsMatrix *Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
                      Cref->matrix0);
   double err = dense_comparison(C.matrix0, C.size0, C.size1, Cref->matrix0);
+  NM_clear(&C);
+
   if (err < tol) {
     info = 0;
   }
@@ -379,9 +374,20 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
     printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix ) ok ...\n");
   else {
     printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix) failed ...\n");
-    NM_clear(Cref);
-    free(C.matrix0);
   }
+  NM_free(Cref);
+  return info;
+}
+
+static int NM_gemm_test_2(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix *M3 = MM[2];
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, double* storage, non square     */
@@ -399,13 +405,14 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
 
   NM_gemm(alpha, M1, M3, beta, &C2);
 
-  NumericsMatrix *C2ref = NM_create(NM_DENSE, C2.size0, C2.size1);
+  NumericsMatrix *C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
                      C2ref->matrix0);
-  err = dense_comparison(C2.matrix0, C2.size0, C2.size1, C2ref->matrix0);
+  double err = dense_comparison(C2.matrix0, C2.size0, C2.size1, C2ref->matrix0);
 
+  NM_clear(&C2);
   if (err < tol) {
     info = 0;
   }
@@ -414,9 +421,22 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
     printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) ok ...\n");
   else {
     printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) failed ...\n");
-    free(C2.matrix0);
-    NM_clear(C2ref);
   }
+
+  NM_free(C2ref);
+  return info;
+}
+
+static int NM_gemm_test_3(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix *M2 = MM[1];
+  NumericsMatrix *M3 = MM[2];
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, SBM storage,  square            */
@@ -433,6 +453,12 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
   add_initial_value_square_1(&C3);
   DEBUG_EXPR(SBM_print(C3.matrix1););
 
+  NumericsMatrix *Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  add_initial_value_square_1(Cref);
+  /* gemm by hand */
+  dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
+                     Cref->matrix0);
+
   NM_gemm(alpha, M2, M2, beta, &C3);
   DEBUG_EXPR(NM_display(&C3));
   DEBUG_EXPR(NM_dense_display(Cref->matrix0, M2->size0, M2->size1, M2->size0));
@@ -441,13 +467,28 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
   /* C3 and CRef must have the same values.*/
 
   info = SBM_dense_equal(C3.matrix1, Cref->matrix0, tol);
+  NM_clear(&C3);
 
   if (info == 0)
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) ok ...\n");
   else {
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) failed ...\n");
-    NM_clear(&C3);
   }
+  NM_free(Cref);
+  return info;
+}
+
+static int NM_gemm_test_4(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix *M2 = MM[1];
+  NumericsMatrix *M3 = MM[2];
+  NumericsMatrix *M4 = MM[3];
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, SBM storage,  non square        */
@@ -465,6 +506,12 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
 
   NM_gemm(alpha, M2, M4, beta, &C4);
 
+  NumericsMatrix *C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  add_initial_value_rectangle_1(C2ref);
+
+  dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
+                     C2ref->matrix0);
+
   DEBUG_EXPR(NM_display(&C4));
   DEBUG_EXPR(NM_dense_display(C2ref->matrix0, M2->size0, M4->size1, M2->size0));
   /*     Check if it is correct */
@@ -472,12 +519,26 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
 
   info = SBM_dense_equal(C4.matrix1, C2ref->matrix0, tol);
 
+  NM_clear(&C4);
+  NM_free(C2ref);
   if (info == 0)
     printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) ok ...\n");
   else {
     printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) failed ...\n");
-    NM_clear(&C4);
   }
+
+  return info;
+}
+
+static int NM_gemm_test_5(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix *M2 = MM[1];
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, NM_SPARSE storage,   square     */
@@ -494,15 +555,37 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
 
   NM_gemm(alpha, M5, M5, beta, C5);
 
+  NumericsMatrix *Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  add_initial_value_square_1(Cref);
+  /* gemm by hand */
+  dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
+                     Cref->matrix0);
+
   info = NM_dense_equal(C5, Cref->matrix0, tol);
+  NM_free(Cref);
+
+  NM_free(M5);
+  NM_free(C5);
 
   if (info == 0)
     printf("Step 4 ( C = alpha*A*B + beta*C, NM_SPARSE storage, square) ok ...\n");
   else {
     printf("Step 4 ( C = alpha*A*B + beta*C, NM_SPARSE storage, square) failed ...\n");
-    NM_clear(M5);
-    NM_clear(C5);
   }
+  return info;
+}
+
+static int NM_gemm_test_6(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix *M2 = MM[1];
+  NumericsMatrix *M3 = MM[2];
+  NumericsMatrix *M4 = MM[3];
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, NM_SPARSE storage, non square  */
@@ -517,17 +600,34 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
   C6->matrix2->origin = NSM_TRIPLET;
   add_initial_value_rectangle_1(C6);
 
+  NumericsMatrix *C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  add_initial_value_rectangle_1(C2ref);
+
+  dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
+                     C2ref->matrix0);
+
   NM_gemm(alpha, M2, M4, beta, C6);
 
   info = NM_dense_equal(C6, C2ref->matrix0, tol);
+  NM_free(C2ref);
+
+  NM_free(M6);
+  NM_free(C6);
 
   if (info == 0)
     printf("Step 5 ( C = alpha*A*B + beta*C, NM_SPARSE storage, non square) ok ...\n");
   else {
     printf("Step 5 ( C = alpha*A*B + beta*C, NM_SPARSE storage, non square) failed ...\n");
-    NM_clear(M6);
-    NM_clear(C6);
   }
+  return info;
+}
+
+static int NM_gemm_test_7(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  int info = -1;
+  double tol = 1e-14;
 
   /***********************************************************/
   /* C = alpha*A*B + beta*C, double* storage, square matrix, empty column of blocks  */
@@ -549,11 +649,15 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
                      C3ref->matrix0);
   DEBUG_EXPR(NM_display(C7));
   DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M9->size0, M9->size1, M9->size0));
-  err = dense_comparison(C7->matrix0, C7->size0, C7->size1, C3ref->matrix0);
+  NM_free(M9);
+
+  double err = dense_comparison(C7->matrix0, C7->size0, C7->size1, C3ref->matrix0);
+  NM_free(C7);
 
   if (err < tol) {
     info = 0;
   }
+  NM_free(C3ref);
 
   if (info == 0)
     printf(
@@ -563,9 +667,17 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
     printf(
         "Step 6 ( C = alpha*A*B + beta*C, double* storage, square matrix, empty column of "
         "blocks) failed ...\n");
-    NM_clear(M9);
-    NM_clear(C7);
   }
+
+  return info;
+}
+
+static int NM_gemm_test_8(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  int info = -1;
+  double tol = 1e-14;
 
   /* /\**********************************************************************\/ */
   /* /\* C = alpha*A*B + beta*C, SBM storage, empty column of blocks        *\/ */
@@ -577,17 +689,27 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
   NumericsMatrix *C8 = NM_create(NM_SPARSE_BLOCK, M10->size0, M10->size1);
   /* This step is not necessary for NM_gemm but conveniently creates a zero matrix with the
    * right structure */
+  SBM_free(C8->matrix1, SBM_FREE_ALL);
   C8->matrix1 = SBM_zero_matrix_for_multiply(M10->matrix1, M10->matrix1);
 
   add_initial_value_square_2(C8);
 
   NM_gemm(alpha, M10, M10, beta, C8);
+  NumericsMatrix *M9 = test_matrix_9();
+  NumericsMatrix *C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  add_initial_value_square_2(C3ref);
+  /* gemm by hand */
+  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->matrix0);
 
-  DEBUG_EXPR(NM_display(C8));
-  DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
+  // DEBUG_EXPR(NM_display(C8));
+  // DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
 
   info = NM_dense_equal(C8, C3ref->matrix0, tol);
-
+  NM_free(C8);
+  NM_free(C3ref);
+  NM_free(M9);
+  NM_free(M10);
   if (info == 0)
     printf(
         "Step 7 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks) "
@@ -596,9 +718,16 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
     printf(
         "Step 7 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks) "
         "failed ...\n");
-    NM_clear(M10);
-    NM_clear(C8);
   }
+  return info;
+}
+
+static int NM_gemm_test_9(NumericsMatrix **MM, double alpha, double beta) {
+  printf("\n == Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
+  printf("Starts NM_gemm_test for alpha = %e and beta=%e\n", alpha, beta);
+
+  int info = -1;
+  double tol = 1e-14;
 
   /* /\************************************************************************************\/
    */
@@ -610,13 +739,24 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
   DEBUG_EXPR(NM_display(C20););
 
   add_initial_value_square_2(C20);
+  NumericsMatrix *M10 = test_matrix_10();
 
   NM_gemm(alpha, M10, M10, beta, C20);
+  NumericsMatrix *M9 = test_matrix_9();
+  NumericsMatrix *C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  add_initial_value_square_2(C3ref);
+  /* gemm by hand */
+  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->matrix0);
 
   DEBUG_EXPR(NM_display(C20));
   DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
 
   info = NM_dense_equal(C20, C3ref->matrix0, tol);
+  NM_free(C20);
+  NM_free(M10);
+  NM_free(M9);
+  NM_free(C3ref);
 
   if (info == 0)
     printf(
@@ -626,24 +766,8 @@ static int NM_gemm_test(NumericsMatrix **MM, double alpha, double beta) {
     printf(
         "Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, "
         "extra blocks) failed ...\n");
-    NM_clear(C20);
   }
 
-  NM_clear(C20);
-  NM_clear(M10);
-  NM_clear(C8);
-  NM_clear(M9);
-  NM_clear(C7);
-  NM_clear(M6);
-  NM_clear(C6);
-  NM_clear(M5);
-  NM_clear(C5);
-  NM_clear(&C4);
-  NM_clear(&C3);
-  free(C2.matrix0);
-  NM_clear(C2ref);
-  NM_clear(Cref);
-  free(C.matrix0);
   return info;
 }
 
@@ -677,6 +801,9 @@ static int gemm_square_triplet() {
   double alpha = 1.0;
   double beta = 0.0;
   NM_gemm(alpha, A, B, beta, C);
+
+  A = NM_free(A);
+  B = NM_free(B);
   NM_display(C);
 
   NumericsMatrix *Cref = NM_create(NM_SPARSE, size0, size1);
@@ -705,7 +832,10 @@ static int gemm_square_triplet() {
   /* } */
 
   printf("NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
-  return (int)!NM_equal(C, Cref);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+  return res;
 }
 
 static int gemm_square_csc() {
@@ -740,6 +870,8 @@ static int gemm_square_csc() {
   double alpha = 1.0;
   double beta = 0.0;
   NM_gemm(alpha, A, B, beta, C);
+  A = NM_free(A);
+  B = NM_free(B);
   NM_display(C);
 
   NumericsMatrix *Cref = NM_create(NM_SPARSE, size0, size1);
@@ -766,9 +898,12 @@ static int gemm_square_csc() {
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return (int)!NM_equal(C, Cref);
-  ;
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+  return res;
 }
+
 static int gemm_square_triplet_into_csc() {
   int size0 = 3;
   int size1 = 3;
@@ -810,6 +945,11 @@ static int gemm_square_triplet_into_csc() {
   NM_entry(Cref, 1, 1, 4);
   NM_entry(Cref, 1, 2, 9);
   NM_display(Cref);
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
 
   /* for(int i=0; i < C->size0; i++) */
   /* { */
@@ -825,8 +965,7 @@ static int gemm_square_triplet_into_csc() {
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return (int)!NM_equal(C, Cref);
-  ;
+  return res;
 }
 
 static int gemm_rectangle_triplet() {
@@ -893,7 +1032,14 @@ static int gemm_rectangle_triplet() {
   /* } */
 
   printf("NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
-  return (int)!NM_equal(C, Cref);
+
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+
+  return res;
 }
 
 static int gemm_square_triplet_1() {
@@ -954,7 +1100,14 @@ static int gemm_square_triplet_1() {
   /* } */
 
   printf("NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
-  return (int)!NM_equal(C, Cref);
+
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+
+  return res;
 }
 
 static int gemm_square_csc_1() {
@@ -1015,8 +1168,14 @@ static int gemm_square_csc_1() {
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return (int)!NM_equal(C, Cref);
-  ;
+
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+
+  return res;
 }
 static int gemm_square_triplet_into_csc_1() {
   int size0 = 3;
@@ -1074,8 +1233,14 @@ static int gemm_square_triplet_into_csc_1() {
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return (int)!NM_equal(C, Cref);
-  ;
+
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+
+  return res;
 }
 
 static int gemm_rectangle_triplet_1() {
@@ -1142,7 +1307,14 @@ static int gemm_rectangle_triplet_1() {
   /* } */
 
   printf("NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
-  return (int)!NM_equal(C, Cref);
+
+  A = NM_free(A);
+  B = NM_free(B);
+  int res = (int)!NM_equal(C, Cref);
+  C = NM_free(C);
+  Cref = NM_free(Cref);
+
+  return res;
 }
 
 static int gemm_test_sparse(void) {
@@ -1167,43 +1339,46 @@ static int NM_gemm_test_all(void) {
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
-  info = NM_gemm_test(NMM, 1.0, 0.0);
-  if (info != 0) {
-    printf("End of ProdNumericsMatrix : unsucessfull\n");
-    return info;
-  }
-  info = NM_gemm_test(NMM, 1.0, 1.0);
-  if (info != 0) {
-    printf("End of ProdNumericsMatrix : unsucessfull\n");
-    return info;
-  }
-  info = NM_gemm_test(NMM, 0.0, 1.0);
-  if (info != 0) {
-    printf("End of ProdNumericsMatrix : unsucessfull\n");
-    return info;
-  }
-  info = NM_gemm_test(NMM, 0.5, 0.5);
-  if (info != 0) {
-    printf("End of ProdNumericsMatrix : unsucessfull\n");
-    return info;
+  typedef int (*func_t)(NumericsMatrix **, double, double);
+
+  func_t funcs[] = {NM_gemm_test_1, NM_gemm_test_2,
+                    // ...
+                    NM_gemm_test_3, NM_gemm_test_4, NM_gemm_test_5, NM_gemm_test_6,
+                    NM_gemm_test_7, NM_gemm_test_8, NM_gemm_test_9};
+
+  // The pairs of parameters to be tested
+  double params[][2] = {{1., 0.}, {1., 1.}, {0., 1.}, {0.5, 0.5}};
+  int nb_params = sizeof(params) / sizeof(params[0]);
+  int nb_funcs = sizeof(funcs) / sizeof(funcs[0]);
+
+  for (int i = 0; i < nb_params; i++) {
+    double x = params[i][0];
+    double y = params[i][1];
+
+    for (int j = 0; j < nb_funcs; j++) {
+      info = funcs[j](NMM, x, y);
+      if (info != 0) {
+        printf("End of ProdNumericsMatrix : unsucessfull\n");
+        goto clean_mem;
+      }
+    }
   }
 
   info = gemm_test_sparse();
   if (info != 0) {
     printf("End of ProdNumericsMatrix : unsucessfull\n");
-    return info;
+    goto clean_mem;
   }
 
   printf("End of ProdNumericsMatrix ...\n");
-
+clean_mem:
   /* free memory */
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
 
   free(NMM);
@@ -1241,12 +1416,9 @@ static int NM_insert_dense_test() {
   // NM_display(A_dense);
   if (!NM_equal(A_dense, AB_dense)) info = 1;
 
-  NM_clear(A_dense);
-  NM_clear(B_dense);
-  NM_clear(AB_dense);
-  free(A_dense);
-  free(B_dense);
-  free(AB_dense);
+  NM_free(A_dense);
+  NM_free(B_dense);
+  NM_free(AB_dense);
   printf("== End of test NM_insert_dense_test(result = %d)\n", info);
   return info;
 }
@@ -1286,12 +1458,9 @@ static int NM_insert_sparse_test() {
   // NM_display(A_sparse);
   if (!NM_equal(A_sparse, AB_sparse)) info = 1;
 
-  NM_clear(A_sparse);
-  NM_clear(B_sparse);
-  NM_clear(AB_sparse);
-  free(A_sparse);
-  free(B_sparse);
-  free(AB_sparse);
+  NM_free(A_sparse);
+  NM_free(B_sparse);
+  NM_free(AB_sparse);
 
   printf("== End of test NM_insert_sparse_test(result = %d)\n", info);
   return info;
@@ -1472,17 +1641,17 @@ static int NM_gemm_test_all2(void) {
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
   info = NM_gemv_test(NMM);
   printf("End of NM_gemv_test ...\n");
-  if (info != 0) return info;
+
   /* free memory */
 
+clean_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
 
   free(NMM);
@@ -1590,22 +1759,16 @@ static int NM_row_prod_test(void) {
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
   info = test_NM_row_prod(NMM[0], NMM[1]);
   printf("End of Sub-Prod ...\n");
-  if (info != 0) return info;
 
   /* free memory */
-
+clean_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    /*    if (NMM[i]->matrix0) */
-    /*        free(NMM[i]->matrix0); */
-    /*    if (NMM[i]->matrix1) */
-    /*        SBM_free(NMM[i]->matrix1); */
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
 
   free(NMM);
@@ -1713,18 +1876,16 @@ static int NM_row_prod_no_diag_test_all(void) {
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
   info = test_NM_row_prod_no_diag(NMM[0], NMM[1]);
   printf("End of Sub-Prod no diag ...\n");
-  if (info != 0) return info;
-
+clean_mem:
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
 
   free(NMM);
@@ -1842,19 +2003,17 @@ static int NM_row_prod_no_diag_non_square_test(void) {
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
   info = test_NM_row_prod_no_diag_non_square(NMM[2], NMM[3]);
   printf("End of Sub-Prod no diag Non Square...\n");
-  if (info != 0) return info;
-
+clean_mem:
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
 
   free(NMM);
@@ -1964,18 +2123,16 @@ static int test_NM_row_prod_non_square_test(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
   info = test_NM_row_prod_non_square(NMM[2], NMM[3]);
   printf("End of Sub-Prod Non Square...\n");
-  if (info != 0) return info;
-
+clean_mem:
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
 
@@ -1992,7 +2149,7 @@ static int test_NM_iterated_power_method(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2002,7 +2159,10 @@ static int test_NM_iterated_power_method(void) {
   printf("End of iterated power method...\n");
 
   if (fabs(eig - 1.0) > 1e-10) info = 1;
-  if (info != 0) return info;
+  NM_free(Id);
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   NumericsMatrix *A = NMM[0];
   NumericsMatrix *Atrans = NM_transpose(A);
@@ -2012,29 +2172,32 @@ static int test_NM_iterated_power_method(void) {
   printf("End of iterated power method...\n");
 
   if (fabs(eig - 9.983560005532535086558710) > 1e-10) info = 1;
-  if (info != 0) return info;
+  NM_free(Atrans);
+  NM_free(AAT);
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   NumericsMatrix *B = NMM[1];
   NumericsMatrix *Btrans = NM_transpose(A);
   NumericsMatrix *BBT = NM_add(1 / 2., B, 1 / 2., Btrans);
   eig = NM_iterated_power_method(BBT, 1e-14, 100);
+  NM_free(Btrans);
+  NM_free(BBT);
+
   printf("largest eigenvalue = %e\n", eig);
   printf("End of iterated power method...\n");
   if (fabs(eig - 9.983560005532535086558710) > 1e-10) info = 1;
-  if (info != 0) return info;
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   /* free memory */
-
+clean_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
-  NM_clear(Id);
-  NM_clear(Atrans);
-  NM_clear(Btrans);
-  NM_clear(AAT);
-  NM_clear(BBT);
 
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
@@ -2048,46 +2211,53 @@ static int test_NM_scal(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
   NumericsMatrix *Id = NM_eye(50);
   NM_scal(1e-03, Id);
+
   printf("NM_get_value(Id,0,0) =%e \n", NM_get_value(Id, 0, 0));
   printf("End of NM_scal...\n");
 
   if (fabs(NM_get_value(Id, 0, 0) - 1e-03) > 1e-10) info = 1;
-  if (info != 0) return info;
+  NM_free(Id);
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   NumericsMatrix *A = NMM[0];
   NM_scal(1e-03, A);
   printf("End of NM_scal...\n");
 
   if (fabs(NM_get_value(A, 3, 0) - 5e-03) > 1e-10) info = 1;
-  if (info != 0) return info;
+
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   NumericsMatrix *A_SBM = NMM[1];
   NM_scal(1e-03, A_SBM);
   printf("End of NM_scal...\n");
 
   if (fabs(NM_get_value(A_SBM, 3, 0) - 5e-03) > 1e-10) info = 1;
-  if (info != 0) return info;
+  if (info != 0) {
+    goto clean_mem;
+  }
 
   NumericsMatrix *B = test_matrix_5();
   /* NM_display(B); */
   NM_scal(1e-03, B);
   /* NM_display(B); */
+  NM_free(B);
 
   /* free memory */
-
+clean_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
-  NM_clear(Id);
-  NM_clear(B);
 
   printf("========= End Numerics tests for NumericsMatrix NM_scal========= \n");
   return info;
@@ -2115,13 +2285,18 @@ static int NM_inv_test_sparse(void) {
   NumericsMatrix *Ainv = NM_LU_inv(A);
 
   NumericsMatrix *AAinv = NM_multiply(A, Ainv);
+  NM_free(A);
+  NM_free(Ainv);
+
   // NM_display(AAinv);
 
   NumericsMatrix *Id = NM_eye(size0);
 
   // NM_display(Id);
-
-  return !NM_equal(AAinv, Id);
+  bool res = NM_equal(AAinv, Id);
+  NM_free(AAinv);
+  NM_free(Id);
+  return !res;
 }
 
 static int NM_inverse_diagonal_block_matrix_test_unit(NumericsMatrix *A, int block_number,
@@ -2194,9 +2369,8 @@ static int NM_inverse_diagonal_block_matrix_test(void) {
   NM_entry(A, size0 - 3, size0 - 1, 3);
 
   info = NM_inverse_diagonal_block_matrix_test_unit(A, 4, blocksize3);
-  if (!info) return !info;
-
   A = NM_free(A);
+  if (!info) return !info;
 
   printf(
       "========= End Numerics tests for NumericsMatrix  NM_inverse_diagonal_block_matrix_test "
@@ -2214,7 +2388,7 @@ static int test_NM_inv(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2224,8 +2398,13 @@ static int test_NM_inv(void) {
   NM_csc(Iinv);
   NumericsMatrix *IIinv = NM_multiply(Id, Iinv);
   info = !NM_equal(IIinv, Id);
+  NM_free(Id);
+  NM_free(Iinv);
+  NM_free(IIinv);
   printf("info : %i\n", info);
-  if (info != 0) return info;
+  if (info != 0) {
+    goto clean_mem;
+  }
   printf("end if test I  ...\n");
 
   NumericsMatrix *A = NMM[0];
@@ -2233,7 +2412,12 @@ static int test_NM_inv(void) {
   NumericsMatrix *AAinv = NM_multiply(A, Ainv);
   NumericsMatrix *IA = NM_eye(A->size0);
   info = !NM_compare(AAinv, IA, 1e-14);
-  if (info != 0) return info;
+  NM_free(AAinv);
+  NM_free(Ainv);
+  NM_free(IA);
+  if (info != 0) {
+    goto clean_mem;
+  }
   printf("end if test A dense  ...\n");
 
   NumericsMatrix *B = NMM[1];
@@ -2241,7 +2425,12 @@ static int test_NM_inv(void) {
   NumericsMatrix *BBinv = NM_multiply(B, Binv);
   NumericsMatrix *IB = NM_eye(B->size0);
   info = !NM_compare(BBinv, IB, 1e-14);
-  if (info != 0) return info;
+  NM_free(BBinv);
+  NM_free(Binv);
+  NM_free(IB);
+  if (info != 0) {
+    goto clean_mem;
+  }
   printf("end if test B  SBM ...\n");
 
   NumericsMatrix *C = test_matrix_5();
@@ -2249,31 +2438,22 @@ static int test_NM_inv(void) {
   NumericsMatrix *CCinv = NM_multiply(C, Cinv);
   NumericsMatrix *IC = NM_eye(C->size0);
   info = !NM_compare(CCinv, IC, 1e-14);
-  if (info != 0) return info;
-  printf("end if test C  Sparse ...\n");
-
-  for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+  CCinv = NM_free(CCinv);
+  Cinv = NM_free(Cinv);
+  IC = NM_free(IC);
+  C = NM_free(C);
+  if (info != 0) {
+    goto clean_mem;
   }
-  free(NMM);
-  NM_clear(Id);
-  NM_clear(Iinv);
-  NM_clear(IIinv);
-
-  NM_clear(AAinv);
-  NM_clear(Ainv);
-  NM_clear(IA);
-  NM_clear(BBinv);
-  NM_clear(Binv);
-  NM_clear(IB);
-  NM_clear(CCinv);
-  NM_clear(Cinv);
-  NM_clear(IC);
-  NM_clear(C);
 
   info = NM_inv_test_sparse();
-  if (info) return info;
+  if (info) goto clean_mem;
+
+clean_mem:
+  for (i = 0; i < nmm; i++) {
+    NM_free(NMM[i]);
+  }
+  free(NMM);
 
   printf("========= End Numerics tests for NumericsMatrix NM_inv ========= \n");
   return info;
@@ -2308,7 +2488,7 @@ static int test_NM_gesv_expert(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_memory;
   }
   printf("Construction ok ...\n");
 
@@ -2338,6 +2518,7 @@ static int test_NM_gesv_expert(void) {
   b = (double *)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_gesv_expert_unit(M1, b);
+  NM_free(M1);
   free(b);
   if (info != 0) goto free_memory;
 
@@ -2345,8 +2526,7 @@ free_memory:
 
   /* free memory */
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix NM_gesv_expert ========= \n");
@@ -2380,7 +2560,7 @@ static int test_NM_posv_expert_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto clean_mem;
   } else
     info = 0;
 #endif
@@ -2399,7 +2579,8 @@ static int test_NM_posv_expert_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    NM_free(M_copy);
+    goto clean_mem;
   } else
     info = 0;
 
@@ -2412,14 +2593,16 @@ static int test_NM_posv_expert_unit(NumericsMatrix *M, double *b) {
   NM_posv_expert(M, b, NM_KEEP_FACTORS);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
+  NM_free(M_copy);
   res = cblas_dnrm2(n, y, 1);
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto clean_mem;
   } else
     info = 0;
 
+clean_mem:
   free(y);
   free(y_save);
 
@@ -2435,27 +2618,26 @@ static int test_NM_posv_expert(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
-
-  NumericsMatrix *M1 = NULL;
-  double *b = NULL;
 
   int n = 0;
 
   NumericsMatrix *Id = NM_eye(10);
   // NM_scal(Id, 5.0);
   n = Id->size0;
-  b = (double *)malloc(n * sizeof(double));
+  double *b = (double *)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) {
     b[j] = 2.0 * j;
     // NM_set_value(Id, j,j, 2.0*j);
   }
   info = test_NM_posv_expert_unit(Id, b);
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  NM_free(Id);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
 
   NumericsMatrix *Z = NM_create(NM_SPARSE, 2, 2);
   NM_triplet_alloc(Z, 0);
@@ -2465,21 +2647,26 @@ static int test_NM_posv_expert(void) {
   NM_entry(Z, 0, 1, 1.0);
   NM_entry(Z, 1, 0, 1.0);
   info = test_NM_posv_expert_unit(Z, b);
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
 
-  M1 = NMM[0];
+  NumericsMatrix *M1 = NMM[0];
   NumericsMatrix *M1T = NM_transpose(M1);
   NumericsMatrix *C = NM_create(NM_DENSE, M1->size0, M1->size1);
   NM_gemm(1.0, M1, M1T, 0.0, C);
+  NM_free(M1T);
   n = M1->size0;
-  b = (double *)malloc(n * sizeof(double));
+  // b = (double *)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_posv_expert_unit(C, b);
-  if (info != 0) return info;
-  NM_clear(M1T);
-  NM_clear(C);
+  NM_free(C);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
 
   /* M1=NMM[1]; */
   /* M1T = NM_transpose(M1); */
@@ -2498,21 +2685,24 @@ static int test_NM_posv_expert(void) {
   NM_triplet_alloc(C, 0);
   C->matrix2->origin = NSM_TRIPLET;
   NM_gemm(1.0, M1, M1T, 0.0, C);
+  NM_free(M1T);
   n = M1->size0;
-  b = (double *)malloc(n * sizeof(double));
+  NM_free(M1);
+  // b = (double *)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_posv_expert_unit(C, b);
-  if (info != 0) return info;
-
+  NM_free(C);
   free(b);
+  if (info != 0) {
+    goto free_mem;
+  }
 
   printf("End of NM_posv...\n");
 
-  /* free memory */
-
+/* free memory */
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
@@ -2549,7 +2739,7 @@ static int test_NM_LU_solve(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto clean_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2564,7 +2754,7 @@ static int test_NM_LU_solve(void) {
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LU_solve_unit(M1, b);
   free(b);
-  if (info != 0) return info;
+  if (info != 0) goto clean_mem;
 
   M1 = NMM[1];
   n = M1->size0;
@@ -2572,7 +2762,7 @@ static int test_NM_LU_solve(void) {
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LU_solve_unit(M1, b);
   free(b);
-  if (info != 0) return info;
+  if (info != 0) goto clean_mem;
 
   M1 = test_matrix_5();
   n = M1->size0;
@@ -2580,20 +2770,22 @@ static int test_NM_LU_solve(void) {
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LU_solve_unit(M1, b);
   free(b);
-  if (info != 0) return info;
+  M1 = NM_free(M1);
+  if (info != 0) {
+    goto clean_mem;
+  }
 
-  if (info != 0) return info;
-
+clean_mem:
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix  (test_NM_LU_solve) ========= \n");
   return info;
 }
+
 static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix *M1, NumericsMatrix *B) {
   int n = M1->size0;
   int info = -1;
@@ -2614,12 +2806,9 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix *M1, NumericsMatrix *
   NumericsMatrix *RES = NM_add(1.0, MB, -1.0, B_backup);
   double res = NM_norm_1(RES);
 
-  NM_clear(B_backup);
-  NM_clear(MB);
-  NM_clear(RES);
-  free(B_backup);
-  free(MB);
-  free(RES);
+  NM_free(B_backup);
+  NM_free(MB);
+  NM_free(RES);
 
   printf("test_NM_LU_solve_matrix_rhs_unit :residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON))
@@ -2639,7 +2828,7 @@ static int test_NM_LU_solve_matrix_rhs(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2655,8 +2844,9 @@ static int test_NM_LU_solve_matrix_rhs(void) {
   B = NM_create(NM_DENSE, n, n);
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
-  NM_clear(B);
-  if (info != 0) return info;
+  NM_free(B);
+  M1 = NULL;
+  if (info != 0) goto free_mem;
 
   /* SBM RHS */
   /* M1=NMM[1]; */
@@ -2665,7 +2855,7 @@ static int test_NM_LU_solve_matrix_rhs(void) {
   /* for(int 2j=0; j < n; j++) */
   /*   B->matrix0[j+j*n] = 1.0; */
   /* info = test_NM_LU_solve_matrix_rhs_unit(M1, B); */
-  /* NM_clear(B); */
+  /* NM_free(B); */
 
   /* SPARSE matrix, DENSE RHS */
   M1 = test_matrix_5();
@@ -2673,8 +2863,9 @@ static int test_NM_LU_solve_matrix_rhs(void) {
   B = NM_create(NM_DENSE, n, n);
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
-  NM_clear(B);
-  if (info != 0) return info;
+  NM_free(B);
+  NM_free(M1);
+  if (info != 0) goto free_mem;
 
   /* SPARSE matrix, SPARSE RHS */
   M1 = test_matrix_5();
@@ -2684,14 +2875,15 @@ static int test_NM_LU_solve_matrix_rhs(void) {
   n = M1->size0;
   B = NM_eye(n);
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
-  NM_clear(B);
-  if (info != 0) return info;
+
+  NM_free(B);
+  NM_free(M1);
+  // if (info != 0) goto free_mem;
 
   /* free memory */
-
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix  (test_NM_LU_solve) ========= \n");
@@ -2727,7 +2919,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 #endif
@@ -2749,7 +2941,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
@@ -2762,14 +2954,15 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix *M, double *b) {
   NM_Cholesky_solve(M, b, 1);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
+  NM_free(M_copy);
   res = cblas_dnrm2(n, y, 1);
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
-
+free_mem:
   free(y);
   free(y_save);
 
@@ -2778,7 +2971,8 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix *M, double *b) {
 
 static int test_NM_Cholesky_solve(void) {
   printf(
-      "========= Starts Numerics tests for NumericsMatrix (test_NM_Cholesky_solve)  ========= "
+      "========= Starts Numerics tests for NumericsMatrix (test_NM_Cholesky_solve)  "
+      "========= "
       "\n");
 
   int i, nmm = 4;
@@ -2787,7 +2981,7 @@ static int test_NM_Cholesky_solve(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2805,9 +2999,11 @@ static int test_NM_Cholesky_solve(void) {
     // NM_set_value(Id, j,j, 2.0*j);
   }
   info = test_NM_Cholesky_solve_unit(Id, b);
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  NM_free(Id);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
   printf("test 1 ...ok \n");
 
   printf("test 2 ...\n");
@@ -2819,9 +3015,12 @@ static int test_NM_Cholesky_solve(void) {
   NM_entry(Z, 0, 1, 1.0);
   NM_entry(Z, 1, 0, 1.0);
   info = test_NM_Cholesky_solve_unit(Z, b);
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
+
   printf("test 2 ... ok\n");
 
   printf("test 3 ...\n");
@@ -2833,9 +3032,13 @@ static int test_NM_Cholesky_solve(void) {
   n = M1->size0;
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_Cholesky_solve_unit(C, b);
-  if (info != 0) return info;
-  NM_clear(M1T);
-  NM_clear(C);
+  NM_free(M1T);
+  NM_free(C);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
+
   printf("test 3 ...ok \n");
 
   /* M1=NMM[1]; */
@@ -2856,25 +3059,29 @@ static int test_NM_Cholesky_solve(void) {
   NM_triplet_alloc(C, 0);
   C->matrix2->origin = NSM_TRIPLET;
   NM_gemm(1.0, M1, M1T, 0.0, C);
+  NM_free(M1T);
   n = M1->size0;
+  NM_free(M1);
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_Cholesky_solve_unit(C, b);
-  if (info != 0) return info;
-  printf("test 5 ... ok\n");
-
+  NM_free(C);
   free(b);
+  if (info != 0) {
+    goto free_mem;
+  }
+  printf("test 5 ... ok\n");
 
   printf("End of NM_Cholesky...\n");
 
   /* free memory */
-
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf(
-      "========= End Numerics tests for NumericsMatrix (test_NM_Cholesky_solve) ========= \n");
+      "========= End Numerics tests for NumericsMatrix (test_NM_Cholesky_solve) ========= "
+      "\n");
   return info;
 }
 
@@ -2898,13 +3105,9 @@ static int test_NM_Cholesky_solve_matrix_rhs_unit(NumericsMatrix *M1, NumericsMa
   NumericsMatrix *RES = NM_add(1.0, MB, -1.0, B_backup);
   double res = NM_norm_1(RES);
 
-  NM_clear(B_backup);
-  NM_clear(MB);
-  NM_clear(RES);
-  free(B_backup);
-  free(MB);
-  free(RES);
-
+  NM_free(B_backup);
+  NM_free(MB);
+  NM_free(RES);
   printf("test_NM_Cholesky_solve_matrix_rhs_unit : residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON))
     info = 1;
@@ -2914,7 +3117,8 @@ static int test_NM_Cholesky_solve_matrix_rhs_unit(NumericsMatrix *M1, NumericsMa
 }
 static int test_NM_Cholesky_solve_matrix_rhs(void) {
   printf(
-      "========= Starts Numerics tests for NumericsMatrix (test_NM_Cholesky_solve_matrix_rhs) "
+      "========= Starts Numerics tests for NumericsMatrix "
+      "(test_NM_Cholesky_solve_matrix_rhs) "
       "========= \n");
   /* numerics_set_verbose(2); */
   int i, nmm = 4;
@@ -2923,7 +3127,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
@@ -2944,10 +3148,10 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   B = NM_create(NM_DENSE, n, n);
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(M1T);
-  if (info != 0) return info;
+  NM_free(B);
+  NM_free(C);
+  NM_free(M1T);
+  if (info != 0) goto free_mem;
 
   /* SBM RHS */
   /* M1=NMM[1]; */
@@ -2956,7 +3160,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   /* for(int 2j=0; j < n; j++) */
   /*   B->matrix0[j+j*n] = 1.0; */
   /* info = test_NM_Cholesky_solve_matrix_rhs_unit(M1, B); */
-  /* NM_clear(B); */
+  /* NM_free(B); */
 
   /* SPARSE matrix, DENSE RHS */
   M1 = test_matrix_5();
@@ -2969,9 +3173,10 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   B = NM_create(NM_DENSE, n, n);
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(M1T);
+  NM_free(B);
+  NM_free(C);
+  NM_free(M1T);
+  NM_free(M1);
 
   /* SPARSE matrix, SPARSE RHS */
   M1 = test_matrix_5();
@@ -2985,11 +3190,13 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   B = NM_eye(n);
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
 
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(M1T);
-  if (info != 0) return info;
-
+  NM_free(B);
+  NM_free(C);
+  NM_free(M1T);
+  NM_free(M1);
+  if (info != 0) {
+    goto free_mem;
+  }
   /* SPARSE matrix, SPARSE RHS */
   M1 = test_matrix_5();
   M1T = NM_transpose(M1);
@@ -3001,17 +3208,16 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   n = M1->size0;
   B = NM_eye(n);
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
-
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(M1T);
-  if (info != 0) return info;
+  NM_free(M1);
+  NM_free(B);
+  NM_free(C);
+  NM_free(M1T);
+  if (info != 0) goto free_mem;
 
   /* free memory */
-
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf(
@@ -3019,6 +3225,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
       "========= \n");
   return info;
 }
+
 static int test_NM_Cholesky_solve_vs_posv_expert(void) {
   printf(
       "========= start Numerics tests for NumericsMatrix  "
@@ -3041,13 +3248,14 @@ static int test_NM_Cholesky_solve_vs_posv_expert(void) {
   for (int j = 0; j < n; j++) x_copy[j] = x[j];
 
   NM_Cholesky_solve(W_copy, x_copy, 1);
-
+  NM_free(W_copy);
   NM_posv_expert(W, x, NM_KEEP_FACTORS);
-
+  NM_free(W);
   for (int j = 0; j < n; j++) x_copy[j] = x_copy[j] - x[j];
 
   double diff = cblas_dnrm2(n, x_copy, 1);
-
+  free(x_copy);
+  free(x);
   printf("diff = %e\n", diff);
 
   if (fabs(diff) >= sqrt(DBL_EPSILON))
@@ -3061,6 +3269,7 @@ static int test_NM_Cholesky_solve_vs_posv_expert(void) {
 }
 
 static int test_NM_LDLT_solve_unit(NumericsMatrix *M, double *b) {
+  assert(M);
   int n = M->size0;
   int info = -1;
   double *y_save = (double *)malloc(n * sizeof(double));
@@ -3091,7 +3300,7 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 #endif
@@ -3113,7 +3322,7 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
@@ -3126,14 +3335,16 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix *M, double *b) {
   NM_LDLT_solve(M, b, 1);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
+  NM_free(M_copy);
   res = cblas_dnrm2(n, y, 1);
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
+free_mem:
   free(y);
   free(y_save);
 
@@ -3142,7 +3353,8 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix *M, double *b) {
 
 static int test_NM_LDLT_solve(void) {
   printf(
-      "========= Starts Numerics tests for NumericsMatrix (test_NM_LDLT_solve)  ========= \n");
+      "========= Starts Numerics tests for NumericsMatrix (test_NM_LDLT_solve)  ========= "
+      "\n");
 
   int i, nmm = 4;
   NumericsMatrix **NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *));
@@ -3150,7 +3362,7 @@ static int test_NM_LDLT_solve(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
@@ -3169,9 +3381,12 @@ static int test_NM_LDLT_solve(void) {
     // NM_set_value(Id, j,j, 2.0*j);
   }
   info = test_NM_LDLT_solve_unit(Id, b);
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  NM_free(Id);
+
+  if (info != 0) {
+    goto free_mem;
+  }
+
   printf("test 1 ...ok \n");
 
   printf("test 2 ...\n");
@@ -3183,9 +3398,11 @@ static int test_NM_LDLT_solve(void) {
   NM_entry(Z, 0, 1, 1.0);
   NM_entry(Z, 1, 0, 1.0);
   info = test_NM_LDLT_solve_unit(Z, b);
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
   printf("test 2 ... ok\n");
 
   printf("test 3 ...\n");
@@ -3197,9 +3414,13 @@ static int test_NM_LDLT_solve(void) {
   n = M1->size0;
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LDLT_solve_unit(C, b);
-  if (info != 0) return info;
-  NM_clear(M1T);
-  NM_clear(C);
+  NM_free(M1T);
+  NM_free(C);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
+
   printf("test 3 ...ok \n");
 
   /* M1=NMM[1]; */
@@ -3221,20 +3442,22 @@ static int test_NM_LDLT_solve(void) {
   C->matrix2->origin = NSM_TRIPLET;
   NM_gemm(1.0, M1, M1T, 0.0, C);
   n = M1->size0;
+  NM_free(M1);
+  NM_free(M1T);
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LDLT_solve_unit(C, b);
-  if (info != 0) return info;
-  printf("test 5 ... ok\n");
-
   free(b);
-
+  NM_free(C);
+  if (info != 0) {
+    goto free_mem;
+  }
+  printf("test 5 ... ok\n");
   printf("End of NM_LDLT...\n");
 
   /* free memory */
-
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix (test_NM_LDLT_solve) ========= \n");
@@ -3278,8 +3501,7 @@ int test_NM_compute_values_sha1() {
 
   info = strncmp(sha1_str, ref_str, SHA_DIGEST_LENGTH * 2);
 
-  NM_clear(M1);
-  free(M1);
+  NM_free(M1);
   return info;
 }
 
@@ -3330,6 +3552,8 @@ static int test_NM_compute_balancing_matrices(void) {
   NM_display(B->D2);
   printf("A\n:");
   NM_display(B->A);
+  B = NM_BalancingMatrices_free(B);
+  NM_free(A);
   int info = 0;
   return info;
 }
@@ -3360,6 +3584,8 @@ static int test_NM_compute_balancing_matrices_sym(void) {
   NM_display(B->D2);
   printf("A\n:");
   NM_display(B->A);
+  B = NM_BalancingMatrices_free(B);
+  NM_free(A);
   int info = 0;
   return info;
 }
@@ -3386,6 +3612,8 @@ static int test_NM_compute_balancing_matrices_rectangle(void) {
   NM_display(B->D2);
   printf("A\n:");
   NM_display(B->A);
+  NM_BalancingMatrices_free(B);
+  NM_free(A);
   int info = 0;
   return info;
 }
@@ -3411,7 +3639,9 @@ static int test_NM_max_by_columns_and_rows(void) {
   NV_display(max, size0);
   printf("Max by rows:\n");
   info += NM_max_by_rows(A, max);
+  NM_free(A);
   NV_display(max, size0);
+  free(max);
 
   return info;
 }
@@ -3457,7 +3687,7 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
@@ -3489,7 +3719,8 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    NM_free(M_copy);
+    goto free_mem;
   } else
     info = 0;
 
@@ -3502,14 +3733,17 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix *M, double *b) {
   NM_LDLT_refine(M, b, y, 1, 1e-12, 10, 0);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
+  NM_free(M_copy);
+
   res = cblas_dnrm2(n, y, 1);
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
+free_mem:
   free(y);
   free(y_save);
 
@@ -3524,18 +3758,16 @@ static int test_NM_LDLT_refine(void) {
   int i, nmm = 4;
   NumericsMatrix **NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *));
   int info = test_build_first_4_NM(NMM);
+  int n = 10;
+  double *b = (double *)malloc(n * sizeof(double));
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
   NumericsMatrix *M1 = NULL;
-  double *b = NULL;
-
-  int n = 10;
-  b = (double *)malloc(n * sizeof(double));
 
   printf("test 1 ...\n");
   NumericsMatrix *Id = NM_eye(10);
@@ -3546,9 +3778,11 @@ static int test_NM_LDLT_refine(void) {
     // NM_set_value(Id, j,j, 2.0*j);
   }
   info = test_NM_LDLT_refine_unit(Id, b);
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  NM_free(Id);
+  if (info != 0) {
+    goto free_mem;
+  }
+
   printf("test 1 ...ok \n");
 
   printf("test 2 ...\n");
@@ -3560,9 +3794,10 @@ static int test_NM_LDLT_refine(void) {
   NM_entry(Z, 0, 1, 1.0);
   NM_entry(Z, 1, 0, 1.0);
   info = test_NM_LDLT_refine_unit(Z, b);
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
+  if (info != 0) {
+    goto free_mem;
+  }
   printf("test 2 ... ok\n");
 
   /* printf("test 3 ...\n"); */
@@ -3576,8 +3811,8 @@ static int test_NM_LDLT_refine(void) {
   /*   b[j] =1.0; */
   /* info = test_NM_LDLT_refine_unit(C, b); */
   /* if(info != 0) return info; */
-  /* NM_clear(M1T); */
-  /* NM_clear(C); */
+  /* NM_free(M1T); */
+  /* NM_free(C); */
   /* printf("test 3 ...ok \n"); */
 
   /* M1=NMM[1]; */
@@ -3605,6 +3840,7 @@ static int test_NM_LDLT_refine(void) {
   /* if(info != 0) return info; */
   /* printf("test 5 ... ok\n"); */
 
+free_mem:
   free(b);
 
   printf("End of NM_LDLT...\n");
@@ -3612,8 +3848,7 @@ static int test_NM_LDLT_refine(void) {
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix (test_NM_LDLT_refine) ========= \n");
@@ -3657,7 +3892,7 @@ static int test_NM_LU_refine_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    goto free_mem;
   } else
     info = 0;
 
@@ -3689,7 +3924,9 @@ static int test_NM_LU_refine_unit(NumericsMatrix *M, double *b) {
   printf("residual = %e\n", res);
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+    NM_free(M_copy);
+
+    goto free_mem;
   } else
     info = 0;
 
@@ -3704,11 +3941,16 @@ static int test_NM_LU_refine_unit(NumericsMatrix *M, double *b) {
   NM_gemv(-1.0, M_copy, b, 1.0, y);
   res = cblas_dnrm2(n, y, 1);
   printf("residual = %e\n", res);
+  NM_free(M_copy);
+
   if (fabs(res) >= sqrt(DBL_EPSILON)) {
     info = 1;
-    return info;
+
+    goto free_mem;
   } else
     info = 0;
+
+free_mem:
 
   free(y);
   free(y_save);
@@ -3718,7 +3960,8 @@ static int test_NM_LU_refine_unit(NumericsMatrix *M, double *b) {
 
 static int test_NM_LU_refine(void) {
   printf(
-      "========= Starts Numerics tests for NumericsMatrix (test_NM_LU_refine)  ========= \n");
+      "========= Starts Numerics tests for NumericsMatrix (test_NM_LU_refine)  ========= "
+      "\n");
 
   int i, nmm = 4;
   NumericsMatrix **NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *));
@@ -3726,7 +3969,7 @@ static int test_NM_LU_refine(void) {
 
   if (info != 0) {
     printf("Construction failed ...\n");
-    return info;
+    goto free_mem;
   }
   printf("Construction ok ...\n");
 
@@ -3745,9 +3988,12 @@ static int test_NM_LU_refine(void) {
     // NM_set_value(Id, j,j, 2.0*j);
   }
   info = test_NM_LU_refine_unit(Id, b);
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
+
+  NM_free(Id);
   printf("test 1 ...ok \n");
 
   printf("test 2 ...\n");
@@ -3759,9 +4005,12 @@ static int test_NM_LU_refine(void) {
   NM_entry(Z, 0, 1, 1.0);
   NM_entry(Z, 1, 0, 1.0);
   info = test_NM_LU_refine_unit(Z, b);
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
+
   printf("test 2 ... ok\n");
 
   /* printf("test 3 ...\n"); */
@@ -3775,8 +4024,8 @@ static int test_NM_LU_refine(void) {
   /*   b[j] =1.0; */
   /* info = test_NM_LU_refine_unit(C, b); */
   /* if(info != 0) return info; */
-  /* NM_clear(M1T); */
-  /* NM_clear(C); */
+  /* NM_free(M1T); */
+  /* NM_free(C); */
   /* printf("test 3 ...ok \n"); */
 
   /* M1=NMM[1]; */
@@ -3813,7 +4062,11 @@ static int test_NM_LU_refine(void) {
   b = (double *)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) b[j] = 1.0;
   info = test_NM_LU_refine_unit(C, b);
-  if (info != 0) return info;
+  NM_free(C);
+  if (info != 0) {
+    free(b);
+    goto free_mem;
+  }
   printf("test 6 ... ok\n");
 
   free(b);
@@ -3821,10 +4074,9 @@ static int test_NM_LU_refine(void) {
   printf("End of NM_LU...\n");
 
   /* free memory */
-
+free_mem:
   for (i = 0; i < nmm; i++) {
-    NM_clear(NMM[i]);
-    free(NMM[i]);
+    NM_free(NMM[i]);
   }
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix (test_NM_LU_refine) ========= \n");
@@ -3842,11 +4094,11 @@ static int test_NM_create_adjacency_graph(void) {
   struct Graph *graph = NM_create_adjacency_graph(Id);
   struct connectedcomponent_node *list = NM_compute_connectedcomponents(Id);
   info = 0;
-  if (info != 0) return info;
-  NM_clear(Id);
-  free(Id);
+  NM_free(Id);
   list = free_connectedcomponents(list);
   graph = free_graph(graph);
+  if (info != 0) return info;
+
   printf("test 1 ...ok \n");
 
   printf("test 2 ...\n");
@@ -3860,9 +4112,7 @@ static int test_NM_create_adjacency_graph(void) {
   graph = NM_create_adjacency_graph(Z);
   list = NM_compute_connectedcomponents(Z);
   info = 0;
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
   list = free_connectedcomponents(list);
   graph = free_graph(graph);
   printf("test 2 ...ok \n");
@@ -3884,13 +4134,11 @@ static int test_NM_create_adjacency_graph(void) {
   } else
     printf("the matrix is not block diagonal\n");
 
-  info = 0;
-  if (info != 0) return info;
-  NM_clear(M1);
-  free(M1);
-  if (info != 0) return info;
+  NM_free(M1);
   list = free_connectedcomponents(list);
   graph = free_graph(graph);
+  if (info != 0) return info;
+
   free(blocksizes);
   blocksizes = NULL;
   printf("test 3 ... ok\n");
@@ -3905,6 +4153,8 @@ static int test_NM_create_adjacency_graph(void) {
   list = NM_compute_connectedcomponents(Mass);
 
   is_diagonal_block_matrix = NM_is_diagonal_block_matrix(Mass, &block_number, &blocksizes);
+  free(blocksizes);
+  blocksizes = NULL;
 
   if (is_diagonal_block_matrix) {
     printf("the matrix is block diagonal\n");
@@ -3914,15 +4164,10 @@ static int test_NM_create_adjacency_graph(void) {
   } else
     printf("the matrix is not block diagonal\n");
 
-  info = 0;
-  if (info != 0) return info;
-  NM_clear(Mass);
-  free(Mass);
-  if (info != 0) return info;
+  NM_free(Mass);
   list = free_connectedcomponents(list);
   graph = free_graph(graph);
-  free(blocksizes);
-  blocksizes = NULL;
+  if (info != 0) return info;
   printf("test 4 ... ok\n");
 
   printf("test 5 ...\n");
@@ -3955,10 +4200,7 @@ static int test_NM_create_adjacency_graph(void) {
   } else
     printf("the matrix is not block diagonal\n");
 
-  info = 0;
-  if (info != 0) return info;
-  NM_clear(Z);
-  free(Z);
+  NM_free(Z);
   list = free_connectedcomponents(list);
   graph = free_graph(graph);
 

@@ -27,11 +27,12 @@
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SiconosBlas.h"        // for cblas_dscal
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
+#include "safe_casts.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "io_tools.h"
-#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_pr...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_pr...
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
@@ -114,12 +115,12 @@ FrictionContactProblem* frictionContact_newFromFile(FILE* file) {
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file(file);
 
-  problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
+  problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
   for (i = 0; i < problem->M->size1; i++) {
     check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
-  problem->mu = (double*)malloc(nc * sizeof(double));
+  problem->mu = (double*)malloc(to_size_t(nc) * sizeof(double));
   for (i = 0; i < nc; i++) {
     check_io(fscanf(file, "%lf ", &(problem->mu[i])));
   }
@@ -188,14 +189,14 @@ FrictionContactProblem* frictionContactProblem_new(void) {
   return fcp;
 }
 
-FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
+FrictionContactProblem* frictionContactProblem_new_with_data(int dim, size_t nc,
                                                              NumericsMatrix* M, double* q,
                                                              double* mu) {
   FrictionContactProblem* fcp =
       (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
 
   fcp->dimension = dim;
-  fcp->numberOfContacts = nc;
+  fcp->numberOfContacts = to_int(nc);
   fcp->M = M;
   fcp->q = q;
   fcp->mu = mu;
@@ -214,8 +215,8 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
 
   /* Splitting vector q */
 
-  splitted_problem->q_n = (double*)malloc(nc * sizeof(double));
-  splitted_problem->q_t = (double*)malloc(2 * nc * sizeof(double));
+  splitted_problem->q_n = (double*)malloc(to_size_t(nc) * sizeof(double));
+  splitted_problem->q_t = (double*)malloc(to_size_t(2 * nc) * sizeof(double));
 
   for (int contact = 0; contact < nc; contact++) {
     splitted_problem->q_n[contact] = problem->q[contact * 3];
@@ -241,34 +242,34 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
   switch (storageType) {
     case NM_SPARSE_BLOCK: {
       DEBUG_PRINT("NM_SPARSE_BLOCK case\n");
-      unsigned int row_components_nn[1] = {0};
-      unsigned int row_components_size_nn = 1;
-      unsigned int col_components_nn[1] = {0};
-      unsigned int col_components_size_nn = 1;
+      size_t row_components_nn[1] = {0};
+      size_t row_components_size_nn = 1;
+      size_t col_components_nn[1] = {0};
+      size_t col_components_size_nn = 1;
       SBM_extract_component_3x3(M->matrix1, M_nn->matrix1, row_components_nn,
                                 row_components_size_nn, col_components_nn,
                                 col_components_size_nn);
 
-      unsigned int row_components_nt[1] = {0};
-      unsigned int row_components_size_nt = 1;
-      unsigned int col_components_nt[2] = {1, 2};
-      unsigned int col_components_size_nt = 2;
+      size_t row_components_nt[1] = {0};
+      size_t row_components_size_nt = 1;
+      size_t col_components_nt[2] = {1, 2};
+      size_t col_components_size_nt = 2;
       SBM_extract_component_3x3(M->matrix1, M_nt->matrix1, row_components_nt,
                                 row_components_size_nt, col_components_nt,
                                 col_components_size_nt);
 
-      unsigned int row_components_tn[2] = {1, 2};
-      unsigned int row_components_size_tn = 2;
-      unsigned int col_components_tn[1] = {0};
-      unsigned int col_components_size_tn = 1;
+      size_t row_components_tn[2] = {1, 2};
+      size_t row_components_size_tn = 2;
+      size_t col_components_tn[1] = {0};
+      size_t col_components_size_tn = 1;
       SBM_extract_component_3x3(M->matrix1, M_tn->matrix1, row_components_tn,
                                 row_components_size_tn, col_components_tn,
                                 col_components_size_tn);
 
-      unsigned int row_components_tt[2] = {1, 2};
-      unsigned int row_components_size_tt = 2;
-      unsigned int col_components_tt[2] = {1, 2};
-      unsigned int col_components_size_tt = 2;
+      size_t row_components_tt[2] = {1, 2};
+      size_t row_components_size_tt = 2;
+      size_t col_components_tt[2] = {1, 2};
+      size_t col_components_size_tt = 2;
       SBM_extract_component_3x3(M->matrix1, M_tt->matrix1, row_components_tt,
                                 row_components_size_tt, col_components_tt,
                                 col_components_size_tt);
@@ -296,6 +297,18 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
   }
   return 0;  
 }
+
+void splittedFrictionContactProblem_free(SplittedFrictionContactProblem* splitted_problem) {
+  splitted_problem->fc3d = NULL;
+  NM_free(splitted_problem->M_nn);
+  NM_free(splitted_problem->M_tn);
+  NM_free(splitted_problem->M_nt);
+  NM_free(splitted_problem->M_tt);
+  free(splitted_problem->q_n);
+  free(splitted_problem->q_t);
+  free(splitted_problem);
+}
+
 void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
                                                double* reaction, double* velocity,
 
@@ -358,10 +371,10 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem) {
   new->numberOfContacts = problem->numberOfContacts;
   new->M = NM_new();
   NM_copy(problem->M, new->M);
-  new->q = (double*)malloc(n * sizeof(double));
-  memcpy(new->q, problem->q, n * sizeof(double));
-  new->mu = (double*)malloc(nc * sizeof(double));
-  memcpy(new->mu, problem->mu, nc * sizeof(double));
+  new->q = (double*)malloc(to_size_t(n) * sizeof(double));
+  memcpy(new->q, problem->q, to_size_t(n) * sizeof(double));
+  new->mu = (double*)malloc(to_size_t(nc) * sizeof(double));
+  memcpy(new->mu, problem->mu, to_size_t(nc) * sizeof(double));
   return new;
 }
 

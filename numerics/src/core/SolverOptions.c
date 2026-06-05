@@ -26,7 +26,6 @@
 #include <string.h>  // for strcmp
 
 /* Solver registration system (NEW) */
-#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 
@@ -42,12 +41,11 @@
     \param iter_max maximum number of iterations allowed for this solver
     \param tol tolerance for the solution.
 */
-static SolverOptions* solver_options_initialize(int solver_id, int iter_max, double tol,
-                                                size_t number_of_internal_solvers) {
+static SolverOptions* solver_options_initialize(int solver_id, int iter_max, double tol) {
   // Warning : the C structure members after the first instanciation might be anything.
   // (C structure members can not have default values).
   // Maybe we should write a function to create so, like so * = so_new ?
-  SolverOptions* options = (SolverOptions*)malloc(sizeof(SolverOptions));
+  SolverOptions* options = (SolverOptions*)calloc(1, sizeof(SolverOptions));
 
   options->solverId = solver_id;
   options->iSize = OPTIONS_PARAM_SIZE;
@@ -80,8 +78,14 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
   options->dWorkSize = 0;
   options->iWork = NULL;
   options->callback = NULL;
-  options->numberOfInternalSolvers = number_of_internal_solvers;
-  options->internalSolvers = calloc(options->numberOfInternalSolvers, sizeof(SolverOptions*));
+  options->numberOfInternalSolvers = 0;
+  // The number of internal solvers and the required allocation must be done in
+  // ..._set_default function, not here
+  // options->numberOfInternalSolvers = number_of_internal_solvers;
+  // if (options->numberOfInternalSolvers > 0) {
+  //   options->internalSolvers =
+  //       calloc(options->numberOfInternalSolvers, sizeof(SolverOptions*));
+  // }
   options->solverData = NULL;
   options->solverParameters = NULL;
 
@@ -91,6 +95,10 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
 
 /** */
 static void recursive_solver_options_print(SolverOptions* options, int level) {
+  if (!options) {
+    numerics_printf("%s========== NULL options pointer.\n");
+    return;
+  }
   char* marge;
   marge = (char*)malloc((size_t)(level + 1) * sizeof(char));
   for (int i = 0; i < level; i++) marge[i] = ' ';
@@ -178,15 +186,16 @@ void solver_options_delete(SolverOptions* op) {
 
     // Clear callback
     if (op->callback) free(op->callback);
-
     op->callback = NULL;
 
     // Clear internal solver(s)
     if (op->internalSolvers) {
-      for (size_t i = 0; i < op->numberOfInternalSolvers; i++)
+      for (size_t i = 0; i < op->numberOfInternalSolvers; i++) {
         solver_options_delete(op->internalSolvers[i]);
-      op->numberOfInternalSolvers = 0;
+        op->internalSolvers[i] = NULL;
+      }
       free(op->internalSolvers);
+      op->numberOfInternalSolvers = 0;
     }
     op->internalSolvers = NULL;
 
@@ -205,9 +214,8 @@ void solver_options_delete(SolverOptions* op) {
     op->dparam = NULL;
 
     op->isSet = false;
+    free(op);
   }
-  //  double free or corruption
-  //  free(op);
 }
 
 SolverOptions* solver_options_copy(SolverOptions* source) {
@@ -308,7 +316,7 @@ SolverOptions* solver_options_create(int solver_id) {
 
   /* Create options with registered defaults */
   SolverOptions* options =
-      solver_options_initialize(solver_id, solver->default_max_iter, solver->default_tol, 0);
+      solver_options_initialize(solver_id, solver->default_max_iter, solver->default_tol);
 
   /* Call set_default if provided - this sets solver-specific options
    * and allocates internal solvers without requiring a problem pointer */
@@ -367,597 +375,3 @@ void solver_options_reset_to_defaults(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = solver->default_max_iter;
   options->dparam[SICONOS_DPARAM_TOL] = solver->default_tol;
 }
-
-/* SolverOptions* solver_options_create_old_style(int solverId) { */
-/*   // This function must be the unique way for users to create a SolverOptions. */
-/*   // It ensures that the object is ready to use by a driver (pointers ready, */
-/*   // memory allocated, minimum default values set ...) */
-/*   // Any further modification of the default values must be done */
-/*   // by setting iparam or dparam explicitely of with solver_options_update_internal */
-/*   // function when it turns to internal solvers. */
-
-/*   SolverOptions* options = NULL; */
-
-/*   // In each case : */
-/*   // - first call a default setup, common to all solvers, with tolerance and max iter value,
- */
-/*   //   to ensure that pointers are ready, and minimum default values set; */
-/*   // - then call <formulation>_<solver_name>_set_default(options) to set value specific to
- */
-/*   //   each solver, if required (if not, the function does not exist). */
-/*   switch (solverId) { */
-/*     // --- VI Solvers --- */
-/*     // ref list : enum VI_SOLVER */
-/*     case SICONOS_VI_EG: */
-/*     case SICONOS_CONVEXQP_VI_EG: */
-/*     case SICONOS_SOCLCP_VI_EG: */
-/*     case SICONOS_FRICTION_3D_VI_EG: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_VI_EG: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       variationalInequality_ExtraGradient_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_VI_FPP: */
-/*     case SICONOS_CONVEXQP_VI_FPP: */
-/*     case SICONOS_SOCLCP_VI_FPP: */
-/*     case SICONOS_FRICTION_3D_VI_FPP: */
-/*     case SICONOS_FRICTION_3D_VI_FPP_Cylinder: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_VI_FPP: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       variationalInequality_FixedPointProjection_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_VI_HP: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       variationalInequality_HyperplaneProjection_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_VI_BOX_QI: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-10, 0); */
-/*       variationalInequality_BOX_QI_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_VI_BOX_AVI_LSA: { */
-/*       options = solver_options_initialize(solverId, 100, 1e-12, 1); */
-/*       variationalInequality_BOX_AVI_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_VI_BOX_PATH: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     // --- QP Solvers --- */
-/*     // ref list : enum CONVEXQP_SOLVER in ConvexQP_cst.h */
-/*     case SICONOS_LCP_CONVEXQP_PG: */
-/*     case SICONOS_CONVEXQP_PG: */
-/*     case SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       convexQP_ProjectedGradient_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_CONVEXQP_ADMM: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       convexQP_ADMM_set_default(options); */
-/*       break; */
-/*     } */
-/*     // --- LCP and Relay Solvers --- */
-/*     // ref list : enum LCP_SOLVER in LCP_cst.h */
-/*     // ref list : enum RELAY_SOLVER in Relay_options.h */
-/*     case SICONOS_LCP_LEMKE: */
-/*     case SICONOS_RELAY_LEMKE: */
-/*     case SICONOS_FRICTION_2D_LEMKE: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-6, 0); */
-/*       lcp_lexicolemke_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_LCP_NSGS_SBM: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 1); */
-/*       lcp_nsgs_sbm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_LCP_PGS: */
-/*     case SICONOS_RELAY_PGS: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-6, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_CPG: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-6, 0); */
-/*       break; */
-/*     } */
-/*     case SICONOS_LCP_LATIN: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 0); */
-/*       lcp_latin_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_LATIN_W: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 0); */
-/*       lcp_latin_w_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_QP: */
-/*     case SICONOS_LCP_NSQP: { */
-/*       options = solver_options_initialize(solverId, 0, 1e-6, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_NEWTONMIN: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_NEWTON_FB_FBLSA: */
-/*     case SICONOS_LCP_NEWTON_MIN_FBLSA: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-10, 0); */
-/*       lcp_newton_FB_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_PSOR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       lcp_psor_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_RPGS: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-6, 0); */
-/*       lcp_rpgs_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_PATH: */
-/*     case SICONOS_RELAY_PATH: */
-/*     case SICONOS_MLCP_PATH: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_ENUM: */
-/*     case SICONOS_RELAY_ENUM: */
-/*     case SICONOS_FRICTION_2D_ENUM: { */
-/*       options = solver_options_initialize(solverId, 0, 1e-6, 0); */
-/*       lcp_enum_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_PIVOT: { */
-/*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
-/*       lcp_pivot_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_BARD: { */
-/*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
-/*       lcp_pivot_set_default(options); */
-/*       // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_BARD; set in */
-/*       // lcp_driver */
-/*       break; */
-/*     } */
-/*     case SICONOS_LCP_MURTY: { */
-/*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
-/*       lcp_pivot_set_default(options); */
-/*       // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX set
- * in */
-/*       // lcp_driver */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_PATHSEARCH: { */
-/*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
-/*       lcp_pathsearch_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_PIVOT_LUMOD: { */
-/*       options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0); */
-/*       lcp_pivot_lumod_set_default(options);  // same as lcp_pivot */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_LCP_GAMS: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     // --- AVI Solvers --- */
-/*     // ref list : enum AVI_SOLVER in AVI_cst.h */
-/*     case SICONOS_AVI_CAOFERRIS: */
-/*     case SICONOS_AVI_PATHAVI: */
-/*     case SICONOS_RELAY_AVI_CAOFERRIS: */
-/*     case SICONOS_RELAY_AVI_CAOFERRIS_TEST: */
-/*     case SICONOS_LCP_AVI_CAOFERRIS: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     // --- SOCLCP Solvers --- */
-/*     // ref list : enum SOCLCP_SOLVER in SOCLCP_cst.h */
-/*     case SICONOS_SOCLCP_NSGS: */
-/*     case SICONOS_FRICTION_3D_SOCLCP: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       soclcp_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration: */
-/*     case SICONOS_SOCLCP_ProjectionOnCone: */
-/*     case SICONOS_SOCLCP_ProjectionOnConeWithRegularization: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-16, 0); */
-/*       soclcp_projection_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     // --- MLCP Solvers --- */
-/*     // ref list : enum MLCP_SOLVER in mlcp_cst.h */
-/*     case SICONOS_MLCP_PGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       mlcp_pgs_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_PGS_SBM: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 1); */
-/*       mlcp_pgs_sbm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_RPGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       mlcp_rpgs_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_PSOR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       mlcp_psor_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_RPSOR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-6, 0); */
-/*       mlcp_rpsor_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_ENUM: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_enum_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_DIRECT_ENUM: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_direct_enum_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_SIMPLEX: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_MLCP_DIRECT_SIMPLEX: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_direct_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_PATH_ENUM: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_enum_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_DIRECT_PATH: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_direct_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_DIRECT_PATH_ENUM: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_enum_set_default(options); */
-/*       mlcp_direct_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_FB: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_DIRECT_FB: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       mlcp_direct_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MLCP_LCP_LEMKE: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-11, 0); */
-/*       mlcp_direct_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     // --- NCP Solvers --- */
-/*     // ref list : enum NCP_SOLVER in NCP_cst.h */
-/*     case SICONOS_NCP_NEWTON_FB_FBLSA: */
-/*     case SICONOS_NCP_NEWTON_MIN_FBLSA: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       newton_lsa_set_default(options); */
-/*       break; */
-/*     }; */
-/*     case SICONOS_NCP_PATHSEARCH: { */
-/*       options = solver_options_initialize(solverId, 100, 1e-12, 1); */
-/*       pathsearch_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_NCP_PATH: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     // --- MCP Solvers --- */
-/*     // ref list : enum MCP_SOLVER in MCP_cst.h */
-/*     case SICONOS_MCP_NEWTON_FB_FBLSA: */
-/*     case SICONOS_MCP_NEWTON_MIN_FBLSA: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-10, 0); */
-/*       newton_lsa_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_MCP_OLD_FB: { */
-/*       options = solver_options_initialize(solverId, 10, 1e-7, 0); */
-/*       nonSmoothNewton_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     // --- Friction Solvers --- */
-/*     // ref list : enum FRICTION_SOLVER in Friction_cst.h */
-/*     case SICONOS_FRICTION_2D_NSGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 0); */
-/*       fc2d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_2D_CPG: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 0); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_NSGS: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_NSGS: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       fc3d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_FRICTION_3D_NSGSV: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       fc3d_nsgs_velocity_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_PROX: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_PROX_WR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       fc3d_proximal_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_TFP: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_TFP_WR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       fc3d_tfp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_NSN_AC: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR: { */
-/*       options = solver_options_initialize(solverId, 200, 1e-3, 0); */
-/*       fc3d_nsn_ac_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_FRICTION_3D_NSN_AC: { */
-/*       options = solver_options_initialize(solverId, 200, 1e-10, 0); */
-/*       gfc3d_nsn_ac_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_NSN_AC_NEW: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-10, 0); */
-/*       newton_lsa_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_DSFP: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_DSFP_WR: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       fc3d_dsfp_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_FRICTION_3D_HP: { */
-/*       options = solver_options_initialize(solverId, 2000000, 1e-3, 0); */
-/*       fc3d_hp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_FPP: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       fc3d_fpp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_EG: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-3, 0); */
-/*       fc3d_eg_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_NSN_FB: { */
-/*       options = solver_options_initialize(solverId, 200, 1e-3, 0); */
-/*       fc3d_nsn_fb_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_GAMS_PATH: */
-/*     case SICONOS_FRICTION_3D_GAMS_PATHVI: */
-/*     case SICONOS_FRICTION_3D_GAMS_LCP_PATH: */
-/*     case SICONOS_FRICTION_3D_GAMS_LCP_PATHVI: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-9, 0); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_FRICTION_3D_ACLMFP: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       fc3d_aclmfp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_FRICTION_3D_ACLMFP: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       gfc3d_aclmfp_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_FRICTION_3D_NSN_NM: { */
-/*       options = solver_options_initialize(solverId, 200, 1e-3, 0); */
-/*       fc3d_nsn_nm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_PFP: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 2); */
-/*       fc3d_pfp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_ADMM: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_ADMM_WR: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       fc3d_admm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_FRICTION_3D_ADMM: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       gfc3d_admm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN: { */
-/*       options = solver_options_initialize(solverId, 10, 1e-14, 0); */
-/*       fc3d_onecontact_nsn_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: { */
-/*       options = solver_options_initialize(solverId, 10, 1e-14, 0); */
-/*       fc3d_onecontact_nsn_gp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */
-/*       fc3d_poc_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_ROLLING_FRICTION_3D_NSGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       rfc3d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_ROLLING_FRICTION_3D_ADMM: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 0); */
-/*       rolling_friction_3d_admm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_ROLLING_FRICTION_2D_NSGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       rfc2d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_GLOBAL_FRICTION_3D_IPM: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       gfc3d_ipm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_IPM_SNM: */
-/*     case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       fc3d_ipm_snm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       gfc3d_ipm_snm_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 1); */
-/*       gfc3d_ipm_snm_set_default(options); */
-/*       assert(options->numberOfInternalSolvers == 1); */
-/*       options->internalSolvers[0] =
- * solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR); */
-
-/*       break; */
-/*     } */
-
-/*     case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       rfc2d_poc_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       rfc2d_poc_withLocalIteration_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 1); */
-/*       rfc3d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-/*     case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM: { */
-/*       options = solver_options_initialize(solverId, 20000, 1e-6, 0); */
-/*       grfc3d_IPM_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint: */
-/*     case SICONOS_FRICTION_3D_NCPGlockerFBNewton: */
-/*     case SICONOS_FRICTION_3D_NCPGlockerFBPATH: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       break; */
-/*     } */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC: */
-/*     case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       break; */
-/*     } */
-
-/*     // --- GMP Solver --- */
-/*     case SICONOS_GENERIC_MECHANICAL_NSGS: { */
-/*       options = solver_options_initialize(solverId, 10000, 1e-4, 4); */
-/*       gmp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case PLASTICITY_2D_NSGS: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-4, 1); */
-/*       plasticity_2d_nsgs_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     case PLASTICITY_2D_ONECONE_NSN: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */
-/*       plasticity_2d_onecone_nsn_set_default(options); */
-/*       break; */
-/*     } */
-/*     case PLASTICITY_2D_ONECONE_NSN_GP: */
-/*     case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-14, 0); */
-/*       plasticity_2d_onecone_nsn_gp_set_default(options); */
-/*       break; */
-/*     } */
-/*     case PLASTICITY_2D_ONECONE_ProjectionOnCone: */
-/*     case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: { */
-/*       options = solver_options_initialize(solverId, 1000, 1e-12, 0); */
-/*       plasticity_2d_poc_set_default(options); */
-/*       break; */
-/*     } */
-
-/*     default: */
-/*       numerics_error("solver_options_create", "Unknown solver : %s (%i) !", */
-/*                      solver_options_id_to_name(solverId), solverId); */
-/*   } */
-
-/*   return options; */
-/* } */

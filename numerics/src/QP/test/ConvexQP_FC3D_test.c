@@ -78,7 +78,6 @@ static int test_0(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   frictionContactProblem_free(problem);
   free(pb);
   free(z);
@@ -164,7 +163,6 @@ static int test_1(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   solver_options_delete(options);
-  free(options);
   frictionContactProblem_free(problem);
   free(pb);
   free(z);
@@ -253,7 +251,6 @@ static int test_2(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   solver_options_delete(options);
-  free(options);
   frictionContactProblem_free(problem);
   free(pb);
   free(z);
@@ -338,7 +335,6 @@ static int test_3(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
   solver_options_delete(options);
-  free(options);
   frictionContactProblem_free(problem);
   free(pb);
   free(z);

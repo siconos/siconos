@@ -520,7 +520,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   NumericsMatrix* M = problem->M;
   NumericsMatrix* H = problem->H;
   NumericsMatrix* Htrans = NM_transpose(problem->H);
-  ;
 
   int update_b = 1;  // this flag should be removed.
 

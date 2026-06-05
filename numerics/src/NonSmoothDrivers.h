@@ -262,8 +262,8 @@ int plasticity_2d_driver(PlasticityProblem *problem, double *stress,
                          double *plastic_strain_rate, SolverOptions *options);
 
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
-                    unsigned int *row, unsigned int *column, unsigned int nc, unsigned int nb,
-                    int solver_id, double tolerance, int itermax, int verbose, int outputFile,
+                    size_t *row, size_t *column, size_t nc, size_t nb, int solver_id,
+                    double tolerance, int itermax, int verbose, int outputFile,
                     int freq_output, int ndof);
 
 /**
@@ -296,11 +296,11 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
 
  */
 int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity, double *q,
-                     double *b, double *mu, double *Mdata, unsigned int nzM,
-                     unsigned int *rowM, unsigned int *colM, double *Hdata, unsigned int nzH,
-                     unsigned int *rowH, unsigned int *colH, unsigned int n, unsigned int nc,
-                     int solver_id, size_t isize, int *iparam, size_t dsize, double *dparam,
-                     int verbose, int outputFile, int freq_output);
+                     double *b, double *mu, double *Mdata, size_t nzM, size_t *rowM,
+                     size_t *colM, double *Hdata, size_t nzH, size_t *rowH, size_t *colH,
+                     size_t n, size_t nc, int solver_id, size_t isize, int *iparam,
+                     size_t dsize, double *dparam, int verbose, int outputFile,
+                     int freq_output);
 
 /**
    General interface to solver for relay problems

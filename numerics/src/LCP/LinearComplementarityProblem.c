@@ -24,9 +24,9 @@
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, FILE
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
-#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
-#include "numerics_verbose.h"  // for check_io
+#include "NumericsMatrix.h"  // for NM_display, NM_clear, NM_new_from_file
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 
 void linearComplementarity_display(LinearComplementarityProblem* problem) {
   assert(problem);
@@ -89,17 +89,17 @@ int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
 }
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem) {
-  if (problem->M) {
-    NM_clear(problem->M);
-    free(problem->M);
-    problem->M = NULL;
-  }
-  if (problem->q) {
-    free(problem->q);
-    problem->q = NULL;
-  }
+  if (problem) {
+    if (problem->M) {
+      problem->M = NM_free(problem->M);
+    }
+    if (problem->q) {
+      free(problem->q);
+      problem->q = NULL;
+    }
 
-  free(problem);
+    free(problem);
+  }
 }
 
 LinearComplementarityProblem* newLCP(void) {

@@ -10,7 +10,7 @@ dependencies:
   - lxml
   - pytest
   - matplotlib
-  - pybind11
+  - pybind11>=3.0.2
   - vtk
   - packaging
   - openblas

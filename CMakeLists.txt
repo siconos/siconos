@@ -54,7 +54,7 @@ endif()
 
 # If not given, turn build type to release mode.
 if(NOT CMAKE_BUILD_TYPE)
-  if(WITH_ASAN) # asan conf will be done at component level (in ComponentSetup.cmake)
+  if(WITH_SANITIZER) # asan conf will be done at component level (in ComponentSetup.cmake)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
   else()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)

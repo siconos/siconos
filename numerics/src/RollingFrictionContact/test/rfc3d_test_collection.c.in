@@ -19,6 +19,7 @@
 #define _XOPEN_SOURCE 700
 #include <stdio.h>                                 // for printf
 #include <string.h>                                // for strcmp
+#include <stdlib.h>
 #include "frictionContact_test_utils.h"            // for build_test_collection
 #include "test_utils.h"                            // for data_collection
 
@@ -61,6 +62,7 @@ int main (int argc, char *argv[])
   //int out = 0;
 
   free_test_collection(collection, number_of_tests);
+  free(_data_collection);
 
 
 

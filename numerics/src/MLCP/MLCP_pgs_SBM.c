@@ -239,6 +239,8 @@ void mlcp_pgs_sbm_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  }else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PGS);

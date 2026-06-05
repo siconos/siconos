@@ -670,7 +670,6 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
       // Clear memory
       solver_options_delete(local_opts);
       fc3d_local_problem_free(localproblem, problem);
-      free(local_opts);
     }
   }
 
@@ -861,7 +860,6 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
       // Clear memory
       solver_options_delete(local_opts);
       fc3d_local_problem_free(localproblem, problem);
-      free(local_opts);
     }
   }
 
@@ -887,8 +885,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   /** Free memory **/
 
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_clear_block(problem->M->matrix1);
-    SBM_clear(problem->M->matrix1);
+    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
     problem->M->matrix1 = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver(problem, localproblem, local_opts);

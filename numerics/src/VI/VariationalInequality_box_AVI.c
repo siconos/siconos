@@ -19,23 +19,22 @@
 #include <assert.h>  // for assert
 #include <stdlib.h>  // for malloc, free, NULL
 
-#include "Newton_methods.h"                 // for functions_LSA, init_lsa_f...
-#include "NumericsFwd.h"                    // for RelayProblem, SolverOptions
-#include "NumericsMatrix.h"                 // for NM_assert, NM_create_from...
-#include "RelayProblem.h"                   // for RelayProblem, freeRelay_p...
-#include "Relay_Solvers.h"                  // for relay_avi_caoferris
-#include "SiconosBlas.h"                    // for cblas_daxpy
-#include "SiconosSets.h"                    // for box_constraints
-#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
-#include "VI_Newton.h"                      // for VI_compute_F, VI_compute_...
-#include "VariationalInequality.h"          // for VariationalInequality
+#include "Newton_methods.h"  // for functions_LSA, init_lsa_f...
+#include "NumericsFwd.h"     // for RelayProblem, SolverOptions
+#include "NumericsMatrix.h"  // for NM_assert, NM_create_from...
+#include "RelayProblem.h"    // for RelayProblem, freeRelay_p...
+#include "Relay_Solvers.h"   // for relay_avi_caoferris
+#include "Relay_options.h"   // for SICONOS_RELAY_AVI_CAOFERRIS
+#include "SiconosBlas.h"     // for cblas_daxpy
+#include "SiconosSets.h"     // for box_constraints
+#include "SolverOptions.h"   // for SolverOptions, solver_opt...
+#include "VI_Newton.h"       // for VI_compute_F, VI_compute_...
 #include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "Relay_options.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
-#include "sanitizer.h"                      // for cblas_dcopy_msan
+#include "numerics_errors.h"
+#include "safe_casts.h"
+#include "sanitizer.h"  // for cblas_dcopy_msan
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_errors.h"
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
@@ -98,7 +97,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
     RelayProblem* relay_pb = (RelayProblem*)malloc(sizeof(RelayProblem));
     relay_pb->size = n;
     relay_pb->M = NM_create_from_data(NM_DENSE, n, n, malloc(n * n * sizeof(double)));
-    ;
+
     relay_pb->q = (double*)malloc(n * sizeof(double));
 
     box_constraints* box = (box_constraints*)problem->set;
@@ -124,6 +123,12 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
 
 void variationalInequality_BOX_AVI_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+  if (options->numberOfInternalSolvers == 0) {
+    options->numberOfInternalSolvers = 1;
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  } else {
+    solver_options_delete(options->internalSolvers[0]);
+  }
 
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_RELAY_AVI_CAOFERRIS);
@@ -151,14 +156,10 @@ static void vi_box_avi_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_VI_BOX_AVI_LSA,
-                "VI_BOX_AVI_LSA",
-                "Box VI solver based on AVI and Line Search",
-                vi_box_avi_init_wrap,
-                vi_box_avi_solve_wrap,
-                vi_box_avi_free_wrap,
-                NULL,
-                variationalInequality_BOX_AVI_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_VI_BOX_AVI_LSA, "VI_BOX_AVI_LSA",
+                "Box VI solver based on AVI and Line Search", vi_box_avi_init_wrap,
+                vi_box_avi_solve_wrap, vi_box_avi_free_wrap, NULL,
+                variationalInequality_BOX_AVI_set_default, /* set_default */
+                1000,                                      /* default_max_iter */
+                1e-4,                                      /* default_tol */
+                0 /* is_local_solver */)

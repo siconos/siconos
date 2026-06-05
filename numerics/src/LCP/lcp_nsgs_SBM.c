@@ -20,18 +20,18 @@
 #include <stdlib.h>  // for malloc, free, exit, EXIT_F...
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_dri...
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep - For LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "NumericsMatrix.h"                // IWYU pragma: keep
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
 #include "numerics_verbose.h"
-#include "sanitizer.h"                     // for cblas_dcopy_msan
+#include "sanitizer.h"  // for cblas_dcopy_msan
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -46,7 +46,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* 
   assert(blmat->blocksize0[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
-  int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
+  unsigned int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
   local_problem->M->matrix0 = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];
@@ -207,7 +207,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
   /* Number of GS iterations */
   options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   /* Resulting error */
-  options[0].iparam[SICONOS_DPARAM_RESIDU] = error;
+  options[0].dparam[SICONOS_DPARAM_RESIDU] = error;
 
   free(local_problem->q);
   free(local_problem->M);
@@ -219,8 +219,11 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
 void lcp_nsgs_sbm_set_default(SolverOptions* options) {
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
+    if (options->internalSolvers) free(options->internalSolvers);
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  } else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);
@@ -237,7 +240,8 @@ static int lcp_nsgs_sbm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_nsgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_nsgs_sbm_solve_wrap(void* problem, double* z, double* w,
+                                   SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_nsgs_SBM((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -250,11 +254,9 @@ static void lcp_nsgs_sbm_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_LCP_NSGS_SBM, "LCP_NSGS_SBM",
                 "Non-smooth Gauss-Seidel for LCP with Sparse Block Matrix",
-                lcp_nsgs_sbm_init_wrap,
-                lcp_nsgs_sbm_solve_wrap,
-                lcp_nsgs_sbm_free_wrap,
-                NULL,  /* error function */
-                lcp_nsgs_sbm_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+                lcp_nsgs_sbm_init_wrap, lcp_nsgs_sbm_solve_wrap, lcp_nsgs_sbm_free_wrap,
+                NULL,                     /* error function */
+                lcp_nsgs_sbm_set_default, /* set_default */
+                1000,                     /* default_max_iter */
+                1e-6,                     /* default_tol */
+                0 /* is_local_solver */)
