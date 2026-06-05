@@ -2,7 +2,7 @@
 
 namespace CompactNSearch
 {
-#ifdef USE_DOUBLE
+#ifdef COMPACTNSEARCH_USE_DOUBLE
 	using Real = double;
 #else
 	using Real = float;

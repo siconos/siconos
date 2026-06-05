@@ -22,14 +22,14 @@ struct point : item {
 // Direct association to a lagrangian_ds: just a point associated at
 // the coordinates of the system.
 template <match::item Item>
-  requires std::derived_from<Item, model::lagrangian_ds>
+  requires(requires { typename Item::lagrangian_dynamical_system_t; })
 struct point<Item> : item {
   using items = gather<Item>;
   using item_t = Item;
 
   struct attributes {
     some::boolean flag;
-    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::vector<float, some::indice_value<3>> coord;
     some::item_ref<item_t> item;
   };
 
@@ -67,7 +67,7 @@ struct point<Item> {
 
   struct attributes {
     some::boolean flag;
-    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::vector<float, some::indice_value<3>> coord;
     some::item_ref<item_t> item;
     some::indice point_index;
   };
@@ -105,12 +105,11 @@ struct point<Item> {
 
   struct attributes {
     some::boolean flag;
-    some::vector<some::scalar, some::indice_value<3>> coord;
+    some::vector<float, some::indice_value<3>> coord;
     some::item_ref<item_t> item;
     some::indice point_index;
     some::indice seg_index;
   };
-
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

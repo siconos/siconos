@@ -82,6 +82,12 @@ concept unbounded = variable_size_vector<T> || variable_size_matrix<T>;
 namespace siconos::algebra {
 namespace match = siconos::storage::pattern::match;
 
+template <typename T, typename M>
+decltype(auto) cast(T, M&& m)
+{
+  return m.template cast<typename T::type>();
+}
+
 template <typename T, size_t M, size_t N>
 using matrix = Eigen::Matrix<T, M, N>;  // column storage
 

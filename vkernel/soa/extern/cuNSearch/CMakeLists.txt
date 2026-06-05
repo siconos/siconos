@@ -8,7 +8,10 @@ enable_language(CUDA)
 set_property(GLOBAL PROPERTY USE_FOLDERS on)
 
 
-option(CUNSEARCH_USE_DOUBLE_PRECISION "Use double precision." ON)
+option(CUNSEARCH_USE_DOUBLE_PRECISION "Use double precision." OFF)
+
+
+set(CUNSEARCH_USE_DOUBLE_PRECISION FALSE)
 
 if(CUNSEARCH_USE_DOUBLE_PRECISION)
 	message(STATUS "cuNSearch::Real = double")

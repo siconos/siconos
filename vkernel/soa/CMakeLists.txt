@@ -52,7 +52,7 @@ endif()
 link_directories(${CMAKE_BUILD_DIR})
 
 if(WITH_GPU)
-  set(flags "-DWITH_GPU -DCUNSEARCH_USE_DOUBLE_PRECISION")
+  set(flags "-DWITH_GPU")
 endif()
 
 set(flags "${flags} -Wall --std=c++23")
