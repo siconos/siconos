@@ -617,6 +617,11 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
     CHECK_CUDA(cudaFree(d_sumP2))
     CHECK_CUDA(cudaFree(d_sumErr2))
+
+    if (graphCreated) {
+      CHECK_CUDA(cudaGraphExecDestroy(instance))
+      CHECK_CUDA(cudaGraphDestroy(graph))
+    }
   }
 
   // Copy z back to host
@@ -675,6 +680,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   CHECK_CUSPARSE(cusparseDestroyDnVec(vec_z))
   CHECK_CUSPARSE(cusparseDestroy(handle))
+
+  CHECK_CUDA(cudaStreamDestroy(stream));
 
   /* Restore problem before permutation */
   problem->M->matrix1 = old_matrix1;
