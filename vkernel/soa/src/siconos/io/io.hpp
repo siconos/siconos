@@ -164,10 +164,6 @@ struct io : item {
       using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
-      /* /!\ first osi */
-      const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
-          [](auto elem) { return elem.p0_vector_assembled(); });
-
       auto& ys = storage::attr_values<interaction, "y">(data, step);
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
@@ -177,30 +173,31 @@ struct io : item {
 
       auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
       auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+
+      auto& h_matrices1 =
+          storage::attr_values<interaction, "h_matrix1">(data, step);
+
       auto& activations =
           storage::prop_values<interaction, "activation">(data, step);
 
       attr<"cp_info">(*self()).clear();
 
       indice k = 0;
-      for (auto [relation, nslaw, y, ydot, lambda, ds1, ds2, activation] :
-           view::zip(relations, nslaws, ys, ydots, lambdas, ds1s, ds2s,
-                     activations)) {
+      for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2,
+                 activation] :
+           view::zip(relations, h_matrices1, nslaws, ys, ydots, lambdas, ds1s,
+                     ds2s, activations)) {
         auto hds1 = storage::make_handle(data, ds1);
         auto hds2 = storage::make_handle(data, ds2);
 
-        using vect = std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
-                                                          translation 2 +
-                                                          orientation 1 */
+        using vect =
+            std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
+                                                 translation 2 +
+                                                 orientation 1 */
 
         if (activation) {
-          auto index_ds1 =
-              prop<"index">(hds1); /* cf one_step_integrator.hpp,
-                                    * assemble_h_matrix_for_involved_ds =>
-                                    * row of p0_vector_assembled */
-
-          auto p0 =
-              algebra::get_vector(p0_v, index_ds1); /* in 2D, 2 components */
+          // computation at the interaction level
+          auto p0 = h_matrix1.transpose() * lambda;
 
           vect c1 = {hds1.q(step)[0], hds1.q(step)[1], 0.};
           vect c2 = {hds2.q(step)[0], hds2.q(step)[1], 0.};
@@ -276,14 +273,14 @@ struct io : item {
           /* disk / segment */
           attr<"cp_info">(*self()).push_back(
               {storage::make_handle(data, nslaw).mu(),
-               ca[0],
-               ca[1],
-               0. /* 2D */,
                cb[0],
                cb[1],
                0. /* 2D */,
-               cn[0],
-               cn[1],
+               ca[0],
+               ca[1],
+               0. /* 2D */,
+               -cn[0],
+               -cn[1],
                0. /* 2D */,
                p0[0],
                p0[1],
@@ -350,9 +347,9 @@ struct io : item {
                     return (integer)0;
                   }));
 
-          attr<"co_info">(*self()).push_back(
-              {(scalar)inter_index, (scalar)id_ds1, (scalar)id_ds2,
-               (scalar)static_shape_info});
+          attr<"co_info">(*self()).push_back({(scalar)inter_index,
+                                              (scalar)id_ds1, (scalar)id_ds2,
+                                              (scalar)static_shape_info});
         }
       }
 
