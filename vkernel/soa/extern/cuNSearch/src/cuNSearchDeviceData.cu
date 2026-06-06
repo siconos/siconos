@@ -290,5 +290,8 @@ namespace cuNSearch
 		CudaHelper::MemcpyDeviceToHost(CudaHelper::GetPointer(d_NeighborWriteOffsets), neighborSet.Offsets, particleCount);
 
 		USE_TIMING(Timing::stopTiming(PRINT_STATS));
+
+    d_Neighbors.clear();
+    d_Neighbors.shrink_to_fit();
 	}
 }

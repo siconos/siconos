@@ -25,6 +25,8 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
 
+#include "siconos/utils/range.hpp"
+
 namespace py = pybind11;
 
 namespace siconos::config::disks {

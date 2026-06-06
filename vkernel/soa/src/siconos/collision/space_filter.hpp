@@ -1,7 +1,6 @@
 #pragma once
 
 #include <concepts>
-#include <range/v3/view/enumerate.hpp>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
@@ -18,6 +17,7 @@
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/storage.hpp"
 #include "siconos/utils/variant.hpp"
+#include "siconos/utils/range.hpp"
 
 namespace std {
 template <typename T>
