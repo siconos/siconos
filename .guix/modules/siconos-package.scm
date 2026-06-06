@@ -172,7 +172,6 @@ problems.")
                                bullet
                                eigen
                                fclib-devel
-                               fmt
                                gmp
                                hdf5-parallel-openmpi
                                lapack
@@ -188,7 +187,6 @@ problems.")
                                python-scipy
                                python-occ-core
                                python-wheel
-                               range-v3
                                suitesparse))
       (home-page
        "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/index.html")
