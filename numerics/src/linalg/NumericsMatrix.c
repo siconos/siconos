@@ -6994,8 +6994,10 @@ int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
       if (indices[k] != indices[k - 1] + 1) {
         is_diagonal_block_matrix = 0;
         free(indices);
+        indices = NULL;
         free(*blocksizes);
         *blocksizes = NULL;
+        break;
       }
     }
 

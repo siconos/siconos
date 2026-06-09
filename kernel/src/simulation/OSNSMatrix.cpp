@@ -422,7 +422,6 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillH(
   _numericsMatrix.reset(NM_transpose(Htrans.get()), NM_free);
   _dimColumn = updateSizeAndPositions(indexSet);
   _dimRow = updateSizeAndPositions(DSG);
-
   DEBUG_END(
       "void "
       "siconos:simulation::OSNSMatrix::fillH(std::shared_ptr<siconos::graphs::"
@@ -443,9 +442,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
     _dimRow = updateSizeAndPositions(indexSet);
     _dimColumn = updateSizeAndPositions(DSG);
   }
-
   switch (_storageType) {
     case NM_SPARSE: {
+
       if (update) {
         // We choose a triplet matrix format for inserting values.
         // This simplifies the memory manipulation.
@@ -463,20 +462,16 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
           auto ds1 = indexSet.properties(*ui).source;
           auto ds2 = indexSet.properties(*ui).target;
-
           bool endl = false;
           auto posBlock = indexSet.properties(*ui).source_pos;
           auto pos_ds2 = indexSet.properties(*ui).target_pos;
 
           pos = indexSet.properties(*ui).absolute_position;
-
           for (auto ds = ds1; !endl; ds = ds2, posBlock = pos_ds2) {
             endl = (ds == ds2);
-            size_t sizeDS = ds->real_size();
-
+            size_t sizeDS = ds->dimension();
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
-
             if (sods && sods->boundaryConditions()) {
               auto bc = sods->boundaryConditions();
 
