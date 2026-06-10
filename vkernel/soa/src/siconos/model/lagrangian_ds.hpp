@@ -1,5 +1,6 @@
 #pragma once
 
+#include "siconos/algebra/eigen.hpp"
 #include "siconos/model/model_head.hpp"
 
 namespace siconos::model {
@@ -12,6 +13,8 @@ namespace siconos::model {
  * parameter.
  */
 struct lagrangian_ds : item {
+  using lagrangian_dynamical_system_t = void;
+
   /// @brief Degree of freedom parameter specifying system dimension
   using dof = some::indice_parameter<"dof">;
 
@@ -42,73 +45,69 @@ struct lagrangian_ds : item {
     using default_interface<Handle>::self;  ///< Inherited self pointer
 
     /// @brief Access mass matrix attribute
-    decltype(auto) mass_matrix() { return attr<"mass_matrix">(*self()); }
+    decltype(auto) mass_matrix()
+    {
+      return attr<"mass_matrix">(*self());
+    }
+
+    decltype(auto) mass_matrix(auto step)
+    {
+      return attr<"mass_matrix">(*self(), step);
+    }
 
     /// @brief Access velocity attribute
-    decltype(auto) velocity() { return attr<"velocity">(*self()); }
+    decltype(auto) velocity()
+    {
+      return attr<"velocity">(*self());
+    }
+
+    decltype(auto) velocity(auto step)
+    {
+      return attr<"velocity">(*self(), step);
+    }
 
     /// @brief Access position attribute
     decltype(auto) q() { return attr<"q">(*self()); }
+    decltype(auto) q(auto step) { return attr<"q">(*self(), step); }
 
     /// @brief Access external forces attribute
     decltype(auto) fext() { return attr<"fext">(*self()); }
+    decltype(auto) fext(auto step) { return attr<"fext">(*self(), step); }
   };
 };
 
-/**
- * @brief Represents a Lagrangian dynamical system with runtime-sized
- * attributes
- *
- * Similar to lagrangian_ds but with unbounded vectors and matrices whose
- * sizes are determined at runtime. Includes an additional "dof" attribute
- * to specify the current system dimension.
- */
-struct rt_lagrangian_ds : item {
-  /// @brief Indicates no attached storage bindings (optimization hint)
+struct elastic_lagrangian_ds : item {
+  using dof = some::indice_parameter<"dof">;
+
   using without_attached_storages_bindings = void;
 
-  /**
-   * @brief Attributes defining the state and properties of the system
-   *
-   * Contains:
-   * - dof: Current degree of freedom (system dimension)
-   * - q: Position vector (unbounded size)
-   * - velocity: Velocity vector (unbounded size)
-   * - mass_matrix: Mass matrix (unbounded size)
-   * - fext: External forces vector (unbounded size)
-   */
   struct attributes {
-    some::scalar dof;                        ///< Current degree of freedom
-    some::unbounded_vector<some::scalar> q;  ///< Position vector
-    some::unbounded_vector<some::scalar> velocity;     ///< Velocity vector
-    some::unbounded_matrix<some::scalar> mass_matrix;  ///< Mass matrix
-    some::unbounded_matrix<some::scalar> k_matrix;     // Rigidity matrix
-    some::unbounded_vector<some::scalar> fext;  ///< External forces vector
+    some::vector<some::scalar, dof> q;                 ///< Position vector
+    some::vector<some::scalar, dof> velocity;          ///< Velocity vector
+    some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
+    some::matrix<some::scalar, dof, dof> k_matrix;     ///< Stiffness matrix
+    some::vector<some::scalar, dof> fext;  ///< External forces vector
   };
 
-  /**
-   * @brief Interface for accessing system attributes
-   * @tparam Handle Type providing access to the system instance
-   */
   template <typename Handle>
-  struct interface : lagrangian_ds::interface<Handle> {
-    using lagrangian_ds::interface<Handle>::self;  ///< Inherited self pointer
+  struct interface : lagrangian_ds::template interface<Handle> {
+    using lagrangian_ds::template interface<Handle>::self;
 
-    /// @brief Access k_matrix
     decltype(auto) k_matrix() { return attr<"k_matrix">(*self()); }
-
-    /// @brief Access degree of freedom attribute
-    decltype(auto) dof() { return attr<"dof">(*self()); }
   };
 };
 
 static constexpr auto has_k_matrix = mp::is_valid(
     [](auto t) -> decltype(&(decltype(t)::attributes::k_matrix)) {});
 
-static constexpr auto runtime_dof = mp::is_valid(
-    [](auto t) -> decltype(&(decltype(t)::attributes::dof)) {});
+template <typename Handle>
+static constexpr bool runtime_dof()
+{
+  using q_t = decltype(std::declval<Handle>().q());
+  return match::variable_size_vector<q_t>;
+}
 
-static_assert(has_k_matrix(rt_lagrangian_ds{}));
+static_assert(has_k_matrix(elastic_lagrangian_ds{}));
 static_assert(!has_k_matrix(lagrangian_ds{}));
 
 }  // namespace siconos::model

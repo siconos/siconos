@@ -28,8 +28,7 @@
  *
  */
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 /** \struct generic_set SiconosSets.h
  * Generic set (can be seen as a kind of ``base class''). Mainly used to infer
@@ -90,7 +89,7 @@ enum SICONOS_SET_ID {
 
 enum SICONOS_RELATION_TYPES { SICONOS_LE, SICONOS_EQ, SICONOS_GE };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -127,7 +126,7 @@ void free_polyhedron(polyhedron* poly);
  */
 void free_polyhedron_unified(polyhedron_unified* poly);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

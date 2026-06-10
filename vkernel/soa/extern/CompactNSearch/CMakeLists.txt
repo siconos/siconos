@@ -55,17 +55,18 @@ install(TARGETS CompactNSearch
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 	
-OPTION(USE_DOUBLE_PRECISION "Use double precision"	ON)
-if (USE_DOUBLE_PRECISION)
-	add_definitions( -DUSE_DOUBLE)	
-endif (USE_DOUBLE_PRECISION)	
+OPTION(COMPACTNSEARCH_USE_DOUBLE_PRECISION "Use double precision"	OFF)
+set(COMPACTNSEARCH_USE_DOUBLE_PRECISION OFF)
+if (COMPACTNSEARCH_USE_DOUBLE_PRECISION)
+	add_definitions(CompactNSearch -DCOMPACTNSEARCH_USE_DOUBLE)
+endif (COMPACTNSEARCH_USE_DOUBLE_PRECISION)
 
 if(WIN32)
-	add_definitions( -D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+	add_definitions(CompactNSearch -D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 endif() 
 
 option(BUILD_DEMO "Build example of how to use this library."
-		ON)
+		OFF)
 if(BUILD_DEMO)
 	add_subdirectory(demo)
 endif(BUILD_DEMO)

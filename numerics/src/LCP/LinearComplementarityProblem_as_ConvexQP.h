@@ -22,8 +22,7 @@
   \brief Definition of a structure to handle with LCP problems.
 */
 
-#include "NumericsFwd.h"    // for ConvexQP, LinearComplementarityProblem, Sol...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for ConvexQP, LinearComplementarityProblem, Sol...
 
 /** \struct LinearComplementarityProblem_as_ConvexQP LinearComplementarityProblem_as_ConvexQP.h
  *
@@ -37,13 +36,13 @@ struct LinearComplementarityProblem_as_ConvexQP {
   SolverOptions *options;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

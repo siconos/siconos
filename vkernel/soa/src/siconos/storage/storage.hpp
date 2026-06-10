@@ -18,7 +18,7 @@ static auto apply_fun = []<typename Item, typename SomeFun>(
   using info_t = get_info_t<decltype(data)>;
   using all_keeps_t = decltype(all_properties_as<property::keep>(data));
 
-  using indice = typename info_t::env::indice;
+  using indice = typename info_t::template env<item_t>::indice;
 
   auto attrs = mp::tuple_unique(
       concat(attributes(item_t{}), attached_storages(item_t{}, data)));
@@ -26,10 +26,10 @@ static auto apply_fun = []<typename Item, typename SomeFun>(
   if constexpr (mp::size(attrs) > mp::size_c<0>) {
     mp::for_each(attrs, [&data, &some_fun]<match::attribute A>(A) {
       return mp::for_each(mp::range<memory_size<A, all_keeps_t>()>,
-                              [&data, &some_fun](indice step) {
-                                static_cast<SomeFun&&>(some_fun)(memory(
-                                    step, mp::get<A>(data.store())));
-                              });
+                          [&data, &some_fun](indice step) {
+                            static_cast<SomeFun&&>(some_fun)(
+                                memory(step, mp::get<A>(data.store())));
+                          });
     });
   }
 };
@@ -78,7 +78,7 @@ struct composite_item : item {
               storages_to_copy,
               [this, &other, &data]<match::attribute Storage>(Storage) {
                 mp::get<Storage>(data.store())[(*handlep).get()] =
-                  mp::get<Storage>(data.store())[other.index().value()];
+                    mp::get<Storage>(data.store())[other.index().value()];
               });
           return *this;
         }

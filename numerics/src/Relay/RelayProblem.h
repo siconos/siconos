@@ -25,8 +25,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for RelayProblem, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for RelayProblem, NumericsMatrix
 
 /** \struct RelayProblem RelayProblem.h
  * \brief Struct defining a Relay problem
@@ -39,7 +38,7 @@ struct RelayProblem {
   double* ub;        /**< ub lower bound */
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -77,7 +76,7 @@ RelayProblem* relay_new_from_filename(const char* filename);
 */
 void freeRelay_problem(RelayProblem* problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

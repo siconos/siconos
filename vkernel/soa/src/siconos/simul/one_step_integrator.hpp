@@ -8,7 +8,6 @@
 #include "siconos/simul/moreau_jean_element.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
-#include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
 #include "siconos/utils/variant.hpp"
 
@@ -49,7 +48,7 @@ struct one_step_integrator {
 
     using elements_t = decltype(mp::unpack(
         mp::filter(all_elements_t{},
-                   [](const auto& h) constexpr {
+                   [](const auto &h) constexpr {
                      using t = typename std::decay_t<decltype(h)>::type;
                      return mp::bool_c<!std::derived_from<t, empty_item>>;
                    }),
@@ -60,15 +59,16 @@ struct one_step_integrator {
     using items = gather<topology, ct_osi_t, rt_ct_osi_t, rt_rt_osi_t,
                          moreau_jean_assembled>;
 
-    using attributes =
-        gather<attribute<"elements", elements_t>,
-               attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
+    struct attributes {
+      elements_t elements;
+      some::item_ref<assembled_osi_t> assembled_osi;
+    };
 
     template <typename Handle>
     struct interface : default_interface<Handle> {
       using default_interface<Handle>::self;
 
-      auto assembled_osi()
+      decltype(auto) assembled_osi()
       {
         return storage::make_ref_handle(self()->data(),
                                         attr<"assembled_osi">(*self()));
@@ -97,7 +97,8 @@ struct one_step_integrator {
 
       void initialize(auto step)
       {
-        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
+        mp::for_each(elements(),
+                     [&](auto elem) { elem.initialize(step); });
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }
@@ -120,7 +121,7 @@ struct one_step_integrator {
       }
 
       template <size_t N, typename Func>
-      decltype(auto) visit_element(Func&& func)
+      decltype(auto) visit_element(Func &&func)
       {
         return func(std::get<N>(elements()));
       }
@@ -129,6 +130,11 @@ struct one_step_integrator {
       {
         return assembled_osi().mass_matrix_assembled();
       };
+
+      decltype(auto) iteration_matrix_assembled()
+      {
+        return assembled_osi().iteration_matrix_assembled();
+      }
 
       decltype(auto) k_matrix_assembled()
       {
@@ -226,6 +232,8 @@ struct one_step_integrator {
 
         if constexpr (with_k_matrix()) {
           algebra::resize(k_matrix_assembled(), raw_ds_size, raw_ds_size);
+          algebra::resize(iteration_matrix_assembled(), raw_ds_size,
+                          raw_ds_size);
         }
         algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
         algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
@@ -247,20 +255,18 @@ struct one_step_integrator {
       void compute_w_matrix(auto step, auto time_step)
       {
         if constexpr (with_k_matrix()) {
-          // only simulation with fem contains runtime inter
+          // stiffness matrix is present
+          algebra::add(1., mass_matrix_assembled(),
+                       time_step * time_step * theta() * theta(),
+                       k_matrix_assembled(), iteration_matrix_assembled());
 
-          auto m_matrix =
-              algebra::add(1., mass_matrix_assembled(),
-                           time_step * time_step * theta() * theta(),
-                           k_matrix_assembled());
-
-          compute_kkt_matrix(h_matrix_assembled(), m_matrix,
+          // H (M+ h^2 \theta^2 K) H^t
+          compute_kkt_matrix(h_matrix_assembled(),
+                             iteration_matrix_assembled(),
                              w_matrix_assembled());
         }
         else {
           // fem systems are not present in data
-          //compute_kkt_matrix(h_matrix_assembled(), mass_matrix_assembled(),
-          //                   w_matrix_assembled());
           compute_w_matrix_with_diagonal_mass_matrix();
         }
       }
@@ -268,10 +274,7 @@ struct one_step_integrator {
       void compute_w_matrix_with_diagonal_mass_matrix()
       {
         // mass matrix is assumed to be diagonal
-        auto& data = self()->data();
-        using info_t = storage::get_info_t<decltype(data)>;
-
-        using env = typename info_t::env;
+        using env = decltype(self()->env());
 
         // xxx properties on h_matrix1, if any, are lost here
         auto tmp_matrix = typename traits::config<env>::template convert<
@@ -281,16 +284,36 @@ struct one_step_integrator {
         // assumption: compile time element is the first one.
         auto ct_elem = std::get<0>(elements());
 
-        auto&& h_mat = ct_elem.h_matrix_assembled();
-        auto&& m_mat = ct_elem.mass_matrix_assembled();
-        auto&& w_mat = ct_elem.w_matrix_assembled();
+        auto &&h_mat = ct_elem.h_matrix_assembled();
+        auto &&m_mat = ct_elem.mass_matrix_assembled();
+        auto &&w_mat = ct_elem.w_matrix_assembled();
 
         resize(tmp_matrix, size1(h_mat), size0(h_mat));
         solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
         prod(h_mat, tmp_matrix, w_mat);
       }
 
-      void compute_input() { assembled_osi().compute_input(); }
+      void compute_input(auto time_step)
+      {
+        auto &h_matrix = h_matrix_assembled();
+        auto &lambda = lambda_vector_assembled();
+        auto &p0 = p0_vector_assembled();
+        auto &velo = velocity_vector_assembled();
+        auto &mass_matrix = mass_matrix_assembled();
+
+        resize(p0, size1(h_matrix));
+        resize(velo, size1(h_matrix));
+
+        transpose(h_matrix);
+        prodt1(h_matrix, lambda, p0);
+
+        if constexpr (with_k_matrix()) {
+          solve_linear_system(iteration_matrix_assembled(), p0, velo);
+        }
+        else {
+          solve_linear_system(mass_matrix, p0, velo);
+        }
+      }
 
       auto methods()
       {
@@ -299,7 +322,8 @@ struct one_step_integrator {
         using scalar = typename env_t::scalar;
 
         return collect(
-            method("compute_input", &interface<Handle>::compute_input),
+            method("compute_input",
+                   &interface<Handle>::compute_input<scalar>),
             method("compute_w_matrix",
                    &interface<Handle>::compute_w_matrix<indice, scalar>));
       }

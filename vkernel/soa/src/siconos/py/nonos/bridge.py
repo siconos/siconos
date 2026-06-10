@@ -9,6 +9,7 @@ def array(l):
     return np.array(l, dtype=np.float64)
 
 class Stored():
+    _data = None
 
     @classmethod
     def setStorage(cls, data):
@@ -134,10 +135,7 @@ class SpaceFilter(Stored):
 
             self._initialized = True
 
-        if step <= 2:
-            self._ngbh.update(step)
-        else:
-            self._ngbh.update(step+1)
+        self._ngbh.update(step)
 
         self._ngbh.search()
         self._handle.update_index_set0(step);

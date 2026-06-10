@@ -122,7 +122,7 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
   /** Add a static body in the collision detector.
    */
   std::shared_ptr<siconos::collision::StaticBody> addStaticBody(
-      std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
+      std::shared_ptr<const siconos::collision::SiconosContactorSet> cs,
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position =
           std::nullopt,
       int number = 0) override;

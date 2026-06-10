@@ -17,7 +17,6 @@
  */
 
 #include "NonSmoothDynamicalSystem.hpp"
-#include "SiconosConfig.h"
 #define WITH_SERIALIZATION
 
 #ifdef HAVE_SICONOS_MECHANICS
@@ -25,7 +24,7 @@
 #endif
 
 #include "KernelTest.hpp"
-#include "SiconosKernel.hpp"
+#include "SiconosKernel.hpp"  // IWYU pragma: keep
 
 #define DEBUG_MESSAGES 1
 #include <boost/archive/binary_iarchive.hpp>
@@ -162,7 +161,7 @@ void KernelTest::t5() {
   // ================= Creation of the model =======================
 
   // User-defined main parameters
-  int nDof = 3;       // degrees of freedom for the ball
+  int nDof = 3;                // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
   double T = 10;               // final computation time
   double h = 0.005;            // time step
@@ -192,7 +191,8 @@ void KernelTest::t5() {
   v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass, siconos::algebra::alias_t);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(
+      q0, v0, mass, siconos::algebra::alias_t);
 
   // -- Set external forces (weight) --
   siconos::algebra::SiconosVector weight{nDof};

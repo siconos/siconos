@@ -23,8 +23,6 @@
  * function to project on rolling cones
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 enum {
   PROJRCONE_DUAL,
   PROJRCONE_INSIDE,
@@ -32,7 +30,7 @@ enum {
   PROJRCONE_BOUNDARY_ROLLING,
   PROJRCONE_BOUNDARY_FRICTION_ROLLING
 };
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -88,7 +86,7 @@ void display_status_rolling_cone(unsigned int status);
 
 unsigned subdifferentialProjectionOnRollingCone(double *H, double *r, double mu, double mur);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

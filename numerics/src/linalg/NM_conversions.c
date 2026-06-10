@@ -23,8 +23,6 @@
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
-#include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
-#include "numerics_errors.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"

@@ -22,16 +22,15 @@
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 
-#include "NumericsFwd.h"    // for LinearComplementarityProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options);
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

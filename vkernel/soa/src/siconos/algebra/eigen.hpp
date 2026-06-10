@@ -12,41 +12,58 @@ template <typename T>
 concept matrix = requires(T m) { m(0, 0); };
 
 template <typename T>
-concept vector = matrix<T> && T::ColsAtCompileTime == 1;
+concept vector_raw = matrix<T> && T::ColsAtCompileTime == 1;
+
+template <typename T>
+concept vector = vector_raw<std::decay_t<T>>;
+
+// general sparse case
+template <typename T>
+concept sparse_matrix_raw = requires(T m) {
+  typename T::Scalar;
+  { m.rows() } -> std::convertible_to<std::size_t>;
+  { m.cols() } -> std::convertible_to<std::size_t>;
+  { m.nonZeros() } -> std::convertible_to<std::size_t>;
+  { m.makeCompressed() } -> std::same_as<void>;
+  // data pointers
+  { m.innerIndexPtr() } -> std::convertible_to<void*>;
+  { m.valuePtr() } -> std::convertible_to<typename T::Scalar*>;
+} && !requires {
+  // exclude fixed-size dense matrices
+  requires T::RowsAtCompileTime != Eigen::Dynamic&& T::ColsAtCompileTime !=
+               Eigen::Dynamic;
+};
+
+template <typename T>
+concept sparse_matrix = sparse_matrix_raw<std::decay_t<T>>;
 
 // Is there a better way to check if a matrix from the Eigen C++ library  is
 // diagonal :
 template <typename T>
-concept diagonal_matrix = !matrix<T> && requires(T m) { m.diagonal()[0]; };
-
-// template <typename T>
-// concept unbounded_matrix = requires(T m) {
-//   { m.rows() } -> std::convertible_to<int>;
-//   { m.cols() } -> std::convertible_to<int>;
-// };
-
-// template <typename T>
-// concept unbounded_vector = requires(T m) {
-//   { m.rows() } -> std::convertible_to<int>;
-// } && T::ColsAtCompileTime == 1;
+concept diagonal_matrix_raw =
+    !matrix<T> && !sparse_matrix<T> && requires(T m) { m.diagonal()[0]; };
 
 template <typename T>
-concept any_matrix = (diagonal_matrix<T> || matrix<T>);
-
-// template <typename T>
-// concept fixed_size_matrix = any_matrix<T> && requires {
-//   T::RowsAtCompileTime != Eigen::Dynamic;
-//   T::ColsAtCompileTime != Eigen::Dynamic;
-// };
+concept diagonal_matrix = diagonal_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
-concept fixed_size_matrix =
+concept any_matrix_raw =
+    (diagonal_matrix<T> || matrix<T> || sparse_matrix<T>);
+
+template <typename T>
+concept any_matrix = any_matrix_raw<std::decay_t<T>>;
+
+template <typename T>
+concept fixed_size_matrix_raw =
     requires(T matrix) {
       // Check if the matrix has fixed rows and columns
       { matrix.rows() } -> std::convertible_to<std::size_t>;
       { matrix.cols() } -> std::convertible_to<std::size_t>;
     } && (T::RowsAtCompileTime != Eigen::Dynamic) &&
     (T::ColsAtCompileTime != Eigen::Dynamic);
+
+template <typename T>
+concept fixed_size_matrix = fixed_size_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
 concept variable_size_matrix = !fixed_size_matrix<T>;
@@ -57,10 +74,19 @@ concept fixed_size_vector = fixed_size_matrix<T> && vector<T>;
 template <typename T>
 concept variable_size_vector = vector<T> && !fixed_size_matrix<T>;
 
+template <typename T>
+concept unbounded = variable_size_vector<T> || variable_size_matrix<T>;
+
 }  // namespace siconos::storage::pattern::match
 
 namespace siconos::algebra {
 namespace match = siconos::storage::pattern::match;
+
+template <typename T, typename M>
+decltype(auto) cast(T, M&& m)
+{
+  return m.template cast<typename T::type>();
+}
 
 template <typename T, size_t M, size_t N>
 using matrix = Eigen::Matrix<T, M, N>;  // column storage
@@ -132,7 +158,7 @@ static constexpr decltype(auto) nrows(T& value)
 {
   namespace match = siconos::storage::pattern::match;
 
-  if constexpr (match::matrix<T> || match::diagonal_matrix<T>) {
+  if constexpr (match::any_matrix<T>) {
     return value.rows();  // specific to Eigen
   }
   else {
@@ -147,7 +173,7 @@ static constexpr decltype(auto) ncols(T& value)
 {
   namespace match = siconos::storage::pattern::match;
 
-  if constexpr (match::matrix<T> || match::diagonal_matrix<T>) {
+  if constexpr (match::any_matrix<T>) {
     return value.cols();  // specific to Eigen
   }
   else {
@@ -176,4 +202,23 @@ void solve_linear_system(match::matrix auto& m, auto& b, auto& c)
   auto lu = m.partialPivLu();
   c = lu.solve(b);
 }
+
+// General sparse solver: c = m^{-1} * b
+template <match::sparse_matrix M>
+void solve_linear_system(M& m, auto& b, auto& c)
+{
+  Eigen::SparseLU<std::remove_cvref_t<M>> solver;
+  solver.compute(m);
+  c = solver.solve(b);
+}
+
+// Sparse in-place solver: b = m^{-1} * b
+template <match::sparse_matrix M>
+void solve_in_place(M& m, auto& b)
+{
+  Eigen::SparseLU<std::remove_cvref_t<M>> solver;
+  solver.compute(m);
+  b = solver.solve(b);
+}
+
 }  // namespace siconos::algebra

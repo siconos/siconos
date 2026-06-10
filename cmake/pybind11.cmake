@@ -4,7 +4,7 @@ set(FETCHCONTENT_QUIET FALSE)
 
 FetchContent_Declare(
   pybind11
-  URL https://github.com/pybind/pybind11/archive/v2.10.0tar.gz
+  URL https://github.com/pybind/pybind11/archive/refs/tags/v3.0.2.tar.gz
   )
 
 FetchContent_GetProperties(pybind11)

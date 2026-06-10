@@ -27,9 +27,8 @@
 #endif
 #include <stdio.h>  // for FILE
 
-#include "NumericsMatrix.h"
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#include "NumericsMatrix.h"  // IWYU pragma: keep
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -177,7 +176,7 @@ void NV_dott(const double* const vec1, const double* const vec2, const unsigned 
 
 int NV_isnan(const double* const vec, const unsigned int vecSize);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

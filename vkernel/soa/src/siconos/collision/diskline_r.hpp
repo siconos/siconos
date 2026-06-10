@@ -22,9 +22,9 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
 
     decltype(auto) shape() { return self()->line(); }
 
-    decltype(auto) compute_h(auto& ds)
+    decltype(auto) compute_h(auto step, auto& ds)
     {
-      auto& q = storage::attr<"q">(ds);
+      auto& q = storage::attr<"q">(ds, step);
       return line().distance(q) -
              make_handle(self()->data(), prop<"shape">(ds)).radius();
     }
@@ -33,7 +33,7 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
     {
       auto& data = self()->data();
 
-      auto& q = storage::attr<"q">(ds);
+      auto& q = storage::attr<"q">(ds, step);
       auto& r =
           storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 

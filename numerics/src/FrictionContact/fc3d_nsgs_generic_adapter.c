@@ -23,26 +23,22 @@
  * by providing appropriate callbacks and initialization.
  */
 
-#include "FrictionContactProblem.h"
+#include "FrictionContact_options.h"
 #include "NumericsFwd.h"
 #include "NumericsMatrix.h"
-#include "fc3d_Solvers.h"
-#include "nsgs_generic.h"
-#include "FrictionContact_options.h"
-#include "fc3d_local_problem_tools.h"
-#include "fc3d_projection.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_Path.h"
 #include "fc3d_NCPGlockerFixedPoint.h"
-#include "fc3d_unitary_enumerative.h"
-#include "numerics_verbose.h"
-#include "naming_conventions.h"  // Standardized naming conventions
-#include "numerics_errors.h"
-#include "fc3d_2NCP_Glocker.h"
+#include "fc3d_Path.h"
+#include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
+#include "fc3d_local_problem_tools.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
+#include "fc3d_projection.h"
+#include "fc3d_unitary_enumerative.h"
+#include "nsgs_generic.h"
+#include "numerics_verbose.h"
 
 /* Profiling support - define NSGS_PROFILE to enable */
-//#define NSGS_PROFILE
+// #define NSGS_PROFILE
 #ifdef NSGS_PROFILE
 #include <sys/time.h>
 static double profile_update_time = 0.0;
@@ -59,29 +55,34 @@ static double profile_get_time(void) {
 }
 
 #define PROFILE_START() double __t_start = profile_get_time()
-#define PROFILE_END(timer, counter) do { \
-  timer += profile_get_time() - __t_start; \
-  counter++; \
-} while(0)
+#define PROFILE_END(timer, counter)          \
+  do {                                       \
+    timer += profile_get_time() - __t_start; \
+    counter++;                               \
+  } while (0)
 
-#define PROFILE_PRINT() do { \
-  printf("\n=== NSGS Generic Profile ===\n"); \
-  printf("update_local: %12.6f ms (%d calls, %.6f ms/call)\n", \
-         profile_update_time * 1000, profile_update_calls, \
-         profile_update_time * 1000 / (profile_update_calls > 0 ? profile_update_calls : 1)); \
-  printf("solve_local:  %12.6f ms (%d calls, %.6f ms/call)\n", \
-         profile_solve_time * 1000, profile_solve_calls, \
-         profile_solve_time * 1000 / (profile_solve_calls > 0 ? profile_solve_calls : 1)); \
-  printf("accept_local: %12.6f ms (%d calls, %.6f ms/call)\n", \
-         profile_accept_time * 1000, profile_accept_calls, \
-         profile_accept_time * 1000 / (profile_accept_calls > 0 ? profile_accept_calls : 1)); \
-  printf("===========================\n\n"); \
-} while(0)
+#define PROFILE_PRINT()                                                                      \
+  do {                                                                                       \
+    printf("\n=== NSGS Generic Profile ===\n");                                              \
+    printf(                                                                                  \
+        "update_local: %12.6f ms (%d calls, %.6f ms/call)\n", profile_update_time * 1000,    \
+        profile_update_calls,                                                                \
+        profile_update_time * 1000 / (profile_update_calls > 0 ? profile_update_calls : 1)); \
+    printf("solve_local:  %12.6f ms (%d calls, %.6f ms/call)\n", profile_solve_time * 1000,  \
+           profile_solve_calls,                                                              \
+           profile_solve_time * 1000 / (profile_solve_calls > 0 ? profile_solve_calls : 1)); \
+    printf(                                                                                  \
+        "accept_local: %12.6f ms (%d calls, %.6f ms/call)\n", profile_accept_time * 1000,    \
+        profile_accept_calls,                                                                \
+        profile_accept_time * 1000 / (profile_accept_calls > 0 ? profile_accept_calls : 1)); \
+    printf("===========================\n\n");                                               \
+  } while (0)
 
-#define PROFILE_RESET() do { \
-  profile_update_time = profile_solve_time = profile_accept_time = 0.0; \
-  profile_update_calls = profile_solve_calls = profile_accept_calls = 0; \
-} while(0)
+#define PROFILE_RESET()                                                    \
+  do {                                                                     \
+    profile_update_time = profile_solve_time = profile_accept_time = 0.0;  \
+    profile_update_calls = profile_solve_calls = profile_accept_calls = 0; \
+  } while (0)
 
 #else
 #define PROFILE_START()
@@ -104,31 +105,31 @@ static void fc3d_relaxation_3(double* z_new, double* z_old, double omega) {
 
 /* Dimension-specific squared norm for 3D: ||z||^2 */
 static double fc3d_squared_norm_3(double* z) {
-  return z[0]*z[0] + z[1]*z[1] + z[2]*z[2];
+  return z[0] * z[0] + z[1] * z[1] + z[2] * z[2];
 }
 
 /* Dimension-specific incremental error for 3D: ||z_new - z_old||^2 */
 static double fc3d_incr_error_3(double* z_new, double* z_old) {
   double diff[3] = {z_new[0] - z_old[0], z_new[1] - z_old[1], z_new[2] - z_old[2]};
-  return diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2];
+  return diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
 }
 
 /** Allocate and initialize local problem, return local solver function
- * 
+ *
  * \param[in] problem Global friction contact problem
  * \param[in] options NSGS solver options
  * \param[out] local_solver Output pointer for local solver function
  * \return Allocated local problem, or NULL on error
  */
-static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProblem* problem, 
-                                                            SolverOptions* options,
-                                                            SolverPtr* local_solver) {
+static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProblem* problem,
+                                                           SolverOptions* options,
+                                                           SolverPtr* local_solver) {
   FrictionContactProblem* localproblem = fc3d_local_problem_allocate(problem);
   if (!localproblem) return NULL;
-  
+
   SolverOptions* localsolver_options = options->internalSolvers[0];
   SolverPtr solver = NULL;
-  
+
   switch (localsolver_options->solverId) {
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization:
       solver = &fc3d_projectionWithDiagonalization_solve;
@@ -148,19 +149,19 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_NSN:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
       solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem,  localsolver_options);
+      fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_NCPGlockerFBPATH:
       solver = &fc3d_Path_solve;
@@ -176,7 +177,8 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration:
       solver = &fc3d_projectionOnCylinderWithLocalIteration_solve;
-      fc3d_projectionOnCylinderWithLocalIteration_initialize(problem, localproblem, options, localsolver_options);
+      fc3d_projectionOnCylinderWithLocalIteration_initialize(problem, localproblem, options,
+                                                             localsolver_options);
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
       solver = &fc3d_unitary_enumerative_solve;
@@ -192,14 +194,14 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
                      solver_options_id_to_name(localsolver_options->solverId));
       return NULL;
   }
-  
+
   *local_solver = solver;
   return localproblem;
 }
 
 /** Free local problem */
-static void fc3d_nsgs_local_problem_free(FrictionContactProblem* localproblem, 
-                                          FrictionContactProblem* problem) {
+static void fc3d_nsgs_local_problem_free(FrictionContactProblem* localproblem,
+                                         FrictionContactProblem* problem) {
   if (localproblem) {
     fc3d_local_problem_free(localproblem, problem);
   }
@@ -219,10 +221,12 @@ static int  fc3d_nsgs_update_wrapper(unsigned int block, void* problem, void* lo
 }
 
 /** Solve local problem wrapper */
+
 static int fc3d_nsgs_solve_local_wrapper(void* local_problem, SolverOptions* localsolver_options,
                                           double* var_z_local, double* localsolver_options_data) {
+
   (void)localsolver_options_data;
-  
+
   SolverPtr local_solver = (SolverPtr)localsolver_options->solverData;
   if (local_solver && local_problem) {
     PROFILE_START();
@@ -230,16 +234,18 @@ static int fc3d_nsgs_solve_local_wrapper(void* local_problem, SolverOptions* loc
     PROFILE_END(profile_solve_time, profile_solve_calls);
     return info;
   } else {
+
     return numerics_error("fc3d_nsgs_solve_local_wrapper", "Local solver or local problem not initialized");
   } 
+
 }
 
 /** Compute error wrapper - maps generic to fc3d */
-static double fc3d_nsgs_compute_error_wrapper(void* problem, double* var_z,
-                                              double* var_x, SolverOptions* options) {
+static double fc3d_nsgs_compute_error_wrapper(void* problem, double* var_z, double* var_x,
+                                              SolverOptions* options) {
   double error = 0.0;
   double norm_q = 0.0;
-  fc3d_compute_error((FrictionContactProblem*)problem, var_z, var_x, 
+  fc3d_compute_error((FrictionContactProblem*)problem, var_z, var_x,
                      options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
   return error;
 }
@@ -252,17 +258,20 @@ static void fc3d_nsgs_set_tol_wrapper(void* problem, SolverOptions* options,
 }
 
 /** Accept local solution wrapper with filtering */
+
 static int fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* options,
                                            unsigned int block, int iter,
                                            double* var_z_global, double* var_z_local) {
+
   (void)local_problem;
   (void)iter;
 
   PROFILE_START();
   double local_residual = options->dparam[SICONOS_DPARAM_RESIDU];
   if (isnan(local_residual) || isinf(local_residual) || local_residual > 1.0) {
-    numerics_printf("Discard local reaction for block %i at iteration %i with local_error = %e",
-                    block, iter, local_residual);
+    numerics_printf(
+        "Discard local reaction for block %i at iteration %i with local_error = %e", block,
+        iter, local_residual);
     PROFILE_END(profile_accept_time, profile_accept_calls);
     return 0;
   }
@@ -281,7 +290,7 @@ void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double
     *info =  numerics_error("fc3d_nsgs_generic", "Invalid input arguments");
     return;
   }
-  
+
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("fc3d_nsgs_generic",
                    "The NSGS method needs options for the internal solvers");
@@ -289,69 +298,70 @@ void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double
   }
 
   /* Extract diagonal blocks for efficient access (for NM_SPARSE matrices) */
-  void* original_matrix1 = nsgs_generic_extract_diagonal_blocks(problem->M, problem->dimension);
+  void* original_matrix1 =
+      nsgs_generic_extract_diagonal_blocks(problem->M, problem->dimension);
 
   /* Create local problem and get local solver function */
   SolverPtr local_solver = NULL;
-  FrictionContactProblem* localproblem = fc3d_nsgs_local_problem_new(problem, options, &local_solver);
+  FrictionContactProblem* localproblem =
+      fc3d_nsgs_local_problem_new(problem, options, &local_solver);
   if (!localproblem) {
     *info = 1;
     return;
   }
-  
+
   /* Store local_solver in internal solver options for the wrapper to access */
   SolverOptions* localsolver_options = options->internalSolvers[0];
   localsolver_options->solverData = (void*)local_solver;
 
   /* Setup problem data */
-  NSGSProblemData problem_data = {
-    .nb_blocks = problem->numberOfContacts,
-    .q = problem->q,
-    .M = problem->M,
-    .mu = problem->mu,
-    .mu_r = NULL,
-    .storage_type = problem->M->storageType,
-    .dimension = 3
-  };
+  NSGSProblemData problem_data = {.nb_blocks = problem->numberOfContacts,
+                                  .q = problem->q,
+                                  .M = problem->M,
+                                  .mu = problem->mu,
+                                  .mu_r = NULL,
+                                  .storage_type = problem->M->storageType,
+                                  .dimension = 3};
 
   /* Dimension-specific copy function for 3D */
-  NSGSCopyLocal copy_local_3 = NULL;  /* Use default BLAS copy in nsgs_solve */
-  
+  NSGSCopyLocal copy_local_3 = NULL; /* Use default BLAS copy in nsgs_solve */
+
   /* Setup generic NSGS toolkit */
   NSGSLocalToolkit toolkit = {
-    .update_local_problem = fc3d_nsgs_update_wrapper,
-    .copy_local = copy_local_3,
-    .solve_local = fc3d_nsgs_solve_local_wrapper,
-    .compute_error = fc3d_nsgs_compute_error_wrapper,
-    .incremental_error = fc3d_incr_error_3,
-    .accept_local = fc3d_nsgs_accept_local_wrapper,
-    .check_convergence = NULL,
-    .alloc_local = NULL,
-    .set_local_tol = fc3d_nsgs_set_tol_wrapper,
-    .stats_callback = NULL,
-    .relaxation = fc3d_relaxation_3,
-    .squared_norm = fc3d_squared_norm_3,
-    .should_freeze = NULL,
-    .alloc_freezing = NULL,  /* Use default allocation in nsgs_solve */
-    .alloc_shuffled = NULL,  /* Use default allocation in nsgs_solve */
-    .localproblem = localproblem,
-    .verbose = 2,                    /* Print every iteration */
-    .user_tolerance = options->dparam[SICONOS_DPARAM_TOL],  /* Store user tolerance */
-    .error_eval_freq = 0,            /* Full error every iteration (0=always) */
-    .dimension = 3,
-    .omega = options->dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE],
-    .use_freezing = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0,
-    .use_shuffling = options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] != SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE,
-    .use_relaxation = options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE,
-    .use_incremental_error = 1,
-    .filter_local_sol = options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION],
-    .error_eval_type = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION],
-    .freezing_iter = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]
-  };
+      .update_local_problem = fc3d_nsgs_update_wrapper,
+      .copy_local = copy_local_3,
+      .solve_local = fc3d_nsgs_solve_local_wrapper,
+      .compute_error = fc3d_nsgs_compute_error_wrapper,
+      .incremental_error = fc3d_incr_error_3,
+      .accept_local = fc3d_nsgs_accept_local_wrapper,
+      .check_convergence = NULL,
+      .alloc_local = NULL,
+      .set_local_tol = fc3d_nsgs_set_tol_wrapper,
+      .stats_callback = NULL,
+      .relaxation = fc3d_relaxation_3,
+      .squared_norm = fc3d_squared_norm_3,
+      .should_freeze = NULL,
+      .alloc_freezing = NULL, /* Use default allocation in nsgs_solve */
+      .alloc_shuffled = NULL, /* Use default allocation in nsgs_solve */
+      .localproblem = localproblem,
+      .verbose = 2,                                          /* Print every iteration */
+      .user_tolerance = options->dparam[SICONOS_DPARAM_TOL], /* Store user tolerance */
+      .error_eval_freq = 0, /* Full error every iteration (0=always) */
+      .dimension = 3,
+      .omega = options->dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE],
+      .use_freezing = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0,
+      .use_shuffling = options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] !=
+                       SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE,
+      .use_relaxation = options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] ==
+                        SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE,
+      .use_incremental_error = 1,
+      .filter_local_sol = options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION],
+      .error_eval_type = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION],
+      .freezing_iter = options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]};
 
   /* Reset profiling counters */
   PROFILE_RESET();
-  
+
   /* Call generic solver */
   nsgs_solve(problem, reaction, velocity, info, options, &toolkit, &problem_data);
 

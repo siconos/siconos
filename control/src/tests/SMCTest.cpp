@@ -25,7 +25,6 @@
 #include "LinearSensor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Twisting.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \

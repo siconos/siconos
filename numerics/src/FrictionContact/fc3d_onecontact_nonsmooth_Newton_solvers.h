@@ -31,10 +31,8 @@
 
 */
 
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -87,23 +85,24 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double
 
     the rest is used to formalize the local problem)
 */
-void fc3d_onecontact_nonsmooth_Newton_AC_update(int number, FrictionContactProblem* main_problem,
+void fc3d_onecontact_nonsmooth_Newton_AC_update(int number,
+                                                FrictionContactProblem* main_problem,
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
 
-/** Update friction-contact 3D problem, usable in parallel context: formalize local problem for one contact
-    \param problem the global problem to solve
-    \param localproblem the local problem to solve
-    \param number (position in global matrix) of the considered contact
-    \param reaction global reaction (only the block corresponding to the
-    current contact will be modified
-    \param options of the solver
+/** Update friction-contact 3D problem, usable in parallel context: formalize local problem for
+   one contact \param problem the global problem to solve \param localproblem the local problem
+   to solve \param number (position in global matrix) of the considered contact \param reaction
+   global reaction (only the block corresponding to the current contact will be modified \param
+   options of the solver
 
     the rest is used to formalize the local problem)
 */
-void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int number, FrictionContactProblem* problem,
+void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int number,
+                                                         FrictionContactProblem* problem,
                                                          FrictionContactProblem* localproblem,
-                                                         double* reaction, SolverOptions* options);
+                                                         double* reaction,
+                                                         SolverOptions* options);
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
                                                           double* R, SolverOptions* options);
@@ -115,7 +114,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
                                                           double* local_reaction,
                                                           SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

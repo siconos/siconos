@@ -18,12 +18,9 @@
 #ifndef GENERICMECHANICAL_TEST_UTILS_H
 #define GENERICMECHANICAL_TEST_UTILS_H
 
-#include <stdio.h>
-
-#include "SiconosConfig.h"  // for BUILD_AS_CPP
 #include "test_utils.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -45,7 +42,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection, int*);
 */
 int gmp_test_function(TestCase*);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

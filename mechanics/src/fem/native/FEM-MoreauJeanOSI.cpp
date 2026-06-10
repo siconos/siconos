@@ -307,8 +307,9 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
     }
 
     if (solid->hasExternalForces()) {
-      double conditionningMagicCoeff =
-          time_step / siconos::algebra::normInf(solid->elasticityMatrix());
+      // double conditionningMagicCoeff =
+      //     time_step / siconos::algebra::normInf(solid->elasticityMatrix());
+      double conditionningMagicCoeff =1.0;
 
       // fext_k+theta += (1-theta) * fext(ti) + theta * fext(ti+1)
 

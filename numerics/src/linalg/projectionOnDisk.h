@@ -23,9 +23,7 @@
  * \brief functions to project on a cylinder
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -41,7 +39,7 @@ radius of the cone \param[in] dim dimension of the cylinder
 */
 void projectionOnGeneralDisk(double* r, double R, int dim);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -117,7 +117,7 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
 unsigned projectionOnDualRollingCone(double* u, double mu, double mur) { return 0; }
 
 void display_status_rolling_cone(unsigned int status) {
-  printf("status = %u\n", status);
+  //printf("status = %u\n", status);
   if (status == PROJRCONE_INSIDE) {
     printf("PROJRCONE_INSIDE reaction was inside the cone\n");
   } else if (status == PROJRCONE_DUAL) {
@@ -157,19 +157,19 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
 
 
       double muoveroneplusmu2 = mu * oneoveroneplusmu2;
-      *H10 = muoveroneplusmu2 * s1;
-      *H20 = muoveroneplusmu2 * s2;
+      *H01 = muoveroneplusmu2 * s1;
+      *H02 = muoveroneplusmu2 * s2;
 
       double s3 = r[3] / normMT;
       double s4 = r[4] / normMT;
       double muroveroneplusmu2 = mur * oneoveroneplusmu2;
-      *H30 = muroveroneplusmu2 * s3;
-      *H40 = muroveroneplusmu2 * s4;
+      *H03 = muroveroneplusmu2 * s3;
+      *H04 = muroveroneplusmu2 * s4;
 
-      *H01 = *H10;
-      *H02 = *H20;
-      *H03 = *H30;
-      *H04 = *H40;
+      *H10 = *H01 ;
+      *H20 = *H02 ;
+      *H30=  *H03 ;
+      *H40 = *H04 ;
 
       double muoveroneplusmu2overnormT = muoveroneplusmu2 / normT;
 
@@ -177,25 +177,25 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
 
       *H11 = muoveroneplusmu2overnormT * (-a_2 * s1 * s1 + a_1);
       *H12 = muoveroneplusmu2overnormT * (-a_2 * s1 * s2);
-      *H13 = 0.;
-      *H14 = 0.;
+      *H13 = muoveroneplusmu2 * s1 * mur * s3;
+      *H14 = muoveroneplusmu2 * s1 * mur * s4;
 
       *H21 = muoveroneplusmu2overnormT * (-a_2 * s1 * s2);
       *H22 = muoveroneplusmu2overnormT * (-a_2 * s2 * s2 + a_1);
-      *H23 = 0.;
-      *H24 = 0.;
+      *H23 = muoveroneplusmu2 * s2 * mur * s3;
+      *H24 = muoveroneplusmu2 * s2 * mur * s4;
 
       double muroveroneplusmu2overnormMT = muroveroneplusmu2 / normMT;
 
       double a_3 = r[0] + mu * normT;
       *H33 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s3 + a_1);
       *H34 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s4);
-      *H31 = 0.;
-      *H32 = 0.;
+      *H31 = *H13;
+      *H32 = *H23;
       *H43 = muroveroneplusmu2overnormMT * (-a_3 * s3 * s4);
       *H44 = muroveroneplusmu2overnormMT * (-a_3 * s4 * s4 + a_1);
-      *H41 = 0.;
-      *H42 = 0.;
+      *H41 = *H14;
+      *H42 = *H24;
 
       return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
     }

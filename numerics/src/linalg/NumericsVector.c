@@ -106,7 +106,7 @@ double NV_min(const double* const vec, const unsigned int vecSize) {
 }
 
 double NV_max(const double* const vec, const unsigned int vecSize) {
-  double max_elem = DBL_MIN;
+  double max_elem = -DBL_MAX;
   for (unsigned int i = 0; i < vecSize; ++i)
     if (vec[i] > max_elem) max_elem = vec[i];
   return max_elem;
@@ -136,7 +136,7 @@ void NV_sub(const double* const vec1, const double* const vec2, const unsigned i
 double NV_norm_inf(const double* const vec, const unsigned int vecSize) {
   /* double * abs_vec = NV_abs(vec, vecSize); */
   /* return NV_max(abs_vec, vecSize); */
-  double norm = DBL_MIN;
+  double norm = -DBL_MAX;
   for (unsigned int i = 0; i < vecSize; ++i) {
     norm = fmax(norm, fabs(vec[i]));
   }

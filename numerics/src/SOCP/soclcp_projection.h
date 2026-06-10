@@ -34,10 +34,9 @@
   Two different storages are available for M: dense and sparse block.
 
 */
-#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -151,7 +150,7 @@ void soclcp_projection_with_regularization_free(
 
 int soclcp_projection_setDefaultSolverOptions(SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

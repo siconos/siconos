@@ -22,8 +22,7 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"    // for ConvexQP, GlobalFrictionContactProblem, Sol...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for ConvexQP, GlobalFrictionContactProblem, Sol...
 
 /** \struct GlobalFrictionContactProblem_as_ConvexQP GlobalFrictionContactProblem_as_ConvexQP.h
  *
@@ -37,13 +36,13 @@ struct GlobalFrictionContactProblem_as_ConvexQP {
   SolverOptions *options;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 void Projection_ConvexQP_GFC3D_DualCone(void *cqpIn, double *x, double *PX);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

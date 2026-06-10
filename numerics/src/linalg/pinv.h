@@ -22,9 +22,7 @@
 #ifndef Pinv_H
 #define Pinv_H
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -37,7 +35,7 @@ value, the computation is considered valid \return the conditioning
 */
 double pinv(double* A, int n, int m, double tolerance);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 #endif

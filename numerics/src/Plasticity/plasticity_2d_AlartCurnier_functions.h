@@ -50,24 +50,25 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsFwd.h"    // for PlasticityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for PlasticityProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* localproblem,
-                                               double* rho);
+                                                        double* rho);
 
-void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem, double* rho);
+void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem,
+                                                   double* rho);
 
 void plasticity_2d_compute_rho_spectral_norm(PlasticityProblem* localproblem, double* rho);
 
-void plasticity_2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double theta, double eta,
-                                 double rho[3], double result[3], double A[9], double B[9]);
+void plasticity_2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double theta,
+                                          double eta, double rho[3], double result[3],
+                                          double A[9], double B[9]);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

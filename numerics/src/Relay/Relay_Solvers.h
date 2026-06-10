@@ -32,7 +32,7 @@
 #define restrict __restrict
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -172,7 +172,7 @@ void project_on_box(int n, double* restrict z, double* restrict lb, double* rest
  */
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

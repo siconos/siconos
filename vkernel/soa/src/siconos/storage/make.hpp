@@ -72,11 +72,13 @@ using with_info_t = decltype(mp::prepend(M{}, mp::key_value<info, Info>{}));
  * @tparam Env The environment type
  * @tparam Items Variadic list of item types
  */
-template <typename Env, match::item... Items>
+template <template <typename> typename EnvTemplate, match::item... Items>
 struct item_storage {
   // Internal info structure containing computed type aliases
   struct iinfo {
-    using env = Env;
+    template <typename Item>
+    using env = EnvTemplate<Item>;
+
     using items = gather<Items...>;
 
     // Compute all unique items through a fold-left operation
@@ -106,17 +108,32 @@ struct item_storage {
         all_properties_t{}, mp::derive_from<some::attached_storage>));
   };
 
-  // Base storage map combining declared attributes and attached storages
-  using map_t = decltype(mp::unpack(
-      mp::concat(typename iinfo::all_attributes_t{},
-                 typename iinfo::all_attached_storages_t{}),
-      []<typename... Attributes>(Attributes...) {
-        return
-            typename unit_storage<typename iinfo::env, Attributes...>::type{};
-      }));
+  template <match::item Item>
+  struct unit_for_item {
+    using attributes_t = decltype(attributes(Item{}));
+    using attached_storages_t = decltype(mp::filter(
+        typename iinfo::all_properties_t{}, mp::is_a_model<[]<typename T>() {
+          return match::attached_storage<T, Item>;
+        }>));
 
-  // Final storage type with info prepended
-  using type = with_info_t<iinfo, map_t>;
+    using all_attrs_t =
+        decltype(concat(attributes_t{}, attached_storages_t{}));
+
+    using type =
+        decltype(mp::unpack(all_attrs_t{}, []<typename... As>(As...) {
+          return typename unit_storage<EnvTemplate<Item>, As...>::type{};
+        }));
+  };
+
+  // final storage with info
+  using type =
+      with_info_t<iinfo,
+                  decltype(mp::unpack(
+                      typename iinfo::all_items_t{},
+                      []<typename... AllItems>(AllItems...) {
+                        return mp::concat_all(
+                            typename unit_for_item<AllItems>::type{}...);
+                      }))>;
 };
 
 /**
@@ -177,7 +194,7 @@ static constexpr auto attribute_storage_transform =
  * @tparam Env The environment type
  * @tparam Items Variadic list of item types to include
  */
-template <typename Env, match::item... Items>
+template <template <typename> typename Env, match::item... Items>
 struct make {
   /**
    * @brief Internal build method that constructs the complete storage
@@ -198,20 +215,25 @@ struct make {
                 []<match::attribute Attribute, typename Storage>(
                     Attribute, Storage& s) -> decltype(auto) {
                   // Convert attributes using recursive refinement
-                  return typename traits::config<typename info_t::env>::
-                      template convert<decltype(refine_recursively_attribute(
+                  using item_t = decltype(item_attribute<Attribute>(
+                      typename info_t::all_items_t{}));
+                  using env_t = typename info_t::template env<item_t>;
+
+                  return typename traits::config<env_t>::template convert<
+                      decltype(refine_recursively_attribute(
                           base_storage, Attribute{}))>::type{};
                 }),
             // Item level: handle collection wrappers for items
             []<match::item Item, match::attribute Attr>(Item item, Attr attr,
                                                         auto s) {
               using storage_t = std::decay_t<decltype(s)>;
+              using env_t = typename info_t::template env<Item>;
 
               // Handle wrapped items by applying their wrapper
               if constexpr (match::wrap<Item>) {
                 return mp::key_value<
                     Attr,
-                    typename traits::config<Env>::template convert<
+                    typename traits::config<env_t>::template convert<
                         typename Item::template wrapper<storage_t>>::type>{};
               }
               else {
@@ -226,16 +248,16 @@ struct make {
                 // Apply wrapper if different from original storage type
                 if constexpr (!std::is_same_v<storage_wrapped, storage_t>) {
                   using storage_wrapped_and_converted =
-                      typename traits::config<typename info_t::env>::
-                          template convert<storage_wrapped>::type;
+                      typename traits::config<env_t>::template convert<
+                          storage_wrapped>::type;
 
                   return mp::key_value<Attr, storage_wrapped_and_converted>{};
                 }
                 else {
                   // Use environment's default storage if no wrapper
                   return mp::key_value<
-                      Attr,
-                      typename Env::template default_storage<storage_t>>{};
+                      Attr, typename Env<Item>::template default_storage<
+                                storage_t>>{};
                 }
               }
             }),

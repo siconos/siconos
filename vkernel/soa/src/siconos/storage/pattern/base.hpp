@@ -48,7 +48,9 @@ struct text {
 
 struct any_symbol {};
 template <string_literal Symbol>
-struct symbol : text<Symbol>, any_symbol {};
+struct symbol : text<Symbol>, any_symbol {
+  using symbol_id = text<Symbol>;
+};
 
 template <string_literal Symbol>
 constexpr auto symb = symbol<Symbol>{};
@@ -122,6 +124,11 @@ concept size = requires(T a) {
 template <typename T>
 concept push_back = requires(T a) {
   { a.push_back(typename T::value_type{}) };
+};
+
+template <typename T>
+concept static_capacity = requires(T a) {
+  { a.static_capacity };
 };
 
 template <typename T, typename I>

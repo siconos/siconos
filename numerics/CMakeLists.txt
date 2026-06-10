@@ -124,7 +124,7 @@ create_siconos_component(${COMPONENT})
 include(WindowsNumericsSetup)
 
 # --- Extra setup for the component ---
-if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
+if(MLCPSIMPLEX_FOUND) 
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
@@ -135,12 +135,34 @@ endif()
 # Links with other Siconos components
 target_link_libraries(numerics PRIVATE externals)
 
+# Timers
+# See also WITH_TIMERS option in advanced_options.cmake
+include(CheckIncludeFile)
+check_include_file("time.h"      HAVE_TIME_H)
+check_include_file("sys/times.h" HAVE_SYS_TIMES_H)
 
-# Specific compilation options
+# ---- Specific compilation options ---
 set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
   PROPERTIES COMPILE_FLAGS "-Wno-unused-value")
-set_source_files_properties(src/tools/NumericsSparseMatrix.c
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-function") # To remove all warnings due to include "sort.h"
+
+if(HAVE_QL0001) # From externals setup
+  set_source_files_properties(src/LCP/lcp_nsqp.c src/LCP/lcp_qp.c PROPERTIES COMPILE_DEFINITIONS "HAVE_QL0001")  
+endif()
+
+# - sort -
+# --- Sort ---
+if(HAVE_SORT)
+    set_source_files_properties(src/linalg/NumericsSparseMatrix.c PROPERTIES COMPILE_DEFINITIONS "HAVE_SORT")  
+    set_source_files_properties(src/tools/NumericsSparseMatrix.c
+      PROPERTIES COMPILE_OPTIONS "-Wno-unused-function") # To remove all warnings due to include "sort.h"
+endif()
+
+# -- fc problems specific dump option
+if(DUMP_PROBLEM)
+  set_source_files_properties(
+    src/FrictionContact/gfc2d_driver.c 
+    src/FrictionContact/gfc3d_nonsmooth_Newton_AlartCurnier.c PROPERTIES COMPILE_DEFINITIONS "DUMP_PROBLEM")  
+endif()
 
 # Links with non-Siconos libraries
 
@@ -168,6 +190,7 @@ if(LPSOLVE_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE CACHE INTERNAL "True if a LP Solver has been found and is activated.")
   # to add more tests in kernel and control
   target_link_libraries(numerics PRIVATE LPSOLVE::LPSOLVE)
+  set_source_files_properties(src/utils/vertex_extraction.c PROPERTIES COMPILE_DEFINITIONS "HAS_ONE_LP_SOLVER") 
 endif()
 
 # - Thread -
@@ -226,6 +249,7 @@ find_package(MlcpSimplex QUIET)
 if(MlcpSimplex_FOUND)
   set(HAVE_MLCPSIMPLEX TRUE CACHE INTERNAL "True if mlcp simplex solver API has been found and is activated.")
   target_link_libraries(numerics PRIVATE $<BUILD_INTERFACE:MlcpSimplex::MlcpSimplex>)
+  set_source_files_properties(src/MLCP/mlcp_simplex.c PROPERTIES COMPILE_DEFINITIONS "HAVE_MLCPSIMPLEX")  
 endif()
 
 # - GAMS, Path -
@@ -279,6 +303,11 @@ endif()
 if(WITH_OPENSSL)
   find_package(OpenSSL REQUIRED COMPONENTS Crypto)
   target_link_libraries(numerics PRIVATE OpenSSL::Crypto)
+  target_compile_definitions(numerics PUBLIC WITH_OPENSSL)  
+endif()
+
+if(WITH_FACTORISATION_DEBUG)
+  set_source_files_properties(src/linalg/NumericsMatrix.c PROPERTIES COMPILE_DEFINITIONS "FACTORIZATION_DEBUG")  
 endif()
 
 # -- HDF5 --
@@ -353,7 +382,7 @@ endif()
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
-if(WITH_MPI AND WITH_TESTING)
+if(WITH_MPI AND WITH_TESTING AND NOT WITH_GUIX)
   # Note FP : temporary fix, to deal with PRIVATE deps of some components.
   # This will be reviewed later.
   target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})

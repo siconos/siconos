@@ -8,32 +8,35 @@ namespace siconos::simul {
 struct moreau_jean_assembled : item {
   using size_1_t = some::indice_value<1>;
 
-  using attributes = gather<
-      attribute<"theta", some::scalar>, attribute<"gamma", some::scalar>,
-      attribute<"constraint_activation_threshold", some::scalar>,
-      attribute<"mass_matrix_assembled",
-                some::assembled_matrix<
-                    some::matrix<some::scalar, size_1_t, size_1_t>>>,
-      attribute<"k_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"h_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"w_matrix_assembled", some::assembled_matrix<some::matrix<
-                                          some::scalar, size_1_t, size_1_t>>>,
-      attribute<"lambda_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"y_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"ydot_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"velocity_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"p0_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"q_nsp_vector_assembled",
-                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"mu_vector_assembled", some::assembled_vector<some::vector<
-                                           some::scalar, size_1_t>>>>;
+  struct attributes {
+    some::scalar theta;
+    some::scalar gamma;
+    some::scalar constraint_activation_threshold;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        mass_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        iteration_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        k_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        h_matrix_assembled;
+    some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>
+        w_matrix_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        lambda_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        y_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        ydot_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        velocity_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        p0_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        q_nsp_vector_assembled;
+    some::assembled_vector<some::vector<some::scalar, size_1_t>>
+        mu_vector_assembled;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -42,6 +45,11 @@ struct moreau_jean_assembled : item {
     decltype(auto) mass_matrix_assembled()
     {
       return storage::attr<"mass_matrix_assembled">(*self());
+    }
+
+    decltype(auto) iteration_matrix_assembled()
+    {
+      return storage::attr<"iteration_matrix_assembled">(*self());
     }
 
     decltype(auto) k_matrix_assembled()
@@ -101,28 +109,6 @@ struct moreau_jean_assembled : item {
     decltype(auto) constraint_activation_threshold()
     {
       return attr<"constraint_activation_threshold">(*self());
-    }
-
-    void compute_input()
-    {
-      auto &h_matrix = h_matrix_assembled();
-      auto &lambda = lambda_vector_assembled();
-      auto &p0 = p0_vector_assembled();
-      auto &velo = velocity_vector_assembled();
-      auto &mass_matrix = mass_matrix_assembled();
-
-      resize(p0, size1(h_matrix));
-      resize(velo, size1(h_matrix));
-
-      transpose(h_matrix);
-      prodt1(h_matrix, lambda, p0);
-      solve_linear_system(mass_matrix, p0, velo);
-    }
-
-    auto methods()
-    {
-      return collect(
-          method("compute_input", &interface<Handle>::compute_input));
     }
   };
 };

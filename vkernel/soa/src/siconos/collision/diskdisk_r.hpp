@@ -18,10 +18,10 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
 
     template <match::handle<model::lagrangian_ds> DS1,
               match::handle<model::lagrangian_ds> DS2>
-    decltype(auto) compute_h(DS1& ds1, DS2& ds2)
+    decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2)
     {
-      auto& q1 = storage::attr<"q">(ds1);
-      auto& q2 = storage::attr<"q">(ds2);
+      auto& q1 = storage::attr<"q">(ds1, step);
+      auto& q2 = storage::attr<"q">(ds2, step);
 
       auto& r1 = storage::make_handle(self()->data(), storage::prop<"shape">(ds1))
                      .radius();
@@ -40,8 +40,8 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
     {
       auto& data = self()->data();
 
-      auto& q1 = storage::attr<"q">(ds1);
-      auto& q2 = storage::attr<"q">(ds2);
+      auto& q1 = storage::attr<"q">(ds1, step);
+      auto& q2 = storage::attr<"q">(ds2, step);
 
       auto& r1 = storage::make_handle(data, storage::prop<"shape">(ds1)).radius();
       auto& r2 = storage::make_handle(data, storage::prop<"shape">(ds2)).radius();

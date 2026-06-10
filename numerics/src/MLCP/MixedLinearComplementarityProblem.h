@@ -25,8 +25,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for MixedLinearComplementarityProblem, Numerics...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, Numerics...
 
 /** The Structure that contains and defines MLCProblem. Find \f$ (z,w) \f$ such
  *  that:
@@ -97,7 +96,7 @@ struct MixedLinearComplementarityProblem {
   double *b; /**< b vector of the MLCP */
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -162,7 +161,7 @@ int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem
 MixedLinearComplementarityProblem *mixedLinearComplementarity_fromMtoABCD(
     MixedLinearComplementarityProblem *problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

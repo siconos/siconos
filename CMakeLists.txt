@@ -152,8 +152,6 @@ main()
     message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
   endif()
 
-  # set(BUILD_AS_CPP ON)
-
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -199,9 +197,14 @@ if(WITH_PYB11_WRAPPER)
 endif()
 
 # ========= Setup each required component =========
+# To ensure a default inclusion of SiconosConfig.h everywhere
+add_library(siconos_config INTERFACE)
+
+
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
+  target_link_libraries(${COMPONENT} PUBLIC siconos_config)
 endforeach()
 
 # ========= Documentation setup =========
@@ -214,9 +217,6 @@ endif()
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 
-# ============= Siconos Package configuration =============
-# i.e. what should be generated/configured at install.
-include(SiconosPackageSetup)
 
 # SiconosConfig.h generation and include
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
@@ -227,9 +227,19 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
     file(READ ${CMAKE_BINARY_DIR}/SiconosConfig.h SICONOS_CONFIG_H)
     message(${SICONOS_CONFIG_H})
   endif()
+
+  # To ensure a default inclusion of SiconosConfig.h everywhere
+  target_include_directories(siconos_config INTERFACE
+      $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+  target_precompile_headers(siconos_config INTERFACE ${CMAKE_BINARY_DIR}/SiconosConfig.h)
+  siconos_component_install_setup(siconos_config)
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
+
 endif()
 
+# ============= Siconos Package configuration =============
+# i.e. what should be generated/configured at install.
+include(SiconosPackageSetup)
 
 # man pages
 if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)

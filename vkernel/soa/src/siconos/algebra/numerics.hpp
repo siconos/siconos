@@ -42,20 +42,22 @@ template <typename T>
 struct mat : any_mat {
   using mat_t = void;
   static constexpr auto vncols = []() {
-    if constexpr (match::matrix<T>) {
+    if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::ColsAtCompileTime;
     }
     else {
+      // runtime
       return 1;
     }
   }();
   static constexpr auto vnrows = []() {
-    if constexpr (match::matrix<T>) {
+    if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::RowsAtCompileTime;
     }
     else {
+      // runtime
       return 1;
     }
   }();
@@ -80,7 +82,12 @@ struct mat : any_mat {
       }
     }
     if (_mt) {
-      _mt = NM_free(_mt);
+      if (_view) {
+        _mt = nullptr;
+      }
+      else {
+        _mt = NM_free(_mt);
+      }
     }
     _view = false;
   }
@@ -90,16 +97,24 @@ template <typename T>
 struct diag_mat : mat<T> {
   using any_mat_t = typename mat<T>::any_mat_t;
   using diag_mat_t = void;
-
-  static constexpr auto vncols = T::ColsAtCompileTime;
-  static constexpr auto vnrows = T::RowsAtCompileTime;
 };
 
 template <typename T>
 struct vec {
   using vec_t = void;
+
   static constexpr auto vncols = 1;
-  static constexpr auto vnrows = T::RowsAtCompileTime;
+
+  static constexpr auto vnrows = []() {
+    if constexpr (match::fixed_size_matrix<T>) {
+      // only eigen
+      return T::RowsAtCompileTime;
+    }
+    else {
+      // runtime
+      return 1;
+    }
+  }();
 
   NumericsMatrix* _v = nullptr;
 
@@ -296,6 +311,16 @@ void set_value(M&& m, match::indice auto i, match::indice auto j,
       }
     }
   }
+  else if constexpr (match::sparse_matrix<T>) {
+    for (typename T::Index k = 0; k < value.outerSize(); ++k) {
+      // /!\ specific to eigen
+      for (typename T::InnerIterator it(value, k); it; ++it) {
+        NM_zentry(m._m, i * m.vnrows + it.row() + m._offsets[0],
+                  j * m.vncols + it.col() + m._offsets[1], it.value(),
+                  zero_threshold);
+      }
+    }
+  }
   else {
     []<bool flag = false>() {
       static_assert(flag, "set_value: cannot insert this value");
@@ -346,7 +371,7 @@ void add(const vec<T>& a, vec<T>& b)
   }
 }
 
-// c = alpha * A + beta * B
+// alpha * A + beta * B
 template <match::scalar scalar, match::any_matrix M>
 mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
 {
@@ -354,6 +379,16 @@ mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
   mat<M> rm;
   rm._m = nm;
   return rm;
+}
+
+// c = alpha * A + beta * B
+template <match::scalar scalar, match::any_matrix M>
+void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
+         mat<M>& C)
+{
+  C._m = NM_add(alpha, A._m, beta, B._m);
+  C._mt = nullptr;
+  C._view = false;
 }
 
 // b <- a
@@ -465,7 +500,8 @@ void solve_in_place(const mat<A>& a, const vec<B>& b)
 }
 
 template <match::diagonal_matrix A, match::matrix B>
-void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b, mat<trans_t<B>>& c)
+void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
+                                        mat<trans_t<B>>& c)
 {
   invert_matrix(a);
   transpose(b);
@@ -473,7 +509,8 @@ void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b, mat<trans_t<B
 }
 
 template <match::matrix A, match::matrix B>
-void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b, mat<trans_t<B>>& c)
+void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
+                                        mat<trans_t<B>>& c)
 {
   assert(false);
 }

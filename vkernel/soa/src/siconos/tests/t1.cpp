@@ -3,7 +3,18 @@
 #include "siconos/config/config.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/pattern/base.hpp"
-#include "siconos/utils/print.hpp"
+
+using namespace siconos;
+
+#include "siconos/collision/neighborhood.hpp"
+#include "siconos/collision/point.hpp"
+#include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/space_filter.hpp"
+#include "siconos/config/environment.hpp"
+#include "siconos/model/lagrangian_r.hpp"
+#include "siconos/storage/mp/mp.hpp"
+#include "siconos/storage/some/some.hpp"
+#include "siconos/storage/traits/traits.hpp"
 
 namespace siconos::config {
 using params = map<assoc<param<"dof">, param_val<3>>>;
@@ -11,17 +22,11 @@ using params = map<assoc<param<"dof">, param_val<3>>>;
 
 using namespace siconos;
 
-using env = standard_environment<config::params>;
-
-#include "siconos/collision/neighborhood.hpp"
-#include "siconos/collision/point.hpp"
-#include "siconos/collision/shape/disk.hpp"
-#include "siconos/collision/space_filter.hpp"
-#include "siconos/model/lagrangian_r.hpp"
-#include "siconos/storage/mp/mp.hpp"
-#include "siconos/storage/some/some.hpp"
-#include "siconos/storage/traits/traits.hpp"
-#include "siconos/utils/environment.hpp"
+template <typename T>
+struct env : standard_environment<T> {
+  using params =
+      config::map<config::iparam<"dof", 3>, config::iparam<"ncgroups", 1>>;
+};
 
 namespace siconos {
 
@@ -98,8 +103,8 @@ static_assert(
 
 static_assert(
     std::is_same_v<
-    typename std::decay_t<decltype(storage::mp::get<storage::info>(
-            storage::make<standard_environment<int>, item0,
+        typename std::decay_t<decltype(storage::mp::get<storage::info>(
+            storage::make<standard_environment, item0,
                           storage::with_properties<
                               storage::diagonal<attr_t<item0, "attr0">>>>()
                 .store()))>::all_properties_t,
@@ -135,7 +140,7 @@ static_assert(
     std::is_same_v<
         decltype(storage::mp::filter(
             typename std::decay_t<decltype(storage::mp::get<storage::info>(
-                storage::make<standard_environment<int>, item0,
+                storage::make<standard_environment, item0,
                               storage::with_properties<storage::attached<
                                   item0, symbol<"zz">, some::scalar>>>()
                     .store()))>::all_properties_t{},
@@ -148,15 +153,15 @@ static_assert(
 
 static_assert(match::diagonal_matrix<
               decltype(storage::attr<"attr0">(storage::add<item0>(
-                  storage::make<standard_environment<int>, item0,
+                  storage::make<standard_environment, item0,
                                 storage::with_properties<storage::diagonal<
                                     attr_t<item0, "attr0">>>>())))>);
 
 static_assert(
     match::mat<
         std::decay_t<decltype(storage::attr<"attr0">(storage::add<item0>(
-            storage::make<standard_environment<int>, item0,
-                          storage::with_properties<storage::assembled_matrix<
+            storage::make<standard_environment, item0,
+                          storage::with_properties<storage::assembled<
                               attr_t<item0, "attr0">>>>())))>>);
 
 /* alias : same type, item1 has a diagonal matrix also */
@@ -164,7 +169,7 @@ using item1 = item0;
 
 static_assert(match::diagonal_matrix<
               decltype(storage::attr<"attr0">(storage::add<item1>(
-                  storage::make<standard_environment<int>, item0, item1,
+                  storage::make<standard_environment, item0, item1,
                                 storage::with_properties<storage::diagonal<
                                     attr_t<item0, "attr0">>>>())))>);
 
@@ -172,27 +177,27 @@ static_assert(match::diagonal_matrix<
 struct item2 : item0 {};
 static_assert(!match::diagonal_matrix<
               decltype(storage::attr<"attr0">(storage::add<item2>(
-                  storage::make<standard_environment<int>, item0, item2,
+                  storage::make<standard_environment, item0, item2,
                                 storage::with_properties<storage::diagonal<
                                     attr_t<item0, "attr0">>>>())))>);
 
 static_assert(
     match::matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
-        storage::make<standard_environment<int>,
+        storage::make<standard_environment,
                       wrap<some::unbounded_collection, item0>>())))>);
 
 static_assert(
     match::push_back<
         std::decay_t<decltype(storage::attr_values<item0, "attr0">(
             storage::add<item0>(
-                storage::make<standard_environment<int>,
+                storage::make<standard_environment,
                               wrap<some::unbounded_collection, item0>>())
                 .data(),
             0))>>);
 
 static_assert(match::diagonal_matrix<
               decltype(storage::attr<"attr0">(storage::add<item0>(
-                  storage::make<standard_environment<int>,
+                  storage::make<standard_environment,
                                 wrap<some::unbounded_collection, item0>,
                                 storage::with_properties<storage::diagonal<
                                     attr_t<item0, "attr0">>>>())))>);
@@ -200,7 +205,7 @@ static_assert(match::diagonal_matrix<
 static_assert(
     std::is_same_v<
         std::decay_t<decltype((storage::add<model::newton_impact>(
-                                   storage::make<standard_environment<int>,
+                                   storage::make<standard_environment,
                                                  model::newton_impact>()))
                                   .e())>,
         typename standard_environment<int>::scalar>);
@@ -210,8 +215,7 @@ static_assert(
         std::decay_t<
             decltype(storage::add<collision::shape::disk>(
                          storage::make<
-                             standard_environment<int>,
-                             collision::shape::disk,
+                             standard_environment, collision::shape::disk,
                              storage::with_properties<storage::bind<
                                  collision::shape::disk, "disk_shape">>>())
                          .radius())>,
@@ -229,12 +233,15 @@ static_assert(
 using namespace boost::hana::literals;
 
 using ball = model::lagrangian_ds;
+struct fem : model::elastic_lagrangian_ds {};
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<lcp>;
 using nslaw = model::newton_impact;
 using relation = model::lagrangian_r<nslaw::size>;
+using rt_relation = model::rt_lagrangian_r;
 using interaction = simul::interaction<nslaw, relation>;
-using topo = simul::topology<ball, interaction>;
+using rt_interaction = simul::rt_rt_interaction<nslaw, rt_relation>;
+using topo = simul::topology<ball, interaction, fem, rt_interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using disk = collision::shape::disk;
@@ -259,23 +266,43 @@ using disk_shape = collision::shape::disk;
 // standard_environment<config::map<config::iparam<"ncgroups",
 //                 1>>>, inter_manager, nslaw>()));
 
-static_assert(
-    match::diagonal_matrix<
-        decltype(storage::attr<"mass_matrix">(storage::add<ball>(
-            storage::make<
-                standard_environment<config::map<
-                    config::iparam<"dof", 3>, config::iparam<"ncgroups", 1>>>,
-                simulation, ball, relation, interaction,
-                storage::with_properties<
-                    storage::diagonal<attr_t<ball, "mass_matrix">>>>())))>);
+static_assert(match::diagonal_matrix<
+              decltype(storage::attr<"mass_matrix">(storage::add<ball>(
+                  storage::make<env, simulation, ball, relation, interaction,
+                                storage::with_properties<storage::diagonal<
+                                    attr_t<ball, "mass_matrix">>>>())))>);
 
 static_assert(
-    match::index<std::decay_t<decltype(storage::prop<
-                                       "shape">(storage::add<ball>(
-        storage::make<
-            standard_environment<config::map<config::iparam<"dof", 3>>>, ball,
-            storage::with_properties<storage::attached<
-                ball, symbol<"shape">, some::item_ref<disk_shape>>>>())))>>);
+    !match::diagonal_matrix<
+        decltype(storage::attr<"mass_matrix">(storage::add<fem>(
+            storage::make<
+                env, simulation, ball, relation, interaction,
+                storage::with_properties<
+                    storage::unbounded<attr_t<fem, "q">>,
+                    storage::unbounded<attr_t<fem, "velocity">>,
+                    storage::unbounded<attr_t<fem, "fext">>,
+                    storage::sparse<attr_t<fem, "mass_matrix">>,
+                    storage::sparse<attr_t<fem, "k_matrix">>,
+                    storage::diagonal<attr_t<ball, "mass_matrix">>>>())))>);
+
+static_assert(match::sparse_matrix<
+              decltype(storage::attr<"mass_matrix">(storage::add<ball>(
+                  storage::make<env, simulation, ball, relation, interaction,
+                                storage::with_properties<storage::sparse<
+                                    attr_t<ball, "mass_matrix">>>>())))>);
+
+static_assert(
+    match::unbounded<decltype(storage::attr<"q">(storage::add<ball>(
+        storage::make<env, simulation, ball, relation, interaction,
+                      storage::with_properties<
+                          storage::unbounded<attr_t<ball, "q">>>>())))>);
+
+static_assert(match::index<
+              std::decay_t<decltype(storage::prop<"shape">(storage::add<ball>(
+                  storage::make<env, ball,
+                                storage::with_properties<storage::attached<
+                                    ball, symbol<"shape">,
+                                    some::item_ref<disk_shape>>>>())))>>);
 
 template <typename T>
 struct is_polymorhic : std::integral_constant<bool, []() {
@@ -290,13 +317,13 @@ static_assert(match::relation1<
 static_assert(std::is_same_v<decltype(all_items(nslaw{})),
                              gather<siconos::model::newton_impact>>);
 
-static_assert(
-    std::derived_from<std::decay_t<decltype(storage::mp::filter(
-                          storage::pattern::struct_to_gather<
-                              typename interaction::attributes>{},
-                          storage::mp::compose(storage::mp::trait<is_polymorhic>,
-                                          storage::mp::typeid_))[0_c])>,
-                      some::polymorphic_attribute<some::item_ref<relation>>>);
+static_assert(std::derived_from<
+              std::decay_t<decltype(storage::mp::filter(
+                  storage::pattern::struct_to_gather<
+                      typename interaction::attributes>{},
+                  storage::mp::compose(storage::mp::trait<is_polymorhic>,
+                                       storage::mp::typeid_))[0_c])>,
+              some::polymorphic_attribute<some::item_ref<relation>>>);
 
 // storage::mp::type_trace<decltype(all_items(interaction{}))>();
 static_assert(std::is_same_v<decltype(all_items(interaction{})),
@@ -317,14 +344,13 @@ static_assert(match::attribute_of<attr_t<td, "step">, td>);
 // decltype(item_attribute<td::step>(all_items(simulation{})))>);
 
 static_assert(
-    std::is_same_v<typename siconos::traits::config<env>::convert<attr_t<
+    std::is_same_v<typename siconos::traits::config<env<int>>::convert<attr_t<
                        siconos::simul::time_discretization<>, "step">>::type,
-                   typename env::indice>);
+                   typename env<int>::indice>);
 
-static_assert(
-    std::is_same_v<
-        typename siconos::traits::config<env>::convert<some::scalar>::type,
-        typename env::scalar>);
+static_assert(std::is_same_v<typename siconos::traits::config<
+                                 env<int>>::convert<some::scalar>::type,
+                             typename env<int>::scalar>);
 
 struct zz {};
 
@@ -356,17 +382,19 @@ static_assert(match::bounded_storage<
               wrap<some::bounded_collection, ball,
                    some::indice_value<1>>::template wrapper<some::scalar>>);
 
-static_assert(traits::translatable<int, env>);
-
-static_assert(std::is_same_v<traits::config<env>::convert<int>::type, int>);
+static_assert(traits::translatable<int, env<void>>);
 
 static_assert(
-    traits::translatable<siconos::some::unbounded_collection<char[3]>, env>);
+    std::is_same_v<traits::config<env<void>>::convert<int>::type, int>);
+
+static_assert(traits::translatable<
+              siconos::some::unbounded_collection<char[3]>, env<void>>);
 
 static_assert(
-    storage::mp::filter(gather<char, int, double>{},
-                   storage::mp::compose(storage::mp::trait<std::is_floating_point>,
-                                   storage::mp::typeid_)) == gather<double>{});
+    storage::mp::filter(
+        gather<char, int, double>{},
+        storage::mp::compose(storage::mp::trait<std::is_floating_point>,
+                             storage::mp::typeid_)) == gather<double>{});
 
 static_assert(std::is_same_v<
               decltype(storage::mp::filter(
@@ -393,50 +421,9 @@ static_assert(
                attr_t<interaction, "ydot">, attr_t<nslaw, "e">,
                attr_t<relation, "b">, attr_t<relation, "h_matrix">>>);
 
-//}  // namespace siconos
-
-namespace siconos::config {
-using disk = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<lcp>;
-using nslaw = model::newton_impact;
-using disk_shape = collision::shape::disk;
-using diskdisk_r = collision::diskdisk_r;
-using diskline_r = collision::diskline_r;
-using interaction = simul::interaction<nslaw, diskdisk_r, diskline_r>;
-using topo = simul::topology<disk, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
-using pointd = collision::point<disk>;
-using pointl = collision::point<collision::shape::line>;
-using neighborhood = collision::neighborhood<pointd, pointl>;
-using space_filter = collision::space_filter<topo, neighborhood>;
-
-using params = map<iparam<"dof", 3>>;
-}  // namespace siconos::config
-
-// static_assert(
-//     typename std::decay_t<decltype(storage::mp::get<storage::info>(
-//         storage::make<
-//             standard_environment<config::params>, config::simulation,
-//             wrap<some::unbounded_collection, config::disk>,
-//             config::disk_shape, config::diskdisk_r,
-//             wrap<some::unbounded_collection, config::diskline_r>,
-//             wrap<some::unbounded_collection, config::pointl>,
-//             wrap<some::unbounded_collection, config::pointd>,
-//             wrap<some::unbounded_collection, config::interaction>,
-//             config::space_filter,
-//             storage::with_properties<
-//                 storage::attached<
-//                     config::disk, storage::pattern::symbol<"shape">,
-//                     storage::some::item_ref<config::disk_shape>>,
-//                 storage::time_invariant<storage::attr_t<config::disk, "fex"
-//                                                                       "t">>,
-//                 storage::diagonal<
-//                     storage::attr_t<config::disk, "mass_matrix">>,
-//                 storage::unbounded_diagonal<storage::attr_t<
-//                     config::osi, "mass_matrix_assembled">>>>()))>::
-//         all_properties_t{});
+static_assert(model::runtime_dof<decltype(storage::add<ball>(
+    storage::make<env, ball,
+                  storage::with_properties<storage::unbounded<
+    siconos::storage::attr_t<ball, "q">>>>()))>());
 
 int main() {}

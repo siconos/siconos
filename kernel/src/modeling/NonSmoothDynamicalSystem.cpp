@@ -19,17 +19,11 @@
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
-#include "Relation.hpp"
+#include "Relation.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 #include "SimulationGraphs.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
-
-// #include <SiconosConfig.h>
-// #include <functional>
-// using namespace std::placeholders;
-
-// #include <limits>
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES

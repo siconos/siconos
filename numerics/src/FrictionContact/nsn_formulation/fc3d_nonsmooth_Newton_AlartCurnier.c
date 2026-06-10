@@ -23,18 +23,16 @@
 #include <stddef.h>  // for NULL
 
 #include "AlartCurnierGenerated.h"          // for fc3d_AlartCurnierFunction...
-#include "FrictionContactProblem.h"         // for FrictionContactProblem
-#include "FrictionContact_options.h"                   // for SICONOS_FRICTION_3D_NSN_H...
-#include "../fc3d_short_names.h"
+#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_NSN_H...
 #include "NumericsFwd.h"                    // for SolverOptions, FrictionCo...
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_cst.h"                         // for SICONOS_VI_ERROR_EVALUATI...
 #include "fc3d_AlartCurnier_functions.h"    // for computeAlartCurnierJeanMo...
 #include "fc3d_Solvers.h"                   // for fc3d_VI_ExtraGradient
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
+#include "fc3d_short_names.h"
+#include "naming_conventions.h"
 #include "numerics_verbose.h"
-#include "solver_registry.h"
-#include "numerics_errors.h"
 
 void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr computeACFun3x3,
                                double *reaction, double *velocity, double *mu, double *rho,
@@ -168,9 +166,9 @@ void fc3d_nsn_ac_set_default(SolverOptions *options) {
 #endif
 }
 
-static int fc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
-  fc3d_nsn_ac_set_default(options);
-  return NUMERICS_OK;
-}
+// static int fc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
+//   fc3d_nsn_ac_set_default(options);
+//   return NUMERICS_OK;
+// }
 
 /* Registration is in fc3d_nonsmooth_Newton_solvers.c to avoid duplicate registrations */

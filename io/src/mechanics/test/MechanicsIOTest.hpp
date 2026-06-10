@@ -20,8 +20,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "SiconosConfig.h"
-
 class MechanicsIOTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(MechanicsIOTest);
 

@@ -25,8 +25,6 @@
 
 #include <stddef.h>  // for size_t
 
-#include "SiconosConfig.h"  // for HAVE_PATHVI, BUILD_AS_CPP // IWYU pragma: keep
-
 /** \struct SN_generic_pathvi_env PATHVI_helpers.h
  * Generic structure for the PATHVI solver*/
 typedef struct {
@@ -43,7 +41,7 @@ typedef struct {
 #include "PATHVI_SDK/include/vi_desc.h"
 #define PATHVI_INDX_TYPE int
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -114,7 +112,7 @@ int pathvi_get_col_name(struct vi_desc *desc, int j, char *name, int len);
  */
 void pathvi_print(unsigned mode, const char *buf);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

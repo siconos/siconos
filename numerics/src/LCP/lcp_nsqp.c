@@ -18,18 +18,15 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_nsqp
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep - for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // IWYU pragma: keep
 #include "QP_Solvers.h"                    // for ql0001_
-#include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
 #include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
 #include "lcp_cst.h"                       // for SICONOS_LCP_NSQP
-#include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
@@ -125,9 +122,6 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
 
 #ifdef HAVE_QL0001
 #ifdef HAS_FORTRAN
-  /* / call ql0001_*/
-  /*   F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu, */
-  /*    z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol); */
   ql0001(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un, war,
          &lwar, iwar, &liwar, &tol);
 #else
@@ -158,7 +152,7 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   free(war);
 }
 
-static void lcp_nsqp_set_default(SolverOptions* options) {
+static void lcp_nsqp_set_default(SolverOptions *options) {
   /* No specific defaults needed */
   (void)options;
 }
@@ -169,30 +163,27 @@ static void lcp_nsqp_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_NSQP in the global solver registry.
  */
 
-static int lcp_nsqp_init_wrap(void* problem, SolverOptions* options) {
+static int lcp_nsqp_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   lcp_nsqp_set_default(options);
   return NUMERICS_OK;
 }
 
-static int lcp_nsqp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_nsqp_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
   int info = NUMERICS_OK;
-  lcp_nsqp((LinearComplementarityProblem*)problem, z, w, &info, options);
+  lcp_nsqp((LinearComplementarityProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void lcp_nsqp_free_wrap(void* problem, SolverOptions* options) {
+static void lcp_nsqp_free_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_NSQP, "LCP_NSQP",
-                       "Non-smooth QP solver for LCP",
-                       lcp_nsqp_init_wrap,
-                       lcp_nsqp_solve_wrap,
-                       lcp_nsqp_free_wrap,
-                       NULL,  /* error function */
-                       lcp_nsqp_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0      /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_LCP_NSQP, "LCP_NSQP", "Non-smooth QP solver for LCP",
+                lcp_nsqp_init_wrap, lcp_nsqp_solve_wrap, lcp_nsqp_free_wrap,
+                NULL,                 /* error function */
+                lcp_nsqp_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-6,                 /* default_tol */
+                0 /* is_local_solver */)

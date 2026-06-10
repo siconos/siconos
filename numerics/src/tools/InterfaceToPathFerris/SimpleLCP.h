@@ -49,8 +49,6 @@
 
 #include <stdint.h>
 
-#include "SiconosConfig.h"
-
 #ifdef HAVE_PATHFERRIS
 #include "PATH_SDK/include/Types.h"
 #else
@@ -64,7 +62,7 @@ typedef void MCP_Termination;
 
 
  */
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
@@ -78,7 +76,7 @@ void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, doubl
 void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b,
              double *M, double *q);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

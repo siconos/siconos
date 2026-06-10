@@ -30,7 +30,7 @@ set(Siconos_DIR ${SICONOS_INSTALL_DIR})
 find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
-find_package(pybind11 CONFIG REQUIRED)
+find_package(pybind11 3.0.2  CONFIG REQUIRED)
 
 include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
@@ -52,7 +52,7 @@ endif()
 link_directories(${CMAKE_BUILD_DIR})
 
 if(WITH_GPU)
-  set(flags "-DWITH_GPU -DCUNSEARCH_USE_DOUBLE_PRECISION")
+  set(flags "-DWITH_GPU")
 endif()
 
 set(flags "${flags} -Wall --std=c++23")
@@ -100,9 +100,9 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 
 if(WITH_GPU)
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread fmt cuNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread cuNSearch pybind11::headers)
 else()
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread fmt CompactNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread CompactNSearch pybind11::headers)
 endif()
 
 

@@ -18,8 +18,7 @@
 #ifndef NCP_PROBLEM_H
 #define NCP_PROBLEM_H
 
-#include "NumericsFwd.h"    // for NonlinearComplementarityProblem, NumericsMa...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NonlinearComplementarityProblem, NumericsMa...
 
 /*!\file NonlinearComplementarityProblem.h
  * Data structure to formalize a Nonlinear Complementarity Problem (NCP)
@@ -52,7 +51,7 @@ struct NonlinearComplementarityProblem {
                variables needed for the computations.*/
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /** free an NCP problem
@@ -67,7 +66,7 @@ void freeNCP(NonlinearComplementarityProblem *ncp);
  */
 NonlinearComplementarityProblem *newNCP(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

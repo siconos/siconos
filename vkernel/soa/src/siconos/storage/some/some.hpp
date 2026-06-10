@@ -108,16 +108,18 @@ template <typename Type, typename N, typename M>
 struct matrix : undefined_matrix, with_sizes<N, M>, with_type<Type> {};
 
 template <typename Mat>
-struct transposed_matrix
-    : undefined_matrix,
-      with_sizes<nth_t<1, typename Mat::sizes>, nth_t<0, typename Mat::sizes>>,
-      with_type<typename Mat::type> {};
+struct transposed_matrix : undefined_matrix,
+                           with_sizes<nth_t<1, typename Mat::sizes>,
+                                      nth_t<0, typename Mat::sizes>>,
+                           with_type<typename Mat::type> {};
 
 template <typename Type = some::scalar>
 struct unbounded_matrix : undefined_unbounded_matrix, with_type<Type> {};
 
 template <typename Type, typename N>
-struct unbounded_col_matrix : undefined_unbounded_matrix, with_type<Type>, with_sizes<N> {};
+struct unbounded_col_matrix : undefined_unbounded_matrix,
+                              with_type<Type>,
+                              with_sizes<N> {};
 
 template <typename Type = some::scalar>
 struct unbounded_vector : undefined_unbounded_vector, with_type<Type> {};
@@ -138,14 +140,16 @@ struct sparse_matrix : undefined_sparse_matrix, with_type<Type> {};
 struct structure_for_assembled_data {};
 
 template <typename Type = some::scalar>
-struct assembled_matrix : unbounded_matrix<Type>, structure_for_assembled_data {};
+struct assembled_matrix : unbounded_matrix<Type>,
+                          structure_for_assembled_data {};
 
 template <typename Type = some::scalar>
 struct assembled_diagonal_matrix : unbounded_diagonal_matrix<Type>,
                                    structure_for_assembled_data {};
 
 template <typename Type = some::scalar>
-struct assembled_vector : unbounded_vector<Type>, structure_for_assembled_data {};
+struct assembled_vector : unbounded_vector<Type>,
+                          structure_for_assembled_data {};
 
 template <typename Type, typename N>
 struct vector : undefined_vector, with_sizes<N>, with_type<Type> {};
@@ -166,10 +170,13 @@ template <typename Edge, typename Vertice>
 struct graph : undefined_graph, with_types<Edge, Vertice> {};
 
 template <typename Type>
-struct unbounded_collection : undefined_unbounded_collection, with_type<Type> {};
+struct unbounded_collection : undefined_unbounded_collection,
+                              with_type<Type> {};
 
 template <typename Type, typename N>
-struct bounded_collection : undefined_bounded_collection, with_sizes<N>, with_type<Type> {};
+struct bounded_collection : undefined_bounded_collection,
+                            with_sizes<N>,
+                            with_type<Type> {};
 
 // xx should be elsewhere
 template <match::item T>
@@ -182,7 +189,9 @@ struct polymorph : undefined_polymorphic_type, with_types<Ts...> {
 };
 
 template <typename... Ts>
-struct polymorphic_attribute : attribute<>, with_type<gather<Ts...>>, polymorph<Ts...> {};
+struct polymorphic_attribute : attribute<>,
+                               with_type<gather<Ts...>>,
+                               polymorph<Ts...> {};
 
 struct given_type {};
 

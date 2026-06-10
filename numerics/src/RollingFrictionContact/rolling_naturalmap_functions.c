@@ -15,31 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "rolling_naturalmap_functions.h"
+
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
-#include "rolling_naturalmap_functions.h"
-
-/* #include "Plasticity2DProblem.h"         // for MohrCoulomb2D... */
-/* #include "NumericsFwd.h"                  // for MohrCoulomb2D... */
-/* #include "NumericsMatrix.h"               // for NumericsMatrix */
-/* #include "plasticity_2d_AlartCurnier_functions.h"  // for plasticity_2d_computeAlartCu... */
-/* #include "plasticity_2d_naturalmap_functions.h" */
-/* #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  // for plasticity_2d_computeNonsmoo... */
-/* #include "numerics_verbose.h"                       // for numerics_printf */
 #include "op5x5.h"  // for SET3, eig_3x3
 #include "projectionOnRollingCone.h"
-
-// extern computeNonsmoothFunction Function;
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
-#include "numerics_errors.h"
 
 void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], double mu,
-                                           double mur, double * Rho, double F[5],
+                                           double mur, double Rho[1], double F[5],
                                            double A[25], double B[25]) {
   DEBUG_PRINT("rolling_friction_3D_computeNaturalMap\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 5; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
@@ -54,7 +44,7 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
   normVT = sqrt(*velocity1 * *velocity1 + *velocity2 * *velocity2);
   normOmegaT = sqrt(*velocity3 * *velocity3 + *velocity4 * *velocity4);
-  
+
   RV[0] = *R0 - rho * (*velocity0 + mu * normVT + mur * normOmegaT);
   RV[1] = *R1 - rho * *velocity1;
   RV[2] = *R2 - rho * *velocity2;
@@ -67,7 +57,7 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   DEBUG_PRINTF("mur= %12.8e \n", mur);
   DEBUG_PRINTF("rho= %12.8e \n", rho);
   unsigned int where = projectionOnRollingCone(F, mu, mur);
-  //display_status_rolling_cone(where);
+  // display_status_rolling_cone(where);
   DEBUG_EXPR_WE(printf("projection F\n"); display5(F););
 
   F[0] = *R0 - F[0];
@@ -78,12 +68,13 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
   DEBUG_EXPR_WE(display5(F););
 
-  DEBUG_EXPR_WE(if (where == PROJRCONE_DUAL) {printf("We are in the polar cone\n");}
-		  else if (where == PROJRCONE_INSIDE) {printf("We are in the cone\n");}
-		  else 
-                    printf("We are outside the cone and its polar\n"););
+  DEBUG_EXPR_WE(
+      if (where == PROJRCONE_DUAL) {
+        printf("We are in the polar cone\n");
+      } else if (where == PROJRCONE_INSIDE) {
+        printf("We are in the cone\n");
+      } else printf("We are outside the cone and its polar\n"););
   if (A && B) {
-    
     SET5X5(A);
     SET5X5(B);
     double s1, s2, s3, s4;
@@ -141,11 +132,12 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
 
       double H[25];
       /* //zero5x5(H); */
-      // unsigned int where2 =
+      //unsigned int where2 =
       subdifferentialProjectionOnRollingCone(H, RV, mu, mur);
+      //printf("where2 ");display_status_rolling_cone(where2);
       DEBUG_EXPR_WE(printf("H:"); display5x5(H););
 
-      // A = rho * (I+D) * H
+      // A =  H * rho * (I+D)
 
       // B = rho * (I+D) we use B for storage
       zero5x5(B00);
@@ -166,7 +158,6 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
       // B = I - H
       eye5x5(B00);
       sub5x5(H, B00);
-
     }
     DEBUG_EXPR_WE(printf("B"); display5x5(B00););
     DEBUG_EXPR_WE(printf("A:"); display5x5(A00););

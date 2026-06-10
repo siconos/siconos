@@ -26,7 +26,6 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288   /* pi             */
@@ -646,8 +645,8 @@ static inline int solve_5x5_gepp_for_loop(const double* restrict a, double* rest
   for (int i = 0; i < 25; ++i) A[i] = a[i];
   for (int i = 0; i < 5; ++i) x[i] = b[i];
 
-  int ipiv[5];
-  for (int i = 0; i < 5; ++i) ipiv[i] = i;
+  // // int ipiv[5];
+  // // for (int i = 0; i < 5; ++i) ipiv[i] = i;
 
   for (int i = 0; i < 5; ++i) {
     /* Find pivot - column i has elements at A[i*5 + row] in column-major */

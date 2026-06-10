@@ -30,13 +30,13 @@
   - free
 
 */
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
-void fc3d_unitary_enumerative_free(FrictionContactProblem* problem);
+void fc3d_unitary_enumerative_free(FrictionContactProblem* problem,
+                                   FrictionContactProblem* dummy1, SolverOptions* dummy2);
 void fc3d_unitary_enumerative_initialize(FrictionContactProblem* problem);
 /*API for the nsgs*/
 int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double* reaction,
@@ -50,7 +50,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double* reaction,
                              double* velocity, int* info, SolverOptions* options);
 int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem,
                                                    double* reaction, SolverOptions* options);
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

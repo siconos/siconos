@@ -26,7 +26,7 @@
 #include "AffineVariationalInequalities.h"
 #include "SolverOptions.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -88,7 +88,7 @@ int avi_pathavi(AffineVariationalInequalities* problem, double* z, double* w,
  */
 //  void avi_compute_error_only(int n,  double *z , double *w, double * error);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

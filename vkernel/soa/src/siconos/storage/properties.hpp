@@ -56,6 +56,11 @@ struct assembled_matrix : refine {
   using refine = some::assembled_matrix<typename A::type>;
 };
 
+struct sparse_matrix : refine {
+  template <match::attribute A>
+  using refine = some::sparse_matrix<typename A::type>;
+};
+
 }  // namespace property
 
 template <match::attribute A, typename T>
@@ -108,28 +113,40 @@ struct assembled_diagonal : property::assembled_diagonal {
   using assembled_diagonal_t = void;
 };
 
+template <typename T>
+struct unbounded;
+
 template <match::abstract_matrix M>
-struct unbounded_matrix : property::unbounded_matrix {
+struct unbounded<M> : property::unbounded_matrix {
   using type = M;
   using unbounded_matrix_t = void;
 };
 
 template <match::abstract_vector V>
-struct unbounded_vector : property::unbounded_vector {
+struct unbounded<V> : property::unbounded_vector {
   using type = V;
   using unbounded_vector_t = void;
 };
 
+template <typename T>
+struct assembled;
+
 template <match::abstract_matrix M>
-struct assembled_matrix : property::assembled_matrix {
+struct assembled<M> : property::assembled_matrix {
   using type = M;
   using assembled_matrix_t = void;
 };
 
 template <match::abstract_vector V>
-struct assembled_vector : property::assembled_vector {
+struct assembled<V> : property::assembled_vector {
   using type = V;
   using assembled_vector_t = void;
+};
+
+template <match::abstract_matrix M>
+struct sparse : property::sparse_matrix {
+  using type = M;
+  using sparse_matrix_t = void;
 };
 
 template <match::property K>
@@ -162,15 +179,14 @@ static auto attribute_properties = [](auto& data) constexpr -> auto {
 template <match::item Item, typename properties>
 static constexpr auto item_properties_from()
 {
-  return mp::filter(properties{},
-                        mp::is_a_model<[]<typename T>() consteval {
-                          if constexpr (match::item_property<T>) {
-                            return std::derived_from<Item, typename T::item>;
-                          }
-                          else {
-                            return false;
-                          };
-                        }>);
+  return mp::filter(properties{}, mp::is_a_model<[]<typename T>() consteval {
+                      if constexpr (match::item_property<T>) {
+                        return std::derived_from<Item, typename T::item>;
+                      }
+                      else {
+                        return false;
+                      };
+                    }>);
 };
 
 template <match::item Item, typename Data>
@@ -201,18 +217,18 @@ static constexpr bool has_property_from()
 template <match::item Item, match::property K>
 static constexpr bool has_property(auto&& data)
 {
-  return mp::any_of(
-      item_properties<Item>(data),
-      []<match::property P>(P) { return std::derived_from<P, K>; });
+  return mp::any_of(item_properties<Item>(data), []<match::property P>(P) {
+    return std::derived_from<P, K>;
+  });
 };
 
 template <match::item Item, typename Properties>
 static constexpr auto bind_name()
 {
   return mp::find_if(item_properties_from<Item, Properties>(),
-                         mp::is_a_model<[]<match::property P>() {
-                           return std::derived_from<P, property::bind>;
-                         }>)
+                     mp::is_a_model<[]<match::property P>() {
+                       return std::derived_from<P, property::bind>;
+                     }>)
       .value_or([]<bool flag = false>() {
         static_assert(flag, "no binding found!");
       })
@@ -225,9 +241,9 @@ using has_property_t = std::decay_t<decltype(has_property<A, K>(D{}))>;
 static auto refine_attribute = []<match::attribute Attr, typename D>(
                                    const D& data,
                                    Attr) constexpr -> decltype(auto) {
-  using refines = decltype(mp::filter(
-      pre_map_all_properties_as<property::refine>(data),
-      mp::is_inside_type_parent<Attr>));
+  using refines =
+      decltype(mp::filter(pre_map_all_properties_as<property::refine>(data),
+                          mp::is_inside_type_parent<Attr>));
 
   if constexpr (mp::size(refines{}) > mp::size_c<0_c>) {
     return typename nth_t<0, refines>::template refine<Attr>{};
@@ -238,30 +254,30 @@ static auto refine_attribute = []<match::attribute Attr, typename D>(
   }
 };
 
+// recursive type refinement
+template <typename Attr>
+struct recursive_rebuild {
+  using type = Attr;
+};
+
+// specialization for internal attribute types
+template <typename Attr>
+  requires(match::attribute_with_internal_type<Attr> &&
+           match::attribute<typename Attr::type>)
+struct recursive_rebuild<Attr> {
+  using inner = typename recursive_rebuild<typename Attr::type>::type;
+  using type = refine_with_type<Attr, inner>;
+};
+
 static constexpr auto refine_recursively_attribute =
     []<match::attribute Attr>(auto& data, Attr) {
       using data_t = std::decay_t<decltype(data)>;
-      constexpr auto rec_loop = []<typename IAttr>(auto&& loop,
-                                                   IAttr) constexpr {
-        if constexpr (match::attribute_with_internal_type<IAttr>) {
-          // look inside and apply fun
-          if constexpr (match::attribute<typename IAttr::type>) {
-            using r =
-                refine_with_type<IAttr, decltype(loop(
-                                            loop, typename IAttr::type{}))>;
-            return refine_attribute(data_t{}, r{});
-          }
-          else {
-            return refine_attribute(data_t{}, IAttr{});
-          }
-        }
-        else {
-          // terminal attribute
-          return refine_attribute(data_t{}, IAttr{});
-        }
-      };
 
-      return rec_loop(rec_loop, Attr{});
+      // rebuild
+      using recursed = typename recursive_rebuild<Attr>::type;
+
+      // user-defined refinements at the top level
+      return refine_attribute(data_t{}, recursed{});
     };
 
 template <typename Handle, typename Data>
@@ -275,9 +291,9 @@ constexpr decltype(auto) attached_storages(Item, auto& data)
   using item_t = Item;
 
   return mp::filter(typename info_t::all_properties_t{},
-                        mp::is_a_model<[]<typename T>() {
-                          return match::attached_storage<T, item_t>;
-                        }>);
+                    mp::is_a_model<[]<typename T>() {
+                      return match::attached_storage<T, item_t>;
+                    }>);
 };
 
 template <typename Item>

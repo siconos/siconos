@@ -31,12 +31,11 @@
 #include "RigidBodyDS.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosBulletDefines.h"
-#include "SiconosBulletOptions.hpp"
+#include "SiconosBulletOptions.hpp"  // IWYU pragma: keep
 #include "SiconosBulletShape.hpp"
 #include "SiconosBulletVisitors.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosContactor.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StaticBody.hpp"
 
@@ -48,9 +47,6 @@
 #ifdef DEBUG_MESSAGES
 #include "BulletUtils.hpp"
 #endif
-
-
-
 
 namespace {  // anonymous because only for local use
              // ======================= Helper functions
@@ -166,7 +162,7 @@ std::shared_ptr<btCollisionObject> siconos::collision::bullet::internal::
     btobject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 
   // put it in the world
-  int collisionFilterGroup = contactor->collision_group;
+  int collisionFilterGroup = contactor->collision_group();
   int collisionFilterMask = 1;
 
 #ifdef QUEUE_STATIC_CONTACTORS
@@ -259,7 +255,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   auto plane = record->shape;
   auto btplane = record->btshape;
 
-  auto o = record->contactor->offset;
+  auto o = record->contactor->offset();
 
   // Adjust the offset according to plane implementation
 #ifdef USE_BOX_FOR_PLANE
@@ -820,7 +816,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   o(2) = z_offset;
   o(3) = 1;
 
-  auto t = offsetTransform(record->contactor->offset, o);
+  auto t = offsetTransform(record->contactor->offset(), o);
 
   o(0) = t.getOrigin().getX();
   o(1) = t.getOrigin().getY();
@@ -1287,7 +1283,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   DEBUG_PRINT("Position of the shape given to bullet:");
   DEBUG_EXPR_WE(siconos::algebra::print(q););
 
-  auto t = offsetTransform(q, record->contactor->offset);
+  auto t = offsetTransform(q, record->contactor->offset());
 
   t.setOrigin(t.getOrigin() * _options->worldScale);
   DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()),
@@ -1305,36 +1301,24 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     createCollisionObjectsForStaticBodyContactorSet(
         const std::shared_ptr<StaticBody> staticBody,
-        std::shared_ptr<SiconosContactorSet> contactors) {
+        std::shared_ptr<const SiconosContactorSet> contactors) {
   DEBUG_BEGIN(
       "siconos::collision::bullet::internal::SiconosBulletCollisionManager_"
       "impl::"
       "createCollisionObjectsForStaticBodyContactorSet(...)\n");
   assert(contactors);
-
-  std::shared_ptr<SiconosContactorSet> con{contactors};
-  if (!con) {
-    DEBUG_PRINT("No contactors");
-    DEBUG_BEGIN(
-        "siconos::collision::bullet::internal::SiconosBulletCollisionManager_"
-        "impl::"
-        "createCollisionObjectsForStaticBodyContactorSet(...)"
-        "\n");
-    return;
-  }
   auto ccosv = std::make_shared<CreateCollisionObjectShapeVisitor>(
       this->shared_from_this(), nullptr, staticBody->base, staticBody);
 
-  /* Call createCollisionObject for each shape type using the visitor
-   * defined above */
-  for (auto& it : *con->vector()) {
+  /* Call createCollisionObject for each shape type using the visitor defined above */
+  for (const auto& it : *contactors) {
     // special collision group -1 = do not collide, thus we can skip
     // creation of associated collision objects
-    if (it->collision_group == -1) continue;
+    if (it->collision_group() == -1) continue;
 
     // otherwise visit the object with createCollisionObject
     ccosv->contactor = it;
-    ccosv->contactor->shape->accept(ccosv);
+    ccosv->contactor->shape()->accept(ccosv);
   }
   DEBUG_END(
       "siconos::collision::bullet::internal::SiconosBulletCollisionManager_"
@@ -1350,13 +1334,13 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       "impl::"
       "createCollisionObjectsForBodyContactorSetFromDS(...)\n");
   assert(ds);
-  std::shared_ptr<SiconosContactorSet> con{nullptr};
+  std::shared_ptr<const SiconosContactorSet> contactors{nullptr};
 
   std::shared_ptr<siconos::algebra::SiconosVector> base;
 
   if (auto rbds = std::dynamic_pointer_cast<RigidBodyDS>(ds)) {
     DEBUG_PRINT("RigidBodyDS case");
-    con = rbds->contactors();
+    contactors = rbds->contactors();
     // printf("\n\n extrapolation %e\n", _options.extrapolationCoefficient);
     // getchar();
     if (_options->extrapolationCoefficient > 0.) {
@@ -1369,10 +1353,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   }
   if (auto rb2dds = std::dynamic_pointer_cast<RigidBody2dDS>(ds)) {
     DEBUG_PRINT("RigidBody2dDS case");
-    con = rb2dds->contactors();
+    contactors = rb2dds->contactors();
     base = rb2dds->q();
   }
-  if (!con) {
+  if (!contactors) {
     DEBUG_PRINT("No contactors");
     DEBUG_BEGIN(
         "siconos::collision::bullet::internal::SiconosBulletCollisionManager_"
@@ -1387,14 +1371,14 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   /* Call createCollisionObject for each shape type using the visitor
    * defined above */
-  for (auto it : *con->vector()) {
+  for (const auto& it : *contactors) {
     // special collision group -1 = do not collide, thus we can skip
     // creation of associated collision objects
-    if (it->collision_group == -1) continue;
+    if (it->collision_group() == -1) continue;
 
     // otherwise visit the object with createCollisionObject
     ccosv->contactor = it;
-    ccosv->contactor->shape->accept(ccosv);
+    ccosv->contactor->shape()->accept(ccosv);
 
     DEBUG_END(
         "siconos::collision::bullet::internal::SiconosBulletCollisionManager_"

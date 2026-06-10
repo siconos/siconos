@@ -326,10 +326,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatri
 
   } else if (dim == 3) {
     siconos::algebra::SiconosMatrix Me_loc{12, 12};
+    Me_loc.setZero();
     // Axial
     Me_loc(0, 0) = massDensity * A * length * 2 / 6;
     Me_loc(0, 6) = massDensity * A * length * 1 / 6;
-    Me_loc(6, 0) = Me_loc(0, 3);
+    Me_loc(6, 0) = Me_loc(0, 6);
     Me_loc(6, 6) = Me_loc(0, 0);
 
     // Torsional
@@ -631,7 +632,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
   bendOnBend = E * I * 2 / length;
 
   if (dim == 2) {
-    siconos::algebra::SiconosMatrix66 Ke_loc;
+    siconos::algebra::SiconosMatrix66 Ke_loc = siconos::algebra::SiconosMatrix66::Zero();
 
     Ke_loc(0, 0) = axial;
     Ke_loc(0, 3) = -axial;
@@ -661,7 +662,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
     Ke.noalias() = Te_transpose * Ke_loc * Te;
 
   } else if (dim == 3) {
-    siconos::algebra::SiconosMatrix Ke_loc{12, 12};
+    siconos::algebra::SiconosMatrix Ke_loc = siconos::algebra::SiconosMatrix1212::Zero();
 
     Ke_loc(0, 0) = axial;
     Ke_loc(0, 6) = -axial;
@@ -913,7 +914,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
 
   // We start to compute the D matrix. Warning:  to be adpated if several
   // materials.
-
   /* loop over the elements */
   for (auto fe : elements()) {
     if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3) {
@@ -981,7 +981,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
         Dmat(5, 5) = coef * (1. - 2. * nu) / 2.;
         computeElementaryStiffnessMatrix(Ke, *fe, Dmat, mat.thickness());
       }
-
       assembleElementaryMatrix(K, Ke, *fe);
     }
   }
@@ -1124,6 +1123,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
   for (std::shared_ptr<FiniteElement> fe : elements()) {
     if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3) {
       siconos::algebra::SiconosDenseMatrix Be{fe->dimStress(), fe->ndof()};
+      Be.setZero();
       computeBeamElementaryBMatrix_direct(*fe, Be, mat);
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
       elem_cnt++;
@@ -1131,6 +1131,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
       auto dimStress =
           siconos::algebra::to_index(fe->ndofPerNode() * (fe->ndofPerNode() + 1) / 2);
       siconos::algebra::SiconosDenseMatrix Be{dimStress, fe->ndof()};
+      Be.setZero();
       const Material& material = mat.at(fe->mElement()->tags(0));
       computeElementaryBMatrix_direct(*fe, Be, material.thickness());
       assembleElementary_B_Matrix(B, Be, *fe, elem_cnt);
@@ -1162,6 +1163,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         // D is diagonal
         double c1 = 1. / (E * A * length);
         double c2 = 1. / (0.5 * E * I * length);
+
         siconos::algebra::SiconosMatrix33Diagonal Dinv{c1, c2, c2};
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 
@@ -1198,6 +1200,10 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         double c2 = 2. / (E * I * length);
         double c3 = 1. / (G * J * length);
         double c4 = 2. / (E * I * length);
+        // double c1 =  (E * A * length);
+        // double c2 = 1./2. * (E * I * length);
+        // double c3 =  (G * J * length);
+        // double c4 = 1./2. * (E * I * length);
         siconos::algebra::SiconosMatrix66Diagonal Dinv{c1, c2, c2, c3, c4, c4};
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 
@@ -1209,7 +1215,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
       elem_cnt++;
     }
   }
-
   DEBUG_END(
       "siconos::mechanics::fem::native::FiniteElementModel::computeElasticityMatrix(...)\n");
 }

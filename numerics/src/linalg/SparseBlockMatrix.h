@@ -23,8 +23,7 @@
 
 #include "CSparseMatrix.h"  // for CSparseMatrix
 #include "NumericsDataVersion.h"
-#include "NumericsFwd.h"    // for SparseBlockStructuredMatrix, SparseBlockC...
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SparseBlockStructuredMatrix, SparseBlockC...
 
 /*!\file SparseBlockMatrix.h
   Structure definition and functions related to
@@ -191,7 +190,7 @@ struct SBM_index_by_column {
 #define NUMERICS_SBM_FREE_BLOCK 4
 #define NUMERICS_SBM_FREE_SBM 8
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -671,7 +670,7 @@ void SBM_row_prod_no_diag_2x2_permut(unsigned int sizeX, unsigned int sizeY,
                                      const SparseBlockStructuredMatrix* const A,
                                      double* const x, double* y);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

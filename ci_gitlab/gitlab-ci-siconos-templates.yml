@@ -187,7 +187,10 @@ workflow:
   artifacts:
     paths:
       - build
-    expire_in: 2 days 
+    expire_in: 2 days
+    exclude: # Try to reduce artifacts size ...
+      - build/**/*.dwo
+      - build/**/*.o    # idéalement, passer uniquement les binaires de test
 
 # - Template to complete .siconos-ctest
 # test step.

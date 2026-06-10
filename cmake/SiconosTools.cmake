@@ -324,7 +324,16 @@ function(apply_compiler_options COMPONENT)
   set(oneValueArgs DIAGNOSTICS_LEVEL)
   cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+
+
   unset(COMP_OPTIONS) # C and C++ options. Append options there by default.
+
+
+  # Try to reduce build type by splitting "o" and "dwarf"
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+      list(APPEND COMP_OPTIONS -gsplit-dwarf)
+      list(APPEND COMP_OPTIONS -gz=zlib)
+  endif()
 
   # -- Compiler options common to all setups --
 

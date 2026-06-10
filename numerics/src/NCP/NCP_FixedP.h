@@ -19,19 +19,17 @@
 #ifndef Fixe_H
 #define Fixe_H
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
 /*!\file NCP_FixedP.h
 
 */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 int Fixe(int n, double* z, int* iparam, double* dparam);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

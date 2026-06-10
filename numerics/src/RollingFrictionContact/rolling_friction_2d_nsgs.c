@@ -21,23 +21,21 @@
 #include <stdlib.h>  // for calloc, malloc, srand
 #include <string.h>  // for NULL, memcpy
 
-#include "FrictionContact_options.h"                      // for SICONOS_FRICTION_3D_IP...
-#include "NumericsArrays.h"                    // for uint_shuffle
-#include "NumericsFwd.h"                       // for SolverOptions, Rolling...
-#include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
-#include "SiconosBlas.h"                       // for cblas_dnrm2
-#include "SolverOptions.h"                     // for SolverOptions, SICONOS...
-#include "numerics_verbose.h"                  // for numerics_printf, numer...
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IP...
+#include "NumericsArrays.h"           // for uint_shuffle
+#include "NumericsFwd.h"              // for SolverOptions, Rolling...
+#include "SiconosBlas.h"              // for cblas_dnrm2
+#include "SolverOptions.h"            // for SolverOptions, SICONOS...
+#include "naming_conventions.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"                         // for numerics_printf, numer...
+#include "rolling_fc_Solvers.h"                       // for RollingComputeErrorPtr
 #include "rolling_friction_2d_compute_error.h"        // for rolling_friction_3d_compute_e...
 #include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
 #include "rolling_friction_2d_projection.h"           // for rolling_friction_3d_projectio...
-#include "rolling_fc_Solvers.h"                // for RollingComputeErrorPtr
-#include "siconos_debug.h"                     // for DEBUG_PRINTF, DEBUG_BEGIN
-
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
 #include "rolling_friction_3d_short_names.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_BEGIN
+#include "solver_registry.h"
 
 // #define FCLIB_OUTPUT
 
@@ -48,8 +46,9 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* static void rolling_friction_2d_nsgs_update(int contact, RollingFrictionContactProblem* problem,
- * RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options) */
+/* static void rolling_friction_2d_nsgs_update(int contact, RollingFrictionContactProblem*
+ * problem, RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions*
+ * options) */
 /* { */
 /*   /\* Build a local problem for a specific contact */
 /*      reaction corresponds to the global vector (size n) of the global problem. */
@@ -87,16 +86,16 @@ int rolling_friction_2d_nsgs_initialize_local_solver(
       *update = &rolling_friction_2d_projection_update;
       *freeSolver =
           (RollingFreeSolverNSGSPtr)&rolling_friction_2d_projectionOnConeWithLocalIteration_free;
-      *computeError = (RollingComputeErrorPtr)&rolling_friction_2d_compute_error;
+      *computeError = &rolling_friction_2d_compute_error;
       rolling_friction_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
-                                                                 localsolver_options);
+                                                                        localsolver_options);
       break;
     }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
       *solve = &rolling_friction_2d_projectionOnCone_solve;
       *update = &rolling_friction_2d_projection_update;
       *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_friction_2d_projection_free;
-      *computeError = (RollingComputeErrorPtr)&rolling_friction_2d_compute_error;
+      *computeError = &rolling_friction_2d_compute_error;
       rolling_friction_2d_projection_initialize(problem, localproblem);
       break;
     }
@@ -270,20 +269,19 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
   int hasNotConverged = 1;
   if (error < *tolerance) {
     hasNotConverged = 0;
-    numerics_printf(
-        "---- RFC2D - NSGS - | %3d | %14.7e | %7.3e |",
-        iter, error, *tolerance);
+    numerics_printf("---- RFC2D - NSGS - | %3d | %14.7e | %7.3e |", iter, error, *tolerance);
 
-    double absolute_error =
-        calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                SOLVER_TOL(options), norm_q);
+    double absolute_error = calculateFullErrorFinal(problem, options, computeError, reaction,
+                                                    velocity, SOLVER_TOL(options), norm_q);
     if (absolute_error > SOLVER_TOL(options)) {
       if (error < DBL_EPSILON) {
         /* in this case, the relative error is very small
            (meaning that the nsgs loop does not
            improve accuracy).
            We try to tighten the local solver tolerance */
-        SET_LOCAL_SOLVER_TOL(options->internalSolvers[0], fmax(LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100., DBL_EPSILON * 1e-6));
+        SET_LOCAL_SOLVER_TOL(
+            options->internalSolvers[0],
+            fmax(LOCAL_SOLVER_TOL(options->internalSolvers[0]) / 100., DBL_EPSILON * 1e-6));
         numerics_printf(
             "------- RFC2D - NSGS - We modify the local solver tolerance precision to reach "
             "accuracy to %e",
@@ -291,7 +289,7 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
 
       } else {
         *tolerance = error / absolute_error * SOLVER_TOL(options);
-	assert(*tolerance > 0.0 && "tolerance has to be positive");
+        assert(*tolerance > 0.0 && "tolerance has to be positive");
         numerics_printf(
             "------- RFC2D - NSGS - We modify the required incremental precision to reach "
             "accuracy to %e",
@@ -306,9 +304,7 @@ static int determine_convergence_with_full_final(RollingFrictionContactProblem *
     }
 
   } else {
-    numerics_printf(
-        "---- RFC2D - NSGS - | %3d | %14.7e | %7.3e |",
-        iter, error, *tolerance);
+    numerics_printf("---- RFC2D - NSGS - | %3d | %14.7e | %7.3e |", iter, error, *tolerance);
   }
   return hasNotConverged;
 }
@@ -324,7 +320,7 @@ static void statsIterationCallback(RollingFrictionContactProblem *problem,
 }
 
 void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *reaction,
-                       double *velocity, int *info, SolverOptions *options) {
+                              double *velocity, int *info, SolverOptions *options) {
   /* problem->mu_r[0]=0.1; */
   /* problem->mu[0]=1.0; */
 
@@ -373,9 +369,9 @@ void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *re
   /*****  Initialize various solver options *****/
   localproblem = rolling_friction_2d_local_problem_allocate(problem);
 
-  rolling_friction_2d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
-                                            (RollingFreeSolverNSGSPtr *)&freeSolver,
-                                            &computeError, problem, localproblem, options);
+  rolling_friction_2d_nsgs_initialize_local_solver(
+      &local_solver, &update_localproblem, (RollingFreeSolverNSGSPtr *)&freeSolver,
+      &computeError, problem, localproblem, options);
 
   scontacts = allocShuffledContacts(problem, options);
 
@@ -423,7 +419,8 @@ void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *re
       ++iter;
       double light_error_sum = 0.0;
 
-      rolling_friction_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
+      rolling_friction_2d_set_internalsolver_tolerance(problem, options, localsolver_options,
+                                                       error);
 
       for (unsigned int i = 0; i < nc; ++i) {
         contact = i;
@@ -453,7 +450,8 @@ void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *re
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
-      rolling_friction_2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
+      rolling_friction_2d_set_internalsolver_tolerance(problem, options, localsolver_options,
+                                                       error);
 
       for (unsigned int i = 0; i < nc; ++i) {
         if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -556,30 +554,29 @@ void rolling_friction_2d_nsgs_set_default(SolverOptions *options) {
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
-    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+    options->internalSolvers = calloc(1, sizeof(SolverOptions *));
   }
-  options->internalSolvers[0] = solver_options_create(
-      SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+  options->internalSolvers[0] =
+      solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
   assert(options->numberOfInternalSolvers == 1);
-
 }
 
-
 /* Solver registration wrapper functions */
-static int rolling_friction_2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
+static int rolling_friction_2d_nsgs_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int rolling_friction_2d_nsgs_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, SolverOptions* options) {
+static int rolling_friction_2d_nsgs_solve_wrap(void *problem, double *reaction,
+                                               double *velocity, SolverOptions *options) {
   int info = NUMERICS_OK;
-  rolling_friction_2d_nsgs((RollingFrictionContactProblem*)problem, reaction, velocity, &info, options);
+  rolling_friction_2d_nsgs((RollingFrictionContactProblem *)problem, reaction, velocity, &info,
+                           options);
   return info;
 }
 
-static void rolling_friction_2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
+static void rolling_friction_2d_nsgs_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -587,11 +584,8 @@ static void rolling_friction_2d_nsgs_free_wrap(void* problem, SolverOptions* opt
 
 REGISTER_SOLVER(RFC2D_NSGS, "RFC2D_NSGS",
                 "Non-smooth Gauss-Seidel for 2D Rolling Friction Contact",
-                rolling_friction_2d_nsgs_init_wrap,
-                rolling_friction_2d_nsgs_solve_wrap,
-                rolling_friction_2d_nsgs_free_wrap,
-                NULL,  /* error function */
-                rolling_friction_2d_nsgs_set_default,
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                rolling_friction_2d_nsgs_init_wrap, rolling_friction_2d_nsgs_solve_wrap,
+                rolling_friction_2d_nsgs_free_wrap, NULL,   /* error function */
+                rolling_friction_2d_nsgs_set_default, 1000, /* default_max_iter */
+                1e-4,                                       /* default_tol */
+                0 /* is_local_solver */);

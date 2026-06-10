@@ -28,16 +28,14 @@ dim(v)=nn
 #include "mlcp_direct_path_enum.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
-
 #include <stdio.h>  // for printf
 
-#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "SolverOptions.h"                      // for SolverOptions
-#include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
-#include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
+#include "MLCP_Solvers.h"  // for mixedLinearComplement...
+#include "mlcp_cst.h"
+#include "mlcp_direct.h"     // for mlcp_direct_getNbDWork
+#include "mlcp_path_enum.h"  // for mlcp_path_enum, mlcp_...
+#include "numerics_errors.h"
+#include "solver_registry.h"
 static int sN;
 static int sM;
 
@@ -109,7 +107,8 @@ static int mlcp_direct_path_enum_init_wrap(void* problem, SolverOptions* options
   return NUMERICS_OK;
 }
 
-static int mlcp_direct_path_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_direct_path_enum_solve_wrap(void* problem, double* z, double* w,
+                                            SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_direct_path_enum((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -123,11 +122,8 @@ static void mlcp_direct_path_enum_free_wrap(void* problem, SolverOptions* option
 
 REGISTER_SOLVER(SICONOS_MLCP_DIRECT_PATH_ENUM, "MLCP_DIRECT_PATH_ENUM",
                 "Direct-PATH-Enum hybrid solver for Mixed Linear Complementarity Problems",
-                mlcp_direct_path_enum_init_wrap,
-                mlcp_direct_path_enum_solve_wrap,
-                mlcp_direct_path_enum_free_wrap,
-                NULL,  /* error function */
-                mlcp_direct_path_enum_set_default,
-                1000,  /* default_max_iter */
-                1e-12, /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_direct_path_enum_init_wrap, mlcp_direct_path_enum_solve_wrap,
+                mlcp_direct_path_enum_free_wrap, NULL,   /* error function */
+                mlcp_direct_path_enum_set_default, 1000, /* default_max_iter */
+                1e-12,                                   /* default_tol */
+                0 /* is_local_solver */);

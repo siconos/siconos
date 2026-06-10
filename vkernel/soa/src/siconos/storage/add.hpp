@@ -19,7 +19,7 @@ decltype(auto) add(auto&& data) {
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
   using all_keeps_t = decltype(all_properties_as<property::keep>(data));
-  using indice = typename info_t::env::indice;
+  using indice = typename info_t::template env<Item>::indice;
 
   // get attached storages from all properties
   constexpr auto attached_storages = mp::filter(
@@ -45,6 +45,19 @@ decltype(auto) add(auto&& data) {
             using storage_t = std::decay_t<decltype(storage)>;
 
             if constexpr (match::push_back<storage_t>) {
+              if constexpr (match::static_capacity<storage_t>) {
+                  // boost::container::static_vector or similar
+                  if (storage.size() == storage.capacity())
+                  {}
+                  else
+                  {
+                    storage.push_back(typename storage_t::value_type{});
+                    assert(index > 0 ? index == std::size(storage) - 1
+                           : index == 0);
+                    index = std::size(storage) - 1;
+                  }
+                }
+                else
               // item has been wrapped into a std::vector or similar
               storage.push_back(typename storage_t::value_type{});
               assert(index > 0 ? index == std::size(storage) - 1

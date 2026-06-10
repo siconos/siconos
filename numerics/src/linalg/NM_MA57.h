@@ -19,10 +19,7 @@
 #ifndef NM_MA57_h
 #define NM_MA57_h
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP, WITH_MA57 // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -36,7 +33,7 @@ void NM_MA57_free(void* p);
 
 #endif /* WITH_MA57 */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

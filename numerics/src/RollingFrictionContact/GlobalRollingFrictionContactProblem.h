@@ -25,8 +25,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for GlobalRollingFrictionContactProblem, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalRollingFrictionContactProblem, NumericsMatrix
 
 /** \struct GlobalRollingFrictionContactProblem
  * GlobalRollingFrictionContactProblem.h The structure that defines a (reduced
@@ -58,7 +57,7 @@ struct GlobalRollingFrictionContactProblem {
   char *name;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -141,7 +140,7 @@ RollingFrictionContactProblem *
 globalRollingFrictionContact_reformulation_RollingFrictionContact(
     GlobalRollingFrictionContactProblem *problem);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

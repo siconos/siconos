@@ -22,8 +22,6 @@
 #ifndef _NUMERICS_VERBOSE_H_
 #define _NUMERICS_VERBOSE_H_
 
-#include "SiconosConfig.h"
-
 /** logging types */
 enum numerics_loggers {
   NUMERICS_LOG_TO_SCREEN,
@@ -31,7 +29,7 @@ enum numerics_loggers {
   NUMERICS_EXTERNAL_LOGGER
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -40,7 +38,7 @@ extern "C" {
 */
 void numerics_set_verbose(int newVerboseMode);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

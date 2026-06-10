@@ -28,7 +28,6 @@
  *
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "line_search.h"
 
 /** \struct armijo_extra_params ArmijoSearch.h
@@ -38,7 +37,7 @@ typedef struct {
   double gamma; /**< Value of the slope coefficient*/
 } armijo_extra_params;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -86,7 +85,7 @@ static inline double arcsearch_Armijo2(int n, double theta, double preRHS,
  */
 void search_Armijo_params_init(armijo_extra_params* p);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

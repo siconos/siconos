@@ -20,20 +20,17 @@
 #include <stdio.h>   // for printf, NULL
 #include <stdlib.h>  // for malloc
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_NSGS, SICONO...
-#include "Friction_tools.h"                  // for ComputeErrorPtr                                       
-#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "SiconosBlas.h"             // for cblas_dnrm2
-#include "SolverOptions.h"           // for SolverOptions, solver_options_cr...
-#include "fc3d_Solvers.h"            // for fc3d_set_internalsolver_tolerance
-#include "fc3d_compute_error.h"      // for fc3d_compute_error
-#include "numerics_verbose.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "Friction_tools.h"      // for ComputeErrorPtr
+#include "NumericsFwd.h"         // for SolverOptions, FrictionContactPr...
+#include "SiconosBlas.h"         // for cblas_dnrm2
+#include "SolverOptions.h"       // for SolverOptions, solver_options_cr...
+#include "fc3d_Solvers.h"        // for fc3d_set_internalsolver_tolerance
+#include "fc3d_compute_error.h"  // for fc3d_compute_error
+#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_NSGS, SICONO...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                            int* info, SolverOptions* options) {
@@ -171,7 +168,8 @@ static int fc3d_tfp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_tfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_tfp_solve_wrap(void* problem, double* reaction, double* velocity,
+                               SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_TrescaFixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -182,14 +180,9 @@ static void fc3d_tfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_TFP,
-                "FC3D_TFP",
-                "Tresca Fixed Point for 3D Friction Contact",
-                fc3d_tfp_init_wrap,
-                fc3d_tfp_solve_wrap,
-                fc3d_tfp_free_wrap,
-                NULL,
-                fc3d_tfp_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(FC3D_TFP, "FC3D_TFP", "Tresca Fixed Point for 3D Friction Contact",
+                fc3d_tfp_init_wrap, fc3d_tfp_solve_wrap, fc3d_tfp_free_wrap, NULL,
+                fc3d_tfp_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-4,                 /* default_tol */
+                0 /* is_local_solver */)

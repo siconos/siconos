@@ -24,10 +24,8 @@
 #include "ControlZOHSimulation.hpp"
 #include "ExplicitTwisting.hpp"
 #include "LinearSensor.hpp"
-#include "RegularTwisting.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Twisting.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

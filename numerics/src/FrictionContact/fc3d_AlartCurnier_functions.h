@@ -50,10 +50,8 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsFwd.h"    // for FrictionContactProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#include "NumericsFwd.h"  // for FrictionContactProblem
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -96,7 +94,7 @@ void computeAlartCurnierJeanMoreau(double reaction[3], double velocity[3], doubl
 /* *\/ */
 /* void computeFGlobal_AC(double* reaction, double* FGlobal); */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -35,10 +35,8 @@
   Two different storages are available for M: dense and sparse block.
 
 */
-#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -68,7 +66,7 @@ void fc3d_projection_update(int number, FrictionContactProblem* main_problem,
                             SolverOptions* options);
 
 /** Same as above but usable in parallel
- * 
+ *
  */
 void fc3d_projection_update_parallel(int number, FrictionContactProblem* problem,
                                      FrictionContactProblem* localproblem, double* reaction,
@@ -82,16 +80,19 @@ void fc3d_projection_update_parallel(int number, FrictionContactProblem* problem
  * the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projection_update_with_regularization(int number, FrictionContactProblem* main_problem,
+void fc3d_projection_update_with_regularization(int number,
+                                                FrictionContactProblem* main_problem,
                                                 FrictionContactProblem* localproblem,
                                                 double* reaction, SolverOptions* options);
 
 /** Same as above but usable in parallel
- * 
+ *
  */
-void fc3d_projection_update_with_regularization_parallel(int contact, FrictionContactProblem* problem,
+void fc3d_projection_update_with_regularization_parallel(int contact,
+                                                         FrictionContactProblem* problem,
                                                          FrictionContactProblem* localproblem,
-                                                         double* reaction, SolverOptions* options);
+                                                         double* reaction,
+                                                         SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection assuming that M is diagonal
  * \param localproblem :  the local problem to initialize
@@ -110,7 +111,8 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
  * the rest is used to formalize the local problem)
  * \param options
  */
-void fc3d_projectionWithDiagonalization_update(int number, FrictionContactProblem* main_problem,
+void fc3d_projectionWithDiagonalization_update(int number,
+                                               FrictionContactProblem* main_problem,
                                                FrictionContactProblem* localproblem,
                                                double* reaction, SolverOptions* options);
 
@@ -139,8 +141,8 @@ void fc3d_projectionOnCylinder_update(int number, FrictionContactProblem* main_p
  * Same as above but usable in parallel.
  */
 void fc3d_projectionOnCylinder_update_parallel(int contact, FrictionContactProblem* problem,
-                                               FrictionContactProblem* localproblem, double* reaction,
-                                               SolverOptions* options);
+                                               FrictionContactProblem* localproblem,
+                                               double* reaction, SolverOptions* options);
 
 /** solve friction-contact 3D problem with projection on the Cone with local
  *   iteration up to convergence of the local problem
@@ -214,7 +216,7 @@ void fc3d_projection_with_regularization_free(FrictionContactProblem* main_probl
                                               FrictionContactProblem* localproblem,
                                               SolverOptions* localsolver_options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

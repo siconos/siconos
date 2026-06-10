@@ -8,7 +8,10 @@ enable_language(CUDA)
 set_property(GLOBAL PROPERTY USE_FOLDERS on)
 
 
-option(CUNSEARCH_USE_DOUBLE_PRECISION "Use double precision." ON)
+option(CUNSEARCH_USE_DOUBLE_PRECISION "Use double precision." OFF)
+
+
+set(CUNSEARCH_USE_DOUBLE_PRECISION FALSE)
 
 if(CUNSEARCH_USE_DOUBLE_PRECISION)
 	message(STATUS "cuNSearch::Real = double")
@@ -69,8 +72,7 @@ else()
 	add_library(cuNSearch STATIC ${INCLUDE_HEADERS} ${HEADER_FILES} ${SOURCE_FILES})
 endif()
 
-
-set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCHITECTURES}")
+set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}")
 
 include(GenerateExportHeader)
 generate_export_header(cuNSearch

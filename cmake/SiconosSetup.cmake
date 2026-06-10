@@ -283,7 +283,7 @@ endif()
 #FP : in which case do we need this ? If anyone knows, please document it...
 option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
 
-#For SiconosConfig.h
+# For SiconosConfig.h
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
 
 #Check Siconos compilation with include - what - you - use

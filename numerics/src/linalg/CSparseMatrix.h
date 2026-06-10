@@ -27,12 +27,7 @@
 #include <cs.h>
 #include <inttypes.h>
 #include <stdbool.h>  // for bool
-//#include <stdint.h>  // for intXX_t
-#include <stdio.h>  // for FILE
-
-
-
-#include "SiconosConfig.h"
+#include <stdio.h>    // for FILE
 
 /** Sparse matrix structure
     switch to the proper cxspsarse (T. Davies) interface
@@ -75,7 +70,7 @@ csi is either int64_t or int32_t and this is controlled at compile time*/
 #define NSM_NROW_CSR(mat) mat->n
 #define NSM_NCOL_CSR(mat) mat->m
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -95,7 +90,7 @@ typedef struct {
  *  \return true if the factorization was successful, 1 otherwise
  */
 bool CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix* A, double tol,
-                                   CSparseMatrix_factors* cs_lu_A);
+                                    CSparseMatrix_factors* cs_lu_A);
 
 /** compute a Cholesky factorization of A and store it in a workspace
  *
@@ -105,7 +100,7 @@ bool CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix* A, double
  *  \return true if the factorization was successful, 1 otherwise
  */
 bool CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix* A,
-                                     CSparseMatrix_factors* cs_chol_A);
+                                      CSparseMatrix_factors* cs_chol_A);
 
 /** compute a LDLT factorization of A and store it in a workspace
  *
@@ -115,7 +110,7 @@ bool CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix* A,
  *  \return true if the factorization was successful, 1 otherwise
  */
 bool CSparseMatrix_ldlt_factorization(CS_INT order, const CSparseMatrix* A,
-                                     CSparseMatrix_factors* cs_ldlt_A);
+                                      CSparseMatrix_factors* cs_ldlt_A);
 
 /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
  *
@@ -323,7 +318,7 @@ int CSparseMatrix_max_by_columns(const CSparseMatrix* A, double* max);
  */
 int CSparseMatrix_max_abs_by_columns(const CSparseMatrix* A, double* max);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

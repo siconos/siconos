@@ -23,13 +23,9 @@
   \brief Functions related to NCP formulation and solvers.
 */
 
-#include "NCP_FixedP.h"
-#include "NonlinearComplementarityProblem.h"
-#include "SiconosConfig.h"
-#include "SolverOptions.h"
-#include "SparseBlockMatrix.h"
+#include "NonlinearComplementarityProblem.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -92,7 +88,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, int* info,
               SolverOptions* options);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

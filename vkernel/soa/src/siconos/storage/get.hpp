@@ -1,7 +1,7 @@
 #pragma once
 
-#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/info.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -25,8 +25,7 @@ static auto get = mp::overload(
     // get<Attr>(data, step, handle)
     []<match::handle_attribute<A> Handle, match::store Data>(
         Data& data, auto step, Handle& handle) constexpr -> decltype(auto) {
-      return memory(step,
-                    mp::get<A>(data.store()))[handle.index().value()];
+      return memory(step, mp::get<A>(data.store()))[handle.index().value()];
     },
     // get<Attr>(data, handle)
     []<match::handle_attribute<A> Handle, match::store Data>(
@@ -65,8 +64,7 @@ template <string_literal S>
 static auto attr = []<typename H>(H h, typename H::indice step =
                                            0) constexpr -> decltype(auto) {
   using attr_n = attr_t<typename H::type, S>;
-  return memory(step,
-                mp::get<attr_n>(h.data().store()))[h.index().value()];
+  return memory(step, mp::get<attr_n>(h.data().store()))[h.index().value()];
 };
 
 template <match::attribute T>
@@ -90,10 +88,9 @@ static constexpr auto is_identified_by =
 template <match::item I, string_literal S>
 static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
   using info_t = get_info_t<decltype(data)>;
-  constexpr auto tpl =
-      mp::filter(mp::filter(typename info_t::all_properties_t{},
-                                    is_attached_storage<I>),
-                     is_identified_by<S>);
+  constexpr auto tpl = mp::filter(
+      mp::filter(typename info_t::all_properties_t{}, is_attached_storage<I>),
+      is_identified_by<S>);
 
   //  constexpr auto tpl = filter<hold<decltype([]<typename X>(X) {
   //      return (match::attached_storage<X, item_t> && (match::tag<X,
@@ -133,7 +130,7 @@ static auto constexpr methods(Hc hc)
   using data_t = typename handle_t::data_t;
 
   if constexpr (match::methods<handle_t>) {
-    return handle_t{data_t{},0UL}.methods();
+    return handle_t{data_t{}, 0UL}.methods();
   }
   else {
     return gather<>{};
@@ -164,11 +161,13 @@ static auto constexpr get_storage_type(Data&& data, Attribute)
   return val_t{};
 }
 
-template <typename Data, typename Attribute>
-static auto constexpr convert_storage_type(Data&& data, Attribute)
+template <typename System, typename Data, typename Attribute>
+static auto constexpr convert_storage_type(System, Data&& data, Attribute)
 {
-  using env_t = typename get_info_t<Data>::env;
-  return typename traits::config<env_t>::template convert<Attribute>::type{};
+  using info_t = get_info_t<Data>;
+
+  return typename traits::config<typename info_t::template env<System>>::
+      template convert<Attribute>::type{};
 }
 
 }  // namespace siconos::storage

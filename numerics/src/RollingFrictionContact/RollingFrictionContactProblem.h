@@ -24,8 +24,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "NumericsFwd.h"    // for RollingFrictionContactProblem, NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for RollingFrictionContactProblem, NumericsMatrix
 
 /**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
@@ -50,7 +49,7 @@ struct RollingFrictionContactProblem {
   double *mu_r;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -119,7 +118,7 @@ void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProb
                                                       double *reaction, double *velocity,
                                                       double tol, int do_print);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

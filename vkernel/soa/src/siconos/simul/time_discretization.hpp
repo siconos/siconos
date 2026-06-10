@@ -6,10 +6,13 @@ namespace siconos::simul {
 
 template <typename... Params>
 struct time_discretization : item {
-  using attributes =
-      gather<attribute<"h", some::scalar>, attribute<"t0", some::scalar>,
-             attribute<"tmax", some::scalar>,
-             attribute<"step", some::indice>>;
+
+  struct attributes {
+    some::scalar h;
+    some::scalar t0;
+    some::scalar tmax;
+    some::indice step;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

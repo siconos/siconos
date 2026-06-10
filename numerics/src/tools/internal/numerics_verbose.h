@@ -28,14 +28,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "NumericsVerbose.h"
-#include "SiconosConfig.h"
 #include "tlsdef.h"
 
 /** Verbose mode */
 extern tlsvar int verbose;
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -128,7 +126,7 @@ void numerics_printf(const char* fmt, ...);
  */
 void numerics_printf_verbose(int verbose, const char* fmt, ...);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

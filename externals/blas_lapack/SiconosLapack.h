@@ -21,11 +21,8 @@
 
 // Definition of the interface to cblas library.
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "SiconosBlas.h"
-#include "SiconosConfig.h"
+#include "SiconosBlas.h"  // IWYU pragma: keep
 
 #if defined(__cplusplus)
 extern "C" {

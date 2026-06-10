@@ -25,17 +25,16 @@
 
 
  */
-#include "NumericsFwd.h"    // for PlasticityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-void plasticity_2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double theta,
-                            double rho[3], double result[3], double A[9], double B[9]);
+void plasticity_2d_computeNaturalMap(double reaction[3], double velocity[3], double eta,
+                                     double theta, double rho[3], double result[3],
+                                     double A[9], double B[9]);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

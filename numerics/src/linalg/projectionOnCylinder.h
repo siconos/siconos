@@ -23,9 +23,7 @@
  * \brief functions to project on a cylinder
  */
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -42,7 +40,7 @@ r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq R \} \f$ \param[in,out] r the vector to be
 */
 void projectionOnGeneralCylinder(double* r, double R, int dim);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

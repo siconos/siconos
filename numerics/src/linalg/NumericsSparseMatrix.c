@@ -28,15 +28,12 @@
 #include <stdio.h>   // for NULL, size_t, printf, fprintf, fscanf
 #include <stdlib.h>  // for free, exit, malloc, realloc, EXIT_FAILURE
 
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_csc, numericsSparse...
-#include "SiconosConfig.h"   // for HAVE_SORT
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_csc, numericsSparse...
+#include "numerics_verbose.h"  // for numerics_error_nonfatal, check_io
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_errors.h"   // CHECK_MATRIX
-#include "numerics_verbose.h"  // for numerics_error_nonfatal, check_io
-#include "siconos_debug.h"     // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
-#include "string.h"            // for memcpy, memset
+#include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 
 typedef struct {
   CS_INT i;
@@ -862,6 +859,10 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       CSparseMatrix* Mcsc = NM_csc(M);
       if (!Mcsc) return NULL;
 
+      /* We ensure that the matrix is correclty ordered before extraction,
+	 otherwise it leads to uncorrect results    */
+      NSM_fix_csc(Mcsc);
+
       size_t n = csint_to_size_t(Mcsc->n);
       size_t m = csint_to_size_t(Mcsc->m);
 
@@ -878,6 +879,11 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
     case NSM_CSR: {
       CSparseMatrix* Mcsr = M->matrix2->csr;
       if (!Mcsr) return NULL;
+
+      /* We ensure that the matrix is correclty ordered before extraction,
+	 otherwise it leads to uncorrect results    */
+      NSM_fix_csc(Mcsr);
+
       size_t n = csint_to_size_t(Mcsr->n);
       size_t m = csint_to_size_t(Mcsr->m);
 

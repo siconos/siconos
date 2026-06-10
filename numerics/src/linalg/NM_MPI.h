@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-#include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP, SICONOS_HAS_MPI // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -52,6 +51,6 @@ int NM_MPI_rank(NumericsMatrix* A);
 
 void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif

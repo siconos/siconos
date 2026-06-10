@@ -23,26 +23,26 @@
 #include <stdio.h>   // for size_t, NULL
 #include <stdlib.h>  // for free, calloc, malloc
 
-#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
-#include "FrictionContactProblem.h"              // for FrictionContactProblem
-#include "FrictionContact_options.h"                        // for SICONOS_FRICTION_3D_...
+#include "../fc3d_short_names.h"
+#include "AlartCurnierGenerated.h"        // for fc3d_AlartCurnierFun...
+#include "FrictionContact_options.h"      // for SICONOS_FRICTION_3D_...
+#include "Newton_methods.h"               // for newton_LSA, function...
+#include "NumericsFwd.h"                  // for FrictionContactProblem
+#include "NumericsMatrix.h"               // for NM_gemv, NumericsMatrix
+#include "SiconosBlas.h"                  // for cblas_dcopy, cblas_d...
+#include "SolverOptions.h"                // for SolverOptions, solve...
+#include "VI_cst.h"                       // for SICONOS_VI_ERROR_EVA...
+#include "fc3d_AlartCurnier_functions.h"  // for computeAlartCurnierJ...
 #include "fc3d_Solvers.h"
-#include "Newton_methods.h"                      // for newton_LSA, function...
-#include "NumericsFwd.h"                         // for FrictionContactProblem
-#include "NumericsMatrix.h"                      // for NM_gemv, NumericsMatrix
-#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
-#include "SolverOptions.h"                       // for SolverOptions, solve...
-#include "VI_cst.h"                              // for SICONOS_VI_ERROR_EVA...
-#include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
 #include "fc3d_Solvers.h"                        // for fc3d_VI_ExtraGradient
 #include "fc3d_compute_error.h"                  // for fc3d_compute_error
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for AlartCurnierParams
 #include "fc3d_nonsmooth_Newton_solvers.h"       // for fc3d_nonsmooth_Newto...
-#include "../fc3d_short_names.h"
 #include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
+#include "naming_conventions.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "solver_registry.h"
-#include "numerics_errors.h"
 
 typedef struct {
   FrictionContactProblem* problem;
@@ -197,10 +197,11 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
   free(opaque_data.Bx);
 }
 
-void fc3d_nsn_ac_new_set_default(SolverOptions *options) {
+void fc3d_nsn_ac_new_set_default(SolverOptions* options) {
   /* Same as fc3d_nsn_ac_set_default but adapted for newton_LSA
    * - iparam[5] = 1 (force arc search) removed - arc search requires get_set_from_problem_data
-   * - iparam[3] = nzmax removed - index 3 is SICONOS_IPARAM_LSA_NONMONOTONE_LS in newton_LSA */
+   * - iparam[3] = nzmax removed - index 3 is SICONOS_IPARAM_LSA_NONMONOTONE_LS in newton_LSA
+   */
   /* Note: nzmax is not used in the new implementation, skip setting iparam[3] */
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
   options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] =
@@ -212,7 +213,8 @@ void fc3d_nsn_ac_new_set_default(SolverOptions *options) {
       SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
   /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
-      SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE; /* 0 GoldsteinPrice line search, 1 FBLSA */
+      SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE; /* 0 GoldsteinPrice line search, 1
+                                                            FBLSA */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] =
       100; /* max iter line search */
   options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
@@ -224,22 +226,23 @@ void fc3d_nsn_ac_new_set_default(SolverOptions *options) {
 #endif
 }
 
-static int fc3d_nsn_ac_new_init_wrap(void *problem, SolverOptions *options) {
+static int fc3d_nsn_ac_new_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_nsn_ac_new_solve_wrap(void *problem, double *reaction, double *velocity,
-                                       SolverOptions *options) {
+static int fc3d_nsn_ac_new_solve_wrap(void* problem, double* reaction, double* velocity,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_AlartCurnier_new((FrictionContactProblem *)problem, reaction, velocity,
-                                          &info, options);
+  fc3d_nonsmooth_Newton_AlartCurnier_new((FrictionContactProblem*)problem, reaction, velocity,
+                                         &info, options);
   return info;
 }
 
-REGISTER_SOLVER(FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
-                "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
-                fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL,
-                fc3d_nsn_ac_new_set_default,  /* set_default */
-                200, 1e-6, 0);
+REGISTER_SOLVER(
+    FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
+    "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
+    fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL,
+    fc3d_nsn_ac_new_set_default, /* set_default */
+    200, 1e-6, 0);

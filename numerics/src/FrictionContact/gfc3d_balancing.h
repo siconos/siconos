@@ -30,7 +30,7 @@ struct GlobalFrictionContactProblem_balancing_data {
   double gamma;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 void gfc3d_rescaling(GlobalFrictionContactProblem* problem, double alpha, double beta,
@@ -60,7 +60,7 @@ GlobalFrictionContactProblem_balancing_data* gfc3d_balancing_data_free(
 
 GlobalFrictionContactProblem_balancing_data* gfc3d_balancing_data_new(void);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

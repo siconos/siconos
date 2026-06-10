@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//#include <H5Apublic.h>
+// #include <H5Apublic.h>
 #include "rolling_friction_3d_onecone_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
 
 #include <float.h>   // for DBL_EPSILON
@@ -27,7 +27,7 @@
 #include "NonSmoothNewton.h"  // for nonSmoothDirec...
 #include "NumericsFwd.h"      // for SolverOptions
 #include "NumericsMatrix.h"
-#include "RollingFrictionContactProblem.h"
+#include "RollingFrictionContactProblem.h"  // IWYU pragma: keep
 #include "RollingFrictionContact_options.h"
 #include "SiconosBlas.h"  // for cblas_ddot
 #include "naming_conventions.h"
@@ -36,8 +36,6 @@
 #include "op5x5.h"  // for cpy3, mvp3x3
 #include "rolling_friction_3d_compute_error.h"
 #include "rolling_friction_3d_local_problem_tools.h"
-#include "rolling_friction_3d_projection.h"
-#include "rolling_friction_3d_short_names.h"
 #include "rolling_naturalmap_functions.h"
 
 /* #define DEBUG_CHECK */
@@ -161,6 +159,7 @@ static void rolling_friction_3d_onecone_nonsmooth_Newton_initialize(
       case SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE: {
         numerics_warning("rolling_friction_3d_onecone_nonsmooth_Newton_initialize",
                          "Adaptive strategy for computing rho not yet implemented");
+        break;
       }
       default: {
         numerics_printf_verbose(2, "rolling_friction_3d_onecone_nonsmooth_Newton_initialize",
@@ -413,7 +412,7 @@ int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_direct(
   // double error = rolling_friction_3d_compute_local_error(localproblem, R);
   // printf("New local error = %e\n", error);
   if (iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] == 0)
-    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "solver", "cone",
+    numerics_printf_verbose(2, "%-12s %-6s %-4s %-12s %-12s %-12s %-12s", "rolling_friction_3d_nsn", "cone",
                             "it", "|dR|", "residu", "error", "tol");
   numerics_printf_verbose(
       2, "%-12s %-6d %-4d %-12.4e %-12.4e %-12.4e %-12.4e", "rolling_friction_3d_nsn",
@@ -506,15 +505,15 @@ int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_direct(
   return 1;
 }
 
-static int LineSearchGP(RollingFrictionContactProblem* localproblem,
-                        computeNonsmoothFunction Function, double* t_opt, double R[3],
-                        double dR[3], double* rho, int LSitermax, double* F, double* A,
-                        double* B, double* velocity) {
-  // to be implemented
-  assert(0);
-  int info = 0;
-  return -1;
-}
+// static int LineSearchGP(RollingFrictionContactProblem* localproblem,
+//                         computeNonsmoothFunction Function, double* t_opt, double R[3],
+//                         double dR[3], double* rho, int LSitermax, double* F, double* A,
+//                         double* B, double* velocity) {
+//   // to be implemented
+//   assert(0);
+//   int info = 0;
+//   return -1;
+// }
 
 int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_damped(
     RollingFrictionContactProblem* localproblem, double* R, SolverOptions* options) {
@@ -580,4 +579,4 @@ static int oc_nsn_solve_wrap(void* problem, double* reaction, double* velocity,
 REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN, "ONECONE_RFC3D_NSN",
                 "One-contact nonsmooth Newton solver", oc_nsn_init_wrap, oc_nsn_solve_wrap,
                 NULL, NULL, rolling_friction_3d_onecone_nsn_set_default, /* set_default */
-                20, 1e-10, 1); /* is_local_solver=1 */
+                10, 1e-12, 1); /* is_local_solver=1 */

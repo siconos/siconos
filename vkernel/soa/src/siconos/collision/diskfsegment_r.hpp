@@ -30,9 +30,9 @@ struct diskfsegment_r : item,
 
     decltype(auto) shape() { return self()->segment(); }
 
-    decltype(auto) compute_h(auto& ds)
+    decltype(auto) compute_h(auto step, auto& ds)
     {
-      auto& q = storage::attr<"q">(ds);
+      auto& q = storage::attr<"q">(ds, step);
       return segment().distance(q) -
              make_handle(self()->data(), prop<"shape">(ds)).radius();
     }
@@ -42,7 +42,7 @@ struct diskfsegment_r : item,
       auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
-      const auto& q = storage::attr<"q">(ds);
+      const auto& q = storage::attr<"q">(ds, step);
       const scalar& r =
           storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 

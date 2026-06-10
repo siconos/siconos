@@ -10,15 +10,22 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "siconos/config/config.hpp"
+#include "siconos/config/environment.hpp"
 #include "siconos/model/fem.hpp"
-#include "siconos/siconos.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
+#include "siconos/model/lagrangian_r.hpp"
+#include "siconos/model/nslaws.hpp"
+#include "siconos/simul/interaction.hpp"
+#include "siconos/simul/one_step_integrator.hpp"
+#include "siconos/simul/one_step_nonsmooth_problem.hpp"
+#include "siconos/simul/time_discretization.hpp"
+#include "siconos/simul/time_stepping.hpp"
+#include "siconos/simul/topology.hpp"
 #include "siconos/storage/handle.hpp"
-#include "siconos/utils/print.hpp"
 
 namespace siconos::config {
-using fem = model::finite_element_linear_tids;
-using fem_ds = model::rt_lagrangian_ds;
-using material = model::material;
+struct fem_ds : model::elastic_lagrangian_ds {};
 using ball = model::lagrangian_ds;
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -35,10 +42,29 @@ struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
-using params = map<iparam<"dof", 3>>;
-
-struct make : storage::make<standard_environment<params>, fem_ds, fem,
-                            material, simulation> {};
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 1>>;
+};
+struct make : storage::make<
+                  env, fem_ds, simulation,
+                  storage::with_properties<
+                      storage::wrapped<config::interaction,
+                                       storage::some::unbounded_collection>,
+                      storage::wrapped<config::relation,
+                                       storage::some::unbounded_collection>,
+                      storage::wrapped<config::rt_rt_interaction,
+                                       storage::some::unbounded_collection>,
+                      storage::wrapped<config::rt_ct_interaction,
+                                       storage::some::unbounded_collection>,
+                      storage::wrapped<config::rt_relation,
+                                       storage::some::unbounded_collection>,
+                      storage::unbounded<storage::attr_t<fem_ds, "q">>,
+                      storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
+                      storage::unbounded<storage::attr_t<fem_ds, "fext">>,
+                      storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
+                      storage::sparse<storage::attr_t<fem_ds, "k_matrix">>>> {
+};
 
 }  // namespace siconos::config
 
@@ -46,7 +72,7 @@ int main(int args, char* argv[])
 {
   double Ly = 1.0;
 
-  auto gmsh_filename = "triangle_reference.msh";
+  auto gmsh_filename = "square_200.msh";
 
   // Applied forces
   siconos::algebra::SiconosVector nodal_forces{2};
@@ -86,7 +112,7 @@ int main(int args, char* argv[])
 
   auto data = siconos::config::make();
   handle fe_solid = storage::add<config::fem_ds>(data);
-  fe_solid.dof() = FEsolid->dimension();
+  // fe_solid.dof() = FEsolid->dimension();
   handle nslaw = storage::add<config::nslaw>(data);
   nslaw.e() = e;
 
@@ -125,6 +151,7 @@ int main(int args, char* argv[])
       Hv.back()(0, idx_y) = 1.0;
 
       handle rt_rel = storage::add<config::rt_relation>(data);
+      rt_rel.h_matrix().resize(1, FEsolid->dimension());
       rt_rel.h_matrix() = Hv.back();
       rt_rel.b() = initial_gap;
 
@@ -137,10 +164,17 @@ int main(int args, char* argv[])
   fe_solid.mass_matrix() = FEsolid->mass();
   fe_solid.k_matrix() = FEsolid->stiffnessMatrix();
   fe_solid.fext() = FEsolid->fext();
-  fe_solid.q() = *FEsolid->q();
-  storage::attr<"q">(fe_solid, 1) = storage::attr<"q">(fe_solid, 0);
+  // storage::attr<"fext">(fe_solid, 1) = storage::attr<"fext">(fe_solid, 0);
 
   fe_solid.velocity() = *FEsolid->velocity();
+  // storage::attr<"velocity">(fe_solid, 1) =
+  //     storage::attr<"velocity">(fe_solid, 0);
+
+  fe_solid.q() = *FEsolid->q();
+  // storage::attr<"q">(fe_solid, 1) =
+  //     storage::attr<"q">(fe_solid, 0) +
+  //     h * storage::attr<"velocity">(fe_solid, 0);
+
 
   auto indices = FEsolid->boundaryConditions()->velocityIndices();
   auto& bc_vel = storage::prop<"bc_velocities_0">(fe_solid);
@@ -167,14 +201,17 @@ int main(int args, char* argv[])
   dataPlot(0, 1) = q(dim - 1);
   dataPlot(0, 2) = v(dim - 1);
   dataPlot(0, 3) = 0.0;  // Initial impulse
-  dataPlot(0, 4) = q(0);
-  dataPlot(0, 5) = v(0);
+  dataPlot(0, 4) = q(169);
+  dataPlot(0, 5) = v(169);
 
   auto filename =
       siconos::mechanics::fem::prepareWriteDisplacementforPython("T3");
   auto mesh = femodel->mesh();
   siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q,
                                                       filename);
+
+  auto ds_index = storage::prop<"index">(fe_solid);
+
   // --- Time loop ---
   std::cout << "====> Start computation ... \n";
   int k = 1;
@@ -194,15 +231,15 @@ int main(int args, char* argv[])
     double p_val = 0.0;
     if (ninvds > 0) {
       handle osi = simul.one_step_integrator();
-      p_val = get_vector(osi.lambda_vector_assembled(), 0)(0);
+      p_val = get_vector(osi.p0_vector_assembled(), ds_index)(0);
     }
 
     dataPlot(k, 0) = step * simul.time_step();
     dataPlot(k, 1) = q_current(dim - 1);
     dataPlot(k, 2) = v_current(dim - 1);
     dataPlot(k, 3) = p_val;
-    dataPlot(k, 4) = q_current(0);
-    dataPlot(k, 5) = v_current(0);
+    dataPlot(k, 4) = q_current(169);
+    dataPlot(k, 5) = v_current(169);
 
     if (k % 1 == 0)
       siconos::mechanics::fem::writeDisplacementforPython(
@@ -226,7 +263,7 @@ int main(int args, char* argv[])
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double eps = 1e-11;
-  if (siconos::algebra::io::compareRefFile(dataPlot, "T3_triangle.ref",
+  if (siconos::algebra::io::compareRefFile(dataPlot, "T3_square_200.ref",
                                            eps) >= eps)
     return 1;
 

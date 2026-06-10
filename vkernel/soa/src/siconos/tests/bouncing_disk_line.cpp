@@ -1,5 +1,7 @@
 #include "siconos/siconos.hpp"
-#include "siconos/utils/print.hpp"
+
+#include <fstream>
+#include <print>
 
 namespace siconos::config {
 
@@ -18,7 +20,10 @@ using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using simulation = simul::time_stepping<td, osi, osnspb>;
 
-using params = map<iparam<"dof", 3>>;
+template <typename T>
+struct env : standard_environment<T> {
+  using params = map<iparam<"dof", 3>>;
+};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -28,9 +33,8 @@ int main(int argc, char* argv[])
   using namespace storage;
 
   auto data = storage::make<
-      standard_environment<config::params>, config::simulation, config::disk,
-      config::disk_shape, config::diskdisk_r, config::diskline_r,
-      config::interaction,
+      config::env, config::simulation, config::disk, config::disk_shape,
+      config::diskdisk_r, config::diskline_r, config::interaction,
       storage::with_properties<
           storage::attached<config::disk, storage::pattern::symbol<"shape">,
                             storage::some::item_ref<config::disk_shape>>,
@@ -51,7 +55,7 @@ int main(int argc, char* argv[])
   double m = 1.;               // Disk mass
   double g = 9.81;             // Gravity
 
-  print("====> Model loading ...\n");
+  std::print("====> Model loading ...\n");
 
   // --------------------------
   // -- The dynamical_system --
@@ -134,15 +138,15 @@ int main(int argc, char* argv[])
   // fix this for constant fext
   simulation.initialize();
 
-  auto out = fmt::output_file("result.dat");
+  std::ofstream result_file("result.dat");
   // std::ofstream cout("result.dat");
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
-  out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-            simulation.current_step() * simulation.time_step(),
-            storage::attr<"q">(d1, simulation.current_step())(1),
-            storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
-            0.);
+  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+             simulation.current_step() * simulation.time_step(),
+             storage::attr<"q">(d1, simulation.current_step())(1),
+             storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
+             0.);
 
   while (simulation.has_next_event()) {
     auto ninvds = simulation.compute_one_step();
@@ -162,11 +166,11 @@ int main(int argc, char* argv[])
       lambda = 0;
     }
 
-    out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(d1, simulation.current_step())(1),
-              storage::attr<"velocity">(d1, simulation.current_step())(1), p0,
-              lambda);
+    std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+               simulation.current_step() * simulation.time_step(),
+               storage::attr<"q">(d1, simulation.current_step())(1),
+               storage::attr<"velocity">(d1, simulation.current_step())(1),
+               p0, lambda);
   }
   //  io::close(fd);
 }

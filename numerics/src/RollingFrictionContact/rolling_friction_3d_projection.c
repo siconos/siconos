@@ -23,12 +23,12 @@
 #include <stdlib.h>  // for calloc, realloc, free
 #include <string.h>  // for memcpy, NULL
 
-#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_NS...
-#include "NumericsFwd.h"                    // for SolverOptions, Rolling...
-#include "NumericsMatrix.h"                 // for NumericsMatrix
-#include "RollingFrictionContactProblem.h"  // for RollingFrictionContact...
-#include "SiconosLapack.h"                  // for DGETRF, DGETRS, LA_NOTRANS
-#include "SolverOptions.h"                  // for SolverOptions, solver_...
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_NS...
+#include "NumericsFwd.h"              // for SolverOptions, Rolling...
+#include "NumericsMatrix.h"           // IWYU pragma: keep
+#include "SolverOptions.h"            // for SolverOptions, solver_...
+#include "naming_conventions.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "op5x5.h"
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
@@ -36,9 +36,6 @@
 #include "rolling_friction_3d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
 #include "rolling_friction_3d_short_names.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END
-
-/* Solver registration system */
-#include "numerics_errors.h"
 #include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES

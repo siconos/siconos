@@ -832,7 +832,7 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     nsgs_shuffle_blocks(sblocks, nb_blocks, toolkit->use_shuffling ? 2 : 0, iter);
 
     /* Pre-compute freezing criteria constants (like original fc3d_nsgs) */
-    double tmp_criteria1 = tolerance * tolerance * 100.0 * 100.0;
+    double tmp_criteria1 = tolerance * tolerance  / (nb_blocks * nb_blocks * 1000.0);
     double tmp_criteria2 = (prev_norm_z > 0.0)
                                ? (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0))
                                : 0.0;

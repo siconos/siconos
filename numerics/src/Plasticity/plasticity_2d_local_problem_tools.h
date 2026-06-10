@@ -21,10 +21,9 @@
 /*!\file
 
  */
-#include "NumericsFwd.h"    // for PlasticityProblem
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for PlasticityProblem
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -40,8 +39,8 @@ typedef void (*UpdatePtr)(int, PlasticityProblem *, PlasticityProblem *, double 
 typedef void (*PostSolverPtr)(int, double *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalSolverPtr)(PlasticityProblem *, PlasticityProblem *,
-                                   SolverOptions *);
+typedef void (*FreeLocalPlasticitySolverPtr)(PlasticityProblem *, PlasticityProblem *,
+                                             SolverOptions *);
 
 typedef void (*CopyLocalReactionPtr)(double *, double *);
 
@@ -55,28 +54,30 @@ struct LocalPLASTICITY_2DProblemFunctionToolkit {
   SolverPtr local_solver;
   UpdatePtr update_local_problem;
   PostSolverPtr post_processed_local_result;
-  FreeLocalSolverPtr free_local_solver;
+  FreeLocalPlasticitySolverPtr free_local_solver;
   CopyLocalReactionPtr copy_local_reaction;
   PerformRelaxationPtr perform_relaxation;
   LightErrorSquaredPtr light_error_squared;
   SquaredNormPtr squared_norm;
 };
 
-struct LocalPLASTICITY_2DProblemFunctionToolkit *localPLASTICITY_2DProblemFunctionToolkit_new(void);
+struct LocalPLASTICITY_2DProblemFunctionToolkit *localPLASTICITY_2DProblemFunctionToolkit_new(
+    void);
 
-void localPLASTICITY_2DProblemFunctionToolkit_display(struct LocalPLASTICITY_2DProblemFunctionToolkit *);
+void localPLASTICITY_2DProblemFunctionToolkit_display(
+    struct LocalPLASTICITY_2DProblemFunctionToolkit *);
 
 PlasticityProblem *plasticity_2d_local_problem_allocate(PlasticityProblem *problem);
 
 void plasticity_2d_local_problem_free(PlasticityProblem *localproblem,
-                             PlasticityProblem *problem);
+                                      PlasticityProblem *problem);
 void plasticity_2d_local_problem_compute_q(PlasticityProblem *problem,
-                                  PlasticityProblem *localproblem, double *reaction,
-                                  int contact);
+                                           PlasticityProblem *localproblem, double *reaction,
+                                           int contact);
 void plasticity_2d_local_problem_fill_M(PlasticityProblem *problem,
-                               PlasticityProblem *localproblem, int contact);
+                                        PlasticityProblem *localproblem, int contact);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -26,7 +26,7 @@
 #include "VI_cst.h"
 #include "VariationalInequality.h"
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /**
@@ -166,7 +166,7 @@ void variationalInequality_BOX_QI_set_default(SolverOptions* options);
 void variationalInequality_BOX_AVI_set_default(SolverOptions* options);
 /** @} */
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

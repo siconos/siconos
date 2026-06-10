@@ -23,17 +23,16 @@
 #ifndef vertex_extraction_h
 #define vertex_extraction_h
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
-#include "SiconosLapack.h"  // for lapack_int
+#include "SiconosLapack.h"  // IWYU pragma: keep - For lapack_int
 #include "SiconosSets.h"    // for polyhedron
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

@@ -21,18 +21,16 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
-#include "NumericsFwd.h"       // for RelayProblem, SolverOptions, NumericsM...
-#include "NumericsMatrix.h"    // for NumericsMatrix
-#include "RelayProblem.h"      // for RelayProblem
-#include "Relay_Solvers.h"     // for relay_compute_error, relay_pgs
+#include "NumericsFwd.h"     // for RelayProblem, SolverOptions, NumericsM...
+#include "NumericsMatrix.h"  // IWYU pragma: keep
+#include "Relay_Solvers.h"   // for relay_compute_error, relay_pgs
 #include "Relay_options.h"
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_ddot
-#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "numerics_verbose.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "SiconosBlas.h"    // for cblas_dcopy, cblas_ddot
+#include "SolverOptions.h"  // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
                SolverOptions *options) {
@@ -124,35 +122,31 @@ void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_PGS in the global solver registry.
  */
 
-static void relay_pgs_set_default(SolverOptions* options) {
+static void relay_pgs_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_pgs_init_wrap(void* problem, SolverOptions* options) {
+static int relay_pgs_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int relay_pgs_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
   int info = NUMERICS_OK;
-  relay_pgs((RelayProblem*)problem, z, w, &info, options);
+  relay_pgs((RelayProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_pgs_free_wrap(void* problem, SolverOptions* options) {
+static void relay_pgs_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_RELAY_PGS, "RELAY_PGS",
-                "Projected Gauss-Seidel solver for Relay problems",
-                relay_pgs_init_wrap,
-                relay_pgs_solve_wrap,
-                relay_pgs_free_wrap,
-                NULL,  /* error function */
-                relay_pgs_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                "Projected Gauss-Seidel solver for Relay problems", relay_pgs_init_wrap,
+                relay_pgs_solve_wrap, relay_pgs_free_wrap, NULL, /* error function */
+                relay_pgs_set_default, 1000,                     /* default_max_iter */
+                1e-6,                                            /* default_tol */
+                0 /* is_local_solver */);

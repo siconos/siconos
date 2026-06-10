@@ -23,10 +23,9 @@
  * \brief non-public functions and data structures
  */
 
-#include "NumericsMatrix.h"
-#include "SiconosConfig.h"
+#include "NumericsMatrix.h"  // IWYU pragma: keep
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -186,7 +185,7 @@ int NM_MKL_pardiso_solve(NumericsMatrix* A, double* b, NM_MKL_pardiso_WS* superl
 
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

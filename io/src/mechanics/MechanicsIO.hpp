@@ -25,14 +25,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-// #include <MechanicsFwd.hpp>
-
-// #ifdef HAVE_SICONOS_MECHANISMS
-// #include <MechanismsFwd.hpp>
-// #endif
-// #include <SiconosFwd.hpp>
-// #include <SiconosPointers.hpp>
-
 namespace siconos::modeling {
 
 class NonSmoothDynamicalSystem;

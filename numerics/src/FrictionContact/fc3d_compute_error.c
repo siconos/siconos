@@ -23,14 +23,14 @@
 #include <math.h>    // for sqrt, fabs
 #include <stddef.h>  // for NULL
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "FrictionContactProblem.h"  // IWYU pragma: keep - For FrictionContactProblem
 #include "NumericsMatrix.h"          // for NM_prod_mv_3x3, NM_gemv
-#include "SolverOptions.h"           // for SolverOptions
+#include "SolverOptions.h"           // IWYU pragma: keep - for SolverOptions
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"      // for projectionOnCone
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
@@ -40,7 +40,7 @@
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
 void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
-                                        double *restrict error, double *worktmp) {
+                                        double *restrict error, double worktmp[3]) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
@@ -97,7 +97,7 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
 
   *error = 0.;
   int ic, ic3;
-  double worktmp[3];
+  double worktmp[3] = {0.0, 0.0, 0.0};
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
     fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
@@ -161,7 +161,8 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
 }
 
 int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double *error) {
+                                double tolerance, SolverOptions *options, double norm,
+                                double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     return numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");

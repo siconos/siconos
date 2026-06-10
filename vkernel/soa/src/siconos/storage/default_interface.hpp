@@ -18,7 +18,7 @@ struct default_interface {
   {
     auto& data = self()->data();
     using info_t = get_info_t<decltype(data)>;
-    return typename info_t::env{};
+    return typename info_t::template env<typename Handle::type>{};
   }
 
   auto params() { return typename decltype(env())::params{}; }

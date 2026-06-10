@@ -24,18 +24,15 @@ Ferris solves the subsequent AVI.
 #include <assert.h>  // for assert
 #include <stdlib.h>  // for free, malloc, calloc
 
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
-#include "RelayProblem.h"                  // for RelayProblem
-#include "Relay_Solvers.h"                 // for relay_avi_caoferris
+#include "NumericsFwd.h"     // for LinearComplementarityProblem
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_fill
+#include "Relay_Solvers.h"   // for relay_avi_caoferris
 #include "Relay_options.h"
-#include "avi_caoferris.h"                 // for avi_caoferris_stage3
-#include "siconos_debug.h"                 // for DEBUG_PRINT_VEC_INT
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "avi_caoferris.h"  // for avi_caoferris_stage3
+#include "naming_conventions.h"
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINT_VEC_INT
+#include "solver_registry.h"
 void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
                          SolverOptions *options) {
   unsigned int n = problem->size;
@@ -112,35 +109,33 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_AVI_CAOFERRIS in the global solver registry.
  */
 
-static void relay_avi_caoferris_set_default(SolverOptions* options) {
+static void relay_avi_caoferris_set_default(SolverOptions *options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
+static int relay_avi_caoferris_init_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_avi_caoferris_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int relay_avi_caoferris_solve_wrap(void *problem, double *z, double *w,
+                                          SolverOptions *options) {
   int info = NUMERICS_OK;
-  relay_avi_caoferris((RelayProblem*)problem, z, w, &info, options);
+  relay_avi_caoferris((RelayProblem *)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
+static void relay_avi_caoferris_free_wrap(void *problem, SolverOptions *options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
 REGISTER_SOLVER(SICONOS_RELAY_AVI_CAOFERRIS, "RELAY_AVICAOFERRIS",
-                "AVI Cao-Ferris solver for Relay problems",
-                relay_avi_caoferris_init_wrap,
-                relay_avi_caoferris_solve_wrap,
-                relay_avi_caoferris_free_wrap,
-                NULL,  /* error function */
-                relay_avi_caoferris_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                "AVI Cao-Ferris solver for Relay problems", relay_avi_caoferris_init_wrap,
+                relay_avi_caoferris_solve_wrap, relay_avi_caoferris_free_wrap,
+                NULL,                                  /* error function */
+                relay_avi_caoferris_set_default, 1000, /* default_max_iter */
+                1e-6,                                  /* default_tol */
+                0 /* is_local_solver */);

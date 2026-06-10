@@ -26,7 +26,6 @@
 #include <stdio.h>
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /* void * solverFC3D; */
 /* void * solverEquality; */
@@ -111,7 +110,7 @@ struct GenericMechanicalProblem {
   //  void * * problems;
 };
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 /* Build an empty GenericMechanicalProblem
@@ -166,7 +165,7 @@ void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size);
 */
 const char* ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+#if defined(__cplusplus)
 }
 #endif
 

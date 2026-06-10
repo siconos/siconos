@@ -34,17 +34,17 @@ if(WITH_vkernel_TESTING)
   set_target_properties(fem_t3 PROPERTIES COMPILE_FLAGS "${flags}")
   
   
-  target_link_libraries(t1 Eigen3::Eigen numerics pthread fmt)
-  target_link_libraries(bouncing_ball  Eigen3::Eigen numerics pthread fmt)
-  target_link_libraries(unbounded_bouncing_ball  Eigen3::Eigen numerics pthread fmt)
-  target_link_libraries(bouncing_balls Eigen3::Eigen numerics pthread fmt)
-  target_link_libraries(bouncing_disk Eigen3::Eigen numerics pthread fmt ${COMPACTNSEARCH})
+  target_link_libraries(t1 Eigen3::Eigen numerics pthread)
+  target_link_libraries(bouncing_ball  Eigen3::Eigen numerics pthread)
+  target_link_libraries(unbounded_bouncing_ball  Eigen3::Eigen numerics pthread)
+  target_link_libraries(bouncing_balls Eigen3::Eigen numerics pthread)
+  target_link_libraries(bouncing_disk Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   #target_link_libraries(bouncing_disk_sf Eigen3::Eigen numerics pthread fmt CompactNSearch)
-  target_link_libraries(bouncing_disk_line Eigen3::Eigen numerics pthread fmt ${COMPACTNSEARCH})
-  target_link_libraries(bouncing_disks Eigen3::Eigen numerics pthread fmt ${COMPACTNSEARCH})
-  target_link_libraries(fixed_disks Eigen3::Eigen numerics pthread fmt ${COMPACTNSEARCH})
+  target_link_libraries(bouncing_disk_line Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+  target_link_libraries(bouncing_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+  target_link_libraries(fixed_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
 
-  target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread fmt ${COMPACTNSEARCH})
+  target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread ${COMPACTNSEARCH})
 endif()
 
 

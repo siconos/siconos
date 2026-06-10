@@ -55,7 +55,21 @@ void wrap_boundaryconditions(py::module_ &m) {
                              "values applied on constrained indices")
       .def("computePrescribedVelocity",
            &siconos::modeling::BoundaryCondition::computePrescribedVelocity,
-           "Compute velocity values on prescribed indices");
+           "Compute velocity values on prescribed indices")
+      .def(
+          "setComputePrescribedVelocityFunction",
+          [](siconos::modeling::BoundaryCondition &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputePrescribedVelocityFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute boundary conditions")
+
+      .def("computePrescribedVelocity",
+           &siconos::modeling::BoundaryCondition::computePrescribedVelocity,
+           "compute  boundary conditions");
 
   py::class_<siconos::modeling::HarmonicBC, siconos::modeling::BoundaryCondition,
              py::smart_holder>(m, "HarmonicBC")

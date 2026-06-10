@@ -2,7 +2,6 @@
 #include <stdlib.h>  // for exit
 
 #include "SiconosBlas.h"    // for cblas_dgemm, CblasNoTrans, cblas_dcopy
-#include "SiconosConfig.h"  // for HAS_LAPACK_dgels, HAS_LAPACK_dgesvd
 #include "SiconosLapack.h"  // for DGELS, DGESV, DGESVD, DGETRF, DGETRI, DPOTRF
 #include "math.h"           // for fabs
 #include "test_utils.h"     // for print_matrix, print_int_vector, print_vec...

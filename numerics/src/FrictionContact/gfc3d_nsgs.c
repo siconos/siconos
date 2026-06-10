@@ -20,25 +20,21 @@
 #include <stdio.h>   // for fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "NumericsFwd.h"     // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_gemv
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dnrm2
+#include "SolverOptions.h"   // for SolverOptions, SICONOS_DPA...
+#include "fc3d_Solvers.h"    // for fc3d_nsgs_set_default
 #include "fc3d_short_names.h"
-#include "fc3d_Solvers.h"                  // for fc3d_nsgs_set_default
 #include "gfc3d_Solvers.h"
-#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "gfc3d_Solvers.h"        // for ComputeErrorGlobalPtr, gfc...
+#include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "numerics_errors.h"
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
-#include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv
-#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "gfc3d_Solvers.h"                 // for ComputeErrorGlobalPtr, gfc...
-#include "gfc3d_compute_error.h"           // for gfc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"              // for projectionOnCone
-#include "sanitizer.h"                     // for cblas_dcopy_msan
-#include "siconos_debug.h"                 // for DEBUG_EXPR, DEBUG_PRINTF
+#include "projectionOnCone.h"  // for projectionOnCone
+#include "sanitizer.h"         // for cblas_dcopy_msan
+#include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
+#include "solver_registry.h"
 
 static void gfc3d_nsgs_local_solver_projection_free(GlobalFrictionContactProblem* problem) {
   assert(problem->M);
@@ -55,7 +51,7 @@ static void gfc3d_nsgs_initialize_local_solver(int n, SolverGlobalPtr* solve,
   if (iparam[4] == 0) {
     /*       *solve = &fc3d_projectionOnCone_solve; */
     *freeSolver = &gfc3d_nsgs_local_solver_projection_free;
-    *computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
+    *computeError = &gfc3d_compute_error;
     /*       fc3d_projection_initialize(n,M,q,mu); */
   } else {
     fprintf(stderr, "Numerics, gfc3d_nsgs failed. Unknown local solver set by iparam[4]\n");
@@ -216,10 +212,11 @@ static int gfc3d_nsgs_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int gfc3d_nsgs_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, double* globalVelocity, SolverOptions* options) {
+static int gfc3d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
+                                 double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_nsgs((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  gfc3d_nsgs((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info,
+             options);
   return info;
 }
 
@@ -230,12 +227,10 @@ static void gfc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER_3VAR(GFC3D_NSGS, "GFC3D_NSGS",
-                "Non-smooth Gauss-Seidel for 3D Global Friction Contact",
-                gfc3d_nsgs_init_wrap,
-                gfc3d_nsgs_solve_wrap,
-                gfc3d_nsgs_free_wrap,
-                NULL,  /* error function */
-                gfc3d_nsgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                     "Non-smooth Gauss-Seidel for 3D Global Friction Contact",
+                     gfc3d_nsgs_init_wrap, gfc3d_nsgs_solve_wrap, gfc3d_nsgs_free_wrap,
+                     NULL,                   /* error function */
+                     gfc3d_nsgs_set_default, /* set_default */
+                     1000,                   /* default_max_iter */
+                     1e-4,                   /* default_tol */
+                     0 /* is_local_solver */);

@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-#include "SiconosConfig.h"  // for HAVE_PATHFERRIS // IWYU pragma: keep
-#include "SimpleLCP.h"      // for ABCDtoM, FortranToPathSparse, MCP_Termination
+#include "SimpleLCP.h"  // for ABCDtoM, FortranToPathSparse, MCP_Termination
 
 #ifdef HAVE_PATHFERRIS
 #include <limits.h>
