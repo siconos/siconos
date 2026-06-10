@@ -38,8 +38,20 @@
 #include "RollingFrictionContactProblem.h"
 #include "RollingFrictionContact_options.h"
 #include "SolverOptions.h"
+#include "numerics_errors.h"
 
 namespace py = pybind11;
+
+/**
+ * @brief Check solver return code and throw Python exception on error
+ */
+inline void check_numerics_error(int info, const char* operation) {
+    if (info != 0) {
+        std::string msg = std::string("Numerics error in ") + operation + 
+                         ": " + numerics_error_string((NumericsError)info);
+        throw std::runtime_error(msg);
+    }
+}
 
 void display_csc_matrix(const CSparseMatrix* csc) {
   std::cout << "START ... " << csc->nzmax << " " << csc->n << "\n";
@@ -156,8 +168,9 @@ struct FrictionContactProblemWrapper {
         solver_options = nullptr;
       }
     } else {
-      std::cout << "FrictionContactProblem solve: wrong dimension" << std::endl;
+      throw std::runtime_error("FrictionContactProblem solve: wrong dimension");
     }
+    check_numerics_error(info, "FrictionContactProblem.solve");
     return info;
   };
 

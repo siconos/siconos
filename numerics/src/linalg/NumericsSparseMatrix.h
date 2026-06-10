@@ -137,8 +137,9 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
  *
  *  \param A a NumericsSparseMatrix
  *  \param B a NumericsSparseMatrix
+ *  \return error code
  */
-void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* B);
+int NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* B);
 
 /** Copy a NumericsSparseMatrix.
  *

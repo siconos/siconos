@@ -143,9 +143,10 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
    \param velocity global vector (n), in-out parameter
    \param reaction global vector (n), in-out parameters
    \param info return 0 if the solution is found
-   \param options the solver options :
+   \param options the solver options 
+   \return error code
 */
-void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
+int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                            int* info, SolverOptions* options);
 
 /**
@@ -158,8 +159,9 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, do
     \param reaction global vector (n), in-out parameters
     \param info return 0 if the solution is found
     \param options the solver options
+    \return error code
 */
-void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* reaction,
+int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* reaction,
                                      double* velocity, int* info, SolverOptions* options);
 
 void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velocity,
@@ -173,8 +175,9 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velo
    \param reaction global vector (n), in-out parameters
    \param info return 0 if the solution is found
    \param options the solver options :
+   \retuen error code
 */
-void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
+int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
                          int* info, SolverOptions* options);
 
 /**

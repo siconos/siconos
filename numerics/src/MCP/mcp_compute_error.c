@@ -29,7 +29,7 @@ int mcp_compute_error(MixedComplementarityProblem *problem, double *z, double *w
                       double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mcp_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("mcp_compute_error", "null input for problem and/or z and/or w");
 
   int size = problem->n1 + problem->n2;
   /* Computes w = F(z) */
@@ -59,7 +59,7 @@ int mcp_old_compute_error(MixedComplementarityProblem_old *problem, double *z, d
                           double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mcp_old_compute_error", "null input for problem and/or z and/or w");
+  return numerics_error("mcp_old_compute_error", "null input for problem and/or z and/or w");
 
   int size = problem->sizeEqualities + problem->sizeInequalities;
   /* Computes w = F(z) */

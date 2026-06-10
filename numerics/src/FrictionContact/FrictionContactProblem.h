@@ -119,7 +119,7 @@ FrictionContactProblem *frictionContact_newFromFile(FILE *file);
  */
 FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
 
-void createSplittedFrictionContactProblem(FrictionContactProblem *problem,
+int createSplittedFrictionContactProblem(FrictionContactProblem *problem,
                                           SplittedFrictionContactProblem *splitted_problem);
 
 void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,

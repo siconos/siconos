@@ -26,7 +26,7 @@
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 
-void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, SolverOptions* options,
+int plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
@@ -55,7 +55,8 @@ void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, Solv
                             "tolerance is set to %e",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
-    numerics_error("plasticity_2d__set_internalsolver_tolerance",
+    return numerics_error("plasticity_2d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
+  return 0;  
 }

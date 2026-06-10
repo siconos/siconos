@@ -22,8 +22,45 @@
 #include "NM_types.h"
 #include "NumericsVerbose.h"
 #include "SolverOptions.h"
+#include "numerics_errors.h"
 
 namespace py = pybind11;
+
+/**
+ * @brief Exception class for numerics solver errors
+ */
+class NumericsException : public std::exception {
+private:
+    int error_code_;
+    std::string message_;
+
+public:
+    NumericsException(int code, const std::string& msg) 
+        : error_code_(code), message_(msg) {}
+    
+    const char* what() const noexcept override {
+        return message_.c_str();
+    }
+    
+    int error_code() const { return error_code_; }
+};
+
+/**
+ * @brief Check solver return code and throw Python exception on error
+ * 
+ * This function should be called after solver operations to convert
+ * C error codes into Python exceptions.
+ * 
+ * @param info The error code returned by the solver
+ * @param operation Name of the operation (for error message)
+ */
+inline void check_solver_error(int info, const char* operation) {
+    if (info != 0) {
+        std::string msg = std::string("Numerics error in ") + operation + 
+                         ": " + numerics_error_string((NumericsError)info);
+        throw NumericsException(info, msg);
+    }
+}
 
 // Forward declarations
 
@@ -53,7 +90,38 @@ py::array_t<double> get_dparam(SolverOptions &options) {
 PYBIND11_MODULE(_numerics, m) {
   m.doc() = "Siconos numerics - Nonsmooth problems solvers toolbox";
 
-  py::class_<SolverOptions, py::smart_holder>(m, "SolverOptions")
+  // Register custom exception translator
+  py::register_exception<NumericsException>(m, "NumericsError");
+
+  // Export error codes to Python
+  py::enum_<::NumericsError>(m, "ErrorCode", "Numerics error codes")
+      .value("OK", NUMERICS_OK, "Success")
+      .value("NULL_POINTER", NUMERICS_ERR_NULL_POINTER, "Null pointer error")
+      .value("INVALID_ARGUMENT", NUMERICS_ERR_INVALID_ARGUMENT, "Invalid argument")
+      .value("INVALID_OPTION", NUMERICS_ERR_INVALID_OPTION, "Invalid option")
+      .value("INVALID_SOLVER", NUMERICS_ERR_INVALID_SOLVER, "Invalid solver")
+      .value("NOT_IMPLEMENTED", NUMERICS_ERR_NOT_IMPLEMENTED, "Not implemented")
+      .value("MEMORY", NUMERICS_ERR_MEMORY, "Memory allocation failed")
+      .value("FILE_IO", NUMERICS_ERR_FILE_IO, "File I/O error")
+      .value("MAX_ITER", NUMERICS_ERR_MAX_ITER, "Maximum iterations reached")
+      .value("DIVERGENCE", NUMERICS_ERR_DIVERGENCE, "Solver diverged")
+      .value("STAGNATION", NUMERICS_ERR_STAGNATION, "Solver stagnated")
+      .value("LINEAR_SOLVER", NUMERICS_ERR_LINEAR_SOLVER, "Linear solver failed")
+      .value("LOCAL_SOLVER", NUMERICS_ERR_LOCAL_SOLVER, "Local solver failed")
+      .value("PROJECTION", NUMERICS_ERR_PROJECTION, "Projection failed")
+      .value("INFEASIBLE", NUMERICS_ERR_INFEASIBLE, "Problem infeasible")
+      .value("UNBOUNDED", NUMERICS_ERR_UNBOUNDED, "Problem unbounded")
+      .value("ILL_CONDITIONED", NUMERICS_ERR_ILL_CONDITIONED, "Ill-conditioned problem")
+      .value("SINGULAR_MATRIX", NUMERICS_ERR_SINGULAR_MATRIX, "Singular matrix")
+      .value("UNKNOWN", NUMERICS_ERR_UNKNOWN, "Unknown error")
+      .export_values();
+
+  // Function to get error string
+  m.def("error_string", [](int code) {
+      return numerics_error_string((::NumericsError)code);
+  }, "Get error message for error code", py::arg("error_code"));
+
+  py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
       .def(py::init<>())
       .def_readwrite("solverId", &SolverOptions::solverId)
       .def_readonly("iSize", &SolverOptions::iSize)

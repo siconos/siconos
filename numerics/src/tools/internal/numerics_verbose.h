@@ -91,12 +91,13 @@ static inline bool check_io(int expr) {
 #define WARN_RESULT_IGNORED
 #endif
 
-/** msg output and exit with error
+/** msg output and return error code
  *
  * \param fn_name name of the function where error occurs
  * \param msg formatted output msg
+ * \return NUMERICS_ERR_INVALID_ARGUMENT (legacy: would abort)
  */
-void numerics_error(const char* fn_name, const char* msg, ...) NO_RETURN;
+int numerics_error(const char* fn_name, const char* msg, ...) WARN_RESULT_IGNORED;
 
 /** log error message without exit
  *

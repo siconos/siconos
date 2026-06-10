@@ -73,7 +73,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,
     }
 
   } else {
-    numerics_error("fc3d_DeSaxceFixedPoint",
+    *info =  numerics_error("fc3d_DeSaxceFixedPoint",
                    "The De Saxce fixed point is implemented with a fixed time--step. Use "
                    "FixedPointProjection (VI_FPP) method for a variable time--step");
   }

@@ -85,9 +85,11 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* in
     rhomin = dparam[SICONOS_CONVEXQP_PGOC_RHOMIN];
   }
 
-  if (rho == 0.0)
-    numerics_error("ConvexQP_ProjectedGradient",
-                   "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+  if (rho == 0.0) {
+    *info  = numerics_error("ConvexQP_ProjectedGradient",
+			    "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+    return;
+  }
 
   double rho_k = rho;
   double* z_tmp = (double*)malloc(n * sizeof(double));
@@ -135,14 +137,18 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* in
     }
   } else {
     double tau = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU];
-    if ((tau <= 0.0) || (tau >= 1.0))
-      numerics_error("fc3d_ProjectedGradientOnCylinder",
+    if ((tau <= 0.0) || (tau >= 1.0)) {
+      *info = numerics_error("fc3d_ProjectedGradientOnCylinder",
                      "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] must in (0,1)");
+      return;
+    }
 
     double mu = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU];
-    if ((mu <= 0.0) || (mu >= 1.0))
-      numerics_error("fc3d_ProjectedGradientOnCylinder",
+    if ((mu <= 0.0) || (mu >= 1.0)) {
+      *info = numerics_error("fc3d_ProjectedGradientOnCylinder",
                      "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
+      return;
+    }
 
     int ls_iter_max = iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER];
 

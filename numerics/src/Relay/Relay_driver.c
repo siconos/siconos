@@ -51,7 +51,7 @@ int relay_driver(RelayProblem* problem, double* z, double* w, SolverOptions* opt
 
   /* Sparse Block Storage */
   if (storageType == NM_SPARSE_BLOCK) {
-    numerics_error("Relay_driver", "not yet implemented for sparse storage.");
+    return numerics_error("Relay_driver", "not yet implemented for sparse storage.");
   }
   // else
 

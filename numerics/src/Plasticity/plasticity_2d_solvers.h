@@ -139,10 +139,9 @@ void plasticity_2d_nsgs_set_default(SolverOptions *options);
 void plasticity_2d_onecone_nsn_set_default(SolverOptions *options);
 void plasticity_2d_onecone_nsn_gp_set_default(SolverOptions *options);
 void plasticity_2d_poc_set_default(SolverOptions *options);
-void plasticity_2d_set_internalsolver_tolerance(PlasticityProblem *problem,
-                                                SolverOptions *options,
-                                                SolverOptions *internalsolver_options,
-                                                double error);
+
+int  plasticity_2d_set_internalsolver_tolerance(PlasticityProblem *problem, SolverOptions *options,
+                                       SolverOptions *internalsolver_options, double error);
 
 /** @} */
 

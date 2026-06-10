@@ -108,7 +108,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   int info = -1;
 
   if (problem->dimension != 2)
-    numerics_error(
+    info = numerics_error(
         "gfc2d_driver",
         "Dimension of the problem : problem-> dimension is not compatible or is not set");
 

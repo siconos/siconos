@@ -28,7 +28,7 @@
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 
-void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOptions* options,
+int fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] ==
@@ -57,7 +57,8 @@ void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem, SolverOp
                             "tolerance is set to %e",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
-    numerics_error("fc3d__set_internalsolver_tolerance",
+    return numerics_error("fc3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
+  return 0;  
 }

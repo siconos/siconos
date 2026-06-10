@@ -165,7 +165,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, doub
                                 double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
@@ -226,7 +226,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem *problem, double *z, double
                               double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

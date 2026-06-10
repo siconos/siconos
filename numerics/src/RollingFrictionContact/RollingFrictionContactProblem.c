@@ -141,8 +141,10 @@ RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file) {
 RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char* filename) {
   RollingFrictionContactProblem* problem = NULL;
   FILE* file = fopen(filename, "r");
-  if (!file) numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
-
+  if (!file) {
+    int error =     numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
+    return NULL;
+  }
   problem = rollingFrictionContact_newFromFile(file);
   fclose(file);
   return problem;

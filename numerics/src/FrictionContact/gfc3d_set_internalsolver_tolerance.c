@@ -24,7 +24,7 @@
 #include "numerics_verbose.h"
 #include "numerics_errors.h"
 
-void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
+int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                         SolverOptions* options,
                                         SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
@@ -53,7 +53,8 @@ void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                             "Internal solver tolerance is set to %e",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
-    numerics_error("fc3d__set_internalsolver_tolerance",
+    return numerics_error("fc3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
+  return 0;  
 }

@@ -17,7 +17,7 @@ extern "C" {
     \param row
     \param data
 */
-void convertToPathSparse(int size0, int size1, double* matIn, int* col_start, int* col_len,
+int convertToPathSparse(int size0, int size1, double* matIn, int* col_start, int* col_len,
                          int* row, double* data);
 #if defined(__cplusplus)
 }

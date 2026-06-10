@@ -135,7 +135,7 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem *problem,
   }
 }
 
-void plasticity_2d_nsgs_initialize_local_solver(
+int plasticity_2d_nsgs_initialize_local_solver(
     struct LocalPLASTICITY_2DProblemFunctionToolkit *local_function_toolkit,
     plasticity_2d_ComputeErrorPtr *computeError, PlasticityProblem *problem,
     PlasticityProblem *localproblem, SolverOptions *options) {
@@ -204,7 +204,7 @@ void plasticity_2d_nsgs_initialize_local_solver(
         break;
       }
       default: {
-        numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+        return numerics_error("plasticity_2d_nsgs_initialize_local_solver",
                        "Numerics, plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
                        solver_options_id_to_name(localsolver_options->solverId));
       }
@@ -235,10 +235,14 @@ void plasticity_2d_nsgs_initialize_local_solver(
       }
     }
   } else {
-    numerics_error("plasticity_2d_nsgs_initialize_local_solver",
-                   "Numerics, plasticity_2d_nsgs failed. Unknown plasticity model \n");
-  }
-}
+
+    return numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+		   "Numerics, plasticity_2d_nsgs failed. Unknown plasticity model \n");
+    }
+
+    return 0;
+    }
+
 
 static unsigned int *allocShuffledCones(PlasticityProblem *problem, SolverOptions *options) {
   unsigned int *scones = 0;
@@ -495,9 +499,10 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
 
   double norm_r[] = {1e24};
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("plasticity_2d_nsgs",
+    *info = numerics_error("plasticity_2d_nsgs",
                    "The NSGS method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >= 1");
+    return;
   }
 
   SolverOptions *localsolver_options = options->internalSolvers[0];
@@ -543,7 +548,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
   if (!(iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
-    numerics_error("plasticity_2d_nsgs",
+    *info = numerics_error("plasticity_2d_nsgs",
                    "iparam[PLASTICITY_NSGS_SHUFFLE] must be equal to "
                    "PLASTICITY_NSGS_SHUFFLE_FALSE (0), "
                    "PLASTICITY_NSGS_SHUFFLE_TRUE (1) or "
@@ -557,7 +562,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] == PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT ||
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
             PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
-    numerics_error("plasticity_2d_nsgs",
+    *info = numerics_error("plasticity_2d_nsgs",
                    "iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] must be equal to "
                    "PLASTICITY_NSGS_ERROR_EVALUATION_FULL (0), "
                    "PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "

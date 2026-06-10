@@ -200,7 +200,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w
 
   /* Sparse Block Storage */
   if (storageType == NM_SPARSE_BLOCK) {
-    numerics_error("mlcp_driver",
+    return numerics_error("mlcp_driver",
                    "not yet implemented for sparse block storage (NM_SPARSE_BLOCK)");
   }
   // else

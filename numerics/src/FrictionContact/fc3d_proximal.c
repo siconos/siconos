@@ -68,9 +68,10 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   }
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("fc3d_proximal",
+    *info = numerics_error("fc3d_proximal",
                    "The PROX method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >1");
+    return;
   }
   SolverOptions* internalsolver_options = options->internalSolvers[0];
 
@@ -119,8 +120,10 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       DEBUG_PRINTF("Initial error = %g\n", error);
       if (error < tolerance) hasNotConverged = 0;
     }
-  } else
-    numerics_error("fc3d_proximal", "Proximal strategy is unknown");
+  } else {
+    *info = numerics_error("fc3d_proximal", "Proximal strategy is unknown");
+    return;
+  }
 
   double* reactionold = (double*)malloc(n * sizeof(double));
   cblas_dcopy(n, reaction, 1, reactionold, 1);
@@ -143,12 +146,15 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
     } else if (internalsolver_options->solverId == FC3D_IPM_SNM) {
       internalsolver = &fc3d_IPM_SNM;
-    } else
-      numerics_error("fc3d_proximal", "unknown internal solver");
+    } else {
+      *info = numerics_error("fc3d_proximal", "unknown internal solver");
+      return;
+    }
   } else {
-    numerics_error("fc3d_proximal",
+    *info = numerics_error("fc3d_proximal",
                    "The PROX method needs options for the internal solvers, "
                    "soptions->internalSolvers should be different from NULL");
+    return;
   }
 
   DEBUG_PRINTF("isVariable = %i\n", isVariable);
@@ -355,8 +361,10 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
-  } else
-    numerics_error("fc3d_proximal", "Proximal strategy is unknown");
+  } else {
+    *info = numerics_error("fc3d_proximal", "Proximal strategy is unknown");
+    return;
+  }
 
   numerics_printf_verbose(1, "---- FC3D - PROXIMAL - | %3d | %.1e | %7.3e | (final)",
                           iter, error, tolerance);

@@ -1033,7 +1033,7 @@ CSparseMatrix *CSparseMatrix_alloc_for_copy(const CSparseMatrix *const m) {
   return out;
 }
 
-void CSparseMatrix_copy(const CSparseMatrix *const A, CSparseMatrix *B) {
+int CSparseMatrix_copy(const CSparseMatrix *const A, CSparseMatrix *B) {
   assert(A);
   assert(B);
 
@@ -1070,10 +1070,12 @@ void CSparseMatrix_copy(const CSparseMatrix *const A, CSparseMatrix *B) {
     size_cpy = (size_t)A->n + 1;
   } else if (A->nz == -2) {
     size_cpy = (size_t)A->m + 1;
-  } else
-    numerics_error("CSparseMatrix_copy", "Wrong nz value in CSparseMatrix.");
+  } else {
+    return numerics_error("CSparseMatrix_copy", "Wrong nz value in CSparseMatrix.");
+  }
 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
+  return 0;  
 }
 
 int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double *max) {

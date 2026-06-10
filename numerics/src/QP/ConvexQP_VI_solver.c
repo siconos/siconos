@@ -42,9 +42,10 @@ void convexQP_VI_solver(ConvexQP* problem, double* z, double* w, int* info,
                         SolverOptions* options) {
   NumericsMatrix* A = problem->A;
   if (A) {
-    numerics_error(
+    *info = numerics_error(
         "ConvexQP_VI_Solver",
         "This solver does not support a specific matrix A different from the identity");
+    return;
   }
   /* Dimension of the problem */
   int n = problem->size;

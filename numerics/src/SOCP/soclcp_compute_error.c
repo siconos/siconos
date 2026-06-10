@@ -123,7 +123,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem,
                            double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("soclcp_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("soclcp_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

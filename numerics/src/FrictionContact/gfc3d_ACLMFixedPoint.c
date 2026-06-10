@@ -67,9 +67,11 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
   double norm_b = cblas_dnrm2(m, problem->b, 1);
 
   if (options->numberOfInternalSolvers < 1) {
-    numerics_error("gfc3d_ACLMFixedpoint",
-                   "The ACLM Fixed Point method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+    *info =
+        numerics_error("gfc3d_ACLMFixedpoint",
+                       "The ACLM Fixed Point method needs options for the internal solvers, "
+                       "options[0].numberOfInternalSolvers should be >1");
+    return;
   }
 
   SolverOptions *internalsolver_options = options->internalSolvers[0];

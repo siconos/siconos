@@ -128,7 +128,11 @@ GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char
 #endif
   } else {
     FILE* file = fopen(filename, "r");
-    if (!file) numerics_error("GlobalFrictionContactProblem", "Can not open file ", filename);
+    if (!file) {
+      int error =
+          numerics_error("GlobalFrictionContactProblem", "Can not open file ", filename);
+      return NULL;
+    }      
 
     problem = globalFrictionContact_newFromFile(file);
     fclose(file);

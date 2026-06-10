@@ -65,11 +65,9 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
 
   /* Check model type - only Drucker-Prager supported for now */
   if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER) {
-    numerics_error("plasticity_2d_compute_error",
-                   "Only Drucker-Prager model is currently supported");
     *error = 0.0;
     DEBUG_END("plasticity_2d_compute_error(...)\n");
-    return 1;
+    return numerics_error("plasticity_2d_compute_error", "Only Drucker-Prager model is currently supported");;
   }
 
   /* Computes w = Mz + q */

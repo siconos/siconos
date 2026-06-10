@@ -101,7 +101,7 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* probl
   int info = -1;
 
   if (problem->dimension != 5)
-    numerics_error(
+   return numerics_error(
         "global_rolling_friction_3d_driver",
         "Dimension of the problem : problem-> dimension is not compatible or is not set");
 

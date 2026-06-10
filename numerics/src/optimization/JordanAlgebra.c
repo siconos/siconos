@@ -67,7 +67,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
   return Arw_mat;
 }
 
-void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
+int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
                         const size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
@@ -85,8 +85,9 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
 
   // Note FP: convert from or compare size_t to/with int --> need to be careful
   // Anyway the best option is to use size_t in NumericsMatrix ...
-  if (!(vecSize <= INT_MAX))
-    numerics_error("Arrow_repr_replace", "value too large for an int");
+  if (!(vecSize <= INT_MAX)) {
+    return numerics_error("Arrow_repr_replace", "value too large for an int");;
+  }
   if (Arw_mat->size0 != (int)vecSize && Arw_mat->size1 != (int)vecSize) {
     assert(0);
   }
@@ -96,8 +97,9 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
   CSparseMatrix* cs = Arw_mat->matrix2->triplet;
 
   size_t memSize = (dimension * 3 - 2) * varsCount;  // same pb as above, size_t to int ...
-  if (!(memSize <= LLONG_MAX))
-    numerics_error("Arrow_repr_replace", "value too large for an int64_t");
+  if (!(memSize <= LLONG_MAX)) {
+    return numerics_error("Arrow_repr_replace", "value too large for an int64_t");
+  }
 
   if (cs->nz != (int64_t)memSize) {
     assert(0);
@@ -127,6 +129,7 @@ void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const 
       cs->p[cs->nz++] = pos + j;
     }
   }
+  return 0;
 }
 
 NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type) {

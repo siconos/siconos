@@ -636,7 +636,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
        * options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]); */
       /*   break; */
       default: {
-        numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier", "Unknown line search option.\n");
+        *info = numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier", "Unknown line search option.\n");
       }
     }
 

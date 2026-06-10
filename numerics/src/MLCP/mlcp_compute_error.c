@@ -36,7 +36,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
                        double tolerance, double *error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numerics_error("mlcp_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("mlcp_compute_error", "null input for problem and/or z and/or w");
 
   int param = 1;
   int n = problem->n; /* Equalities */
@@ -47,7 +47,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
 
   /* Problem in the form (M,q) */
   if (problem->isStorageType1) {
-    if (problem->M == NULL) numerics_error("mlcp_compute_error", "null input for M");
+    if (problem->M == NULL) return numerics_error("mlcp_compute_error", "null input for M");
 
     /* Computes w = Mz + q */
     cblas_dcopy(n + m, problem->q, incx, w, incy);
@@ -59,10 +59,10 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
   {
     /* Checks inputs */
     if (problem->A == NULL || problem->B == NULL || problem->C == NULL || problem->D == NULL) {
-      numerics_error("mlcp_compute_error: ", "null input for A, B, C or D");
+      return numerics_error("mlcp_compute_error: ", "null input for A, B, C or D");
     }
     if (problem->a == NULL || problem->b == NULL) {
-      numerics_error("mlcp_compute_error: ", "null input for a or b");
+      return numerics_error("mlcp_compute_error: ", "null input for a or b");
     }
     /* Links to problem data */
     double *a = problem->a;

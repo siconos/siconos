@@ -1817,14 +1817,14 @@ static void printInteresProbPythonFile(int iteration, double *v, double *u, doub
       ++ error_proj   = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}  if
    max >= tol = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|                otherwise
 */
-static void compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w,
+static int compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w,
                            const double *f, double *r, double *u, double *v,
                            double *primalConstraint, double *pinfeas, double *dualConstraint,
                            double *dinfeas, double tolerance, double *proj_error,
                            double *full_error, int problemIsNotConvex) {
   /* Checks inputs */
   if (M == NULL || H == NULL || w == NULL || f == NULL || r == NULL || u == NULL || v == NULL)
-    numerics_error("compute_errors", "null input");
+    return numerics_error("compute_errors", "null input");
 
   size_t nd = H->size0;
   size_t m = H->size1;
@@ -1880,6 +1880,7 @@ static void compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w
   /* --- Full error = Relative dual residual + Relative primal residual + Projection error ---
    */
   *full_error = *dinfeas + *pinfeas + *proj_error;
+  return 0;
 }
 
 // static void print_NAN_in_matrix(const NumericsMatrix *const m) {
