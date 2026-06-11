@@ -231,8 +231,9 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
   # To ensure a default inclusion of SiconosConfig.h everywhere
   target_include_directories(siconos_config INTERFACE
       $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
-  target_precompile_headers(siconos_config INTERFACE ${CMAKE_BINARY_DIR}/SiconosConfig.h)
+  target_precompile_headers(siconos_config INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/SiconosConfig.h>)
   siconos_component_install_setup(siconos_config)
+
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 
 endif()
