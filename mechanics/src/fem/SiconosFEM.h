@@ -29,3 +29,4 @@ Include header files required for the FEM toolbox in Siconos
 #include "MeshUtils.hpp"
 #include "NodeFem1d2DR.hpp"
 #include "NodeFem2d2DR.hpp"
+#include "StressLinearTIR.hpp""

@@ -58,6 +58,8 @@ class StressLinearTIR : public siconos::modeling::LagrangianLinearTIR {
 
   using LagrangianLinearTIR::LagrangianLinearTIR;
 
+  StressLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
+
   /** destructor
    */
   virtual ~StressLinearTIR() noexcept = default;

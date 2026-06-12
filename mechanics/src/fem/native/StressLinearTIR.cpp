@@ -33,6 +33,14 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
+siconos::mechanics::fem::StressLinearTIR::StressLinearTIR(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC)
+    : LagrangianLinearTIR(newC) {
+  _subType = siconos::modeling::RelationSubType::StressLinearTIR;
+}
+
+
+
 void siconos::mechanics::fem::StressLinearTIR::checkSize(
     const siconos::modeling::Interaction& inter) const {
   auto sizeY = inter.dimension();
@@ -58,12 +66,10 @@ void siconos::mechanics::fem::StressLinearTIR::computeOutput(
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-
   // y[i] = C * sigma_i (i=0 or 1)
   siconos::algebra::matrixBlockVector_prod(
       *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::sigma) + derivativeNumber],
       y);
-
   // y[0] = C * sigma_0 + e
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;

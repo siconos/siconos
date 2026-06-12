@@ -28,6 +28,7 @@
 #include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
+#include "Relation.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -458,6 +459,8 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
           auto& inter = *indexSet.bundle(*ui);
+          auto relationSubType = inter.relation()->getSubType();
+
           size_t sizeY = inter.dimension();
 
           auto ds1 = indexSet.properties(*ui).source;
@@ -477,6 +480,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
               siconos::algebra::SiconosDenseMatrix inter_block =
                   inter.getLeftInteractionBlock();
+              if(relationSubType == modeling::RelationSubType::StressLinearTIR){
+                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied after the velocity dimension
+                sizeDS = ds->real_size() - ds->dimension();
+              }
               for (auto idcol : bc->velocityIndices()) {
                 inter_block.col(posBlock + idcol).setZero();
               }
@@ -485,6 +492,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                                                raw_array + posBlock * sizeY, sizeY, sizeDS,
                                                DBL_EPSILON);
             } else {
+              if(relationSubType == modeling::RelationSubType::StressLinearTIR){
+                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied after the velocity dimension
+                sizeDS = ds->real_size() - ds->dimension();
+              }
               const double* raw_array = inter.getLeftInteractionBlock().data();
               CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
                                                raw_array + posBlock * sizeY, sizeY, sizeDS,
