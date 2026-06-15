@@ -189,13 +189,8 @@ void siconos::mechanics::fem::FiniteElement::initialize_beam_element() {
     for (int a = 0; a < 2; a++) {
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-          Te_(6 * a + i, 6 * a + j) = R(i, j);
+          Te_(6 * a + i, 6 * a + j) = Te_(3 + 6 * a + i, 3 + 6 * a + j) = R(i, j);
         }
-      }
-    }
-    for (int a = 0; a < 2; a++) {
-      for (int i = 0; i < 3; i++) {
-        Te_(3 + 6 * a + i, 3 + 6 * a + i) = 1.;
       }
     }
   }
