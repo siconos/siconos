@@ -7,12 +7,14 @@ endif()
 
 include(FindPkgConfig)
 
+set(PKG_CONFIG_ARGN "--define-variable=PETSC_DIR=/tmp")
+
 pkg_search_module(PETSC
   REQUIRED
   IMPORTED_TARGET
   petsc PETSc)
 
-find_package(MPI REQUIRED)
+#find_package(MPI REQUIRED)
 message("- includes for petsc ${PETSC_INCLUDEDIR}")
 message("- lib path for petsc ${PETSC_LIBDIR}")
 message("- libraries for petsc ${PETSC_LINK_LIBRARIES}")

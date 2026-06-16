@@ -211,7 +211,7 @@ endif()
 if(WITH_PETSC)
   include(PetscSetup)
   target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
-  target_link_libraries(numerics PRIVATE MPI::MPI_C)
+#  target_link_libraries(numerics PRIVATE MPI::MPI_C)
   target_compile_definitions(numerics PUBLIC SICONOS_PETSC)
 endif()
 
