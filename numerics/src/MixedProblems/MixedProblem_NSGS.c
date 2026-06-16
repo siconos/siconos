@@ -274,25 +274,63 @@ static void mixedProblem_local_solver_free(MixedProblemLocalSolverData* solver_d
    * internalSolvers array */
 
   if (solver_data->local_problem) {
+    /* Before freeing the problem, set shared pointers to NULL to avoid
+     * double-free. These pointers point to memory owned by MixedProblem
+     * or already freed above (local_q). */
     switch (model_type) {
-      case MIXED_MODEL_FRICTION_2D:
-        frictionContactProblem_free((FrictionContactProblem*)solver_data->local_problem);
+      case MIXED_MODEL_FRICTION_2D: {
+        FrictionContactProblem* fc2d = (FrictionContactProblem*)solver_data->local_problem;
+        fc2d->mu = NULL; /* Don't free - points to block's mu array */
+        fc2d->q = NULL;  /* Don't free - already freed above */
+        frictionContactProblem_free(fc2d);
         break;
-      case MIXED_MODEL_FRICTION_3D:
-        frictionContactProblem_free((FrictionContactProblem*)solver_data->local_problem);
+      }
+      case MIXED_MODEL_FRICTION_3D: {
+        FrictionContactProblem* fc3d = (FrictionContactProblem*)solver_data->local_problem;
+        fc3d->mu = NULL; /* Don't free - points to block's mu array */
+        fc3d->q = NULL;  /* Don't free - already freed above */
+        frictionContactProblem_free(fc3d);
         break;
-      case MIXED_MODEL_ROLLING_FRICTION_2D:
-        rollingFrictionContactProblem_free(
-            (RollingFrictionContactProblem*)solver_data->local_problem);
+      }
+      case MIXED_MODEL_ROLLING_FRICTION_2D: {
+        RollingFrictionContactProblem* rfc2d =
+            (RollingFrictionContactProblem*)solver_data->local_problem;
+        rfc2d->mu = NULL;   /* Don't free */
+        rfc2d->mu_r = NULL; /* Don't free */
+        rfc2d->q = NULL;    /* Don't free - already freed above */
+        rollingFrictionContactProblem_free(rfc2d);
         break;
-      case MIXED_MODEL_ROLLING_FRICTION_3D:
-        rollingFrictionContactProblem_free(
-            (RollingFrictionContactProblem*)solver_data->local_problem);
+      }
+      case MIXED_MODEL_ROLLING_FRICTION_3D: {
+        RollingFrictionContactProblem* rfc3d =
+            (RollingFrictionContactProblem*)solver_data->local_problem;
+        rfc3d->mu = NULL;   /* Don't free */
+        rfc3d->mu_r = NULL; /* Don't free */
+        rfc3d->q = NULL;    /* Don't free - already freed above */
+        rollingFrictionContactProblem_free(rfc3d);
         break;
-      case MIXED_MODEL_VON_MISES:
-      case MIXED_MODEL_DRUCKER_PRAGER:
-        plasticityProblem_free((PlasticityProblem*)solver_data->local_problem);
+      }
+      case MIXED_MODEL_VON_MISES: {
+        PlasticityProblem* plasticity = (PlasticityProblem*)solver_data->local_problem;
+        plasticity->q = NULL; /* Don't free - already freed above */
+        /* Don't free model->sigma_y - it points to block's data */
+        if (plasticity->model.von_mises) {
+          plasticity->model.von_mises->sigma_y = NULL;
+        }
+        plasticityProblem_free(plasticity);
         break;
+      }
+      case MIXED_MODEL_DRUCKER_PRAGER: {
+        PlasticityProblem* plasticity = (PlasticityProblem*)solver_data->local_problem;
+        plasticity->q = NULL; /* Don't free - already freed above */
+        /* Don't free model->eta/theta - they point to block's data */
+        if (plasticity->model.drucker_prager) {
+          plasticity->model.drucker_prager->eta = NULL;
+          plasticity->model.drucker_prager->theta = NULL;
+        }
+        plasticityProblem_free(plasticity);
+        break;
+      }
       default:
         break;
     }
@@ -367,59 +405,120 @@ static void mixedProblem_update_global_block(MixedProblem* problem, int block_in
 
 /* Compute local w = M*z + q for a single block */
 static void mixedProblem_compute_local_w(MixedProblemLocalSolverData* solver_data,
-                                         int local_size) {
-  NumericsMatrix* local_M = NULL;
-
-  /* Get local M based on problem type - we need to extract it from the local problem */
-  /* For now, assume local_M is stored in the solver_data or compute directly */
-  /* This is a simplified version - in practice we'd get M from the local problem structure */
-
+                                         MixedModelType model_type, int local_size) {
   double* z = solver_data->local_z;
   double* w = solver_data->local_w;
   double* q = solver_data->local_q;
+  NumericsMatrix* local_M = NULL;
 
-  /* Get local M dense - we need to retrieve it from the local problem */
-  /* Since local_M was set up during initialization, we need to access it */
-  /* For simplicity, we'll assume diagonal M (identity) for the local block */
-  /* In a full implementation, we'd extract M from the local problem structure */
+  /* Get local M based on problem type */
+  switch (model_type) {
+    case MIXED_MODEL_FRICTION_2D:
+    case MIXED_MODEL_FRICTION_3D:
+      local_M = ((FrictionContactProblem*)solver_data->local_problem)->M;
+      break;
+    case MIXED_MODEL_ROLLING_FRICTION_2D:
+    case MIXED_MODEL_ROLLING_FRICTION_3D:
+      local_M = ((RollingFrictionContactProblem*)solver_data->local_problem)->M;
+      break;
+    case MIXED_MODEL_VON_MISES:
+    case MIXED_MODEL_DRUCKER_PRAGER:
+      local_M = ((PlasticityProblem*)solver_data->local_problem)->M;
+      break;
+    default:
+      break;
+  }
 
-  /* w = z + q (since M = I for local block) */
-  for (int i = 0; i < local_size; i++) {
-    w[i] = z[i] + q[i];
+  /* Compute w = M*z + q using local M */
+  if (local_M && local_M->dense) {
+    /* Dense matrix computation */
+    for (int i = 0; i < local_size; i++) {
+      w[i] = q[i];
+      for (int j = 0; j < local_size; j++) {
+        w[i] += local_M->dense[i * local_size + j] * z[j];
+      }
+    }
+  } else {
+    /* Fallback: assume identity M */
+    for (int i = 0; i < local_size; i++) {
+      w[i] = z[i] + q[i];
+    }
   }
 }
 
 static int mixedProblem_solve_local_block(MixedProblem* problem, int block_index,
                                           MixedProblemLocalSolverData* solver_data,
-                                          SolverOptions* global_options) {
+                                          SolverOptions* global_options, double* z_global) {
   MixedProblemBlock* block = &problem->blocks[block_index];
   int info = 0;
 
-  /* Update local q with coupling terms from other blocks */
+  /* Update local q with coupling terms from other blocks using NM_row_prod_no_diag* functions.
+   * These functions work with all matrix types (NM_DENSE, NM_SPARSE_BLOCK, NM_SPARSE)
+   * and have optimized implementations for common sizes (1, 2, 3).
+   */
   int start = block->start_index;
   int local_size = block->dimension * block->num_elements;
 
+  /* Compute coupling = row of M * global_z, excluding the diagonal block.
+   * The result is stored in solver_data->local_w (temporary storage).
+   * Then local_q = global_q - coupling.
+   */
+  double* coupling = solver_data->local_w; /* Use local_w as temp storage for coupling */
+
+  switch (local_size) {
+    case 1:
+      NM_row_prod_no_diag1x1((size_t)problem->total_dimension, block_index, (size_t)start,
+                             problem->M, z_global, coupling, true);
+      break;
+    case 2:
+      NM_row_prod_no_diag2((size_t)problem->total_dimension, block_index, (size_t)start,
+                           problem->M, z_global, coupling, true);
+      break;
+    case 3:
+      NM_row_prod_no_diag3((size_t)problem->total_dimension, block_index, (size_t)start,
+                           problem->M, z_global, coupling, true);
+      break;
+    default:
+      /* Generic implementation for any size */
+      NM_row_prod_no_diag((size_t)problem->total_dimension, (size_t)local_size, block_index,
+                          (size_t)start, problem->M, z_global, coupling, NULL, true);
+      break;
+  }
+
+  /* local_q = global_q - coupling */
   for (int i = 0; i < local_size; i++) {
-    double coupling = 0.0;
-    for (int j = 0; j < problem->total_dimension; j++) {
-      if (j < start || j >= start + local_size) {
-        coupling += problem->M->dense[(start + i) * problem->total_dimension + j] *
-                    solver_data->local_z[j - start];
-      }
-    }
-    solver_data->local_q[i] = problem->q[start + i] - coupling;
+    solver_data->local_q[i] = problem->q[start + i] - coupling[i];
   }
 
   /* Solve local problem using direct local solvers (not drivers) */
   switch (block->model_type) {
     case MIXED_MODEL_FRICTION_2D: {
-      /* For 2D friction, use direct NSGS since there's no simple projection */
+      /* For 2D friction, use direct local solve for each contact */
       FrictionContactProblem* fc2d = (FrictionContactProblem*)solver_data->local_problem;
       /* Copy updated q to local problem */
       fc2d->q = solver_data->local_q;
-      /* Use nsgs for small 2D problem (returns void, info passed by pointer) */
-      fc2d_nsgs(fc2d, solver_data->local_z, solver_data->local_w, &info,
-                solver_data->local_options);
+
+      /* Solve each contact locally using fc2d_nsgs_local_solve */
+      for (int contact = 0; contact < block->num_elements; contact++) {
+        double* W = fc2d->M->dense + contact * 4; /* 2x2 matrix for this contact */
+        double* q_local = solver_data->local_q + contact * 2;
+        double* z_local = solver_data->local_z + contact * 2;
+        double mu = fc2d->mu[contact];
+
+        /* Compute determinant: Wnn*Wtt - Wnt*Wtn */
+        double Wnn = W[0];
+        double Wtn = W[1];
+        double Wnt = W[2];
+        double Wtt = W[3];
+        double D = Wnn * Wtt - Wnt * Wtn;
+
+        /* Call local solver */
+        fc2d_nsgs_local_solve(W, D, q_local, mu, z_local);
+      }
+
+      /* Compute w = M*z + q */
+      mixedProblem_compute_local_w(solver_data, block->model_type, local_size);
+      info = 0;
       break;
     }
 
@@ -432,7 +531,7 @@ static int mixedProblem_solve_local_block(MixedProblem* problem, int block_index
       info =
           fc3d_projectionOnCone_solve(fc3d, solver_data->local_z, solver_data->local_options);
       /* Compute w = M*z + q */
-      mixedProblem_compute_local_w(solver_data, local_size);
+      mixedProblem_compute_local_w(solver_data, block->model_type, local_size);
       break;
     }
 
@@ -463,7 +562,7 @@ static int mixedProblem_solve_local_block(MixedProblem* problem, int block_index
       info = plasticity_2d_projectionOnVonMises_solve(plasticity, solver_data->local_z,
                                                       solver_data->local_options);
       /* Compute w = M*z + q */
-      mixedProblem_compute_local_w(solver_data, local_size);
+      mixedProblem_compute_local_w(solver_data, block->model_type, local_size);
       break;
     }
 
@@ -474,7 +573,7 @@ static int mixedProblem_solve_local_block(MixedProblem* problem, int block_index
       info = plasticity_2d_projectionOnCone_solve(plasticity, solver_data->local_z,
                                                   solver_data->local_options);
       /* Compute w = M*z + q */
-      mixedProblem_compute_local_w(solver_data, local_size);
+      mixedProblem_compute_local_w(solver_data, block->model_type, local_size);
       break;
     }
 
@@ -523,7 +622,7 @@ void mixedProblem_NSGS(MixedProblem* problem, double* z, double* w, int* info,
       mixedProblem_extract_local_block(problem, b, z, w, problem->q, solver_data);
 
       /* Solve local problem */
-      int local_info = mixedProblem_solve_local_block(problem, b, solver_data, options);
+      int local_info = mixedProblem_solve_local_block(problem, b, solver_data, options, z);
       if (local_info != 0) {
         if (verbose > 0) {
           printf("MixedProblem_NSGS: Local solver failed for block %d\n", b);
@@ -534,8 +633,21 @@ void mixedProblem_NSGS(MixedProblem* problem, double* z, double* w, int* info,
       mixedProblem_update_global_block(problem, b, z, w, solver_data);
     }
 
-    /* Compute error */
-    *info = mixedProblem_compute_error(problem, z, w, tolerance, options, &error);
+    /* Compute "light error" - change in z between iterations */
+    /* This is similar to fc2d_nsgs error computation */
+    double error_sum = 0.0;
+    double norm_z_sq = 0.0;
+    for (int i = 0; i < total_dim; i++) {
+      double diff = z[i] - nsgs_data->z_prev[i];
+      error_sum += diff * diff;
+      norm_z_sq += z[i] * z[i];
+    }
+    error = sqrt(error_sum);
+    double norm_z = sqrt(norm_z_sq);
+    if (norm_z > 1e-14) {
+      error /= norm_z;
+    }
+
     options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
     if (verbose > 0) {
@@ -619,7 +731,7 @@ void mixedProblem_NSGS_init(MixedProblem* problem, SolverOptions* options) {
 }
 
 void mixedProblem_NSGS_free(MixedProblem* problem, SolverOptions* options) {
-  assert(problem && options);
+  if (!problem || !options) return;
 
   MixedProblemNSGSData* nsgs_data = (MixedProblemNSGSData*)options->solverData;
   if (!nsgs_data) return;
@@ -642,9 +754,13 @@ void mixedProblem_NSGS_set_default_solver_options(MixedProblem* problem,
   assert(options);
   assert(problem);
 
+  /* Zero-initialize all fields first to ensure safe cleanup */
+  memset(options, 0, sizeof(SolverOptions));
+
   options->solverId = SICONOS_MIXED_NSGS;
-  options->numberOfInternalSolvers = problem->num_blocks;
-  options->isSet = 1;
+  options->numberOfInternalSolvers = 0;
+  options->internalSolvers = NULL;
+  options->isSet = true;
 
   options->iparam = (int*)calloc(OPTIONS_PARAM_SIZE, sizeof(int));
   options->dparam = (double*)calloc(OPTIONS_PARAM_SIZE, sizeof(double));
@@ -656,61 +772,11 @@ void mixedProblem_NSGS_set_default_solver_options(MixedProblem* problem,
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
-  /* Create internal solvers for each block based on model type */
-  if (problem->num_blocks > 0) {
-    options->internalSolvers =
-        (SolverOptions**)calloc(problem->num_blocks, sizeof(SolverOptions*));
-    if (!options->internalSolvers) {
-      int err = numerics_error("mixedProblem_NSGS_set_default_solver_options",
-                               "Failed to allocate internal solvers array");
-      (void)err;
-      return;
-    }
-
-    for (int b = 0; b < problem->num_blocks; b++) {
-      MixedProblemBlock* block = &problem->blocks[b];
-      SolverOptions* internal_options = NULL;
-
-      switch (block->model_type) {
-        case MIXED_MODEL_FRICTION_2D:
-          /* Use NSGS for 2D friction */
-          internal_options = solver_options_create(SICONOS_FRICTION_2D_NSGS);
-          break;
-
-        case MIXED_MODEL_FRICTION_3D:
-          /* Use projection on cone for 3D friction */
-          internal_options =
-              solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-          break;
-
-        case MIXED_MODEL_ROLLING_FRICTION_2D:
-          /* Use NSGS for rolling friction 2D */
-          internal_options = solver_options_create(SICONOS_ROLLING_FRICTION_2D_NSGS);
-          break;
-
-        case MIXED_MODEL_ROLLING_FRICTION_3D:
-          /* Use NSGS for rolling friction 3D */
-          internal_options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
-          break;
-
-        case MIXED_MODEL_VON_MISES:
-          /* Use Von Mises radial return projection */
-          internal_options = solver_options_create(PLASTICITY_2D_ONECONE_VONMISES);
-          break;
-
-        case MIXED_MODEL_DRUCKER_PRAGER:
-          /* Use projection on cone for Drucker-Prager */
-          internal_options = solver_options_create(PLASTICITY_2D_ONECONE_ProjectionOnCone);
-          break;
-
-        default:
-          /* Unknown model type - will be handled later */
-          break;
-      }
-
-      options->internalSolvers[b] = internal_options;
-    }
-  }
+  /* Note: We use direct local solvers that don't need internal solver options.
+   * For FC2D: fc2d_nsgs_local_solve (direct, no options needed)
+   * For FC3D: fc3d_projectionOnCone_solve (direct, no options needed)
+   * For plasticity: direct projection functions (no options needed)
+   */
 }
 
 int mixedProblem_compute_error(MixedProblem* problem, double* z, double* w, double tolerance,

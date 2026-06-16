@@ -88,7 +88,7 @@ static int test_friction2d_only(void) {
   printf("  iterations = %d\n", options.iparam[SICONOS_MIXED_IPARAM_ITER_DONE]);
   printf("  residual = %12.8e\n", options.dparam[SICONOS_MIXED_DPARAM_RESIDU]);
 
-  /* Cleanup */
+  /* Cleanup - mixedProblem_free does NOT free M or q, so we free them separately */
   free(z);
   free(w);
   NM_free(M);

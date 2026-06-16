@@ -233,6 +233,18 @@ void fc2d_nsgs_set_default(SolverOptions* options);
 
 /** @} */
 
+/**
+ * Local solver for a single 2D friction contact problem.
+ * Solves the local problem: WP + q = 0 with Coulomb friction cone.
+ *
+ * \param[in] W the 2x2 local matrix (stored as [Wnn, Wtn, Wnt, Wtt])
+ * \param[in] D determinant of W
+ * \param[in] q the 2D local vector
+ * \param[in] mu friction coefficient
+ * \param[out] P the solution (2D reaction vector)
+ */
+void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu, double* P);
+
 /* Driver and convenience functions */
 int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
                 SolverOptions* options);

@@ -236,8 +236,7 @@ static double* fc2d_nsgs_compute_local_problem_determinant(
   return diagonal_block_determinant;
 }
 
-static inline void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu,
-                                         double* P) {
+void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu, double* P) {
   /* | Wnn Wnt |
      | Wtn Wtt | */
 
