@@ -108,7 +108,7 @@ class MLCP : public LinearOSNS {
 
   /** Update blocks used to compute M matrix.
    */
-  void updateInteractionBlocks() override;
+  void updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) override;
 
   /** get the number of equality constraints,
    *

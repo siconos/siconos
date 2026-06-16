@@ -32,6 +32,7 @@ This should be used only by final user.
 #include "GenericMechanical.hpp"
 #include "GlobalFrictionContact.hpp"
 #include "GlobalRollingFrictionContact.hpp"
+#include "CohesiveFrictionContact.hpp"
 #include "Hem5OSI.hpp"
 #include "InteractionManager.hpp"
 #include "LCP.hpp"

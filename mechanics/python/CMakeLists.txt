@@ -95,6 +95,21 @@ install(TARGETS
 )
 list(APPEND py${COMPONENT}_modules pyjoints)
 
+create_pybind11_module(
+  MODULE_NAME pyczm
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/czm/czm_pybind11.cpp
+  DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/czm
+)
+
+set_target_properties(pyczm PROPERTIES OUTPUT_NAME "_czm")
+install(TARGETS
+  pyczm
+  COMPONENT python
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/czm"
+)
+list(APPEND py${COMPONENT}_modules pyczm)
+
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)

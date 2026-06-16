@@ -489,7 +489,16 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   virtual siconos::algebra::SiconosVector& osnsp_rhs(
       siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
       siconos::graphs::InteractionsGraph& indexSet) = 0;
+
+  
+  /** update the state of the nonsmooth law
+   */
+  virtual void updateInteractionInternalState() {};
+
+  
 };
+
+
 }  // namespace siconos::integrators
 
 #endif  // ONESTEPINTEGRATOR_H

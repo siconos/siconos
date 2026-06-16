@@ -270,7 +270,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
   if (!_hasBeenUpdated || !isLinear) {
     // Computes new _unitaryBlocks if required
-    updateInteractionBlocks();
+    updateInteractionBlocks(indexSet);
     // Updates matrix M
     _M->fillM(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->rows();

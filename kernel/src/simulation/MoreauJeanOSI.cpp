@@ -32,6 +32,7 @@
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
 #include "MohrCoulombPlasticityNSL.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
@@ -59,8 +60,8 @@
 siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
     siconos::nonsmooth_formulations::OneStepNSProblem& p,
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    double theta)
-    : _osnsp{p}, _inter{inter}, _interProp{interProp}, _theta{theta} {};
+    double theta, double h)
+: _osnsp{p}, _inter{inter}, _interProp{interProp}, _theta{theta}, _h{h} {};
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL& nslaw) {
@@ -134,6 +135,37 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
   if (nslaw.c() > 0.0) {
     // osnsp_rhs(0) += nslaw.c() / (tan(nslaw.phi()) * dimension);
     osnsp_rhs(0) += nslaw.c();
+  }
+}
+
+void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
+    const siconos::modeling::CohesiveZoneModelNIFNSL& nslaw) {
+
+  auto& osnsp_rhs = *(*_interProp.workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
+
+  // The normal part is multiplied depends on en
+  if (nslaw.en() > 0.0) {
+    osnsp_rhs(0) += nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
+  }
+  // The tangential part is multiplied depends on et
+  if (nslaw.et() > 0.0) {
+    osnsp_rhs(1) += nslaw.et() * _inter.y_k(_osnsp.inputOutputLevel())(1);
+    if (_inter.nonSmoothLaw()->size() > 2) {
+      osnsp_rhs(2) += nslaw.et() * _inter.y_k(_osnsp.inputOutputLevel())(2);
+    }
+  }
+
+  // For cohesive zone models, the cohesion force contributes to the OSNSP_RHS_COHESION
+  // This is handled separately from the standard contact force
+  auto& osnsp_rhs_cohesion = *(*_interProp.workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs_cohesion)];
+  
+  // Get the cohesion force from the internal variables
+  double* r_cohesion = nslaw.r_cohesion(_inter);
+  if (r_cohesion) {
+    // Copy cohesion force to osnsp_rhs_cohesion
+    for (unsigned int i = 0; i < _inter.nonSmoothLaw()->size(); ++i) {
+      osnsp_rhs_cohesion(i) = _h * r_cohesion[i];
+    }
   }
 }
 
@@ -282,6 +314,18 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)] =
         std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
     inter_work[tools::enum_to_index(wk_inter::osnsp_rhs)]->setZero();
+  }
+
+  // Check if interaction uses a cohesive zone model and allocate cohesion work vector
+  auto nslaw = inter.nonSmoothLaw();
+  auto cohesive_nslaw = std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(nslaw);
+  if (cohesive_nslaw) {
+    if (!inter_work[tools::enum_to_index(wk_inter::osnsp_rhs_cohesion)]) {
+      inter_work[tools::enum_to_index(wk_inter::osnsp_rhs_cohesion)] =
+          std::make_shared<siconos::algebra::SiconosVector>(inter.dimension());
+      inter_work[tools::enum_to_index(wk_inter::osnsp_rhs_cohesion)]->setZero();
+    }
+    _hasInputInIndexSet0 = true;
   }
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with
@@ -1278,8 +1322,11 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   }
 
   // 3 - add part due to NonSmoothLaw
+  double h = _simulation->timeStep();
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
-                                               indexSet.properties(vertex_inter), _theta);
+                                               indexSet.properties(vertex_inter),
+                                               _theta, h);
+ 
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
 
   DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -1860,6 +1907,24 @@ void siconos::integrators::MoreauJeanOSI::display() const {
   std::cout << "================================" << std::endl;
 }
 
+void siconos::integrators::MoreauJeanOSI::updateInteractionInternalState()
+{
+  DEBUG_BEGIN("MoreauJeanOSI::updateInteractionInternalState()\n");
+  siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0); /* we work all the nslaw for indexSet0 */
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  {
+    siconos::modeling::Interaction &inter = *indexSet0.bundle(*ui);
+    // this is a simple update of the interaction based on the current value in the interaction
+    if (inter.internalVariables())
+    {
+      inter.nonSmoothLaw()->updateInternalVariables(inter);
+    }
+  }
+  DEBUG_END("MoreauJeanOSI::updateInteractionInternalState()\n");
+}
+
+
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS& neds,
     Eigen::Ref<siconos::algebra::SiconosMatrix66> iterationMatrix,
@@ -1953,4 +2018,62 @@ void siconos::integrators::moreau_jean::updatePosition(
     DEBUG_EXPR(siconos::algebra::print(q));
   }
   DEBUG_END("siconos::integrators::moreau_jean::updatePosition(...)");
+}
+
+
+// CZM-specific: updateInput override for cohesive zone models
+void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level) {
+  // Warning: This reset may be prone to issue with multiple osis.
+  // We compute input using lambda(level).
+  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level)\n");
+  DEBUG_PRINTF("level = %u\n", level);
+
+  auto& indexSet = *_simulation->indexSet(level);
+  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+
+  // we first compute p[1] from lambda[1] on indexSet1
+  for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
+    DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 1 \n");
+    if (!checkInteractionOSI(indexSet0, ui)) continue;
+    auto& inter = *indexSet.bundle(*ui);
+    assert(inter.lowerLevelForInput() <= level);
+    assert(inter.upperLevelForInput() >= level);
+    inter.computeInput(time, level);
+  }
+
+  // we compute the additional (cohesive) terms of p[1] on indexSet0
+  // we use lambda(1) temporarily to compute the input since we want to add the term to p[1]
+  if (_hasInputInIndexSet0) {
+    double h = _simulation->timeStep();
+    for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
+      DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 0\n");
+
+      if (!checkInteractionOSI(indexSet0, ui)) continue;
+      auto& inter = *indexSet0.bundle(*ui);
+      assert(inter.lowerLevelForInput() <= level);
+      assert(inter.upperLevelForInput() >= level);
+
+      auto& nslaw = *inter.nonSmoothLaw();
+      auto cohesive_nslaw = dynamic_cast<siconos::modeling::CohesiveZoneModelNIFNSL*>(&nslaw);
+      if (cohesive_nslaw) {
+        double* r_cohesion = cohesive_nslaw->r_cohesion(inter);
+
+        // Save current lambda[1]
+        auto lambda_1_save = std::make_shared<siconos::algebra::SiconosVector>(*inter.lambda(level));
+        
+        // Set lambda[1] to h * r_cohesion for computing cohesion input
+        for (int k = 0; k < nslaw.size(); k++) {
+          (*inter.lambda(level))(k) = h * r_cohesion[k];
+        }
+        
+        // Compute input with cohesion force
+        inter.computeInput(time, level);
+        
+        // Restore original lambda[1]
+        *inter.lambda(level) = *lambda_1_save;
+      }
+    }
+  }
+
+  DEBUG_END("siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level)\n");
 }

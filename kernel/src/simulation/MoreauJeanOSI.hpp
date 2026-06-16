@@ -162,6 +162,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   bool _activateWithNegativeRelativeVelocity{false};
 
+  /** a boolean to know if there is an additional input to compute
+   * on the indexSet 0. This is used for cohesive zone models.
+   */
+  bool _hasInputInIndexSet0{false};
+
   /** Constraint activation threshold
    *
    */
@@ -182,10 +187,12 @@ class MoreauJeanOSI : public OneStepIntegrator {
     siconos::modeling::Interaction& _inter;
     siconos::graphs::InteractionProperties& _interProp;
     double _theta{0.};
+    double _h{0.};
 
     _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
                            siconos::modeling::Interaction& inter,
-                           siconos::graphs::InteractionProperties& interProp, double theta);
+                           siconos::graphs::InteractionProperties& interProp, double theta,
+                           double h);
 
     void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override;
 
@@ -197,6 +204,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
     void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override {};
     void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {};
     void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
+    void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nslaw) override;
   };
 
   /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI
@@ -232,7 +240,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  - a container saved in the graph of interactions
    *  - a container associated to a specific interaction
    */
-  enum class wk_inter : std::size_t { osnsp_rhs, size };
+  enum class wk_inter : std::size_t { osnsp_rhs, osnsp_rhs_cohesion, size };
 
   /** This enum is used to get access to work block vectors relared to an Interaction
    *  It corresponds to:
@@ -435,6 +443,15 @@ class MoreauJeanOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
+  /** Update the input (right-hand side) of the dynamical systems using
+   *  the multiplier lambda at the given level.
+   *  For cohesive zone models, also adds cohesion contribution from indexSet0.
+   *
+   *  @param time current time
+   *  @param level order of lambda used to compute input
+   */
+  void updateInput(double time, unsigned int level) override;
+
   /** \return the workVector corresponding to the right hand side of the OneStepNonsmooth
    *  problem
    */
@@ -496,6 +513,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   siconos::algebra::SiconosDenseMatrix computeWorkForces();
 
+  /** update the state of the nonsmooth law
+   */
+  virtual void updateInteractionInternalState() override;
+
+  
   /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display() const override;

@@ -113,7 +113,7 @@ class GenericMechanical : public LinearOSNS {
       compute interactionBlocks if necessary (this depends on the type of
       OSNS, on the indexSets ...)
    */
-  void updateInteractionBlocks() override;
+  void updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;

@@ -233,11 +233,11 @@ void siconos::nonsmooth_formulations::MLCP::display() const {
   LinearOSNS::display();
 }
 
-void siconos::nonsmooth_formulations::MLCP::updateInteractionBlocks() {
+void siconos::nonsmooth_formulations::MLCP::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) {
   if (!_hasBeenUpdated) {
     _curBlock = 0;
     _m = 0;
     _n = 0;
   }
-  LinearOSNS::updateInteractionBlocks();
+  LinearOSNS::updateInteractionBlocks(indexSet);
 }

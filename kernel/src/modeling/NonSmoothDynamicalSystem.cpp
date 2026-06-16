@@ -19,6 +19,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
+#include "NonSmoothLaw.hpp"
 #include "Relation.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 #include "SimulationGraphs.hpp"
@@ -355,3 +356,5 @@ siconos::modeling::NonSmoothDynamicalSystem::InteractionsVector() const {
 
   return interactionsVector;
 }
+
+

@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "FremondImpactFrictionNSL.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
 #include "Interaction.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
@@ -36,6 +37,9 @@ struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
     answer = nsl.mu();
   }
   void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) override {
+    answer = nsl.mu();
+  }
+  void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nsl) override {
     answer = nsl.mu();
   }
 };

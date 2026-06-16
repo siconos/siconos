@@ -30,6 +30,10 @@
 #include "TypeName.hpp"              // visitor to get ds type
 
 namespace siconos::modeling {
+
+// Forward declaration
+class Interaction;
+
 /**
    Non Smooth Laws (NSL) Base Class
 
@@ -93,6 +97,52 @@ class NonSmoothLaw {
 
   /** display the data of the NonSmoothLaw on the standard output */
   virtual void display() const = 0;
+
+  /** Check if the NS law is active at a given level
+   *  This is used for cohesive zone models and other level-dependent laws.
+   *  
+   *  \param inter the Interaction using this law
+   *  \param level the level to check
+   *  \return true if active at the given level
+   */
+  virtual bool isActiveAtLevel(Interaction& inter, unsigned int level) const {
+    // Default: active at level 1 for standard contact laws
+    return (level == 1);
+  }
+
+
+  /** Update the internal state of the interaction
+   *  This is called after each time step for cohesive zone models
+   *  to update internal variables (damage, etc.).
+   *  
+   *  \param inter the Interaction using this law
+   */
+  virtual void updateInteractionInternalState(Interaction& inter) {
+    // Default: do nothing for standard laws
+    (void)inter;  // Suppress unused parameter warning
+  }
+
+  /** Display internal variables for debugging
+   * \param inter the Interaction containing internal variables
+   */
+  virtual void displayInternalVariables(siconos::algebra::blocks::SharedVector & internalVariables) {
+  };
+
+  
+  
+  /** initialize non smooth law if there is some internal variables
+  */
+  virtual std::shared_ptr<siconos::algebra::blocks::SharedVector> initializeInternalVariables(
+      Interaction&)
+      { return std::shared_ptr<siconos::algebra::blocks::SharedVector>();}
+
+ /** update non smooth law if there is some internal variables
+  */
+  virtual void updateInternalVariables(Interaction &) {}
+
+  /** Ask if the Nslaw is active at a given level
+  */
+  virtual bool isActiveAtLevel(Interaction & inter, unsigned int level) { return false;}
 
   // visitors stuff.
   virtual void accept(nonsmooth_laws::Visitor&) const {

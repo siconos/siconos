@@ -40,7 +40,7 @@ bool siconos::nonsmooth_formulations::OneStepNSProblem::hasInteractions() const 
              ->size() > 0;
 }
 
-void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks() {
+void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) {
   DEBUG_PRINT(
       "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks() starts\n");
   // The present functions checks various conditions and possibly
@@ -64,26 +64,24 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
   //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
   //
 
-  // Get index set from Simulation
-  auto indexSet = simulation()->indexSet(indexSetLevel());
 
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal information on vertices
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
-  if (indexSet->properties().symmetric) {
+  if (indexSet.properties().symmetric) {
     DEBUG_PRINT(
         "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). "
         "Symmetric case");
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
-    for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
-      std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
+    for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
+      std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
       auto nslawSize = inter->nonSmoothLaw()->size();
-      if (!indexSet->properties(*vi).block) {
-        indexSet->properties(*vi).block =
+      if (!indexSet.properties(*vi).block) {
+        indexSet.properties(*vi).block =
             std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
-        indexSet->properties(*vi).block->setZero();
+        indexSet.properties(*vi).block->setZero();
       }
 
       if (!isLinear || !_hasBeenUpdated) {
@@ -93,55 +91,55 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 
     /* interactionBlock must be zeroed at init */
     std::vector<bool> initialized;
-    initialized.resize(indexSet->edges_number());
+    initialized.resize(indexSet.edges_number());
     std::fill(initialized.begin(), initialized.end(), false);
 
     siconos::graphs::InteractionsGraph::EIterator ei, eiend;
-    for (std::tie(ei, eiend) = indexSet->edges(); ei != eiend; ++ei) {
+    for (std::tie(ei, eiend) = indexSet.edges(); ei != eiend; ++ei) {
       std::shared_ptr<siconos::modeling::Interaction> inter1 =
-          indexSet->bundle(indexSet->source(*ei));
+          indexSet.bundle(indexSet.source(*ei));
       std::shared_ptr<siconos::modeling::Interaction> inter2 =
-          indexSet->bundle(indexSet->target(*ei));
+          indexSet.bundle(indexSet.target(*ei));
 
       /* on adjoint graph there is at most 2 edges between source and target */
       siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
-      std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
+      std::tie(ed1, ed2) = indexSet.edges(indexSet.source(*ei), indexSet.target(*ei));
 
       assert(*ei == ed1 || *ei == ed2);
 
       /* the first edge has the lower index */
-      assert(indexSet->index(ed1) <= indexSet->index(ed2));
+      assert(indexSet.index(ed1) <= indexSet.index(ed2));
 
       // Memory allocation if needed
       auto nslawSize1 = inter1->nonSmoothLaw()->size();
       auto nslawSize2 = inter2->nonSmoothLaw()->size();
-      auto isrc = indexSet->index(indexSet->source(*ei));
-      auto itar = indexSet->index(indexSet->target(*ei));
+      auto isrc = indexSet.index(indexSet.source(*ei));
+      auto itar = indexSet.index(indexSet.target(*ei));
 
       std::shared_ptr<siconos::algebra::SiconosMatrix> currentInteractionBlock;
 
       if (itar > isrc)  // upper block
       {
-        if (!indexSet->properties(ed1).upper_block) {
-          indexSet->properties(ed1).upper_block =
+        if (!indexSet.properties(ed1).upper_block) {
+          indexSet.properties(ed1).upper_block =
               std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
           if (ed2 != ed1)
-            indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
+            indexSet.properties(ed2).upper_block = indexSet.properties(ed1).upper_block;
         }
-        currentInteractionBlock = indexSet->properties(ed1).upper_block;
+        currentInteractionBlock = indexSet.properties(ed1).upper_block;
       } else  // lower block
       {
-        if (!indexSet->properties(ed1).lower_block) {
-          indexSet->properties(ed1).lower_block =
+        if (!indexSet.properties(ed1).lower_block) {
+          indexSet.properties(ed1).lower_block =
               std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
           if (ed2 != ed1)
-            indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
+            indexSet.properties(ed2).lower_block = indexSet.properties(ed1).lower_block;
         }
-        currentInteractionBlock = indexSet->properties(ed1).lower_block;
+        currentInteractionBlock = indexSet.properties(ed1).lower_block;
       }
 
-      if (!initialized[indexSet->index(ed1)]) {
-        initialized[indexSet->index(ed1)] = true;
+      if (!initialized[indexSet.index(ed1)]) {
+        initialized[indexSet.index(ed1)] = true;
         currentInteractionBlock->setZero();
       }
       if (!isLinear || !_hasBeenUpdated) {
@@ -152,26 +150,26 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 
         if (itar > isrc)  // upper block has been computed
         {
-          if (!indexSet->properties(ed1).lower_block) {
-            indexSet->properties(ed1).lower_block =
+          if (!indexSet.properties(ed1).lower_block) {
+            indexSet.properties(ed1).lower_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(
-                    indexSet->properties(ed1).upper_block->cols(),
-                    indexSet->properties(ed1).upper_block->rows());
+                    indexSet.properties(ed1).upper_block->cols(),
+                    indexSet.properties(ed1).upper_block->rows());
           }
-          *(indexSet->properties(ed1).lower_block) =
-              (*indexSet->properties(ed1).upper_block).transpose();
-          indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
+          *(indexSet.properties(ed1).lower_block) =
+              (*indexSet.properties(ed1).upper_block).transpose();
+          indexSet.properties(ed2).lower_block = indexSet.properties(ed1).lower_block;
         } else {
           assert(itar < isrc);  // lower block has been computed
-          if (!indexSet->properties(ed1).upper_block) {
-            indexSet->properties(ed1).upper_block =
+          if (!indexSet.properties(ed1).upper_block) {
+            indexSet.properties(ed1).upper_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(
-                    indexSet->properties(ed1).lower_block->cols(),
-                    indexSet->properties(ed1).lower_block->rows());
+                    indexSet.properties(ed1).lower_block->cols(),
+                    indexSet.properties(ed1).lower_block->rows());
           }
-          *(indexSet->properties(ed1).upper_block) =
-              (*indexSet->properties(ed1).lower_block).transpose();
-          indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
+          *(indexSet.properties(ed1).upper_block) =
+              (*indexSet.properties(ed1).lower_block).transpose();
+          indexSet.properties(ed2).upper_block = indexSet.properties(ed1).upper_block;
         }
       }
     }
@@ -183,15 +181,15 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         "case\n");
 
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
-    for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
+    for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
       DEBUG_PRINT(
           "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). "
           "Computation of "
           "diaganal block\n");
-      auto inter = indexSet->bundle(*vi);
+      auto inter = indexSet.bundle(*vi);
       auto nslawSize = inter->nonSmoothLaw()->size();
-      if (!indexSet->properties(*vi).block) {
-        indexSet->properties(*vi).block =
+      if (!indexSet.properties(*vi).block) {
+        indexSet.properties(*vi).block =
             std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
       }
 
@@ -203,28 +201,28 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
       /* interactionBlock must be zeroed at init */
       std::map<std::shared_ptr<siconos::algebra::SiconosMatrix>, bool> initialized;
-      for (std::tie(oei, oeiend) = indexSet->out_edges(*vi); oei != oeiend; ++oei) {
+      for (std::tie(oei, oeiend) = indexSet.out_edges(*vi); oei != oeiend; ++oei) {
         /* on adjoint graph there is at most 2 edges between source and target */
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
-        std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
-        if (indexSet->properties(ed1).upper_block) {
-          initialized[indexSet->properties(ed1).upper_block] = false;
+        std::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
+        if (indexSet.properties(ed1).upper_block) {
+          initialized[indexSet.properties(ed1).upper_block] = false;
         }
-        // if(indexSet->properties(ed2).upper_block)
+        // if(indexSet.properties(ed2).upper_block)
         // {
-        //   initialized[indexSet->properties(ed2).upper_block] = false;
+        //   initialized[indexSet.properties(ed2).upper_block] = false;
         // }
 
-        if (indexSet->properties(ed1).lower_block) {
-          initialized[indexSet->properties(ed1).lower_block] = false;
+        if (indexSet.properties(ed1).lower_block) {
+          initialized[indexSet.properties(ed1).lower_block] = false;
         }
-        // if(indexSet->properties(ed2).lower_block)
+        // if(indexSet.properties(ed2).lower_block)
         // {
-        //   initialized[indexSet->properties(ed2).lower_block] = false;
+        //   initialized[indexSet.properties(ed2).lower_block] = false;
         // }
       }
 
-      for (std::tie(oei, oeiend) = indexSet->out_edges(*vi); oei != oeiend; ++oei) {
+      for (std::tie(oei, oeiend) = indexSet.out_edges(*vi); oei != oeiend; ++oei) {
         DEBUG_PRINT(
             "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). "
             "Computation of "
@@ -232,44 +230,44 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 
         /* on adjoint graph there is at most 2 edges between source and target */
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
-        std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        std::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
 
         assert(*oei == ed1 || *oei == ed2);
 
         /* the first edge as the lower index */
-        assert(indexSet->index(ed1) <= indexSet->index(ed2));
+        assert(indexSet.index(ed1) <= indexSet.index(ed2));
 
-        auto inter1 = indexSet->bundle(indexSet->source(*oei));
-        auto inter2 = indexSet->bundle(indexSet->target(*oei));
+        auto inter1 = indexSet.bundle(indexSet.source(*oei));
+        auto inter2 = indexSet.bundle(indexSet.target(*oei));
 
         // Memory allocation if needed
         auto nslawSize1 = inter1->nonSmoothLaw()->size();
         auto nslawSize2 = inter2->nonSmoothLaw()->size();
-        auto isrc = indexSet->index(indexSet->source(*oei));
-        auto itar = indexSet->index(indexSet->target(*oei));
+        auto isrc = indexSet.index(indexSet.source(*oei));
+        auto itar = indexSet.index(indexSet.target(*oei));
 
         std::shared_ptr<siconos::algebra::SiconosMatrix> currentInteractionBlock;
 
         if (itar > isrc)  // upper block
         {
-          if (!indexSet->properties(ed1).upper_block) {
-            indexSet->properties(ed1).upper_block =
+          if (!indexSet.properties(ed1).upper_block) {
+            indexSet.properties(ed1).upper_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
-            initialized[indexSet->properties(ed1).upper_block] = false;
+            initialized[indexSet.properties(ed1).upper_block] = false;
             if (ed2 != ed1)
-              indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
+              indexSet.properties(ed2).upper_block = indexSet.properties(ed1).upper_block;
           }
-          currentInteractionBlock = indexSet->properties(ed1).upper_block;
+          currentInteractionBlock = indexSet.properties(ed1).upper_block;
         } else  // lower block
         {
-          if (!indexSet->properties(ed1).lower_block) {
-            indexSet->properties(ed1).lower_block =
+          if (!indexSet.properties(ed1).lower_block) {
+            indexSet.properties(ed1).lower_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
-            initialized[indexSet->properties(ed1).lower_block] = false;
+            initialized[indexSet.properties(ed1).lower_block] = false;
             if (ed2 != ed1)
-              indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
+              indexSet.properties(ed2).lower_block = indexSet.properties(ed1).lower_block;
           }
-          currentInteractionBlock = indexSet->properties(ed1).lower_block;
+          currentInteractionBlock = indexSet.properties(ed1).lower_block;
         }
 
         if (!initialized[currentInteractionBlock]) {
@@ -291,34 +289,34 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 }
 
 void siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(
-    std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) {
+								      siconos::graphs::InteractionsGraph& indexSet) {
   std::cout << "siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(std::shared_"
                "ptr<siconos::"
                "graphs::InteractionsGraph> indexSet) "
             << std::endl;
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
-    std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
-    if (indexSet->properties(*vi).block) {
-      siconos::algebra::print(*indexSet->properties(*vi).block);
+  for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
+    std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
+    if (indexSet.properties(*vi).block) {
+      siconos::algebra::print(*indexSet.properties(*vi).block);
     }
 
     siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-    for (std::tie(oei, oeiend) = indexSet->out_edges(*vi); oei != oeiend; ++oei) {
+    for (std::tie(oei, oeiend) = indexSet.out_edges(*vi); oei != oeiend; ++oei) {
       siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
-      std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
 
-      if (indexSet->properties(ed1).upper_block) {
-        siconos::algebra::print(*indexSet->properties(ed1).upper_block);
+      if (indexSet.properties(ed1).upper_block) {
+        siconos::algebra::print(*indexSet.properties(ed1).upper_block);
       }
-      if (indexSet->properties(ed1).lower_block) {
-        siconos::algebra::print(*indexSet->properties(ed1).lower_block);
+      if (indexSet.properties(ed1).lower_block) {
+        siconos::algebra::print(*indexSet.properties(ed1).lower_block);
       }
-      if (indexSet->properties(ed2).upper_block) {
-        siconos::algebra::print(*indexSet->properties(ed2).upper_block);
+      if (indexSet.properties(ed2).upper_block) {
+        siconos::algebra::print(*indexSet.properties(ed2).upper_block);
       }
-      if (indexSet->properties(ed2).lower_block) {
-        siconos::algebra::print(*indexSet->properties(ed2).lower_block);
+      if (indexSet.properties(ed2).lower_block) {
+        siconos::algebra::print(*indexSet.properties(ed2).lower_block);
       }
     }
   }
@@ -437,4 +435,17 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode(b
 
 void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseLevel(int level) {
   numerics_set_verbose(level);
+}
+
+
+void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState() {
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
+  // Update internal state of all interactions in the current index set
+  auto& indexSet = *_simulation->indexSet(_indexSetLevel);
+  for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
+    auto& inter = *indexSet.bundle(*ui);
+    auto& nslaw = *inter.nonSmoothLaw();
+    nslaw.updateInteractionInternalState(inter);
+  }
+  DEBUG_END("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
 }

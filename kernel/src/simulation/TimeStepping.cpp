@@ -490,6 +490,8 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
 
   updateIndexSets();
 
+  updateInteractionInternalState();
+    
   initializeOneStepNSProblem();
 
   computeInitialStateOfTheStep();
@@ -540,6 +542,8 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
                                   // should be only for globalOSI
       updateAllInput();
 
+    updateInteractionInternalState();
+
     computeIteration();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
@@ -582,6 +586,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       }
 
       updateAllInput();
+      updateInteractionInternalState();
       computeIteration();
 
       // -- VA 01/07/2021

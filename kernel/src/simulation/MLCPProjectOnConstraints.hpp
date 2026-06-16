@@ -91,7 +91,7 @@ class MLCPProjectOnConstraints : public MLCP {
   /** Display the set of blocks for  a given indexSet
       \param indexSet the graph of interactions
    */
-  void displayBlocks(std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) override;
+  void displayBlocks(siconos::graphs::InteractionsGraph& indexSet) override;
 
   /** print the data to the screen
    */
@@ -102,7 +102,7 @@ class MLCPProjectOnConstraints : public MLCP {
   /** compute interactionBlocks if necessary (this depends on the type of
    *  OSNS, on the indexSets ...)
    */
-  void updateInteractionBlocks() override;
+  void updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) override;
 
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor

@@ -234,7 +234,23 @@ struct siconos::modeling::Interaction::SetLevels
           "nslaw ");
     }
   }
+  
+  void visit(const CohesiveZoneModelNIFNSL& nslaw) override {
+    RelationType relationType = interaction_->relation()->getType();
+    if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
+    } else {
+      THROW_EXCEPTION(
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
+          "nslaw ");
+    }
+  }
+  
   void visit(const MohrCoulombPlasticityNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
@@ -281,6 +297,12 @@ void siconos::modeling::Interaction::reset() {
     _lambda[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
     _lambda[i]->setZero();
   }
+
+  // initialize internal variable 
+  _internalVariables = _nslaw->initializeInternalVariables(*this);
+
+  if(_internalVariables)
+    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector(*_internalVariables));  
 }
 
 siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
@@ -505,6 +527,8 @@ void siconos::modeling::Interaction::swapInMemory() {
   for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     _lambdaMemory[i].swap(*_lambda[i]);
   }
+  // Swap internal variables for cohesive zone models
+  swapInternalVariablesInMemory();
   DEBUG_END("void siconos::modeling::Interaction::swapInMemory()\n");
 }
 
@@ -629,7 +653,35 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
     interactionBlock->setZero();
 }
 
-void siconos::modeling::Interaction::display(bool brief) const {
+void siconos::modeling::Interaction::initInternalVariablesMemory() {
+  DEBUG_BEGIN("siconos::modeling::Interaction::initInternalVariablesMemory()\n");
+  if (_internalVariables) {
+    // Create a copy of current internal variables for previous state
+    _internalVariables_k = std::make_shared<siconos::algebra::blocks::SharedVector>();
+    _internalVariables_k->resize(_internalVariables->size());
+    for (size_t i = 0; i < _internalVariables->size(); ++i) {
+      if ((*_internalVariables)[i]) {
+        (*_internalVariables_k)[i] = std::make_shared<siconos::algebra::SiconosVector>(
+            *(*_internalVariables)[i]);
+      }
+    }
+  }
+  DEBUG_END("siconos::modeling::Interaction::initInternalVariablesMemory()\n");
+}
+
+void siconos::modeling::Interaction::swapInternalVariablesInMemory() {
+  DEBUG_BEGIN("siconos::modeling::Interaction::swapInternalVariablesInMemory()\n");
+  if (_internalVariables && _internalVariables_k) {
+    for (size_t i = 0; i < _internalVariables->size(); ++i) {
+      if ((*_internalVariables)[i] && (*_internalVariables_k)[i]) {
+        *(*_internalVariables_k)[i] = *(*_internalVariables)[i];
+      }
+    }
+  }
+  DEBUG_END("siconos::modeling::Interaction::swapInternalVariablesInMemory()\n");
+}
+
+void siconos::modeling::Interaction::display(bool brief) const  {
   std::cout << "======= Interaction display number " << _number << " =======\n";
 
   std::cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << "\n";
@@ -666,6 +718,9 @@ void siconos::modeling::Interaction::display(bool brief) const {
       siconos::algebra::print(_yMemory[i]);
     }
   }
-
+  if (_internalVariables)
+    _nslaw->displayInternalVariables(*_internalVariables);
+    //_nslaw->initializeInternalVariables(*this);
+   
   std::cout << "===================================\n";
 }

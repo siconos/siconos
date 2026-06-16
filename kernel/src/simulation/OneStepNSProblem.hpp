@@ -225,12 +225,12 @@ class OneStepNSProblem {
    *
    *  \param  indexSet  the concerned index set
    */
-  virtual void displayBlocks(std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet);
+  virtual void displayBlocks(siconos::graphs::InteractionsGraph& indexSet);
 
   /** compute interactionBlocks if necessary (this depends on the type of
    *  OSNS, on the indexSets ...)
    */
-  virtual void updateInteractionBlocks();
+  virtual void updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet);
 
   /** compute extra-diagonal interactionBlock-matrix
    *
@@ -280,6 +280,12 @@ class OneStepNSProblem {
   /** post treatment for output of the solver
    */
   virtual void postCompute() = 0;
+
+  /** Update the internal state of all interactions in the index set
+   *  This is called after each time step for cohesive zone models
+   *  to update internal variables (damage, etc.).
+   */
+  void updateInteractionInternalState();
 
   /**
       change the solver type and its default parameters

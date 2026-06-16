@@ -42,6 +42,7 @@ import siconos.mechanics
 import siconos.mechanics.collision
 import siconos.mechanics.joints
 import siconos.mechanics.quaternions
+import siconos.mechanics.czm as czm
 import siconos.io as sio
 from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace as GFCTrace
 from siconos.io.FrictionContactTrace import FrictionContactTrace as FCTrace
@@ -863,7 +864,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
-            nslawClass = getattr(sm, self._nslaws_data[name].attrs["type"])
+
+            if hasattr(sm, self._nslaws_data[name].attrs["type"]):
+                nslawClass = getattr(sm, self._nslaws_data[name].attrs["type"])
+            elif hasattr(czm, self._nslaws_data[name].attrs["type"]):
+                nslawClass = getattr(czm, self._nslaws_data[name].attrs["type"])
+            else:
+                raise RuntimeError(f"The nonsmoothlaw is not found is siconos")
+
+            print('nslawClass', nslawClass)
+            
             if nslawClass == sm.NewtonImpactFrictionNSL:
                 nslaw = nslawClass(
                     float(self._nslaws_data[name].attrs["e"]),
@@ -903,6 +913,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     float(self._nslaws_data[name].attrs["lb"]),
                     float(self._nslaws_data[name].attrs["ub"]),
                 )
+            elif nslawClass == czm.BinaryCohesiveNSL:
+                nslaw = nslawClass(
+                    float(self._nslaws_data[name].attrs['e']), 0.,
+                    float(self._nslaws_data[name].attrs['mu']),
+                    float(self._nslaws_data[name].attrs['sigma_c']),
+                    float(self._nslaws_data[name].attrs['delta_c']),
+                    3)
             if not nslaw:
                 raise AssertionError("no nslaw")
             # assert(nslaw)
@@ -3294,6 +3311,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb = nsf.GlobalRollingFrictionContact(
                             dimension_contact, solver_options
                         )
+               
                 osnspb.setMStorageType(sn.params.NM_SPARSE)
                 # if sid == sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_ADMM:
                 #     osnspb.setMStorageType(sn.params.NM_SPARSE)
@@ -3307,6 +3325,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb = nsf.GenericMechanical()
                     else:
                         osnspb = nsf.GenericMechanical(solver_options)
+                elif 'BinaryCohesiveNSL' in set(nslaw_type_list):
+                    if self._dimension ==3:
+                        dimension_contact=3
+                    elif self._dimension ==2:
+                        dimension_contact=2
+                    if (solver_options is None):
+                        osnspb = nsf.CohesiveFrictionContact(dimension_contact)
+                    else:
+                        osnspb = nsf.CohesiveFrictionContact(dimension_contact, solver_options)
                 else:
                     if (
                         ("NewtonImpactFrictionNSL" in set(nslaw_type_list))

@@ -582,6 +582,12 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
   virtual void firstInitialize();
+
+  /** Update the internal state of all interactions
+   *  This is called after each time step for cohesive zone models
+   *  to update internal variables (damage, etc.).
+   */
+  void updateInteractionInternalState();
 };
 }  // namespace siconos::simulation
 #endif  // SIMULATION_H

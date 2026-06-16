@@ -145,6 +145,12 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
 
   siconos::algebra::blocks::SharedVector _relationVectors = {};
 
+  /** internal variables for cohesive zone models and other advanced features */
+  std::shared_ptr<siconos::algebra::blocks::SharedVector> _internalVariables{nullptr};
+
+  /** internal variables at the previous time step */
+  std::shared_ptr<siconos::algebra::blocks::SharedVector> _internalVariables_k{nullptr};
+
   // internal struct used to handle visitors process to set Interaction levels
   // depending on the nslaw and the relation.
   struct SetLevels;
@@ -499,6 +505,40 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   inline siconos::algebra::blocks::SharedVector& relationVectors() {
     return _relationVectors;
   };
+
+  // -- internal variables --
+
+  /** get internal variables vector
+   *  \return shared pointer to internal variables vector
+   */
+  inline std::shared_ptr<siconos::algebra::blocks::SharedVector> internalVariables() {
+    return _internalVariables;
+  };
+
+  /** get internal variables at previous time step
+   *  \return shared pointer to previous internal variables vector
+   */
+  inline std::shared_ptr<siconos::algebra::blocks::SharedVector> internalVariables_k() {
+    return _internalVariables_k;
+  };
+
+  /** set internal variables vector
+   *  \param vars shared pointer to internal variables vector
+   */
+  inline void setInternalVariables(
+      std::shared_ptr<siconos::algebra::blocks::SharedVector> vars) {
+    _internalVariables = vars;
+  };
+
+  /** initialize internal variables storage from previous time step
+   *  This copies current internal variables to _internalVariables_k
+   */
+  void initInternalVariablesMemory();
+
+  /** swap internal variables in memory (called after convergence)
+   *  Copies current internal variables to _internalVariables_k
+   */
+  void swapInternalVariablesInMemory();
 
   // --- OTHER FUNCTIONS ---
 

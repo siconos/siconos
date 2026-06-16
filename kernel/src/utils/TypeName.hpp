@@ -45,6 +45,7 @@ class NormalConeNSL;
 class NewtonImpactRollingFrictionNSL;
 class NewtonImpactNSL;
 class NewtonImpactFrictionNSL;
+class CohesiveZoneModelNIFNSL;
 class MultipleImpactNSL;
 class MixedComplementarityConditionNSL;
 class EqualityConditionNSL;
@@ -70,6 +71,7 @@ enum class Type {
   NewtonImpactNSL,
   FremondImpactFrictionNSL,
   NewtonImpactFrictionNSL,
+  CohesiveZoneModelNIFNSL,
   MultipleImpactNSL,
   MixedComplementarityConditionNSL,
   EqualityConditionNSL,
@@ -134,6 +136,9 @@ struct FindType {
   };
   auto visit(const siconos::modeling::NewtonImpactFrictionNSL&) const {
     return siconos::modeling::Type::NewtonImpactFrictionNSL;
+  };
+  auto visit(const siconos::modeling::CohesiveZoneModelNIFNSL&) const {
+    return siconos::modeling::Type::CohesiveZoneModelNIFNSL;
   };
   auto visit(const siconos::modeling::MultipleImpactNSL&) const {
     return siconos::modeling::Type::MultipleImpactNSL;
@@ -205,6 +210,9 @@ constexpr auto str(const T& X) {
       break;
     case T::NewtonImpactFrictionNSL:
       return "siconos::modeling::NewtonImpactFrictionNSL";
+      break;
+    case T::CohesiveZoneModelNIFNSL:
+      return "siconos::modeling::CohesiveZoneModelNIFNSL";
       break;
     case T::MultipleImpactNSL:
       return "siconos::modeling::MultipleImpactNSL";

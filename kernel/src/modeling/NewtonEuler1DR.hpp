@@ -161,6 +161,35 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param nnc new coordinates
    */
   void setRelNc(const siconos::algebra::SiconosVector3 &nnc) { relNc_ = nnc; };
+
+  /** Compute current contact points from relative contact points stored in cohesive zone model
+   *  This is used for cohesive zone models to track the evolution of contact points.
+   *
+   *  \param q0 block vector of dynamical system positions
+   *  \param r_pc1 relative contact point 1 (input)
+   *  \param r_pc2 relative contact point 2 (input)
+   *  \param r_nc relative normal (input)
+   *  \param r_t1 relative tangent 1 (input)
+   *  \param r_t2 relative tangent 2 (input)
+   *  \param pc1 computed absolute contact point 1 (output)
+   *  \param pc2 computed absolute contact point 2 (output)
+   *  \param nc computed absolute normal (output)
+   *  \param t1 computed absolute tangent 1 (output)
+   *  \param t2 computed absolute tangent 2 (output)
+   */
+  void computeContactPointsFromRelativeContactPoints(
+      const siconos::algebra::BlockVector &q0,
+      const siconos::algebra::SiconosVector3 &r_pc1,
+      const siconos::algebra::SiconosVector3 &r_pc2,
+      const siconos::algebra::SiconosVector3 &r_nc,
+      const siconos::algebra::SiconosVector3 &r_t1,
+      const siconos::algebra::SiconosVector3 &r_t2,
+      siconos::algebra::SiconosVector3 &pc1,
+      siconos::algebra::SiconosVector3 &pc2,
+      siconos::algebra::SiconosVector3 &nc,
+      siconos::algebra::SiconosVector3 &t1,
+      siconos::algebra::SiconosVector3 &t2);
+
   void display() const override {}
   virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };

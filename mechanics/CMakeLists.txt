@@ -36,6 +36,7 @@ set(${COMPONENT}_DIRS
   src/fem
   src/fem/native
   src/fem/cable
+  src/czm
   )
 
 # Then, optional parts ---

@@ -61,6 +61,7 @@ class ComplementarityConditionNSL;
 class MixedComplementarityConditionNSL;
 class MultipleImpactNSL;
 class NewtonImpactFrictionNSL;
+class CohesiveZoneModelNIFNSL;
 class NewtonImpactNSL;
 class NewtonImpactRollingFrictionNSL;
 class NormalConeNSL;
@@ -89,6 +90,9 @@ struct Visitor {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
   virtual void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) {
+    THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
+  };
+  virtual void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
   virtual void visit(const siconos::modeling::NewtonImpactNSL& nslaw) {

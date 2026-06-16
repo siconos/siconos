@@ -707,3 +707,18 @@ void siconos::simulation::Simulation::updateOutput(unsigned int) {
   }
   DEBUG_END("siconos::simulation::Simulation::updateOutput()\n");
 }
+
+void siconos::simulation::Simulation::updateInteractionInternalState() {
+  DEBUG_BEGIN("siconos::simulation::Simulation::updateInteractionInternalState()\n");
+
+  DEBUG_BEGIN("Simulation::updateInteractionInternalState()\n");
+  // 2 - compute state for each dynamical system
+  for (auto osi : *_allOSI) {
+    osi->updateInteractionInternalState();
+  }
+  /*Because the dof of DS have been updated,
+    the world (CAO for example) must be updated.*/
+  updateWorldFromDS();
+
+  DEBUG_END("siconos::simulation::Simulation::updateInteractionInternalState()\n");
+}

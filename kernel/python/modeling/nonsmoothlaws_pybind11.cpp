@@ -30,6 +30,9 @@
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "RelayNSL.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
+#include "Interaction.hpp"
+
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
 
@@ -83,4 +86,24 @@ void wrap_nonsmoothlaws(py::module_ &m) {
   py::class_<siconos::modeling::EqualityConditionNSL, siconos::modeling::NonSmoothLaw,
              py::smart_holder>(m, "EqualityConditionNSL")
       .def(py::init<siconos::algebra::Index>());
+
+  // Expose the CohesiveZoneModelNIFNSL base class
+  // Note: This is an abstract base class, so we don't expose constructors
+  py::class_<siconos::modeling::CohesiveZoneModelNIFNSL,
+             siconos::modeling::NewtonImpactFrictionNSL, py::smart_holder>(
+      m, "CohesiveZoneModelNIFNSL")
+      .def(
+          "r_cohesion",
+          [](siconos::modeling::CohesiveZoneModelNIFNSL& self,
+             siconos::modeling::Interaction& inter) -> py::array_t<double> {
+            double* data = self.r_cohesion(inter);
+            // Return as numpy array of size 3 (assuming 3D cohesion force)
+            return py::array_t<double>({3}, {sizeof(double)}, data);
+          },
+          py::arg("inter"), "Get the cohesion force vector as a numpy array")
+      .def("nslawBroken", &siconos::modeling::CohesiveZoneModelNIFNSL::nslawBroken,
+           "Get the fallback non-smooth law when interface is broken")
+      .def("isActiveAtLevel", &siconos::modeling::CohesiveZoneModelNIFNSL::isActiveAtLevel,
+           py::arg("inter"), py::arg("level"),
+           "Check if the NS law is active at a given level");  
 }

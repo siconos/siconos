@@ -125,12 +125,12 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   ql0001(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un, war,
          &lwar, iwar, &liwar, &tol);
 #else
-  numerics_error("lcp_qp", "Fortran language is not enabled in siconos numerics");
-  return 0;
+  numerics_log_error("lcp_qp", "Fortran language is not enabled in siconos numerics");
+  return;
 #endif
 #else
-  numerics_error("lcp_qp", "ql0001 is not available in siconos numerics");
-  return 0;
+  numerics_log_error("lcp_qp", "ql0001 is not available in siconos numerics");
+  return;
 #endif
   /* /    printf("tol = %10.4e\n",*tol);
   // for (i=0;i<mnn;i++)printf("lambda[%i] = %g\n",i,lambda[i]);

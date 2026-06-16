@@ -211,12 +211,12 @@ void siconos::nonsmooth_formulations::GenericMechanical::display() const {
   LinearOSNS::display();
 }
 
-void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks() {
+void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) {
   if (!_hasBeenUpdated) {
     //    printf("siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks :
     //    must be updated\n");
     genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
     _pnumerics_GMP = genericMechanicalProblem_new();
   }
-  LinearOSNS::updateInteractionBlocks();
+  LinearOSNS::updateInteractionBlocks(indexSet);
 }

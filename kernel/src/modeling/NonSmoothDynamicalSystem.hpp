@@ -464,6 +464,7 @@ class NonSmoothDynamicalSystem {
    *  \param the visitor
    */
   void visitDynamicalSystems(siconos::modeling::dynamical_systems::Visitor& visitor);
+
 };
 
 }  // namespace siconos::modeling

@@ -69,7 +69,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::display() const 
   std::cout << "======= m " << _m << " _n " << _n << "\n";
   LinearOSNS::display();
 }
-void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks() {
+void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet_dummy) {
   // The present functions checks various conditions and possibly
   // compute interactionBlocks matrices.
   //
@@ -282,62 +282,62 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
       "\n");
 }
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::displayBlocks(
-    std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) {
+									      siconos::graphs::InteractionsGraph& indexSet) {
   std::cout << "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::displayBlocks(std::"
                "shared_ptr<"
                "siconos::graphs::"
                "InteractionsGraph> indexSet) "
             << "\n";
-  std::cout << "                          indexSet :" << indexSet << "\n";
+
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
-    auto inter = indexSet->bundle(*vi);
+  for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
+    auto inter = indexSet.bundle(*vi);
     std::cout << "                          vertex :" << *vi << "\n";
-    std::cout << "                          bundle :" << indexSet->bundle(*vi) << "\n";
+    std::cout << "                          bundle :" << indexSet.bundle(*vi) << "\n";
 
-    if (indexSet->blockProj[*vi]) {
+    if (indexSet.blockProj[*vi]) {
       std::cout << "                          blockProj ";
-      siconos::algebra::print(*indexSet->blockProj[*vi]);
+      siconos::algebra::print(*indexSet.blockProj[*vi]);
     }
 
     siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
 
-    for (std::tie(oei, oeiend) = indexSet->out_edges(*vi); oei != oeiend; ++oei) {
-      auto isrc = indexSet->index(indexSet->source(*oei));
-      auto itar = indexSet->index(indexSet->target(*oei));
+    for (std::tie(oei, oeiend) = indexSet.out_edges(*vi); oei != oeiend; ++oei) {
+      auto isrc = indexSet.index(indexSet.source(*oei));
+      auto itar = indexSet.index(indexSet.target(*oei));
       std::cout << "                          isrc :" << isrc << "\n";
       std::cout << "                          itar :" << itar << "\n";
 
       siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
       std::cout << "                          outedges :" << *oei << "\n";
-      std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
       std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2 << "\n";
       std::cout << "                          (ed1)->upper_blockProj : ";
-      if (indexSet->upper_blockProj[ed1]) {
-        std::cout << indexSet->upper_blockProj[ed1] << "   :";
-        siconos::algebra::print(*indexSet->upper_blockProj[ed1]);
+      if (indexSet.upper_blockProj[ed1]) {
+        std::cout << indexSet.upper_blockProj[ed1] << "   :";
+        siconos::algebra::print(*indexSet.upper_blockProj[ed1]);
       } else
         std::cout << "nullptr \n";
 
       std::cout << "                          (ed1)->lower_blockProj : ";
-      if (indexSet->lower_blockProj[ed1]) {
-        std::cout << indexSet->lower_blockProj[ed1] << "   :";
-        siconos::algebra::print(*indexSet->lower_blockProj[ed1]);
+      if (indexSet.lower_blockProj[ed1]) {
+        std::cout << indexSet.lower_blockProj[ed1] << "   :";
+        siconos::algebra::print(*indexSet.lower_blockProj[ed1]);
       } else
         std::cout << "nullptr \n";
 
       std::cout << "                          (ed2)->upper_blockProj : ";
-      if (indexSet->upper_blockProj[ed2]) {
-        std::cout << indexSet->upper_blockProj[ed2] << "   :";
-        siconos::algebra::print(*indexSet->upper_blockProj[ed2]);
+      if (indexSet.upper_blockProj[ed2]) {
+        std::cout << indexSet.upper_blockProj[ed2] << "   :";
+        siconos::algebra::print(*indexSet.upper_blockProj[ed2]);
       } else
         std::cout << "nullptr\n";
 
       std::cout << "                          (ed2)->lower_blockProj : ";
-      if (indexSet->lower_blockProj[ed2]) {
-        std::cout << indexSet->lower_blockProj[ed2] << "   :";
-        siconos::algebra::print(*indexSet->lower_blockProj[ed2]);
+      if (indexSet.lower_blockProj[ed2]) {
+        std::cout << indexSet.lower_blockProj[ed2] << "   :";
+        siconos::algebra::print(*indexSet.lower_blockProj[ed2]);
       } else
         std::cout << "nullptr\n";
     }

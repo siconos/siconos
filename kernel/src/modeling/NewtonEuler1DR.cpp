@@ -231,3 +231,71 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
     NewtonEulerR::computeh(q1, std::nullopt, y);
   }
 }
+
+
+void siconos::modeling::NewtonEuler1DR::computeContactPointsFromRelativeContactPoints(
+    const siconos::algebra::BlockVector& q0,
+    const siconos::algebra::SiconosVector3& r_pc1,
+    const siconos::algebra::SiconosVector3& r_pc2,
+    const siconos::algebra::SiconosVector3& r_nc,
+    const siconos::algebra::SiconosVector3& r_t1,
+    const siconos::algebra::SiconosVector3& r_t2,
+    siconos::algebra::SiconosVector3& pc1,
+    siconos::algebra::SiconosVector3& pc2,
+    siconos::algebra::SiconosVector3& nc,
+    siconos::algebra::SiconosVector3& t1,
+    siconos::algebra::SiconosVector3& t2) {
+  // Contact points and normal are stored as relative to q1 and q2, if
+  // no q2 then pc2 and normal are absolute.
+
+  // Update pc1 based on q0 and r_pc1
+  const auto& q1 = *q0.vector(0);
+  boost::math::quaternion<double> qq1(q1(3), q1(4), q1(5), q1(6));
+  boost::math::quaternion<double> qpc1(0, r_pc1(0), r_pc1(1), r_pc1(2));
+
+  // apply q1 rotation and add
+  qpc1 = qq1 * qpc1 / qq1;
+  pc1(0) = qpc1.R_component_2() + q1(0);
+  pc1(1) = qpc1.R_component_3() + q1(1);
+  pc1(2) = qpc1.R_component_4() + q1(2);
+
+  if (q0.numberOfBlocks() > 1) {
+    // Update pc2 based on q0 and r_pc2
+    const auto& q2 = *q0.vector(1);
+    boost::math::quaternion<double> qq2(q2(3), q2(4), q2(5), q2(6));
+    boost::math::quaternion<double> qpc2(0, r_pc2(0), r_pc2(1), r_pc2(2));
+
+    // apply q2 rotation and add
+    qpc2 = qq2 * qpc2 / qq2;
+    pc2(0) = qpc2.R_component_2() + q2(0);
+    pc2(1) = qpc2.R_component_3() + q2(1);
+    pc2(2) = qpc2.R_component_4() + q2(2);
+
+    // same for normal
+    boost::math::quaternion<double> qnc(0, r_nc(0), r_nc(1), r_nc(2));
+    qnc = qq2 * qnc / qq2;
+    nc(0) = qnc.R_component_2();
+    nc(1) = qnc.R_component_3();
+    nc(2) = qnc.R_component_4();
+
+    // tangent 1
+    boost::math::quaternion<double> qt1(0, r_t1(0), r_t1(1), r_t1(2));
+    qt1 = qq2 * qt1 / qq2;
+    t1(0) = qt1.R_component_2();
+    t1(1) = qt1.R_component_3();
+    t1(2) = qt1.R_component_4();
+
+    // tangent 2
+    boost::math::quaternion<double> qt2(0, r_t2(0), r_t2(1), r_t2(2));
+    qt2 = qq2 * qt2 / qq2;
+    t2(0) = qt2.R_component_2();
+    t2(1) = qt2.R_component_3();
+    t2(2) = qt2.R_component_4();
+  } else {
+    // Single body case - use relative coordinates as absolute
+    pc2 = r_pc2;
+    nc = r_nc;
+    t1 = r_t1;
+    t2 = r_t2;
+  }
+}

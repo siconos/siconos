@@ -745,7 +745,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
     // Computes new _interactionBlocks if required
-    updateInteractionBlocks();
+    updateInteractionBlocks(indexSet);
 
     _M->fillM(indexSet, !_hasBeenUpdated);
 
