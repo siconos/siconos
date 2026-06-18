@@ -136,7 +136,7 @@ class SiconosBulletCollisionManager_impl
 
   StaticBodyShapeMap staticBodyShapeMap;
 
-  std::weak_ptr<siconos::simulation::Simulation> _simulation{nullptr};
+  std::weak_ptr<siconos::simulation::Simulation> _simulation;
 
   std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> _options{nullptr};
 
