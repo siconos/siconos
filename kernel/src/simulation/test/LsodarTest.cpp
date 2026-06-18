@@ -55,7 +55,9 @@ void LsodarTest::init(bool initDS) {
   _sim->initialize();
 }
 
-void LsodarTest::tearDown() {}
+void LsodarTest::tearDown() {
+  std::cerr << "use_count TimeStepping: " << _sim.use_count() << std::endl;
+}
 
 void LsodarTest::testCstGradTIDS() {
   std::cout << "===========================================" << std::endl;

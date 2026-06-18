@@ -136,19 +136,20 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
 }
 
 void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
-  auto allOSNSP = _simulation->oneStepNSProblems();  // all OSNSP
-
+  auto sim = simulation();
+  if (sim->numberOfOSNSProblems() < 1) return;
+  auto allOSNSP = sim->oneStepNSProblems();  // all OSNSP
   bool isOSNSPinitialized = false;
   switch (_typeOfD1MinusLinearOSI) {
     case Type::halfexplicit_acceleration_level:
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(sim);
 
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(sim);
       isOSNSPinitialized = true;
       DEBUG_EXPR(siconos::algebra::print(
           *((*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1])));
@@ -157,23 +158,23 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(sim);
 
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(sim);
       isOSNSPinitialized = true;
       break;
     case Type::halfexplicit_velocity_level:
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(sim);
 
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(
           1); /** !!! */
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+      (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(sim);
       isOSNSPinitialized = true;
       break;
   }
@@ -299,9 +300,9 @@ double siconos::integrators::D1MinusLinearOSI::computeResidu() {
 
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
 
-  DEBUG_PRINTF("nextTime %f\n", _simulation->nextTime());
-  DEBUG_PRINTF("startingTime %f\n", _simulation->startingTime());
-  DEBUG_PRINTF("time step size %f\n", _simulation->timeStep());
+  DEBUG_PRINTF("nextTime %f\n", simulation()->nextTime());
+  DEBUG_PRINTF("startingTime %f\n", simulation()->startingTime());
+  DEBUG_PRINTF("time step size %f\n", simulation()->timeStep());
 
   switch (_typeOfD1MinusLinearOSI) {
     case Type::halfexplicit_acceleration_level:

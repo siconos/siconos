@@ -19,19 +19,17 @@
 
 #include <memory>
 
-#include "BlockVector.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "SolidLinearTIDS.hpp"
-#include "StressLinearTIR.hpp"
+#include "StressLinearTIR.hpp"  // IWYU pragma: keep
 #include "Tools.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
-
 
 double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
   DEBUG_PRINT("\nMoreauJeanGOSI::computeResidu(), start\n");
@@ -42,10 +40,10 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
   // The state values used are those saved in the DS, ie the last computed ones.
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
-
-  auto tend = _simulation->nextTime();      // End of the time step
-  auto told = _simulation->startingTime();  // Beginning of the time step
-  auto time_step = tend - told;             // time step length
+  auto sim = simulation();
+  auto tend = sim->nextTime();      // End of the time step
+  auto told = sim->startingTime();  // Beginning of the time step
+  auto time_step = tend - told;     // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -88,7 +86,7 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
 
     // --- ResiduFree computation Equation (1) ---
     // auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
-    //residu.setZero();
+    // residu.setZero();
 
     auto& residusigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
 

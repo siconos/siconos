@@ -239,7 +239,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   auto dsGraph = hem5osi->_dynamicalSystemsGraph;
 
   int ifcn = (int)(*IFCN);
-
+auto indexSet2 = hem5osi->simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   if ((ifcn == 1) || (ifcn >= 7))  // compute Mass AM
   {
     int pos = 0;
@@ -294,7 +294,6 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   if (ifcn == 4)  // compute G (constraints)
   {
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-    auto indexSet2 = hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     assert(indexSet2);
     for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet2->bundle(*ui);
@@ -306,7 +305,6 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   if ((ifcn == 6) || (ifcn >= 10))  // compute GP ( Jacobian of the constraints)
   {
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-    auto indexSet2 = hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
@@ -325,7 +323,6 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       (ifcn >= 10))  // compute GT (partial time derivative of the constraints)
   {
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-    auto indexSet2 = hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
@@ -370,7 +367,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
 // double*  time, double* x,
 // int* ng, double* gOut)
 // {
-//   std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq,
+//   std::static_pointer_cast<EventDriven>(simulation())->computeg(shared_from_this(), nEq,
 //   time, x, ng, gOut);
 // }
 
@@ -379,7 +376,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
 // int* ml, int* mu,  double*
 // jacob, int* nrowpd)
 // {
-//   std::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(),
+//   std::static_pointer_cast<EventDriven>(simulation())->computeJacobianfx(shared_from_this(),
 //   sizeOfX, time, x, jacob);
 // }
 void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
@@ -507,7 +504,7 @@ void siconos::integrators::Hem5OSI::initialize() {
 
   // siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   // auto indexSet0
-  //   = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  //   = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   // assert(indexSet0);
   // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   // {
@@ -525,7 +522,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::solout(
 unsigned int siconos::integrators::Hem5OSI::numberOfConstraints() {
   DEBUG_PRINT("siconos::integrators::Hem5OSI::updateConstraints() \n");
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  auto indexSet2 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   assert(indexSet2);
   std::shared_ptr<siconos::algebra::SiconosVector> y;
   unsigned int n = 0;
@@ -723,7 +720,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   DEBUG_PRINT("\n");
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  auto indexSet2 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   assert(indexSet2);
   std::shared_ptr<siconos::algebra::SiconosVector> y;
   siconos::algebra::Index pos = 0;
@@ -749,7 +746,7 @@ void siconos::integrators::Hem5OSI::updateState(const unsigned int level) {
       lds->computePostImpactVelocity();
     }
   } else if (level == 2) {
-    double time = _simulation->nextTime();
+    double time = simulation()->nextTime();
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
       {
@@ -797,7 +794,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
 void siconos::integrators::Hem5OSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
     siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto allOSNS = simulation()->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
 
@@ -821,7 +818,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
    * it is in accelaration or not
    */
 
-  // auto  allOSNS  = _simulation->oneStepNSProblems();
+  // auto  allOSNS  = simulation()->oneStepNSProblems();
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = ds_vars[siconos::integrators::Hem5OSI::xfree];

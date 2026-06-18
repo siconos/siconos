@@ -22,7 +22,7 @@
 #include "MLCPProjectOnConstraints.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
-#include "Relation.hpp"
+#include "Relation.hpp"  // IWYU pragma: keep
 // #define TSPROJ_DEBUG_LEVEL1
 // #define TSPROJ_WITHOUT_PROJECTION
 // #define DEBUG_STDOUT
@@ -103,7 +103,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   // Update interactions if a manager was provided
   updateInteractions();
 
-  auto topo = _nsds->topology();
+  auto topo = nonSmoothDynamicalSystem()->topology();
   if (topo->numberOfIndexSet() > _indexSetLevelForProjection) {
     auto indexSet1 = topo->indexSet(1);
     auto indexSet2 = topo->indexSet(2);
@@ -262,13 +262,13 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
     int info = 0;
 
     // Zeroing Lambda Muliplier of indexSet()
-
-    auto indexSet = _nsds->topology()->indexSet(0);
+    auto nsds = nonSmoothDynamicalSystem();
+    auto indexSet = nsds->topology()->indexSet(0);
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet->bundle(*ui);
       inter->lambda(0)->setZero();
     }
-    _nsds->updateInput(nextTime(), 0);
+    nsds->updateInput(nextTime(), 0);
 
 #ifdef TSPROJ_WITHOUT_PROJECTION
 
@@ -279,12 +279,12 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
         "begin "
         "projection:\n");
 
-    auto dsGraph = _nsds->dynamicalSystems();
+    auto dsGraph = nsds->dynamicalSystems();
 
     bool runningProjection = false;
     _nbProjectionIteration = 0;
 
-    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection) {
+    if (nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection) {
       updateIndexSet(2);
       computeCriteria(&runningProjection);
 
@@ -305,13 +305,13 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
     if (!runningProjection) {
       // Zeroing Lambda Muliplier of indexSet()
 
-      auto indexSet = _nsds->topology()->indexSet(0);
+      auto indexSet = nsds->topology()->indexSet(0);
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet->bundle(*ui);
         inter->lambda(0)->setZero();
       }
-      _nsds->updateInput(nextTime(), 0);
+      nsds->updateInput(nextTime(), 0);
     }
 
     // Store the q vector of each DS.
@@ -347,7 +347,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
       // Zeroing Lambda Muliplier of indexSet()
 
-      auto indexSet = _nsds->topology()->indexSet(0);
+      auto indexSet = nsds->topology()->indexSet(0);
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet->bundle(*ui);
@@ -368,7 +368,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
         return;
       }
 
-      _nsds->updateInput(nextTime(), 0);
+      nsds->updateInput(nextTime(), 0);
 
       for (auto aVi2 : *dsGraph) {
         auto ds = dsGraph->bundle(aVi2);
@@ -508,7 +508,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
             "not from NewtonEulerDS neither from LagrangianDS.");
     }
 
-    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection) {
+    if (nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection) {
       updateIndexSet(1);
     } else {
       _isIndexSetsStable = true;
@@ -568,7 +568,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
       "bool * "
       "runningProjection)\n");
   // auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
-  auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
+  auto indexSet =
+      nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
 
   siconos::graphs::InteractionsGraph::VIterator aVi, viend;
 
@@ -658,11 +659,11 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
   // - gray_color : discovered vertex (Interactions) but searching descendants
   // - black_color : discovered vertex (Interaction) together with the
   // descendants
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
 
-  assert(_nsds);
-  assert(_nsds->topology());
-
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
@@ -744,7 +745,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
             //  We assume that the integrator of the ds1 drive the update of the
             //  index set
             auto ds1 = indexSet1->properties(*ui0).source;
-            auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+            auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
 
             activate = osi.addInteractionInIndexSet(inter0, i);
           }
@@ -799,11 +800,11 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
       bool activate = true;
       if (siconos::types::type_value(*(inter1->nonSmoothLaw())) !=
           siconos::modeling::Type::EqualityConditionNSL) {
-        // auto Osi = indexSet1->properties(*ui1).osi;
+        // auto Osi = indexSet1->properties(*ui1).osi.lock();
         //  We assume that the integrator of the ds1 drive the update of the
         //  index set
         auto ds1 = indexSet1->properties(*ui1).source;
-        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
 
         activate = osi.addInteractionInIndexSet(inter1, i);
       }

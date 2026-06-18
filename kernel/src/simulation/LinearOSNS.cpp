@@ -399,7 +399,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
 
-    auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+    auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
     auto osiType = osi.getType();
     auto sizeDS = ds->real_size();
 
@@ -539,9 +539,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   auto inter1 = indexSet->bundle(indexSet->source(ed));
   auto inter2 = indexSet->bundle(indexSet->target(ed));
   // Once again we assume that inter1 and inter2 have the same osi ...
-  // auto Osi = indexSet->properties(indexSet->source(ed)).osi;
+  // auto Osi = indexSet->properties(indexSet->source(ed)).osi.lock();
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+  auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
   auto osiType = osi.getType();
 
   // For the edge 'ds', we need to find relative position of this ds
@@ -789,7 +789,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   auto& nslaw = *inter.nonSmoothLaw();
   if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
     auto ds1 = indexSet.properties(*vs).source;
-    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi.lock();
     double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
     NM_scal(theta, &*_M->numericsMatrix());
   }

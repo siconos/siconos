@@ -44,10 +44,10 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   // The state values used are those saved in the DS, ie the last computed ones.
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
-
-  auto t = _simulation->nextTime();         // End of the time step
-  auto told = _simulation->startingTime();  // Beginning of the time step
-  auto time_step = t - told;                // time step length
+  auto sim = simulation();
+  auto t = sim->nextTime();         // End of the time step
+  auto told = sim->startingTime();  // Beginning of the time step
+  auto time_step = t - told;        // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -427,10 +427,10 @@ void siconos::integrators::MoreauJeanGOSI::integrate(double& tinit, double& tend
 
 void siconos::integrators::MoreauJeanGOSI::computeIteration() {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanGOSI::computeIteration(const unsigned int )\n");
-
-  auto RelativeTol = _simulation->relativeConvergenceTol();
-  auto useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+  auto sim = simulation();
+  auto RelativeTol = sim->relativeConvergenceTol();
+  auto useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -442,7 +442,7 @@ void siconos::integrators::MoreauJeanGOSI::computeIteration() {
             _dynamicalSystemsGraph->bundle(*dsi))) {
     } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(
                    _dynamicalSystemsGraph->bundle(*dsi))) {
-      bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
+      bool baux = useRCC && sim->relativeConvergenceCriterionHeld();
 
       auto& local_buffer = *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
 
@@ -453,14 +453,14 @@ void siconos::integrators::MoreauJeanGOSI::computeIteration() {
         double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
         local_buffer -= lds->q_read();
         double aux = (local_buffer.norm()) / ds_norm_ref;
-        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+        if (aux > RelativeTol) sim->setRelativeConvergenceCriterionHeld(false);
       }
     } else if (auto lltids =
                    std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
                        _dynamicalSystemsGraph->bundle(*dsi))) {
     } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(
                    _dynamicalSystemsGraph->bundle(*dsi))) {
-      bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
+      bool baux = useRCC && sim->relativeConvergenceCriterionHeld();
 
       auto& local_buffer = *ds_work_vectors[tools::enum_to_index(wk_ds::buffer)];
 
@@ -471,7 +471,7 @@ void siconos::integrators::MoreauJeanGOSI::computeIteration() {
         double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
         local_buffer -= lds->q_read();
         double aux = (local_buffer.norm()) / ds_norm_ref;
-        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+        if (aux > RelativeTol) sim->setRelativeConvergenceCriterionHeld(false);
       }
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(
                    _dynamicalSystemsGraph->bundle(*dsi))) {

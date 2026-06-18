@@ -29,7 +29,6 @@
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "NewtonImpactNSL.hpp"  // For the visitor
-#include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SecondOrderDS.hpp"
@@ -222,20 +221,20 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
 }
 
 void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x, double* xdot) {
-  std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+  std::static_pointer_cast<siconos::simulation::EventDriven>(simulation())
       ->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void siconos::integrators::LsodarOSI::g(int* nEq, double* time, double* x, int* ng,
                                         double* gOut) {
-  std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+  std::static_pointer_cast<siconos::simulation::EventDriven>(simulation())
       ->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void siconos::integrators::LsodarOSI::jacobianfx(int* sizeOfX, double* time, double* x,
                                                  int* ml, int* mu, double* jacob,
                                                  int* nrowpd) {
-  std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+  std::static_pointer_cast<siconos::simulation::EventDriven>(simulation())
       ->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
@@ -297,9 +296,8 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
   assert(ds2);
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::LsodarOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::LsodarOSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {
@@ -416,7 +414,7 @@ void siconos::integrators::LsodarOSI::initialize() {
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 2 - Ng, number of constraints:
-  auto sizeofg = std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+  auto sizeofg = std::static_pointer_cast<siconos::simulation::EventDriven>(simulation())
                      ->computeSizeOfg();
   assert(sizeofg <= std::numeric_limits<int>::max());
   _intData[1] = static_cast<int>(sizeofg);
@@ -567,7 +565,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
         lds->computePostImpactVelocity();
     }
   } else if (level == 2) {
-    auto time = _simulation->nextTime();
+    auto time = simulation()->nextTime();
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
       {
@@ -618,7 +616,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
 void siconos::integrators::LsodarOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
     siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto allOSNS = simulation()->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
   const auto& ds_vars = inter->read_dynamical_systems_variables();
@@ -647,7 +645,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
    * not known if it is in accelaration of not
    */
 
-  // auto  allOSNS  = _simulation->oneStepNSProblems();
+  // auto  allOSNS  = simulation()->oneStepNSProblems();
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = inter_work_block[siconos::integrators::LsodarOSI::xfree];

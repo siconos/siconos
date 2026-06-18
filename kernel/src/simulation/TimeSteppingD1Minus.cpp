@@ -33,7 +33,7 @@
 
 void siconos::simulation::TimeSteppingD1Minus::initializeOneStepNSProblem() {
   // initialize OSNS for InteractionsGraph from Topology
-  auto topo = _nsds->topology();
+  auto topo = nonSmoothDynamicalSystem()->topology();
 
   // there is at least one OSNP
   if (!_allNSProblems->empty()) {
@@ -67,11 +67,11 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(
       i);
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
 
-  assert(_nsds);
-  assert(_nsds->topology());
-
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "siconos::simulation::TimeSteppingD1Minus::updateIndexSet(i), "
@@ -105,9 +105,9 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(
     auto inter = indexSet0->bundle(*uip);
 
     // We assume that the integrator of the ds1 drive the update of the index
-    // set auto Osi = indexSetCurrent->properties(*uip).osi;
+    // set auto Osi = indexSetCurrent->properties(*uip).osi.lock();
     auto ds1 = indexSetCurrent->properties(*uip).source;
-    auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+    auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
     auto levelMaxForInput = osi.levelMaxForInput();
     if ((!indexSetCurrent->is_vertex(inter)) and (osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
@@ -169,7 +169,8 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   // * indexset (I_{k+1}^+)
 
   // Initialize lambdas of all interactions.
-  auto indexSet0 = _nsds->topology()->indexSet(0);
+  auto nsds = nonSmoothDynamicalSystem();
+  auto indexSet0 = nsds->topology()->indexSet(0);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend, vnext;
   std::tie(ui, uiend) = indexSet0->vertices();
   for (vnext = ui; ui != uiend; ui = vnext) {
@@ -200,10 +201,10 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   // this should be done in updateIndexSet(i) for all integrators only
   // if a graph has changed
   // updateIndexSet(1);
-  //_nsds->topology()->indexSet(1)->update_vertices_indices();
-  //_nsds->topology()->indexSet(1)->update_edges_indices();
+  // nsds->topology()->indexSet(1)->update_vertices_indices();
+  // nsds->topology()->indexSet(1)->update_edges_indices();
 
-  // if(_nsds->topology()->hasChanged())
+  // if(nsds->topology()->hasChanged())
   //{
   //   for(auto osns: *_allNSProblems)
   //   {
@@ -214,7 +215,7 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
 
-  DEBUG_EXPR(if (_nsds->topology()->indexSet(1)->size() > 0) siconos::algebra::print(
+  DEBUG_EXPR(if (nsds->topology()->indexSet(1)->size() > 0) siconos::algebra::print(
                  *((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]));)
 
   // update on impulse level

@@ -165,7 +165,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_q() {
     auto ds_size = ds->dimension();
 
     auto mjgosi = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-        DSG0.properties(DSG0.descriptor(ds)).osi);
+        DSG0.properties(DSG0.descriptor(ds)).osi.lock());
     if (mjgosi) {
       auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
       if ((std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds))) {
@@ -200,9 +200,9 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contr
 
     // We need to be sure that the integrators of these DS are MoreauJeanGOSI
     auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-    auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi;
+    auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
     auto osi2 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-        DSG0.properties(DSG0.descriptor(ds2)).osi);
+        DSG0.properties(DSG0.descriptor(ds2)).osi.lock());
 
     if (auto mjgosi1 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi1)) {
       assert(osi2);
@@ -389,7 +389,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::update_dynamicalsys
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
     auto ds = DSG0.bundle(*dsi);
 
-    auto& osi = static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi);
+    auto& osi = static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi.lock());
     auto& ds_work_vectors = *DSG0.properties(*dsi).workVectors;
     auto& v_iter = osi.get_v_iter(ds_work_vectors);
     auto lds = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);

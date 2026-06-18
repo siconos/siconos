@@ -384,7 +384,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   // We assume that all ds in vertex_inter have the same osi.
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
-  auto& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+  auto& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
   // OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).
   auto sizeY =
       std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)->computeSizeForProjection(
@@ -614,7 +614,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
   auto inter1 = indexSet->bundle(indexSet->source(ed));
   auto inter2 = indexSet->bundle(indexSet->target(ed));
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  auto& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+  auto& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
   // - find if ds is source or target in inter_i

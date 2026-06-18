@@ -18,7 +18,7 @@
 
 #include "LuenbergerObserver.hpp"
 
-#include "ControlSensor.hpp"
+#include "ControlSensor.hpp"  // IWYU pragma: keep
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosVector.hpp"

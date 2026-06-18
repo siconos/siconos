@@ -171,7 +171,7 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
       auto dss = ds->dimension();
       DEBUG_PRINTF("offset = %lu \n", offset);
 
-      auto Osi = DSG0.properties(DSG0.descriptor(ds)).osi;
+      auto Osi = DSG0.properties(DSG0.descriptor(ds)).osi.lock();
 
       if (std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(Osi)) {
         auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
@@ -226,10 +226,10 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
       auto ds1 = indexSet.properties(*ui).source;
       auto ds2 = indexSet.properties(*ui).target;
       auto mjgosi1 = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-          DSG0.properties(DSG0.descriptor(ds1)).osi);
+          DSG0.properties(DSG0.descriptor(ds1)).osi.lock());
 
       if (mjgosi1 and std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-                          DSG0.properties(DSG0.descriptor(ds2)).osi)) {
+                          DSG0.properties(DSG0.descriptor(ds2)).osi.lock())) {
         mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
       } else {
         THROW_EXCEPTION(

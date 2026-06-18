@@ -19,7 +19,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
-#include "NonSmoothLaw.hpp"
+#include "NonSmoothLaw.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 // #include "SiconosVector.hpp"
 //  #define DEBUG_STDOUT

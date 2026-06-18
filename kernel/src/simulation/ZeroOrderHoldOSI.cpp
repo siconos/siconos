@@ -19,7 +19,7 @@
 #include "ZeroOrderHoldOSI.hpp"
 
 #include "BlockVector.hpp"
-#include "EventsManager.hpp"
+#include "EventsManager.hpp"  // IWYU pragma: keep
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -33,7 +33,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
 
 // #define DEBUG_WHERE_MESSAGES
 
@@ -55,9 +54,9 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
   // Get work buffers from the graph
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
   ds_work_vectors.resize(siconos::integrators::ZeroOrderHoldOSI::WORK_LENGTH);
-
+  auto sim = simulation();
   auto& DSG0 = *_dynamicalSystemsGraph;
-  auto& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto& IG0 = *sim->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
   if (not std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds))
     THROW_EXCEPTION(
@@ -69,8 +68,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
   auto dsgVD = DSG0.descriptor(ds);
   if (!DSG0.Ad.hasKey(dsgVD)) {
     DSG0.Ad[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
-        *ds, *_simulation->nonSmoothDynamicalSystem(),
-        _simulation->eventsManager()->timeDiscretisation());
+        *ds, *sim->nonSmoothDynamicalSystem(), sim->eventsManager()->timeDiscretisation());
     if (DSG0.Ad.at(dsgVD)->isConst()) DSG0.Ad.at(dsgVD)->integrate();
   } else
     THROW_EXCEPTION(
@@ -81,15 +79,15 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
     siconos::algebra::SiconosMatrix E{ds->dimension(), ds->dimension()};
     E.setIdentity();
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
-                                 *ds, *_simulation->nonSmoothDynamicalSystem(),
-                                 _simulation->eventsManager()->timeDiscretisation(), E));
+                                 *ds, *sim->nonSmoothDynamicalSystem(),
+                                 sim->eventsManager()->timeDiscretisation(), E));
     if (DSG0.AdInt.at(dsgVD)->isConst()) DSG0.AdInt.at(dsgVD)->integrate();
   }
 
   // init extra term, usually to add control terms
   if (_extraAdditionalTerms)
-    _extraAdditionalTerms->init(DSG0, *_simulation->nonSmoothDynamicalSystem(),
-                                _simulation->eventsManager()->timeDiscretisation());
+    _extraAdditionalTerms->init(DSG0, *sim->nonSmoothDynamicalSystem(),
+                                sim->eventsManager()->timeDiscretisation());
 
   // Now we search for an Interaction dedicated to control
   for (std::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD); avi != aviend; ++avi) {
@@ -109,15 +107,15 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
         indxIter++;
         if (relR.hasConstantJacobiangOver_lambda()) {
           DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
-              *ds, *_simulation->nonSmoothDynamicalSystem(),
-              _simulation->eventsManager()->timeDiscretisation(), relR.jacobiangOver_lambda());
+              *ds, *sim->nonSmoothDynamicalSystem(),
+              sim->eventsManager()->timeDiscretisation(), relR.jacobiangOver_lambda());
           if (DSG0.Bd.at(dsgVD)->isConst()) DSG0.Bd.at(dsgVD)->integrate();
         } else {  // user defined function for jacobiangOver_lambda
           THROW_EXCEPTION(
               "siconos::integrators::ZeroOrderHoldOSI::initialize - Case not implemented");
           // DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
-          //     *ds, *_simulation->nonSmoothDynamicalSystem(),
-          //     _simulation->eventsManager()->timeDiscretisation(), relR.getPluging(),
+          //     *ds, *sim->nonSmoothDynamicalSystem(),
+          //     sim->eventsManager()->timeDiscretisation(), relR.getPluging(),
           //     inter.dimension());
         }
       } else {
@@ -147,9 +145,8 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForInteraction
   assert(ds2);
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::ZeroOrderHoldOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::ZeroOrderHoldOSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {
@@ -251,9 +248,10 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
   // "Free" means without taking non-smooth effects into account.
 
   // Operators computed at told have index i, and (i+1) at t.
-  double t = _simulation->nextTime();         // End of the time step
-  double told = _simulation->startingTime();  // Beginning of the time step
-  double h = t - told;                        // time step length
+  auto sim = simulation();
+  double t = sim->nextTime();         // End of the time step
+  double told = sim->startingTime();  // Beginning of the time step
+  double h = t - told;                // time step length
 
   auto& DSG0 = *_dynamicalSystemsGraph;
 
@@ -308,7 +306,7 @@ void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time)
   // }
 
   if (!_explicitJacobiansOfRelation) {
-    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+    simulation()->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 }
 
@@ -453,8 +451,9 @@ void siconos::integrators::ZeroOrderHoldOSI::integrate(double& tinit, double& te
 void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int level) {
   DEBUG_BEGIN(
       "siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
-  bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+  auto sim = simulation();
+  bool useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
 
   auto& DSG0 = *_dynamicalSystemsGraph;
   siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
@@ -504,7 +503,7 @@ bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1);
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
   double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
   double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   double gamma = .5;
@@ -529,14 +528,14 @@ bool siconos::integrators::ZeroOrderHoldOSI::removeInteractionFromIndexSet(
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Ad(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
-  auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
   return DSG0.Ad.at(dsgVD)->mat();
 }
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Bd(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
-  auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
   return DSG0.Bd.at(dsgVD)->mat();
 }

@@ -87,7 +87,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
     // We first swap the initial value contained in q and v after initialization.
     lltids->swapInMemory();
     // we compute the new state values
-    auto h = _simulation->timeStep();
+    auto h = simulation()->timeStep();
     *lltids->q() = lltids->q0() + h * lltids->velocity0();
 
     //*velocity=*velocity; we do nothing for the velocity
@@ -116,9 +116,8 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
   assert(ds2);
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {
@@ -198,7 +197,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-  auto h = _simulation->timeStep();
+  auto h = simulation()->timeStep();
   auto ndof = ds->dimension();
 
   // Allocate storage for W in the graph
@@ -238,10 +237,10 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
   // The state values used are those saved in the DS, ie the last computed ones.
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
-
-  auto t = _simulation->nextTime();         // End of the time step
-  auto told = _simulation->startingTime();  // Beginning of the time step
-  auto h = t - told;                        // time step length
+  auto sim = simulation();
+  auto t = sim->nextTime();         // End of the time step
+  auto told = sim->startingTime();  // Beginning of the time step
+  auto h = t - told;                // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -333,8 +332,8 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  // double t = _simulation->nextTime(); // End of the time step
-  // double told = _simulation->startingTime(); // Beginning of the time step
+  // double t = sim->nextTime(); // End of the time step
+  // double told = sim->startingTime(); // Beginning of the time step
   // double h = t-told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -388,7 +387,7 @@ void siconos::integrators::SchatzmanPaoliOSI::prepareNewtonIteration(double time
   //   auto ds = _dynamicalSystemsGraph->bundle(*dsi);
   // }
   if (!_explicitJacobiansOfRelation) {
-    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+    simulation()->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 }
 
@@ -403,7 +402,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
@@ -444,7 +443,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
 
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto allOSNS = simulation()->oneStepNSProblems();
   auto& inter_work_block = *indexSet->properties(vertex_inter).workBlockVectors;
 
   // Get relation and non smooth law types
@@ -517,12 +516,12 @@ void siconos::integrators::SchatzmanPaoliOSI::integrate(double& tinit, double& t
 
 void siconos::integrators::SchatzmanPaoliOSI::computeIteration() {
   DEBUG_BEGIN("siconos::integrators::SchatzmanPaoliOSI::computeIteration()\n");
+  auto sim = simulation();
+  double h = sim->timeStep();
 
-  double h = _simulation->timeStep();
-
-  auto RelativeTol = _simulation->relativeConvergenceTol();
-  bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+  auto RelativeTol = sim->relativeConvergenceTol();
+  bool useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> W;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -538,7 +537,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeIteration() {
       //    siconos::algebra::SiconosVector *vfree = d->velocityFree();
       bool baux =
           ((not(std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds))) &&
-           useRCC && _simulation->relativeConvergenceCriterionHeld());
+           useRCC && sim->relativeConvergenceCriterionHeld());
 
       // To compute q, we solve W(q - qfree) = p
       if (d->p(_levelMaxForInput)) {
@@ -589,7 +588,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeIteration() {
         auto aux =
             (ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER]->norm()) /
             ds_norm_ref;
-        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+        if (aux > RelativeTol) sim->setRelativeConvergenceCriterionHeld(false);
       }
     }
     // 2 - Newton Euler Systems
@@ -678,8 +677,7 @@ void siconos::integrators::SchatzmanPaoliOSI::display() const {
     if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
       siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
     else
-      std::cout << "-> nullptr"
-                << "\n";
+      std::cout << "-> nullptr" << "\n";
     std::cout << "--> and corresponding theta is: " << _theta << "\n";
   }
   std::cout << "================================\n";

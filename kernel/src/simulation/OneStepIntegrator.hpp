@@ -58,6 +58,10 @@ namespace siconos::integrators {
    - ZeroOrderHoldOSI
 */
 class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator> {
+ private:
+  /** A link to the simulation that owns this OSI */
+  std::weak_ptr<siconos::simulation::Simulation> _simulation;
+
  protected:
   ACCEPT_SERIALIZATION(OneStepIntegrator);
 
@@ -105,9 +109,6 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  not in the Newton iteration
    */
   bool _explicitJacobiansOfRelation{false};
-
-  /** A link to the simulation that owns this OSI */
-  std::shared_ptr<siconos::simulation::Simulation> _simulation{nullptr};
 
   /** struct to add terms in the integration. Useful for Control */
   std::shared_ptr<ExtraAdditionalTerms> _extraAdditionalTerms{nullptr};
@@ -194,7 +195,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  \return a pointer to Simulation
    */
   inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
-    return _simulation;
+    return _simulation.lock();
+    //  https:  // en.cppreference.com/cpp/memory/weak_ptr/lock
   }
 
   /** set the Simulation of the OneStepIntegrator
@@ -250,7 +252,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   /**
      Initialization process of the nonsmooth problems
      linked to this OSI*/
-  virtual void initialize_nonsmooth_problems(){};
+  virtual void initialize_nonsmooth_problems() {};
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -462,7 +464,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       of interest.
   */
   inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const {
-    return (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
+    return (_dynamicalSystemsGraph->properties(*dsi).osi.lock().get()) == this;
   };
 
   /**
@@ -472,7 +474,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       system of interest.
   */
   inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const {
-    return (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
+    return (_dynamicalSystemsGraph->properties(dsgv).osi.lock().get()) == this;
   };
 
   /**

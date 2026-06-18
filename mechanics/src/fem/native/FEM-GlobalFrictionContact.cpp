@@ -44,7 +44,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::com
 
     if (auto mjgosi =
             std::dynamic_pointer_cast<siconos::mechanics::fem::integrators::MoreauJeanGOSI>(
-                DSG0.properties(DSG0.descriptor(ds)).osi)) {
+                DSG0.properties(DSG0.descriptor(ds)).osi.lock())) {
       auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
       auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
       assert(solid);
@@ -60,7 +60,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::com
       _q->segment(offset, ds_size) = qSigmafree;
 
     } else if (auto mjgosi = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
-                   DSG0.properties(DSG0.descriptor(ds)).osi)) {
+                   DSG0.properties(DSG0.descriptor(ds)).osi.lock())) {
       auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
       if ((std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds))) {
         auto& vfree = *ds_work_vectors[tools::enum_to_index(
@@ -94,8 +94,8 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
 
     // We need to be sure that the integrators of these DS are MoreauJeanGOSI
     auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-    auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi;
-    auto osi2 = DSG0.properties(DSG0.descriptor(ds2)).osi;
+    auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+    auto osi2 = DSG0.properties(DSG0.descriptor(ds2)).osi.lock();
     [[maybe_unused]] bool is_ds2_mjgosi =
         std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi2) ||
         std::dynamic_pointer_cast<siconos::mechanics::fem::integrators::MoreauJeanGOSI>(osi2);
@@ -133,7 +133,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
     auto pos = DSG0.properties(*dsi).absolute_position;
     if (auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds)) {
       auto& osi = static_cast<siconos::mechanics::fem::integrators::MoreauJeanGOSI&>(
-          *DSG0.properties(*dsi).osi);
+          *DSG0.properties(*dsi).osi.lock());
       auto& v_iter = osi.get_v_iter(ds_work_vectors);
       auto& stress_iter = osi.get_sigma_iter(ds_work_vectors);
       v_iter = _globalVelocities->segment(pos, solid->dimension());
@@ -141,7 +141,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
           _globalVelocities->segment(pos + solid->dimension(), solid->stressDimension());
     } else if (auto sds = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds)) {
       auto& osi =
-          static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi);
+          static_cast<siconos::integrators::MoreauJeanGOSI&>(*DSG0.properties(*dsi).osi.lock());
       auto& v_iter = osi.get_v_iter(ds_work_vectors);
       auto sizeDS = sds->dimension();
       v_iter = _globalVelocities->segment(pos, sizeDS);

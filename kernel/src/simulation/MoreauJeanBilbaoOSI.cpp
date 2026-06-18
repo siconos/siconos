@@ -18,7 +18,7 @@
 #include "MoreauJeanBilbaoOSI.hpp"
 
 #include "BlockVector.hpp"
-#include "BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"  // IWYU pragma: keep
 #include "Interaction.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "LagrangianR.hpp"
@@ -80,9 +80,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteract
   assert(ds2);
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {
@@ -164,7 +163,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeInitialNewtonState() {
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::initialize_nonsmooth_problems() {
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto sim = simulation();
+  if (sim->numberOfOSNSProblems() < 1) return;
+  auto allOSNS = sim->oneStepNSProblems();  // all OSNSP
   ((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
 }
@@ -206,7 +207,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     auto mass = lldds->massMatrix();
 
     double one_minus_theta, dt_sigma_star;
-    auto time_step = _simulation->timeStep();
+    auto time_step = simulation()->timeStep();
     double coeff = 0.5 * time_step * time_step;
     double one = 1.;
     double two = 2.;
@@ -262,7 +263,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
   // This function computes "free" states of the DS belonging to this
   // Integrator. "Free" means without taking non-smooth effects into account.
 
-  double time_step = _simulation->timeStep();
+  double time_step = simulation()->timeStep();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     // Nothing to be done if the osi is not linked to the ds
@@ -364,7 +365,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
     siconos::modeling::DynamicalSystem& ds) {
   // --  Update current position for the last computed velocities --
   // q(i+1) = q(i) + dt v(i+1)
-  double time_step = _simulation->timeStep();
+  double time_step = simulation()->timeStep();
   // get dynamical system
   auto& d = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(ds);
   // Compute q
@@ -380,8 +381,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned "
       "int)");
-  bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+  auto sim = simulation();
+  bool useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -437,7 +439,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
 
 void siconos::integrators::MoreauJeanBilbaoOSI::prepareNewtonIteration(double time) {
   if (!_explicitJacobiansOfRelation) {
-    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+    simulation()->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 }
 
@@ -450,7 +452,7 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
       "unsigned int i)\n");
 
   assert(i == 1);
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
   auto y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
   auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   bool _useGamma = false;

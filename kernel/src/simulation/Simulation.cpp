@@ -27,7 +27,6 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"  // for enum_to_string
-// #include "Topology.hpp"
 //  for Debug
 //  #define DEBUG_BEGIN_END_ONLY
 //  #define DEBUG_NOCOLOR
@@ -41,14 +40,15 @@ siconos::simulation::Simulation::Simulation(
     std::shared_ptr<TimeDiscretisation> td)
     : _nsds{nsds} {
   if (!td) THROW_EXCEPTION("Simulation constructor - timeDiscretisation == nullptr.");
-  assert(_nsds);
+
+  assert(nsds);
   _allOSI =
       std::make_shared<std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>();
   _allNSProblems = std::make_shared<
       std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>();
   _eventsManager = std::make_shared<EventsManager>(td);
-  _eventsManager->updateT(_nsds->finalT());
-  _nsdsChangeLogPosition = _nsds->changeLog().begin();
+  _eventsManager->updateT(nsds->finalT());
+  _nsdsChangeLogPosition = nsds->changeLog().begin();
 }
 
 // --- Destructor ---
@@ -105,7 +105,7 @@ void siconos::simulation::Simulation::associate(
 
 std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Simulation::indexSet(
     siconos::simulation::Topology::size_type i) {
-  return _nsds->topology()->indexSet(i);
+  return nonSmoothDynamicalSystem()->topology()->indexSet(i);
 }
 
 std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
@@ -122,21 +122,22 @@ siconos::simulation::Simulation::oneStepNSProblem(std::size_t Id) {
 void siconos::simulation::Simulation::updateIndexSets() {
   DEBUG_BEGIN("siconos::simulation::Simulation::updateIndexSets()\n");
   // update I0 indices
-  auto nindexsets = _nsds->topology()->indexSetsSize();
+  auto topo = nonSmoothDynamicalSystem()->topology();
+  auto nindexsets = topo->indexSetsSize();
 
   DEBUG_PRINTF("  nindexsets = %d\n", nindexsets);
   if (nindexsets > 1) {
     for (decltype(nindexsets) i = 1; i < nindexsets; ++i) {
       updateIndexSet(i);
-      _nsds->topology()->indexSet(i)->update_vertices_indices();
-      _nsds->topology()->indexSet(i)->update_edges_indices();
+      topo->indexSet(i)->update_vertices_indices();
+      topo->indexSet(i)->update_edges_indices();
     }
   }
   DEBUG_END("siconos::simulation::Simulation::updateIndexSets()\n");
 }
 
 void siconos::simulation::Simulation::updateDSPlugins(double time) {
-  _nsds->updateDSPlugins(time);
+  nonSmoothDynamicalSystem()->updateDSPlugins(time);
 }
 
 void siconos::simulation::Simulation::insertNonSmoothProblem(
@@ -158,12 +159,14 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi for all
   // integrators declared in the set.
+  auto topo = nonSmoothDynamicalSystem()->topology();
+
   for (auto osi : *_allOSI) {
     if (!osi->isInitialized()) {
       DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
       osi->setSimulationPtr(shared_from_this());
-      // a subgraph has to be implemented.
-      osi->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
+      //  a subgraph has to be implemented.
+      osi->setDynamicalSystemsGraph(topo->dSG(0));
     }
   }
 
@@ -173,7 +176,7 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
         "- 2 - we set the osi of DS that has been defined through "
         "associate(ds,osi)\n");
     for (auto& ds : osi_it.second) {
-      _nsds->topology()->setOSI(ds, osi_it.first);
+      topo->setOSI(ds, osi_it.first);
     }
     // osi_it.second.clear();  // clear the tmp list
   }
@@ -187,14 +190,16 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
    * initialize the associated ata structures.  It is just an
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
-  auto DSG = _nsds->topology()->dSG(0);
+  auto nsds = nonSmoothDynamicalSystem();
+
+  auto DSG = nsds->topology()->dSG(0);
 
   auto _nsdsChangeLogPosition_save = _nsdsChangeLogPosition;
 
   auto& itc = _nsdsChangeLogPosition;
 
   itc++;
-  while (itc != _nsds->changeLog().end()) {
+  while (itc != nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n");
     const auto& change = *itc;
@@ -205,12 +210,12 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
         siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
       DEBUG_PRINTF("ds number : %zu\n", ds->number());
-      if (!DSG->properties(DSG->descriptor(ds)).osi) {
+      if (!DSG->properties(DSG->descriptor(ds)).osi.lock()) {
         if (_allOSI->size() == 0)
           THROW_EXCEPTION("Simulation::initialize - there is no osi in this Simulation !!");
         DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
         auto osi_default = *_allOSI->begin();
-        _nsds->topology()->setOSI(ds, osi_default);
+        nsds->topology()->setOSI(ds, osi_default);
         if (_allOSI->size() > 1) {
           std::cout << "Warning. The simulation has multiple OneStepIntegrators "
                        "(OSI) but the DS number "
@@ -220,7 +225,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
                     << std::endl;
         }
       }
-      auto& osi = *DSG->properties(DSG->descriptor(ds)).osi;
+      auto& osi = *DSG->properties(DSG->descriptor(ds)).osi.lock();
       osi.initializeWorkVectorsForDS(getTk(), ds);
     }
     // else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
@@ -265,13 +270,15 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
    * initialize the associated ata structures.  It is just an
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
-  auto DSG = _nsds->topology()->dSG(0);
+  auto nsds = nonSmoothDynamicalSystem();
+
+  auto DSG = nsds->topology()->dSG(0);
   auto& itc = _nsdsChangeLogPosition;
 
   bool interactionInitialized = false;
   itc++;
 
-  while (itc != _nsds->changeLog().end()) {
+  while (itc != nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n");
     const auto& change = *itc;
@@ -288,7 +295,7 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     //       ("Simulation::initialize - there is no osi in this Simulation !!");
     //     DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
     //     auto osi_default = *_allOSI->begin();
-    //     _nsds->topology()->setOSI(ds, osi_default);
+    //     nsds->topology()->setOSI(ds, osi_default);
     //     if(_allOSI->size() > 1)
     //     {
     //       std::cout << "Warning. The simulation has multiple
@@ -314,7 +321,7 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
       interactionInitialized = true;
     }
   }
-  _nsdsChangeLogPosition = std::prev(_nsds->changeLog().end());
+  _nsdsChangeLogPosition = std::prev(nsds->changeLog().end());
 
   // (re)initialize OneStepNSProblem(s) if necessary
   if (interactionInitialized || !_isInitialized) {
@@ -328,15 +335,16 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     // Since updateIndexSets() call resets the
     // topology->hasChanged() flag, it must be specified explicitly.
     // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
+    nsds->topology()->setHasChanged(true);
   }
 }
 
 void siconos::simulation::Simulation::initializeIndexSets() {
   // 3 - we finalize the initialization of osi
+  auto topo = nonSmoothDynamicalSystem()->topology();
 
   // symmetry in indexSets Do we need it ?
-  _nsds->topology()->setProperties();
+  topo->setProperties();
 
   // === OneStepIntegrators initialization ===
   for (auto osi : *_allOSI) {
@@ -349,7 +357,6 @@ void siconos::simulation::Simulation::initializeIndexSets() {
     }
   }
 
-  auto topo = _nsds->topology();
   auto indxSize = topo->indexSetsSize();
   assert(_numberOfIndexSets > 0);
   if ((indxSize == siconos::internal::LEVELMAX) || (indxSize < _numberOfIndexSets)) {
@@ -365,7 +372,8 @@ void siconos::simulation::Simulation::initializeIndexSets() {
 void siconos::simulation::Simulation::firstInitialize() {
   if (!_isInitialized) {
     DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
-    _T = _nsds->finalT();
+    auto nsds = nonSmoothDynamicalSystem();
+    _T = nsds->finalT();
 
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
@@ -430,11 +438,13 @@ void siconos::simulation::Simulation::initializeInteraction(
       "siconos::simulation::Simulation::initializeInteraction(double time, "
       "std::shared_ptr<siconos::modeling::Interaction> inter)\n");
   // Get the interaction properties from the topology for initialization.
-  auto indexSet0 = _nsds->topology()->indexSet0();
+  auto nsds = nonSmoothDynamicalSystem();
+
+  auto indexSet0 = nsds->topology()->indexSet0();
   auto ui = indexSet0->descriptor(inter);
 
   // This calls computeOutput() and initializes qMemory and q_k.
-  auto& DSG = *_nsds->topology()->dSG(0);
+  auto& DSG = *nsds->topology()->dSG(0);
 
   // auto osi = indexSet0->properties(ui).osi;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds1;
@@ -466,11 +476,11 @@ void siconos::simulation::Simulation::initializeInteraction(
   assert(ds1);
   assert(ds2);
 
-  auto& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi;
-  auto& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
+  auto& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi.lock();
+  auto& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi.lock();
   auto& i_prop = indexSet0->properties(ui);
-  i_prop.osi1 = DSG.properties(DSG.descriptor(ds1)).osi;
-  i_prop.osi2 = DSG.properties(DSG.descriptor(ds2)).osi;
+  i_prop.osi1 = DSG.properties(DSG.descriptor(ds1)).osi.lock();
+  i_prop.osi2 = DSG.properties(DSG.descriptor(ds2)).osi.lock();
 
   if (&osi1 == &osi2) {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
@@ -509,9 +519,10 @@ int siconos::simulation::Simulation::computeOneStepNSProblem(std::size_t Id) {
         "Simulation - computeOneStepNSProblem, OneStepNSProblem == nullptr, "
         "Id: " +
         std::to_string(Id));
+  auto nsds = nonSmoothDynamicalSystem();
 
   // Before compute, inform all OSNSs if topology has changed
-  if (_nsds->topology()->hasChanged()) {
+  if (nsds->topology()->hasChanged()) {
     for (auto osns : *_allNSProblems) {
       osns->setHasBeenUpdated(false);
     }
@@ -532,11 +543,12 @@ siconos::algebra::SiconosVector siconos::simulation::Simulation::y_output(
       "siconos::simulation::Simulation::output(unsigned int level, unsigned "
       "int coor)\n");
   DEBUG_PRINTF("with level = %i and coor = %i \n", level, coor);
+  auto nsds = nonSmoothDynamicalSystem();
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet0 = _nsds->topology()->indexSet0();
+  auto indexSet0 = nsds->topology()->indexSet0();
 
-  siconos::algebra::SiconosVector y{_nsds->topology()->indexSet0()->size()};
+  siconos::algebra::SiconosVector y{nsds->topology()->indexSet0()->size()};
 
   int i = 0;
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
@@ -563,9 +575,11 @@ siconos::algebra::SiconosVector siconos::simulation::Simulation::lambda_input(
   DEBUG_PRINTF("with level = %i and coor = %i \n", level, coor);
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet0 = _nsds->topology()->indexSet0();
+  auto nsds = nonSmoothDynamicalSystem();
 
-  siconos::algebra::SiconosVector lambda{_nsds->topology()->indexSet0()->size()};
+  auto indexSet0 = nsds->topology()->indexSet0();
+
+  siconos::algebra::SiconosVector lambda{nsds->topology()->indexSet0()->size()};
   int i = 0;
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet0->bundle(*ui);
@@ -608,7 +622,7 @@ void siconos::simulation::Simulation::processEvents() {
 }
 
 void siconos::simulation::Simulation::clearNSDSChangeLog() {
-  _nsds->clearChangeLogTo(_nsdsChangeLogPosition);
+  nonSmoothDynamicalSystem()->clearChangeLogTo(_nsdsChangeLogPosition);
 }
 
 void siconos::simulation::Simulation::updateT(double T) {

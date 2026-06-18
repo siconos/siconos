@@ -35,7 +35,7 @@
 // }  // namespace siconos::mechanics::occ::internal
 
 void siconos::mechanics::occ::OccTimeStepping::updateWorldFromDS() {
-  auto& dsg = *_nsds->dynamicalSystems();
+  auto& dsg = *nonSmoothDynamicalSystem()->dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   std::tie(dsi, dsiend) = dsg.vertices();
 

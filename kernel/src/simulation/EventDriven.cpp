@@ -20,17 +20,15 @@
 #include <memory>
 
 #include "EventsManager.hpp"
-#include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
-#include "NonSmoothLaw.hpp"
+#include "NonSmoothLaw.hpp"  // IWYU pragma: keep
 #include "OneStepNSProblem.hpp"
-#include "Relation.hpp"
+#include "Relation.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
 
@@ -78,9 +76,10 @@ void siconos::simulation::EventDriven::updateIndexSet(
     siconos::simulation::Topology::size_type i) {
   DEBUG_BEGIN("siconos::simulation::EventDriven::updateIndexSet(i)\n");
   DEBUG_PRINTF("with i = %i\n", i);
-  assert(_nsds);
-  assert(_nsds->topology());
-  auto topo = _nsds->topology();
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
+  auto topo = nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "siconos::simulation::EventDriven::updateIndexSet(i), indexSets[i] "
@@ -177,13 +176,14 @@ void siconos::simulation::EventDriven::updateIndexSet(
 }
 
 void siconos::simulation::EventDriven::updateIndexSetsWithDoubleCondition() {
-  assert(_nsds);
-  assert(_nsds->topology());
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
 
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
 
   auto indexSet2 = topo->indexSet(2);
 
@@ -219,13 +219,14 @@ void siconos::simulation::EventDriven::updateIndexSetsWithDoubleCondition() {
 }
 void siconos::simulation::EventDriven::initializeOneStepNSProblem() {
   DEBUG_BEGIN("siconos::simulation::EventDriven::initializeOneStepNSProblem()\n");
-  assert(_nsds);
-  assert(_nsds->topology());
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   // Note that interactions set may be empty.
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
 
   // === update all index sets ===
   // updateIndexSets();
@@ -298,7 +299,7 @@ void siconos::simulation::EventDriven::initializeOneStepNSProblem() {
     // // Detect NonSmoothEvent at the beginning of the simulation
     // if(topo->indexSetsSize() > 1)
     // {
-    //   auto indexSet1 = _nsds->topology()->indexSet(1);
+    //   auto indexSet1 = nsds->topology()->indexSet(1);
     //   if(indexSet1->size() != 0)  // There is one non-smooth event to be
     //   added
     //   {
@@ -339,8 +340,9 @@ void siconos::simulation::EventDriven::initOSIRhs() {
 void siconos::simulation::EventDriven::firstInitialize() {
   if (!_isInitialized) {
     DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
+    auto nsds = nonSmoothDynamicalSystem();
 
-    _T = _nsds->finalT();
+    _T = nsds->finalT();
 
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
@@ -364,10 +366,10 @@ void siconos::simulation::EventDriven::firstInitialize() {
     //  - currentEvent of the simu. corresponds to _tinit and nextEvent
     //  - to _tend.
 
-    auto topo = _nsds->topology();
+    auto topo = nsds->topology();
     // Detect NonSmoothEvent at the beginning of the simulation
     if (topo->indexSetsSize() > 1) {
-      auto indexSet1 = _nsds->topology()->indexSet(1);
+      auto indexSet1 = nsds->topology()->indexSet(1);
       if (indexSet1->size() != 0)  // There is one non-smooth event to be added
       {
         DEBUG_PRINT("Schedule an event at starting time\n");
@@ -383,8 +385,10 @@ void siconos::simulation::EventDriven::initialize() {
   DEBUG_BEGIN("void siconos::simulation::EventDriven::initialize()\n");
 
   // Initialization for Simulation
-  _indexSet0 = _nsds->topology()->indexSet(0);
-  _DSG0 = _nsds->topology()->dSG(0);
+  auto nsds = nonSmoothDynamicalSystem();
+
+  _indexSet0 = nsds->topology()->indexSet(0);
+  _DSG0 = nsds->topology()->dSG(0);
 
   Simulation::initialize();
 
@@ -421,13 +425,14 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
     auto& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter);
   }
+  auto nsds = nonSmoothDynamicalSystem();
 
   // solve a LCP at "acceleration" level if required
   if (!_allNSProblems->empty()) {
     if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions())) {
       // Update the state of the DS
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
-      _nsds->updateInput(t, 2);  // Necessary to compute DS state below
+      nsds->updateInput(t, 2);  // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the
     // ds, with the new value of input.  lsodar->computeRhs(t);
@@ -518,10 +523,12 @@ void siconos::simulation::EventDriven::computeJacobianfx(
 void siconos::simulation::EventDriven::computeg(
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi, int* sizeOfX, double* time,
     double* x, int* ng, double* gOut) {
-  assert(_nsds);
-  assert(_nsds->topology());
+  auto nsds = nonSmoothDynamicalSystem();
+
+  assert(nsds);
+  assert(nsds->topology());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
   auto indexSet2 = topo->indexSet(2);
   siconos::algebra::Index nsLawSize, k = 0;
   std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, yddot, lambda;
@@ -546,9 +553,9 @@ void siconos::simulation::EventDriven::computeg(
      free(xdottmp);
      */
   // Update the output from level 0 to level 1
-  _nsds->updateOutput(t, 0);
-  _nsds->updateOutput(t, 1);
-  _nsds->updateOutput(t, 2);
+  nsds->updateOutput(t, 0);
+  nsds->updateOutput(t, 1);
+  nsds->updateOutput(t, 2);
   //
   for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
     auto inter = _indexSet0->bundle(*ui);
@@ -590,7 +597,7 @@ void siconos::simulation::EventDriven::computeg(
 }
 void siconos::simulation::EventDriven::updateImpactState() {
   // Compute input = R(lambda[1])
-  _nsds->updateInput(nextTime(), 1);
+  nonSmoothDynamicalSystem()->updateInput(nextTime(), 1);
 
   // Compute post-impact velocity
   for (auto itOSI : *_allOSI) itOSI->updateState(1);
@@ -598,9 +605,9 @@ void siconos::simulation::EventDriven::updateImpactState() {
 
 void siconos::simulation::EventDriven::updateSmoothState() {
   // Update input of level 2
-  _nsds->updateInput(nextTime(),
-                     2);  // Note FP : Probably already up to date? (previous
-                          // call of updateInput in simu)
+  nonSmoothDynamicalSystem()->updateInput(nextTime(),
+                                          2);  // Note FP : Probably already up to date?
+                                               // (previous call of updateInput in simu)
   // Compute acceleration
   for (auto itOSI : *_allOSI) itOSI->updateState(2);
 }
@@ -616,7 +623,7 @@ void siconos::simulation::EventDriven::updateState(unsigned int levelInput) {
 
 void siconos::simulation::EventDriven::updateOutput(unsigned int levelInput) {
   // Update output (y)
-  _nsds->updateOutput(nextTime(), levelInput);
+  nonSmoothDynamicalSystem()->updateOutput(nextTime(), levelInput);
   // Warning: index sets are not updated in this function !!
 }
 
@@ -645,6 +652,7 @@ void siconos::simulation::EventDriven::advanceToEvent() {
     ++vnext;
     _indexSet0->bundle(*ui)->resetAllLambda();
   }
+  auto nsds = nonSmoothDynamicalSystem();
 
   if (osiType == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
     // if the time to next event if too small, we skip the integration
@@ -653,7 +661,7 @@ void siconos::simulation::EventDriven::advanceToEvent() {
     if (fabs(_tend - _tinit) >= 10 * siconos::internal::MACHINE_PREC) {
       newtonSolve(_newtonTolerance, _newtonMaxIteration);
     } else {
-      auto indexSet2 = _nsds->topology()->indexSet(2);
+      auto indexSet2 = nsds->topology()->indexSet(2);
       if (indexSet2->size() != 0)  // if indexSet2 is not empty, solve LCP to
                                    // determine contact forces
       {
@@ -771,10 +779,10 @@ void siconos::simulation::EventDriven::advanceToEvent() {
       if (!_allNSProblems->empty()) {
         // Solve LCP at acceleration level
         if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions())) {
-          auto indexSet2 = _nsds->topology()->indexSet(2);
+          auto indexSet2 = nsds->topology()->indexSet(2);
           if (indexSet2->size() != 0) {
             (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(_tout);
-            _nsds->updateInput(_tout, 2);
+            nsds->updateInput(_tout, 2);
             // update indexSet[2] with double condition
             // updateIndexSetsWithDoubleCondition();
           }
@@ -794,7 +802,9 @@ void siconos::simulation::EventDriven::advanceToEvent() {
 double siconos::simulation::EventDriven::computeResiduConstraints() {
   // Make sure that the state of all Dynamical Systems was updated
   double t = nextTime();  // time at the end of the step
-  auto indexSet2 = _nsds->topology()->indexSet(2);
+  auto nsds = nonSmoothDynamicalSystem();
+
+  auto indexSet2 = nsds->topology()->indexSet(2);
   double _y;
   // Loop over all interactions of indexSet2
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -838,8 +848,10 @@ void siconos::simulation::EventDriven::prepareNewtonIteration() {
   _newtonResiduDSMax = 0.0;
   _newtonResiduYMax = 0.0;
   double _maxResidu;
+  auto nsds = nonSmoothDynamicalSystem();
+
   // Update input of level 2
-  _nsds->updateInput(nextTime(), 2);
+  nsds->updateInput(nextTime(), 2);
   // Loop over all OSIs
 
   for (auto itosi : *_allOSI) {
@@ -899,7 +911,7 @@ void siconos::simulation::EventDriven::predictionNewtonIteration() {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::simulation::EventDriven::correctionNewtonIteration() {
   // Update the input of level 2 for all Dynamical Systems after each iteration
-  _nsds->updateInput(nextTime(), 2);
+  nonSmoothDynamicalSystem()->updateInput(nextTime(), 2);
   // Correction
   for (auto itosi : *_allOSI) {
     auto osi_NewMark = std::dynamic_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
@@ -920,6 +932,8 @@ void siconos::simulation::EventDriven::newtonSolve(double criterion, unsigned in
   _istate = 1;  // beginning of time integration
   // Prediction
   predictionNewtonIteration();
+  auto nsds = nonSmoothDynamicalSystem();
+
   while (1 != 0) {
     _newtonNbIterations++;
     // Prepare for iteration
@@ -942,7 +956,7 @@ void siconos::simulation::EventDriven::newtonSolve(double criterion, unsigned in
                 << maxStep << "\n";
     }
     // If no convergence, proceed iteration
-    auto indexSet2 = _nsds->topology()->indexSet(2);
+    auto indexSet2 = nsds->topology()->indexSet(2);
     if (indexSet2->size() !=
         0)  // if indexSet2 is not empty, solve LCP to determine contact forces
     {
@@ -977,7 +991,7 @@ double siconos::simulation::EventDriven::detectEvents(bool updateIstate) {
   bool _IsFirstTime = true;
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, lambda;
-  auto topo = _nsds->topology();
+  auto topo = nonSmoothDynamicalSystem()->topology();
   auto indexSet2 = topo->indexSet(2);
   for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
     auto inter = _indexSet0->bundle(*ui);
@@ -1067,6 +1081,8 @@ void siconos::simulation::EventDriven::LocalizeFirstEvent() {
   bool found = false;
   bool _IsupdateIstate = false;
   unsigned int _numIter = 0;
+  auto nsds = nonSmoothDynamicalSystem();
+
   while (!found) {
     _numIter++;
     double t_i = (t_b + t_a) / 2.0;  // mid-time of the current interval
@@ -1082,7 +1098,7 @@ void siconos::simulation::EventDriven::LocalizeFirstEvent() {
     // y[0] for all interactions
     if ((_istate == 3) || (_istate == 5))  // some contacts are closed
     {
-      _nsds->updateOutput(t_i, 0);
+      nsds->updateOutput(t_i, 0);
     }
     // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve
     // LCP at the acceleration level to compute contact forces

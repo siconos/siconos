@@ -116,11 +116,11 @@ void siconos::simulation::TimeStepping::updateIndexSet(
   // - gray_color : discovered vertex (Interaction) but searching descendants
   // - black_color : discovered vertex (Interaction) together with the
   // descendants
+  auto nsds = nonSmoothDynamicalSystem();
+  assert(nsds);
+  assert(nsds->topology());
 
-  assert(_nsds);
-  assert(_nsds->topology());
-
-  auto topo = _nsds->topology();
+  auto topo = nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "siconos::simulation::TimeStepping::updateIndexSet(i), indexSets[i] "
@@ -176,7 +176,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(
         // index set std::shared_ptr<siconos::integrators::OneStepIntegrator>
         // Osi = indexSet1->properties(*ui1).osi;
         auto ds1 = indexSet1->properties(*ui1).source;
-        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
 
         // if(predictorDeactivate(inter1,i))
         if (osi.removeInteractionFromIndexSet(inter1, i)) {
@@ -258,7 +258,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(
           //  We assume that the integrator of the ds1 drive the update of the
           //  index set
           auto ds1 = indexSet1->properties(*ui0).source;
-          auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+          auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
 
           activate = osi.addInteractionInIndexSet(inter0, i);
         }
@@ -295,7 +295,7 @@ void siconos::simulation::TimeStepping::initializeOneStepNSProblem() {
   // Interactions
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi;
 
-  auto topo = _nsds->topology();
+  auto topo = nonSmoothDynamicalSystem()->topology();
   auto indexSet0 = topo->indexSet(0);
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -331,7 +331,7 @@ void siconos::simulation::TimeStepping::initializeOneStepNSProblem() {
   // Since initializeOneStepNSProblem calls updateIndexSets() which resets the
   // topology->hasChanged() flag, it must be specified explicitly.
   // Otherwise OneStepNSProblem may fail to update its matrices.
-  _nsds->topology()->setHasChanged(true);
+  nonSmoothDynamicalSystem()->topology()->setHasChanged(true);
 }
 
 void siconos::simulation::TimeStepping::nextStep() {
@@ -373,7 +373,7 @@ void siconos::simulation::TimeStepping::run() {
 void siconos::simulation::TimeStepping::resetLambdas() {
   if (_resetAllLambda) {
     // Initialize lambdas of all interactions.
-    auto indexSet0 = _nsds->topology()->indexSet(0);
+    auto indexSet0 = nonSmoothDynamicalSystem()->topology()->indexSet(0);
     siconos::graphs::InteractionsGraph::VIterator ui, uiend, vnext;
     std::tie(ui, uiend) = indexSet0->vertices();
     for (vnext = ui; ui != uiend; ui = vnext) {
@@ -499,7 +499,7 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   computeResidu();
 
   if (_computeResiduY) {
-    auto indexSet0 = _nsds->topology()->indexSet0();
+    auto indexSet0 = nonSmoothDynamicalSystem()->topology()->indexSet0();
     for (auto osi : *_allOSI) {
       osi->computeResiduOutput(tkp1, indexSet0);
     }
@@ -512,7 +512,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
   _isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
-  bool isLinear = _nsds->isLinear();
+  bool isLinear = nonSmoothDynamicalSystem()->isLinear();
 
   // 1 - initialize Newton Solve ;
   initializeNewtonSolve();
@@ -651,13 +651,13 @@ bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion)
       // break;
     }
   }
-
+  auto nsds = nonSmoothDynamicalSystem();
   if (_computeResiduY) {
     // check residuy.
     _newtonResiduYMax = 0.0;
     residu = 0.0;
 
-    auto indexSet0 = _nsds->topology()->indexSet0();
+    auto indexSet0 = nsds->topology()->indexSet0();
     for (auto it : *_allOSI) {
       residu = std::max(residu, it->computeResiduOutput(getTkp1(), indexSet0));
     }
@@ -679,7 +679,7 @@ bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion)
     // check residur.
     _newtonResiduRMax = 0.0;
     residu = 0.0;
-    auto indexSet0 = _nsds->topology()->indexSet0();
+    auto indexSet0 = nsds->topology()->indexSet0();
 
     for (auto it : *_allOSI) {
       residu = std::max(residu, it->computeResiduInput(getTkp1(), indexSet0));

@@ -131,8 +131,8 @@ struct DynamicalSystemProperties {
       nullptr}; /**< Used for instance in Newton iteration */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Mostly for Lagrangian system.*/
-  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi{
-      nullptr}; /**< Integrator used for the given DynamicalSystem */
+  std::weak_ptr<siconos::integrators::OneStepIntegrator>
+      osi; /**< Integrator used for the given DynamicalSystem */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
       nullptr}; /**< Matrix for integration */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{

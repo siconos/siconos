@@ -92,7 +92,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** A pointer to the simulated nonsmooth dynamical system
    */
-  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
+  std::weak_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds;
 
   /** An interaction manager
    */
@@ -260,7 +260,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *
-   *  \return an unsigned int
+   *  \return the size of the set of integrators associated with the simulation
    */
   inline size_t numberOfOSI() const { return _allOSI->size(); }
 
@@ -291,7 +291,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
    *
-   *  \return an unsigned int
+   *  \return the size of the set of nonsmooth problems associated with
    */
   inline size_t numberOfOSNSProblems() const { return _allNSProblems->size(); }
 
@@ -322,7 +322,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
   nonSmoothDynamicalSystem() const {
-    return _nsds;
+    return _nsds.lock();
   }
   /** set the NonSmoothDynamicalSystem of the Simulation
    *
@@ -330,7 +330,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   void setNonSmoothDynamicalSystemPtr(
       std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> newPtr) {
-    _nsdsChangeLogPosition = _nsds->changeLog().begin();
+    _nsdsChangeLogPosition = nonSmoothDynamicalSystem()->changeLog().begin();
     _nsds = newPtr;
   }
 
@@ -358,9 +358,9 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline bool getPrintStat() const { return _printStat; };
 
-  virtual void computeInitialStateOfTheStep(){};
+  virtual void computeInitialStateOfTheStep() {};
 
-  virtual void updateAndSwapAllOutput(){};
+  virtual void updateAndSwapAllOutput() {};
 
   /**
       update all index sets of the topology, using current y and lambda values of Interactions
