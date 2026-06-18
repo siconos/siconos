@@ -28,18 +28,18 @@
 #include "NumericsFwd.h"           // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"        // for NM_gemv, NM_clear, NM_copy, NM_new
 #include "NumericsSparseMatrix.h"  // for NSM_diag_indices
+#include "SiconosBlas.h"           // for cblas_dcopy, cblas_daxpy, cblas_...
 #include "SolverOptions.h"         // for SolverOptions, SICONOS_DPARAM_TOL
-#include "fc3d_short_names.h"      // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "SiconosBlas.h"  // for cblas_dcopy, cblas_daxpy, cblas_...
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
+#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnCone, projectionOnDu...
 #include "safe_casts.h"
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
 
@@ -56,7 +56,7 @@ typedef struct {
 } Fc3d_ADMM_data;
 
 /** pointer to function used to call local solver */
-typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, unsigned int nrhs);
+typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, size_t nrhs);
 
 void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options) {
   size_t nc = to_size_t(problem->numberOfContacts);
@@ -93,8 +93,12 @@ void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options) {
       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
           SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY) {
     data->b = (double*)calloc(nb_constraints, sizeof(double));
-    if (!options->dWork || options->dWorkSize != 2 * m) {
-      options->dWork = (double*)calloc(2 * m, sizeof(double));
+    if (!options->dWork || options->dWorkSize < 2 * m) {
+      double* p = (double*)realloc(options->dWork, 2 * m * sizeof(double));
+      if (!p) {
+        numerics_error("fc3d_IP_SNM_init", "bad alloc");
+      }
+      options->dWork = p;
       options->dWorkSize = 2 * m;
     }
   } else {
@@ -102,11 +106,6 @@ void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options) {
   }
 }
 void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWork = NULL;
-    options->dWorkSize = 0;
-  }
   if (options->solverData) {
     Fc3d_ADMM_data* data = (Fc3d_ADMM_data*)options->solverData;
     free(data->xi);

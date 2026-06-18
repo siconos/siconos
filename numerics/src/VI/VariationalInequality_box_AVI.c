@@ -32,9 +32,9 @@
 #include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
 #include "numerics_errors.h"
-#include "safe_casts.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 #include "solver_registry.h"
+
 typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
@@ -45,7 +45,7 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F,
   VariationalInequality* vi_pb = (VariationalInequality*)problem;
   int n = vi_pb->size;
   vi_pb->F(vi_pb, n, z, F);
-  RelayProblem* relay_pb = ((vi_box_AVI_LSA_data*)options->solverData)->relay_pb;
+  RelayProblem* relay_pb = ((newton_LSA_data*)options->solverData)->extra_problem;
 
   NM_assert(NM_DENSE, relay_pb->M);
 
@@ -77,14 +77,12 @@ void* vi_get_set(void* problem) { return ((VariationalInequality*)problem)->set;
  */
 static void vi_box_AVI_free(SolverOptions* options) {
   if (options->solverData) {
-    vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
-    NM_clear(sData->mat);
-    free(sData->mat);
-    sData->mat = NULL;
-    sData->relay_pb->lb = NULL;
-    sData->relay_pb->ub = NULL;
-    freeRelay_problem(sData->relay_pb);
-    free(sData);
+    newton_LSA_data* sData = (newton_LSA_data*)options->solverData;
+    // sData->mat = NM_free(sData->mat);
+    ((RelayProblem*)(sData->extra_problem))->lb = NULL;
+    ((RelayProblem*)(sData->extra_problem))->ub = NULL;
+    freeRelay_problem(((RelayProblem*)(sData->extra_problem)));
+    free(options->solverData);
   }
   options->solverData = NULL;
 }
@@ -96,16 +94,18 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   if (!options->solverData) {
     RelayProblem* relay_pb = (RelayProblem*)malloc(sizeof(RelayProblem));
     relay_pb->size = n;
-    relay_pb->M = NM_create_from_data(NM_DENSE, n, n, malloc(n * n * sizeof(double)));
+    relay_pb->M = NM_create(NM_DENSE, n, n);
 
     relay_pb->q = (double*)malloc(n * sizeof(double));
 
     box_constraints* box = (box_constraints*)problem->set;
     relay_pb->lb = box->lb;
     relay_pb->ub = box->ub;
-    vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)malloc(sizeof(vi_box_AVI_LSA_data));
-    sData->mat = (NumericsMatrix*)NM_duplicate(problem->nabla_F);
-    sData->relay_pb = relay_pb;
+    newton_LSA_data* sData = (newton_LSA_data*)malloc(sizeof(newton_LSA_data));
+    // sData->mat = (NumericsMatrix*)NM_duplicate(problem->nabla_F);
+    sData->extra_problem = relay_pb;
+    sData->keep = true;
+
     options->solverData = sData;
   }
 
@@ -117,7 +117,6 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, z, F, info, (void*)problem, options, &functions_AVI_LSA);
-
   vi_box_AVI_free(options);
 }
 

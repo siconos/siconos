@@ -238,7 +238,13 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* problem, double* reaction, do
                      double* globalVelocity, int* info, SolverOptions* options,
                      double barr_param, const char* problem_name);
 
-void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+/* @brief allocate memory for internal parameters of the ipm solver
+ * @param[in] problem the gfc3d problem
+ * @param[in,out] options options (options->solverData and dWork might be modified)
+ * @param[in] work_size required (minimal) size for dwork vector
+ */
+void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options,
+                    size_t work_size);
 
 void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          double* reaction, double* velocity,
@@ -258,10 +264,6 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
  */
 void gfc3d_IPM_SNM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options);
-
-void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
-
-void gfc3d_IPM_SNM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
 void gfc3d_ipm_snm_set_default(SolverOptions* options);
 
@@ -289,8 +291,6 @@ void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* optio
  */
 void gfc3d_IPM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                double* globalVelocity, int* info, SolverOptions* options);
-
-void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
 void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
 

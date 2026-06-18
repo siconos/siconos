@@ -421,7 +421,6 @@ void plasticity_2d_nsgs_generic(PlasticityProblem* problem, double* stress,
 
 static void plasticity_2d_nsgs_generic_set_default(SolverOptions* options) {
   /* Delegate to the regular NSGS set_default since options are the same */
-  extern void plasticity_2d_nsgs_set_default(SolverOptions*);
   plasticity_2d_nsgs_set_default(options);
 }
 

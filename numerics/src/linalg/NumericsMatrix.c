@@ -3482,8 +3482,6 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B, const dou
 #ifdef WITH_MUMPS
   NM_MUMPS_copy(A, C);
 #endif
-
-  NM_version_sync(A);
 }
 
 NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A) {

@@ -387,7 +387,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // Permutation done
 
   SparseBlockStructuredMatrix* SBM_permuted_with_diag = SBM_new();
-  SBM_copy(SBM_permuted, SBM_permuted_with_diag, 1);
+  SBM_copy(SBM_permuted, SBM_permuted_with_diag);
   problem->M->matrix1 = SBM_permuted_with_diag;
 
   // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR
@@ -688,8 +688,8 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   problem->q = old_q;
   problem->mu = old_mu;
 
-  free(SBM_col_permuted);
-  free(SBM_permuted);
+  SBM_col_permuted = SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCK);
+  SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);
   free(q_permuted);
   free(mu_permuted);
 

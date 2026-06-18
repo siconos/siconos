@@ -637,8 +637,14 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   problem->q = old_q;
   problem->mu = old_mu;
 
-  free(SBM_col_permuted);
-  free(SBM_permuted);
+  if (SBM_problem != NULL) {
+    SBM_free(SBM_problem, SBM_FREE_ALL);
+    problem->M->matrix1 = NULL;
+  }
+  SBM_col_permuted =
+      SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCK);  // do not free blocks on this one
+  SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);  // free blocks because they were copied
+
   free(q_permuted);
   free(mu_permuted);
 

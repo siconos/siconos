@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "fc3d_local_problem_tools.h"
+
 #ifndef __cplusplus
 #include <stdbool.h>  // for false
 #endif

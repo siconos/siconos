@@ -17,13 +17,16 @@
  */
 #include "GenericMechanical.hpp"
 
+#include "FrictionContactProblem.h"
+#include "GenericMechanicalProblem.h"
+#include "GenericMechanical_Solvers.h"
 #include "Interaction.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include "NumericsSolversNamespace.h"
 #include "OSNSMatrix.hpp"
 #include "RelayNSL.hpp"
-#include "SiconosVector.hpp"
+#include "RelayProblem.h"
 #include "Simulation.hpp"
+#include "SolverOptions.h"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT

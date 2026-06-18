@@ -78,8 +78,9 @@ int variationalInequality_newFromFile(VariationalInequality* vi, FILE* file);
 /** free a VariationalInequalityProblem
  *
  *  \param vi the problem to free
+ *  \return NULL
  */
-void freeVariationalInequalityProblem(VariationalInequality* vi);
+VariationalInequality* freeVariationalInequalityProblem(VariationalInequality* vi);
 
 /** Clear VariationalInequality structure: set all pointeurs to NULL, double and int to 0
  *

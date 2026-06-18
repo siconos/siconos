@@ -16,21 +16,15 @@
  * limitations under the License.
  */
 #include <assert.h>  // for assert
-#include <stdio.h>   // for NULL, fprintf, stderr
-#include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "RollingFrictionContact_options.h"                         // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalRollingFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"                     // for global_rolling_friction_3d_driver
 #include "NumericsFwd.h"                          // for SolverOptions, GlobalFrict...
-#include "NumericsMatrix.h"                       //
+#include "RollingFrictionContact_options.h"       // for SICONOS_GLOBAL_FRICTION_3D...
 #include "SolverOptions.h"                        // for SolverOptions, solver_opti...
-#include "global_rolling_friction_3d_Solvers.h"                       // for grfc3d...
-#include "numerics_verbose.h"
+#include "global_rolling_friction_3d_Solvers.h"   // for grfc3d...
 #include "numerics_errors.h"
-// #include "gfc3d_compute_error.h"
-// #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
-
+#include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
@@ -47,24 +41,28 @@
 #ifdef FCLIB_OUTPUT
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"  // for frictionContact_fclib_write, fri...
-#include "string.h"           // for strcpy, strcat
 #include "numerics_errors.h"
+#include "string.h"  // for strcpy, strcat
 #endif
 static int fccounter = -1;
 #endif
 
-int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                          double* velocity, double* globalVelocity, SolverOptions* options) {
+int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* problem,
+                                      double* reaction, double* velocity,
+                                      double* globalVelocity, SolverOptions* options) {
 #ifdef FCLIB_OUTPUT
 #ifdef WITH_FCLIB
-  // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 001 OK\n");
+  // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 001
+  // OK\n");
   fccounter++;
   int freq_output = 1;
   int nc = problem->numberOfContacts;
   if (nc > 0) {
-    // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 002 OK\n");
+    // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 002
+    // OK\n");
     if (fccounter % freq_output == 0) {
-      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 003 OK\n");
+      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 003
+      // OK\n");
       char fname[256];
       snprintf(fname, sizeof(fname), "GRFC3D-%.5d-%.5d.hdf5", (int)nc, fccounter);
       printf("Dump GRFC3D-%.5d-%.5d.hdf5.\n", (int)nc, fccounter);
@@ -80,7 +78,8 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* probl
       char* mathInfo = (char*)malloc(n * sizeof(char));
       strcpy(mathInfo, "unknown");
       globalRollingFrictionContact_fclib_write(problem, title, description, mathInfo, fname);
-      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 004 OK\n");
+      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 004
+      // OK\n");
     }
     /* fclose(foutput); */
   }
@@ -89,7 +88,8 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* probl
 #endif
 #endif
 
-  // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 005 OK\n");
+  // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver 005
+  // OK\n");
 
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity, problem_ori->M->size0););
@@ -121,13 +121,17 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* probl
           1,
           " ========================== Call NSGS_WR solver with reformulation into Rolling "
           "Friction-Contact 3D problem ==========================\n");
-      global_rolling_friction_3d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
+      global_rolling_friction_3d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info,
+                                         options);
       break;
     }
     case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM: {
-      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver global_rolling_friction_3d_IPM 006 OK\n");
-      global_rolling_friction_3d_IPM(problem, reaction, velocity, globalVelocity, &info, options);
-      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver global_rolling_friction_3d_IPM 007 OK\n");
+      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver
+      // global_rolling_friction_3d_IPM 006 OK\n");
+      global_rolling_friction_3d_IPM(problem, reaction, velocity, globalVelocity, &info,
+                                     options);
+      // printf("\n global_rolling_friction_3d_driver.c global_rolling_friction_3d_driver
+      // global_rolling_friction_3d_IPM 007 OK\n");
       break;
     }
     default: {
@@ -138,8 +142,9 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* probl
   return info;
 }
 
-int global_rolling_friction_3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction,
-                                  double* globalVelocity, SolverOptions* options) {
+int global_rolling_friction_3d_checkTrivialCaseGlobal(int n, double* q, double* velocity,
+                                                      double* reaction, double* globalVelocity,
+                                                      SolverOptions* options) {
   /* norm of vector q */
   /*   double qs = cblas_dnrm2( n , q , 1 ); */
   /*   int i; */

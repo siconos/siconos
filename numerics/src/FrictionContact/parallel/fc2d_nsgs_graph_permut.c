@@ -22,17 +22,14 @@
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_IPARAM...
-#include "LCP_Solvers.h"                   // for lcp_nsgs_SBM_buildLocalPro...
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
-#include "SiconosBlas.h"                   // for cblas_dnrm2
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
-#include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
-#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IPARAM...
+#include "NumericsFwd.h"              // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"           // for NumericsMatrix, RawNumeric...
+#include "SiconosBlas.h"              // for cblas_dnrm2
+#include "SolverOptions.h"            // for SolverOptions, SICONOS_DPA...
+#include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
+#include "fc2d_Solvers.h"             // for fc2d_nsgs_sbm, fc2d_spa...
+#include "fc2d_compute_error.h"       // for fc2d_compute_error
 #include "graph_tools.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 #include "op3x3.h"
@@ -351,7 +348,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   /* Can  do better? In place stuff? */
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
-  unsigned int* rowIndex = (unsigned int*)malloc(nc * sizeof(unsigned int));
+  size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
   SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
@@ -741,12 +738,11 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     problem->M->matrix1 = NULL;
   }
 
-  SBM_free(SBM_col_permuted, SBM_FREE_NONE);  // do not free blocks on this one
-  SBM_free(SBM_permuted, SBM_FREE_ALL);      // free blocks because they were copied
-  free(SBM_col_permuted);
+  SBM_col_permuted =
+      SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCK);  // do not free blocks on this one
+  SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);  // free blocks because they were copied
   free(q_permuted);
   free(mu_permuted);
-
 }
 
 /* ===========================================================================

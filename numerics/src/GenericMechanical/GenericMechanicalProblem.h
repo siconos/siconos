@@ -47,9 +47,9 @@
 struct listNumericsProblem {
   int type;
   void* problem;
-  double* q; /*a pointer on the q of the problem*/
-  int size;  /*size of the local problem.(needed because of dense case)*/
-  int error; /*non-zero if there was an error reported*/
+  double* q;   /*a pointer on the q of the problem*/
+  size_t size; /*size of the local problem.(needed because of dense case)*/
+  int error;   /*non-zero if there was an error reported*/
   struct listNumericsProblem* nextProblem;
   struct listNumericsProblem* prevProblem;
 };
@@ -57,7 +57,7 @@ struct listNumericsProblem {
 /** \enum SICONOS_NUMERICS_PROBLEM_TYPE ids for the possible/allowed numerics problem
  * formulations
  */
-enum SICONOS_NUMERICS_PROBLEM_TYPE {
+typedef enum {
   SICONOS_NUMERICS_PROBLEM_LCP = 0,
   SICONOS_NUMERICS_PROBLEM_MLCP = 1,
   SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
@@ -68,7 +68,7 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE {
   SICONOS_NUMERICS_PROBLEM_VI = 7,
   SICONOS_NUMERICS_PROBLEM_AVI = 8,
   SICONOS_NUMERICS_PROBLEM_RELAY = 9,
-};
+} SICONOS_NUMERICS_PROBLEM_TYPE;
 
 enum NUMERICS_GMP_FREE { GMP_FREE_MATRIX = 4, GMP_FREE_GMP = 8 };
 
@@ -83,7 +83,7 @@ enum NUMERICS_GMP_FREE { GMP_FREE_MATRIX = 4, GMP_FREE_GMP = 8 };
  *
  *  Remark:
  *  The M and q contains the matrices of the GMP problem.
- *  The sub problems (problems) has also a M and q member usfull for the computation of the
+ *  The sub problems (problems) has also a M and q member useful for the computation of the
  * local error.
  *
  * ONLY q and M must be allocated/free by the users, the others fields are private:
@@ -95,10 +95,10 @@ enum NUMERICS_GMP_FREE { GMP_FREE_MATRIX = 4, GMP_FREE_GMP = 8 };
 struct GenericMechanicalProblem {
   /*Number of line of blocks.*/
   /*PRIVATE: manage by gmp_add.*/
-  int size;
+  size_t size;
   /*maximal size of local problem.*/
   /*PRIVATE: manage by gmp_add.*/
-  int maxLocalSize;
+  size_t maxLocalSize;
   /*must be set by the user.*/
   NumericsMatrix* M;
   /*must be set by the user.*/
@@ -157,13 +157,14 @@ void genericMechanicalProblem_display(GenericMechanicalProblem* pGMP);
  * dim of the linear system, 3 for the fc3d) \ return the localProblem (either lcp,
  * linearSystem of fc3d
  */
-void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, size_t size);
+void* gmp_add(GenericMechanicalProblem* pGMP, SICONOS_NUMERICS_PROBLEM_TYPE problemType,
+              size_t size);
 
 /** returns nonsmooth problem formulation name, from its id number.
  \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE
  enum). \return const char
 */
-const char* ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
+const char* ns_problem_id_to_name(SICONOS_NUMERICS_PROBLEM_TYPE id);
 
 #if defined(__cplusplus)
 }

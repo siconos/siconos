@@ -129,6 +129,7 @@ int main(void) {
   total_info += test_unit("./data/plasticity_2d_example1.dat", options);
   total_info += test_unit("./data/plasticity_2d_example1_theta0.dat", options);
   total_info += test_unit("./data/plasticity_2d_footing_1.dat", options);
+  solver_options_delete(options);
 
   /* numerics_set_verbose(0); */
   /* printf("#######\ntest with projection on Cone with local iteration solver \n"); */
@@ -221,6 +222,6 @@ int main(void) {
   /* options_vm_2->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100; */
 
   /* total_info += test_unit("./data/plasticity_2d_vonmises_footing_100.dat", options_vm_2); */
-
+  solver_options_delete(options_generic);
   return total_info;
 }

@@ -606,6 +606,8 @@ void rolling_friction_3d_nsgs(RollingFrictionContactProblem *problem, double *re
     /* } */
     free(light_error_2);
   }
+  if (freeze_contacts) free(freeze_contacts);
+  freeze_contacts = NULL;
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==

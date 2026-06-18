@@ -20,8 +20,10 @@
 #include <float.h>
 #include <limits.h>  // For LLONG_MAX
 #include <math.h>
+#include <stdarg.h>  // for va_list, va_start, va_end
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "FrictionContact_options.h"
 #include "JordanAlgebra.h"
@@ -31,30 +33,17 @@
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
 #include "fc3d_short_names.h"
-// #include "SparseBlockMatrix.h"
-// #include "fc3d_compute_error.h"
 #include "float.h"
 #include "gfc3d_Solvers.h"
-// #include "gfc3d_compute_error.h"
-#include "numerics_verbose.h"
-// #include "numerics_errors.h"
-// #include "projectionOnCone.h"
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include <stdarg.h>  // for va_list, va_start, va_end
-#include <time.h>
-
-// #include "FrictionContactProblem.h"        // for FrictionContactProblem
-// #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContac...
-// #include "fc3d_Solvers.h"
 #include "gfc3d_ipm.h"
 #include "io_tools.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "safe_casts.h"
-#include "siconos_debug.h"
-
-/* Solver registration system */
 #include "solver_registry.h"
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "siconos_debug.h"
 
 #if defined(WITH_FCLIB) && defined(WITH_HDF5)
 #include <fclib.h>
@@ -438,140 +427,11 @@ static int NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const size_t start
  * ------------------------------ */
 /*
  * Implementation contains the following functions:
- *  - gfc3d_IPM_SNM_init - initialize solver (allocate memory)
- *  - gfc3d_IPM_SNM_free - deallocate memory
+ *  - init ---> same routine as for gfc3d_IPM
+ *  - free ---> deallocate memory, same routine as for gfc3d_ipm
  *  - gfc3d_IPM_SNM_setDefaultSolverOptions - setup default solver parameters
  *  - gfc3d_IPM_SNM - optimization method
  */
-void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options) {
-  size_t m = problem->M->size0;
-  size_t nd = problem->H->size1;
-  size_t d = problem->dimension;
-
-  if (!options->dWork || options->dWorkSize != (size_t)(m + nd + nd + nd / d)) {
-    options->dWork = (double*)calloc(m + nd + nd + nd / d, sizeof(double));
-    options->dWorkSize = m + nd + nd + nd / d;
-  }
-
-  /* ------------- initialize starting point ------------- */
-  options->solverData = (Gfc3d_IPM_init_data*)malloc(sizeof(Gfc3d_IPM_init_data));
-  Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
-
-  /* --------- allocate memory for tmp point ----------- */
-  data->tmp_point = (IPM_tmp_point*)malloc(sizeof(IPM_tmp_point));
-  data->tmp_point->t_globalVelocity = (double*)calloc(m, sizeof(double));
-  data->tmp_point->t_velocity = (double*)calloc(nd, sizeof(double));
-  data->tmp_point->t_reaction = (double*)calloc(nd, sizeof(double));
-
-  /* 1. v */
-  data->starting_point = (IPM_starting_point*)malloc(sizeof(IPM_starting_point));
-  data->starting_point->globalVelocity = (double*)calloc(m, sizeof(double));
-  for (size_t i = 0; i < m; ++i) data->starting_point->globalVelocity[i] = 0.01;
-
-  /* 2. u */
-  data->starting_point->velocity = (double*)calloc(nd, sizeof(double));
-  for (size_t i = 0; i < nd; ++i) {
-    data->starting_point->velocity[i] = 0.01;
-    if (i % d == 0) data->starting_point->velocity[i] = 0.1;
-  }
-
-  /* 3. r */
-  data->starting_point->reaction = (double*)calloc(nd, sizeof(double));
-  for (size_t i = 0; i < nd; ++i) {
-    data->starting_point->reaction[i] = 0.01;                 // 0.0351;
-    if (i % d == 0) data->starting_point->reaction[i] = 0.1;  // 0.2056;
-  }
-
-  /* ------ initialize the change of variable matrix P_mu ------- */
-  data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
-  data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
-  NM_triplet_alloc(data->P_mu->mat, nd);
-  data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
-  for (size_t i = 0; i < nd; ++i)
-    if (i % d == 0) /* NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]); */
-      NM_entry(data->P_mu->mat, i, i, 1.);
-    else
-      /* NM_entry(data->P_mu->mat, i, i, 1.); */
-      NM_entry(data->P_mu->mat, i, i, problem->mu[(int)(i / d)]);
-
-  /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
-  data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
-  NM_triplet_alloc(data->P_mu->inv_mat, nd);
-  data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
-  for (size_t i = 0; i < nd; ++i)
-    if (i % d == 0) /* NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]); */
-      NM_entry(data->P_mu->inv_mat, i, i, 1.);
-    else
-      /* NM_entry(data->P_mu->inv_mat, i, i, 1.); */
-      NM_entry(data->P_mu->inv_mat, i, i, 1.0 / problem->mu[(int)(i / d)]);
-  /* ------ initial parameters initialization ---------- */
-  data->internal_params = (IPM_internal_params*)malloc(sizeof(IPM_internal_params));
-  data->internal_params->alpha_primal = 1.0;
-  data->internal_params->alpha_dual = 1.0;
-  data->internal_params->sigma = 0.1;
-  data->internal_params->barr_param = 1.0;
-
-  /* ----- temporary vaults initialization ------- */
-  data->tmp_vault_nd = (double**)malloc(17 * sizeof(double*));
-  for (size_t i = 0; i < 17; ++i) data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
-
-  data->tmp_vault_m = (double**)malloc(2 * sizeof(double*));
-  for (size_t i = 0; i < 2; ++i) data->tmp_vault_m[i] = (double*)calloc(m, sizeof(double));
-}
-
-void gfc3d_IPM_SNM_free(GlobalFrictionContactProblem* problem, SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWork = NULL;
-    options->dWorkSize = 0;
-  }
-  if (options->solverData) {
-    Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
-
-    free(data->starting_point->globalVelocity);
-    data->starting_point->globalVelocity = NULL;
-
-    free(data->starting_point->velocity);
-    data->starting_point->velocity = NULL;
-
-    free(data->starting_point->reaction);
-    data->starting_point->reaction = NULL;
-
-    free(data->starting_point);
-
-    NM_clear(data->P_mu->mat);
-    free(data->P_mu->mat);
-    data->P_mu->mat = NULL;
-
-    NM_clear(data->P_mu->inv_mat);
-    free(data->P_mu->inv_mat);
-    data->P_mu->inv_mat = NULL;
-
-    free(data->P_mu);
-
-    for (size_t i = 0; i < 17; ++i) free(data->tmp_vault_nd[i]);
-    free(data->tmp_vault_nd);
-    data->tmp_vault_nd = NULL;
-
-    for (size_t i = 0; i < 2; ++i) free(data->tmp_vault_m[i]);
-    free(data->tmp_vault_m);
-    data->tmp_vault_m = NULL;
-
-    free(data->tmp_point->t_globalVelocity);
-    data->tmp_point->t_globalVelocity = NULL;
-
-    free(data->tmp_point->t_velocity);
-    data->tmp_point->t_velocity = NULL;
-
-    free(data->tmp_point->t_reaction);
-    data->tmp_point->t_reaction = NULL;
-
-    free(data->tmp_point);
-
-    free(data->internal_params);
-  }
-}
-
 void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                    double* restrict velocity, double* restrict globalVelocity,
                    int* restrict info, SolverOptions* restrict options) {
@@ -643,8 +503,9 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
   // initialize solver if it is not set
   int internal_allocation = 0;
-  if (!options->dWork || (options->dWorkSize != (size_t)(m + nd + nd))) {
-    gfc3d_IPM_SNM_init(problem, options);
+  size_t work_size = m + nd + nd + nd / d;
+  if (!options->dWork || (options->dWorkSize < work_size)) {
+    gfc3d_IPM_init(problem, options, work_size);
     internal_allocation = 1;
   }
 
@@ -756,11 +617,10 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double* dudr_jprod = data->tmp_vault_nd[no_nd++];  // for Mehrotra
   // double* s_plus_ds = data->tmp_vault_nd[no_n++];    // for Mehrotra
   // double diff_fixp_plus = 1e300;
-  double* rhs_tmp = NULL;
 
   double* rhs = options->dWork;
   double* rhs_2 = (double*)calloc(m + 2 * nd + n, sizeof(double));
-  // double *rhs_tmp = (double*)calloc(m+2*nd+n,sizeof(double));
+  double* rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
   double* sol = (double*)calloc(m + 2 * nd + n, sizeof(double));
 
   double* nub_vec = (double*)calloc(n, sizeof(double));
@@ -1259,7 +1119,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
           sigma = 0.499;
         } else {
           // Solve
-          rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
           cblas_dcopy(m + 2 * nd + n, rhs_2, 1, rhs_tmp, 1);
           for (size_t k = 0; k < m + 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -1278,7 +1137,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
             if (cblas_dnrm2(m + 2 * nd + n, rhs_tmp, 1) <= 1e-14) {
               // printf("\nrefinement iterations = %d %8.2e\n",itr+1, cblas_dnrm2(m+2*nd+n,
               // rhs_tmp, 1));
-              free(rhs_tmp);
+              //              free(rhs_tmp);
               break;
             }
           }
@@ -1322,7 +1181,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
         // SOLVE
         // NM_LU_solve(J, rhs, 1);
 
-        rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
         cblas_dcopy(m + 2 * nd + n, rhs_2, 1, rhs_tmp, 1);
         for (size_t k = 0; k < m + 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -1536,7 +1394,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
         cblas_dcopy(m + 2 * nd + n, rhs, 1, rhs_2, 1);  // rhs_2 = old rhs
 
         // Solve
-        rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
+        // rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
         cblas_dcopy(m + 2 * nd + n, rhs_2, 1, rhs_tmp, 1);
         for (size_t k = 0; k < m + 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -1554,7 +1412,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
           if (cblas_dnrm2(m + 2 * nd + n, rhs_tmp, 1) <= 1e-14) {
             // printf("\nrefinement iterations = %d %8.2e\n",itr+1, cblas_dnrm2(m+2*nd+n,
             // rhs_tmp, 1));
-            free(rhs_tmp);
             break;
           }
         }
@@ -1612,7 +1469,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
         // SOLVE
         // NM_LU_solve(J, rhs, 1);
 
-        rhs_tmp = (double*)calloc(m + 2 * nd + n, sizeof(double));
         cblas_dcopy(m + 2 * nd + n, rhs_2, 1, rhs_tmp, 1);
         for (size_t k = 0; k < m + 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -1630,7 +1486,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
           if (cblas_dnrm2(m + 2 * nd + n, rhs_tmp, 1) <= 1e-14) {
             // printf("\nrefinement iterations = %d %8.2e\n",itr+1, cblas_dnrm2(m+2*nd+n,
             // rhs_tmp, 1));
-            free(rhs_tmp);
             break;
           }
         }
@@ -1707,11 +1562,12 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     iteration++;
 
   }  // while loop
+  if (diff_fixp_vec) free(diff_fixp_vec);
 
   /* Checking strict complementarity */
   classify_BNRT(velocity, reaction, nd, n, &nB, &nN, &nR, &nT);
   if (nT > 0)
-    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f \t %4i %4i %4i\n",
+    printf("Ratio of Strict complementarity solutions: %4zu / %4zu = %4.2f \t %4i %4i %4i\n",
            n - nT, n, (double)(n - nT) / (double)n, nB, nN, nR);
   else
     printf("Strict complementarity satisfied: %4i %4i %4i\n", nB, nN, nR);
@@ -1757,7 +1613,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   // options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
   if (internal_allocation) {
-    gfc3d_IPM_SNM_free(problem, options);
+    gfc3d_IPM_free(problem, options);
   }
 
   options->solverData = (double*)malloc(sizeof(double));
@@ -1790,21 +1646,21 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
   if (blk_num_name) {
     free(blk_num_name);
-    blk_num_name = NULL;
   }
+  blk_num_name = NULL;
 
   if (rhs_tmp) {
     free(rhs_tmp);
-    rhs_tmp = NULL;
   }
+  rhs_tmp = NULL;
   if (nub_vec) {
     free(nub_vec);
-    nub_vec = NULL;
   }
+  nub_vec = NULL;
   if (setR) {
     free(setR);
-    setR = NULL;
   }
+  setR = NULL;
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
     // fprintf(iterates, "];\n\n");
@@ -1854,10 +1710,32 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;  // 0.095
 }
+
+static int gfc3d_ipm_snm_init_wrap(void* problem, SolverOptions* options) {
+  /* set_default is now called by the registry before init_wrap */
+  (void)problem;
+  (void)options;
+  return NUMERICS_OK;
+}
+
+static int gfc3d_ipm_snm_solve_wrap(void* problem, double* reaction, double* velocity,
+                                    double* globalVelocity, SolverOptions* options) {
+  int info = NUMERICS_OK;
+  gfc3d_IPM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info,
+            options);
+  return info;
+}
+
+static void gfc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
+  /* Cleanup if needed */
+  (void)problem;
+  (void)options;
+}
 REGISTER_SOLVER_3VAR(
     GFC3D_IPM_SNM, "GFC3D_IPM_SNM",
-    "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact", NULL,
-    NULL, NULL, NULL, gfc3d_ipm_snm_set_default, /* set_default */
-    500,                                         /* default_max_iter - from set_default */
-    1e-10,                                       /* default_tol - from set_default */
+    "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact",
+    gfc3d_ipm_snm_init_wrap, gfc3d_ipm_snm_solve_wrap, gfc3d_ipm_snm_free_wrap, NULL,
+    gfc3d_ipm_snm_set_default, /* set_default */
+    500,                       /* default_max_iter - from set_default */
+    1e-10,                     /* default_tol - from set_default */
     0 /* is_local_solver */)

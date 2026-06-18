@@ -309,7 +309,7 @@ Test your installation
 
 When all the installation process is done, you can test your installation by running a simple example.
 (for non-standard installation path, mind :ref:`siconos_install_note`.). Try one of the numerous files
-provided in `Siconos Tutorial project<https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/examples>`_
+provided in `Siconos Tutorial project <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_
 
 
 .. code-block:: bash

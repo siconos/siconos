@@ -2300,7 +2300,7 @@ static int NM_inv_test_sparse(void) {
 }
 
 static int NM_inverse_diagonal_block_matrix_test_unit(NumericsMatrix *A, int block_number,
-                                                      unsigned int *blocksize) {
+                                                      size_t *blocksize) {
   int size0 = A->size0;
   // NM_display(A);
   NumericsMatrix *Ainv = NM_inverse_diagonal_block_matrix(A, block_number, blocksize);
@@ -2351,15 +2351,15 @@ static int NM_inverse_diagonal_block_matrix_test(void) {
   NM_write_in_file_python(A, fileout);
   fclose(fileout);
 
-  unsigned int blocksize[3] = {3, 3, 6};
+  size_t blocksize[3] = {3, 3, 6};
   int info = NM_inverse_diagonal_block_matrix_test_unit(A, 3, blocksize);
   if (!info) return !info;
 
-  unsigned int blocksize2[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  size_t blocksize2[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
   info = NM_inverse_diagonal_block_matrix_test_unit(A, 12, blocksize2);
   if (!info) return !info;
 
-  unsigned int blocksize3[4] = {3, 3, 3, 3};
+  size_t blocksize3[4] = {3, 3, 3, 3};
   info = NM_inverse_diagonal_block_matrix_test_unit(A, 4, blocksize3);
   if (!info) return !info;
 
@@ -4122,14 +4122,14 @@ static int test_NM_create_adjacency_graph(void) {
   graph = NM_create_adjacency_graph(M1);
   list = NM_compute_connectedcomponents(M1);
 
-  unsigned int block_number;
-  unsigned int *blocksizes = NULL;
+  size_t block_number;
+  size_t *blocksizes = NULL;
   int is_diagonal_block_matrix = NM_is_diagonal_block_matrix(M1, &block_number, &blocksizes);
 
   if (is_diagonal_block_matrix) {
     printf("the matrix is block diagonal\n");
-    printf("block_number = %i\n", block_number);
-    /* for (unsigned int k = 0; k < block_number; k++) */
+    printf("block_number = %zu\n", block_number);
+    /* for (size_t k = 0; k < block_number; k++) */
     /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
   } else
     printf("the matrix is not block diagonal\n");
@@ -4158,8 +4158,8 @@ static int test_NM_create_adjacency_graph(void) {
 
   if (is_diagonal_block_matrix) {
     printf("the matrix is block diagonal\n");
-    printf("block_number = %i\n", block_number);
-    /* for (unsigned int k = 0; k < block_number; k++) */
+    printf("block_number = %zu\n", block_number);
+    /* for (size_t k = 0; k < block_number; k++) */
     /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
   } else
     printf("the matrix is not block diagonal\n");
@@ -4194,8 +4194,8 @@ static int test_NM_create_adjacency_graph(void) {
 
   if (is_diagonal_block_matrix) {
     printf("the matrix is block diagonal\n");
-    printf("block_number = %i\n", block_number);
-    /* for (unsigned int k = 0; k < block_number; k++) */
+    printf("block_number = %zu\n", block_number);
+    /* for (size_t k = 0; k < block_number; k++) */
     /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
   } else
     printf("the matrix is not block diagonal\n");

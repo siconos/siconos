@@ -185,14 +185,38 @@ extern "C" {
  * @brief An enum to define the behavior of SBM_clear and SBM_free
  *
  * When calling SBM_clear everything in the structure is cleared and freed
- * with an exception for block attribute, for which the behavior must be set
- * with the current enum.
+ * with  possible exceptions for
+ *  - block[i] attribute, for which the behavior must be set
+ *  - blocksizes1 and 2
+ *  - the structure itself (SBM_free only)
+ *
+ * The current enum is used to set this behavior.
+ *
+ *  no: not freed. yes: freed.
+ *
+ *  | Flag(s).                      | block[i] | blocksize | sbm |
+ *  |-------------------------------|----------|-----------|-----|
+ *  | SBM_FREE_NONE                 |    n     |     no    |  no |
+ *  | SBM_FREE_BLOCK                |    yes   |     no    |  no |
+ *  | SBM_FREE_SBM                  |    no    |     no    |  yes|
+ *  | SBM_FREE_SIZES                |    no    |     yes   |  no |
+ *  | SBM_FREE_KEEP_BLOCK           |    no    |     yes   |  yes|
+ *  | SBM_FREE_KEEP_SIZES           |    yes   |     no    |  yes|
+ *  | SBM_FREE_ALL                  |    yes   |     yes   |  yes|
+ *
+ *  In all cases:
+ *   - sbm->block[i] will end up to null and sbm->block is freed
+ *   - sbm->index1,2 freed and set to null
+ *
  */
 typedef enum {
-  SBM_FREE_NONE = 0,  /* Do not free sbm.block[i] nor sbm */
+  SBM_FREE_NONE = 0,  /* Do not free sbm.block[i] nor sbm, nor blocksizes*/
   SBM_FREE_BLOCK = 1, /* Clear and free sbm.block[i] and call free(sbm.block)*/
   SBM_FREE_SBM = 2,   /* call free(sbm) */
-  SBM_FREE_ALL = SBM_FREE_BLOCK | SBM_FREE_SBM /* Clear and free everything */
+  SBM_FREE_SIZES = 4, /* free blocksize0 and blocksize1 */
+  SBM_FREE_KEEP_BLOCK = SBM_FREE_SIZES | SBM_FREE_SBM, /**< free all except block[i] */
+  SBM_FREE_KEEP_SIZES = SBM_FREE_BLOCK | SBM_FREE_SBM, /**< free all except blocksize */
+  SBM_FREE_ALL = SBM_FREE_BLOCK | SBM_FREE_SBM | SBM_FREE_SIZES
 } SBMFreeLevel;
 
 /** Creation of an empty Sparse Block Matrix (all fields to "0")
@@ -210,10 +234,7 @@ void SBM_null(SparseBlockStructuredMatrix* sbm);
 /** @brief Free memory allocated for the attribute 'blocks' of a SBM matrix
  *
  *  Warning : the behavior is controlled by the level parameter
- *  - SBM_FREE_NONE  : sbm.block[i] are not freed. Assumes the memory pointed by block[i] is
- *       owned and handled elsewhere
- *  - SBM_FREE_BLOCK : sbm.block[i] are freed
- *  In any case, sbm->block[i] will end up to null and sbm->block is freed
+ *  @see SBMFreeLevel
  *
  *  @param sbm the matrix to clear
  *  @param level controls what is freed, see comment above.
@@ -223,11 +244,7 @@ void SBM_clear_block(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level);
 /** @brief Free memory allocated for the SBM matrix
  *
  * Warning : the behavior for the block attribute is controlled by the level parameter
- * - SBM_FREE_NONE  : sbm.block[i] are not freed.  Assumes the memory pointed by block[i] is
- *       owned and handled elsewhere.
- * - SBM_FREE_BLOCK : sbm.block[i] are freed
- * - SBM_FREE_ALL   : sbm.block[i] and sbm itself are freed
- * All other attr. of sbm are cleared and freed.
+ *  @see SBMFreeLevel
  *
  * @param sbm   the matrix to clear
  * @param level controls what is freed, see comment above.
@@ -235,21 +252,16 @@ void SBM_clear_block(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level);
 void SBM_clear(SparseBlockStructuredMatrix* blmat, SBMFreeLevel level);
 
 /** @brief lear and free a  SparseBlockStructuredMatrix
- *  @param sbm the SparseBlockStructuredMatrix that must be freed
  *
  * Calls SBM_clear then frees sbm itself if level & SBM_FREE_SBM.
  *
  * Warning : the behavior for the block attribute is controlled by the level parameter
- * - SBM_FREE_NONE  : sbm.block[i] are not freed.  Assumes the memory pointed by block[i] is
- *       owned and handled elsewhere.
- * - SBM_FREE_BLOCK : sbm.block[i] are freed
- * - SBM_FREE_SBM   : sbm itself is freed (but not sbm.block[i])
- * - SBM_FREE_ALL   : sbm.block[i] and sbm itself are freed
- * All other attr. of sbm are cleared and freed.
  *
- * @param sbm   the matrix to free
- * @param level controls what is freed, see SBMFreeLevel
- * @return NULL
+ *  @see SBMFreeLevel
+ *
+ *  @param sbm the SparseBlockStructuredMatrix that must be freed
+ *  @param level controls what is freed, see SBMFreeLevel
+ *  @return NULL
  */
 SparseBlockStructuredMatrix* SBM_free(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level);
 
@@ -334,8 +346,8 @@ SparseBlockStructuredMatrix* SBM_zero_matrix_for_multiply(
    \param[in] beta coefficient
    \return C the resulting matrix
 */
-SparseBlockStructuredMatrix* SBM_add(SparseBlockStructuredMatrix* A,
-                                     SparseBlockStructuredMatrix* B, double alpha,
+SparseBlockStructuredMatrix* SBM_add(const SparseBlockStructuredMatrix* A,
+                                     const SparseBlockStructuredMatrix* B, double alpha,
                                      double beta);
 
 /**
@@ -349,9 +361,9 @@ SparseBlockStructuredMatrix* SBM_add(SparseBlockStructuredMatrix* A,
    \param[in] gamma coefficient
    \param[in,out] C the resulting matrix
 */
-void SBM_add_without_allocation(SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix* B,
-                                double alpha, double beta, SparseBlockStructuredMatrix* C,
-                                double gamma);
+void SBM_add_without_allocation(const SparseBlockStructuredMatrix* A,
+                                const SparseBlockStructuredMatrix* B, double alpha,
+                                double beta, SparseBlockStructuredMatrix* C, double gamma);
 
 /**
    In-place multiply a matrix with a double alpha*A --> A
@@ -525,23 +537,30 @@ bool SBM_entry(SparseBlockStructuredMatrix* M, size_t row, size_t col, double va
 double SBM_get_value(const SparseBlockStructuredMatrix* const M, size_t row, size_t col);
 
 /**
-   Copy of a SBM  A into B
+   @brief Full copy of a Sparse Block matrix into another
 
-   \param[in] A the SparseBlockStructuredMatrix matrix to be copied
-   \param[out] B the SparseBlockStructuredMatrix matrix copy of A
-   \param[in] copyBlock if copyBlock then the content of block are copied, else only the
-   pointers are copied.
-   \return 0 if ok
+   @param[in] A the matrix to be copied
+   @param[out] B the matrix copy of A
 */
-int SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B,
-             size_t copyBlock);
+void SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B);
 
 /**
-   Transpose  by copy of a SBM  A into B
+ * @brief Copy of a SBM into another BUT B block data are pointer links to A block data
+ *   --> B does not own the blocks
+ * Be careful with SBM_free on B matrix.
+ * All other attributes of B are reallocated and set.
+ * @param[in] A the matrix to be copied
+ * @param[out] B the matrix copy of A
+ */
+void SBM_copy_and_link(const SparseBlockStructuredMatrix* const A,
+                       SparseBlockStructuredMatrix* B);
 
-   \param[in] A the SparseBlockStructuredMatrix matrix to be copied
-   \param[out]  B the SparseBlockStructuredMatrix matrix copy of transpose A
-   \return 0 if ok
+/**
+Transpose  by copy of a SBM  A into B
+
+\param[in] A the SparseBlockStructuredMatrix matrix to be copied
+\param[out]  B the SparseBlockStructuredMatrix matrix copy of transpose A
+\return 0 if ok
 */
 int SBM_transpose(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B);
 
@@ -604,7 +623,8 @@ void SBM_row_to_dense(const SparseBlockStructuredMatrix* const A, size_t row, do
    \param [in] A The source SBM.
    \param [out] C The target SBM. It assumes the structure SBM has been allocated.
    The memory allocation for its menber is done inside.
-   NB : The blocks are not copied.
+   Warning: in the end, A and C share their blocks (pointer links). C must be freed
+   using SBM_free(..., SBM_FREE_KEEP_BLOCK).
 */
 void SBM_row_permutation(const size_t* const rowIndex,
                          const SparseBlockStructuredMatrix* const A,
@@ -620,13 +640,54 @@ void SBM_row_permutation(const size_t* const rowIndex,
 */
 void SBM_column_permutation(size_t* colIndex, SparseBlockStructuredMatrix* A,
                             SparseBlockStructuredMatrix* C);
-
+/** set all matrix fields to "0"
+ *
+ *  \param sbm a matrix (must not be nullptr)
+ */
 void SBCM_null(SparseBlockCoordinateMatrix* MC);
 
+/** @brief Creation of an empty Sparse Block Coordinate Matrix (all fields to "0")
+ *
+ *  @return a pointer on allocated and initialized space
+ */
 SparseBlockCoordinateMatrix* SBCM_new(void);
 
+/** @brief Free memory allocated for a Sparse Block Coordinate matrix
+ *
+ * Warning : the behavior for the block attribute is controlled by the level parameter
+ *  @see SBMFreeLevel
+ *
+ * @param sbm   the matrix to clear
+ * @param level controls what is freed, see comment above.
+ */
+void SBCM_clear(SparseBlockCoordinateMatrix* blmat, SBMFreeLevel level);
+
+/** @brief Free memory allocated for the attribute 'blocks' of a Sparse Block Coordinate
+ * matrix
+ *
+ *  Warning : the behavior is controlled by the level parameter
+ *  @see SBMFreeLevel
+ *
+ *  @param sbm the matrix to clear
+ *  @param level controls what is freed, see comment above.
+ */
+void SBCM_clear_block(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level);
+
+/** @brief lear and free a  SparseBlockCoordinateMatrix
+ *
+ * Calls SBCM_clear then frees sbm itself if level & SBM_FREE_SBM.
+ *
+ * Warning : the behavior for the block attribute is controlled by the level parameter
+ *  @see SBMFreeLevel
+ *
+ *  @param sbm the SparseBlockCoordinateMatrix that must be freed
+ *  @param level controls what is freed, see SBMFreeLevel
+ *  @return NULL
+ */
+SparseBlockCoordinateMatrix* SBCM_free(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level);
+
 /**
-   allocate a SparseBlockCoordinateMatrix from a list of 3x3
+   creates a SparseBlockCoordinateMatrix from a list of 3x3
    blocks
 
    \param[in] m the number of rows
@@ -641,24 +702,12 @@ SparseBlockCoordinateMatrix* SBCM_new_3x3(size_t m, size_t n, size_t nbblocks, s
                                           size_t* column, double* block);
 
 /**
-   free allocated memory in newSparseBlockCoordinateMatrix functions
-
-   \param[in] MC matrix pointer */
-void SBCM_free_3x3(SparseBlockCoordinateMatrix* MC);
-
-/**
    copy a SparseBlockCoordinateMatrix to a SparseBlockStructuredMatrix
 
    \param[in] MC the SparseBlockCoordinateMatrix matrix
    \return a pointer to a SparseBlockCoordinateMatrix structure
  */
 SparseBlockStructuredMatrix* SBCM_to_SBM(SparseBlockCoordinateMatrix* MC);
-
-/**
-   free a SparseBlockStructuredMatrix created with SBCM_to_SBM
-
-   \param[in,out] M a SparseBlockStructuredMatrix to free*/
-void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M);
 
 /**
    Copy a Sparse Matrix into a SBM, with fixed blocksize

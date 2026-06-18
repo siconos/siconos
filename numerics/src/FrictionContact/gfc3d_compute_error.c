@@ -22,14 +22,14 @@
 #include <math.h>    // for fabs, sqrt
 #include <stdlib.h>  // for NULL, calloc
 
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // IWYU pragma: keep
 #include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
-#include "SolverOptions.h"                 // for SolverOptions
+#include "SolverOptions.h"                 // IWYU pragma: keep
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 /* #define DEBUG_NOCOLOR */
@@ -78,7 +78,12 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   NumericsMatrix* M = problem->M;
 
   if (!options->dWork || options->dWorkSize < 2 * n) {
-    options->dWork = (double*)calloc(2 * n, sizeof(double));
+    double* p = (double*)realloc(options->dWork, 2 * n * sizeof(double));
+    if (!p) {
+      numerics_error("gfc3d_compute_error", "bad alloc");
+      return 0;
+    }
+    options->dWork = p;
     options->dWorkSize = 2 * n;
   }
   double* tmp = options->dWork;
@@ -180,7 +185,12 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
   NumericsMatrix* M = problem->M;
 
   if (!options->dWork || options->dWorkSize < 2 * n) {
-    options->dWork = (double*)calloc(2 * n, sizeof(double));
+    double* p = (double*)realloc(options->dWork, 2 * n * sizeof(double));
+    if (!p) {
+      numerics_error("gfc3d_compute_error_r", "bad alloc");
+      return 0;
+    }
+    options->dWork = p;
     options->dWorkSize = 2 * n;
   }
   double* tmp = options->dWork;
@@ -349,10 +359,14 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
   NumericsMatrix* H = problem->H;
   NumericsMatrix* M = problem->M;
 
-  int d_work_size = 2 * n > m ? 2 * n : m;
-  if (!options->dWork || (int)options->dWorkSize < d_work_size) {
-    if (options->dWork) free(options->dWork);
-    options->dWork = (double*)calloc(d_work_size, sizeof(double));
+  size_t d_work_size = 2 * n > m ? 2 * n : m;
+  if (!options->dWork || options->dWorkSize < d_work_size) {
+    double* p = (double*)realloc(options->dWork, d_work_size * sizeof(double));
+    if (!p) {
+      numerics_error("gfc3d_compute_error_convex", "bad alloc");
+      return 0;
+    }
+    options->dWork = p;
     options->dWorkSize = d_work_size;
   }
 

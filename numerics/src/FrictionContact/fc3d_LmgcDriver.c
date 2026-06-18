@@ -22,10 +22,9 @@
 #include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IPARAM_ERROR...
 #include "NonSmoothDrivers.h"         // for fc3d_driver, fc3d_LmgcDriver
 #include "NumericsFwd.h"              // for SolverOptions, SparseBlockStruct...
-#include "NumericsMatrix.h"           // for NM_new_SBM
 #include "NumericsVerbose.h"          // for numerics_set_verbose
 #include "SolverOptions.h"            // for SolverOptions, SICONOS_IPARAM_IT...
-#include "SparseBlockMatrix.h"        // for SBCM_free_3x3, SBCM_new_3x3, SBC...
+#include "SparseBlockMatrix.h"        // for SBCM_new_3x3, SBC...
 #include "fc3d_short_names.h"
 
 /* #define DEBUG_STDOUT */
@@ -175,18 +174,18 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     free(reaction_guess);
     free(velocity_guess);
   }
-
-  SBCM_free_3x3(MC);
-
-  free(M->index1_data);
-  free(M->index2_data);
-  free(M->block);
-  free(M);
-  free(FC);
   solver_options_delete(numerics_solver_options);
-  numerics_solver_options = NULL;
-  free(NM);
-  free(MC);
+  FC->M = NULL;
+  FC->q = NULL;
+  FC->mu = NULL;
+  frictionContactProblem_free(FC);
+  FC = NULL;
+  NM->matrix1 = NULL;
+  NM_free(NM);
+  M = SBM_free(M, SBM_FREE_SBM);
 
+  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCK);  // W used to build MC was allocated elsewhere, so
+                                            // we do not free MC->blocks
+  numerics_solver_options = NULL;
   return info;
 }

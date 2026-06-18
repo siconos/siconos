@@ -580,6 +580,7 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
         /* reallocate if needed */
         if ((nz + H->size0) > QpH_csc->nzmax &&
             !cs_sprealloc(QpH_csc, 2 * (QpH_csc->nzmax) + H->size0)) {
+          free(beta);
           return NULL; /* out of memory */
         }
         QpHi = QpH_csc->i;
@@ -935,14 +936,19 @@ void printBlockVec(double* vec, int vecSize, int sizeBlock, int cl) {
  *  - gfc3d_IPM_setDefaultSolverOptions - setup default solver parameters
  *  - gfc3d_IPM - optimization method
  */
-void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options) {
+void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options,
+                    size_t work_size) {
   size_t m = problem->M->size0;
   size_t nd = problem->H->size1;
   size_t d = problem->dimension;
 
-  if (!options->dWork || options->dWorkSize != (size_t)(m + nd + nd)) {
-    options->dWork = (double*)calloc(m + nd + nd, sizeof(double));
-    options->dWorkSize = m + nd + nd;
+  if (!options->dWork || options->dWorkSize < work_size) {
+    double* p = (double*)realloc(options->dWork, work_size * sizeof(double));
+    if (!p) {
+      numerics_error("gfc3d init", "bad alloc");
+    }
+    options->dWork = p;
+    options->dWorkSize = work_size;
   }
 
   /* ------------- initialize starting point ------------- */
@@ -1030,56 +1036,64 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
 // }
 
 void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWork = NULL;
-    options->dWorkSize = 0;
-  }
   if (options->solverData) {
     Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
 
-    free(data->starting_point->globalVelocity);
-    data->starting_point->globalVelocity = NULL;
+    if (data->starting_point) {
+      free(data->starting_point->globalVelocity);
+      data->starting_point->globalVelocity = NULL;
 
-    free(data->starting_point->velocity);
-    data->starting_point->velocity = NULL;
+      free(data->starting_point->velocity);
+      data->starting_point->velocity = NULL;
 
-    free(data->starting_point->reaction);
-    data->starting_point->reaction = NULL;
+      free(data->starting_point->reaction);
+      data->starting_point->reaction = NULL;
 
-    free(data->starting_point);
+      free(data->starting_point);
+    }
+    data->starting_point = NULL;
 
-    NM_clear(data->P_mu->mat);
-    free(data->P_mu->mat);
-    data->P_mu->mat = NULL;
+    if (data->P_mu) {
+      data->P_mu->mat = NM_free(data->P_mu->mat);
 
-    NM_clear(data->P_mu->inv_mat);
-    free(data->P_mu->inv_mat);
-    data->P_mu->inv_mat = NULL;
+      data->P_mu->inv_mat = NM_free(data->P_mu->inv_mat);
 
-    free(data->P_mu);
+      free(data->P_mu);
+    }
+    data->P_mu = NULL;
 
-    for (size_t i = 0; i < 17; ++i) free(data->tmp_vault_nd[i]);
-    free(data->tmp_vault_nd);
+    if (data->tmp_vault_nd) {
+      for (size_t i = 0; i < 17; ++i) free(data->tmp_vault_nd[i]);
+      free(data->tmp_vault_nd);
+    }
     data->tmp_vault_nd = NULL;
 
-    for (size_t i = 0; i < 2; ++i) free(data->tmp_vault_m[i]);
-    free(data->tmp_vault_m);
+    if (data->tmp_vault_m) {
+      for (size_t i = 0; i < 2; ++i) free(data->tmp_vault_m[i]);
+      free(data->tmp_vault_m);
+    }
     data->tmp_vault_m = NULL;
 
-    free(data->tmp_point->t_globalVelocity);
-    data->tmp_point->t_globalVelocity = NULL;
+    if (data->tmp_point) {
+      free(data->tmp_point->t_globalVelocity);
+      data->tmp_point->t_globalVelocity = NULL;
 
-    free(data->tmp_point->t_velocity);
-    data->tmp_point->t_velocity = NULL;
+      free(data->tmp_point->t_velocity);
+      data->tmp_point->t_velocity = NULL;
 
-    free(data->tmp_point->t_reaction);
-    data->tmp_point->t_reaction = NULL;
+      free(data->tmp_point->t_reaction);
+      data->tmp_point->t_reaction = NULL;
 
-    free(data->tmp_point);
+      free(data->tmp_point);
+    }
+    data->tmp_point = NULL;
 
-    free(data->internal_params);
+    if (data->internal_params) free(data->internal_params);
+    data->internal_params = NULL;
+
+    free(options->solverData);
   }
+  options->solverData = NULL;
 }
 
 void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
@@ -1140,7 +1154,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH) {
     size_t block_number_of_M = to_size_t(M->size0) / 3;
     size_t* blocksizes_of_M = (size_t*)malloc(block_number_of_M * sizeof(size_t));
-    for (int i = 0; i < block_number_of_M; i++) *(blocksizes_of_M + i) = 3;
+    for (size_t i = 0; i < block_number_of_M; i++) *(blocksizes_of_M + i) = 3;
     Minv = NM_inverse_diagonal_block_matrix(M, block_number_of_M, blocksizes_of_M);
     free(blocksizes_of_M);
   }
@@ -1162,8 +1176,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   // initialize solver if it is not set
   int internal_allocation = 0;
-  if (!options->dWork || (options->dWorkSize != (size_t)(m + nd + nd))) {
-    gfc3d_IPM_init(problem, options);
+  size_t work_size = m + nd + nd;
+  if (!options->dWork || (options->dWorkSize < work_size)) {
+    gfc3d_IPM_init(problem, options, work_size);
     internal_allocation = 1;
   }
 
@@ -1253,7 +1268,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double error[6];
   double totalresidual = 1e300, totalresidual_Jor = 1e300;
   // double diff_fixp = 1e300, nub = 1e300;
-  double* diff_fixp_vec = (double*)calloc(n, sizeof(double));
 
   double* primalConstraint = data->tmp_vault_nd[1];
   double* dualConstraint = data->tmp_vault_m[0];
@@ -1444,7 +1458,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   char matlab_name[100];
   sprintf(matlab_name, "iterates.m");
-
+  free(str);
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
     iterates = fopen(matlab_name, "w");
@@ -2437,7 +2451,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     iteration++;
 
   }  // while loop
-
+  free(d_s);
   /* Checking strict complementarity */
   /* For each cone i from 1 to n, one checks if u+r is in the interior of the Lorentz cone */
   /* One first computes the 3 dimensional vector somme = (u+r)/norm(u+r) */
@@ -2470,18 +2484,18 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       printf("cone %zu %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2, somme + 1, 1));
   }
   if (nsc < (int)n)
-    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f\n", nsc, n,
+    printf("Ratio of Strict complementarity solutions: %4i / %4zu = %4.2f\n", nsc, n,
            (double)nsc / n);
   else
-    printf("Strict complementarity satisfied: %4i / %4i  %9.2e %9.2e  %4i %4i %4i\n", nsc, n,
+    printf("Strict complementarity satisfied: %4i / %4zu  %9.2e %9.2e  %4i %4i %4i\n", nsc, n,
            ns, ns / cblas_dnrm2(3, s, 1), nB, nN, nR);
-
+  free(s);
   if (hasNotConverged == 0)
     printf("test IPM: success, ");
   else
     printf("test IPM: failure, ");
 
-  printf("%.1e  %.1e,     iter=%3d, n=%4d, \t%s \n", totalresidual, projerr, iteration, n,
+  printf("%.1e  %.1e,     iter=%3zu, n=%4zu, \t%s \n", totalresidual, projerr, iteration, n,
          strToken);
 
   printf("\n\n");
@@ -2500,10 +2514,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   if (internal_allocation) {
     gfc3d_IPM_free(problem, options);
   }
-
-  options->solverData = (double*)malloc(sizeof(double));
-  double* projerr_ptr = (double*)options->solverData;
-  *projerr_ptr = projerr;
 
   if (H_tilde) H_tilde = NM_free(H_tilde);
   if (minus_H) minus_H = NM_free(minus_H);
@@ -2538,12 +2548,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   if (phiu) free(phiu);
 
-  //  free(tmpsol);
-
   free(d_globalVelocity);
   free(d_velocity);
   free(d_reaction);
-  free(diff_fixp_vec);
 
   *info = hasNotConverged;
 }
@@ -2582,10 +2589,9 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 
   // initialize solver if it is not set
   int internal_allocation = 0;
-  if (!options->dWork || (options->dWorkSize != (size_t)(m + nd + nd)))
-  // if(!options->dWork)
-  {
-    gfc3d_IPM_init(problem, options);
+  size_t work_size = m + nd + nd;
+  if (!options->dWork || (options->dWorkSize < work_size)) {
+    gfc3d_IPM_init(problem, options, work_size);
     internal_allocation = 1;
   }
 
@@ -2951,10 +2957,10 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
       printf("cone %zu %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2, somme + 1, 1));
   }
   if (nsc < (int)n)
-    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f\n", nsc, n,
+    printf("Ratio of Strict complementarity solutions: %4i / %4zu = %4.2f\n", nsc, n,
            (double)nsc / n);
   else
-    printf("Strict complementarity satisfied: %4i / %4i  %9.2e %9.2e  %4i %4i %4i\n", nsc, n,
+    printf("Strict complementarity satisfied: %4i / %4zu  %9.2e %9.2e  %4i %4i %4i\n", nsc, n,
            ns, ns / cblas_dnrm2(3, s, 1), nB, nN, nR);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = totalresidual;
@@ -2963,13 +2969,14 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   cblas_dcopy(nd, reaction, 1, data->starting_point->reaction, 1);
   cblas_dcopy(m, globalVelocity, 1, data->starting_point->globalVelocity, 1);
 
+  free(s);
   if (internal_allocation) {
     gfc3d_IPM_free(problem, options);
   }
 
   options->solverData = (double*)malloc(sizeof(double));
-  double* projerr_ptr = (double*)options->solverData;
-  *projerr_ptr = projerr;
+  // double* projerr_ptr = (double*)options->solverData;
+  // *projerr_ptr = projerr;
 
   if (H_tilde) H_tilde = NM_free(H_tilde);
   if (H) H = NM_free(H);

@@ -19,18 +19,17 @@
 
 #include <assert.h>  // for assert
 #include <errno.h>   // for errno
-#include <math.h>    // for fabs
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
-#include "FrictionContactProblem.h"
+#include "FrictionContactProblem.h"  // IWYU pragma: keep
 #include "GlobalFrictionContactProblem.h"
 #include "NumericsMatrix.h"  // for NM_vector_display, NM_display, NM_clear
 #include "RollingFrictionContactProblem.h"
-#include "SiconosBlas.h"       // for cblas_dscal, cblas_dcopy
-#include "io_tools.h"          // for check_hdf5_file
-#include "numerics_verbose.h"  // for check_io, numerics_printf_verbose
+#include "SiconosBlas.h"  // for cblas_dscal, cblas_dcopy
+#include "io_tools.h"     // for check_hdf5_file
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io, numerics_printf_verbose
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -102,7 +101,8 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
 int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem* problem,
                                              FILE* file) {
   if (!problem) {
-    CHECK_ARG(0, "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
+    CHECK_ARG(
+        0, "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
   }
   int i;
 
@@ -226,34 +226,27 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filen
 
 void globalRollingFrictionContactProblem_free(GlobalRollingFrictionContactProblem* problem) {
   assert(problem);
-  if (problem->M) {
-    NM_clear(problem->M);
-    free(problem->M);
-    problem->M = NULL;
-  }
-  if (problem->H) {
-    NM_clear(problem->H);
-    free(problem->H);
-    problem->H = NULL;
-  }
-
+  problem->M = NM_free(problem->M);
+  problem->H = NM_free(problem->H);
   if (problem->mu) {
     free(problem->mu);
-    problem->mu = NULL;
   }
+  problem->mu = NULL;
+
   if (problem->mu_r) {
     free(problem->mu_r);
-    problem->mu_r = NULL;
   }
+  problem->mu_r = NULL;
 
   if (problem->q) {
     free(problem->q);
-    problem->q = NULL;
   }
+  problem->q = NULL;
+
   if (problem->b) {
     free(problem->b);
-    problem->b = NULL;
   }
+  problem->b = NULL;
 
   free(problem);
 }

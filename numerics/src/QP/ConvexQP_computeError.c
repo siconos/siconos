@@ -24,16 +24,16 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for calloc
 
-#include "ConvexQP.h"        // for ConvexQP
+#include "ConvexQP.h"        // IWYU pragma: keep
 #include "NumericsMatrix.h"  // for NM_gemv, NM_tgemv
-#include "SolverOptions.h"   // for SolverOptions
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
+#include "SolverOptions.h"   // IWYU pragma: keep
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
-#include "numerics_verbose.h"
-#include "numerics_errors.h"
-#include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_PRINTF
 
 int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, double tolerance,
                                    SolverOptions *options, double norm, double *error) {
@@ -109,6 +109,7 @@ int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, 
   *error = 0.;
 
   if (!options->dWork || options->dWorkSize < 2 * m + n) {
+    if (options->dWork) free(options->dWork);
     options->dWork = (double *)calloc(2 * n, sizeof(double));
     options->dWorkSize = 2 * m + n;
   }

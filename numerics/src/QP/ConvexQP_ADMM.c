@@ -20,25 +20,23 @@
 #include <math.h>    // for sqrt, fabs, INFINITY
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
+#include <time.h>
 
-#include "ConvexQP.h"               // for ConvexQP
 #include "ConvexQP_Solvers.h"       // for convexQP_ADMM, convexQP_ADMM_free
 #include "ConvexQP_computeError.h"  // for convexQP_compute_error
 #include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_ADMM_IPARAM_ACCE...
 #include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
 #include "NumericsMatrix.h"         // for NM_gemv, NM_clear, ...
 #include "NumericsSparseMatrix.h"   // for NSM_TRIPLET, NumericsSparseMatrix
+#include "SiconosBlas.h"            // for cblas_daxpy, cblas_dcopy, cblas_d...
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "SiconosBlas.h"       // for cblas_daxpy, cblas_dcopy, cblas_d...
-#include "numerics_verbose.h"
-#include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
-
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
 
 typedef struct {
   double* xi_hat;
@@ -51,6 +49,7 @@ void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options) {
   size_t n = problem->size;
   size_t m = problem->m;
   if (!options->dWork || options->dWorkSize != 2 * m + n) {
+    if (options->dWork) free(options->dWork);
     options->dWork = (double*)calloc(2 * m + n, sizeof(double));
     options->dWorkSize = 2 * m + n;
   }
@@ -69,22 +68,29 @@ void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options) {
   }
 }
 void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWorkSize = 0;
-  }
-  options->dWork = NULL;
-
   if (options->solverData) {
     ConvexQP_ADDM_data* data = (ConvexQP_ADDM_data*)options->solverData;
     free(data->xi_hat);
+    data->xi_hat = NULL;
     free(data->u_hat);
+    data->u_hat = NULL;
     free(data->xi_k);
+    data->xi_k = NULL;
     free(data->u_k);
+    data->u_k = NULL;
     free(data);
   }
   options->solverData = NULL;
+  if (problem->M) problem->M = NM_free(problem->M);
+  if (problem->A) problem->A = NM_free(problem->A);
+  if (problem->q) free(problem->q);
+  if (problem->b) free(problem->b);
+
+  problem->b = NULL;
+  problem->ProjectionOnC = NULL;
+  problem->set = NULL;
 }
+
 static double convexQP_ADMM_select_rho(NumericsMatrix* M, NumericsMatrix* A,
                                        int* is_rho_variable, SolverOptions* restrict options) {
   double rho = 0.0;
@@ -172,7 +178,8 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   double rho = convexQP_ADMM_select_rho(M, A, &is_rho_variable, options);
 
   if (rho <= DBL_EPSILON) {
-    *info = numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be positive");
+    *info =
+        numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be positive");
     return;
   }
 
@@ -186,7 +193,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   double* tmp = options->dWork;
 
   /* Compute M + rho A^T A (storage in M)*/
-  NumericsMatrix* Atrans = 0;
+  NumericsMatrix* Atrans = NULL;
   if (!A) {
     if (M->storageType != A->storageType) {
       *info = numerics_error("ConvexQP_ADMM", "M and A must have the same storage");
@@ -391,9 +398,10 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       cblas_dcopy(m, xi_k, 1, xi_hat, 1);
       cblas_dcopy(m, u_k, 1, u_hat, 1);
     } else {
-      *info = numerics_error("convexqp_admm",
-                     " options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] value is "
-                     "not recognize");
+      *info = numerics_error(
+          "convexqp_admm",
+          " options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] value is "
+          "not recognize");
       return;
     }
 
@@ -484,6 +492,8 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     *info = hasNotConverged;
   }
 
+  W = NM_free(W);
+
   /* check the full criterion */
   /* **** Criterium convergence **** */
   convexQP_compute_error(problem, z, xi, w, u, tolerance, rho, options, norm_q, norm_b,
@@ -524,10 +534,11 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     convexQP_ADMM_free(problem, options);
   }
 
-  NM_free(W);
   if (AisIdentity) {
-    NM_free(A);
-    free(b);
+    A = NULL;
+    // NM_free(A);
+    b = NULL;  // free(b);
+  } else {
     if (Atrans) NM_free(Atrans);
   }
 
@@ -561,7 +572,8 @@ static int convexqp_admm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int convexqp_admm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int convexqp_admm_solve_wrap(void* problem, double* z, double* w,
+                                    SolverOptions* options) {
   int info = NUMERICS_OK;
   /* ADMM requires additional workspace for xi and u */
   ConvexQP* cqp = (ConvexQP*)problem;
@@ -580,11 +592,8 @@ static void convexqp_admm_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_CONVEXQP_ADMM, "CONVEXQP_ADMM",
                 "Alternating Direction Method of Multipliers for Convex QP",
-                convexqp_admm_init_wrap,
-                convexqp_admm_solve_wrap,
-                convexqp_admm_free_wrap,
-                NULL,  /* error function */
-                convexQP_ADMM_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                convexqp_admm_init_wrap, convexqp_admm_solve_wrap, convexqp_admm_free_wrap,
+                NULL,                            /* error function */
+                convexQP_ADMM_set_default, 1000, /* default_max_iter */
+                1e-6,                            /* default_tol */
+                0 /* is_local_solver */);

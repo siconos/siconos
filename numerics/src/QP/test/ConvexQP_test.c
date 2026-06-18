@@ -211,8 +211,9 @@ static int test_2(void) {
   }
 
   solver_options_delete(options);
-  free(q);
-  NM_free(M);
+  // cqp.q = NULL;
+  // free(q);
+  // NM_free(M);
   return info;
 }
 
@@ -312,10 +313,10 @@ static int test_3(void) {
   }
 
   solver_options_delete(options);
-  free(q);
-  free(b);
-  NM_free(A);
-  NM_free(M);
+  //  free(q);
+  // free(b);
+  // NM_free(A);
+  // NM_free(M);
   return info;
 }
 
@@ -414,10 +415,10 @@ static int test_4(void) {
   }
 
   solver_options_delete(options);
-  free(q);
-  free(b);
-  NM_free(M);
-  NM_free(A);
+  // free(q);
+  // free(b);
+  // NM_free(M);
+  // NM_free(A);
   return info;
 }
 
@@ -516,10 +517,10 @@ static int test_5(void) {
   }
 
   solver_options_delete(options);
-  free(b);
-  free(q);
-  NM_free(A);
-  NM_free(M);
+  // free(b);
+  // free(q);
+  // NM_free(A);
+  // NM_free(M);
   return info;
 }
 

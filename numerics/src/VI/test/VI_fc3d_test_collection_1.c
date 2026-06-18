@@ -114,7 +114,11 @@ static int test_0(void) {
   }
 
   solver_options_delete(options);
-  free(problem);
+  pb->fc3d = NULL;
+  free(pb);
+
+  frictionContactProblem_free(problem);
+
   free(x);
   free(w);
 
@@ -200,7 +204,9 @@ static int test_1(void) {
   }
 
   solver_options_delete(options);
-  free(problem);
+  pb->fc3d = NULL;
+  free(pb);
+  frictionContactProblem_free(problem);
   free(x);
   free(w);
 
@@ -285,8 +291,9 @@ static int test_2(void) {
   }
 
   solver_options_delete(options);
-  options = NULL;
-  free(problem);
+  pb->fc3d = NULL;
+  free(pb);
+  frictionContactProblem_free(problem);
   free(x);
   free(w);
 

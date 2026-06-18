@@ -145,6 +145,7 @@ void SiconosMatrixTest::testfillTriplet() {
     if (i == 2 && j == 1 && fabs(x + 3.0) < 1e-12) found_2_1 = true;
     if (i == 1 && j == 2 && fabs(x - 2.0) < 1e-12) found_1_2 = true;
   }
+  cs_spfree(triplet2);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testfillTriplet : ", found_0_0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testfillTriplet : ", found_2_1, true);

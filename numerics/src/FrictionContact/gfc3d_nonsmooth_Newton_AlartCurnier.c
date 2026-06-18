@@ -426,9 +426,14 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
     options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 1;
   }
 
-  assert(options->dWork != NULL);
   assert(options->iWork != NULL);
-
+  size_t required_size = (size_t)(8 * m + 5 * problem_size);
+  if (!options->dWork || options->dWorkSize < required_size) {
+    double *p = (double *)realloc(options->dWork, required_size * sizeof(double));
+    if (!p) return numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier", "bad alloc");
+    options->dWork = p;
+    options->dWorkSize = required_size;
+  }
   double *F = options->dWork;
   double *A = F + m;
   double *B = A + 3 * m;

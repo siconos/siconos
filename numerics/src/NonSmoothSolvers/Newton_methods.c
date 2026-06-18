@@ -24,17 +24,16 @@
 #include <stdio.h>   // for fprintf, stderr
 #include <stdlib.h>  // for free, calloc, malloc, getenv, atoi
 
-#include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
-#include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
-#include "NumericsMatrix.h"    // for NM_LU_solve, NM_tgemv, NM_duplicate, NM_clear
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
-#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
-#include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
+#include "ArmijoSearch.h"     // for linesearch_Armijo2, armijo_extra_params
+#include "GoldsteinSearch.h"  // for goldstein_extra_params, search_Goldste...
+#include "NumericsMatrix.h"   // for NM_LU_solve, NM_tgemv, NM_duplicate, NM_clear
+#include "SiconosBlas.h"      // for cblas_dcopy, cblas_dnrm2, cblas_dscal
+#include "SolverOptions.h"    // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "hdf5_logger.h"      // for SN_logh5_scalar_double, SN_logh5_vec_d...
+#include "line_search.h"      // for search_data, fill_nm_data, free_ls_data
 #include "numerics_verbose.h"
-#include "numerics_errors.h"
-#include "siconos_debug.h"     // for DEBUG_PRINT
-#include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
+#include "siconos_debug.h"  // for DEBUG_PRINT
+#include "sn_logger.h"      // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
@@ -529,9 +528,11 @@ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat) {
 
   if (!options->solverData) {
     options->solverData = malloc(sizeof(newton_LSA_data));
-    newton_LSA_data* sd = (newton_LSA_data*)options->solverData;
-    sd->H = NM_duplicate(mat);
+    ((newton_LSA_data*)options->solverData)->keep = false;
   }
+
+  newton_LSA_data* sd = (newton_LSA_data*)options->solverData;
+  sd->H = NM_duplicate(mat);
 }
 
 void newton_LSA_free_solverOptions(SolverOptions* options) {
@@ -543,9 +544,11 @@ void newton_LSA_free_solverOptions(SolverOptions* options) {
   if (options->solverData) {
     newton_LSA_data* sd = (newton_LSA_data*)options->solverData;
     assert(sd->H);
-    NM_clear(sd->H);
-    free(sd->H);
-    free(sd);
-    options->solverData = NULL;
+    sd->H = NM_free(sd->H);
+
+    if (!sd->keep) {
+      free(options->solverData);
+      options->solverData = NULL;
+    }
   }
 }

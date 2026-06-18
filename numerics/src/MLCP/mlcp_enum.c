@@ -377,6 +377,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double* z, double* w,
           mlcp_enum_display_solution(u, v, w_e, w_i, n, m, n_row);
         }
         numerics_printf_verbose(1, "mlcp_enum END");
+        free(enum_struct);
         return;
       }
     } else {
@@ -384,6 +385,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double* z, double* w,
     }
   }
   *info = 1;
+  free(enum_struct);
   numerics_printf_verbose(1, "mlcp_enum failed nbSol=%i!\n", nbSol);
 }
 

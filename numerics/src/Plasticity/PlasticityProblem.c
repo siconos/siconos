@@ -336,11 +336,7 @@ PlasticityProblem *plasticity_new_from_filename(const char *filename) {
 
 void plasticityProblem_free(PlasticityProblem *problem) {
   assert(problem);
-  if (problem->M) {
-    NM_clear(problem->M);
-    free(problem->M);
-    problem->M = NULL;
-  }
+  problem->M = NM_free(problem->M);
 
   /* Free model-specific data based on model_type */
   switch (problem->model_type) {
@@ -349,12 +345,12 @@ void plasticityProblem_free(PlasticityProblem *problem) {
       if (model) {
         if (model->theta) {
           free(model->theta);
-          model->theta = NULL;
         }
+        model->theta = NULL;
         if (model->eta) {
           free(model->eta);
-          model->eta = NULL;
         }
+        model->eta = NULL;
         free(model);
         problem->model.drucker_prager = NULL;
       }
@@ -365,8 +361,8 @@ void plasticityProblem_free(PlasticityProblem *problem) {
       if (model) {
         if (model->sigma_y) {
           free(model->sigma_y);
-          model->sigma_y = NULL;
         }
+        model->sigma_y = NULL;
         free(model);
         problem->model.von_mises = NULL;
       }

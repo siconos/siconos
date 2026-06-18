@@ -25,14 +25,12 @@
 #include "SiconosBlas.h"                         // for cblas_daxpy, cblas_d...
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VI_cst.h"                              // for SICONOS_VI_IPARAM_ER...
-#include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -471,32 +469,27 @@ void variationalInequality_ExtraGradient_set_default(SolverOptions *options) {
  * ===========================================================================
  */
 
-static int vi_eg_init_wrap(void* problem, SolverOptions* options) {
+static int vi_eg_init_wrap(void *problem, SolverOptions *options) {
   /* set_default already called by solver_options_create */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int vi_eg_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
+static int vi_eg_solve_wrap(void *problem, double *x, double *F, SolverOptions *options) {
   int info = NUMERICS_OK;
-  variationalInequality_ExtraGradient((VariationalInequality*)problem, x, F, &info, options);
+  variationalInequality_ExtraGradient((VariationalInequality *)problem, x, F, &info, options);
   return info;
 }
 
-static void vi_eg_free_wrap(void* problem, SolverOptions* options) {
+static void vi_eg_free_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_VI_EG,
-                "VI_EG",
-                "Extra Gradient for Variational Inequality",
-                vi_eg_init_wrap,
-                vi_eg_solve_wrap,
-                vi_eg_free_wrap,
-                NULL,
-                variationalInequality_ExtraGradient_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_VI_EG, "VI_EG", "Extra Gradient for Variational Inequality",
+                vi_eg_init_wrap, vi_eg_solve_wrap, vi_eg_free_wrap, NULL,
+                variationalInequality_ExtraGradient_set_default, /* set_default */
+                1000,                                            /* default_max_iter */
+                1e-4,                                            /* default_tol */
+                0 /* is_local_solver */)

@@ -22,8 +22,6 @@
 #include <stdio.h>   // for size_t, printf
 #include <stdlib.h>  // for rand
 
-#include "numerics_errors.h"
-
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 

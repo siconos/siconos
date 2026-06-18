@@ -58,8 +58,8 @@ int main(void) {
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-  SBCM_free_3x3(MC);
-  free(MC);
+  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCK);
+
   free(FC);
 
   return info;

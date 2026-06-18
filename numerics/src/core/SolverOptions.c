@@ -240,9 +240,10 @@ SolverOptions* solver_options_copy(SolverOptions* source) {
   assert(options->numberOfInternalSolvers == source->numberOfInternalSolvers);
   // this assert should be ensured by solver_options_create and initialize.
 
-  for (size_t i = 0; i < options->numberOfInternalSolvers; ++i)
+  for (size_t i = 0; i < options->numberOfInternalSolvers; ++i) {
+    if (options->internalSolvers[i]) solver_options_delete(options->internalSolvers[i]);
     options->internalSolvers[i] = solver_options_copy(source->internalSolvers[i]);
-
+  }
   // Warning pointer links!
   if (source->callback)
     options->callback =

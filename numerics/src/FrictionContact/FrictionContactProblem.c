@@ -159,20 +159,19 @@ FrictionContactProblem* frictionContact_new_from_filename(const char* filename) 
 void frictionContactProblem_free(FrictionContactProblem* problem) {
   assert(problem);
   if (problem->M) {
-    NM_clear(problem->M);
-    free(problem->M);
-    problem->M = NULL;
+    problem->M = NM_free(problem->M);
   }
+  problem->M = NULL;
 
   if (problem->mu) {
     free(problem->mu);
-    problem->mu = NULL;
   }
+  problem->mu = NULL;
 
   if (problem->q) {
     free(problem->q);
-    problem->q = NULL;
   }
+  problem->q = NULL;
 
   free(problem);
 }

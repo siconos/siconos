@@ -90,13 +90,12 @@ int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem) {
   if (problem) {
-    if (problem->M) {
-      problem->M = NM_free(problem->M);
-    }
+    problem->M = NM_free(problem->M);
+
     if (problem->q) {
       free(problem->q);
-      problem->q = NULL;
     }
+    problem->q = NULL;
 
     free(problem);
   }

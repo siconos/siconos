@@ -180,7 +180,7 @@ NumericsMatrix *test_matrix_5() {
   NM_csc(M2);
 
   NM_clearDense(M2);
-  SBM_clear(M2->matrix1, SBM_FREE_BLOCK);
+  SBM_clear(M2->matrix1, SBM_FREE_ALL);
   M2->storageType = NM_SPARSE;
   numericsSparseMatrix(M2)->origin = NSM_CSC;
   return M2;
@@ -191,7 +191,7 @@ NumericsMatrix *test_matrix_6() {
   NM_csc(M4);
 
   NM_clearDense(M4);
-  SBM_clear(M4->matrix1, SBM_FREE_BLOCK);
+  SBM_clear(M4->matrix1, SBM_FREE_ALL);
   M4->storageType = NM_SPARSE;
   numericsSparseMatrix(M4)->origin = NSM_CSC;
 
@@ -492,7 +492,7 @@ int test_SBM_row_permutation(SparseBlockStructuredMatrix *input) {
     curRow += nbRow;
   }
   for (size_t n = 0; n < input->blocksize0[input->blocknumber0 - 1] *
-                                   input->blocksize1[input->blocknumber1 - 1];
+                             input->blocksize1[input->blocknumber1 - 1];
        n++)
     if (fabs(denseMRes[n] - denseM[n]) > 10e-12) {
       info = 1;
@@ -500,7 +500,7 @@ int test_SBM_row_permutation(SparseBlockStructuredMatrix *input) {
     }
 
 clean_mem:
-  SBM_clear(&MRes, SBM_FREE_NONE);
+  SBM_clear(&MRes, SBM_FREE_SIZES);
 
   free(denseM);
   free(denseMRes);
@@ -525,7 +525,7 @@ int test_SBM_column_permutation(SparseBlockStructuredMatrix *M) {
   SBM_column_permutation(colBlockIndex, M, &MRes);
   free(colBlockIndex);
   free(mark);
-  SBM_clear(&MRes, SBM_FREE_NONE);
+  SBM_clear(&MRes, SBM_FREE_SIZES);
   SBM_null(&MRes);
   return 0;
 }

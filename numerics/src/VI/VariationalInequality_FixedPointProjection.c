@@ -25,14 +25,12 @@
 #include "SiconosBlas.h"                         // for cblas_daxpy, cblas_d...
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VI_cst.h"                              // for SICONOS_VI_DPARAM...
-#include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_errors.h"
 
 static int determine_convergence(double error, double *tolerance, int iter,
                                  SolverOptions *options, VariationalInequality *problem,
@@ -47,7 +45,7 @@ static int determine_convergence(double error, double *tolerance, int iter,
           "Residual = %14.7e < %7.3e\n",
           iter, error, *tolerance);
     double absolute_error = 0.0;
-    variationalInequality_computeError(problem, z, w, *tolerance, options, &absolute_error);
+    // variationalInequality_computeError(problem, z, w, *tolerance, options, &absolute_error);
     if (verbose > 0)
       printf("--------------  VI - Fixed Point Projection (FPP)- Full error criterion =  %e\n",
              absolute_error);
@@ -511,32 +509,28 @@ void variationalInequality_FixedPointProjection_set_default(SolverOptions *optio
  * ===========================================================================
  */
 
-static int vi_fpp_init_wrap(void* problem, SolverOptions* options) {
+static int vi_fpp_init_wrap(void *problem, SolverOptions *options) {
   /* set_default already called by solver_options_create */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int vi_fpp_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
+static int vi_fpp_solve_wrap(void *problem, double *x, double *F, SolverOptions *options) {
   int info = NUMERICS_OK;
-  variationalInequality_FixedPointProjection((VariationalInequality*)problem, x, F, &info, options);
+  variationalInequality_FixedPointProjection((VariationalInequality *)problem, x, F, &info,
+                                             options);
   return info;
 }
 
-static void vi_fpp_free_wrap(void* problem, SolverOptions* options) {
+static void vi_fpp_free_wrap(void *problem, SolverOptions *options) {
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_VI_FPP,
-                "VI_FPP",
-                "Fixed Point Projection for Variational Inequality",
-                vi_fpp_init_wrap,
-                vi_fpp_solve_wrap,
-                vi_fpp_free_wrap,
-                NULL,
-                variationalInequality_FixedPointProjection_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_VI_FPP, "VI_FPP", "Fixed Point Projection for Variational Inequality",
+                vi_fpp_init_wrap, vi_fpp_solve_wrap, vi_fpp_free_wrap, NULL,
+                variationalInequality_FixedPointProjection_set_default, /* set_default */
+                1000,                                                   /* default_max_iter */
+                1e-4,                                                   /* default_tol */
+                0 /* is_local_solver */)

@@ -43,13 +43,6 @@
 #include "mlcp_cst.h"                      // for SICONOS_MLCP_ENUM
 #include "pinv.h"                          // for pinv
 
-void _GMPReducedEquality(GenericMechanicalProblem *pInProblem, double *reducedProb,
-                         double *Qreduced, size_t *Me_size, size_t *Mi_size);
-void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, size_t *Me_size,
-                         size_t *Mi_size);
-void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *Mi, double *Qe,
-                     double *Qi, size_t *Me_Size, size_t *Mi_Size);
-
 #ifdef GMP_DEBUG_REDUCED
 static void printDenseMatrice(char *name, FILE *file, double *m, int N, int M) {
   if (file) {
@@ -112,8 +105,8 @@ void gmp_reduced_convert_solution(GenericMechanicalProblem *pInProblem, double *
     curProblem = curProblem->nextProblem;
   }
 }
-void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, size_t *Me_size,
-                         size_t *Mi_size) {
+static void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, size_t *Me_size,
+                                size_t *Mi_size) {
   listNumericsProblem *curProblem = 0;
   (*Me_size) = 0;
   (*Mi_size) = 0;
@@ -130,8 +123,8 @@ void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, size_t *Me_size,
 }
 
 /*mem loc done */
-void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *Mi, double *Qe,
-                     double *Qi, size_t *Me_Size, size_t *Mi_Size) {
+static void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *Mi,
+                            double *Qe, double *Qi, size_t *Me_Size, size_t *Mi_Size) {
   assert(pInProblem->M->storageType);
   // #ifdef TYTYFCRR
   SparseBlockStructuredMatrix *m = pInProblem->M->matrix1;
@@ -198,7 +191,7 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
   SparseBlockStructuredMatrix *Morder = SBM_new();
   SBM_row_permutation(newIndexOfCol, Maux, Morder);
   // free Maux but not the blocks, since they are shared with m and Morder
-  SBM_free(Maux, SBM_FREE_SBM);
+  Maux = SBM_free(Maux, SBM_FREE_KEEP_BLOCK);
 
   /*
     get the permutation indices of col (and row).
@@ -229,7 +222,7 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
     curPos = Morder->blocksize1[numBlockRow] - firtMiLine;
     SBM_row_to_dense(Morder, numBlockRow, Mi, curPos, MiRow);
   }
-  SBM_free(Morder, SBM_FREE_NONE);
+  Morder = SBM_free(Morder, SBM_FREE_KEEP_BLOCK);
 
   curProblem = pInProblem->firstListElem;
   int curBlock = 0;
@@ -300,6 +293,54 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
   free(newIndexOfCol);
   // #endif
 }
+
+static void _GMPReducedEquality(GenericMechanicalProblem *pInProblem, double *reducedProb,
+                                double *Qreduced, size_t *Me_size, size_t *Mi_size) {
+  SparseBlockStructuredMatrix *m = pInProblem->M->matrix1;
+  size_t nbRow = m->blocksize0[m->blocknumber0 - 1];
+  size_t nbCol = m->blocksize1[m->blocknumber1 - 1];
+
+  _GMPReducedGetSizes(pInProblem, Me_size, Mi_size);
+  if (*Me_size == 0) {
+    memcpy(Qreduced, pInProblem->q, (*Mi_size) * sizeof(double));
+    SBM_to_dense(m, reducedProb);
+    return;
+  }
+
+  double *Me = (*Me_size) ? (double *)malloc((*Me_size) * nbCol * sizeof(double)) : 0;
+  double *Mi = (*Mi_size) ? (double *)malloc((*Mi_size) * nbCol * sizeof(double)) : 0;
+  double *Qi = (double *)malloc(nbRow * sizeof(double));
+  buildReducedGMP(pInProblem, Me, Mi, Qreduced, Qi, Me_size, Mi_size);
+
+#ifdef GMP_DEBUG_GMPREDUCED_SOLVE
+  double *Me1 = Me;
+  double *Me2 = Me + (*Me_size) * (*Me_size);
+  double *Mi1 = Mi;
+  double *Mi2 = Mi + (*Mi_size) * (*Me_size);
+  FILE *file = fopen("buildReduced2GMP_output.txt", "w");
+  printf("GMP2Reducedsolve\n");
+  printDenseMatrice("Me1", file, Me1, *Me_size, *Me_size);
+  printDenseMatrice("Me2", file, Me2, *Me_size, *Mi_size);
+  printDenseMatrice("Mi1", file, Mi1, *Mi_size, *Me_size);
+  printDenseMatrice("Mi2", file, Mi2, *Mi_size, *Mi_size);
+  printDenseMatrice("Qe", file, Qreduced, *Me_size, 1);
+  printDenseMatrice("Qi", file, Qi, *Mi_size, 1);
+  fclose(file);
+#endif
+  for (size_t numCol = 0; numCol < nbCol; numCol++) {
+    if (*Me_size)
+      memcpy(reducedProb + numCol * nbRow, Me + numCol * (*Me_size),
+             (*Me_size) * sizeof(double));
+    if (*Mi_size)
+      memcpy(reducedProb + numCol * nbRow + (*Me_size), Mi + numCol * (*Mi_size),
+             (*Mi_size) * sizeof(double));
+  }
+  if (*Mi_size) memcpy(Qreduced + (*Me_size), Qi, (*Mi_size) * sizeof(double));
+  free(Me);
+  free(Mi);
+  free(Qi);
+}
+
 /*
  * The equalities are assamblate in one block.
  *
@@ -588,53 +629,6 @@ void gmp_reduced_solve(GenericMechanicalProblem *pInProblem, double *reaction,
   free(Mi1pseduInvMe1);
   //  GenericMechanicalProblem GMPOutProblem;
   //  SparseBlockStructuredMatrix mOut;
-}
-
-void _GMPReducedEquality(GenericMechanicalProblem *pInProblem, double *reducedProb,
-                         double *Qreduced, size_t *Me_size, size_t *Mi_size) {
-  SparseBlockStructuredMatrix *m = pInProblem->M->matrix1;
-  size_t nbRow = m->blocksize0[m->blocknumber0 - 1];
-  size_t nbCol = m->blocksize1[m->blocknumber1 - 1];
-
-  _GMPReducedGetSizes(pInProblem, Me_size, Mi_size);
-  if (*Me_size == 0) {
-    memcpy(Qreduced, pInProblem->q, (*Mi_size) * sizeof(double));
-    SBM_to_dense(m, reducedProb);
-    return;
-  }
-
-  double *Me = (*Me_size) ? (double *)malloc((*Me_size) * nbCol * sizeof(double)) : 0;
-  double *Mi = (*Mi_size) ? (double *)malloc((*Mi_size) * nbCol * sizeof(double)) : 0;
-  double *Qi = (double *)malloc(nbRow * sizeof(double));
-  buildReducedGMP(pInProblem, Me, Mi, Qreduced, Qi, Me_size, Mi_size);
-
-#ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  double *Me1 = Me;
-  double *Me2 = Me + (*Me_size) * (*Me_size);
-  double *Mi1 = Mi;
-  double *Mi2 = Mi + (*Mi_size) * (*Me_size);
-  FILE *file = fopen("buildReduced2GMP_output.txt", "w");
-  printf("GMP2Reducedsolve\n");
-  printDenseMatrice("Me1", file, Me1, *Me_size, *Me_size);
-  printDenseMatrice("Me2", file, Me2, *Me_size, *Mi_size);
-  printDenseMatrice("Mi1", file, Mi1, *Mi_size, *Me_size);
-  printDenseMatrice("Mi2", file, Mi2, *Mi_size, *Mi_size);
-  printDenseMatrice("Qe", file, Qreduced, *Me_size, 1);
-  printDenseMatrice("Qi", file, Qi, *Mi_size, 1);
-  fclose(file);
-#endif
-  for (size_t numCol = 0; numCol < nbCol; numCol++) {
-    if (*Me_size)
-      memcpy(reducedProb + numCol * nbRow, Me + numCol * (*Me_size),
-             (*Me_size) * sizeof(double));
-    if (*Mi_size)
-      memcpy(reducedProb + numCol * nbRow + (*Me_size), Mi + numCol * (*Mi_size),
-             (*Mi_size) * sizeof(double));
-  }
-  if (*Mi_size) memcpy(Qreduced + (*Me_size), Qi, (*Mi_size) * sizeof(double));
-  free(Me);
-  free(Mi);
-  free(Qi);
 }
 
 void gmp_as_mlcp(GenericMechanicalProblem *pInProblem, double *reaction, double *velocity,

@@ -28,17 +28,17 @@
 #include <time.h>
 
 #include "CSparseMatrix.h"
-#include "NumericsArrays.h"  // for NA_merge_and_sort_sorted_arrays
-#include "SiconosBlas.h"     // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
-#include "SiconosLapack.h"   // for lapack_int, DGETRF, DGETRI
-/* #define DEBUG_NOCOLOR 1 */
-/* #define DEBUG_STDOUT 1 */
-/* #define DEBUG_MESSAGES 1 */
 #include "NM_conversions.h"
 #include "NSSTools.h"          // for min, max
+#include "NumericsArrays.h"    // for NA_merge_and_sort_sorted_arrays
+#include "SiconosBlas.h"       // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
+#include "SiconosLapack.h"     // for lapack_int, DGETRF, DGETRI
 #include "numerics_verbose.h"  // for check_io, numerics_error, numerics_war...
 #include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
 #include "safe_casts.h"
+/* #define DEBUG_NOCOLOR 1 */
+/* #define DEBUG_STDOUT 1 */
+/* #define DEBUG_MESSAGES 1 */
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
 
 #ifdef DEBUG_MESSAGES
@@ -101,16 +101,15 @@ void SBM_clear(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level) {
    the way the structure is filled in.
   */
   if (!sbm) return;
-
-  if (sbm->blocksize0) {
-    free(sbm->blocksize0);
+  if (level & SBM_FREE_SIZES) {
     if (sbm->blocksize0 == sbm->blocksize1) {
-      sbm->blocksize1 = NULL;
+      /* same pointer, free only once */
+      if (sbm->blocksize0) free(sbm->blocksize0);
+    } else {
+      if (sbm->blocksize0) free(sbm->blocksize0);
+      if (sbm->blocksize1) free(sbm->blocksize1);
     }
     sbm->blocksize0 = NULL;
-  }
-  if (sbm->blocksize1) {
-    free(sbm->blocksize1);
     sbm->blocksize1 = NULL;
   }
 
@@ -605,9 +604,9 @@ static SparseBlockStructuredMatrix* SBM_calloc_for_add(
   return C;
 }
 
-void SBM_add_without_allocation(SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix* B,
-                                double alpha, double beta, SparseBlockStructuredMatrix* C,
-                                double gamma) {
+void SBM_add_without_allocation(const SparseBlockStructuredMatrix* A,
+                                const SparseBlockStructuredMatrix* B, double alpha,
+                                double beta, SparseBlockStructuredMatrix* C, double gamma) {
   DEBUG_BEGIN("SBM_add_without_allocation(...)\n");
   assert(SBM_check_compatibility_for_add(A, B) &&
          "Non compatible matrices or blocks sizes.\n");
@@ -706,8 +705,8 @@ void SBM_scal(double alpha, SparseBlockStructuredMatrix* A) {
   DEBUG_END("SBM_scal(...)\n");
 }
 
-SparseBlockStructuredMatrix* SBM_add(SparseBlockStructuredMatrix* A,
-                                     SparseBlockStructuredMatrix* B, double alpha,
+SparseBlockStructuredMatrix* SBM_add(const SparseBlockStructuredMatrix* A,
+                                     const SparseBlockStructuredMatrix* B, double alpha,
                                      double beta) {
   /*     Check the compatibility of the number and the sizes of blocks */
   int compat = SBM_check_compatibility_for_add(A, B);
@@ -1942,25 +1941,23 @@ size_t* SBM_compute_diagonal_block_indices(SparseBlockStructuredMatrix* const M)
   if (!M) return NULL;
   if (M->diagonal_blocks) return M->diagonal_blocks;
 
-  size_t* diagonal_blocks =
-      (size_t*)malloc(M->blocksize0[M->blocknumber0 - 1] * sizeof(size_t));
+  M->diagonal_blocks = (size_t*)malloc(M->blocksize0[M->blocknumber0 - 1] * sizeof(size_t));
   for (size_t currentRowNumber = 0; currentRowNumber < M->filled1 - 1; ++currentRowNumber) {
     for (size_t blockNum = M->index1_data[currentRowNumber];
          blockNum < M->index1_data[currentRowNumber + 1]; ++blockNum) {
       if (M->index2_data[blockNum] == currentRowNumber) {
-        diagonal_blocks[currentRowNumber] = blockNum;
+        M->diagonal_blocks[currentRowNumber] = blockNum;
         break;
       }
       /* Warning: no check if the diagonal block does not exists */
     }
   }
-  M->diagonal_blocks = diagonal_blocks;
-  return diagonal_blocks;
+  return M->diagonal_blocks;
 }
 
 size_t SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, size_t row) {
-  size_t* diagonal_blocks = SBM_compute_diagonal_block_indices(M);
-  return diagonal_blocks[row];
+  SBM_compute_diagonal_block_indices(M);
+  return M->diagonal_blocks[row];
 
   /* /\* Look for the first block of row number num *\/ */
   /* size_t pos; */
@@ -2105,89 +2102,135 @@ double SBM_get_value(const SparseBlockStructuredMatrix* const M, size_t row, siz
   return M->block[blockNumber][rowpos + colpos * nbRows];
 }
 
-int SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B,
-             size_t copyBlock) {
-  CHECK_NULL(A);
-  CHECK_NULL(B);
+// Test the SB matrix structure.
+// Useful to avoid reallocation in SBM copy
+static bool SBM_has_same_structure(const SparseBlockStructuredMatrix* const A,
+                                   const SparseBlockStructuredMatrix* const B) {
+  assert(A);
+  assert(B);
 
-  int need_blocks = 0;
+  if (A->nbblocks != B->nbblocks) return false;
+  if (A->blocknumber0 != B->blocknumber0) return false;
+  if (A->blocknumber1 != B->blocknumber1) return false;
+  if (A->filled1 != B->filled1) return false;
+  if (A->filled2 != B->filled2) return false;
 
-  if (B->nbblocks < A->nbblocks) {
-    need_blocks = 1;
-    for (unsigned i = 0; i < B->nbblocks; ++i) {
-      free(B->block[i]);
-      B->block[i] = NULL;
-    }
+  if (memcmp(A->blocksize0, B->blocksize0, A->blocknumber0 * sizeof(size_t))) return false;
+  if (memcmp(A->blocksize1, B->blocksize1, A->blocknumber1 * sizeof(size_t))) return false;
+  if (memcmp(A->index1_data, B->index1_data, A->filled1 * sizeof(size_t))) return false;
+  if (memcmp(A->index2_data, B->index2_data, A->filled2 * sizeof(size_t))) return false;
+
+  return true;
+}
+
+void SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B) {
+  assert(A);
+  assert(B);
+
+  bool has_common_struct = SBM_has_same_structure(A, B);
+
+  if (!has_common_struct)  // Then reallocation are required ...
+  {
+    for (size_t i = 0; i < B->nbblocks; ++i) free(B->block[i]);
     B->block = (double**)realloc(B->block, A->nbblocks * sizeof(double*));
+    B->nbblocks = A->nbblocks;
+
+    if (B->blocknumber0 < A->blocknumber0) {
+      B->blocksize0 = (size_t*)realloc(B->blocksize0, A->blocknumber0 * sizeof(size_t));
+    }
+    B->blocknumber0 = A->blocknumber0;
+    memcpy(B->blocksize0, A->blocksize0, A->blocknumber0 * sizeof(size_t));
+
+    if (B->blocknumber1 < A->blocknumber1) {
+      B->blocksize1 = (size_t*)realloc(B->blocksize1, A->blocknumber1 * sizeof(size_t));
+    }
+    B->blocknumber1 = A->blocknumber1;
+    memcpy(B->blocksize1, A->blocksize1, A->blocknumber1 * sizeof(size_t));
+
+    if (B->filled1 < A->filled1) {
+      B->index1_data = (size_t*)realloc(B->index1_data, A->filled1 * sizeof(size_t));
+    }
+    B->filled1 = A->filled1;
+    memcpy(B->index1_data, A->index1_data, A->filled1 * sizeof(size_t));
+
+    if (B->filled2 < A->filled2) {
+      B->index2_data = (size_t*)realloc(B->index2_data, A->filled2 * sizeof(size_t));
+    }
+    B->filled2 = A->filled2;
+    memcpy(B->index2_data, A->index2_data, A->filled2 * sizeof(size_t));
+
+    if (B->diagonal_blocks) {
+      free(B->diagonal_blocks);
+      B->diagonal_blocks = NULL;
+    }
+    if (A->diagonal_blocks) {
+      B->diagonal_blocks =
+          (size_t*)malloc(A->blocksize0[A->blocknumber0 - 1] * sizeof(size_t));
+    }
   }
+
+  for (size_t currentRowNumber = 0; currentRowNumber < A->filled1 - 1; ++currentRowNumber) {
+    size_t nbRows = A->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0) nbRows -= A->blocksize0[currentRowNumber - 1];
+
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum) {
+      assert(blockNum < A->filled2);
+      size_t colNumber = A->index2_data[blockNum];
+      /* Get dim. of the current block */
+
+      size_t nbColumns = A->blocksize1[colNumber];
+      if (colNumber != 0) nbColumns -= A->blocksize1[colNumber - 1];
+
+      if (!has_common_struct) {
+        B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+      }
+      memcpy(B->block[blockNum], A->block[blockNum], nbRows * nbColumns * sizeof(double));
+    }
+  }
+
+  if (A->diagonal_blocks) {
+    memcpy(B->diagonal_blocks, A->diagonal_blocks,
+           A->blocksize0[A->blocknumber0 - 1] * sizeof(size_t));
+  }
+}
+
+void SBM_copy_and_link(const SparseBlockStructuredMatrix* const A,
+                       SparseBlockStructuredMatrix* B) {
+  assert(A);
+  assert(B);
+  B->block = (double**)realloc(B->block, A->nbblocks * sizeof(double*));
+  // Rq: no test on nbblocks, we trust realloc to optimise the behavior, whatever B->nbblocks
+  // is
   B->nbblocks = A->nbblocks;
 
-  if (B->blocknumber0 < A->blocknumber0) {
-    B->blocksize0 = (size_t*)realloc(B->blocksize0, A->blocknumber0 * sizeof(size_t));
-  }
+  for (size_t n = 0; n < A->nbblocks; n++) B->block[n] = A->block[n];
+
+  B->blocksize0 = (size_t*)realloc(B->blocksize0, A->blocknumber0 * sizeof(size_t));
   B->blocknumber0 = A->blocknumber0;
-
-  if (B->blocknumber1 < A->blocknumber1) {
-    B->blocksize1 = (size_t*)realloc(B->blocksize1, A->blocknumber1 * sizeof(size_t));
-  }
-  B->blocknumber1 = A->blocknumber1;
-
-  if (B->filled1 < A->filled1) {
-    B->index1_data = (size_t*)realloc(B->index1_data, A->filled1 * sizeof(size_t));
-  }
-  B->filled1 = A->filled1;
-
-  if (B->filled2 < A->filled2) {
-    B->index2_data = (size_t*)realloc(B->index2_data, A->filled2 * sizeof(size_t));
-  }
-  B->filled2 = A->filled2;
-
   memcpy(B->blocksize0, A->blocksize0, A->blocknumber0 * sizeof(size_t));
+
+  B->blocksize1 = (size_t*)realloc(B->blocksize1, A->blocknumber1 * sizeof(size_t));
+  B->blocknumber1 = A->blocknumber1;
   memcpy(B->blocksize1, A->blocksize1, A->blocknumber1 * sizeof(size_t));
+
+  B->index1_data = (size_t*)realloc(B->index1_data, A->filled1 * sizeof(size_t));
+  B->filled1 = A->filled1;
   memcpy(B->index1_data, A->index1_data, A->filled1 * sizeof(size_t));
+
+  B->index2_data = (size_t*)realloc(B->index2_data, A->filled2 * sizeof(size_t));
+  B->filled2 = A->filled2;
   memcpy(B->index2_data, A->index2_data, A->filled2 * sizeof(size_t));
-
-  if (copyBlock) {
-    size_t currentRowNumber;
-    size_t colNumber;
-    size_t nbRows, nbColumns;
-    for (currentRowNumber = 0; currentRowNumber < A->filled1 - 1; ++currentRowNumber) {
-      for (size_t blockNum = A->index1_data[currentRowNumber];
-           blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum) {
-        assert(blockNum < A->filled2);
-        colNumber = A->index2_data[blockNum];
-        /* Get dim. of the current block */
-        nbRows = A->blocksize0[currentRowNumber];
-        if (currentRowNumber != 0) nbRows -= A->blocksize0[currentRowNumber - 1];
-        nbColumns = A->blocksize1[colNumber];
-
-        if (colNumber != 0) nbColumns -= A->blocksize1[colNumber - 1];
-
-        if (need_blocks) {
-          B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
-        }
-
-        for (size_t i = 0; i < nbRows * nbColumns; i++) {
-          B->block[blockNum][i] = A->block[blockNum][i];
-        }
-      }
-    }
-  } else {
-    for (size_t n = 0; n < B->nbblocks; n++) B->block[n] = A->block[n];
-  }
 
   if (B->diagonal_blocks) {
     free(B->diagonal_blocks);
     B->diagonal_blocks = NULL;
   }
-
   if (A->diagonal_blocks) {
     B->diagonal_blocks = (size_t*)malloc(A->blocksize0[A->blocknumber0 - 1] * sizeof(size_t));
     memcpy(B->diagonal_blocks, A->diagonal_blocks,
            A->blocksize0[A->blocknumber0 - 1] * sizeof(size_t));
   }
-
-  return 0;
 }
 
 int SBM_transpose(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix* B) {
@@ -2511,15 +2554,8 @@ int sparseMatrixNext(sparse_matrix_iterator* it) {
 }
 
 void SBCM_null(SparseBlockCoordinateMatrix* MC) {
-  MC->blocknumber0 = 0;
-  MC->blocknumber1 = 0;
-  MC->nbblocks = 0;
-
-  MC->row = NULL;
-  MC->column = NULL;
-  MC->blocksize0 = NULL;
-  MC->blocksize1 = NULL;
-  MC->block = NULL;
+  assert(MC);
+  *MC = (SparseBlockCoordinateMatrix){0};
 }
 
 SparseBlockCoordinateMatrix* SBCM_new(void) {
@@ -2555,12 +2591,62 @@ SparseBlockCoordinateMatrix* SBCM_new_3x3(size_t m, size_t n, size_t nbblocks, s
   return MC;
 }
 
-void SBCM_free_3x3(SparseBlockCoordinateMatrix* MC) {
-  free(MC->block);
-  free(MC->blocksize0);
-  free(MC->blocksize1);
-  free(MC->row);
-  free(MC->column);
+void SBCM_clear_block(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level) {
+  assert(sbm);
+  if (sbm->block) {
+    for (size_t i = 0; i < sbm->nbblocks; i++) {
+      if (sbm->block[i]) {
+        if (level & SBM_FREE_BLOCK) {
+          free(sbm->block[i]);
+        }
+        sbm->block[i] = NULL;
+        // Warning: if not SBM_FREE_BLOCK, we assume the memory of block[i] is
+        // owned and handled elsewhere
+      }
+    }
+    free(sbm->block);
+  }
+  sbm->block = NULL;
+}
+
+void SBCM_clear(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level) {
+  if (!sbm) return;
+  if (level & SBM_FREE_SIZES) {
+    if (sbm->blocksize0 == sbm->blocksize1) {
+      /* same pointer, free only once */
+      if (sbm->blocksize0) free(sbm->blocksize0);
+    } else {
+      if (sbm->blocksize0) free(sbm->blocksize0);
+      if (sbm->blocksize1) free(sbm->blocksize1);
+    }
+    sbm->blocksize0 = NULL;
+    sbm->blocksize1 = NULL;
+  }
+
+  SBCM_clear_block(sbm, level);
+
+  if (sbm->row) {
+    free(sbm->row);
+    sbm->row = NULL;
+  }
+
+  if (sbm->column) {
+    free(sbm->column);
+    sbm->column = NULL;
+  }
+  sbm->blocknumber0 = 0;
+  sbm->blocknumber1 = 0;
+  sbm->nbblocks = 0;
+}
+
+SparseBlockCoordinateMatrix* SBCM_free(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level) {
+  if (!sbm) return NULL;
+
+  SBCM_clear(sbm, level);
+  if (level & SBM_FREE_SBM) {
+    free(sbm);
+  }
+  return NULL;
 }
 
 /* quite obvious alg but in case of incomprehension see Nathan Bell coo_tocsr */
@@ -2611,13 +2697,6 @@ SparseBlockStructuredMatrix* SBCM_to_SBM(SparseBlockCoordinateMatrix* MC) {
   }
 
   return M;
-}
-
-void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M) {
-  free(M->index1_data);
-  free(M->index2_data);
-  free(M->block);
-  free(M);
 }
 
 int SBM_from_dense(size_t blocksize, size_t n, size_t m, const double* const denseMat,
@@ -3331,7 +3410,7 @@ void SBM_column_permutation(size_t* colIndex, SparseBlockStructuredMatrix* A,
   SBM_write_in_fileForScilab(A, titi);
   fclose(titi);
 #endif
-  SBM_copy(A, C, 0);
+  SBM_copy_and_link(A, C);  // A and C share block pointers
   for (size_t n = 0; n < C->nbblocks; n++) {
     C->index2_data[n] = colIndex[C->index2_data[n]];
   }
