@@ -157,11 +157,22 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
 }
 
 std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMeshFromGMSH2(
-    std::string gmsh_filename) {
-  std::ifstream in(gmsh_filename);
-  if (!in.is_open()) {
-    throw std::runtime_error("Cannot open file: " + gmsh_filename);
+    const std::string& input, bool is_filename) {
+  std::ifstream file_stream;
+  std::istringstream string_stream;
+
+  if (is_filename) {
+    file_stream.open(input);
+    if (!file_stream.is_open()) {
+      throw std::runtime_error("Cannot open file: " + input);
+    }
+  } else {
+    string_stream.str(input);
   }
+
+  // Create a reference to the appropriate stream
+  std::istream& in = is_filename ? static_cast<std::istream&>(file_stream)
+                                 : static_cast<std::istream&>(string_stream);
 
   // char str[500];
   float gmsh_version;
@@ -310,7 +321,9 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
     }
   }
 
-  in.close();
+  if (is_filename) {
+    file_stream.close();
+  }
 
   return std::make_shared<Mesh>(m, vertices, elements, physical_entities);
 }
