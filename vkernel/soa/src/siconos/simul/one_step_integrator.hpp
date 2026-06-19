@@ -48,7 +48,7 @@ struct one_step_integrator {
 
     using elements_t = decltype(mp::unpack(
         mp::filter(all_elements_t{},
-                   [](const auto &h) constexpr {
+                   [](const auto& h) constexpr {
                      using t = typename std::decay_t<decltype(h)>::type;
                      return mp::bool_c<!std::derived_from<t, empty_item>>;
                    }),
@@ -97,8 +97,7 @@ struct one_step_integrator {
 
       void initialize(auto step)
       {
-        mp::for_each(elements(),
-                     [&](auto elem) { elem.initialize(step); });
+        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }
@@ -121,7 +120,7 @@ struct one_step_integrator {
       }
 
       template <size_t N, typename Func>
-      decltype(auto) visit_element(Func &&func)
+      decltype(auto) visit_element(Func&& func)
       {
         return func(std::get<N>(elements()));
       }
@@ -256,14 +255,21 @@ struct one_step_integrator {
       {
         if constexpr (with_k_matrix()) {
           // stiffness matrix is present
-          algebra::add(1., mass_matrix_assembled(),
-                       time_step * time_step * theta() * theta(),
-                       k_matrix_assembled(), iteration_matrix_assembled());
+          if (algebra::nnz(k_matrix_assembled()) == 0) {
+            // fem systems are not involved in contact
+            compute_w_matrix_with_diagonal_mass_matrix();
+          }
+          else {
+            // fem systems are involved in contact
+            algebra::add(1., mass_matrix_assembled(),
+                         time_step * time_step * theta() * theta(),
+                         k_matrix_assembled(), iteration_matrix_assembled());
 
-          // H (M+ h^2 \theta^2 K) H^t
-          compute_kkt_matrix(h_matrix_assembled(),
-                             iteration_matrix_assembled(),
-                             w_matrix_assembled());
+            // H (M+ h^2 \theta^2 K)^-1 H^t
+            compute_kkt_matrix(h_matrix_assembled(),
+                               iteration_matrix_assembled(),
+                               w_matrix_assembled());
+          }
         }
         else {
           // fem systems are not present in data
@@ -284,22 +290,28 @@ struct one_step_integrator {
         // assumption: compile time element is the first one.
         auto ct_elem = std::get<0>(elements());
 
-        auto &&h_mat = ct_elem.h_matrix_assembled();
-        auto &&m_mat = ct_elem.mass_matrix_assembled();
-        auto &&w_mat = ct_elem.w_matrix_assembled();
+        auto&& h_mat = ct_elem.h_matrix_assembled();
+        auto&& m_mat = ct_elem.mass_matrix_assembled();
+        auto&& w_mat = ct_elem.w_matrix_assembled();
 
         resize(tmp_matrix, size1(h_mat), size0(h_mat));
-        solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+        if constexpr (with_k_matrix()) {
+          solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat,
+                                             tmp_matrix);
+        }
+        else {
+          solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+        }
         prod(h_mat, tmp_matrix, w_mat);
       }
 
       void compute_input(auto time_step)
       {
-        auto &h_matrix = h_matrix_assembled();
-        auto &lambda = lambda_vector_assembled();
-        auto &p0 = p0_vector_assembled();
-        auto &velo = velocity_vector_assembled();
-        auto &mass_matrix = mass_matrix_assembled();
+        auto& h_matrix = h_matrix_assembled();
+        auto& lambda = lambda_vector_assembled();
+        auto& p0 = p0_vector_assembled();
+        auto& velo = velocity_vector_assembled();
+        auto& mass_matrix = mass_matrix_assembled();
 
         resize(p0, size1(h_matrix));
         resize(velo, size1(h_matrix));
@@ -308,7 +320,12 @@ struct one_step_integrator {
         prodt1(h_matrix, lambda, p0);
 
         if constexpr (with_k_matrix()) {
-          solve_linear_system(iteration_matrix_assembled(), p0, velo);
+          if (algebra::nnz(k_matrix_assembled()) > 0) {
+            solve_linear_system(iteration_matrix_assembled(), p0, velo);
+          }
+          else {
+            solve_linear_system(mass_matrix, p0, velo);
+          }
         }
         else {
           solve_linear_system(mass_matrix, p0, velo);

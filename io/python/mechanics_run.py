@@ -39,6 +39,7 @@ import siconos.integrators as integrators
 # Siconos Mechanics imports
 # import siconos.mechanics.collision.tools as smc_tools
 import siconos.mechanics
+import siconos.mechanics.fem
 import siconos.mechanics.collision
 import siconos.mechanics.joints
 import siconos.mechanics.quaternions
@@ -922,6 +923,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         orientation,
         velocity,
         contactors,
+        material,
+        boundary_conditions,
+        nodal_forces,
         mass,
         given_inertia,
         body_class,
@@ -929,7 +933,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         birth=False,
         number=None,
     ):
-        if mass is None:
+        if material is None and mass is None:
             # a static object
             # for native only plans
             self._static[name] = {
@@ -1027,22 +1031,69 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             flag = "static"
         else:
             # a dynamic object
+            # just one contactor
             ctor = contactors[0]
             # shape = self._shape.get(ctor.shape_name)
             # attrs = self._shape.attributes(ctor.shape_name)
-            initial_pos = np.concatenate([translation, orientation], axis=0)
-            self._q0.append(initial_pos.copy())
-            self._v0.append(velocity)
+            print(material)
             if self.config.backend == "vnative":
                 body_class = self.config.default_body_class
+                if self._shape.attributes(ctor.shape_name)["type"] == "msh":
+                    # a gmsh mesh
+                    mesh_data = self._shape._io.shapes()[ctor.shape_name][:][0].decode('utf-8')
+                    
+                    fem_material = siconos.mechanics.fem.Material(material[0],
+                                                                  material[1],
+                                                                  material[2])
+                    mesh = siconos.mechanics.fem.createMeshFromGMSH2(
+                        mesh_data,
+                        is_filename=False)
+                    tags = siconos.mechanics.fem.default_tags
+                    material_tag = tags[siconos.mechanics.fem.MeshTags.bulk_material]
+                    materials = {material_tag: fem_material}
+                    fesolid = siconos.mechanics.fem.FiniteElementLinearTIDS(mesh, materials)
+
+                    if boundary_conditions is not None:
+                        fesolid.applyDirichletBoundaryConditions(tags[siconos.mechanics.fem.MeshTags.boundary_conditions], boundary_conditions)
+
+                    if nodal_forces is not None:
+                        fesolid.applyNodalForces(tags[siconos.mechanics.fem.MeshTags.applied_forces], nodal_forces)
+
+                    body = body_class()
+                    body.init_fem(mesh_data)
+
+                    body.handle().set_mass_matrix(fesolid.mass())
+                    body.handle().set_k_matrix(fesolid.stiffnessMatrix())
+                    body.handle().set_q(fesolid.q())
+                    body.handle().set_q0(fesolid.q())
+                    body.handle().set_fext(fesolid.fext_vector())
+                    body.handle().set_velocity(fesolid.velocity())
+                    body.handle().set_bc_velocities_0(boundary_conditions)
+                    
+                elif self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
+                    initial_pos = np.concatenate([translation, orientation], axis=0)
+                    self._q0.append(initial_pos.copy())
+                    self._v0.append(velocity)
+
+                    body = body_class()
+                    radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+                    body.init_disk(radius, mass, self._q0[-1], self._v0[-1])
+                    self._set_external_forces(body)
+                else:
+                    print("vnative body error!")
+                    exit(1)
             else:
+                initial_pos = np.concatenate([translation, orientation], axis=0)
+                self._q0.append(initial_pos.copy())
+                self._v0.append(velocity)
                 if self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                     body_class = siconos.mechanics.collision.Disk
                 elif self._shape.attributes(ctor.shape_name)["primitive"] == "Circle":
                     body_class = siconos.mechanics.collision.Circle
-            radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
-            body = body_class(radius, mass, self._q0[-1], self._v0[-1])
-            self._set_external_forces(body)
+                radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+                body = body_class(radius, mass, self._q0[-1], self._v0[-1])
+                self._set_external_forces(body)
+                
             self._nsds.insertDynamicalSystem(body)
             if birth and self._verbose:
                 self.print_verbose(
@@ -1789,15 +1840,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             obj.attrs.get("center_of_mass", [0, 0, 0]), dtype=np.float64
         )
 
+        material = obj.attrs.get("material", None)
+        boundary_conditions = obj.attrs.get("boundary_conditions", None)
+        nodal_forces = obj.attrs.get("nodal_forces", None)
+        
         mass = obj.attrs.get("mass", None)
         inertia = obj.attrs.get("inertia", None)
 
-        if mass is None:
+        if material is not None:
+            self.print_verbose("              material is defined")
+        
+        if material is None and mass is None:
             self.print_verbose("              static object")
             self.print_verbose(
                 "              position", np.concatenate([translation, orientation])
             )
-        else:
+        elif material is None:
             self.print_verbose("              dynamic object")
             self.print_verbose(
                 "              position", np.concatenate([translation, orientation])
@@ -1884,6 +1942,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 orientation,
                 velocity,
                 contactors,
+                material,
+                boundary_conditions,
+                nodal_forces,
                 mass,
                 inertia,
                 body_class,
@@ -2267,6 +2328,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._p0s_data.resize(current_line + p0s.shape[0], 0)
             self._p0s_data[current_line:, :] = p0s
 
+    def output_displacements(self):
+        # Get displacements map from C++
+        disp_map = self._io.displacements(self._nsds)
+
+        if disp_map is not None:
+            # For each FEM system
+            for ds_id, displacements in disp_map.items():
+                # Create or get dataset for this system
+                dataset_name = f"fem_displacements_{ds_id}"
+                if dataset_name not in self._data:
+                    # Create new dataset with variable columns
+                    max_cols = 2 + len(displacements)  # time + ds_id + displacements
+                    dataset = self._data.create_dataset(
+                        dataset_name,
+                        (0, max_cols),
+                        maxshape=(None, max_cols),
+                        chunks=True,
+                        compression="gzip"
+                    )
+                    dataset.attrs["dof_count"] = len(displacements)
+                else:
+                    dataset = self._data[dataset_name]
+
+                # Append data
+                current_line = dataset.shape[0]
+                dataset.resize(current_line + 1, 0)
+                dataset[current_line, 0] = self.current_time()  # time
+                dataset[current_line, 1] = ds_id                # system ID
+                dataset[current_line, 2:2+len(displacements)] = displacements
+
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -2280,7 +2371,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Each column corresponds to one DS. First value in the column
         # is the ds number.
         positions = self.get_io_array(self._io.positions(self._nsds))
-
+        
         if positions.shape[0] > 0:
             number_of_ds = positions.shape[0]
             self._dynamic_data.resize(current_line + number_of_ds, 0)
@@ -2606,6 +2697,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def output_results(self, with_timer=False):
         self.log(self.output_static_objects, with_timer)()
 
+        self.log(self.output_displacements, with_timer)()
+        
         self.log(self.output_dynamic_objects, with_timer)()
 
         self.log(self.output_velocities, with_timer)()

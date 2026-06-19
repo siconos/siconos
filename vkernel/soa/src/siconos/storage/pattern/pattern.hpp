@@ -683,8 +683,15 @@ concept without_attached_storages_bindings =
 template <typename Item>
 concept batch_capable = requires { typename Item::batch_capable; };
 
+template <typename Prop>
+concept without_binding = requires { typename Prop::without_binding_t; };
+
+template <typename Item>
+concept empty_item = requires { typename Item::empty_item_t; };
 }  // namespace match
 
-struct empty_item : item {};
+struct empty_item : item {
+  using empty_item_t = void;
+};
 
 }  // namespace siconos::storage::pattern

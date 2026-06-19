@@ -66,6 +66,18 @@ template <typename T>
 concept fixed_size_matrix = fixed_size_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
+concept matrix_1x1_raw = matrix<T> && T::RowsAtCompileTime == 1 && T::ColsAtCompileTime == 1;
+
+template <typename T>
+concept matrix_1x1 = matrix_1x1_raw<std::decay_t<T>>;
+
+template <typename T>
+concept diagonal_or_1x1_raw = diagonal_matrix<T> || matrix_1x1<T>;
+
+template <typename T>
+concept diagonal_or_1x1 = diagonal_or_1x1_raw<std::decay_t<T>>;
+
+template <typename T>
 concept variable_size_matrix = !fixed_size_matrix<T>;
 
 template <typename T>

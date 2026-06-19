@@ -95,6 +95,17 @@ struct diag_mat : mat<T> {
 };
 
 template <typename T>
+diag_mat<T> cast_to_diag_mat(mat<T>& m)
+{
+  diag_mat<T> result;
+  result._m = m._m;
+  result._offsets[0] = m._offsets[0];
+  result._offsets[1] = m._offsets[1];
+  result._view = m._view;
+  return result;
+}
+
+template <typename T>
 struct vec {
   using vec_t = void;
 
@@ -245,6 +256,8 @@ void resize(match::vec auto& v, match::indice auto nrows)
   v._v = NM_create(NM_DENSE, nrows * v.vnrows, v.vncols);
 }
 
+auto nnz(match::any_mat auto& m) { return NM_triplet(m._m)->nz; }
+
 template <typename T>
 vec<T> copy(vec<T>& v)
 {
@@ -344,8 +357,8 @@ void set_value(match::vec auto&& m, match::indice auto i, const T& value)
   }
 }
 
-template <match::diagonal_matrix A>
-void invert_matrix(diag_mat<A>& a)
+template <match::diagonal_or_1x1 A>
+void invert_diagonal_matrix(diag_mat<A>& a)
 {
   if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
@@ -370,7 +383,15 @@ void add(const vec<T>& a, vec<T>& b)
 template <match::scalar scalar, match::any_matrix M>
 mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
 {
-  NumericsMatrix* nm = NM_add(alpha, A._m, beta, B._m);
+  NumericsMatrix* nm;
+
+  if (nnz(B) > 0) {
+    nm = NM_add(alpha, A._m, beta, B._m);
+  }
+  else {
+    nm = NM_new();
+    NM_copy(A._m, nm);
+  }
   mat<M> rm;
   rm._m = nm;
   return rm;
@@ -381,7 +402,14 @@ template <match::scalar scalar, match::any_matrix M>
 void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
          mat<M>& C)
 {
-  C._m = NM_add(alpha, A._m, beta, B._m);
+  if (nnz(B) > 0) {
+    C._m = NM_add(alpha, A._m, beta, B._m);
+  }
+  else {
+    NumericsMatrix* nm = NM_new();
+    NM_copy(A._m, nm);
+    C._m = nm;
+  }
   C._mt = nullptr;
   C._view = false;
 }
@@ -465,7 +493,7 @@ void prodt2(const diag_mat<A>& a, const mat<B>& b,
 template <match::diagonal_matrix A, typename B>
 void solve_linear_system(diag_mat<A>& a, vec<B>& b, vec<B>& c)
 {
-  invert_matrix(a);
+  invert_diagonal_matrix(a);
   prod(a, b, c);
 }
 
@@ -494,20 +522,20 @@ void solve_in_place(const mat<A>& a, const vec<B>& b)
   }
 }
 
-template <match::diagonal_matrix A, match::matrix B>
+template <match::diagonal_or_1x1 A, match::matrix B>
 void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
                                         mat<trans_t<B>>& c)
 {
-  invert_matrix(a);
+  invert_diagonal_matrix(a);
   transpose(b);
   prodt2(a, b, c);
 }
 
-template <match::matrix A, match::matrix B>
-void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
+template <match::diagonal_or_1x1 A, match::matrix B>
+void solve_linear_system_with_transpose(diag_mat<A>&& a, mat<B>& b,
                                         mat<trans_t<B>>& c)
 {
-  assert(false);
+  solve_linear_system_with_transpose(a, b, c);
 }
 
 template <match::any_matrix H, match::any_matrix M, typename W>

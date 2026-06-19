@@ -301,7 +301,7 @@ class Simulation(Stored):
 class BodyBase(Stored):
 
     __count = 0
-    __disk_shapes = {}
+    __shapes = {}
 
     @classmethod
     def count(cls):
@@ -312,12 +312,25 @@ class BodyBase(Stored):
         cls.__count = newcount
 
     @classmethod
-    def disk_shapes(cls):
-        return cls.__disk_shapes
+    def shapes(cls):
+        return cls.__shapes
 
 class Body(BodyBase):
 
-    def __init__(self, radius, mass, position, velocity):
+    def __init__(self):
+        pass
+
+    def init_fem(self, mesh_data):
+
+        self.set_count(self.count() + 1)
+        self._ident = self.count()
+
+        body = vkernel.disks.add_fem(self.data())
+        self._handle = body
+        body.set_id(self._ident)
+        self._mesh_data = mesh_data
+
+    def init_disk(self, radius, mass, position, velocity):
 
         self.set_count(self.count() + 1)
         self._ident = self.count()
@@ -330,12 +343,12 @@ class Body(BodyBase):
         body.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
 
         disk_shape = None
-        if radius in self.disk_shapes():
-            disk_shape = self.disk_shapes()[radius]
+        if radius in self.shapes():
+            disk_shape = self.shapes()[radius]
         else:
             disk_shape = vkernel.disks.add_disk_shape(self.data())
             disk_shape.set_radius(radius)
-            self.disk_shapes()[radius] = disk_shape
+            self.shapes()[radius] = disk_shape
 
         body.set_shape(disk_shape)
         body.set_fext(array([0,0,0])) # default
@@ -428,12 +441,12 @@ class Bodies(BodyBase):
         bodies.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
 
         disk_shape = None
-        if radius in self.disk_shapes():
-            disk_shape = self.disk_shapes()[radius]
+        if radius in self.shapes():
+            disk_shape = self.shapes()[radius]
         else:
             disk_shape = vkernel.disks.add_disk_shape(self.data())
             disk_shape.set_radius(radius)
-            self.disk_shapes()[radius] = disk_shape
+            self.shapes()[radius] = disk_shape
 
         bodies.set_shape(disk_shape)
         bodies.set_fext(array([0,0,0])) # default
@@ -566,6 +579,10 @@ class MechanicsIO(Stored):
 
     def radii(self, nsds):
         return self.handle().radii(
+            self._simulation.handle().current_step())
+
+    def displacements(self, nsds):
+        return self.handle().displacements(
             self._simulation.handle().current_step())
 
     def positions(self, nsds):

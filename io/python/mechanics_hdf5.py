@@ -870,10 +870,13 @@ class MechanicsHdf5(object):
         self,
         name,
         shapes,
-        translation,
+        translation=None,
         orientation=None,
         velocity=None,
         use_volume_centroid_as_initial_translation=False,
+        material=None,
+        boundary_conditions=None,
+        nodal_forces=None,
         mass=None,
         center_of_mass=None,
         inertia=None,
@@ -925,6 +928,12 @@ class MechanicsHdf5(object):
                The components are those of the translation velocity along
                x, y and the rotation velocity z axis.
 
+        material: array_like of length 3.
+            (density, elastic Young modulus, poisson ratio)
+            The material of the finite elements object. If material is
+            given, mass is directly computed and the mass parameter is not
+            used.
+
         mass: float
             The mass of the object, if it is None the object is defined as
             a static object involved only in contact detection.
@@ -942,6 +951,7 @@ class MechanicsHdf5(object):
             if True and if a Volume is given is the list of shape,
             the position of
             the volume centroid is used as initial translation.
+
         """
 
         # Does nothing if an object of the same name is already registered.
@@ -951,12 +961,14 @@ class MechanicsHdf5(object):
         # Ensure all input parameters have proper values
         # (set default values, convert tuple or list to numpy arrays ...)
 
+        rigid = material is None # material only for the elastic case
+
         translation = np.asarray(translation, dtype=np.float64)
 
         if center_of_mass is None:
             center_of_mass = np.zeros(3, dtype=np.float64)
 
-        if self._dimension == 3:
+        if rigid and self._dimension == 3:
             if orientation is None:
                 orientation = np.array([1, 0, 0, 0], dtype=np.float64)
             if velocity is None:
@@ -966,12 +978,21 @@ class MechanicsHdf5(object):
             assert len(translation) == 3
             assert len(ori) == 4
 
-        elif self._dimension == 2:
+        elif rigid and self._dimension == 2:
             if orientation is None:
                 orientation = np.zeros(1, dtype=np.float64)
             if velocity is None:
                 velocity = np.zeros(3, dtype=np.float64)
             assert len(translation) == 2
+            ori = np.asarray(orientation, dtype=np.float64)
+
+        if not rigid:
+            if orientation is None:
+                orientation = 0.
+            if velocity is None:
+                velocitiy = 0.
+            if translation is None:
+                translation = 0.
             ori = np.asarray(orientation, dtype=np.float64)
 
         is_center_of_mass_computed = False
@@ -1042,6 +1063,16 @@ class MechanicsHdf5(object):
             obj.attrs["time_of_birth"] = time_of_birth
         if time_of_death >= 0:
             obj.attrs["time_of_death"] = time_of_death
+
+        if material is not None:
+            obj.attrs["material"] = np.asarray(material, dtype=np.float64)
+            obj.attrs["type"] = "dynamic"
+
+        if boundary_conditions is not None:
+            obj.attrs["boundary_conditions"] = np.asarray(boundary_conditions, dtype=np.int32)
+
+        if nodal_forces is not None:
+            obj.attrs["nodal_forces"] = np.asarray(nodal_forces, dtype=np.float64)
 
         if mass is not None:
             obj.attrs["mass"] = mass
