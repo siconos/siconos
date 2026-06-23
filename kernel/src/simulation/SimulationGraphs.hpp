@@ -189,8 +189,8 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
       ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginB))  // For Controlled System
       ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
-        pluginL))                                                        // For Observer
-      ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, e))  // For Observer
+        pluginL))                                                              // For Observer
+      ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, eVector))  // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         u))  // For Controlled System
       ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_BV,
@@ -219,7 +219,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
     L._store->erase(vd);
     pluginB._store->erase(vd);
     pluginL._store->erase(vd);
-    e._store->erase(vd);
+    eVector._store->erase(vd);
     u._store->erase(vd);
     // pluginU._store->erase(vd);
     // pluginJacgx._store->erase(vd);

@@ -123,7 +123,7 @@ RelayProblem* relay_new_from_filename(const char* filename) {
 
   FILE* file = fopen(filename, "r");
   if (file == NULL) {
-    int error = numerics_error("RelayProblem", "Can not open file ", filename);
+    numerics_error_log("RelayProblem", "Can not open file ", filename);
     return NULL;
   }
 

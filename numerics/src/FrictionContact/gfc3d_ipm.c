@@ -259,7 +259,7 @@ double complemResidualNorm_type(const double* const velocity, const double* cons
   }
 
   else {
-    int error = numerics_error("complemResidualNorm_type", "unknown norm type");
+    numerics_error_log("complemResidualNorm_type", "unknown norm type");
     return NAN;
   }
 
@@ -945,7 +945,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   if (!options->dWork || options->dWorkSize < work_size) {
     double* p = (double*)realloc(options->dWork, work_size * sizeof(double));
     if (!p) {
-      numerics_error("gfc3d init", "bad alloc");
+      numerics_error_log("gfc3d init", "bad alloc");
     }
     options->dWork = p;
     options->dWorkSize = work_size;

@@ -51,7 +51,7 @@ struct NSGSLocalProblem {
 NSGSLocalProblem* nsgs_local_problem_create(void* global_problem, unsigned int block_id,
                                             const NSGSLocalProblemOps* ops) {
   if (!global_problem || !ops) {
-    int error = numerics_error("nsgs_local_problem_create", "NULL arguments");
+    numerics_error_log("nsgs_local_problem_create", "NULL arguments");
     return NULL;
   }
 
@@ -116,7 +116,7 @@ int nsgs_local_problem_solve(NSGSLocalProblem* local, double* result, SolverOpti
 
   /* Otherwise use registered solver */
   if (!local->solver) {
-    int error = numerics_error("nsgs_local_problem_solve", "No local solver configured");
+    numerics_error_log("nsgs_local_problem_solve", "No local solver configured");
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 

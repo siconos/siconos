@@ -129,7 +129,7 @@ static version_t NM_version(const NumericsMatrix* M, NM_types id) {
       }
     }
     default: {
-      int error = numerics_error("NM_version", "unknown id");
+      numerics_error_log("NM_version", "unknown id");
       return 0;
     }
   }
@@ -1006,6 +1006,7 @@ int NM_clear_other_storages(NumericsMatrix* M, NM_types storageType) {
     case NM_SPARSE_BLOCK: {
       NM_clearDense(M);
       NM_clearSparse(M);
+      M->matrix1 = NULL;
       break;
     }
     case NM_SPARSE: {
@@ -1905,7 +1906,8 @@ SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_
       break;
     }
     default: {
-      numerics_error("NM_extract_diagonal_blocks", "works only if M is of type NM_SPARSE.");
+      numerics_error_log("NM_extract_diagonal_blocks",
+                         "works only if M is of type NM_SPARSE.");
       return NULL;
     }
   }
@@ -2107,8 +2109,8 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
           break;
         }
         default: {
-          int error = numerics_error("NM_add", "Unsupported storage type %d, exiting!\n",
-                                     B->storageType);
+          numerics_error_log("NM_add", "Unsupported storage type %d, exiting!\n",
+                             B->storageType);
           return NULL;
         }
       }
@@ -2130,7 +2132,7 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
       break;
     }
     default: {
-      int error = numerics_error("NM_add:", "unsupported matrix storage %d", A->storageType);
+      numerics_error_log("NM_add:", "unsupported matrix storage %d", A->storageType);
       return NULL;
     }
   }
@@ -2252,8 +2254,8 @@ NumericsMatrix* NM_create(NM_types storageType, int size0, int size1) {
       break;
     default:
       data = NULL;
-      int error = numerics_error("NM_create", "storageType value %d not implemented yet !",
-                                 storageType);
+      numerics_error_log("NM_create", "storageType value %d not implemented yet !",
+                         storageType);
       return NULL;
   }
 
@@ -2340,8 +2342,8 @@ NumericsMatrix* NM_transpose(NumericsMatrix* A) {
       break;
     }
     default: {
-      int error = numerics_error("NM_transpose", "Unsupported storage type %d, exiting!\n",
-                                 A->storageType);
+      numerics_error_log("NM_transpose", "Unsupported storage type %d, exiting!\n",
+                         A->storageType);
       return NULL;
     }
   }
@@ -2995,7 +2997,7 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
         break;
       }
       case NSM_HALF_TRIPLET: {
-        int error = numerics_error("NM_csc", "cannot get csc from half triplet");
+        numerics_error_log("NM_csc", "cannot get csc from half triplet");
         return NULL;
       }
       default: {
@@ -3063,7 +3065,7 @@ CSparseMatrix* NM_csr(NumericsMatrix* A) {
         break;
       }
       case NSM_HALF_TRIPLET: {
-        int error = numerics_error("NM_csr", "cannot get csr from half triplet");
+        numerics_error_log("NM_csr", "cannot get csr from half triplet");
         return NULL;
       }
       default: {

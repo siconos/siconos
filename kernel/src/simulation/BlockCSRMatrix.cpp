@@ -235,7 +235,6 @@ void siconos::simulation::BlockCSRMatrix::convert() {
   _sparseBlockStructuredMatrix->blocksize0 = _diagsize0->data();
   _sparseBlockStructuredMatrix->blocksize1 = _diagsize1->data();  // nr = nc
 
-  // boost
   _sparseBlockStructuredMatrix->filled1 = (*_blockCSR).filled1();
   _sparseBlockStructuredMatrix->filled2 = (*_blockCSR).filled2();
   _sparseBlockStructuredMatrix->index1_data = _blockCSR->index1_data().begin();

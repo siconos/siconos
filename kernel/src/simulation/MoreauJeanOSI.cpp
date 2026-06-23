@@ -130,7 +130,7 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
   auto& osnsp_rhs = *(*_interProp.workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
 
   // The normal part is multiplied depends on en
-  int dimension = 2;  // 2D ou 3D ???
+  // int dimension = 2;  // 2D ou 3D ???
   if (nslaw.c() > 0.0) {
     // osnsp_rhs(0) += nslaw.c() / (tan(nslaw.phi()) * dimension);
     osnsp_rhs(0) += nslaw.c();

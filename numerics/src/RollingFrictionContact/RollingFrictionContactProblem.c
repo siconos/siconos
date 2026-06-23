@@ -23,9 +23,9 @@
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
-#include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
-#include "numerics_verbose.h"  // for check_io, numerics_printf_verbose
+#include "NumericsMatrix.h"  // for NM_vector_display, NM_display, NM_clear
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io, numerics_printf_verbose
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
@@ -142,7 +142,7 @@ RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const ch
   RollingFrictionContactProblem* problem = NULL;
   FILE* file = fopen(filename, "r");
   if (!file) {
-    int error =     numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
+    numerics_error_log("RollingFrictionContactProblem", "Can not open file ", filename);
     return NULL;
   }
   problem = rollingFrictionContact_newFromFile(file);

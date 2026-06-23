@@ -99,6 +99,14 @@ static inline bool check_io(int expr) {
  */
 int numerics_error(const char* fn_name, const char* msg, ...) WARN_RESULT_IGNORED;
 
+/** msg output no return code
+ *
+ * \param fn_name name of the function where error occurs
+ * \param msg formatted output msg
+ * \return NUMERICS_ERR_INVALID_ARGUMENT (legacy: would abort)
+ */
+void numerics_error_log(const char* fn_name, const char* msg, ...);
+
 /** log error message without exit
  *
  *  \param fn_name name of the function where the error occurs

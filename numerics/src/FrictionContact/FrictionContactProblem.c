@@ -139,15 +139,16 @@ FrictionContactProblem* frictionContact_new_from_filename(const char* filename) 
 #if defined(WITH_FCLIB)
     problem = frictionContact_fclib_read(filename);
 #else
-    numerics_error("FrictionContactProblem",
-                   "Try to read an hdf5 file, while fclib interface is not active. Recompile "
-                   "Siconos with fclib.",
-                   filename);
+    numerics_error_log(
+        "FrictionContactProblem",
+        "Try to read an hdf5 file, while fclib interface is not active. Recompile "
+        "Siconos with fclib.",
+        filename);
 #endif
   } else {
     FILE* file = fopen(filename, "r");
     if (!file) {
-      int error = numerics_error("FrictionContactProblem", "Can not open file ", filename);
+      numerics_error_log("FrictionContactProblem", "Can not open file ", filename);
       return NULL;
     }
     problem = frictionContact_newFromFile(file);
@@ -206,7 +207,7 @@ FrictionContactProblem* frictionContactProblem_new_with_data(int dim, size_t nc,
 // #define SN_SBM_TO_DENSE
 
 int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
-                                          SplittedFrictionContactProblem* splitted_problem) {
+                                         SplittedFrictionContactProblem* splitted_problem) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
 
@@ -292,9 +293,9 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
     }
     default:
       return numerics_error("createSplittedFrictionContactProblem",
-                     "storageType value %d not implemented yet !", storageType);
+                            "storageType value %d not implemented yet !", storageType);
   }
-  return 0;  
+  return 0;
 }
 
 void splittedFrictionContactProblem_free(SplittedFrictionContactProblem* splitted_problem) {

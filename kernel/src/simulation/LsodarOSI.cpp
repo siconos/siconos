@@ -151,7 +151,10 @@ void siconos::integrators::LsodarOSI::updateData() {
 
   rwork.resize(_intData[4], 0.);
 
-  jroot.resize(_intData[1], 0);
+  if (_intData[1] > 0)
+    jroot.resize(_intData[1], 0);
+  else
+    jroot.resize(1, 0);  // To avoid STL warning during call to lsodar
 }
 
 void siconos::integrators::LsodarOSI::fillXWork(std::size_t sizeOfX, double* x) {
@@ -495,7 +498,11 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   }
 
   _intData[3] = istate;
-
+  assert(!rtol.empty());
+  assert(!atol.empty());
+  assert(!rwork.empty());
+  assert(!iwork.empty());
+  assert(!jroot.empty());
   // call LSODAR to integrate dynamical equation
   siconos::netlib::lsodar(&LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->data(), &tinit_DR,
                           &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(),

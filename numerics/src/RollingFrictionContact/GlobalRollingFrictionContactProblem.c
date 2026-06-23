@@ -204,17 +204,19 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filen
     // printf("\n globalRollingFrictionContactProblem
     // globalRollingFrictionContact_new_from_filename 004 OK\n");
 #else
-    numerics_error("GlobalRollingFrictionContactProblem",
-                   "Try to read an hdf5 file, while fclib interface is not active. Recompile "
-                   "Siconos with fclib.",
-                   filename);
+    numerics_error_log(
+        "GlobalRollingFrictionContactProblem",
+        "Try to read an hdf5 file, while fclib interface is not active. Recompile "
+        "Siconos with fclib.",
+        filename);
 #endif
   }
 
   else {
     FILE* file = fopen(filename, "r");
     if (!file) {
-      int error = numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
+      numerics_error_log("GlobalRollingFrictionContactProblem", "Can not open file ",
+                         filename);
       return NULL;
     }
     problem = globalRollingFrictionContact_newFromFile(file);

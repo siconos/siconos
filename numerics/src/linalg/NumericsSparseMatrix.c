@@ -74,7 +74,7 @@ static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1, NSM_t ty
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M) {
   if (!M) {
-    int error = numerics_error("NSM_latest_id", "Null pointer Matrix");
+    numerics_error_log("NSM_latest_id", "Null pointer Matrix");
     return NSM_UNKNOWN;
   }
 
@@ -97,12 +97,11 @@ CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M) {
       return M->csr;
     case NSM_CSC:
       return M->csc;
-    default:
-      {
-	int error = numerics_error("NSM_latest", "unknown matrix type");
-	return NULL;
-      }
-      }
+    default: {
+      numerics_error_log("NSM_latest", "unknown matrix type");
+      return NULL;
+    }
+  }
 }
 
 void NSM_reset_version(NumericsSparseMatrix* M, NSM_t id) { NDV_reset(&(M->versions[id])); }
@@ -236,7 +235,6 @@ int NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* 
     }
     default: {
       return numerics_error("NSM_version_copy", "unknown id");
-      ;
     }
   }
   return 0;
@@ -435,7 +433,7 @@ size_t NSM_nnz(const CSparseMatrix* const A) {
   } else if (A->nz == NSM_CS_CSR) {
     return csint_to_size_t(A->p[A->m]);
   } else {
-    int error = numerics_error("NSM_nnz", "unsupported nz number");
+    numerics_error_log("NSM_nnz", "unsupported nz number");
     return 0;
   }
 }
@@ -524,7 +522,7 @@ int NSM_to_dense(const NumericsSparseMatrix* const A, double* B) {
 
 NSM_t NSM_origin(const NumericsSparseMatrix* M) {
   if (!M) {
-    int error = numerics_error("NSM_latest_id", "Null pointer Matrix");
+    numerics_error_log("NSM_latest_id", "Null pointer Matrix");
     return NSM_UNKNOWN;
   }
   assert(NSM_version(M, NSM_latest_id(M)) == NSM_version(M, M->origin));

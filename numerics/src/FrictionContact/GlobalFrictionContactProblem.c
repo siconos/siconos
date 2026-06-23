@@ -122,18 +122,18 @@ GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char
 #if defined(WITH_FCLIB)
     problem = globalFrictionContact_fclib_read(filename);
 #else
-    numerics_error("GlobalFrictionContactProblem",
-                   "Try to read an hdf5 file, while fclib interface is not active. Recompile "
-                   "Siconos with fclib.",
-                   filename);
+    numerics_error_log(
+        "GlobalFrictionContactProblem",
+        "Try to read an hdf5 file, while fclib interface is not active. Recompile "
+        "Siconos with fclib.",
+        filename);
 #endif
   } else {
     FILE* file = fopen(filename, "r");
     if (!file) {
-      int error =
-          numerics_error("GlobalFrictionContactProblem", "Can not open file ", filename);
+      numerics_error_log("GlobalFrictionContactProblem", "Can not open file ", filename);
       return NULL;
-    }      
+    }
 
     problem = globalFrictionContact_newFromFile(file);
     fclose(file);

@@ -92,7 +92,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** A pointer to the simulated nonsmooth dynamical system
    */
-  std::weak_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds;
 
   /** An interaction manager
    */
@@ -322,7 +322,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
   nonSmoothDynamicalSystem() const {
-    return _nsds.lock();
+    return _nsds;
   }
   /** set the NonSmoothDynamicalSystem of the Simulation
    *

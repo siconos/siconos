@@ -86,7 +86,7 @@ void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options) 
   if (!options->dWork || options->dWorkSize < worksize) {
     double* p = (double*)realloc(options->dWork, worksize * sizeof(double));
     if (!p) {
-      numerics_error("fc3d_IP_SNM_init", "bad alloc");
+      numerics_error_log("fc3d_IP_SNM_init", "bad alloc");
     }
     options->dWork = p;
     options->dWorkSize = worksize;

@@ -80,7 +80,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   if (!options->dWork || options->dWorkSize < 2 * n) {
     double* p = (double*)realloc(options->dWork, 2 * n * sizeof(double));
     if (!p) {
-      numerics_error("gfc3d_compute_error", "bad alloc");
+      numerics_error_log("gfc3d_compute_error", "bad alloc");
       return 0;
     }
     options->dWork = p;
@@ -187,8 +187,7 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
   if (!options->dWork || options->dWorkSize < 2 * n) {
     double* p = (double*)realloc(options->dWork, 2 * n * sizeof(double));
     if (!p) {
-      numerics_error("gfc3d_compute_error_r", "bad alloc");
-      return 0;
+      return numerics_error("gfc3d_compute_error_r", "bad alloc");
     }
     options->dWork = p;
     options->dWorkSize = 2 * n;
@@ -363,8 +362,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
   if (!options->dWork || options->dWorkSize < d_work_size) {
     double* p = (double*)realloc(options->dWork, d_work_size * sizeof(double));
     if (!p) {
-      numerics_error("gfc3d_compute_error_convex", "bad alloc");
-      return 0;
+      return numerics_error("gfc3d_compute_error_convex", "bad alloc");
     }
     options->dWork = p;
     options->dWorkSize = d_work_size;

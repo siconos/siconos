@@ -430,7 +430,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
   size_t required_size = (size_t)(8 * m + 5 * problem_size);
   if (!options->dWork || options->dWorkSize < required_size) {
     double *p = (double *)realloc(options->dWork, required_size * sizeof(double));
-    if (!p) return numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier", "bad alloc");
+    if (!p) {
+      numerics_error_log("gfc3d_nonsmooth_Newton_AlartCurnier", "bad alloc");
+      return;
+    }
     options->dWork = p;
     options->dWorkSize = required_size;
   }
@@ -641,7 +644,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
        * options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]); */
       /*   break; */
       default: {
-        *info = numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier", "Unknown line search option.\n");
+        *info = numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier",
+                               "Unknown line search option.\n");
       }
     }
 

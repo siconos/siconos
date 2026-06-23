@@ -371,7 +371,7 @@ int* read_fricprob_block(const char* path, int type, int blk_index) {
     H5Fclose(file_id);
 
 #else
-    int error = numerics_error(
+    numerics_error_log(
         "gfc3d_IPM_SNM",
         "Try to read an hdf5 file, while fclib interface is not active. Recompile "
         "Siconos with fclib.",
@@ -379,7 +379,7 @@ int* read_fricprob_block(const char* path, int type, int blk_index) {
     return NULL;
 #endif
   } else {
-    int error = numerics_error("gfc3d_IPM_SNM", "Not a hdf5 file ", path);
+    numerics_error_log("gfc3d_IPM_SNM", "Not a hdf5 file ", path);
     return NULL;
   }
   return out;
