@@ -16,6 +16,57 @@
  * limitations under the License.
 */
 
+/**
+ * \file BinaryCohesiveNSL.cpp
+ * \brief Implementation of the BinaryCohesiveNSL cohesive zone model
+ *
+ * This file implements a binary (intact/broken) cohesive zone model where
+ * the interface can be in one of two states:
+ * - Intact (beta = 1): Can sustain traction up to sigma_c
+ * - Broken (beta = 0): No cohesive traction, standard contact only
+ *
+ * \section sec_bczm_impl_damage Damage Evolution
+ *
+ * The damage parameter beta evolves based on the displacement jump delta:
+ *
+ * DOOR_SHAPE:
+ * - If delta > delta_c: interface breaks instantaneously (beta = 0)
+ * - If delta <= delta_c: interface remains intact (beta = 1)
+ *
+ * TRIANGLE_SHAPE:
+ * - beta = min(beta_previous, 1 - delta/delta_c)
+ * - Linear softening from beta=1 at delta=0 to beta=0 at delta=delta_c
+ *
+ * \section sec_bczm_impl_cohesion Cohesive Force Computation
+ *
+ * The cohesive force is computed as:
+ * \f[ r_{cohesion} = -beta \cdot sigma_c \cdot surface \cdot n \f]
+ *
+ * where:
+ * - beta is the damage parameter
+ * - sigma_c is the critical traction
+ * - surface is the interface area
+ * - n is the normal vector (pointing from body 2 to body 1)
+ *
+ * The negative sign indicates traction (pulling bodies together).
+ *
+ * \section sec_bczm_impl_internal Internal Variables Management
+ *
+ * The model stores 14 internal variables per interaction, organized as:
+ * - BETA_SURFACE: [beta, surface_area]
+ * - R_COHESION: 3D cohesive force vector
+ * - DISPLACEMENT_JUMP: 3D displacement across interface
+ * - COHESIVE_POINT_1/2: 3D contact points in global frame
+ * - NORMAL/TANGENT_1/TANGENT_2: 3D local coordinate frame
+ * - INITIAL_*: Initial values for persistency
+ *
+ * These variables are initialized in initializeInternalVariables() and
+ * updated in updateInternalVariables() at each time step.
+ *
+ * \see BinaryCohesiveNSL.hpp for class documentation
+ * \see CohesiveZoneModelNIFNSL for the base class
+ */
+
 #include "BinaryCohesiveNSL.hpp"
 
 #include <algorithm>
@@ -280,8 +331,20 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   DEBUG_PRINTF("normal  cohesion force %4.2e\n", r_cohesion[0]);
 
 
-  // V.A. 23/06/2026
-  // Below is an attempt at an explicit calculation of the tangential cohesive force. This cannot work for a model of intrinsic CZM (as it creates unstable oscillations that disrupt the interface). The cohesive force must be derived from the calculation of the complementarity problem coupled with friction.
+  // IMPORTANT NOTE (V.A. 23/06/2026):
+  // The code below shows an attempt at explicit calculation of tangential cohesive forces.
+  // This approach DOES NOT WORK for intrinsic cohesive zone models because:
+  // 1. Explicit tangential forces create unstable oscillations at the interface
+  // 2. The coupling between cohesion and friction must be resolved implicitly
+  // 3. The complementarity problem must include both cohesive and frictional constraints
+  //
+  // The correct approach (implemented elsewhere):
+  // - Normal cohesive force is computed here and stored in r_cohesion
+  // - Tangential forces emerge from the friction-contact solve via CohesiveFrictionContact
+  // - The V matrix maps cohesive forces into the OSNS problem
+  // - The solver couples cohesion and friction implicitly
+  //
+  // DO NOT ENABLE THIS CODE - it is kept for documentation purposes only.
 
   // if (_size > 2) {
   //   double norm_u_T = sqrt(u_T * u_T + u_S * u_S);
