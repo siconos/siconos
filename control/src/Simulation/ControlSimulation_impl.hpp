@@ -23,6 +23,7 @@
 #ifndef ControlSimulation_impl_hpp
 #define ControlSimulation_impl_hpp
 
+#include <cstddef>
 #include <string>
 #include <utility>
 
@@ -30,12 +31,12 @@
 
 #define TO_STR(x) std::to_string(x)
 
-static inline std::pair<unsigned, std::string> getNumberOfStates(
+static inline std::pair<size_t, std::string> getNumberOfStates(
     siconos::graphs::DynamicalSystemsGraph& DSG0, siconos::graphs::InteractionsGraph& IG0) {
   std::string legend;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  unsigned nb = 0;
-  unsigned counter = 0;
+  size_t nb = 0;
+  int counter = 0;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
@@ -60,12 +61,12 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
       }
     }
 
-    if (DSG0.e.hasKey(*dsvi)) {
-      siconos::algebra::Index sizeE = DSG0.e[*dsvi]->size();
+    if (DSG0.eVector.hasKey(*dsvi)) {
+      siconos::algebra::Index sizeE = DSG0.eVector[*dsvi]->size();
       for (siconos::algebra::Index i = 0; i < sizeE; ++i) {
         legend.append(" " + nameDS + "_e_" + TO_STR(i));
       }
-      nb += DSG0.e[*dsvi]->size();
+      nb += DSG0.eVector[*dsvi]->size();
     }
   }
 
@@ -101,16 +102,16 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
  * \param DSG0 the graph of DynamicalSystem
  * \param IG0 the graph of Interaction
  * \param data the matrix where to save the data
- * \return the last written column
+ * \return the index of the last written column
  */
-static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
-                                      siconos::graphs::DynamicalSystemsGraph& DSG0,
-                                      siconos::graphs::InteractionsGraph& IG0,
-                                      siconos::algebra::SiconosMatrix& data) {
+static inline size_t storeAllStates(size_t indx, size_t startColumn,
+                                    siconos::graphs::DynamicalSystemsGraph& DSG0,
+                                    siconos::graphs::InteractionsGraph& IG0,
+                                    siconos::algebra::SiconosMatrix& data) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  unsigned column = startColumn;
+  size_t column = startColumn;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
-    unsigned i = column;
+    size_t i = column;
     auto& x = *DSG0.bundle(*dsvi)->x();
     for (siconos::algebra::Index j = 0; j < x.size(); ++i, ++j) {
       data(indx, i) = x(j);
@@ -125,8 +126,8 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
       column += u.size();
     }
 
-    if (DSG0.e.hasKey(*dsvi)) {
-      auto& e = *DSG0.e[*dsvi];
+    if (DSG0.eVector.hasKey(*dsvi)) {
+      auto& e = *DSG0.eVector[*dsvi];
       for (siconos::algebra::Index j = 0; j < e.size(); ++i, ++j) {
         data(indx, i) = e(j);
       }
@@ -136,7 +137,7 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
 
   siconos::graphs::InteractionsGraph::VIterator ivi, ivdend;
   for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi) {
-    unsigned i = column;
+    size_t i = column;
     auto& y = *IG0.bundle(*ivi)->y(0);
     for (siconos::algebra::Index j = 0; j < y.size(); ++i, ++j) {
       data(indx, i) = y(j);

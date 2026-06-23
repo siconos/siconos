@@ -60,22 +60,21 @@ class TwistingTest : public CppUnit::TestFixture {
 #endif
   // Members
 
-  unsigned int _n;
-  double _h;
-  double _t0;
-  double _T;
-  double _tol;
-  double _beta;
-  double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _C;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _Csurface;
-  std::shared_ptr<siconos::algebra::SiconosVector> _b;
-  std::shared_ptr<siconos::algebra::SiconosVector> _x0;
-  std::shared_ptr<siconos::algebra::SiconosVector> _K;
-  std::shared_ptr<siconos::control::LinearSensor> _sensor;
+  size_t _n{2};
+  double _h{0.05};
+  double _t0{0.};
+  double _T{100};
+  double _tol{7.5e-11};
+  double _beta{0.2};
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Csurface{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _K{nullptr};
+  std::shared_ptr<siconos::control::LinearSensor> _sensor{nullptr};
 #ifdef HAS_EXTREME_POINT_ALGO
   std::shared_ptr<siconos::control::Twisting> _itw;
   std::shared_ptr<siconos::control::RegularTwisting> _reg_itw;
@@ -83,7 +82,7 @@ class TwistingTest : public CppUnit::TestFixture {
   std::shared_ptr<siconos::control::ExplicitTwisting> _expl_tw;
 
  public:
-  TwistingTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.2) {}
+  TwistingTest() = default;
   void setUp();
   void tearDown();
 };

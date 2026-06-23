@@ -77,7 +77,8 @@ void siconos::control::LuenbergerObserver::initialize(
   DEBUG_EXPR(_DS->display(););
   _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
   _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
-
+  _e->setZero();
+  _y->setZero();
   auto t0 = nsds.t0();
   auto h = s.currentTimeStep();
   auto T = nsds.finalT() + h;
@@ -94,7 +95,7 @@ void siconos::control::LuenbergerObserver::initialize(
   auto dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
-  DSG0.e[dsgVD] = _e;
+  DSG0.eVector[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
   if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD)) {

@@ -21,11 +21,11 @@
 #include <boost/circular_buffer.hpp>
 
 #include "ControlSensor.hpp"
-#include "FirstOrderNonLinearDS.hpp"
+#include "FirstOrderNonLinearDS.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "TimeStepping.hpp"
+#include "TimeStepping.hpp"  // IWYU pragma: keep
 #include "ZeroOrderHoldOSI.hpp"
 
 siconos::control::LinearSMCimproved::LinearSMCimproved(std::shared_ptr<ControlSensor> sensor)
@@ -143,7 +143,7 @@ void siconos::control::LinearSMCimproved::actuate() {
   _indx++;
 }
 
-void siconos::control::LinearSMCimproved::setPredictionOrder(unsigned int order) {
+void siconos::control::LinearSMCimproved::setPredictionOrder(size_t order) {
   _measuredPert->set_capacity(order + 1);
   _predictedPert->set_capacity(order + 1);
 }

@@ -24,15 +24,13 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "Event.hpp"
 #include "EventsManager.hpp"
-#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
-#include "Topology.hpp"  //#define DEBUG_BEGIN_END_ONLY
 #include "ZeroOrderHoldOSI.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
 #include "SiconosException.hpp"
+#include "siconos_debug.h"
 
 siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h)
     : ControlSimulation(t0, T, h) {
@@ -54,10 +52,9 @@ siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T
 void siconos::control::ControlZOHSimulation::run() {
   DEBUG_BEGIN("void siconos::control::ControlZOHSimulation::run()\n");
   auto& eventsManager = *_processSimulation->eventsManager();
-  unsigned k = 0;
+  int k = 0;
   auto start = std::chrono::system_clock::now();
 
-  
   auto& sim = static_cast<siconos::simulation::TimeStepping&>(*_processSimulation);
   try {
     while (sim.hasNextEvent()) {

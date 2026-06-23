@@ -18,7 +18,6 @@
 
 #include "ControlLinearAdditionalTermsTS.hpp"
 
-
 void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
@@ -29,9 +28,9 @@ void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
     xfree.noalias() += h * *DSG0.B[dsgVD] * *DSG0.u[dsgVD];  // xfree += h*B*u
   }
   // check whether the DynamicalSystem is an Observer
-  if (DSG0.e.hasKey(dsgVD)) {
+  if (DSG0.eVector.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    xfree.noalias() += h * *DSG0.L[dsgVD] * *DSG0.e[dsgVD];  // xfree += -h*L*e
+    xfree.noalias() += h * *DSG0.L[dsgVD] * *DSG0.eVector[dsgVD];  // xfree += -h*L*e
   }
 }
 

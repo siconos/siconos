@@ -29,7 +29,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
-
 namespace siconos::graphs {
 struct DynamicalSystemsGraph;
 struct InteractionsGraph;
@@ -83,10 +82,10 @@ class ControlSimulation {
   double _elapsedTime{0.};
 
   /** rough estimation of the number of points to save */
-  unsigned _N{0};
+  size_t _N{0};
 
   /** Dimension of the state space */
-  unsigned _nDim{0};
+  size_t _nDim{0};
 
   /** Save only the data in the main Simulation*/
   bool _saveOnlyMainSimulation{false};
@@ -134,7 +133,7 @@ class ControlSimulation {
 
   /** Modify the value of theta (for MoreauJeanOSI)
    * \param newTheta the new value of theta */
-  void setTheta(unsigned int newTheta);
+  void setTheta(double newTheta);
 
   /** Initialize the ControlSimulation, instantiate all objects
    */
@@ -168,28 +167,25 @@ class ControlSimulation {
   /** store the simulation data in a row of the matrix
    * \param indx the current row index
    */
-  void storeData(unsigned indx);
+  void storeData(size_t indx);
 
   /** Return the Simulation
    * \return the simulation for the main simulation
    */
-  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const
-  {
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
     return _processSimulation;
   };
 
   /** Return the OneStepIntegrator
    * \return the Integrator
    */
-  inline std::shared_ptr<siconos::integrators::OneStepIntegrator> integrator() const
-  {
+  inline std::shared_ptr<siconos::integrators::OneStepIntegrator> integrator() const {
     return _processIntegrator;
   };
 
   /** \return the siconos::modeling::NonSmoothDynamicalSystem
    */
-  inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> model() const
-  {
+  inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> model() const {
     return _nsds;
   }
 

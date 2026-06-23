@@ -26,13 +26,10 @@
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "LsodarOSI.hpp"
-#include "SiconosMatrix.hpp"
-#include "Topology.hpp"
 
 siconos::control::ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T,
                                                                    double h)
-    : ControlSimulation(t0, T, h)
-{
+    : ControlSimulation(t0, T, h) {
   _processIntegrator = std::make_shared<siconos::integrators::LsodarOSI>();
   _processSimulation =
       std::make_shared<siconos::simulation::EventDriven>(_nsds, _processTD, 0);
@@ -48,10 +45,9 @@ siconos::control::ControlLsodarSimulation::ControlLsodarSimulation(double t0, do
   _CM = std::make_shared<ControlManager>(_processSimulation);
 }
 
-void siconos::control::ControlLsodarSimulation::run()
-{
+void siconos::control::ControlLsodarSimulation::run() {
   auto& eventsManager = *_processSimulation->eventsManager();
-  unsigned k = 0;
+  int k = 0;
   auto start = std::chrono::system_clock::now();
   auto& sim = static_cast<siconos::simulation::EventDriven&>(*_processSimulation);
 

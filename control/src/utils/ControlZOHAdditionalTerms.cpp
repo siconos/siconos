@@ -51,7 +51,7 @@ void siconos::control::ControlZOHAdditionalTerms::init(
           ds, nsds, td, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size());
     if (DSG0.pluginL.hasKey(*dsvi))
       DSG0.Ld[*dsvi] = std::make_shared<siconos::simulation::MatrixIntegrator>(
-          ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size());
+          ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.eVector[*dsvi]->size());
   }
   DEBUG_END("void siconos::control::ControlZOHAdditionalTerms::init(...)\n")
 }
@@ -74,12 +74,12 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
     xfree.noalias() += DSG0.Bd.at(dsgVD)->mat() * *DSG0.u.at(dsgVD);  // xfree += Bd*u
   }
   // check whether the DynamicalSystem is an Observer
-  if (DSG0.e.hasKey(dsgVD)) {
+  if (DSG0.eVector.hasKey(dsgVD)) {
     assert(DSG0.Ld.hasKey(dsgVD));
     if (!DSG0.Ld.at(dsgVD)->isConst()) {
       DSG0.Ld.at(dsgVD)->integrate();
     }
-    xfree.noalias() += DSG0.Ld.at(dsgVD)->mat() * *DSG0.e.at(dsgVD);  // xfree += -Ld*e
+    xfree.noalias() += DSG0.Ld.at(dsgVD)->mat() * *DSG0.eVector.at(dsgVD);  // xfree += -Ld*e
   }
   DEBUG_END("void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(...)\n");
 }

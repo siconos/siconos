@@ -118,7 +118,7 @@ class LinearSMCimproved : public LinearSMC {
    *
    *  \param order the order of the prediction
    */
-  void setPredictionOrder(unsigned int order);
+  void setPredictionOrder(size_t order);
 };
 
 // Register the observer into the factory

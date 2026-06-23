@@ -56,7 +56,7 @@ class CommonSMC : public Actuator {
 
  protected:
   /** index for saving data */
-  unsigned int _indx{0};
+  size_t _indx{0};
 
   /** function wrapper used to compute e(t) in FirstOrderLinearR */
   siconos::modeling::func_prototypes::FunctionS_V computee_{nullptr};

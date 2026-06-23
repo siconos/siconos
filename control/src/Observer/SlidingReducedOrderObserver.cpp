@@ -103,7 +103,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   auto dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
-  DSG0.e[dsgVD] = _e;
+  DSG0.eVector[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
   if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD)) {
@@ -161,7 +161,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     //
     //    SiconosVector tmpV(_DS->dimension());
     //    SiconosMatrix tmpC(*_C);
-    //    for (unsigned int i = 0; i < _e->size(); ++i)
+    //    for (size_t i = 0; i < _e->size(); ++i)
     //      tmpV(i) = (*_e)(i);
     //
     //    tmpC.SolveByLeastSquares(tmpV);

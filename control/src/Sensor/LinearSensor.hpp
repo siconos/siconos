@@ -38,14 +38,14 @@ class LinearSensor : public ControlSensor {
   /** A matrix for saving all values */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _dataPlot{nullptr};
   /** counter */
-  unsigned int _k{0};
+  size_t _k{0};
 
   /** Canonical matrices */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _matC{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _matD{nullptr};
 
   /** Number of time steps*/
-  unsigned int _nSteps{0};
+  size_t _nSteps{0};
 
   // /** Default constructor
   //  */

@@ -51,6 +51,7 @@ void ObserverTest::setUp() {
   (*_C)(0, 0) = 1.0;
 
   _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
+  (*_B)(0, 0) = 0.0;
   (*_B)(1, 0) = 1.0;
 
   _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);

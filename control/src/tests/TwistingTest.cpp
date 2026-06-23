@@ -50,6 +50,7 @@ void TwistingTest::setUp() {
   _C->setIdentity();
 
   _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
+  (*_B)(0, 0) = 0.0;
   (*_B)(1, 0) = 1.0;
 
   _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
@@ -131,9 +132,13 @@ void TwistingTest::test_ExplicitTwisting_Lsodar() {
   siconos::algebra::io::write("explicitTwisting_Lsodar.dat", data,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
-  auto error = siconos::algebra::io::compareRefFile(data, "etw_lsodar.ref", _tol);
-  bool test = !(error > _tol);
+  double error = 0.;
+  bool test =
+      !((error = siconos::algebra::io::compareRefFile(data, "etw_ZOH.ref", _tol)) >= 0.0 &&
+        error > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
+  // FP warning: this test is broken for a long time ... It needs a control's expert review for
+  // ControlLsodarSimulation.
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
