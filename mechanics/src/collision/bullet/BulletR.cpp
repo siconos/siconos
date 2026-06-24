@@ -20,10 +20,16 @@
 // #define DEBUG_MESSAGES 1
 #include "BulletR.hpp"
 
+#include "NewtonEulerDS.hpp"
+
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 
+
 #include <iostream>
+#include <boost/math/quaternion.hpp>
+#include "RotationQuaternion.hpp"
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatPos etc
 // #include "siconos_debug.h"
@@ -55,4 +61,65 @@ void siconos::collision::bullet::BulletR::display() const {
   std::cout << "&btObject[1]" << &btObject[1] << std::endl;
   std::cout << "&btShape[0]" << &btShape[0] << std::endl;
   std::cout << "&btShape[1]" << &btShape[1] << std::endl;
+}
+
+
+void siconos::collision::bullet::BulletR::updateRelativeContactPointsFromManifoldPoint(
+    const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+    double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {
+  // Get new world positions of contact points and calculate relative
+  // to ds1 and ds2
+  
+  ::boost::math::quaternion<double> rq1, rq2, posa;
+  ::boost::math::quaternion<double> pq1, pq2, posb;
+  siconos::geometry::copyQuatPos(*ds1->q(), pq1);
+  siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
+  siconos::geometry::copyQuatRot(*ds1->q(), rq1);
+  if (ds2) {
+    siconos::geometry::copyQuatPos(*ds2->q(), pq2);
+    siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
+    siconos::geometry::copyQuatRot(*ds2->q(), rq2);
+  }
+
+  if (flip) {
+    ::boost::math::quaternion<double> tmp = posa;
+    posa = posb;
+    posb = tmp;
+  }
+
+  siconos::algebra::SiconosVector3 va, vb, vn;
+  if (flip) {
+    siconos::geometry::copyQuatPos((1.0 / rq1) * (posb - pq1) * rq1, va);
+    if (ds2)
+      siconos::geometry::copyQuatPos((1.0 / rq2) * (posa - pq2) * rq2, vb);
+    else {
+      // If no body2, position is relative to 0,0,0
+      siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
+    }
+  } else {
+    siconos::geometry::copyQuatPos((1.0 / rq1) * (posa - pq1) * rq1, va);
+    if (ds2)
+      siconos::geometry::copyQuatPos((1.0 / rq2) * (posb - pq2) * rq2, vb);
+    else {
+      // If no body2, position is relative to 0,0,0
+      siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling, vb);
+    }
+  }
+
+  // Get new normal
+  if (ds2) {
+    btQuaternion qn(point.m_normalWorldOnB.x(), point.m_normalWorldOnB.y(),
+                    point.m_normalWorldOnB.z(), 0);
+    btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
+    // un-rotate normal into body1 frame
+    qn = qb1.inverse() * qn * qb1;
+    vn(0) = qn.x();
+    vn(1) = qn.y();
+    vn(2) = qn.z();
+    vn = vn / vn.norm();
+  } else
+    siconos::collision::bullet::copyBtVector3(point.m_normalWorldOnB, vn);
+
+  ContactR::updateContactPoints(va, vb, vn * (flip ? -1 : 1));
 }

@@ -171,9 +171,9 @@ void copyQuatRot(const siconos::algebra::SiconosVector7 &from,
                  boost::math::quaternion<double> &to);
 
 void copyQuatPos(const boost::math::quaternion<double> &from,
-                 siconos::algebra::SiconosVector &to);
+                 siconos::algebra::SiconosVector3 &to);
 
-void copyQuatPos(const siconos::algebra::SiconosVector &from,
+void copyQuatPos(const siconos::algebra::SiconosVector7 &from,
                  boost::math::quaternion<double> &to);
 
 void copyQuatRot2d(const siconos::algebra::SiconosVector &from,

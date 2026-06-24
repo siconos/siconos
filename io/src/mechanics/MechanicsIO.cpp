@@ -57,6 +57,7 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
@@ -115,6 +116,10 @@ struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<d
   void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
+  void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nsl) override
+  {
+    answer = nsl . mu();
+  }  
   void visit(const siconos::modeling::NewtonImpactNSL& nsl) override { answer = 0.; }
 };
 
@@ -128,6 +133,9 @@ struct siconos::io::ForE : public siconos::modeling::nonsmooth_laws::Question<do
     answer = nsl.en();
   }
   void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) override {
+    answer = nsl.en();
+  }
+  void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nsl) override {
     answer = nsl.en();
   }
   void visit(const siconos::modeling::NewtonImpactNSL& nsl) override { answer = 0.; }

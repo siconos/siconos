@@ -41,7 +41,10 @@
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h>
 
-#include <FremondImpactFrictionNSL.hpp>
+// Custom Siconos sphere-sphere collision algorithm
+#include "bullet_patch/siconos_btSphereSphereCollisionAlgorithm.h"
+
+
 #include <algorithm>
 #include <map>
 
@@ -55,6 +58,8 @@
 #include "NewtonEulerJointR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
+#include "FremondImpactFrictionNSL.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosBulletCollisionManager_impl.hpp"
@@ -138,8 +143,17 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
                                                     BOX_2D_SHAPE_PROXYTYPE, m_convexAlgo2d);
     _impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,
                                                     BOX_2D_SHAPE_PROXYTYPE, m_box2dbox2dAlgo);
-  } else
+  } else {
     btGImpactCollisionAlgorithm::registerAlgorithm(&*_impl->_dispatcher);
+
+    // Register custom Siconos sphere-sphere collision algorithm
+    // This replaces the default Bullet sphere-sphere algorithm with our custom implementation
+    siconos_btSphereSphereCollisionAlgorithm::CreateFunc* sphereSphereAlgo =
+        new siconos_btSphereSphereCollisionAlgorithm::CreateFunc();
+    _impl->_dispatcher->registerCollisionCreateFunc(SPHERE_SHAPE_PROXYTYPE,
+                                                    SPHERE_SHAPE_PROXYTYPE,
+                                                    sphereSphereAlgo);
+  }
 
   _impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
   _impl->_collisionWorld->getDispatchInfo().m_enableSatConvex = _options->enableSatConvex;
@@ -672,13 +686,15 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           std::dynamic_pointer_cast<siconos::modeling::FremondImpactFrictionNSL>(nslaw);
       auto nslaw_NewtonImpactRollingFrictionNSL =
           std::dynamic_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(nslaw);
+      auto nslaw_CohesiveZoneModelNIFNSL =
+          std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(nslaw);
 
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if (nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL)) {
+      if (nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL|| nslaw_CohesiveZoneModelNIFNSL)) {
         if (nslaw->size() == 3) {
           DEBUG_PRINT("Creation of a relation for 3D frictional contact\n");
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
@@ -699,7 +715,15 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // TODO cast down btshape from BodyShapeRecord-derived classes
           // rel->btShape[0] = pairA->btshape;
           // rel->btShape[1] = pairB->btshape;
-
+          
+	  if (nslaw_CohesiveZoneModelNIFNSL)
+	    {
+            rel->updateRelativeContactPointsFromManifoldPoint(
+                *it->manifold, *it->point,
+		flip, _options->worldScale,
+		rbdsA,
+		rbdsB ? rbdsB :  std::shared_ptr<siconos::modeling::NewtonEulerDS>());
+	    }
           rel->updateContactPointsFromManifoldPoint(
               *it->manifold, *it->point, flip, _options->worldScale,
               rbdsA ? rbdsA : std::shared_ptr<siconos::modeling::NewtonEulerDS>(),
@@ -715,7 +739,20 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
                 rel->distance());
             _stats.interaction_warnings++;
           }
+	  if(nslaw_CohesiveZoneModelNIFNSL )
+	    {
+	      double current_time = simulation->getTk();
+	      double t0 = simulation->nonSmoothDynamicalSystem()->t0();
+	      std::cout << "time = "<< current_time << " t0 "<< t0 << std::endl;
+	      if (fabs(current_time-t0) >= DBL_EPSILON )
+		{
+		  //std::cout << "a creation of Cohesive interaction not at in the initial time" << std::endl;
+		  nslaw = nslaw_CohesiveZoneModelNIFNSL->nslawBroken();
+		  //nslaw->display();
+		  //getchar();
+		}
 
+	    }
           inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
           _stats.new_interactions_created++;
         } else if (nslaw && nslaw->size() == 2) {

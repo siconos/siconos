@@ -44,7 +44,7 @@ set(${COMPONENT}_DIRS
 # -- Bullet --
 # - add collision/bullet to the build process
 if(WITH_BULLET)
-  list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
+  list(APPEND ${COMPONENT}_DIRS src/collision/bullet src/collision/bullet/bullet_patch)
 endif()
 
 # -- OPenCascade --

@@ -333,13 +333,13 @@ void siconos::geometry::copyQuatRot(const siconos::algebra::SiconosVector7 &from
 }
 
 void siconos::geometry::copyQuatPos(const boost::math::quaternion<double> &from,
-                                    siconos::algebra::SiconosVector &to) {
+                                    siconos::algebra::SiconosVector3 &to) {
   to(0) = from.R_component_2();
   to(1) = from.R_component_3();
   to(2) = from.R_component_4();
 }
 
-void siconos::geometry::copyQuatPos(const siconos::algebra::SiconosVector &from,
+void siconos::geometry::copyQuatPos(const siconos::algebra::SiconosVector7 &from,
                                     boost::math::quaternion<double> &to) {
   to = boost::math::quaternion<double>{0, from(0), from(1), from(2)};
 }

@@ -325,8 +325,10 @@ void CohesiveFrictionContact::postCompute() {
 
   // Call parent postCompute
   FrictionContact::postCompute();
-  std::cout <<  "indexSetLevel() :" << indexSetLevel() <<std::endl;
-  std::cout <<  "inputOutputLevel() :" << inputOutputLevel() <<std::endl;
+
+  
+  // std::cout <<  "indexSetLevel() :" << indexSetLevel() <<std::endl;
+  // std::cout <<  "inputOutputLevel() :" << inputOutputLevel() <<std::endl;
   
   DEBUG_END("CohesiveFrictionContact::postCompute()\n");
 }
