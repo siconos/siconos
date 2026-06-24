@@ -58,7 +58,7 @@ void QuaternionTest::testQuaternion() {
   v.setConstant(1.0);
   vref << 1., -1., -1.;
 
-  siconos::geometry::quaternionRotateVector(q0, v);
+  siconos::geometry::rotateVector(q0, v);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testQuaternionC : ", v == vref, true);
 
@@ -70,7 +70,7 @@ void QuaternionTest::testQuaternion() {
 
   Rref = siconos::algebra::SiconosMatrix::Identity(3, 3);
   siconos::geometry::computeRotationMatrix(q01, R);
-  siconos::geometry::quaternionRotateVector(q01, v);
+  siconos::geometry::rotateVector(q01, v);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testQuaternion : ", angle == angleref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testQuaternion : ", axis == axisref, true);
@@ -92,7 +92,7 @@ void QuaternionTest::testQuaternion() {
   Rref(2, 0) = -1.0;
   Rref(1, 1) = 1.0;
   Rref(0, 2) = 1.0;
-  siconos::geometry::quaternionRotateVector(q02, v);
+  siconos::geometry::rotateVector(q02, v);
   vref(0) = -1.0;
   vref(1) = -1.0;
   vref(2) = -1.0;
@@ -117,7 +117,7 @@ void QuaternionTest::testQuaternion() {
   Rref(2, 0) = -sqrt(2.0) / 2.0;
   Rref(2, 2) = sqrt(2.0) / 2.0;
 
-  siconos::geometry::quaternionRotateVector(q02, v);
+  siconos::geometry::rotateVector(q02, v);
   vref(0) = -sqrt(2.0);
   vref(1) = -1.0;
   vref(2) = 0.0;
@@ -165,7 +165,7 @@ void QuaternionTest::testQuaternionMatrix() {
 
   // New version
   v << 1., 1., 1.;
-  siconos::geometry::quaternionRotateVector(q03, v);
+  siconos::geometry::rotateVector(q03, v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testQuaternion : ",
       (v - vref).lpNorm<Eigen::Infinity>() <= std::numeric_limits<double>::epsilon() * 10.0,
@@ -187,7 +187,7 @@ void QuaternionTest::testQuaternionMatrix() {
   mref(0, 2) = sqrt(2.0);
   mref(1, 2) = 1.0;
 
-  siconos::geometry::quaternionRotateMatrix(q03, m);
+  siconos::geometry::rotateMatrix(q03, m);
   auto diff = (m - mref).cwiseAbs().rowwise().sum().maxCoeff();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testQuaternion : ", diff <= std::numeric_limits<double>::epsilon() * 100.0, true);

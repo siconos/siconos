@@ -55,10 +55,10 @@ PYBIND11_MODULE(geometry, m) {
         )pbdoc");
 
   m.def(
-      "rewriteVectorFromAbsoluteToBodyFrame",
+      "rotateVectorFromInertialToBodyFrame",
       [](const siconos::algebra::SiconosVector7 &q,
          Eigen::Ref<siconos::algebra::SiconosVector3> v) {
-        siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, v);
+        siconos::geometry::rotateVectorFromInertialToBodyFrame(q, v);
       },
       py::arg("q"), py::arg("v"),
       R"pbdoc(
@@ -73,10 +73,10 @@ PYBIND11_MODULE(geometry, m) {
         )pbdoc");
 
   m.def(
-      "rewriteVectorFromBodyToAbsoluteFrame",
+      "rotateVectorFromBodyToInertialFrame",
       [](const siconos::algebra::SiconosVector7 &q,
          Eigen::Ref<siconos::algebra::SiconosVector3> v) {
-        siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q, v);
+        siconos::geometry::rotateVectorFromBodyToInertialFrame(q, v);
       },
       py::arg("q"), py::arg("v"),
       R"pbdoc(

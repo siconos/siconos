@@ -774,6 +774,6 @@ siconos::algebra::SiconosVector3 siconos::joints::PrismaticJointR::normalDoF(
   // We assume that a is normalized.
   auto result = axes_[0];
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q0, result);
+  if (absoluteRef) siconos::geometry::rotateVectorFromBodyToInertialFrame(q0, result);
   return result;  // RVO
 }

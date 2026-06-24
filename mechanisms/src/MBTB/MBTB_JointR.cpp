@@ -22,7 +22,7 @@
 
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerJointR.hpp"
-#include "RotationQuaternion.hpp"  // For rewriteVectorFromBodyToAbsoluteFrame
+#include "RotationQuaternion.hpp"  // For rotateVectorToInertialFrame
 #include "SiconosMatrix.hpp"
 #include "op3x3.h"  // For orthoBaseFromVector
 // #define MBTB_JOINTR_DEBUG
@@ -59,7 +59,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   siconos::algebra::SiconosVector3 ML_G_abs;
   auto spML_G_abs = std::make_shared<siconos::algebra::SiconosVector3>();
   *spML_G_abs = ML_G;
-  siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*_ds1->q(), *spML_G_abs);
+  siconos::geometry::rotateVectorFromBodyToInertialFrame(*_ds1->q(), *spML_G_abs);
   ML_G_abs = *spML_G_abs;
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces Blambda\n");

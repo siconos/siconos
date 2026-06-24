@@ -302,7 +302,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       printf("\n");
 
       printf("Moments in Joint %i in absolute frame \n", numJ);
-      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+      siconos::geometry::rotateVectorFromBodyToInertialFrame(
           *mbtb::data::sJointRelations[numJ]->_ds1->q(), vaux);
       std::cout << vaux << "\n";
       printf("\n");
@@ -329,7 +329,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       siconos::algebra::SiconosVector3 vaux;
       vaux = mbtb::data::sContacts[numC]->relation()->contactForce().tail(3);
       /*convert momentum in abs frame*/
-      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+      siconos::geometry::rotateVectorFromBodyToInertialFrame(
           *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), vaux);
       printf("\n");
       printf("Moments of contact forces in contact  %i in absolute frame \n", numC);
@@ -401,7 +401,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
     siconos::algebra::SiconosVector3 vaux;
     vaux = mbtb::data::sJointRelations[numJ]->_jointR->contactForce().tail(3);
     /*convert momentum in abs frame*/
-    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+    siconos::geometry::rotateVectorFromBodyToInertialFrame(
         *mbtb::data::sJointRelations[numJ]->_ds1->q(), vaux);
     for (int ii = 0; ii < 3; ii++) {
       myfile << vaux(ii) << "\t";
@@ -422,7 +422,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
     vaux = mbtb::data::sContacts[numC]->relation()->contactForce().tail(3);
 
     /*convert momentum in abs frame*/
-    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+    siconos::geometry::rotateVectorFromBodyToInertialFrame(
         *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), vaux);
     myfile << vaux;
   }

@@ -91,18 +91,18 @@ void siconos::joints::PivotJointR::setBasePositions(
   // constraint relative to q1.
   // If provided in absolute coordinates, must be rotated to q1 frame.
   if (absoluteRef_) {
-    boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff;
+    boost::math::quaternion<double> rot1{siconos::geometry::getRotationQuaternion(q1)}, quatBuff;
 
     // Move to q1 frame by unapplying q1 frame rotation
-    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(axes_[0]) * rot1;
+    quatBuff = (1.0 / rot1) * siconos::geometry::getPositionQuaternion(axes_[0]) * rot1;
     axes_[0] << quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4();
   }
   boost::math::quaternion<double> cq2q10;
   if (q2)
     // Initial orientation offset between q2 and q1.
-    cq2q10 = 1.0 / siconos::geometry::rotquat(*q2) * siconos::geometry::rotquat(q1);
+    cq2q10 = 1.0 / siconos::geometry::getRotationQuaternion(*q2) * siconos::geometry::getRotationQuaternion(q1);
   else
-    cq2q10 = 1. / boost::math::quaternion<double>(1, 0, 0, 0) * siconos::geometry::rotquat(q1);
+    cq2q10 = 1. / boost::math::quaternion<double>(1, 0, 0, 0) * siconos::geometry::getRotationQuaternion(q1);
 
   cq2q_ << cq2q10.R_component_1(), cq2q10.R_component_2(), cq2q10.R_component_3(),
       cq2q10.R_component_4();
@@ -365,7 +365,7 @@ siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
   // We assume that A is normalized.
   auto result = axes_[0];
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q0, result);
+  if (absoluteRef) siconos::geometry::rotateVectorFromBodyToInertialFrame(q0, result);
   return result;  // RVO
 }
 

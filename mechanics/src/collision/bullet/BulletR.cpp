@@ -73,13 +73,13 @@ void siconos::collision::bullet::BulletR::updateRelativeContactPointsFromManifol
   
   ::boost::math::quaternion<double> rq1, rq2, posa;
   ::boost::math::quaternion<double> pq1, pq2, posb;
-  siconos::geometry::copyQuatPos(*ds1->q(), pq1);
+  siconos::geometry::extractPositionToQuaternion(*ds1->q(), pq1);
   siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
-  siconos::geometry::copyQuatRot(*ds1->q(), rq1);
+  siconos::geometry::extractRotationQuaternion(*ds1->q(), rq1);
   if (ds2) {
-    siconos::geometry::copyQuatPos(*ds2->q(), pq2);
+    siconos::geometry::extractPositionToQuaternion(*ds2->q(), pq2);
     siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
-    siconos::geometry::copyQuatRot(*ds2->q(), rq2);
+    siconos::geometry::extractRotationQuaternion(*ds2->q(), rq2);
   }
 
   if (flip) {
@@ -90,17 +90,17 @@ void siconos::collision::bullet::BulletR::updateRelativeContactPointsFromManifol
 
   siconos::algebra::SiconosVector3 va, vb, vn;
   if (flip) {
-    siconos::geometry::copyQuatPos((1.0 / rq1) * (posb - pq1) * rq1, va);
+    siconos::geometry::extractVectorFromQuaternion((1.0 / rq1) * (posb - pq1) * rq1, va);
     if (ds2)
-      siconos::geometry::copyQuatPos((1.0 / rq2) * (posa - pq2) * rq2, vb);
+      siconos::geometry::extractVectorFromQuaternion((1.0 / rq2) * (posa - pq2) * rq2, vb);
     else {
       // If no body2, position is relative to 0,0,0
       siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
     }
   } else {
-    siconos::geometry::copyQuatPos((1.0 / rq1) * (posa - pq1) * rq1, va);
+    siconos::geometry::extractVectorFromQuaternion((1.0 / rq1) * (posa - pq1) * rq1, va);
     if (ds2)
-      siconos::geometry::copyQuatPos((1.0 / rq2) * (posb - pq2) * rq2, vb);
+      siconos::geometry::extractVectorFromQuaternion((1.0 / rq2) * (posb - pq2) * rq2, vb);
     else {
       // If no body2, position is relative to 0,0,0
       siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling, vb);

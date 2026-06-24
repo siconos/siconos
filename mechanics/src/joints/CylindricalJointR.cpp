@@ -121,8 +121,8 @@ void siconos::joints::CylindricalJointR::setBasePositions(
 
   if (q2) q2i = q2.value();
 
-  auto quat1{siconos::geometry::rotquat(q1)};
-  auto quat2{siconos::geometry::rotquat(q2i)};
+  auto quat1{siconos::geometry::getRotationQuaternion(q1)};
+  auto quat2{siconos::geometry::getRotationQuaternion(q2i)};
 
   // Initial orientation offset
   auto tmp = 1.0 / quat2 * quat1;
@@ -134,7 +134,7 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   // Initial G1-P vector in G1 frame is just P.  Initial G2-P vector
   // in G1 frame is calculated by subtracting (P - G2) in the absolute
   // frame and un-rotating from the q2 frame.
-  auto quatG1P0{siconos::geometry::posquat(G1P0_)};
+  auto quatG1P0{siconos::geometry::getPositionQuaternion(G1P0_)};
   tmp = quat1 * quatG1P0 / quat1;
 
   siconos::algebra::SiconosVector3 P0_abs;
@@ -143,7 +143,7 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   P0_abs(2) = tmp.R_component_4() + q1(2);
 
   siconos::algebra::SiconosVector3 G2P0_abs = P0_abs - q2i.head<3>();
-  auto quatG2P0_abs{siconos::geometry::posquat(G2P0_abs)};
+  auto quatG2P0_abs{siconos::geometry::getPositionQuaternion(G2P0_abs)};
   tmp = 1.0 / quat2 * quatG2P0_abs * quat2;
 
   G2P0_(0) = tmp.R_component_2();
@@ -945,6 +945,6 @@ siconos::algebra::SiconosVector3 siconos::joints::CylindricalJointR::normalDoF(
   // We assume that axes_[0] is normalized.
   auto result = axes_[0];
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q0, result);
+  if (absoluteRef) siconos::geometry::rotateVectorFromBodyToInertialFrame(q0, result);
   return result;
 }

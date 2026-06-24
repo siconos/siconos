@@ -545,7 +545,7 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
       use_mext([&](auto& mext) { computemext_(time, mext); });
     if (isMextExpressedInInertialFrame_) {
       use_mext([&](auto& mext) {
-        siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext);
+        siconos::geometry::rotateVectorFromInertialToBodyFrame(q, mext);
       });
       use_mext([&](auto& mext) { wrench_->tail(3) += mext; });
       // wrench[3:6] += mext
@@ -762,7 +762,7 @@ void siconos::modeling::NewtonEulerDS::computeTdot() {
 }
 
 void siconos::modeling::NewtonEulerDS::normalizeq() {
-  siconos::geometry::normalizeq(*state_q_);
+  siconos::geometry::normalizeQuaternion(*state_q_);
 }
 
 double siconos::modeling::NewtonEulerDS::computeKineticEnergy() {
@@ -781,14 +781,14 @@ double siconos::modeling::NewtonEulerDS::computeKineticEnergy() {
 siconos::algebra::SiconosVector3 siconos::modeling::NewtonEulerDS::linearVelocityInBodyFrame()
     const {
   siconos::algebra::SiconosVector3 v = twist_->head(3);  // copy
-  siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(*state_q_, v);
+  siconos::geometry::rotateVectorFromInertialToBodyFrame(*state_q_, v);
   return v;  // RVO, no copy!
 }
 
 siconos::algebra::SiconosVector3 siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame()
     const {
   siconos::algebra::SiconosVector3 w = twist_->tail(3);
-  siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*state_q_, w);
+  siconos::geometry::rotateVectorFromBodyToInertialFrame(*state_q_, w);
   return w;  // RVO, no copy!
 }
 
@@ -855,20 +855,20 @@ void siconos::modeling::newton_euler::computeMextForceAtPos(
   siconos::algebra::SiconosVector3 local_frc(force);  // copy
 
   if (forceAbsRef) {
-    siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_frc);
+    siconos::geometry::rotateVectorFromInertialToBodyFrame(q, local_frc);
   }
 
   siconos::algebra::SiconosVector3 moment = siconos::algebra::SiconosVector3::Zero();
   if (posAbsRef) {
     siconos::algebra::SiconosVector3 local_pos = pos - q.head<3>();
-    siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_pos);
+    siconos::geometry::rotateVectorFromInertialToBodyFrame(q, local_pos);
     moment = local_pos.cross(local_frc);
   } else {
     moment = pos.cross(local_frc);
   }
 
   if (isMextExpressedInInertialFrame)
-    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q, moment);
+    siconos::geometry::rotateVectorFromBodyToInertialFrame(q, moment);
 
   if (accumulate)
     mExt += moment;
@@ -882,7 +882,7 @@ void siconos::modeling::newton_euler::computeFextForceAtPos(
     Eigen::Ref<siconos::algebra::MapVector3Type> fext, bool accumulate) {
   siconos::algebra::SiconosVector3 abs_frc(force);
 
-  if (!forceAbsRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q, abs_frc);
+  if (!forceAbsRef) siconos::geometry::rotateVectorFromBodyToInertialFrame(q, abs_frc);
   if (accumulate)
     fext += abs_frc;
   else
@@ -992,7 +992,7 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
   siconos::algebra::SiconosVector3 mext0 = siconos::algebra::SiconosVector3::Zero();
   mext_func(time, mext0);
   if (isMextExpressedInInertialFrame)
-    siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext0);
+    siconos::geometry::rotateVectorFromInertialToBodyFrame(q, mext0);
 
   auto qeps = q;  // copy
   result.setZero();
@@ -1001,7 +1001,7 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
     qeps(j) += epsilonFD;
     mext_func(time, mext);
     if (isMextExpressedInInertialFrame)
-      siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(qeps, mext);
+      siconos::geometry::rotateVectorFromInertialToBodyFrame(qeps, mext);
     result.col(j) = (mext - mext0) / epsilonFD;
     qeps(j) -= epsilonFD;
   }
