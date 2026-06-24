@@ -1,5 +1,5 @@
 # Usage: disks-bench <backend> <problem size>
-import petsc4py
+#import petsc4py
 
 import siconos.numerics as sn
 import siconos.simulation as sim
@@ -25,7 +25,7 @@ disk_radius = 1
 io_filename = 'bench-disks-{}-{}.hdf5'.format(backend,N)
 
 # for parrallel solvers
-petsc4py.init()
+#petsc4py.init()
 
 with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
 
@@ -86,7 +86,7 @@ bullet_options.perturbationIterations = 1
 #bullet_options.contactBreakingThreshold = 1
 bullet_options.minimumPointsPerturbationThreshold = 1
 
-options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI)
+options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
 options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10

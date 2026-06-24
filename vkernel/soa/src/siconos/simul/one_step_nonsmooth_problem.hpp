@@ -1,8 +1,5 @@
 #pragma once
 
-#include "siconos/algebra/algebra.hpp"
-#include "siconos/simul/simul_head.hpp"
-
 #include <FrictionContactProblem.h>
 #include <FrictionContact_options.h>
 #include <LinearComplementarityProblem.h>
@@ -11,7 +8,13 @@
 #include <SolverOptions.h>
 #include <fclib_interface.h>
 #include <lcp_cst.h>
+
+#include <chrono>
 #include <format>
+#include <print>
+
+#include "siconos/algebra/algebra.hpp"
+#include "siconos/simul/simul_head.hpp"
 
 namespace siconos {
 
@@ -128,7 +131,9 @@ template <typename NonsmoothProblem>
 struct one_step_nonsmooth_problem : item {
   using problem_t = NonsmoothProblem;
   using attributes =
-      gather<attribute<"level", some::indice>,
+      gather<attribute<"solver_duration_seconds", some::scalar>,
+             attribute<"number_of_contacts", some::indice>,
+             attribute<"level", some::indice>,
              attribute<"trace", some::boolean>,
              attribute<"trace_params", some::item_ref<trace_params>>,
              attribute<"verbose", some::boolean>,
@@ -163,6 +168,9 @@ struct one_step_nonsmooth_problem : item {
                algebra::vec<V>& z_vec, algebra::vec<V>& w_vec,
                algebra::vec<V>& mu_vec)  // mu_vec can be empty for LCP
     {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
       numerics_set_verbose(storage::attr<"verbose">(*self()));
       if constexpr (std::derived_from<Formulation,
                                       LinearComplementarityProblem>) {
@@ -189,16 +197,37 @@ struct one_step_nonsmooth_problem : item {
         self()->problem().instance()->q = q_vec._v->matrix0;
         self()->problem().instance()->mu = mu_vec._v->matrix0;
 
+        attr<"number_of_contacts">(*self()) =
+            self()->problem().instance()->numberOfContacts;
+
         if (!trace()) {
+          const auto start_time{std::chrono::steady_clock::now()};
           fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
                       w_vec._v->matrix0, &*options().instance());
+          const auto end_time{std::chrono::steady_clock::now()};
+
+          const std::chrono::duration<scalar> elapsed_seconds{end_time -
+                                                              start_time};
+
+          attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
+
+          std::println("number_of_contacts:{}",
+                       attr<"number_of_contacts">(*self()));
+          std::println("solver_duration_seconds:{}",
+                       attr<"solver_duration_seconds">(*self()));
         }
         else {
           auto z_bck = algebra::copy(z_vec);
           auto w_bck = algebra::copy(w_vec);
 
+          const auto start_time{std::chrono::steady_clock::now()};
           fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
                       w_vec._v->matrix0, &*options().instance());
+          const auto end_time{std::chrono::steady_clock::now()};
+
+          const std::chrono::duration<scalar> elapsed_seconds{end_time -
+                                                              start_time};
+          attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
 
           // trace_params must be set!
           if (options().iparam(SICONOS_IPARAM_ITER_DONE) >
@@ -207,8 +236,7 @@ struct one_step_nonsmooth_problem : item {
             auto n_format_string = std::to_string(solver_maxiter).length();
 
             // format alone ambiguous for clang-19
-            auto iter_filename =
-              std::format(
+            auto iter_filename = std::format(
                 "{}-i{:0{}d}-{}-{}.hdf5", trace_params().filename(),
                 solver_maxiter, n_format_string, size0(w_mat),
                 trace_params().counter());

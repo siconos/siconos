@@ -783,34 +783,37 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         )
         return self
 
-    def log(self, fun, with_timer=False, after=True):
+    def log(self, fun, with_timer=False, after=True, already_done=False):
         if with_timer:
             t = siconos.io.tools.Timer()
 
             def logged(*args):
-                t.update()
-                if not after:
-                    print(
-                        "[io.mechanics] |-->start {0:42s} ...".format(fun.__name__),
-                        flush=True,
-                    )
-
-                output = fun(*args)
-                endt = t.elapsed()
-
-                if not after:
-                    print(
-                        "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(
-                            fun.__name__, endt
-                        ),
-                        flush=True,
-                    )
-                else:
-                    print(
-                        "[io.mechanics] | {0:50s} .... {1:6.2e} s".format(
-                            fun.__name__, endt
+                if not already_done:
+                    t.update()
+                    if not after:
+                        print(
+                            "[io.mechanics] |-->start {0:42s} ...".format(fun.__name__),
+                            flush=True,
                         )
-                    )
+
+                    output = fun(*args)
+                    endt = t.elapsed()
+
+                    if not after:
+                        print(
+                            "[io.mechanics] |-->end {0:44s} .... {1:6.2e} s".format(
+                                fun.__name__, endt
+                            ),
+                            flush=True,
+                        )
+                    else:
+                        print(
+                            "[io.mechanics] | {0:50s} .... {1:6.2e} s".format(
+                                fun.__name__, endt
+                            )
+                        )
+                else:
+                    output, endt = fun(*args)
 
                 # timing in hdf5
                 if self._run_options["with_timer_output_at_the_end"]:
@@ -3651,7 +3654,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if self.config.backend == "vnative":
                     self.log(self._simulation.updateInteractions, with_timer)()
                 self.log(self._simulation.computeOneStep, with_timer)()
+                if self.config.backend == "vnative":
+                    def numerics_solver_duration():
+                        return [0, self._simulation.handle().one_step_nonsmooth_problem().solver_duration_seconds()]
+                    self.log(numerics_solver_duration, with_timer, after=True,  already_done=True)()
+                    siconos.io.mechanics_hdf5.group(self.log_data(), "vnative")
+                    siconos.io.mechanics_hdf5.add_line(
+                        siconos.io.mechanics_hdf5.data(
+                            self.log_data()["vnative"], "number_of_contacts", 1
+                        ),
+                        self._simulation.handle().one_step_nonsmooth_problem().number_of_contacts(),
+                    )
 
+                    
             number_of_contacts = self.log(self.contact_statistics_verbose, with_timer)()
 
             self.log(self.solver_verbose, with_timer)(number_of_contacts)
