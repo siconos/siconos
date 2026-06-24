@@ -11,7 +11,6 @@
 
 #include <chrono>
 #include <format>
-#include <print>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
@@ -212,12 +211,6 @@ struct one_step_nonsmooth_problem : item {
 
           attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
 
-	  attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
-
-          std::println("number_of_contacts:{}",
-                       attr<"number_of_contacts">(*self()));
-          std::println("solver_duration_seconds:{}",
-                       attr<"solver_duration_seconds">(*self()));
         }
         else {
           auto z_bck = algebra::copy(z_vec);
