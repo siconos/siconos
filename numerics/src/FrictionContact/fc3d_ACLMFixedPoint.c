@@ -133,7 +133,7 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
       soclcp->q[3 * ic] = problem->q[3 * ic] + problem->mu[ic] * normUT;
     }
 
-    fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options, error);
+    fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
 
     (*internalsolver)(soclcp, reaction, velocity, info, internalsolver_options);
     cumul_iter += internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];

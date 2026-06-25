@@ -103,7 +103,7 @@ static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
     }
   }
 
-  FrictionContactProblem* local_p = fc3d_local_problem_allocate(main_problem);
+  FrictionContactProblem* local_p = fc3d_local_problem_allocate(main_problem->M->storageType);
 
   double* rho = 0;
   for (size_t contact = 0; contact < nc; contact++) {
@@ -184,8 +184,7 @@ static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
   return 0;  
 }
 
-static void fc3d_AC_free(FrictionContactProblem* main_problem,
-                         FrictionContactProblem* localproblem,
+static void fc3d_AC_free(FrictionContactProblem* localproblem,
                          SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
@@ -287,18 +286,17 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   /*  (*postSolver)(contact,reaction); */
 }
 
-void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* main_problem,
-                                                   FrictionContactProblem* localproblem,
+void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem,
                                                    SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
   if (localsolver_options->solverId == OC_NSN || localsolver_options->solverId == OC_NSN_GP ||
       localsolver_options->solverId == OC_NSN_GP_HYBRID) {
-    fc3d_AC_free(main_problem, localproblem, localsolver_options);
+    fc3d_AC_free(localproblem, localsolver_options);
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
   else if (localsolver_options->solverId == FC3D_NCPG_NEWTON) {
-    NCPGlocker_free(main_problem, localproblem, localsolver_options);
+    NCPGlocker_free(localproblem, localsolver_options);
     ;
   }
   
@@ -377,28 +375,6 @@ static int fc3d_onecontact_nonsmooth_Newton_AC_debug(double* R, double* velocity
 }
 #endif
 
-void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact,
-                                                FrictionContactProblem* main_problem,
-                                                FrictionContactProblem* localproblem,
-                                                double* reaction, SolverOptions* options) {
-  /* Build a local problem for a specific contact
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
-   reaction corresponds to the global vector (size n) of the global problem.
-  */
-
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_local_problem_fill_M(main_problem, localproblem, contact);
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
-     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
-  fc3d_local_problem_compute_q(main_problem, localproblem, reaction, contact);
-
-  /* Friction coefficient for current block*/
-  localproblem->mu[0] = main_problem->mu[contact];
-}
 
 void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int contact,
                                                          FrictionContactProblem* problem,

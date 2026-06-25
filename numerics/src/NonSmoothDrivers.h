@@ -115,6 +115,18 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *r
                                double *velocity, SolverOptions *options);
 
 /**
+   General interface to solvers for cohesive friction-contact 3D problem
+
+   \param[in] problem the structure which handles the Cohesive Friction-Contact problem
+   \param[in,out] reaction global vector (n)
+   \param[in,out] velocity global vector (n)
+   \param[in,out] options structure used to define the solver(s) and their parameters
+   \return result (0 if successful otherwise 1).
+*/
+int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem, double *reaction,
+                                double *velocity, SolverOptions *options);
+
+/**
    General interface to solvers for global friction-contact 2D problem
 
    \param[in] problem the structure which handles the Friction-Contact problem

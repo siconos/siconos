@@ -228,11 +228,6 @@ enum SICONOS_FRICTION_3D_IPARAM {
   SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE = 4,
   /** Current contact/block number (used by one-contact solvers) */
   SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER = 5,
-  /** Error evaluation method (see SICONOS_NSGS_ERROR_EVALUATION) - now in
-     NonSmoothGaussSeidel_options.h */
-  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
-  /** Frequency of error evaluation (0 = every iteration) */
-  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
   /** Number of contacts in the problem */
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
 };
@@ -267,11 +262,6 @@ enum SICONOS_FRICTION_3D_RESCALING_CONE {
  * and numerical parameters.
  */
 
-/** Indices for friction contact 3D double parameters */
-enum SICONOS_FRICTION_3D_DPARAM {
-  /** Ratio for internal solver error tolerance (relative to outer tolerance) */
-  SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO = 2
-};
 
 /* ===========================================================================
  * NSGS Options

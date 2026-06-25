@@ -102,7 +102,7 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
 
     if (verbose > 0) printf("norm of mu = %10.5e \n", cblas_dnrm2(nc, mu, 1));
 
-    fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options, error);
+    fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
 
     (*internalsolver)(problem, reaction, velocity, info, internalsolver_options);
 

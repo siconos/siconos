@@ -193,7 +193,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
   while ((iter < itermax) && (hasNotConverged > 0)) {
     ++iter;
 
-    fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options[0], error);
+    fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options[0], error);
 
     /* ----------------- */
     /* normal resolution */
@@ -220,7 +220,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
       /* tangent resolution */
       /* ------------------ */
 
-      fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options[1], error);
+      fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options[1], error);
       /* compute the rhs of the tangent problem */
       cblas_dcopy(2 * nc, splitted_problem->q_t, 1, tangent_cqp->q, 1);
       NM_gemv(1.0, splitted_problem->M_tn, r_n, 1.0, tangent_cqp->q);

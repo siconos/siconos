@@ -540,6 +540,73 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeM(
   NM_free(H_NM);
 }
 
+void siconos::nonsmooth_formulations::OSNSMatrix::computeV(
+    std::shared_ptr<NumericsMatrix> Htrans, std::shared_ptr<NumericsMatrix> Winverse,
+    std::shared_ptr<NumericsMatrix> H0) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
+
+  // Compute V = H^T * Winverse * H0
+  // This maps cohesive forces from indexSet0 to the OSNS problem
+
+  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
+  
+  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
+
+  _dimRow = _numericsMatrix->size0;
+  _dimColumn = _numericsMatrix->size1;
+
+  NM_free(NM1);
+
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
+}
+void siconos::nonsmooth_formulations::OSNSMatrix::computeU(
+    std::shared_ptr<NumericsMatrix> Htrans, std::shared_ptr<NumericsMatrix> Winverse,
+    std::shared_ptr<NumericsMatrix> H0) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
+
+  // Compute U = H0^T * Winverse * H
+
+  auto H0trans_NM = NM_transpose(H0.get());
+  auto H_NM = NM_transpose(Htrans.get());
+  
+  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H_NM);
+ 
+  _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
+
+  _dimRow = _numericsMatrix->size0;
+  _dimColumn = _numericsMatrix->size1;
+
+  NM_free(NM1);
+  NM_free(H_NM);
+  NM_free(H0trans_NM);
+  
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
+}
+void siconos::nonsmooth_formulations::OSNSMatrix::computeX(
+    std::shared_ptr<NumericsMatrix> H0, std::shared_ptr<NumericsMatrix> Winverse) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
+
+  // Compute X = H0^T * Winverse * H0
+
+  auto H0trans_NM = NM_transpose(H0.get());
+  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
+  
+  _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
+
+  _dimRow = _numericsMatrix->size0;
+  _dimColumn = _numericsMatrix->size1;
+
+  NM_free(NM1);
+  NM_free(H0trans_NM);
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
+}
+
 // Display data
 void siconos::nonsmooth_formulations::OSNSMatrix::display() const {
   if (_storageType == NM_DENSE) {
@@ -562,110 +629,4 @@ void siconos::nonsmooth_formulations::OSNSMatrix::display() const {
   } else if (_storageType == NM_SPARSE) {
     std::cout << "----- OSNS Matrix using sparse storage, nothing to show" << std::endl;
   }
-}
-
-
-// CZM-specific: fillV implementation for cohesive zone models
-void siconos::nonsmooth_formulations::OSNSMatrix::fillV(
-    siconos::graphs::InteractionsGraph& indexSet1,
-    siconos::graphs::InteractionsGraph& indexSet0, bool update) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::OSNSMatrix::fillV(InteractionsGraph& indexSet1, "
-      "InteractionsGraph& indexSet0, bool update)\n");
-
-  if (update) {
-    // Update size based on indexSet1 (destination)
-    unsigned int newDim = 0;
-    for (auto [ui, uiend] = indexSet1.vertices(); ui != uiend; ++ui) {
-      auto& inter = *indexSet1.bundle(*ui);
-      indexSet1.properties(*ui).absolute_position = newDim;
-      newDim += inter.dimension();
-    }
-    _dimRow = newDim;
-
-    // Update column size based on indexSet0 (source)
-    newDim = 0;
-    for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
-      auto& inter = *indexSet0.bundle(*ui);
-      indexSet0.properties(*ui).absolute_position = newDim;
-      newDim += inter.dimension();
-    }
-    _dimColumn = newDim;
-  }
-
-  switch (_storageType) {
-    case NM_DENSE: {
-      if (!_M1) {
-        _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(_dimRow, _dimColumn);
-      } else if (update) {
-        _M1->resize(_dimRow, _dimColumn);
-      }
-      _M1->setZero();
-
-      // Fill V matrix based on interaction connections
-      // For each interaction in indexSet1, find matching interaction in indexSet0
-      for (auto [ui1, ui1end] = indexSet1.vertices(); ui1 != ui1end; ++ui1) {
-        auto& inter1 = *indexSet1.bundle(*ui1);
-        auto pos1 = indexSet1.properties(*ui1).absolute_position;
-        auto size1 = inter1.dimension();
-
-        // Look for matching interaction in indexSet0
-        for (auto [ui0, ui0end] = indexSet0.vertices(); ui0 != ui0end; ++ui0) {
-          auto& inter0 = *indexSet0.bundle(*ui0);
-          if (inter0.number() == inter1.number()) {
-            auto pos0 = indexSet0.properties(*ui0).absolute_position;
-            auto size0 = inter0.dimension();
-
-            // Set identity block for matching interactions
-            for (unsigned int i = 0; i < std::min(size1, size0); ++i) {
-              _M1->setValue(pos1 + i, pos0 + i, 1.0);
-            }
-            break;
-          }
-        }
-      }
-      break;
-    }
-    case NM_SPARSE_BLOCK: {
-      // Sparse block implementation for V matrix
-      if (!_M2) {
-        _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(_dimRow);
-      }
-      // TODO: Implement sparse block filling for V matrix
-      // This requires mapping interactions between indexSet1 and indexSet0
-      break;
-    }
-    default: {
-      THROW_EXCEPTION(
-          "siconos::nonsmooth_formulations::OSNSMatrix::fillV unknown _storageType");
-    }
-  }
-  if(update)
-    convert();
-  DEBUG_END(
-      "siconos::nonsmooth_formulations::OSNSMatrix::fillV(InteractionsGraph& indexSet1, "
-      "InteractionsGraph& indexSet0, bool update)\n");
-}
-
-void siconos::nonsmooth_formulations::OSNSMatrix::computeV(
-    std::shared_ptr<NumericsMatrix> Htrans, std::shared_ptr<NumericsMatrix> Winverse,
-    std::shared_ptr<NumericsMatrix> H0) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
-
-  // Compute V = H^T * Winverse * H0
-  // This maps cohesive forces from indexSet0 to the OSNS problem
-
-  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
-  
-  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
-
-  _dimRow = _numericsMatrix->size0;
-  _dimColumn = _numericsMatrix->size1;
-
-  NM_free(NM1);
-
-
-  DEBUG_END(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
 }

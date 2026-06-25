@@ -165,6 +165,26 @@ class CohesiveFrictionContact : public FrictionContact {
    */
   std::shared_ptr<OSNSMatrix> _V{nullptr};
 
+  /** Matrix U for cohesive contribution mapping.
+   * 
+   * Maps cohesive forces from interactions in indexSet0 (distant but cohesive)
+   * to the contact space of the OSNS problem. This is needed because cohesive
+   * forces act at different points than the contact points used in the OSNS.
+   * 
+   * Dimensions:  (size of cohesive problem) x (size of contact problem) 
+   */
+  std::shared_ptr<OSNSMatrix> _U{nullptr};
+  
+ /** Matrix X for cohesive contribution mapping.
+   * 
+   * Maps cohesive forces from interactions in indexSet0 (distant but cohesive)
+   * to the contact space of the OSNS problem. This is needed because cohesive
+   * forces act at different points than the contact points used in the OSNS.
+   * 
+   * Dimensions:  (size of cohesive problem) x (size of contact problem) 
+   */
+  std::shared_ptr<OSNSMatrix> _X{nullptr};
+
   /** Matrix H0 for direct assembly of cohesive contribution.
    * 
    * Stores the H matrices (Jacobians) for interactions in indexSet0,
@@ -245,15 +265,15 @@ class CohesiveFrictionContact : public FrictionContact {
 
   /** \brief Compute the V matrix for cohesive mapping
    *
-   * Builds matrix V that maps cohesive forces from indexSet0 interactions
+   * Builds matrix V, U and X that maps cohesive forces from indexSet0 interactions
    * to the contact space. This involves:
    * 1. Gathering H matrices (Jacobians) for all cohesive interactions
    * 2. Computing the mapping to contact space coordinates
    *
-   * The V matrix structure depends on the graph of interactions and
+   * The V,U and X matrices structure depends on the graph of interactions and
    * their geometric relations.
    */
-  void computeV();
+  void computeMatrices();
 
   /** \brief Build problem coefficients including cohesive contribution
    *

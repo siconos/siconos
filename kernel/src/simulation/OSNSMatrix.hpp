@@ -263,17 +263,7 @@ class OSNSMatrix {
   virtual void fillHtrans(siconos::graphs::DynamicalSystemsGraph& DSG,
                           siconos::graphs::InteractionsGraph& indexSet, bool update = true);
 
-  /** fill the V matrix using two index sets (for cohesive zone models)
-   *  V maps cohesive forces from indexSet0 to the OSNS problem on indexSet1
-   *
-   *  \param indexSet1 the active index set (destination)
-   *  \param indexSet0 the source index set (usually indexSet 0 for CZM)
-   *  \param update if true update the size of the Matrix (default true)
-   */
-  virtual void fillV(siconos::graphs::InteractionsGraph& indexSet1,
-                     siconos::graphs::InteractionsGraph& indexSet0, bool update = true);
-
-  /** Compute V matrix given Htrans, Winverse, and H0
+  /** Compute V = H^T * Winverse * H0 matrix given Htrans, Winverse, and H0
    *  Used for cohesive zone models to compute the contribution matrix
    *
    *  \param Htrans the transpose of H matrix
@@ -283,6 +273,28 @@ class OSNSMatrix {
   void computeV(std::shared_ptr<NumericsMatrix> Htrans,
                 std::shared_ptr<NumericsMatrix> Winverse,
                 std::shared_ptr<NumericsMatrix> H0);
+
+  
+ /** Compute U = H0^T * Winverse * H matrix given Htrans, Winverse, and H0
+   *  Used for cohesive zone models to compute the contribution matrix
+   *
+   *  \param Htrans the transpose of H matrix
+   *  \param Winverse the inverse of W matrix
+   *  \param H0 the H matrix for indexSet0
+   */
+  void computeU(std::shared_ptr<NumericsMatrix> Htrans,
+                std::shared_ptr<NumericsMatrix> Winverse,
+                std::shared_ptr<NumericsMatrix> H0);
+  
+ /** Compute X = H0^T * Winverse * H0 matrix given Winverse, and H0
+   *  Used for cohesive zone models to compute the contribution matrix
+   *
+   *  \param Htrans the transpose of H matrix
+   *  \param Winverse the inverse of W matrix
+   *  \param H0 the H matrix for indexSet0
+   */
+  void computeX(std::shared_ptr<NumericsMatrix> H0,
+                std::shared_ptr<NumericsMatrix> Winverse);
 
   /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();

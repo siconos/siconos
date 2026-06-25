@@ -40,8 +40,11 @@ CohesiveFrictionContact::CohesiveFrictionContact(int dimPb, int numericsSolverId
                                                 solver_options_delete)) {}
 
 CohesiveFrictionContact::CohesiveFrictionContact(int dimPb,
-                                                  std::shared_ptr<SolverOptions> options)
-    : FrictionContact(dimPb, options) {}
+                                                 std::shared_ptr<SolverOptions> options)
+    : FrictionContact(dimPb, options) {
+  _assemblyType = LinearOSNSAssemblyType::REDUCED_DIRECT;
+  _numericsMatrixStorageType = NM_SPARSE;
+}
 
 void CohesiveFrictionContact::initialize(
     std::shared_ptr<siconos::simulation::Simulation> simulation) {
@@ -58,33 +61,44 @@ void CohesiveFrictionContact::initialize(
   // Initialize V matrix for cohesive contribution
   // Note: V matrix size will be determined by the number of cohesive interactions
 
-  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK or
-      _assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
+  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
     if (!_V) {
       switch (_numericsMatrixStorageType) {
-        case NM_DENSE:
         case NM_SPARSE: {
-          _V = std::make_shared<OSNSMatrix>(0 , 0, _numericsMatrixStorageType);
-          break;
-        }
-        case NM_SPARSE_BLOCK: {
-          // = number of Interactionin the largest considered indexSet
-          if (indexSetLevel() != siconos::internal::LEVELMAX &&
-              simulation->nonSmoothDynamicalSystem()->topology()->indexSetsSize() >
-                  indexSetLevel()) {
-            _V = std::make_shared<OSNSMatrix>(0 ,simulation->indexSet(indexSetLevel())->size(),
-                                              _numericsMatrixStorageType);
-          } else {
-            _V = std::make_shared<OSNSMatrix>(0 , 1, _numericsMatrixStorageType);
-          }
+          _V = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
           break;
         }
           {
             default:
-              THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+              THROW_EXCEPTION("CohesiveFrictionContact::initialize unknown _storageType");
           }
       }
     }
+    if (!_U) {
+      switch (_numericsMatrixStorageType) {
+        case NM_SPARSE: {
+          _U = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION("CohesiveFrictionContact::initialize unknown _storageType");
+          }
+      }
+    }
+    if (!_X) {
+      switch (_numericsMatrixStorageType) {
+        case NM_SPARSE: {
+          _X = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
+          break;
+        }
+          {
+            default:
+              THROW_EXCEPTION("CohesiveFrictionContact::initialize unknown _storageType");
+          }
+      }
+    }
+    
   }
 
   // Initialize H0 for direct assembly if needed  
@@ -95,23 +109,11 @@ void CohesiveFrictionContact::initialize(
 
 	  switch(_numericsMatrixStorageType)
 	    {
-	    case NM_DENSE:
-	      {
-		_H0 = std::make_shared<OSNSMatrix>(LinearOSNS::maxSize(), LinearOSNS::maxSize(), NM_DENSE);
-		break;
-	      }
 	    case NM_SPARSE:
 	      {
               _H0 = std::make_shared<OSNSMatrix>(
                   simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
                   simulation->indexSet(_indexSetLevel)->size(), NM_SPARSE);
-		break;
-	      }
-	    case NM_SPARSE_BLOCK:
-	      {
-              _H0 = std::make_shared<OSNSMatrix>(
-                  simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-                  simulation->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK);
 		break;
 	      }
 	      {
@@ -218,28 +220,12 @@ void CohesiveFrictionContact::updateQWithQCohesion(double time) {
   DEBUG_END("CohesiveFrictionContact::updateQWithQCohesion()\n");
 }
 
-void CohesiveFrictionContact::computeV() {
-  DEBUG_BEGIN("CohesiveFrictionContact::computeV()\n");
+void CohesiveFrictionContact::computeMatrices() {  
+  DEBUG_BEGIN("CohesiveFrictionContact::computeMatrices()\n");
   // Compute matrix V that maps cohesive forces from indexSet0 to the OSNS problem
   // This is similar to the M matrix computation but for indexSet0 interactions
   
-  if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK)
-  {
-
-    siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
-    siconos::graphs::InteractionsGraph& indexSet1 = *simulation()->indexSet(1);
-    indexSet0.update_vertices_indices();
-    indexSet0.update_edges_indices();
-    // Computes new _interactionBlocks if required
-    updateInteractionBlocks(indexSet0);
-
-    _V->fillV(indexSet1, indexSet0, !_hasBeenUpdated);
-    DEBUG_PRINT("partial V");
-    DEBUG_EXPR( _V->display(););
-
-
-  }
-    else if (_assemblyType ==LinearOSNSAssemblyType::REDUCED_DIRECT)
+  if (_assemblyType ==LinearOSNSAssemblyType::REDUCED_DIRECT)
   {
      siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
      siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
@@ -256,10 +242,14 @@ void CohesiveFrictionContact::computeV() {
 
     // ComputeV
     _V->computeV(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
+    // ComputeU
+    _U->computeU(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
+    // ComputeX
+    _X->computeX(_H0->numericsMatrix(), _W_inverse->numericsMatrix());
 
   }
   else
-    THROW_EXCEPTION("CohesiveFrictionContact::computeV unknown _assemblyTYPE");
+    THROW_EXCEPTION("CohesiveFrictionContact::computeMatrices unknown _assemblyTYPE");
 
 
   DEBUG_EXPR(_V->display(););
@@ -269,7 +259,7 @@ void CohesiveFrictionContact::computeV() {
   //   NM_display(V_NM);
 
   // getchar();
-  DEBUG_END("CohesiveFrictionContact::computeV()\n");
+  DEBUG_END("CohesiveFrictionContact::computeMatrices()\n");
 }
 
 bool CohesiveFrictionContact::preCompute(double time) {
@@ -281,8 +271,8 @@ bool CohesiveFrictionContact::preCompute(double time) {
 
   if (!hasContactActive) return false;
 
-  // Update cohesion contribution
-  computeV();
+  // Compute coupling matrices between point with cohesion and contact points.
+  computeMatrices();
 
   //Add cohesive contribution to q
   updateQWithQCohesion(time);

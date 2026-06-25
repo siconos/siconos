@@ -124,7 +124,7 @@ static double fc3d_incr_error_3(double* z_new, double* z_old) {
 static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProblem* problem,
                                                            SolverOptions* options,
                                                            SolverPtr* local_solver) {
-  FrictionContactProblem* localproblem = fc3d_local_problem_allocate(problem);
+  FrictionContactProblem* localproblem = fc3d_local_problem_allocate(problem->M->storageType);
   if (!localproblem) return NULL;
 
   SolverOptions* localsolver_options = options->internalSolvers[0];

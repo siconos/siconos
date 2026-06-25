@@ -191,7 +191,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
 
       numerics_printf_verbose(1, "---- FC3D - PROXIMAL - alpha = %8.4e\n", alpha);
 
-      fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options, error);
+      fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
       DEBUG_PRINTF("internal solver tolerance = %21.8e \n",
                    internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
 
@@ -314,7 +314,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* add proximal regularization on M */
       NM_add_to_diag3(M, alpha);
 
-      fc3d_set_internalsolver_tolerance(problem, options, internalsolver_options, error);
+      fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
 
       DEBUG_PRINTF("internal solver tolerance = %21.8e \n",
                    internalsolver_options->dparam[SICONOS_DPARAM_TOL]);

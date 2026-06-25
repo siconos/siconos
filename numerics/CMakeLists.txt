@@ -40,6 +40,7 @@ set(${COMPONENT}_DIRS
   src/FrictionContact/nsn_formulation
   src/FrictionContact/nsn_formulation/Generated
   src/RollingFrictionContact
+  src/CohesiveFrictionContact
   src/NCP
   src/MCP
   src/GenericMechanical
@@ -91,6 +92,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/FrictionContact
   src/FrictionContact/Generated
   src/RollingFrictionContact
+  src/CohesiveFrictionContact
   src/NonSmoothSolvers
   src/NCP
   src/MCP

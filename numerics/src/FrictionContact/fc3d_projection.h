@@ -153,8 +153,7 @@ void fc3d_projectionOnCylinder_update_parallel(int contact, FrictionContactProbl
  */
 int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem,
                                                   double* reaction, SolverOptions* options);
-void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* main_problem,
-                                                  FrictionContactProblem* localproblem,
+void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* localproblem,
                                                   SolverOptions* localsolver_options);
 void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* main_problem,
                                                         SolverOptions* localsolver_options);
@@ -176,8 +175,7 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double
 void fc3d_projectionOnCylinder_initialize(FrictionContactProblem* main_problem,
                                           FrictionContactProblem* localproblem,
                                           SolverOptions* options);
-void fc3d_projectionOnCylinder_free(FrictionContactProblem* main_problem,
-                                    FrictionContactProblem* localproblem,
+void fc3d_projectionOnCylinder_free(FrictionContactProblem* localproblem,
                                     SolverOptions* localsolver_options);
 
 /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
@@ -194,8 +192,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
     FrictionContactProblem* main_problem, FrictionContactProblem* localproblem,
     SolverOptions* options, SolverOptions* localsolver_options);
 
-void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* main_problem,
-                                                      FrictionContactProblem* localproblem,
+void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* localproblem,
                                                       SolverOptions* localsolver_options);
 
 /** free memory for friction contact 3D projection solver
@@ -203,8 +200,7 @@ void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* ma
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void fc3d_projection_free(FrictionContactProblem* main_problem,
-                          FrictionContactProblem* localproblem,
+void fc3d_projection_free(FrictionContactProblem* localproblem,
                           SolverOptions* localsolver_options);
 
 /** free memory for friction contact 3D projection solver
@@ -212,8 +208,7 @@ void fc3d_projection_free(FrictionContactProblem* main_problem,
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
-                                              FrictionContactProblem* localproblem,
+void fc3d_projection_with_regularization_free(FrictionContactProblem* localproblem,
                                               SolverOptions* localsolver_options);
 
 #if defined(__cplusplus)

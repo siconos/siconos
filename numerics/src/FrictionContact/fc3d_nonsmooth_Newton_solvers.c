@@ -473,7 +473,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   }
 
   // compute rho here
-  FrictionContactProblem *localproblem = fc3d_local_problem_allocate(problem);
+  FrictionContactProblem *localproblem = fc3d_local_problem_allocate(problem->M->storageType);
   assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0);
   SparseBlockStructuredMatrix *matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {

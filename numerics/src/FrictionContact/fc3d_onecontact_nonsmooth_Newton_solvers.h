@@ -61,8 +61,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
     \param localproblem for freeing matrix0
     \param localsolver_options options of the solver
  */
-void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* main_problem,
-                                                   FrictionContactProblem* localproblem,
+void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem,
                                                    SolverOptions* localsolver_options);
 
 /** compute error for friction-contact 3D problem with Newton
@@ -74,21 +73,6 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* main_
 void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
                                                            double* reaction,
                                                            double* output_error);
-
-/** Update friction-contact 3D problem: formalize local problem for one contact
-    \param problem the main problem to solve
-    \param localproblem the local problem to solve
-    \param number (position in main matrix) of the considered contact
-    \param reaction main reaction (only the block corresponding to the
-    current contact will be modified
-    \param options of the solver
-
-    the rest is used to formalize the local problem)
-*/
-void fc3d_onecontact_nonsmooth_Newton_AC_update(int number,
-                                                FrictionContactProblem* main_problem,
-                                                FrictionContactProblem* localproblem,
-                                                double* reaction, SolverOptions* options);
 
 /** Update friction-contact 3D problem, usable in parallel context: formalize local problem for
    one contact \param problem the global problem to solve \param localproblem the local problem

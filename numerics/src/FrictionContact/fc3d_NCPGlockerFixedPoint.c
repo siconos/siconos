@@ -93,7 +93,7 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_FixedP_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+void fc3d_FixedP_free(FrictionContactProblem* localproblem,
                       SolverOptions* localsolver_option) {}
 
 /*

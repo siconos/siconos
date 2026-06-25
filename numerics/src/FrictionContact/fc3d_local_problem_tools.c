@@ -68,7 +68,7 @@ void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 }
 
-FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem) {
+FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType) {
   /* Connect local solver and local problem*/
   FrictionContactProblem* localproblem =
       (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
@@ -77,7 +77,7 @@ FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* prob
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
 
-  if (problem->M->storageType != NM_SPARSE_BLOCK) {
+  if (storageType != NM_SPARSE_BLOCK) {
     localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {

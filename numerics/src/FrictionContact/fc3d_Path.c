@@ -99,7 +99,7 @@ int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_Path_free(FrictionContactProblem* dummy1, FrictionContactProblem* dummy2,
+void fc3d_Path_free(FrictionContactProblem* dummy2,
                     SolverOptions* dummy3) {}
 
 void fc3d_Path_computeError(int n, double* velocity, double* reaction, double* error) {

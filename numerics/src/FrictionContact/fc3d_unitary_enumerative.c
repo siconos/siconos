@@ -158,7 +158,7 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
 #endif
 }
 void fc3d_unitary_enumerative_free(FrictionContactProblem *localproblem,
-                                   FrictionContactProblem *dummy1, SolverOptions *dummy2) {
+                                   SolverOptions *dummy2) {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
 }

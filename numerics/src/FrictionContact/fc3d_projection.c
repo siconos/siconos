@@ -217,8 +217,7 @@ void fc3d_projection_update_with_regularization(int contact,
   /* Friction coefficient for current block*/
   localproblem->mu[0] = main_problem->mu[contact];
 }
-void fc3d_projection_with_regularization_free(FrictionContactProblem* main_problem,
-                                              FrictionContactProblem* localproblem,
+void fc3d_projection_with_regularization_free(FrictionContactProblem* localproblem,
                                               SolverOptions* localsolver_options) {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
@@ -338,8 +337,7 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem* 
   }
 }
 
-void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* main_problem,
-                                                  FrictionContactProblem* localproblem,
+void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem* localproblem,
                                                   SolverOptions* localsolver_options) {
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
@@ -600,8 +598,7 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
   return 0;
 }
 
-void fc3d_projection_free(FrictionContactProblem* main_problem,
-                          FrictionContactProblem* localproblem,
+void fc3d_projection_free(FrictionContactProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
 int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
@@ -712,16 +709,14 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
     localsolver_options->dWork[i] = 1.0;
   }
 }
-void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* main_problem,
-                                                      FrictionContactProblem* localproblem,
+void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem* localproblem,
                                                       SolverOptions* localsolver_options) {
   localproblem->mu = NULL;
   free(localsolver_options->dWork);
   localsolver_options->dWork = NULL;
 }
 
-void fc3d_projectionOnCylinder_free(FrictionContactProblem* main_problem,
-                                    FrictionContactProblem* localproblem,
+void fc3d_projectionOnCylinder_free(FrictionContactProblem* localproblem,
                                     SolverOptions* localsolver_options) {
   localproblem->mu = NULL;
 }

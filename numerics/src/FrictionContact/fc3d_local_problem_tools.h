@@ -21,6 +21,7 @@
 /*!\file
 
  */
+#include "NM_types.h"
 #include "NumericsFwd.h"  // for FrictionContactProblem
 
 #if defined(__cplusplus)
@@ -39,7 +40,7 @@ typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*,
 typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalSolverPtr)(FrictionContactProblem*, FrictionContactProblem*,
+typedef void (*FreeLocalSolverPtr)( FrictionContactProblem*,
                                    SolverOptions*);
 
 typedef void (*CopyLocalReactionPtr)(double*, double*);
@@ -65,7 +66,7 @@ struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void);
 
 void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit*);
 
-FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem);
+FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType);
 
 void fc3d_local_problem_free(FrictionContactProblem* localproblem,
                              FrictionContactProblem* problem);
