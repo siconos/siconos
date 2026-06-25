@@ -78,15 +78,17 @@ void SBM_clear_block(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level) {
   if (sbm->block) {
     for (size_t i = 0; i < sbm->nbblocks; i++) {
       if (sbm->block[i]) {
-        if (level & SBM_FREE_BLOCK) {
+        if (level & SBM_FREE_BLOCKS) {
           free(sbm->block[i]);
         }
         sbm->block[i] = NULL;
-        // Warning: if not SBM_FREE_BLOCK, we assume the memory of block[i] is
+        // Warning: if not SBM_FREE_BLOCKS, we assume the memory of block[i] is
         // owned and handled elsewhere
       }
     }
-    free(sbm->block);
+    if (level & SBM_FREE_BLOCK_ARRAY) {
+      free(sbm->block);
+    }
   }
   sbm->block = NULL;
 }
@@ -114,17 +116,17 @@ void SBM_clear(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level) {
   }
 
   SBM_clear_block(sbm, level);
+  if (level & SBM_FREE_INDEX) {
+    if (sbm->index1_data) {
+      free(sbm->index1_data);
+      sbm->index1_data = NULL;
+    }
 
-  if (sbm->index1_data) {
-    free(sbm->index1_data);
-    sbm->index1_data = NULL;
+    if (sbm->index2_data) {
+      free(sbm->index2_data);
+      sbm->index2_data = NULL;
+    }
   }
-
-  if (sbm->index2_data) {
-    free(sbm->index2_data);
-    sbm->index2_data = NULL;
-  }
-
   if (sbm->diagonal_blocks) {
     free(sbm->diagonal_blocks);
     sbm->diagonal_blocks = NULL;
@@ -135,7 +137,6 @@ void SBM_clear(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level) {
   sbm->blocknumber1 = 0;
   sbm->nbblocks = 0;
 }
-
 SparseBlockStructuredMatrix* SBM_free(SparseBlockStructuredMatrix* sbm, SBMFreeLevel level) {
   if (!sbm) return NULL;
 
@@ -2596,15 +2597,17 @@ void SBCM_clear_block(SparseBlockCoordinateMatrix* sbm, SBMFreeLevel level) {
   if (sbm->block) {
     for (size_t i = 0; i < sbm->nbblocks; i++) {
       if (sbm->block[i]) {
-        if (level & SBM_FREE_BLOCK) {
+        if (level & SBM_FREE_BLOCKS) {
           free(sbm->block[i]);
         }
         sbm->block[i] = NULL;
-        // Warning: if not SBM_FREE_BLOCK, we assume the memory of block[i] is
+        // Warning: if not SBM_FREE_BLOCKS, we assume the memory of block[i] is
         // owned and handled elsewhere
       }
     }
-    free(sbm->block);
+    if (level & SBM_FREE_BLOCK_ARRAY) {
+      free(sbm->block);
+    }
   }
   sbm->block = NULL;
 }

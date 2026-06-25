@@ -182,10 +182,10 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
   FC = NULL;
   NM->matrix1 = NULL;
   NM_free(NM);
-  M = SBM_free(M, SBM_FREE_SBM);
+  M = SBM_free(M, SBM_FREE_KEEP_BLOCKS_AND_SIZES);
 
-  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCK);  // W used to build MC was allocated elsewhere, so
-                                            // we do not free MC->blocks
+  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCKS);  // W used to build MC was allocated elsewhere, so
+                                             // we do not free MC->block[i]
   numerics_solver_options = NULL;
   return info;
 }

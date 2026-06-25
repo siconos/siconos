@@ -99,6 +99,7 @@ static void recursive_solver_options_print(SolverOptions* options, int level) {
     numerics_printf("%s========== NULL options pointer.\n");
     return;
   }
+
   char* marge;
   marge = (char*)malloc((size_t)(level + 1) * sizeof(char));
   for (int i = 0; i < level; i++) marge[i] = ' ';

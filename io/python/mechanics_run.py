@@ -3355,7 +3355,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb.handle().set_trace(True)
             else:
                 if solver_options is None:
-                    solver_options = sn.solver_options_create(
+                    solver_options = sn.SolverOptions(
                         sn.solver_ids.SICONOS_FRICTION_3D_NSGS
                     )
                 # sid = solver_options.solverId

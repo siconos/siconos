@@ -193,30 +193,52 @@ extern "C" {
  * The current enum is used to set this behavior.
  *
  *  no: not freed. yes: freed.
- *
- *  | Flag(s).                      | block[i] | blocksize | sbm |
- *  |-------------------------------|----------|-----------|-----|
- *  | SBM_FREE_NONE                 |    n     |     no    |  no |
- *  | SBM_FREE_BLOCK                |    yes   |     no    |  no |
- *  | SBM_FREE_SBM                  |    no    |     no    |  yes|
- *  | SBM_FREE_SIZES                |    no    |     yes   |  no |
- *  | SBM_FREE_KEEP_BLOCK           |    no    |     yes   |  yes|
- *  | SBM_FREE_KEEP_SIZES           |    yes   |     no    |  yes|
- *  | SBM_FREE_ALL                  |    yes   |     yes   |  yes|
+ * | Flag                          | block[i] | blocksize | sbm | block[] | index1/2 |
+ * |-------------------------------|----------|-----------|-----|---------|----------|
+ * | SBM_FREE_NONE                 |    no    |     no    |  no |    no   |    no    |
+ * | SBM_FREE_BLOCKS               |    yes   |     no    |  no |    no   |    no    |
+ * | SBM_FREE_SBM                  |    no    |     no    |  yes|    no   |    no    |
+ * | SBM_FREE_SIZES                |    no    |     yes   |  no |    no   |    no    |
+ * | SBM_FREE_BLOCK_ARRAY          |    no    |     no    |  no |    yes  |    no    |
+ * | SBM_FREE_INDEX                |    no    |     no    |  no |    no   |    yes   |
+ * | SBM_FREE_KEEP_BLOCKS          |    no    |     yes   |  yes|    yes  |    yes   |
+ * | SBM_FREE_KEEP_BLOCK_ARRAY     |    no    |     yes   |  yes|    no   |    yes   |
+ * | SBM_FREE_KEEP_SIZES           |    yes   |     no    |  yes|    yes  |    yes   |
+ * | SBM_FREE_KEEP_BLOCK_AND_SIZES |   no     |     no    |  yes|    no   |    yes   |
+ * | SBM_FREE_KEEP_BLOCKS_AND_SIZES|   no     |     no    |  yes|    yes  |    yes   |
+ * | SBM_FREE_ALL                  |    yes   |     yes   |  yes|    yes  |    yes   |
  *
  *  In all cases:
- *   - sbm->block[i] will end up to null and sbm->block is freed
- *   - sbm->index1,2 freed and set to null
+ *   - all pointers will end up to null
+ *   - sbm->_blocks is freed.
  *
+ *  Warning FP: combinations (SBM_FREE_KEEP_*) must NOT be combined
+ *  with each other or with primitive flags using |.
+ *  Only primitive flags (SBM_FREE_BLOCKS ...) can be combined with | else
+ *  unexpected results may occur.
  */
 typedef enum {
-  SBM_FREE_NONE = 0,  /* Do not free sbm.block[i] nor sbm, nor blocksizes*/
-  SBM_FREE_BLOCK = 1, /* Clear and free sbm.block[i] and call free(sbm.block)*/
-  SBM_FREE_SBM = 2,   /* call free(sbm) */
-  SBM_FREE_SIZES = 4, /* free blocksize0 and blocksize1 */
-  SBM_FREE_KEEP_BLOCK = SBM_FREE_SIZES | SBM_FREE_SBM, /**< free all except block[i] */
-  SBM_FREE_KEEP_SIZES = SBM_FREE_BLOCK | SBM_FREE_SBM, /**< free all except blocksize */
-  SBM_FREE_ALL = SBM_FREE_BLOCK | SBM_FREE_SBM | SBM_FREE_SIZES
+  SBM_FREE_NONE =
+      0, /* Do not free sbm.block[i] nor sbm.block, nor sbm, nor blocksizes, nor index*/
+  SBM_FREE_BLOCKS = 1,      /**< Free sbm->block[i] */
+  SBM_FREE_SBM = 2,         /**< Free the struct sbm itself */
+  SBM_FREE_SIZES = 4,       /**< Free blocksize0 and blocksize1 */
+  SBM_FREE_BLOCK_ARRAY = 8, /**< Free sbm->block */
+  SBM_FREE_INDEX = 16,      /**< Free index1_data and index2_data */
+  /* Combinations to ease call of this enum ... */
+  SBM_FREE_KEEP_BLOCKS = SBM_FREE_SIZES | SBM_FREE_SBM | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX,
+  /**< Free all except block[i] */
+  SBM_FREE_KEEP_BLOCK_ARRAY = SBM_FREE_SIZES | SBM_FREE_SBM | SBM_FREE_INDEX,
+  /**< Free sizes, sbm, index; keep block[] and block[i] */
+  SBM_FREE_KEEP_SIZES = SBM_FREE_BLOCKS | SBM_FREE_SBM | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX,
+  /**< Free all except blocksize */
+  SBM_FREE_KEEP_BLOCK_AND_SIZES = SBM_FREE_SBM | SBM_FREE_INDEX,
+  /**< Free sbm and index; keep block[], block[i] and sizes */
+  SBM_FREE_KEEP_BLOCKS_AND_SIZES = SBM_FREE_SBM | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX,
+  /**< Free sbm, index and blocl; keep block[i] and sizes */
+  SBM_FREE_ALL =
+      SBM_FREE_BLOCKS | SBM_FREE_SBM | SBM_FREE_SIZES | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX
+  /**< Free everything */
 } SBMFreeLevel;
 
 /** Creation of an empty Sparse Block Matrix (all fields to "0")
@@ -624,7 +646,7 @@ void SBM_row_to_dense(const SparseBlockStructuredMatrix* const A, size_t row, do
    \param [out] C The target SBM. It assumes the structure SBM has been allocated.
    The memory allocation for its menber is done inside.
    Warning: in the end, A and C share their blocks (pointer links). C must be freed
-   using SBM_free(..., SBM_FREE_KEEP_BLOCK).
+   using SBM_free(..., SBM_FREE_KEEP_BLOCKS).
 */
 void SBM_row_permutation(const size_t* const rowIndex,
                          const SparseBlockStructuredMatrix* const A,

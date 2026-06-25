@@ -21,14 +21,14 @@
 #include <memory>
 
 #include "BlockCSRMatrix.hpp"
-#include "BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"  // IWYU pragma: keep
 #include "Interaction.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "NumericsToolsNamespace.h"  // For NumericsMatrix
+#include "NumericsMatrix.h"
+#include "Relation.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "Relation.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -445,7 +445,6 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
   }
   switch (_storageType) {
     case NM_SPARSE: {
-
       if (update) {
         // We choose a triplet matrix format for inserting values.
         // This simplifies the memory manipulation.
@@ -480,8 +479,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
               siconos::algebra::SiconosDenseMatrix inter_block =
                   inter.getLeftInteractionBlock();
-              if(relationSubType == modeling::RelationSubType::StressLinearTIR){
-                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied after the velocity dimension
+              if (relationSubType == modeling::RelationSubType::StressLinearTIR) {
+                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied
+                                       // after the velocity dimension
                 sizeDS = ds->real_size() - ds->dimension();
               }
               for (auto idcol : bc->velocityIndices()) {
@@ -492,8 +492,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                                                raw_array + posBlock * sizeY, sizeY, sizeDS,
                                                DBL_EPSILON);
             } else {
-              if(relationSubType == modeling::RelationSubType::StressLinearTIR){
-                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied after the velocity dimension
+              if (relationSubType == modeling::RelationSubType::StressLinearTIR) {
+                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied
+                                       // after the velocity dimension
                 sizeDS = ds->real_size() - ds->dimension();
               }
               const double* raw_array = inter.getLeftInteractionBlock().data();

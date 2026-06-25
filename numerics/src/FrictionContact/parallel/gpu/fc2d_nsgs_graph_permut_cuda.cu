@@ -688,7 +688,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   problem->q = old_q;
   problem->mu = old_mu;
 
-  SBM_col_permuted = SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCK);
+  SBM_col_permuted = SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCKS);
   SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);
   free(q_permuted);
   free(mu_permuted);

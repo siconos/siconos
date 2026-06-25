@@ -56,7 +56,6 @@ int main(void) {
   int info1 = SBM_get_value(m, 0, 0) == 2.;
   int info2 = SBM_get_value(m, 8, 8) == 9.;
 
-  m = SBM_free(m, SBM_FREE_KEEP_BLOCK &
-                      SBM_FREE_KEEP_SIZES);  // from sbcm -> keep blocks and blocksizes
+  m = SBM_free(m, SBM_FREE_KEEP_BLOCKS_AND_SIZES);  // from sbcm -> keep blocks and blocksizes
   return 1 - info1 + 1 - info2;
 }

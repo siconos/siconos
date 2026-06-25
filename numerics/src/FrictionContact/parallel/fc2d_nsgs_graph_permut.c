@@ -739,7 +739,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   }
 
   SBM_col_permuted =
-      SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCK);  // do not free blocks on this one
+      SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCKS);  // do not free blocks on this one
   SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);  // free blocks because they were copied
   free(q_permuted);
   free(mu_permuted);

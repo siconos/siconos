@@ -191,7 +191,7 @@ static void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, do
   SparseBlockStructuredMatrix *Morder = SBM_new();
   SBM_row_permutation(newIndexOfCol, Maux, Morder);
   // free Maux but not the blocks, since they are shared with m and Morder
-  Maux = SBM_free(Maux, SBM_FREE_KEEP_BLOCK);
+  Maux = SBM_free(Maux, SBM_FREE_KEEP_BLOCKS);
 
   /*
     get the permutation indices of col (and row).
@@ -222,7 +222,7 @@ static void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, do
     curPos = Morder->blocksize1[numBlockRow] - firtMiLine;
     SBM_row_to_dense(Morder, numBlockRow, Mi, curPos, MiRow);
   }
-  Morder = SBM_free(Morder, SBM_FREE_KEEP_BLOCK);
+  Morder = SBM_free(Morder, SBM_FREE_KEEP_BLOCKS);
 
   curProblem = pInProblem->firstListElem;
   int curBlock = 0;

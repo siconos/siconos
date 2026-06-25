@@ -269,10 +269,13 @@ if(WITH_TESTING)
   endif()
   if(WITH_PYB11_WRAPPER)
     find_python_module(pytest REQUIRED)
+    # -s: capture all outputs, even if the test has passed
+    # -vv: high verbosity
+    # -rA: display a short test summary info for all tests
     if(WITH_AGGRESSIVE_PYTHON_TESTS)
-      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+      set(pytest_opt -rA -s -vv -pep8 CACHE INTERNAL "extra options for py.test")
     else()
-      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+      set(pytest_opt -rA -s -vv CACHE INTERNAL "extra options for py.test")
     endif()
   endif()
 endif()

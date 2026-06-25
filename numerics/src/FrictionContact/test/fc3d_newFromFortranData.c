@@ -58,7 +58,7 @@ int main(void) {
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCK);
+  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCKS);
 
   free(FC);
 

@@ -531,17 +531,13 @@ function(build_python_tests)
       set(exename ${RUNDIR}/${exename})
       # set_ldlibpath()
 
-      add_test(${name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${exename})
+      add_test(NAME ${name}  COMMAND ${Python_EXECUTABLE} -m pytest ${pytest_opt} ${DRIVE_LETTER}${exename})
       set_tests_properties(${name} PROPERTIES WORKING_DIRECTORY ${RUNDIR})
       set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
 
       if(WITH_SANITIZER)
             set_tests_properties(${name} PROPERTIES ENVIRONMENT
-              "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};\
-              LDFLAGS=${TEST_RPATH_FLAGS};\
-              LD_PRELOAD=${LIBASAN_PATH};\
-              ASAN_OPTIONS=detect_leaks=1;\
-              LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
+              "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS};LD_PRELOAD=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
       else()
         set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
       endif()

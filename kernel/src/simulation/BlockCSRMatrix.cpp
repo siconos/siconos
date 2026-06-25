@@ -24,9 +24,11 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NonSmoothLaw.hpp"          // IWYU pragma: keep
+#include "NonSmoothLaw.hpp"  // IWYU pragma: keep
+#include "NumericsFwd.h"
 #include "NumericsToolsNamespace.h"  // IWYU pragma: keep - For SparseBlockStructuredmatrix
 #include "SiconosException.hpp"
+#include "SparseBlockMatrix.h"
 #include "Tools.hpp"     // For print
 #include "TypeName.hpp"  // for DS type visitor
 
@@ -44,7 +46,11 @@ siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(
     siconos::graphs::InteractionsGraph::size_type nRow)
     : _nr(nRow), _nc{_nr} {
   _blockCSR = std::make_shared<CompressedRowMat>(_nr, _nr);
-  _sparseBlockStructuredMatrix = std::make_shared<SparseBlockStructuredMatrix>();
+
+  auto deleter = [](SparseBlockStructuredMatrix* p) { SBM_free(p, SBM_FREE_SBM); };
+
+  _sparseBlockStructuredMatrix.reset(
+      SBM_new(), deleter);  // = std::make_shared<SparseBlockStructuredMatrix>();
   _diagsize0 = std::make_shared<std::vector<std::size_t>>(_nr);
   _diagsize1 = std::make_shared<std::vector<std::size_t>>(_nr);
   rowPos = std::make_shared<std::vector<std::size_t>>(_nr);

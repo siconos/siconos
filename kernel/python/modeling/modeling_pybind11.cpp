@@ -34,8 +34,6 @@
 
 namespace py = pybind11;
 
-// // PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
-
 void wrap_dynamical_systems(py::module_& m);
 void wrap_nonsmoothlaws(py::module_& m);
 void wrap_relations(py::module_& m);

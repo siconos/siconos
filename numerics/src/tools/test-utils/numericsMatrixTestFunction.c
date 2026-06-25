@@ -500,7 +500,7 @@ int test_SBM_row_permutation(SparseBlockStructuredMatrix *input) {
     }
 
 clean_mem:
-  SBM_clear(&MRes, SBM_FREE_SIZES);
+  SBM_clear(&MRes, SBM_FREE_SIZES | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX);
 
   free(denseM);
   free(denseMRes);
@@ -525,7 +525,7 @@ int test_SBM_column_permutation(SparseBlockStructuredMatrix *M) {
   SBM_column_permutation(colBlockIndex, M, &MRes);
   free(colBlockIndex);
   free(mark);
-  SBM_clear(&MRes, SBM_FREE_SIZES);
+  SBM_clear(&MRes, SBM_FREE_SIZES | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX);
   SBM_null(&MRes);
   return 0;
 }
