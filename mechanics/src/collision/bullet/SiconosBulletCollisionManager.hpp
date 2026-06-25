@@ -40,7 +40,7 @@ namespace siconos::collision::bullet {
 
 class BulletR;
 class Bullet2d3DR;
-class Bullet5DR;
+class BulletVelocityAngularVelocityR;
 class Bullet2dR;
 
 namespace internal {  // An "impl" class to hide implementation. See
@@ -92,7 +92,7 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
 
   /** Provided so that creation of collision points can be overridden.
    *  See modify_normals.py in examples/Mechanics/Hacks */
-  virtual std::shared_ptr<Bullet5DR> makeBullet5DR(
+  virtual std::shared_ptr<BulletVelocityAngularVelocityR> makeBulletVelocityAngularVelocityR(
       std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
       std::shared_ptr<siconos::collision::SiconosShape> shape1,
       std::shared_ptr<siconos::collision::RigidBodyDS> ds2,

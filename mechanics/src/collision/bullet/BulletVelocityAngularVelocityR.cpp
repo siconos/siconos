@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-#include "Bullet5DR.hpp"
+#include "BulletVelocityAngularVelocityR.hpp"
 
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatpos
 
-void siconos::collision::bullet::Bullet5DR::updateContactPointsFromManifoldPoint(
+void siconos::collision::bullet::BulletVelocityAngularVelocityR::updateContactPointsFromManifoldPoint(
     const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
     double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {

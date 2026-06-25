@@ -27,7 +27,7 @@ Include files related to Siconos Mechanics collision interface
 #include "ContactR.hpp"
 #include "Contact2dR.hpp"
 #include "Contact2d3DR.hpp"
-#include "Contact5DR.hpp"
+#include "ContactVelocityAngularVelocityR.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosCollisionQueryResult.hpp"
 #include "SiconosContactor.hpp"

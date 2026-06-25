@@ -18,16 +18,16 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
-#include "Contact5DR.hpp"
+#include "ContactVelocityAngularVelocityR.hpp"
 
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::collision::Contact5DR::computeh(
+void siconos::collision::ContactVelocityAngularVelocityR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_BEGIN("Contact5DR::computeh(...)\n");
+  DEBUG_BEGIN("ContactVelocityAngularVelocityR::computeh(...)\n");
 
   // Update contact points and distance if necessary
   NewtonEulerR::computeh(q1, q2, y);
@@ -40,10 +40,10 @@ void siconos::collision::Contact5DR::computeh(
                contactPoint2_(2));
   DEBUG_PRINTF("normal on B   : %g,%g,%g\n", nc_(0), nc_(1), nc_(2));
 
-  DEBUG_END("Contact5DR::computeh(...)\n");
+  DEBUG_END("ContactVelocityAngularVelocityR::computeh(...)\n");
 }
 
-void siconos::collision::Contact5DR::updateContactPoints(
+void siconos::collision::ContactVelocityAngularVelocityR::updateContactPoints(
     const siconos::algebra::SiconosVector3& pos1, const siconos::algebra::SiconosVector3& pos2,
     const siconos::algebra::SiconosVector3& normal) {
   // Copy relative positions

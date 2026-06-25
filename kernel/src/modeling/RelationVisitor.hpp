@@ -46,7 +46,7 @@ class SphereNEDSPlanR;
 }  // namespace native::bodies
 
 class ContactR;
-class Contact5DR;
+class ContactVelocityAngularVelocityR;
 class Contact2d3DR;
 class Contact2dR;
 
@@ -274,20 +274,20 @@ struct Visitor {
         "you must define a visit function for ContactR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(std::shared_ptr<siconos::collision::Contact5DR>) {
+  virtual void visit(std::shared_ptr<siconos::collision::ContactVelocityAngularVelocityR>) {
     THROW_EXCEPTION(
         "you must define a visit function for shared ptr to "
-        "Contact5DR in a derived class of relations::Visitor");
+        "ContactVelocityAngularVelocityR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::Contact5DR &) {
+  virtual void visit(siconos::collision::ContactVelocityAngularVelocityR &) {
     THROW_EXCEPTION(
-        "you must define a visit function for Contact5DR "
+        "you must define a visit function for ContactVelocityAngularVelocityR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::Contact5DR &) {
+  virtual void visit(const siconos::collision::ContactVelocityAngularVelocityR &) {
     THROW_EXCEPTION(
-        "you must define a visit function for Contact5DR "
+        "you must define a visit function for ContactVelocityAngularVelocityR "
         "in a derived class of relations::Visitor");
   }
 

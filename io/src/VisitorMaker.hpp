@@ -46,7 +46,7 @@ class NewtonEulerVelocityAngularVelocityR;
 namespace siconos::collision {
 
 class ContactR;
-class Contact5DR;
+class ContactVelocityAngularVelocityR;
 class Contact2dR;
 class Contact2d3DR;
 class RigidBodyDS;
@@ -155,7 +155,7 @@ struct GlobalRelationVisitor {
                               VisitMaker<
                                   siconos::collision::ContactR,
                                   VisitMaker<
-                                      siconos::collision::Contact5DR,
+                                      siconos::collision::ContactVelocityAngularVelocityR,
                                       VisitMaker<
                                           siconos::collision::Contact2dR,
                                           VisitMaker<
@@ -212,7 +212,7 @@ struct GlobalRelationVisitor {
                               VisitMaker<
                                   siconos::collision::ContactR,
                                   VisitMaker<
-                                      siconos::collision::Contact5DR,
+                                      siconos::collision::ContactVelocityAngularVelocityR,
                                       VisitMaker<
                                           siconos::collision::Contact2dR,
                                           VisitMaker<

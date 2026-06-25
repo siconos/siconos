@@ -16,23 +16,23 @@
  * limitations under the License.
  */
 
-#ifndef Bullet5DR_hpp
-#define Bullet5DR_hpp
+#ifndef BulletVelocityAngularVelocityR_hpp
+#define BulletVelocityAngularVelocityR_hpp
 
 #include "BulletDeclarations.h"
-#include "Contact5DR.hpp"
+#include "ContactVelocityAngularVelocityR.hpp"
 
 namespace siconos::modeling {
 class NewtonEulerDS;
 }
 
 namespace siconos::collision::bullet {
-class Bullet5DR : public siconos::collision::Contact5DR {
+class BulletVelocityAngularVelocityR : public siconos::collision::ContactVelocityAngularVelocityR {
  private:
-  ACCEPT_SERIALIZATION(Bullet5DR);
+  ACCEPT_SERIALIZATION(BulletVelocityAngularVelocityR);
 
  public:
-  virtual ~Bullet5DR() noexcept = default;
+  virtual ~BulletVelocityAngularVelocityR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
   std::shared_ptr<btCollisionObject> btObject[2] = {nullptr, nullptr};

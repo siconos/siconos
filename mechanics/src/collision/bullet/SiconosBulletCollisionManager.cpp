@@ -51,7 +51,7 @@
 #include "Bullet1DR.hpp"
 #include "Bullet2d3DR.hpp"
 #include "Bullet2dR.hpp"
-#include "Bullet5DR.hpp"
+#include "BulletVelocityAngularVelocityR.hpp"
 #include "BulletR.hpp"
 #include "Interaction.hpp"
 #include "IterateContactPoint.hpp"
@@ -227,8 +227,8 @@ bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactCle
   DEBUG_PRINTF("unlinking interaction %p, number %zu \n", &**p_inter, (*p_inter)->number());
 
   // std::shared_ptr<BulletR>
-  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation())); Bullet5DR
-  // rel_bullet5DR(std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation())); Bullet2dR
+  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation())); BulletVelocityAngularVelocityR
+  // rel_bullet5DR(std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation())); Bullet2dR
   // rel_bullet2dR(std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
   // auto
   // rel_bullet2d3DR(std::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation())); if
@@ -406,13 +406,13 @@ siconos::collision::bullet::SiconosBulletCollisionManager::makeBulletR(
   return std::make_shared<BulletR>();
 }
 
-std::shared_ptr<siconos::collision::bullet::Bullet5DR>
-siconos::collision::bullet::SiconosBulletCollisionManager::makeBullet5DR(
+std::shared_ptr<siconos::collision::bullet::BulletVelocityAngularVelocityR>
+siconos::collision::bullet::SiconosBulletCollisionManager::makeBulletVelocityAngularVelocityR(
     std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
     std::shared_ptr<siconos::collision::SiconosShape> shape1,
     std::shared_ptr<siconos::collision::RigidBodyDS> ds2,
     std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint& p) {
-  return std::make_shared<Bullet5DR>();
+  return std::make_shared<BulletVelocityAngularVelocityR>();
 }
 
 std::shared_ptr<siconos::collision::bullet::Bullet2dR>
@@ -628,7 +628,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           (std::shared_ptr<siconos::modeling::Interaction>*)it->point->m_userPersistentData;
 
       auto rel_bulletR = std::dynamic_pointer_cast<BulletR>((*p_inter)->relation());
-      auto rel_bullet5DR = std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation());
+      auto rel_bullet5DR = std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation());
       auto rel_bullet2dR = std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation());
       auto rel_bullet2d3DR = std::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation());
 
@@ -802,7 +802,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
           auto rbdsB = std::static_pointer_cast<RigidBodyDS>(pairB->ds);
 
-          auto rel = makeBullet5DR(rbdsA, pairA->sshape, rbdsB, pairB->sshape, *it->point);
+          auto rel = makeBulletVelocityAngularVelocityR(rbdsA, pairA->sshape, rbdsB, pairB->sshape, *it->point);
 
           if (!rel) continue;
 

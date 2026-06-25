@@ -16,17 +16,17 @@
  * limitations under the License.
  */
 
-#ifndef Contact5DR_hpp
-#define Contact5DR_hpp
+#ifndef ContactVelocityAngularVelocityR_hpp
+#define ContactVelocityAngularVelocityR_hpp
 
 #include "NewtonEulerVelocityAngularVelocityR.hpp"
 
 namespace siconos::collision {
 class BodyShapeRecord;
 
-class Contact5DR : public siconos::modeling::NewtonEulerVelocityAngularVelocityR {
+class ContactVelocityAngularVelocityR : public siconos::modeling::NewtonEulerVelocityAngularVelocityR {
  private:
-  ACCEPT_SERIALIZATION(Contact5DR);
+  ACCEPT_SERIALIZATION(ContactVelocityAngularVelocityR);
 
  public:
   /* For users that may require extra information about contacts. */

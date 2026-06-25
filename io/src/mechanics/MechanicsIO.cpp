@@ -22,7 +22,7 @@
 #ifdef SICONOS_HAS_BULLET
 #include "Bullet2d3DR.hpp"  // IWYU pragma: keep
 #include "Bullet2dR.hpp"    // IWYU pragma: keep
-#include "Bullet5DR.hpp"
+#include "BulletVelocityAngularVelocityR.hpp"
 #include "BulletR.hpp"
 #else
 #include "NewtonEuler3DR.hpp"
@@ -37,7 +37,7 @@
 #include "CircleCircleR.hpp"
 #include "Contact2d3DR.hpp"
 #include "Contact2dR.hpp"
-#include "Contact5DR.hpp"
+#include "ContactVelocityAngularVelocityR.hpp"
 #include "ContactR.hpp"
 #include "Disk.hpp"
 #include "DiskDiskR.hpp"
@@ -704,7 +704,7 @@ void ContactInfoVisitor::operator()(const siconos::collision::ContactR& rel) {
 }
 
 template <>
-void ContactInfoVisitor::operator()(const siconos::collision::Contact5DR& rel) {
+void ContactInfoVisitor::operator()(const siconos::collision::ContactVelocityAngularVelocityR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(4);
   answer(0) = id;
@@ -763,7 +763,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
     using ContactInfoInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
             siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
-            siconos::collision::Contact5DR, siconos::collision::Contact2dR,
+            siconos::collision::ContactVelocityAngularVelocityR, siconos::collision::Contact2dR,
             siconos::collision::Contact2d3DR>,
         ContactInfoVisitor>::Make;
 
@@ -1035,7 +1035,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
 
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
-    const siconos::collision::Contact5DR& rel) {
+    const siconos::collision::ContactVelocityAngularVelocityR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(7);
   answer(0) = id;
@@ -1088,7 +1088,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
             siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
             siconos::modeling::NewtonEulerVelocityAngularVelocityR, siconos::modeling::Lagrangian2d2DR,
             siconos::modeling::Lagrangian2d3DR, siconos::collision::ContactR,
-            siconos::collision::Contact5DR, siconos::collision::Contact2dR,
+            siconos::collision::ContactVelocityAngularVelocityR, siconos::collision::Contact2dR,
             siconos::collision::Contact2d3DR,
             siconos::collision::native::bodies::CircleCircleR,
             siconos::collision::native::bodies::DiskDiskR,
