@@ -33,7 +33,7 @@
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEuler5DR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -255,7 +255,7 @@ PYBIND11_MODULE(_collision, m) {
       .def_readonly("bodyShapeRecordA", &siconos::collision::ContactR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::ContactR::bodyShapeRecordB);
 
-  py::class_<siconos::collision::Contact5DR, siconos::modeling::NewtonEuler5DR,
+  py::class_<siconos::collision::Contact5DR, siconos::modeling::NewtonEulerVelocityAngularVelocityR,
              py::smart_holder>(m, "Contact5DR")
       .def_readonly("bodyShapeRecordA", &siconos::collision::Contact5DR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::Contact5DR::bodyShapeRecordB);

@@ -28,7 +28,7 @@
 #include "LagrangianR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEuler5DR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 #include "NewtonEulerR.hpp"
 
 namespace py = pybind11;
@@ -124,6 +124,6 @@ void wrap_relations(py::module_ &m) {
 
   auto ne3dR = py::class_<siconos::modeling::NewtonEuler3DR, siconos::modeling::NewtonEuler1DR,
                           py::smart_holder>(m, "NewtonEuler3DR");
-  auto ne5dR = py::class_<siconos::modeling::NewtonEuler5DR, siconos::modeling::NewtonEuler1DR,
-                          py::smart_holder>(m, "NewtonEuler5DR");
+  auto ne5dR = py::class_<siconos::modeling::NewtonEulerVelocityAngularVelocityR, siconos::modeling::NewtonEuler1DR,
+                          py::smart_holder>(m, "NewtonEulerVelocityAngularVelocityR");
 }

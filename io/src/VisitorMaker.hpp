@@ -39,7 +39,7 @@ class Lagrangian2d3DR;
 class NewtonEulerR;
 class NewtonEuler1DR;
 class NewtonEuler3DR;
-class NewtonEuler5DR;
+class NewtonEulerVelocityAngularVelocityR;
 
 }  // namespace siconos::modeling
 
@@ -151,7 +151,7 @@ struct GlobalRelationVisitor {
                       VisitMaker<
                           siconos::modeling::NewtonEuler3DR,
                           VisitMaker<
-                              siconos::modeling::NewtonEuler5DR,
+                              siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<
                                   siconos::collision::ContactR,
                                   VisitMaker<
@@ -208,7 +208,7 @@ struct GlobalRelationVisitor {
                       VisitMaker<
                           siconos::modeling::NewtonEuler3DR,
                           VisitMaker<
-                              siconos::modeling::NewtonEuler5DR,
+                              siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<
                                   siconos::collision::ContactR,
                                   VisitMaker<

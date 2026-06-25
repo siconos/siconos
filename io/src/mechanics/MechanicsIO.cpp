@@ -26,7 +26,7 @@
 #include "BulletR.hpp"
 #else
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEuler5DR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 #include "SpaceFilter.hpp"
 #endif
 // #include <concepts>
@@ -52,7 +52,7 @@
 #include "NSLVisitor.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEuler5DR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
@@ -196,7 +196,7 @@ void siconos::io::ContactPointVisitor::operator()(
 /* then specializations : */
 template <>
 void siconos::io::ContactPointVisitor::operator()(
-    const siconos::modeling::NewtonEuler5DR& rel) {
+    const siconos::modeling::NewtonEulerVelocityAngularVelocityR& rel) {
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -628,7 +628,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
     using ContactPointInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
             siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
-            siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
+            siconos::modeling::NewtonEulerVelocityAngularVelocityR, siconos::modeling::Lagrangian2d2DR,
             siconos::modeling::Lagrangian2d3DR,
             siconos::collision::native::bodies::CircleCircleR,
             siconos::collision::native::bodies::DiskDiskR,
@@ -1086,7 +1086,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     using ContactContactWorkInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
             siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
-            siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
+            siconos::modeling::NewtonEulerVelocityAngularVelocityR, siconos::modeling::Lagrangian2d2DR,
             siconos::modeling::Lagrangian2d3DR, siconos::collision::ContactR,
             siconos::collision::Contact5DR, siconos::collision::Contact2dR,
             siconos::collision::Contact2d3DR,

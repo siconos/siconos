@@ -19,12 +19,12 @@
 #ifndef Contact5DR_hpp
 #define Contact5DR_hpp
 
-#include "NewtonEuler5DR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 
 namespace siconos::collision {
 class BodyShapeRecord;
 
-class Contact5DR : public siconos::modeling::NewtonEuler5DR {
+class Contact5DR : public siconos::modeling::NewtonEulerVelocityAngularVelocityR {
  private:
   ACCEPT_SERIALIZATION(Contact5DR);
 
