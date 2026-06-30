@@ -3665,6 +3665,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         ),
                         self._simulation.handle().one_step_nonsmooth_problem().number_of_contacts(),
                     )
+                    siconos.io.mechanics_hdf5.add_line(
+                        siconos.io.mechanics_hdf5.data(
+                            self.log_data()["vnative"], "number_of_iterations", 1
+                        ),
+                        self._simulation.handle().one_step_nonsmooth_problem().number_of_iterations(),
+                    )
 
                     
             number_of_contacts = self.log(self.contact_statistics_verbose, with_timer)()

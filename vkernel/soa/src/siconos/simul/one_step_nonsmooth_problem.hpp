@@ -133,6 +133,7 @@ struct one_step_nonsmooth_problem : item {
   using attributes =
       gather<attribute<"solver_duration_seconds", some::scalar>,
              attribute<"number_of_contacts", some::indice>,
+	     attribute<"number_of_iterations", some::indice>,
              attribute<"level", some::indice>,
              attribute<"trace", some::boolean>,
              attribute<"trace_params", some::item_ref<trace_params>>,
@@ -211,6 +212,8 @@ struct one_step_nonsmooth_problem : item {
 
           attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
 
+	  attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
+
           std::println("number_of_contacts:{}",
                        attr<"number_of_contacts">(*self()));
           std::println("solver_duration_seconds:{}",
@@ -228,6 +231,8 @@ struct one_step_nonsmooth_problem : item {
           const std::chrono::duration<scalar> elapsed_seconds{end_time -
                                                               start_time};
           attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
+
+	  attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
 
           // trace_params must be set!
           if (options().iparam(SICONOS_IPARAM_ITER_DONE) >
