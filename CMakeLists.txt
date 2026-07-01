@@ -233,7 +233,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
       $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
   target_precompile_headers(siconos_config INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/SiconosConfig.h>)
   siconos_component_install_setup(siconos_config)
-
+  target_precompile_headers(siconos_config INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/siconos/SiconosConfig.h>)
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 
 endif()

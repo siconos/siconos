@@ -23,21 +23,6 @@
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
 
-// siconos::collision::RigidBody2dDS::RigidBody2dDS(
-//     Eigen::Ref<siconos::algebra::SiconosVector> position,
-//     Eigen::Ref<siconos::algebra::SiconosVector> velocity,
-//     Eigen::Ref<siconos::algebra::SiconosMatrix> mass)
-//     : LagrangianLinearTIDS(position, velocity, mass),
-//       contactors_(std::make_shared<siconos::collision::SiconosContactorSet>()) {
-//   // Check size of positions, velocities and mass matrix
-//   if ((position.size() != 3) or (velocity.size() != 3)) {
-//     THROW_EXCEPTION(
-//         "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
-//         "velocity must of size 3");
-//   }
-//   scalarMass_ = mass(0, 0);
-// }
-
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
     const siconos::algebra::SiconosVector3& position,
     const siconos::algebra::SiconosVector3& velocity, double mass, double inertia)
