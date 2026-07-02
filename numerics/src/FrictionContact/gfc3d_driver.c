@@ -17,25 +17,24 @@
  */
 #include <assert.h>  // for assert
 #include <stdio.h>   // for NULL, fprintf, stderr
-#include <stdlib.h>  // for exit, EXIT_FAILURE
-#include <string.h>
-#include <time.h>
+// #include <stdlib.h>  // for exit, EXIT_FAILURE
+// #include <string.h>
+// #include <time.h>
 
-#include "fc3d_short_names.h"
-#include "FrictionContact_options.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "FrictionContact_options.h"       // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
+#include "fc3d_short_names.h"
+#include "gfc3d_Solvers.h"  // for gfc3d_ACLMFixedPoint, gfc3...
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"
 #include "gfc3d_ipm.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
-
-#include "numerics_errors.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
@@ -79,7 +78,7 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                  double* globalVelocity, SolverOptions* options) {
   // verbose = 1;
-  
+
   /* Input validation using standardized macros */
   CHECK_NULL(problem);
   CHECK_NULL(globalVelocity);
@@ -88,7 +87,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 
   CHECK_NULL(problem->q);
 
-  
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity, problem->M->size0););
   if (verbose > 0) solver_options_print(options);
@@ -118,7 +116,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   CHECK_NULL(reaction);
   CHECK_NULL(velocity);
   CHECK_MATRIX(problem->H);
-  CHECK_NULL(problem->b);  
+  CHECK_NULL(problem->b);
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
     case GFC3D_NSGS_WR: {

@@ -462,7 +462,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   problem->norm_b = norm_b;
 
   int internal_allocation = 0;
-  if (!options->dWork || options->dWorkSize != 2 * m + n) {
+  if (!(Gfc3d_ADDM_data*)options->solverData || !options->dWork ||
+      options->dWorkSize != 2 * m + n) {
     gfc3d_ADMM_init(problem, options);
     internal_allocation = 1;
   }
@@ -483,6 +484,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   double br_phi = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI];
 
   Gfc3d_ADDM_data* data = (Gfc3d_ADDM_data*)options->solverData;
+  if (!data) *info = numerics_error("gfc3d_ADMM", "null options->solverData");
 
   double* v = globalVelocity;
 

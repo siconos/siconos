@@ -19,13 +19,12 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
-#include "NumericsFwd.h"       // for RelayProblem
-#include "NumericsMatrix.h"    // for NM_gemv
-#include "RelayProblem.h"      // for RelayProblem
-#include "Relay_Solvers.h"     // for project_on_box, relay_compute_error
-#include "SiconosBlas.h"       // for cblas_daxpy, cblas_dnrm2, cblas_dcopy
-#include "numerics_verbose.h"  // for verbose
+#include "NumericsFwd.h"     // for RelayProblem
+#include "NumericsMatrix.h"  // for NM_gemv
+#include "Relay_Solvers.h"   // for project_on_box, relay_compute_error
+#include "SiconosBlas.h"     // for cblas_daxpy, cblas_dnrm2, cblas_dcopy
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose
 #include "sanitizer.h"         // for cblas_dcopy_msan
 
 void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub) {
