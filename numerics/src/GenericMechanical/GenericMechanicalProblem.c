@@ -52,6 +52,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int 
       }
       case SICONOS_NUMERICS_PROBLEM_RELAY: {
         freeRelay_problem((RelayProblem*)(pElem->problem));
+        pElem->problem = NULL;
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_FC2D:

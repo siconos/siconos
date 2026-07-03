@@ -807,7 +807,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
 }
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeqBlock(
-    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos) {
+    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+    siconos::algebra::Index pos) {
   DEBUG_BEGIN(
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeqBlock(siconos::"
       "graphs::"

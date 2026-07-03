@@ -121,7 +121,7 @@ class MLCPProjectOnConstraints : public MLCP {
       \param pos the position of the first element of yOut to be set
   */
   void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor& vd,
-                     unsigned int pos) override;
+                     siconos::algebra::Index pos) override;
 
   /** compute vector q
    *

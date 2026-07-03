@@ -340,7 +340,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
                               lcpProblem->q, NULL, 0);
           resLocalSolver =
               linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers[0]);
-          lcpProblem->M->matrix0 = NULL;
           break;
         }
         case SICONOS_NUMERICS_PROBLEM_RELAY: {
@@ -353,7 +352,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
                               relayProblem->q, NULL, 0);
           resLocalSolver = relay_driver(relayProblem, sol, w, options->internalSolvers[2]);
-          relayProblem->M->matrix0 = NULL;
 
           break;
         }
@@ -373,7 +371,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
            * various local solvers */
           resLocalSolver = fc3d_driver(fcProblem, sol, w, options->internalSolvers[1]);
           // resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
-          fcProblem->M->matrix0 = NULL;
           break;
         }
         case SICONOS_NUMERICS_PROBLEM_FC2D: {
@@ -401,7 +398,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
            * various local solvers */
           resLocalSolver = fc2d_driver(fcProblem, sol, w, options->internalSolvers[3]);
           // resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
-          fcProblem->M->matrix0 = NULL;
 
           break;
         }
@@ -455,6 +451,42 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     /*next GS it*/
     it++;
     // numerics_printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
+  }
+
+  // Free
+  curProblem = pGMP->firstListElem;
+  while (curProblem) {
+    switch (curProblem->type) {
+      case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_LCP: {
+        LinearComplementarityProblem* lcpProblem =
+            (LinearComplementarityProblem*)curProblem->problem;
+        lcpProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_RELAY: {
+        RelayProblem* relayProblem = (RelayProblem*)curProblem->problem;
+        relayProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_FC3D: {
+        FrictionContactProblem* fcProblem = (FrictionContactProblem*)curProblem->problem;
+        fcProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_FC2D: {
+        FrictionContactProblem* fcProblem = (FrictionContactProblem*)curProblem->problem;
+        fcProblem->M->matrix0 = NULL;
+        break;
+      }
+      default:
+        numerics_printf(
+            "genericMechanical_GS Numerics : gmp_gauss_seidel unknown problem type %d.\n",
+            curProblem->type);
+    }
+    curProblem = curProblem->nextProblem;
   }
 
   if (tolViolate) {

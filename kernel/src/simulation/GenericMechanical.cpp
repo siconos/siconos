@@ -50,6 +50,13 @@ siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
   // assert(options->solverId == SICONOS_GENERIC_MECHANICAL_NSGS); this will be checked in the
   // driver
   _numericsMatrixStorageType = NM_SPARSE_BLOCK;
+
+  // auto deleter = [](GenericMechanicalProblem* pb) {
+  //   genericMechanicalProblem_free(pb, GMP_FREE_GMP);
+  // };
+
+  //_pnumerics_GMP.reset(genericMechanicalProblem_new(), deleter);
+
   _pnumerics_GMP = genericMechanicalProblem_new();
   DEBUG_END(
       "siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(std::shared_ptr<"
@@ -58,7 +65,11 @@ siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
 }
 
 siconos::nonsmooth_formulations::GenericMechanical::~GenericMechanical() noexcept {
-  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
+  if (_pnumerics_GMP) {
+    _pnumerics_GMP->M = NULL;
+    _pnumerics_GMP->q = NULL;
+    // genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
+  }
   _pnumerics_GMP = nullptr;
 }
 
@@ -191,7 +202,7 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time) {
 
   if (_sizeOutput != 0) {
     // The GenericMechanical Problem in Numerics format
-
+    assert(_pnumerics_GMP);
     _pnumerics_GMP->M = &*_M->numericsMatrix();
     _pnumerics_GMP->q = &*_q->data();
     DEBUG_EXPR(display(););
@@ -200,6 +211,9 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time) {
     info = gmp_driver(_pnumerics_GMP, &*_z->data(), &*_w->data(), &*_numerics_solver_options);
     // printf("siconos::nonsmooth_formulations::GenericMechanical::compute : R:\n");
     // siconos::algebra::print(*_z);
+    _pnumerics_GMP->M = NULL;
+    _pnumerics_GMP->q = NULL;
+
     postCompute();
   } else {
     DEBUG_PRINT(
@@ -216,9 +230,6 @@ void siconos::nonsmooth_formulations::GenericMechanical::display() const {
 
 void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks() {
   if (!_hasBeenUpdated) {
-    //    printf("siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks :
-    //    must be updated\n");
-    genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
     _pnumerics_GMP = genericMechanicalProblem_new();
   }
   LinearOSNS::updateInteractionBlocks();

@@ -698,7 +698,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
 }
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
-    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos) {
+    siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+    siconos::algebra::Index pos) {
   DEBUG_BEGIN("siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(...)\n");
   auto indexSet = simulation()->indexSet(indexSetLevel());
 
@@ -729,7 +730,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::compute_q() {
   // === Loop through "active" Interactions (ie present in
   // indexSets[level]) ===
 
-  unsigned int pos = 0;
+  siconos::algebra::Index pos = 0;
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
     // Compute q, this depends on the type of non smooth problem, on

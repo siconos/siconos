@@ -141,12 +141,15 @@ void freeRelay_problem(RelayProblem* problem) {
   if (problem->q) {
     free(problem->q);
   }
+  problem->q = NULL;
   if (problem->lb) {
     free(problem->lb);
   }
+  problem->lb = NULL;
   if (problem->ub) {
     free(problem->ub);
   }
+  problem->ub = NULL;
   free(problem);
 }
 
