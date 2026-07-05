@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /**
  * \file BinaryCohesiveNSL.cpp
@@ -37,16 +37,19 @@
  * - beta = min(beta_previous, 1 - delta/delta_c)
  * - Linear softening from beta=1 at delta=0 to beta=0 at delta=delta_c
  *
- * \section sec_bczm_impl_cohesion Cohesive Force Computation
+ * \section sec_bczm_impl_cohesion Cohesive Intensity Computation
  *
- * The cohesive force is computed as:
- * \f[ r_{cohesion} = -beta \cdot sigma_c \cdot surface \cdot n \f]
+ * The cohesive intensity is computed as:
+ * \f[ {cohesion} = -beta \cdot sigma_c \cdot surface \f] for the normal part
+ * \f[ {cohesion} = -beta \cdot gamma \cdot sigma_c \cdot surface \cdot n \f] for the tangent
+ * part
+ *
  *
  * where:
  * - beta is the damage parameter
  * - sigma_c is the critical traction
  * - surface is the interface area
- * - n is the normal vector (pointing from body 2 to body 1)
+ * - gamma is the ration normal/tangent
  *
  * The negative sign indicates traction (pulling bodies together).
  *
@@ -54,7 +57,7 @@
  *
  * The model stores 14 internal variables per interaction, organized as:
  * - BETA_SURFACE: [beta, surface_area]
- * - R_COHESION: 3D cohesive force vector
+ * - COHESION: 3D cohesive force vector
  * - DISPLACEMENT_JUMP: 3D displacement across interface
  * - COHESIVE_POINT_1/2: 3D contact points in global frame
  * - NORMAL/TANGENT_1/TANGENT_2: 3D local coordinate frame
@@ -72,12 +75,12 @@
 #include <algorithm>
 #include <iostream>
 
+#include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEulerR.hpp"
 #include "RotationQuaternion.hpp"  // for orthoBaseFromVector
 #include "SiconosVector.hpp"
-#include "BlockVector.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -90,15 +93,15 @@ BinaryCohesiveNSL::BinaryCohesiveNSL(siconos::algebra::Index size)
     : siconos::modeling::CohesiveZoneModelNIFNSL(size) {}
 
 BinaryCohesiveNSL::BinaryCohesiveNSL(double en, double et, double mu, double sigma_c,
-                                      double delta_c, siconos::algebra::Index size)
+                                     double delta_c, siconos::algebra::Index size)
     : siconos::modeling::CohesiveZoneModelNIFNSL(en, et, mu, size),
       _sigma_c(sigma_c),
       _delta_c(delta_c),
       _shape_type(ShapeType::DOOR_SHAPE) {}
 
 BinaryCohesiveNSL::BinaryCohesiveNSL(double en, double et, double mu, double sigma_c,
-                                      double delta_c, siconos::algebra::Index size,
-                                      ShapeType shape_type)
+                                     double delta_c, siconos::algebra::Index size,
+                                     ShapeType shape_type)
     : siconos::modeling::CohesiveZoneModelNIFNSL(en, et, mu, size),
       _sigma_c(sigma_c),
       _delta_c(delta_c),
@@ -120,11 +123,11 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
 
   if (rel_NewtonEuler1DR) {
     /* internalVariables(0) --> beta and surface */
-    /* internalVariables(1) --> r_cohesion */
+    /* internalVariables(1) --> cohesion */
     /* internalVariables(2) --> displacement_jump */
     /* etc. */
 
-    internalVariables[BinaryCohesiveNSL::R_COHESION] =
+    internalVariables[BinaryCohesiveNSL::COHESION] =
         std::make_shared<siconos::algebra::SiconosVector>(3);
     internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP] =
         std::make_shared<siconos::algebra::SiconosVector>(3);
@@ -197,12 +200,12 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
         std::make_shared<siconos::algebra::SiconosVector>(displacement_jump);
 
     DEBUG_EXPR(for (const auto& v : internalVariables) {
-	if (v) siconos::algebra::print(*v);
+      if (v) siconos::algebra::print(*v);
     };);
 
   } else {
     // Simplified initialization for non-NewtonEuler1DR relations
-    internalVariables[BinaryCohesiveNSL::R_COHESION] =
+    internalVariables[BinaryCohesiveNSL::COHESION] =
         std::make_shared<siconos::algebra::SiconosVector>(3);
     internalVariables[BinaryCohesiveNSL::BETA_SURFACE] =
         std::make_shared<siconos::algebra::SiconosVector>(2);
@@ -221,7 +224,8 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   auto internalVars_k = inter.internalVariables_k();
 
   if (!internalVars || !internalVars_k) {
-    THROW_EXCEPTION("BinaryCohesiveNSL::updateInternalVariables: internal variables not initialized");
+    THROW_EXCEPTION(
+        "BinaryCohesiveNSL::updateInternalVariables: internal variables not initialized");
   }
 
   auto& internalVariables = *internalVars;
@@ -239,12 +243,15 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
     double delta = 0.0;
 
     auto rel = inter.relation();
-    auto rel_NewtonEuler1DR = std::dynamic_pointer_cast<siconos::modeling::NewtonEuler1DR>(rel);
+    auto rel_NewtonEuler1DR =
+        std::dynamic_pointer_cast<siconos::modeling::NewtonEuler1DR>(rel);
 
     if (rel_NewtonEuler1DR) {
       // Get stored initial configuration
-      const auto& r_pc1_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_1];
-      const auto& r_pc2_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_2];
+      const auto& r_pc1_0 =
+          *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_1];
+      const auto& r_pc2_0 =
+          *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_2];
       const auto& r_nc_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_NORMAL];
       const auto& r_t1_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_1];
       const auto& r_t2_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_2];
@@ -319,58 +326,27 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
 
   DEBUG_PRINTF("beta = %e\n", *beta);
 
-  // Compute cohesion force
-  double* r_cohesion = internalVariables[BinaryCohesiveNSL::R_COHESION]->data();
+  // Compute cohesion intensity
+  double* cohesion = internalVariables[BinaryCohesiveNSL::COHESION]->data();
 
   // Initialize to zero
   for (int k = 1; k < this->size(); k++) {
-    r_cohesion[k] = 0.0;
+    cohesion[k] = 0.0;
   }
   // Normal cohesion force (negative for traction)
-  r_cohesion[0] = -(*beta) * _sigma_c * (*surface);
-  DEBUG_PRINTF("normal  cohesion force %4.2e\n", r_cohesion[0]);
+  cohesion[0] = (*beta) * _sigma_c * (*surface);
+  DEBUG_PRINTF("normal  cohesion intensity %4.2e\n", cohesion[0]);
 
+  cohesion[1] = (*beta) * _gamma * _sigma_c * (*surface);
+  DEBUG_PRINTF("tangent  cohesion intensity %4.2e\n", cohesion[1]);
 
-  // IMPORTANT NOTE (V.A. 23/06/2026):
-  // The code below shows an attempt at explicit calculation of tangential cohesive forces.
-  // This approach DOES NOT WORK for intrinsic cohesive zone models because:
-  // 1. Explicit tangential forces create unstable oscillations at the interface
-  // 2. The coupling between cohesion and friction must be resolved implicitly
-  // 3. The complementarity problem must include both cohesive and frictional constraints
-  //
-  // The correct approach (implemented elsewhere):
-  // - Normal cohesive force is computed here and stored in r_cohesion
-  // - Tangential forces emerge from the friction-contact solve via CohesiveFrictionContact
-  // - The V matrix maps cohesive forces into the OSNS problem
-  // - The solver couples cohesion and friction implicitly
-  //
-  // DO NOT ENABLE THIS CODE - it is kept for documentation purposes only.
-
-  // if (_size > 2) {
-  //   double norm_u_T = sqrt(u_T * u_T + u_S * u_S);
-
-  //   if (norm_u_T > 0.0) {
-  //     double d_T1 = u_T / norm_u_T;
-  //     double d_T2 = u_S / norm_u_T;
-
-  //     r_cohesion[1] = -*beta * _sigma_c * *surface * d_T1;
-  //     r_cohesion[2] = -*beta * _sigma_c * *surface * d_T2;
-
-  //     DEBUG_PRINTF("tangential cohesion force %4.2e\t %4.2e\n", r_cohesion[1], r_cohesion[2]);
-  //   } else {
-  //     r_cohesion[1] = 0.0;
-  //     r_cohesion[2] = 0.0;
-  //   }
-  // }
-
-  DEBUG_EXPR(siconos::algebra::print(*internalVariables[BinaryCohesiveNSL::R_COHESION]));
-
+  DEBUG_EXPR(siconos::algebra::print(*internalVariables[BinaryCohesiveNSL::COHESION]));
 
   DEBUG_END("void BinaryCohesiveNSL::updateInternalVariables(Interaction& inter)\n");
 }
 
 bool BinaryCohesiveNSL::isActiveAtLevel(siconos::modeling::Interaction& inter,
-                                         unsigned int level) {
+                                        unsigned int level) {
   auto internalVars = inter.internalVariables();
   if (!internalVars) return (level == 1);  // Default behavior
 
@@ -384,10 +360,10 @@ bool BinaryCohesiveNSL::isActiveAtLevel(siconos::modeling::Interaction& inter,
   return (level == 1);
 }
 
-double* BinaryCohesiveNSL::r_cohesion(siconos::modeling::Interaction& inter) const {
+double* BinaryCohesiveNSL::cohesion(siconos::modeling::Interaction& inter) const {
   auto internalVars = inter.internalVariables();
   if (!internalVars) return nullptr;
-  return (*internalVars)[BinaryCohesiveNSL::R_COHESION]->data();
+  return (*internalVars)[BinaryCohesiveNSL::COHESION]->data();
 }
 
 double BinaryCohesiveNSL::beta(siconos::modeling::Interaction& inter) const {
@@ -404,14 +380,14 @@ void BinaryCohesiveNSL::display() const {
   std::cout << "delta_c: " << _delta_c << std::endl;
   std::cout << "shape_type: " << (_shape_type == ShapeType::DOOR_SHAPE ? "DOOR" : "TRIANGLE")
             << std::endl;
-  std::cout << "==================================================================" << std::endl;
+  std::cout << "=================================================================="
+            << std::endl;
 }
 
 void BinaryCohesiveNSL::displayInternalVariables(
     siconos::algebra::blocks::SharedVector& internalVariables) {
   std::cout << "=== BinaryCohesiveNSL Internal Variables ========================="
             << std::endl;
-
 
   // auto& internalVariables = *internalVars;
 
@@ -425,11 +401,11 @@ void BinaryCohesiveNSL::displayInternalVariables(
   }
 
   // R_COHESION
-  if (internalVariables[BinaryCohesiveNSL::R_COHESION]) {
-    auto& r_coh = *internalVariables[BinaryCohesiveNSL::R_COHESION];
-    std::cout << "Cohesion force R_COHESION: [" << r_coh(0);
-    for (int i = 1; i < r_coh.size(); ++i) {
-      std::cout << ", " << r_coh(i);
+  if (internalVariables[BinaryCohesiveNSL::COHESION]) {
+    auto& coh = *internalVariables[BinaryCohesiveNSL::COHESION];
+    std::cout << "Cohesion intensity COHESION: [" << coh(0);
+    for (int i = 1; i < coh.size(); ++i) {
+      std::cout << ", " << coh(i);
     }
     std::cout << "]" << std::endl;
   }
@@ -481,7 +457,8 @@ void BinaryCohesiveNSL::displayInternalVariables(
     std::cout << "]" << std::endl;
   }
 
-  std::cout << "==================================================================" << std::endl;
+  std::cout << "=================================================================="
+            << std::endl;
 }
 
 }  // namespace siconos::mechanics::czm

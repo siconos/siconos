@@ -93,10 +93,10 @@ void wrap_nonsmoothlaws(py::module_ &m) {
              siconos::modeling::NewtonImpactFrictionNSL, py::smart_holder>(
       m, "CohesiveZoneModelNIFNSL")
       .def(
-          "r_cohesion",
+          "cohesion",
           [](siconos::modeling::CohesiveZoneModelNIFNSL& self,
              siconos::modeling::Interaction& inter) -> py::array_t<double> {
-            double* data = self.r_cohesion(inter);
+            double* data = self.cohesion(inter);
             // Return as numpy array of size 3 (assuming 3D cohesion force)
             return py::array_t<double>({3}, {sizeof(double)}, data);
           },

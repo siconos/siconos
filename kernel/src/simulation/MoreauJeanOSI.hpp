@@ -240,7 +240,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  - a container saved in the graph of interactions
    *  - a container associated to a specific interaction
    */
-  enum class wk_inter : std::size_t { osnsp_rhs, osnsp_rhs_cohesion, size };
+  enum class wk_inter : std::size_t { osnsp_rhs, osnsp_rhs_position, size };
 
   /** This enum is used to get access to work block vectors relared to an Interaction
    *  It corresponds to:
@@ -442,6 +442,15 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
+  
+  /** integrates the Interaction linked to this integrator, without taking
+   *  non-smooth effects into account at the position
+   *
+   *  @param vertex_inter vertex of the interaction graph
+   *  @param osnsp pointer to OneStepNSProblem
+   */
+  void computeFreeOutputPosition(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+				 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** Update the input (right-hand side) of the dynamical systems using
    *  the multiplier lambda at the given level.

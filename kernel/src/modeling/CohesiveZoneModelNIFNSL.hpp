@@ -162,7 +162,7 @@ class CohesiveZoneModelNIFNSL : public NewtonImpactFrictionNSL {
    * \note The returned pointer points to internal storage that is valid 
    *       until the next call to updateInternalVariables()
    */
-  virtual double* r_cohesion(Interaction& inter) const = 0;
+  virtual double* cohesion(Interaction& inter) const = 0;
 
   /** \brief Get the fallback law for broken interfaces
    * 

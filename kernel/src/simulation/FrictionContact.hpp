@@ -182,11 +182,12 @@ class FrictionContact : public LinearOSNS {
    */
   int compute(double time) override;
 
+  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+
   /** print the data to the screen */
   void display() const override;
 
-  /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // FrictionContact_H

@@ -784,16 +784,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
 
   // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
   // Get first vertex in the graph to access to theta value from the integrator ...
-  auto vs = indexSet.vertices().first;
-  auto& inter = *indexSet.bundle(*vs);
-  auto& nslaw = *inter.nonSmoothLaw();
-  if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
-    auto ds1 = indexSet.properties(*vs).source;
-    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
-    double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
-    NM_scal(theta, &*_M->numericsMatrix());
+  if (indexSet.size() > 0) {
+      auto vs = indexSet.vertices().first;
+      auto& inter = *indexSet.bundle(*vs);
+      auto& nslaw = *inter.nonSmoothLaw();
+      if (siconos::types::type_value(nslaw) ==
+          siconos::modeling::Type::FremondImpactFrictionNSL) {
+        auto ds1 = indexSet.properties(*vs).source;
+        auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+        double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+        NM_scal(theta, &*_M->numericsMatrix());
+      }
   }
-
   DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )

@@ -43,7 +43,7 @@ PYBIND11_MODULE(_czm, m) {
   py::enum_<siconos::mechanics::czm::BinaryCohesiveNSL::InternalVariables>(m, "InternalVariables")
       .value("BETA_SURFACE", siconos::mechanics::czm::BinaryCohesiveNSL::BETA_SURFACE,
              "Damage parameter (0=broken, 1=intact) and surface area")
-      .value("R_COHESION", siconos::mechanics::czm::BinaryCohesiveNSL::R_COHESION,
+      .value("COHESION", siconos::mechanics::czm::BinaryCohesiveNSL::COHESION,
              "Cohesion force vector")
       .value("DISPLACEMENT_JUMP", siconos::mechanics::czm::BinaryCohesiveNSL::DISPLACEMENT_JUMP,
              "Current displacement jump")

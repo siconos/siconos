@@ -314,6 +314,15 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   virtual void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                                  siconos::nonsmooth_formulations::OneStepNSProblem* osnsp);
 
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects
+   * into account at the position level
+   *
+   *  \param vertex_inter of the interaction graph
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
+   */
+  virtual void computeFreeOutputPosition(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+					 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {};
+
   /** compute the residu of the output of the relation (y)
    *  This computation depends on the type of OSI
    *
