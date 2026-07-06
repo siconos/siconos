@@ -28,6 +28,8 @@
 // point on the convex hull.  (For convex shapes.)
 
 #include "SiconosBulletCollisionManager.hpp"
+
+#include <memory>
 #ifdef BULLET_TIMER
 #include <chrono>
 #endif
@@ -91,7 +93,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
   _impl = std::make_shared<internal::SiconosBulletCollisionManager_impl>(_options);
 
   // collision configuration contains default setup for memory, collision setup
-  _impl->_collisionConfiguration.reset(new btDefaultCollisionConfiguration());
+  _impl->_collisionConfiguration = std::make_shared<btDefaultCollisionConfiguration>();
 
   if (_options->perturbationIterations > 0 ||
       _options->minimumPointsPerturbationThreshold > 0) {
@@ -103,41 +105,41 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
 
   // use the default collision dispatcher. For parallel processing you can use a diffent
   // dispatcher (see Extras/BulletMultiThreaded)
-  _impl->_dispatcher.reset(new btCollisionDispatcher(&*_impl->_collisionConfiguration));
+  _impl->_dispatcher =
+      std::make_shared<btCollisionDispatcher>(&*_impl->_collisionConfiguration);
 
   if (_options->useAxisSweep3)
-    _impl->_broadphase.reset(new btAxisSweep3(btVector3(), btVector3()));
+    _impl->_broadphase = std::make_shared<btAxisSweep3>(btVector3(), btVector3());
   else
-    _impl->_broadphase.reset(new btDbvtBroadphase());
+    _impl->_broadphase = std::make_shared<btDbvtBroadphase>();
 
-  _impl->_collisionWorld.reset(new btCollisionWorld(&*_impl->_dispatcher, &*_impl->_broadphase,
-                                                    &*_impl->_collisionConfiguration));
+  _impl->_collisionWorld = std::make_shared<btCollisionWorld>(
+      &*_impl->_dispatcher, &*_impl->_broadphase, &*_impl->_collisionConfiguration);
 
-  btOverlapFilterCallback* filterCallback = new internal::SiconosBulletFilterCallback();
-  reinterpret_cast<internal::SiconosBulletFilterCallback*>(filterCallback)
-      ->interactionManager = this;
-  _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(filterCallback);
+  _impl->filterCallback_ = std::make_shared<internal::SiconosBulletFilterCallback>();
+  _impl->filterCallback_->interactionManager = this;
+  _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(
+      _impl->filterCallback_.get());
 
   DEBUG_PRINTF("_options->dimension = %i", _options->dimension);
 
   // 2D specific
   if (_options->dimension == SiconosBulletDimension::TwoD) {
-    btVoronoiSimplexSolver* m_simplexSolver = new btVoronoiSimplexSolver();
-    btMinkowskiPenetrationDepthSolver* m_pdSolver = new btMinkowskiPenetrationDepthSolver();
+    _impl->m_simplexSolver_ = std::make_unique<btVoronoiSimplexSolver>();
+    _impl->m_pdSolver_ = std::make_unique<btMinkowskiPenetrationDepthSolver>();
 
-    btConvex2dConvex2dAlgorithm::CreateFunc* m_convexAlgo2d =
-        new btConvex2dConvex2dAlgorithm::CreateFunc(m_simplexSolver, m_pdSolver);
-    btBox2dBox2dCollisionAlgorithm::CreateFunc* m_box2dbox2dAlgo =
-        new btBox2dBox2dCollisionAlgorithm::CreateFunc();
+    _impl->m_convexAlgo2d_ = std::make_unique<btConvex2dConvex2dAlgorithm::CreateFunc>(
+        _impl->m_simplexSolver_.get(), _impl->m_pdSolver_.get());
+    _impl->m_box2dbox2dAlgo_ = std::make_unique<btBox2dBox2dCollisionAlgorithm::CreateFunc>();
 
-    _impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,
-                                                    CONVEX_2D_SHAPE_PROXYTYPE, m_convexAlgo2d);
-    _impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,
-                                                    CONVEX_2D_SHAPE_PROXYTYPE, m_convexAlgo2d);
-    _impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,
-                                                    BOX_2D_SHAPE_PROXYTYPE, m_convexAlgo2d);
-    _impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,
-                                                    BOX_2D_SHAPE_PROXYTYPE, m_box2dbox2dAlgo);
+    _impl->_dispatcher->registerCollisionCreateFunc(
+        CONVEX_2D_SHAPE_PROXYTYPE, CONVEX_2D_SHAPE_PROXYTYPE, _impl->m_convexAlgo2d_.get());
+    _impl->_dispatcher->registerCollisionCreateFunc(
+        BOX_2D_SHAPE_PROXYTYPE, CONVEX_2D_SHAPE_PROXYTYPE, _impl->m_convexAlgo2d_.get());
+    _impl->_dispatcher->registerCollisionCreateFunc(
+        CONVEX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, _impl->m_convexAlgo2d_.get());
+    _impl->_dispatcher->registerCollisionCreateFunc(
+        BOX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, _impl->m_box2dbox2dAlgo_.get());
   } else
     btGImpactCollisionAlgorithm::registerAlgorithm(&*_impl->_dispatcher);
 
@@ -147,6 +149,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
 
 siconos::collision::bullet::SiconosBulletCollisionManager::
     ~SiconosBulletCollisionManager() noexcept {
+  if (_impl && _impl->_collisionWorld) {
+    _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(nullptr);
+  }
   // unlink() will be called on all remaining
   // contact points when world is destroyed
 

@@ -25,7 +25,9 @@
 #define SICOBULLETCOLLISIONIMPL_H
 
 #include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
+#include <BulletCollision/CollisionDispatch/btBox2dBox2dCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
@@ -33,6 +35,7 @@
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h>
 
 #include <map>
 #include <variant>
@@ -141,6 +144,13 @@ class SiconosBulletCollisionManager_impl
   std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> _options{nullptr};
 
   std::vector<std::pair<std::shared_ptr<btCollisionObject>, int>> _queuedCollisionObjects;
+
+  std::shared_ptr<SiconosBulletFilterCallback> filterCallback_{nullptr};
+
+  std::unique_ptr<btConvex2dConvex2dAlgorithm::CreateFunc> m_convexAlgo2d_{nullptr};
+  std::unique_ptr<btBox2dBox2dCollisionAlgorithm::CreateFunc> m_box2dbox2dAlgo_{nullptr};
+  std::unique_ptr<btVoronoiSimplexSolver> m_simplexSolver_{nullptr};
+  std::unique_ptr<btMinkowskiPenetrationDepthSolver> m_pdSolver_{nullptr};
 
   // Rule of five
   SiconosBulletCollisionManager_impl() = delete;
@@ -261,7 +271,8 @@ class SiconosBulletCollisionManager_impl
       std::shared_ptr<siconos::algebra::SiconosVector> base, const std::shared_ptr<DST> ds,
       std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap &bodyShapeMap,
       std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap &StaticBodyShapeMap,
-      std::shared_ptr<StaticBody> staticBody);
+      std::shared_ptr<StaticBody> staticBody,
+      std::shared_ptr<btConvexShape> childShape = nullptr);
   void updateShape(std::shared_ptr<BodySphereRecord> record);
   void updateShape(std::shared_ptr<BodyPlaneRecord> record);
   void updateShape(std::shared_ptr<BodyBoxRecord> record);
