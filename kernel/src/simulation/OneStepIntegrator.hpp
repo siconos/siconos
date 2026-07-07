@@ -464,7 +464,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       of interest.
   */
   inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const {
-    return (_dynamicalSystemsGraph->properties(*dsi).osi.lock().get()) == this;
+    return (_dynamicalSystemsGraph->properties(*dsi).osi().get()) == this;
   };
 
   /**
@@ -474,7 +474,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       system of interest.
   */
   inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const {
-    return (_dynamicalSystemsGraph->properties(dsgv).osi.lock().get()) == this;
+    return (_dynamicalSystemsGraph->properties(dsgv).osi().get()) == this;
   };
 
   /**

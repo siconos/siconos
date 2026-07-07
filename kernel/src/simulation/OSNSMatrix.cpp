@@ -360,7 +360,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse;
 
-          auto osi = DSG.properties(*dsi).osi.lock();
+          auto osi = DSG.properties(*dsi).osi();
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
           auto sods = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
           assert(sods);

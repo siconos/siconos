@@ -17,20 +17,20 @@
  */
 #include "MLCPProjectOnConstraints.hpp"
 
-#include "BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"  // IWYU pragma: keep
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
 #include "MixedComplementarityConditionNSL.hpp"
+#include "MixedLinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Relation.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Simulation.hpp"
-#include "Tools.hpp"  // enum_to_string
+#include "Simulation.hpp"  // IWYU pragma: keep
+#include "Tools.hpp"       // enum_to_string
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -384,7 +384,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   // We assume that all ds in vertex_inter have the same osi.
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
-  auto& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+  auto osi1 = DSG0.properties(DSG0.descriptor(ds1)).osi();
   // OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).
   auto sizeY =
       std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)->computeSizeForProjection(
@@ -485,7 +485,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
       //        siconos::algebra::print(*leftInteractionBlock);
 
       if (_useMassNormalization) {
-        auto centralInteractionBlock = getOSIMatrix(osi1, ds);
+        auto centralInteractionBlock = getOSIMatrix(*osi1, ds);
         *work = centralInteractionBlock->solve(*work);
         *currentInteractionBlock += *leftInteractionBlock * *work;
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
@@ -614,7 +614,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
   auto inter1 = indexSet->bundle(indexSet->source(ed));
   auto inter2 = indexSet->bundle(indexSet->target(ed));
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  auto& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
+  auto Osi = DSG0.properties(DSG0.descriptor(ds)).osi();
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
   // - find if ds is source or target in inter_i
@@ -772,7 +772,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     // because right = transpose(left) and because of
     // size checking inside the getBlock function, a
     // getRight call will fail.
-    auto centralInteractionBlock = getOSIMatrix(Osi, ds);
+    auto centralInteractionBlock = getOSIMatrix(*Osi, ds);
 #ifdef MLCPPROJ_DEBUG
     std::cout << "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::"
                  "computeInteractionBlock "

@@ -210,7 +210,8 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
         siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
       DEBUG_PRINTF("ds number : %zu\n", ds->number());
-      if (!DSG->properties(DSG->descriptor(ds)).osi.lock()) {
+      auto osi = DSG->properties(DSG->descriptor(ds)).osi();
+      if (!osi) {
         if (_allOSI->size() == 0)
           THROW_EXCEPTION("Simulation::initialize - there is no osi in this Simulation !!");
         DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
@@ -224,9 +225,9 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
                        "OSI. We assign the following OSI to this DS."
                     << std::endl;
         }
-      }
-      auto& osi = *DSG->properties(DSG->descriptor(ds)).osi.lock();
-      osi.initializeWorkVectorsForDS(getTk(), ds);
+        osi_default->initializeWorkVectorsForDS(getTk(), ds);
+      } else
+        osi->initializeWorkVectorsForDS(getTk(), ds);
     }
     // else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     // {
@@ -476,27 +477,27 @@ void siconos::simulation::Simulation::initializeInteraction(
   assert(ds1);
   assert(ds2);
 
-  auto& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi.lock();
-  auto& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi.lock();
+  auto osi1 = DSG.properties(DSG.descriptor(ds1)).osi();
+  auto osi2 = DSG.properties(DSG.descriptor(ds2)).osi();
   auto& i_prop = indexSet0->properties(ui);
-  i_prop.osi1 = DSG.properties(DSG.descriptor(ds1)).osi.lock();
-  i_prop.osi2 = DSG.properties(DSG.descriptor(ds2)).osi.lock();
+  i_prop.osi1 = osi1;
+  i_prop.osi2 = osi2;
 
-  if (&osi1 == &osi2) {
-    osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.updateAndSwapAllOutput(*inter, time);
+  if (&(*osi1) == &(*osi2)) {
+    osi1->initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
+    osi1->updateAndSwapAllOutput(*inter, time);
   } else {
-    osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.updateAndSwapAllOutput(*inter, time);
-    osi2.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi2.updateAndSwapAllOutput(*inter, time);
+    osi1->initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
+    osi1->updateAndSwapAllOutput(*inter, time);
+    osi2->initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
+    osi2->updateAndSwapAllOutput(*inter, time);
   }
   DEBUG_END(
       "siconos::simulation::Simulation::initializeInteraction(double time, "
       "std::shared_ptr<siconos::modeling::Interaction> inter)\n");
 
-  auto osi1Type = osi1.getType();
-  auto osi2Type = osi2.getType();
+  auto osi1Type = osi1->getType();
+  auto osi2Type = osi2->getType();
 
   // Check consistency of the OneStepIntegrator
   // We assume that the osi of ds1 (osi1) is used for all DS of the interaction (to be

@@ -745,9 +745,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
             //  We assume that the integrator of the ds1 drive the update of the
             //  index set
             auto ds1 = indexSet1->properties(*ui0).source;
-            auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+            auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
-            activate = osi.addInteractionInIndexSet(inter0, i);
+            activate = osi->addInteractionInIndexSet(inter0, i);
           }
           if (activate) {
             assert(!indexSet1->is_vertex(inter0));
@@ -800,13 +800,13 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
       bool activate = true;
       if (siconos::types::type_value(*(inter1->nonSmoothLaw())) !=
           siconos::modeling::Type::EqualityConditionNSL) {
-        // auto Osi = indexSet1->properties(*ui1).osi.lock();
+        // auto Osi = indexSet1->properties(*ui1).osi();
         //  We assume that the integrator of the ds1 drive the update of the
         //  index set
         auto ds1 = indexSet1->properties(*ui1).source;
-        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+        auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
-        activate = osi.addInteractionInIndexSet(inter1, i);
+        activate = osi->addInteractionInIndexSet(inter1, i);
       }
       if (activate) {
         assert(!indexSet2->is_vertex(inter1));

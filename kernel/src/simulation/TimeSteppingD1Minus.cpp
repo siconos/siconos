@@ -105,15 +105,15 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(
     auto inter = indexSet0->bundle(*uip);
 
     // We assume that the integrator of the ds1 drive the update of the index
-    // set auto Osi = indexSetCurrent->properties(*uip).osi.lock();
+    // set auto Osi = indexSetCurrent->properties(*uip).osi();
     auto ds1 = indexSetCurrent->properties(*uip).source;
-    auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
-    auto levelMaxForInput = osi.levelMaxForInput();
-    if ((!indexSetCurrent->is_vertex(inter)) and (osi.addInteractionInIndexSet(inter, i))) {
+    auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
+    auto levelMaxForInput = osi->levelMaxForInput();
+    if ((!indexSetCurrent->is_vertex(inter)) and (osi->addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
     } else if ((indexSetCurrent->is_vertex(inter)) and
-               !(osi.addInteractionInIndexSet(inter, i))) {
+               !(osi->addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
       if (i <= levelMaxForInput) {

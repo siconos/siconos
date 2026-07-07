@@ -23,6 +23,8 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
+#include <memory>
+
 #include "FunctionTypes.hpp"
 #include "Interaction.hpp"
 #include "SiconosGraph.hpp"
@@ -132,7 +134,7 @@ struct DynamicalSystemProperties {
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Mostly for Lagrangian system.*/
   std::weak_ptr<siconos::integrators::OneStepIntegrator>
-      osi; /**< Integrator used for the given DynamicalSystem */
+      osi_; /**< Integrator used for the given DynamicalSystem */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
       nullptr}; /**< Matrix for integration */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{
@@ -145,7 +147,10 @@ struct DynamicalSystemProperties {
                                      the unknown vector in osnsp*/
   //  std::shared_ptr<siconos::algebra::SiconosMemory> xMemory_            /**< old value of x,
   //  TBD */
-
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi() const {
+    return osi_.lock();
+    //  https:  // en.cppreference.com/cpp/memory/weak_ptr/lock
+  }
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
 };
 

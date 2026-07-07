@@ -176,10 +176,10 @@ void siconos::simulation::TimeStepping::updateIndexSet(
         // index set std::shared_ptr<siconos::integrators::OneStepIntegrator>
         // Osi = indexSet1->properties(*ui1).osi;
         auto ds1 = indexSet1->properties(*ui1).source;
-        auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+        auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
         // if(predictorDeactivate(inter1,i))
-        if (osi.removeInteractionFromIndexSet(inter1, i)) {
+        if (osi->removeInteractionFromIndexSet(inter1, i)) {
           // Interaction is not active
           // ui1 becomes invalid
           indexSet0->color(inter1_descr0) = boost::black_color;
@@ -258,9 +258,9 @@ void siconos::simulation::TimeStepping::updateIndexSet(
           //  We assume that the integrator of the ds1 drive the update of the
           //  index set
           auto ds1 = indexSet1->properties(*ui0).source;
-          auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi.lock();
+          auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
-          activate = osi.addInteractionInIndexSet(inter0, i);
+          activate = osi->addInteractionInIndexSet(inter0, i);
         }
         if (activate) {
           assert(!indexSet1->is_vertex(inter0));

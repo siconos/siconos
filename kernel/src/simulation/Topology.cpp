@@ -236,7 +236,7 @@ std::string siconos::simulation::Topology::name(
 void siconos::simulation::Topology::setOSI(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
     std::shared_ptr<siconos::integrators::OneStepIntegrator> OSI) {
-  _DSG[0]->properties(_DSG[0]->descriptor(ds)).osi = OSI;
+  _DSG[0]->properties(_DSG[0]->descriptor(ds)).osi_ = OSI;
 }
 
 void siconos::simulation::Topology::setControlProperty(

@@ -30,7 +30,6 @@
 #include "LagrangianCompliantLinearTIR.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "NonSmoothLaw.hpp"
 #include "NumericsMatrix.h"  // NM_scal
 #include "OSNSMatrix.hpp"
 #include "OneStepIntegrator.hpp"
@@ -399,8 +398,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
 
-    auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
-    auto osiType = osi.getType();
+    auto osi = DSG0.properties(DSG0.descriptor(ds)).osi();
+    auto osiType = osi->getType();
     auto sizeDS = ds->real_size();
 
     // get _interactionBlocks corresponding to the current DS
@@ -412,25 +411,27 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
       if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
-        if ((static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGamma() ||
-            (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGammaForRelation()) {
+        if ((std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi))
+                ->useGamma() ||
+            (std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi))
+                ->useGammaForRelation()) {
           *rightInteractionBlock *=
-              (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
+              (std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi))->gamma();
         }
       }
       // for ZOH, we have a different formula ...
       if ((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
           indexSet->properties(vd).forControl) {
         *rightInteractionBlock =
-            static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
+            std::dynamic_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(osi)->Bd(ds);
         *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
       } else {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
-        auto centralInteractionBlock = getOSIMatrix(osi, ds);
+        auto centralInteractionBlock = getOSIMatrix(*osi, ds);
         *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
         auto& workMInter = *indexSet->properties(vd).workMatrices;
-        static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(
+        std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi)->computeKhat(
             *inter, *rightInteractionBlock, workMInter, h);
 
         //      integration of r with theta method removed
@@ -457,7 +458,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             leftInteractionBlock->rows(), leftInteractionBlock->cols());
 
         // Get inverse of the iteration matrix
-        auto inv_iteration_matrix = osi.iterationMatrix(ds);
+        auto inv_iteration_matrix = osi->iterationMatrix(ds);
         // work = HW (remind that W contains the inverse of the iteration matrix)
         work->noalias() = *leftInteractionBlock * *inv_iteration_matrix;
         leftInteractionBlock->transposeInPlace();
@@ -465,7 +466,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=
-                (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+                (std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi))->theta();
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
@@ -479,7 +480,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         // (inter1 == inter2)
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
-        auto centralInteractionBlock = getOSIMatrix(osi, ds);
+        auto centralInteractionBlock = getOSIMatrix(*osi, ds);
         if (centralInteractionBlock) {  // else it means centralInteractionBlock = identity
           *work = centralInteractionBlock->solve(*work);
         }
@@ -493,7 +494,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=
-                (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+                (std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi))->theta();
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
@@ -539,10 +540,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   auto inter1 = indexSet->bundle(indexSet->source(ed));
   auto inter2 = indexSet->bundle(indexSet->target(ed));
   // Once again we assume that inter1 and inter2 have the same osi ...
-  // auto Osi = indexSet->properties(indexSet->source(ed)).osi.lock();
+  // auto Osi = indexSet->properties(indexSet->source(ed)).osi();
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi.lock();
-  auto osiType = osi.getType();
+  auto osi = DSG0.properties(DSG0.descriptor(ds)).osi();
+  auto osiType = osi->getType();
 
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
@@ -624,7 +625,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     rightInteractionBlock = inter2->getRightInteractionBlockForDS(pos2, sizeDS, nslawSize2);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
-    auto centralInteractionBlock = getOSIMatrix(osi, ds);
+    auto centralInteractionBlock = getOSIMatrix(*osi, ds);
     *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
@@ -661,7 +662,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
           std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS);
       // auto work(new SiconosMatrix(*leftInteractionBlock));
       //  Get inverse of the iteration matrix
-      auto inv_iteration_matrix = osi.iterationMatrix(ds);
+      auto inv_iteration_matrix = osi->iterationMatrix(ds);
       // remind that W contains the inverse of the iteration matrix
       *rightInteractionBlock = *leftInteractionBlock * *inv_iteration_matrix;
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
@@ -678,7 +679,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
       // because right = transpose(left) and because of
       // size checking inside the getBlock function, a
       // getRight call will fail.
-      auto centralInteractionBlock = getOSIMatrix(osi, ds);
+      auto centralInteractionBlock = getOSIMatrix(*osi, ds);
       *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
@@ -790,8 +791,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   auto& nslaw = *inter.nonSmoothLaw();
   if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
     auto ds1 = indexSet.properties(*vs).source;
-    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi.lock();
-    double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+    auto osi = DSG0->properties(DSG0->descriptor(ds1)).osi();
+    double theta =
+        (std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi))->theta();
     NM_scal(theta, &*_M->numericsMatrix());
   }
 
