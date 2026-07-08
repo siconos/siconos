@@ -418,9 +418,11 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       } else if (s_scaled > br_phi * r_scaled) {
         rho = rho_k / br_tau;
         has_rho_changed = 1;
+      } else {
         /* keep the value of rho */
         has_rho_changed = 0;
       }
+    } else {
       has_rho_changed = 0;
     }
     numerics_printf_verbose(2, "convexQP_admm. rho = %5.2e\t, rho_k = %5.2e\t ", rho, rho_k);
@@ -474,6 +476,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
         numerics_printf_verbose(
             1, "---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e",
             iter, rho, error);
+      } else {
         numerics_printf_verbose(1,
                                 "---- ConvexQP - ADMM  - The tolerance on the  residual is "
                                 "not sufficient to reach accuracy (error =  %14.7e)",
