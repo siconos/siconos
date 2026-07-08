@@ -29,39 +29,35 @@
 #include "numerics_verbose.h"
 #include "projectionOnDisk.h"
 
-
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
-void cohesive_friction_3d_unitary_compute_and_add_error(double r[3],
-                                                        double u[3],
-                                                        double mu,
-                                                        double *error,
-                                                        double worktmp[3]) {
-  /* Compute the modified local velocity: w = r - u - mu*||u_t||*e_n */
-  worktmp[0] = r[1] - u[1];
-  worktmp[1] = r[2] - u[2];
-  
+void cohesive_friction_3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
+                                                        double* error, double worktmp[3]) {
+  /* Compute the modified local velocity: w = r - u */
+  worktmp[0] = r[0] - u[0];
+  worktmp[1] = r[1] - u[1];
+  worktmp[2] = r[2] - u[2];
+
   /* Project onto the friction cone */
-  projectionOnDisk(worktmp, mu);
+  projectionOnDisk(&worktmp[1], mu);
 
   /* Compute residual: r - P_C(r - u) */
-  worktmp[2] = r[2] - worktmp[1];  
-  worktmp[1] = r[1] - worktmp[0];
   worktmp[0] = 0.0;
+  worktmp[1] = r[1] - worktmp[1];
+  worktmp[2] = r[2] - worktmp[2];
+
   /* Accumulate squared error */
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-
 int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
                                        double* reaction, double* velocity, double tolerance,
-                                       SolverOptions* options, double norm, 
-                                       double* error) {
+                                       SolverOptions* options, double norm, double* error) {
   DEBUG_BEGIN("cohesive_friction_3d_compute_error(...)\n");
-  
+
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
   CHECK_NULL(velocity);
@@ -72,30 +68,29 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
 
   int nc = problem->numberOfContacts;
   int ncoh = problem->numberOfCohesivePoints;
-  
+
   int dim = problem->dimension;
   int n = dim * (nc + ncoh);
-  double *mu = problem->mu;
+  double* mu = problem->mu;
 
   *error = 0.0;
   double worktmp[3];
   int incx = 1, incy = 1;
- 
+
   /* Compute the current velocity */
-  cblas_dcopy(n, problem->q, incx, velocity, incy);  // w <-q
-  NM_prod_mv_3x3(n, n, problem->M, reaction, velocity);     // w = Mz +q
+  cblas_dcopy(n, problem->q, incx, velocity, incy);      // w <-q
+  NM_prod_mv_3x3(n, n, problem->M, reaction, velocity);  // w = Mz +q
 
   /* Loop over all contacts and accumulate error */
   for (int ic = 0, ic3 = 0; ic < nc; ic++, ic3 += dim) {
-    fc3d_unitary_compute_and_add_error(
-        reaction + ic3, velocity + ic3, mu[ic], error, worktmp);
+    fc3d_unitary_compute_and_add_error(reaction + ic3, velocity + ic3, mu[ic], error, worktmp);
   }
   /* Loop over all cohesive points and accumulate error */
-  for (int ic = nc, ic3 = 3*nc; ic < nc+ncoh ; ic++, ic3 += dim) {
-    cohesive_friction_3d_unitary_compute_and_add_error(
-        reaction + ic3, velocity + ic3,problem->c_t[ic-nc], error, worktmp);
+  for (int ic = nc, ic3 = 3 * nc; ic < nc + ncoh; ic++, ic3 += dim) {
+    cohesive_friction_3d_unitary_compute_and_add_error(reaction + ic3, velocity + ic3,
+                                                       problem->c_t[ic - nc], error, worktmp);
   }
-  
+
   *error = sqrt(*error);
   DEBUG_PRINTF("absolute error = %12.8e\n", *error);
 
@@ -110,7 +105,6 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
 
   DEBUG_PRINTF("relative error = %12.8e\n", *error);
   DEBUG_END("cohesive_friction_3d_compute_error(...)\n");
-  
+
   return (*error > tolerance) ? 1 : 0;
 }
-

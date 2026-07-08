@@ -33,10 +33,11 @@
 extern "C" {
 #endif
 
+void cohesive_friction_3d_projection_initialize(CohesiveFrictionContactProblem* main_problem,
+                                                SolverOptions* localsolver_option);
 
-void cohesive_friction_3d_projection_initialize(CohesiveFrictionContactProblem* main_problem);
-
-  void cohesive_friction_3d_projection_free(CohesiveFrictionContactProblem* main_problem, SolverOptions *);
+void cohesive_friction_3d_projection_free(CohesiveFrictionContactProblem* main_problem,
+                                          SolverOptions*);
 
 /**
  * Project a reaction onto the friction cone
@@ -46,8 +47,8 @@ void cohesive_friction_3d_projection_initialize(CohesiveFrictionContactProblem* 
  * \param[in] dim the dimension (2 or 3)
  *
  */
-int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localproblem, double* reaction,
-					  SolverOptions* options);
+int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localproblem,
+                                          double* reaction, SolverOptions* options);
 /**
  * Projection on cone solver for 3D cohesive friction-contact
  *
@@ -61,7 +62,6 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
  * \return 0 if converged, error code otherwise
  */
 
-
 /**
  * Projection on cone with local iteration
  *
@@ -74,7 +74,6 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
  * \param[in,out] options solver options
  * \return 0 if converged, error code otherwise
  */
-
 
 #if defined(__cplusplus)
 }

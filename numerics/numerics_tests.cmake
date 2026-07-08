@@ -445,6 +445,7 @@ if(WITH_TESTING)
   #===========================================
   begin_tests(src/CohesiveFrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
   new_test(NAME cohesive_friction_3d_simple SOURCES test_cohesive_friction_3d_simple.c)
+  new_test(NAME cohesive_friction_read_file SOURCES test_read_file.c)
 
   #===========================================
   # 2D Friction Contact tests

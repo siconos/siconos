@@ -183,7 +183,7 @@ int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem* problem,
 
   NM_write_in_file(problem->M, file);
 
-  int m = problem->dimension * problem->numberOfContacts;
+  int m = problem->dimension * (problem->numberOfContacts + problem->numberOfCohesivePoints);
   for (int i = 0; i < m; i++) {
     fprintf(file, "%.32e\n", problem->q[i]);
   }
@@ -207,14 +207,14 @@ int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem* problem,
 
   // Write q_u
   if (problem->q_u) {
-    for (int i = 0; i < problem->numberOfCohesivePoints; i++) {
+    for (int i = 0; i < problem->dimension * problem->numberOfCohesivePoints; i++) {
       fprintf(file, "%.32e\n", problem->q_u[i]);
     }
   }
 
   // Write q_v
   if (problem->q_v) {
-    for (int i = 0; i < problem->numberOfContacts; i++) {
+    for (int i = 0; i < problem->dimension * problem->numberOfContacts; i++) {
       fprintf(file, "%.32e\n", problem->q_v[i]);
     }
   }
@@ -254,7 +254,7 @@ CohesiveFrictionContactProblem* cohesiveFrictionContact_newFromFile(FILE* file) 
   problem->M = NM_new_from_file(file);
   if (!problem->M) goto fail;
 
-  int m = dim * nc;
+  int m = dim * (nc + n_coh);
   problem->q = (double*)malloc(m * sizeof(double));
   for (int i = 0; i < m; i++) {
     if (fscanf(file, "%lf", &problem->q[i]) != 1) goto fail;
@@ -277,14 +277,14 @@ CohesiveFrictionContactProblem* cohesiveFrictionContact_newFromFile(FILE* file) 
   }
 
   // Read q_u
-  problem->q_u = (double*)malloc(n_coh * sizeof(double));
-  for (int i = 0; i < n_coh; i++) {
+  problem->q_u = (double*)malloc(dim * n_coh * sizeof(double));
+  for (int i = 0; i < dim * n_coh; i++) {
     if (fscanf(file, "%lf", &problem->q_u[i]) != 1) goto fail;
   }
 
   // Read q_v
-  problem->q_v = (double*)malloc(nc * sizeof(double));
-  for (int i = 0; i < nc; i++) {
+  problem->q_v = (double*)malloc(dim * nc * sizeof(double));
+  for (int i = 0; i < dim * nc; i++) {
     if (fscanf(file, "%lf", &problem->q_v[i]) != 1) goto fail;
   }
 
@@ -365,9 +365,9 @@ int cohesiveFrictionContactProblem_build_M_q_from_blocks(
       return -1;
     }
   } else if ((nc == 0) && (n_coh > 0)) {
+    contact_friction_case = 1;
     if (!problem->X) {
       storageType = problem->X->storageType;
-      contact_friction_case = 1;
       fprintf(stderr,
               "cohesiveFrictionContactProblem_build_M_q_from_blocks: "
               "Missing block matrix (X must  be set)\n");
@@ -412,7 +412,7 @@ int cohesiveFrictionContactProblem_build_M_q_from_blocks(
     // Use sparse representation if the storage is sparse, otherwise dense
     if (storageType == NM_SPARSE) {
       problem->M = NM_create(NM_SPARSE, M_size, M_size);
-      NM_triplet_alloc(problem->M, M_size);     
+      NM_triplet_alloc(problem->M, M_size);
     } else {
       problem->M = NM_create(NM_DENSE, M_size, M_size);
     }

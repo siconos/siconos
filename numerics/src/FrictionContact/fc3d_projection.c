@@ -434,7 +434,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
      * incx, 1.0, velocity_k, incy); */
     for (i = 0; i < 3; i++)
       velocity_k[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
-                      MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
+                      MLocal[i + 1 * 3] * reaction[1] + MLocal[i + 2 * 3] * reaction[2];
     DEBUG_EXPR(NV_display(velocity_k, 3););
     ls_iter = 0;
     success = 0;
@@ -460,7 +460,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
 
       for (i = 0; i < 3; i++)
         velocity[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
-                      MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
+                      MLocal[i + 1 * 3] * reaction[1] + MLocal[i + 2 * 3] * reaction[2];
 
       a1 = sqrt((velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
                 (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +

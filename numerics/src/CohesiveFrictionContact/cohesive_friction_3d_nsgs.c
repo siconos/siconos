@@ -119,10 +119,16 @@ static void cohesive_fc3d_nsgs_update(int contact, CohesiveFrictionContactProble
   
   int nc = problem->numberOfContacts;
   if (contact < nc) {
+    localproblem->dimension = problem->dimension;    
+    localproblem->numberOfContacts = 1;
+    localproblem->numberOfCohesivePoints = 0;
     localproblem->mu[0] = problem->mu[contact];
     localproblem->c_n[0] = 0.0;
     localproblem->c_t[0] = 0.0;
   } else {
+    localproblem->dimension = problem->dimension;       
+    localproblem->numberOfContacts = 0;
+    localproblem->numberOfCohesivePoints = 1;    
     localproblem->mu[0] = 0.0;
     localproblem->c_n[0] = problem->c_n[contact-nc];
     localproblem->c_t[0] = problem->c_t[contact-nc];
@@ -218,7 +224,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
       local_function_toolkit->local_solver_cohesion = &cohesive_friction_3d_projection_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
        local_function_toolkit->free_local_solver_cohesion = &cohesive_friction_3d_projection_free;
-      cohesive_friction_3d_projection_initialize(problem);
+       cohesive_friction_3d_projection_initialize(problem, local_opts_cohesion);
       break;
     }
   default: {
@@ -271,25 +277,24 @@ static int solveLocalReaction(
     struct CohesiveLocalProblemFunctionToolkit* localProblemFunctionToolkit,
     unsigned int contact, CohesiveFrictionContactProblem* problem,
     CohesiveFrictionContactProblem* localproblem, FrictionContactProblem* localproblem_contact,
-    double* reaction, SolverOptions* local_opts, double localreaction[3]) {
+    double* reaction, SolverOptions* local_opts_contact, SolverOptions* local_opts_cohesion, double localreaction[3]) {
 
   
-  (*localProblemFunctionToolkit->update_local_problem)(contact, problem, localproblem, reaction, local_opts);
+  (*localProblemFunctionToolkit->update_local_problem)(contact, problem, localproblem, reaction, local_opts_contact);
 
-  local_opts->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
-
+ 
   localProblemFunctionToolkit->copy_local_reaction(&(reaction[contact * problem->dimension]), localreaction);
   if (contact < problem->numberOfContacts) {
-
+    local_opts_contact->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
     localproblem_contact->M = localproblem->M;
     localproblem_contact->q = localproblem->q;
     localproblem_contact->mu = localproblem->mu;
     
     return (*localProblemFunctionToolkit->local_solver_contact)(localproblem_contact, localreaction,
-                                                                local_opts);
-    }    
-  else {
-    return (*localProblemFunctionToolkit->local_solver_cohesion)(localproblem, localreaction, local_opts);
+                                                                local_opts_contact);
+  } else {
+    local_opts_cohesion->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] = contact - problem->numberOfContacts;       
+    return (*localProblemFunctionToolkit->local_solver_cohesion)(localproblem, localreaction, local_opts_cohesion);
   }
   //  return -1;  
 }
@@ -463,6 +468,9 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   if (!problem || !reaction || !velocity || !options) {
     return numerics_error("cohesive_friction_3d_nsgs", "NULL pointer argument");
   }
+
+  //cohesiveFrictionContact_display(problem);
+  
   /* Number of contacts */
   unsigned int nc = problem->numberOfContacts;
   unsigned int ncoh = problem->numberOfCohesivePoints;
@@ -612,8 +620,9 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
       /*   } */
       /* } */
 
-      solveLocalReaction(localProblemFunctionToolkit, contact, problem,
-                         localproblem_cohesion, localproblem_contact, reaction, local_opts_contact, localreaction);
+      solveLocalReaction(localProblemFunctionToolkit, contact, problem, localproblem_cohesion,
+                         localproblem_contact,
+                         reaction, local_opts_contact, local_opts_cohesion, localreaction);
 
       if (options->iparam[SICONOS_NSGS_RELAXATION] == SICONOS_NSGS_RELAXATION_TRUE)
         localProblemFunctionToolkit->perform_relaxation(localreaction, &reaction[contact * 3],
