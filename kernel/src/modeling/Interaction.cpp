@@ -302,7 +302,7 @@ void siconos::modeling::Interaction::reset() {
   _internalVariables = _nslaw->initializeInternalVariables(*this);
 
   if(_internalVariables)
-    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector(*_internalVariables));  
+    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector3(*_internalVariables));  
 }
 
 siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
@@ -657,11 +657,11 @@ void siconos::modeling::Interaction::initInternalVariablesMemory() {
   DEBUG_BEGIN("siconos::modeling::Interaction::initInternalVariablesMemory()\n");
   if (_internalVariables) {
     // Create a copy of current internal variables for previous state
-    _internalVariables_k = std::make_shared<siconos::algebra::blocks::SharedVector>();
+    _internalVariables_k = std::make_shared<siconos::algebra::blocks::SharedVector3>();
     _internalVariables_k->resize(_internalVariables->size());
     for (size_t i = 0; i < _internalVariables->size(); ++i) {
       if ((*_internalVariables)[i]) {
-        (*_internalVariables_k)[i] = std::make_shared<siconos::algebra::SiconosVector>(
+        (*_internalVariables_k)[i] = std::make_shared<siconos::algebra::SiconosVector3>(
             *(*_internalVariables)[i]);
       }
     }

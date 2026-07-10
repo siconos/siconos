@@ -162,7 +162,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * \see Interaction::initInternalVariablesMemory()
    * \see Interaction::swapInternalVariablesInMemory()
    */
-  std::shared_ptr<siconos::algebra::blocks::SharedVector> _internalVariables{nullptr};
+  std::shared_ptr<siconos::algebra::blocks::SharedVector3> _internalVariables{nullptr};
 
   /** \brief Internal variables from the previous time step.
    * 
@@ -175,7 +175,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * The swap between _internalVariables and _internalVariables_k is
    * performed by swapInternalVariablesInMemory() after time step convergence.
    */
-  std::shared_ptr<siconos::algebra::blocks::SharedVector> _internalVariables_k{nullptr};
+  std::shared_ptr<siconos::algebra::blocks::SharedVector3> _internalVariables_k{nullptr};
 
   // internal struct used to handle visitors process to set Interaction levels
   // depending on the nslaw and the relation.
@@ -546,7 +546,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * \see CohesiveZoneModelNIFNSL for typical usage
    * \see initInternalVariablesMemory() to allocate storage
    */
-  inline std::shared_ptr<siconos::algebra::blocks::SharedVector> internalVariables() {
+  inline std::shared_ptr<siconos::algebra::blocks::SharedVector3> internalVariables() {
     return _internalVariables;
   };
 
@@ -560,7 +560,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * \return nullptr if internal variables memory has not been initialized
    * \see swapInternalVariablesInMemory() for the swapping mechanism
    */
-  inline std::shared_ptr<siconos::algebra::blocks::SharedVector> internalVariables_k() {
+  inline std::shared_ptr<siconos::algebra::blocks::SharedVector3> internalVariables_k() {
     return _internalVariables_k;
   };
 
@@ -575,7 +575,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *          matches what the non-smooth law expects
    */
   inline void setInternalVariables(
-      std::shared_ptr<siconos::algebra::blocks::SharedVector> vars) {
+      std::shared_ptr<siconos::algebra::blocks::SharedVector3> vars) {
     _internalVariables = vars;
   };
 

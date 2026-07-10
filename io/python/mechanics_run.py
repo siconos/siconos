@@ -864,7 +864,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
-
+            self.print_verbose("Import nonsmooth law name:", name)
+            self.print_verbose("              type: {0} ".format(self._nslaws_data[name].attrs["type"]))
             if hasattr(sm, self._nslaws_data[name].attrs["type"]):
                 nslawClass = getattr(sm, self._nslaws_data[name].attrs["type"])
             elif hasattr(czm, self._nslaws_data[name].attrs["type"]):
@@ -872,8 +873,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 raise RuntimeError(f"The nonsmoothlaw is not found is siconos")
 
-            print('nslawClass', nslawClass)
-            
             if nslawClass == sm.NewtonImpactFrictionNSL:
                 nslaw = nslawClass(
                     float(self._nslaws_data[name].attrs["e"]),
@@ -919,7 +918,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     float(self._nslaws_data[name].attrs['mu']),
                     float(self._nslaws_data[name].attrs['sigma_c']),
                     float(self._nslaws_data[name].attrs['delta_c']),
-                    3)
+                    3,
+                    float(self._nslaws_data[name].attrs.get('gamma', 1.0)))
             if not nslaw:
                 raise AssertionError("no nslaw")
             # assert(nslaw)
@@ -2080,7 +2080,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     # pass
                 elif (mass is not None
                       and dpos_data is not None
-                      and len(dpos_data) >0 
+                      and len(dpos_data) >0
                       and xdpos_data.get(obj.attrs["id"],None) is None) :
                     # object already dead do not import
                     self.print_verbose("object", name, "Object", obj.attrs["id"],"have no initial position. Perhaps already removed from the simulation")
@@ -3311,7 +3311,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb = nsf.GlobalRollingFrictionContact(
                             dimension_contact, solver_options
                         )
-               
+
                 osnspb.setMStorageType(sn.params.NM_SPARSE)
                 # if sid == sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_ADMM:
                 #     osnspb.setMStorageType(sn.params.NM_SPARSE)

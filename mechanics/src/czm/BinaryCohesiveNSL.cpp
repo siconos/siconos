@@ -81,10 +81,10 @@
 #include "NewtonEulerR.hpp"
 #include "RotationQuaternion.hpp"  // for orthoBaseFromVector
 #include "SiconosVector.hpp"
-
-// #define DEBUG_MESSAGES
-// #define DEBUG_STDOUT
-
+#include "BlockVector.hpp"
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_NOCOLOR
 #include "siconos_debug.h"
 
 namespace siconos::mechanics::czm {
@@ -93,27 +93,29 @@ BinaryCohesiveNSL::BinaryCohesiveNSL(siconos::algebra::Index size)
     : siconos::modeling::CohesiveZoneModelNIFNSL(size) {}
 
 BinaryCohesiveNSL::BinaryCohesiveNSL(double en, double et, double mu, double sigma_c,
-                                     double delta_c, siconos::algebra::Index size)
+                                     double delta_c, siconos::algebra::Index size, double gamma)
     : siconos::modeling::CohesiveZoneModelNIFNSL(en, et, mu, size),
       _sigma_c(sigma_c),
       _delta_c(delta_c),
+      _gamma(gamma),
       _shape_type(ShapeType::DOOR_SHAPE) {}
 
 BinaryCohesiveNSL::BinaryCohesiveNSL(double en, double et, double mu, double sigma_c,
                                      double delta_c, siconos::algebra::Index size,
-                                     ShapeType shape_type)
+                                     ShapeType shape_type, double gamma)
     : siconos::modeling::CohesiveZoneModelNIFNSL(en, et, mu, size),
       _sigma_c(sigma_c),
       _delta_c(delta_c),
+      _gamma(gamma),
       _shape_type(shape_type) {
   if (_shape_type == ShapeType::TRIANGLE_SHAPE) {
     _slope = -1.0 / _delta_c;
   }
 }
 
-std::shared_ptr<siconos::algebra::blocks::SharedVector>
+std::shared_ptr<siconos::algebra::blocks::SharedVector3>
 BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& inter) {
-  auto internalVariables_sp = std::make_shared<siconos::algebra::blocks::SharedVector>();
+  auto internalVariables_sp = std::make_shared<siconos::algebra::blocks::SharedVector3>();
   internalVariables_sp->resize(BinaryCohesiveNSL::INTERNAL_VARIABLE_LENGTH);
 
   auto& internalVariables = *internalVariables_sp;
@@ -128,11 +130,11 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     /* etc. */
 
     internalVariables[BinaryCohesiveNSL::COHESION] =
-        std::make_shared<siconos::algebra::SiconosVector>(3);
+        std::make_shared<siconos::algebra::SiconosVector3>();
     internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP] =
-        std::make_shared<siconos::algebra::SiconosVector>(3);
+        std::make_shared<siconos::algebra::SiconosVector3>();
     internalVariables[BinaryCohesiveNSL::BETA_SURFACE] =
-        std::make_shared<siconos::algebra::SiconosVector>(2);
+        std::make_shared<siconos::algebra::SiconosVector3>();
 
     // Initial value of beta = 1.0 (intact)
     (*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(0) = 1.0;
@@ -143,13 +145,13 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
 
     // Store initial relative contact points
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_1] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->relPc1());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->relPc1());
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_2] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->relPc2());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->relPc2());
 
     // Store initial relative normal
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_NORMAL] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->relNc());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->relNc());
 
     // Compute tangent vectors from normal
     const auto& r_nc = rel_NewtonEuler1DR->relNc();
@@ -163,17 +165,17 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     }
 
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_1] =
-        std::make_shared<siconos::algebra::SiconosVector>(t1);
+        std::make_shared<siconos::algebra::SiconosVector3>(t1);
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_2] =
-        std::make_shared<siconos::algebra::SiconosVector>(t2);
+        std::make_shared<siconos::algebra::SiconosVector3>(t2);
 
     // Store current (absolute) contact points and normal
     internalVariables[BinaryCohesiveNSL::COHESIVE_POINT_1] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->pc1());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->pc1());
     internalVariables[BinaryCohesiveNSL::COHESIVE_POINT_2] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->pc2());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->pc2());
     internalVariables[BinaryCohesiveNSL::NORMAL] =
-        std::make_shared<siconos::algebra::SiconosVector>(rel_NewtonEuler1DR->nc());
+        std::make_shared<siconos::algebra::SiconosVector3>(rel_NewtonEuler1DR->nc());
 
     // Compute tangent vectors from absolute normal
     const auto& nc = rel_NewtonEuler1DR->nc();
@@ -187,9 +189,9 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     }
 
     internalVariables[BinaryCohesiveNSL::TANGENT_1] =
-        std::make_shared<siconos::algebra::SiconosVector>(abs_t1);
+        std::make_shared<siconos::algebra::SiconosVector3>(abs_t1);
     internalVariables[BinaryCohesiveNSL::TANGENT_2] =
-        std::make_shared<siconos::algebra::SiconosVector>(abs_t2);
+        std::make_shared<siconos::algebra::SiconosVector3>(abs_t2);
 
     // Compute initial displacement jump
     siconos::algebra::SiconosVector3 displacement_jump =
@@ -197,7 +199,7 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
 
     DEBUG_EXPR(siconos::algebra::print(displacement_jump););
     internalVariables[BinaryCohesiveNSL::INITIAL_DISPLACEMENT_JUMP] =
-        std::make_shared<siconos::algebra::SiconosVector>(displacement_jump);
+        std::make_shared<siconos::algebra::SiconosVector3>(displacement_jump);
 
     DEBUG_EXPR(for (const auto& v : internalVariables) {
       if (v) siconos::algebra::print(*v);
@@ -206,9 +208,9 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
   } else {
     // Simplified initialization for non-NewtonEuler1DR relations
     internalVariables[BinaryCohesiveNSL::COHESION] =
-        std::make_shared<siconos::algebra::SiconosVector>(3);
+        std::make_shared<siconos::algebra::SiconosVector3>();
     internalVariables[BinaryCohesiveNSL::BETA_SURFACE] =
-        std::make_shared<siconos::algebra::SiconosVector>(2);
+        std::make_shared<siconos::algebra::SiconosVector3>();
 
     (*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(0) = 1.0;  // beta
     (*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(1) = 1.0;  // surface
@@ -257,6 +259,11 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       const auto& r_t2_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_2];
       const auto& pos_0 = *internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP];
 
+            
+      DEBUG_EXPR_WE(std::cout << "r_pc1_0 is: " << r_pc1_0.transpose() << std::endl;
+		    std::cout << "r_pc2_0 is: " << r_pc2_0.transpose() << std::endl;);
+
+      
       // Access DS position from interaction
       const auto& ds_vars = inter.read_dynamical_systems_variables();
       // Note: In the modern API, we need to get q from DS differently
@@ -271,8 +278,18 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       // Update contact points from current configuration
       // Note: In the old API this used computeContactPointsFromRelativeContactPoints
       // which needs to be adapted to the modern API. For now, we use the stored values.
+      
+      auto&  q  = *(ds_vars[tools::enum_to_index(siconos::modeling::NewtonEulerR::ds_var::q0)]);
 
-      DEBUG_EXPR(std::cout << "pc1_0 is: " << pc1_0.transpose() << std::endl;
+      DEBUG_EXPR(std::cout << "q_0 is: " << q.numberOfBlocks() <<  std::endl;
+		 siconos::algebra::print(q.toSiconosVector()););
+      
+      rel_NewtonEuler1DR->computeContactPointsFromRelativeContactPoints(
+          q, r_pc1_0, r_pc2_0, r_nc_0, r_t1_0, r_t2_0, pc1_0, pc2_0, nc_0, t1_0, t2_0);
+
+
+      
+      DEBUG_EXPR_WE(std::cout << "pc1_0 is: " << pc1_0.transpose() << std::endl;
                  std::cout << "pc2_0 is: " << pc2_0.transpose() << std::endl;
                  std::cout << "nc_0 is: " << nc_0.transpose() << std::endl;);
 
@@ -312,6 +329,8 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       if (delta > _delta_c) {
         DEBUG_PRINT("the interface is broken\n");
         *beta = 0.0;
+        printf(" the interface is broken\n ");
+	getchar();
       } else if (delta <= _delta_c && beta_k == 1.0) {
         DEBUG_PRINT("the interface is intact\n");
         *beta = 1.0;
@@ -341,7 +360,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   DEBUG_PRINTF("tangent  cohesion intensity %4.2e\n", cohesion[1]);
 
   DEBUG_EXPR(siconos::algebra::print(*internalVariables[BinaryCohesiveNSL::COHESION]));
-
+  //getchar();
   DEBUG_END("void BinaryCohesiveNSL::updateInternalVariables(Interaction& inter)\n");
 }
 
@@ -378,6 +397,7 @@ void BinaryCohesiveNSL::display() const {
             << std::endl;
   std::cout << "sigma_c: " << _sigma_c << std::endl;
   std::cout << "delta_c: " << _delta_c << std::endl;
+  std::cout << "gamma: " << _gamma << std::endl;
   std::cout << "shape_type: " << (_shape_type == ShapeType::DOOR_SHAPE ? "DOOR" : "TRIANGLE")
             << std::endl;
   std::cout << "=================================================================="
@@ -385,7 +405,7 @@ void BinaryCohesiveNSL::display() const {
 }
 
 void BinaryCohesiveNSL::displayInternalVariables(
-    siconos::algebra::blocks::SharedVector& internalVariables) {
+    siconos::algebra::blocks::SharedVector3& internalVariables) {
   std::cout << "=== BinaryCohesiveNSL Internal Variables ========================="
             << std::endl;
 

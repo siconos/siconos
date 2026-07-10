@@ -82,18 +82,20 @@ PYBIND11_MODULE(_czm, m) {
       .def(py::init<siconos::algebra::Index>(),
            py::arg("size"),
            "Construct a BinaryCohesiveNSL with just size")
-      // Constructor with en, et, mu, sigma_c, delta_c, size
-      .def(py::init<double, double, double, double, double, siconos::algebra::Index>(),
+      // Constructor with en, et, mu, sigma_c, delta_c, size, gamma
+      .def(py::init<double, double, double, double, double, siconos::algebra::Index, double>(),
            py::arg("en"), py::arg("et"), py::arg("mu"),
            py::arg("sigma_c"), py::arg("delta_c"), py::arg("size"),
+           py::arg("gamma") = 0.0,
            "Construct a BinaryCohesiveNSL with restitution coefficients and cohesive parameters")
-      // Constructor with en, et, mu, sigma_c, delta_c, size, shape_type
+      // Constructor with en, et, mu, sigma_c, delta_c, size, shape_type, gamma
       .def(py::init<double, double, double, double, double,
                     siconos::algebra::Index,
-                    siconos::mechanics::czm::BinaryCohesiveNSL::ShapeType>(),
+                    siconos::mechanics::czm::BinaryCohesiveNSL::ShapeType, double>(),
            py::arg("en"), py::arg("et"), py::arg("mu"),
            py::arg("sigma_c"), py::arg("delta_c"), py::arg("size"),
            py::arg("shape_type"),
+           py::arg("gamma") = 0.0,
            "Construct a BinaryCohesiveNSL with shape type")
       // Getters and setters
       .def_property("sigma_c",
@@ -104,6 +106,10 @@ PYBIND11_MODULE(_czm, m) {
                     &siconos::mechanics::czm::BinaryCohesiveNSL::delta_c,
                     &siconos::mechanics::czm::BinaryCohesiveNSL::setDelta_c,
                     "Critical displacement for failure")
+      .def_property("gamma",
+                    &siconos::mechanics::czm::BinaryCohesiveNSL::gamma,
+                    &siconos::mechanics::czm::BinaryCohesiveNSL::setGamma,
+                    "Ratio of normal to tangent cohesion")
       .def_property_readonly("shape_type",
                     &siconos::mechanics::czm::BinaryCohesiveNSL::shape_type,
 			     "Shape type of the cohesive law");

@@ -542,7 +542,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
                                   // should be only for globalOSI
       updateAllInput();
 
-    updateInteractionInternalState();
+    //updateInteractionInternalState();
 
     computeIteration();
 
@@ -586,7 +586,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       }
 
       updateAllInput();
-      updateInteractionInternalState();
+      //updateInteractionInternalState();
       computeIteration();
 
       // -- VA 01/07/2021

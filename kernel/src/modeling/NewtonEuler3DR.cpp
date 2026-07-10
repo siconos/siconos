@@ -45,7 +45,6 @@ void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
       std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(), 3, qSize);
   H_NE_view_->setZero();
   NewtonEulerR::initialize(inter);
-
   //  _isContact=1;
 }
 
@@ -85,7 +84,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   NPG_buffer_ << 0.0, -v.z(), v.y(), v.z(), 0.0, -v.x(), -v.y(), v.x(), 0.0;
 
   DEBUG_PRINT("lever arm skew matrix :\n");
-  DEBUG_EXPR(siconos::algebra::printNPG_buffer_;);
+  DEBUG_EXPR(siconos::algebra::print(NPG_buffer_););
 
   /* The Jacobian matrix (H) is given by the product
    * H = _rotationAbsoluteToContactFrame
@@ -105,7 +104,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   H_NE_prod_T_->block(0, 3, 3, 3) =
       rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
 
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
   DEBUG_END(
       "siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1)\n");

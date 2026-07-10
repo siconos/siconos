@@ -232,9 +232,10 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    * \param sigma_c critical traction stress (Pa), must be >= 0
    * \param delta_c critical displacement (m), must be > 0
    * \param size dimension of the law (2 for 2D, 3 for 3D contact)
+   * \param gamma ratio of normal to tangent cohesion (default 0.0)
    */
   BinaryCohesiveNSL(double en, double et, double mu, double sigma_c, double delta_c,
-                    siconos::algebra::Index size);
+                    siconos::algebra::Index size, double gamma = 0.0);
 
   /** \brief Constructor with shape type selection
    *
@@ -245,9 +246,10 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    * \param delta_c critical displacement (m), must be > 0
    * \param size dimension of the law (2 for 2D, 3 for 3D contact)
    * \param shape_type shape of the traction-separation law
+   * \param gamma ratio of normal to tangent cohesion (default 0.0)
    */
   BinaryCohesiveNSL(double en, double et, double mu, double sigma_c, double delta_c,
-                    siconos::algebra::Index size, ShapeType shape_type);
+                    siconos::algebra::Index size, ShapeType shape_type, double gamma = 0.0);
 
   /** \brief Destructor */
   ~BinaryCohesiveNSL() noexcept override = default;
@@ -279,6 +281,16 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    */
   inline ShapeType shape_type() const { return _shape_type; };
 
+  /** \brief Get the normal/tangent cohesion ratio
+   * \return gamma ratio (normal cohesion / tangent cohesion)
+   */
+  inline double gamma() const { return _gamma; };
+
+  /** \brief Set the normal/tangent cohesion ratio
+   * \param newVal new gamma value, must be >= 0
+   */
+  inline void setGamma(double newVal) { _gamma = newVal; };
+
   // CZM INTERFACE IMPLEMENTATION
 
   /** \brief Initialize internal variables for this cohesive law
@@ -295,7 +307,7 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    * \return shared pointer to the initialized internal variables vector
    * \note This method requires the Interaction to have a NewtonEuler1DR relation
    */
-  std::shared_ptr<siconos::algebra::blocks::SharedVector> initializeInternalVariables(
+  std::shared_ptr<siconos::algebra::blocks::SharedVector3> initializeInternalVariables(
       siconos::modeling::Interaction& inter) override;
 
   /** \brief Update internal variables after each time step
@@ -360,7 +372,7 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    * \param internalVariables the internal variables vector to display
    */
   void displayInternalVariables(
-      siconos::algebra::blocks::SharedVector& internalVariables) override;
+      siconos::algebra::blocks::SharedVector3& internalVariables) override;
 
   /** \cond DEVEL */
   /** Visitors hook for type dispatch */

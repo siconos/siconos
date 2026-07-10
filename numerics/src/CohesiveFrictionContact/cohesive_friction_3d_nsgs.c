@@ -286,6 +286,8 @@ static int solveLocalReaction(
   localProblemFunctionToolkit->copy_local_reaction(&(reaction[contact * problem->dimension]), localreaction);
   if (contact < problem->numberOfContacts) {
     local_opts_contact->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
+    localproblem_contact->numberOfContacts = 1;
+    localproblem_contact->dimension=3;    // just for display
     localproblem_contact->M = localproblem->M;
     localproblem_contact->q = localproblem->q;
     localproblem_contact->mu = localproblem->mu;
@@ -469,8 +471,12 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
     return numerics_error("cohesive_friction_3d_nsgs", "NULL pointer argument");
   }
 
-  //cohesiveFrictionContact_display(problem);
-  
+  /* cohesiveFrictionContact_display(problem); */
+  /* if ((problem->numberOfCohesivePoints == 2) && (problem->numberOfContacts == 2)) */
+  /*   { */
+  /*   cohesiveFrictionContact_printInFilename(problem, "sphere_2x2_mu0.dat"); */
+  /*   getchar(); */
+  /*   } */
   /* Number of contacts */
   unsigned int nc = problem->numberOfContacts;
   unsigned int ncoh = problem->numberOfCohesivePoints;

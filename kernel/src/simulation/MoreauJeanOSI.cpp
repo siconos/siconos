@@ -158,7 +158,7 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
   // // For cohesive zone models, the cohesion force contributes to the OSNSP_RHS_COHESION
   // // This is handled separately from the standard contact force
   // auto& osnsp_rhs_position = *(*_interProp.workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs_position)];
-  
+
   // // Get the cohesion force from the internal variables
   // double* r_cohesion = nslaw.r_cohesion(_inter);
   // if (r_cohesion) {
@@ -1326,7 +1326,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
                                                indexSet.properties(vertex_inter),
                                                _theta, h);
- 
+
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
 
   DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -1365,7 +1365,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
   assert(xfree);
   double h = _simulation->timeStep();
 
-  
+
   // 1 - product h * theta * H Xfree{}
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto relation = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
@@ -1383,39 +1383,45 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
 	false);
 
 
-    // // should be better to use the previous value of y_k    // 
+    // // should be better to use the previous value of y_k    //
     // // + H * q_k
     // siconos::algebra::matrixBlockVector_prod(
     //     H, *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
     //     osnsp_rhs_position, false);
-        
+
     // if (relation->haseVector()) {
     //     osnsp_rhs += relation->eVector();
 
 
     //+ y_k
     osnsp_rhs_position += inter.y_k(0);
-    
-    
+
+    DEBUG_EXPR(std::cout << "osnsp_rhs_position : " ;
+	       siconos::algebra::print(osnsp_rhs_position););
+
+
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
                  ->H_NE_prod_T();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);
+    osnsp_rhs_position *= h * _theta;
+
+
     // +  h * (1-theta) * H v_k
-     
     const auto& ds_vars = inter.read_dynamical_systems_variables();
 
-    *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q1)] *= (1 - _theta) * h;
+    *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)] *= (1 - _theta) * h;
     siconos::algebra::matrixBlockVector_prod(
-        H, *ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q1)],
+        H, *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)],
         osnsp_rhs_position,
 	false);
 
     //+ y_k
     osnsp_rhs_position += inter.y_k(0);
-    
+    DEBUG_EXPR(std::cout << "osnsp_rhs_position : " ;
+	       siconos::algebra::print(osnsp_rhs_position););
   }
-  
+
   // auto relationSubType = inter.relation()->getSubType();
 
   // // 2 -  compute additional terms for ScleronomousR and CompliantLinearTIR
@@ -1478,7 +1484,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
   // _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
   //                                              indexSet.properties(vertex_inter),
   //                                              _theta, h);
- 
+
   // inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
 
   DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -2199,8 +2205,8 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
   // This implementation is more a hack that a elegant solution
   // perhaps it would have better to compute p[0] = H \lambda[0] and then use it in
   // computeIteration
-  
-  
+
+
   if (_hasInputInIndexSet0) {
     double h = _simulation->timeStep();
     for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
@@ -2214,18 +2220,18 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
       auto& nslaw = *inter.nonSmoothLaw();
       auto cohesive_nslaw = dynamic_cast<siconos::modeling::CohesiveZoneModelNIFNSL*>(&nslaw);
       if (cohesive_nslaw) {
-        
+
         // Save current lambda[1]
         auto lambda_1_save = std::make_shared<siconos::algebra::SiconosVector>(*inter.lambda(level));
-        
+
         // Set lambda[1] to h * r_coh for computing cohesion input
         for (int k = 0; k < nslaw.size(); k++) {
           (*inter.lambda(level))(k) = h * (*inter.lambda(0))(k);
         }
-        
+
         // Compute input with cohesion force
         inter.computeInput(time, level);
-        
+
         // Restore original lambda[1]
         *inter.lambda(level) = *lambda_1_save;
       }

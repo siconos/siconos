@@ -1267,6 +1267,7 @@ class MechanicsHdf5(object):
         nslaw.attrs["gid2"] = collision_group2
         
     def add_binary_cohesive_nsl(self, name, mu,  e=0, sigma_c=0, delta_c=0,
+                                gamma=0.0,
                                 collision_group1=0,
                                 collision_group2=0):
         """
@@ -1275,6 +1276,7 @@ class MechanicsHdf5(object):
         name is an user identifiant and must be unique,
         mu is the coefficient of friction,
         e is the coefficient of restitution on the contact normal,
+        gamma is the ratio of tangent to normal cohesive strength,
         gid1 and gid2 define the group identifiants.
 
         """
@@ -1285,6 +1287,7 @@ class MechanicsHdf5(object):
             nslaw.attrs['e'] = e
             nslaw.attrs['sigma_c'] = sigma_c
             nslaw.attrs['delta_c'] = delta_c
+            nslaw.attrs['gamma'] = gamma
             nslaw.attrs['gid1'] = collision_group1
             nslaw.attrs['gid2'] = collision_group2
 

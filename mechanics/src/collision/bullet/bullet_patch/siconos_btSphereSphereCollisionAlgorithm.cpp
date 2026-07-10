@@ -66,13 +66,13 @@ void siconos_btSphereSphereCollisionAlgorithm::processCollision(
   m_manifoldPtr->clearManifold();  // don't do this, it disables warmstarting
 #endif
 
-  /// iff distance positive, don't generate a new contact
-  if (len > (radius0 + radius1 + resultOut->m_closestPointDistanceThreshold)) {
-#ifndef CLEAR_MANIFOLD
-    resultOut->refreshContactPoints();
-#endif  // CLEAR_MANIFOLD
-    return;
-  }
+//   /// iff distance positive, don't generate a new contact
+//   if (len > (radius0 + radius1 + resultOut->m_closestPointDistanceThreshold)) {
+// #ifndef CLEAR_MANIFOLD
+//     resultOut->refreshContactPoints();
+// #endif  // CLEAR_MANIFOLD
+//     return;
+//   }
   /// distance (negative means penetration)
   btScalar dist = len - (radius0 + radius1);
 

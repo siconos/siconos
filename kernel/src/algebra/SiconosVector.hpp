@@ -53,6 +53,9 @@ namespace blocks {
 /** Vector (std) of pointers to SiconosVector */
 using SharedVector = std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>;
 
+/** Vector (std) of pointers to SiconosVector */
+using SharedVector3 = std::vector<std::shared_ptr<siconos::algebra::SiconosVector3>>;
+
 /** Vector (std) of SiconosVector */
 using Vector = std::vector<siconos::algebra::SiconosVector>;
 

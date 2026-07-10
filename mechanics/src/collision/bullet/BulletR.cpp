@@ -20,19 +20,21 @@
 // #define DEBUG_MESSAGES 1
 #include "BulletR.hpp"
 
-#include "NewtonEulerDS.hpp"
-
-#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 
-
-#include <iostream>
 #include <boost/math/quaternion.hpp>
-#include "RotationQuaternion.hpp"
+#include <iostream>
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatPos etc
-// #include "siconos_debug.h"
+#include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
+
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+#include "siconos_debug.h"
 
 void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(
     const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
@@ -51,6 +53,11 @@ void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(
     siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnB() / scaling,
                                               contactPoint2_);
   }
+  DEBUG_PRINTF("position on A : %g,%g,%g\n", contactPoint1_(0), contactPoint1_(1),
+               contactPoint1_(2));
+  DEBUG_PRINTF("position on B : %g,%g,%g\n", contactPoint2_(0), contactPoint2_(1),
+               contactPoint2_(2));
+  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", nc_(0), nc_(1), nc_(2));
 }
 
 void siconos::collision::bullet::BulletR::display() const {
@@ -63,14 +70,13 @@ void siconos::collision::bullet::BulletR::display() const {
   std::cout << "&btShape[1]" << &btShape[1] << std::endl;
 }
 
-
 void siconos::collision::bullet::BulletR::updateRelativeContactPointsFromManifoldPoint(
     const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
     double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {
   // Get new world positions of contact points and calculate relative
   // to ds1 and ds2
-  
+
   ::boost::math::quaternion<double> rq1, rq2, posa;
   ::boost::math::quaternion<double> pq1, pq2, posb;
   siconos::geometry::extractPositionToQuaternion(*ds1->q(), pq1);

@@ -125,16 +125,16 @@ class NonSmoothLaw {
   /** Display internal variables for debugging
    * \param inter the Interaction containing internal variables
    */
-  virtual void displayInternalVariables(siconos::algebra::blocks::SharedVector & internalVariables) {
+  virtual void displayInternalVariables(siconos::algebra::blocks::SharedVector3 & internalVariables) {
   };
 
   
   
   /** initialize non smooth law if there is some internal variables
   */
-  virtual std::shared_ptr<siconos::algebra::blocks::SharedVector> initializeInternalVariables(
+  virtual std::shared_ptr<siconos::algebra::blocks::SharedVector3> initializeInternalVariables(
       Interaction&)
-      { return std::shared_ptr<siconos::algebra::blocks::SharedVector>();}
+      { return std::shared_ptr<siconos::algebra::blocks::SharedVector3>();}
 
  /** update non smooth law if there is some internal variables
   */

@@ -37,6 +37,8 @@
 #include "NumericsMatrix_pybind11.h"
 #include "RollingFrictionContactProblem.h"
 #include "RollingFrictionContact_options.h"
+#include "CohesiveFrictionContactProblem.h"
+#include "CohesiveFrictionContact_options.h"
 #include "SolverOptions.h"
 #include "numerics_errors.h"
 
@@ -919,6 +921,18 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM",
              ROLLING_FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM,
              "Global 3D Rolling friction solver IPM")
+      .export_values();
+
+    // Rolling Friction solver enum (separate from FRICTION_SOLVER)
+  py::enum_<COHESIVE_FRICTION_SOLVER>(solver_ids, "COHESIVE_FRICTION_SOLVER_enum",
+                                      "Cohesive friction solver IDs")
+      // Rolling Friction solvers (3D and 2D)
+      .value("SICONOS_COHESIVE_FRICTION_3D_NSGS",
+             COHESIVE_FRICTION_SOLVER::SICONOS_COHESIVE_FRICTION_3D_NSGS,
+             "3D Non-smooth Gauss Seidel, local formulation")
+      .value("SICONOS_COHESIVE_FRICTION_3D_PROJECTION",
+             COHESIVE_FRICTION_SOLVER::SICONOS_COHESIVE_FRICTION_3D_PROJECTION,
+             "3D local projection solver")
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_IPARAM>(params, "SICONOS_FRICTION_3D_IPARAM_enum")

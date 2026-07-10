@@ -36,7 +36,7 @@
  */
 
 #include "CohesiveFrictionContact.hpp"
-
+#include "FrictionContact.hpp"
 #include <algorithm>
 // #include <boost/smart_ptr/shared_ptr.hpp>
 // #include <memory>
@@ -67,6 +67,11 @@ struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
   using Visitor::visit;
 
   void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nsl) override {
+    DEBUG_EXPR(std::cout << "CohesiveZoneModelNIFNSL type " << std::endl;)
+    answer = nsl.mu();
+  }
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
+    DEBUG_EXPR(std::cout << "NewtonImpactFrictionNSL type " << std::endl;    );
     answer = nsl.mu();
   }
 };
@@ -143,7 +148,7 @@ void CohesiveFrictionContact::initialize(
         if (!_H0) {
 	  _H0 = std::make_shared<OSNSMatrix>(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
 					     simulation->indexSet(_indexSetLevel)->size(), _numericsMatrixStorageType);
-	}          
+	}
         if (!_V) {
           _V = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
         }
@@ -161,9 +166,9 @@ void CohesiveFrictionContact::initialize(
         }
     }
   } else {
-    
-    }    
-  
+
+    }
+
 
 
   DEBUG_END("CohesiveFrictionContact::initialize()\n");
@@ -172,11 +177,12 @@ void CohesiveFrictionContact::updateCoefficients() {
   _mu->clear();
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    // auto nsl = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+    // auto nsl = std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
     //     indexSet->bundle(*ui)->nonSmoothLaw());
     // assert(nsl);
-    auto mu_val = siconos::modeling::nonsmooth_laws::ask<cohesive_friction_contact::ForMu>(
+    auto mu_val = siconos::modeling::nonsmooth_laws::ask<siconos::nonsmooth_formulations::cohesive_friction_contact::ForMu>(
         *indexSet->bundle(*ui)->nonSmoothLaw());
 
     _mu->push_back(mu_val);
@@ -188,16 +194,15 @@ void CohesiveFrictionContact::updateCoefficients() {
   auto indexSet0 = simulation()->indexSet(0);
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     siconos::modeling::Interaction& inter = *indexSet0->bundle(*ui);
-
-    modeling::CohesiveZoneModelNIFNSL& nslaw =
-        *(std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
+    auto nslaw =
+        (std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
             indexSet->bundle(*ui)->nonSmoothLaw()));
-
-    auto c_n_val = nslaw.cohesion(inter)[0];
-
-    _c_n->push_back(c_n_val);
-    auto c_t_val = nslaw.cohesion(inter)[1];
-    _c_t->push_back(c_t_val);
+    if (nslaw) {
+      auto c_n_val = nslaw->cohesion(inter)[0];
+      _c_n->push_back(c_n_val * simulation()->currentTimeStep());
+      auto c_t_val = nslaw->cohesion(inter)[1];
+      _c_t->push_back(c_t_val * simulation()->currentTimeStep());
+    }
 
     // An attempt with visitor Question to avoid the dynamic cast
     // --> does not work for the moment
@@ -212,6 +217,7 @@ void CohesiveFrictionContact::updateCoefficients() {
     //     *indexSet->bundle(*ui)->nonSmoothLaw());
 
     // _c_t->push_back(c_t_val);
+
   }
   DEBUG_EXPR(
       std::cout << "_c_n = ["; bool first = true; for (double x : *_c_n) {
@@ -316,7 +322,7 @@ void CohesiveFrictionContact::compute_q_cohesion(double time) {
     auto inter = indexSet0->bundle(*ui);
     compute_q_cohesion_block(*ui, pos);
   }
-
+  *_q_cohesion = *_q_cohesion /simulation()->timeStep();
   DEBUG_EXPR(siconos::algebra::print(*_q_cohesion););
 
   DEBUG_END("CohesiveFrictionContact::updateQWithQCohesion()\n");
@@ -342,16 +348,41 @@ void CohesiveFrictionContact::computeMatrices() {
     // fill H0
     _H0->fillH(DSG0, indexSet0);
 
-    NumericsMatrix* H0_NM = &*(_H0->numericsMatrix());
-
-    NM_scal(simulation()->currentTimeStep(), H0_NM);
+    DEBUG_EXPR(NumericsMatrix* H0_NM = &*(_H0->numericsMatrix());
+	       std::cout << "H0 :";
+	       NM_display(H0_NM););
+    //NM_scal(simulation()->currentTimeStep(), H0_NM);
 
     // ComputeV
     _V->computeV(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
+
+    // Ugly Hack to get theta
+    // we should consider a vector of theta
+
+    double theta = 0.0;
+    for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
+      auto inter = indexSet0.bundle(*ui);
+      auto osi1 = indexSet0.properties(*ui).osi1;
+      auto osi1_type = osi1->getType();
+      auto& osi2 = *indexSet0.properties(*ui).osi1;
+      auto osi2_type = osi2.getType();
+      using siconos::integrators::IntegratorType;
+      if ((osi1_type == IntegratorType::MOREAUJEANOSI &&
+	   osi2_type == IntegratorType::MOREAUJEANOSI)) {
+
+        auto moreaujean_osi1 =
+            std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi1);
+	theta = moreaujean_osi1->theta();
+        }
+      break;
+    }
+
     // ComputeU
     _U->computeU(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
+    NM_scal(theta, &*(_U->numericsMatrix()));
     // ComputeX
     _X->computeX(_H0->numericsMatrix(), _W_inverse->numericsMatrix());
+    NM_scal(theta, &*(_X->numericsMatrix()));
 
   } else
     THROW_EXCEPTION("CohesiveFrictionContact::computeMatrices unknown _assemblyTYPE");
@@ -371,25 +402,25 @@ bool CohesiveFrictionContact::preCompute(double time) {
 
   DEBUG_EXPR(std::cout << "indexSet0 size : " <<  simulation()->indexSet(0)->size() << std::endl;
 	     std::cout << "indexSet1 size : " <<  simulation()->indexSet(1)->size() << std::endl;);
-  
-  
+
+
   // First do standard preCompute
   // _M and _q are computed on indexSet 1
   bool hasContactActive = LinearOSNS::preCompute(time);
 
   // In the case, that indexSet1 is empty, we compute M to fill en empty marix !!
-  if (!hasContactActive) 
+  if (!hasContactActive)
   {
     LinearOSNS::computeM();
-  }    
-  
+  }
+
   // Compute coupling matrices between cohesive points and contact points.
   computeMatrices();
 
   _sizeOutput= _M->cols();
   _sizeOutput_cohesion= _V->cols();
 
-  
+
   // Add cohesive contribution to q
   compute_q_cohesion(time);
 
@@ -404,32 +435,6 @@ bool CohesiveFrictionContact::preCompute(double time) {
     _w->setZero();
   }
 
-  // siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
-  // if (_keepLambdaAndYState) {
-  //   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  //   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
-  //     auto& inter = *indexSet.bundle(*ui);
-  //     auto nslaw = inter.nonSmoothLaw();
-  //     auto nslaw_CohesiveZoneModelNIFNSL(
-  //         std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(nslaw));
-  //     if (nslaw_CohesiveZoneModelNIFNSL) {
-  //       // Get the position of inter-interactionBlock in the vector w
-  //       // or z
-  //       unsigned int pos = indexSet.properties(*ui).absolute_position;
-  //       // auto osnsp_rhs_position =
-  //       //
-  //       *(*indexSet.properties(*ui).workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS_COHESION];
-  //       auto& osnsp_rhs_position =
-  //           *(*indexSet.properties(*ui).workVectors)[tools::enum_to_index(
-  //               siconos::integrators::MoreauJeanOSI::wk_inter::osnsp_rhs_position)];
-
-  //       for (int k = 0; k < osnsp_rhs_position.size(); k++) {
-  //         (*_z)(pos + k) -= osnsp_rhs_position(k);
-  //       }
-  //     }
-  //   }
-  // }
-
   DEBUG_END("CohesiveFrictionContact::preCompute()\n");
   return true;
 }
@@ -437,8 +442,11 @@ bool CohesiveFrictionContact::preCompute(double time) {
 void CohesiveFrictionContact::postCompute() {
   DEBUG_BEGIN("CohesiveFrictionContact::postCompute()\n");
 
-  DEBUG_EXPR(siconos::algebra::print(*_w););
-  DEBUG_EXPR(siconos::algebra::print(*_z););
+  // // DEBUG_EXPR(
+  // std::cout << "w: " ;siconos::algebra::print(*_w);
+  //            // );
+  // // DEBUG_EXPR(
+  // std::cout << "z: " ;   siconos::algebra::print(*_z);// );
 
   // Call parent postCompute
   FrictionContact::postCompute();
@@ -450,7 +458,7 @@ void CohesiveFrictionContact::postCompute() {
   // indexSet0
   // Warning, when mixing law with FrictionContact for instance.
 
-  auto& indexSet0 = *simulation()->indexSet(0);  
+  auto& indexSet0 = *simulation()->indexSet(0);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet0.bundle(*ui);
@@ -460,7 +468,7 @@ void CohesiveFrictionContact::postCompute() {
     auto lambda = inter.lambda(0);
     // Copy _z values, starting from index pos + _sizeOutput_cohesion into lambda[0].
     lambda->segment(0, lambda->size()) =
-        _z->segment(pos + _sizeOutput, lambda->size());
+        _z->segment(pos + _sizeOutput, lambda->size()) / simulation()->currentTimeStep();
     DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
 
@@ -473,7 +481,7 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::solve()
   //  if (!problem) {
   auto problem = cohesiveFrictionContactProblem();
   //}
-  // cohesiveFrictionContact_display(&*problem);
+  cohesiveFrictionContact_display(&*problem);
   cohesiveFrictionContactProblem_build_M_q_from_blocks(&*problem);
   // getchar();
   return (*_cohesiveFrictionContact_driver)(&*problem, &*_z->data(), &*_w->data(),
@@ -486,11 +494,11 @@ bool CohesiveFrictionContact::checkCompatibleNSLaw(siconos::modeling::NonSmoothL
   if (cohesive_nslaw) {
     return true;
   }
-  // Also accept standard NewtonImpactFrictionNSL
-  auto friction_nslaw = dynamic_cast<siconos::modeling::NewtonImpactFrictionNSL*>(&nslaw);
-  if (friction_nslaw) {
-    return true;
-  }
+  // // Also accept standard NewtonImpactFrictionNSL
+  // auto friction_nslaw = dynamic_cast<siconos::modeling::NewtonImpactFrictionNSL*>(&nslaw);
+  // if (friction_nslaw) {
+  //   return true;
+  // }
   return false;
 }
 
@@ -508,6 +516,7 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::compute(double tim
 
   updateCoefficients();
 
+
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -521,8 +530,10 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::compute(double tim
     info = solve();
     postCompute();
   }
+  // display();
+  //getchar();
 
-  // getchar();
+
   return info;
 }
 void CohesiveFrictionContact::display() const {
@@ -544,7 +555,7 @@ void CohesiveFrictionContact::display() const {
     _V->display();
   else
     std::cout << "-> nullptr" << std::endl;
-  
+
   if (_q_cohesion) {
     std::cout << "q_cohesion:\n";
     siconos::algebra::print(*_q_cohesion);
@@ -552,9 +563,9 @@ void CohesiveFrictionContact::display() const {
   std::cout << std::endl;
   std::cout << "The CohesiveFrictionContact works on the index set of level  "
             << _indexSetLevel
-	    << " for contacts points and 0 for cohesive points"      
+	    << " for contacts points and 0 for cohesive points"
             << std::endl;
-  
+
   std::cout << "================================================\n";
 }
 
