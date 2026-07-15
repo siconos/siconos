@@ -481,7 +481,7 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::solve()
   //  if (!problem) {
   auto problem = cohesiveFrictionContactProblem();
   //}
-  cohesiveFrictionContact_display(&*problem);
+  //cohesiveFrictionContact_display(&*problem);
   cohesiveFrictionContactProblem_build_M_q_from_blocks(&*problem);
   // getchar();
   return (*_cohesiveFrictionContact_driver)(&*problem, &*_z->data(), &*_w->data(),
