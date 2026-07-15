@@ -81,10 +81,9 @@
 #include "NewtonEulerR.hpp"
 #include "RotationQuaternion.hpp"  // for orthoBaseFromVector
 #include "SiconosVector.hpp"
-#include "BlockVector.hpp"
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
-#define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
 #include "siconos_debug.h"
 
 namespace siconos::mechanics::czm {
@@ -93,7 +92,8 @@ BinaryCohesiveNSL::BinaryCohesiveNSL(siconos::algebra::Index size)
     : siconos::modeling::CohesiveZoneModelNIFNSL(size) {}
 
 BinaryCohesiveNSL::BinaryCohesiveNSL(double en, double et, double mu, double sigma_c,
-                                     double delta_c, siconos::algebra::Index size, double gamma)
+                                     double delta_c, siconos::algebra::Index size,
+                                     double gamma)
     : siconos::modeling::CohesiveZoneModelNIFNSL(en, et, mu, size),
       _sigma_c(sigma_c),
       _delta_c(delta_c),
@@ -257,13 +257,11 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       const auto& r_nc_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_NORMAL];
       const auto& r_t1_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_1];
       const auto& r_t2_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_2];
-      const auto& pos_0 = *internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP];
+      const auto& pos_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_DISPLACEMENT_JUMP];
 
-            
       DEBUG_EXPR_WE(std::cout << "r_pc1_0 is: " << r_pc1_0.transpose() << std::endl;
-		    std::cout << "r_pc2_0 is: " << r_pc2_0.transpose() << std::endl;);
+                    std::cout << "r_pc2_0 is: " << r_pc2_0.transpose() << std::endl;);
 
-      
       // Access DS position from interaction
       const auto& ds_vars = inter.read_dynamical_systems_variables();
       // Note: In the modern API, we need to get q from DS differently
@@ -278,20 +276,18 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       // Update contact points from current configuration
       // Note: In the old API this used computeContactPointsFromRelativeContactPoints
       // which needs to be adapted to the modern API. For now, we use the stored values.
-      
-      auto&  q  = *(ds_vars[tools::enum_to_index(siconos::modeling::NewtonEulerR::ds_var::q0)]);
 
-      DEBUG_EXPR(std::cout << "q_0 is: " << q.numberOfBlocks() <<  std::endl;
-		 siconos::algebra::print(q.toSiconosVector()););
-      
+      auto& q = *(ds_vars[tools::enum_to_index(siconos::modeling::NewtonEulerR::ds_var::q0)]);
+
+      DEBUG_EXPR(std::cout << "q_0 is: " << q.numberOfBlocks() << std::endl;
+                 siconos::algebra::print(q.toSiconosVector()););
+
       rel_NewtonEuler1DR->computeContactPointsFromRelativeContactPoints(
           q, r_pc1_0, r_pc2_0, r_nc_0, r_t1_0, r_t2_0, pc1_0, pc2_0, nc_0, t1_0, t2_0);
 
-
-      
       DEBUG_EXPR_WE(std::cout << "pc1_0 is: " << pc1_0.transpose() << std::endl;
-                 std::cout << "pc2_0 is: " << pc2_0.transpose() << std::endl;
-                 std::cout << "nc_0 is: " << nc_0.transpose() << std::endl;);
+                    std::cout << "pc2_0 is: " << pc2_0.transpose() << std::endl;
+                    std::cout << "nc_0 is: " << nc_0.transpose() << std::endl;);
 
       // Compute displacement
       siconos::algebra::SiconosVector3 pos = pc1_0 - pc2_0;
@@ -302,10 +298,12 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       u_N = u.dot(nc_0);
       u_T = u.dot(t1_0);
       u_S = u.dot(t2_0);
-
+      std::cout << "displacement jump u :" << u.transpose() << std::endl;
       DEBUG_EXPR(std::cout << "displacement jump u :" << u.transpose() << std::endl;);
       delta = u.norm();
       DEBUG_EXPR(std::cout << "delta :" << delta << std::endl;);
+      internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP] =
+          std::make_shared<siconos::algebra::SiconosVector3>(u);
 
     } else {
       // Simplified case for non-NewtonEuler1DR
@@ -330,7 +328,6 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
         DEBUG_PRINT("the interface is broken\n");
         *beta = 0.0;
         printf(" the interface is broken\n ");
-	getchar();
       } else if (delta <= _delta_c && beta_k == 1.0) {
         DEBUG_PRINT("the interface is intact\n");
         *beta = 1.0;
@@ -360,7 +357,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   DEBUG_PRINTF("tangent  cohesion intensity %4.2e\n", cohesion[1]);
 
   DEBUG_EXPR(siconos::algebra::print(*internalVariables[BinaryCohesiveNSL::COHESION]));
-  //getchar();
+  // getchar();
   DEBUG_END("void BinaryCohesiveNSL::updateInternalVariables(Interaction& inter)\n");
 }
 
