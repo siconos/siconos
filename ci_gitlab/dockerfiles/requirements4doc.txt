@@ -4,4 +4,8 @@ sphinx-book-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport
 sphinxcontrib-youtube
+sphinx-copybutton
+sphinx-design
+sphinx-autodoc-typehints
+furo
 

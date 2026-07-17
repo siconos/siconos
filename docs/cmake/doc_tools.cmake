@@ -119,7 +119,6 @@ macro(finalize_doc)
     #  - Results in binary_dir/docs/
     #  - input config from config/doxy.config
     #  - only html output
-    # 'inputs' are updated by each component, during call to update_doxygen_inputs macro.
     # Doc will be built when 'make doxygen' is called.
     # config file name
 
@@ -169,6 +168,31 @@ macro(finalize_doc)
 	      add_dependencies(html ${COMP}-xml2rst)
       endif()
     endforeach()
+
+  set(PYTHON_RST_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python)
+
+  # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
+  add_custom_target(rst_python
+      COMMAND ${CMAKE_COMMAND} -E rm -rf ${PYTHON_RST_DIR}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_RST_DIR}
+      COMMAND
+          ${Python_EXECUTABLE}
+          -m sphinx.ext.apidoc
+          -f
+          -e
+          -M
+          --remove-old
+          -T
+          -d 3
+          #-P # to include modules starting with _ (private)
+          -o ${PYTHON_RST_DIR}
+          ${SICONOS_PB11_BINARY_DIR}/siconos
+
+      COMMENT "Generating Python API rst files with sphinx-apidoc"
+      VERBATIM
+  )    
+  
+  add_dependencies(rst_api rst_python)
 
     # --- Generates conf.py, to describe sphinx setup ---
     # !! Should be call after doxygen setup

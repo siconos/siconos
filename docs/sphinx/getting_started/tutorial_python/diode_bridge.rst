@@ -179,7 +179,7 @@ A few remarks:
 
     help(sk.FirstOrderLinearDS)
 
- or by checking the :ref:`siconos_api_reference` or :ref:`siconos_python_reference` documention.
+ or by checking the :ref:`cpp_api` or :ref:`python_api` documention.
 
 Modeling the interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^

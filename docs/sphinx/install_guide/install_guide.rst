@@ -3,10 +3,6 @@
 Build and install
 #################
 
-.. contents::
-   :local:
-
-
 Overview
 ========
 
@@ -206,7 +202,7 @@ Siconos software is made of different components described below
 
 .. image:: /figures/siconos_components.*
 
-The list of components to be installed can be set using :ref:`siconos_install_with_user_options` (mind the dependencies shown in the figure above).
+The list of components to be installed can be set as shown in :ref:`siconos_detailed_install` (mind the dependencies shown in the figure above).
 
 
 .. _siconos_run_tests:
@@ -308,8 +304,7 @@ Test your installation
 ----------------------
 
 When all the installation process is done, you can test your installation by running a simple example.
-(for non-standard installation path, mind :ref:`siconos_install_note`.). Try one of the numerous files
-provided in `Siconos Tutorial project <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_
+Try one of the numerous files provided in `Siconos Tutorial project <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_
 
 
 .. code-block:: bash

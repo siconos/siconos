@@ -16,26 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import OCC
-
-from OCC import VERSION
-
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
-from OCC.TopLoc import TopLoc_Location
+from OCC.Core.gp import gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
+from OCC.Core.TopLoc import TopLoc_Location
 
 # from OCC.Display.SimpleGui import get_backend
 
-from OCC.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
-from OCC.Interface import Interface_Static_SetCVal
+from OCC.Core.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
 
-from OCC.BRep import BRep_Builder
-from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
-from OCC.TopoDS import TopoDS_Compound
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
+from OCC.Core.TopoDS import TopoDS_Compound
 
-from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
-import OCC.Graphic3d as Graphic3d
-from OCC.Quantity import (
+import OCC.Core.Graphic3d as Graphic3d
+from OCC.Core.Quantity import (
     Quantity_NOC_DARKVIOLET,
     Quantity_NOC_BLUE1,
     Quantity_NOC_GREEN,
@@ -45,14 +40,10 @@ from OCC.Quantity import (
     Quantity_NOC_YELLOW,
 )
 
-import vtk
-from vtk.util import numpy_support
-
-import sys
-
 import siconos.io.mechanics_run as IO
 
-from siconos.io.SimpleGui import get_backend, init_display
+# from siconos.io.SimpleGui import init_display
+from OCC.Display.SimpleGui import init_display
 import siconos.mechanics.quaternions as quat_tools
 
 
@@ -71,7 +62,7 @@ def memoize(f):
 
 
 def make_slider(minv, maxv, vstep):
-    from PyQt4 import QtCore, QtGui, QtOpenGL
+    from PyQt4 import QtCore, QtGui  # , QtOpenGL
 
     class SlidersGroup(QtGui.QGroupBox):
 
@@ -213,10 +204,11 @@ with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
                 step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
                 step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
 
-                ok = step_reader.TransferRoot(1)
+                # ok =
+                step_reader.TransferRoot(1)
                 nbs = step_reader.NbShapes()
 
-                l = []
+                result = []
                 for i in range(1, nbs + 1):
                     ais_shape = display.DisplayShape(
                         step_reader.Shape(i), update=True, transparency=0.55
@@ -224,9 +216,9 @@ with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
                     ais_shape.GetObject().SetColor(colors[current_color % 6])
                     current_color += 1
                     ais_shape.GetObject().SetMaterial(Graphic3d.Graphic3d_NOM_PLASTIC)
-                    l.append(ais_shape)
+                    result.append(ais_shape)
 
-                return l
+                return result
 
     obj_by_id = dict()
     for instance in io.instances():
@@ -245,12 +237,12 @@ with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
 
     @memoize
     def avatars(obj):
-        l = [
+        result = [
             make_shape(io.instances()[obj][shape].attrs["name"])
             for shape in io.instances()[obj]
         ]
         # flatten
-        return [item for sublist in l for item in sublist]
+        return [item for sublist in result for item in sublist]
 
     @memoize
     def write_step(stshape):
@@ -263,7 +255,8 @@ with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
         step_str, shape = stshape
 
         step_writer.Transfer(shape, STEPControl_AsIs)
-        status = step_writer.Write("siconos-mechanisms-{0}.stp".format(step_str))
+        # status =
+        step_writer.Write("siconos-mechanisms-{0}.stp".format(step_str))
 
     def vstep(step_str):
 

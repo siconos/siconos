@@ -3,50 +3,30 @@
 Linear Algebra in Siconos
 =========================
 
-An overview of matrices and vectors in Siconos : storage, usage, operations ...
+.. _kernel_matrix_storage:
 
-Defined in :
+Matrices and vectors handling in kernel component
+-------------------------------------------------
 
-* numerics/src/tools
-* kernel/src/utils/SiconosAlgebra
+In Siconos kernel, all matrices and vectors are just interfaces to `Eigen <https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html>`_ vectors and matrices
+and defined in the files :file:`SiconosMatrix.hpp` and :file:`SiconosVector.hpp`.
 
-.. contents::
-   :local:
+Please refer to Eigen documentation for details.
 
+Siconos wrappers are:
 
+* :class:`SiconosVector` : dense vector of real numbers (type : double precision)
+* :class:`BlockVector` : vector of :class:`SiconosVector`
+* :class:`SiconosDenseMatrix` : dense matrix of double
+* :class:`SiconosSparseMatrix` : sparse matrix of double, column-major storage.
 
-Siconos vectors and matrices in the kernel component are mostly an interface to boost ublas objects (https://www.boost.org/doc/libs/1_65_1/libs/numeric/ublas/doc/index.html)
+and some fixed-sized objects, like :class:`SiconosMatrix33`, :class:`SiconosMatrix66` ....
 
-
-      
-Vectors
--------
-
-Vectors in siconos are defined with `SiconosVector` object.
-
-* Contains real numbers (type : double precision)
-* Can be dense (type: Siconos::DENSE) or sparse (type Siconos::SPARSE).
-
-
-Matrices
---------
-
-Matrices are represented with SimpleMatrix class, which is a wrapper around boost ublas matrix types.
-
-* Contains real numbers (type : double precision)
-* Can be dense, triangular, symmetric, sparse, banded, zero or identity
+Notice that BlockVector are no more that a collection of pointers to SiconosVector.
+Then in most cases, to build such an object, you just need to insert some existing objects.
+The usual ways of construction are described below.
 
 
-Notes about SimpleMatrix
-""""""""""""""""""""""""
-
-* Concerning sparse matrices, see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
-* Comparison between ublas (direct call) and Siconos are available in sandbox (developers only) gitlab project.
-* Different ways to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or boost numeric bindings.
-* axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
-
-
-  
 .. _numerics_matrix_storage:
 
 Matrix Storage in numerics component

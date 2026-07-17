@@ -96,6 +96,11 @@ if(WITH_DOCUMENTATION)
   find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
   find_python_module(sphinx_book_theme REQUIRED)
+  find_python_module(sphinx_autodoc_typehints REQUIRED)
+  find_python_module(sphinx_copybutton REQUIRED)
+  find_python_module(sphinx_design REQUIRED)
+  #find_python_module(sphinxcontrib napoleon REQUIRED)
+  
 
   # --- copy/conf sphinx files into build directory ---
 
@@ -137,6 +142,7 @@ if(WITH_DOCUMENTATION)
   set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
   set(SPHINX_PARAMETERS
     -N # no color, it is terrible in log files --xhub
+    #-j 8 # parallel build
     -w ${SPHINX_LOG_FILE}
     -b html # html output
     -d build/doctrees # path to doctree files

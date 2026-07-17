@@ -63,6 +63,7 @@ def parse_cmake_info(path):
 
     Each line of the file has the format:
         KEY=val1;val2;val3
+
     Empty values are filtered out.
 
     Example output:
@@ -71,6 +72,7 @@ def parse_cmake_info(path):
             "LIBS": ["siconos_mechanics", "siconos_kernel"],
             ...
         }
+
     """
     data = {}
     with open(path) as f:

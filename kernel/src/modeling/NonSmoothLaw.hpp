@@ -25,7 +25,7 @@
 
 #include "NSLVisitor.hpp"
 #include "SiconosException.hpp"
-#include "SiconosMatrix.hpp"
+#include "SiconosMatrix.hpp"         // IWYU pragma: keep
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "TypeName.hpp"              // visitor to get ds type
 

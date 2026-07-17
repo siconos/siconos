@@ -30,35 +30,43 @@ import getopt
 # a replacement for vview --vtk-export
 #
 
+
 def usage(long=False):
-    print(__doc__); print()
-    print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
-          .format(os.path.split(sys.argv[0])[1]))
+    print(__doc__)
+    print()
+    print(
+        "Usage:  {0} [--help] [--version] [--ascii] <HDF5>".format(
+            os.path.split(sys.argv[0])[1]
+        )
+    )
     if long:
         print()
-        print("""Options:
+        print(
+            """Options:
         --help     display this message
         --version  display version information
         --ascii    export file in ascii format
-        """)
+        """
+        )
+
+
 try:
-    opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['help','version','ascii'])
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["help", "version", "ascii"])
 except getopt.GetoptError as err:
-        sys.stderr.write('{0}\n'.format(str(err)))
-        usage()
-        exit(2)
+    sys.stderr.write("{0}\n".format(str(err)))
+    usage()
+    exit(2)
 
 ascii_mode = False
 
 for o, a in opts:
-    if o == '--help':
+    if o == "--help":
         usage(long=True)
         exit(0)
-    if o == '--version':
-        print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
+    if o == "--version":
+        print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
         exit(0)
-    if o in ('--ascii'):
+    if o in ("--ascii"):
         ascii_mode = True
 
 min_time = None
@@ -88,6 +96,7 @@ from siconos.io.mechanics_hdf5 import MechanicsHdf5
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
 
+
 class UnstructuredGridSource(vtk.vtkProgrammableSource):
 
     def GetOutputPort(self):
@@ -105,20 +114,21 @@ class ConvexSource(UnstructuredGridSource):
     def method(self):
         output = self.GetUnstructuredGridOutput()
         output.Allocate(1, 1)
-        output.InsertNextCell(
-            convex.GetCellType(), self._convex.GetPointIds())
+        output.InsertNextCell(convex.GetCellType(), self._convex.GetPointIds())
         output.SetPoints(self._points)
+
 
 def add_compatiblity_methods(obj):
     """
     Add missing methods in previous VTK versions.
     """
 
-    if hasattr(obj, 'SetInput'):
+    if hasattr(obj, "SetInput"):
         obj.SetInputData = obj.SetInput
 
-    if hasattr(obj, 'AddInput'):
+    if hasattr(obj, "AddInput"):
         obj.AddInputData = obj.AddInput
+
 
 transforms = dict()
 transformers = dict()
@@ -138,7 +148,7 @@ offsets = dict()
 vtkmath = vtk.vtkMath()
 
 
-class Quaternion():
+class Quaternion:
 
     def __init__(self, *args):
         self._data = vtk.vtkQuaternion[float](*args)
@@ -183,10 +193,8 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
 
         axis, angle = r.axisAngle()
 
-        transform.RotateWXYZ(angle * 180. / pi,
-                             axis[0],
-                             axis[1],
-                             axis[2])
+        transform.RotateWXYZ(angle * 180.0 / pi, axis[0], axis[1], axis[2])
+
 
 set_positionv = numpy.vectorize(set_position)
 
@@ -202,9 +210,10 @@ def build_set_velocity(dico):
     set_velocityv = numpy.vectorize(set_velocity)
     return set_velocityv
 
+
 def build_set_translation(dico):
 
-    def set_translation(instance, x0, x1, x2 ):
+    def set_translation(instance, x0, x1, x2):
 
         if instance in dico:
             dico[instance]._data[:] = [x0, x1, x2]
@@ -213,9 +222,10 @@ def build_set_translation(dico):
     set_translationv = numpy.vectorize(set_translation)
     return set_translationv
 
+
 def build_set_displacement(dico):
 
-    def set_displacement(instance, x0, x1, x2 ):
+    def set_displacement(instance, x0, x1, x2):
 
         if instance in dico:
             dico[instance]._data[:] = [x0, x1, x2]
@@ -223,6 +233,7 @@ def build_set_displacement(dico):
 
     set_displacementv = numpy.vectorize(set_displacement)
     return set_displacementv
+
 
 def step_reader(step_string):
 
@@ -258,15 +269,15 @@ def step_reader(step_string):
 
                 builder.Add(comp, shape)
 
-            with io.tmpfile(suffix='.stl') as tmpf:
-                    stl_writer.Write(comp, tmpf[1])
-                    tmpf[0].flush()
+            with io.tmpfile(suffix=".stl") as tmpf:
+                stl_writer.Write(comp, tmpf[1])
+                tmpf[0].flush()
 
-                    reader = vtk.vtkSTLReader()
-                    reader.SetFileName(tmpf[1])
-                    reader.Update()
+                reader = vtk.vtkSTLReader()
+                reader.SetFileName(tmpf[1])
+                reader.Update()
 
-                    return reader
+                return reader
 
 
 def brep_reader(brep_string, indx):
@@ -274,6 +285,7 @@ def brep_reader(brep_string, indx):
     from OCC.StlAPI import StlAPI_Writer
 
     from OCC.BRepTools import BRepTools_ShapeSet
+
     shape_set = BRepTools_ShapeSet()
     shape_set.ReadFromString(brep_string)
     shape = shape_set.Shape(shape_set.NbShapes())
@@ -282,7 +294,7 @@ def brep_reader(brep_string, indx):
 
     stl_writer = StlAPI_Writer()
 
-    with io.tmpfile(suffix='.stl') as tmpf:
+    with io.tmpfile(suffix=".stl") as tmpf:
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
@@ -300,7 +312,7 @@ shape = dict()
 pos = dict()
 instances = dict()
 
-with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
+with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
     def load():
 
@@ -315,9 +327,9 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
     spos_data, dpos_data, velo_data, cf_data, solv_data = load()
 
-    class DataConnector():
+    class DataConnector:
 
-        def __init__(self, instance, data_name='velocity', data_size=6):
+        def __init__(self, instance, data_name="velocity", data_size=6):
 
             self._instance = instance
             self._data_name = data_name
@@ -340,12 +352,11 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
             data = self._data
 
-            data_t = tuple(data[0:self._data_size])
-            output.GetFieldData().GetArray(self._data_name).SetTuple(
-                0, data_t)
+            data_t = tuple(data[0 : self._data_size])
+            output.GetFieldData().GetArray(self._data_name).SetTuple(0, data_t)
 
     # contact forces provider
-    class ContactInfoSource():
+    class ContactInfoSource:
 
         def __init__(self, data):
             self._data = None
@@ -374,36 +385,27 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
             output_a = self._contact_source_a.GetPolyDataOutput()
             output_b = self._contact_source_b.GetPolyDataOutput()
 
-            id_f = numpy.where(
-                abs(self._data[:, 0] - self._time) < 1e-15)[0]
+            id_f = numpy.where(abs(self._data[:, 0] - self._time) < 1e-15)[0]
 
-            self.cpa_export = self._data[
-                id_f, 2:5].copy()
+            self.cpa_export = self._data[id_f, 2:5].copy()
 
-            self.cpb_export = self._data[
-                id_f, 5:8].copy()
+            self.cpb_export = self._data[id_f, 5:8].copy()
 
-            self.cn_export = self._data[
-                id_f, 8:11].copy()
+            self.cn_export = self._data[id_f, 8:11].copy()
 
-            self.cf_export = self._data[
-                id_f, 11:14].copy()
+            self.cf_export = self._data[id_f, 11:14].copy()
 
-            self.cpa_ = numpy_support.numpy_to_vtk(
-                self.cpa_export)
-            self.cpa_.SetName('contact_positions_A')
+            self.cpa_ = numpy_support.numpy_to_vtk(self.cpa_export)
+            self.cpa_.SetName("contact_positions_A")
 
-            self.cpb_ = numpy_support.numpy_to_vtk(
-                self.cpb_export)
-            self.cpb_.SetName('contact_positions_B')
+            self.cpb_ = numpy_support.numpy_to_vtk(self.cpb_export)
+            self.cpb_.SetName("contact_positions_B")
 
-            self.cn_ = numpy_support.numpy_to_vtk(
-                self.cn_export)
-            self.cn_.SetName('contact_normals')
+            self.cn_ = numpy_support.numpy_to_vtk(self.cn_export)
+            self.cn_.SetName("contact_normals")
 
-            self.cf_ = numpy_support.numpy_to_vtk(
-                self.cf_export)
-            self.cf_.SetName('contact_forces')
+            self.cf_ = numpy_support.numpy_to_vtk(self.cf_export)
+            self.cf_.SetName("contact_forces")
 
             output_a.Allocate(len(self.cpa_export), 1)
 
@@ -428,14 +430,13 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
     #
     #
     readers = dict()
-    vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
-                  'stl': vtk.vtkSTLReader}
+    vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
 
     for shape_name in io.shapes():
 
-        shape_type = io.shapes()[shape_name].attrs['type']
+        shape_type = io.shapes()[shape_name].attrs["type"]
 
-        if shape_type in ['vtp', 'stl']:
+        if shape_type in ["vtp", "stl"]:
             with io.tmpfile() as tmpf:
                 tmpf[0].write(str(io.shapes()[shape_name][:][0]))
                 tmpf[0].flush()
@@ -444,29 +445,26 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
                 reader.Update()
                 readers[shape_name] = reader
 
-        elif shape_type in ['brep']:
+        elif shape_type in ["brep"]:
             # try to find an associated shape
-            if 'associated_shape' in io.shapes()[shape_name].attrs:
-                associated_shape = \
-                    io.shapes()[shape_name].\
-                    attrs['associated_shape']
+            if "associated_shape" in io.shapes()[shape_name].attrs:
+                associated_shape = io.shapes()[shape_name].attrs["associated_shape"]
 
             else:
-                if 'brep' in io.shapes()[shape_name].attrs:
-                    brep = io.shapes()[shape_name].attrs['brep']
+                if "brep" in io.shapes()[shape_name].attrs:
+                    brep = io.shapes()[shape_name].attrs["brep"]
                 else:
                     brep = shape_name
 
-                reader = brep_reader(str(io.shapes()[brep][:][0]),
-                                     io.shapes()[brep].attrs['occ_indx'])
+                reader = brep_reader(
+                    str(io.shapes()[brep][:][0]), io.shapes()[brep].attrs["occ_indx"]
+                )
                 readers[shape_name] = reader
 
-        elif shape_type in ['stp', 'step']:
+        elif shape_type in ["stp", "step"]:
             # try to find an associated shape
-            if 'associated_shape' in io.shapes()[shape_name].attrs:
-                associated_shape = \
-                    io.shapes()[shape_name].\
-                    attrs['associated_shape']
+            if "associated_shape" in io.shapes()[shape_name].attrs:
+                associated_shape = io.shapes()[shape_name].attrs["associated_shape"]
                 # delayed
 
             else:
@@ -474,7 +472,7 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
                 readers[shape_name] = reader
 
-        elif shape_type == 'convex':
+        elif shape_type == "convex":
             # a convex shape
             points = vtk.vtkPoints()
             convex = vtk.vtkConvexPointSet()
@@ -488,34 +486,34 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
             readers[shape_name] = ConvexSource(convex, points)
 
         else:
-            assert shape_type == 'primitive'
-            primitive = io.shapes()[shape_name].attrs['primitive']
+            assert shape_type == "primitive"
+            primitive = io.shapes()[shape_name].attrs["primitive"]
             attrs = io.shapes()[shape_name][:][0]
-            if primitive == 'Sphere':
+            if primitive == "Sphere":
                 source = vtk.vtkSphereSource()
                 source.SetRadius(attrs[0])
 
-            elif primitive == 'Cone':
+            elif primitive == "Cone":
                 source = vtk.vtkConeSource()
                 source.SetRadius(attrs[0])
                 source.SetHeight(attrs[1])
                 source.SetResolution(15)
                 source.SetDirection(0, 1, 0)  # needed
 
-            elif primitive == 'Cylinder':
+            elif primitive == "Cylinder":
                 source = vtk.vtkCylinderSource()
                 source.SetResolution(15)
                 source.SetRadius(attrs[0])
                 source.SetHeight(attrs[1])
                 #           source.SetDirection(0,1,0)
 
-            elif primitive == 'Box':
+            elif primitive == "Box":
                 source = vtk.vtkCubeSource()
                 source.SetXLength(attrs[0])
                 source.SetYLength(attrs[1])
                 source.SetZLength(attrs[2])
 
-            elif primitive == 'Capsule':
+            elif primitive == "Capsule":
                 sphere1 = vtk.vtkSphereSource()
                 sphere1.SetRadius(attrs[0])
                 sphere1.SetCenter(0, attrs[1] / 2, 0)
@@ -549,13 +547,14 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
     for instance_name in io.instances():
 
-        instance = int(io.instances()[instance_name].attrs['id'])
+        instance = int(io.instances()[instance_name].attrs["id"])
         contactors[instance] = []
         transforms[instance] = []
         offsets[instance] = []
         for contactor_instance_name in io.instances()[instance_name]:
             contactor_name = io.instances()[instance_name][
-                contactor_instance_name].attrs['name']
+                contactor_instance_name
+            ].attrs["name"]
 
             contactors[instance].append(contactor_name)
 
@@ -563,42 +562,55 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
             transformer = vtk.vtkTransformFilter()
 
             if contactor_name in readers:
-                transformer.SetInputConnection(
-                    readers[contactor_name].GetOutputPort())
+                transformer.SetInputConnection(readers[contactor_name].GetOutputPort())
             else:
-                print ('WARNING: cannot find a shape source for instance:',
-                       instance)
+                print("WARNING: cannot find a shape source for instance:", instance)
 
             transformer.SetTransform(transform)
             transformers[contactor_name] = transformer
 
             data_connectors_v[instance] = DataConnector(instance)
             data_connectors_v[instance]._connector.SetInputConnection(
-                transformer.GetOutputPort())
+                transformer.GetOutputPort()
+            )
             data_connectors_v[instance]._connector.Update()
             big_data_source.AddInputConnection(
-                data_connectors_v[instance]._connector.GetOutputPort())
+                data_connectors_v[instance]._connector.GetOutputPort()
+            )
 
-            data_connectors_t[instance] = DataConnector(instance, data_name='translation', data_size=3)
+            data_connectors_t[instance] = DataConnector(
+                instance, data_name="translation", data_size=3
+            )
             data_connectors_t[instance]._connector.SetInputConnection(
-                transformer.GetOutputPort())
+                transformer.GetOutputPort()
+            )
             data_connectors_t[instance]._connector.Update()
             big_data_source.AddInputConnection(
-                data_connectors_t[instance]._connector.GetOutputPort())
+                data_connectors_t[instance]._connector.GetOutputPort()
+            )
 
-            data_connectors_d[instance] = DataConnector(instance, data_name='displacement', data_size=3)
+            data_connectors_d[instance] = DataConnector(
+                instance, data_name="displacement", data_size=3
+            )
             data_connectors_d[instance]._connector.SetInputConnection(
-                transformer.GetOutputPort())
+                transformer.GetOutputPort()
+            )
             data_connectors_d[instance]._connector.Update()
             big_data_source.AddInputConnection(
-                data_connectors_d[instance]._connector.GetOutputPort())
+                data_connectors_d[instance]._connector.GetOutputPort()
+            )
 
             transforms[instance].append(transform)
             offsets[instance].append(
-                (io.instances()[
-                    instance_name][
-                 contactor_instance_name].attrs['translation'],
-                    io.instances()[instance_name][contactor_instance_name].attrs['orientation']))
+                (
+                    io.instances()[instance_name][contactor_instance_name].attrs[
+                        "translation"
+                    ],
+                    io.instances()[instance_name][contactor_instance_name].attrs[
+                        "orientation"
+                    ],
+                )
+            )
 
     pos_data = dpos_data[:].copy()
     spos_data = spos_data[:].copy()
@@ -617,23 +629,23 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
     pvelob = DataConnector(0)
 
     pveloa._connector.SetInputConnection(
-        contact_info_source._contact_source_a.GetOutputPort())
+        contact_info_source._contact_source_a.GetOutputPort()
+    )
     pvelob._connector.SetInputConnection(
-        contact_info_source._contact_source_a.GetOutputPort())
+        contact_info_source._contact_source_a.GetOutputPort()
+    )
 
-    big_data_source.AddInputConnection(
-        pveloa._connector.GetOutputPort())
-    big_data_source.AddInputConnection(
-        pvelob._connector.GetOutputPort())
+    big_data_source.AddInputConnection(pveloa._connector.GetOutputPort())
+    big_data_source.AddInputConnection(pvelob._connector.GetOutputPort())
 
     big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
     ntime = len(times)
-    k=0
-    packet= int(ntime/100)+1
+    k = 0
+    packet = int(ntime / 100) + 1
     for time in times:
-        k=k+1
-        if (k%packet == 0):
-            sys.stdout.write('.')
+        k = k + 1
+        if k % packet == 0:
+            sys.stdout.write(".")
         index = bisect.bisect_left(times, time)
         index = max(0, index)
         index = min(index, len(times) - 1)
@@ -646,16 +658,27 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
         id_t = numpy.where(pos_data[:, 0] == times[index])
 
         if numpy.shape(spos_data)[0] > 0:
-            set_positionv(spos_data[:, 1], spos_data[:, 2],
-                          spos_data[:, 3],
-                          spos_data[:, 4], spos_data[:, 5],
-                          spos_data[:, 6],
-                          spos_data[:, 7], spos_data[:, 8])
+            set_positionv(
+                spos_data[:, 1],
+                spos_data[:, 2],
+                spos_data[:, 3],
+                spos_data[:, 4],
+                spos_data[:, 5],
+                spos_data[:, 6],
+                spos_data[:, 7],
+                spos_data[:, 8],
+            )
 
         set_positionv(
-            pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
-            pos_data[id_t, 4], pos_data[id_t, 5], pos_data[id_t, 6],
-            pos_data[id_t, 7], pos_data[id_t, 8])
+            pos_data[id_t, 1],
+            pos_data[id_t, 2],
+            pos_data[id_t, 3],
+            pos_data[id_t, 4],
+            pos_data[id_t, 5],
+            pos_data[id_t, 6],
+            pos_data[id_t, 7],
+            pos_data[id_t, 8],
+        )
 
         id_tv = numpy.where(velo_data[:, 0] == times[index])
 
@@ -666,7 +689,8 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
             velo_data[id_tv, 4],
             velo_data[id_tv, 5],
             velo_data[id_tv, 6],
-            velo_data[id_tv, 7])
+            velo_data[id_tv, 7],
+        )
 
         set_translationv(
             pos_data[id_t, 1],
@@ -682,13 +706,17 @@ with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
         #     pos_data[id_t, 4]- pos_data[0, 4]
         # ) # should be w.r.t initial position
 
-        big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
-                                    os.path.basename(io_filename))[0],
-            index, big_data_writer.GetDefaultFileExtension()))
+        big_data_writer.SetFileName(
+            "{0}-{1}.{2}".format(
+                os.path.splitext(os.path.basename(io_filename))[0],
+                index,
+                big_data_writer.GetDefaultFileExtension(),
+            )
+        )
         big_data_writer.SetTimeStep(times[index])
         big_data_source.Update()
 
         if ascii_mode:
             big_data_writer.SetDataModeToAscii()
         big_data_writer.Write()
-    print(' ')
+    print(" ")

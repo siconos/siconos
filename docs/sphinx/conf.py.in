@@ -22,7 +22,7 @@ from distutils.version import LooseVersion
 import sphinx
 
 # append siconos package build path to sys
-siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
+siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'python')
 sys.path.insert(0, siconos_pythonpath)
 siconos_tools_path = os.path.join("@CMAKE_BINARY_DIR@", 'share')
 sys.path.insert(0, siconos_tools_path)
@@ -56,6 +56,8 @@ extensions = [
     'sphinx.ext.githubpages',
     #'ytsphinx.youtube',
     'sphinxcontrib.youtube',
+    'sphinx_copybutton',
+    'sphinx_design'
 ]
 
 with_python_wrapper = '@WITH_PYB11_WRAPPER@' == 'ON'
@@ -63,6 +65,7 @@ if with_python_wrapper:
     extensions += [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
+        'sphinx_autodoc_typehints',
         # numpydoc must be listed after autodoc!
         # but we don't need it anymore because of napoleon
         #'numpydoc.numpydoc',
@@ -74,16 +77,17 @@ if with_python_wrapper:
 
     # ---- Autodoc config ----
     autodoc_default_options = {
-        #'members': None,
-        #'show-inheritance': None,
-        'member-order': 'bysource',
-        'private-members': None
+        "members": True,
+        "show-inheritance": True,
+        "member-order": "bysource",
         }
+
     autodoc_docstring_signature = True
     autodoc_typehints = 'none'
     automodule_skip_lines = 'True'
     autoclass_content = 'both'
-    
+
+
     # ---- Napoleon config ----
 
     # Customize napoleon/sphinx output.
@@ -154,7 +158,8 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
+
 
 # The master toctree document.
 master_doc = 'index'
@@ -213,7 +218,9 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #html_theme = 'bootstrap'
-html_theme = 'sphinx_book_theme'
+#html_theme = 'sphinx_book_theme'
+html_theme = 'furo'
+#html_theme = 'pydata_sphinx_theme'
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
@@ -445,10 +452,10 @@ texinfo_documents = [(
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'https://docs.python.org/': None}
 intersphinx_mapping = {
-    'python': ('https://docs.python.org', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-    'matplotlib': ('https://matplotlib.org/', None)}
+    'python': ('https://docs.python.org/3/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None)}
 
 path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'numerics')
 

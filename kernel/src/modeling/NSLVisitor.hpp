@@ -16,40 +16,11 @@
  * limitations under the License.
  */
 
-/*! \file NSLVisitor.hpp
-  Abstract class - General interface for visitors of  nonsmooth laws.
-*/
+/**  @file NSLVisitor.hpp - General interface for visitors of  nonsmooth laws.
+ */
 
 #ifndef NSLVisitor_hpp
 #define NSLVisitor_hpp
-
-/** A visitor pattern.
-
-   User has to instantiate a derivation of NSLVisitor class :
-
-   struct myvisitor : public NSLVisitor
-   {
-     void visit(const LagrangianDS& ds)
-     {
-       ...
-     }
-   }
-
-   with some wanted visit() functions.
-
-   Then the visitor may be used as :
-
-   A_visitable_Siconos_Object->accept(siconos::Visitor myvisitor)
-
-   NSLVisitor also define a type visitor object under the
-   namespace Type:: and some functions to access type of visitables
-   classes:
-
-   Type::value(c) : the type of the visitable object c as an enum.
-
-   Type::name(c)  : the name of the Type::value as a std::string
-
-*/
 
 #include "SiconosException.hpp"
 
@@ -70,6 +41,37 @@ class MohrCoulombPlasticityNSL;
 
 namespace nonsmooth_laws {
 
+/** @brief A visitor pattern for nonsmooth laws
+ *
+ * Usage:
+ *
+ * 1. Any new nonsmooth law class must implement an accept function:
+ *
+ *  @code{.cpp}
+ *   virtual void accept(nonsmooth_laws::Visitor &tourist) const override {
+ *      tourist.visit(*this); }
+ *  @endcode
+ *
+ * 2. Derive visitor class:
+ *
+ *  @code{.cpp}
+ *  struct MyVisitor : public NSLVisitor
+ *  {
+ *     void visit(const SomeNSL& nsl) override
+ *      {
+ *        ...
+ *      }
+ *  }
+ *  @endcode
+ *
+ * 3. Then the visitor may be used as :
+ *
+ *  @code{.cpp}
+ *    SomeNSL nslaw;
+ *    MyVisitor vis{...};
+ *    nslaw->accept(vis)
+ *  @endcode
+ */
 struct Visitor {
   virtual ~Visitor() noexcept = default;
   // Note FP: use variant for nslaws ?

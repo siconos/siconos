@@ -5,61 +5,166 @@
    Git SHA-1: @SOURCE_ABBREV_GIT_SHA1@
    Build: @BUILD_TIMESTAMP@
 
-:github_url: https://github.com/siconos/siconos/
 :gitlab_url: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/
-   
+
 Siconos : nonsmooth numerical simulation |licence|
-============================================================
+==================================================
+
+.. List in this toctree the items that must appear in the top bar or in the left menu 
+   (depending on the chosen theme) for all pages
+
 .. toctree::
    :hidden:
    :maxdepth: 3
-   
+
    getting_started/index
    install_guide/index
    examples/index
-   reference/index
    complete_documentation
+   extras
    search_index
-   license
+
+.. grid:: 2
+   :gutter: 3
+
+   .. grid-item-card::
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      .. image:: /figures/polyhedras_flow.png
+         :width: 100%
+         :target: https://www.youtube.com/watch?v=3I_BkFTqH8I
+
+      **Video: flows of polyhedras in an hopper**
+
+   .. grid-item-card::
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      .. image:: /figures/movies/dambreak3D.gif
+         :width: 100%
+
+      **Dam break simulation**
+
+.. button-ref:: getting_started/index
+   :ref-type: doc
+   :color: primary
+   :expand:
+
+   🚀 **Quickstart**
+
+
+.. div:: sd-fs-5
+ 
+   Siconos is an open-source scientific software package for **modelling and simulation of nonsmooth dynamical systems** in C++ and Python.
+
+   Our main applications are mechanical systems (rigid or solid) with unilateral contact and Coulomb friction
+   and impact (nonsmooth mechanics, contact dynamics, multibody systems dynamics or granular materials).
+   Other constitutive models are being developed to model plasticity, damage, cohesive zones. 
+
+
+
+-------------------------------------------------------------------------------
+
+
+
+.. grid:: 4
+   :gutter: 3
+
+   .. grid-item-card:: 🚀 Getting started
+      :link: getting_started/index
+      :link-type: doc
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      Start using Siconos in a few steps
+
+   .. grid-item-card:: ⚙️ Installation
+      :link: install_guide/index
+      :link-type: doc
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      How to build and install Siconos software
+
+   .. grid-item-card:: 📚 Examples
+      :link: examples/index
+      :link-type: doc
+      :class-card: sd-shadow-sm sd-rounded-3
+      :img-top: /figures/C60.png
+
+      Tutorials and application examples.
+
+   .. grid-item-card:: 📖  Guides
+      :link: reference/index
+      :link-type: doc
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      User and developers manuals, C++ and Python reference API.
+
+
+-------------------------------------------------------------------------------
+
+.. div:: sd-fs-5 sd-mb-4
+
+   Other applications are also targeted, as Siconos is designed to be a generic kernel simulator for non-smooth dynamical systems:
+
+   - switched electrical circuits, such as electrical circuits with ideal and piecewise linear components,
+   - sliding mode control systems, and 
+   - biology (gene regulatory network).
+   - systems and control (hybrid systems, optimal control with state control with state constraints)
+   - optimisation (complementarity systems and variational inequalities)
+   - fluid mechanics
+   - computer graphics.
    
 
-.. |imag1| image::  /figures/buck.*
-   :height: 150
 
-.. |imag2| image::  /figures/C60.*
-   :height: 150
+.. grid:: 3
+   :gutter: 3
 
-.. |imag3| image:: /figures/Exomars.24.10.small.*
-   :height: 150
+   .. grid-item-card::
+      :class-card: sd-shadow-sm sd-rounded-3
 
-========================================= =========================
-  .. include:: about.rst                   .. include:: video.rst   
-========================================= =========================
+      .. image:: /figures/buck.*
+         :width: 100%
+
+   .. grid-item-card::
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      .. image:: /figures/Exomars.24.10.small.*
+         :width: 100%
+
+   .. grid-item-card::
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      .. image:: /figures/snapshot-0827.png
+         :width: 100%
 
 
-.. csv-table:: 
 
-   .. include:: teaser.rst, |imag1|, |imag2|, |imag3|,
+-------------------------------------------------------------------------------
+
+.. grid:: 2
+   :gutter: 3
+
+   .. grid-item-card:: 📬 Contacts
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      .. include:: contacts.rst
 
 
-.. include:: contacts.rst
+   .. grid-item-card:: 📊 Project status
+      :class-card: sd-shadow-sm sd-rounded-3
 
+      Continuous integration and quality assurance.
 
-**Project status**
+      |build|
 
-.. csv-table:: 
+      `Browse CDash reports <https://cdash-ci.irisa.fr/index.php?project=Siconos>`_
 
-   `Cdash reports`_
- 
-.. _Cdash reports: http://siconos-dashboard.univ-grenoble-alpes.fr:8080/index.php?project=siconos
+  
  
 .. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg
-   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/main
+.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master
    :alt: Build status
 	 
-
-

@@ -4,11 +4,6 @@
  Writing and building documention for Siconos Software
 =======================================================
 
-
-.. contents::
-   :local:
-
-
 .. _about_doc:
 
 Documentation overview
@@ -98,7 +93,7 @@ Each header file must contain something like
 
 .. code-block:: c++
 
-     /*! \file SimpleMatrix.hpp
+     /*! @file SimpleMatrix.hpp
        Brief (no more than one line) description of the content of the file
      */
 
@@ -113,7 +108,7 @@ Document each class like this
 .. code-block:: c++
 
      /**
-        Short description of the class
+        @brief Short description of the class
      
         Detailed description
         equations (see details about latex below), reference to textbooks chapter and so on
@@ -125,11 +120,11 @@ Document each class like this
 
 .. code-block:: c++
 
-     /** brief description
+     /** @brief brief description
       *
-      *  \param name_of_param1 description of the param
-      *  \param name_of_param2 description of the param
-      *  \return description of what is returned
+      *  @param name_of_param1 description of the param
+      *  @param name_of_param2 description of the param
+      *  @return description of what is returned
      */
      double some_function(int p, int v)
 
@@ -138,9 +133,9 @@ Something like
 
 .. code-block:: c++
 
-   /** get size of A
-   *   \param A double A
-   *   \return unsigned int
+   /** @brief get size of A
+   *   @param A double A
+   *   @return unsigned int
    */
    unsigned int size(double * A) const;
 
@@ -151,7 +146,7 @@ is totally useless ...
 
    Space, tab and newline are important and taken into account, especially when generating docstrings and doc from docstrings !
 
-   - always add a newline before the first \param or \return
+   - always add a newline before the first @param or @return
    - align properly everything with the first line of the doxygen comment
 
 
@@ -159,21 +154,21 @@ Correct:
 
 .. code-block:: c++
 
-    /** brief description
+    /** @brief brief description
      *
-     *  \param name_of_param1 description of the param
-     *  \param name_of_param2 description of the param
-     *  \return description of what is returned
+     *  @param name_of_param1 description of the param
+     *  @param name_of_param2 description of the param
+     *  @return description of what is returned
      */
 
 Wrong (missing newline and wrong indent):
    
 .. code-block:: c++
 
-    /** brief description
-     * \param name_of_param1 description of the param
-     * \param name_of_param2 description of the param
-     * \return description of what is returned
+    /** @brief brief description
+     * @param name_of_param1 description of the param
+     * @param name_of_param2 description of the param
+     * @return description of what is returned
      */
   
     
@@ -278,67 +273,18 @@ Below are some details about the documentation generation process, useful only i
 Tools, config and description
 -----------------------------
 
-**Tools:**
+.. rubric:: Tools
 
-* `Doxygen`_ : tool able to generate documentation from annotated C++ sources, in html, xml ...
-* `Sphinx`_ : powerful generator of documentation (mostly for Python)
+* `Doxygen`_: used to generate xml files from comments in source code (hpp C/C++ headers)
 * `Breathe`_ : an extension to reStructuredText and Sphinx to be able to read and render the Doxygen xml outputs.
+   Used to convert xml outputs of doxygen to rst files.
+* `SphinxApidoc`_: used to generate rst files from docstrings in Python code (pure or from pybind11) 
+* `Sphinx`_ : powerful generator of documentation (mostly for Python). Will generate html outputs from rst files
 
 
-Images are sometimes better than words : the different operations are  detailed on figures below
+See the file `docs/requirements.txt <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/docs/requirements.txt?ref_type=heads>`_ in siconos repository for a list of required python packages.
 
-.. rubric:: Generation of rst files for C++ API
-
-
-How does it work?
-
-`Doxygen`_ is used to generate xml files from comments in headers of each Siconos component. Python scripts are used to postprocess those xml files and produce rst files fitting with `Breathe`_ requirements and ready for `Sphinx_`.
-
-
-*Config and sources:*
-
-* cmake/doc_tools.cmake : cmake macros and functions calling doxygen, sphinx or other tool related to documentation.
-* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
-  at build time.
-* docs/config/doxyxml2sphinx.config.in : doxygen (xml output) for breathe/sphinx
-
-.. figure:: /figures/doc_process/build_breathe.*
-   :figclass: align-center
-
-   Generation of rst files for C++ API
-
-
-.. rubric:: Generation of rst files for Python API
-
-How does it work?
-
-Doxygen generates xml from comments in headers. Some python scripts are
-used to postprocess those xml files and produce rst files for sphinx
-
-*Config and sources:*
-
-* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
-  at build time.
-
-
-
-
-.. figure:: /figures/doc_process/build_doxy2swig.*
-   :figclass: align-center
-
-   Generation of rst files for Python API.
-
-Remark : during generation process, siconos python packages are imported and only
-objects with non-empty docstrings are documented. 
- 
-
-.. rubric:: html pages generation
-
-How does it work?
-
-All rst files (from source dir and generated for Python and C++ API) and processed by `Sphinx`_ to produce html documentation.
-          
-*Config and sources:*
+.. rubric:: Config and sources:
 
 * docs/CMakeLists.txt : main driver
 * cmake/doc_tools.cmake : cmake macros and functions calling doxygen, sphinx or other tool related to documentation.
@@ -347,21 +293,22 @@ All rst files (from source dir and generated for Python and C++ API) and process
 * docs/sphinx/index.rst.in : source for documentation main page
 * docs/sphinx/\*/\*.rst : inputs for sphinx doc (textbooks)
 * docs/sphinx/figures/\* : all figures used in sphinx doc
-* docs/gendoctools/* : python tools used to generate docs.
+* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
+  at build time.
 
-            
-.. figure:: /figures/doc_process/build_html_process.*
+.. rubric:: Process
+
+The whole process is executed with "make doc" and is summarized on the figure below.
+
+.. figure:: /figures/doc_process/build_breathe.*
    :figclass: align-center
-              
-   make doc toolchain
-            
-..
-   .. figure:: /figures/doc_process/targets_dep.*
-      :figclass: align-center
 
-      make targets (related to doc) dependencies
+   Generation of the documentation for the C++ and Python API
 
-           
+
+Remark : during generation process, siconos python packages are imported and only
+objects with non-empty docstrings are documented. 
+          
 .. rubric:: Other (exotic) configuration options
 
 * Full doxygen (i.e. extract all from sources!)  html documentation.
@@ -397,73 +344,19 @@ But, if required (devel), use:
   doxygen warnings conf is defined in docs/config/doxy_warnings.config.in and setup in
   cmake/doxygen_warnings.cmake.
 
-
-* Generate docstrings
-
-  .. code-block:: bash
-
-     cmake -DWITH_DOCUMENTATION=ON -DWITH_DOXY2SWIG=ON
-     make numerics_docstrings
-
-  This option is set to ON by default.
-     
-  To produce documentation in python interface, xml outputs from doxygen are used to create swig files containing 'docstrings' for python.
-
-  Comments written in C++ (doxygen) will be available in python interface, e.g. :
-
-  .. code-block:: python
-
-     import siconos.modeling as sm
-     help(sk.DynamicalSystem)
-   
-     Help on class LCP in module siconos.kernel:
-
-     class LCP(LinearOSNS)
-     |  Non Smooth Problem Formalization and Simulation.
-     |
-     |  author: SICONOS Development Team - copyright INRIA
-     |
-     |  This is an abstract class, that provides an interface to define a non smooth
-     |  problem:
-     |
-     |  *   a formulation (ie the way the problem is written)
-     |  *   a solver (algorithm and solving formulation, that can be different from
-     |      problem formulation)
-     |  *   routines to compute the problem solution.
-
-
- 
-Dependencies
-------------
-
-* `Doxygen`_
-* `Sphinx`_, sphinxcontrib.bibtex, sphinxcontrib-napoleon
-* sphinx-bootstrap-theme
-* `Breathe`_
-
-See docs/requirements.txt for a list of required python packages, and try for example
-
 .. code-block:: bash
 
-   pip install -r ./docs/requirements.txt
+   python3 -m pip install -rU ./docs/requirements.txt
 
-See also the file CI/make_siconos_doc.sh that may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu. 
+See also the file `ci_gitlab/make_siconos_doc.sh <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/devel/siconos/-/blob/main/ci_gitlab/make_siconos_doc.sh?ref_type=heads>`_ in siconos repository.
+It may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu. 
 
 
-
-More about Doxygen to sphinx rst
---------------------------------
-
-Some other tools to generate rst from doxygen have been tested : Exhale and doxyrest. We choose breathe, that seems more appropriate to our case. Exhale and doxyrest configs are kept for the records in siconos-junk/sandbox project.
-
-Existing tools (as far as we know ...):
-
-* Sphinx/Exhale(breathe) : https://github.com/svenevs/exhale`Sphinx/Exhale
-* doxyrest https://github.com/vovkos/doxyrest
-* https://bitbucket.org/trlandet/doxygen_to_sphinx_and_swig
 
 .. _Doxygen : http://www.stack.nl/~dimitri/doxygen/
 
 .. _Sphinx : http://www.sphinx-doc.org/en/master/
 
 .. _Breathe : https://github.com/michaeljones/breathe
+
+.. _SphinxApidoc : https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html

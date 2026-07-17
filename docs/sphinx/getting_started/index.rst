@@ -8,10 +8,6 @@ simulation with Siconos. There you will learn basics things to know to describe 
 For a more detailed description of Siconos and its functionnalities please check the :ref:`full_documentation` table of content.
 
 
-.. contents::
-   :local:
-
-
 What is Siconos?
 ----------------
 
@@ -57,9 +53,9 @@ This page proposes a Python interactive interface (notebooks) to Siconos, that y
 Siconos usage in a few steps
 ----------------------------
 
-#.  :ref:`download` the software
+#.  :ref:`download` software
 #.  :ref:`siconos_install_guide`
-#.  Run your first simulation.
+#.  Write and run your first simulation.
 
 There are two ways to use Siconos
 
@@ -74,10 +70,15 @@ Anyway, for new users we recommend the Python API which is easier to understand.
 Below are two examples (Python and C++) of a Siconos process. We just build and print a first-order dynamical
 system (See :class:`FirstOrderLinearDS`).
 
+.. admonition:: tip
+
+   have a look to the numerous `examples in siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_ to inspire you and use the search bar to find details on all (Python, C or C++) objects)
+
 **Example of Siconos Python API usage**
 
 .. code-block:: python
 
+   # File run.py
    # import siconos package
    import siconos.modeling as sm
    # import numpy package
@@ -89,18 +90,34 @@ system (See :class:`FirstOrderLinearDS`).
    ds = sk.FirstOrderLinearDS(x0)
    print(ds)
 
+And:
+
+.. code-block:: bash
+
+   siconos run.py
+   # --> will call python and anything else required
+
+.. admonition:: tip
+
+   More on *siconos* script options, try:
+
+   .. code-block:: shell
+
+      siconos --help
+      siconos --info
+
 **Example of Siconos C++ API usage**
 
 Write a c++ file, e.g. run.cpp
 
 .. code-block:: c++
-
+   // File run.cpp
    #include "SiconosKernel.hpp"
    int main()
    {
     unsigned int size = 10;
     auto x0 = std::make_shared<siconos::algebra::SiconosVector>(size);
-    auto A = std::make_shared<(siconos::algebra::SimpleMatrix>(size, size);
+    auto A = std::make_shared<(siconos::algebra::SiconosDenseMatrix>(size, size);
     A->randomize();
 
     auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS(x0, A);
@@ -109,22 +126,21 @@ Write a c++ file, e.g. run.cpp
 
 And, compile, link and execute (in one shot, thanks to siconos script)::
 
-  siconos run.cpp
+.. code-block:: bash
 
+   siconos run.cpp
+
+    
 
 For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
 or try to mimic one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
   
+
 More
 ----
 
-.. toctree::
-   :maxdepth: 2
-
-   nsds_basics
-   tutorial_python/index
-   tutorial_cpp/siconos_tutorial
-   tutorial_cpp/RLCD
-   running_siconos
-   cpp_reminder
+* :ref:`nsds_basics`
+* :doc:`tutorial_python/index`
+* :doc:`tutorial_cpp/siconos_tutorial`
+* :ref:`running_siconos`
 

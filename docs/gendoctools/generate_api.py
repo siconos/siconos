@@ -50,37 +50,41 @@ def build_rst_api(sphinx_directory):
     # Place where files will be written
     outputdir = Path(sphinx_directory, "reference")
 
-    # Top file comments
-    label = ".. _siconos_api:\n\n"
-    title = "API reference"
-    title += "\n" + len(title) * "=" + "\n\n"
-    remark = (
-        "Writing and running a simulation with Siconos may be achieved "
-        "either with C++ language or with the python interface.\n"
-        "Although those two APIs are quite similar, two different documentations "
-        "(both generated from sources) are available. "
-        "Please pick the one corresponding to the interface you choose.\n"
-    )
-    introduction = "Below you will find links to documentation "
-    introduction += "for all classes and files in Siconos, "
-    introduction += "sorted  by component or module name.\n\n"
-    common_header = label + title + remark + introduction
+    # # Top file comments
+    # label = ".. _siconos_api:\n\n"
+    # title = "API reference"
+    # title += "\n" + len(title) * "=" + "\n\n"
+    # remark = (
+    #     "Writing and running a simulation with Siconos may be achieved "
+    #     "either with C++ language or with the python interface.\n"
+    #     "Although those two APIs are quite similar, two different documentations "
+    #     "(both generated from sources) are available. "
+    #     "Please pick the one corresponding to the interface you choose.\n"
+    # )
+    # introduction = "Below you will find links to documentation "
+    # introduction += "for all classes and files in Siconos, "
+    # introduction += "sorted  by component or module name.\n\n"
+    # common_header = label + title + remark + introduction
 
-    mainrst_filename = Path(outputdir, "index.rst")
-    with open(mainrst_filename, "w") as f:
-        f.write(common_header)
+    # mainrst_filename = Path(outputdir, "index.rst")
+    # with open(mainrst_filename, "w") as f:
+    #     f.write(common_header)
+    #     f.write("\n.. toctree::\n")
+    #     f.write("   :maxdepth: 2\n\n")
+    #     f.write("   C++ <cpp_api>\n")
+    #     f.write("   Python<python_api>\n\n")
 
     # Write rst for C/C++ API
     cpp2rst.build_cpp_api_main(outputdir, siconos_components)
     # Write rst for for Python API
-    python2rst.build_python_api_main(outputdir, siconos_components)
+    python2rst.build_python_api_main(outputdir)
 
-    post = "\n*If a file or a class you know does not appear in this page, "
-    post += "it means it has not been (properly) documented or is not "
-    post += "available in the high level API. Please contact us "
-    post += "if you think it is an error.*\n\n"
-    with open(mainrst_filename, "a") as f:
-        f.write(post)
+    # post = "\n*If a file or a class you know does not appear in this page, "
+    # post += "it means it has not been (properly) documented or is not "
+    # post += "available in the high level API. Please contact us "
+    # post += "if you think it is an error.*\n\n"
+    # with open(mainrst_filename, "a") as f:
+    #     f.write(post)
 
 
 def find_doxygen_diagrams(doxygen_path, output_directory):

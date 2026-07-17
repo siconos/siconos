@@ -72,6 +72,7 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort.h")
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort_common.h")
     set(HAVE_SORT TRUE CACHE INTERNAL "True if sort is available in externals.")
     target_include_directories(externals INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sort>)
+    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/sort/sort.h PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
     # Required by NumericsSparseMatrix
   endif()
 endif()

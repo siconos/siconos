@@ -67,14 +67,14 @@ static int fccounter = -1;
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localstress[3], double *oldstress,
+static inline void performRelaxation_3(double localstress[3], double* oldstress,
                                        double omega) {
   localstress[0] = omega * localstress[0] + (1.0 - omega) * oldstress[0];
   localstress[1] = omega * localstress[1] + (1.0 - omega) * oldstress[1];
   localstress[2] = omega * localstress[2] + (1.0 - omega) * oldstress[2];
 }
 
-static inline double light_error_squared_3(double localstress[3], double *oldstress) {
+static inline double light_error_squared_3(double localstress[3], double* oldstress) {
   return (pow(oldstress[0] - localstress[0], 2) + pow(oldstress[1] - localstress[1], 2) +
           pow(oldstress[2] - localstress[2], 2));
 }
@@ -83,30 +83,30 @@ static inline double squared_norm_3(double localstress[3]) {
   return (pow(localstress[0], 2) + pow(localstress[1], 2) + pow(localstress[2], 2));
 }
 
-static double calculateLightError(double light_error_sum, size_t nc, double *stress,
-                                  double *norm_r) {
+static double calculateLightError(double light_error_sum, size_t nc, double* stress,
+                                  double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2(nc * 3, stress, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
   return error;
 }
 
-static void acceptLocalReactionUnconditionally(size_t cone, double *stress,
+static void acceptLocalReactionUnconditionally(size_t cone, double* stress,
                                                double localstress[3]) {
   memcpy(&stress[cone * 3], localstress, sizeof(double) * 3);
 }
 
-static void statsIterationCallback(PlasticityProblem *problem, SolverOptions *options,
-                                   double *stress, double *strainrate, double error) {
+static void statsIterationCallback(PlasticityProblem* problem, SolverOptions* options,
+                                   double* stress, double* strainrate, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(
         options->callback->env, problem->numberOfCones * 3, stress, strainrate, error, NULL);
   }
 }
 
-static void plasticity_2d_nsgs_update(int cone, PlasticityProblem *problem,
-                                      PlasticityProblem *localproblem, double *stress,
-                                      SolverOptions *options) {
+static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
+                                      PlasticityProblem* localproblem, double* stress,
+                                      SolverOptions* options) {
   /* Build a local problem for a specific cone
      stress corresponds to the global vector (size n) of the global problem.
   */
@@ -132,10 +132,10 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem *problem,
 }
 
 static int plasticity_2d_nsgs_initialize_local_solver(
-    struct LocalPLASTICITY_2DProblemFunctionToolkit *local_function_toolkit,
-    plasticity_2d_ComputeErrorPtr *computeError, PlasticityProblem *problem,
-    PlasticityProblem *localproblem, SolverOptions *options) {
-  SolverOptions *localsolver_options = options->internalSolvers[0];
+    struct LocalPLASTICITY_2DProblemFunctionToolkit* local_function_toolkit,
+    plasticity_2d_ComputeErrorPtr* computeError, PlasticityProblem* problem,
+    PlasticityProblem* localproblem, SolverOptions* options) {
+  SolverOptions* localsolver_options = options->internalSolvers[0];
 
   *computeError = &plasticity_2d_compute_error;
 
@@ -239,8 +239,8 @@ static int plasticity_2d_nsgs_initialize_local_solver(
   return 0;
 }
 
-static size_t *allocShuffledCones(PlasticityProblem *problem, SolverOptions *options) {
-  size_t *scones = 0;
+static size_t* allocShuffledCones(PlasticityProblem* problem, SolverOptions* options) {
+  size_t* scones = 0;
   size_t nc = problem->numberOfCones;
   if (options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
       options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
@@ -248,7 +248,7 @@ static size_t *allocShuffledCones(PlasticityProblem *problem, SolverOptions *opt
       srand((size_t)options->iparam[PLASTICITY_NSGS_SHUFFLE_SEED]);
     } else
       srand(1);
-    scones = (size_t *)malloc(nc * sizeof(size_t));
+    scones = (size_t*)malloc(nc * sizeof(size_t));
     for (size_t i = 0; i < nc; ++i) {
       scones[i] = i;
     }
@@ -256,11 +256,11 @@ static size_t *allocShuffledCones(PlasticityProblem *problem, SolverOptions *opt
   }
   return scones;
 }
-static size_t *allocfreezingCones(PlasticityProblem *problem, SolverOptions *options) {
-  size_t *fcones = 0;
+static size_t* allocfreezingCones(PlasticityProblem* problem, SolverOptions* options) {
+  size_t* fcones = 0;
   size_t nc = problem->numberOfCones;
   if (options->iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
-    fcones = (size_t *)malloc(nc * sizeof(size_t));
+    fcones = (size_t*)malloc(nc * sizeof(size_t));
     for (size_t i = 0; i < nc; ++i) {
       fcones[i] = 0;
     }
@@ -270,8 +270,8 @@ static size_t *allocfreezingCones(PlasticityProblem *problem, SolverOptions *opt
 
 static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
                               CopyLocalReactionPtr copyLocalReaction, size_t cone,
-                              PlasticityProblem *problem, PlasticityProblem *localproblem,
-                              double *stress, SolverOptions *localsolver_options,
+                              PlasticityProblem* problem, PlasticityProblem* localproblem,
+                              double* stress, SolverOptions* localsolver_options,
                               double localstress[3]) {
   (*update_localproblem)(cone, problem, localproblem, stress, localsolver_options);
 
@@ -291,9 +291,9 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
 //   return 0;
 // }
 
-static void acceptLocalReactionFiltered(PlasticityProblem *localproblem,
-                                        SolverOptions *localsolver_options, size_t cone,
-                                        size_t iter, double *stress, double localstress[3]) {
+static void acceptLocalReactionFiltered(PlasticityProblem* localproblem,
+                                        SolverOptions* localsolver_options, size_t cone,
+                                        size_t iter, double* stress, double localstress[3]) {
   if (isnan(SOLVER_RESIDUAL(localsolver_options)) ||
       isinf(SOLVER_RESIDUAL(localsolver_options)) ||
       SOLVER_RESIDUAL(localsolver_options) > 1.0) {
@@ -346,10 +346,10 @@ static void acceptLocalReactionFiltered(PlasticityProblem *localproblem,
            sizeof(double) * localproblem->dimension);
 }
 
-static double calculateFullErrorAdaptiveInterval(PlasticityProblem *problem,
+static double calculateFullErrorAdaptiveInterval(PlasticityProblem* problem,
                                                  plasticity_2d_ComputeErrorPtr computeError,
-                                                 SolverOptions *options, int iter,
-                                                 double *stress, double *strainrate,
+                                                 SolverOptions* options, int iter,
+                                                 double* stress, double* strainrate,
                                                  double tolerance, double norm_q) {
   double error = 1e+24;
   if (options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
@@ -371,9 +371,9 @@ static double calculateFullErrorAdaptiveInterval(PlasticityProblem *problem,
   return error;
 }
 
-static double calculateFullErrorFinal(PlasticityProblem *problem, SolverOptions *options,
+static double calculateFullErrorFinal(PlasticityProblem* problem, SolverOptions* options,
                                       plasticity_2d_ComputeErrorPtr computeError,
-                                      double *stress, double *strainrate, double tolerance,
+                                      double* stress, double* strainrate, double tolerance,
                                       double norm_q) {
   double absolute_error;
   (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &absolute_error);
@@ -395,7 +395,7 @@ static double calculateFullErrorFinal(PlasticityProblem *problem, SolverOptions 
 }
 
 static int determine_convergence(double error, double tolerance, int iter,
-                                 SolverOptions *options) {
+                                 SolverOptions* options) {
   int hasNotConverged = 1;
   if (error < tolerance) {
     hasNotConverged = 0;
@@ -408,11 +408,11 @@ static int determine_convergence(double error, double tolerance, int iter,
   return hasNotConverged;
 }
 
-static int determine_convergence_with_full_final(PlasticityProblem *problem,
-                                                 SolverOptions *options,
+static int determine_convergence_with_full_final(PlasticityProblem* problem,
+                                                 SolverOptions* options,
                                                  plasticity_2d_ComputeErrorPtr computeError,
-                                                 double *stress, double *strainrate,
-                                                 double *tolerance, double norm_q,
+                                                 double* stress, double* strainrate,
+                                                 double* tolerance, double norm_q,
                                                  double error, int iter) {
   int hasNotConverged = 1;
   if (error < *tolerance) {
@@ -462,8 +462,8 @@ static int determine_convergence_with_full_final(PlasticityProblem *problem,
   return hasNotConverged;
 }
 
-void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *strainrate,
-                        int *info, SolverOptions *options) {
+void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* strainrate,
+                        int* info, SolverOptions* options) {
   /* verbose=1; */
 
   /* plasticity_display(problem); */
@@ -475,8 +475,8 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
 
   /* int and double parameters */
 
-  int *iparam = options->iparam;
-  double *dparam = options->dparam;
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
 
   /* Number of cones */
   size_t nc = problem->numberOfCones;
@@ -486,7 +486,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
 
   /* Tolerance */
   double tolerance = SOLVER_TOL(options);
-  SolverOptions *local_opts = options->internalSolvers[0];
+  SolverOptions* local_opts = options->internalSolvers[0];
   double local_tolerance_save = LOCAL_SOLVER_TOL(local_opts);
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   double omega = dparam[PLASTICITY_NSGS_RELAXATION_VALUE];
@@ -499,10 +499,10 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
     return;
   }
 
-  SolverOptions *localsolver_options = options->internalSolvers[0];
+  SolverOptions* localsolver_options = options->internalSolvers[0];
   plasticity_2d_ComputeErrorPtr computeError = NULL;
 
-  struct LocalPLASTICITY_2DProblemFunctionToolkit *localProblemFunctionToolkit =
+  struct LocalPLASTICITY_2DProblemFunctionToolkit* localProblemFunctionToolkit =
       localPLASTICITY_2DProblemFunctionToolkit_new();
   /* localPLASTICITY_2DProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
@@ -513,12 +513,12 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
   size_t cone; /* Number of the current row of blocks in M */
-  size_t *scones = NULL;
-  size_t *freeze_cones = NULL;
+  size_t* scones = NULL;
+  size_t* freeze_cones = NULL;
 
   /* Solver initialization continues below */
 
-  SparseBlockStructuredMatrix *matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
     if (problem->M->matrix1) {
       printf("Warning matrix 1 different from NULL");
@@ -529,7 +529,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
   }
 
   /*****  Initialize various solver options *****/
-  PlasticityProblem *localproblem = plasticity_2d_local_problem_allocate(problem);
+  PlasticityProblem* localproblem = plasticity_2d_local_problem_allocate(problem);
 
   plasticity_2d_nsgs_initialize_local_solver(localProblemFunctionToolkit, &computeError,
                                              problem, localproblem, options);
@@ -608,7 +608,7 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
   else {
-    double *light_error_2 = calloc(nc, sizeof(double));
+    double* light_error_2 = calloc(nc, sizeof(double));
 
     /* verbose=1; */
     while ((iter < itermax) && (hasNotConverged > 0)) {
@@ -643,8 +643,6 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
             /* we skip freeze cones */
             freeze_cones[cone] -= 1;
             light_error_sum += light_error_2[cone];
-            continue;
-
             continue;
           }
         }
@@ -807,19 +805,19 @@ void plasticity_2d_nsgs(PlasticityProblem *problem, double *stress, double *stra
  * - Elimination of giant switch statements in drivers
  */
 
-static int plasticity_2d_nsgs_init_wrap(void *problem, SolverOptions *options) {
+static int plasticity_2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
   plasticity_2d_nsgs_set_default(options);
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_nsgs_solve_wrap(void *problem, double *reaction, double *velocity,
-                                         SolverOptions *options) {
+static int plasticity_2d_nsgs_solve_wrap(void* problem, double* reaction, double* velocity,
+                                         SolverOptions* options) {
   int info = NUMERICS_OK;
-  plasticity_2d_nsgs((PlasticityProblem *)problem, reaction, velocity, &info, options);
+  plasticity_2d_nsgs((PlasticityProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void plasticity_2d_nsgs_free_wrap(void *problem, SolverOptions *options) {
+static void plasticity_2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -834,7 +832,7 @@ REGISTER_SOLVER(PLASTICITY_2D_NSGS, "PLASTICITY_2D_NSGS",
                 1e-4,                               /* default_tol */
                 0 /* is_local_solver */);
 
-void plasticity_2d_nsgs_set_default(SolverOptions *options) {
+void plasticity_2d_nsgs_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   // options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
@@ -857,7 +855,7 @@ void plasticity_2d_nsgs_set_default(SolverOptions *options) {
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
-    options->internalSolvers = calloc(1, sizeof(SolverOptions *));
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
   } else {
     solver_options_delete(options->internalSolvers[0]);
   }

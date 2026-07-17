@@ -15,8 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file LagrangianR.hpp
-
+/*! @file LagrangianR.hpp
  */
 #ifndef LAGRANGIANRELATION_H
 #define LAGRANGIANRELATION_H
@@ -25,17 +24,15 @@
 
 namespace siconos::modeling {
 /**
-   Lagrangian Non Linear Relation (generic interface)
-
-   This class is the interface to relations used for Lagrangian (2nd order) systems.
+   @brief Class/interface to 2nd order Lagrangian nonlinear relations with dense storage for
+  the matrix-like attributes.
 
    -  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint
 
     h may be \f$ h(q)\f$  (scleronomous), \f$ h(q,t)\f$  (rheonomous), \f$ h(q, \lambda)\f$
   (compliant)... depending on the chosen derived class.
 
-  The Jacobian of the constraints with respect to the coodinates  \f$ q \f$
-  i.e.  \f$ \nabla^T_q h(t,q,\dot q,\ldots) \f$ is always defined.
+  The Jacobian of the constraints with respect to the coodinates  \f$ q \f$ is always defined.
   Other jacobians are defined only when required in the derived classes, check the API if
   required.
 
@@ -56,7 +53,6 @@ namespace siconos::modeling {
   account in h and its jacobians. Here again, check in the proper derived class API to find
   which functions are available.
  */
-
 class LagrangianR : public Relation {
  public:
   /** Names and positions of ds variables that might be used (read only) in compute input and

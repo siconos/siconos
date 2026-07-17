@@ -12,4 +12,8 @@ sphinxcontrib-napoleon
 sphinxcontrib-youtube
 numpydoc
 breathe
+sphinx-copybutton
+sphinx-design
+sphinx-autodoc-typehints
+furo
 

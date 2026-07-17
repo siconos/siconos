@@ -34,7 +34,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-/** utilities to handle file input/output for vectors and matrices */
 namespace siconos::algebra {
 
 // class SiconosMatrix;

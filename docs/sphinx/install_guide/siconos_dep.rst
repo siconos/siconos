@@ -5,16 +5,20 @@ Siconos required and optional dependencies
 
 .. note::
 
-   Dockerfiles available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_ of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them
+   Dockerfiles available in 
+.. warning::
 
-   
+   This page might be outdated. To find an up to date list of siconos dependencies, please have a look to the configurations used for the continuous integration process.
+   Dockerfiles or requirements.txt files available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_ 
+   of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them.
+
 
 
 * a compiler suite, with c++, c and gfortran compilers.
 
- c++ 17 compatibility is required.
+ c++ 20 compatibility is required.
 
-* cmake, version > 3.14 - https://cmake.org
+* cmake, version > 3.19 - https://cmake.org
 
   cmake is very easy to install or update, whatever your system is, e.g.:
 
@@ -22,7 +26,9 @@ Siconos required and optional dependencies
 
      python3 -m pip install cmake
   
-* boost, version > 1.71, http://www.boost.org)
+* Eigen https://libeigen.gitlab.io/
+
+* boost, version >= 1.75, http://www.boost.org)
 
 * blas and lapack (see :ref:`about_blas_lapack`)
 
@@ -36,7 +42,7 @@ For the python bindings:
 
 * python (>= 3.8)
 
-  We strongly recommend to use Conda-like or Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+  We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
 
   See details in :ref:`about_python`
   
@@ -49,9 +55,9 @@ For the python bindings:
 .. _about_python:
 
 About Python
-============
+------------
 
-We strongly recommend to use Conda-like or Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
   
 
 Siconos venv example
@@ -111,7 +117,7 @@ Activation:
 .. _about_blas_lapack:
 
 About blas and Lapack
-=====================
+---------------------
 
 The BLAS (Basic Linear Algebra Subprograms, http://www.netlib.org/blas/) are routines that provide standard building blocks for performing basic vector and matrix operations, while LAPACK (http://www.netlib.org/lapack/#_presentation) provides routines for solving systems of simultaneous linear equations, least-squares solutions of linear systems of equations, eigenvalue problems, and singular value problems.
 Different implementations are available, such as:
@@ -150,7 +156,7 @@ If the process failed or if you need a specific implementation, the following va
 
 
 About Boost
-===========
+-----------
 
 Boost provides a lot of useful C++ binaries, especially Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities 
 for dense, packed and sparse matrices.
@@ -173,7 +179,7 @@ They are distributed and installed with the Siconos but you can also get the las
 http://mathema.tician.de/software/boost-bindings
 
 GMP
-===
+---
 
 "GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers ... "
 
