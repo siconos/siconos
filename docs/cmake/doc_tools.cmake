@@ -83,9 +83,10 @@ function(doxy2rst_sphinx COMPONENT)
     
     # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
     # It calls a python function defined in gendoctools (create_breathe_files)
+
     add_custom_target(${COMPONENT}-xml2rst
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
-      "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXYGEN_OUTPUT}/${DOXYGEN_XML_OUTPUT}')"
+      "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXYGEN_OUTPUT}/${DOXYGEN_XML_OUTPUT}', '${GIT_WEB_URL}', '${SOURCE_GIT_SHA1}')"
       VERBATIM
       DEPENDS ${COMPONENT}-doxy2xml
       )

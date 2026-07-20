@@ -72,10 +72,10 @@ enum class WriteType {
  *  \param[in] flags for reading
  *  \return bool true if read ok, else false ...
  */
-bool read(const std::string &fileName, SiconosVector &m,
-          const std::ios_base::openmode &mode = ASCII_IN, int precision = 15,
+bool read(const std::string& fileName, SiconosVector& m,
+          const std::ios_base::openmode& mode = ASCII_IN, int precision = 15,
           const WriteType = WriteType::python,
-          const std::ios::fmtflags &flags = std::cin.flags());
+          const std::ios::fmtflags& flags = std::cin.flags());
 
 /** Write a SiconosVector to a file
     \param[in] fileName output file name
@@ -94,10 +94,10 @@ bool read(const std::string &fileName, SiconosVector &m,
     \param[in] flags
     \return bool true if read ok, else false ...
 */
-bool write(const std::string &fileName, const SiconosVector &m,
-           const std::ios_base::openmode &mode = ASCII_OUT, int precision = 15,
+bool write(const std::string& fileName, const SiconosVector& m,
+           const std::ios_base::openmode& mode = ASCII_OUT, int precision = 15,
            const WriteType = WriteType::python,
-           const std::ios_base::fmtflags &flags = std::cout.flags());
+           const std::ios_base::fmtflags& flags = std::cout.flags());
 
 /**
    Read a dense matrix from a file
@@ -113,7 +113,7 @@ bool write(const std::string &fileName, const SiconosVector &m,
    \return the new matrix
 */
 siconos::algebra::SiconosDenseMatrix readDenseMatrix(
-    const std::string &filename, const std::ios_base::openmode &mode = ASCII_IN);
+    const std::string& filename, const std::ios_base::openmode& mode = ASCII_IN);
 
 /**
    Read a sparse matrix from a file
@@ -127,7 +127,7 @@ siconos::algebra::SiconosDenseMatrix readDenseMatrix(
     \return the new matrix
 */
 siconos::algebra::SiconosSparseMatrix readSparseMatrix(
-    const std::string &filename, const std::ios_base::openmode &mode = ASCII_IN);
+    const std::string& filename, const std::ios_base::openmode& mode = ASCII_IN);
 
 /**
    Write a matrix in dense format
@@ -146,8 +146,8 @@ siconos::algebra::SiconosSparseMatrix readSparseMatrix(
 
     Rq: reading input format is the one corresponding to "python".
 */
-void write(const std::string &filename, const siconos::algebra::SiconosDenseMatrix &mat,
-           const std::ios_base::openmode &mode = ASCII_OUT,
+void write(const std::string& filename, const siconos::algebra::SiconosDenseMatrix& mat,
+           const std::ios_base::openmode& mode = ASCII_OUT,
            const WriteType = WriteType::python);
 
 /**
@@ -157,9 +157,9 @@ void write(const std::string &filename, const siconos::algebra::SiconosDenseMatr
    \param[in] m the SiconosMatrix to write
    \param[in] mode the storage type used in the file (either ASCII_OUT or BINARY_OUT)
 */
-void writeSparseMatrix(const std::string &filename,
-                       const siconos::algebra::SiconosSparseMatrix &mat,
-                       const std::ios_base::openmode &mode = ASCII_OUT);
+void writeSparseMatrix(const std::string& filename,
+                       const siconos::algebra::SiconosSparseMatrix& mat,
+                       const std::ios_base::openmode& mode = ASCII_OUT);
 
 /** Function to load data from a file and compare it with the provided
  *  data.  Returns the measured difference between files if the file
@@ -176,7 +176,7 @@ void writeSparseMatrix(const std::string &filename,
  *  \return Positive or 0.0 if the file was loaded and the comparison was performed,
  *  otherwise -1.
  */
-double compareRefFile(const SiconosDenseMatrix &data, std::string filename, double epsilon,
+double compareRefFile(const SiconosDenseMatrix& data, std::string filename, double epsilon,
                       std::vector<int> index = {},
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);
@@ -184,21 +184,21 @@ double compareRefFile(const SiconosDenseMatrix &data, std::string filename, doub
 /** \returns a SiconosVector, built from json input
     \param jin json input (either a list of values or a list of points)
 */
-SiconosVector readVectorFromJson(const nlohmann::json &jin);
+SiconosVector readVectorFromJson(const nlohmann::json& jin);
 }  // namespace io
 }  // namespace siconos::algebra
 
 namespace nlohmann {
 
-// Add json serialization for SiconosVector
+/** A json serialization for SiconosVector */
 template <>
 struct adl_serializer<siconos::algebra::SiconosVector> {
-  static void to_json(ordered_json &j, const siconos::algebra::SiconosVector &vec) {
+  static void to_json(ordered_json& j, const siconos::algebra::SiconosVector& vec) {
     j = ordered_json::array();
     for (int i = 0; i < vec.size(); ++i) j.push_back(vec(i));
   }
 
-  static void from_json(const ordered_json &j, siconos::algebra::SiconosVector &vec) {
+  static void from_json(const ordered_json& j, siconos::algebra::SiconosVector& vec) {
     vec = siconos::algebra::SiconosVector(j.size());
     for (siconos::algebra::Index i = 0; i < std::ssize(j); ++i) vec(i) = j.at(i).get<double>();
   }

@@ -17,15 +17,15 @@ Below some examples on how to write internal links to siconos objects in sphinx 
   Try link to :class:`DynamicalSystem`
 
 
-* Link to a file (programs listing): 
+.. * Link to a file (programs listing): 
 
-  .. code-block:: rst
+..   .. code-block:: rst
 
-     Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
+..      Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
       
-  **Result** : 
+..   **Result** : 
 
-  Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
+..   Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
 
 * Link to a file (documentation): 
 

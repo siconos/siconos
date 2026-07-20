@@ -28,9 +28,9 @@
 namespace siconos::modeling {
 /**
 
-    Lagrangian Linear Systems with time invariant and diagonal coefficients -  \f$ M\dot v + Cv
-   + Kq = F_{ext}(t,z) + p \f$
-
+    Lagrangian Linear Systems with time invariant and diagonal coefficients
+    
+    \f$ M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
 
     where
 

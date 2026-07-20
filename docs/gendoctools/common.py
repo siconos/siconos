@@ -320,3 +320,8 @@ def replace_latex(inoutfile, latex_sources):
         for line in source_lines:
             f.write(line)
     shutil.move(target, inoutfile)
+
+
+# To handle < > in class names -> mess with sphinx rst
+def rst_escape(text):
+    return text.replace("\\", "\\\\").replace("<", "\\<").replace(">", "\\>")

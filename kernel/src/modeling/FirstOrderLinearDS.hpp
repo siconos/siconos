@@ -27,8 +27,9 @@
 namespace siconos::modeling {
 
 /**
-   First Order Linear Systems - \f$ M(t) \dot x = A(t)x(t)+ b(t) + r, \quad
-   x(t_0)=x_0 \f$.
+   First Order Linear Systems
+
+   \f$ M(t) \dot x = A(t)x(t)+ b(t) + r, \quad x(t_0)=x_0 \f$
 
    This class represents first order linear systems of the form:
 

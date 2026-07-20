@@ -54,6 +54,26 @@ if(WITH_GIT)
     OUTPUT_VARIABLE SOURCE_GIT_SHA1
     OUTPUT_STRIP_TRAILING_WHITESPACE
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+  # Get url of repo (required for links to source code in doc)
+  execute_process(
+    COMMAND git config --get remote.origin.url
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_REMOTE_URL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # Convert SSH URL to HTTPS URL
+  if(GIT_REMOTE_URL MATCHES "^git@([^:]+):(.+)$")
+    set(GIT_WEB_URL "https://${CMAKE_MATCH_1}/${CMAKE_MATCH_2}")
+  else()
+    set(GIT_WEB_URL "${GIT_REMOTE_URL}")
+  endif()
+
+  # Remove .git suffix
+  string(REGEX REPLACE "\\.git$" "" GIT_WEB_URL "${GIT_WEB_URL}")
+
+
 endif()
 
 
