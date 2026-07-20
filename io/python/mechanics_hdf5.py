@@ -194,6 +194,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._cf_info = None
         self._cf_work = None
+        self._cf_internal_variables = None
         self._enery_work = None
         self._domain_data = None
         self._solv_data = None
@@ -353,6 +354,18 @@ class MechanicsHdf5(object):
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
+
+        try:
+            self._cf_internal_variables = data(
+                self._data, "cf_internal_variables", 41, use_compression=self._use_compression
+            )
+            if self._mode == "w":
+                self._cf_internal_variables.attrs["info"] = "[0] : time,\n [1] : interaction id,\n"
+                self._cf_internal_variables.attrs["info"] += " ,\n"
+        except Exception as e:
+            self.print_io_mechanics("Warning -  cf_internal_variables in the hdf5 file")
+            self.print_io_mechanics("        -  group(self._cf_internal_variables, log ) : ", e)
+
         try:
             self._energy_work = data(
                 self._data, "energy_work", 9, use_compression=self._use_compression
@@ -490,6 +503,12 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_data
+
+    def contact_internal_variable_data(self):
+        """
+        Contact internal variables information.
+        """
+        return self._cf_internal_variables
 
     def contact_info_data(self):
         """
@@ -1265,7 +1284,7 @@ class MechanicsHdf5(object):
         nslaw.attrs["e"] = e
         nslaw.attrs["gid1"] = collision_group1
         nslaw.attrs["gid2"] = collision_group2
-        
+
     def add_binary_cohesive_nsl(self, name, mu,  e=0, sigma_c=0, delta_c=0,
                                 gamma=0.0,
                                 collision_group1=0,
@@ -1291,7 +1310,7 @@ class MechanicsHdf5(object):
             nslaw.attrs['gid1'] = collision_group1
             nslaw.attrs['gid2'] = collision_group2
 
-            
+
     def add_Fremond_impact_friction_nsl(
         self, name, mu, e=0, collision_group1=0, collision_group2=0
     ):

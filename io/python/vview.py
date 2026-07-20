@@ -113,6 +113,7 @@ class VViewOptions(object):
         self.with_charts = 0
         self.depth_2d = 0.1
         self.verbose = 0
+        self.cf_cohesive = False
 
     # Print usage information
     def usage(self, long=False):
@@ -254,6 +255,7 @@ class VViewOptions(object):
                     "with-charts=",
                     "depth-2d=",
                     "verbose=",
+                    'cohesive-force'
                 ],
             )
             self.configure(opts, args)
@@ -283,6 +285,9 @@ class VViewOptions(object):
 
             elif o == "--no-cf":
                 self.cf_disable = True
+
+            elif o == '--cohesive-force':
+                self.cf_cohesive = True
 
             elif o == "--imr":
                 self.imr = True
@@ -1007,6 +1012,7 @@ class IOReader(VTKPythonAlgorithmBase):
         )
         self._io = None
         self._with_contact_forces = False
+        self._with_cohesive_forces = False
         self.cf_data = None
         self.time = 0
         self.timestep = 0
@@ -1404,6 +1410,14 @@ class IOReader(VTKPythonAlgorithmBase):
             self._idom_data = None
 
         self._icf_data = self._io.contact_forces_data()
+
+        if self._with_cohesive_forces :
+            print('display cohesive forces')
+            self._icf_data = self._io.contact_internal_variable_data()
+            #input()
+        else:
+            self._icf_data = self._io.contact_forces_data()
+
         self._isolv_data = self._io.solver_data()
         self._ivelo_data = self._io.velocities_data()
 
@@ -1569,6 +1583,9 @@ class VView(object):
         self.offsets = dict()
 
         self.io_reader = IOReader(self.opts)
+
+        if self.opts.cf_cohesive:
+            self.io_reader._with_cohesive_forces =True
 
         self.io_reader.SetIO(io=self.io)
 
@@ -2218,7 +2235,7 @@ class VView(object):
 
         if "orientations" in instance:
             return
-        
+
         if "shape_name" not in contactor.attrs:
             print(
                 "Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(
@@ -2468,7 +2485,7 @@ class VView(object):
 
         # all objects are set to a nan position at startup,
         # so they are invisibles
-        
+
         if numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6])) or numpy.any(
             numpy.isinf([q0, q1, q2, q3, q4, q5, q6])
         ):
@@ -2881,7 +2898,7 @@ class VView(object):
         self.renderer_window.SetSize(*self.config["window_size"])
         self.renderer_window.SetWindowName("vview: " + self.opts.io_filename)
 
-    @profile    
+    @profile
     def setup_charts(self):
         self.print_verbose_level(1, "setup_charts")
         # Warning! numpy support offer a view on numpy array

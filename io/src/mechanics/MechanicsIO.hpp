@@ -39,6 +39,7 @@ struct ForE;
 struct ContactPointVisitor;
 struct ContactPointDomainVisitor;
 struct ContactContactWorkVisitor;
+struct ContactInternalVariableVisitor;
 
 class MechanicsIO {
  protected:
@@ -113,6 +114,13 @@ class MechanicsIO {
   siconos::algebra::SiconosMatrix contactContactWork(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set = 1,
       double omega = 0.5, double tol = 1e-08) const;
+
+  /** \return the internal variables  of all contact points
+      \return a matrix
+  */
+  siconos::algebra::SiconosMatrix contactInternalVariables(
+      const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+      unsigned int index_set = 1) const;
 
   /** get the domain of each contact point
    *  \param nsds current nonsmooth dynamical system

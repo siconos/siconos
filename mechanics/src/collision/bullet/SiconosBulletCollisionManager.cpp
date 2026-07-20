@@ -746,7 +746,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 	      //std::cout << "time = "<< current_time << " t0 "<< t0 << std::endl;
 	      if (fabs(current_time-t0) >= DBL_EPSILON )
 		{
-		  //std::cout << "a creation of Cohesive interaction not at in the initial time" << std::endl;
+		  std::cout << "a creation of Cohesive interaction not at in the initial time :" << current_time << std::endl;
 		  nslaw = nslaw_CohesiveZoneModelNIFNSL->nslawBroken();
 		  //nslaw->display();
 		  //getchar();

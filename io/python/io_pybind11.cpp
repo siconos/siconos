@@ -42,5 +42,9 @@ PYBIND11_MODULE(_io, m) {
            py::arg("omega") = 0.5, py::arg("tol") = 1e-8,
            "return the dissipation values  of all contact points as a matrix where"
            "each row corresponds to a contact, row[i] = id, normal contact work, "
-           "tangent contact work, friction dissipation, contact status");
+           "tangent contact work, friction dissipation, contact status")
+      .def("contactInternalVariables", &siconos::io::MechanicsIO::contactInternalVariables,
+           py::return_value_policy::move, py::arg("nsds"), py::arg("index_Set") = 1,
+           "return internal variables of all contact points as a matrix where"
+           "each row corresponds to a contact");
 }

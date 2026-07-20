@@ -513,6 +513,13 @@ class MechanicsHdf5Runner_run_options(dict):
             """if True, the kinetic and work for each bodies are computed
                 and written in the hdf5 file""",
         )
+        create_option(
+            d,
+            "output_contact_internal_variables",
+            "boolean, optional",
+            True,
+            """if True, the contact internal variables are written in the hdf5 file  """,
+        )
 
         # default verbose and debug  options
         create_option(
@@ -2478,6 +2485,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             return 0
         return 0
 
+    def output_contact_internal_variables(self):
+        """
+        Outputs contact internal variables
+        _output_contact_index_set default value is 0.
+        """
+        if self._nsds.topology().indexSetsSize() > 1:
+            time = self.current_time()
+            contact_internal_variables = self._io.contactInternalVariables(
+                self._nsds,
+                0)
+
+            # print(contact_internal_variables)
+            # input()
+            if contact_internal_variables is not None:
+                current_line = self._cf_internal_variables.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
+                self._cf_internal_variables.resize(current_line + contact_internal_variables.shape[0], 0)
+                times = np.empty((contact_internal_variables.shape[0], 1))
+                times.fill(time)
+
+                self._cf_internal_variables[current_line:, :] = np.concatenate(
+                    (times, contact_internal_variables), axis=1
+                )
+                # return the number of contacts
+                # print(self._cf_contact_work[:,:])
+                return len(contact_internal_variables)
+            return 0
+        return 0
+
     def output_energy_and_work(self):
         """
         Outputs energy_and_work
@@ -2663,6 +2700,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose(
                 "          to remove this message set output_contact_info options to False"
             )
+
+        if self._output_contact_internal_variables:
+            self.log(self.output_contact_internal_variables, with_timer)()
 
         if self._output_energy_work:
             self.log(self.output_energy_and_work, with_timer)()
@@ -3112,6 +3152,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if run_options["output_energy_work"] is not None:
             self._output_energy_work = run_options["output_energy_work"]
+
+        if run_options["output_contact_internal_variables"] is not None:
+            self._output_contact_internal_variables = run_options["output_contact_internal_variables"]
 
         if run_options["gravity_scale"] is not None:
             self._gravity_scale = run_options["gravity_scale"]
