@@ -141,7 +141,7 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     // Initial value of surface = 1.0 (should be fixed correctly based on geometry)
     (*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(1) = 1.0;
 
-    DEBUG_EXPR(std::cout << "\n The relation is of type NewtonEuler1DR" << std::endl;);
+    DEBUG_EXPR_WE(std::cout << "\n The relation is of type NewtonEuler1DR" << std::endl;);
 
     // Store initial relative contact points
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_1] =
@@ -258,6 +258,8 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       const auto& r_t1_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_1];
       const auto& r_t2_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_TANGENT_2];
       const auto& pos_0 = *internalVariables[BinaryCohesiveNSL::INITIAL_DISPLACEMENT_JUMP];
+      DEBUG_EXPR_WE(std::cout << "initial displacement jump  pos_0 :" << pos_0.transpose()
+                              << std::endl;);
 
       DEBUG_EXPR_WE(std::cout << "r_pc1_0 is: " << r_pc1_0.transpose() << std::endl;
                     std::cout << "r_pc2_0 is: " << r_pc2_0.transpose() << std::endl;);
@@ -279,8 +281,8 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
 
       auto& q = *(ds_vars[tools::enum_to_index(siconos::modeling::NewtonEulerR::ds_var::q0)]);
 
-      DEBUG_EXPR(std::cout << "q_0 is: " << q.numberOfBlocks() << std::endl;
-                 siconos::algebra::print(q.toSiconosVector()););
+      // DEBUG_EXPR_WE(std::cout << "q_0 is: " << q.numberOfBlocks() << std::endl;
+      //            siconos::algebra::print(q.toSiconosVector()););
 
       rel_NewtonEuler1DR->computeContactPointsFromRelativeContactPoints(
           q, r_pc1_0, r_pc2_0, r_nc_0, r_t1_0, r_t2_0, pc1_0, pc2_0, nc_0, t1_0, t2_0);
@@ -290,20 +292,27 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
                     std::cout << "nc_0 is: " << nc_0.transpose() << std::endl;);
 
       // Compute displacement
-      siconos::algebra::SiconosVector3 pos = pc1_0 - pc2_0;
-
-      DEBUG_EXPR(std::cout << "pos :" << pos.transpose() << std::endl;);
+      siconos::algebra::SiconosVector3 pos = pc2_0 - pc1_0;
       siconos::algebra::SiconosVector3 u = pos - pos_0;
+      DEBUG_EXPR_WE(std::cout << "displacement jump u in inertial frame:" << u.transpose()
+                              << std::endl;);
+      delta = u.norm();
+      DEBUG_EXPR_WE(std::cout << "delta :" << delta << std::endl;);
 
       u_N = u.dot(nc_0);
       u_T = u.dot(t1_0);
       u_S = u.dot(t2_0);
-      std::cout << "displacement jump u :" << u.transpose() << std::endl;
-      DEBUG_EXPR(std::cout << "displacement jump u :" << u.transpose() << std::endl;);
-      delta = u.norm();
-      DEBUG_EXPR(std::cout << "delta :" << delta << std::endl;);
+
+      siconos::algebra::SiconosVector3 jump_in_contact_frame;
+
+      jump_in_contact_frame(0) = u.dot(nc_0);
+      jump_in_contact_frame(1) = u.dot(t1_0);
+      jump_in_contact_frame(2) = u.dot(t2_0);
+
       internalVariables[BinaryCohesiveNSL::DISPLACEMENT_JUMP] =
-          std::make_shared<siconos::algebra::SiconosVector3>(u);
+          std::make_shared<siconos::algebra::SiconosVector3>(jump_in_contact_frame);
+      DEBUG_EXPR_WE(std::cout << "displacement jump u in contact frame:"
+                              << jump_in_contact_frame.transpose() << std::endl;);
 
     } else {
       // Simplified case for non-NewtonEuler1DR
@@ -328,6 +337,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
         DEBUG_PRINT("the interface is broken\n");
         *beta = 0.0;
         printf(" the interface is broken\n ");
+        // getchar();
       } else if (delta <= _delta_c && beta_k == 1.0) {
         DEBUG_PRINT("the interface is intact\n");
         *beta = 1.0;
@@ -351,10 +361,9 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   }
   // Normal cohesion force (negative for traction)
   cohesion[0] = (*beta) * _sigma_c * (*surface);
-  DEBUG_PRINTF("normal  cohesion intensity %4.2e\n", cohesion[0]);
-
   cohesion[1] = (*beta) * _gamma * _sigma_c * (*surface);
-  DEBUG_PRINTF("tangent  cohesion intensity %4.2e\n", cohesion[1]);
+  DEBUG_PRINTF("cohesion intensity %4.2e (normal)\t %4.2e (tangent)\n", cohesion[0],
+               cohesion[1]);
 
   DEBUG_EXPR(siconos::algebra::print(*internalVariables[BinaryCohesiveNSL::COHESION]));
   // getchar();

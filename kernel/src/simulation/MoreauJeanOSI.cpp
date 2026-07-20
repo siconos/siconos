@@ -1400,43 +1400,52 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
                  ->H_NE_prod_T();
+    const auto& ds_vars = inter.read_dynamical_systems_variables();
+
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);
     osnsp_rhs_position *= h * _theta;
 
-    // +  h * (1-theta) * H v_k
-    const auto& ds_vars = inter.read_dynamical_systems_variables();
+    // // +  h * (1-theta) * H v_k
+    // original version that is bugged
+    // *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)] *=
+    //    (1 - _theta) * h;
 
-    *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)] *=
-        (1 - _theta) * h;
+    // siconos::algebra::matrixBlockVector_prod(
+    //     H, *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)],
+    //     osnsp_rhs_position, false);
+
+    std::shared_ptr<siconos::algebra::SiconosVector> tmp =
+        std::make_shared<siconos::algebra::SiconosVector>(osnsp_rhs_position);
+    tmp->setZero();
     siconos::algebra::matrixBlockVector_prod(
-        H, *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)],
-        osnsp_rhs_position, false);
+        H, *ds_vars[tools::enum_to_index(modeling::NewtonEulerR::ds_var::velocity)], *tmp,
+        false);
+    *tmp *= (1 - _theta) * h;
+    osnsp_rhs_position += *tmp;
 
     //+ y_k
 
     osnsp_rhs_position += inter.y_k(0);
+    // std::cout << "Moreau displacement jump y_k :" ;
+    // siconos::algebra::print(inter.y_k(0));
 
-    siconos::algebra::print(inter.y_k(0));
+    // // inter.nonSmoothLaw();
+    // auto nslaw = (std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
+    //     inter.nonSmoothLaw()));
+    // if (nslaw) {
+    //   const auto& internalVars = inter.internalVariables();
+    //   auto& internalVariables = *internalVars;
 
-    // inter.nonSmoothLaw();
-    auto nslaw = (std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
-        inter.nonSmoothLaw()));
-    if (nslaw) {
-      const auto& internalVars = inter.internalVariables();
-      auto& internalVariables = *internalVars;
+    //   siconos::algebra::SiconosVector3 displacement_jump = (*internalVariables[2]);
 
-      siconos::algebra::SiconosVector3 displacement_jump = (*internalVariables[2]);
-
-      std::cout << "Moreau displacement jump u :" << displacement_jump.transpose()
-                << std::endl;
-      // osnsp_rhs_position += displacement_jump;
-    }
-
-    DEBUG_EXPR(std::cout << "osnsp_rhs_position : ";
-               siconos::algebra::print(osnsp_rhs_position););
+    //   std::cout << "Moreau displacement jump u :" << displacement_jump.transpose()
+    //             << std::endl;
+    //   osnsp_rhs_position += displacement_jump;
+    // }
   }
 
-  DEBUG_EXPR(siconos::algebra::print(osnsp_rhs_position););
+  DEBUG_EXPR(std::cout << "osnsp_rhs_position : ";
+             siconos::algebra::print(osnsp_rhs_position););
 
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition("

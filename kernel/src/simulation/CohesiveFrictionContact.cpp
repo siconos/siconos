@@ -418,7 +418,7 @@ bool CohesiveFrictionContact::preCompute(double time) {
   computeMatrices();
 
   _sizeOutput= _M->cols();
-  _sizeOutput_cohesion= _V->cols();
+  _sizeOutput_cohesion= _X->cols();
 
 
   // Add cohesive contribution to q
