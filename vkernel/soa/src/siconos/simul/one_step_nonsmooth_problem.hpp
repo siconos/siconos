@@ -34,7 +34,6 @@ struct solver_options : storage::data_holder<SolverOptions> {
       self()->instance().reset(solver_options_create(solver_id),
                                [](SolverOptions* so) {
                                  solver_options_delete(so);
-                                 delete so;
                                });
     }
 
