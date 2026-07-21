@@ -1,29 +1,44 @@
 #pragma once
 
+#include <print>
+
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/collision_head.hpp"
 
 namespace siconos::collision::shape {
 
-struct segment_base : item {
+struct segment : item {
   using indice_t = std::size_t;
   template <typename T>
   using vector_t = algebra::vector<T, 6>;
+
+  struct attributes {
+    // fixed vector of size 1 => same interface for an unbounded vector
+    // in the case of chained segment
+    some::array<some::vector<some::scalar, some::indice_value<3>>,
+                 some::indice_value<2>>
+        nodes;
+    some::array<some::vector<some::scalar, some::indice_value<3>>,
+                 some::indice_value<1>>
+        dp2p1;
+    some::scalar maxpoints;
+    some::array<some::scalar, some::indice_value<1>> length_sq;
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) points() { return attr<"points">(*self()); }
+    decltype(auto) nodes() { return attr<"nodes">(*self()); }
 
     decltype(auto) p1(indice_t seg_index = 0)
     {
-      return points()[seg_index * 2];
+      return nodes()[seg_index * 2];
     };
     decltype(auto) p2(indice_t seg_index = 0)
     {
-      return points()[seg_index * 2 + 1];
+      return nodes()[seg_index * 2 + 1];
     };
     decltype(auto) x1(indice_t seg_index = 0) { return p1(seg_index)[0]; };
     decltype(auto) y1(indice_t seg_index = 0) { return p1(seg_index)[1]; };
@@ -90,10 +105,10 @@ struct segment_base : item {
              view::transform([=](auto i) { return p + i * pstep * dir; });
     }
 
-    void set_points(auto points_array, indice_t seg_index = 0)
+    void set_p1_p2(auto nodes_array, indice_t seg_index = 0)
     {
-      p1(seg_index) = {points_array[0], points_array[1], points_array[2]};
-      p2(seg_index) = {points_array[3], points_array[4], points_array[5]};
+      p1(seg_index) = {nodes_array[0], nodes_array[1], nodes_array[2]};
+      p2(seg_index) = {nodes_array[3], nodes_array[4], nodes_array[5]};
     }
 
     void set_maxpoints(indice_t mp) { maxpoints() = mp; }
@@ -104,14 +119,14 @@ struct segment_base : item {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
 
-      using points_store_t = decltype(points());
+      using nodes_store_t = std::decay_t<decltype(nodes())>;
 
-      if constexpr (match::push_back<points_store_t>) {
-        points().push_back({x, y, 0.}); /* 2D */
+      if constexpr (match::push_back<nodes_store_t>) {
+        nodes().push_back({x, y, 0.}); /* 2D */
 
         /* initialize must be called on even sizes */
-        indice number_of_points = std::size(points());
-        if (number_of_points % 2 == 0) self()->initialize(number_of_points);
+        indice number_of_nodes = std::size(nodes());
+        if (number_of_nodes % 2 == 0) self()->initialize(number_of_nodes);
       }
       else {
         // throw an exception ?
@@ -126,27 +141,12 @@ struct segment_base : item {
       return collect(
           method("initialize", &interface<Handle>::initialize),
           method("set_maxpoints", &interface<Handle>::set_maxpoints),
-          method("set_points",
-                 &interface<Handle>::set_points<vector_t<scalar>>),
+          method("set_p1_p2",
+                 &interface<Handle>::set_p1_p2<vector_t<scalar>>),
           method("insert", &interface<Handle>::insert<scalar>));
     }
   };
 };
 
-struct segment : segment_base {
-  using without_attributes_bindings = void;
 
-  struct attributes {
-    // fixed vector of size 1 => same interface for an unbounded vector
-    // in the case of chained segment
-    some::vector<some::vector<some::scalar, some::indice_value<3>>,
-                 some::indice_value<2>>
-        points;
-    some::vector<some::vector<some::scalar, some::indice_value<3>>,
-                 some::indice_value<1>>
-        dp2p1;
-    some::scalar maxpoints;
-    some::vector<some::scalar, some::indice_value<1>> length_sq;
-  };
-};
 }  // namespace siconos::collision::shape

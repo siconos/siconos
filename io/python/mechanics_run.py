@@ -1035,7 +1035,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             ctor = contactors[0]
             # shape = self._shape.get(ctor.shape_name)
             # attrs = self._shape.attributes(ctor.shape_name)
-            print(material)
             if self.config.backend == "vnative":
                 body_class = self.config.default_body_class
                 if self._shape.attributes(ctor.shape_name)["type"] == "msh":
@@ -1060,7 +1059,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         fesolid.applyNodalForces(tags[siconos.mechanics.fem.MeshTags.applied_forces], nodal_forces)
 
                     body = body_class()
-                    body.init_fem(mesh_data)
+
+                    [coords, indices, segments] = siconos.io.tools.extract_contact_nodes_with_indices(mesh_data)
+                    body.init_fem(mesh_data, coords, indices)
 
                     body.handle().set_mass_matrix(fesolid.mass())
                     body.handle().set_k_matrix(fesolid.stiffnessMatrix())

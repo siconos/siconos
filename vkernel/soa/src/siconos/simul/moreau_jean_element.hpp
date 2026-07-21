@@ -1,15 +1,17 @@
 #pragma once
 
-
-#include "siconos/algebra/numerics.hpp"
-#include "siconos/model/lagrangian_ds.hpp"
-#include "siconos/utils/variant.hpp"
-#include "siconos/model/lagrangian_r.hpp"
-
 #include <fstream>
 #include <print>
 
+#include "siconos/algebra/numerics.hpp"
+#include "siconos/collision/diskmesh_r.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
+#include "siconos/model/lagrangian_r.hpp"
+#include "siconos/storage/get.hpp"
+#include "siconos/utils/variant.hpp"
+
 namespace siconos::simul {
+
 template <typename System, typename Inter, typename OsiAssembled>
 struct moreau_jean_element : item {
   using system = System;
@@ -52,11 +54,12 @@ struct moreau_jean_element : item {
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
+
     static constexpr bool runtime_dof()
     {
       using data_t = typename Handle::data_t;
       return model::runtime_dof<decltype(storage::make_handle<system>(
-          data_t{}, storage::index<system, int>{0}))>();
+          std::declval<data_t>(), storage::index<system, int>{0}))>();
     }
 
     decltype(auto) total_dofs(auto step)
@@ -66,10 +69,10 @@ struct moreau_jean_element : item {
         using env_t = decltype(self()->env());
         using indice = typename env_t::indice;
 
-        auto &data = self()->data();
-        auto &mass_matrices =
+        auto& data = self()->data();
+        auto& mass_matrices =
             storage::attr_values<system, "mass_matrix">(data, step);
-        auto &involveds =
+        auto& involveds =
             storage::prop_values<system, "involved">(data, step);
 
         indice total_cols = 0;
@@ -251,15 +254,15 @@ struct moreau_jean_element : item {
 
     void initialize(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &vs_next =
+      auto& vs_next =
           storage::attr_values<system, "velocity">(data, step + 1);
 
-      auto &lambdas = storage::attr_values<interaction, "lambda">(data, step);
+      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
-      auto &ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto &ydots_next =
+      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
+      auto& ydots_next =
           storage::attr_values<interaction, "ydot">(data, step + 1);
 
       for (auto [v_next] : view::zip(vs_next)) {
@@ -280,20 +283,20 @@ struct moreau_jean_element : item {
 
     void compute_iteration_matrix(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
       using env = decltype(self()->env());
       using scalar = typename env::scalar;
 
-      auto &mats = storage::attr_values<system, "mass_matrix">(data, step);
-      auto &fs = storage::attr_values<system, "fext">(data, step);
-      auto &fs_next = storage::attr_values<system, "fext">(data, step + 1);
-      auto &minv_fs = storage::prop_values<system, "minv_f">(data, step);
-      auto &minv_fs_next =
+      auto& mats = storage::attr_values<system, "mass_matrix">(data, step);
+      auto& fs = storage::attr_values<system, "fext">(data, step);
+      auto& fs_next = storage::attr_values<system, "fext">(data, step + 1);
+      auto& minv_fs = storage::prop_values<system, "minv_f">(data, step);
+      auto& minv_fs_next =
           storage::prop_values<system, "minv_f">(data, step + 1);
 
       if constexpr (system_with_k_matrix()) {
-        auto &ks = storage::attr_values<system, "k_matrix">(data, step);
-        auto &qs = storage::attr_values<system, "q">(data, step);
+        auto& ks = storage::attr_values<system, "k_matrix">(data, step);
+        auto& qs = storage::attr_values<system, "q">(data, step);
         for (auto [mat, k, q, f, f_next, minv_f, minv_f_next] :
              view::zip(mats, ks, qs, fs, fs_next, minv_fs, minv_fs_next)) {
           algebra::unbounded_vector<scalar> fmkq = f - k * q;
@@ -315,21 +318,21 @@ struct moreau_jean_element : item {
 
     void compute_h_matrices(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &h_matrices1 = storage::attr_values<h_matrix1>(data, step);
-      auto &h_matrices2 = storage::attr_values<h_matrix2>(data, step);
-      auto &ndss = storage::prop_values<interaction, "nds">(data, step);
+      auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
+      auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
+      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
 
-      auto &ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto &ds2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto &relations = storage::attr_values<relation>(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& relations = storage::attr_values<relation>(data, step);
 
       for (auto [rel, hm1, hm2, nds, ds1, ds2] :
            view::zip(relations, h_matrices1, h_matrices2, ndss, ds1s, ds2s)) {
         // local binding not enough to be passed to lambda...
-        auto &hhm1 = hm1;
-        auto &hhm2 = hm2;
+        auto& hhm1 = hm1;
+        auto& hhm2 = hm2;
         auto hds1 = storage::make_handle(data, ds1);
         auto hds2 = storage::make_handle(data, ds2);
         auto rnds = nds;
@@ -338,7 +341,7 @@ struct moreau_jean_element : item {
             data, rel,
             mp::overload(
                 [&step, &hhm1, &hhm2, &hds1, &hds2,
-                 &rnds](match::linear_relation auto &&rrel) {
+                 &rnds](match::linear_relation auto&& rrel) {
                   if (rnds == 1) {
                     rrel.compute_jachq(step, hds1, hhm1);
                   }
@@ -347,11 +350,11 @@ struct moreau_jean_element : item {
                     rrel.compute_jachq(step, hds1, hds2, hhm1, hhm2);
                   }
                 },
-                [&step, &hhm1, &hds1](match::relation1 auto &rrel) {
+                [&step, &hhm1, &hds1](match::relation1 auto& rrel) {
                   rrel.compute_jachq(step, hds1, hhm1);
                 },
                 [&step, &hhm1, &hhm2, &hds1,
-                 &hds2](match::relation2 auto &rrel) {
+                 &hds2](match::relation2 auto& rrel) {
                   rrel.compute_jachq(step, hds1, hds2, hhm1, hhm2);
                 },
                 [](auto rrel) { assert(false); }));
@@ -372,7 +375,7 @@ struct moreau_jean_element : item {
 
     void update_h_matrices(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
       using data_t = const std::decay_t<decltype(data)>;
       if constexpr (!storage::has_property_t<
                         interaction, property::time_invariant, data_t>()) {
@@ -383,20 +386,20 @@ struct moreau_jean_element : item {
     // update v(step + 1)
     void compute_free_state(auto step, auto h)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
       scalar theta = self()->theta();
 
-      auto &vs = storage::attr_values<system, "velocity">(data, step);
-      auto &vs_next =
+      auto& vs = storage::attr_values<system, "velocity">(data, step);
+      auto& vs_next =
           storage::attr_values<system, "velocity">(data, step + 1);
 
-      auto &qs = storage::attr_values<system, "q">(data, step);
-      auto &qs_next = storage::attr_values<system, "q">(data, step + 1);
+      auto& qs = storage::attr_values<system, "q">(data, step);
+      auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
 
-      auto &bc_indices =
+      auto& bc_indices =
           storage::prop_values<system, "bc_velocities_0">(data, step);
 
       if constexpr (system_with_k_matrix()) {
@@ -404,16 +407,16 @@ struct moreau_jean_element : item {
         // RHS = M*v - h^2*theta*(1-theta)*K*v + h*(f_ext - K*q)
         // Note: for constant fext, F_k = f_ext
 
-        auto &fexts = storage::attr_values<system, "fext">(data, step);
+        auto& fexts = storage::attr_values<system, "fext">(data, step);
 
-        auto &mass_matrices =
+        auto& mass_matrices =
             storage::attr_values<system, "mass_matrix">(data, step);
-        auto &k_matrices =
+        auto& k_matrices =
             storage::attr_values<system, "k_matrix">(data, step);
-        auto &vs = storage::attr_values<system, "velocity">(data, step);
-        auto &vs_next =
+        auto& vs = storage::attr_values<system, "velocity">(data, step);
+        auto& vs_next =
             storage::attr_values<system, "velocity">(data, step + 1);
-        auto &bc_indices =
+        auto& bc_indices =
             storage::prop_values<system, "bc_velocities_0">(data, step);
 
         for (auto [m_mat, k_mat, q, q_next, v, v_next, f, bc_indice] :
@@ -449,8 +452,8 @@ struct moreau_jean_element : item {
 
       else {
         // K = 0
-        auto &minv_fs = storage::prop_values<system, "minv_f">(data, step);
-        auto &minv_fs_next =
+        auto& minv_fs = storage::prop_values<system, "minv_f">(data, step);
+        auto& minv_fs_next =
             storage::prop_values<system, "minv_f">(data, step + 1);
 
         for (auto [q, q_next, v, v_next, minv_f, minv_f_next, bc_indice] :
@@ -471,27 +474,28 @@ struct moreau_jean_element : item {
 
     void compute_output(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
       using env = decltype(self()->env());
       using scalar = typename env::scalar;
-      using vector =
+      using indice = typename env::indice;
+      using nslaw_size_vector =
           typename env::template vector<scalar, nslaw_size_t{}.value>;
 
-      auto &ys = storage::attr_values<y>(data, step);
-      auto &ydots = storage::attr_values<ydot>(data, step);
-      auto &h_matrices1 = storage::attr_values<h_matrix1>(data, step);
-      auto &h_matrices2 = storage::attr_values<h_matrix2>(data, step);
+      auto& ys = storage::attr_values<y>(data, step);
+      auto& ydots = storage::attr_values<ydot>(data, step);
+      auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
+      auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
 
-      auto &qs = storage::attr_values<system, "q">(data, step);
-      auto &velocities =
+      auto& qs = storage::attr_values<system, "q">(data, step);
+      auto& velocities =
           storage::attr_values<attr_t<system, "velocity">>(data, step);
 
-      auto &ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto &ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
 
-      auto &ndss = storage::prop_values<interaction, "nds">(data, step);
+      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
 
-      const auto &inters = storage::handles<interaction>(data, step);
+      const auto& inters = storage::handles<interaction>(data, step);
 
       // global h_matrix is not assembled at this stage
       for (auto [y, ydot, hm1, hm2, ds1, ds2, nds, inter] :
@@ -507,12 +511,12 @@ struct moreau_jean_element : item {
           auto b = siconos::variant::visit(
               data, inter.relation(),
               mp::overload(
-                  [](match::linear_relation auto &real_relation) {
+                  [](match::linear_relation auto& real_relation) {
                     return real_relation.b();
                   },
                   // no b() present
                   [](auto) {
-                    vector b;
+                    nslaw_size_vector b;
                     b(0) = 0.;
                     return b;
                   }));
@@ -529,36 +533,67 @@ struct moreau_jean_element : item {
           auto hds1 = storage::make_handle(data, ds1);
           auto hds2 = storage::make_handle(data, ds2);
 
-          y[0] = siconos::variant::visit(
+          siconos::variant::visit(
               data, inter.relation(),
               mp::overload(
                   [&](match::linear_relation auto rrel) {
                     assert(false);
                     return 0.;
                   },
+                  [&](match::handle<collision::diskmesh_r> auto rrel) {
+                    using vector_4d =
+                        typename env::template vector<scalar, 4>;
+                    using ds1_t = typename decltype(hds1)::type;
+
+                    auto& ds1_velocities =
+                        storage::attr_values<ds1_t, "velocity">(
+                            self()->data(), step);
+
+                    y[0] = rrel.compute_h(step, hds1, hds2);
+
+                    indice i = rrel.contact_index();
+                    indice idx1 =
+                      rrel.mesh().global_indices()[i];
+                    indice idy1 =
+                      rrel.mesh().global_indices()[i+1];
+                    indice idx2 =
+                      rrel.mesh().global_indices()[i+2];
+                    indice idy2 =
+                      rrel.mesh().global_indices()[i+3];
+
+                    ydot = hm1 * ds1_velocities[ds1.value()];
+
+                    /* segment nodes */
+                    vector_4d local_velocity = {
+                        velocities[ds2.value()][idx1],
+                        velocities[ds2.value()][idy1],
+                        velocities[ds2.value()][idx2],
+                        velocities[ds2.value()][idy2]};
+
+                    ydot += hm2 * local_velocity;
+                  },
                   [&](match::relation1 auto rrel) {
-                    return rrel.compute_h(step, hds1);
+                    y[0] = rrel.compute_h(step, hds1);
+                    ydot = hm1 * velocities[ds1.value()];
                   },
                   [&](match::relation2 auto rrel) {
-                    return rrel.compute_h(step, hds1, hds2);
+                    y[0] = rrel.compute_h(step, hds1, hds2);
+                    ydot = hm1 * velocities[ds1.value()];
+                    ydot += hm2 * velocities[ds2.value()];
                   }));
-          ydot = hm1 * velocities[ds1.value()];
-          if (nds == 2) {
-            ydot += hm2 * velocities[ds2.value()];
-          }
         }
       }
     }
 
     void keep_lambdas(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &&lambda_assembled = lambda_vector_assembled();
-      auto &&ydot_assembled = ydot_vector_assembled();
+      auto&& lambda_assembled = lambda_vector_assembled();
+      auto&& ydot_assembled = ydot_vector_assembled();
 
-      auto &lambdas = storage::attr_values<interaction, "lambda">(data, step);
-      auto &ydots_bck =
+      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
+      auto& ydots_bck =
           storage::prop_values<interaction, "ydot_backup">(data, step);
 
       auto activations =
@@ -584,16 +619,16 @@ struct moreau_jean_element : item {
 
     void update_velocities(auto step, auto h)
     {
-      auto &data = self()->data();
-      auto &&velo = velocity_vector_assembled();
+      auto& data = self()->data();
+      auto&& velo = velocity_vector_assembled();
 
-      auto &vs_next = storage::attr_values<velocity>(data, step + 1);
+      auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto &involveds = storage::prop_values<system, "involved">(data, step);
+      auto& involveds = storage::prop_values<system, "involved">(data, step);
 
-      auto &indices = storage::prop_values<system, "index">(data, step);
+      auto& indices = storage::prop_values<system, "index">(data, step);
 
-      auto &bc_indices =
+      auto& bc_indices =
           storage::prop_values<system, "bc_velocities_0">(data, step);
 
       // involved ds velocities -> ds velocities
@@ -616,14 +651,14 @@ struct moreau_jean_element : item {
 
     void update_positions(auto step, auto h)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &xs = storage::attr_values<system, "q">(data, step);
-      auto &xs_next = storage::attr_values<system, "q">(data, step + 1);
-      auto &vs = storage::attr_values<velocity>(data, step);
-      auto &vs_next = storage::attr_values<velocity>(data, step + 1);
+      auto& xs = storage::attr_values<system, "q">(data, step);
+      auto& xs_next = storage::attr_values<system, "q">(data, step + 1);
+      auto& vs = storage::attr_values<velocity>(data, step);
+      auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto &involveds = storage::prop_values<system, "involved">(data, step);
+      auto& involveds = storage::prop_values<system, "involved">(data, step);
       for (auto [x, x_next, v, v_next, involved] :
            view::zip(xs, xs_next, vs, vs_next, involveds)) {
         x_next = x + h * (theta() * v_next + (1.0 - theta()) * v);
@@ -632,23 +667,23 @@ struct moreau_jean_element : item {
 
     auto compute_active_interactions(auto step, auto h)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
       using env = decltype(self()->env());
       using indice = typename env::indice;
 
-      auto &ys = storage::attr_values<y>(data, step);
-      auto &ydots = storage::attr_values<ydot>(data, step);
+      auto& ys = storage::attr_values<y>(data, step);
+      auto& ydots = storage::attr_values<ydot>(data, step);
 
-      auto &ids1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto &ids2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto &ndss = storage::prop_values<interaction, "nds">(data, step);
+      auto& ids1s = storage::prop_values<interaction, "ds1">(data, step);
+      auto& ids2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
 
-      auto &activations =
+      auto& activations =
           storage::prop_values<interaction, "activation">(data, step);
 
-      auto &involveds = storage::prop_values<system, "involved">(data, step);
+      auto& involveds = storage::prop_values<system, "involved">(data, step);
 
-      const auto &interactions = storage::handles<interaction>(data, step);
+      const auto& interactions = storage::handles<interaction>(data, step);
 
       // all ds -> not involved
       // without zip : involved is a copy not a ref!!
@@ -707,17 +742,17 @@ struct moreau_jean_element : item {
     // strategy 1 : assemble the matrix for involved ds only
     auto assemble_h_matrix_for_involved_ds(auto step)
     {
-      auto &data = self()->data();
-      auto &&h_matrix = self()->h_matrix_assembled();
-      auto &activations =
+      auto& data = self()->data();
+      auto&& h_matrix = self()->h_matrix_assembled();
+      auto& activations =
           storage::prop_values<interaction, "activation">(data, step);
-      auto &h_mat1s =
+      auto& h_mat1s =
           storage::attr_values<interaction, "h_matrix1">(data, step);
-      auto &h_mat2s =
+      auto& h_mat2s =
           storage::attr_values<interaction, "h_matrix2">(data, step);
-      auto &ids1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto &ids2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto &indices = storage::prop_values<system, "index">(data, step);
+      auto& ids1s = storage::prop_values<interaction, "ds1">(data, step);
+      auto& ids2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& indices = storage::prop_values<system, "index">(data, step);
 
       size_t i = 0;
       for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
@@ -728,7 +763,7 @@ struct moreau_jean_element : item {
 
           // BC velocities for ds1
           auto handle_ds1 = storage::make_handle(data, ids1);
-          auto &bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
+          auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
 
           // modification on a copy
           auto h_mat1_mod = h_mat1;
@@ -743,7 +778,7 @@ struct moreau_jean_element : item {
             auto h_mat2_mod = h_mat2;
 
             auto handle_ds2 = storage::make_handle(data, ids2);
-            auto &bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
+            auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
 
             // zero columns in h_mat2_mod / BC DOFs in ds2
             for (auto bc_local_idx : bc_vel_2) {
@@ -766,12 +801,12 @@ struct moreau_jean_element : item {
 
     auto assemble_vectors(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &lambdas = storage::attr_values<interaction, "lambda">(data, step);
-      auto &nslaws = storage::attr_values<interaction, "nslaw">(data, step);
+      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
+      auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
 
-      auto &ydots = storage::attr_values<interaction, "ydot">(data, step);
+      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
       auto activations =
           storage::prop_values<interaction, "activation">(data, step);
 
@@ -794,12 +829,12 @@ struct moreau_jean_element : item {
 
     void assemble_mass_matrix_for_involved_ds(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &mass_matrices =
+      auto& mass_matrices =
           storage::attr_values<system, "mass_matrix">(data, step);
-      auto &involveds = storage::prop_values<system, "involved">(data, step);
-      auto &indices = storage::prop_values<system, "index">(data, step);
+      auto& involveds = storage::prop_values<system, "involved">(data, step);
+      auto& indices = storage::prop_values<system, "index">(data, step);
 
       // size may be 0
       for (auto [mass_matrix, involved, index] :
@@ -813,13 +848,13 @@ struct moreau_jean_element : item {
     void assemble_k_matrix_for_involved_ds(auto step)
     {
       if constexpr (system_with_k_matrix()) {
-        auto &data = self()->data();
+        auto& data = self()->data();
 
-        auto &k_matrices =
+        auto& k_matrices =
             storage::attr_values<system, "k_matrix">(data, step);
-        auto &involveds =
+        auto& involveds =
             storage::prop_values<system, "involved">(data, step);
-        auto &indices = storage::prop_values<system, "index">(data, step);
+        auto& indices = storage::prop_values<system, "index">(data, step);
         // size may be 0
 
         for (auto [k_matrix, involved, index] :
@@ -835,13 +870,13 @@ struct moreau_jean_element : item {
     // nonsmooth law effect
     void nsl_effect_on_free_output(auto step)
     {
-      auto &data = self()->data();
-      auto &ydots = storage::attr_values<ydot>(data, step);
-      auto &ydots_next = storage::attr_values<ydot>(data, step + 1);
+      auto& data = self()->data();
+      auto& ydots = storage::attr_values<ydot>(data, step);
+      auto& ydots_next = storage::attr_values<ydot>(data, step + 1);
 
-      auto &es = storage::attr_values<nslaw, "e">(data, step);
+      auto& es = storage::attr_values<nslaw, "e">(data, step);
 
-      auto &inslaws =
+      auto& inslaws =
           storage::attr_values<attr_t<interaction, "nslaw">>(data, step);
 
       for (auto [ydot, ydot_next, inslaw] :
@@ -853,10 +888,10 @@ struct moreau_jean_element : item {
     // compute H vfree
     void compute_q_nsp_vector_assembled(auto step)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
-      auto &ydots_next = storage::attr_values<ydot>(data, step + 1);
-      auto &activations =
+      auto& ydots_next = storage::attr_values<ydot>(data, step + 1);
+      auto& activations =
           storage::prop_values<interaction, "activation">(data, step);
 
       auto k = 0;

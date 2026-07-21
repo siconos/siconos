@@ -40,7 +40,8 @@ using diskfsegment_r = collision::diskfsegment_r;
 using diskmesh_r = collision::diskmesh_r;
 using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
-using mesh_shape = collision::shape::chained_segment;
+using mesh_shape = collision::shape::mesh;
+using chained_segment_shape = collision::shape::chained_segment;
 using translated_disk_shape = collision::translated<disk_shape>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
@@ -52,10 +53,13 @@ struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r> {};
 struct topo : simul::topology<disk, ct_interaction, fem, rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
-using pointd = collision::point<disk>;
-using pointl = collision::point<segment_shape>;
-using pointtds = collision::point<translated_disk_shape>;
-struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
+using pointd = collision::point<disk, collision::empty_shape>;
+using pointf = collision::point<fem, mesh_shape>;
+using pointl = collision::point<storage::pattern::empty_item, segment_shape>;
+using pointtds =
+    collision::point<storage::pattern::empty_item, translated_disk_shape>;
+struct neighborhood
+    : collision::neighborhood<pointd, pointf, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
@@ -138,6 +142,7 @@ struct maker
               storage::bind<config::neighborhood, "neighborhood">,
               storage::bind<config::space_filter, "space_filter">,
               storage::bind<config::segment_shape, "segment_shape">,
+              storage::bind<config::chained_segment_shape, "chained_segment">,
               storage::bind<config::disk_shape, "disk_shape">,
               storage::bind<config::mesh_shape, "mesh_shape">,
               storage::bind<config::translated_disk_shape,
@@ -146,7 +151,6 @@ struct maker
                             "interaction_manager">,
               storage::bind<config::ct_interaction, "ct_interaction">,
               storage::bind<config::rt_interaction, "rt_interaction">,
-              storage::bind<config::osnspb, "osnspb">,
               storage::bind<config::solver_options, "solver_options">,
               storage::bind<config::trace_params, "trace_params">,
               storage::bind<config::osi, "osi">,

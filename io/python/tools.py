@@ -29,6 +29,61 @@ import time
 import warnings
 import siconos.mechanics.collision
 
+try:
+    import meshio
+    def extract_contact_nodes_with_indices(mesh_data):
+        """Extract node coordinates and original indices for contact segments (tag 4)"""
+        with tempfile.NamedTemporaryFile(mode='w+', suffix='.msh') as tmp:
+            tmp.write(mesh_data)
+            tmp.flush()
+            mesh = meshio.read(tmp.name)
+
+            contact_nodes = set()
+            contact_segments = []
+
+            # mesh.cell_data['gmsh:physical'] is a list of arrays, one per cell block
+            physical_data = mesh.cell_data.get('gmsh:physical', [])
+
+            for block_idx, cell_block in enumerate(mesh.cells):
+                if cell_block.type != 'line':
+                    continue
+
+                # Get physical tags for this specific cell block
+                if block_idx >= len(physical_data):
+                    continue
+
+                block_tags = physical_data[block_idx]
+                if block_tags is None:
+                    continue
+
+                # Filter for physical tag 4
+                mask = (block_tags == 4)
+
+                if not mask.any():
+                    continue
+
+                # Extract matching line segments
+                segments = cell_block.data[mask]
+                contact_segments.extend(segments.tolist())
+                contact_nodes.update(np.asarray(segments).flatten())
+
+            if contact_nodes:
+                node_indices = sorted(contact_nodes)
+                node_0based = [i-1 for i in node_indices]  # [2, 3]
+                dof_indices = []
+                for n in node_0based:
+                    dof_indices.extend([n*2, n*2+1])  # [4, 5, 6, 7]
+                node_coords = mesh.points[node_indices]
+                return node_coords, dof_indices, contact_segments
+            return np.array([]), [], []
+
+except ImportError:
+    def extract_contact_nodes_with_indices(mesh_data):
+        """Dummy"""
+        raise ImportError("meshio missing")
+
+
+
 warnings.simplefilter("always", UserWarning)
 
 

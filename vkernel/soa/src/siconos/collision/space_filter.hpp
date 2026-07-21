@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <print>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
@@ -16,8 +17,8 @@
 #include "siconos/collision/translated.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/storage.hpp"
-#include "siconos/utils/variant.hpp"
 #include "siconos/utils/range.hpp"
+#include "siconos/utils/variant.hpp"
 
 namespace std {
 template <typename T>
@@ -63,8 +64,9 @@ struct space_filter : item {
   using items = gather<Topology, Neighborhood>;
   using topology = Topology;
   using dynamical_system = typename topology::fixed_dof_system;
-  using interaction = typename topology::finteraction;
-  using nslaw = typename interaction::nslaw;
+  using finteraction = typename topology::finteraction;
+  using dfinteraction = typename topology::dfinteraction;
+  using nslaw = typename finteraction::nslaw;
   using neighborhood = Neighborhood;
 
   struct attributes {
@@ -168,7 +170,7 @@ struct space_filter : item {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using item_t = typename std::decay_t<decltype(item_handle)>::type;
-      using point_t = collision::point<item_t>;
+      using point_t = collision::point<empty_item, item_t>;
       using points_t = typename neighborhood::points_t;
 
       auto& data = self()->data();
@@ -255,19 +257,26 @@ struct space_filter : item {
       mp::for_each(points_t{}, [&]<typename Point>(Point) {
         using item_t = typename Point::item_t;
 
-        if constexpr (std::derived_from<item_t, model::lagrangian_ds>) {
+        if constexpr (std::derived_from<item_t, model::lagrangian_ds> ||
+                      std::derived_from<item_t,
+                                        model::elastic_lagrangian_ds>) {
           auto all_ds = storage::handles<item_t>(data);
           for (auto ds : all_ds) {
             //            print("add disk point : {}\n", ds.get());
-            auto shape = storage::prop<"shape">(ds);
-            using shape_t = std::decay_t<decltype(shape)>;
-            if constexpr (std::derived_from<
-                              shape_t, collision::shape::chained_segment>) {
-              auto nbsegments = std::size(shape.points()) / 2;
+            auto shape_idx = storage::prop<"shape">(ds);
+            using shape_t = typename std::decay_t<decltype(shape_idx)>::type;
+            if constexpr (std::derived_from<shape_t,
+                                            collision::shape::mesh>) {
+              auto shape_handle =
+                  storage::make_handle(self()->data(), shape_idx);
+
+              auto nbsegments =
+                  std::size(shape_handle.segments().nodes()) / 2;
               // multiple points are associated to the system
               for (std::size_t index = 0; index < nbsegments; ++index) {
                 for (auto [i, point_coord] :
-                     shape.points_coords(index) | view::enumerate) {
+                     shape_handle.segments().points_coords(index) |
+                         view::enumerate) {
                   auto new_point = storage::add<Point>(data);
                   new_point.item() = ds;
                   new_point.coord() =
@@ -376,17 +385,26 @@ struct space_filter : item {
       }
     }
 
-    void dsds_activation(auto& ds1, auto& ds2, auto& map, auto hp1, auto hp2)
+    void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s,
+                               const auto& ds2s, const auto& dinteractions)
+    {
+      // build (ds ds -> inter) & (ds segment -> inter) maps
+      for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, dinteractions)) {
+        ds_dds_prox[make_ipair(ds1, ds2)] = inter;
+      }
+    }
+
+    void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2)
     {
       auto& data = self()->data();
       auto topo = self()->topology();
       auto nslaw = self()->nslaw();
       auto diskdisk_r = self()->diskdisk_r();
-      auto relmap = self()->diskmeshes();
+      auto diskmeshes = self()->diskmeshes();
 
       // at most one edge between 2 ds !!
-      auto find_inter = map.find(make_ipair(ds1.index(), ds2.index()));
-      if (find_inter != map.end()) {
+      auto find_inter = fmap.find(make_ipair(ds1.index(), ds2.index()));
+      if (find_inter != fmap.end()) {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation">(inter) = true;
@@ -398,39 +416,48 @@ struct space_filter : item {
 
         storage::prop<"activation">(inter) = true;
 
-        auto shape1 = storage::prop<"shape">(ds1);
-        using shape1_t = std::decay_t<decltype(shape1)>;
+        inter.relation() = diskdisk_r;
+        fmap[make_ipair(ds1.index(), ds2.index())] = inter;
+      }
+    }
 
-        auto shape2 = storage::prop<"shape">(ds2);
-        using shape2_t = std::decay_t<decltype(shape2)>;
+    void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1,
+                          auto hp2)
+    {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto nslaw = self()->nslaw();
+      auto diskmeshes = self()->diskmeshes();
 
-        if constexpr (std::derived_from<shape1_t, collision::shape::disk>) {
-          if constexpr (std::derived_from<
-                            shape2_t, collision::shape::chained_segment>) {
-            auto mesh = hp2.item();
-            auto contact_index = hp2.seg_index();
-            if (auto search = relmap.find({mesh.get(), contact_index});
-                search != relmap.end()) {
-              inter.relation = search->second;
-            }
-            else {
-              auto rel = storage::add<collision::diskmesh_r>(data);
-              rel.mesh() = mesh;
-              rel.contact_index = contact_index;
-              inter.relation() = rel;
-              relmap[{mesh.get(), contact_index}] = rel;
-            }
-          }
-          else if constexpr (std::derived_from<shape2_t,
-                                               collision::shape::disk>) {
-            inter.relation() = diskdisk_r;
-          }
-          else {
-            assert(false);
-          }
+      // at most one edge between 2 ds !!
+      auto find_inter = dmap.find(make_ipair(ds1.index(), ds2.index()));
+      if (find_inter != dmap.end()) {
+        // keep this edge
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        storage::prop<"activation">(inter) = true;
+      }
+      else {
+        // create the edge
+        auto inter = topo.link(ds1, ds2);
+        inter.nslaw() = nslaw;  // one nslaw for the moment
+
+        storage::prop<"activation">(inter) = true;
+
+        auto mesh = hp2.shape();
+        auto contact_index = hp2.seg_index();
+        if (auto search =
+                diskmeshes.find({mesh.index().value(), contact_index});
+            search != diskmeshes.end()) {
+          inter.relation() = search->second;
         }
-
-        map[make_ipair(ds1.index(), ds2.index())] = inter;
+        else {
+          auto rel = storage::add<collision::diskmesh_r>(data);
+          rel.mesh() = mesh;
+          rel.contact_index() = contact_index;
+          inter.relation() = rel;
+          diskmeshes[{mesh.index().value(), contact_index}] = rel;
+        }
+        dmap[make_ipair(ds1.index(), ds2.index())] = inter;
       }
     }
 
@@ -539,9 +566,9 @@ struct space_filter : item {
       auto& data = self()->data();
 
       auto& activations =
-          storage::prop_values<interaction, "activation">(data, 0);
+          storage::prop_values<finteraction, "activation">(data, 0);
 
-      auto interactions = storage::handles<interaction>(data, 0);
+      auto interactions = storage::handles<finteraction>(data, 0);
 
       //      print("BEFORE REMOVAL: size of indexset0: {}\n",
       //      activations.size());
@@ -609,7 +636,7 @@ struct space_filter : item {
         auto fact_index = fact - activations.begin();
         //        print("  activation of {} is false\n", fact_index);
         auto inter = storage::make_handle(
-            data, storage::index<interaction, indice>(fact_index));
+            data, storage::index<finteraction, indice>(fact_index));
 
         // with move_back : order is modified
 
@@ -646,15 +673,19 @@ struct space_filter : item {
 
       using map_ds_ds_prox_t =
           typename env::template map<mp::pair<indice, indice>,
-                                     storage::index<interaction, indice>>;
+                                     storage::index<finteraction, indice>>;
+
+      using map_ds_dds_prox_t =
+          typename env::template map<mp::pair<indice, indice>,
+                                     storage::index<dfinteraction, indice>>;
 
       using map_ds_segment_prox_t =
           typename env::template map<mp::pair<indice, std::array<scalar, 4>>,
-                                     storage::index<interaction, indice>>;
+                                     storage::index<finteraction, indice>>;
 
       using map_ds_fdisk_prox_t =
           typename env::template map<mp::pair<indice, std::array<scalar, 2>>,
-                                     storage::index<interaction, indice>>;
+                                     storage::index<finteraction, indice>>;
 
       auto& data = self()->data();
       auto diskfsegments = self()->diskfsegments();
@@ -664,24 +695,44 @@ struct space_filter : item {
       using points_t = typename ngbh_t::points_t;
 
       auto ds_ds_prox = map_ds_ds_prox_t();
+      auto ds_dds_prox = map_ds_dds_prox_t();
 
       auto ds_segment_prox = map_ds_segment_prox_t();
 
       auto ds_fdisk_prox = map_ds_fdisk_prox_t();
 
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto interactions = storage::handles<interaction>(data, step);
+      auto& ds1s = storage::prop_values<finteraction, "ds1">(data, step);
+      auto& ds2s = storage::prop_values<finteraction, "ds2">(data, step);
+
+      auto& dds1s = storage::prop_values<dfinteraction, "ds1">(data, step);
+      auto& dds2s = storage::prop_values<dfinteraction, "ds2">(data, step);
+
+      auto interactions = storage::handles<finteraction>(data, step);
 
       build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s,
                            ds2s, interactions);
 
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        auto dinteractions = storage::handles<dfinteraction>(data, step);
+        build_dproximity_maps(ds_dds_prox, dds1s, dds2s, dinteractions);
+      }
+
       auto& activations =
-          storage::prop_values<interaction, "activation">(data, 0);
+          storage::prop_values<finteraction, "activation">(data, 0);
+
+      auto& dactivations =
+          storage::prop_values<dfinteraction, "activation">(data, 0);
 
       int activations_size = activations.size();
+      int dactivations_size = dactivations.size();
       if (activations_size > 0) {
         for (auto [activation] : view::zip(activations)) {
+          activation = false;
+        }
+      }
+
+      if (dactivations_size > 0) {
+        for (auto [activation] : view::zip(dactivations)) {
           activation = false;
         }
       }
@@ -739,8 +790,14 @@ struct space_filter : item {
                                     handle_point2);
                   }
                   else {
-                    if constexpr (std::derived_from<system1_t,
-                                                    model::lagrangian_ds>) {
+                    if constexpr (std::derived_from<
+                                      system2_t,
+                                      model::elastic_lagrangian_ds>) {
+                      dsdds_activation(body1, body2, ds_dds_prox,
+                                       handle_point1, handle_point2);
+                    }
+                    else if constexpr (std::derived_from<
+                                           system1_t, model::lagrangian_ds>) {
                       if constexpr (std::derived_from<
                                         system2_t,
                                         collision::shape::segment>) {

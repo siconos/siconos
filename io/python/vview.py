@@ -24,7 +24,6 @@ import h5py
 from siconos.io.tools import tmpfile as io_tmpfile
 import siconos.mechanics
 
-from line_profiler import profile
 
 # Exports from this module
 __all__ = ["VView", "VViewOptions", "VExportOptions", "VViewConfig"]
@@ -38,6 +37,24 @@ else:
 def print_io_vview(*args, **kwargs):
     print("[io.vview]", *args, **kwargs)
 
+def msh_to_stl(msh_data):
+    """Convert msh data to stl format using meshio"""
+    import meshio
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmp_msh, \
+         tempfile.NamedTemporaryFile(suffix='.stl') as tmp_stl:
+
+        tmp_msh.write(msh_data)
+        tmp_msh.flush()
+
+        mesh = meshio.read(tmp_msh.name)
+        mesh.write(tmp_stl.name)
+
+        with open(tmp_stl.name, 'r') as f:
+            stl_data = f.read()
+
+    return stl_data
 
 # Persistent configuration
 class VViewConfig(dict):
@@ -655,7 +672,6 @@ class Quaternion:
 
 class InputObserver:
 
-    @profile
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
@@ -679,7 +695,6 @@ class InputObserver:
             return
         self._slider_repres = slider_repres
 
-    @profile
     def update(self):
         self.vview.print_verbose("InputObserver -  update at time", self._time)
 
@@ -732,7 +747,6 @@ class InputObserver:
             self.vview.sactora[mu].GetProperty().SetOpacity(self._opacity_contact)
             self.vview.sactorb[mu].GetProperty().SetOpacity(self._opacity_contact)
 
-    @profile
     def key(self, obj, event):
         key = obj.GetKeySym()
 
@@ -861,7 +875,6 @@ class InputObserver:
         # if(key_recognized):
         self.update()
 
-    @profile
     def time(self, obj, event):
         slider_repres = obj.GetRepresentation()
         self._time = slider_repres.GetValue()
@@ -935,7 +948,6 @@ class CellConnector(vtk.vtkProgrammableFilter):
     Add Arrays to Cells
     """
 
-    @profile
     def __init__(self, instance, data_names, data_sizes):
         vtk.vtkProgrammableFilter.__init__(self)
         self._instance = instance
@@ -950,7 +962,6 @@ class CellConnector(vtk.vtkProgrammableFilter):
             self._vtk_datas[i].SetName(data_name)
             self._vtk_datas[i].SetNumberOfComponents(data_sizes[i])
 
-    @profile
     def method(self):
         input = self.GetInput()
         output = self.GetOutput()
@@ -1000,7 +1011,6 @@ def makeConvexSourceClass():
 # in vview and export from python members
 class IOReader(VTKPythonAlgorithmBase):
 
-    @profile
     def __init__(self, opts):
         VTKPythonAlgorithmBase.__init__(
             self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
@@ -1017,7 +1027,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.ctf = vtk.vtkColorTransferFunction()
         self.options = opts
 
-    @profile
     def InitGlyphs(self):
         self.polydata.SetPoints(self.points)
         self.polydata.GetPointData().AddArray(self.vtk_radii_data)
@@ -1101,7 +1110,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.stream_actor.SetMapper(self.stream_mapper)
 
 
-    @profile
     def RequestInformation(self, request, inInfo, outInfo):
 
         info = outInfo.GetInformationObject(0)
@@ -1120,7 +1128,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
         return 1
 
-    @profile
     def RequestData(self, request, inInfo, outInfo):
 
         info = outInfo.GetInformationObject(0)
@@ -1379,7 +1386,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
         return 1
 
-    @profile
     def SetIO(self, io):
         self._io = io
 
@@ -1438,7 +1444,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.Modified()
         return 1
 
-    @profile
     def SetTime(self, time):
         self.GetOutputInformation(0).Set(
             vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP(), time
@@ -1452,7 +1457,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.Update()
 
     # contact forces provider
-    @profile
     def ContactForcesOn(self):
 
         self._cf_raw_times = self._icf_data[:, 0]
@@ -1517,7 +1521,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
 # Read file and open VTK interaction window
 class VView(object):
-    @profile
     def __init__(self, io, options, config=None):
         self.opts = options
         self.config = [config, VViewConfig()][config is None]
@@ -1590,7 +1593,6 @@ class VView(object):
         if level <= self.opts.verbose:
             print("[io.vview]", *args, **kwargs)
 
-    @profile
     def reload(self):
 
         if self.opts.cf_disable:
@@ -1610,7 +1612,6 @@ class VView(object):
         self.max_time = self.io_reader._times[-1]
         self.set_dynamic_actors_visibility(self.time0)
 
-    @profile
     def init_contact_pos(self, mu):
         self.print_verbose_level(2, "contact positions", mu)
         self.contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
@@ -1653,7 +1654,6 @@ class VView(object):
     #       if self.cf_prov.dom_at_time is not None:
     #            self.contact_pos_norm[mu].SetScalarComponent(0, "domains", 0)
 
-    @profile
     def init_cf_sources(self, mu, transform):
         self.print_verbose_level(2, "contact sources", mu)
         self.cf_collector.AddInputData(self.io_reader._output[mu])
@@ -1858,7 +1858,6 @@ class VView(object):
         self.sactorb[mu].GetProperty().SetColor(0, 1, 0)
         self.sactorb[mu].SetMapper(self.smapperb[mu])
 
-    @profile
     def init_shape(self, shape_name):
         self.print_verbose_level(2, "init_shape", shape_name)
         shape_type = self.io.shapes()[shape_name].attrs["type"]
@@ -1874,13 +1873,18 @@ class VView(object):
 
         ConvexSource = makeConvexSourceClass()
 
-        if shape_type in ["vtp", "stl"]:
+        if shape_type in ["msh", "vtp", "stl"]:
+            if h5py.version.version_tuple.major >= 3:
+                shape_data = (self.io.shapes()[shape_name][:][0]).decode("utf-8")
+            else:
+                shape_data = str(self.io.shapes()[shape_name][:][0])
+            if shape_type in ["msh"]:
+                shape_data = msh_to_stl(shape_data)
+                shape_type = "stl"
+                
             with io_tmpfile() as tmpf:
                 # fix compatibility with h5py version: to be removed in the future
-                if h5py.version.version_tuple.major >= 3:
-                    tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode("utf-8"))
-                else:
-                    tmpf[0].write(str(self.io.shapes()[shape_name][:][0]))
+                tmpf[0].write(shape_data)
                 tmpf[0].flush()
                 reader = self.vtk_reader[shape_type]()
                 reader.SetFileName(tmpf[1])
@@ -2194,7 +2198,6 @@ class VView(object):
                     mapper_edge.SetInputConnection(source.GetOutputPort())
                 self.mappers_edges[shape_name] = (y for y in [mapper_edge])
 
-    @profile
     def init_shapes(self):
         self.print_verbose_level(1, "init_shapes")
         for shape_name in self.io.shapes():
@@ -2210,7 +2213,6 @@ class VView(object):
                         self.mappers_edges[shape_name]
                     )
 
-    @profile
     def init_contactor(self, contactor_instance_name, instance, instid):
         self.print_verbose_level(2, "init_contactor", contactor_instance_name)
         contactor = instance[contactor_instance_name]
@@ -2406,7 +2408,6 @@ class VView(object):
                 self.objects_collector.AddInputConnection(cc.GetOutputPort())
                 cc.Update()
 
-    @profile
     def init_instance(self, instance_name):
         self.print_verbose_level(2, "init_instance", instance_name)
         instance = self.io.instances()[instance_name]
@@ -2452,14 +2453,12 @@ class VView(object):
         for contactor_instance_name in instance:
             self.init_contactor(contactor_instance_name, instance, instid)
 
-    @profile
     def init_instances(self):
         self.print_verbose_level(1, "init_instances")
         for instance_name in self.io.instances():
             self.init_instance(instance_name)
 
     # this sets the position for all transforms associated to an instance
-    @profile
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
         # Skip if no transforms exist (e.g., aggregate objects visualized as glyphs)
         if instance not in self.transforms:
@@ -2502,7 +2501,6 @@ class VView(object):
 
                 transform.RotateWXYZ(angle * 180.0 / pi, axis[0], axis[1], axis[2])
 
-    @profile
     def set_position(self, data):
         self.print_verbose_level(2, "set_position")
         self.set_position_v(
@@ -2516,7 +2514,6 @@ class VView(object):
             data[:, 8],
         )
 
-    @profile
     def build_set_functions(self, cc=None):
         if cc is None:
             cc = self.cell_connectors
@@ -2576,7 +2573,6 @@ class VView(object):
         self.set_instance_v = numpy.vectorize(set_instance)
 
     # set visibility for all actors associated to a dynamic instance
-    @profile
     def set_dynamic_instance_visibility(self, instance, time):
         tob = self.times_of_birth.get(instance, -1)
         tod = self.times_of_death.get(instance, infinity)
@@ -2608,7 +2604,6 @@ class VView(object):
                 actor.VisibilityOff()
 
     # set visibility for all actors associated to a static instance
-    @profile
     def set_static_instance_visibility(self, instance, time):
         tob = self.times_of_birth.get(instance, -1)
         tod = self.times_of_death.get(instance, infinity)
@@ -2639,17 +2634,14 @@ class VView(object):
             for actor, index, group in self.static_actors[instance]:
                 actor.VisibilityOff()
 
-    @profile
     def set_dynamic_actors_visibility(self, time):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
-    @profile
     def set_static_actors_visibility(self, time):
         if self.set_visibility_static_v:
             self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
-    @profile
     def make_scale_observer(self, glyphs):
 
         def scale_observer(obj, event):
@@ -2662,7 +2654,6 @@ class VView(object):
         return scale_observer
 
     # callback maker for time scale manipulation
-    @profile
     def make_time_scale_observer(self, time_slider_repres, time_observer):
 
         delta_time = self.max_time - self.min_time
@@ -2689,7 +2680,6 @@ class VView(object):
         return time_scale_observer
 
     # make a slider widget and its representation
-    @profile
     def make_slider(
         self,
         title,
@@ -2743,7 +2733,6 @@ class VView(object):
 
         return slider_widget, slider_repres
 
-    @profile
     def setup_initial_position(self):
 
         if self.opts.export:
@@ -2801,7 +2790,6 @@ class VView(object):
         self.set_static_actors_visibility(self.time0)
         self.set_dynamic_actors_visibility(self.time0)
 
-    @profile
     def setup_vtk_renderer(self):
         self.print_verbose_level(1, "setup_tvk_renderer")
         self.renderer_window.AddRenderer(self.renderer)
@@ -2881,7 +2869,6 @@ class VView(object):
         self.renderer_window.SetSize(*self.config["window_size"])
         self.renderer_window.SetWindowName("vview: " + self.opts.io_filename)
 
-    @profile    
     def setup_charts(self):
         self.print_verbose_level(1, "setup_charts")
         # Warning! numpy support offer a view on numpy array
@@ -2953,7 +2940,6 @@ class VView(object):
         self.tview_iter = tview_iter
         self.tview_prec = tview_prec
 
-    @profile
     def setup_sliders(self, times):
         self.print_verbose_level(1, "setup_sliders")
         if len(times) > 0:
@@ -3053,7 +3039,6 @@ class VView(object):
                 0.9,
             )
 
-    @profile
     def setup_axes(self):
         self.print_verbose_level(1, "setup_axes")
         # display coordinates axes
@@ -3067,7 +3052,6 @@ class VView(object):
         self.widget.SetEnabled(True)
         self.widget.InteractiveOn()
 
-    @profile
     def setup_siconos_text(self):
         self.print_verbose_level(1, "setup_siconos_text")
         # Create a text actor.
@@ -3090,7 +3074,6 @@ class VView(object):
         # self._renderer.SetBackground(colors.GetColor3d('DarkGreen'))
 
     # this should be extracted from the VView class
-    @profile
     def export(self):
         self.print_verbose("export start")
         times = self.io_reader._times[
@@ -3216,7 +3199,6 @@ class VView(object):
 
             big_data_writer.Write()
 
-    @profile
     def export_raw_data(self):
 
         times = self.io_reader._times[
@@ -3364,7 +3346,6 @@ class VView(object):
 
         sys.stdout.write("\n")
 
-    @profile
     def initialize_vtk(self):
         self.print_verbose("initialize_vtk")
         if not self.opts.gen_para_script:
@@ -3477,7 +3458,6 @@ class VView(object):
 
                 self.renderer.ResetCamera()
 
-    @profile
     def initialize_gui(self):
         self.print_verbose("initialize_gui")
         self.setup_vtk_renderer()
@@ -3489,7 +3469,6 @@ class VView(object):
 
         self.gui_initialized = True
 
-    @profile
     def run(self):
         self.print_verbose("vview start")
         self.initialize_vtk()
