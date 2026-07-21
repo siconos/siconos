@@ -179,7 +179,7 @@ theta = 0.50001
 
 solver = sn.solver_ids.SICONOS_FRICTION_2D_NSGS
 
-options = sn.solver_options_create(solver)
+options = sn.SolverOptions(solver)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = itermax
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
 options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
@@ -204,7 +204,7 @@ friction_contact_trace_params = FrictionContactTraceParams(
 
 run_options = MechanicsHdf5Runner_run_options()
 run_options['t0'] = 0
-run_options['T'] = 15
+run_options['T'] = 10
 run_options['h'] = hstep
 run_options['gravity_scale'] = 1
 run_options['bullet_options'] = bullet_options

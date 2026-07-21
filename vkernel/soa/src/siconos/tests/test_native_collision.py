@@ -77,7 +77,7 @@ def make_input():
 # with the vview command.
 
 # LEMKE failure when mu=0
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
+options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100000
 options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-12
 

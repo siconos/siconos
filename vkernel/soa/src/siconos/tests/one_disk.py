@@ -42,7 +42,7 @@ bullet_options.perturbationIterations = 1
 #bullet_options.contactBreakingThreshold = 1
 bullet_options.minimumPointsPerturbationThreshold = 1
 
-options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
 options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
@@ -78,7 +78,7 @@ run_options['with_timer']=True
 #run_options['output_contact_info']=True
 #run_options['output_contact_work']=False # failure for bullet/features-eigen2
 
-#options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_LEMKE)
+#options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_LEMKE)
 
 
 

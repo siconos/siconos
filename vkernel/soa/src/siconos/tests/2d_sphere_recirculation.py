@@ -416,7 +416,7 @@ else:
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
 
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
+options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-3
 options.iparam[sn.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
