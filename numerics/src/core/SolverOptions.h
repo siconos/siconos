@@ -115,6 +115,9 @@ enum SICONOS_IPARAM_ERROR_EVALUATION_ENUM {
 enum SICONOS_DPARAM {
   SICONOS_DPARAM_TOL = 0,
   SICONOS_DPARAM_RESIDU = 1,
+  SICONOS_DPARAM_TIME_BEFORE_LOOP = 20, // time before while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_IN_LOOP = 21, // time inside while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_AFTER_LOOP = 22 // time after while loop in fc2d_nsgs_graph_permut
 };
 
 #if defined(__cplusplus)

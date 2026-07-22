@@ -322,9 +322,11 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
 
   color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
+  SparseBlockStructuredMatrix* SBM_problem = NULL;
+
   /* Create SBM if it does not exist */
   if (!problem->M->matrix1) {
-    SparseBlockStructuredMatrix* SBM_problem = SBM_new();
+    SBM_problem = SBM_new();
     switch (problem->M->storageType) {
       // Convert DENSE -> SBM
       case NM_DENSE: {
@@ -355,7 +357,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
 
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
-  unsigned int* rowIndex = (unsigned int*)malloc(nc * sizeof(unsigned int));
+  size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
 
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 

@@ -356,7 +356,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
-  unsigned int* rowIndex = (unsigned int*)malloc(nc * sizeof(unsigned int));
+  size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
 
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 

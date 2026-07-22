@@ -281,6 +281,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   /* verbose=1; */
   /* Global Solver parameters*/
 
+  double start_time = omp_get_wtime();
+
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
@@ -406,6 +408,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   size_t* index2_data = NULL;
 
   unsigned int* freeze_contacts = NULL;
+
+  double end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_BEFORE_LOOP] = end_time - start_time;
+
+  start_time = omp_get_wtime();
+
   // FREEZING CONTACTS
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
     unsigned int pos;
@@ -678,6 +687,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     }
   }
 
+  end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_IN_LOOP] = end_time - start_time;
+
+  start_time = omp_get_wtime();
+
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
@@ -743,6 +758,10 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);  // free blocks because they were copied
   free(q_permuted);
   free(mu_permuted);
+
+  end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_AFTER_LOOP] = end_time - start_time;
 }
 
 /* ===========================================================================
