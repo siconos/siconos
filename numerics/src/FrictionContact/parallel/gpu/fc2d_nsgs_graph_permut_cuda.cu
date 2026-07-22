@@ -35,9 +35,11 @@
 #include "graph_tools.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 #include "op3x3.h"
+#include "safe_casts.h"
 
 /* Solver registration system */
 #include "numerics_errors.h"
+#include "safe_casts.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_STDOUT */
@@ -79,12 +81,12 @@
  * Only works on SBM matrices.
  */
 static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
-  unsigned int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
   double* sbcm = (double*)calloc(4 * nc, sizeof(double));
   double* block;
   int diagPos;
 
-  for (unsigned int i = 0; i < nc; ++i) {
+  for (size_t i = 0; i < nc; ++i) {
     diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
     block = problem->M->matrix1->block[diagPos];
     for (int j = 0; j < 4; j++) sbcm[i * 4 + j] = block[j];
@@ -189,12 +191,12 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
   return has_not_converged;
 }
 
-static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
+static double* fc2d_nsgs_compute_local_problem_determinant(size_t nc,
                                                            double* diagonal_blocks) {
   double* diagonal_block_determinant = (double*)calloc(sizeof(double), nc);
   double* block;
 
-  for (unsigned int i = 0; i < nc; ++i) {
+  for (size_t i = 0; i < nc; ++i) {
     block = &diagonal_blocks[4 * i];
     diagonal_block_determinant[i] = block[0] * block[3] - block[1] * block[2];
     if (diagonal_block_determinant[i] < DBL_EPSILON) {
@@ -303,7 +305,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // Get solver parameters
   int* iparam = options->iparam;
   double* dparam = options->dparam;
-  unsigned int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
   double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
   double norm_r = 0.0;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -358,7 +360,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
   size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
 
-  for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
+  for (size_t i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
   SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
@@ -374,7 +376,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   double* mu_permuted = (double*)malloc(nc * sizeof(double));
   double* q_permuted = (double*)malloc(nc * 2 * sizeof(double));
-  for (unsigned int i = 0; i < nc; i++) {
+  for (size_t i = 0; i < nc; i++) {
     q_permuted[2 * i] = problem->q[2 * inv_permutation[i]];
     q_permuted[2 * i + 1] = problem->q[2 * inv_permutation[i] + 1];
     mu_permuted[i] = problem->mu[inv_permutation[i]];
@@ -394,7 +396,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // conversion, unless the conversion function checks for 0 elements
   double* block;
   int diagPos;
-  for (unsigned int i = 0; i < nc; ++i) {
+  for (size_t i = 0; i < nc; ++i) {
     diagPos = SBM_diagonal_block_index(SBM_permuted, i);
     block = SBM_permuted->block[diagPos];
     for (int j = 0; j < 4; j++) block[j] = 0.0;
@@ -408,11 +410,11 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   // submatrix
   int64_t* h_all_RowOffsets = (int64_t*)malloc((2 * nc + n_colors) * sizeof(int64_t));
   size_t k = 0;
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     size_t start_line = 2 * sum_sizes[color];
     size_t end_line = 2 * sum_sizes[color + 1];
 
-    for (unsigned int row = start_line; row < end_line + 1; row++) {
+    for (size_t row = start_line; row < end_line + 1; row++) {
       h_all_RowOffsets[k] =
           SBM_permuted_csr_nodiag->p[row] - SBM_permuted_csr_nodiag->p[start_line];
       k++;
@@ -447,7 +449,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   size_t start_line, end_line;
   size_t current_nnz;
   size_t cumul_nnz = 0;
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     start_line = 2 * sum_sizes[color];
     end_line = 2 * sum_sizes[color + 1];
     n_rows = end_line - start_line;
@@ -480,7 +482,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   cusparseDnVecDescr_t* all_q_new =
       (cusparseDnVecDescr_t*)malloc(n_colors * sizeof(cusparseDnVecDescr_t));
 
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     CHECK_CUSPARSE(cusparseCreateDnVec(&all_q_new[color],
                                        2 * (sum_sizes[color + 1] - sum_sizes[color]),
                                        &d_q_new[2 * sum_sizes[color]], CUDA_R_64F))
@@ -491,7 +493,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   alpha = 1.0;
   beta = 0.0;
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha,
                                            all_cusparse_csrmat[color], vec_z, &beta,
                                            all_q_new[color], CUDA_R_64F,
@@ -647,7 +649,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   /* Permutate z and w back */
   double* z_permut = (double*)malloc(2 * nc * sizeof(double));
   double* w_permut = (double*)malloc(2 * nc * sizeof(double));
-  for (unsigned int i = 0; i < nc; i++) {
+  for (size_t i = 0; i < nc; i++) {
     z_permut[2 * inv_permutation[i]] = z[2 * i];
     z_permut[2 * inv_permutation[i] + 1] = z[2 * i + 1];
     w_permut[2 * inv_permutation[i]] = w[2 * i];
@@ -668,7 +670,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   free(inv_permutation);
 
   // Destroy matrix/vector descriptors
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     CHECK_CUSPARSE(cusparseDestroySpMat(all_cusparse_csrmat[color]))
     CHECK_CUSPARSE(cusparseDestroyDnVec(all_q_new[color]))
     CHECK_CUDA(cudaFree(d_all_Buffer[color]))

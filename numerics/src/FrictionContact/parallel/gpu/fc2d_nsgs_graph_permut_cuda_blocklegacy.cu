@@ -22,28 +22,30 @@
 #include <stdio.h>   // for NULL, fprintf, printf, stderr
 #include <stdlib.h>  // for free, malloc, calloc
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_IPARAM...
-#include "LCP_Solvers.h"                   // for lcp_nsgs_SBM_buildLocalPro...
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
-#include "SiconosBlas.h"                   // for cblas_dnrm2
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
-#include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
-#include "fc2d_compute_error.h"            // for fc2d_compute_error
+// #include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IPARAM...
+// #include "LCP_Solvers.h"                   // for lcp_nsgs_SBM_buildLocalPro...
+// #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"         // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"      // for NumericsMatrix, RawNumeric...
+#include "SiconosBlas.h"         // for cblas_dnrm2
+#include "SolverOptions.h"       // for SolverOptions, SICONOS_DPA...
+#include "SparseBlockMatrix.h"   // for SparseBlockStructuredMatrix
+#include "fc2d_Solvers.h"        // for fc2d_nsgs_sbm, fc2d_spa...
+#include "fc2d_compute_error.h"  // for fc2d_compute_error
 #include "graph_tools.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 #include "op3x3.h"
+#include "safe_casts.h"
 
 /* Solver registration system */
 #include "numerics_errors.h"
+#include "safe_casts.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
-#include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END
+// #include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
@@ -80,12 +82,12 @@
  * Only works on SBM matrices.
  */
 static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
-  unsigned int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
   double* sbcm = (double*)calloc(4 * nc, sizeof(double));
   double* block;
   int diagPos;
 
-  for (unsigned int i = 0; i < nc; ++i) {
+  for (size_t i = 0; i < nc; ++i) {
     diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
     block = problem->M->matrix1->block[diagPos];
     for (int j = 0; j < 4; j++) sbcm[i * 4 + j] = block[j];
@@ -191,7 +193,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
   return has_not_converged;
 }
 
-static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
+static double* fc2d_nsgs_compute_local_problem_determinant(size_t nc,
                                                            double* diagonal_blocks) {
   double* diagonal_block_determinant = (double*)calloc(sizeof(double), nc);
   double* block;
@@ -305,7 +307,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   // Get solver parameters
   int* iparam = options->iparam;
   double* dparam = options->dparam;
-  unsigned int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
   double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
   double norm_r = 0.0;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -359,7 +361,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
   size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
 
-  for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
+  for (size_t i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
   SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
@@ -375,7 +377,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
 
   double* mu_permuted = (double*)malloc(nc * sizeof(double));
   double* q_permuted = (double*)malloc(nc * 2 * sizeof(double));
-  for (unsigned int i = 0; i < nc; i++) {
+  for (size_t i = 0; i < nc; i++) {
     q_permuted[2 * i] = problem->q[2 * inv_permutation[i]];
     q_permuted[2 * i + 1] = problem->q[2 * inv_permutation[i] + 1];
     mu_permuted[i] = problem->mu[inv_permutation[i]];
@@ -391,11 +393,11 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   // submatrix
   int* h_all_RowOffsets = (int*)malloc((nc + n_colors) * sizeof(int));
   size_t k = 0;
-  for (unsigned int color = 0; color < n_colors; color++) {
+  for (size_t color = 0; color < n_colors; color++) {
     size_t start_line = sum_sizes[color];
     size_t end_line = sum_sizes[color + 1];
 
-    for (unsigned int row = start_line; row < end_line + 1; row++) {
+    for (size_t row = start_line; row < end_line + 1; row++) {
       h_all_RowOffsets[k] =
           SBM_permuted->index1_data[row] - SBM_permuted->index1_data[start_line];
       k++;
@@ -429,16 +431,16 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   int ii = 0;
   int diagPos = SBM_diagonal_block_index(SBM_permuted, ii);
 
-  for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++) {
+  for (size_t blockNum = 0; blockNum < nbblocks; blockNum++) {
     if (blockNum == diagPos) {
-      for (unsigned int j = 0; j < 4; j++) {
+      for (size_t j = 0; j < 4; j++) {
         h_all_Values[blockNum * 4 + j] = 0;
       }
       ii++;
       diagPos = SBM_diagonal_block_index(SBM_permuted, ii);
     } else {
       current_block = SBM_permuted->block[blockNum];
-      for (unsigned int j = 0; j < 4; j++) {
+      for (size_t j = 0; j < 4; j++) {
         h_all_Values[blockNum * 4 + j] = current_block[j];
       }
     }
@@ -612,7 +614,7 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   /* Permutate z and w back */
   double* z_permut = (double*)malloc(2 * nc * sizeof(double));
   double* w_permut = (double*)malloc(2 * nc * sizeof(double));
-  for (unsigned int i = 0; i < nc; i++) {
+  for (size_t i = 0; i < nc; i++) {
     z_permut[2 * inv_permutation[i]] = z[2 * i];
     z_permut[2 * inv_permutation[i] + 1] = z[2 * i + 1];
     w_permut[2 * inv_permutation[i]] = w[2 * i];
