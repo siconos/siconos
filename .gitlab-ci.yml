@@ -3,407 +3,133 @@
 include:
    - ci_gitlab/gitlab-ci-siconos-templates.yml
 
-# --- First, build docker images that contains all the required dependencies to build siconos ---
-# This step is optional and run only when the commit message starts with "[docker-build]"
-debian-bookworm:docker-build:
-  variables:
-    IMAGE_NAME: debian-bookworm
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
-  extends: .docker-build
 
-fedora-38:docker-build:
-  variables:
-    IMAGE_NAME: fedora-38
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora-38
-  extends: .docker-build
+variables:
+  PACKAGE_NAME: documentation
+  # Branch name (lower-case)
+  PACKAGE_VERSION: "${CI_COMMIT_REF_SLUG}"
+  ARCHIVE_NAME: "documentation.tgz"
 
-ubuntu22.04:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu22.04
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-  extends: .docker-build
 
-ubuntu24.04:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu24.04
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
-  extends: .docker-build
+## WARNING: this branch is to be frozen to keep trace of the old master branch.
+## --> CI to generate images, doc, release for the last commit in the branch before freeze
+## --> CI (manual), if one day we need to re-generate things ...
+## 
 
-  
-image4doc:docker-build:
+# An image with all options (occ, doc and so on)
+# - reproducible (try to) --> digest, pin packages, lock ...
+# - including everything required to compile siconos with all components
+legacy-full:docker-build:
   variables:
-    IMAGE_NAME: ubuntu22.04
-    SICONOS_DOCKER_TARGET: siconos-base-doc
-    RESULT_NAME: $SICONOS_REGISTRY/sources/image4doc
-  extends: .docker-build
-  stage: docker-build-layer2
-  needs: ["ubuntu22.04:docker-build"]
-
-opencascade:docker-build:
-  variables:
-    IMAGE_NAME: opencascade
-    SICONOS_DOCKER_TARGET: mamba-occenv
-    RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
-    SICONOS_DOCKER_TARGET: mamba-occenv
+    IMAGE_NAME: legacy-full-2026-07
+    SICONOS_DOCKER_TARGET: siconos-doc
+    RESULT_NAME: $SICONOS_REGISTRY/sources/legacy-full-2026-07
   extends: .docker-build
   when: manual
 
-opensuse-tumbleweed:docker-build:
+# -- Configure, build and test Siconos --
+
+legacy:configure:
   variables:
-    IMAGE_NAME: opensuse-tumbleweed
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
-  extends: .docker-build
-  when: manual
-
-
-# A specific image, that may be used to install siconos,
-# get examples and provide some notebooks to
-# run siconos software.
-jupyter-notebook:docker-build:
-  variables:
-    IMAGE_NAME: jupyterlab
-    SICONOS_DOCKER_TARGET: jupylab
-    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab
-  extends: .docker-build
-  stage: docker-build-layer2
-  needs: ["ubuntu24.04:docker-build"]
-
-# The same, based on micromamba.
-mambaenv:docker-build:
-  variables:
-    IMAGE_NAME: jupyterlab-mamba
-    SICONOS_DOCKER_TARGET: mambaenv
-    RESULT_NAME: $SICONOS_REGISTRY/sources/mambaenv
-  extends: .docker-build
-   
-  
-# Manual jobs, used to create docker images.
-# docker-manual-img:
-#   extends: .docker-rules
-#   stage: docker-build-layer2
-#   trigger:
-#     include:
-#       - ci_gitlab/docker-manual.yml
-
-
-# -------------- Configure, build and test Siconos --------------
-
-# -- Jobs that will always be executed (rule .devel-rules) --
-
-# ------ ubuntu 24, debug setup -------
-ubuntu24.04-debug:configure:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/legacy-full-2026-07
     CDASH_SUBMIT: 1
-    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
+    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/for_legacy.cmake
   extends:
     - .siconos-configure
     - .devel-rules
   needs:
-    - job: ubuntu24.04:docker-build
+    - job: legacy-full:docker-build
       optional: true
 
-ubuntu24.04-debug:build:
+legacy:build:
   variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/legacy-full-2026-07
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
     - .devel-rules
-  needs: ["ubuntu24.04-debug:configure"]
+  needs: ["legacy:configure"]
 
-ubuntu24.04-debug:test:
+legacy:test:
     variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/legacy-full-2026-07
       CDASH_SUBMIT: 1
     extends:
       - .siconos-test
       - .devel-rules
-    needs: ["ubuntu24.04-debug:build"]
+    needs: ["legacy:build"]
 
-# ------ ubuntu 24, release setup -------
-ubuntu24.04-release:configure:
+# -- Build doc --
+legacy:doc:
+  image: $SICONOS_REGISTRY/sources/legacy-full-2026-07
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-configure
-    - .devel-rules
-  needs:
-    - job: ubuntu24.04:docker-build
-      optional: true
-
-ubuntu24.04-release:build:
-  variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
-      CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-    - .devel-rules
-  needs: ["ubuntu24.04-release:configure"]
-
-ubuntu24.04-release:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
-      CDASH_SUBMIT: 1
-    extends:
-      - .siconos-test
-      - .devel-rules
-    needs: ["ubuntu24.04-release:build"]
-
-# ------ ubuntu 22, default setup -------
-ubuntu22.04-release:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-     CDASH_SUBMIT: 1
-   extends:
-     - .siconos-configure
-   needs:
-     - job: ubuntu22.04:docker-build
-       optional: true
-
-ubuntu22.04-release:build:
-  variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-      CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04-release:configure"]
-
-ubuntu22.04-release:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-      CDASH_SUBMIT: 1
-    extends:
-      - .siconos-test
-    needs: ["ubuntu22.04-release:build"]
-
-# --- Siconos inside a notebook, default setup ---
-mambalab:configure:
-  variables:
-     OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
-     CDASH_SUBMIT: 1
-     BLA_VENDOR: OpenBLAS
-  extends:
-    - .siconos-configure
-    - .devel-rules
-  needs:
-    - job: mambaenv:docker-build
-      optional: true
-
-
-mambalab:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-    - .devel-rules
-  needs: ["mambalab:configure"]
-
-mambalab:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
-      CDASH_SUBMIT: 1
-    extends:
-      - .siconos-test
-      - .devel-rules
-    needs: ["mambalab:build"]
-    
-# ------ ubuntu 22, with mechanisms component -------
-# optional (manual)
-with-mechanisms:configure:
-  variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-     CDASH_SUBMIT: 1
-     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
-  extends:
-    - .siconos-configure
-    - .devel-rules
-  needs:
-    - job: opencascade:docker-build
-      optional: true
-    
-with-mechanisms:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-    - .devel-rules
-  needs: ["with-mechanisms:configure"]
-
-with-mechanisms:test:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-test
-    - .devel-rules
-  needs: ["with-mechanisms:build"]
-
-# -- Jobs executed for MR or main branch only --
-
-# ------ ubuntu 22, numerics only, fclib -------
-ubuntu22.04-numerics-fclib:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-     CDASH_SUBMIT: 1
-     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/numerics_with_fclib.cmake
-   extends:
-    - .siconos-configure
-   needs:
-    - job: ubuntu22.04:docker-build
-      optional: true
-
-ubuntu22.04-numerics-fclib:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04-numerics-fclib:configure"]
-
-ubuntu22.04-numerics-fclib:test:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-test
-  needs: ["ubuntu22.04-numerics-fclib:build"]
-
-
-    
-# ------ debian bookworm, default setup -------
-debian-bookworm:configure:
-  variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
-     CDASH_SUBMIT: 1
-  extends:
-    - .siconos-configure
-  needs:
-    - job: debian-bookworm:docker-build
-      optional: true
-
-debian-bookworm:build:
-  variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
-      CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["debian-bookworm:configure"]
-
-debian-bookworm:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
-      CDASH_SUBMIT: 1
-    extends:
-      - .siconos-test
-    needs: ["debian-bookworm:build"]
-
-      
-# --- fedora 38, default setup ---
-fedora-38:configure:
-  variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
-     CDASH_SUBMIT: 1
-  extends:
-    - .siconos-configure
-  needs:
-    - job: fedora-38:docker-build
-      optional: true
-
-fedora-38:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["fedora-38:configure"]
-
-fedora-38:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
-      CDASH_SUBMIT: 1
-    extends:
-    - .siconos-test
-    needs: ["fedora-38:build"]
-
-# --- opensuse-tumbleweed default setup ---
-# Only manual activation when required to test user configs.
-opensuse-tumbleweed:configure:
-  variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
-     CDASH_SUBMIT: 1
-  extends:
-    - .siconos-configure
-  needs:
-    - job: opensuse-tumbleweed:docker-build
-      optional: true
+    OPENBLAS_NUM_THREADS: 1
+  stage: doc-deploy
+  artifacts:
+    paths:
+      - ${ARCHIVE_NAME}
+    expire_in: 2 days  
+  script:
+      - cd build; make doc -j 32
+      - cd $CI_PROJECT_DIR; tar -zcvf ${ARCHIVE_NAME} $CI_PROJECT_DIR/build/docs/build/html
+      - ls -altr $CI_PROJECT_DIR/
   when: manual
+  needs: ["legacy:build"]
 
-opensuse-tumbleweed:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["opensuse-tumbleweed:configure"]
-  when: manual
-
-opensuse-tumbleweed:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
-      CDASH_SUBMIT: 1
-    extends:
-    - .siconos-test
-    needs: ["opensuse-tumbleweed:build"]
-    when: manual
-
-# --- Jobs to install siconos and produce a Docker image "Siconos ready" ---
-
-# Chosen OS for the install is ubuntu 22
-# The image is saved in siconos-tutorials (public) registries
-# Remark: branch name will be appended to image name.
-# Tag will correspond to the commit ref
-# siconos:install:
-#   variables: 
-#     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-#     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
-#   extends:
-#     - .siconos-install
-#     - .devel-rules
-#   needs: ["ubuntu22.04-release:build"] 
-
-# The image is saved in siconos-tutorials (public) registries
-# Remark: branch name will be appended to image name.
-# Tag will correspond to the commit ref
-jupyterlab:install:
-  variables:
-    IMAGE_NAME: siconoslab
-    RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
-    SICONOS_DOCKER_TARGET: siconoslab
-  extends:
-    - .siconos-jupyterlab-install
-    - .devel-rules
-  needs: ["ubuntu24.04-release:build"]
-
+# --- install siconos and produce a Docker image "Siconos ready" ---
 mambalab:install:
     variables:
       IMAGE_NAME: siconoslab-mamba
-      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-occ
+      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
       SICONOS_DOCKER_TARGET: siconoslab
     extends:
       - .siconos-jupyterlab-install
-    needs: ["with-mechanisms:build"]
+    needs: ["legacy:build"]
+
+# Start CI in siconos-tutorials, when required
+# How? Use [with examples] in your commit message.
+# Based on the specific docker image build and saved during siconos:install step.
+# Examples will be executed using imag $LAB_NAME-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-main
+bridge:examples:
+  stage: test
+  variables:
+    # base name of the docker image used in child project.
+    LAB_NAME: siconoslab
+  trigger: 
+    project: nonsmooth/siconos-tutorials
+    branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!
+    strategy : depend
+    forward :  
+      yaml_variables: true # to send LAB_NAME
+  needs: ["mambalab:install"]
+  rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
+    - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
+      when: on_success
+    - when: manual    
+
+
+# https://docs.gitlab.com/user/packages/generic_packages/
+publish-package:
+  stage: doc-deploy
+  image: curlimages/curl:latest
+  needs:
+    - legacy:doc
+  script:
+    - |
+      PACKAGE_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
+      echo "Uploading ${ARCHIVE_NAME}"
+      echo "Destination: ${PACKAGE_URL}"
+      curl \
+        --fail \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file ${ARCHIVE_NAME} \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
+# --fail --> job fails if http error during curl
+
 
 # Job run when a new tag (release) is created.
+# See https://docs.gitlab.com/user/project/releases/release_fields/
+# Standard release + link to package registry with the documentation
 release_job:
     stage: release
     image: registry.gitlab.com/gitlab-org/release-cli:latest
@@ -413,36 +139,11 @@ release_job:
     script:
     - echo "running release_job"
     release:                               # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
-      tag_name: '$CI_COMMIT_TAG'
-      description: '$CI_COMMIT_TAG'
-
-# Start CI in siconos-tutorials, when required
-# How? Use [with examples] in your commit message.
-# Based on the specific docker image build and saved during siconos:install step.
-# Examples will be executed using imag $LAB_NAME-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-master
-bridge:examples:
-  stage: examples
-  variables:
-    LAB_NAME: siconoslab-occ # base name of the docker image used in child project
-  trigger: 
-    project: nonsmooth/siconos-tutorials
-    branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!
-    strategy : depend
-    forward :  
-      yaml_variables: true # to send LAB_NAME
-  needs: ["mambalab:install"]
-  rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
-    
-
-# --- Creates a new pipeline to build documentation
-# Trigger : manual.
-# When the job is activated (manual trigger through the web interface),
-# it starts a new pipeline, i.e. includes jobs declared in docs/build-doc.yml
-generate-doc:
-  stage: configure
-  trigger:
-    include:
-      - docs/build-doc.yml
-  when: manual
-
+      tag_name: "${CI_COMMIT_TAG}"
+      description: "${CI_COMMIT_REF_NAME} - Frozen documentation"
+      assets: # Downloadables things on release page 
+        links:
+          - name: documentation.tar.gz
+            url: "${CI_SERVER_URL}/${CI_PROJECT_PATH}/-/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
+            filepath: "/documentation"
+    needs: ["legacy:doc"]
