@@ -35,6 +35,7 @@ struct moreau_jean_element : item {
 
   struct attributes {
     some::item_ref<osi_assembled_t> assembled_osi;
+    some::unbounded_collection<some::indice> sum_dofs;
     some::indice ds_offset;
     some::indice inter_offset;
     some::indice number_of_involved_ds;
@@ -62,7 +63,9 @@ struct moreau_jean_element : item {
           std::declval<data_t>(), storage::index<system, int>{0}))>();
     }
 
-    decltype(auto) total_dofs(auto step)
+    decltype(auto) sum_dofs() { return storage::attr<"sum_dofs">(*self()); }
+
+    void compute_total_dofs(auto step)
     {
       if constexpr (runtime_dof()) {
         // runtime degrees of freedom: we must compute the sum
@@ -75,15 +78,26 @@ struct moreau_jean_element : item {
         auto& involveds =
             storage::prop_values<system, "involved">(data, step);
 
-        indice total_cols = 0;
+        indice sum_cols = 0;
+        sum_dofs().clear();
+        sum_dofs().push_back(0.);
         for (auto [mass_matrix, involved] :
              view::zip(mass_matrices, involveds)) {
           if (involved) {
-            total_cols += algebra::ncols(mass_matrix);
+            sum_cols += algebra::ncols(mass_matrix);
+            sum_dofs().push_back(sum_cols);
           }
         }
+      }
+      else {
+        // compile time systems => sum dofs useless
+      }
+    }
 
-        return total_cols;
+    decltype(auto) total_dofs()
+    {
+      if constexpr (runtime_dof()) {
+        return sum_dofs()[sum_dofs().size() - 1];
       }
       else {
         // compile time degree of freedom: same dof for all systems of this
@@ -156,9 +170,9 @@ struct moreau_jean_element : item {
 
     decltype(auto) h_matrix_assembled()
     {
-      auto h_matrix1_storage = get_storage_type(self()->data(), h_matrix1{});
+      auto h_matrix2_storage = get_storage_type(self()->data(), h_matrix2{});
 
-      return algebra::mat_view(h_matrix1_storage,
+      return algebra::mat_view(h_matrix2_storage,
                                assembled_osi().h_matrix_assembled(),
                                inter_offset(), ds_offset());
     }
@@ -552,14 +566,10 @@ struct moreau_jean_element : item {
                     y[0] = rrel.compute_h(step, hds1, hds2);
 
                     indice i = rrel.contact_index();
-                    indice idx1 =
-                      rrel.mesh().global_indices()[i];
-                    indice idy1 =
-                      rrel.mesh().global_indices()[i+1];
-                    indice idx2 =
-                      rrel.mesh().global_indices()[i+2];
-                    indice idy2 =
-                      rrel.mesh().global_indices()[i+3];
+                    indice idx1 = rrel.mesh().global_indices()[i];
+                    indice idy1 = rrel.mesh().global_indices()[i + 1];
+                    indice idx2 = rrel.mesh().global_indices()[i + 2];
+                    indice idy2 = rrel.mesh().global_indices()[i + 3];
 
                     ydot = hm1 * ds1_velocities[ds1.value()];
 
@@ -665,140 +675,6 @@ struct moreau_jean_element : item {
       }
     }
 
-    auto compute_active_interactions(auto step, auto h)
-    {
-      auto& data = self()->data();
-      using env = decltype(self()->env());
-      using indice = typename env::indice;
-
-      auto& ys = storage::attr_values<y>(data, step);
-      auto& ydots = storage::attr_values<ydot>(data, step);
-
-      auto& ids1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ids2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
-
-      auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
-
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
-
-      const auto& interactions = storage::handles<interaction>(data, step);
-
-      // all ds -> not involved
-      // without zip : involved is a copy not a ref!!
-      for (auto [involved] : view::zip(involveds)) {
-        involved = false;
-      };
-
-      auto gamma_v = 0.5;
-
-      indice ds_counter = 0;
-      indice inter_counter = 0;
-      for (auto [y, ydot, activation, nds, ids1, ids2, inter] : view::zip(
-               ys, ydots, activations, ndss, ids1s, ids2s, interactions)) {
-        activation = ((y + gamma_v * h * ydot)(0) <=
-                      self()->constraint_activation_threshold());
-
-        if (activation) {
-          inter_counter++;
-
-          auto ds2 = storage::make_handle(data, ids2);
-
-          if (!prop<"involved">(ds2)) {
-            prop<"involved">(ds2) = true;
-            prop<"index">(ds2) = ds_counter++;
-          }
-
-          if (nds == 2) {
-            auto ds1 = storage::make_handle(data, ids1);
-
-            if (!prop<"involved">(ds1)) {
-              prop<"involved">(ds1) = true;
-              prop<"index">(ds1) = ds_counter++;
-            };
-          }
-        }
-      }
-
-      std::print(
-          "  [compute_active_interactions] total number of ds: {}, total "
-          "number of "
-          "interactions: {}\n",
-          std::size(involveds), std::size(activations));
-
-      std::print(
-          "  [compute_active_interactions] number of involved ds:{}, "
-          "number of "
-          "activated interactions: {}\n",
-          ds_counter, inter_counter);
-
-      number_of_interactions() = inter_counter;
-      number_of_involved_ds() = ds_counter;
-
-      return std::pair{inter_counter, ds_counter};
-    }
-
-    // strategy 1 : assemble the matrix for involved ds only
-    auto assemble_h_matrix_for_involved_ds(auto step)
-    {
-      auto& data = self()->data();
-      auto&& h_matrix = self()->h_matrix_assembled();
-      auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
-      auto& h_mat1s =
-          storage::attr_values<interaction, "h_matrix1">(data, step);
-      auto& h_mat2s =
-          storage::attr_values<interaction, "h_matrix2">(data, step);
-      auto& ids1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ids2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto& indices = storage::prop_values<system, "index">(data, step);
-
-      size_t i = 0;
-      for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
-           view::zip(activations, h_mat1s, h_mat2s, ids1s, ids2s)) {
-        if (activation) {
-          auto j1 = indices[ids1.value()];
-          auto j2 = indices[ids2.value()];
-
-          // BC velocities for ds1
-          auto handle_ds1 = storage::make_handle(data, ids1);
-          auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
-
-          // modification on a copy
-          auto h_mat1_mod = h_mat1;
-
-          // zero columns in h_mat1_mod / BC DOFs in ds1
-          for (auto bc_local_idx : bc_vel_1) {
-            h_mat1_mod.col(bc_local_idx).setZero();
-          }
-
-          if (j1 != j2) {
-            // modification on a copy
-            auto h_mat2_mod = h_mat2;
-
-            auto handle_ds2 = storage::make_handle(data, ids2);
-            auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
-
-            // zero columns in h_mat2_mod / BC DOFs in ds2
-            for (auto bc_local_idx : bc_vel_2) {
-              h_mat2_mod.col(bc_local_idx).setZero();
-            }
-
-            // insertion
-            set_value(h_matrix, i, j1, h_mat1_mod);
-            set_value(h_matrix, i, j2, h_mat2_mod);
-          }
-          else {
-            // self interaction
-            set_value(h_matrix, i, j2, h_mat1_mod);
-          }
-
-          i++;
-        }
-      }
-    }
-
     auto assemble_vectors(auto step)
     {
       auto& data = self()->data();
@@ -882,24 +758,6 @@ struct moreau_jean_element : item {
       for (auto [ydot, ydot_next, inslaw] :
            view::zip(ydots, ydots_next, inslaws)) {
         ydot_next += es[inslaw.value()] * ydot;
-      }
-    }
-
-    // compute H vfree
-    void compute_q_nsp_vector_assembled(auto step)
-    {
-      auto& data = self()->data();
-
-      auto& ydots_next = storage::attr_values<ydot>(data, step + 1);
-      auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
-
-      auto k = 0;
-      for (auto [ydot_next, activation] :
-           view::zip(ydots_next, activations)) {
-        if (activation) {
-          set_value(q_nsp_vector_assembled(), k++, ydot_next);
-        }
       }
     }
   };
