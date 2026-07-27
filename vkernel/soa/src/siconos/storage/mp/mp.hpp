@@ -245,7 +245,7 @@ struct database {
   constexpr database() : store{} {};
   database(tuple<Pairs...> &&m)
       : store(to_map(static_cast<tuple<Pairs...> &&>(m))){};
-  decltype(to_map(tuple<Pairs...>{})) store;
+  decltype(to_map(std::declval<tuple<Pairs...>>())) store;
 };
 
 // Faster compilation but this error occurs with python bindings:
