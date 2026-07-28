@@ -50,16 +50,16 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   } else {
     strcpy(str, "foo_");
   }
-  const char* separators = "/";
-  char* strToken = strtok(str, separators);
-  for (int i = 0; i < 5; i++) {
-    if (strToken != NULL) strToken = strtok(NULL, separators);
-  }
-  strToken = strtok(strToken, ".");
-  FILE* fileName = fopen("problem_name.res", "w");
-  fprintf(fileName, "%s", strToken);
-  fclose(fileName);
-  free(str);
+  // const char* separators = "/";
+  // char* strToken = strtok(str, separators);
+  // for (int i = 0; i < 5; i++) {
+  //   if (strToken != NULL) strToken = strtok(NULL, separators);
+  // }
+  // strToken = strtok(strToken, ".");
+  // FILE* fileName = fopen("problem_name.res", "w");
+  // fprintf(fileName, "%s", strToken);
+  // fclose(fileName);
+  // free(str);
 
   /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
