@@ -255,7 +255,7 @@ struct moreau_jean_element : item {
         using vec_mu_t = traits::config<env_t>::template convert<
             some::vector<some::scalar, some::indice_value<1>>>::type;
         return algebra::vec_view<vec_mu_t>(
-            assembled_osi().mu_vector_assembled(), inter_offset());
+            assembled_osi().mu_vector_assembled(), inter_offset()/2);
       }
       else {
         // cf
