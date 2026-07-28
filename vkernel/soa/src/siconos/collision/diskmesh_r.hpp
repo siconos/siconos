@@ -3,8 +3,6 @@
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/mesh.hpp"
 
-#include<print>
-
 namespace siconos::collision {
 
 struct mesh_relation {};
@@ -109,15 +107,6 @@ struct diskmesh_r : item,
       h_matrix2(0, 3) = -t * dty;
       h_matrix2(1, 2) = -h_matrix2(0, 3);
       h_matrix2(1, 3) = h_matrix2(0, 2);
-
-      std::println("rrel.contact_index()={}", contact_index());
-      std::println("dtx={}", dtx);
-      std::println("dty={}", dty);
-
-      std::println("nnorm={}", nnorm);
-
-      std::println("xw1={},yw1={},xw2={},yw2={}",xw1,yw1,xw2,yw2);
-      std::println("q1={},{}", q1(0),q1(1));
 
     }
   };
