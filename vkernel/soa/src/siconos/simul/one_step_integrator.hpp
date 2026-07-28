@@ -373,7 +373,7 @@ struct one_step_integrator {
         }
 
         std::print(
-            "  [compute_active_interactions] total number of involved ct ds: "
+            "  [compute_active_interactions] total number of ct ds: "
             "{}, "
             "total "
             "number of "
@@ -381,16 +381,29 @@ struct one_step_integrator {
             std::size(ct_involveds), std::size(ct_activations));
 
         std::print(
+            "  [compute_active_interactions] total number of rt ds: "
+            "{}, "
+            "total "
+            "number of "
+            "rt ct interactions: {}\n",
+            std::size(rt_involveds), std::size(rt_ct_activations));
+
+        std::print(
+            "  [compute_active_interactions] number of involved ct ds:{}, "
+            "number of "
+            "activated ct interactions: {}\n",
+            ct_ds_counter, ct_inter_counter);
+
+        std::print(
             "  [compute_active_interactions] number of involved rt ds:{}, "
             "number of "
-            "activated interactions: {}\n",
+            "activated ct rt interactions: {}\n",
             rt_ds_counter, rt_ct_inter_counter);
 
         auto ct_elem = std::get<0>(elements());
         auto rt_elem = std::get<1>(elements());
 
-        ct_elem.number_of_interactions() =
-            ct_inter_counter + rt_ct_inter_counter;
+        ct_elem.number_of_interactions() = ct_inter_counter;
         ct_elem.number_of_involved_ds() = ct_ds_counter;
 
         rt_elem.number_of_interactions() = rt_ct_inter_counter;

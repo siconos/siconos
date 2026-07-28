@@ -297,6 +297,10 @@ template <match::any_mat M, typename T>
 void set_value(M&& m, match::indice auto i, match::indice auto j,
                const T& value)
 {
+  assert(i>=0 && j>=0);
+  assert(i<m._m->size0);
+  assert(j<m._m->size1);
+
   if constexpr (match::scalar<T>) {
     NM_zentry(m._m, i * m.vnrows + m._offsets[0],
               j * m.vncols + m._offsets[1], value, zero_threshold);
@@ -339,6 +343,9 @@ void set_value(M&& m, match::indice auto i, match::indice auto j,
 template <typename T>
 void set_value(match::vec auto&& m, match::indice auto i, const T& value)
 {
+  assert (i>=0);
+  assert (i<m._v->size0);
+
   if constexpr (match::scalar<T>) {
     NM_zentry(m._v, i * m.vnrows + m._offset, 0, value, zero_threshold);
   }
