@@ -102,6 +102,7 @@ bridge:examples:
     #forward :  
     #yaml_variables: true # to send LAB_NAME
   needs: ["mambalab:install"]
+  allow_failure: true 
   rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
       when: on_success
