@@ -100,7 +100,8 @@ bridge:examples:
     branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!
     strategy : depend
     forward :  
-      yaml_variables: true # to send LAB_NAME
+      #yaml_variables: true # to send LAB_NAME
+      LAB_NAME: $LAB_NAME
   needs: ["mambalab:install"]
   rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
