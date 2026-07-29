@@ -89,19 +89,18 @@ mambalab:install:
 # Start CI in siconos-tutorials, when required
 # How? Use [with examples] in your commit message.
 # Based on the specific docker image build and saved during siconos:install step.
-# Examples will be executed using imag $LAB_NAME-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-main
+# Examples will be executed using imag siconoslab-$CI_COMMIT_REF_SLUG e.g. siconoslab-occ-main
 bridge:examples:
   stage: test
-  variables:
-    # base name of the docker image used in child project.
-    LAB_NAME: siconoslab
+  #variables:
+  # base name of the docker image used in child project.
+  # LAB_NAME: siconoslab
   trigger: 
     project: nonsmooth/siconos-tutorials
     branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!
     strategy : depend
-    forward :  
-      #yaml_variables: true # to send LAB_NAME
-      LAB_NAME: $LAB_NAME
+    #forward :  
+    #yaml_variables: true # to send LAB_NAME
   needs: ["mambalab:install"]
   rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/

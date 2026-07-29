@@ -22,8 +22,6 @@ variables:
   # configurations may require non-parallel builds (cf. swig +
   # serialization requires too much memory)
   PARALLEL_BUILD: 1
-  GIT_DEPTH: 1
-  #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
   # Default build path
   BUILD_DIR: $CI_PROJECT_DIR/build
 
