@@ -21,8 +21,6 @@ variables:
   # By default we allow builds to run in parallel, but certain
   # configurations may require non-parallel builds (cf. serialization that requires too much memory)
   PARALLEL_BUILD: 1
-  GIT_DEPTH: 1
-  #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
   # Default build path
   BUILD_DIR: $CI_PROJECT_DIR/build
 
@@ -53,9 +51,9 @@ stages:
   # To execute cmake and configure the project
   - configure 
   # To execute make and build the project
-  - build     
+  - build
   # Build and publish html pages
-  - doc-deploy
+  - doc-deploy 
   # To install software, generate a "siconos-ready" docker image and asave it in the registry.
   - install
   # To run all tests, examples ...
