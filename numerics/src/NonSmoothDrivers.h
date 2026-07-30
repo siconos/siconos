@@ -47,8 +47,8 @@ extern "C" {
     - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
 */
-int linearComplementarity_driver(LinearComplementarityProblem *problem, double *z, double *w,
-                                 SolverOptions *options);
+int linearComplementarity_driver(LinearComplementarityProblem* problem, double* z, double* w,
+                                 SolverOptions* options);
 
 /**
    General interface to solver for MLCP problems
@@ -63,8 +63,8 @@ int linearComplementarity_driver(LinearComplementarityProblem *problem, double *
    - >0 : otherwise see each solver for more information about the log info
    \todo Sizing the regularization parameter and apply it only on null diagnal term
 */
-int mlcp_driver(MixedLinearComplementarityProblem *problem, double *z, double *w,
-                SolverOptions *options);
+int mlcp_driver(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                SolverOptions* options);
 
 /**
    General interface to solvers for friction-contact 2D problem
@@ -75,8 +75,8 @@ int mlcp_driver(MixedLinearComplementarityProblem *problem, double *z, double *w
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int fc2d_driver(FrictionContactProblem *problem, double *reaction, double *velocity,
-                SolverOptions *options);
+int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options);
 
 /**
     General interface to solvers for friction-contact 3D problem
@@ -87,8 +87,8 @@ int fc2d_driver(FrictionContactProblem *problem, double *reaction, double *veloc
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return result (0 if successful otherwise 1).
 */
-int fc3d_driver(FrictionContactProblem *problem, double *reaction, double *velocity,
-                SolverOptions *options);
+int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options);
 
 /**
    General interface to solvers for rolling friction-contact 3D problem
@@ -99,8 +99,8 @@ int fc3d_driver(FrictionContactProblem *problem, double *reaction, double *veloc
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *reaction,
-                               double *velocity, SolverOptions *options);
+int rolling_friction_3d_driver(RollingFrictionContactProblem* problem, double* reaction,
+                               double* velocity, SolverOptions* options);
 
 /**
    General interface to solvers for rolling friction-contact 2D problem
@@ -111,8 +111,8 @@ int rolling_friction_3d_driver(RollingFrictionContactProblem *problem, double *r
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *reaction,
-                               double *velocity, SolverOptions *options);
+int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* reaction,
+                               double* velocity, SolverOptions* options);
 
 /**
    General interface to solvers for global friction-contact 2D problem
@@ -124,8 +124,8 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem *problem, double *r
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int gfc2d_driver(GlobalFrictionContactProblem *problem, double *reaction, double *velocity,
-                 double *globalVelocity, SolverOptions *options);
+int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
+                 double* globalVelocity, SolverOptions* options);
 
 /**
    General interface to solvers for global friction-contact 3D problem
@@ -137,8 +137,8 @@ int gfc2d_driver(GlobalFrictionContactProblem *problem, double *reaction, double
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int gfc3d_driver(GlobalFrictionContactProblem *problem, double *reaction, double *velocity,
-                 double *globalVelocity, SolverOptions *options);
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
+                 double* globalVelocity, SolverOptions* options);
 
 /**
    General interface to solvers for global rolling friction-contact 3D problem
@@ -149,9 +149,9 @@ int gfc3d_driver(GlobalFrictionContactProblem *problem, double *reaction, double
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *problem,
-                                      double *reaction, double *velocity,
-                                      double *globalVelocity, SolverOptions *options);
+int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem* problem,
+                                      double* reaction, double* velocity,
+                                      double* globalVelocity, SolverOptions* options);
 
 /**
     General interface to solvers for friction-contact 3D problem
@@ -162,8 +162,8 @@ int global_rolling_friction_3d_driver(GlobalRollingFrictionContactProblem *probl
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return result (0 if successful otherwise 1).
  */
-int variationalInequality_driver(VariationalInequality *problem, double *x, double *w,
-                                 SolverOptions *options);
+int variationalInequality_driver(VariationalInequality* problem, double* x, double* w,
+                                 SolverOptions* options);
 
 /**
     General interface to solvers for Affine Variational Inequalities (AVI)
@@ -176,8 +176,8 @@ int variationalInequality_driver(VariationalInequality *problem, double *x, doub
     - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
 */
-int avi_driver(AffineVariationalInequalities *problem, double *z, double *w,
-               SolverOptions *options);
+int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
+               SolverOptions* options);
 
 /**
    General interface to solver for MCP problems
@@ -188,8 +188,8 @@ int avi_driver(AffineVariationalInequalities *problem, double *z, double *w,
    \param[in,out] options structure used to define the solver(s) and its(their) parameters
    \return info termination value  0 : successful, else error.
 */
-int mcp_old_driver(MixedComplementarityProblem_old *problem, double *z, double *w,
-                   SolverOptions *options);
+int mcp_old_driver(MixedComplementarityProblem_old* problem, double* z, double* w,
+                   SolverOptions* options);
 
 /**
    General interface to solver for MCP problems -- new version
@@ -200,8 +200,8 @@ int mcp_old_driver(MixedComplementarityProblem_old *problem, double *z, double *
    \param[in,out] options structure used to define the solver(s) and its(their) parameters
    \return info termination value  0 : successful, else error.
 */
-int mcp_driver(MixedComplementarityProblem *problem, double *z, double *w,
-               SolverOptions *options);
+int mcp_driver(MixedComplementarityProblem* problem, double* z, double* w,
+               SolverOptions* options);
 
 /**
    General interface to solver for NCP problems
@@ -212,8 +212,8 @@ int mcp_driver(MixedComplementarityProblem *problem, double *z, double *w,
    solution of the problem. \param[in,out] options structure used to define the solver(s) and
    its(their) parameters \return info termination value  0 : successful, else error
 */
-int ncp_driver(NonlinearComplementarityProblem *problem, double *z, double *F,
-               SolverOptions *options);
+int ncp_driver(NonlinearComplementarityProblem* problem, double* z, double* F,
+               SolverOptions* options);
 
 /**
    General interface to solvers for SOCLCP problem
@@ -224,30 +224,8 @@ int ncp_driver(NonlinearComplementarityProblem *problem, double *z, double *F,
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *r, double *v,
-                  SolverOptions *options);
-
-/**
-   LMGC interface to solvers for friction-contact 3D problem
-
-   \param[in,out] reaction global vector (nc*3)
-   \param[in,out] velocity global vector (nc*3)
-   \param[in] q global vector (nc*3)
-   \param[in] mu global vector (nc)
-   \param[in] W the block matrix in coordinate format
-   \param[in] row block row indices
-   \param[in] column block column indices
-   \param[in] nc number of contacts
-   \param[in] nb number of blocks
-   \param[in] solver_id id an int to be mapped to actual solver in Numerics
-   \param[in] tolerance threshold used to validate the solution: if the error is less than this
-   value, the solution is accepted \param[in] itermax the maximum number of iteration
-   \param[in] verbose level 0 : nothing, 1: mid level 2: high level
-   \param[in] outputFile outputFile option 0 : nothing 1 : dat file 2: FCLIB HDF5 file if FCLIB
-   is found \param[in] freq_output \param[in] ndof the numbe of dof in the dynamical systems
-   involved in contact (for output in file.) \return result (0 if successful otherwise 1).
-
-*/
+int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
+                  SolverOptions* options);
 
 /**
     General interface to solvers for Mohr Coulomb 2D problem
@@ -258,11 +236,11 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return result (0 if successful otherwise 1).
 */
-int plasticity_2d_driver(PlasticityProblem *problem, double *stress,
-                         double *plastic_strain_rate, SolverOptions *options);
+int plasticity_2d_driver(PlasticityProblem* problem, double* stress,
+                         double* plastic_strain_rate, SolverOptions* options);
 
-int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
-                    size_t *row, size_t *column, size_t nc, size_t nb, int solver_id,
+int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, double* W,
+                    size_t* row, size_t* column, size_t nc, size_t nb, int solver_id,
                     double tolerance, int itermax, int verbose, int outputFile,
                     int freq_output, int ndof);
 
@@ -295,11 +273,11 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
    file if FCLIB is found \param[in] freq_output \return result (0 if successful otherwise 1).
 
  */
-int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity, double *q,
-                     double *b, double *mu, double *Mdata, size_t nzM, size_t *rowM,
-                     size_t *colM, double *Hdata, size_t nzH, size_t *rowH, size_t *colH,
-                     size_t n, size_t nc, int solver_id, size_t isize, int *iparam,
-                     size_t dsize, double *dparam, int verbose, int outputFile,
+int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity, double* q,
+                     double* b, double* mu, double* Mdata, size_t nzM, size_t* rowM,
+                     size_t* colM, double* Hdata, size_t nzH, size_t* rowH, size_t* colH,
+                     size_t n, size_t nc, int solver_id, size_t isize, int* iparam,
+                     size_t dsize, double* dparam, int verbose, int outputFile,
                      int freq_output);
 
 /**
@@ -314,7 +292,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
    - 0 : successful
    - >0 : otherwise see each solver for more information about the log info
 */
-int relay_driver(RelayProblem *problem, double *z, double *w, SolverOptions *options);
+int relay_driver(RelayProblem* problem, double* z, double* w, SolverOptions* options);
 
 #if defined(__cplusplus)
 }

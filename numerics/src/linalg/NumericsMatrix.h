@@ -969,7 +969,7 @@ void NM_add_to_diag5(NumericsMatrix* M, double alpha);
  */
 RawNumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
-/** Multiply a matrix with a double alpha*A --> A
+/** Multiply a matrix with a double alpha*A (in place)
  *
  *  \param alpha the  coefficient
  *  \param A the   matrix

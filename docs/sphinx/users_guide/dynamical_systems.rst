@@ -4,14 +4,14 @@
 Dynamical Systems
 =================
 
-:class:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first step of any nonsmooth problem description in Siconos.
+:cpp:class:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first step of any nonsmooth problem description in Siconos.
 This base class defines a common interface to all systems. To fit with different types of problems, we propose several derived classes representing some specific formulations, as described below.
 
 .. image:: /figures/dynamical_system_classes.*
 
-As usual, a complete description of the interface (members and methods) of these classes can be found in the doxygen documentation, see for example :class:`DynamicalSystem`.
+As usual, a complete description of the interface (members and methods) of these classes can be found in the doxygen documentation, see for example :cpp:class:`DynamicalSystem`.
 
-Note that :class:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
+Note that :cpp:class:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
 
   
 Overview
@@ -45,9 +45,9 @@ The aim of this class is to provide some members and functions for all dynamical
 
 *That means that all members and functions described below are also available in any of the derived classes.*
 
-Each system is identified thanks to a number and the current state of the system is saved as a vector :func:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
+Each system is identified thanks to a number and the current state of the system is saved as a vector :cpp:func:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
 
-All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :func:`DynamicalSystem::jacobianRhsOver_x` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
+All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :cpp:func:`DynamicalSystem::jacobianRhsOver_x` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
 
 The common rules for all members are, 'name' being the required variable:
 
@@ -91,21 +91,21 @@ Common interface
 
 The following functions are (and must) be present in any class derived from DynamicalSystems
 
-* :func:`DynamicalSystem::initRhs()`
+* :cpp:func:`DynamicalSystem::initRhs()`
 
-* :func:`DynamicalSystem::icomputeRhs()`
+* :cpp:func:`DynamicalSystem::icomputeRhs()`
 
-* :func:`DynamicalSystem::computeJacobianRhsOver_x()`
+* :cpp:func:`DynamicalSystem::computeJacobianRhsOver_x()`
   
-* :func:`DynamicalSystem::initializeNonSmoothInput()`
+* :cpp:func:`DynamicalSystem::initializeNonSmoothInput()`
 
-* :func:`DynamicalSystem::swapInMemory()`
+* :cpp:func:`DynamicalSystem::swapInMemory()`
 
-* :func:`DynamicalSystem::display()`
+* :cpp:func:`DynamicalSystem::display()`
 
-* :func:`DynamicalSystem::resetAllNonSmoothParts()`
+* :cpp:func:`DynamicalSystem::resetAllNonSmoothParts()`
 
-* :func:`DynamicalSystem::resetNonSmoothPart()`
+* :cpp:func:`DynamicalSystem::resetNonSmoothPart()`
   
 
 
@@ -115,7 +115,7 @@ First order dynamical systems
 Non linear
 """"""""""
 
-:class:`FirstOrderNonLinearDS`
+:cpp:class:`FirstOrderNonLinearDS`
 
 They are described by the following set:
 
@@ -146,14 +146,14 @@ We have:
    rhs &= M^{-1}(f(t,x,z)+r) \\
    \nabla_x rhs &= M^{-1}\nabla_x f(t,x,z)
 
-   Other variables are those of :class:`DynamicalSystem` class, but some of them are not defined and thus not usable:
+   Other variables are those of :cpp:class:`DynamicalSystem` class, but some of them are not defined and thus not usable:
 
 * g and its gradients
 
 Linear
 """"""
 
-:class:`FirstOrderLinearDS`
+:cpp:class:`FirstOrderLinearDS`
 
 Described by the set of n equations and initial conditions: 
 
@@ -167,7 +167,7 @@ With:
 * A(t,z): nXn matrix, state independent but possibly time-dependent.
 * b(t,z): Vector of size n, possibly time-dependent.
   A and B have corresponding plug-in functions. 
-  Other variables are those of :class:`DynamicalSystem` and FirstOrderNonLinearDS classes, but some of them are not defined and thus not usable: \n
+  Other variables are those of :cpp:class:`DynamicalSystem` and FirstOrderNonLinearDS classes, but some of them are not defined and thus not usable: \n
   
 * g and its gradients
 * f and its gradient
@@ -185,7 +185,7 @@ Second order (Lagrangian) systems
 Non linear
 """"""""""
 
-:class:`LagrangianDS`, derived from :class:`DynamicalSystem`.
+:cpp:class:`LagrangianDS`, derived from :cpp:class:`DynamicalSystem`.
 
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
 
@@ -219,10 +219,10 @@ We consider that the Mass matrix is invertible and that its gradient is null.
 
 There are plug-in functions in this class for :math:`F_{int}, F_{Ext}, M, fGyr` and the four Jacobian matrices. 
 
-Other variables are those of :class:`DynamicalSystem` class, but some of them are not defined and thus not usable: \n
+Other variables are those of :cpp:class:`DynamicalSystem` class, but some of them are not defined and thus not usable: \n
 * g and its gradients
 
-Links with :class:`DynamicalSystem` are, :math:`n= 2 ndof` and :math:`x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]`. \n
+Links with :cpp:class:`DynamicalSystem` are, :math:`n= 2 ndof` and :math:`x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]`. \n
 
 And we have:
 
@@ -256,7 +256,7 @@ With:
 * C: constant viscosity nDof X nDof matrix 
 * K: constant rigidity nDof X nDof matrix 
 
-Other variables are those of :class:`DynamicalSystem` and LagrangianDS classes, but some of them are not defined and thus not usable: \n
+Other variables are those of :cpp:class:`DynamicalSystem` and LagrangianDS classes, but some of them are not defined and thus not usable: \n
 * g and its gradients
 * fL, fInt, fGyr and their gradients.
 
@@ -281,8 +281,8 @@ And we have:
 Dynamical Systems plug-in functions
 -----------------------------------
 
-* :class:`DynamicalSystem`: :math:`g(t,\dot x,x,z), \ \ \nabla_x g(t,\dot x,x,z), \ \ \nabla_{\dot x} g(t,\dot x,x,z)`
-* :class:`FirstOrderNonLinearDS`: :math:`f(t,x,z), \ \ \nabla_x f(t,x,z)`
-* :class:`FirstOrderLinearDS`: A(t,z), b(t,z)
-* :class:`LagrangianDS`: :math:`M(q,z), \ \ fGyr(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q fGyr(\dot q, q, z), \ \ \nabla_{\dot q}fGyr(\dot q, q, z)`.
-* :class:`LagrangianLinearTIDS`: :math:`F_{Ext}(t,z)`
+* :cpp:class:`DynamicalSystem`: :math:`g(t,\dot x,x,z), \ \ \nabla_x g(t,\dot x,x,z), \ \ \nabla_{\dot x} g(t,\dot x,x,z)`
+* :cpp:class:`FirstOrderNonLinearDS`: :math:`f(t,x,z), \ \ \nabla_x f(t,x,z)`
+* :cpp:class:`FirstOrderLinearDS`: A(t,z), b(t,z)
+* :cpp:class:`LagrangianDS`: :math:`M(q,z), \ \ fGyr(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q fGyr(\dot q, q, z), \ \ \nabla_{\dot q}fGyr(\dot q, q, z)`.
+* :cpp:class:`LagrangianLinearTIDS`: :math:`F_{Ext}(t,z)`

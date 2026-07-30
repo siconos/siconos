@@ -22,7 +22,7 @@ Create a problem
 Create and describe a solver
 ============================
 
-Solver parameters are handled by the object :class:`SolverOptions`. It defines which solver will be used, its parameters, like tolerance, possibly
+Solver parameters are handled by the object :cpp:class:`SolverOptions`. It defines which solver will be used, its parameters, like tolerance, possibly
 handles some internal work arrays or data.
 
 The simplest way to create and use a solver is to select the corresponding id (check the list of avalaible solver for each problem and the corresponding numbers in the pages below) and initialize the solver with this id.
@@ -62,7 +62,7 @@ The simplest way to create and use a solver is to select the corresponding id (c
 In any case, the id is the only required input. All the other parameters have default values.
 
 To change/update these default values explicitely set the content of iparam or dparam
-or use :func:`solver_options_update_internal` to deal with internal solvers.
+or use :cpp:func:`solver_options_update_internal` to deal with internal solvers.
 
 e.g.:
 

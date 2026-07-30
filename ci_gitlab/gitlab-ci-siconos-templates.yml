@@ -54,19 +54,14 @@ stages:
   - configure 
   # To execute make and build the project
   - build     
-  # To run all tests
-  - test      
+  # Build and publish html pages
+  - doc-deploy
   # To install software, generate a "siconos-ready" docker image and asave it in the registry.
-  - install 
+  - install
+  # To run all tests, examples ...
+  - test      
+  # Create and provide a release
   - release
-  # To build and run all examples
-  - examples
-  # Templates for these jobs : .siconos-build (see below).
-  # --- Doc stages ---
-  # Build documentation (run doxygen, sphinx, ...)
-  - doc-build
-  # Publish html pages
-  - doc-deploy 
 
 
 # --- Templates definitions ---
@@ -130,7 +125,7 @@ workflow:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
       when: never
-    - if: $CI_COMMIT_BRANCH == "master" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
       when: never  # avoid duplicate pipeline: ci with main branch  only for public siconos
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
@@ -141,7 +136,7 @@ workflow:
 
 .full-rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" # If changes are pushed to the default branch
+    - if: $CI_COMMIT_BRANCH == "main" # If changes are pushed to the default branch
     - if: $CI_COMMIT_TAG   # If changes are pushed for a tag.
     - if: $CI_COMMIT_MESSAGE =~ /^\[all-jobs\]/
 

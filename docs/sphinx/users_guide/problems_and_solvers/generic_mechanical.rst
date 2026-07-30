@@ -16,18 +16,18 @@ Problem statement
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`GenericMechanicalProblem`.
+Structure to define the problem: :cpp:class:`GenericMechanicalProblem`.
 
-Solvers list : :enum:`GENERIC_MECHANICAL_SOLVER`
+Solvers list : :cpp:enum:`GENERIC_MECHANICAL_SOLVER`
 
-The generic drivers for generic mechanical problems is :func:`gmp_driver`.
+The generic drivers for generic mechanical problems is :cpp:func:`gmp_driver`.
 
 .. _gmp_error:
 
 Error strategy
 ==============
 
-Use :func:`gmp_compute_error`.
+Use :cpp:func:`gmp_compute_error`.
 
 Check details in :ref:`fc_error`
 

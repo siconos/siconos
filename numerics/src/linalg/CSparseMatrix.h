@@ -30,7 +30,8 @@
 #include <stdio.h>    // for FILE
 
 /** Sparse matrix structure
-    switch to the proper cxspsarse (T. Davies) interface
+
+  switch to the proper cxspsarse (T. Davies) interface
  */
 
 typedef struct CS_NAME(_sparse) CSparseMatrix;
@@ -146,7 +147,7 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, dou
  *  \param[in,out] b on input sparse RHS of the linear system; on output the solution
  *  \return false if failed, true otherwise*/
 bool CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X,
-                                  CSparseMatrix* B);
+                                CSparseMatrix* B);
 
 /** reuse a LDLT factorization (stored in the cs_ldlt_A) to solve a linear system Ax = b
  *
@@ -281,7 +282,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
  */
 int CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
 
-/** Multiply a matrix with a double alpha*A --> A
+/** Multiply a matrix with a double alpha*A (in place)
  *
  *  \param alpha the  coefficient
  *  \param A the  matrix

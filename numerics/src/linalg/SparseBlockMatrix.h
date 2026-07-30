@@ -341,7 +341,7 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
                                  SparseBlockStructuredMatrix* C);
 
 /**
-   SparseBlockStructuredMatrix - SparseBlockStructuredMatrix multiplication C = A *B
+   SparseBlockStructuredMatrix - SparseBlockStructuredMatrix multiplication C = A * B
 
    Memory allocation for C.
 

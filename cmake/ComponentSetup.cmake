@@ -93,7 +93,6 @@ function(create_siconos_component COMPONENT)
 
   endif()
 
-
 endfunction()
 
 
@@ -121,7 +120,7 @@ function(configure_component_documentation COMPONENT)
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
-
+  doxygen_warnings(${COMPONENT} HEADERS ${component_HEADERS})
   # update the main doxy file, without building the doc
   if(WITH_DOCUMENTATION OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml

@@ -40,21 +40,21 @@ Implementation in numerics
 
 Structure to define the problem: :struct:`VariationalInequality`.
 
-The generic driver for all VI is :func:`variationalInequality_driver()`.
+The generic driver for all VI is :cpp:func:`variationalInequality_driver()`.
 
-solvers list  :enum:`VI_SOLVER`
+solvers list  :cpp::enum:`VI_SOLVER`
 
 .. _vi_solvers:
 
 VI Available solvers
 ====================
 
-Extra gradient (:enumerator:`SICONOS_VI_EG`)
---------------------------------------------
+Extra gradient (:cpp:enumerator:`SICONOS_VI_EG`)
+-------------------------------------------------
 
 Extra Gradient solver forvariational inequality problem based on the De Saxce Formulation
 
-driver :func:`variationalInequality_ExtraGradient()`
+driver :cpp:func:`variationalInequality_ExtraGradient()`
 
 parameters:
 
@@ -80,19 +80,19 @@ parameters:
 * dparam[SICONOS_VI_DPARAM_LS_LMIN] = 0.3
 
 
-Fixed-point  projection (:enumerator:`SICONOS_VI_FPP`)
-------------------------------------------------------
+Fixed-point  projection (:cpp:enumerator:`SICONOS_VI_FPP`)
+-----------------------------------------------------------
 
 Fixed Point Projection solver for variational inequality problem based on the De Saxce Formulation.
 
-driver: :func:`variationalInequality_FixedPointProjection()`
+driver: :cpp:func:`variationalInequality_FixedPointProjection()`
 
-parameters: same as :enumerator:`SICONOS_VI_EG.`
+parameters: same as :cpp:enumerator:`SICONOS_VI_EG`
 
-Hyperplane  projection (:enumerator:`SICONOS_VI_HP`)
-----------------------------------------------------
+Hyperplane  projection (:cpp:enumerator:`SICONOS_VI_HP`)
+---------------------------------------------------------
 
-driver: :func:`variationalInequality_HyperplaneProjection()`
+driver: :cpp:func:`variationalInequality_HyperplaneProjection()`
 
 parameters:
 
@@ -111,14 +111,14 @@ out :
 * iparam[SICONOS_IPARAM_ITER_DONE] : number of iterations
     
 
-SICONOS_VI_BOX_QI (:enumerator:`SICONOS_VI_BOX_QI`)
----------------------------------------------------
+SICONOS_VI_BOX_QI (:cpp:enumerator:`SICONOS_VI_BOX_QI`)
+--------------------------------------------------------
 
 Solver using the merit function proposed by Qi for box-constrained Newton QI LSA
 
 id: 
 
-driver : :func:`variationalInequality_box_newton_QiLSA()`
+driver : :cpp:func:`variationalInequality_box_newton_QiLSA()`
 
 parameters:
 
@@ -136,10 +136,10 @@ parameters:
   
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
   
-SICONOS_VI_BOX_AVI_LSA (:enumerator:`SICONOS_VI_BOX_AVI_LSA`)
--------------------------------------------------------------
+SICONOS_VI_BOX_AVI_LSA (:cpp:enumerator:`SICONOS_VI_BOX_AVI_LSA`)
+------------------------------------------------------------------
 
-driver : :func:`vi_box_AVI_LSA()`
+driver : :cpp:func:`vi_box_AVI_LSA()`
 
 parameters:
 
@@ -152,12 +152,12 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16 
   
-internal solver : :enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`
+internal solver : :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`
 
-SICONOS_VI_BOX_PATH (:enumerator:`SICONOS_VI_BOX_PATH`)
--------------------------------------------------------
+SICONOS_VI_BOX_PATH (:cpp:enumerator:`SICONOS_VI_BOX_PATH`)
+-----------------------------------------------------------
 
-driver : :func:`vi_box_path()`
+driver : :cpp:func:`vi_box_path()`
 
 parameters:
 

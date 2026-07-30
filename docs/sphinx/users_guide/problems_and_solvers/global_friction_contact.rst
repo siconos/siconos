@@ -66,18 +66,18 @@ This problem models any instance of discretized frictional contact problem obtai
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`GlobalFrictionContactProblem`.
+Structure to define the problem: :cpp:class:`GlobalFrictionContactProblem`.
 
-Solvers list : :enum:`FRICTION_SOLVER`, id containing 'GLOBAL_FRICTION_3D'
+Solvers list : :cpp:enum:`FRICTION_SOLVER`, id containing 'GLOBAL_FRICTION_3D'
 
-The generic drivers for global friction-contact problems is :func:`gfc3d_driver`.
+The generic drivers for global friction-contact problems is :cpp:func:`gfc3d_driver`.
 
 .. _gfc_error:
 
 Error strategy
 ==============
 
-To set internal solver tolerance (when it makes sense!) use :func:`gfc3d_set_internalsolver_tolerance`.
+To set internal solver tolerance (when it makes sense!) use :cpp:func:`gfc3d_set_internalsolver_tolerance`.
 
 Check details in :ref:`fc_error`
 
@@ -87,24 +87,24 @@ Check details in :ref:`fc_error`
 Global Friction 3D available solvers
 ====================================
 
-NSGS (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+NSGS (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Non-Smooth Gauss Seidel solver with reformulation.
 
-**Driver:** :func:`gfc3d_nsgs`
+**Driver:** :cpp:func:`gfc3d_nsgs`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_NSGS`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`.
 
 Warning : default iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] is 0, which may lead to
 very expensive computation for error checking. Increase this value to improve performances.
 
-Nonsmooth Newton, Alart-Curnier, (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Nonsmooth Newton, Alart-Curnier, (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_nonsmooth_Newton_AlartCurnier_wr`
+**Driver:** :cpp:func:`gfc3d_nonsmooth_Newton_AlartCurnier_wr`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_NSN_AC`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`.
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 200;
 
@@ -133,38 +133,38 @@ Nonsmooth Newton, Alart-Curnier, (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC
 
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1
 
-PATH (GAMS) (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-**Driver:** :func:`gfc3d_AVI_gams_path`
-
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_GAMS_PATH`.
-
-PATHVI (GAMS) (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI`)
+PATH (GAMS) (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_AVI_gams_pathvi`
+**Driver:** :cpp:func:`gfc3d_AVI_gams_path`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_GAMS_PATHVI`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_PATH`.
 
-Fixed-Point projection (VI reformulation) (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_VI_FPP`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+PATHVI (GAMS) (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_VI_FixedPointProjection`
+**Driver:** :cpp:func:`gfc3d_AVI_gams_pathvi`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_VI_FPP`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_PATHVI`.
 
-Extra-Gradient (VI reformulation) (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_VI_EG`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Fixed-Point projection (VI reformulation) (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_VI_FPP`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_VI_ExtraGradient`
+**Driver:** :cpp:func:`gfc3d_VI_FixedPointProjection`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_VI_EG`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_VI_FPP`.
 
-ACLM Fixed point (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ACLMFP`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Extra-Gradient (VI reformulation) (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_VI_EG`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_ACLMFixedPoint`
+**Driver:** :cpp:func:`gfc3d_VI_ExtraGradient`
+
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_VI_EG`.
+
+ACLM Fixed point (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ACLMFP`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+**Driver:** :cpp:func:`gfc3d_ACLMFixedPoint`
 
 **Parameters:**
 
@@ -173,14 +173,14 @@ ACLM Fixed point (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ACLMFP`)
 * dparam[SICONOS_DPARAM_TOL] = 1e-4;
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 2.0
 
-Internal solver: :enumerator:`SICONOS_CONVEXQP_ADMM`, see :ref:`convex_qp_solvers`.
+Internal solver: :cpp:enumerator:`SICONOS_CONVEXQP_ADMM`, see :ref:`convex_qp_solvers`.
 
-ADMM (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+ADMM (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 
-**Driver:** :func:`gfc3d_ADMM`
+**Driver:** :cpp:func:`gfc3d_ADMM`
 
 **Parameters:**
 
@@ -240,56 +240,56 @@ starts with a reformulation of the global problem into a local one, which is sol
 with one of the fc3d solvers.
 
 
-NSGS, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+NSGS, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Non-Smooth Gauss Seidel solver with reformulation.
 
-**Driver:** :func:`gfc3d_nsgs_wr`
+**Driver:** :cpp:func:`gfc3d_nsgs_wr`
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_NSGS`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`.
 
-NSGS, velocity, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Non-Smooth Gauss Seidel solver with reformulation.
-
-**Driver:** :func:`gfc3d_nsgs_velocity_wr`
-
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_NSGSV`.
-
-Proximal point, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_PROX_WR`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-**Driver:** :func:`gfc3d_proximal_wr`
-
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_PROX`.
-
-DeSaxce FixedPoint, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_DSFP_WR`)
+NSGS, velocity, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Driver:** :func:`gfc3d_DeSaxceFixedPoint_wr`
+Non-Smooth Gauss Seidel solver with reformulation.
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_DSFP`.
+**Driver:** :cpp:func:`gfc3d_nsgs_velocity_wr`
 
-Tresca FixedPoint, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_TFP_WR`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSGSV`.
 
-**Driver:** :func:`gfc3d_TrescaFixedPoint_wr`
+Proximal point, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_PROX_WR`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_TFP`.
+**Driver:** :cpp:func:`gfc3d_proximal_wr`
 
-Nonsmooth Newton, Alart-Curnier, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_PROX`.
 
-**Driver:** :func:`gfc3d_nonsmooth_Newton_AlartCurnier_wr`
+DeSaxce FixedPoint, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_DSFP_WR`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_NSN_AC`.
+**Driver:** :cpp:func:`gfc3d_DeSaxceFixedPoint_wr`
 
-ADMM, with reformulation (:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM_WR`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_DSFP`.
 
-**Driver:** :func:`gfc3d_admm_wr`
+Tresca FixedPoint, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_TFP_WR`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-**Parameters:** same as :enumerate:`SICONOS_FRICTION_3D_ADMM`.
+**Driver:** :cpp:func:`gfc3d_TrescaFixedPoint_wr`
+
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_TFP`.
+
+Nonsmooth Newton, Alart-Curnier, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+**Driver:** :cpp:func:`gfc3d_nonsmooth_Newton_AlartCurnier_wr`
+
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`.
+
+ADMM, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM_WR`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+**Driver:** :cpp:func:`gfc3d_admm_wr`
+
+**Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_ADMM`.
 

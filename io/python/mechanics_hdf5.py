@@ -961,7 +961,7 @@ class MechanicsHdf5(object):
         # Ensure all input parameters have proper values
         # (set default values, convert tuple or list to numpy arrays ...)
 
-        rigid = material is None # material only for the elastic case
+        rigid = material is None  # material only for the elastic case
 
         translation = np.asarray(translation, dtype=np.float64)
 
@@ -988,11 +988,11 @@ class MechanicsHdf5(object):
 
         if not rigid:
             if orientation is None:
-                orientation = 0.
+                orientation = 0.0
             if velocity is None:
-                velocitiy = 0.
+                velocity = 0.0
             if translation is None:
-                translation = 0.
+                translation = 0.0
             ori = np.asarray(orientation, dtype=np.float64)
 
         is_center_of_mass_computed = False
@@ -1069,7 +1069,9 @@ class MechanicsHdf5(object):
             obj.attrs["type"] = "dynamic"
 
         if boundary_conditions is not None:
-            obj.attrs["boundary_conditions"] = np.asarray(boundary_conditions, dtype=np.int32)
+            obj.attrs["boundary_conditions"] = np.asarray(
+                boundary_conditions, dtype=np.int32
+            )
 
         if nodal_forces is not None:
             obj.attrs["nodal_forces"] = np.asarray(nodal_forces, dtype=np.float64)

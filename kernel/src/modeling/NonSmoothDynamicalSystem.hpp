@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 /*! \file NonSmoothDynamicalSystem.hpp
- * container for DynamicalSystem and Interaction
+ * Description of the nonsmooth dynamical system (i.e. set of DynamicalSystems and
+ * Interactions)
  */
 #ifndef NSDS_H
 #define NSDS_H
@@ -80,9 +81,9 @@ class NonSmoothDynamicalSystem {
 
     Change(Change&&) = default;  // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
-        : typeOfChange(t), ds(dsnew){};
-    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};
-    Change(ChangeType t) : typeOfChange(t){};
+        : typeOfChange(t), ds(dsnew) {};
+    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew) {};
+    Change(ChangeType t) : typeOfChange(t) {};
     void display() const;
   };
 

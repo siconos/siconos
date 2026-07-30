@@ -16,12 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import contextlib
+import warnings
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 from OCC.Core.gp import gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
 from OCC.Core.TopLoc import TopLoc_Location
 
 # from OCC.Display.SimpleGui import get_backend
 
-from OCC.Core.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
+from OCC.Core.STEPControl import (
+    STEPControl_Reader,
+    STEPControl_Writer,
+    STEPControl_AsIs,
+)
 
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
@@ -161,7 +169,14 @@ def make_slider(minv, maxv, vstep):
     return SliderWindow()
 
 
-with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
+# Note FP: Suppress error --> temporary fix. This part seems to be outdated. Must be reviewed
+# https://docs.python.org/3/library/contextlib.html
+warnings.warn(
+    "Call pprocess: this part may be outdated and must be reviewed",
+    stacklevel=2,
+)
+
+with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r") as io:
 
     display, start_display, add_menu, add_function_to_menu, win, app = init_display()
 

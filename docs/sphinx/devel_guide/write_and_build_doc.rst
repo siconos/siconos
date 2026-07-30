@@ -18,7 +18,7 @@ It consists in
   * Users' guide
   * Developers' guide
   
-  All these guides are generated with sphinx (http://www.sphinx-doc.org/en/master/index.html) from files written in reStructuredText (http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
+  All these guides are generated with sphinx (http://www.sphinx-doc.org/en/main/index.html) from files written in reStructuredText (http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
 
   Source files and sphinx configuration file are all in docs/sphinx directory.
 

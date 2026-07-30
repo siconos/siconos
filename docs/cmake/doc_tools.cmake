@@ -136,41 +136,58 @@ macro(finalize_doc)
     include(doxycommon)
     
     # - Doxygen to generate html -
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/docs/sphinx/doxygen)
+
     # --- Set doxygen options for html outputs ---
+    # We need to generate the html output to create and collect png class diagrams, for sphinx ...
     set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_HTML_OUTPUT ${DOC_ROOT_DIR}/html/doxygen)
+    set(DOXYGEN_HTML_OUTPUT ${CMAKE_BINARY_DIR}/docs/sphinx/doxygen)
     set(DOXYGEN_GENERATE_XML NO)
+    set(DOXYGEN_DOT_IMAGE_FORMAT svg)
+    set(DOXYGEN_INTERACTIVE_SVG YES)
     # --- Create the target ---
     doxygen_add_docs(
       doxygen-html ${DOXYGEN_INPUTS}
-      COMMENT "Generate doxygen html doc ...")
+      COMMENT "Generate doxygen html doc (dot graphs for sphinx) ...")
     
-  add_custom_command(
+    add_custom_command(
     TARGET doxygen-html POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Doxygen documentation has been built in ${DOC_ROOT_DIR}/html/doxygen")
     # --- Target : create class diagrams from doxygen outputs, for sphinx. ---
     # run : make doxypng2sphinx
     # depends : doxygen-html
     # Call a python function defined in gendoctools (find_doxygen_diagrams)
-    add_custom_target(doxypng2sphinx
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
-      "from gendoctools.generate_api import find_doxygen_diagrams as f; f('${CMAKE_BINARY_DIR}/docs/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
-      VERBATIM
-      DEPENDS doxygen-html
-      COMMENT "Browse doxygen outputs (graphs ...)")
+    #add_custom_target(doxypng2sphinx
+    #  COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
+    #  "from gendoctools.generate_api import find_doxygen_diagrams as f; f('${CMAKE_BINARY_DIR}/docs/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
+    #  VERBATIM
+    #  DEPENDS doxygen-html
+    #  COMMENT "Browse doxygen outputs (graphs ...)")
 
-    add_custom_command(TARGET doxypng2sphinx POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green  "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
+    #add_custom_command(TARGET doxypng2sphinx POST_BUILD
+    #  COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green  "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
 
-    add_dependencies(html doxypng2sphinx)
+    #add_dependencies(html doxypng2sphinx)
 
     foreach(COMP ${COMPONENTS})
       if(TARGET ${COMP}-xml2rst)
-	      add_dependencies(html ${COMP}-xml2rst)
+	      add_dependencies(${COMP}-xml2rst doxygen-html)
       endif()
     endforeach()
 
   set(PYTHON_RST_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python)
+
+  set(APIDOC_EXCLUDES)
+
+  if(NOT SICONOS_HAS_MECHANICS_OCC)
+    list(APPEND APIDOC_EXCLUDES
+         ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/occ)
+  endif()
+
+  if(NOT WITH_BULLET)
+    list(APPEND APIDOC_EXCLUDES
+        ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/bullet)
+  endif()
 
   # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
   add_custom_target(rst_python
@@ -188,7 +205,7 @@ macro(finalize_doc)
           #-P # to include modules starting with _ (private)
           -o ${PYTHON_RST_DIR}
           ${SICONOS_PB11_BINARY_DIR}/siconos
-
+          ${APIDOC_EXCLUDES}
       COMMENT "Generating Python API rst files with sphinx-apidoc"
       VERBATIM
   )    

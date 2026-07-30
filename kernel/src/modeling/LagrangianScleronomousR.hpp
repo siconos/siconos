@@ -100,13 +100,13 @@ class LagrangianScleronomousR : public LagrangianR {
   /** destructor */
   virtual ~LagrangianScleronomousR() noexcept = default;
 
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** set a user-defined function to compute \f$ h(q) \f$  \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V &fct);
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V& fct);
 
   /**
     to compute the output y = h(q) of the Relation
@@ -114,7 +114,7 @@ class LagrangianScleronomousR : public LagrangianR {
     \param q coordinates of the dynamical systems involved in the relation
     \param y the resulting vector
   */
-  virtual void computeh(const siconos::algebra::BlockVector &q,
+  virtual void computeh(const siconos::algebra::BlockVector& q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** Set a constant  \f$ \nabla^\top_q h(q) \f$
@@ -129,12 +129,12 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianhOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionBV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBV_M& fct);
 
   /** Computes \f$ \nabla^\top_q h(q) \f$
    * \param q coordinates of the dynamical systems involved in the relation
    */
-  virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector &q);
+  virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector& q);
 
   /** set a user-defined function to compute
    *  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
@@ -142,14 +142,14 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputejacobianhOver_q_dotFunction(
-      const siconos::modeling::func_prototypes::FunctionBVBV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBVBV_M& fct);
 
   /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
    *  \param q 'list' of state vectors (for all ds involved in the interaction)
    *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
    */
-  void computejacobianhOver_q_dot(const siconos::algebra::BlockVector &q,
-                                  const siconos::algebra::BlockVector &qdot);
+  void computejacobianhOver_q_dot(const siconos::algebra::BlockVector& q,
+                                  const siconos::algebra::BlockVector& qdot);
 
   /** \return a read-only view on \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
    * vector */
@@ -163,7 +163,7 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param time double, current time
    *  \param inter interaction
    */
-  void computeJacobianhOver_q_dot_X_qdot(double time, Interaction &inter);
+  void computeJacobianhOver_q_dot_X_qdot(double time, Interaction& inter);
 
   /** compute all the H Jacobian
    *
@@ -171,7 +171,7 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param inter interaction that owns the relation
    *  \param interProp
    */
-  void computeJach(double time, Interaction &inter) override;
+  void computeJach(double time, Interaction& inter) override;
 
   /** to compute output
    *
@@ -180,7 +180,7 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** to compute p
@@ -189,11 +189,11 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param inter interaction that owns the relation
    *  \param level "derivative" order of lambda used to compute input
    */
-  void computeInput(double time, Interaction &inter,
+  void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
 
-  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 
-#endif  // LAGRANGIANRELATION_H
+#endif

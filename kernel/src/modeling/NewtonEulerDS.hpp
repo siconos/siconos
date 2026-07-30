@@ -320,7 +320,6 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void reset_twist0(const siconos::algebra::SiconosVector6& newValue);
 
-
   /** reset the state to the initial state */
   void resetToInitialState() override;
 
@@ -835,6 +834,7 @@ void computeJacobianMGyrOver_twist(
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
 /** Compute \f$ \nabla_{twist} m_{gyr}(twist) \f$ by forward finite difference
+ *
  *  we compute only the sub-block [:,3:6]
  *
  *  \param[in] twist vector (size 6) = [vg, Omega]^T
@@ -849,7 +849,8 @@ void computeJacobianMGyrOver_twist_byFD(
     const siconos::modeling::func_prototypes::FunctionMV_V& computeMgyr,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
-/** Compute \f$ \nabla_{twist} f(twist, q, time) \f$ by forward finite difference
+/** Compute \f$ \nabla_{twist} f(twist, q, time) \f$
+ *
  *   f = fint, mint ...
  *  \param[in] twist vector (size 6) = [vg, Omega]^T
  *  \param[in] q vector q =  \left[\begin{array}{c} x_g \\ p \end{array}\right]
@@ -865,6 +866,7 @@ void computeJacobianFOver_twist_byFD(
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
 /** Compute \f$ \nabla_{q} f(twist, q, time) \f$ by forward finite difference
+ *
  *   f = fint, mint ...
  *  \param[in] twist vector (size 6) = [vg, Omega]^T
  *  \param[in] q vector q =  \left[\begin{array}{c} x_g \\ p \end{array}\right]

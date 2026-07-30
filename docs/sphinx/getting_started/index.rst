@@ -68,7 +68,7 @@ Python API is generated (pybind11) from C++ and thus both API are quite equivale
 Anyway, for new users we recommend the Python API which is easier to understand.
 
 Below are two examples (Python and C++) of a Siconos process. We just build and print a first-order dynamical
-system (See :class:`FirstOrderLinearDS`).
+system (See :cpp:class:`siconos::modeling::siconos::modeling::FirstOrderLinearDS`).
 
 .. admonition:: tip
 
@@ -111,6 +111,7 @@ And:
 Write a c++ file, e.g. run.cpp
 
 .. code-block:: c++
+   
    // File run.cpp
    #include "SiconosKernel.hpp"
    int main()
@@ -126,11 +127,9 @@ Write a c++ file, e.g. run.cpp
 
 And, compile, link and execute (in one shot, thanks to siconos script)::
 
-.. code-block:: bash
+.. code-block:: shell
 
-   siconos run.cpp
-
-    
+   siconos run.cpp    
 
 For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
 or try to mimic one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
@@ -139,7 +138,8 @@ or try to mimic one of the examples available at https://gricad-gitlab.univ-gren
 More
 ----
 
-* :ref:`nsds_basics`
+* :doc:`users_guide/index`
+* :doc:`reference/index``
 * :doc:`tutorial_python/index`
 * :doc:`tutorial_cpp/siconos_tutorial`
 * :ref:`running_siconos`

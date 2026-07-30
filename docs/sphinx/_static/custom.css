@@ -2,6 +2,25 @@ a {
     color: mediumseagreen;
 }
 
+/* sphinx-design */
+
+:root {
+    --sd-color-primary: #58A96D;
+    --sd-color-primary-highlight: #275932;
+    --sd-color-primary-text: #ffffff;
+}
+
+.sd-btn.sd-btn-primary {
+    background: var(--sd-color-primary);
+    border-color: var(--sd-color-primary);
+}
+
+.sd-btn.sd-btn-primary:hover {
+    background: var(--sd-color-primary-highlight);
+    border-color: var(--sd-color-primary-highlight);
+}
+
+
 .sd-bg-code {
     background-color: var(--color-code-background);
     border: 1px solid var(--color-card-border);

@@ -140,7 +140,7 @@ Siconos : nonsmooth numerical simulation |licence|
 
 -------------------------------------------------------------------------------
 
-.. grid:: 2
+.. grid:: 3
    :gutter: 3
 
    .. grid-item-card:: 📬 Contacts
@@ -158,13 +158,16 @@ Siconos : nonsmooth numerical simulation |licence|
 
       `Browse CDash reports <https://cdash-ci.irisa.fr/index.php?project=Siconos>`_
 
+   .. grid-item-card:: Previous versions
+      :class-card: sd-shadow-sm sd-rounded-3
+
+      Documentation for previous versions is available as tgz archives in the `package registry of Siconos. <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/packages>`_
   
  
 .. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
-   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master
+.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/main/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main
    :alt: Build status
-	 

@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-/** Compute \f$\mathbf{F}_{\mathrm{min}}(z)\f$, possibly in the mixed case
+/** Compute \f$ \mathbf{F}_{\mathrm{min}}(z) \f$, possibly in the mixed case
  * \param n1 number of equality constraints
  * \param n2 size of the complementary variables
  * \param[in] z input vector

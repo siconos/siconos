@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! @file LagrangianR.hpp
+
+/** @file LagrangianR.hpp
  */
 #ifndef LAGRANGIANRELATION_H
 #define LAGRANGIANRELATION_H
@@ -24,23 +25,36 @@
 
 namespace siconos::modeling {
 /**
-   @brief Class/interface to 2nd order Lagrangian nonlinear relations with dense storage for
-  the matrix-like attributes.
+  @brief Interface to 2nd order Lagrangian nonlinear relations (dense storage)
 
-   -  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint
+  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint
 
-    h may be \f$ h(q)\f$  (scleronomous), \f$ h(q,t)\f$  (rheonomous), \f$ h(q, \lambda)\f$
-  (compliant)... depending on the chosen derived class.
+  - Dense storage for matrix-like attributes (see LagrangianSparseR for sparse storage)
+  - h may be \f$ h(q)\f$  (scleronomous), \f$ h(q,t)\f$  (rheonomous), \f$ h(q, \lambda)\f$
+  (compliant) ... Choose the proper derivated class, according to your needs.
 
-  The Jacobian of the constraints with respect to the coodinates  \f$ q \f$ is always defined.
-  Other jacobians are defined only when required in the derived classes, check the API if
-  required.
+  - The Jacobian of the constraints with respect to the coordinates  \f$ q \f$ is always
+  defined. Other jacobians are defined only when required in the derived classes.
 
+  Notations:
+
+  \f[
+    J^h_q(q, ...)
+    = \frac{\partial h}{\partial q} \in \mathbb{R}^{M \times N}
+    =
+   \left[
+   \frac{\partial h_i}{\partial q_j}
+   \right]_{1\le i\le M,\;1\le j\le N}.
+  \f]
+
+  with \f$ q \in \mathbb{R}^N \f$ and \f$ h \in \mathbb{R}^M \f$
+
+  Same for other jacobians (\f$ J^h_\lambda(q, ...) \f$ ) when they exist.
 
   This Jacobians are mainly used for Newton linearization and to compute the time-derivative of
   the constraint, \f$ y = h(q,\ldots) \f$
 
-  that is  \f$ \dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots \f$
+  that is  \f$ \dot y (t) = J^h_q(q, ...)\dot q +\ldots \f$
 
   This object can also store more general linearized part of the gap function.
   If \f$ y=h(q) \f$ models a gap function, then the time derivative can be generically  written
@@ -48,10 +62,12 @@ namespace siconos::modeling {
 
   \f$ \dot y (t) = H(q,\ldots) \dot q  +\ldots.  \f$
 
-  All operators of Lagrangian relations can be plugged to user-defined functions.
+  All operators of Lagrangian relations can be set by user-defined functions.
   The signature of the plugged functions depends on which variables are taken into
   account in h and its jacobians. Here again, check in the proper derived class API to find
   which functions are available.
+
+
  */
 class LagrangianR : public Relation {
  public:
@@ -65,41 +81,39 @@ class LagrangianR : public Relation {
   ACCEPT_SERIALIZATION(LagrangianR);
 
   /** The Jacobian of the constraints with respect to the generalized coordinates   \f$ q \f$
-   *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$
    */
   std::shared_ptr<siconos::algebra::MapType> jacobianhOver_q_view_{nullptr};
 
-  /** internal (optional) storage used for \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ */
+  /** internal (optional) storage used for \f$ J^h_q \f$ */
   std::unique_ptr<std::vector<double>> jacobianhOver_q_internal_storage_{nullptr};
 
-  /** True if \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ is a constant matrix */
+  /** True if \f$ J^h_q \f$ is a constant matrix */
   bool hasConstantJacobianhOver_q_{false};
 
-  /** basic constructor
+  /** @brief minimal (protected) constructor
    *
-   *  \param lagType the sub-type of the relation
+   *  @param lagType the sub-type of the relation
    */
   LagrangianR(RelationSubType lagType) : Relation(RelationType::Lagrangian, lagType) {}
 
  public:
-  /** destructor
-   */
+  /** @brief destructor */
   virtual ~LagrangianR() noexcept = default;
 
-  /** initialize the relation (check sizes, memory allocation ...)
+  /**
+   *  @brief initialize the relation (check sizes, memory allocation ...)
    *
-   *  \param inter the interaction using this relation
+   *  @param inter the interaction using this relation
    */
   inline void initialize(Interaction& inter) override {};
 
   /** check sizes of the relation specific operators.
    *
-   *  \param inter an Interaction using this relation
+   *  @param inter an Interaction using this relation
    */
   virtual void checkSize(const Interaction& inter) const override {};
-  // Does nothing by default. Reimplement if required.
 
-  /** \return a read-only view on \f$ \nabla^\top_q h(q, \ldots) \f$ matrix */
+  /** @return a read-only reference on \f$ J^h_q \f$ matrix */
   inline auto jacobianhOver_q() const {
     return siconos::algebra::ConstMapType(jacobianhOver_q_view_->data(),
                                           jacobianhOver_q_view_->rows(),
@@ -110,8 +124,9 @@ class LagrangianR : public Relation {
   void display() const override;
 
   /** @brief allocation of memory space for relations in the graph
+   *
    *      Warning: internal use only (called from Topology)
-   *  @param dslink a container of vectors (pointers), from the parent interaction
+   *  @param ds_vars a container of vectors (pointers), from the parent interaction
    *  @param ds1 first ds concerned by the relation
    *  @param ds2 second ds concerned by the relation
    */

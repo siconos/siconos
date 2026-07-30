@@ -1,5 +1,3 @@
-**Contacts**
-
 siconos-team@inria.fr - `INRIA - Tripop`_
 
 `Contributors`_

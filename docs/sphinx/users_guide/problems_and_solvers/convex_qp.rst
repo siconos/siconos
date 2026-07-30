@@ -64,48 +64,48 @@ Structure to define the problem: :struct:`ConvexQP`.
 
 No generic driver.
 
-solvers list  :enum:`CONVEXQP_SOLVER`
+solvers list  :cpp:enum:`CONVEXQP_SOLVER`
 
 .. _convex_qp_solvers:
 
 Available solvers
 =================
 
-convex QP, projected gradient (:enumerator:`SICONOS_CONVEXQP_PG`)
-----------------------------------------------------------------
+convex QP, projected gradient (:cpp:enumerator:`SICONOS_CONVEXQP_PG`)
+---------------------------------------------------------------------
 
-driver :func:`convexQP_ProjectedGradient()`
+driver :cpp:func:`convexQP_ProjectedGradient()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000
 * iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] =20
-* dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3 /* rho is variable by default */
+* dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3
 * dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9
 * dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9
 * dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] = 2.0/3.0
   
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
-convex QP, VI solvers`(:enumerator:`SICONOS_CONVEXQP_VI_FPP` and :enumerator:`SICONOS_CONVEXQP_VI_EG`)
-------------------------------------------------------------------------------------------------------
+convex QP, VI solvers`(:cpp:enumerator:`SICONOS_CONVEXQP_VI_FPP` and :cpp:enumerator:`SICONOS_CONVEXQP_VI_EG`)
+--------------------------------------------------------------------------------------------------------------
 
 Rewrite QP as Variational Inequality problem.
 
 ids: SICONOS_CONVEXQP_VI_FPP (fixed-point projection) and SICONOS_CONVEXQP_VI_EG (extra-gradient)
 
-driver :func:`convexQP_VI_solver()`
+driver :cpp:func:`convexQP_VI_solver()`
 
 parameters:
 
 same as SICONOS_VI_FPP and SICONOS_VI_EG (see :ref:`vi_solvers`).
 
-convex QP, ADMM (:enumerator:`SICONOS_CONVEXQP_ADMM`)
------------------------------------------------------
+convex QP, ADMM (:cpp:enumerator:`SICONOS_CONVEXQP_ADMM`)
+---------------------------------------------------------
 
 ADMM, alternating direction method of multipliers
 
-driver :func:`convexQP_ADMM()`
+driver :cpp:func:`convexQP_ADMM()`
 
 parameters:
 

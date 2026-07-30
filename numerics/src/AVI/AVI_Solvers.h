@@ -30,8 +30,9 @@
 extern "C" {
 #endif
 
-/** avi_caoferris is a direct solver for AVI based on pivoting method principle for degenerate
- * problem Choice of pivot variable is performed via lexicographic ordering Ref: "A Pivotal
+/** direct solver for AVI based on pivoting method principle for degenerate problem.
+ *
+ * Choice of pivot variable is performed via lexicographic ordering Ref: "A Pivotal
  * Method for Affine Variational Inequalities" Menglin Cao et Michael Ferris (1996)
  *
  *  \param[in] problem structure that represents the AVI (M, q, K)

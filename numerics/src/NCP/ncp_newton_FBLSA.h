@@ -58,7 +58,7 @@ void FB_compute_H_ncp(void* data_opaque, double* z, double* w, double* workV1, d
 void FB_compute_error_ncp(void* data_opaque, double* z, double* w, double* notused, double tol,
                           double* err);
 
-/** Compute F_FB : \f${F_FB}_i = \sqrt(z_i^2 + F_i^2) - (z_i + F_i)\f$
+/** Compute F_FB : \f$ {F_FB}_i = \sqrt(z_i^2 + F_i^2) - (z_i + F_i) \f$
  * \param data_opaque a NonlinearComplementarityProblem but casted
  * \param[in] z non-basic variable
  * \param[in] F basic variable

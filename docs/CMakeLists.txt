@@ -47,7 +47,7 @@ if(USE_DOXYGEN)
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
+  #file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
   # --- Config files and their options. --
   # --> a lot for doxygen warnings (from doxy_warnings.config.in)
@@ -59,7 +59,7 @@ if(USE_DOXYGEN)
   #  - only xml output.
   if(WITH_DOXYGEN_WARNINGS)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings/man)
+    #file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings/man)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doxygen_warnings/xml)
     set(DOXY_WARNINGS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/config/doxy_warnings.config.in CACHE INTERNAL "config file for doxygen warnings output.")
     # All the configure process will be done for each component
@@ -72,7 +72,7 @@ if(USE_DOXYGEN)
       "from gendoctools.filters import filter_doxygen_warnings_files as f; f('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
       VERBATIM
       COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
-      DEPENDS ${last_component} # No warnings if siconos has not been compiled. Should we remove this dep ? 
+      DEPENDS doxygen_warnings
       )
   endif()
 
@@ -141,7 +141,6 @@ if(WITH_DOCUMENTATION)
   set(SPHINX_EXECUTABLE sphinx-build)
   set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
   set(SPHINX_PARAMETERS
-    -N # no color, it is terrible in log files --xhub
     #-j 8 # parallel build
     -w ${SPHINX_LOG_FILE}
     -b html # html output

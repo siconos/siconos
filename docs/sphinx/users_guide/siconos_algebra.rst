@@ -15,12 +15,12 @@ Please refer to Eigen documentation for details.
 
 Siconos wrappers are:
 
-* :class:`SiconosVector` : dense vector of real numbers (type : double precision)
-* :class:`BlockVector` : vector of :class:`SiconosVector`
-* :class:`SiconosDenseMatrix` : dense matrix of double
-* :class:`SiconosSparseMatrix` : sparse matrix of double, column-major storage.
+* :cpp:class:`SiconosVector` : dense vector of real numbers (type : double precision)
+* :cpp:class:`BlockVector` : vector of :cpp:class:`SiconosVector`
+* :cpp:class:`SiconosDenseMatrix` : dense matrix of double
+* :cpp:class:`SiconosSparseMatrix` : sparse matrix of double, column-major storage.
 
-and some fixed-sized objects, like :class:`SiconosMatrix33`, :class:`SiconosMatrix66` ....
+and some fixed-sized objects, like :cpp:class:`SiconosMatrix33`, :cpp:class:`SiconosMatrix66` ....
 
 Notice that BlockVector are no more that a collection of pointers to SiconosVector.
 Then in most cases, to build such an object, you just need to insert some existing objects.
@@ -32,21 +32,21 @@ The usual ways of construction are described below.
 Matrix Storage in numerics component
 ------------------------------------
 
-Numerics component proposes different ways to store 'matrix-like' objects, all handled through a C structure, :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` .
+Numerics component proposes different ways to store 'matrix-like' objects, all handled through a C structure, :cpp:struct:`NumericsMatrix` .
 
-Numerics component proposes different ways to store 'matrix-like' objects, all handled through a C structure, :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` .
+Numerics component proposes different ways to store 'matrix-like' objects, all handled through a C structure, :cpp:struct:`NumericsMatrix` .
 
-A number ( :ref:`NumericsMatrix.storageType <doxid-struct_numerics_matrix_1a1967b9a134e02375a0a5ecbe804a2b49>` ) identify the type of storage while only one pointer among NumericsMatrix.matrixX, X = storageType = 0, 1 or 2, is not NULL and hold the values of the matrix.
+A number (:cpp:member:`NumericsMatrix::storageType` ) identify the type of storage while only one pointer among NumericsMatrix.matrixX, X = storageType = 0, 1 or 2, is not NULL and hold the values of the matrix.
 
 At the time, the following storages are available:
 
 
 
-* "classical" (i.e. dense) column-major storage in a double*, :ref:`NumericsMatrix.matrix0 <doxid-struct_numerics_matrix_1aed33596859b4c613f48bce4fd9fd707c>`
+* "classical" (i.e. dense) column-major storage in a double*, :cpp:member:`NumericsMatrix::matrix0`
 
-* sparse block storage, in a structure of type :ref:`SparseBlockStructuredMatrix <doxid-struct_sparse_block_structured_matrix>` (warning: only for square matrices!!), :ref:`NumericsMatrix.matrix1 <doxid-struct_numerics_matrix_1a3ebb848fffd1648ed0609abd17eb9441>`
+* sparse block storage, in a structure of type :cpp:struct:`SparseBlockStructuredMatrix` (warning: only for square matrices!!), :cpp:member:`NumericsMatrix::matrix1`
 
-* sparse storage (csc, csr or triplet), based on CSparse (from T.Davis), :ref:`NumericsMatrix.matrix2 <doxid-struct_numerics_matrix_1ad0498bfc6c8c84c46a860bd77ef1abb5>`
+* sparse storage (csc, csr or triplet), based on CSparse (from T.Davis), :cpp:member:`NumericsMatrix::matrix2`
 
 As an example, consider the following matrix A of size 8X8:
 
@@ -70,13 +70,13 @@ The first classical storage results in:
   
   matrix0 being a double* of size 64.
 
-For the second way of storage, :ref:`SparseBlockStructuredMatrix <doxid-struct_sparse_block_structured_matrix>` we have:
+For the second way of storage, :cpp:struct:`SparseBlockStructuredMatrix` we have:
 
 * M.storageType = 1
 
 * M.size0 = 8, M.size1 = 8
 
-* M.matrix1 a :ref:`SparseBlockStructuredMatrix <doxid-struct_sparse_block_structured_matrix>` in which we save:
+* M.matrix1 a :cpp:struct:`SparseBlockStructuredMatrix` in which we save:
   
   * the number of non null blocks, 6 (matrix1->nbblocks) and the number of diagonal blocks, 3 (matrix1->size).
   
@@ -106,13 +106,13 @@ Todo write proper doc for CSparse storage and complete the example above.
 .. _numerics_matrix_storage_1NMAlloc:
 .. rubric:: Create, fill and delete NumericsMatrix functions:
 
-* :ref:`NM_create() <doxid-_numerics_matrix_8h_1a7bf697d892ef962778d10c62696735a7>` : allocation without initial values
+* :cpp:func:`NM_create` : allocation without initial values
 
-* :ref:`NM_create_from_data() <doxid-_numerics_matrix_8h_1acf0c380f241e12e90046341ffe283f6f>` : allocation and set default values from external data
+* :cpp:func:`NM_create_from_data` : allocation and set default values from external data
 
-* :ref:`NM_fill() <doxid-_numerics_matrix_8h_1ab980dffc6a809393994c57c4c2dfc748>` : needs a pre-defined :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` , set default values from external data
+* :cpp:func:`NM_fill` : needs a pre-defined :cpp:struct:`NumericsMatrix` , set default values from external data
 
-* :ref:`NM_free() <doxid-_numerics_matrix_8h_1a21829f090afbac3cb9b1d4dc3e8e3312>` : free a :ref:`NumericsMatrix <doxid-struct_numerics_matrix>`
+* :cpp:func:`NM_free()` : free a NumericsMatrix
 
 These last two functions accept a *data* parameter, which if non-NULL contains the matrix data.
 
@@ -123,24 +123,24 @@ The following linear algebra operation are supported:
 
 * BLAS-like functions:
   
-  * product matrix - vector: :ref:`NM_gemv() <doxid-_numerics_matrix_8h_1a7dc236c34ee1ed9dd3bc680ff332241a>` and :ref:`NM_tgemv() <doxid-_numerics_matrix_8h_1a61088ce617e69fb5e25f0246758f2ff8>` (transpose)
+  * product matrix - vector: :cpp:func:`NM_gemv` and :cpp:func:`NM_tgemv` (transpose)
   
-  * product matrix - matrix: :ref:`NM_gemm() <doxid-_numerics_matrix_8h_1a1d00d2d368f5eea0c1dce711033fecf3>`
+  * product matrix - matrix: :cpp:func:`NM_gemm`
   
-  * partial product matrix - vector: :ref:`NM_row_prod() <doxid-_numerics_matrix_8h_1a4e37dc94ecee8a398f44481683c91b4d>`
+  * partial product matrix - vector: :cpp:func:`NM_row_prod`
 
 -LAPACK-like functions -NM_gesv(): solve a linear system Ax = b
 
 .. _numerics_matrix_storage_1NM_IO:
 .. rubric:: Input / Output:
 
-* :ref:`NM_display() <doxid-_numerics_matrix_8h_1ab5b41fe722c5aedbb2a7e80fad32a3c9>` : display a :ref:`NumericsMatrix <doxid-struct_numerics_matrix>`
+* :cpp:func:`NM_display` : display a :cpp:struct:`NumericsMatrix`
 
-* :ref:`NM_display_row_by_row() <doxid-_numerics_matrix_8h_1a08c490d545a730ae230b9e1b7e56e42f>` : display a :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` row by row
+* :cpp:func:`NM_display_row_by_row` : display a :cpp:struct:`NumericsMatrix` row by row
 
-* :ref:`NM_write_in_filename() <doxid-_numerics_matrix_8h_1a38d9c8dfa9ba1ac0013e9c99506e6629>` , :ref:`NM_write_in_file() <doxid-_numerics_matrix_8h_1af5dcc5a62ff0f9035d07cb30addedd14>` : save to filesystem
+* :cpp:func:`NM_write_in_filename` , :cpp:func:`NM_write_in_file` : save to filesystem
 
-* :ref:`NM_read_in_filename() <doxid-_numerics_matrix_8h_1a72b1385f5ff6e4e158e900984ab8647e>` , :ref:`NM_read_in_file() <doxid-_numerics_matrix_8h_1a79412e3c65f0775299ac4690abbcb63d>` : fill a :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` from a file
+* :cpp:func:`NM_read_in_filename` , :cpp:func:`NM_read_in_file` : fill a :cpp:struct:`NumericsMatrix` from a file
 
-* :ref:`NM_new_from_file() <doxid-_numerics_matrix_8h_1ac5c99652db6920701a65489f857f97ee>` : create new :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` from a file
+* :cpp:func:`NM_new_from_file` : create new :cpp:struct:`NumericsMatrix` from a file
 

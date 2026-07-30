@@ -34,37 +34,37 @@ From more details on theory and analysis of AVI (and VI in general), we refer to
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`AffineVariationalInequalities`.
+Structure to define the problem: :cpp:class:`AffineVariationalInequalities`.
 
-The generic driver for all VI is :func:`avi_driver()`.
+The generic driver for all VI is :cpp:func:`avi_driver()`.
 
-solvers list  :enum:`AVI_SOLVER`
+solvers list  :cpp:enum:`AVI_SOLVER`
 
 .. _avi_solvers:
 
 AVI Available solvers
 =====================
 
-Cao Ferris (:enumerator:`SICONOS_AVI_CAOFERRIS`)
-------------------------------------------------
+Cao Ferris (:cpp:enumerator:`SICONOS_AVI_CAOFERRIS`)
+----------------------------------------------------
 
 Direct solver for AVI based on pivoting method principle for degenerate problem. Choice of pivot variable is performed via lexicographic ordering
 
-driver: :func:`avi_caoferris()`
+driver: :cpp:func:`avi_caoferris()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
-Pathvi (:enumerator:`SICONOS_AVI_PATHAVI`)
-------------------------------------------
+Pathvi (:cpp:enumerator:`SICONOS_AVI_PATHAVI`)
+----------------------------------------------
 
 Direct solver for VI based on pivoting method principle for degenerate problem.
 
 Ref: "A structure-preserving Pivotal Method for Affine Variational Inequalities" Y. Kim, O. Huber, M.C. Ferris, Math Prog B (2017).
 
-driver: :func:`avi_pathvi()`
+driver: :cpp:func:`avi_pathvi()`
 
 parameters:
 

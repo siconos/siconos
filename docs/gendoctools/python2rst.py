@@ -91,7 +91,7 @@ def build_python_api_main(outputdir):
         # thanks to hidden toctree below
 
         first_indent = "   "
-        second_indent = 2*first_indent
+        second_indent = 2 * first_indent
 
         f.write(".. grid:: 3\n")
         f.write(f"{first_indent}:gutter: 3\n\n")

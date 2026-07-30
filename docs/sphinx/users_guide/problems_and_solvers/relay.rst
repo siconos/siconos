@@ -27,11 +27,11 @@ where M is an ( :math:`n \times n` )-matrix, q, z and w are n-dimensional vector
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`RelayProblem`.
+Structure to define the problem: :cpp:class:`RelayProblem`.
 
-The generic driver for all Relay problems is :func:`relay_driver()`.
+The generic driver for all Relay problems is :cpp:func:`relay_driver()`.
 
-Solvers list  :enum:`RELAY_SOLVER`
+Solvers list  :cpp:enum:`RELAY_SOLVER`
 
 .. _relay_solvers:
 
@@ -41,63 +41,63 @@ Relay available solvers
 Direct solvers
 --------------
 
-Enumerative solver (:enumerator:`SICONOS_RELAY_ENUM`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
+Enumerative solver (:cpp:enumerator:`SICONOS_RELAY_ENUM`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The relay problem is reformulated as a LCP and solved with enum method, see :ref:`lcp_solvers`.
 
-driver: :func:`relay_enum()`
+driver: :cpp:func:`relay_enum()`
 
-parameters: same as :enumerator:`SICONOS_LCP_ENUM`.
+parameters: same as :cpp:enumerator:`SICONOS_LCP_ENUM`.
 
-Lemke solver (:enumerator:`SICONOS_RELAY_LEMKE`)
-""""""""""""""""""""""""""""""""""""""""""""""""
+Lemke solver (:cpp:enumerator:`SICONOS_RELAY_LEMKE`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The relay problem is reformulated as a LCP and solved with Lemke's method, see :ref:`lcp_solvers`.
 
-driver: :func:`relay_lexicolemke()`
+driver: :cpp:func:`relay_lexicolemke()`
 
-parameters: same as :enumerator:`SICONOS_LCP_ENUM`.
+parameters: same as :cpp:enumerator:`SICONOS_LCP_ENUM`.
 
 
-PATH (:enumerator:`SICONOS_RELAY_PATH`)
-"""""""""""""""""""""""""""""""""""""""
+PATH (:cpp:enumerator:`SICONOS_RELAY_PATH`)
+""""""""""""""""""""""""""""""""""""""""""""
 
 The relay problem is reformulated as a LCP and solved with the PATH solver
 
 *Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see* :ref:`siconos_install_guide` *)*
 
-driver: :func:`relay_path()`
+driver: :cpp:func:`relay_path()`
 
 parameters : none.
 
 AVI reformulation
 -----------------
 
-AVI, Cao/Ferris solver (:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+AVI, Cao/Ferris solver (:cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
 
-driver:  :func:`relay_avi_caoferris()`
+driver:  :cpp:func:`relay_avi_caoferris()`
 
-parameters: same as :enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
+parameters: same as :cpp:enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
 
 
-There also exists a test version :enumerator:`SICONOS_RELAY_AVI_CAOFERRIS_TEST` with 
+There also exists a test version :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS_TEST` with 
 
-driver:  :func:`relay_avi_caoferris_test()`
+driver:  :cpp:func:`relay_avi_caoferris_test()`
 
-parameters: same as :enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
+parameters: same as :cpp:enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
 
 
 Iterative solvers
 -----------------
 
-Projected Gauss-Seidel (:enumerator:`SICONOS_RELAY_PGS`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Projected Gauss-Seidel (:cpp:enumerator:`SICONOS_RELAY_PGS`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-driver: :func:`relay_pgs()`
+driver: :cpp:func:`relay_pgs()`
 
 parameters:
 

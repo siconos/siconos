@@ -399,7 +399,7 @@ endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
-
+  
 # --- python bindings ---
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)

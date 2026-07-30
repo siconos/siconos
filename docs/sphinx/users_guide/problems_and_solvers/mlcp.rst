@@ -39,20 +39,20 @@ D is an ( :math:`m \times n` ) matrix, a and u is an ( :math:`n` ) vectors b,v a
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`MixedLinearComplementarityProblem`.
+Structure to define the problem: :cpp:class:`MixedLinearComplementarityProblem`.
 
-The generic driver for all MLCPs is :func:`mlcp_driver()`.
+The generic driver for all MLCPs is :cpp:func:`mlcp_driver()`.
 
-Solvers list  :enum:`MLCP_SOLVER`
+Solvers list  :cpp:enum:`MLCP_SOLVER`
 
 
 MLCP solvers must be initialized before any call of the driver. Here is the standard sequence of calls:
 
-#. Initialize the solver with :func:`mlcp_driver_init()`.
+#. Initialize the solver with :cpp:func:`mlcp_driver_init()`.
 
-#. Solve the problemt with :func:`mlcp_driver()`.
+#. Solve the problemt with :cpp:func:`mlcp_driver()`.
 
-#. Reset the solver with :func:`mlcp_driver_reset()`.
+#. Reset the solver with :cpp:func:`mlcp_driver_reset()`.
 
 
 .. _mlcp_error:
@@ -68,7 +68,7 @@ The criterion is based on :
    
 with :math:`x_{+} = max(0,x)` and :math:`x_{-} = max(0,-x)`.
 
-* :func:`mlcp_compute_error` returns 0 if :math:`error \leq tolerance`, else 1.
+* :cpp:func:`mlcp_compute_error` returns 0 if :math:`error \leq tolerance`, else 1.
 * A call to this function updates the content of the input vector w with :math:`Mz + q`.
 
  
@@ -77,11 +77,11 @@ with :math:`x_{+} = max(0,x)` and :math:`x_{-} = max(0,-x)`.
 MLCP available solvers
 ======================
 
-Projected Gauss-Seidel (:enumerator:`SICONOS_MLCP_PGS`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Projected Gauss-Seidel (:cpp:enumerator:`SICONOS_MLCP_PGS`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Projected Gauss-Seidel,  a basic Projected Gauss-Seidel solver for MLCP.
 
-driver: :func:`mlcp_pgs()`
+driver: :cpp:func:`mlcp_pgs()`
 
 parameters:
 
@@ -90,31 +90,31 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
 
-Projected Gauss-Seidel, SBM (:enumerator:`SICONOS_MLCP_PGS_SBM`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Projected Gauss-Seidel, SBM (:cpp:enumerator:`SICONOS_MLCP_PGS_SBM`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Gauss-Seidel with sparse-block storage.
 
-driver: :func:`mlcp_pgs_sbm()`
+driver: :cpp:func:`mlcp_pgs_sbm()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
-internal solver : :enumerate:`SICONOS_LCP_PGS`.
+internal solver : :cpp:enumerator:`SICONOS_LCP_PGS`.
  
 out
 * iparam[SICONOS_IPARAM_MLCP_PGS_SUM_ITER], sum of local number of iterations (output from local_driver)
 * dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] sum of local errors (output from local_driver)
 
 
-Regularized Projected Gauss-Seidel (:enumerator:`SICONOS_MLCP_RPGS`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Regularized Projected Gauss-Seidel (:cpp:enumerator:`SICONOS_MLCP_RPGS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrices with null diagonal terms
 
-driver: :func:`mlcp_rpgs()`
+driver: :cpp:func:`mlcp_rpgs()`
 
 parameters:
 
@@ -123,12 +123,12 @@ parameters:
 * dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5
 
 
-PSOR (:enumerator:`SICONOS_MLCP_PSOR`)
-""""""""""""""""""""""""""""""""""""""
+PSOR (:cpp:enumerator:`SICONOS_MLCP_PSOR`)
+""""""""""""""""""""""""""""""""""""""""""
 
 Projected Succesive over relaxation solver.
 
-driver: :func:`mlcp_psor()`
+driver: :cpp:func:`mlcp_psor()`
 
 parameters:
 
@@ -137,12 +137,12 @@ parameters:
 * dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2
 
 
-RPSOR (:enumerator:`SICONOS_MLCP_RPSOR`)
-""""""""""""""""""""""""""""""""""""""""
+RPSOR (:cpp:enumerator:`SICONOS_MLCP_RPSOR`)
+""""""""""""""""""""""""""""""""""""""""""""
 
 Regularized projected successive overrelaxation method.
 
-driver: :func:`mlcp_rpsor()`
+driver: :cpp:func:`mlcp_rpsor()`
 
 parameters:
 
@@ -152,24 +152,24 @@ parameters:
 * dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5
 
 
-PATH (Ferris) solver (:enumerator:`SICONOS_MLCP_PATH`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
+PATH (Ferris) solver (:cpp:enumerator:`SICONOS_MLCP_PATH`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Path (Ferris) Solver.
 
 *Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see :ref:`siconos_install_guide`)*
 
-driver: :func:`mlcp_path()`
+driver: :cpp:func:`mlcp_path()`
 
 parameters
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
-Enumerative solver (:enumerator:`SICONOS_MLCP_ENUM`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+Enumerative solver (:cpp:enumerator:`SICONOS_MLCP_ENUM`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Brute-force method which tries every possible solution.
 
-driver: :func:`mlcp_enum()`
+driver: :cpp:func:`mlcp_enum()`
 
 parameters:
 
@@ -178,23 +178,23 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
 
-PATH + enum solver (:enumerator:`SICONOS_MLCP_PATH_ENUM`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+PATH + enum solver (:cpp:enumerator:`SICONOS_MLCP_PATH_ENUM`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 First try with Path (Ferris) Solver then use enum if the solver failed.
 
 *Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see :ref:`siconos_install_guide`)*
 
-driver: :func:`mlcp_path_enum()`
+driver: :cpp:func:`mlcp_path_enum()`
 
-parameters : same as :enumerator:`SICONOS_MLCP_ENUM`.
+parameters : same as :cpp:enumerator:`SICONOS_MLCP_ENUM`.
 
   
-Direct + enum solver (:enumerator:`SICONOS_MLCP_DIRECT_ENUM`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Direct + enum solver (:cpp:enumerator:`SICONOS_MLCP_DIRECT_ENUM`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 First try direct method and then use enum if the solver failed.
-driver: :func:`mlcp_direct_enum()`
+driver: :cpp:func:`mlcp_direct_enum()`
 
 parameters:
 
@@ -210,21 +210,21 @@ parameters:
 
 
   
-Simplex solver (:enumerator:`SICONOS_MLCP_SIMPLEX`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""
+Simplex solver (:cpp:enumerator:`SICONOS_MLCP_SIMPLEX`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-driver: :func:`mlcp_simplex()`
+driver: :cpp:func:`mlcp_simplex()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
-Direct/Simplex solver (:enumerator:`SICONOS_MLCP_DIRECT_SIMPLEX`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Direct/Simplex solver (:cpp:enumerator:`SICONOS_MLCP_DIRECT_SIMPLEX`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Try direct method and switch to simplex if it fails.
 
-driver: :func:`mlcp_direct_simplex()`
+driver: :cpp:func:`mlcp_direct_simplex()`
 
 parameters:
 
@@ -238,11 +238,11 @@ parameters:
 * iparam[7] (out): Number of case the direct solved failed.
 
 
-Direct/Path solver (:enumerator:`SICONOS_MLCP_DIRECT_PATH`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Direct/Path solver (:cpp:enumerator:`SICONOS_MLCP_DIRECT_PATH`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Try direct method and switch to Path if it fails.
 
-driver: :func:`mlcp_direct_path()`
+driver: :cpp:func:`mlcp_direct_path()`
 
 parameters:
 
@@ -256,12 +256,12 @@ parameters:
 * iparam[7] (out): Number of case the direct solved failed.
 
 
-Direct/Path/enum solver (:enumerator:`SICONOS_MLCP_DIRECT_PATH_ENUM`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Direct/Path/enum solver (:cpp:enumerator:`SICONOS_MLCP_DIRECT_PATH_ENUM`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Try direct then switch to PATH and finish with enum.
 
-driver: :func:`mlcp_direct_path_enum()`
+driver: :cpp:func:`mlcp_direct_path_enum()`
 
 parameters:
 
@@ -276,22 +276,22 @@ parameters:
 * iparam[7] (out): Number of case the direct solved failed.
 
 
-Nonsmooth Newton solver, Fisher-Burmeister (:enumerator:`SICONOS_MLCP_FB`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Nonsmooth Newton solver, Fisher-Burmeister (:cpp:enumerator:`SICONOS_MLCP_FB`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-driver: :func:`mlcp_FB()`
+driver: :cpp:func:`mlcp_FB()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
-Direct + Nonsmooth Newton solver, Fisher-Burmeister (:enumerator:`SICONOS_MLCP_DIRECT_FB`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Direct + Nonsmooth Newton solver, Fisher-Burmeister (:cpp:enumerator:`SICONOS_MLCP_DIRECT_FB`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Try direct solver then switch to Fisher-Burmeister.
 
-driver: :func:`mlcp_direct_FB()`
+driver: :cpp:func:`mlcp_direct_FB()`
 
 parameters:
 

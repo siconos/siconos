@@ -22,6 +22,7 @@
 #include <limits.h>
 #include <stdint.h>
 
+/** @brief this is a test */
 typedef uint64_t version_t;
 
 /** \struct DataVersioning data */

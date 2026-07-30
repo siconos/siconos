@@ -1,4 +1,4 @@
-# Templates for ci jobs - test cdash
+# Templates for ci jobs
 # It defines workflow rules, templates to create docker images, to configure, build siconos and so on.
 include:
    - ci_gitlab/gitlab-ci-siconos-templates.yml
@@ -476,9 +476,10 @@ bridge:examples:
     forward :  
       yaml_variables: true # to send LAB_NAME
   needs: ["mambalab:install"]
-  rules:
+  rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
-    
+      when: on_success
+    - when: manual    
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.

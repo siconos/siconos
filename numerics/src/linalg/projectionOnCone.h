@@ -30,8 +30,9 @@ extern "C" {
 #endif
 
 /**
-   projectionOnCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
-   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+   Projection on the second Order Cone in \f$ R^3 \f$
+   
+   \f$ K \{r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected
    \param[in] mu the angle of the cone
@@ -40,10 +41,10 @@ extern "C" {
 unsigned projectionOnCone(double *r, double mu);
 
 /**
-   subdifferentialProjectionOnCone.
    Compute an element of the the subdifferential of the
-   projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
-   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+   projection on the second Order Cone in \f$ R^3 \f$
+   
+   \f$ K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[out] H an element of the the subdifferential
    \param[in] r the vector to be projected
@@ -53,7 +54,8 @@ unsigned projectionOnCone(double *r, double mu);
 unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
 
 /**
-    projectionOnDualCone Projection on the second Order Cone in \f$ R^3 \f$,
+    Projection on the second Order Cone in \f$ R^3 \f$
+
     \f$ K \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
 
     \param[in,out] u the vector to be projected
@@ -63,8 +65,9 @@ unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
 unsigned projectionOnDualCone(double *u, double mu);
 
 /**
-   projectionOnCone Projection on the second Order Cone in \f$ R^n \f$, \f$ K \{
-   r, r_1 \geq 0, 0 \|[r_2,r_n]\| \geq mu r_1  \} \f$
+   Projection on the second Order Cone in \f$ R^n \f$
+   
+   \f$ K \{r, r_1 \geq 0, 0 \|[r_2,r_n]\| \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected
    \param[in] mu the angle of the cone

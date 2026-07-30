@@ -34,17 +34,23 @@
 
 namespace siconos::modeling {
 
-/** @enum List of possible Relations types*/
+/** @enum RelationType
+ *  @brief List of authorized Relation types
+ */
 enum class RelationType {
   /** First Order */
   FirstOrder,
-  /** Lagrangian (2nd order)*/
+  /** Lagrangian (2nd order) with dense storage*/
   Lagrangian,
+  /** Lagrangian (2nd order) with sparse storage */
+  LagrangianSparse,
   /** Newton-Euler (2nd order) */
   NewtonEuler
 };
 
-/** @enum List of possible Relations subtypes*/
+/** @enum RelationSubType
+ *  @brief List of authorized Relation subtypes
+ */
 enum class RelationSubType {
   /** non linear */
   NonLinearR,
@@ -82,23 +88,42 @@ enum class RelationSubType {
 
    \f[
    output &= y = h(...) \\
-   input &= g(...)
+   input &= R = g(\lambda,...)
    \f]
 
-  All relations are specified by their type (First order, Lagrangian, see RelationType)
-  accessed by getType() and their sub-type (linear, scleronomous ..., see RelationSubType),
-  returned by getSubType().
+   with \f$ y \in  \mathbb{R}^{M}, \lambda \in  \mathbb{R}^{M} \f$.
 
-  The variables to be taken into account for g and h, as well as their Jacobians, depend on the
-  specific type of relationship.
+  \f$ R \in \mathbb{R}^{N} \f$ is the nonsmooth "input" to the dynamics (see r in
+  DynamicalSystem). It is composed with the concatenation of the r components of the dynamical
+  systems (one or two) involved in the relation.
 
-  A relation provides functions to compute:
+  \f[
+    J^h_x(...)
+    = \frac{\partial h}{\partial x} \in \mathbb{R}^{M \times N}
+    =
+   \left[
+   \frac{\partial h_i}{\partial x_j}
+   \right]_{1\le i\le M,\;1\le j\le N}.
+  \f]
 
-  - the "output" (function computeOutput()) to update y using dynamical systems global
-   variables
+   with \f$ x \in \mathbb{R}^{N} \f$
 
-  - the "input" to the dynamics, (function computeInput()) to update the non-smooth dynamical
-  systems parts, (e.g. r or p).
+  - All relations are specified by their type (First order, Lagrangian, NewtonEuler, see
+  RelationType) accessed by getType() and their sub-type (linear, scleronomous ..., see
+  RelationSubType), returned by getSubType().
+
+  - The variables to be taken into account for g and h, as well as their Jacobians, depend on
+  the specific type of relationship.
+
+  - A relation provides functions to compute:
+
+      - the "output" (function computeOutput()) to update y using dynamical systems global
+        variables
+
+      - the "input" to the dynamics, (function computeInput()) to update the non-smooth
+  dynamical systems parts, (e.g. r or p).
+
+      - the jacobians of the output and of the input.
 
 */
 class Relation {
@@ -165,7 +190,7 @@ class Relation {
     /*Does nothing by default. Reimplement if required*/
   };
 
-  /** default function to compute y
+  /** default function to compute y or one of its derivative
    *
    *  @param time the current time
    *  @param inter the interaction using this relation
@@ -174,7 +199,7 @@ class Relation {
    */
   virtual void computeOutput(double time, Interaction& inter,
                              siconos::algebra::blocks::size_type derivativeNumber = 0) = 0;
-  /** default function to compute r
+  /** default function to compute r or one of its derivative
    *
    *  @param time the current time
    *  @param inter the interaction using this relation
@@ -192,10 +217,10 @@ class Relation {
   /** main relation members display */
   virtual void display() const = 0;
 
-  /** @return True if \f$ \nabla_\lambda h(x,t,\lambda) \f$ is taken into account */
+  /** @return True if \f$ J^h_\lambda h(...) \f$ is taken into account */
   virtual bool hasJacobianhOver_lambda() const { return false; }
 
-  /** @return a read - only view on the matrix \f$ \nabla ^\top_{\lambda} h(q,\lambda) \f$
+  /** @return a read - only view on the matrix \f$ J^h_{\lambda} h(...) \f$
 
     warning: use hasJacobianhOver_lambda before any call to ensure the jacobian is defined and
     has sense */

@@ -76,21 +76,25 @@ def build_doxygen_xml_index(xml_path, srcdir):
 
         kind = compound.attrib.get("kind")
 
-        if kind not in (
-            "class",
-            "struct",
-            "file",
-        ):
-            continue
+        if kind in ("class", "struct", "file"):
 
-        location = compound.find("location")
+            location = compound.find("location")
+            if location is None:
+                continue
+            filename = location.attrib.get("file")
 
-        if location is None:
-            continue
-
-        filename = location.attrib.get("file")
-
-        if filename is None:
+        elif kind == "namespace":
+            # There we want to deal with typedefs, using ...
+            filename = None
+            for member in compound.findall(".//memberdef"):
+                location = member.find("location")
+                if location is not None:
+                    filename = location.attrib.get("file")
+                    if filename:
+                        break
+            if filename is None:
+                continue
+        else:
             continue
 
         filename = Path(filename)

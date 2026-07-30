@@ -30,11 +30,11 @@ A Mixed Complementarity problem (MCP) is a :ref:`ncp_problem` "augmented" with e
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`MixedLinearComplementarityProblem`.
+Structure to define the problem: :cpp:class:`MixedLinearComplementarityProblem`.
 
-The generic driver for all MCP is :func:`mcp_driver()`.
+The generic driver for all MCP is :cpp:func:`mcp_driver()`.
 
-Solvers list  :enum:`MCP_SOLVER`
+Solvers list  :cpp:enum:`MCP_SOLVER`
 
 .. _mcp_error:
 
@@ -43,12 +43,12 @@ Solvers list  :enum:`MCP_SOLVER`
 MCP available solvers
 =====================
 
-Newton, Fisher-Burmeister (:enumerator:`SICONOS_MCP_NEWTON_FB_FBLSA`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Newton, Fisher-Burmeister (:cpp:enumerator:`SICONOS_MCP_NEWTON_FB_FBLSA`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Solver based on Fischer-Burmeister reformulation and line search (VFBLSA in Facchinei--Pang 2003 p. 834)
 
-driver: :func:`mcp_newton_FB_FBLSA()`
+driver: :cpp:func:`mcp_newton_FB_FBLSA()`
 
 parameters:
 
@@ -59,13 +59,13 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 
-Newton (min), Fisher-Burmeister (:enumerator:`SICONOS_MCP_NEWTON_MIN_FB_FBLSA`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Newton (min), Fisher-Burmeister (:cpp:enumerator:`SICONOS_MCP_NEWTON_MIN_FB_FBLSA`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Solver based on Fischer-Burmeister reformulation and line search.
 The descent direction is found using a min reformulation (minFBLSA in Facchinei--Pang 2003 p. 855)
 
-driver: :func:`mcp_newton_min_FB_FBLSA()`
+driver: :cpp:func:`mcp_newton_min_FB_FBLSA()`
 
 parameters:
 
@@ -75,12 +75,13 @@ parameters:
 * iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
-Newton, Fisher-Burmeister (:enumerator:`SICONOS_MCP_OLD_FB`)
+
+Newton, Fisher-Burmeister (:cpp:enumerator:`SICONOS_MCP_OLD_FB`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Solver based on Fischer-Burmeister reformulation, old (outdated) version, for the records.
 
-driver: :func:`mcp_old_FischerBurmeister()`
+driver: :cpp:func:`mcp_old_FischerBurmeister()`
 
 parameters:
 
