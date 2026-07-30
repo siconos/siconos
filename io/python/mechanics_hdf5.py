@@ -479,6 +479,13 @@ class MechanicsHdf5(object):
         """
         return self._dynamic_data
 
+    def displacement_data(self, fem_id):
+        """
+        Displacements
+        """
+        return data(self._data, f"fem_displacements_{fem_id}",
+                    use_compression=False)
+
     def velocities_data(self):
         """
         Velocities of dynamic objects
@@ -1134,7 +1141,7 @@ class MechanicsHdf5(object):
             dat.attrs["translation"] = ctor.translation
             dat.attrs["orientation"] = quaternion_get(ctor.orientation)
 
-        if mass is None or mass == 0:
+        if (mass is None or mass == 0) and material is None:
             obj.attrs["id"] = -(self._number_of_static_objects + 1)
             self._number_of_static_objects += 1
 

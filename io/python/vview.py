@@ -112,6 +112,8 @@ class VViewOptions(object):
         else:
             # vtk 8
             self.imr = True
+        self.cf_scale_factor
+        self.disp_scale_factor = 1.0
         self.depth_peeling = True
         self.maximum_number_of_peels = 100
         self.occlusion_ratio = 0.1
@@ -141,6 +143,7 @@ class VViewOptions(object):
             print(
                 """[--help] [--tmin=<float value>] [--tmax=<float value>]
             [--cf-scale=<float value>] [--no-cf] [--imr]
+            [--disp-scale=<float value>]
             [--view-as-glyphs] [--glyphs-ratio=<float value>] [--global-filter]
             [--no-depth-peeling] [--maximum-number-of-peels=<int value>]
             [--occlusion-ratio=<float value>]
@@ -169,6 +172,8 @@ class VViewOptions(object):
      --cf-scale= value  (default : 1.0 )
        rescale the arrow representing the contact forces by the value.
        the normal cone and the contact points are also rescaled
+     --disp-scale= value (default: 1.0)
+       scale factor for fem displacement
      --no-cf
        do not display contact forces
      --imr
@@ -257,6 +262,7 @@ class VViewOptions(object):
                     "zoom=",
                     "record",
                     "cf-scale=",
+                    "disp-scale=",
                     "normalcone-ratio=",
                     "advance=",
                     "fps=",
@@ -297,6 +303,9 @@ class VViewOptions(object):
 
             elif o == "--cf-scale":
                 self.cf_scale_factor = float(a)
+
+            elif o == "--disp-scale":
+                self.disp_scale_factor = float(a)
 
             elif o == "--no-cf":
                 self.cf_disable = True
@@ -397,6 +406,7 @@ class VViewOptions(object):
             max_time : {self.max_time}
             cf_disable : {self.cf_disable}
             cf_scale_factor : {self.cf_scale_factor}
+            disp_scale_factor: {self.disp_scale_factor}
             normalcone_ratio : {self.normalcone_ratio}
             time_scale_factor : {self.time_scale_factor}
             advance_by_time : {self.advance_by_time}
@@ -703,6 +713,8 @@ class InputObserver:
         if self._times is None:
             self.vview.renderer_window.Render()
             return
+
+        self.vview.io_reader.update_fem_displacements(self._time)
 
         if not self.vview.opts.cf_disable:
             self.vview.io_reader.Update()
@@ -1025,6 +1037,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self.polydata = vtk.vtkPolyData()
         self.stream_actor = None
         self.ctf = vtk.vtkColorTransferFunction()
+        self.fem_actors = dict()
+        self.fem_disp_arrays = dict()
         self.options = opts
 
     def InitGlyphs(self):
@@ -1404,6 +1418,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self._ispos_data = self._io.static_data()
         self._idpos_data = self._io.dynamic_data()
+
         try:
             self._idom_data = self._io.domains_data()
         except ValueError:
@@ -1443,6 +1458,43 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self.Modified()
         return 1
+
+    def update_fem_displacements(self, current_time):
+        for instid, actors in self.fem_actors.items():
+            for actor, _, _ in actors:
+
+                # Find row matching current time
+                ds = self._io.displacement_data(instid)
+                times_col = ds[:, 0]
+                idx = numpy.searchsorted(times_col, current_time, side="right")
+                if idx == 0:
+                    return
+                if idx < len(times_col):
+                    dt_curr = abs(times_col[idx] - current_time)
+                    dt_prev = abs(times_col[idx - 1] - current_time)
+                    row = idx if dt_curr < dt_prev else idx - 1
+                else:
+                    row = idx - 1
+
+                flat_disp = ds[row, 2:]  # Skip time and ds_id columns
+                shape_name = next(k for k, v in self.fem_disp_arrays.items()
+                                  if v == actor.GetMapper().GetInput().GetPointData().GetArray("displacement_norm"))
+
+                disp_array = self.fem_disp_arrays[shape_name]
+
+                # Compute displacement norms (2 DOFs per node)
+                num_nodes = len(flat_disp) // 2
+                for k in range(num_nodes):
+                    ux = flat_disp[2 * k]
+                    uy = flat_disp[2 * k + 1]
+                    scale_factor = self.options.disp_scale_factor
+                    norm = float(numpy.sqrt(ux * ux + uy * uy)) * scale_factor
+                    disp_array.SetTuple1(k, norm)
+                disp_array.Modified()
+                mapper = actor.GetMapper()
+                mapper.SetScalarRange(disp_array.GetRange())
+                mapper.Modified()
+
 
     def SetTime(self, time):
         self.GetOutputInformation(0).Set(
@@ -1566,6 +1618,7 @@ class VView(object):
         self.min_time = self.opts.min_time
         self.max_time = self.opts.max_time
 
+        self.fem_shape_names = []
         self.transforms = dict()
         self.transformers = dict()
 
@@ -1873,7 +1926,65 @@ class VView(object):
 
         ConvexSource = makeConvexSourceClass()
 
-        if shape_type in ["msh", "vtp", "stl"]:
+        if shape_type in ["msh"]:
+            import meshio
+            import tempfile
+
+            # Keep original msh data for FEM visualization
+            if h5py.version.version_tuple.major >= 3:
+                shape_data = (self.io.shapes()[shape_name][:][0]).decode("utf-8")
+            else:
+                shape_data = str(self.io.shapes()[shape_name][:][0])
+
+            with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmpf:
+                tmpf.write(shape_data)
+                tmpf.flush()
+                mesh = meshio.read(tmpf.name)
+
+            # Build VTK unstructured grid
+            points = vtk.vtkPoints()
+            for coords in mesh.points:
+                points.InsertNextPoint(coords[0], coords[1], coords[2])
+
+            grid = vtk.vtkUnstructuredGrid()
+            grid.SetPoints(points)
+
+            # Add triangle cells
+            for cell_block in mesh.cells:
+                if cell_block.type == "triangle":
+                    for cell in cell_block.data:
+                        tri = vtk.vtkTriangle()
+                        tri.GetPointIds().SetId(0, cell[0])
+                        tri.GetPointIds().SetId(1, cell[1])
+                        tri.GetPointIds().SetId(2, cell[2])
+                        grid.InsertNextCell(tri.GetCellType(), tri.GetPointIds())
+
+            # Create scalar array for displacement norm
+            disp_array = vtk.vtkFloatArray()
+            disp_array.SetName("displacement_norm")
+            disp_array.SetNumberOfComponents(1)
+            disp_array.SetNumberOfTuples(mesh.points.shape[0])
+            disp_array.Fill(0.0)
+            grid.GetPointData().AddArray(disp_array)
+            grid.GetPointData().SetActiveScalars("displacement_norm")
+
+            self.datasets[shape_name] = grid
+            self.io_reader.fem_disp_arrays[shape_name] = disp_array
+
+            # Mapper with color interpolation
+            mapper = vtk.vtkDataSetMapper()
+            mapper.SetInputData(grid)
+            mapper.SetScalarModeToUsePointData()
+
+            lut = vtk.vtkLookupTable()
+            lut.SetHueRange(0.667, 0.0)  # Blue to Red
+            lut.Build()
+            mapper.SetLookupTable(lut)
+            mapper.UseLookupTableScalarRangeOn()
+
+            self.mappers[shape_name] = (x for x in [mapper])
+
+        elif shape_type in ["vtp", "stl"]:
             if h5py.version.version_tuple.major >= 3:
                 shape_data = (self.io.shapes()[shape_name][:][0]).decode("utf-8")
             else:
@@ -2257,7 +2368,8 @@ class VView(object):
             actor = None
             actor_edge = None
 
-            if instance.attrs.get("mass", 0) > 0 and not self.opts.view_as_glyphs:
+            if (instance.attrs.get("mass", 0) > 0 or len(instance.attrs.get("material", [])) > 0) \
+               and not self.opts.view_as_glyphs:
 
                 # objects that may move
                 actor = vtk.vtkActor()
@@ -2267,6 +2379,10 @@ class VView(object):
                 self.dynamic_actors[instid].append(
                     (actor, contact_shape_indx, collision_group)
                 )
+
+                if len(instance.attrs.get("material", [])) > 0:
+                    self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
+
                 actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
 
                 actor.GetProperty().SetColor(
@@ -2284,7 +2400,10 @@ class VView(object):
                     )
                     actor_edge.GetProperty().SetRepresentationToWireframe()
 
-            elif instance.attrs.get("mass", 0) <= 0:
+            else:
+                assert (instance.attrs.get("mass", 0) <= 0)
+                assert (len(instance.attrs.get("material", [])) == 0)
+
                 # objects that are not supposed to move
                 actor = vtk.vtkActor()
                 if self.opts.with_edges:
