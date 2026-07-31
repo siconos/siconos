@@ -101,12 +101,11 @@ stages:
    rules:
     - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/ # if commit message contains "[docker-build]"
     - if: $CI_COMMIT_TAG
-    - when: manual # it will always be possible to start the job manualy
-      allow_failure: true
     
 .docker-manual-rules:
     rules:
     - when: manual
+      allow_failure: true
 
 .docker-build:
   extends:
@@ -117,7 +116,6 @@ stages:
   extends:
     - .docker-manual-rules
     - .docker-create-image
-
 
 workflow:
   rules:

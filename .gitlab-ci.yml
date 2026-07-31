@@ -19,6 +19,13 @@ ubuntu24.04:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
   extends: .docker-build
 
+ubuntu24.04:docker-build-manual:
+  variables:
+    IMAGE_NAME: ubuntu24.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+  extends: .docker-manual
+
 ubuntu24.04-petsc:docker-build:
   variables:
     IMAGE_NAME: ubuntu24.04
