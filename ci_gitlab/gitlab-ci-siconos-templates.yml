@@ -141,7 +141,7 @@ workflow:
   rules:
     - when: on_success
 
-.manual-only
+.manual-only:
   rules:
     - when: manual
     

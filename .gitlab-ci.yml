@@ -289,7 +289,7 @@ ubuntu22.04-release:configure:
      CDASH_SUBMIT: 1
    extends:
      - .siconos-configure
-    - .manual-only
+     - .manual-only
    needs:
      - job: ubuntu22.04:docker-build
        optional: true
