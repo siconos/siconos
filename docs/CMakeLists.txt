@@ -95,7 +95,7 @@ if(WITH_DOCUMENTATION)
   find_sphinx_module(sphinxcontrib youtube REQUIRED)
   find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
-  find_python_module(sphinx_book_theme REQUIRED)
+  find_python_module(furo REQUIRED)
   find_python_module(sphinx_autodoc_typehints REQUIRED)
   find_python_module(sphinx_copybutton REQUIRED)
   find_python_module(sphinx_design REQUIRED)

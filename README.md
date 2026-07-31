@@ -8,6 +8,8 @@
 
 > 📚 **Examples and Tutorials**: Most examples and tutorials are in the separate **[siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials)** repository. Please ensure you use **consistent versions** of siconos and siconos-tutorials (e.g., both `main` branch or both same release version).
 
+> 📖 **Documentation**: check **[getting started, install, user or developer guides, complete (C++ and python) API reference ...](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos)**, getting started, user or developer guides, complete (C++ and python) API reference ...
+
 [Homepage](http://siconos.org) |
 [Documentation](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos) |
 [Tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials) |
@@ -181,9 +183,9 @@ while sim.has_next_event():
 
 | Resource | Link |
 |----------|------|
-| **User Guide** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos) |
+| **User Guide** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/users_guide/index.html](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/users_guide/index.html) |
 | **Tutorials** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials) |
-| **API Reference (Doxygen)** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/doxygen](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/doxygen) |
+| **API Reference** | [https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/reference/index.html](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/reference/index.html) |
 | **Bug Reports** | [GitHub Issues](https://github.com/siconos/siconos/issues) |
 
 ---

@@ -59,11 +59,6 @@ WORKDIR /home/siconos-user
 COPY ci_gitlab/dockerfiles/requirements4doc.txt .
 RUN pip install --no-cache-dir -U -r requirements4doc.txt
 
-
-
-
-
-
 FROM siconos-base-python AS siconos-base-parallel
 USER root
 RUN  apt-get update && apt-get install --no-install-recommends -y -qq \

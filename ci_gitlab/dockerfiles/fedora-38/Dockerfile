@@ -34,3 +34,6 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --no-cache-dir -U -r requirements.txt
 
+FROM siconos-base-python AS final
+USER root
+RUN dnf --setopt=deltarpm=false install -y json-devel && dnf clean all

@@ -4,7 +4,7 @@ lxml
 pytest
 matplotlib
 h5py
-pybind11
+pybind11 >=3.0.2
 wheel
 vtk
 packaging

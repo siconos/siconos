@@ -12,20 +12,6 @@ debian-bookworm:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
   extends: .docker-build
 
-fedora-38:docker-build:
-  variables:
-    IMAGE_NAME: fedora-38
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora-38
-  extends: .docker-build
-
-ubuntu22.04:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu22.04
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-  extends: .docker-build
-
 ubuntu24.04:docker-build:
   variables:
     IMAGE_NAME: ubuntu24.04
@@ -40,31 +26,14 @@ ubuntu24.04-petsc:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04-parallel
   extends: .docker-build
 
-
 image4doc:docker-build:
   variables:
-    IMAGE_NAME: ubuntu22.04
+    IMAGE_NAME: ubuntu24.04
     SICONOS_DOCKER_TARGET: siconos-base-doc
     RESULT_NAME: $SICONOS_REGISTRY/sources/image4doc
   extends: .docker-build
   stage: docker-build-layer2
-  needs: ["ubuntu22.04:docker-build"]
-
-opencascade:docker-build:
-  variables:
-    IMAGE_NAME: opencascade
-    SICONOS_DOCKER_TARGET: mamba-occenv
-    RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
-  extends: .docker-build
-  when: manual
-
-opensuse-tumbleweed:docker-build:
-  variables:
-    IMAGE_NAME: opensuse-tumbleweed
-    SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
-  extends: .docker-build
-  when: manual
+  needs: ["ubuntu24.04:docker-build"]
 
 
 # A specific image, that may be used to install siconos,
@@ -86,20 +55,41 @@ mambaenv:docker-build:
     SICONOS_DOCKER_TARGET: mambaenv
     RESULT_NAME: $SICONOS_REGISTRY/sources/mambaenv
   extends: .docker-build
-   
+
+## Older images ##
+fedora-38:docker-build:
+  variables:
+    IMAGE_NAME: fedora-38
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora-38
+  extends: .docker-manual
+
+ubuntu22.04:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu22.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+  extends: .docker-manual
+
+opencascade:docker-build:
+  variables:
+    IMAGE_NAME: opencascade
+    SICONOS_DOCKER_TARGET: mamba-occenv
+    RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
+  extends: .docker-manual
+
+opensuse-tumbleweed:docker-build:
+  variables:
+    IMAGE_NAME: opensuse-tumbleweed
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
+  extends: .docker-manual
+
   
-# Manual jobs, used to create docker images.
-# docker-manual-img:
-#   extends: .docker-rules
-#   stage: docker-build-layer2
-#   trigger:
-#     include:
-#       - ci_gitlab/docker-manual.yml
-
-
 # -------------- Configure, build and test Siconos --------------
 
-# -- Jobs that will always be executed (rule .devel-rules) --
+#######################
+### -- Jobs that will always be executed (rule .devel-rules) --
 
 # ------ ubuntu 24, debug setup -------
 ubuntu24.04-debug:configure:
@@ -163,7 +153,6 @@ ubuntu24.04-release:test:
     needs: ["ubuntu24.04-release:build"]
 
 # ------ ubuntu 24, asan (sanitizer) setup -------
-# This job is to be started manually through gitlab interface
 ubuntu24.04-asan:configure:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
@@ -175,7 +164,6 @@ ubuntu24.04-asan:configure:
   needs:
     - job: ubuntu24.04:docker-build
       optional: true
-  when: manual
 
 ubuntu24.04-asan:build:
   variables:
@@ -186,7 +174,6 @@ ubuntu24.04-asan:build:
     - .siconos-build
     - .devel-rules
   needs: ["ubuntu24.04-asan:configure"]
-  when: manual
 
 ubuntu24.04-asan:test:
   variables:
@@ -196,35 +183,7 @@ ubuntu24.04-asan:test:
     - .siconos-test
     - .devel-rules
   needs: ["ubuntu24.04-asan:build"]
-  when: manual
 
-
-# ------ ubuntu 22, default setup -------
-ubuntu22.04-release:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-     CDASH_SUBMIT: 1
-   extends:
-     - .siconos-configure
-   needs:
-     - job: ubuntu22.04:docker-build
-       optional: true
-
-ubuntu22.04-release:build:
-  variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-      CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04-release:configure"]
-
-ubuntu22.04-release:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-      CDASH_SUBMIT: 1
-    extends:
-      - .siconos-test
-    needs: ["ubuntu22.04-release:build"]
 
 # --- Siconos inside a notebook, default setup ---
 mambalab:configure:
@@ -259,8 +218,8 @@ mambalab:test:
       - .devel-rules
     needs: ["mambalab:build"]
     
-# ------ ubuntu 22, with mechanisms component -------
-# optional (manual)
+# ------ with mechanisms component -------
+# Based on micromamba
 with-mechanisms:configure:
   variables:
      IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
@@ -291,38 +250,9 @@ with-mechanisms:test:
     - .devel-rules
   needs: ["with-mechanisms:build"]
 
-# -- Jobs executed for MR or main branch only --
+#######################
+## -- Jobs executed for MR or main branch only --
 
-# ------ ubuntu 22, numerics only, fclib -------
-ubuntu22.04-numerics-fclib:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-     CDASH_SUBMIT: 1
-     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/numerics_with_fclib.cmake
-   extends:
-    - .siconos-configure
-   needs:
-    - job: ubuntu22.04:docker-build
-      optional: true
-
-ubuntu22.04-numerics-fclib:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04-numerics-fclib:configure"]
-
-ubuntu22.04-numerics-fclib:test:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-test
-  needs: ["ubuntu22.04-numerics-fclib:build"]
-
-
-    
 # ------ debian bookworm, default setup -------
 debian-bookworm:configure:
   variables:
@@ -350,7 +280,39 @@ debian-bookworm:test:
       - .siconos-test
     needs: ["debian-bookworm:build"]
 
-      
+#######################
+# --- Optional jobs, for legacy or specific tests ---
+# - ubuntu 22 -
+ubuntu22.04-release:configure:
+   variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+     CDASH_SUBMIT: 1
+   extends:
+     - .siconos-configure
+    - .manual-only
+   needs:
+     - job: ubuntu22.04:docker-build
+       optional: true
+
+ubuntu22.04-release:build:
+  variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .manual-only
+  needs: ["ubuntu22.04-release:configure"]
+
+ubuntu22.04-release:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
+    extends:
+      - .siconos-test
+      - .manual-only
+    needs: ["ubuntu22.04-release:build"]
+    
+ 
 # --- fedora 38, default setup ---
 fedora-38:configure:
   variables:
@@ -358,6 +320,7 @@ fedora-38:configure:
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
+    - .manual-only
   needs:
     - job: fedora-38:docker-build
       optional: true
@@ -368,6 +331,7 @@ fedora-38:build:
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
+    - .manual-only
   needs: ["fedora-38:configure"]
 
 fedora-38:test:
@@ -376,20 +340,20 @@ fedora-38:test:
       CDASH_SUBMIT: 1
     extends:
     - .siconos-test
+    - .manual-only
     needs: ["fedora-38:build"]
 
 # --- opensuse-tumbleweed default setup ---
-# Only manual activation when required to test user configs.
 opensuse-tumbleweed:configure:
   variables:
      IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
+    - .manual-only
   needs:
     - job: opensuse-tumbleweed:docker-build
       optional: true
-  when: manual
 
 opensuse-tumbleweed:build:
   variables:
@@ -397,8 +361,8 @@ opensuse-tumbleweed:build:
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
+    - .manual-only
   needs: ["opensuse-tumbleweed:configure"]
-  when: manual
 
 opensuse-tumbleweed:test:
     variables:
@@ -406,23 +370,11 @@ opensuse-tumbleweed:test:
       CDASH_SUBMIT: 1
     extends:
     - .siconos-test
+    - .manual-only
     needs: ["opensuse-tumbleweed:build"]
-    when: manual
 
+#################
 # --- Jobs to install siconos and produce a Docker image "Siconos ready" ---
-
-# Chosen OS for the install is ubuntu 22
-# The image is saved in siconos-tutorials (public) registries
-# Remark: branch name will be appended to image name.
-# Tag will correspond to the commit ref
-# siconos:install:
-#   variables: 
-#     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-#     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
-#   extends:
-#     - .siconos-install
-#     - .devel-rules
-#   needs: ["ubuntu22.04-release:build"] 
 
 # The image is saved in siconos-tutorials (public) registries
 # Remark: branch name will be appended to image name.
@@ -477,7 +429,7 @@ bridge:examples:
     #yaml_variables: true # to send LAB_NAME
   needs: ["mambalab:install"]
   allow_failure: true 
-  rules: # This job starts if the commit message contains "[with examples] or may be triggered manualy"
+  rules: # This job starts if the commit message contains "[with examples]" or may be triggered manualy
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
       when: on_success
     - when: manual    

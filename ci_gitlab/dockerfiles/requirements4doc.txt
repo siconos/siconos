@@ -1,9 +1,12 @@
+sphinx>=8.0,<8.2
 sphinx
-breathe
-sphinx-book-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport
+sphinxcontrib-napoleon
 sphinxcontrib-youtube
+sphinx-book-theme
+numpydoc
+breathe
 sphinx-copybutton
 sphinx-design
 sphinx-autodoc-typehints

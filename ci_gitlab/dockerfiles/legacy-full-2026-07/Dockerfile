@@ -27,8 +27,7 @@ RUN apt update  && apt install --no-install-recommends -y -qq \
 	texlive-latex-base &&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN micromamba config prepend channels conda-forge
 
-ARG MAMBA_YAML_FILE=ci_gitlab/siconos-freeze-2026-07.yml
-ARG MAMBA_LOCKFILE=ci_gitlab/siconos-conda-lock.yml
+ARG MAMBA_LOCKFILE=ci_gitlab/siconos-conda-lock-2026-07.yml
 FROM mamba-base AS mamba-occenv
 USER $MAMBA_USER
 WORKDIR /home/mambauser
