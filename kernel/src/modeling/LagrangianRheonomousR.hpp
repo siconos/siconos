@@ -88,17 +88,15 @@ class LagrangianRheonomousR : public LagrangianR {
   /** default and only constructor */
   LagrangianRheonomousR() : LagrangianR(RelationSubType::RheonomousR) {}
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~LagrangianRheonomousR() noexcept = default;
 
-  /** initialize G matrices or components specific to derived classes.
-   *
+  /** initialize matrices or components
    *  @param inter the Interaction
    */
   void initialize(Interaction& inter) override;
 
-  /** set a user-defined function to compute \f$ h(q,t) \f$ 
+  /** set a user-defined function to compute \f$ h(q,t) \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)
    */
@@ -144,13 +142,18 @@ class LagrangianRheonomousR : public LagrangianR {
    */
   virtual void computehdot(const siconos::algebra::BlockVector& position, double time);
 
-  /** compute all the jacobians of h */
+  /** compute all the jacobians of h
+   *
+   *  @param time double, current time
+   *  @param inter interaction that owns the relation
+   *  @param interProp
+   */
   void computeJach(double time, Interaction& inter) override;
 
   /** to compute output
    *
    *  @param time current time
-   *  @param inter the Interaction
+   *  @param inter interaction that owns the relation
    *  @param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
@@ -160,11 +163,13 @@ class LagrangianRheonomousR : public LagrangianR {
   /** to compute p
    *
    *  @param time current time
-   *  @param inter the Interaction
+   *  @param inter interaction that owns the relation
    *  @param level "derivative" order of lambda used to compute input
    */
   void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
+
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif

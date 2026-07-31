@@ -150,3 +150,4 @@ void siconos::modeling::LagrangianSparseR::allocate_read_dynamical_systems_var_v
     }
   }
 }
+

@@ -26,10 +26,12 @@ class LagrangianSparseRelationsTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(LagrangianSparseRelationsTest);
 
   // tests to be done ...
-  CPPUNIT_TEST(testBuildLagrangianSparseRelationsheonomousR);
+  CPPUNIT_TEST(testBuildLagrangianSparseRheonomousR);
+  CPPUNIT_TEST(testBuildLagrangianSparseScleronomousR);
   CPPUNIT_TEST_SUITE_END();
 
-  void testBuildLagrangianSparseRelationsheonomousR();
+  void testBuildLagrangianSparseRheonomousR();
+  void testBuildLagrangianSparseScleronomousR();
 
  public:
   void setUp();

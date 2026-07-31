@@ -15,58 +15,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file LagrangianScleronomousR.hpp
 
- */
+/*! @file LagrangianScleronomousR.hpp Lagrangian scleronomous ( h(q) ) relations (dense
+ * storage)*/
 #ifndef LagrangianScleronomousR_H
 #define LagrangianScleronomousR_H
 
 #include "LagrangianR.hpp"
 
 namespace siconos::modeling {
+
 /**
-  Scleronomic Lagrangian (Non Linear) Relations
+  @brief Lagrangian (2nd order) non linear relations, with y=h(q) (dense storage)
 
-  This class provides tools to describe Lagrangian (2nd order) non linear relations, with:
-
-    \f[
+  \f[
     y = h(q)
     \f]
 
     \f[
-    \dot y = \nabla^\top_q h(q) \dot q
-    \f]
-
-    or more generally
-
-    \f[
-     \dot y = H(q) \dot q
+    \dot y = J^h_q(q) \dot q
     \f]
 
     and by duality
 
     \f[
-    p = \nabla_q h(q)\lambda
+
+      p = {J^h_q}^\top(q)\lambda
     \f]
 
-    or more generally
+    where
 
     \f[
-    p = H^\top(q)\lambda
+    J^h_q(q)
+    =
+    \frac{\partial h}{\partial q}(q)
+    =
+    \left[
+    \frac{\partial h_i}{\partial q_j}
+    \right]_{1\le i\le m,\;1\le j\le n}.
     \f]
 
-    with
+   is the Jacobian matrix of the relation.
 
-    \f[
-    H^\top(q) = \nabla_q h(q)
-    \f]
-
-    The following operators can be set by user-defined functions:
+   The following operators can be set by user-defined functions:
 
     - \f$ h(q) \f$
-    - \f$ \nabla_q h(q) \f$
+    - \f$ J^h_q(q) \f$
+    - \f$ \frac{\partial}{\partial t}(J^h_q) \f$
 
-   */
+*/
 class LagrangianScleronomousR : public LagrangianR {
  protected:
   ACCEPT_SERIALIZATION(LagrangianScleronomousR);
@@ -74,23 +71,23 @@ class LagrangianScleronomousR : public LagrangianR {
   /** function wrapper used to compute \f$ h(q) \f$ */
   siconos::modeling::func_prototypes::FunctionBV_V computeh_{nullptr};
 
-  /** function wrapper used to compute  \f$ \nabla^\top_q h(q) \f$ */
+  /** function wrapper used to compute  \f$ J^h_q(q) \f$ */
   siconos::modeling::func_prototypes::FunctionBV_M computejacobianhOver_q_{nullptr};
 
-  /** \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$
+  /** \f$ \frac{\partial}{\partial t}(J^h_q) \f$
    *  This value is useful to compute the second-order
    *  derivative of the constraints with respect to time.
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_dot_{nullptr};
 
-  /** function wrapper used to compute \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$
+  /** function wrapper used to compute \f$ \frac{\partial}{\partial t}(J^h_q) \f$
    */
   siconos::modeling::func_prototypes::FunctionBVBV_M computejacobianhOver_q_dot_{nullptr};
 
-  /** True if  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$ is taken into account */
+  /** True if \f$ \frac{\partial}{\partial t}(J^h_q) \f$ is taken into account */
   bool hasJacobianhOver_q_dot_{false};
 
-  /** \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$ */
+  /** \f$ \frac{\partial}{\partial t}(J^h_q) .\dot q\f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> jacobianhOver_q_dot_X_qdot_{nullptr};
 
  public:
@@ -100,84 +97,87 @@ class LagrangianScleronomousR : public LagrangianR {
   /** destructor */
   virtual ~LagrangianScleronomousR() noexcept = default;
 
+  /** initialize matrices or components
+   *  @param inter the Interaction
+   */
   void initialize(Interaction& inter) override;
 
-  /** set a user-defined function to compute \f$ h(q) \f$  \f$
+  /** set a user-defined function to compute \f$ h(q) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V& fct);
 
   /**
     to compute the output y = h(q) of the Relation
 
-    \param q coordinates of the dynamical systems involved in the relation
-    \param y the resulting vector
+    @param q coordinates of the dynamical systems involved in the relation
+    @param y the resulting vector
   */
   virtual void computeh(const siconos::algebra::BlockVector& q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** Set a constant  \f$ \nabla^\top_q h(q) \f$
+  /** Set a constant  \f$ J^h_q(q) \f$
    *
-   *  \param newValue the constant matrix
+   *  @param newValue the constant matrix
    *
    */
   void setConstantJacobianhOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
-  /** set a user-defined function to compute \f$ \nabla^\top_q h(q) \f$
+  /** set a user-defined function to compute \f$  J^h_q(q) \f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianhOver_qFunction(
       const siconos::modeling::func_prototypes::FunctionBV_M& fct);
 
-  /** Computes \f$ \nabla^\top_q h(q) \f$
-   * \param q coordinates of the dynamical systems involved in the relation
+  /** Computes \f$  J^h_q(q) \f$
+   * @param q coordinates of the dynamical systems involved in the relation
    */
   virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector& q);
 
   /** set a user-defined function to compute
-   *  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *  \f$ \frac{\partial}{\partial t}(J^h_q)\f$
    *
-   *  \param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...)
    */
   void setComputejacobianhOver_q_dotFunction(
       const siconos::modeling::func_prototypes::FunctionBVBV_M& fct);
 
-  /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
-   *  \param q 'list' of state vectors (for all ds involved in the interaction)
-   *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
+  /** Update \f$ \frac{\partial}{\partial t}( J^h_q) \f$
+   *  @param q 'list' of state vectors (for all ds involved in the interaction)
+   *  @param qdot 'list' of state vectors (for all ds involved in the interaction)
    */
-  void computejacobianhOver_q_dot(const siconos::algebra::BlockVector& q,
+  void computeJacobianhOver_q_dot(const siconos::algebra::BlockVector& q,
                                   const siconos::algebra::BlockVector& qdot);
 
-  /** \return a read-only view on \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
+  /** @return a read-only view on \f$ \frac{\partial}{\partial t}( J^h_q(q)).\dot q\f$
    * vector */
   inline auto jacobianhOver_q_dot_X_qdot() const {
     return siconos::algebra::ConstMapVectorType(jacobianhOver_q_dot_X_qdot_->data(),
                                                 jacobianhOver_q_dot_X_qdot_->size());
   }
 
-  /** to compute \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
+  /** to compute \f$ \frac{\partial}{\partial t}( J^h_q(q)).\dot q\f$
    *
-   *  \param time double, current time
-   *  \param inter interaction
+   *  @param time double, current time
+   *  @param inter interaction
    */
   void computeJacobianhOver_q_dot_X_qdot(double time, Interaction& inter);
 
-  /** compute all the H Jacobian
+  /** compute all the jacobians of h
    *
-   *  \param time double, current time
-   *  \param inter interaction that owns the relation
-   *  \param interProp
+   *  @param time double, current time
+   *  @param inter interaction that owns the relation
+   *  @param interProp
    */
   void computeJach(double time, Interaction& inter) override;
 
   /** to compute output
    *
-   *  \param time the current time
-   *  \param inter interaction that owns the relation
-   *  \param derivativeNumber number of the derivative to compute, optional,
+   *  @param time current time
+   *  @param inter interaction that owns the relation
+   *  @param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
   void computeOutput(double time, Interaction& inter,
@@ -185,9 +185,9 @@ class LagrangianScleronomousR : public LagrangianR {
 
   /** to compute p
    *
-   *  \param time the current time
-   *  \param inter interaction that owns the relation
-   *  \param level "derivative" order of lambda used to compute input
+   *  @param time current time
+   *  @param inter interaction that owns the relation
+   *  @param level "derivative" order of lambda used to compute input
    */
   void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
@@ -195,5 +195,4 @@ class LagrangianScleronomousR : public LagrangianR {
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
-
 #endif

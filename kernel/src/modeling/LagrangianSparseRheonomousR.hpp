@@ -152,23 +152,6 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
   void setConstantJacobianhOver_q(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
                                   siconos::algebra::AliasTag);
 
-  /** @brief Set a constant \f$ J^h_q \f$
-   *
-   * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
-   * pointing directly to the memory provided by the argument.
-   *
-   * This means:
-   *  - ownership stays external
-   *  - modifications to the original vector are reflected inside the class
-   *
-   *  @param newValue jacobianhOver_q matrix
-   *  @param tag Pass siconos::algebra::alias_t to select this overload
-   *        (rather than copy version)
-   *
-   */
-  void setConstantJacobianhOver_q(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue,
-                                  siconos::algebra::CopyTag);
-
   /** set a user-defined function to compute \f$ J^h_q \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)

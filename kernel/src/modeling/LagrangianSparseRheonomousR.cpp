@@ -99,6 +99,7 @@ void siconos::modeling::LagrangianSparseRheonomousR::setConstantJacobianhOver_q(
   computejacobianhOver_q_ = nullptr;
   computejacobianhOver_q_python_ = nullptr;
 }
+
 void siconos::modeling::LagrangianSparseRheonomousR::computehdot(
     const siconos::algebra::BlockVector& positions, double time) {
   if (computehdot_)

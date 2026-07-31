@@ -207,6 +207,25 @@ using FunctionBVBV_M = std::function<void(const siconos::algebra::BlockVector&,
                                           const siconos::algebra::BlockVector&,
                                           Eigen::Ref<siconos::algebra::MapType>)>;
 
+/** function proto to compute f(block vector, result_matrix_sparse) */
+using FunctionBV_Ms = std::function<void(const siconos::algebra::BlockVector&,
+                                         siconos::algebra::SiconosSparseMatrix&)>;
+
+/** function proto to compute result_matrix = f(block vector, result_matrix_sparse)*/
+using RFunctionBV_Ms = std::function<siconos::algebra::SiconosSparseMatrix(
+    const siconos::algebra::BlockVector&, siconos::algebra::SiconosSparseMatrix&)>;
+
+/** function proto to compute f(block vector, block vector, result_matrix_sparse) */
+using FunctionBVBV_Ms = std::function<void(const siconos::algebra::BlockVector&,
+                                           const siconos::algebra::BlockVector&,
+                                           siconos::algebra::SiconosSparseMatrix&)>;
+
+/** function proto to compute result_matrix = f(block vector, block
+ * vector,result_matrix_sparse)*/
+using RFunctionBVBV_Ms = std::function<siconos::algebra::SiconosSparseMatrix(
+    const siconos::algebra::BlockVector&, const siconos::algebra::BlockVector&,
+    siconos::algebra::SiconosSparseMatrix&)>;
+
 /** function proto to compute f(block vector, t, vector, result_matrix) */
 using FunctionBVSV_M =
     std::function<void(const siconos::algebra::BlockVector&, double,
