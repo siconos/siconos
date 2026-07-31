@@ -57,7 +57,7 @@ struct siconos::modeling::Interaction::SetLevels
 
   Interaction* interaction_{nullptr};
 
-  SetLevels(Interaction* inter) : interaction_(inter){};
+  SetLevels(Interaction* inter) : interaction_(inter) {};
 
   void visit(const ComplementarityConditionNSL& nslaw) override {
     auto relationType = interaction_->relation()->getType();
@@ -139,6 +139,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const EqualityConditionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -160,6 +161,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const NewtonImpactNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -176,6 +178,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const NewtonImpactFrictionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -191,6 +194,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const NewtonImpactRollingFrictionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -207,6 +211,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const FremondImpactFrictionNSL& nslaw) override {
     auto relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -222,6 +227,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const MultipleImpactNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(1);
@@ -238,6 +244,7 @@ struct siconos::modeling::Interaction::SetLevels
   void visit(const MohrCoulombPlasticityNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::LagrangianSparse ||
         relationType == RelationType::NewtonEuler) {
       interaction_->setLowerLevelForOutput(0);
       interaction_->setUpperLevelForOutput(0);

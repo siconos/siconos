@@ -17,6 +17,7 @@
  */
 #include "LagrangianSparseDSTest.hpp"
 
+#include "LagrangianSparseDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"

@@ -83,7 +83,7 @@ opencascade:docker-build:
     IMAGE_NAME: opencascade
     SICONOS_DOCKER_TARGET: mamba-occenv
     RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
-  extends: .docker-manual
+  extends: .docker-build
 
 opensuse-tumbleweed:docker-build:
   variables:

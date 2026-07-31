@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2025 INRIA.
+ * Copyright 2026 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __LagrangianSparseDSTest__
-#define __LagrangianSparseDSTest__
+#ifndef __LagrangianSparseRelationsTest__
+#define __LagrangianSparseRelationsTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-
-class LagrangianSparseDSTest : public CppUnit::TestFixture {
+class LagrangianSparseRelationsTest : public CppUnit::TestFixture {
  private:
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianSparseDSTest);
+  CPPUNIT_TEST_SUITE(LagrangianSparseRelationsTest);
 
   // tests to be done ...
-
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_basic);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_alias);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_copy);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_compute);
+  CPPUNIT_TEST(testBuildLagrangianSparseRelationsheonomousR);
   CPPUNIT_TEST_SUITE_END();
 
-  // \todo exception test
-
-  void testBuildLagrangianSparseDS_basic();
-  void testBuildLagrangianSparseDS_alias();
-  void testBuildLagrangianSparseDS_copy();
-  void testBuildLagrangianSparseDS_compute();
-  // void testcomputeDS();
-
-  // Members
-
-  siconos::algebra::SiconosVector3 q0, velocity0;
-
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> mass{nullptr};
+  void testBuildLagrangianSparseRelationsheonomousR();
 
  public:
   void setUp();
