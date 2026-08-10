@@ -26,8 +26,8 @@
 #include "FemTools.hpp"
 #include "FiniteElementLinearTIDS.hpp"
 #include "FiniteElementModel.hpp"
-#include "LagrangianSparseLinearTIDS.hpp"
 #include "LagrangianSparseDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "Material.hpp"
 #include "Mesh.hpp"
 #include "MeshUtils.hpp"
@@ -42,33 +42,19 @@ PYBIND11_MODULE(_fem, m) {
   m.def("createMeshFromGMSH2", &siconos::mechanics::fem::createMeshFromGMSH2, py::arg("input"),
         py::arg("is_filename") = true);
 
-  py::class_<siconos::mechanics::fem::Mesh, py::smart_holder>(m, "Mesh")
-      .def_property_readonly("dim", &siconos::mechanics::fem::Mesh::dim)
-      .def_property_readonly("vertices", &siconos::mechanics::fem::Mesh::vertices)
-      .def_property_readonly("elements", &siconos::mechanics::fem::Mesh::elements)
-      .def_property_readonly("physical_entities",
-                             &siconos::mechanics::fem::Mesh::physical_entities)
-      .def("display", &siconos::mechanics::fem::Mesh::display, py::arg("brief") = true);
-
   py::class_<siconos::mechanics::fem::Material, py::smart_holder> material(m, "Material");
   material
       .def(py::init<double, double, double, double>(),  // parameterized constructor
            py::arg("massDensity"), py::arg("E"), py::arg("nu"), py::arg("radius") = 1.0)
-      .def_property_readonly("massDensity", &siconos::mechanics::fem::Material::massDensity)
-      .def_property_readonly("elasticYoungModulus",
-                             &siconos::mechanics::fem::Material::elasticYoungModulus)
-      .def_property_readonly("Poisson_s_ratio",
-                             &siconos::mechanics::fem::Material::Poisson_s_ratio)
-      .def_property_readonly("analysisType2D",
-                             &siconos::mechanics::fem::Material::analysisType2D)
-      .def_property_readonly("thickness", &siconos::mechanics::fem::Material::thickness)
-      .def_property_readonly("shearModulus", &siconos::mechanics::fem::Material::shearModulus)
-      .def_property_readonly("momentOfInertia",
-                             &siconos::mechanics::fem::Material::momentOfInertia)
-      .def_property_readonly("crossSectionArea",
-                             &siconos::mechanics::fem::Material::crossSectionArea)
-      .def_property_readonly("secondMomentOfArea",
-                             &siconos::mechanics::fem::Material::secondMomentOfArea);
+      .def("massDensity", &siconos::mechanics::fem::Material::massDensity)
+      .def("elasticYoungModulus", &siconos::mechanics::fem::Material::elasticYoungModulus)
+      .def("Poisson_s_ratio", &siconos::mechanics::fem::Material::Poisson_s_ratio)
+      .def("analysisType2D", &siconos::mechanics::fem::Material::analysisType2D)
+      .def("thickness", &siconos::mechanics::fem::Material::thickness)
+      .def("shearModulus", &siconos::mechanics::fem::Material::shearModulus)
+      .def("momentOfInertia", &siconos::mechanics::fem::Material::momentOfInertia)
+      .def("crossSectionArea", &siconos::mechanics::fem::Material::crossSectionArea)
+      .def("secondMomentOfArea", &siconos::mechanics::fem::Material::secondMomentOfArea);
 
   material.attr("Steel") = siconos::mechanics::fem::Steel
 
@@ -123,4 +109,79 @@ PYBIND11_MODULE(_fem, m) {
       .export_values();
 
   m.attr("default_tags") = siconos::mechanics::fem::default_tags;
+
+  py::class_<siconos::mechanics::fem::FiniteElementModel, py::smart_holder>(
+      m, "FiniteElementModel")
+      .def("mesh", &siconos::mechanics::fem::FiniteElementModel::mesh)  // method
+      .def("vertices",
+           [](const siconos::mechanics::fem::FiniteElementModel& self) {
+             // Convert span to vector for pybind11
+             auto span = self.mesh()->vertices();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshVertex>>(
+                 span.begin(), span.end());
+           })
+      .def("elements",
+           [](const siconos::mechanics::fem::FiniteElementModel& self) {
+             auto span = self.mesh()->elements();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshElement>>(
+                 span.begin(), span.end());
+           })
+      .def("vertexToNode", &siconos::mechanics::fem::FiniteElementModel::vertexToNode)
+      .def("nodes",
+           [](const siconos::mechanics::fem::FiniteElementModel& self) {
+             auto span = self.nodes();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::FENode>>(span.begin(),
+                                                                                  span.end());
+           })
+      .def("display", &siconos::mechanics::fem::FiniteElementModel::display,
+           py::arg("brief") = true)
+      .def("getContactSegments",
+           &siconos::mechanics::fem::FiniteElementModel::getContactSegments,
+           py::arg("contact_tag"))
+      .def("getContactGlobalIndices",
+           [](const siconos::mechanics::fem::FiniteElementModel& self,
+              py::array_t<double> coords) {
+             auto buf = coords.request();
+             if (buf.ndim != 2 || buf.shape[1] != 2)
+               throw std::runtime_error("contact_coords must be (N,2)");
+             Eigen::Map<const Eigen::MatrixXd> mat(static_cast<double*>(buf.ptr), buf.shape[0],
+                                                   2);
+             return self.getContactGlobalIndices(mat);
+           });
+
+  py::class_<siconos::mechanics::fem::Mesh, py::smart_holder>(m, "Mesh")
+      .def("dim", &siconos::mechanics::fem::Mesh::dim)
+      .def("vertices",
+           [](const siconos::mechanics::fem::Mesh& self) {
+             auto span = self.vertices();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshVertex>>(
+                 span.begin(), span.end());
+           })
+      .def("elements",
+           [](const siconos::mechanics::fem::Mesh& self) {
+             auto span = self.elements();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshElement>>(
+                 span.begin(), span.end());
+           })
+      .def("physical_entities", &siconos::mechanics::fem::Mesh::physical_entities)
+      .def("display", &siconos::mechanics::fem::Mesh::display, py::arg("brief") = true);
+
+  py::class_<siconos::mechanics::fem::MeshVertex, py::smart_holder>(m, "MeshVertex")
+      .def("num", &siconos::mechanics::fem::MeshVertex::num)
+      .def("x", &siconos::mechanics::fem::MeshVertex::x)
+      .def("y", &siconos::mechanics::fem::MeshVertex::y)
+      .def("z", &siconos::mechanics::fem::MeshVertex::z)
+      .def("display", &siconos::mechanics::fem::MeshVertex::display);
+
+  py::class_<siconos::mechanics::fem::FENode, py::smart_holder>(m, "FENode")
+      .def("num", &siconos::mechanics::fem::FENode::num)
+      .def("global_dof_index",
+           [](const siconos::mechanics::fem::FENode& self) {
+             return std::vector<siconos::algebra::Index>(self.global_dof_index().begin(),
+                                                         self.global_dof_index().end());
+           })
+      .def("x", &siconos::mechanics::fem::FENode::x)
+      .def("y", &siconos::mechanics::fem::FENode::y)
+      .def("z", &siconos::mechanics::fem::FENode::z)
+      .def("display", &siconos::mechanics::fem::FENode::display);
 }

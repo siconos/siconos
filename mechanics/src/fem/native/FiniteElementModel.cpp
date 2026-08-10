@@ -1297,3 +1297,47 @@ void siconos::mechanics::fem::FiniteElementModel::display(bool brief) const {
     f->display();
   }
 }
+
+std::vector<std::array<siconos::algebra::Index, 4>>
+siconos::mechanics::fem::FiniteElementModel::getContactSegments(int contact_tag) const {
+  std::vector<std::array<siconos::algebra::Index, 4>> segments;
+  for (auto elem : mesh_->elements()) {
+    if (elem->tags(0) == contact_tag && elem->vertices().size() == 2) {
+      auto v0 = elem->vertices()[0];
+      auto v1 = elem->vertices()[1];
+      auto n0 = vertexToNode_.at(v0);
+      auto n1 = vertexToNode_.at(v1);
+      segments.push_back({n0->global_dof_index()[0], n0->global_dof_index()[1],
+                          n1->global_dof_index()[0], n1->global_dof_index()[1]});
+    }
+  }
+  return segments;
+}
+
+std::vector<siconos::algebra::Index>
+siconos::mechanics::fem::FiniteElementModel::getContactGlobalIndices(const Eigen::Ref<const Eigen::MatrixXd>& contact_coords) const {
+  std::vector<siconos::algebra::Index> indices;
+  indices.reserve((contact_coords.rows() - 1) * 4);
+
+  for (int i = 0; i < contact_coords.rows() - 1; ++i) {
+    Eigen::Vector2d p1(contact_coords(i, 0), contact_coords(i, 1));
+    Eigen::Vector2d p2(contact_coords(i+1, 0), contact_coords(i+1, 1));
+
+    auto v1_it = std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
+        [&](const auto& v) { return v->x() == p1(0) && v->y() == p1(1); });
+    auto v2_it = std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
+        [&](const auto& v) { return v->x() == p2(0) && v->y() == p2(1); });
+
+    if (v1_it == mesh_->vertices().end() || v2_it == mesh_->vertices().end())
+      THROW_EXCEPTION("Contact coordinate not found in mesh vertices");
+
+    auto n1 = vertexToNode_.at(*v1_it);
+    auto n2 = vertexToNode_.at(*v2_it);
+
+    indices.push_back(n1->global_dof_index()[0]);
+    indices.push_back(n1->global_dof_index()[1]);
+    indices.push_back(n2->global_dof_index()[0]);
+    indices.push_back(n2->global_dof_index()[1]);
+  }
+  return indices;
+}
