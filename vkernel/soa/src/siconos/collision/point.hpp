@@ -53,11 +53,9 @@ struct point<Item, empty_shape> : item {
     void update(auto step)
     {
       // one body / one point
-      storage::attr<"coord">(*self())[0] =
-          storage::attr<"q">(item(), step)(0);
-      storage::attr<"coord">(*self())[1] =
-          storage::attr<"q">(item(), step)(1);
-      storage::attr<"coord">(*self())[2] = 0.; /* 2D */
+      coord()[0] = item().q(step)(0);
+      coord()[1] = item().q(step)(1);
+      coord()[2] = 0; /* 2D */
     }
   };
 };
@@ -145,12 +143,12 @@ struct point<Item, Shape> {
 
     void update(auto step)
     {
-      coord() = algebra::cast(
-          mp::type_c<float>,
-          storage::make_handle(self()->data(),
-                               storage::prop<"shape">(self()->item()))
-              .segments()
-              .point_coord(point_index(), seg_index()));
+      // coord() = algebra::cast(
+      //     mp::type_c<float>,
+      //     storage::make_handle(self()->data(),
+      //                          storage::prop<"shape">(self()->item()))
+      //         .segments()
+      //         .point_coord(point_index(), seg_index()));
     }
   };
 };

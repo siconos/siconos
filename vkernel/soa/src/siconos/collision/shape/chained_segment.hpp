@@ -34,13 +34,12 @@ struct chained_segment : item {
 
     decltype(auto) nodes() { return attr<"nodes">(*self()); }
 
-    decltype(auto) p1(indice_t seg_index = 0)
-    {
-      return nodes()[seg_index * 2];
-    };
+    auto size() { return std::size(nodes()) - 1; }
+
+    decltype(auto) p1(indice_t seg_index = 0) { return nodes()[seg_index]; };
     decltype(auto) p2(indice_t seg_index = 0)
     {
-      return nodes()[seg_index * 2 + 1];
+      return nodes()[seg_index + 1];
     };
     decltype(auto) x1(indice_t seg_index = 0) { return p1(seg_index)[0]; };
     decltype(auto) y1(indice_t seg_index = 0) { return p1(seg_index)[1]; };
@@ -79,8 +78,9 @@ struct chained_segment : item {
       qp[2] = 0.;
 
       const auto t =
-          fmax(0, fmin(1, algebra::dot(qp - p1(), dp2p1()) / length_sq()));
-      const auto p = p1() + t * dp2p1();
+          fmax(0, fmin(1, algebra::dot(qp - p1(seg_index), dp2p1(seg_index)) /
+                              length_sq(seg_index)));
+      const auto p = p1(seg_index) + t * dp2p1(seg_index);
       return collision::distance(qp, p);
     }
 
@@ -126,9 +126,8 @@ struct chained_segment : item {
       if constexpr (match::push_back<nodes_store_t>) {
         nodes().push_back({x, y, 0.}); /* 2D */
 
-        /* initialize must be called on even sizes */
         indice number_of_nodes = std::size(nodes());
-        if (number_of_nodes % 2 == 0) {
+        if (number_of_nodes > 1) {
           self()->initialize(number_of_nodes - 2);
         }
       }
@@ -143,6 +142,7 @@ struct chained_segment : item {
       using scalar = typename env_t::scalar;
 
       return collect(
+          method("size", &interface<Handle>::size),
           method("initialize", &interface<Handle>::initialize),
           method("set_maxpoints", &interface<Handle>::set_maxpoints),
           method("set_p1_p2",

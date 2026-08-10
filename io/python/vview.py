@@ -714,7 +714,8 @@ class InputObserver:
             self.vview.renderer_window.Render()
             return
 
-        self.vview.io_reader.update_fem_displacements(self._time)
+        if self.vview.with_fem:
+            self.vview.io_reader.update_fem_displacements(self._time)
 
         if not self.vview.opts.cf_disable:
             self.vview.io_reader.Update()
@@ -1461,9 +1462,13 @@ class IOReader(VTKPythonAlgorithmBase):
 
     def update_fem_displacements(self, current_time):
         for instid, actors in self.fem_actors.items():
-            for actor, _, _ in actors:
+            for actor, contact_shape_indx, _ in actors:
+                # Get shape_name from contact_shape_indx
+                if isinstance(contact_shape_indx, tuple):
+                    shape_name = contact_shape_indx[1]  # ('Face', shape_name, index) or similar
+                else:
+                    shape_name = contact_shape_indx
 
-                # Find row matching current time
                 ds = self._io.displacement_data(instid)
                 times_col = ds[:, 0]
                 idx = numpy.searchsorted(times_col, current_time, side="right")
@@ -1476,21 +1481,20 @@ class IOReader(VTKPythonAlgorithmBase):
                 else:
                     row = idx - 1
 
-                flat_disp = ds[row, 2:]  # Skip time and ds_id columns
-                shape_name = next(k for k, v in self.fem_disp_arrays.items()
-                                  if v == actor.GetMapper().GetInput().GetPointData().GetArray("displacement_norm"))
+                flat_disp = ds[row, 2:]  # Already in spatial order
 
                 disp_array = self.fem_disp_arrays[shape_name]
 
-                # Compute displacement norms (2 DOFs per node)
-                num_nodes = len(flat_disp) // 2
-                for k in range(num_nodes):
+                num_vertices = len(flat_disp) // 2
+                for k in range(num_vertices):
                     ux = flat_disp[2 * k]
                     uy = flat_disp[2 * k + 1]
                     scale_factor = self.options.disp_scale_factor
                     norm = float(numpy.sqrt(ux * ux + uy * uy)) * scale_factor
                     disp_array.SetTuple1(k, norm)
+
                 disp_array.Modified()
+
                 mapper = actor.GetMapper()
                 mapper.SetScalarRange(disp_array.GetRange())
                 mapper.Modified()
@@ -1618,7 +1622,7 @@ class VView(object):
         self.min_time = self.opts.min_time
         self.max_time = self.opts.max_time
 
-        self.fem_shape_names = []
+        self.with_fem = False
         self.transforms = dict()
         self.transformers = dict()
 
@@ -1983,6 +1987,10 @@ class VView(object):
             mapper.UseLookupTableScalarRangeOn()
 
             self.mappers[shape_name] = (x for x in [mapper])
+            if self.opts.with_edges:
+                mapper_edge = vtk.vtkDataSetMapper()
+                mapper_edge.SetInputData(grid)
+                self.mappers_edges[shape_name] = (y for y in [mapper_edge])
 
         elif shape_type in ["vtp", "stl"]:
             if h5py.version.version_tuple.major >= 3:
@@ -2381,6 +2389,7 @@ class VView(object):
                 )
 
                 if len(instance.attrs.get("material", [])) > 0:
+                    self.with_fem = True
                     self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
 
                 actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))

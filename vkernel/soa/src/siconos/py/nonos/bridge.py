@@ -328,15 +328,16 @@ class Body(BodyBase):
     def __init__(self):
         pass
 
-    def init_fem(self, mesh_data, contact_nodes, contact_nodes_indices):
+    def init_fem(self, mesh_data, fesolid, contact_nodes, contact_nodes_indices):
 
+        self._mesh_data = mesh_data
+        self._fesolid = fesolid
         self.set_count(self.count() + 1)
         self._ident = self.count()
 
         body = vkernel.disks.add_fem(self.data())
         self._handle = body
         body.set_id(self._ident)
-        self._mesh_data = mesh_data
         sign = hashlib.sha256(mesh_data.encode('utf-8')).hexdigest()
         if sign in self.shapes():
             mesh_shape = self.shapes()[sign]

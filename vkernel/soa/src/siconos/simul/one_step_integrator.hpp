@@ -554,20 +554,29 @@ struct one_step_integrator {
             auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
 
             // contact index in original mesh
-            auto global_index = variant::visit(
+            variant::visit(
                 data, rel,
                 [&](match::handle<collision::diskmesh_r> auto rrel) {
-                  return rrel.mesh().global_indices()[rrel.contact_index()];
+                  auto base_idx = 4*rrel.contact_index();
+                  auto dof0 = rrel.mesh().global_indices()[base_idx];
+                  auto dof1 = rrel.mesh().global_indices()[base_idx + 1];
+                  auto dof2 = rrel.mesh().global_indices()[base_idx + 2];
+                  auto dof3 = rrel.mesh().global_indices()[base_idx + 3];
+
+                  for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
+                    set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                              dof0 + j2, h_mat2(i, 0));
+                    set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                              dof1 + j2, h_mat2(i, 1));
+                    set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                              dof2 + j2, h_mat2(i, 2));
+                    set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                              dof3 + j2, h_mat2(i, 3));
+                  }
                 });
 
-            // modification on a copy
+            // bc dofs in ds2
             for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-              for (auto j = 0; j < algebra::ncols(h_mat2); ++j) {
-                set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                          j + j2 + global_index, h_mat2(i, j));
-              }
-
-              // bc dofs in ds2
               for (auto bc_local_idx : bc_vel_2) {
                 set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
                           j2 + bc_local_idx, 0.);

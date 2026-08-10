@@ -565,7 +565,7 @@ struct moreau_jean_element : item {
 
                     y[0] = rrel.compute_h(step, hds1, hds2);
 
-                    indice i = rrel.contact_index();
+                    indice i = 4*rrel.contact_index();
                     indice idx1 = rrel.mesh().global_indices()[i];
                     indice idy1 = rrel.mesh().global_indices()[i + 1];
                     indice idx2 = rrel.mesh().global_indices()[i + 2];

@@ -21,38 +21,53 @@
 #include "siconos/utils/variant.hpp"
 
 namespace std {
+
+// std::array<T, 2>
 template <typename T>
 struct hash<std::array<T, 2>> {
-  size_t operator()(const std::array<T, 2>& arr) const noexcept
-  {
+  size_t operator()(const std::array<T, 2>& arr) const noexcept {
     size_t h1 = std::hash<T>{}(arr[0]);
     size_t h2 = std::hash<T>{}(arr[1]);
-    return h1 ^ (h2 << 1);
+    // boost::hash_combine
+    return h1 ^ (h2 + 0x9e3779b97f4a7c15 + (h1 << 6) + (h1 >> 2));
   }
 };
 
+// std::array<T, 4>
 template <typename T>
 struct hash<std::array<T, 4>> {
-  size_t operator()(const std::array<T, 4>& arr) const noexcept
-  {
-    size_t h1 = std::hash<T>{}(arr[0]);
-    size_t h2 = std::hash<T>{}(arr[1]);
-    size_t h3 = std::hash<T>{}(arr[2]);
-    size_t h4 = std::hash<T>{}(arr[3]);
-    size_t combined1 = h1 ^ (h2 << 1);
-    size_t combined2 = h3 ^ (h4 << 1);
-    return combined1 ^ (combined2 << 1);
+  size_t operator()(const std::array<T, 4>& arr) const noexcept {
+    size_t seed = 0;
+    for (size_t i = 0; i < 4; ++i) {
+      size_t h = std::hash<T>{}(arr[i]);
+      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
   }
 };
 
+// siconos::storage::mp::pair
 template <typename First, typename Second>
 struct hash<siconos::storage::mp::pair<First, Second>> {
-  size_t operator()(
-      const siconos::storage::mp::pair<First, Second>& p) const noexcept
-  {
+  size_t operator()(const siconos::storage::mp::pair<First, Second>& p) const noexcept {
     size_t h1 = std::hash<First>{}(siconos::storage::mp::first(p));
     size_t h2 = std::hash<Second>{}(siconos::storage::mp::second(p));
-    return h1 ^ (h2 << 1);
+    return h1 ^ (h2 + 0x9e3779b97f4a7c15 + (h1 << 6) + (h1 >> 2));
+  }
+};
+
+// siconos::storage::mp::tuple<First, Second, Third>
+template <typename First, typename Second, typename Third>
+struct hash<siconos::storage::mp::tuple<First, Second, Third>> {
+  size_t operator()(const siconos::storage::mp::tuple<First, Second, Third>& p) const noexcept {
+    size_t h1 = std::hash<First>{}(siconos::storage::mp::tuple_first(p));
+    size_t h2 = std::hash<Second>{}(siconos::storage::mp::tuple_second(p));
+    size_t h3 = std::hash<Third>{}(siconos::storage::mp::tuple_third(p));
+    size_t seed = 0;
+    seed ^= h1 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    seed ^= h2 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    seed ^= h3 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    return seed;
   }
 };
 }  // namespace std
@@ -271,7 +286,7 @@ struct space_filter : item {
                   storage::make_handle(self()->data(), shape_idx);
 
               auto nbsegments =
-                  std::size(shape_handle.segments().nodes()) / 2;
+                  std::size(shape_handle.segments().nodes()) - 1;
               // multiple points are associated to the system
               for (std::size_t index = 0; index < nbsegments; ++index) {
                 for (auto [i, point_coord] :
@@ -328,15 +343,25 @@ struct space_filter : item {
       });
     }
 
-    decltype(auto) make_ipair(auto ids1, auto ids2)
+    template <typename Index1, typename Index2>
+    decltype(auto) make_ipair(Index1 ids1, Index2 ids2)
     {
       auto i1 = ids1.value();
       auto i2 = ids2.value();
-      if (i1 < i2) {
-        return mp::make_pair(i1, i2);
+
+      if constexpr (std::is_same_v<Index1, Index2>)
+      // same type of indices, relation is the same with permutation
+      {
+        if (i1 < i2) {
+          return mp::make_pair(i1, i2);
+        }
+        else {
+          return mp::make_pair(i2, i1);
+        }
       }
       else {
-        return mp::make_pair(i2, i1);
+        // not same type of indices: no permutation!
+        return mp::make_pair(i1, i2);
       }
     }
 
@@ -388,9 +413,15 @@ struct space_filter : item {
     void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s,
                                const auto& ds2s, const auto& dinteractions)
     {
+      auto& data = self()->data();
+
       // build (ds ds -> inter) & (ds segment -> inter) maps
       for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, dinteractions)) {
-        ds_dds_prox[make_ipair(ds1, ds2)] = inter;
+        auto contact_index =
+            variant::visit(data, inter.relation(),
+                           [](auto& rrel) { return rrel.contact_index(); });
+        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(), contact_index)] =
+            inter;
       }
     }
 
@@ -429,8 +460,11 @@ struct space_filter : item {
       auto nslaw = self()->nslaw();
       auto diskmeshes = self()->diskmeshes();
 
+      auto mesh = hp2.shape();
+      auto contact_index = hp2.seg_index();
       // at most one edge between 2 ds !!
-      auto find_inter = dmap.find(make_ipair(ds1.index(), ds2.index()));
+      auto find_inter = dmap.find(mp::make_tuple(
+          ds1.index().value(), ds2.index().value(), contact_index));
       if (find_inter != dmap.end()) {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
@@ -443,8 +477,6 @@ struct space_filter : item {
 
         storage::prop<"activation">(inter) = true;
 
-        auto mesh = hp2.shape();
-        auto contact_index = hp2.seg_index();
         if (auto search =
                 diskmeshes.find({mesh.index().value(), contact_index});
             search != diskmeshes.end()) {
@@ -457,7 +489,8 @@ struct space_filter : item {
           inter.relation() = rel;
           diskmeshes[{mesh.index().value(), contact_index}] = rel;
         }
-        dmap[make_ipair(ds1.index(), ds2.index())] = inter;
+        dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(),
+                            contact_index)] = inter;
       }
     }
 
@@ -557,6 +590,7 @@ struct space_filter : item {
       }
     }
 
+    template <typename Interaction>
     void remove_interactions(auto& ds_ds_prox, auto& ds_segment_prox,
                              auto& ds_fdisk_prox)
     {
@@ -566,9 +600,9 @@ struct space_filter : item {
       auto& data = self()->data();
 
       auto& activations =
-          storage::prop_values<finteraction, "activation">(data, 0);
+          storage::prop_values<Interaction, "activation">(data, 0);
 
-      auto interactions = storage::handles<finteraction>(data, 0);
+      auto interactions = storage::handles<Interaction>(data, 0);
 
       //      print("BEFORE REMOVAL: size of indexset0: {}\n",
       //      activations.size());
@@ -636,7 +670,7 @@ struct space_filter : item {
         auto fact_index = fact - activations.begin();
         //        print("  activation of {} is false\n", fact_index);
         auto inter = storage::make_handle(
-            data, storage::index<finteraction, indice>(fact_index));
+            data, storage::index<Interaction, indice>(fact_index));
 
         // with move_back : order is modified
 
@@ -676,7 +710,7 @@ struct space_filter : item {
                                      storage::index<finteraction, indice>>;
 
       using map_ds_dds_prox_t =
-          typename env::template map<mp::pair<indice, indice>,
+          typename env::template map<mp::tuple<indice, indice, indice>,
                                      storage::index<dfinteraction, indice>>;
 
       using map_ds_segment_prox_t =
@@ -821,7 +855,10 @@ struct space_filter : item {
           };
         });
       });
-      remove_interactions(ds_ds_prox, ds_segment_prox, ds_fdisk_prox);
+      remove_interactions<finteraction>(ds_ds_prox, ds_segment_prox,
+                                        ds_fdisk_prox);
+      //      remove_interactions<dfinteraction>(ds_dds_prox, ds_segment_prox,
+      //                                         ds_fdisk_prox);
     }
 
     auto methods()

@@ -217,6 +217,7 @@ class MechanicsHdf5(object):
         self._use_compression = use_compression
         self._should_output_domains = output_domains
         self._verbose = verbose
+        self._fem_dof_mappings = {}  # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
 
     def __enter__(self):
         """Reminder: this function will be called when a 'with'
@@ -483,7 +484,8 @@ class MechanicsHdf5(object):
         """
         Displacements
         """
-        return data(self._data, f"fem_displacements_{fem_id}",
+        nbcolumns = self._data[f"fem_displacements_{fem_id}"].attrs["dof_count"]
+        return data(self._data, f"fem_displacements_{fem_id}", nbcolumns,
                     use_compression=False)
 
     def velocities_data(self):

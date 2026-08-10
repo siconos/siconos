@@ -97,6 +97,7 @@ struct maker
                                some::unbounded_collection>,
               storage::wrapped<config::pointl, some::unbounded_collection>,
               storage::wrapped<config::pointd, some::unbounded_collection>,
+              storage::wrapped<config::pointf, some::unbounded_collection>,
               storage::wrapped<config::pointtds, some::unbounded_collection>,
               storage::wrapped<config::ct_interaction,
                                some::unbounded_collection>,

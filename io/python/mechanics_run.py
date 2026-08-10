@@ -1069,10 +1069,31 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     body = body_class()
 
-                    [coords, indices, segments] = (
-                        siconos.io.tools.extract_contact_nodes_with_indices(mesh_data)
-                    )
-                    body.init_fem(mesh_data, coords, indices)
+                    contact_tag = 4  # msh tag contact convention
+
+                    femodel = fesolid.FEModel()
+                    mesh = femodel.mesh()
+
+                    # segments in counter clockwise order
+                    segments = femodel.getContactSegments(contact_tag)  # list of array([dof_x1, dof_y1, dof_x2, dof_y2])
+
+                    # ordered vertices: first vertex of each segment
+                    ordered_vertex_dofs = [seg[:2] for seg in segments]  # [dof_x, dof_y] for each vertex in CCW order
+
+                    # contact_nodes from vertex coordinates
+                    contact_nodes = []
+                    for dofs in ordered_vertex_dofs:
+                        # vertex index from DOF (2D)
+                        v_idx = dofs[0] // 2
+                        vertex = mesh.vertices()[v_idx]
+                        contact_nodes.append([vertex.x(), vertex.y(), 0.0])
+
+                    contact_nodes = np.array(contact_nodes, dtype=np.float64)
+
+                    # global_indices: flatten segments
+                    global_indices = np.array(segments, dtype=np.uint64).flatten()
+
+                    body.init_fem(mesh_data, fesolid, contact_nodes, global_indices)
 
                     body.handle().set_mass_matrix(fesolid.mass())
                     body.handle().set_k_matrix(fesolid.stiffnessMatrix())
@@ -2351,34 +2372,34 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._p0s_data[current_line:, :] = p0s
 
     def output_displacements(self):
-        # Get displacements map from C++
+        """
+        Outputs displacements of fem objects.
+        """
         disp_map = self._io.displacements(self._nsds)
-
         if disp_map is not None:
-            # For each FEM system
             for ds_id, displacements in disp_map.items():
-                # Create or get dataset for this system
+                mapping = self._fem_dof_mappings.get(ds_id)
+                if mapping is None:
+                    continue
+
+                spatial_displacements = displacements[mapping['dof_indices']]
+
                 dataset_name = f"fem_displacements_{ds_id}"
+                nbcolumns = 2 + len(spatial_displacements)
                 if dataset_name not in self._data:
-                    # Create new dataset with variable columns
-                    max_cols = 2 + len(displacements)  # time + ds_id + displacements
                     dataset = self._data.create_dataset(
-                        dataset_name,
-                        (0, max_cols),
-                        maxshape=(None, max_cols),
-                        chunks=True,
-                        compression="gzip",
-                    )
-                    dataset.attrs["dof_count"] = len(displacements)
+                        dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
+                        chunks=True, compression="gzip")
+                    dataset.attrs["dof_count"] = len(spatial_displacements)
+                    dataset.attrs["spatial_order"] = True
                 else:
                     dataset = self._data[dataset_name]
 
-                # Append data
                 current_line = dataset.shape[0]
                 dataset.resize(current_line + 1, 0)
-                dataset[current_line, 0] = self.current_time()  # time
-                dataset[current_line, 1] = ds_id  # system ID
-                dataset[current_line, 2 : 2 + len(displacements)] = displacements
+                dataset[current_line, 0] = self.current_time()
+                dataset[current_line, 1] = ds_id
+                dataset[current_line, 2:2+len(spatial_displacements)] = spatial_displacements
 
     def output_dynamic_objects(self, initial=False):
         """
@@ -3586,6 +3607,39 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._before_next_step_iteration_hook is not None:
             self._before_next_step_iteration_hook.initialize(self)
 
+        # fem/mesh indices
+        for name, obj in self._input.items():
+            if obj.attrs.get("material") is not None:  # FEM object
+                ds_id = int(obj.attrs["id"])
+                # mapping 
+                fem_ds = self._nsds.dynamicalSystem(ds_id)
+                fem_model = fem_ds._fesolid.FEModel()
+                mesh = fem_model.mesh()
+
+                dof_to_vertex = []
+                for v_idx, vertex in enumerate(mesh.vertices()):
+                    node = fem_model.vertexToNode(vertex)
+                    if node:
+                        dofs = node.global_dof_index()
+                        if len(dofs) >= 2:
+                            dof_to_vertex.append((dofs[0], dofs[1], v_idx, vertex.y(), vertex.x()))
+
+                dof_to_vertex.sort(key=lambda x: (x[3], x[4]))  # spatial order
+
+                dof_indices = np.array([(d[0], d[1]) for d in dof_to_vertex], dtype=np.int32).flatten()
+                coords = np.array([[d[4], d[3], 0.0] for d in dof_to_vertex], dtype=np.float64)
+
+                self._fem_dof_mappings[ds_id] = {
+                    'dof_indices': dof_indices,
+                    'coords': coords,
+                    'n_vertices': len(dof_to_vertex)
+                }
+
+                # Write coords once
+                coord_name = f"fem_coords_{ds_id}"
+                if coord_name not in self._data:
+                    self._data.create_dataset(coord_name, data=coords)
+            
         self.print_verbose("first output static and dynamic objects ...")
         self.output_static_objects()
         self.output_dynamic_objects()

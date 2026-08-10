@@ -237,5 +237,7 @@ void solve_in_place(M& m, auto& b)
 auto rows(auto& m) { return m.rows(); };
 auto cols(auto& m) { return m.cols(); };
 
+auto norm(auto& m) { return m.norm(); };
+
 void clear(auto& m) { m.resize(0); };
 }  // namespace siconos::algebra

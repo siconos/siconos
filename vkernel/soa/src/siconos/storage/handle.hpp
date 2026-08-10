@@ -93,6 +93,18 @@ struct index {
 
   /// @brief Three-way comparison operator
   friend auto operator<=>(const index<T, R>&, const index<T, R>&) = default;
+
+
+  template <match::item U>
+  friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs) {
+    return true;
+  }
+
+  template <match::item U>
+  friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs) {
+    return false;
+  }
+
 };
 
 /**
