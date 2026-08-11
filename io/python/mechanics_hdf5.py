@@ -554,6 +554,56 @@ class MechanicsHdf5(object):
         """
         return self._boundary_conditions
 
+    def p0s(self, step):
+        """Get p0 data for a specific time step (fixed-dof systems only)."""
+        if self._p0s_data is None:
+            return None
+        # Get dynamic objects at this step to know count
+        dyn_data = self.dynamic_data()
+        if dyn_data is None or len(dyn_data) == 0:
+            return None
+        # Find rows for this step
+        step_times = dyn_data[:, 0]
+        # Find indices for this step (assuming step corresponds to index in unique times)
+        unique_times, indices = np.unique(step_times, return_index=True)
+        if step >= len(indices):
+            return None
+        start_idx = indices[step]
+        if step + 1 < len(indices):
+            end_idx = indices[step + 1]
+        else:
+            end_idx = len(dyn_data)
+        # Count dynamic objects at this step
+        n_dyn = end_idx - start_idx
+        # p0s_data is appended per step, so calculate offset
+        # This assumes constant number of fixed-dof objects per step
+        # Better: store count per step, but for now assume fixed
+        p0s_all = self._p0s_data[:]
+        if len(p0s_all) == 0:
+            return None
+        # Estimate entries per step
+        entries_per_step = len(p0s_all) // len(unique_times)
+        p0_start = step * entries_per_step
+        p0_end = min(p0_start + entries_per_step, len(p0s_all))
+        return p0s_all[p0_start:p0_end]
+
+    def radii(self, step):
+        """Get radii for a specific time step (fixed-dof systems only)."""
+        if self._radii_data is None:
+            return None
+        radii_all = self._radii_data[:]
+        if len(radii_all) == 0:
+            return None
+        dyn_data = self.dynamic_data()
+        if dyn_data is None:
+            return None
+        unique_times = np.unique(dyn_data[:, 0])
+        entries_per_step = len(radii_all) // len(unique_times)
+        r_start = step * entries_per_step
+        r_end = min(r_start + entries_per_step, len(radii_all))
+        return radii_all[r_start:r_end]
+
+
     def add_plugin_source(self, name, filename):
         """
         Add C source plugin

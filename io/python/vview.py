@@ -1190,17 +1190,35 @@ class IOReader(VTKPythonAlgorithmBase):
         self.vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data[:, 0:2])
         self.vtk_velo_data.SetName("velocity")
 
-        if len(self._radii_data) > 0:
-            self.vtk_radii_data = dsa.numpyTovtkDataArray(
-                self._radii_data[self._id_t_m, 1]
-            )
-            self.vtk_radii_data.SetName("radii")
-        else:
-            self.vtk_radii_data = None
+        try:
+            radii_current = self._io.radii(self._index)  # shape: (n_disks, 2) -> [ds_id, radius]
+            if radii_current is not None and len(radii_current) > 0:
+                radii_dict = {int(row[0]): row[1] for row in radii_current}
+                ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
+                self.vtk_radii_data = dsa.numpyTovtkDataArray(
+                    numpy.array([radii_dict.get(ds_id, 0.0) for ds_id in ds_ids])
+                )
+                self.vtk_radii_data.SetName("radii")
+            else:
+                self.vtk_radii_data = None
+        except:
+            pass
 
         if len(self._p0s_data) > 0:
 
-            self.current_p0_norm = self.p0_norm[self._id_t_m]
+            # Get p0 data for current time step (only for disks/fixed-dof systems)
+            p0s_current = self._io.p0s(self._index)  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
+            if p0s_current is not None and len(p0s_current) > 0:
+                # Build dict: ds_id -> p0_norm
+                p0_dict = {int(row[0]): math.sqrt(row[1]**2 + row[2]**2 + row[3]**2) 
+                           for row in p0s_current}
+                # Get ds_ids for current dynamic objects
+                ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
+                # Map to p0_norm, default 0 for FEM objects
+                self.current_p0_norm = numpy.array([p0_dict.get(ds_id, 0.0) for ds_id in ds_ids])
+            else:
+                self.current_p0_norm = numpy.zeros(len(self._id_t_m))
+
             self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(self.current_p0_norm)
             self.vtk_p0_norm_data.SetName("p0_norm")
         else:
@@ -1247,7 +1265,7 @@ class IOReader(VTKPythonAlgorithmBase):
         # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(self.vtk_velo_data)
-        if self.vtk_radii_data is not None:
+        if hasattr(self, 'vtk_radii_data') and self.vtk_radii_data is not None:
             output.GetPointData().AddArray(self.vtk_radii_data)
             output.GetPointData().SetActiveScalars("radii")
         if self.vtk_p0_norm_data is not None:
@@ -2371,170 +2389,173 @@ class VView(object):
             except AttributeError:
                 pass
 
-        if not (self.opts.global_filter or self.opts.export):
+        actor = None
+        actor_edge = None
 
-            actor = None
-            actor_edge = None
+        if (instance.attrs.get("mass", 0) > 0 or len(instance.attrs.get("material", [])) > 0) \
+           and not self.opts.view_as_glyphs:
 
-            if (instance.attrs.get("mass", 0) > 0 or len(instance.attrs.get("material", [])) > 0) \
-               and not self.opts.view_as_glyphs:
+            # objects that may move
+            actor = vtk.vtkActor()
+            if self.opts.with_edges:
+                actor_edge = vtk.vtkActor()
 
-                # objects that may move
-                actor = vtk.vtkActor()
-                if self.opts.with_edges:
-                    actor_edge = vtk.vtkActor()
+            self.dynamic_actors[instid].append(
+                (actor, contact_shape_indx, collision_group)
+            )
 
+            if len(instance.attrs.get("material", [])) > 0:
+                self.with_fem = True
+                self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
+
+            actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
+
+            actor.GetProperty().SetColor(
+                instance.attrs.get(
+                    "color",
+                    self.config.get("dynamic_bodies_color", [0.3, 0.3, 0.3]),
+                )
+            )
+            if self.opts.with_edges:
                 self.dynamic_actors[instid].append(
-                    (actor, contact_shape_indx, collision_group)
+                    (actor_edge, contact_shape_indx, collision_group)
                 )
-
-                if len(instance.attrs.get("material", [])) > 0:
-                    self.with_fem = True
-                    self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
-
-                actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
-
-                actor.GetProperty().SetColor(
-                    instance.attrs.get(
-                        "color",
-                        self.config.get("dynamic_bodies_color", [0.3, 0.3, 0.3]),
-                    )
+                actor_edge.GetProperty().SetOpacity(
+                    self.config.get("dynamic_opacity", 1.0)
                 )
+                actor_edge.GetProperty().SetRepresentationToWireframe()
+
+        else:
+            assert (instance.attrs.get("mass", 0) <= 0)
+            assert (len(instance.attrs.get("material", [])) == 0)
+
+            # objects that are not supposed to move
+            actor = vtk.vtkActor()
+            if self.opts.with_edges:
+                actor_edge = vtk.vtkActor()
+
+            self.static_actors[instid].append(
+                (actor, contact_shape_indx, collision_group)
+            )
+            actor.GetProperty().SetOpacity(self.config.get("static_opacity", 1.0))
+            actor.GetProperty().SetColor(
+                instance.attrs.get(
+                    "color", self.config.get("static_bodies_color", [0.5, 0.5, 0.5])
+                )
+            )
+
+        if actor is not None:
+
+            if self.opts.with_random_color:
+                actor.GetProperty().SetColor(random_color())
                 if self.opts.with_edges:
-                    self.dynamic_actors[instid].append(
-                        (actor_edge, contact_shape_indx, collision_group)
-                    )
-                    actor_edge.GetProperty().SetOpacity(
-                        self.config.get("dynamic_opacity", 1.0)
-                    )
-                    actor_edge.GetProperty().SetRepresentationToWireframe()
+                    actor_edge.GetProperty().SetColor(random_color())
 
+            actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
+            if self.opts.with_edges:
+                actor_edge.SetMapper(
+                    self.unfrozen_mappers_edges[contact_shape_indx]
+                )
+
+            self.renderer.AddActor(actor)
+            if self.opts.with_edges:
+                self.renderer.AddActor(actor_edge)
+
+            transform = vtk.vtkTransform()
+            transformer = vtk.vtkTransformFilter()
+
+            if contact_shape_indx in self.readers:
+                transformer.SetInputConnection(
+                    self.readers[contact_shape_indx].GetOutputPort()
+                )
             else:
-                assert (instance.attrs.get("mass", 0) <= 0)
-                assert (len(instance.attrs.get("material", [])) == 0)
+                # FORCE: ensure dataset is not empty
+                ds = self.datasets[contact_shape_indx]
+                print(f"[init] dataset pts={ds.GetNumberOfPoints() if ds else 'None'}")
+                transformer.SetInputData(ds)
 
-                # objects that are not supposed to move
-                actor = vtk.vtkActor()
+                transformer.SetInputData(self.datasets[contact_shape_indx])
+
+            if isinstance(contact_shape_indx, tuple):
+                contact_shape_name = contact_shape_indx[1]
+            else:
+                contact_shape_name = contact_shape_indx
+
+            if "scale" in self.io.shapes()[contact_shape_name].attrs:
+                scale = self.io.shapes()[contact_shape_name].attrs["scale"]
+                scale_transform = vtk.vtkTransform()
+                scale_transform.Scale(scale, scale, scale)
+                scale_transform.SetInput(transform)
+                transformer.SetTransform(scale_transform)
+
+                actor.SetUserTransform(scale_transform)
                 if self.opts.with_edges:
-                    actor_edge = vtk.vtkActor()
-
-                self.static_actors[instid].append(
-                    (actor, contact_shape_indx, collision_group)
-                )
-                actor.GetProperty().SetOpacity(self.config.get("static_opacity", 1.0))
-                actor.GetProperty().SetColor(
-                    instance.attrs.get(
-                        "color", self.config.get("static_bodies_color", [0.5, 0.5, 0.5])
-                    )
-                )
-
-            if actor is not None:
-
-                if self.opts.with_random_color:
-                    actor.GetProperty().SetColor(random_color())
-                    if self.opts.with_edges:
-                        actor_edge.GetProperty().SetColor(random_color())
-
-                actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
+                    actor_edge.SetUserTransform(scale_transform)
+            else:
+                transformer.SetTransform(transform)
+                actor.SetUserTransform(transform)
                 if self.opts.with_edges:
-                    actor_edge.SetMapper(
-                        self.unfrozen_mappers_edges[contact_shape_indx]
-                    )
+                    actor_edge.SetUserTransform(transform)
 
-                self.renderer.AddActor(actor)
-                if self.opts.with_edges:
-                    self.renderer.AddActor(actor_edge)
+            self.transformers[contact_shape_indx] = transformer
 
-                transform = vtk.vtkTransform()
-                transformer = vtk.vtkTransformFilter()
+            self.transforms[instid].append(transform)
 
-                if contact_shape_indx in self.readers:
-                    transformer.SetInputConnection(
-                        self.readers[contact_shape_indx].GetOutputPort()
-                    )
-                else:
-                    transformer.SetInputData(self.datasets[contact_shape_indx])
+            if "center_of_mass" in instance.attrs:
+                center_of_mass = instance.attrs["center_of_mass"].astype(float)
+            else:
+                center_of_mass = [0.0, 0.0, 0.0]
 
-                if isinstance(contact_shape_indx, tuple):
-                    contact_shape_name = contact_shape_indx[1]
-                else:
-                    contact_shape_name = contact_shape_indx
+            offset_orientation = contactor.attrs["orientation"].astype(float)
 
-                if "scale" in self.io.shapes()[contact_shape_name].attrs:
-                    scale = self.io.shapes()[contact_shape_name].attrs["scale"]
-                    scale_transform = vtk.vtkTransform()
-                    scale_transform.Scale(scale, scale, scale)
-                    scale_transform.SetInput(transform)
-                    transformer.SetTransform(scale_transform)
-
-                    actor.SetUserTransform(scale_transform)
-                    if self.opts.with_edges:
-                        actor_edge.SetUserTransform(scale_transform)
-                else:
-                    transformer.SetTransform(transform)
-                    actor.SetUserTransform(transform)
-                    if self.opts.with_edges:
-                        actor_edge.SetUserTransform(transform)
-
-                self.transformers[contact_shape_indx] = transformer
-
-                self.transforms[instid].append(transform)
-
-                if "center_of_mass" in instance.attrs:
-                    center_of_mass = instance.attrs["center_of_mass"].astype(float)
-                else:
-                    center_of_mass = [0.0, 0.0, 0.0]
-
-                offset_orientation = contactor.attrs["orientation"].astype(float)
-
-                # for disk, we change the offset since cylinder source are directed
-                #  along the y axis by default
-                # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
-                # we propose to erase it.
-                try:
-                    if (
-                        self.io.shapes()[contact_shape_name].attrs["primitive"]
-                        == "Disk"
-                    ):
-                        offset_orientation = [
-                            math.cos(pi / 4.0),
-                            math.sin(pi / 4.0),
-                            0.0,
-                            0.0,
-                        ]
-                except KeyError:
-                    pass
-                self.offsets[instid].append(
-                    (
-                        numpy.subtract(
-                            contactor.attrs["translation"].astype(float), center_of_mass
-                        ),
-                        offset_orientation,
-                    )
+            # for disk, we change the offset since cylinder source are directed
+            #  along the y axis by default
+            # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
+            # we propose to erase it.
+            try:
+                if (
+                    self.io.shapes()[contact_shape_name].attrs["primitive"]
+                    == "Disk"
+                ):
+                    offset_orientation = [
+                        math.cos(pi / 4.0),
+                        math.sin(pi / 4.0),
+                        0.0,
+                        0.0,
+                    ]
+            except KeyError:
+                pass
+            self.offsets[instid].append(
+                (
+                    numpy.subtract(
+                        contactor.attrs["translation"].astype(float), center_of_mass
+                    ),
+                    offset_orientation,
                 )
+            )
 
-                cc = CellConnector(
-                    instid,
-                    data_names=[
-                        "instance",
-                        "translation",
-                        "velocity(linear)",
-                        "velocity(angular)",
-                        "kinetic_energy",
-                        "displacement",
-                    ],
-                    data_sizes=[1, 3, 3, 3, 1, 3],
-                )
+            cc = CellConnector(
+                instid,
+                data_names=[
+                    "instance",
+                    "translation",
+                    "velocity(linear)",
+                    "velocity(angular)",
+                    "kinetic_energy",
+                    "displacement",
+                ],
+                data_sizes=[1, 3, 3, 3, 1, 3],
+            )
 
-                if self.cell_connectors.get(instid, None) is None:
-                    self.cell_connectors[instid] = [cc]
-                else:
-                    self.cell_connectors[instid].append(cc)
+            if self.cell_connectors.get(instid, None) is None:
+                self.cell_connectors[instid] = [cc]
+            else:
+                self.cell_connectors[instid].append(cc)
 
-                cc.SetInputConnection(transformer.GetOutputPort())
+            cc.SetInputConnection(transformer.GetOutputPort())
 
-                self.objects_collector.AddInputConnection(cc.GetOutputPort())
-                cc.Update()
+            self.objects_collector.AddInputConnection(cc.GetOutputPort())
+            cc.Update()
 
     def init_instance(self, instance_name):
         self.print_verbose_level(2, "init_instance", instance_name)
@@ -2628,6 +2649,7 @@ class VView(object):
                 axis, angle = r.axisAngle()
 
                 transform.RotateWXYZ(angle * 180.0 / pi, axis[0], axis[1], axis[2])
+                transform.Modified()
 
     def set_position(self, data):
         self.print_verbose_level(2, "set_position")
@@ -3256,19 +3278,23 @@ class VView(object):
 
                 self.io_reader.SetTime(time)
 
+                if self.with_fem:
+                    self.io_reader.update_fem_displacements(time)
+
                 spos_data = self.io_reader.pos_static_data
-                # print('spos_data at time 1' , time, spos_data)
-                if spos_data.size > 0:
-                    self.set_position_v(
-                        spos_data[:, 1],
-                        spos_data[:, 2],
-                        spos_data[:, 3],
-                        spos_data[:, 4],
-                        spos_data[:, 5],
-                        spos_data[:, 6],
-                        spos_data[:, 7],
-                        spos_data[:, 8],
-                    )
+                if spos_data is not None:
+                    # print('spos_data at time 1' , time, spos_data)
+                    if spos_data.size > 0:
+                        self.set_position_v(
+                            spos_data[:, 1],
+                            spos_data[:, 2],
+                            spos_data[:, 3],
+                            spos_data[:, 4],
+                            spos_data[:, 5],
+                            spos_data[:, 6],
+                            spos_data[:, 7],
+                            spos_data[:, 8],
+                        )
 
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data
