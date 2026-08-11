@@ -1107,6 +1107,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             boundary_conditions,
                         )
 
+                    if nodal_forces is None:
+                        nodal_forces = [0, 0] # need fext storage.
+
                     if nodal_forces is not None:
                         fesolid.applyNodalForces(
                             tags[siconos.mechanics.fem.MeshTags.applied_forces],
