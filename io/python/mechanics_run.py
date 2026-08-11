@@ -2740,13 +2740,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def output_results(self, with_timer=False):
         self.log(self.output_static_objects, with_timer)()
 
-        self.log(self.output_displacements, with_timer)()
-
         self.log(self.output_dynamic_objects, with_timer)()
 
         self.log(self.output_velocities, with_timer)()
 
         if self.config.backend == "vnative":
+            self.log(self.output_displacements, with_timer)()
             self.log(self.output_p0s, with_timer)()
 
         if self._output_contact_forces:
