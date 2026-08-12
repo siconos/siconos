@@ -191,3 +191,59 @@ def load_siconos_mesh(shape_filename, scale=None):
         shape = siconos.mechanics.collision.SiconosConvexHull(coors.keys())
 
     return shape, dims
+
+def extract_bc_global_dofs(fesolid, mesh_data):
+    """
+    Return global DOF indices for vertices with physical tag 2 ("Dirichlet BC").
+    """
+    import meshio
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w') as tmp:
+        tmp.write(mesh_data)
+        tmp.flush()
+        mesh = meshio.read(tmp.name)
+
+    # 1. "Dirichlet BC"
+    tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name 
+                   for name, (tag, dim) in mesh.field_data.items()}
+    dirichlet_tag = next((tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None)
+    if dirichlet_tag is None:
+        return []
+
+    # 2. collect boundary vertex IDs (1-based GMSH indices) with tag 2
+    bc_vertex_ids = set()
+    for cell_block, data_block in zip(mesh.cells, mesh.cell_data.get('gmsh:physical', [])):
+        if cell_block.type == 'vertex':
+            tags = data_block[0] if isinstance(data_block, list) else data_block
+            for i, tag in enumerate(tags):
+                if tag == dirichlet_tag:
+                    bc_vertex_ids.add(cell_block.data[i][0])  # 1-based
+
+    if not bc_vertex_ids:
+        return []
+
+    # 3. simulate FEModel::init() registration order:
+    #    traverse elements in file order; for each element's vertices,
+    #    if not yet registered, assign next DOF block.
+    vertex_to_dof = {}  # 1-based vertex_id -> (dof_x, dof_y)
+    dof_counter = 0
+    dim = 2  # 2D FEM
+
+    for cell_block in mesh.cells:
+        if cell_block.type != 'triangle':
+            continue
+        for tri in cell_block.data:
+            for vid_1based in tri:
+                if vid_1based not in vertex_to_dof:
+                    vertex_to_dof[vid_1based] = (dof_counter, dof_counter + 1)
+                    dof_counter += dim
+
+    # 4. extract global DOFs for boundary vertices in sorted order
+    #    (sorted by vertex_id for determinism)
+    global_dofs = []
+    for vid in sorted(bc_vertex_ids):
+        if vid in vertex_to_dof:
+            global_dofs.extend(vertex_to_dof[vid])
+
+    return global_dofs

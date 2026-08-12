@@ -784,43 +784,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         )
         return self
 
-    def _extract_boundary_conditions_from_mesh(self, mesh_data, material):
-        """Parse GMSH v2 ASCII for physical tag 2 (Dirichlet BC) vertices."""
-        import meshio
-        import tempfile
-
-        with tempfile.NamedTemporaryFile(suffix='.msh', mode='w') as tmp:
-            tmp.write(mesh_data)
-            tmp.flush()
-            mesh = meshio.read(tmp.name)
-
-        # Find physical tag for "Dirichlet BC"
-        tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name 
-                       for name, (tag, dim) in mesh.field_data.items()}
-        dirichlet_tag = next((tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None)
-
-        if dirichlet_tag is None:
-            return []  # No BC tag found
-
-        # Collect vertex nodes from tag 2 (type 15 = vertex)
-        bc_nodes = set()
-        for cell_block, data_block in zip(mesh.cells, mesh.cell_data.get('gmsh:physical', [])):
-            if cell_block.type == 'vertex':
-                tags = data_block[0] if isinstance(data_block, list) else data_block
-                for i, tag in enumerate(tags):
-                    if tag == dirichlet_tag:
-                        bc_nodes.add(cell_block.data[i][0])  # 0-based node index
-
-        # Convert to global DOF indices (2 DOF per node for 2D)
-        # Node order matches FiniteElementModel::init() registration order
-        # which follows mesh vertex numbering
-        global_dofs = []
-        for node_idx in sorted(bc_nodes):
-            global_dofs.extend([node_idx * 2, node_idx * 2 + 1])  # x, y DOFs
-
-        return global_dofs
-
-
     def log(self, fun, with_timer=False, after=True, already_done=False):
         if with_timer:
             t = siconos.io.tools.Timer()
@@ -1093,13 +1056,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
 
                     if boundary_conditions is None:
-                         # Auto-extract from mesh
+                         # from mesh
                         shape_name = contactors[0].shape_name
                         shape_data = self._shape._io.shapes()[shape_name][:][0].decode("utf-8")
 
-                        # Parse msh for tag 2 vertices → get node indices
-                        # Convert to global DOF indices using the same logic as FemTools
-                        boundary_conditions = self._extract_boundary_conditions_from_mesh(shape_data, material)
+                        # get global dof from bc node indices
+                        boundary_conditions = siconos.io.tools.extract_bc_global_dofs(fesolid, mesh_data)
 
                     if boundary_conditions is not None:
                         fesolid.applyDirichletBoundaryConditions(
