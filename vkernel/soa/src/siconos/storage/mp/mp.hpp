@@ -336,8 +336,9 @@ static constexpr auto tuple_unique(auto xs)
 template <typename Xs, typename X>
 static constexpr bool contains(Xs xs, X)
 {
-  return hana::contains(
-      transform(xs, []<typename IX>(IX) { return type_c<IX>; }), type_c<X>);
+  return hana::unpack(xs, [](auto... xs) {
+    return (std::is_same_v<X, std::decay_t<decltype(xs)>> || ...);
+  });
 }
 
 using hana::filter;

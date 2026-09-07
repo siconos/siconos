@@ -73,40 +73,35 @@ using with_info_t = decltype(mp::prepend(M{}, mp::key_value<info, Info>{}));
  * @tparam Items Variadic list of item types
  */
 template <template <typename> typename EnvTemplate, match::item... Items>
+struct item_storage_info {
+  using items = gather<Items...>;
+
+  using all_items_t = decltype(mp::fold_left(
+      mp::reverse(mp::concat_all(all_items(std::declval<Items>())...)),
+      mp::make_tuple(), []<typename Acc, typename Elem>(Acc acc, Elem elem) {
+        if constexpr (mp::contains(acc, elem)) {
+          return acc;
+        }
+        else {
+          return mp::append(acc, elem);
+        }
+      }));
+
+  using all_attributes_t = decltype(mp::flatten(
+      mp::concat_all(all_attributes(std::declval<Items>())...)));
+
+  using all_properties_t = decltype(mp::flatten(
+      mp::concat_all(all_properties(std::declval<Items>())...)));
+
+  using all_attached_storages_t = decltype(mp::filter(
+      all_properties_t{}, mp::derive_from<some::attached_storage>));
+};
+
+template <template <typename> typename EnvTemplate, match::item... Items>
 struct item_storage {
-  // Internal info structure containing computed type aliases
-  struct iinfo {
+  struct iinfo : item_storage_info<EnvTemplate, Items...> {
     template <typename Item>
     using env = EnvTemplate<Item>;
-
-    using items = gather<Items...>;
-
-    // Compute all unique items through a fold-left operation
-    using all_items_t = decltype(mp::fold_left(
-        // Process items in reverse order to prioritize later definitions
-        mp::reverse(mp::concat_all(all_items(std::declval<Items>())...)),
-        mp::make_tuple(),
-        []<typename Acc, typename Elem>(Acc acc, Elem elem) {
-          // Skip duplicate items, keeping only the first occurrence
-          if constexpr (mp::contains(acc, elem)) {
-            return acc;
-          }
-          else {
-            return mp::append(acc, elem);
-          };
-        }));
-
-    // Flatten all attributes from all items
-    using all_attributes_t = decltype(mp::flatten(
-        mp::concat_all(all_attributes(std::declval<Items>())...)));
-
-    // Flatten all properties from all items
-    using all_properties_t = decltype(mp::flatten(
-        mp::concat_all(all_properties(std::declval<Items>())...)));
-
-    // Extract attached storage properties (subset of all properties)
-    using all_attached_storages_t = decltype(mp::filter(
-        all_properties_t{}, mp::derive_from<some::attached_storage>));
   };
 
   template <match::item Item>
