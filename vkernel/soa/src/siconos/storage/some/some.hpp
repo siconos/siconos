@@ -12,9 +12,12 @@ struct attribute {
   using attribute_t = void;
 };
 
+
 struct property {
   using property_t = void;
 };
+
+struct storage_property : property {};
 
 struct attached_storage : property {};
 
@@ -30,6 +33,8 @@ struct scalar : attribute<> {};
 struct indice : attribute<> {};
 
 struct integer : attribute<> {};
+
+struct string : attribute<> {};
 
 struct undefined_indice_parameter : attribute<> {};
 
@@ -210,4 +215,15 @@ struct undefined_tuple {};
 
 template <typename... Ts>
 struct tuple : attribute<>, undefined_tuple, with_types<Ts...> {};
+
+struct undefined_sparse_set : attribute<> {};
+
+template <typename Key, typename Value>
+struct sparse_set : undefined_sparse_set, with_types<Key, Value> {};
+
+struct undefined_dynamic_properties : attribute<> {};
+
+template <typename Key = std::string>
+struct dynamic_properties : undefined_dynamic_properties, with_type<Key> {};
+
 }  // namespace siconos::storage::some

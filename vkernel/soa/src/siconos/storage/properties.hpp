@@ -320,4 +320,12 @@ static constexpr auto is_attached_storage =
       return match::attached_storage<T, Item>;
     }>;
 
+// For dynamic properties (one per item, holds heterogeneous runtime
+// properties)
+template <match::item Item>
+struct dynamic_attached : some::dynamic_properties<>, some::attached_storage {
+  using item = Item;
+  using dynamic_properties_t = void;
+};
+
 }  // namespace siconos::storage

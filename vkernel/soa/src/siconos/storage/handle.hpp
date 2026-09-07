@@ -94,17 +94,17 @@ struct index {
   /// @brief Three-way comparison operator
   friend auto operator<=>(const index<T, R>&, const index<T, R>&) = default;
 
-
   template <match::item U>
-  friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs) {
+  friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs)
+  {
     return true;
   }
 
   template <match::item U>
-  friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs) {
+  friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs)
+  {
     return false;
   }
-
 };
 
 /**
@@ -298,6 +298,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   /// @brief Three-way comparison operator
   friend auto operator<=>(const handle<B, T, R, D>&,
                           const handle<B, T, R, D>&) = default;
+
 };
 
 /**
@@ -349,8 +350,6 @@ auto make_handle(D& data, index<T, R>& indx)
 {
   return handle<handle_base, T, R, D>{data, indx};
 }
-
-
 
 /**
  * @brief Create a handle from data and rvalue index
@@ -449,7 +448,18 @@ static constexpr auto handle_derive_from =
 template <typename B>
 static constexpr auto not_handle_derive_from =
     mp::is_a_model<[]<typename T>() consteval {
-      return std::derived_from<typename T::type, B>;
+  return std::derived_from<typename T::type, B>;
     }>;
 
 }  // namespace siconos::storage
+
+namespace std {
+
+template <siconos::storage::pattern::match::item Item, typename R>
+struct hash<siconos::storage::index<Item, R>> {
+  std::size_t operator()(const siconos::storage::index<Item, R>& idx) const noexcept
+  {
+    return std::hash<R>{}(idx.value());
+  }
+};
+}  // namespace std

@@ -38,15 +38,16 @@ struct topology : item {
   };
 
   using properties = gather<
+      storage::attached<fsystem, symbol<"runtime_properties">,
+                        some::dynamic_properties<some::string>>,
+      storage::attached<dsystem, symbol<"runtime_properties">,
+                        some::dynamic_properties<some::string>>,
       storage::attached<fsystem, symbol<"involved">, some::boolean>,
       storage::attached<fsystem, symbol<"index">, some::indice>,
       storage::attached<fsystem, symbol<"id">, some::indice>,
       storage::attached<fsystem, symbol<"p0">,
                         some::array<some::vector<some::scalar, dof>,
                                     std::integral_constant<int, 2>>>,
-
-      storage::attached<fsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_vector<some::indice>>,
 
       storage::attached<dsystem, symbol<"q0">,
                         some::unbounded_vector<some::scalar>>,
@@ -59,12 +60,11 @@ struct topology : item {
                           some::scalar, std::integral_constant<int, 1>>>,
                       std::integral_constant<int, 2>>>>,
 
-      storage::attached<dsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_collection<some::indice>>,
-
       storage::attached<finteraction, symbol<"nds">, some::indice>,
-      storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,
-      storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
+      storage::attached<finteraction, symbol<"ds1">,
+                        some::item_ref<fsystem>>,
+      storage::attached<finteraction, symbol<"ds2">,
+                        some::item_ref<fsystem>>,
       storage::attached<finteraction, symbol<"activation">, some::boolean>,
 
       storage::attached<dfinteraction, symbol<"nds">, some::indice>,
