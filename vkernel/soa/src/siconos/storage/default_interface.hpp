@@ -3,6 +3,7 @@
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/info.hpp"
+#include "siconos/storage/mp/mp.hpp"
 
 namespace siconos::storage {
 

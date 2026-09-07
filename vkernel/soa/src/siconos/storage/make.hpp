@@ -1,5 +1,7 @@
 #pragma once
 
+#include <any>
+
 #include "siconos/storage/memory.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
@@ -109,7 +111,8 @@ struct item_storage {
     using attributes_t = decltype(attributes(Item{}));
     using attached_storages_t = decltype(mp::filter(
         typename iinfo::all_properties_t{}, mp::is_a_model<[]<typename T>() {
-          return match::attached_storage<T, Item>;
+          return match::attached_storage<T, Item> &&
+                 !requires { typename T::dynamic_storage_t; };
         }>));
 
     using all_attrs_t =
@@ -269,7 +272,9 @@ struct make {
   };
 
   // The actual storage member variable
-  struct store_t : decltype(internal_build()){};
+  struct store_t : decltype(internal_build()) {
+    std::unordered_map<std::string, std::any> _dynamic_properties;
+  };
 
   store_t _store;
 

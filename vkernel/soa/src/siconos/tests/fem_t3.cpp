@@ -36,7 +36,7 @@ struct interaction : simul::interaction<nslaw, relation> {};
 struct rt_ct_interaction : simul::rt_ct_interaction<nslaw, rt_relation> {};
 struct rt_rt_interaction : simul::rt_rt_interaction<nslaw, rt_relation> {};
 struct topo
-    : simul::topology<ball, interaction, fem_ds, storage::pattern::empty_item,
+    : simul::topology<ball, interaction, fem_ds, interaction,
                       rt_rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
@@ -177,7 +177,7 @@ int main(int args, char* argv[])
 
 
   auto indices = FEsolid->boundaryConditions()->velocityIndices();
-  auto& bc_vel = storage::prop<"bc_velocities_0">(fe_solid);
+  auto& bc_vel = fe_solid["bc_velocities_0"_k];
   bc_vel.resize(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
     bc_vel[i] = indices[i];
@@ -218,6 +218,7 @@ int main(int args, char* argv[])
   auto start = std::chrono::system_clock::now();
   while (simul.has_next_event()) {
     // compute_one_step returns the number of involved dynamical systems
+
     uint ninvds = simul.compute_one_step();
 
     auto step = simul.current_step();

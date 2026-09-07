@@ -26,6 +26,8 @@ struct wrapped : some::property {};
 
 struct time_invariant : some::property {};
 
+struct dynamic_storage : some::property {};
+
 struct refine : some::property {};
 
 struct bind : some::property {};
@@ -102,6 +104,15 @@ template <match::attribute Attr>
 struct time_invariant : property::time_invariant {
   using type = Attr;
   using time_invariant_t = void;
+};
+
+template <match::attribute Attr>
+struct dynamic_storage : property::dynamic_storage {
+  using type = Attr;
+  using dynamic_storage_t = void;
+  using item = typename Attr::item;
+  using tag = typename Attr::tag;
+  using attribute_t = typename Attr::attribute_t;
 };
 
 template <match::item Item, string_literal S>
@@ -313,11 +324,23 @@ constexpr decltype(auto) all_storages(Item, auto& data)
       concat(attributes(item_t{}), attached_storages(item_t{}, data)));
 }
 
-// use storage::attached_storages(...) instead
+// Attached storage that lives in the static store, excluding
+// dynamic_storage-tagged properties (those have no static slot; see
+// storage::attached_storages(...) for the unfiltered, exposure-facing
+// variant that includes them).
 template <typename Item>
 static constexpr auto is_attached_storage =
     mp::is_a_model<[]<typename T>() constexpr {
-      return match::attached_storage<T, Item>;
+      return match::attached_storage<T, Item> &&
+             !requires { typename T::dynamic_storage_t; };
     }>;
+
+// For dynamic properties (one per item, holds heterogeneous runtime
+// properties)
+template <match::item Item>
+struct dynamic_attached : some::dynamic_properties<>, some::attached_storage {
+  using item = Item;
+  using dynamic_properties_t = void;
+};
 
 }  // namespace siconos::storage

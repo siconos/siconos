@@ -8,7 +8,8 @@ namespace siconos::simul {
 template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
           typename DynamicDofFixedDofInteraction = empty_item,
-          typename DynamicDofDynamicDofInteraction = empty_item>
+          typename DynamicDofDynamicDofInteraction = empty_item,
+          bool BcVelocitiesDynamic = true>
 struct topology : item {
   // fixed dof case
   using dof = some::indice_parameter<"dof">;
@@ -37,6 +38,22 @@ struct topology : item {
     some::map<some::indice, some::item_ref<fsystem>> system_id;
   };
 
+  using bc_velocities_0_fsys_attr =
+      storage::attached<fsystem, symbol<"bc_velocities_0">,
+                        some::unbounded_vector<some::indice>>;
+  using bc_velocities_0_dsys_attr =
+      storage::attached<dsystem, symbol<"bc_velocities_0">,
+                        some::unbounded_collection<some::indice>>;
+
+  using bc_velocities_0_fsys =
+      std::conditional_t<BcVelocitiesDynamic,
+                         storage::dynamic_storage<bc_velocities_0_fsys_attr>,
+                         bc_velocities_0_fsys_attr>;
+  using bc_velocities_0_dsys =
+      std::conditional_t<BcVelocitiesDynamic,
+                         storage::dynamic_storage<bc_velocities_0_dsys_attr>,
+                         bc_velocities_0_dsys_attr>;
+
   using properties = gather<
       storage::attached<fsystem, symbol<"involved">, some::boolean>,
       storage::attached<fsystem, symbol<"index">, some::indice>,
@@ -45,22 +62,20 @@ struct topology : item {
                         some::array<some::vector<some::scalar, dof>,
                                     std::integral_constant<int, 2>>>,
 
-      storage::attached<fsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_vector<some::indice>>,
+      bc_velocities_0_fsys,
 
       storage::attached<dsystem, symbol<"q0">,
                         some::unbounded_vector<some::scalar>>,
       storage::attached<dsystem, symbol<"involved">, some::boolean>,
       storage::attached<dsystem, symbol<"index">, some::indice>,
       storage::attached<dsystem, symbol<"id">, some::indice>,
-      storage::without_binding<storage::attached<
-          dsystem, symbol<"p0">,
-          some::array<some::unbounded_vector<some::vector<
-                          some::scalar, std::integral_constant<int, 1>>>,
-                      std::integral_constant<int, 2>>>>,
+       storage::without_binding<storage::attached<
+           dsystem, symbol<"p0">,
+           some::array<some::unbounded_vector<some::vector<
+                           some::scalar, std::integral_constant<int, 1>>>,
+                       std::integral_constant<int, 2>>>>,
 
-      storage::attached<dsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_collection<some::indice>>,
+      bc_velocities_0_dsys,
 
       storage::attached<finteraction, symbol<"nds">, some::indice>,
       storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,

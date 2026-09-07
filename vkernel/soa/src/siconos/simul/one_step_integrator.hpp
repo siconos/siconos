@@ -472,7 +472,10 @@ struct one_step_integrator {
         //     storage::prop_values<rt_rt_interaction, "ds2">(data, step);
 
         auto& ct_indices =
-            storage::prop_values<ct_system, "index">(data, step);
+             storage::prop_values<ct_system, "index">(data, step);
+
+        auto& ct_bc_velocities_0s =
+            storage::prop_values<ct_system, "bc_velocities_0">(data, step);
 
         size_t i_ct = 0;
         for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
@@ -483,27 +486,20 @@ struct one_step_integrator {
             auto j1 = ct_indices[ids1.value()];
             auto j2 = ct_indices[ids2.value()];
 
-            // BC velocities for ds1
-            auto handle_ds1 = storage::make_handle(data, ids1);
-            auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
-
             // modification on a copy
             auto h_mat1_mod = h_mat1;
+            auto h_mat2_mod = h_mat2;
 
+            // BC velocities for ds1
             //  zero columns in h_mat1_mod / BC DOFs in ds1
-            for (auto bc_local_idx : bc_vel_1) {
+            for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
               h_mat1_mod.col(bc_local_idx).setZero();
             }
 
             if (j1 != j2) {
-              // modification on a copy
-              auto h_mat2_mod = h_mat2;
-
-              auto handle_ds2 = storage::make_handle(data, ids2);
-              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
-
+              // BC velocities for ds2
               // zero columns in h_mat2_mod / BC DOFs in ds2
-              for (auto bc_local_idx : bc_vel_2) {
+              for (auto bc_local_idx : ct_bc_velocities_0s[ids2.value()]) {
                 h_mat2_mod.col(bc_local_idx).setZero();
               }
 
@@ -532,88 +528,82 @@ struct one_step_integrator {
           auto& rt_ct_h_mat2s =
               storage::attr_values<rt_ct_interaction, "h_matrix2">(data,
                                                                    step);
-          auto& rt_ct_ids1s =
-              storage::prop_values<rt_ct_interaction, "ds1">(data, step);
-          auto& rt_ct_ids2s =
-              storage::prop_values<rt_ct_interaction, "ds2">(data, step);
-          auto& rt_ct_rels =
-              storage::attr_values<rt_ct_interaction, "relation">(data, step);
-          auto& rt_indices =
-              storage::prop_values<rt_system, "index">(data, step);
+           auto& rt_ct_ids1s =
+               storage::prop_values<rt_ct_interaction, "ds1">(data, step);
+           auto& rt_ct_ids2s =
+               storage::prop_values<rt_ct_interaction, "ds2">(data, step);
+           auto& rt_ct_rels =
+               storage::attr_values<rt_ct_interaction, "relation">(data, step);
+            auto& rt_indices =
+                storage::prop_values<rt_system, "index">(data, step);
 
-          size_t i_rt = 0;
-          for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
-               view::zip(rt_ct_activations, rt_ct_h_mat1s, rt_ct_h_mat2s,
-                         rt_ct_ids1s, rt_ct_ids2s, rt_ct_rels)) {
-            if (activation) {
-              // ct / rt activation (i.e disk/fem)
-              auto j1 = ct_indices[ids1.value()];
-              auto j2 = rt_elem.sum_dofs()[rt_indices[ids2.value()]];
+           size_t i_rt = 0;
+           for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
+                view::zip(rt_ct_activations, rt_ct_h_mat1s, rt_ct_h_mat2s,
+                          rt_ct_ids1s, rt_ct_ids2s, rt_ct_rels)) {
+             if (activation) {
+               // ct / rt activation (i.e disk/fem)
+               auto j1 = ct_indices[ids1.value()];
+               auto j2 = rt_elem.sum_dofs()[rt_indices[ids2.value()]];
 
-              // BC velocities for ds1
-              auto handle_ds1 = storage::make_handle(data, ids1);
-              auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
+               // modification on a copy
+               auto h_mat1_mod = h_mat1;
 
-              // modification on a copy
-              auto h_mat1_mod = h_mat1;
+               // BC velocities for ds1
+               // zero columns in h_mat1_mod / BC DOFs in ds1
+               for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
+                 h_mat1_mod.col(bc_local_idx).setZero();
+               }
 
-              // zero columns in h_mat1_mod / BC DOFs in ds1
-              for (auto bc_local_idx : bc_vel_1) {
-                h_mat1_mod.col(bc_local_idx).setZero();
-              }
+               // insertion
+               set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
 
-              // insertion
-              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
+               // contact index in original mesh
+               variant::visit(
+                   data, rel,
+                   mp::overload(
+                       [&](match::handle<collision::diskmesh_r> auto rrel) {
+                         auto base_idx = 4 * rrel.contact_index();
+                         auto dof0 = rrel.mesh().global_indices()[base_idx];
+                         auto dof1 =
+                             rrel.mesh().global_indices()[base_idx + 1];
+                         auto dof2 =
+                             rrel.mesh().global_indices()[base_idx + 2];
+                         auto dof3 =
+                             rrel.mesh().global_indices()[base_idx + 3];
 
-              auto handle_ds2 = storage::make_handle(data, ids2);
-              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
+                         for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
+                           set_value(rt_h_matrix,
+                                     i + i_rt * rt_elem.nslaw_size(),
+                                     dof0 + j2, h_mat2(i, 0));
+                           set_value(rt_h_matrix,
+                                     i + i_rt * rt_elem.nslaw_size(),
+                                     dof1 + j2, h_mat2(i, 1));
+                           set_value(rt_h_matrix,
+                                     i + i_rt * rt_elem.nslaw_size(),
+                                     dof2 + j2, h_mat2(i, 2));
+                           set_value(rt_h_matrix,
+                                     i + i_rt * rt_elem.nslaw_size(),
+                                     dof3 + j2, h_mat2(i, 3));
+                         }
+                       },
+                       [](auto) {})  // in the case of no rt ct relation
+                   );
 
-              // contact index in original mesh
-              variant::visit(
-                  data, rel,
-                  mp::overload(
-                      [&](match::handle<collision::diskmesh_r> auto rrel) {
-                        auto base_idx = 4 * rrel.contact_index();
-                        auto dof0 = rrel.mesh().global_indices()[base_idx];
-                        auto dof1 =
-                            rrel.mesh().global_indices()[base_idx + 1];
-                        auto dof2 =
-                            rrel.mesh().global_indices()[base_idx + 2];
-                        auto dof3 =
-                            rrel.mesh().global_indices()[base_idx + 3];
+               // BC velocities for ds2
+               for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
+                 for (auto bc_local_idx : ct_bc_velocities_0s[ids2.value()]) {
+                   set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                             j2 + bc_local_idx, 0.);
+                 }
+               }
 
-                        for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                          set_value(rt_h_matrix,
-                                    i + i_rt * rt_elem.nslaw_size(),
-                                    dof0 + j2, h_mat2(i, 0));
-                          set_value(rt_h_matrix,
-                                    i + i_rt * rt_elem.nslaw_size(),
-                                    dof1 + j2, h_mat2(i, 1));
-                          set_value(rt_h_matrix,
-                                    i + i_rt * rt_elem.nslaw_size(),
-                                    dof2 + j2, h_mat2(i, 2));
-                          set_value(rt_h_matrix,
-                                    i + i_rt * rt_elem.nslaw_size(),
-                                    dof3 + j2, h_mat2(i, 3));
-                        }
-                      },
-                      [](auto) {})  // in the case of no rt ct relation
-                                    // instantiated);
-              );
-              // bc dofs in ds2
-              for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                for (auto bc_local_idx : bc_vel_2) {
-                  set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                            j2 + bc_local_idx, 0.);
-                }
-              }
-
-              i_ct++;
-              i_rt++;
-            }
-          }
-        }
-      }
+               i_ct++;
+               i_rt++;
+             }
+           }
+         }
+       }
 
       void compute_w_matrix(auto step, auto time_step)
       {
