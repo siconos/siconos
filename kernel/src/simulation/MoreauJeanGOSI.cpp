@@ -413,7 +413,7 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
       inter->relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
     auto& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
     auto ivd = indexSet.descriptor(inter);
-    double h = _simulation->timeStep();
+    double h = simulation()->timeStep();
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
       _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta, h);
     auto& osnsp_rhs =

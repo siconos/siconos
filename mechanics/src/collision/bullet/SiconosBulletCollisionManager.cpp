@@ -146,7 +146,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
     _impl->_dispatcher->registerCollisionCreateFunc(
         BOX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, _impl->m_box2dbox2dAlgo_.get());
   } else
-
+    {
     btGImpactCollisionAlgorithm::registerAlgorithm(&*_impl->_dispatcher);
 
     // Register custom Siconos sphere-sphere collision algorithm

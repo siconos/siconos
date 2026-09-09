@@ -1328,7 +1328,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   }
 
   // 3 - add part due to NonSmoothLaw
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
                                                indexSet.properties(vertex_inter), _theta, h);
 
@@ -1350,7 +1350,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
    * different ds ?
    */
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(...)\n");
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto allOSNS = simulation()->oneStepNSProblems();
   auto& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
 
@@ -1369,7 +1369,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
 
   auto xfree = inter_work_block[tools::enum_to_index(wkb_inter::xfree)];
   assert(xfree);
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
 
   // 1 - product h * theta * H Xfree{}
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
@@ -2147,8 +2147,8 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
       "siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level)\n");
   DEBUG_PRINTF("level = %u\n", level);
 
-  auto& indexSet = *_simulation->indexSet(level);
-  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  auto& indexSet = *simulation()->indexSet(level);
+  auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
 
   // we first compute p[1] from lambda[1] on indexSet1
   for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
@@ -2167,7 +2167,7 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
   // computeIteration
 
   if (_hasInputInIndexSet0) {
-    double h = _simulation->timeStep();
+    double h = simulation()->timeStep();
     for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
       DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 0\n");
 

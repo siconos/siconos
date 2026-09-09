@@ -441,7 +441,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseLevel(
 void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState() {
   DEBUG_BEGIN("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
   // Update internal state of all interactions in the current index set
-  auto& indexSet = *_simulation->indexSet(_indexSetLevel);
+  auto& indexSet = *simulation()->indexSet(_indexSetLevel);
   for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet.bundle(*ui);
     auto& nslaw = *inter.nonSmoothLaw();
