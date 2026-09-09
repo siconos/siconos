@@ -38,6 +38,7 @@
 #include "NumericsVerbose.h"
 #include "SolverOptions.h"
 #include "cohesive_friction_3d_driver.h"
+
 #include "numerics_verbose.h"
 
 /* Helper function to print a vector */
@@ -90,16 +91,29 @@ static int test_nsgs_on_filename(const char* filename) {
 
   /* Set solver parameters */
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_NSGS_FREEZING_CONTACT] = 0;
-
+  options->iparam[SICONOS_NSGS_SHUFFLE] = SICONOS_NSGS_SHUFFLE_TRUE;
+  options->iparam[SICONOS_NSGS_ERROR_EVALUATION_TYPE] =
+    SICONOS_NSGS_ERROR_EVALUATION_FULL;  
+  
   printf("  Solver: NSGS (Non-Smooth Gauss-Seidel)\n");
   printf("  Tolerance: %.2e\n", options->dparam[SICONOS_DPARAM_TOL]);
   printf("  Max iterations: %d\n", options->iparam[SICONOS_IPARAM_MAX_ITER]);
 
   /* Solve the problem */
   printf("\nSolving...\n");
-  numerics_set_verbose(2);
+  numerics_set_verbose(1);
+  /* double alpha =100.; */
+  /* for (unsigned int k = 0; k < problem->numberOfCohesivePoints; k++) { */
+  /*   problem->c_n[k] = alpha*problem->c_n[k] ; */
+  /*   problem->c_t[k] = alpha*problem->c_t[k] ; */
+  /*   }     */
+  /* for (unsigned int k = 0; k < problem->numberOfContacts; k++) { */
+  /*   //problem->mu[k] = 1.0; */
+  /* }     */
+
+  
   int info = cohesive_friction_3d_driver(problem, reaction, velocity, options);
 
 
@@ -187,11 +201,14 @@ int main(int argc, char** argv) {
   /* const char* filename_0 = "data/cohesive_test_2x2.dat"; */
   /* info = test_nsgs_on_filename(filename_0); */
   
-  const char* filename_1 = "data/sphere_2x2_mu0.dat";
-  info += test_nsgs_on_filename(filename_1);
+  /* const char* filename_1 = "data/sphere_2x2_mu0.dat"; */
+  /* info += test_nsgs_on_filename(filename_1); */
   
   /* const char* filename_2 = "data/sphere_2x2.dat"; */
   /* info += test_nsgs_on_filename(filename_2); */
+
+  const char* filename_3 = "data/diamond_sphere_sphere_pack.dat";
+  info += test_nsgs_on_filename(filename_3);
 
   printf("\n=================================================================\n");
   printf("=== Test %s ======================================\n",

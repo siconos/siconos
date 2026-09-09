@@ -30,8 +30,8 @@
 #include "projectionOnDisk.h"
 
 /* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void cohesive_friction_3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
@@ -97,6 +97,10 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
   /* Compute relative error with proper normalization */
   double norm_r = cblas_dnrm2(n, reaction, 1);
   double norm_u = cblas_dnrm2(n, velocity, 1);
+  
+  /* DEBUG_PRINTF("norm_r = %2.4e\n", norm_r); */
+  /* DEBUG_PRINTF("norm_u = %2.4e\n", norm_u); */
+    
   double relative_scaling = fmax(norm, fmax(norm_r, norm_u));
 
   if (fabs(relative_scaling) > DBL_EPSILON) {
