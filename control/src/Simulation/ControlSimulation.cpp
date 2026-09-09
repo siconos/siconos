@@ -24,18 +24,17 @@
 #include "Interaction.hpp"
 #include "Observer.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 #include "Topology.hpp"
 
 namespace siconos::control::internal {
-static inline std::pair<unsigned, std::string> getNumberOfStates(
+static inline std::pair<size_t, std::string> getNumberOfStates(
     siconos::graphs::DynamicalSystemsGraph& DSG0, siconos::graphs::InteractionsGraph& IG0) {
   std::string legend;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  unsigned nb = 0;
-  unsigned counter = 0;
+  size_t nb = 0;
+  int counter = 0;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
@@ -60,12 +59,12 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
       }
     }
 
-    if (DSG0.e.hasKey(*dsvi)) {
-      auto sizeE = DSG0.e[*dsvi]->size();
+    if (DSG0.eVector.hasKey(*dsvi)) {
+      auto sizeE = DSG0.eVector[*dsvi]->size();
       for (decltype(sizeE) i = 0; i < sizeE; ++i) {
         legend.append(" " + nameDS + "_e_" + std::to_string(i));
       }
-      nb += DSG0.e[*dsvi]->size();
+      nb += DSG0.eVector[*dsvi]->size();
     }
   }
 
@@ -103,10 +102,10 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
  * \param data the matrix where to save the data
  * \return the last written column
  */
-static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
-                                      siconos::graphs::DynamicalSystemsGraph& DSG0,
-                                      siconos::graphs::InteractionsGraph& IG0,
-                                      siconos::algebra::SiconosMatrix& data) {
+static inline size_t storeAllStates(size_t indx, size_t startColumn,
+                                    siconos::graphs::DynamicalSystemsGraph& DSG0,
+                                    siconos::graphs::InteractionsGraph& IG0,
+                                    siconos::algebra::SiconosMatrix& data) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   auto column = startColumn;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
@@ -125,8 +124,8 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
       column += u.size();
     }
 
-    if (DSG0.e.hasKey(*dsvi)) {
-      auto& e = *DSG0.e[*dsvi];
+    if (DSG0.eVector.hasKey(*dsvi)) {
+      auto& e = *DSG0.eVector[*dsvi];
       for (decltype(e.size()) j = 0; j < e.size(); ++i, ++j) {
         data(indx, i) = e(j);
       }
@@ -161,7 +160,7 @@ siconos::control::ControlSimulation::ControlSimulation(double t0, double T, doub
 }
 
 void siconos::control::ControlSimulation::initialize() {
-  std::pair<unsigned, std::string> res;
+  std::pair<size_t, std::string> res;
   _dataLegend = "time";
 
   // Simulation part
@@ -172,7 +171,7 @@ void siconos::control::ControlSimulation::initialize() {
   _CM->initialize(*_nsds);
 
   // Output
-  _N = (unsigned)ceil((_T - _t0) / _h) + 1;  // Number of time steps
+  _N = (size_t)ceil((_T - _t0) / _h) + 1;  // Number of time steps
   auto& DSG0 = *_nsds->topology()->dSG(0);
   auto& IG0 = *_nsds->topology()->indexSet0();
   res = siconos::control::internal::getNumberOfStates(DSG0, IG0);
@@ -201,12 +200,10 @@ void siconos::control::ControlSimulation::initialize() {
   }
   _dataM = std::make_shared<siconos::algebra::SiconosMatrix>(_N, _nDim + 1);
   _dataM->setZero();
-  // we save the system state
+  //  we save the system state
 }
 
-void siconos::control::ControlSimulation::setTheta(unsigned int newTheta) {
-  _theta = newTheta;
-}
+void siconos::control::ControlSimulation::setTheta(double newTheta) { _theta = newTheta; }
 
 void siconos::control::ControlSimulation::addDynamicalSystem(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name) {
@@ -251,8 +248,8 @@ void siconos::control::ControlSimulation::addObserver(std::shared_ptr<Observer> 
   _CM->addObserverPtr(observer, td);
 }
 
-void siconos::control::ControlSimulation::storeData(unsigned indx) {
-  unsigned startingColumn = 1;
+void siconos::control::ControlSimulation::storeData(size_t indx) {
+  size_t startingColumn = 1;
   startingColumn =
       siconos::control::internal::storeAllStates(indx, startingColumn, *_DSG0, *_IG0, *_dataM);
 

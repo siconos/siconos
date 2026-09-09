@@ -23,6 +23,8 @@
  * \brief condition number computation
  */
 
+#include <stddef.h>  // size_t
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,7 +34,7 @@ extern "C" {
 \param m the number of columns of A
 \return the condition number
 */
-double cond(double* A, int n, int m);
+double cond(double* A, size_t n, size_t m);
 
 #ifdef __cplusplus
 }

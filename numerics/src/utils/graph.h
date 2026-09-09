@@ -14,17 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file op3x3.h
  * \brief linear algebra operations in 3D*/
 
 #ifndef _graph_h_
 #define _graph_h_
-
-
-
-
+#include <stddef.h>
 /* node in a list of vertices
  */
 struct node {
@@ -33,7 +30,7 @@ struct node {
 };
 
 // Create a node
-struct node *create_node(int v);
+struct node* create_node(int v);
 struct node* free_node_list(struct node* list);
 /* node in a list of connected component
  */
@@ -45,10 +42,9 @@ struct connectedcomponent_node {
 // Create node in connectedcomponent
 struct connectedcomponent_node* create_node_connectedcomponent(struct node* v);
 
-int len_connectedcomponent(struct node* connectedcomponent);
+size_t len_connectedcomponent(struct node* connectedcomponent);
 
 void print_connectedcomponent(struct node* connectedcomponent);
-
 
 struct Graph {
   int numVertices;
@@ -68,11 +64,8 @@ void print_graph(struct Graph* graph);
 
 void DFS(struct Graph* graph, int vertex);
 
-
-
-
-
-void DFS_compute_connectedcomponent(struct Graph* graph, int vertex, struct node**  connected_component);
+void DFS_compute_connectedcomponent(struct Graph* graph, int vertex,
+                                    struct node** connected_component);
 
 int compute_number_connectedcomponents(struct Graph* graph);
 struct connectedcomponent_node* compute_connectedcomponents(struct Graph* graph);
@@ -82,8 +75,6 @@ unsigned int len_connectedcomponents(struct connectedcomponent_node* connectedco
 struct connectedcomponent_node* free_connectedcomponents(
     struct connectedcomponent_node* connectedcomponentList);
 
-
 void print_connectedcomponents(struct connectedcomponent_node* connectedcomponentList);
 
 #endif
-

@@ -30,5 +30,5 @@ dependencies:
   - flake8
   - autopep8
   - eigen
-  - sphinxcontrib-youtube
+
 

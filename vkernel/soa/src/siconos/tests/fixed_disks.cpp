@@ -21,9 +21,11 @@ using interaction =
 using topo = simul::topology<disk, interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
-using pointd = collision::point<disk>;
-using pointl = collision::point<collision::shape::segment>;
-using pointtds = collision::point<translated_disk_shape>;
+using pointd = collision::point<disk, collision::empty_shape>;
+using pointl =
+    collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointtds =
+    collision::point<storage::pattern::empty_item, translated_disk_shape>;
 using neighborhood = collision::neighborhood<pointd, pointl, pointtds>;
 using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;

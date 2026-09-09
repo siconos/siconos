@@ -24,9 +24,9 @@
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, FILE
 #include <stdlib.h>  // for malloc, atof, free, exit, EXIT_FAILURE
 
-#include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
-#include "numerics_verbose.h"  // for check_io
+#include "NumericsMatrix.h"  // for NM_dense_display, NumericsMatrix, NM_c...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 
 void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem) {
   if (problem->isStorageType1) {
@@ -167,7 +167,8 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
                                            FILE* file) {
   int info = 0;
   if (!problem) {
-    CHECK_ARG(0, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
+    CHECK_ARG(0,
+              "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
   }
   int i, j;
   fprintf(file, "%d\n", problem->isStorageType1);
@@ -245,7 +246,8 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
   int info = 0;
   CHECK_NULL(file);
   if (!problem) {
-    CHECK_ARG(0, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
+    CHECK_ARG(0,
+              "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
   }
   int i, j;
   int st1, st2;
@@ -463,12 +465,12 @@ MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(
   mlcp->m = problem->m; /* Inequalities */
 
   if ((size_t)problem->m > SIZE_MAX / sizeof(double)) {
-    int error = numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    numerics_error_log("mixedLinearComplementarity_newFromFilename", "Size overflow");
     return NULL;
   }
 
   if ((size_t)problem->n > SIZE_MAX / sizeof(double)) {
-    int error = numerics_error("mixedLinearComplementarity_newFromFilename", "Size overflow");
+    numerics_error_log("mixedLinearComplementarity_newFromFilename", "Size overflow");
     return NULL;
   }
 

@@ -71,7 +71,7 @@ int main(void) {
 
   for (i = 0; i < nmm; i++) {
     if (NMM[i]->matrix0) free(NMM[i]->matrix0);
-    if (NMM[i]->matrix1) SBM_clear(NMM[i]->matrix1);
+    if (NMM[i]->matrix1) SBM_clear(NMM[i]->matrix1, SBM_FREE_ALL);
     free(NMM[i]);
   }
 

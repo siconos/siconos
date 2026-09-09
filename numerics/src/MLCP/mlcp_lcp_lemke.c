@@ -24,18 +24,15 @@
 #include <stdlib.h>  // for free, malloc, exit
 #include <string.h>  // for free, malloc, exit
 
-#include "LCP_Solvers.h"                        // for mlcp_compute_error
-#include "MLCP_Solvers.h"                       // for mlcp_compute_error
-#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "NumericsMatrix.h"                     // for storageType
-#include "lcp_cst.h"                            // for SICONOS_LCP_LEMKE
-#include "mlcp_cst.h"                           // for SICONOS_MLCP_LCP_LEMKE
-#include "mlcp_to_lcp.h"                        // for mlcp_to_lcp
-#include "numerics_verbose.h"
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "LCP_Solvers.h"     // for mlcp_compute_error
+#include "MLCP_Solvers.h"    // for mlcp_compute_error
+#include "NumericsMatrix.h"  // for storageType
+#include "lcp_cst.h"         // for SICONOS_LCP_LEMKE
+#include "mlcp_cst.h"        // for SICONOS_MLCP_LCP_LEMKE
+#include "mlcp_to_lcp.h"     // for mlcp_to_lcp
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
@@ -90,6 +87,7 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double* z, doubl
   NumericsMatrix* C = NM_new();
   NM_fill(C, NM_DENSE, n, m, problem->C);
   NM_gemv(-1.0, C, z_lcp, -1.0, u);
+
   double* A_copy = (double*)calloc(n * n, sizeof(double));
   memcpy(A_copy, problem->A, n * n * sizeof(double)); /* we preserve the original A */
   NumericsMatrix* A = NM_new();
@@ -115,9 +113,11 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double* z, doubl
   options->solverId = SICONOS_MLCP_LCP_LEMKE;
 
   freeLinearComplementarityProblem(lcp);
-  NM_clear(A);
+  A->matrix0 = NULL;
+  NM_free(A);
+  free(A_copy);
   C->matrix0 = NULL;
-  NM_clear(C);
+  NM_free(C);
   DEBUG_END("mlcp_lcp_lemke(...)\n");
   return;
 }
@@ -136,7 +136,8 @@ static int mlcp_lcp_lemke_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_lcp_lemke_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_lcp_lemke_solve_wrap(void* problem, double* z, double* w,
+                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_lcp_lemke((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -144,11 +145,8 @@ static int mlcp_lcp_lemke_solve_wrap(void* problem, double* z, double* w, Solver
 
 REGISTER_SOLVER(SICONOS_MLCP_LCP_LEMKE, "MLCP_LCP_LEMKE",
                 "Lemke solver via LCP conversion for Mixed Linear Complementarity Problems",
-                mlcp_lcp_lemke_init_wrap,
-                mlcp_lcp_lemke_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_lcp_lemke_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_lcp_lemke_init_wrap, mlcp_lcp_lemke_solve_wrap, NULL, /* free function */
+                NULL,                                                      /* error function */
+                mlcp_lcp_lemke_default, 1000, /* default_max_iter */
+                1e-6,                         /* default_tol */
+                0 /* is_local_solver */)

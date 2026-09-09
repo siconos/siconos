@@ -18,8 +18,7 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "FrictionContact_options.h"                // for SICONOS_FRICTION_3D_ONECONTA...
-#include "NumericsFwd.h"                 // for SolverOptions
+#include "FrictionContact_options.h"     // for SICONOS_FRICTION_3D_ONECONTA...
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
@@ -28,7 +27,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
                                 int* number_of_tests) {
   int n_solvers = 5;
   *number_of_tests = n_data * n_solvers;
-  TestCase* collection = malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase* collection = calloc(*number_of_tests, sizeof(TestCase));
 
   // "External" solver parameters
   // -> same values for all tests.
@@ -110,7 +109,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   }
 
   // ProjectionOnConeWithLocalIteration fails on Rover11211.dat (test #63)
-  //collection[63].will_fail = 1;
+  // collection[63].will_fail = 1;
 
   return collection;
 }

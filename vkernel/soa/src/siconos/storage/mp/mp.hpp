@@ -157,6 +157,11 @@ static auto first = hana::first;
 
 static auto second = hana::second;
 
+decltype(auto) tuple_first(auto&& tpl) { return tpl[0_c];}
+decltype(auto) tuple_second(auto&& tpl) { return tpl[1_c];}
+decltype(auto) tuple_third(auto&& tpl) { return tpl[2_c];}
+
+
 static auto front = hana::front;
 
 static auto reverse = hana::reverse;
@@ -245,7 +250,7 @@ struct database {
   constexpr database() : store{} {};
   database(tuple<Pairs...> &&m)
       : store(to_map(static_cast<tuple<Pairs...> &&>(m))){};
-  decltype(to_map(tuple<Pairs...>{})) store;
+  decltype(to_map(std::declval<tuple<Pairs...>>())) store;
 };
 
 // Faster compilation but this error occurs with python bindings:

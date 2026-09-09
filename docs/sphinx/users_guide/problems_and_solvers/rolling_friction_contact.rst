@@ -18,18 +18,18 @@ Problem statement
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`RollingFrictionContactProblem`.
+Structure to define the problem: :cpp:class:`RollingFrictionContactProblem`.
 
-Solvers list : :enum:`FRICTION_SOLVER`  (id contains ROLLING_FRICTION_3D)
+Solvers list : :cpp:enum:`FRICTION_SOLVER`  (id contains ROLLING_FRICTION_3D)
 
 The generic drivers for friction-contact problems are:
 
-* :func:`rolling_fc3d_driver`
+* :cpp:func:`rolling_fc3d_driver`
 
 Error strategy
 ==============
 
-To set internal solver tolerance (when it makes sense!) use :func:`rolling_fc3d_set_internalsolver_tolerance`.
+To set internal solver tolerance (when it makes sense!) use :cpp:func:`rolling_fc3d_set_internalsolver_tolerance`.
 
 Check details in :ref:`fc_error`
 
@@ -40,12 +40,12 @@ Check details in :ref:`fc_error`
 Rolling-Friction 3D available solvers
 =====================================
 
-NSGS (:enumerator:`SICONOS_ROLLING_FRICTION_3D_NSGS`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
+NSGS (:cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_NSGS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Non-Smooth Gauss Seidel solver.
 
-**Driver:** :func:`rolling_fc3d_nsgs`
+**Driver:** :cpp:func:`rolling_fc3d_nsgs`
 
 **Parameters:**
 
@@ -84,18 +84,21 @@ Non-Smooth Gauss Seidel solver.
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
 * dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE]  the relaxation parameter omega
 
-Default internal solver : :enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration`.
+Default internal solver : :cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration`.
 
-Projection on cone (:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone`, ...)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Projection on cone (:cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone`, ...)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+.. list-table:: Projection on cone solvers
+   :header-rows: 1
+   :widths: 15 30
 
-.. csv-table:: Projection on cone solvers
-   :header: "Solver id", "Driver"
-   :widths: 15, 30
-
-   ":enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone`",":func:`rolling_fc3d_projectionOnCone_solve`"
-   ":enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration`",":func:`rolling_fc3d_projectionOnConeWithLocalIteration_solve`
+   * - Solver id
+     - Driver
+   * - :cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone`
+     - :cpp:func:`rolling_fc3d_projectionOnCone_solve`
+   * - :cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration`
+     - :cpp:func:`rolling_fc3d_projectionOnConeWithLocalIteration_solve`
 
 **Parameters:**
 

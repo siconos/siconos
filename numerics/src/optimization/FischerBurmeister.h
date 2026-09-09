@@ -26,9 +26,8 @@
   A set of routines to compute the Fischer-Burmeister function and its jacobian.
 
   The Fischer-Burmeister function is defined as :
-  \f[
-  \phi(z,w) = \sqrt( z^2 + w^2) - z - w
-  \f]
+
+  \f$  \phi(z,w) = \sqrt( z^2 + w^2) - z - w \f$
 
   This function is used to solve MLCP, MCP and NCP. The inequalities are rewritten using
   Fischer function with \f$ w = F(z) \f$ and solved with a semi-smooth Newton algorithm.
@@ -36,10 +35,12 @@
   For "mixed" problems (i.e. including equality constraints), the Fischer function is defined
   as :
 
-  \f[ \phi_{mixed}(z,F(z)) =
+  \f[ 
+  \phi_{mixed}(z,F(z)) =
   \left\lbrace \begin{array}{c}
   F_e(z) \\
-  \sqrt( z^2 + F_i(z)^2) - z - F_i(z) \end{array}\right. \f]
+  \sqrt( z^2 + F_i(z)^2) - z - F_i(z) \end{array}\right.
+  \f]
 
   where index "e" stands for equalities part in F and "i" for inequalities.
 
@@ -101,8 +102,9 @@ void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict
 void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* z, double* F, double* jacobianF,
                           double* jacobianPhi);
 
-/** Computes an element of \f$Jac \mathbf{F}_{\mathrm{FB}}\f$ (possibly mixed)
-   Fischer-Burmeister function, see Facchinei--Pang (2003) p. 808 \param[in] n1 number of
+/** Computes an element of \f$ Jac \mathbf{F}_{\mathrm{FB}} \f$ (possibly mixed)
+
+    Fischer-Burmeister function, see Facchinei--Pang (2003) p. 808 \param[in] n1 number of
    equality constraints. \param[in] n2 number of complementarity constraints. \param[in] z
    vector \f$z\f$ \param[in] F vector \f$F(z)\f$ \param[in] workV1 work vector (value gets
    overwritten) \param[in] workV2 work vector (value gets overwritten) \param[in] nabla_F \f$

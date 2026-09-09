@@ -100,7 +100,9 @@ typedef struct {
 
 /** \struct newton_LSA_data Newton_methods.h*/
 typedef struct {
-  NumericsMatrix *H; /**< matrix */
+  NumericsMatrix *H;    /**< matrix */
+  void *extra_problem;  // Required to keep relay in vi_compute_decent_dir_by_avi
+  bool keep;            // True if extra problem handled by the caller to set_lsa_params_data
 } newton_LSA_data;
 
 enum NEWTON_SOLVER { SICONOS_NEWTON_LSA = 10000 };

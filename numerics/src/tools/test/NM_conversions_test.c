@@ -1,4 +1,3 @@
-#include <stdio.h>  // for printf, fclose, fopen, FILE, NULL
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -17,15 +16,15 @@
  * limitations under the License.
  */
 
+#include <cs.h>
+#include <stdio.h>   // for printf, fclose, fopen, FILE, NULL
 #include <stdlib.h>  // for malloc
 
 #include "CSparseMatrix.h"
-//#include "CSparseMatrix_internal.h"  // for cs_dl_entry, CS_INT, cs_dl_print
 #include "NM_conversions.h"        // for NV_display
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
-#include "NumericsVector.h"        // for NV_display
 
 static int compare_csc(CSparseMatrix *A, CSparseMatrix *B) {
   CS_INT m, n, nz, p, k, j, *Ap, *Ai, *Bi, *Bp;
@@ -78,6 +77,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
 
   bool is_equal = CSparseMatrix_is_equal(triplet, triplet_2, 1e-14);
 
+  cs_spfree(triplet_2);
   if (!is_equal) {
     printf("triplet and triplet_2 are not equal\n");
     return 1;
@@ -90,7 +90,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
   /* CSparseMatrix_print(csr, 1); */
 
   is_equal = CSparseMatrix_is_equal(triplet, csr, 1e-14);
-
+  cs_spfree(csr);
   if (!is_equal) {
     printf("triplet and csr are not equal\n");
     return 1;
@@ -108,11 +108,12 @@ static int test_NM_conversion(NumericsMatrix *M) {
 
   printf("\n ###### conversion csc to triplet\n");
   CSparseMatrix *triplet_3 = NM_csc_to_triplet(csc_2);
+  cs_spfree(csc_2);
 
   /* CSparseMatrix_print(triplet_3, 1); */
 
   is_equal = CSparseMatrix_is_equal(triplet, triplet_3, 1e-14);
-
+  cs_spfree(triplet_3);
   if (!is_equal) {
     printf("triplet and triplet_3 are not equal\n");
     return 1;
@@ -158,7 +159,8 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   fclose(finput);
 
   is_equal = NM_equal(M_new, M_csc);
-
+  NM_free(M_csc);
+  M_new->matrix2->csc = NULL;
   if (is_equal)
     printf("equal csc\n");
   else
@@ -181,6 +183,10 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   fclose(finput);
 
   is_equal = NM_equal(M_new, M_csr);
+  NM_free(M_csr);
+  M_new->matrix2->csr = NULL;
+  NM_free(M_new);
+  NM_free(M);
 
   if (is_equal)
     printf("equal csr\n");
@@ -196,7 +202,6 @@ int main() {
 
   NumericsMatrix *M = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
       if ((i != j) && (i != j + 2)) NM_entry(M, i, j, i + j);
@@ -213,6 +218,6 @@ int main() {
   /* NumericsMatrix *A = NM_new_from_filename(filename); */
 
   /* info = test_NM_conversion(A); */
-
+  NM_free(M);
   return info;
 }

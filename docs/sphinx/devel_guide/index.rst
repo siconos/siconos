@@ -11,8 +11,6 @@ Developer guide
    numerics/solvers
    modal_moreau_jean
    about_ci
-   how_to_add_new_task
-   plugins
    notes/DevNotes
    todos_from_doxygen
    howto_doc

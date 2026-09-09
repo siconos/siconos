@@ -25,17 +25,15 @@
 #include <string.h>  // for NULL, memcpy
 
 #include "LCP_Solvers.h"                   // for lcp_enum, lcp_enum_init
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NumericsMatrix.h"                // for NM_dense_display, Numerics...
 #include "SiconosLapack.h"                 // for DGELS, DGESV, lapack_int, LA_NOTRANS
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "enum_tool.h"
-#include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_ENUM_US...
-
-/* Solver registration system */
-#include "solver_registry.h"
+#include "lcp_cst.h"  // for SICONOS_LCP_IPARAM_ENUM_US...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "solver_registry.h"
 
 static void lcp_buildM(int* zw, double* M, double* Mref, int size, double* column_of_zero) {
   int col;
@@ -108,8 +106,10 @@ void lcp_enum(LinearComplementarityProblem* problem, double* z, double* w, int* 
               SolverOptions* options) {
   *info = 1;
   double tol;
+  bool withMemAlloc = false;
   if (options->dWork == NULL) {
-    lcp_enum_init(problem, options, 1);
+    withMemAlloc = true;
+    lcp_enum_init(problem, options, withMemAlloc);
   }
   double* workingFloat = options->dWork;
   int* workingInt = options->iWork;
@@ -210,11 +210,18 @@ void lcp_enum(LinearComplementarityProblem* problem, double* z, double* w, int* 
         lcp_fillSolution(z, w, size, zw_indices, q_linear_system);
         options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM] = (int)enum_struct->current - 1;
         options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
-        if (!multipleSolutions) return;
+        if (!multipleSolutions) {
+          if (withMemAlloc) lcp_enum_reset(problem, options, withMemAlloc);
+          free(enum_struct);
+          return;
+        }
       }
     }
   }
   *info = 1;
+  free(enum_struct);
+  if (withMemAlloc) lcp_enum_reset(problem, options, withMemAlloc);
+
   if (verbose) numerics_printf("lcp_enum has not found a solution!\n");
 }
 
@@ -248,13 +255,9 @@ static void lcp_enum_free_wrap(void* problem, SolverOptions* options) {
   lcp_enum_reset((LinearComplementarityProblem*)problem, options, 1);
 }
 
-REGISTER_SOLVER(SICONOS_LCP_ENUM, "LCP_ENUM",
-                "Enumerative solver for LCP",
-                lcp_enum_init_wrap,
-                lcp_enum_solve_wrap,
-                lcp_enum_free_wrap,
-                NULL,  /* error function */
-                lcp_enum_set_default,  /* set_default */
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_ENUM, "LCP_ENUM", "Enumerative solver for LCP", lcp_enum_init_wrap,
+                lcp_enum_solve_wrap, lcp_enum_free_wrap, NULL, /* error function */
+                lcp_enum_set_default,                          /* set_default */
+                100,                                           /* default_max_iter */
+                1e-6,                                          /* default_tol */
+                0);                                            /* is_local_solver */

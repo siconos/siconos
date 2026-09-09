@@ -49,23 +49,23 @@ with
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`SecondOrderConeLinearComplementarityProblem`.
+Structure to define the problem: :cpp:class:`SecondOrderConeLinearComplementarityProblem`.
 
-The generic driver for all SOCLCP problems is :func:`soclcp_driver()`.
+The generic driver for all SOCLCP problems is :cpp:func:`soclcp_driver()`.
 
-Solvers list  :enum:`SOCLCP_SOLVER`
+Solvers list  :cpp:enum:`SOCLCP_SOLVER`
 
 .. _soclcp_solvers:
 
 SOCLCP available solvers
 ========================
 
-Gauss-Seidel (:enumerator:`SICONOS_SOCLCP_NSGS`)
-""""""""""""""""""""""""""""""""""""""""""""""""
+Gauss-Seidel (:cpp:enumerator:`SICONOS_SOCLCP_NSGS`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 PSOR (Gauss-Seidel with overrelaxation) solver.
 
-driver: :func:`soclcp_nsgs()`
+driver: :cpp:func:`soclcp_nsgs()`
 
 parameters:
 
@@ -82,50 +82,49 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-4;
 * dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1., relaxation parameter value
   
-internal solver: :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`.
+internal solver: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`.
 
 
-VI, fixed-point (:enumerator:`SICONOS_SOCLCP_VI_FPP`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
+VI, fixed-point (:cpp:enumerator:`SICONOS_SOCLCP_VI_FPP`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 VI formulation and fixed point projection.
 
-driver: :func:`soclcp_VI_FixedPointProjection()`
+driver: :cpp:func:`soclcp_VI_FixedPointProjection()`
 
-parameters: same as :enumerator:`SICONO_VI_FPP`, see :ref:`vi_solvers`.
+parameters: same as :cpp:enumerator:`SICONO_VI_FPP`, see :ref:`vi_solvers`.
 
 
-VI, Extra-gradient (:enumerator:`SICONOS_SOCLCP_VI_EG`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-VI formulation and extra-gradient solver.
-
-driver: :func:`soclcp_VI_ExtraGradient()`
-
-parameters: same as :enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
-
-VI, Extra-gradient (:enumerator:`SICONOS_SOCLCP_VI_EG`)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+VI, Extra-gradient (:cpp:enumerator:`SICONOS_SOCLCP_VI_EG`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 VI formulation and extra-gradient solver.
 
-driver: :func:`soclcp_VI_ExtraGradient()`
+driver: :cpp:func:`soclcp_VI_ExtraGradient()`
 
-parameters: same as :enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
+parameters: same as :cpp:enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
+
+VI, Extra-gradient (:cpp:enumerator:`SICONOS_SOCLCP_VI_EG`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+VI formulation and extra-gradient solver.
+
+driver: :cpp:func:`soclcp_VI_ExtraGradient()`
+
+parameters: same as :cpp:enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
 
 Projections
 """""""""""
 
-Used as internal solver for :enumerator:`SICONOS_SOCLCP_NSGS`.
+Used as internal solver for :cpp:enumerator:`SICONOS_SOCLCP_NSGS`.
 
-ids: :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`,
-:enumerator:`SICONOS_SOCLCP_ProjectionOnCone`,
-   :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithRegularization`.
+ids: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`,
+:cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnCone`, :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithRegularization`.
 
 drivers:
 
-* :func:`soclcp_projectionOnCone_solve` for ProjectionOnCone and ProjectionOnConeWithRegularization,
-* :func:`soclcp_projectionOnConeWithLocalIteration` for ProjectionOnConeWithLocalIteration.
+* :cpp:func:`soclcp_projectionOnCone_solve` for ProjectionOnCone and ProjectionOnConeWithRegularization,
+* :cpp:func:`soclcp_projectionOnConeWithLocalIteration` for ProjectionOnConeWithLocalIteration.
 
 
 parameters:

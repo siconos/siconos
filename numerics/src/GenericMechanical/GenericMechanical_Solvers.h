@@ -23,8 +23,7 @@
 
 */
 
-#include "GenericMechanicalProblem.h"
-#include "SolverOptions.h"
+#include "NumericsFwd.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -56,9 +55,6 @@ void gmp_set_default(SolverOptions* options);
  *\return  0 if the memory is not allocated. else return 1.
  */
 int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* options);
-
-/* Free the Work memory, and set pointer to zero.*/
-void gmp_working_memory_free(GenericMechanicalProblem* problem, SolverOptions* options);
 
 /* Compute the error, return 0 iff success.*/
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,

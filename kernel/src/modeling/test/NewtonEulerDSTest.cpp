@@ -52,11 +52,15 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1_alias() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias)  : ", neds.getqDim() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test constr 1 (alias)  : ", neds.scalarMass() == mass, true);
 
-  siconos::algebra::SiconosMatrix massMatrix{6, 6};
+  siconos::algebra::SiconosMatrix66 massMatrix = siconos::algebra::SiconosMatrix66::Zero();
   massMatrix(0, 0) = mass;
   massMatrix(1, 1) = mass;
   massMatrix(2, 2) = mass;
   massMatrix.block<3, 3>(3, 3) = inertia;
+
+  siconos::algebra::print(massMatrix);
+  std::cout << "----------------- \n";
+  siconos::algebra::print(neds.totalInertiaMatrix());
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildNewtonEulerDS5 : ", neds.totalInertiaMatrix() == massMatrix, true);

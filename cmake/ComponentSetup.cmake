@@ -25,6 +25,7 @@ function(create_siconos_component COMPONENT)
 
   # --> Scan source directories and return a list of files
   # to be compiled.
+
   get_sources(${COMPONENT} DIRS ${${COMPONENT}_DIRS} EXCLUDE ${component_EXCLUDE})
 
   # Create the library
@@ -79,8 +80,8 @@ function(create_siconos_component COMPONENT)
 
 
   # === Sanitizer
-  # Add option(WITH_ASAN "Activate asan sanitizer" ON) in config file to activate it
-  if(WITH_ASAN AND NOT (${COMPONENT} STREQUAL "externals" OR ${COMPONENT} STREQUAL "externals_fortran"))
+  # Add option(WITH_SANITIZER "Activate asan sanitizer" ON) in config file to activate it
+  if(WITH_SANITIZER AND NOT (${COMPONENT} STREQUAL "externals" OR ${COMPONENT} STREQUAL "externals_fortran"))
     target_compile_options(${COMPONENT} PUBLIC "-fsanitize=address")
     target_compile_options(${COMPONENT} PUBLIC "-fsanitize=undefined")
     target_compile_options(${COMPONENT} PUBLIC "-fno-omit-frame-pointer")
@@ -91,7 +92,6 @@ function(create_siconos_component COMPONENT)
     target_link_options(${COMPONENT} PUBLIC "-fno-common")
 
   endif()
-
 
 endfunction()
 
@@ -120,7 +120,7 @@ function(configure_component_documentation COMPONENT)
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
-
+  doxygen_warnings(${COMPONENT} HEADERS ${component_HEADERS})
   # update the main doxy file, without building the doc
   if(WITH_DOCUMENTATION OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml

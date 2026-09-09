@@ -241,7 +241,7 @@ endif()
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
 
-  if(WITH_MPI)
+  if(SICONOS_HAS_MPI)
     target_include_directories(${TEST_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
     target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
   endif()
@@ -374,7 +374,7 @@ function(build_plugin)
   if(NOT WITH_CXX)
     set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
   endif(NOT WITH_CXX)
-  if(WITH_MPI)
+  if(SICONOS_HAS_MPI)
     # Note FP : temporary fix, to deal with PRIVATE deps of some components.
     # This will be reviewed later.
     target_include_directories(${plug_name} PRIVATE ${MPI_C_INCLUDE_DIRS})
@@ -490,6 +490,33 @@ function(build_python_tests)
     add_subdirectory(${RUNDIR} ${RUNDIR})
   endif()
 
+  # sanitizer conf
+  # We need to remove all leaks from python
+  if(WITH_SANITIZER)
+    set(LSAN_SUPPRESSIONS_FILE "${CMAKE_BINARY_DIR}/lsan_suppressions.txt")
+    file(WRITE ${LSAN_SUPPRESSIONS_FILE}
+    "leak:libpython
+    leak:python3
+    leak:Py_
+    leak:PyObject
+    leak:PyList
+    leak:PyDict
+    leak:PyModule
+    leak:_PyObject
+    leak:_Py_
+    leak:importlib
+    ")
+
+    # asan lib path (run gcc --print-file-name=libasan.so to find it)
+    execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libasan.so
+    OUTPUT_VARIABLE LIBASAN_PATH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+
+  endif()
+
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
     foreach(excluded_test IN LISTS test_EXCLUDE)
@@ -504,10 +531,17 @@ function(build_python_tests)
       set(exename ${RUNDIR}/${exename})
       # set_ldlibpath()
 
-      add_test(${name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${exename})
+      add_test(NAME ${name}  COMMAND ${Python_EXECUTABLE} -m pytest ${pytest_opt} ${DRIVE_LETTER}${exename})
       set_tests_properties(${name} PROPERTIES WORKING_DIRECTORY ${RUNDIR})
       set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-      set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
+
+      if(WITH_SANITIZER)
+            set_tests_properties(${name} PROPERTIES ENVIRONMENT
+              "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS};LD_PRELOAD=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
+      else()
+        set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
+      endif()
+
     endforeach()
   endif()
 endfunction()

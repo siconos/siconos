@@ -17,6 +17,9 @@ struct attached : DataSpec, some::attached_storage {
 };
 
 namespace property {
+
+struct without_binding : some::property {};
+
 struct keep : some::property {};
 
 struct wrapped : some::property {};
@@ -71,6 +74,12 @@ struct refine_with_type : A {
 template <match::property... Parts>
 struct with_properties : item {
   using properties = gather<Parts...>;
+};
+
+template <match::attribute Attr>
+struct without_binding : property::without_binding {
+  using type = Attr;
+  using without_binding_t = void;
 };
 
 template <match::attribute Attr, std::size_t N>

@@ -35,13 +35,18 @@ int variationalInequality_printInFile(VariationalInequality* vi, FILE* file) {
 
 int variationalInequality_newFromFile(VariationalInequality* vi, FILE* file) { return 0; }
 
-void freeVariationalInequalityProblem(VariationalInequality* vi) {
+VariationalInequality* freeVariationalInequalityProblem(VariationalInequality* vi) {
+  if (!vi) return NULL;
   if (vi->nabla_F) {
-    NM_clear(vi->nabla_F);
-    free(vi->nabla_F);
-    vi->nabla_F = NULL;
+    vi->nabla_F = NM_free(vi->nabla_F);
   }
+  vi->env = NULL;
+  vi->F = NULL;
+  vi->compute_nabla_F = NULL;
+  vi->ProjectionOnX = NULL;
+  vi->set = NULL;
   free(vi);
+  return NULL;
 }
 
 void variationalInequality_clear(VariationalInequality* vi) {

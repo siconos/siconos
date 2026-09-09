@@ -25,10 +25,11 @@ shape in a contactor.
 #ifndef BodyBulletShapeRecord_h
 #define BodyBulletShapeRecord_h
 
-#include "SiconosVector.hpp"
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+
 #include "BodyShapeRecord.hpp"
 #include "BulletDeclarations.h"
-
+#include "SiconosVector.hpp"
 
 namespace siconos::collision {
 class StaticBody;
@@ -65,13 +66,18 @@ class BodyRecord : public BodyBulletShapeRecord,
  public:
   std::shared_ptr<SHAPE> shape{nullptr};
   std::shared_ptr<BT_SHAPE> btshape{nullptr};
-
+  std::shared_ptr<btConvexShape> childShape{nullptr};
+  // // FP: we need to keep trace of child shape to avoid memory leaks, when BT_SHAPE is 2D
   BodyRecord(std::shared_ptr<siconos::algebra::SiconosVector> base, std::shared_ptr<DS> ds,
              std::shared_ptr<SHAPE> sh, std::shared_ptr<BT_SHAPE> btsh,
              std::shared_ptr<btCollisionObject> btobj,
              std::shared_ptr<siconos::collision::SiconosContactor> con,
-             std::shared_ptr<siconos::collision::StaticBody> staticCSR)
-      : BodyBulletShapeRecord(base, ds, sh, btobj, con, staticCSR), shape(sh), btshape(btsh) {}
+             std::shared_ptr<siconos::collision::StaticBody> staticCSR,
+             std::shared_ptr<btConvexShape> child = nullptr)
+      : BodyBulletShapeRecord{base, ds, sh, btobj, con, staticCSR},
+        shape{sh},
+        btshape{btsh},
+        childShape{child} {}
 
   ~BodyRecord() noexcept = default;
 };

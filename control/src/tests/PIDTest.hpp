@@ -14,21 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __PIDTest__
 #define __PIDTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include <FirstOrderLinearDS.hpp>
-#include <PID.hpp>
 #include <LinearSensor.hpp>
+#include <PID.hpp>
 
-class PIDTest : public CppUnit::TestFixture
-{
-
-private:
+class PIDTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(PIDTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(PIDTest);
@@ -45,12 +43,12 @@ private:
   void testPIDLsodar();
   // Members
 
-  unsigned int _n;
+  size_t _n;
   double _h;
   double _t0;
   double _T;
   double _tol;
-  double _xFinal;
+  double _xFinal{0.};
   std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
@@ -59,18 +57,10 @@ private:
   std::shared_ptr<siconos::control::LinearSensor> _sensor;
   std::shared_ptr<siconos::control::PID> _PIDcontroller;
 
-
-
-public:
-
-  PIDTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(5e-12) {}
+ public:
+  PIDTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(5e-12) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

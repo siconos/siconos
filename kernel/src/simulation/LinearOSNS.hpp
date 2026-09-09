@@ -244,7 +244,7 @@ class LinearOSNS : public OneStepNSProblem {
    *  \param pos the position of the first element of yOut to be set
    */
   virtual void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor& vertex,
-                             unsigned int pos);
+                             siconos::algebra::Index pos);
 
   /** compute vector q */
   virtual void compute_q();

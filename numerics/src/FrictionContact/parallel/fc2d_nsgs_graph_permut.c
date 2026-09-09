@@ -22,17 +22,14 @@
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_IPARAM...
-#include "LCP_Solvers.h"                   // for lcp_nsgs_SBM_buildLocalPro...
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
-#include "SiconosBlas.h"                   // for cblas_dnrm2
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
-#include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
-#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IPARAM...
+#include "NumericsFwd.h"              // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"           // for NumericsMatrix, RawNumeric...
+#include "SiconosBlas.h"              // for cblas_dnrm2
+#include "SolverOptions.h"            // for SolverOptions, SICONOS_DPA...
+#include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
+#include "fc2d_Solvers.h"             // for fc2d_nsgs_sbm, fc2d_spa...
+#include "fc2d_compute_error.h"       // for fc2d_compute_error
 #include "graph_tools.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 #include "op3x3.h"
@@ -284,6 +281,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   /* verbose=1; */
   /* Global Solver parameters*/
 
+  double start_time = omp_get_wtime();
+
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
@@ -351,7 +350,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   /* Can  do better? In place stuff? */
   SparseBlockStructuredMatrix* SBM_col_permuted = SBM_new();
   SparseBlockStructuredMatrix* SBM_permuted = SBM_new();
-  unsigned int* rowIndex = (unsigned int*)malloc(nc * sizeof(unsigned int));
+  size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
   SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
@@ -409,6 +408,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   size_t* index2_data = NULL;
 
   unsigned int* freeze_contacts = NULL;
+
+  double end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_BEFORE_LOOP] = end_time - start_time;
+
+  start_time = omp_get_wtime();
+
   // FREEZING CONTACTS
   if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
     unsigned int pos;
@@ -420,12 +426,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
-#pragma omp parallel default(none)                                                      \
-    private(pos, local_problem, localreaction, light_error_2, index1_data, index2_data) \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)    \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,    \
-               has_not_converged, norm_q, w, itermax)                                   \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,    \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2, \
+                                               index1_data, index2_data)                     \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)         \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,         \
+               has_not_converged, norm_q, w, itermax)                                        \
+    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,         \
                blocks_contiguous)
     {
       // Allocate local problem
@@ -577,11 +583,11 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     double light_error_sum = 0.;
     double localreaction[2];
 
-#pragma omp parallel default(none)                                                   \
-    private(pos, local_problem, localreaction, index1_data, index2_data)             \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter, \
-               blocks_contiguous)                                                    \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, index1_data, \
+                                               index2_data)                                \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter,       \
+               blocks_contiguous)                                                          \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,       \
                has_not_converged, norm_q, w, itermax)
     {
       // Allocate local problem
@@ -681,6 +687,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     }
   }
 
+  end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_IN_LOOP] = end_time - start_time;
+
+  start_time = omp_get_wtime();
+
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
@@ -737,18 +749,19 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   free(blocks_contiguous);
 
   if (SBM_problem != NULL) {
-    SBM_clear(SBM_problem);
-    free(SBM_problem);
-    SBM_problem = NULL;
+    SBM_free(SBM_problem, SBM_FREE_ALL);
     problem->M->matrix1 = NULL;
   }
 
-  SBMfree(SBM_col_permuted, 0);  // do not free blocks on this one
-  SBM_clear(SBM_permuted);       // free blocks because they were copied
-  free(SBM_col_permuted);
-  free(SBM_permuted);
+  SBM_col_permuted =
+      SBM_free(SBM_col_permuted, SBM_FREE_KEEP_BLOCKS);  // do not free blocks on this one
+  SBM_permuted = SBM_free(SBM_permuted, SBM_FREE_ALL);  // free blocks because they were copied
   free(q_permuted);
   free(mu_permuted);
+
+  end_time = omp_get_wtime();
+
+  dparam[SICONOS_DPARAM_TIME_AFTER_LOOP] = end_time - start_time;
 }
 
 /* ===========================================================================

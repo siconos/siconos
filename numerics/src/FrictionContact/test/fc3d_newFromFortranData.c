@@ -30,8 +30,8 @@ int main(void) {
   double q[] = {-1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[] = {0.1, 0.1, 0.1};
 
-  unsigned int row[] = {1, 2, 3};
-  unsigned int column[] = {1, 2, 3};
+  size_t row[] = {1, 2, 3};
+  size_t column[] = {1, 2, 3};
   int m = 3;
   int n = 3;
   double W[] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1,
@@ -58,8 +58,8 @@ int main(void) {
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-  SBCM_free_3x3(MC);
-  free(MC);
+  MC = SBCM_free(MC, SBM_FREE_KEEP_BLOCKS);
+
   free(FC);
 
   return info;

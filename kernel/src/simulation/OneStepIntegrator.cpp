@@ -18,9 +18,9 @@
 #include "OneStepIntegrator.hpp"
 
 #include "DynamicalSystem.hpp"
-#include "EventsManager.hpp"
+#include "EventsManager.hpp"  // IWYU pragma: keep
 #include "Interaction.hpp"
-#include "Relation.hpp"
+#include "Relation.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
@@ -49,9 +49,10 @@ siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(
 
 void siconos::integrators::OneStepIntegrator::initialize() {
   if (_extraAdditionalTerms) {
-    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
-                                *_simulation->nonSmoothDynamicalSystem(),
-                                _simulation->eventsManager()->timeDiscretisation());
+    auto sim = simulation();
+    _extraAdditionalTerms->init(*sim->nonSmoothDynamicalSystem()->topology()->dSG(0),
+                                *sim->nonSmoothDynamicalSystem(),
+                                sim->eventsManager()->timeDiscretisation());
   }
 
   initialize_nonsmooth_problems();
@@ -60,7 +61,7 @@ void siconos::integrators::OneStepIntegrator::initialize() {
 
 void siconos::integrators::OneStepIntegrator::updateAndSwapAllOutput(double time) {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
     if (!checkInteractionOSI(indexSet0, ui)) continue;
     auto& inter = *indexSet0.bundle(*ui);
@@ -173,7 +174,7 @@ siconos::integrators::OneStepIntegrator::LUiterationMatrix(
 
 void siconos::integrators::OneStepIntegrator::updateOutput(double time, unsigned int level) {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
     if (!checkInteractionOSI(indexSet0, ui)) continue;
     auto& inter = *indexSet0.bundle(*ui);
@@ -196,10 +197,10 @@ void siconos::integrators::OneStepIntegrator::updateInput(double time) {
 void siconos::integrators::OneStepIntegrator::updateInput(double time, unsigned int level) {
   // resetNonSmoothPart(level);
   // We compute input using lambda(level).
-  //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+  // simulation()->>nonSmoothDynamicalSystem()->updateInput(time,level);
   // resetNonSmoothPart(level);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
     if (!checkInteractionOSI(indexSet0, ui)) continue;
     auto& inter = *indexSet0.bundle(*ui);

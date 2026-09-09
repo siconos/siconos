@@ -59,7 +59,19 @@ size_t NA_min(size_t *arr, size_t len);
 /* swap two indices */
 void uint_swap(unsigned int *a, unsigned int *b);
 /* shuffle an unsigned array */
-void uint_shuffle(unsigned int *a, unsigned int n);
+void uint_shuffle(unsigned int *a, size_t n);
+
+/** @brief swap two indices
+ * @param[in,out] a first index
+ * @param[in,out] b second index
+ */
+void size_t_swap(size_t *a, size_t *b);
+
+/** @brief shuffle a size_t array
+ * @param[in,out] a the array
+ * @param[in] n size of the array
+ */
+void size_t_shuffle(size_t *a, size_t n);
 
 #if defined(__cplusplus)
 }

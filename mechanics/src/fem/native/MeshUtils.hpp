@@ -40,7 +40,7 @@ std::shared_ptr<Mesh> create2dMeshnxm(size_t n, size_t m, double Lx, double Ly);
  *  @return a Siconos Mesh
  *
  */
-std::shared_ptr<Mesh> createMeshFromGMSH2(std::string fname);
+std::shared_ptr<Mesh> createMeshFromGMSH2(const std::string& input, bool is_filename = true);
 
 std::shared_ptr<Mesh> createBeamMesh(const siconos::algebra::SiconosVector3& coords_start,
                                      const siconos::algebra::SiconosVector3& coords_end,

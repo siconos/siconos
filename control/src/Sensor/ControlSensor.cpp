@@ -14,42 +14,39 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ControlSensor.cpp
  * A generic control sensor
-*/
+ */
 
 #include "ControlSensor.hpp"
-#include "SiconosVector.hpp"
 
-void siconos::control::ControlSensor::initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds)
-{
+void siconos::control::ControlSensor::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds) {
   Sensor::initialize(nsds);
-//  if (_delay > 0)
-//  {
-//    if (_timeDiscretisation->getTDCase() != 2)
-//    {
-//       THROW_EXCEPTION("ControlSensor::initialize the timediscretization should be of type 2");
-//    }
-//    else
-//    {
-//       double h = _timeDiscretisation->currentTimeStep();
-//       double shift = _delay;
-//       if (_delay >= h)
-//       {
-//         unsigned int size = ceil(_delay/h);
-//         shift = fmod(_delay, h);
-//         _bufferY.resize(size);
-//       }
-//      _timeDiscretisation->setT0(_timeDiscretisation->currentTime() + h - shift);
-//    }
-//  }
-//  else if (_delay < 0)
-//    THROW_EXCEPTION("ControlSensor::initialize the delay value should be >= 0");
+  //  if (_delay > 0)
+  //  {
+  //    if (_timeDiscretisation->getTDCase() != 2)
+  //    {
+  //       THROW_EXCEPTION("ControlSensor::initialize the timediscretization should be of type
+  //       2");
+  //    }
+  //    else
+  //    {
+  //       double h = _timeDiscretisation->currentTimeStep();
+  //       double shift = _delay;
+  //       if (_delay >= h)
+  //       {
+  //         size_t size = ceil(_delay/h);
+  //         shift = fmod(_delay, h);
+  //         _bufferY.resize(size);
+  //       }
+  //      _timeDiscretisation->setT0(_timeDiscretisation->currentTime() + h - shift);
+  //    }
+  //  }
+  //  else if (_delay < 0)
+  //    THROW_EXCEPTION("ControlSensor::initialize the delay value should be >= 0");
 }
 
-unsigned int siconos::control::ControlSensor::getYDim() const
-{
-  return _storedY->size();
-}
+auto siconos::control::ControlSensor::getYDim() const { return _storedY->size(); }

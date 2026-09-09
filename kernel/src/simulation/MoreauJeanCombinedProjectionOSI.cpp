@@ -135,7 +135,7 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1 || i == 2);
-  // double h = _simulation->timeStep();
+  // double h = simulation()->timeStep();
   if (i == 1)  // index set for resolution at the velocity
   {
     auto y = (*(inter->y(0)))(0);  // y(0) is the position

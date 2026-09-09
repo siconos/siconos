@@ -191,9 +191,6 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc) {
   cs_spfree(triplet);
 
   return csr;
-
-  fprintf(stderr, "NM_csc_to_csr :: MKL not enabled\n");
-  return NULL;
 #endif
 }
 

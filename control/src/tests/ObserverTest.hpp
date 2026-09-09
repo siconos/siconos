@@ -14,22 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __ObserverTest__
 #define __ObserverTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include <FirstOrderLinearDS.hpp>
+
 #include "LinearSensor.hpp"
 #include "PID.hpp"
 
-
-class ObserverTest : public CppUnit::TestFixture
-{
-
-private:
+class ObserverTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(ObserverTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(ObserverTest);
@@ -51,13 +49,14 @@ private:
   void test_Luenberger_Lsodar();
   // Members
 
-  unsigned int _n;
-  double _h;
-  double _t0;
-  double _T;
-  double _tol;
-  double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
+  size_t _n{2};
+  double _h{0.05};
+  double _t0{0.};
+  double _T{100};
+  double _tol{7e-11};
+  double _beta{0.2};
+
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
@@ -70,17 +69,10 @@ private:
   std::shared_ptr<siconos::control::LinearSensor> _sensor{nullptr};
   std::shared_ptr<siconos::control::PID> _pid{nullptr};
 
-
-public:
-
-  ObserverTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7e-11) {}
+ public:
+  ObserverTest() = default;
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

@@ -26,11 +26,11 @@
 
 #include "SiconosBlas.h"            // for cblas_daxpy, cblas_dnrm2, cblas_d...
 #include "SiconosSets.h"            // for box_constraints
-#include "SolverOptions.h"          // for SolverOptions
-#include "VariationalInequality.h"  // for VariationalInequality
-#include "numerics_verbose.h"
+#include "SolverOptions.h"          // IWYU pragma: keep
+#include "VariationalInequality.h"  // IWYU pragma: keep
 #include "numerics_errors.h"
-#include "siconos_debug.h"          // for DEBUG_PRINTF
+#include "numerics_verbose.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 int variationalInequality_computeError(VariationalInequality* problem, double* z, double* w,
                                        double tolerance, SolverOptions* options,

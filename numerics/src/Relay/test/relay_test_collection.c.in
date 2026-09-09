@@ -17,6 +17,7 @@
  */
 #include <stdio.h>             // for printf
 #include <string.h>            // for strcmp
+#include <stdlib.h>
 #include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 #include "relay_test_utils.h"  // for relay_test_function
 #include "test_utils.h"        // for build_test_collection_generic, data_co...
@@ -56,9 +57,9 @@ int main(void)
   number_of_tests -= 1;   // Remove the last test : no enum on data/relay1.dat, too long ...
   int out = run_test_collection(collection, number_of_tests, relay_test_function);
 
-
+  number_of_tests += 1;  // for the free call to be complete
   free_test_collection(collection, number_of_tests);
-
+  free(_data_collection);
   
   return out;
 }

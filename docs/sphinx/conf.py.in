@@ -20,9 +20,10 @@ import importlib
 import textwrap
 from distutils.version import LooseVersion
 import sphinx
+import logging
 
 # append siconos package build path to sys
-siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
+siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'python')
 sys.path.insert(0, siconos_pythonpath)
 siconos_tools_path = os.path.join("@CMAKE_BINARY_DIR@", 'share')
 sys.path.insert(0, siconos_tools_path)
@@ -54,15 +55,19 @@ extensions = [
     'sphinxcontrib.bibtex',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.githubpages',
-    'ytsphinx.youtube',
-    #'sphinxcontrib.youtube',
+    #'ytsphinx.youtube',
+    'sphinxcontrib.youtube',
+    'sphinx_copybutton',
+    'sphinx_design'
 ]
+suppress_warnings = ["toc.not_included"]
 
 with_python_wrapper = '@WITH_PYB11_WRAPPER@' == 'ON'
 if with_python_wrapper:
     extensions += [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
+        'sphinx_autodoc_typehints',
         # numpydoc must be listed after autodoc!
         # but we don't need it anymore because of napoleon
         #'numpydoc.numpydoc',
@@ -74,16 +79,17 @@ if with_python_wrapper:
 
     # ---- Autodoc config ----
     autodoc_default_options = {
-        #'members': None,
-        #'show-inheritance': None,
-        'member-order': 'bysource',
-        'private-members': None
+        "members": True,
+        "show-inheritance": True,
+        "member-order": "bysource",
         }
+
     autodoc_docstring_signature = True
     autodoc_typehints = 'none'
     automodule_skip_lines = 'True'
     autoclass_content = 'both'
-    
+
+
     # ---- Napoleon config ----
 
     # Customize napoleon/sphinx output.
@@ -130,7 +136,7 @@ for comp in components:
     breathe_projects[comp] = "@DOXYGEN_4_RST@/" + comp
     # Path to doxygen outputs
 breathe_default_project = 'numerics'  # "@PROJECT_NAME@"
-breathe_default_members = ('members', 'public-members')
+breathe_default_members = ('members', 'public-members', 'protected-members', 'private-members')
 
 # sphinx versioning option. Review this later (issue to be fixed :
 # https://github.com/CityOfZion/neon-js/issues/111)
@@ -154,7 +160,8 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
+
 
 # The master toctree document.
 master_doc = 'index'
@@ -213,7 +220,9 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #html_theme = 'bootstrap'
-html_theme = 'sphinx_book_theme'
+#html_theme = 'sphinx_book_theme'
+html_theme = 'furo'
+#html_theme = 'pydata_sphinx_theme'
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
@@ -222,79 +231,20 @@ html_css_files = ["custom.css"]
 #html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # # Note FP : using bootstrap theme results in (very) long
 # # times to generate doc from rst files.
-# html_theme_options = {
-#     # Navigation bar title. (Default: ``project`` value)
-#     'navbar_title': "Siconos",
 
-#     # Tab name for entire site. (Default: "Site")
-#     'navbar_site_name': "Documentation",
 
-#     # A list of tuples containing pages or urls to link to.
-#     # Valid tuples should be in the following forms:
-#     #    (name, page)                 # a link to a page
-#     #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-#     #    (name, "http://example.com", True) # arbitrary absolute url
-#     # Note the "1" or "True" value above as the third argument to indicate
-#     # an arbitrary url.
-#     'navbar_links': [
-#         ("Sources on github", "https://github.com/siconos/siconos", True),
-#         ("Index", "genindex"),
-#     ],
-
-#     # Render the next and previous page links in navbar. (Default: true)
-#     'navbar_sidebarrel': True,
-
-#     # Render the current pages TOC in the navbar. (Default: true)
-#     'navbar_pagenav': True,
-
-#     # Tab name for the current pages TOC. (Default: "Page")
-#     'navbar_pagenav_name': "Page",
-
-#     # Global TOC depth for "site" navbar tab. (Default: 1)
-#     # Switching to -1 shows all levels.
-#     'globaltoc_depth': -1,
-
-#     # Include hidden TOCs in Site navbar?
-#     #
-#     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-#     # non-hidden ``toctree`` directives in the same page, or else the build
-#     # will break.
-#     #
-#     # Values: "true" (default) or "false"
-#     'globaltoc_includehidden': "true",
-
-#     # HTML navbar class (Default: "navbar") to attach to <div> element.
-#     # For black navbar, do "navbar navbar-inverse"
-#     'navbar_class': "navbar",
-
-#     # Fix navigation bar to top of page?
-#     # Values: "true" (default) or "false"
-#     'navbar_fixed_top': "true",
-
-#     # Location of link to source.
-#     # Options are "nav" (default), "footer" or anything else to exclude.
-#     'source_link_position': "footer",
-
-#     # Bootswatch (http://bootswatch.com/) theme.
-#     #
-#     # Options are nothing (default) or the name of a valid theme
-#     # such as "cosmo" or "sandstone".
-#     #
-#     # The set of valid themes depend on the version of Bootstrap
-#     # that's used (the next config option).
-#     #
-#     # Currently, the supported themes are:
-#     # - Bootstrap 2: https://bootswatch.com/2
-#     # - Bootstrap 3: https://bootswatch.com/3
-#     #'bootswatch_theme': "sandstone", #--> for Bootstrap 3 but it
-#     # lacks some options https://stackoverflow.com/questions/18023493/bootstrap-dropdown-sub-menu-missing
-#     'bootswatch_theme': "flatly",
-
-#     # Choose Bootstrap version.
-#     # Values: "3" (default) or "2" (in quotes)
-#     'bootstrap_version': "2",
-
-# }
+html_theme_options = {
+    "light_css_variables": {
+        # Couleur principale
+        "color-brand-primary": "#58A96D",
+        "color-brand-content": "#58A96D",
+    },
+    "dark_css_variables": {
+        # Légèrement plus clair pour conserver le contraste
+        "color-brand-primary": "#58A96D",
+        "color-brand-content": "#58A96D",
+    },
+}
 
 html_context = {
     "display_github": False,
@@ -445,10 +395,10 @@ texinfo_documents = [(
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'https://docs.python.org/': None}
 intersphinx_mapping = {
-    'python': ('https://docs.python.org', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-    'matplotlib': ('https://matplotlib.org/', None)}
+    'python': ('https://docs.python.org/3/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None)}
 
 path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'numerics')
 
@@ -488,21 +438,73 @@ def source_read(app, docname, source):
 
 
 
-from sphinx.ext.autodoc import cut_lines
+# def skip(app, what, name, obj, would_skip, options):
+#    if name.startswith('_'):
+#        return True
+#    if name == 'thisown':
+#        return True
+#    return would_skip
 
-def skip(app, what, name, obj, would_skip, options):
-    if name.startswith('_'):
-        return True
-    if name == 'thisown':
-        return True
-    return would_skip
 
+# --- Filtering on namespace warnings to avoid messages because of duplicate declarations
+# https://github.com/breathe-doc/breathe/issues/25
+# https://github.com/breathe-doc/breathe/issues/772
+# 
+NAMESPACE_NAMES = (
+    "siconos",
+    "algebra",
+    "control",
+    "modeling",
+    "simulation",
+    "kernel",
+    "numerics",
+    "mechanics",
+    "graphs",
+    "integrators",
+    "nonsmooth_formulations",
+    "nonsmooth_laws",
+    "collision",
+    "native",
+    "bodies",
+    "bullet",
+    "fem",
+    "cable",
+    "tools",
+    "nlohmann",
+    "devel_model",
+    "internal",
+    "serialization",
+    "joints",
+    "exception",
+    "boost",
+    "io",
+)
+
+_PATTERN = re.compile(
+    r"cpp:type::\s*(" + "|".join(re.escape(n) for n in NAMESPACE_NAMES) + r")\b"
+)
+
+
+class NamespaceDuplicateFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        if "dupliqu" in msg.lower() or "duplicate" in msg.lower():
+            if _PATTERN.search(msg):
+                return False
+        return True
+
+def setup_namespace_filter(app):
+    sphinx_logger = logging.getLogger("sphinx")
+    f = NamespaceDuplicateFilter()
+    for handler in sphinx_logger.handlers:
+        handler.addFilter(f)
+    sphinx_logger.addFilter(f)
 
 def setup(app):
     app.connect('source-read', source_read)
     app.add_css_file("biblio.css")
-    app.connect("autodoc-skip-member", skip)
-    #    app.connect('autodoc-process-docstring', postprocess_docstrings)
+    # app.connect("autodoc-skip-member", skip)
+    setup_namespace_filter(app)
 
 #if with_python_wrapper:
 #    autodoc_member_order = 'bysource'

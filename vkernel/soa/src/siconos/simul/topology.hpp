@@ -46,16 +46,18 @@ struct topology : item {
                                     std::integral_constant<int, 2>>>,
 
       storage::attached<fsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_collection<some::indice>>,
+                        some::unbounded_vector<some::indice>>,
 
+      storage::attached<dsystem, symbol<"q0">,
+                        some::unbounded_vector<some::scalar>>,
       storage::attached<dsystem, symbol<"involved">, some::boolean>,
       storage::attached<dsystem, symbol<"index">, some::indice>,
       storage::attached<dsystem, symbol<"id">, some::indice>,
-      storage::attached<
+      storage::without_binding<storage::attached<
           dsystem, symbol<"p0">,
           some::array<some::unbounded_vector<some::vector<
                           some::scalar, std::integral_constant<int, 1>>>,
-                      std::integral_constant<int, 2>>>,
+                      std::integral_constant<int, 2>>>>,
 
       storage::attached<dsystem, symbol<"bc_velocities_0">,
                         some::unbounded_collection<some::indice>>,
@@ -63,8 +65,6 @@ struct topology : item {
       storage::attached<finteraction, symbol<"nds">, some::indice>,
       storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,
       storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
-      storage::attached<finteraction, symbol<"ydot_backup">,
-                        some::vector<some::scalar, nslaw_size>>,
       storage::attached<finteraction, symbol<"activation">, some::boolean>,
 
       storage::attached<dfinteraction, symbol<"nds">, some::indice>,
@@ -72,8 +72,6 @@ struct topology : item {
                         some::item_ref<fsystem>>,
       storage::attached<dfinteraction, symbol<"ds2">,
                         some::item_ref<dsystem>>,
-      storage::attached<dfinteraction, symbol<"ydot_backup">,
-                        some::vector<some::scalar, nslaw_size>>,
       storage::attached<dfinteraction, symbol<"activation">, some::boolean>,
 
       storage::attached<ddinteraction, symbol<"nds">, some::indice>,
@@ -81,8 +79,6 @@ struct topology : item {
                         some::item_ref<dsystem>>,
       storage::attached<ddinteraction, symbol<"ds2">,
                         some::item_ref<dsystem>>,
-      storage::attached<ddinteraction, symbol<"ydot_backup">,
-                        some::vector<some::scalar, nslaw_size>>,
       storage::attached<ddinteraction, symbol<"activation">, some::boolean>>;
 
   template <typename Handle>
@@ -93,7 +89,7 @@ struct topology : item {
     template <match::handle<fsystem> Hds>
     decltype(auto) link(Hds ds)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
       auto inter = storage::add<finteraction>(data);
 
@@ -112,7 +108,7 @@ struct topology : item {
     template <match::handle<fsystem> Hds>
     decltype(auto) link(Hds ds1, Hds ds2)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
       auto inter = storage::add<finteraction>(data);
 
@@ -131,7 +127,7 @@ struct topology : item {
     template <match::handle<fsystem> Hfds, match::handle<dsystem> Hdds>
     decltype(auto) link(Hfds ds1, Hdds ds2)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
       auto inter = storage::add<dfinteraction>(data);
 
@@ -151,7 +147,7 @@ struct topology : item {
     template <match::handle<dsystem> Hdds>
     decltype(auto) link(Hdds ds)
     {
-      auto &data = self()->data();
+      auto& data = self()->data();
 
       auto inter = storage::add<ddinteraction>(data);
 

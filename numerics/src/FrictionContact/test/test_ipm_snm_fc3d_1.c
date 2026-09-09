@@ -17,11 +17,9 @@
  */
 
 #include <float.h>   // for DBL_EPSILON
-#include <math.h>    // for fabs, sqrt
 #include <stdlib.h>  // for malloc
 
-#include "FrictionContact_options.h"                // for SICONOS_GLOBAL_FRICTION_3D_ADMM
-#include "NumericsFwd.h"                 // for SolverOptions
+#include "FrictionContact_options.h"     // for SICONOS_GLOBAL_FRICTION_3D_ADMM
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase

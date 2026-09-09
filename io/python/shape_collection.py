@@ -72,7 +72,7 @@ def load_vtp_file(shape_ref):
     Read a VTP shape from an HDF5 reference and return a loaded mesh.
 
     Parameters:
-    ----------
+    -----------
 
     shape_ref: h5py.Dataset
         HDF5 dataset containing the VTP shape, stored as a string

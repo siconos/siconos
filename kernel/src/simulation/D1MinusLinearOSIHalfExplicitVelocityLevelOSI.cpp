@@ -42,7 +42,7 @@
 namespace siconos::integrators::d1_minus_linear {
 
 template <typename DS>
-requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
 void compute_vfree_lagrangian(double told, double time_step, DS& lagds,
                               siconos::algebra::SiconosVector& vfree,
                               siconos::algebra::SiconosVector& free_tdg) {
@@ -85,10 +85,10 @@ void compute_vfree_lagrangian(double told, double time_step, DS& lagds,
 }
 
 template <typename DS>
-requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
-    siconos::algebra::SiconosVector compute_residu_lagrangian(
-        double time_step, DS& lagds, const siconos::algebra::SiconosVector& vfree,
-        const siconos::algebra::SiconosVector& free_tdg) {
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+siconos::algebra::SiconosVector compute_residu_lagrangian(
+    double time_step, DS& lagds, const siconos::algebra::SiconosVector& vfree,
+    const siconos::algebra::SiconosVector& free_tdg) {
   // initialize *it->residuFree and predicted right velocity (left limit)
 
   siconos::algebra::SiconosVector residufree{vfree.size()};
@@ -130,12 +130,12 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
   DEBUG_BEGIN(
       "siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), "
       "starts\n");
-
-  double t = _simulation->nextTime();               // end of the time step
-  double told = _simulation->startingTime();        // beginning of the time step
-  double h = _simulation->timeStep();               // time step length
-  auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
-  auto topo = _simulation->nonSmoothDynamicalSystem()->topology();
+  auto sim = simulation();
+  double t = sim->nextTime();               // end of the time step
+  double told = sim->startingTime();        // beginning of the time step
+  double h = sim->timeStep();               // time step length
+  auto allOSNS = sim->oneStepNSProblems();  // all OSNSP
+  auto topo = sim->nonSmoothDynamicalSystem()->topology();
   auto indexSet1 = topo->indexSet(1);
 
   /******************************************************************************************
@@ -206,7 +206,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
   if (!allOSNS->empty()) {
     if (indexSet1->size() > 0) {
-      //_simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
+      //sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       std::shared_ptr<siconos::modeling::Interaction> inter;
       for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
@@ -215,7 +215,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
         inter->relation()->computeJacg(told, *inter);
       }
 
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
+      if (sim->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
         for (auto osns : *allOSNS) {
           osns->setHasBeenUpdated(false);
         }
@@ -237,8 +237,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
   // NSDS So let the simu do this.
   //(*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push
   // y and lambda in Memories
-  _simulation->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-  _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(), 2);
+  sim->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
+  sim->nonSmoothDynamicalSystem()->updateInput(sim->nextTime(), 2);
 
   /**************************************************************************************************************
    *  Step 2 -  compute v_{k,1}
@@ -342,11 +342,11 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
   _isThereImpactInTheTimeStep = false;
   if (!allOSNS->empty()) {
     for (auto level = levelMinForOutput(); level < levelMaxForOutput(); level++) {
-      _simulation->nonSmoothDynamicalSystem()->updateOutput(_simulation->nextTime(), level);
+      sim->nonSmoothDynamicalSystem()->updateOutput(sim->nextTime(), level);
     }
-    _simulation->updateIndexSets();
+    sim->updateIndexSets();
 
-    auto topo = _simulation->nonSmoothDynamicalSystem()->topology();
+    auto topo = sim->nonSmoothDynamicalSystem()->topology();
     auto indexSet2 = topo->indexSet(2);
 
     if (indexSet2->size() > 0) {
@@ -489,18 +489,18 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
     // solve a LCP at acceleration level only for contacts which have been active at the
     // beginning of the time-step
     if (!allOSNS->empty()) {
-      // for (unsigned int level = _simulation->levelMinForOutput(); level <
-      // _simulation->levelMaxForOutput(); level++)
+      // for (unsigned int level = sim->ForOutput(); level <
+      // sim->levelMaxForOutput(); level++)
       // {
-      //   _simulation->updateOutput(level);
+      //   sim->updateOutput(level);
       // }
-      // _simulation->updateIndexSets();
+      // sim->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       DEBUG_PRINTF("indexSet1->size() = %i\n", (int)indexSet1->size());
 
-      _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
+      sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
 
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
+      if (sim->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
         for (auto osns : *allOSNS) {
           osns->setHasBeenUpdated(false);
         }
@@ -513,7 +513,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       }
     }
 
-    _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(), 2);
+    sim->nonSmoothDynamicalSystem()->updateInput(sim->nextTime(), 2);
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
       auto ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -610,7 +610,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   DEBUG_PRINT(
       "\n siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel "
       "starts\n");
-  auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
+  auto allOSNS = simulation()->oneStepNSProblems();  // all OSNSP
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
   const auto& ds_vars = inter->read_dynamical_systems_variables();

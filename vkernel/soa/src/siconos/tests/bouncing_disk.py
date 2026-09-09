@@ -1,53 +1,54 @@
-import siconos.numerics as sn
-import siconos.kernel as sk
+# Usage: disks-bench <backend> <problem size>
+#import petsc4py
 
+import siconos.numerics as sn
+import siconos.simulation as sim
+
+from math import log
 import sys
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
-from siconos.io.mechanics_run import MechanicsHdf5Runner, set_backend
-from math import pi
+
+from siconos.io.mechanics_run import MechanicsHdf5Runner,\
+    MechanicsHdf5Runner_run_options,\
+    RunnerConfig
 
 backend = str(sys.argv[1])
-set_backend(backend)
+runner_config = RunnerConfig(backend)
 
 disk_radius = 1
 
-with MechanicsHdf5Runner() as io:
+with MechanicsHdf5Runner( config=runner_config) as io:
 
     io.add_primitive_shape('DiskR', 'Disk', [disk_radius])
 
 
-#    io.add_primitive_shape('Ground-1',
-#                           'Segment', (-10, 0,
-#                                       10, 0.))
+    io.add_primitive_shape('Ground-1',
+                           'Segment', (-10, 0,
+                                       10,  0))
 
-    io.add_primitive_shape('Ground-2',
-                           'Box2d', (20, 1), insideMargin=0., outsideMargin=0.)
-
-#    io.add_object('ground-1', [Contactor('Ground-1')], translation=[0,0], orientation=[pi/4])
-
-    io.add_object('ground-2', [Contactor('Ground-2')], translation=[0,0], orientation=[pi/4])
+    io.add_object('ground-1', [Contactor('Ground-1')], translation=[0,0], orientation=[0])
 
     io.add_object('disk-1', [Contactor('DiskR')],
                   translation=[0, 10],
                   orientation=[0], velocity=[0, 0, 0], mass=1, inertia=0.5)
 
-    io.add_Newton_impact_friction_nsl('contact', mu=0.5, e=0)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.5, e=0.9)
 
 bullet_options = SiconosBulletOptions()
 bullet_options.worldScale = 1.0
 bullet_options.perturbationIterations = 1
 bullet_options.minimumPointsPerturbationThreshold = 1
 
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 20
-options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-4
+options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-4
 
 def noforces(body):
     pass
 
-with MechanicsHdf5Runner(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+', config=runner_config) as io:
 
         io.run(with_timer=True,
                bullet_options=bullet_options,

@@ -126,12 +126,18 @@ NumericsSparseMatrix* NSM_triplet_eye(size_t size);
 
 NumericsSparseMatrix* NSM_triplet_scalar(size_t size, double s);
 
-/** Free allocated space for a NumericsSparseMatrix.
+/** @brief free allocated space for a NumericsSparseMatrix.
  *
- *  \param A a NumericsSparseMatrix
- *  \return NULL on success
+ *  @param A a NumericsSparseMatrix
  */
-NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
+void NSM_clear(NumericsSparseMatrix* A);
+
+/** @brief Free allocated space for a NumericsSparseMatrix and free the object itself
+ *
+ *  @param A a NumericsSparseMatrix
+ *  @return NULL on success
+ */
+NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
 
 /** Copy NumericsSparseMatrix version.
  *

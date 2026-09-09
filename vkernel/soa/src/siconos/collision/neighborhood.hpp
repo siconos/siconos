@@ -57,12 +57,19 @@ struct neighborhood
       auto& psid = storage::attr<"point_set_id">(*self());
       auto& instance = self()->instance();
       mp::for_each(points_t{}, [&data, &step, &i, &psid,
-                                    &instance]<typename Point>(Point) {
+                                &instance]<typename Point>(Point) {
         auto& coords = storage::attr_values<Point, "coord">(data, step);
 
         // std::vector assumed for coords
-        psid[i++] =
-            instance->add_point_set(coords.front().data(), coords.size());
+        if (coords.empty()) {
+          // dummy
+          float dummy[3] = {0, 0, 0};
+          psid[i++] = instance->add_point_set(dummy, 0);
+        }
+        else {
+          psid[i++] =
+              instance->add_point_set(coords.front().data(), coords.size());
+        }
       });
     }
 

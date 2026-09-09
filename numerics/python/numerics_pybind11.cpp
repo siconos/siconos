@@ -30,36 +30,33 @@ namespace py = pybind11;
  * @brief Exception class for numerics solver errors
  */
 class NumericsException : public std::exception {
-private:
-    int error_code_;
-    std::string message_;
+ private:
+  int error_code_;
+  std::string message_;
 
-public:
-    NumericsException(int code, const std::string& msg) 
-        : error_code_(code), message_(msg) {}
-    
-    const char* what() const noexcept override {
-        return message_.c_str();
-    }
-    
-    int error_code() const { return error_code_; }
+ public:
+  NumericsException(int code, const std::string &msg) : error_code_(code), message_(msg) {}
+
+  const char *what() const noexcept override { return message_.c_str(); }
+
+  int error_code() const { return error_code_; }
 };
 
 /**
  * @brief Check solver return code and throw Python exception on error
- * 
+ *
  * This function should be called after solver operations to convert
  * C error codes into Python exceptions.
- * 
+ *
  * @param info The error code returned by the solver
  * @param operation Name of the operation (for error message)
  */
-inline void check_solver_error(int info, const char* operation) {
-    if (info != 0) {
-        std::string msg = std::string("Numerics error in ") + operation + 
-                         ": " + numerics_error_string((NumericsError)info);
-        throw NumericsException(info, msg);
-    }
+inline void check_solver_error(int info, const char *operation) {
+  if (info != 0) {
+    std::string msg = std::string("Numerics error in ") + operation + ": " +
+                      numerics_error_string((NumericsError)info);
+    throw NumericsException(info, msg);
+  }
 }
 
 // Forward declarations
@@ -76,7 +73,7 @@ void wrap_relay(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
 // Plasticity
-void wrap_plasticity(py::module_ &m);
+void wrap_plasticity(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
 
 py::array_t<int> get_iparam(SolverOptions &options) {
   return py::array_t<int>({options.iSize}, {sizeof(int)}, options.iparam, py::cast(&options));
@@ -117,12 +114,25 @@ PYBIND11_MODULE(_numerics, m) {
       .export_values();
 
   // Function to get error string
-  m.def("error_string", [](int code) {
-      return numerics_error_string((::NumericsError)code);
-  }, "Get error message for error code", py::arg("error_code"));
+  m.def(
+      "error_string", [](int code) { return numerics_error_string((::NumericsError)code); },
+      "Get error message for error code", py::arg("error_code"));
 
   py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
-      .def(py::init<>())
+      .def(py::init([](int solver_id) {
+             SolverOptions *opts = solver_options_create(solver_id);
+
+             if (!opts) throw std::runtime_error("Error during Solver options creation");
+
+             return std::shared_ptr<SolverOptions>(opts, [](SolverOptions *p) {
+               if (p) solver_options_delete(p);
+             });
+           }),
+           py::arg("solver_id"))
+
+      .def("__enter__", [](std::shared_ptr<SolverOptions> self) { return self; })
+      .def("__exit__",
+           [](std::shared_ptr<SolverOptions>, py::object, py::object, py::object) {})
       .def_readwrite("solverId", &SolverOptions::solverId)
       .def_readonly("iSize", &SolverOptions::iSize)
       .def_readonly("dSize", &SolverOptions::dSize)
@@ -130,22 +140,30 @@ PYBIND11_MODULE(_numerics, m) {
       .def_property_readonly("iparam", &get_iparam)
       .def_property_readonly("dparam", &get_dparam)
       .def_readwrite("filterOn", &SolverOptions::filterOn)
-      .def("print", [](SolverOptions &options) { solver_options_print(&options); })
-      .def("__repr__", [](const SolverOptions &options) {
+      .def("print", [](SolverOptions *self) { solver_options_print(self); })
+      .def(
+          "get_internal_solver",
+          [](SolverOptions *self, size_t num) {
+            return solver_options_get_internal_solver(self, num);
+          },
+          py::return_value_policy::reference_internal)
+      .def("update_internal",
+           [](SolverOptions *self, size_t num, int id) {
+             return solver_options_update_internal(self, num, id);
+           })
+      .def_property_readonly(
+          "name",
+          [](SolverOptions *self) { return solver_options_id_to_name(self->solverId); })
+
+      .def("__repr__", [](const SolverOptions *self) {
         std::ostringstream oss;
-        oss << "SolverOptions (ID: " << options.solverId << ")";
-        solver_options_print(const_cast<SolverOptions *>(&options));
+        oss << "SolverOptions (ID: " << self->solverId << ")";
+        solver_options_print(const_cast<SolverOptions *>(self));
         return oss.str();
       });
 
-  m.def("solver_options_create", &solver_options_create,
-        py::return_value_policy::take_ownership, py::arg("solverId"));
-  m.def("solver_options_get_internal_solver", &solver_options_get_internal_solver,
-        py::return_value_policy::take_ownership, py::arg("options"), py::arg("id"));
   m.def("numerics_set_verbose", &numerics_set_verbose);
   m.def("solver_options_id_to_name", &solver_options_id_to_name);
-  m.def("solver_options_update_internal", &solver_options_update_internal, py::arg("options"),
-        py::arg("internal_solver_number"), py::arg("solver_id"));
 
   py::module_ params = m.def_submodule(
       "params", "Parameter names in numerics (storage types, param for solvers ...)");
@@ -193,5 +211,5 @@ PYBIND11_MODULE(_numerics, m) {
 
   wrap_generic_mechanical(m, params, solver_ids);
 
-  wrap_plasticity(m);
+  wrap_plasticity(m, params, solver_ids);
 }

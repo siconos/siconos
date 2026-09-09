@@ -4,6 +4,7 @@ from math import sqrt
 import siconos.numerics as sn
 
 from math import pi
+import hashlib
 
 def array(l):
     return np.array(l, dtype=np.float64)
@@ -40,7 +41,7 @@ class SpaceFilter(Stored):
     # Fixed segment
     def insertSegment(self, x1, y1, x2, y2):
         segment = vkernel.disks.add_segment_shape(self.data())
-        segment.set_points(array([x1, y1, 0, x2, y2, 0]), 0)
+        segment.set_p1_p2(array([x1, y1, 0, x2, y2, 0]), 0)
 
         mp = int(max(3, sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)) / self._options.min_radius))
 
@@ -124,14 +125,21 @@ class SpaceFilter(Stored):
             self._handle.make_points()
             self._ngbh.add_point_sets(step)
             self._ngbh.set_active(0, 0, True)       # disk - disk
-            self._ngbh.set_active(0, 1, True)       # disk - segment
-            self._ngbh.set_active(0, 2, True)       # disk - fixed disk
+            self._ngbh.set_active(0, 1, True)       # disk - mesh
+            self._ngbh.set_active(0, 2, True)       # disk - segment
+            self._ngbh.set_active(0, 3, True)       # disk - fixed disk
             self._ngbh.set_active(1, 1, False)
             self._ngbh.set_active(2, 2, False)
+            self._ngbh.set_active(3, 3, False)
             self._ngbh.set_active(1, 0, False)
             self._ngbh.set_active(2, 0, False)
+            self._ngbh.set_active(3, 0, False)
             self._ngbh.set_active(1, 2, False)
             self._ngbh.set_active(2, 1, False)
+            self._ngbh.set_active(1, 3, False)
+            self._ngbh.set_active(3, 1, False)
+            self._ngbh.set_active(2, 3, False)
+            self._ngbh.set_active(3, 2, False)
 
             self._initialized = True
 
@@ -301,7 +309,7 @@ class Simulation(Stored):
 class BodyBase(Stored):
 
     __count = 0
-    __disk_shapes = {}
+    __shapes = {}
 
     @classmethod
     def count(cls):
@@ -312,12 +320,38 @@ class BodyBase(Stored):
         cls.__count = newcount
 
     @classmethod
-    def disk_shapes(cls):
-        return cls.__disk_shapes
+    def shapes(cls):
+        return cls.__shapes
 
 class Body(BodyBase):
 
-    def __init__(self, radius, mass, position, velocity):
+    def __init__(self):
+        pass
+
+    def init_fem(self, mesh_data, fesolid, contact_nodes, contact_nodes_indices):
+
+        self._mesh_data = mesh_data
+        self._fesolid = fesolid
+        self.set_count(self.count() + 1)
+        self._ident = self.count()
+
+        body = vkernel.disks.add_fem(self.data())
+        self._handle = body
+        body.set_id(self._ident)
+        sign = hashlib.sha256(mesh_data.encode('utf-8')).hexdigest()
+        if sign in self.shapes():
+            mesh_shape = self.shapes()[sign]
+        else:
+            mesh_shape = vkernel.disks.add_mesh_shape(self.data())
+            print (contact_nodes_indices)
+            print (contact_nodes)
+            mesh_shape.set_nodes(contact_nodes)
+            mesh_shape.segments().set_maxpoints(10)
+            mesh_shape.set_global_indices(np.array(contact_nodes_indices, dtype=np.uint64))
+
+        body.set_shape(mesh_shape)
+
+    def init_disk(self, radius, mass, position, velocity):
 
         self.set_count(self.count() + 1)
         self._ident = self.count()
@@ -330,12 +364,12 @@ class Body(BodyBase):
         body.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
 
         disk_shape = None
-        if radius in self.disk_shapes():
-            disk_shape = self.disk_shapes()[radius]
+        if radius in self.shapes():
+            disk_shape = self.shapes()[radius]
         else:
             disk_shape = vkernel.disks.add_disk_shape(self.data())
             disk_shape.set_radius(radius)
-            self.disk_shapes()[radius] = disk_shape
+            self.shapes()[radius] = disk_shape
 
         body.set_shape(disk_shape)
         body.set_fext(array([0,0,0])) # default
@@ -428,12 +462,12 @@ class Bodies(BodyBase):
         bodies.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
 
         disk_shape = None
-        if radius in self.disk_shapes():
-            disk_shape = self.disk_shapes()[radius]
+        if radius in self.shapes():
+            disk_shape = self.shapes()[radius]
         else:
             disk_shape = vkernel.disks.add_disk_shape(self.data())
             disk_shape.set_radius(radius)
-            self.disk_shapes()[radius] = disk_shape
+            self.shapes()[radius] = disk_shape
 
         bodies.set_shape(disk_shape)
         bodies.set_fext(array([0,0,0])) # default
@@ -566,6 +600,10 @@ class MechanicsIO(Stored):
 
     def radii(self, nsds):
         return self.handle().radii(
+            self._simulation.handle().current_step())
+
+    def displacements(self, nsds):
+        return self.handle().displacements(
             self._simulation.handle().current_step())
 
     def positions(self, nsds):

@@ -38,7 +38,7 @@ extern "C" {
  */
 void NV_display(const double* const m, int n);
 
-void NV_copy(const double* const vec, unsigned int vecSize, double* out);
+void NV_copy(const double* const vec, size_t vecSize, double* out);
 
 void NV_write_in_file_python(double* m, int nRow, FILE* file);
 
@@ -58,22 +58,22 @@ bool NV_equal(double* x, double* y, int nRow, double tol);
     \param size_y the size of the vector y
     \param i the position of insertion
  */
-void NV_insert(double* x, const unsigned int xSize, const double* const y,
-               const unsigned int ySize, unsigned int i);
+void NV_insert(double* x, const size_t xSize, const double* const y, const size_t ySize,
+               size_t i);
 
 /** Put all elements of vector to the square (element by element)
     \param vec is the vector
     \param vecSize the size of the vector vec
     \param out is the result power2 vector
  */
-void NV_power2(const double* const vec, const unsigned int vecSize, double* out);
+void NV_power2(const double* const vec, const size_t vecSize, double* out);
 
 /** Sum all the elements in vector
     \param vec is the vector
     \param vecSize the size of the vector vec
     \return sum of all the elements in vector
  */
-double NV_reduce(const double* const vec, const unsigned int vecSize);
+double NV_reduce(const double* const vec, const size_t vecSize);
 
 /** Element by element product of two vectors
     \param vec1 is the vector
@@ -81,7 +81,7 @@ double NV_reduce(const double* const vec, const unsigned int vecSize);
     \param vecSize the size of the vector vec
     \param out is the result product vector
  */
-void NV_prod(const double* const vec1, const double* const vec2, const unsigned int vecSize,
+void NV_prod(const double* const vec1, const double* const vec2, const size_t vecSize,
              double* out);
 
 /** Element by element division of two vectors
@@ -90,28 +90,28 @@ void NV_prod(const double* const vec1, const double* const vec2, const unsigned 
     \param vecSize the size of the vector vec
     \return product vector
  */
-double* NV_div(const double* const x, const double* const y, const unsigned int vecSize);
+double* NV_div(const double* const x, const double* const y, const size_t vecSize);
 
 /** Find a minimum value of vertor
     \param vec is the vector
     \param vecSize the size of the vector vec
     \return a minimum value of vertor
  */
-double NV_min(const double* const vec, const unsigned int vecSize);
+double NV_min(const double* const vec, const size_t vecSize);
 
 /** Find a maximum value of vertor
     \param vec is the vector
     \param vecSize the size of the vector vec
     \return a minimum value of vertor
  */
-double NV_max(const double* const vec, const unsigned int vecSize);
+double NV_max(const double* const vec, const size_t vecSize);
 
 /** Compute abs vector
     \param vec is the vector
     \param vecSize the size of the vector vec
     \return elemet by element abs vector
  */
-double* NV_abs(const double* const vec, const unsigned int vecSize);
+double* NV_abs(const double* const vec, const size_t vecSize);
 
 /** Compute element by element by element sum
     \param vec1 is the vector
@@ -119,7 +119,7 @@ double* NV_abs(const double* const vec, const unsigned int vecSize);
     \param vecSize the size of the vector vec
     \param out is the sum vector
  */
-void NV_add(const double* const vec1, const double* const vec2, const unsigned int vecSize,
+void NV_add(const double* const vec1, const double* const vec2, const size_t vecSize,
             double* out);
 
 /** Compute y = alpha * x + beta
@@ -130,7 +130,7 @@ void NV_add(const double* const vec1, const double* const vec2, const unsigned i
     \param out is y = alpha * x + beta
  */
 
-void NV_const_add(const double* const vec, const unsigned int vecSize, const double alpha,
+void NV_const_add(const double* const vec, const size_t vecSize, const double alpha,
                   const double beta, double* out);
 
 /** Compute element by element by element subtraction
@@ -140,7 +140,7 @@ void NV_const_add(const double* const vec, const unsigned int vecSize, const dou
     \return subtract vector
  */
 
-void NV_sub(const double* const vec1, const double* const vec2, const unsigned int vecSize,
+void NV_sub(const double* const vec1, const double* const vec2, const size_t vecSize,
             double* out);
 
 /** Find a L-inf norm of vertor ( max(abs(vec)) )
@@ -148,21 +148,21 @@ void NV_sub(const double* const vec1, const double* const vec2, const unsigned i
     \param vecSize the size of the vector vec
     \return a minimum value of vertor
  */
-double NV_norm_inf(const double* const vec, const unsigned int vecSize);
+double NV_norm_inf(const double* const vec, const size_t vecSize);
 
 /** Find a L-2 norm of vertor ( sqrt(sum(vec^2)) )
     \param vec is the vector
     \param vecSize the size of the vector vec
     \return a minimum value of vertor
  */
-double NV_norm_2(const double* const vec, const unsigned int vecSize);
+double NV_norm_2(const double* const vec, const size_t vecSize);
 
 /** Compute element by element square root
     \param vec is the vector
     \param vecSize is the size of the vector vec
     \param out is the sqrt vector
  */
-void NV_sqrt(const double* const vec, const unsigned int vecSize, double* out);
+void NV_sqrt(const double* const vec, const size_t vecSize, double* out);
 
 /**
  * Compute scalar product x x^T which is a matrix of rank 1.
@@ -171,10 +171,10 @@ void NV_sqrt(const double* const vec, const unsigned int vecSize, double* out);
  * \param vecSize is the size of the vector vec
  * \param out is the resut matrix of rank 1.
  */
-void NV_dott(const double* const vec1, const double* const vec2, const unsigned int vecSize,
+void NV_dott(const double* const vec1, const double* const vec2, const size_t vecSize,
              NumericsMatrix* out);
 
-int NV_isnan(const double* const vec, const unsigned int vecSize);
+int NV_isnan(const double* const vec, const size_t vecSize);
 
 #if defined(__cplusplus)
 }

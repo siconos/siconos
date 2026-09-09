@@ -57,7 +57,7 @@ Note that all time-independent operators are computed during simulation initiali
 Customize simulation behavior
 -----------------------------
 
-Each time :func:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
+Each time :cpp:func:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
 
 * output = 0 => solver succeeded,
 * else, the meaning of output depends on the solver called (see :ref:`problems_and_solvers`).

@@ -26,7 +26,7 @@
 
 namespace py = pybind11;
 
-void wrap_plasticity(py::module_& m) {
+void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // PlasticityModelType enum
   py::enum_<PlasticityModelType>(m, "PlasticityModelType", "Type of plasticity model")
       .value("UNKNOWN", PLASTICITY_MODEL_UNKNOWN, "Unknown model")
@@ -206,7 +206,7 @@ void wrap_plasticity(py::module_& m) {
   // Users should use the C API or implement a custom wrapper.
 
   // Solver IDs enum
-  py::enum_<PLASTICITY_SOLVER>(m, "PLASTICITY_SOLVER", "Plasticity solver IDs")
+  py::enum_<PLASTICITY_SOLVER>(solver_ids, "PLASTICITY_SOLVER", "Plasticity solver IDs")
       .value("PLASTICITY_2D_NSGS", PLASTICITY_2D_NSGS, "Non-smooth Gauss-Seidel")
       .value("PLASTICITY_2D_NSGS_GENERIC", PLASTICITY_2D_NSGS_GENERIC,
              "Non-smooth Gauss-Seidel (generic)")

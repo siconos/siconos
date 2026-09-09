@@ -26,3 +26,37 @@ pages:
   stage: doc-deploy 
   needs: ["doc:build"]
 
+
+# -- Build doc and save it in the package registry --
+# --> only for release, tags, when an old version has to be saved
+legacy:doc:
+  image: $SICONOS_REGISTRY/sources/image4doc
+  stage: doc-deploy
+  artifacts:
+    paths:
+      - ${ARCHIVE_NAME}
+    expire_in: 2 days  
+  script:
+      - cd build; make doc -j 32
+      - cd $CI_PROJECT_DIR; tar -zcvf ${ARCHIVE_NAME} $CI_PROJECT_DIR/build/docs/build/html
+      - ls -altr $CI_PROJECT_DIR/
+  when: manual
+
+
+# https://docs.gitlab.com/user/packages/generic_packages/
+publish-package:
+  stage: doc-deploy
+  image: curlimages/curl:latest
+  needs:
+    - legacy:doc
+  script:
+    - |
+      PACKAGE_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
+      echo "Uploading ${ARCHIVE_NAME}"
+      echo "Destination: ${PACKAGE_URL}"
+      curl \
+        --fail \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file ${ARCHIVE_NAME} \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
+  

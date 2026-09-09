@@ -92,7 +92,7 @@ class OneStepNSProblem {
   siconos::algebra::Index _sizeOutput = 0;
 
   /** link to the simulation that owns the nonsmooth problem */
-  std::shared_ptr<siconos::simulation::Simulation> _simulation;
+  std::weak_ptr<siconos::simulation::Simulation> _simulation;
 
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel = 0;
@@ -167,7 +167,7 @@ class OneStepNSProblem {
    *  \return a pointer on Simulation
    */
   inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
-    return _simulation;
+    return _simulation.lock();
   }
 
   /** set the Simulation of the OneStepNSProblem

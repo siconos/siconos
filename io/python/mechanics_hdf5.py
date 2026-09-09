@@ -218,6 +218,7 @@ class MechanicsHdf5(object):
         self._use_compression = use_compression
         self._should_output_domains = output_domains
         self._verbose = verbose
+        self._fem_dof_mappings = {}  # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
 
     def __enter__(self):
         """Reminder: this function will be called when a 'with'
@@ -492,6 +493,14 @@ class MechanicsHdf5(object):
         """
         return self._dynamic_data
 
+    def displacement_data(self, fem_id):
+        """
+        Displacements
+        """
+        nbcolumns = self._data[f"fem_displacements_{fem_id}"].attrs["dof_count"]
+        return data(self._data, f"fem_displacements_{fem_id}", nbcolumns,
+                    use_compression=False)
+
     def velocities_data(self):
         """
         Velocities of dynamic objects
@@ -563,6 +572,56 @@ class MechanicsHdf5(object):
         Boundary conditions applied to  dynamic objects
         """
         return self._boundary_conditions
+
+    def p0s(self, step):
+        """Get p0 data for a specific time step (fixed-dof systems only)."""
+        if self._p0s_data is None:
+            return None
+        # Get dynamic objects at this step to know count
+        dyn_data = self.dynamic_data()
+        if dyn_data is None or len(dyn_data) == 0:
+            return None
+        # Find rows for this step
+        step_times = dyn_data[:, 0]
+        # Find indices for this step (assuming step corresponds to index in unique times)
+        unique_times, indices = np.unique(step_times, return_index=True)
+        if step >= len(indices):
+            return None
+        start_idx = indices[step]
+        if step + 1 < len(indices):
+            end_idx = indices[step + 1]
+        else:
+            end_idx = len(dyn_data)
+        # Count dynamic objects at this step
+        n_dyn = end_idx - start_idx
+        # p0s_data is appended per step, so calculate offset
+        # This assumes constant number of fixed-dof objects per step
+        # Better: store count per step, but for now assume fixed
+        p0s_all = self._p0s_data[:]
+        if len(p0s_all) == 0:
+            return None
+        # Estimate entries per step
+        entries_per_step = len(p0s_all) // len(unique_times)
+        p0_start = step * entries_per_step
+        p0_end = min(p0_start + entries_per_step, len(p0s_all))
+        return p0s_all[p0_start:p0_end]
+
+    def radii(self, step):
+        """Get radii for a specific time step (fixed-dof systems only)."""
+        if self._radii_data is None:
+            return None
+        radii_all = self._radii_data[:]
+        if len(radii_all) == 0:
+            return None
+        dyn_data = self.dynamic_data()
+        if dyn_data is None:
+            return None
+        unique_times = np.unique(dyn_data[:, 0])
+        entries_per_step = len(radii_all) // len(unique_times)
+        r_start = step * entries_per_step
+        r_end = min(r_start + entries_per_step, len(radii_all))
+        return radii_all[r_start:r_end]
+
 
     def add_plugin_source(self, name, filename):
         """
@@ -889,10 +948,13 @@ class MechanicsHdf5(object):
         self,
         name,
         shapes,
-        translation,
+        translation=None,
         orientation=None,
         velocity=None,
         use_volume_centroid_as_initial_translation=False,
+        material=None,
+        boundary_conditions=None,
+        nodal_forces=None,
         mass=None,
         center_of_mass=None,
         inertia=None,
@@ -944,6 +1006,12 @@ class MechanicsHdf5(object):
                The components are those of the translation velocity along
                x, y and the rotation velocity z axis.
 
+        material: array_like of length 3.
+            (density, elastic Young modulus, poisson ratio)
+            The material of the finite elements object. If material is
+            given, mass is directly computed and the mass parameter is not
+            used.
+
         mass: float
             The mass of the object, if it is None the object is defined as
             a static object involved only in contact detection.
@@ -961,6 +1029,7 @@ class MechanicsHdf5(object):
             if True and if a Volume is given is the list of shape,
             the position of
             the volume centroid is used as initial translation.
+
         """
 
         # Does nothing if an object of the same name is already registered.
@@ -970,12 +1039,14 @@ class MechanicsHdf5(object):
         # Ensure all input parameters have proper values
         # (set default values, convert tuple or list to numpy arrays ...)
 
+        rigid = material is None  # material only for the elastic case
+
         translation = np.asarray(translation, dtype=np.float64)
 
         if center_of_mass is None:
             center_of_mass = np.zeros(3, dtype=np.float64)
 
-        if self._dimension == 3:
+        if rigid and self._dimension == 3:
             if orientation is None:
                 orientation = np.array([1, 0, 0, 0], dtype=np.float64)
             if velocity is None:
@@ -985,12 +1056,21 @@ class MechanicsHdf5(object):
             assert len(translation) == 3
             assert len(ori) == 4
 
-        elif self._dimension == 2:
+        elif rigid and self._dimension == 2:
             if orientation is None:
                 orientation = np.zeros(1, dtype=np.float64)
             if velocity is None:
                 velocity = np.zeros(3, dtype=np.float64)
             assert len(translation) == 2
+            ori = np.asarray(orientation, dtype=np.float64)
+
+        if not rigid:
+            if orientation is None:
+                orientation = 0.0
+            if velocity is None:
+                velocity = 0.0
+            if translation is None:
+                translation = 0.0
             ori = np.asarray(orientation, dtype=np.float64)
 
         is_center_of_mass_computed = False
@@ -1062,6 +1142,18 @@ class MechanicsHdf5(object):
         if time_of_death >= 0:
             obj.attrs["time_of_death"] = time_of_death
 
+        if material is not None:
+            obj.attrs["material"] = np.asarray(material, dtype=np.float64)
+            obj.attrs["type"] = "dynamic"
+
+        if boundary_conditions is not None:
+            obj.attrs["boundary_conditions"] = np.asarray(
+                boundary_conditions, dtype=np.int32
+            )
+
+        if nodal_forces is not None:
+            obj.attrs["nodal_forces"] = np.asarray(nodal_forces, dtype=np.float64)
+
         if mass is not None:
             obj.attrs["mass"] = mass
             obj.attrs["type"] = "dynamic"
@@ -1120,7 +1212,7 @@ class MechanicsHdf5(object):
             dat.attrs["translation"] = ctor.translation
             dat.attrs["orientation"] = quaternion_get(ctor.orientation)
 
-        if mass is None or mass == 0:
+        if (mass is None or mass == 0) and material is None:
             obj.attrs["id"] = -(self._number_of_static_objects + 1)
             self._number_of_static_objects += 1
 

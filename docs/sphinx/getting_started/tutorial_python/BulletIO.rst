@@ -5,7 +5,7 @@ Collections of rigid bodies with Bullet based contact detection (Siconos/Mechani
 
 Author: Maurice Bremond, Vincent Acary 2013--2016
 
-You may refer to the source code of this set of  examples, `found here <https://github.com/siconos/siconos/tree/master/examples/Mechanics/MechanicsIO/>`_.
+You may refer to the source code of this set of  examples, `found here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/tree/main/examples/mechanics/GeometricPrimitives?ref_type=heads>`_.
 
 
 Description of the physical problems : rigid bodies collection with contact and Coulomb friction
@@ -13,7 +13,7 @@ Description of the physical problems : rigid bodies collection with contact and 
 
 In this set of examples (cubes.py, n_cubes.py, ...), we model collections of rigid bodies
 associated with shapes (primitive (sphere, cube capsule, etc), convex hull, mesh) that interact
-with contact and friction (see :ref:`fig-n_cubes`).
+with contact and friction.
 
 The example use extensively the mechanics_run python code that enable to create and manage the geometrical
 data and the results of the simulation in hdf5 file.

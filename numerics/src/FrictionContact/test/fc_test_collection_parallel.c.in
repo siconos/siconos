@@ -19,6 +19,7 @@
 #define _XOPEN_SOURCE 700
 #include <stdio.h>                       // for printf
 #include <string.h>                      // for strcmp
+#include <stdlib.h>
 #include "frictionContact_test_utils.h"  // for build_test_collection, frict...
 #include "test_utils.h"                  // for data_collection, free_test_c...
 #include <petscsys.h>  // for PetscInitialize, PetscFinalize
@@ -47,6 +48,7 @@ int main (int argc, char *argv[])
   int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
 
   free_test_collection(collection, number_of_tests);
+  free(_data_collection);
 
   PetscCall(PetscFinalize());
   return out;

@@ -26,17 +26,14 @@
 #include "LagrangianSparseDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
-#include "Tools.hpp"  // for enum_to_string
-#include "Topology.hpp"
+#include "Tools.hpp"     // for enum_to_string
 #include "TypeName.hpp"  // for siconos::types visitors
 
 // #define DEBUG_NOCOLOR
@@ -49,12 +46,12 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       "\n "
       "siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()"
       "\n");
-
-  double t = _simulation->nextTime();               // end of the time step
-  double told = _simulation->startingTime();        // beginning of the time step
-  double h = _simulation->timeStep();               // time step length
-  auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
-  auto topo = _simulation->nonSmoothDynamicalSystem()->topology();
+  auto sim = simulation();
+  double t = sim->nextTime();               // end of the time step
+  double told = sim->startingTime();        // beginning of the time step
+  double h = sim->timeStep();               // time step length
+  auto allOSNS = sim->oneStepNSProblems();  // all OSNSP
+  auto topo = sim->nonSmoothDynamicalSystem()->topology();
   auto indexSet2 = topo->indexSet(2);
 
   /**************************************************************************************************************
@@ -191,7 +188,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         inter->relation()->computeJacg(told, *inter);
       }
 
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
+      if (sim->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
         for (auto osns : *allOSNS) {
           osns->setHasBeenUpdated(false);
         }
@@ -211,8 +208,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       // the NSDS So let the simu do this.
       //(*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we
       // push y and lambda in Memories
-      _simulation->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-      _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(), 2);
+      sim->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
+      sim->nonSmoothDynamicalSystem()->updateInput(sim->nextTime(), 2);
 
       for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
         if (!checkOSI(dsi)) continue;
@@ -373,11 +370,11 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
   _isThereImpactInTheTimeStep = false;
   if (!allOSNS->empty()) {
     for (auto level = levelMinForOutput(); level < levelMaxForOutput(); level++) {
-      _simulation->nonSmoothDynamicalSystem()->updateOutput(_simulation->nextTime(), level);
+      sim->nonSmoothDynamicalSystem()->updateOutput(sim->nextTime(), level);
     }
-    _simulation->updateIndexSets();
+    sim->updateIndexSets();
 
-    auto topo = _simulation->nonSmoothDynamicalSystem()->topology();
+    auto topo = sim->nonSmoothDynamicalSystem()->topology();
     auto indexSet3 = topo->indexSet(3);
 
     if (indexSet3->size() > 0) {
@@ -517,17 +514,17 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
     // solve a LCP at acceleration level only for contacts which have been active at the
     // beginning of the time-step
     if (!allOSNS->empty()) {
-      // for (unsigned int level = _simulation->levelMinForOutput(); level <
-      // _simulation->levelMaxForOutput(); level++)
+      // for (unsigned int level = sim->ForOutput(); level <
+      // sim->levelMaxForOutput(); level++)
       // {
-      //   _simulation->updateOutput(level);
+      //   sim->updateOutput(level);
       // }
-      // _simulation->updateIndexSets();
+      // sim->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
 
-      _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet2);
+      sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet2);
 
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
+      if (sim->nonSmoothDynamicalSystem()->topology()->hasChanged()) {
         for (auto osns : *allOSNS) {
           osns->setHasBeenUpdated(false);
         }
@@ -538,7 +535,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR(siconos::algebra::print(
                        *(*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]););
-        _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(), 2);
+        sim->nonSmoothDynamicalSystem()->updateInput(sim->nextTime(), 2);
       }
     }
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -643,7 +640,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
   DEBUG_BEGIN(
       "siconos::integrators::D1MinusLinearOSI::"
       "computeFreeOutputHalfExplicitAccelerationLevel\n");
-  auto allOSNS = _simulation->oneStepNSProblems();  // all OSNSP
+  auto allOSNS = simulation()->oneStepNSProblems();  // all OSNSP
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
   const auto& ds_vars = inter->read_dynamical_systems_variables();

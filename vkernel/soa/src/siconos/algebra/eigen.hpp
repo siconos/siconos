@@ -66,6 +66,19 @@ template <typename T>
 concept fixed_size_matrix = fixed_size_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
+concept matrix_1x1_raw =
+    matrix<T> && T::RowsAtCompileTime == 1 && T::ColsAtCompileTime == 1;
+
+template <typename T>
+concept matrix_1x1 = matrix_1x1_raw<std::decay_t<T>>;
+
+template <typename T>
+concept diagonal_or_1x1_raw = diagonal_matrix<T> || matrix_1x1<T>;
+
+template <typename T>
+concept diagonal_or_1x1 = diagonal_or_1x1_raw<std::decay_t<T>>;
+
+template <typename T>
 concept variable_size_matrix = !fixed_size_matrix<T>;
 
 template <typename T>
@@ -221,4 +234,10 @@ void solve_in_place(M& m, auto& b)
   b = solver.solve(b);
 }
 
+auto rows(auto& m) { return m.rows(); };
+auto cols(auto& m) { return m.cols(); };
+
+auto norm(auto& m) { return m.norm(); };
+
+void clear(auto& m) { m.resize(0); };
 }  // namespace siconos::algebra

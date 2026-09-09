@@ -36,7 +36,7 @@ typedef int solver_id_t;
 typedef struct {
   void *env; /**< general user environment */
   void (*collectStatsIteration)(
-      void *env, int size, double *reaction, double *velocity, double error,
+      void *env, size_t size, double *reaction, double *velocity, double error,
       void *extra_data); /**<pointer on a function
                           * Its signature is: user env, problem size, reaction,
                           * velocity, error at end of solver iteration (when
@@ -115,6 +115,9 @@ enum SICONOS_IPARAM_ERROR_EVALUATION_ENUM {
 enum SICONOS_DPARAM {
   SICONOS_DPARAM_TOL = 0,
   SICONOS_DPARAM_RESIDU = 1,
+  SICONOS_DPARAM_TIME_BEFORE_LOOP = 20, // time before while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_IN_LOOP = 21, // time inside while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_AFTER_LOOP = 22 // time after while loop in fc2d_nsgs_graph_permut
 };
 
 #if defined(__cplusplus)

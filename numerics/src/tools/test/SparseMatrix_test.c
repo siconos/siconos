@@ -74,10 +74,10 @@ int add_square_triplet() {
   printf("add_square_triplet: NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
   int info = (int)!NM_equal(C, Cref);
 
-  NM_clear(A);
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(Cref);
+  NM_free(A);
+  NM_free(B);
+  NM_free(C);
+  NM_free(Cref);
 
   return info;
 }
@@ -123,10 +123,10 @@ int add_square_csc() {
   printf("add_square_csc: NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
   int info = (int)!NM_equal(C, Cref);
 
-  NM_clear(A);
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(Cref);
+  NM_free(A);
+  NM_free(B);
+  NM_free(C);
+  NM_free(Cref);
 
   return info;
 }
@@ -185,10 +185,10 @@ int add_rectangle_triplet() {
   printf("add_rectangle_triplet : NM_equal(C,Cref) =%i \n", NM_equal(C, Cref));
   int info = (int)!NM_equal(C, Cref);
 
-  NM_clear(A);
-  NM_clear(B);
-  NM_clear(C);
-  NM_clear(Cref);
+  NM_free(A);
+  NM_free(B);
+  NM_free(C);
+  NM_free(Cref);
 
   return info;
 }
@@ -231,10 +231,11 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
       (CSparseMatrix_factors *)malloc(sizeof(CSparseMatrix_factors));
 
   bool info = CSparseMatrix_lu_factorization(1, M, 1e-14, cs_lu_M);
-
+  int res = EXIT_SUCCESS;
   if (!info) {
     printf("problem in Lu factor\n");
-    return EXIT_FAILURE;
+    res = EXIT_FAILURE;
+    goto clean_mem;
   }
   /* printf(" L:\n"); */
   /* cs_print(cs_lu_M->N->L, 0); */
@@ -244,7 +245,8 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   info = CSparseMatrix_spsolve(cs_lu_M, X, B);
   if (!info) {
     printf("problem in spsolve\n");
-    return EXIT_FAILURE;
+    res = EXIT_FAILURE;
+    goto clean_mem;
   }
   CSparseMatrix *II = cs_multiply(M, B);
   // printf(" M * M^-1:\n");
@@ -258,6 +260,11 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   double error = cs_norm(check);
   printf("residual =%e\n", error);
 
+  if (error > 1e-12) {
+    res = EXIT_FAILURE;
+  }
+
+clean_mem:
   cs_spfree(b_triplet);
   cs_spfree(B);
   cs_spfree(X);
@@ -266,11 +273,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   cs_spfree(Id);
   cs_spfree(check);
 
-  if (error > 1e-12) {
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return res;
 }
 
 static int test_CSparseMatrix_spsolve(void) {
@@ -331,10 +334,12 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
       (CSparseMatrix_factors *)malloc(sizeof(CSparseMatrix_factors));
 
   bool info = CSparseMatrix_chol_factorization(1, M, cs_chol_M);
+  int res = 0;
 
   if (!info) {
     printf("problem in Cholesky factor\n");
-    return EXIT_FAILURE;
+    res = 1;
+    goto clean_mem;
   }
   /* printf(" L:\n"); */
   /* cs_print(cs_chol_M->N->L, 0); */
@@ -342,7 +347,8 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
   info = CSparseMatrix_chol_spsolve(cs_chol_M, X, B);
   if (!info) {
     printf("problem in chol_spsolve\n");
-    return EXIT_FAILURE;
+    res = 1;
+    goto clean_mem;
   }
   CSparseMatrix *II = cs_multiply(M, B);
   // printf(" M * M^-1:\n");
@@ -355,19 +361,23 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
 
   double error = cs_norm(check);
   printf("residual =%e\n", error);
-  cs_spfree(b_triplet);
-  cs_spfree(B);
-  cs_spfree(X);
-  CSparseMatrix_free_lu_factors(cs_chol_M);
   cs_spfree(II);
   cs_spfree(Id);
   cs_spfree(check);
 
   if (error > 1e-12) {
-    return EXIT_FAILURE;
+    res = 1;
+    goto clean_mem;
   }
+
+clean_mem:
+  cs_spfree(b_triplet);
+  cs_spfree(B);
+  cs_spfree(X);
+  CSparseMatrix_free_lu_factors(cs_chol_M);
+
   // printf("info =%i\n", info);
-  return EXIT_SUCCESS;
+  return res;
 }
 
 static int test_CSparseMatrix_chol_spsolve(void) {
@@ -380,7 +390,11 @@ static int test_CSparseMatrix_chol_spsolve(void) {
   CSparseMatrix *M = cs_compress(m_triplet);
 
   int info = test_CSparseMatrix_chol_spsolve_unit(M);
-  if (info) return 1;
+  cs_spfree(M);
+  if (info) {
+    cs_spfree(m_triplet);
+    return info;
+  }
 
   cs_entry(m_triplet, 0, 1, 3.0);
   cs_entry(m_triplet, 0, 2, 6.0);
@@ -392,12 +406,12 @@ static int test_CSparseMatrix_chol_spsolve(void) {
   CSparseMatrix *M2T = cs_transpose(M2, 1);
   CSparseMatrix *M2M2T = cs_multiply(M2, M2T);
   info = test_CSparseMatrix_chol_spsolve_unit(M2M2T);
-  cs_spfree(M);
+
   cs_spfree(M2);
   cs_spfree(M2T);
   cs_spfree(M2M2T);
   cs_spfree(m_triplet);
-  if (info) return 1;
+  if (info) return info;
 
   int size0 = 10;
   int size1 = 10;
@@ -419,6 +433,7 @@ static int test_CSparseMatrix_chol_spsolve(void) {
   printf("end - test_CSparseMatrix_chol_spsolve \n");
   return info;
 }
+
 static int test_CSparseMatrix_ldlt_solve_unit(CSparseMatrix *M) {
   // cs_print(M, 0);
 
@@ -439,15 +454,18 @@ static int test_CSparseMatrix_ldlt_solve_unit(CSparseMatrix *M) {
 
   if (info) {
     printf("problem in LDLT factor\n");
-    return info;
+    CSparseMatrix_free_lu_factors(cs_ldlt_M);
+    goto clean_mem;
   }
   /* printf(" L:\n"); */
   /* cs_print(cs_ldlt_M->N->L, 0); */
 
   info = 1 - CSparseMatrix_ldlt_solve(cs_ldlt_M, x, b);
+  CSparseMatrix_free_lu_factors(cs_ldlt_M);
+
   if (info) {
     printf("problem in ldlt_spsolve\n");
-    return info;
+    goto clean_mem;
   }
 
   /* compute residual */
@@ -458,15 +476,16 @@ static int test_CSparseMatrix_ldlt_solve_unit(CSparseMatrix *M) {
     error += b_backup[k] * b_backup[k];
   }
   error = sqrt(error);
+  printf("residual =%e\n", error);
+  if (error > 1e-12) {
+    info = 1;
+  }
 
+clean_mem:
   free(b);
   free(x);
   free(b_backup);
 
-  printf("residual =%e\n", error);
-  if (error > 1e-12) {
-    return 1;
-  }
   printf("info =%i\n", info);
   return info;
 }
@@ -481,7 +500,8 @@ static int test_CSparseMatrix_ldlt_solve(void) {
   CSparseMatrix *M = cs_compress(m_triplet);
   printf("test 1 ....");
   int info = test_CSparseMatrix_ldlt_solve_unit(M);
-  if (info) return 1;
+
+  if (info) goto clean_mem;
   printf("ok\n");
 
   cs_entry(m_triplet, 0, 1, 3.0);
@@ -495,7 +515,7 @@ static int test_CSparseMatrix_ldlt_solve(void) {
   CSparseMatrix *M2M2T = cs_multiply(M2, M2T);
   printf("test 2 ....");
   info = test_CSparseMatrix_ldlt_solve_unit(M2M2T);
-  if (info) return 1;
+  if (info) goto clean_mem2;
   printf("ok\n");
   int size0 = 10;
   int size1 = 10;
@@ -512,6 +532,20 @@ static int test_CSparseMatrix_ldlt_solve(void) {
   info = test_CSparseMatrix_ldlt_solve_unit(AAT);
   printf("ok\n");
   printf("end - test_CSparseMatrix_ldlt_solve \n");
+  cs_spfree(a_triplet);
+  cs_spfree(A);
+  cs_spfree(AT);
+  cs_spfree(AAT);
+
+clean_mem2:
+  cs_spfree(M2);
+  cs_spfree(M2T);
+  cs_spfree(M2M2T);
+
+clean_mem:
+  cs_spfree(M);
+  cs_spfree(m_triplet);
+
   return info;
 }
 

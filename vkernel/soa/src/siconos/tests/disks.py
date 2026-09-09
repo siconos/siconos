@@ -71,7 +71,7 @@ with MechanicsHdf5Runner() as io:
     #               orientation=[0], velocity=[0, 0, 0], mass=1)
 
 
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
+options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 20
 options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-4
 

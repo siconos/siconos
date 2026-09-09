@@ -20,7 +20,7 @@
 
 #include <Eigen/LU>
 
-#include "ControlSensor.hpp"
+#include "ControlSensor.hpp"  // IWYU pragma: keep
 #include "EulerMoreauOSI.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearR.hpp"

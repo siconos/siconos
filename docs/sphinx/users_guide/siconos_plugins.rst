@@ -8,93 +8,54 @@ User-defined plugins
 Siconos proposes a 'plugin' system that allows users to provide their own function(s) to describe some specific behavior for
 some classes components.
 
-For example, consider a lagrangian linear dynamical system, where :math:`M\ddot q + C \dot q + K q =  F_{Ext}(t,z) + p`.
+For example, consider a lagrangian linear dynamical system, where :math:`M\ddot q + C \dot q + K q =  F_{Ext}(t) + p`.
 
-Suppose you want to set :math:`F_{Ext}(t,z) = cos(t)`, then you can define a C function to compute this cosine and 'plug' it to
+Suppose you want to set :math:`F_{Ext}(t) = cos(t)`, then you can define a C function to compute this cosine and 'plug' it to
 the dynamical system so that each time the system needs to compute its external forces, your cosine function will be called.
 
 
-At the time, plug-in are available for :class:`DynamicalSystems` and :class:`Relation`. For both of them and for their derived classes, a list
-of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`relation_plugins`.
+At the time, plug-in are available for :cpp:class:`DynamicalSystems`, :cpp:class:`Relation` and derived classes.
 
-* find the variable you want to plug and check what is the expected list of arguments for a function plugged to this variable
-  (check :ref:`ds_plugins` or :ref:`relation_plugins`).
+**How to provide user-defined functions ?**
 
-* write a C function::
+When pluggin mechanism is available for an operator, two methods exist in the class:
 
-    extern "C" external_forces(double time, int size, double* fext, int zsize, double *z)
-    {
-    for(int i=0;i<size;++i)
-       (*fext)(i) = cos(time);
-    }
+* setCompute<VARNAME>Function: to define the function to be used (any other c++ function, lambda function ...)
+* compute<VARNAME>
 
-* connect your function to the variable. For each 'plugable' variable, a setComputeVARNAMEFunction exists
+So 
+
+1. Check the documentation class, find de the setCompute<VARNAME>Function and identify the arguments of the required user-defined function
+
+   All types are defined in :ref:`FunctionTypes.hpp <_file_kernel_src_modeling_FunctionTypes.hpp>`.
+
+   Example for :cpp:class:`siconos::modeling::LagrangianDS`: :cpp:func:`siconos::modeling::LagrangianDS::setComputeFextFunction` and :cpp:func:`siconos::modeling::LagrangianDS::computeFext`.
+
+2. Define your function as you would for any other function
+
+3. call setCompute<VARNAME>Function
+
+That's it!
+
+Example:
 
 .. code-block:: c++
 
-   ds->setComputeFExtFunction('myPlugin', 'external_forces');
+   siconos::modeling::LagrangianDS lds{q0, velocity0, siconos::algebra::alias_t};
+   lds.setComputeFextFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        auto i = 0;
+        for (auto& v : result) v = time;
+      });
+   ...
    // ...
-   ds->computeFExt(2.)
+   ds.computeFext(2.)
    // --> call external_forces with time == 2.
-    
+   
+.. tip::
+   
+   Some good places to find complete examples of user-defined functions usage:
 
-Plugins overview
-""""""""""""""""
+   - Tests files in siconos repository; e.g. `LagrangianDSTest.cpp <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/kernel/src/modelingTools/test/LagrangianDSTest.cpp?ref_type=heads>`_
+   - Try to find setCompute... inside `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials>`_ 
 
-.. csv-table:: plugins in siconos classes
-   :header: "Class Name", "operator", "plugin name", "signature"
-   :widths: 10 5 5 40
-
-   :class:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
-   :class:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
-   :class:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x_size, double *x, int lambda_size, double * lambda, double * y, int z_size, double * z)``"
-
-
-Example
-"""""""
-
-
-.. highlight:: c++
-
-	     
-Suppose that you defined a LagrangianDS named lds, and want to set two parameters in the external forces, say mu and lambda.
-
-Then cpp input file looks like::
-
-  // In the main file:
-  double mu , lambda;
-  // ... give mu and lambda the required values
-  // ... declare and built your dynamical system
-  auto lds = std::make_shared<siconos::modeling::LagrangianDS>(...);
-  // Link with the plug-in function
-  lds->setComputeFExtFunction("myPlugin.so", "myFExt");
-
-  
-  // === First way, with setZ function (copy) ===
-  // declare and built a SimpleVector of size 2
-  SimpleVector myZ(2);
-  myZ(0) = mu;
-  myZ(1) = lambda;
-
-  lds->setZ(myZ);
-  // In this case, if parameters values are change after this step,
-  // this won't affect param values inside the dynamical system. 
-  //
-  //=== Second way, with setZPtr function (pointer link) ===
-  //:SimpleVector declare and built a pointer to SimpleVector of size 2
-  auto myZPtr = std::make_shared<siconos::algebra::SimpleVector>(2);
-  (*myZPtr)(0) = mu;
-  (*myZPtr)(1) = lambda;
-
-  lds->setZPtr(myZPtr);
-
-  // Warning: in that case, from this point any change in parameters
-  // will affect param value in the dynamical system.
-  //
-  // Then in the plug-in file, you have access to the parameter values:
-  extern "C" void myFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z)
-  {
-  for(unsigned int i = 0; i<sizeOfq;++i)
-  fExt[i] = cos(z[1]*time) + z[0] ;
-  // this means that Fext = cos(lambda t) + mu
-  }

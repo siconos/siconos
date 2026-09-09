@@ -79,8 +79,6 @@ struct lagrangian_ds : item {
 struct elastic_lagrangian_ds : item {
   using dof = some::indice_parameter<"dof">;
 
-  using without_attached_storages_bindings = void;
-
   struct attributes {
     some::vector<some::scalar, dof> q;                 ///< Position vector
     some::vector<some::scalar, dof> velocity;          ///< Velocity vector

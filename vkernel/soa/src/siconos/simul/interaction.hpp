@@ -52,9 +52,9 @@ struct rt_ct_interaction : item {
       attribute<"relation",
                 some::polymorphic_attribute<some::item_ref<Relations>...>>,
       attribute<"nslaw", some::item_ref<nslaw>>,
-      attribute<"h_matrix1",
-                some::unbounded_col_matrix<some::scalar, nslaw_size>>,
-      attribute<"h_matrix2", some::matrix<some::scalar, nslaw_size, dof>>,
+      attribute<"h_matrix1", some::matrix<some::scalar, nslaw_size, dof>>,
+      attribute<"h_matrix2", some::matrix<some::scalar, nslaw_size,
+                                          some::indice_value<4>>>,
       attribute<"lambda", some::vector<some::scalar, nslaw_size>>,
       attribute<"y", some::vector<some::scalar, nslaw_size>>,
       attribute<"ydot", some::vector<some::scalar, nslaw_size>>>;
@@ -75,7 +75,7 @@ struct rt_ct_interaction : item {
   };
 };
 
-/* runtime / runtime interaction */
+/* runtime / runtime interaction: draft */
 template <match::item Nslaw, match::item... Relations>
 struct rt_rt_interaction : item {
   using nslaw = Nslaw;

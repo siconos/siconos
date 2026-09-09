@@ -97,16 +97,16 @@
         "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials",
         "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/"
     ],
-    "releaseNotes": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/master/Changelog?ref_type=heads",
+    "releaseNotes": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/Changelog?ref_type=heads",
     "softwareRequirements": [
         "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/siconos_dep.html",
         "/"
     ],
-    "version": "4.5.0",
+    "version": "2026.rc1",
     "codemeta:contIntegration": {
-        "id": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master"
+        "id": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main"
     },
-    "continuousIntegration": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master",
+    "continuousIntegration": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/main",
     "developmentStatus": "active",
     "issueTracker": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/issues",
     "referencePublication": "https://hal.inria.fr/inria-00162911"

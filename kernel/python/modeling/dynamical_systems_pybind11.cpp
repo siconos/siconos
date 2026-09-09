@@ -41,8 +41,6 @@
 
 namespace py = pybind11;
 
-// PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
-
 void wrap_dynamical_systems(py::module_& m) {
   m.doc() = "Siconos modeling library";
 
@@ -175,7 +173,8 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal)
       .def("setBoundaryConditions", &siconos::modeling::SecondOrderDS::setBoundaryConditions)
-      .def("reactionToBoundaryConditions", &siconos::modeling::SecondOrderDS::reactionToBoundaryConditions_python,
+      .def("reactionToBoundaryConditions",
+           &siconos::modeling::SecondOrderDS::reactionToBoundaryConditions_python,
            py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::LagrangianSparseDS, siconos::modeling::SecondOrderDS,
@@ -1100,6 +1099,12 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("computeMass", &siconos::modeling::LagrangianDS::computeMass,
            "compute total forces")
       .def("computeKineticEnergy", &siconos::modeling::LagrangianDS::computeKineticEnergy)
+      .def_property(
+          "mass_alias",
+          [](const siconos::modeling::LagrangianDS& self) -> py::object {
+            throw std::runtime_error("before cast");
+          },
+          nullptr, "View (shared memory) on the mass (scipy.sparse.csc_array).")
 
       .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 

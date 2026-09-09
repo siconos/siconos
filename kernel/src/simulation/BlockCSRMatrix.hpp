@@ -49,7 +49,7 @@ namespace siconos::simulation {
    - a SparseMat (boost-ublas) of SiconosMatrix*
    - a vector<SiconosMatrix*> which handles the non-null blocks
 
-   - three vector<int> (std::vector<unsigned int>) to save non-null blocks position in
+   - three vector<int> (std::vector<std::size_t>) to save non-null blocks position in
    row, columns and the list of the sizes of diagonal blocks.
 
    - two int, the number of blocks in a row and the number of non null blocks.
@@ -100,7 +100,7 @@ namespace siconos::simulation {
 class BlockCSRMatrix {
  private:
   using CompressedRowMat = boost::numeric::ublas::compressed_matrix<
-      double *, boost::numeric::ublas::basic_row_major<unsigned int>, 0,
+      double *, boost::numeric::ublas::basic_row_major<std::size_t>, 0,
       boost::numeric::ublas::unbounded_array<std::size_t>>;
 
   ACCEPT_SERIALIZATION(BlockCSRMatrix);
@@ -120,18 +120,18 @@ class BlockCSRMatrix {
   /** Vector used to save the sum of rows of diagonal blocks of M:
       _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
       diagonal block at row(block) i */
-  std::shared_ptr<std::vector<unsigned int>> _diagsize0{nullptr};
+  std::shared_ptr<std::vector<std::size_t>> _diagsize0{nullptr};
 
   /** Vector used to save the sum of dim of diagonal blocks of M:
       _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
       diagonal block at row(block) i */
-  std::shared_ptr<std::vector<unsigned int>> _diagsize1{nullptr};
+  std::shared_ptr<std::vector<std::size_t>> _diagsize1{nullptr};
 
   /** List of non null blocks positions (in row) */
-  std::shared_ptr<std::vector<unsigned int>> rowPos{nullptr};
+  std::shared_ptr<std::vector<std::size_t>> rowPos{nullptr};
 
   /** List of non null blocks positions (in col) */
-  std::shared_ptr<std::vector<unsigned int>> colPos{nullptr};
+  std::shared_ptr<std::vector<std::size_t>> colPos{nullptr};
 
   // Rule of five
   BlockCSRMatrix() = delete;
@@ -159,13 +159,13 @@ class BlockCSRMatrix {
 
   /** get size (in block-components)
    *
-   *  \return unsigned int NumberOfBlocksInARow
+   *  \return  NumberOfBlocksInARow
    */
   inline auto numberOfBlocksInARow() const { return _nr; };
 
   /** get total number of non-null blocks
    *
-   *  \return unsigned int
+   *  \return number of non-null blocks
    */
   std::size_t getNbNonNullBlocks() const;
 
@@ -184,9 +184,9 @@ class BlockCSRMatrix {
   /** get the dimension of the square-diagonal block number num
    *
    *  \param i block position
-   *  \return unsigned int
+   *  \return
    */
-  std::vector<unsigned int>::value_type getSizeOfDiagonalBlock(int i) const {
+  std::vector<std::size_t>::value_type getSizeOfDiagonalBlock(size_t i) const {
     if (i == 0)
       return _diagsize0->at(0);
     else
@@ -195,10 +195,10 @@ class BlockCSRMatrix {
 
   /** get the index of blocks position (i=0 -> rows, i=1 -> columns)
    *
-   *  \param i unsigned int, 0 for rows, 1 for columns
-   *  \return std::shared_ptr<std::vector<unsigned int>>
+   *  \param i , 0 for rows, 1 for columns
+   *  \return the index of blocks position (i=0 -> rows, i=1 -> columns)
    */
-  inline std::shared_ptr<std::vector<unsigned int>> getPositionsIndex(bool i) {
+  inline std::shared_ptr<std::vector<std::size_t>> getPositionsIndex(bool i) {
     if (i)
       return rowPos;
     else

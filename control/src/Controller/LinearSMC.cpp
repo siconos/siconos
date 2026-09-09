@@ -22,7 +22,7 @@
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "TimeStepping.hpp"
+#include "TimeStepping.hpp"  // IWYU pragma: keep
 //  #define DEBUG_WHERE_MESSAGES
 //   #define DEBUG_NOCOLOR
 //   #define DEBUG_STDOUT
@@ -65,9 +65,7 @@ void siconos::control::LinearSMC::actuate() {
 
   _simulationSMC->computeOneStep();
   //  if (_indx > 0)
-  {
-    _simulationSMC->nextStep();
-  }
+  { _simulationSMC->nextStep(); }
 
   // discontinous part
   *_us = *_lambda;

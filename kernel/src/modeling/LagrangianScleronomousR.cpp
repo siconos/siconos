@@ -22,15 +22,14 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
-
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
-#include "SiconosException.hpp"
 #include "siconos_debug.h"
 
 void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) {
@@ -95,7 +94,7 @@ void siconos::modeling::LagrangianScleronomousR::setComputejacobianhOver_q_dotFu
   computejacobianhOver_q_dot_ = func;
 }
 
-void siconos::modeling::LagrangianScleronomousR::computejacobianhOver_q_dot(
+void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot(
     const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
   if (computejacobianhOver_q_dot_) computejacobianhOver_q_dot_(q, qdot, *jacobianhOver_q_dot_);
 }
@@ -105,7 +104,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot_X_qd
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot starts");
 
-  computejacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+  computeJacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
                              *ds_vars[tools::enum_to_index(ds_var::q1)]);
   if (!jacobianhOver_q_dot_X_qdot_) {
     jacobianhOver_q_dot_X_qdot_ =
@@ -117,11 +116,12 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot_X_qd
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot ends");
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& inter,
-                                                               siconos::algebra::blocks::size_type derivativeNumber) {
+void siconos::modeling::LagrangianScleronomousR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_PRINTF(
       "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& "
-      "inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type derivativeNumber) with time = "
+      "inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type "
+      "derivativeNumber) with time = "
       "%f "
       "and derivativeNumber = %i\n",
       time, derivativeNumber);
@@ -138,7 +138,7 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
     } else if (derivativeNumber == 2) {
       siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q2)], y);
-      computejacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+      computeJacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
                                  *ds_vars[tools::enum_to_index(ds_var::q1)]);
       siconos::algebra::matrixBlockVector_prod(
           *jacobianhOver_q_dot_, *ds_vars[tools::enum_to_index(ds_var::q1)], y, false);
@@ -146,16 +146,18 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
     } else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, "
-          "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type "
+          "Interaction& inter, InteractionProperties& interProp, "
+          "siconos::algebra::blocks::size_type "
           "derivativeNumber), index out of range");
   }
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Interaction& inter,
-                                                              siconos::algebra::blocks::size_type level) {
+void siconos::modeling::LagrangianScleronomousR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
-      "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
+      "Interaction& inter, InteractionProperties& interProp, "
+      "siconos::algebra::blocks::size_type level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
@@ -170,7 +172,8 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
   DEBUG_EXPR(siconos::algebra::print(*ds_vars[tools::enum_to_index(ds_var::p0) + level]););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
-      "Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type level) \n");
+      "Interaction& inter, InteractionProperties& interProp, "
+      "siconos::algebra::blocks::size_type level) \n");
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Interaction& inter) {
@@ -181,7 +184,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Intera
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   DEBUG_EXPR(siconos::algebra::print(inter););
   computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)]);
-  computejacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+  computeJacobianhOver_q_dot(*ds_vars[tools::enum_to_index(ds_var::q0)],
                              *ds_vars[tools::enum_to_index(ds_var::q1)]);
 
   DEBUG_END(

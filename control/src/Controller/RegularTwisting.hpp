@@ -52,7 +52,7 @@ class RegularTwisting : public Twisting {
   virtual ~RegularTwisting() noexcept = default;
 };
 // Register the observer into the factory
-static ActuatorRegistration<RegularTwisting> reg_AELSMC(ActuatorType::RegularTwisting);
+static ActuatorRegistration<RegularTwisting> reg_ART(ActuatorType::RegularTwisting);
 
 }  // namespace siconos::control
 #endif

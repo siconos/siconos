@@ -27,7 +27,6 @@ int main(void) {
 
   int solvers[] = {SICONOS_LCP_NSGS_SBM,
                    SICONOS_LCP_LEMKE,
-                   SICONOS_LCP_NSGS_SBM,
                    SICONOS_LCP_PGS,
                    SICONOS_LCP_CPG,
                    SICONOS_LCP_LATIN,
@@ -55,7 +54,6 @@ int main(void) {
     options = solver_options_create(solvers[s]);
     solver_options_print(options);
     solver_options_delete(options);
-    options = NULL;
   }
 
   printf("\n End of test on Default SolverOptions\n");

@@ -91,9 +91,9 @@ problems.")
         #~(list "-DCMAKE_VERBOSE_MAKEFILE=1"
                 "-DWITH_GUIX=1"
                 (string-append "-Dpetsc_ROOT="
-                               #$(this-package-input "petsc-openmpi"))
+                               #$(this-package-input "petsc"))
                 (string-append "-DHDF5_ROOT="
-                               #$(this-package-input "hdf5-parallel-openmpi") "/lib")
+                               #$(this-package-input "hdf5") "/lib")
                 (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
                 "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel"
                 "-DCMAKE_BUILD_TYPE=Release"
@@ -108,7 +108,6 @@ problems.")
                 "-DWITH_BULLET=1"
                 "-DWITH_HDF5=1"
                 "-DWITH_PETSC=1"
-                "-DWITH_MPI=1"
                 "-DWITH_OPENMP=1")
         #:phases
         #~(modify-phases %standard-phases
@@ -173,17 +172,15 @@ problems.")
                                eigen
                                fclib-devel
                                gmp
-                               hdf5-parallel-openmpi
+                               hdf5
                                lapack
                                nlohmann-json
                                openblas
                                opencascade-occt
-                               petsc-openmpi
-                               openmpi-4
+                               petsc
                                python-h5py
                                python-numpy
                                python-packaging
-                               python-petsc4py
                                python-scipy
                                python-occ-core
                                python-wheel

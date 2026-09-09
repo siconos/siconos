@@ -18,12 +18,12 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING "build type (compiler options)" FORCE)
 option(WITH_DOCUMENTATION "Build Documentation" OFF)
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings" ON)
 option(WITH_OpenCASCADE "compilation with OpenCascade Bindings" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
-option(WITH_ASAN "Activate asan" ON)
+option(WITH_SANITIZER "Activate asan" ON)
 

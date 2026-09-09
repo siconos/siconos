@@ -555,6 +555,8 @@ void rolling_friction_2d_nsgs_set_default(SolverOptions *options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions *));
+  }else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   options->internalSolvers[0] =
       solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);

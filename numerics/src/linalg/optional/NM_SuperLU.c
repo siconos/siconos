@@ -16,17 +16,15 @@
  * limitations under the License.
  */
 
-#include "numerics_verbose.h"
-#include "siconos_debug.h"
-
 #ifdef WITH_SUPERLU
-
 #include <slu_ddefs.h>
 
 #include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "siconos_debug.h"
 
 /** \struct NM_SuperLU_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs

@@ -28,6 +28,7 @@
 #include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "numerics_verbose.h"
+#include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 
 #ifdef WITH_FCLIB
@@ -40,16 +41,16 @@ static int gfccounter = -1;
 
 // #define USE_NM_DENSE
 
-static double *alloc_memory_double(unsigned int size, double *p) {
+static double *alloc_memory_double(size_t size, double *p) {
   double *r = (double *)malloc(size * sizeof(double));
   memcpy(r, p, size * sizeof(double));
   return r;
 }
 
-static CS_INT *alloc_memory_csi(unsigned int size, unsigned int *p) {
+static CS_INT *alloc_memory_csi(size_t size, size_t *p) {
   CS_INT *r = (CS_INT *)malloc(size * sizeof(CS_INT));
-  for (unsigned int i = 0; i < size; ++i) {
-    r[i] = (CS_INT)p[i];
+  for (size_t i = 0; i < size; ++i) {
+    r[i] = to_csint(p[i]);
   }
   return r;
 }
@@ -58,23 +59,23 @@ int globalFrictionContact_fclib_write(GlobalFrictionContactProblem *problem, cha
                                       char *description, char *mathInfo, const char *path);
 
 int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity, double *q,
-                     double *b, double *mu, double *Mdata, unsigned int nzM,
-                     unsigned int *rowM, unsigned int *colM, double *Hdata, unsigned int nzH,
-                     unsigned int *rowH, unsigned int *colH, unsigned int n, unsigned int nc,
-                     int solver_id, size_t isize, int *iparam, size_t dsize, double *dparam,
-                     int verbose_in, int outputFile, int freq_output) {
+                     double *b, double *mu, double *Mdata, size_t nzM, size_t *rowM,
+                     size_t *colM, double *Hdata, size_t nzH, size_t *rowH, size_t *colH,
+                     size_t n, size_t nc, int solver_id, size_t isize, int *iparam,
+                     size_t dsize, double *dparam, int verbose_in, int outputFile,
+                     int freq_output) {
   verbose = verbose_in;
 
   /* NumericsMatrix M, H; */
   NumericsMatrix *M = NM_new();
   M->storageType = 2; /* sparse */
-  M->size0 = n;
-  M->size1 = n;
+  M->size0 = to_int(n);
+  M->size1 = to_int(n);
 
   NumericsMatrix *H = NM_new();
   H->storageType = 2;
   H->size0 = M->size0;
-  H->size1 = 3 * nc;
+  H->size1 = 3 * to_int(nc);
 
   NumericsSparseMatrix *SM = NSM_new();
   M->matrix2 = SM;
@@ -85,12 +86,12 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   CS_INT *_colM = alloc_memory_csi(nzM, colM);
   CS_INT *_rowM = alloc_memory_csi(nzM, rowM);
 
-  _M->nzmax = nzM;
-  _M->nz = nzM;
+  _M->nzmax = to_csint(nzM);
+  _M->nz = to_csint(nzM);
   _M->m = M->size0;
   _M->n = M->size1;
-  _M->p = (CS_INT *)_colM;
-  _M->i = (CS_INT *)_rowM;
+  _M->p = _colM;
+  _M->i = _rowM;
   double *_Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
@@ -106,8 +107,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   CS_INT *_colH = alloc_memory_csi(nzH, colH);
   CS_INT *_rowH = alloc_memory_csi(nzH, rowH);
 
-  _H->nzmax = nzH;
-  _H->nz = nzH;
+  _H->nzmax = to_csint(nzH);
+  _H->nz = to_csint(nzH);
   _H->m = H->size0;
   _H->n = H->size1;
 
@@ -156,7 +157,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
       (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
 
   problem->dimension = 3;
-  problem->numberOfContacts = nc;
+  problem->numberOfContacts = to_int(nc);
   problem->env = NULL;
 
   problem->M = M;
@@ -256,15 +257,15 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*                                        double *b, */
 /*                                        double *mu, */
 /*                                        double *Mdata, */
-/*                                        unsigned int nzM, */
-/*                                        unsigned int *rowM, */
-/*                                        unsigned int *colM, */
+/*                                        size_t nzM, */
+/*                                        size_t *rowM, */
+/*                                        size_t *colM, */
 /*                                        double* Hdata, */
-/*                                        unsigned int nzH, */
-/*                                        unsigned int *rowH, */
-/*                                        unsigned int *colH, */
-/*                                        unsigned int n, */
-/*                                        unsigned int nc, */
+/*                                        size_t nzH, */
+/*                                        size_t *rowH, */
+/*                                        size_t *colH, */
+/*                                        size_t n, */
+/*                                        size_t nc, */
 /*                                        int solver_id, */
 /*                                        int isize, */
 /*                                        int *iparam, */
@@ -278,11 +279,11 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 
 /*   CSparseMatrix _M, _H; */
 
-/*   unsigned int * _colM = alloc_memory_int(nzM, colM); */
-/*   unsigned int * _rowM = alloc_memory_int(nzM, rowM); */
+/*   size_t * _colM = alloc_memory_int(nzM, colM); */
+/*   size_t * _rowM = alloc_memory_int(nzM, rowM); */
 
-/*   unsigned int * _colH = alloc_memory_int(nzH, colH); */
-/*   unsigned int * _rowH = alloc_memory_int(nzH, rowH); */
+/*   size_t * _colH = alloc_memory_int(nzH, colH); */
+/*   size_t * _rowH = alloc_memory_int(nzH, rowH); */
 
 /*   M.matrix0 = NULL; */
 /*   M.matrix1 = NULL; */
@@ -426,15 +427,15 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*                                        double *b, */
 /*                                        double *mu, */
 /*                                        double *Mdata, */
-/*                                        unsigned int nzM, */
-/*                                        unsigned int *rowM, */
-/*                                        unsigned int *colM, */
+/*                                        size_t nzM, */
+/*                                        size_t *rowM, */
+/*                                        size_t *colM, */
 /*                                        double* Hdata, */
-/*                                        unsigned int nzH, */
-/*                                        unsigned int *rowH, */
-/*                                        unsigned int *colH, */
-/*                                        unsigned int n, */
-/*                                        unsigned int nc, */
+/*                                        size_t nzH, */
+/*                                        size_t *rowH, */
+/*                                        size_t *colH, */
+/*                                        size_t n, */
+/*                                        size_t nc, */
 /*                                        int solver_id, */
 /*                                        int isize, */
 /*                                        int *iparam, */

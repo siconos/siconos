@@ -23,16 +23,15 @@
 #include <string.h>  //  fo strlen
 #include <time.h>    // for clock
 
-#include "GlobalRollingFrictionContactProblem.h"  // for globalRollingFrictionContactPro...
+#include "GlobalRollingFrictionContactProblem.h"  // IWYU pragma: keep
 #include "JordanAlgebra.h"                        // for dnrm2l
 #include "NonSmoothDrivers.h"                     // for global_rolling_friction_3d_driver
 #include "NumericsFwd.h"                          // for GlobalRollingFrictionContactPro...
-#include "NumericsMatrix.h"                       // for NumericsMatrix
 #include "NumericsVerbose.h"                      // for numerics_set_verbose
 #include "SolverOptions.h"                        // for SolverOptions, SICONOS_DPA...
 #include "frictionContact_test_utils.h"           // for globalRollingFrictionContact_te...
-#include "test_utils.h"                           // for TestCase
 #include "rolling_friction_3d_short_names.h"
+#include "test_utils.h"  // for TestCase
 
 int globalRollingFrictionContact_test_function(TestCase* current) {
   int k;
@@ -74,8 +73,8 @@ int globalRollingFrictionContact_test_function(TestCase* current) {
   if (dim == 2) {
     info = 1;
   } else if (dim == 5) {
-    info =
-        global_rolling_friction_3d_driver(problem, reaction, velocity, globalvelocity, current->options);
+    info = global_rolling_friction_3d_driver(problem, reaction, velocity, globalvelocity,
+                                             current->options);
   }
 
   clock_t t2 = clock();
@@ -144,8 +143,8 @@ int globalRollingFrictionContact_test_function(TestCase* current) {
   free(velocity);
   free(globalvelocity);
   fclose(foutput);
-
+  free(problem->name);
   globalRollingFrictionContactProblem_free(problem);
-
+  problem = NULL;
   return info;
 }

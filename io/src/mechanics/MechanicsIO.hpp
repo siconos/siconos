@@ -19,7 +19,7 @@
 #ifndef MechanicsIO_hpp
 #define MechanicsIO_hpp
 
-#include <memory>
+// #include <memory>
 #include <optional>
 
 #include "SiconosMatrix.hpp"

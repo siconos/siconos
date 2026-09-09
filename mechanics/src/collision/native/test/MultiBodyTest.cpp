@@ -24,10 +24,10 @@
 #include "MoreauJeanOSI.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "NumericsSolversNamespace.h"  // for SolverOptions tools
 #include "SiconosBodies.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "SolverOptions.h"
 #include "SpaceFilter.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -168,7 +168,7 @@ void Disks::init(std::string disks_input) {
     }
 
     /* set center positions */
-    for (unsigned int i = 0; i < _plans->rows(); ++i) {
+    for (siconos::algebra::Index i = 0; i < _plans->rows(); ++i) {
       auto tmpr =
           std::make_shared<DiskPlanR>(1., (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
                                       (*_plans)(i, 3), (*_plans)(i, 4), (*_plans)(i, 5));
@@ -201,7 +201,7 @@ void Disks::init(std::string disks_input) {
 
     auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
-    for (unsigned int i = 0; i < disks_matrix->rows(); i++) {
+    for (siconos::algebra::Index i = 0; i < disks_matrix->rows(); i++) {
       R = (*disks_matrix)(i, 2);
       m = (*disks_matrix)(i, 3);
 
@@ -292,7 +292,7 @@ void MultiBodyTest::t1() {
   // just try to run a simulation
   // if something is broken with SpaceFilter
   // an exception may occurs
-  for (unsigned int i = 0; i < 20; ++i) {
+  for (size_t i = 0; i < 20; ++i) {
     disks->compute();
   }
 
@@ -308,7 +308,7 @@ void MultiBodyTest::t2() {
   // if something is broken with SpaceFilter
   // an exception may occurs
   // test fail with rev 3146
-  // for (unsigned int i = 0; i < 20; ++i) {
+  // for (size_t i = 0; i < 20; ++i) {
   //   disks->compute();
   // }
 

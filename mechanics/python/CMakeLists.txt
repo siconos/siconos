@@ -31,6 +31,19 @@
 # #   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
 # #   )
 
+create_pybind11_module(
+  MODULE_NAME pyfem
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fem/fem_pybind11.cpp
+  DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/fem
+)
+set_target_properties(pyfem PROPERTIES OUTPUT_NAME "_fem")
+install(TARGETS
+  pyfem
+  COMPONENT python
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/fem"
+)
+set(py${COMPONENT}_modules pyfem)
 
 create_pybind11_module(
   MODULE_NAME pycollision

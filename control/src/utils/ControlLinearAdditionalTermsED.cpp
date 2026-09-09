@@ -18,6 +18,8 @@
 
 #include "ControlLinearAdditionalTermsED.hpp"
 
+#include <cstddef>
+
 #include "BlockVector.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
@@ -25,8 +27,8 @@
 
 namespace siconos::control {
 
-typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, double*, double*,
-                                      unsigned, double*);
+typedef void (*AdditionalTermsEDfctU)(double, size_t, double*, size_t, double*, double*,
+                                      size_t, double*);
 }
 
 void siconos::control::ControlLinearAdditionalTermsED::init(
@@ -70,9 +72,9 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
     }
   }
   // check whether the DynamicalSystem is an Observer
-  if (DSG0.e.hasKey(dsgVD)) {
+  if (DSG0.eVector.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    xdot.noalias() += *DSG0.L[dsgVD] * *DSG0.e[dsgVD];  // xdot += -L*e
+    xdot.noalias() += *DSG0.L[dsgVD] * *DSG0.eVector[dsgVD];  // xdot += -L*e
   }
 }
 

@@ -53,7 +53,7 @@ typedef struct {
 } Rolling_Fc3d_Admm_data;
 
 /** pointer to function used to call local solver */
-typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, unsigned int nrhs);
+typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, size_t nrhs);
 
 void rolling_friction_3d_admm_init(RollingFrictionContactProblem* problem,
                                    SolverOptions* options) {
@@ -92,8 +92,13 @@ void rolling_friction_3d_admm_init(RollingFrictionContactProblem* problem,
       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
           SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY) {
     data->b = (double*)calloc(nb_constraints, sizeof(double));
-    if (!options->dWork || options->dWorkSize != 2 * m) {
-      options->dWork = (double*)calloc(2 * m, sizeof(double));
+    if (!options->dWork || options->dWorkSize < 2 * m) {
+      double* p = (double*)realloc(options->dWork, 2 * m * sizeof(double));
+      if (!p) {
+        numerics_error_log("gfc3d_compute_error_convex", "bad alloc");
+        return;
+      }
+      options->dWork = p;
       options->dWorkSize = 2 * m;
     }
   } else {
@@ -102,11 +107,6 @@ void rolling_friction_3d_admm_init(RollingFrictionContactProblem* problem,
 }
 void rolling_friction_3d_admm_free(RollingFrictionContactProblem* problem,
                                    SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWork = NULL;
-    options->dWorkSize = 0;
-  }
   if (options->solverData) {
     Rolling_Fc3d_Admm_data* data = (Rolling_Fc3d_Admm_data*)options->solverData;
     free(data->xi);
@@ -236,8 +236,6 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
     if (has_rho_changed) {
-      /* NM_clear(W); */
-      /* W= NM_new(); */
       NM_copy(M, W);
       NM_add_to_diag5(W, rho);
     }
@@ -395,7 +393,7 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
           "rolling_friction_3d_admm",
           " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
           "not recognize");
-      return;      
+      return;
     }
     /*********************************/
     /*  4 - Updating rho             */
@@ -524,7 +522,7 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
     numerics_printf_verbose(1, "---- RFC3D - ADMM - | %3d | %14.7e | %7.3e | (final)", iter,
                             error, tolerance);
   }
-  NM_clear(W);
+  W = NM_free(W);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 }
@@ -645,8 +643,6 @@ static void rolling_friction_3d_admm_asymmetric(
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
     if (has_rho_changed) {
-      /* NM_clear(W); */
-      /* W= NM_new(); */
       NM_copy(M_s, W);
       NM_gemm(rho, Atrans, A, 1.0, W);
       DEBUG_EXPR(NM_display(W));
@@ -829,7 +825,7 @@ static void rolling_friction_3d_admm_asymmetric(
           "rolling_friction_3d_admm",
           " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
           "not recognize");
-      return;      
+      return;
     }
     /*********************************/
     /*  4 - Updating rho             */
@@ -939,9 +935,9 @@ static void rolling_friction_3d_admm_asymmetric(
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
-  NM_clear(A);
-  NM_clear(M_s);
-  NM_clear(W);
+  A = NM_free(A);
+  M_s = NM_free(M_s);
+  W = NM_free(W);
 }
 
 static double rolling_friction_3d_admm_select_rho(NumericsMatrix* M, int* is_rho_variable,
@@ -1007,11 +1003,11 @@ void rolling_friction_3d_admm(RollingFrictionContactProblem* restrict problem,
   int is_rho_variable = 0;
   double rho = rolling_friction_3d_admm_select_rho(M, &is_rho_variable, options);
 
-  if (rho <= DBL_EPSILON){
+  if (rho <= DBL_EPSILON) {
     *info = numerics_error("rolling_friction_3d_admm",
-                   "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
+                           "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
     return;
-    }
+  }
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
       SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY) {
     rolling_friction_3d_admm_symmetric(problem, reaction, velocity, info, options, rho,
@@ -1049,12 +1045,11 @@ void rolling_friction_3d_admm(RollingFrictionContactProblem* restrict problem,
   }
 
   else
-    
+
     *info = numerics_error(
         "rolling_friction_3d_admm",
         "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
         options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
-  
 
   numerics_printf_verbose(1, "---- RFC3D - ADMM - Solution information");
   numerics_printf_verbose(1, "---- RFC3D - ADMM - norm of velocity = %e, norm of q = %e ",

@@ -22,13 +22,17 @@ template <typename Osi, typename... ContactShapes>
 struct io : item {
   using osi = Osi;
   /* /!\ only system sizes defined at compile time and 2D for the moment */
-  using system = nth_t<0, typename osi::systems_t>;
+  using system = nth_t<0, typename osi::systems_t>;   // fixed dof system
+  using dsystem = nth_t<1, typename osi::systems_t>;  // runtime dof system
+                                                      // maybe empty_item
   using interaction = nth_t<0, typename osi::interactions_t>;
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
   using attributes = gather<
       attribute<"osi", some::item_ref<osi>>,
+      attribute<"disp_info", some::map<some::indice,
+                                       some::unbounded_vector<some::scalar>>>,
       attribute<"p0_info", some::unbounded_collection<some::vector<
                                some::scalar, some::indice_value<4>>>>,
       attribute<"radii_info", some::unbounded_collection<some::vector<
@@ -112,6 +116,23 @@ struct io : item {
           attr<"radii_info">(*self()).data()->size());
     }
 
+    decltype(auto) displacements(auto step)
+    {
+      auto& data = self()->data();
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& ids = storage::prop_values<dsystem, "id">(data, step);
+        auto& qs = storage::attr_values<dsystem, "q">(data, step);
+        auto& q0s = storage::prop_values<dsystem, "q0">(data, step);
+
+        attr<"disp_info">(*self()).clear();
+
+        for (auto [id, q, q0] : view::zip(ids, qs, q0s)) {
+          attr<"disp_info">(*self())[id] = q - q0;
+        }
+
+        return attr<"disp_info">(*self());
+      }
+    }
     decltype(auto) positions(auto step)
     {
       auto& data = self()->data();
@@ -491,6 +512,7 @@ struct io : item {
           method("p0s", &interface<Handle>::p0s<indice>),
           method("radii", &interface<Handle>::radii<indice>),
           method("positions", &interface<Handle>::positions<indice>),
+          method("displacements", &interface<Handle>::displacements<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points",
                  &interface<Handle>::contact_points<indice>),

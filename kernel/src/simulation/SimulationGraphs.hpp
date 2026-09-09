@@ -23,6 +23,8 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
+#include <memory>
+
 #include "FunctionTypes.hpp"
 #include "Interaction.hpp"
 #include "SiconosGraph.hpp"
@@ -131,8 +133,8 @@ struct DynamicalSystemProperties {
       nullptr}; /**< Used for instance in Newton iteration */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Mostly for Lagrangian system.*/
-  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi{
-      nullptr}; /**< Integrator used for the given DynamicalSystem */
+  std::weak_ptr<siconos::integrators::OneStepIntegrator>
+      osi_; /**< Integrator used for the given DynamicalSystem */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
       nullptr}; /**< Matrix for integration */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{
@@ -145,7 +147,10 @@ struct DynamicalSystemProperties {
                                      the unknown vector in osnsp*/
   //  std::shared_ptr<siconos::algebra::SiconosMemory> xMemory_            /**< old value of x,
   //  TBD */
-
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi() const {
+    return osi_.lock();
+    //  https:  // en.cppreference.com/cpp/memory/weak_ptr/lock
+  }
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
 };
 
@@ -189,8 +194,8 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
       ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginB))  // For Controlled System
       ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
-        pluginL))                                                        // For Observer
-      ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, e))  // For Observer
+        pluginL))                                                              // For Observer
+      ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, eVector))  // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         u))  // For Controlled System
       ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_BV,
@@ -219,7 +224,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
     L._store->erase(vd);
     pluginB._store->erase(vd);
     pluginL._store->erase(vd);
-    e._store->erase(vd);
+    eVector._store->erase(vd);
     u._store->erase(vd);
     // pluginU._store->erase(vd);
     // pluginJacgx._store->erase(vd);

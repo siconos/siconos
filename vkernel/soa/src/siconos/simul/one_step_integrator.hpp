@@ -48,7 +48,7 @@ struct one_step_integrator {
 
     using elements_t = decltype(mp::unpack(
         mp::filter(all_elements_t{},
-                   [](const auto &h) constexpr {
+                   [](const auto& h) constexpr {
                      using t = typename std::decay_t<decltype(h)>::type;
                      return mp::bool_c<!std::derived_from<t, empty_item>>;
                    }),
@@ -97,8 +97,7 @@ struct one_step_integrator {
 
       void initialize(auto step)
       {
-        mp::for_each(elements(),
-                     [&](auto elem) { elem.initialize(step); });
+        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }
@@ -121,7 +120,7 @@ struct one_step_integrator {
       }
 
       template <size_t N, typename Func>
-      decltype(auto) visit_element(Func &&func)
+      decltype(auto) visit_element(Func&& func)
       {
         return func(std::get<N>(elements()));
       }
@@ -186,6 +185,15 @@ struct one_step_integrator {
         return assembled_osi().mu_vector_assembled();
       };
 
+      static constexpr auto with_runtime_dofs()
+      {
+        return mp::any_of(typename elements_t::types{}, []<typename Elem>(
+                                                            Elem) {
+          return
+              typename Elem::type::template interface<Handle>{}.runtime_dof();
+        });
+      }
+
       static constexpr auto with_k_matrix()
       {
         return mp::any_of(
@@ -216,9 +224,11 @@ struct one_step_integrator {
 
         mp::for_each(
             elements(), [&ods, &ointer, &num_fric, &step](auto elem) {
+              elem.compute_total_dofs(step);
+
               elem.ds_offset() = ods;
               elem.inter_offset() = ointer;
-              ods += elem.total_dofs(step);
+              ods += elem.total_dofs();
 
               ointer += elem.number_of_interactions() * elem.nslaw_size();
 
@@ -252,18 +262,378 @@ struct one_step_integrator {
         }
       }
 
+      auto compute_active_interactions(auto step, auto h)
+      {
+        auto& data = self()->data();
+        using env = decltype(self()->env());
+        using indice = typename env::indice;
+
+        auto& ct_ys = storage::attr_values<ct_interaction, "y">(data, step);
+        auto& ct_ydots =
+            storage::attr_values<ct_interaction, "ydot">(data, step);
+
+        auto& ct_ids1s =
+            storage::prop_values<ct_interaction, "ds1">(data, step);
+        auto& ct_ids2s =
+            storage::prop_values<ct_interaction, "ds2">(data, step);
+        auto& ct_ndss =
+            storage::prop_values<ct_interaction, "nds">(data, step);
+
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation">(data, step);
+
+        auto& ct_involveds =
+            storage::prop_values<ct_system, "involved">(data, step);
+
+        const auto& ct_interactions =
+            storage::handles<ct_interaction>(data, step);
+
+        // all ds -> not involved
+        // view::concat: c++26
+        for (auto [involved] : view::zip(ct_involveds)) {
+          involved = false;
+        };
+
+        auto gamma_v = 0.5;
+
+        indice ct_ds_counter = 0;
+        indice ct_inter_counter = 0;
+
+        indice rt_ds_counter = 0;
+        indice rt_ct_inter_counter = 0;
+
+        for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
+             view::zip(ct_ys, ct_ydots, ct_activations, ct_ndss, ct_ids1s,
+                       ct_ids2s, ct_interactions)) {
+          activation = ((y + gamma_v * h * ydot)(0) <=
+                        self()->constraint_activation_threshold());
+
+          if (activation) {
+            ct_inter_counter++;
+
+            auto ds2 = storage::make_handle(data, ids2);
+
+            if (!prop<"involved">(ds2)) {
+              prop<"involved">(ds2) = true;
+              prop<"index">(ds2) = ct_ds_counter++;
+            }
+
+            if (nds == 2) {
+              auto ds1 = storage::make_handle(data, ids1);
+
+              if (!prop<"involved">(ds1)) {
+                prop<"involved">(ds1) = true;
+                prop<"index">(ds1) = ct_ds_counter++;
+              };
+            }
+          }
+        }
+
+        std::print(
+            "  [compute_active_interactions] total number of ct ds: "
+            "{}, "
+            "total "
+            "number of "
+            "ct interactions: {}\n",
+            std::size(ct_involveds), std::size(ct_activations));
+
+        if constexpr (with_k_matrix()) {
+          auto& rt_ct_ys =
+              storage::attr_values<rt_ct_interaction, "y">(data, step);
+          auto& rt_ct_ydots =
+              storage::attr_values<rt_ct_interaction, "ydot">(data, step);
+          auto& rt_ct_ids1s =
+              storage::prop_values<rt_ct_interaction, "ds1">(data, step);
+          auto& rt_ct_ids2s =
+              storage::prop_values<rt_ct_interaction, "ds2">(data, step);
+          auto& rt_ct_ndss =
+              storage::prop_values<rt_ct_interaction, "nds">(data, step);
+
+          auto& rt_ct_activations =
+              storage::prop_values<rt_ct_interaction, "activation">(data,
+                                                                    step);
+
+          auto& rt_involveds =
+              storage::prop_values<rt_system, "involved">(data, step);
+
+          for (auto [involved] : view::zip(rt_involveds)) {
+            involved = false;
+          };
+
+          const auto& rt_ct_interactions =
+              storage::handles<rt_ct_interaction>(data, step);
+
+          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
+               view::zip(rt_ct_ys, rt_ct_ydots, rt_ct_activations, rt_ct_ndss,
+                         rt_ct_ids1s, rt_ct_ids2s, rt_ct_interactions)) {
+            activation = ((y + gamma_v * h * ydot)(0) <=
+                          self()->constraint_activation_threshold());
+
+            if (activation) {
+              rt_ct_inter_counter++;
+
+              auto ds2 = storage::make_handle(data, ids2);
+
+              if (!prop<"involved">(ds2)) {
+                prop<"involved">(ds2) = true;
+                prop<"index">(ds2) = rt_ds_counter++;
+              }
+
+              // /!\ a rt system can only be in interaction with a ct system
+              // i.e no rt rt interaction yet
+              assert(nds == 2);
+              {
+                auto ds1 = storage::make_handle(data, ids1);
+
+                if (!prop<"involved">(ds1)) {
+                  prop<"involved">(ds1) = true;
+                  prop<"index">(ds1) = ct_ds_counter++;
+                };
+              }
+            }
+          }
+          std::print(
+              "  [compute_active_interactions] total number of rt ds: "
+              "{}, "
+              "total "
+              "number of "
+              "rt ct interactions: {}\n",
+              std::size(rt_involveds), std::size(rt_ct_activations));
+
+          auto rt_elem = std::get<1>(elements());
+
+          rt_elem.number_of_interactions() = rt_ct_inter_counter;
+          rt_elem.number_of_involved_ds() = rt_ds_counter;
+        }
+
+        std::print(
+            "  [compute_active_interactions] number of involved ct ds:{}, "
+            "number of "
+            "activated ct interactions: {}\n",
+            ct_ds_counter, ct_inter_counter);
+
+        std::print(
+            "  [compute_active_interactions] number of involved rt ds:{}, "
+            "number of "
+            "activated ct rt interactions: {}\n",
+            rt_ds_counter, rt_ct_inter_counter);
+
+        auto ct_elem = std::get<0>(elements());
+
+        ct_elem.number_of_interactions() = ct_inter_counter;
+        ct_elem.number_of_involved_ds() = ct_ds_counter;
+
+        return ct_ds_counter + rt_ds_counter;
+      }
+
+      auto assemble_h_matrix_for_involved_ds(auto step)
+      {
+        using env_t = decltype(self()->env());
+        using scalar = typename env_t::scalar;
+        using matrix_1x1_t = typename env_t::template matrix<scalar, 1, 1>;
+
+        auto& data = self()->data();
+
+        // assumption: compile time element is the first one.
+        auto ct_elem = std::get<0>(elements());
+
+        auto&& ct_h_matrix = ct_elem.h_matrix_assembled();
+
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation">(data, step);
+
+        auto& rt_ct_activations =
+            storage::prop_values<rt_ct_interaction, "activation">(data, step);
+
+        // auto& rt_rt_activations =
+        //     storage::prop_values<rt_rt_interaction, "activation">(data,
+        //     step);
+
+        auto& ct_h_mat1s =
+            storage::attr_values<ct_interaction, "h_matrix1">(data, step);
+        auto& ct_h_mat2s =
+            storage::attr_values<ct_interaction, "h_matrix2">(data, step);
+
+        // auto& rt_rt_h_mat1s =
+        //     storage::attr_values<rt_rt_interaction, "h_matrix1">(data,
+        //     step);
+        // auto& rt_rt_h_mat2s =
+        //     storage::attr_values<rt_rt_interaction, "h_matrix2">(data,
+        //     step);
+
+        auto& ct_ids1s =
+            storage::prop_values<ct_interaction, "ds1">(data, step);
+        auto& ct_ids2s =
+            storage::prop_values<ct_interaction, "ds2">(data, step);
+
+        // auto& rt_rt_ids1s =
+        //     storage::prop_values<rt_rt_interaction, "ds1">(data, step);
+        // auto& rt_rt_ids2s =
+        //     storage::prop_values<rt_rt_interaction, "ds2">(data, step);
+
+        auto& ct_indices =
+            storage::prop_values<ct_system, "index">(data, step);
+
+        size_t i_ct = 0;
+        for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
+             view::zip(ct_activations, ct_h_mat1s, ct_h_mat2s, ct_ids1s,
+                       ct_ids2s)) {
+          // ct / ct activation (i.e disk/disk)
+          if (activation) {
+            auto j1 = ct_indices[ids1.value()];
+            auto j2 = ct_indices[ids2.value()];
+
+            // BC velocities for ds1
+            auto handle_ds1 = storage::make_handle(data, ids1);
+            auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
+
+            // modification on a copy
+            auto h_mat1_mod = h_mat1;
+
+            //  zero columns in h_mat1_mod / BC DOFs in ds1
+            for (auto bc_local_idx : bc_vel_1) {
+              h_mat1_mod.col(bc_local_idx).setZero();
+            }
+
+            if (j1 != j2) {
+              // modification on a copy
+              auto h_mat2_mod = h_mat2;
+
+              auto handle_ds2 = storage::make_handle(data, ids2);
+              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
+
+              // zero columns in h_mat2_mod / BC DOFs in ds2
+              for (auto bc_local_idx : bc_vel_2) {
+                h_mat2_mod.col(bc_local_idx).setZero();
+              }
+
+              // insertion
+              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
+              set_value(ct_h_matrix, i_ct, j2, h_mat2_mod);
+            }
+            else {
+              // self interaction
+              set_value(ct_h_matrix, i_ct, j2, h_mat1_mod);
+            }
+
+            i_ct++;
+          }
+        }
+
+        if constexpr (with_k_matrix()) {
+          auto rt_elem = std::get<1>(elements());
+          auto&& rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
+              assembled_osi().h_matrix_assembled(), rt_elem.inter_offset(),
+              rt_elem.ds_offset());
+
+          auto& rt_ct_h_mat1s =
+              storage::attr_values<rt_ct_interaction, "h_matrix1">(data,
+                                                                   step);
+          auto& rt_ct_h_mat2s =
+              storage::attr_values<rt_ct_interaction, "h_matrix2">(data,
+                                                                   step);
+          auto& rt_ct_ids1s =
+              storage::prop_values<rt_ct_interaction, "ds1">(data, step);
+          auto& rt_ct_ids2s =
+              storage::prop_values<rt_ct_interaction, "ds2">(data, step);
+          auto& rt_ct_rels =
+              storage::attr_values<rt_ct_interaction, "relation">(data, step);
+          auto& rt_indices =
+              storage::prop_values<rt_system, "index">(data, step);
+
+          size_t i_rt = 0;
+          for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
+               view::zip(rt_ct_activations, rt_ct_h_mat1s, rt_ct_h_mat2s,
+                         rt_ct_ids1s, rt_ct_ids2s, rt_ct_rels)) {
+            if (activation) {
+              // ct / rt activation (i.e disk/fem)
+              auto j1 = ct_indices[ids1.value()];
+              auto j2 = rt_elem.sum_dofs()[rt_indices[ids2.value()]];
+
+              // BC velocities for ds1
+              auto handle_ds1 = storage::make_handle(data, ids1);
+              auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
+
+              // modification on a copy
+              auto h_mat1_mod = h_mat1;
+
+              // zero columns in h_mat1_mod / BC DOFs in ds1
+              for (auto bc_local_idx : bc_vel_1) {
+                h_mat1_mod.col(bc_local_idx).setZero();
+              }
+
+              // insertion
+              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
+
+              auto handle_ds2 = storage::make_handle(data, ids2);
+              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
+
+              // contact index in original mesh
+              variant::visit(
+                  data, rel,
+                  mp::overload(
+                      [&](match::handle<collision::diskmesh_r> auto rrel) {
+                        auto base_idx = 4 * rrel.contact_index();
+                        auto dof0 = rrel.mesh().global_indices()[base_idx];
+                        auto dof1 =
+                            rrel.mesh().global_indices()[base_idx + 1];
+                        auto dof2 =
+                            rrel.mesh().global_indices()[base_idx + 2];
+                        auto dof3 =
+                            rrel.mesh().global_indices()[base_idx + 3];
+
+                        for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
+                          set_value(rt_h_matrix,
+                                    i + i_rt * rt_elem.nslaw_size(),
+                                    dof0 + j2, h_mat2(i, 0));
+                          set_value(rt_h_matrix,
+                                    i + i_rt * rt_elem.nslaw_size(),
+                                    dof1 + j2, h_mat2(i, 1));
+                          set_value(rt_h_matrix,
+                                    i + i_rt * rt_elem.nslaw_size(),
+                                    dof2 + j2, h_mat2(i, 2));
+                          set_value(rt_h_matrix,
+                                    i + i_rt * rt_elem.nslaw_size(),
+                                    dof3 + j2, h_mat2(i, 3));
+                        }
+                      },
+                      [](auto) {})  // in the case of no rt ct relation
+                                    // instantiated);
+              );
+              // bc dofs in ds2
+              for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
+                for (auto bc_local_idx : bc_vel_2) {
+                  set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
+                            j2 + bc_local_idx, 0.);
+                }
+              }
+
+              i_ct++;
+              i_rt++;
+            }
+          }
+        }
+      }
+
       void compute_w_matrix(auto step, auto time_step)
       {
         if constexpr (with_k_matrix()) {
           // stiffness matrix is present
-          algebra::add(1., mass_matrix_assembled(),
-                       time_step * time_step * theta() * theta(),
-                       k_matrix_assembled(), iteration_matrix_assembled());
+          if (algebra::nnz(k_matrix_assembled()) == 0) {
+            // fem systems are not involved in contact
+            compute_w_matrix_with_diagonal_mass_matrix();
+          }
+          else {
+            // fem systems are involved in contact
+            algebra::add(1., mass_matrix_assembled(),
+                         time_step * time_step * theta() * theta(),
+                         k_matrix_assembled(), iteration_matrix_assembled());
 
-          // H (M+ h^2 \theta^2 K) H^t
-          compute_kkt_matrix(h_matrix_assembled(),
-                             iteration_matrix_assembled(),
-                             w_matrix_assembled());
+            // H (M+ h^2 \theta^2 K)^-1 H^t
+            compute_kkt_matrix(h_matrix_assembled(),
+                               iteration_matrix_assembled(),
+                               w_matrix_assembled());
+          }
         }
         else {
           // fem systems are not present in data
@@ -284,22 +654,65 @@ struct one_step_integrator {
         // assumption: compile time element is the first one.
         auto ct_elem = std::get<0>(elements());
 
-        auto &&h_mat = ct_elem.h_matrix_assembled();
-        auto &&m_mat = ct_elem.mass_matrix_assembled();
-        auto &&w_mat = ct_elem.w_matrix_assembled();
+        auto&& h_mat = ct_elem.h_matrix_assembled();
+        auto&& m_mat = ct_elem.mass_matrix_assembled();
+        auto&& w_mat = ct_elem.w_matrix_assembled();
 
         resize(tmp_matrix, size1(h_mat), size0(h_mat));
-        solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+        if constexpr (with_k_matrix()) {
+          solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat,
+                                             tmp_matrix);
+        }
+        else {
+          solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+        }
         prod(h_mat, tmp_matrix, w_mat);
+      }
+
+      // compute H vfree
+      void compute_q_nsp_vector_assembled(auto step)
+      {
+        auto& data = self()->data();
+        auto ct_elem = std::get<0>(elements());
+
+        auto& ct_ydots_next =
+            storage::attr_values<ct_interaction, "ydot">(data, step + 1);
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation">(data, step);
+
+        auto k = 0;
+        for (auto [ydot_next, activation] :
+             view::zip(ct_ydots_next, ct_activations)) {
+          if (activation) {
+            set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
+          }
+        }
+
+        if constexpr (with_k_matrix()) {
+          auto& rt_ct_ydots_next =
+              storage::attr_values<rt_ct_interaction, "ydot">(data, step + 1);
+          auto& rt_ct_activations =
+              storage::prop_values<rt_ct_interaction, "activation">(data,
+                                                                    step);
+
+          for (auto [ydot_next, activation] :
+               view::zip(rt_ct_ydots_next, rt_ct_activations)) {
+            if (activation) {
+              // /!\ with ct_elem offsets (0), should be directly in
+              // global q_nsp_vector_assembled()
+              set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
+            }
+          }
+        }
       }
 
       void compute_input(auto time_step)
       {
-        auto &h_matrix = h_matrix_assembled();
-        auto &lambda = lambda_vector_assembled();
-        auto &p0 = p0_vector_assembled();
-        auto &velo = velocity_vector_assembled();
-        auto &mass_matrix = mass_matrix_assembled();
+        auto& h_matrix = h_matrix_assembled();
+        auto& lambda = lambda_vector_assembled();
+        auto& p0 = p0_vector_assembled();
+        auto& velo = velocity_vector_assembled();
+        auto& mass_matrix = mass_matrix_assembled();
 
         resize(p0, size1(h_matrix));
         resize(velo, size1(h_matrix));
@@ -308,7 +721,12 @@ struct one_step_integrator {
         prodt1(h_matrix, lambda, p0);
 
         if constexpr (with_k_matrix()) {
-          solve_linear_system(iteration_matrix_assembled(), p0, velo);
+          if (algebra::nnz(k_matrix_assembled()) > 0) {
+            solve_linear_system(iteration_matrix_assembled(), p0, velo);
+          }
+          else {
+            solve_linear_system(mass_matrix, p0, velo);
+          }
         }
         else {
           solve_linear_system(mass_matrix, p0, velo);

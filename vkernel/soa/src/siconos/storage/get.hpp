@@ -76,7 +76,7 @@ static constexpr decltype(auto) attr_memory(auto& data)
 template <match::item I, string_literal S>
 static constexpr decltype(auto) attr_memory(auto& data)
 {
-  return mp::get<attr_t<I, S>>(data.store());
+  return mp::get<checked_attr_t<I, S>>(data.store());
 };
 
 template <string_literal S>
@@ -111,6 +111,7 @@ static constexpr decltype(auto) attr_values(auto& data, auto step)
 };
 
 template <match::item I, string_literal S, typename D>
+requires match::with_attribute<I, symbol<S>>
 static constexpr decltype(auto) attr_values(D&& data, auto step)
 {
   return memory(step, (attr_memory<I, S>(data)));

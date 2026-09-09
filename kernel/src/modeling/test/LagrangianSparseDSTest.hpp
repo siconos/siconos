@@ -20,13 +20,11 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "LagrangianSparseDS.hpp"
-#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 class LagrangianSparseDSTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(LagrangianSparseDSTest);
-
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianSparseDSTest);
 

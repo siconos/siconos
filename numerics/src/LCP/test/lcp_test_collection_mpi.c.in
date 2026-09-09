@@ -17,6 +17,7 @@
  */
 #include <stdio.h>           // for printf
 #include <string.h>          // for strcmp
+#include <stdlib.h>
 #include "lcp_cst.h"         // for SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP_BARD
 #include "lcp_test_utils.h"  // for lcp_test_function
 #include "test_utils.h"      // for TestCase, build_test_collection_generic
@@ -83,6 +84,7 @@ int main(void)
   int number_of_tests = n_data * n_solvers;
   int out = run_test_collection(collection, number_of_tests, lcp_test_function);
   free_test_collection(collection, number_of_tests);
+  free(_data_collection);
 
   PetscCall(PetscFinalize());
   return out;

@@ -208,7 +208,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
   auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
 
   // Start computation
-  double timeStep = _simulation->timeStep();
+  double timeStep = simulation()->timeStep();
   double htheta = timeStep * _theta;
   double conditionningMagicCoeff = 1.0;
 
@@ -265,10 +265,10 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
   //  h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) -
   //  h(1-\theta)f(x_k,t_k) $
-
-  double t = _simulation->nextTime();         // End of the time step
-  double told = _simulation->startingTime();  // Beginning of the time step
-  double time_step = t - told;                // time step length
+  auto sim = simulation();
+  double t = sim->nextTime();         // End of the time step
+  double told = sim->startingTime();  // Beginning of the time step
+  double time_step = t - told;        // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -503,7 +503,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
     // Update ds variables with the current iteration state
     *solid->velocity() = v_iter;
     *solid->stress() = sigma_iter;
-    auto time_step = _simulation->timeStep();
+    auto time_step = simulation()->timeStep();
     *solid->q() = time_step * _theta * solid->velocity_read() +
                   time_step * (1. - _theta) * solid->velocityMemory().getSiconosVector(0) +
                   solid->qMemory().getSiconosVector(0);
@@ -512,10 +512,10 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
 
 void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeIteration() {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIteration()\n");
-
-  bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
-  double time_step = _simulation->timeStep();
+  auto sim = simulation();
+  bool useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
+  double time_step = sim->timeStep();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;

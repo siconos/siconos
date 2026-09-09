@@ -30,7 +30,6 @@
 extern "C" {
 #endif
 
-#include "FrictionContactProblem.h"
 #include "SolverOptions.h"
 
 /**
@@ -347,8 +346,6 @@ void fc3d_IPM_SNM(FrictionContactProblem* problem, double* reaction, double* vel
                   int* info, SolverOptions* options);
 
 void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options);
-
-void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options);
 
 void fc3d_ipm_snm_set_default(SolverOptions* options);
 

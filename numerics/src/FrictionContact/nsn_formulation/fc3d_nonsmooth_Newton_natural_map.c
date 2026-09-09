@@ -23,6 +23,7 @@
 #include <stdio.h>   // for printf, NULL
 #include <stdlib.h>  // for calloc, free, malloc
 
+#include "FrictionContactProblem.h"   // IWYU pragma: keep
 #include "FrictionContact_options.h"  // for FC3D_NSN_NM
 #include "NaturalMapGenerated.h"      // for fc3d_NaturalMapFunctionGe...
 #include "fc3d_Solvers.h"

@@ -59,13 +59,12 @@ class SMCTest : public CppUnit::TestFixture {
 #endif
   // Members
 
-  unsigned int _n;
+  size_t _n;
   double _h;
   double _t0;
   double _T;
   double _tol;
   double _beta;
-  double _xFinal;
   std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;

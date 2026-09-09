@@ -10,7 +10,6 @@
 #include "SolverOptions.h"           // for SolverOptions, solver_options_de...
 #include "numerics_verbose.h"        // for verbose
 #include "projectionOnCone.h"        // for projectionOnCone
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 typedef struct {
   ConvexQP *cqp;
@@ -78,7 +77,6 @@ static int test_0(void) {
   }
 
   solver_options_delete(options);
-  free(options);
   frictionContactProblem_free(problem);
   free(pb);
   free(z);
@@ -164,8 +162,9 @@ static int test_1(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   solver_options_delete(options);
-  free(options);
-  frictionContactProblem_free(problem);
+  problem->M = NULL;
+  problem->q = NULL;
+  frictionContactProblem_free(problem);  // Everything allready freed inside convexQP_ADMM
   free(pb);
   free(z);
   free(w);
@@ -253,7 +252,8 @@ static int test_2(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   solver_options_delete(options);
-  free(options);
+  problem->M = NULL;
+  problem->q = NULL;
   frictionContactProblem_free(problem);
   free(pb);
   free(z);
@@ -338,7 +338,8 @@ static int test_3(void) {
     printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
   solver_options_delete(options);
-  free(options);
+  problem->M = NULL;
+  problem->q = NULL;
   frictionContactProblem_free(problem);
   free(pb);
   free(z);

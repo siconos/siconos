@@ -54,6 +54,26 @@ if(WITH_GIT)
     OUTPUT_VARIABLE SOURCE_GIT_SHA1
     OUTPUT_STRIP_TRAILING_WHITESPACE
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+  # Get url of repo (required for links to source code in doc)
+  execute_process(
+    COMMAND git config --get remote.origin.url
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_REMOTE_URL
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # Convert SSH URL to HTTPS URL
+  if(GIT_REMOTE_URL MATCHES "^git@([^:]+):(.+)$")
+    set(GIT_WEB_URL "https://${CMAKE_MATCH_1}/${CMAKE_MATCH_2}")
+  else()
+    set(GIT_WEB_URL "${GIT_REMOTE_URL}")
+  endif()
+
+  # Remove .git suffix
+  string(REGEX REPLACE "\\.git$" "" GIT_WEB_URL "${GIT_WEB_URL}")
+
+
 endif()
 
 
@@ -269,10 +289,13 @@ if(WITH_TESTING)
   endif()
   if(WITH_PYB11_WRAPPER)
     find_python_module(pytest REQUIRED)
+    # -s: capture all outputs, even if the test has passed
+    # -vv: high verbosity
+    # -rA: display a short test summary info for all tests
     if(WITH_AGGRESSIVE_PYTHON_TESTS)
-      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+      set(pytest_opt -rA -s -vv -pep8 CACHE INTERNAL "extra options for py.test")
     else()
-      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+      set(pytest_opt -rA -s -vv CACHE INTERNAL "extra options for py.test")
     endif()
   endif()
 endif()

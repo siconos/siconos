@@ -1,10 +1,4 @@
-**Contacts**
-
-Siconos development team
-
-`INRIA - Tripop`_
-
-**E-Mail** : siconos-team@inria.fr
+siconos-team@inria.fr - `INRIA - Tripop`_
 
 `Contributors`_
 	

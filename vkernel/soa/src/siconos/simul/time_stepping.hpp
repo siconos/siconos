@@ -85,8 +85,6 @@ struct time_stepping : item {
 
       indice_t step = current_step();
 
-      indice_t total_number_of_involved_ds = 0;
-
       // loop over different kind of dynamic systems
       mp::for_each(osi.elements(), [&](auto elem) {
         // udpate M^-1 * fext
@@ -103,13 +101,11 @@ struct time_stepping : item {
         // -> y & ydot (step & step+1)
         elem.compute_output(step);
         elem.compute_output(step + 1);
-
-        // compute active interactions
-        auto [ninter, nds] =
-            elem.compute_active_interactions(step, time_step());
-
-        total_number_of_involved_ds += nds;
       });
+
+      // compute active interactions
+      indice_t total_number_of_involved_ds =
+          osi.compute_active_interactions(step, time_step());
 
       if (total_number_of_involved_ds > 0) {
         // resize assembled matrices and vectors
@@ -118,15 +114,19 @@ struct time_stepping : item {
         mp::for_each(osi.elements(), [&](auto elem) {
           // a least one activated interaction
           elem.compute_h_matrices(step);
+        });
 
-          elem.assemble_h_matrix_for_involved_ds(step);
+        osi.assemble_h_matrix_for_involved_ds(step);
+
+        mp::for_each(osi.elements(), [&](auto elem) {
           elem.assemble_mass_matrix_for_involved_ds(step);
           elem.assemble_k_matrix_for_involved_ds(step);
           elem.assemble_vectors(step);
 
           elem.nsl_effect_on_free_output(step);
-          elem.compute_q_nsp_vector_assembled(step);
         });
+
+        osi.compute_q_nsp_vector_assembled(step);
 
         // H M^-1 H^t or H (M^-1 + h^2 * theta^2 * K) H^t
         osi.compute_w_matrix(step, time_step());

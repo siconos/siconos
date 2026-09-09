@@ -49,6 +49,7 @@ set(${COMPONENT}_DIRS
   src/NonSmoothSolvers
 )
 
+
 # - Extras, optional -
 # Static verifications (ACSL)
 if(WITH_FRAMA_C)
@@ -120,6 +121,7 @@ endif()
 # -- create/setup component target --
 include(ComponentSetup)
 
+
 create_siconos_component(${COMPONENT})
 
 # Windows stuff
@@ -149,6 +151,13 @@ set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
 
 if(HAVE_QL0001) # From externals setup
   set_source_files_properties(src/LCP/lcp_nsqp.c src/LCP/lcp_qp.c PROPERTIES COMPILE_DEFINITIONS "HAVE_QL0001")  
+endif()
+
+
+if(WITH_MA57)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_MA57.c)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE src/linalg/optional/NM_MA57.h)
+  target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/linalg/optional>)
 endif()
 
 # - sort -
@@ -213,7 +222,7 @@ endif()
 if(WITH_PETSC)
   include(PetscSetup)
   target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
-  target_link_libraries(numerics PRIVATE MPI::MPI_C)
+#  target_link_libraries(numerics PRIVATE MPI::MPI_C)
   target_compile_definitions(numerics PUBLIC SICONOS_PETSC)
 endif()
 
@@ -261,7 +270,9 @@ include(gams_path_setup)
 # - UMFPack -
 if(WITH_UMFPACK)
   find_package(UMFPACK REQUIRED)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_UMFPACK.c)
   target_link_libraries(numerics PUBLIC UMFPACK::UMFPACK)
+  target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/linalg/optional>)
 endif()
 
 # - SuperLU -
@@ -269,10 +280,15 @@ endif()
 # Serial version
 if(WITH_SUPERLU)
   find_package(SuperLU REQUIRED)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_SuperLU.c)
+  target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/linalg/optional>)
 endif()
+
 # Multithreaded version
 if(WITH_SUPERLU_MT)
   find_package(SuperLU_MT REQUIRED COMPONENTS MT)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_SuperLU_MT.c)
+  target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/linalg/optional>)
 endif()
 # MPI/OpenMP version
 if(WITH_SUPERLU_DIST)
@@ -284,17 +300,19 @@ if(SuperLU_FOUND)
 endif()
 
 # mumps and mpi
-if(WITH_MPI)
+
+if(SICONOS_HAS_MPI)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_MPI.c)
+  target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/linalg/optional>)
   target_include_directories(numerics PUBLIC ${MPI_C_INCLUDE_DIRS})
   # Note FP : PUBLIC for the moment since it's required by tests.
   # This will be improved later.
   target_link_libraries(numerics PUBLIC ${MPI_C_LIBRARIES})
-  #   target_include_directories(numerics PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
-  #   target_link_libraries(numerics PRIVATE ${MPI_Fortran_LIBRARIES})
 endif()
 
 if(WITH_MUMPS)
-  if(WITH_MPI)
+  target_sources(numerics PRIVATE src/linalg/optional/NM_MUMPS.c)
+  if(SICONOS_HAS_MPI)
     find_package(MUMPS REQUIRED COMPONENTS PAR)
   else()
     find_package(MUMPS REQUIRED COMPONENTS SEQ)
@@ -383,14 +401,7 @@ endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
-
-if(WITH_MPI AND WITH_TESTING AND NOT WITH_GUIX)
-  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
-  # This will be reviewed later.
-  target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(numerics-tests PUBLIC ${MPI_C_LIBRARIES})
-endif()
-
+  
 # --- python bindings ---
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
@@ -425,6 +436,6 @@ ${${COMPONENT}_DIRS} # All .hpp are installed
 )
 
 # List header files (in dir above) that must not be installed 
-set(${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
+list(APPEND ${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
 
 siconos_component_install_setup(${COMPONENT})

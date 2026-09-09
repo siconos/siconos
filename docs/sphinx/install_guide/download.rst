@@ -4,11 +4,6 @@
 Download Siconos
 ================
 
-.. contents::
-   :local:
-
-
-
 Latest source release
 ---------------------
 

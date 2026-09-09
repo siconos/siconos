@@ -74,8 +74,3 @@ The following targets will be executed:
 * make docker-ctest : call cmake, make, make test on Siconos sources inside a docker container, based on the image created with make docker-build.
 
 A report will be sent to siconos cdash.
-
-
-
-
-For details on the description of a task, check :ref:`adding_ci_task`.

@@ -18,11 +18,11 @@
 
 #include <stdlib.h>  // for malloc
 
-#include "SolverOptions.h"               // for SolverOptions, solver_option...
-#include "NumericsFwd.h"                 // for SolverOptions
-#include "../test-utils/plasticity_test_utils.h"       // for build_test_collection
-#include "test_utils.h"                  // for TestCase
-#include "Plasticity_options.h"          // for PLASTICITY_2D_NSGS, etc
+#include "../test-utils/plasticity_test_utils.h"  // for build_test_collection
+#include "NumericsFwd.h"                          // for SolverOptions
+#include "Plasticity_options.h"                   // for PLASTICITY_2D_NSGS, etc
+#include "SolverOptions.h"                        // for SolverOptions, solver_option...
+#include "test_utils.h"                           // for TestCase
 
 TestCase* build_test_collection(int n_data, const char** data_collection,
                                 int* number_of_tests) {
@@ -59,9 +59,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(PLASTICITY_2D_NSGS);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    solver_options_update_internal(
-        collection[current].options, 0,
-        PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration);
+    solver_options_update_internal(collection[current].options, 0,
+                                   PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration);
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
     current++;
@@ -73,8 +72,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].will_fail = 0;
     collection[current].options = solver_options_create(PLASTICITY_2D_NSGS);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-    solver_options_update_internal(collection[current].options, 0,
-                                   PLASTICITY_2D_ONECONE_NSN);
+    solver_options_update_internal(collection[current].options, 0, PLASTICITY_2D_ONECONE_NSN);
     current++;
   }
 

@@ -21,8 +21,6 @@ variables:
   # By default we allow builds to run in parallel, but certain
   # configurations may require non-parallel builds (cf. serialization that requires too much memory)
   PARALLEL_BUILD: 1
-  GIT_DEPTH: 1
-  #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
   # Default build path
   BUILD_DIR: $CI_PROJECT_DIR/build
 
@@ -53,20 +51,15 @@ stages:
   # To execute cmake and configure the project
   - configure 
   # To execute make and build the project
-  - build     
-  # To run all tests
-  - test      
-  # To install software, generate a "siconos-ready" docker image and asave it in the registry.
-  - install 
-  - release
-  # To build and run all examples
-  - examples
-  # Templates for these jobs : .siconos-build (see below).
-  # --- Doc stages ---
-  # Build documentation (run doxygen, sphinx, ...)
-  - doc-build
-  # Publish html pages
+  - build
+  # Build and publish html pages
   - doc-deploy 
+  # To install software, generate a "siconos-ready" docker image and asave it in the registry.
+  - install
+  # To run all tests, examples ...
+  - test      
+  # Create and provide a release
+  - release
 
 
 # --- Templates definitions ---
@@ -111,9 +104,8 @@ stages:
     
 .docker-manual-rules:
     rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/
-      when: manual
-    - when: never
+    - when: manual
+      allow_failure: true
 
 .docker-build:
   extends:
@@ -125,12 +117,11 @@ stages:
     - .docker-manual-rules
     - .docker-create-image
 
-
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
       when: never
-    - if: $CI_COMMIT_BRANCH == "master" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
       when: never  # avoid duplicate pipeline: ci with main branch  only for public siconos
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
@@ -141,7 +132,7 @@ workflow:
 
 .full-rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" # If changes are pushed to the default branch
+    - if: $CI_COMMIT_BRANCH == "main" # If changes are pushed to the default branch
     - if: $CI_COMMIT_TAG   # If changes are pushed for a tag.
     - if: $CI_COMMIT_MESSAGE =~ /^\[all-jobs\]/
 
@@ -149,6 +140,9 @@ workflow:
   rules:
     - when: on_success
 
+.manual-only:
+  rules:
+    - when: manual
     
   
 # -- Template used for siconos configure-build-test-install jobs  --

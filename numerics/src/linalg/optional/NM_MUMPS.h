@@ -19,14 +19,14 @@
 #ifndef NM_MUMPS_h
 #define NM_MUMPS_h
 
-#include "NumericsFwd.h"  // for NumericsMatrix
-
+#ifdef WITH_MUMPS
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#ifdef WITH_MUMPS
 #include <dmumps_c.h>
+
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 #ifndef MUMPS_INT
 #define MUMPS_INT int
@@ -166,7 +166,6 @@ void NM_MUMPS(NumericsMatrix* A, int job);
  */
 void NM_MUMPS_free(void* p);
 
-#endif /* WITH_MUMPS */
 /** copy MUMPS id if compiled WITH_MUMPS, otherwise do nothing.
  *
  *  \param A the source NumericsMatrix
@@ -177,5 +176,6 @@ void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B);
 #if defined(__cplusplus)
 }
 #endif
+#endif /* WITH_MUMPS */
 
 #endif

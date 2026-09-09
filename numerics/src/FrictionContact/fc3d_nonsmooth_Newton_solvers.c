@@ -516,8 +516,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
                             rho[3 * contact + 2]);
   }
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_clear_block(problem->M->matrix1);
-    SBM_clear(problem->M->matrix1);
+    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
     problem->M->matrix1 = matrix1;
     localproblem->M->matrix0 = NULL;
   }

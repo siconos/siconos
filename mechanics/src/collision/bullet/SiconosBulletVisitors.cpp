@@ -22,7 +22,6 @@
 #include "RigidBodyDS.hpp"
 #include "SiconosBulletCollisionManager_impl.hpp"
 #include "SiconosShape.hpp"  // for SiconosPlane, SiconosBox and so on
-#include "SiconosVector.hpp"
 
 void siconos::collision::bullet::internal::CreateCollisionObjectShapeVisitor::visit(
     std::shared_ptr<siconos::collision::SiconosPlane> shape) {

@@ -75,8 +75,8 @@ namespace siconos::integrators {
     \f]
 
     where \f$ \theta = [0,1] \f$ and \f$ \gamma \in [0,1] \f$.
-    As in Acary & Brogliato 2008, we call the previous problem  the ``one--step
-    nonsmooth problem''.
+    As in Acary & Brogliato 2008, we call the previous problem  the one--step
+    nonsmooth problem.
 
     Another variant can also be used (FullThetaGamma scheme)
 
@@ -114,7 +114,6 @@ namespace siconos::integrators {
     See User's guide, for details.
 
  */
-
 class EulerMoreauOSI : public OneStepIntegrator {
  protected:
   ACCEPT_SERIALIZATION(EulerMoreauOSI);
@@ -401,7 +400,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *
    *  \param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level) override{};
+  void updateState(const unsigned int level) override {};
 
   /** compute the current iteration
    *

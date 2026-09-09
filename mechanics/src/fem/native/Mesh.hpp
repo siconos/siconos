@@ -46,7 +46,7 @@ class MeshVertex {
   double _z = 0.;
 
   /** elements to which the node belongs **/
-  std::vector<std::shared_ptr<MeshElement>> elements_ = {};
+  std::vector<std::weak_ptr<MeshElement>> elements_ = {};
 
   // Rule of five
   MeshVertex() = delete;
@@ -68,7 +68,7 @@ class MeshVertex {
   size_t num() const { return num_; }
 
   void link_element(std::shared_ptr<MeshElement> elem) { elements_.push_back(elem); }
-  const std::span<const std::shared_ptr<MeshElement>> elements() const { return elements_; }
+  const std::span<const std::weak_ptr<MeshElement>> elements() const { return elements_; }
 
   virtual void display() const;
 };

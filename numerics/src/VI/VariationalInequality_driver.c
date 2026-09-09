@@ -18,7 +18,6 @@
 #include <assert.h>  // for assert
 #include <math.h>    // for fmin
 #include <stdio.h>   // for printf, fprintf, NULL
-#include <stdlib.h>  // for exit, EXIT_FAILURE
 
 #include "NonSmoothDrivers.h"                    // for variationalInequalit...
 #include "NumericsFwd.h"                         // for VariationalInequality
@@ -26,12 +25,11 @@
 #include "SiconosSets.h"                         // for project_on_set
 #include "SolverOptions.h"                       // for SolverOptions, solve...
 #include "VI_cst.h"                              // for SICONOS_VI_BOX_AVI_LSA
-#include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
-#include "siconos_debug.h"                       // for DEBUG_PRINTF
+#include "numerics_verbose.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 int variationalInequality_driver(VariationalInequality* problem, double* x, double* w,
                                  SolverOptions* options) {

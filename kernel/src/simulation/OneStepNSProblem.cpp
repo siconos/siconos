@@ -34,7 +34,7 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 bool siconos::nonsmooth_formulations::OneStepNSProblem::hasInteractions() const {
-  return _simulation->nonSmoothDynamicalSystem()
+  return simulation()->nonSmoothDynamicalSystem()
              ->topology()
              ->indexSet(_indexSetLevel)
              ->size() > 0;

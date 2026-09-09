@@ -16,17 +16,15 @@
  * limitations under the License.
  */
 
-#include "NumericsFwd.h"  // for NumericsMatrix
-
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
-#endif
+
+#include "NumericsFwd.h"  // for NumericsMatrix
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#ifdef SICONOS_HAS_MPI
 MPI_Comm NM_MPI_comm(NumericsMatrix* A);
 void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
 #include <stdio.h>
@@ -45,7 +43,6 @@ void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
       MPI_Abort(COMM, error_code);                                          \
     };                                                                      \
   } while (0)
-#endif
 
 int NM_MPI_rank(NumericsMatrix* A);
 
@@ -53,4 +50,5 @@ void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B);
 
 #if defined(__cplusplus)
 }
+#endif
 #endif

@@ -457,10 +457,6 @@ template <typename Attrs, string_literal S>
 using get_attr_t = std::decay_t<decltype(mp::filter(
     Attrs{}, mp::derive_from<symbol<S>>)[0_c])>;
 
-template <match::item Item, string_literal S>
-using attr_t = std::decay_t<decltype(mp::filter(
-    attributes(Item{}), mp::derive_from<symbol<S>>)[0_c])>;
-
 static auto properties =
     []<match::item Item>(Item) constexpr -> decltype(auto) {
   if constexpr (match::properties<Item>) {
@@ -683,8 +679,39 @@ concept without_attached_storages_bindings =
 template <typename Item>
 concept batch_capable = requires { typename Item::batch_capable; };
 
+template <typename Prop>
+concept without_binding = requires { typename Prop::without_binding_t; };
+
+template <typename Item>
+concept empty_item = requires { typename Item::empty_item_t; };
+
+template <typename Item, typename Symb>
+concept with_attribute = requires {
+  // Check that filter returns at least one element
+  {
+    mp::size(mp::filter(storage::pattern::attributes(Item{}),
+                        mp::derive_from<Symb>))
+  } -> std::convertible_to<std::size_t>;
+  requires(mp::size(mp::filter(storage::pattern::attributes(Item{}),
+                               mp::derive_from<Symb>)) > mp::size_c<0_c>)
+  .value; // hana specific => hide under mp.hpp
+};
+
 }  // namespace match
 
-struct empty_item : item {};
+struct empty_item : item {
+  using empty_item_t = void;
+};
+
+template <match::item Item, string_literal S>
+using attr_t = std::decay_t<decltype(mp::filter(
+    attributes(Item{}), mp::derive_from<symbol<S>>)[0_c])>;
+
+template <match::item Item, string_literal S>
+  requires match::with_attribute<Item, symbol<S>>
+using checked_attr_t = attr_t<Item, S>;
+
+template <match::item Item, string_literal S>
+constexpr bool with_attribute_v = match::with_attribute<Item, symbol<S>>;
 
 }  // namespace siconos::storage::pattern

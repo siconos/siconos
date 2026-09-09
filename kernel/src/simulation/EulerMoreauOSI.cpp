@@ -99,9 +99,8 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
   assert(ds2);
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::EulerMoreauOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::EulerMoreauOSI::WORK_INTERACTION_LENGTH);
   }
   if (!interProp.workMatrices) {
     interProp.workMatrices =
@@ -274,7 +273,9 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
     else
       iterationMat->setIdentity();
 
-    if (foltids->hasA()) *iterationMat -= _simulation->timeStep() * _theta * foltids->A();
+    auto time_step = simulation()->timeStep();
+
+    if (foltids->hasA()) *iterationMat -= time_step * _theta * foltids->A();
 
     //  if (_useGamma)
     {
@@ -286,7 +287,7 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
         auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter->relation());
         if (rel.hasJacobiangOver_state()) {
           auto K = rel.jacobiangOver_state();
-          *iterationMat -= _simulation->timeStep() * _gamma * K;
+          *iterationMat -= time_step * _gamma * K;
         }
       }
     }
@@ -336,7 +337,7 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
   // When this function is called, we assume that memory has been allocated for iterationMatrix
   // (call to initializeIterationMatrix)
 
-  auto h = _simulation->timeStep();
+  auto h = simulation()->timeStep();
   auto fods = dynamic_cast<siconos::modeling::FirstOrderNonLinearDS*>(&ds);
   // No need to check if the system is first-order. This must have been done during init.
 
@@ -414,9 +415,10 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double time = _simulation->nextTime();      // End of the time step
-  double told = _simulation->startingTime();  // Beginning of the time step
-  double h = time - told;                     // time step length
+  auto sim = simulation();
+  double time = sim->nextTime();      // End of the time step
+  double told = sim->startingTime();  // Beginning of the time step
+  double h = time - told;             // time step length
 
   DEBUG_PRINTF("nextTime %f\n", time);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -530,9 +532,10 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
   // "Free" means without taking non-smooth effects into account.
   DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeFreeState()\n");
 
-  double t = _simulation->nextTime();         // End of the time step
-  double told = _simulation->startingTime();  // Beginning of the time step
-  double h = t - told;                        // time step length
+  auto sim = simulation();
+  double t = sim->nextTime();         // End of the time step
+  double told = sim->startingTime();  // Beginning of the time step
+  double h = t - told;                // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -657,12 +660,12 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
     auto W = _dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     computeIterationMatrix(time, *ds, dsv, *W);
   }
-
+  auto sim = simulation();
   if (!_explicitJacobiansOfRelation) {
-    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+    sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
 
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-    auto indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+    auto indexSet0 = sim->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
     for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
       auto& inter = *indexSet0->bundle(*ui);
@@ -688,7 +691,7 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
   }
   // update alpha variables
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto indexSet0 = sim->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet0->bundle(*ui);
@@ -727,7 +730,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
   DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeFreeOutput(...)\n");
-  auto allOSNS = _simulation->oneStepNSProblems();
+  auto allOSNS = simulation()->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
 
@@ -865,12 +868,12 @@ void siconos::integrators::EulerMoreauOSI::integrate(double& tinit, double& tend
 
 void siconos::integrators::EulerMoreauOSI::computeIteration() {
   DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration\n");
+  auto sim = simulation();
+  double h = sim->timeStep();
 
-  double h = _simulation->timeStep();
-
-  double RelativeTol = _simulation->relativeConvergenceTol();
-  bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
+  double RelativeTol = sim->relativeConvergenceTol();
+  bool useRCC = sim->useRelativeConvergenceCriteron();
+  if (useRCC) sim->setRelativeConvergenceCriterionHeld(true);
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
 
@@ -891,7 +894,7 @@ void siconos::integrators::EulerMoreauOSI::computeIteration() {
     // TODO ???
     bool baux = (useRCC &&
                  (not std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) &&
-                 _simulation->relativeConvergenceCriterionHeld());
+                 sim->relativeConvergenceCriterionHeld());
 
     //    std::shared_ptr<siconos::algebra::SiconosVector> xFree = d->xFree();
 
@@ -915,7 +918,7 @@ void siconos::integrators::EulerMoreauOSI::computeIteration() {
       auto aux =
           (ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER]->norm()) /
           (ds_norm_ref);
-      if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+      if (aux > RelativeTol) sim->setRelativeConvergenceCriterionHeld(false);
     }
     DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeIteration New value of x\n");
     DEBUG_EXPR(siconos::algebra::print(x));
@@ -925,16 +928,14 @@ void siconos::integrators::EulerMoreauOSI::computeIteration() {
 void siconos::integrators::EulerMoreauOSI::display() const {
   OneStepIntegrator::display();
 
-  std::cout << "====== EulerMoreauOSI OSI display ======"
-            << "\n";
+  std::cout << "====== EulerMoreauOSI OSI display ======" << "\n";
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------\n";
-    std::cout << "--> W of dynamical system number " << ds->number() << ": "
-              << "\n";
+    std::cout << "--> W of dynamical system number " << ds->number() << ": " << "\n";
     if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
       siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
     else
@@ -962,9 +963,9 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
       "siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned int "
       "level)\n");
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+  //simulation()->nonSmoothDynamicalSystem()->updateOutput(time,level);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  auto indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto indexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet0->bundle(*ui);
     assert(inter.lowerLevelForOutput() <= level);
@@ -1042,11 +1043,11 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
 void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int level) {
   // Set dynamical systems non-smooth part to zero.
   // Warning: This reset may be prone to issue with multiple osis.
-  // _simulation->nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
+  // simulation()->nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
 
-  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
     if (!checkInteractionOSI(indexSet0, ui)) continue;
     auto& inter = *indexSet0.bundle(*ui);

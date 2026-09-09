@@ -29,7 +29,6 @@
 #include <stdbool.h>
 
 #include "SolverOptions.h"
-#include "numerics_errors.h"
 
 #ifdef __cplusplus
 extern "C" {

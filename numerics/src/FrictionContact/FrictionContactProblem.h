@@ -72,7 +72,7 @@ FrictionContactProblem *frictionContactProblem_new(void);
  *  \param[in] mu the mu vector
  *  \return a pointer to a FrictionContactProblem structure
  */
-FrictionContactProblem *frictionContactProblem_new_with_data(int dim, int nc,
+FrictionContactProblem *frictionContactProblem_new_with_data(int dim, size_t nc,
                                                              NumericsMatrix *M, double *q,
                                                              double *mu);
 
@@ -119,8 +119,20 @@ FrictionContactProblem *frictionContact_newFromFile(FILE *file);
  */
 FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
 
+/** @brief create a SplittedFrictionContactProblem
+ *
+ *  @param problem the source problem
+ *  @param splitted_problem the new (splitted) problem
+ *  @return error code
+ */
 int createSplittedFrictionContactProblem(FrictionContactProblem *problem,
-                                          SplittedFrictionContactProblem *splitted_problem);
+                                         SplittedFrictionContactProblem *splitted_problem);
+
+/** @brief free a SplittedFrictionContactProblem
+ *
+ *  @param problem the problem to free
+ */
+void splittedFrictionContactProblem_free(SplittedFrictionContactProblem *problem);
 
 void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,
                                                double *reaction, double *velocity, double tol,

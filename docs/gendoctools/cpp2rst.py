@@ -35,6 +35,7 @@ import re
 import buildtools as bt
 from pathlib import Path
 from gendoctools import common
+from collections import defaultdict
 
 try:
     import lxml.etree as ET
@@ -43,32 +44,65 @@ except ImportError:
 
 components_docs = {
     "externals": "API or tools related to external software libraries used by Siconos.",
-    "numerics": "a collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.",
-    "kernel": "high-level API to modelise and simulate nonsmooth dynamical systems.",
-    "control": "control toolbox",
-    "mechanics": "toolbox for collision detection and joints",
-    "mechanisms": "toolbox for collision detection and joints (legacy version, won’t be sustained in long term)",
-    "io": "tools related to input/outputs (hdf5, vtk …)",
+    "numerics": "A collection (C language) of low-level algorithms for solving basic algebra and"
+    " optimization problem arising in the simulation of nonsmooth dynamical systems.",
+    "kernel": "High-level C++ API to modelise and simulate nonsmooth dynamical systems.",
+    "control": "Control toolbox",
+    "mechanics": "Toolbox for collision detection and joints",
+    "mechanisms": "Toolbox for collision detection and joints"
+    " (legacy version, won’t be sustained in long term)",
+    "io": "Tools related to input/outputs (hdf5, vtk …)",
+}
+
+# map between types in xml files and their directive and name
+documentable_types = {
+    "class": {
+        "directive": "doxygenclass",
+        "title": "Class",
+    },
+    "struct": {
+        "directive": "doxygenstruct",
+        "title": "Struct",
+    },
+    "typedef": {
+        "directive": "doxygentypedef",
+        "title": "Type",
+    },
+    "enum": {
+        "directive": "doxygenenum",
+        "title": "Enum",
+    },
 }
 
 
-def create_breathe_files(headers, srcdir, component_name, sphinx_directory, xml_output):
+def create_breathe_files(
+    headers,
+    srcdir,
+    component_name,
+    sphinx_directory,
+    xml_output,
+    git_url=None,
+    git_commit=None,
+):
     """Create rst files for sphinx from xml (doxygen) outputs generated
        from headers.
 
     Parameters
     ----------
-
-    headers : list (cmake like)
-         headers files to parse
-    srcdir : string
-        absolute path to c/c++ sources (CMAKE_SOURCE_DIR)
-    component_name : string
-         component (numerics, kernel, ...) of interest
-    sphinx_directory : string
-        root directory for sphinx rst files
-    xml_output : string
-         (full) path to the requested xml outputs
+    headers : list
+        Header files to parse.
+    srcdir : str
+        Absolute path to C/C++ sources
+    component_name : str
+        component (numerics, kernel, ...) of interest
+    sphinx_directory : str
+        Root sphinx directory.
+    xml_output : str
+        (full) path to the requested xml outputs
+    git_url : str
+        reference repo for the source code (to add link into the doc)
+    git_commit : str
+        id of the commit for which the doc is generated
 
     Notes:
     * for each header, rst files (class, struct, file and source codes)
@@ -82,44 +116,71 @@ def create_breathe_files(headers, srcdir, component_name, sphinx_directory, xml_
     (make <component>-xml2rst)
 
     """
-
     # Get all headers for the current component, as a list.
     headers = bt.parse_cmake_list(headers)
-    rst_files = []
-    # Parse doxygen config (specific to the current component)
-    # doxyconf = common.parse_doxygen_config(doxygen_config_filename)
-    xmlconf = {}
-    # Output path for cpp api documentation
-    sphinx_directory = Path(sphinx_directory, "reference", "cpp", component_name)
-    if not sphinx_directory.exists():
-        os.makedirs(sphinx_directory)
 
-    # Check if doxygen doc is case-sensitive
-    xmlconf["CASE_SENSE_NAMES"] = True
+    sphinx_directory = Path(
+        sphinx_directory,
+        "reference",
+        "cpp",
+        component_name,
+    )
+
+    sphinx_directory.mkdir(parents=True, exist_ok=True)
+
     # Get xml files path
+    xmlconf = {}
     xmlconf["XML_OUTPUT"] = Path(xml_output)
+
+    # Build Doxygen XML index once
+    xml_index = common.build_doxygen_xml_index(
+        xmlconf["XML_OUTPUT"],
+        Path(srcdir),
+    )
+
     all_index = {}
+
     # -- Create rst for classes, structs and files found in xml directory --
     for hfile in headers:
+
         xml2rst(
-            Path(hfile), srcdir, component_name, sphinx_directory, xmlconf, all_index
+            Path(hfile),
+            srcdir,
+            component_name,
+            sphinx_directory,
+            xmlconf,
+            all_index,
+            xml_index,
+            git_url,
+            git_commit,
         )
 
+    # Build lists from the unified index
+    class_and_struct_files = []
+    rst_files = []
     # -- Create rst files to collect list of classes and files
     # (i.e. files created above) --
-    class_and_struct_files = [f for f in sphinx_directory.glob("class*.rst")]
-    class_and_struct_files += [f for f in sphinx_directory.glob("struct*.rst")]
-    class_and_struct_files.sort()
-    pgm_files = [f for f in sphinx_directory.glob("pgm_*.rst")]
-    pgm_files.sort()
-    rst_files = [f for f in sphinx_directory.glob("file_*.rst")]
+    for f in sphinx_directory.glob("*.rst"):
+        if f.stem not in all_index:
+            continue
+        kind = all_index[f.stem][0]
+        if kind in ("class", "struct", "typedef"):
+            class_and_struct_files.append(f)
+        elif kind == "file":
+            rst_files.append(f)
+
+    # For each entry in the index, split according to namespace names
+    # example : all_index[MoreauJeanOSI] = ('siconos::integrators::MoreauJeanOSI','comment (doxygen'))
+    # --> sort first by namespace and then alphabetical order inside each namespace
+    def sort_by_namespace(f):
+        cppname = all_index[f.stem][1]
+        return tuple(split_cpp_name(cppname))
+
+    class_and_struct_files.sort(
+        key=sort_by_namespace,
+    )
     rst_files.sort()
-    all_files = class_and_struct_files + rst_files
-    all_files.sort()
-    # -- Name of the main rst files for the current component --
-    # usually : docs/sphinx/reference/cpp/component_name/autodoc_all.rst
-    outputname = Path(sphinx_directory, "autodoc_all.rst")
-    autodoc_collect(outputname, all_files, all_index, component_name)
+
     # Classes and structs
     outputname = Path(sphinx_directory, "autodoc_classes.rst")
     autodoc_collect(
@@ -127,136 +188,461 @@ def create_breathe_files(headers, srcdir, component_name, sphinx_directory, xml_
         class_and_struct_files,
         all_index,
         component_name,
-        subtitle="Classes and structs",
+        subtitle="Classes, structs and types",
+    )
+
+    # Functions
+    outputname = Path(sphinx_directory, "autodoc_functions.rst")
+    autodoc_collect(
+        outputname,
+        [],
+        all_index,
+        component_name,
+        subtitle="Free functions",
     )
     # Files doc
     outputname = Path(sphinx_directory, "autodoc_files.rst")
     autodoc_collect(
-        outputname, rst_files, all_index, component_name, subtitle="Files documentation"
+        outputname,
+        rst_files,
+        all_index,
+        component_name,
+        subtitle="",
     )
-    # Programs listings
-    autodoc_collect_pgm(pgm_files, component_name, sphinx_directory)
 
 
-def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf, all_index):
-    """Generate rst file(s) from xml (doxygen outputs) for given C/C++ header
+def write_breathe_type_rst(
+    outputname, refid, name, descr, kind, component_name, headername, srcdir
+):
+    """Generate rst file for a documented C++ type."""
+
+    info = documentable_types[kind]
+    title = "{} {}\n".format(
+        info["title"],
+        name,
+    )
+    # title
+    gen = ":orphan:\n\n"
+    gen += ".. _{}:\n\n".format(refid)
+    gen += title
+    gen += len(title) * "-" + "\n\n"
+
+    # link to the header which contains the class
+    relpath = headername.relative_to(Path(srcdir)).as_posix()
+    shortname = relpath
+    file_rst = "file_" + headername.name.replace(".", "_")
+
+    gen += "This object is defined in the file"
+    gen += f" :doc:`{shortname} <{file_rst}>`\n\n"
+
+    # Inheritance diagrams
+    sphinx_root = outputname.parents[3]
+    graph_name = refid + "__inherit__graph_org.svg"
+    graph = sphinx_root / "doxygen" / graph_name
+    if graph.exists():
+        gen += f".. image:: /doxygen/{graph_name}\n"
+        gen += "   :align: center\n\n"
+    # Todo later? Add collab, heritage, call graphs ...
+    gen += ".. {}:: {}\n".format(
+        info["directive"],
+        name,
+    )
+    gen += "   :project: {}\n".format(component_name)
+    # Only classes/structs have members
+    if kind in ("class", "struct"):
+        gen += "   :members:\n"
+    gen += "\n"
+
+    with open(outputname, "wt") as out:
+        out.write(gen)
+
+
+def get_namespace_typedefs(compound):
+    """Get typedef or using information from a namespace XML node."""
+    for section in compound.findall("sectiondef"):
+        if section.attrib.get("kind") != "typedef":
+            continue
+        for member in section.findall("memberdef"):
+            if member.attrib.get("kind") != "typedef":
+                continue
+            name = member.findtext("qualifiedname")
+            if name is None:
+                continue
+            descr = ""
+            brief = member.find("briefdescription")
+            if brief is not None:
+                para = brief.find("para")
+                if para is not None:
+                    descr = ET.tostring(
+                        para,
+                        method="text",
+                        encoding="unicode",
+                    )
+            yield (
+                member.attrib["id"],
+                name,
+                descr,
+            )
+
+
+def fill_all_index(
+    compound,
+    file_rst,
+    all_index,
+    sphinx_directory,
+    component_name,
+    headername,
+    srcdir,
+    object_type,
+    write_rst=True,
+):
+    for member in compound.findall(f".//memberdef[@kind='{object_type}']"):
+        if member.attrib.get("kind") != object_type:
+            continue
+        object_refid = member.attrib["id"]
+        qualified = member.findtext("qualifiedname")
+        object_name = qualified or member.findtext("name")
+        brief = member.find("briefdescription")
+        if brief is not None:
+            object_descr = "".join(brief.itertext()).strip()
+        else:
+            object_descr = ""
+        all_index[object_refid] = (
+            object_type,
+            object_name,
+            object_descr,
+            object_refid,
+            file_rst,
+        )
+        if write_rst:
+            write_breathe_type_rst(
+                Path(sphinx_directory, object_refid + ".rst"),
+                object_refid,
+                object_name,
+                object_descr,
+                object_type,
+                component_name,
+                headername,
+                srcdir,
+            )
+
+
+def xml2rst(
+    headername,
+    srcdir,
+    component_name,
+    sphinx_directory,
+    doxyconf,
+    all_index,
+    xml_index,
+    git_url=None,
+    git_commit=None,
+):
+    """Generate rst file(s) from xml (doxygen outputs) for given C/C++ header.
 
     Parameters
     ----------
     headername : Path()
-        name of the header (full path)
+        Name of the header (full path).
     srcdir : string
-        absolute path to c/c++ sources (CMAKE_SOURCE_DIR)
+        Absolute path to c/c++ sources (CMAKE_SOURCE_DIR).
     component_name : string
-         component (numerics, kernel, ...) of interest
-         (i.e. breathe project)
-    sphinx_directory : string
-        directory where rst files will be written
+        Component (numerics, kernel, ...) of interest
+        (i.e. breathe project).
+    sphinx_directory : Path()
+        Directory where rst files will be written.
     doxyconf : dict
-        dict describing xml/doxy conf.
+        Dict describing xml/doxy configuration.
+    all_index : dict
+        Mapping (roughly xml/rst) used later to build the API index.
+    xml_index : dict
+        global index from doxygen (generated in create_breathe...)
+    git_url : str
+        reference repo for the source code (to add link into the doc)
+    git_commit : str
+        id of the commit for which the doc is generated
     """
-    case_sense_names = doxyconf["CASE_SENSE_NAMES"]
-    xml_path = doxyconf["XML_OUTPUT"]
     # First get list of xml files generated from current header by doxygen
-    xml_files = common.get_xml_files(headername, xml_path, case_sense_names)
-    # Then, for each xml, write sphinx header.
-    # 3 cases : class, struct or file.
-    for f in xml_files:
-        common.filter_dot_in_xml_formulas(f)
-        path = os.path.join(xml_path, f)
-        root = ET.parse(path).getroot()
-        f = f.as_posix()
-        compounds = root.findall("compounddef")
-        refname = sphinxref4headername(headername.as_posix(), srcdir)
-        name, kind, descr = common.get_xml_compound_infos(compounds[0])
-        if f.find("class") > -1 or f.find("struct") > -1:
-            assert len(compounds) == 1
-            all_index[name] = descr
-            assert kind in ("struct", "class")
-            label = ".. _" + kind + "_" + name + ":\n\n"
-            title = kind.title() + " " + name
-            lenname = len(title)
-            title = label + title + "\n" + lenname * "-" + "\n\n"
-            pgm = "Defined in :ref:`pgm" + refname + "`" + "\n\n"
-            gen = title + pgm
-            gen += ".. doxygen" + kind + ":: " + name + "\n"
-            gen += "     :project: " + component_name + "\n"
-            outputname = kind + headername.stem
-            outputname = Path(sphinx_directory, outputname + ".rst")
+    xml_files = common.get_xml_files(
+        headername,
+        xml_index,
+        Path(srcdir),
+    )
 
-        elif f.find("_8h") > -1:
-            label = ".. _file" + refname + ":\n\n"
-            shortname = headername.as_posix().split(srcdir)[-1]
-            shortname = shortname.replace("/./", "/")
-            if shortname[0] == "/":
-                shortname = shortname[1:]
-            title = "File " + shortname
-            lenname = len(title)
-            title = label + title + "\n" + lenname * "-" + "\n\n"
-            pgm = ":ref:`Go to the source code of this file <pgm"
-            pgm += refname + ">`" + "\n\n"
-            gen = title + pgm
-            # sphinx_root = Path(sphinx_directory, '../../')
-            # relpath = os.path.relpath(srcdir, sphinx_root)
-            # fname = os.path.join(relpath, shortname[1:])
-            gen += ".. doxygenfile:: " + shortname + "\n"
-            gen += "     :project: " + component_name + "\n"
-            outputname = "file_" + headername.name.replace(".", "_")
-            outputname = Path(sphinx_directory, outputname + ".rst")
-            fname = shortname.split("/")[-1]
-            all_index[fname] = descr
-
-        else:  # namespaces files.
-            # Nothing to be done, breathe deal with those
-            # directly from _8h file.
+    file_rst = "file_" + headername.name.replace(".", "_")
+    nested = set()
+    member_to_file = {}
+    # First run: collect nested strycts and build member->file map
+    for xmlfile in xml_files:
+        common.filter_dot_in_xml_formulas(xmlfile)
+        root = ET.parse(xmlfile).getroot()
+        compound = root.find("compounddef")
+        if compound is None:
             continue
+        kind = compound.attrib.get("kind")
+        if kind == "class" or kind == "struct":
+            for inner in compound.findall("innerclass"):
+                nested.add(inner.attrib["refid"])
+        elif kind == "file":
+            rst_id = file_rst
+            # Every func declared in the header has a refid.
+            for codeline in compound.findall(".//codeline"):
+                refid = codeline.attrib.get("refid")
+                if refid:
+                    member_to_file[refid] = rst_id
+
+    # Round 2, fill all_index
+    for xmlfile in xml_files:
+        common.filter_dot_in_xml_formulas(xmlfile)
+        root = ET.parse(xmlfile).getroot()
+        compound = root.find("compounddef")
+        if compound is None:
+            continue
+        name, kind, descr = common.get_xml_compound_infos(compound)
+        descr = descr.strip()
+        refid = compound.attrib["id"]
+        # Classes and structs
+        if kind in ("class", "struct"):
+            if refid in nested:
+                continue
+
+            all_index[refid] = (kind, name, descr, refid, file_rst)
+            write_breathe_type_rst(
+                Path(sphinx_directory, refid + ".rst"),
+                refid,
+                name,
+                descr,
+                kind,
+                component_name,
+                headername,
+                srcdir,
+            )
+        elif kind == "namespace":
+            # typedefs
+            for refid, name, descr in get_namespace_typedefs(compound):
+                all_index[refid] = ("typedef", name, descr.strip(), refid, file_rst)
+                # write_breathe_type_rst(
+                #     Path(sphinx_directory, refid + ".rst"),
+                #     refid,
+                #     name,
+                #     descr,
+                #     "typedef",
+                #     component_name,
+                #     headername,
+                #     srcdir,
+                # )
+                #
+            # free functions
+            for member in compound.findall(".//memberdef[@kind='function']"):
+                func_refid = member.attrib["id"]
+                target = member_to_file.get(func_refid)
+                if target is None:
+                    continue
+                qualified = member.findtext("qualifiedname")
+                func_name = qualified or member.findtext("name")
+                brief = member.find("briefdescription")
+                if brief is not None:
+                    func_descr = "".join(brief.itertext()).strip()
+                else:
+                    func_descr = ""
+                all_index[func_refid] = (
+                    "function",
+                    func_name,
+                    func_descr,
+                    target,
+                    file_rst,
+                )
+        elif kind == "file":
+            all_index[rst_id] = ("file", name, descr, rst_id, rst_id)
+            # Free functions declared in this header
+            fill_all_index(
+                compound,
+                file_rst,
+                all_index,
+                sphinx_directory,
+                component_name,
+                headername,
+                srcdir,
+                "function",
+                False,  # do not write a specific page for each free function
+            )
+            # handle typedefs
+            # fill_all_index(
+            #     compound,
+            #     file_rst,
+            #     all_index,
+            #     sphinx_directory,
+            #     component_name,
+            #     headername,
+            #     srcdir,
+            #     "typedef",
+            # )
+            # # enums
+            # fill_all_index(
+            #     compound,
+            #     file_rst,
+            #     all_index,
+            #     sphinx_directory,
+            #     component_name,
+            #     headername,
+            #     srcdir,
+            #     "enum",
+            # )
+        else:
+            continue
+
+    # Round 3 write rst files for headers
+    for xmlfile in xml_files:
+
+        common.filter_dot_in_xml_formulas(xmlfile)
+
+        root = ET.parse(xmlfile).getroot()
+        compound = root.find("compounddef")
+        if compound is None:
+            continue
+        if compound.attrib.get("kind") != "file":
+            continue
+        shortname, _, _ = common.get_xml_compound_infos(compound)
+        refid = compound.attrib["id"]
+
+        refname = sphinxref4headername(
+            headername.as_posix(),
+            srcdir,
+        )
+        label = f".. _file{refname}:\n\n"
+        title = f"File {shortname}\n"
+        title += len(title) * "-" + "\n\n"
+        gen = label + title
+
+        if git_url and git_commit:
+            relpath = headername.relative_to(Path(srcdir)).as_posix()
+            gen += f"Generated from commit `{git_commit[:7]}`\n\n"
+            repo_url = git_url.rstrip("/")
+            source_url = f"{repo_url}/-/blob/{git_commit}/{relpath}"
+            gen += "Source code: " f"`{relpath} <{source_url}>`_\n\n"
+
+        rst_id = file_rst
+        outputname = Path(sphinx_directory, rst_id + ".rst")
+
+        # Macros --> done with doxygenfile directive
+        # defines = []
+        # for member in compound.findall(".//memberdef[@kind='define']"):
+        #     name = member.findtext("name")
+        #     if name:
+        #         defines.append(name)
+        # if defines:
+        #     gen += "Macros\n"
+        #     gen += "~~~~~~\n\n"
+
+        #     for d in sorted(defines):
+        #         gen += f".. doxygendefine:: {d}\n"
+        #         gen += f"   :project: {component_name}\n\n"
+
+        #     gen += "\n"
+
+        classes = []
+        typedefs = []
+        enums = []
+        functions = []
+        for refid, tuple_values in all_index.items():
+            kind2, name2, descr2, target_rst, declared_in = tuple_values
+            if declared_in != rst_id:
+                continue
+            if kind2 == "class" or kind2 == "struct":
+                classes.append((name2, descr2, target_rst))
+            elif kind2 == "typedef":
+                typedefs.append((name2, descr2, target_rst))
+            elif kind2 == "enum":
+                enums.append((name2, descr2, target_rst))
+            elif kind2 == "function":
+                functions.append(name2)
+        # Classes and structs
+        if classes:
+            title = "Classes and structs declared in this file\n"
+            gen += title
+            gen += len(title) * "~" + "\n\n"
+            for cppname, descr2, target in sorted(classes):
+                gen += f"* :doc:`{cppname} <{target}>`"
+                gen += f": {descr2}\n"
+            gen += "\n"
+        # Typedefs
+        # if typedefs:
+        #     gen += "Typedefs\n"
+        #     gen += "~~~~~~~~\n\n"
+        #     for cppname, descr2, target in sorted(typedefs):
+        #         gen += f"* :doc:`{cppname} <{target}>`"
+        #         gen += f": {descr2}\n"
+        #     gen += "\n"
+        # # Enums
+        # if enums:
+        #     gen += "Enums\n"
+        #     gen += "~~~~~\n\n"
+        #     for cppname, descr2, target in sorted(enums):
+        #         gen += f"* :doc:`{cppname} <{target}>`"
+        #         gen += f": {descr2}\n"
+        #     gen += "\n"
+        # # Free functions
+        # if functions:
+        #     gen += "Free functions\n"
+        #     gen += "~~~~~~~~~~~~~~\n\n"
+        #     for func in sorted(functions):
+        #         gen += f".. doxygenfunction:: {func}\n"
+        #         gen += f"   :project: {component_name}\n\n"
+
+        title = "Free functions, typedefs, enums ...\n"
+        gen += title
+        gen += len(title) * "~" + "\n\n"
+
+        gen += f".. doxygenfile:: {shortname}\n"
+        gen += f"   :project: {component_name}\n"
+        gen += "   :sections: briefdescription detaileddescription innernamespace"
+        gen += " define typedef enum func var\n\n"
 
         with open(outputname, "wt") as out:
             out.write(gen)
-            out.write("\n")
-
-    create_rst_for_program(headername.as_posix(), srcdir, sphinx_directory, True)
 
 
-def create_rst_for_program(headername, srcdir, sphinx_directory, filterdox=False):
-    """Build rst file from header (c++), for a 'pgm' target in sphinx.
+def split_cpp_name(cppname):
+    """For a given class name, separate namespaces and real name of the class
 
 
-    Parameters
-    ----------
-    headername : string
-        name of the header (full path)
-    srcdir : string
-        absolute path to c/c++ sources (CMAKE_SOURCE_DIR)
-    sphinx_directory : Path()
-        directory where rst files will be written
-    filterdox : boolean
-        true to remove doxygen comments from program listings in sphinx
+    I takesinto account special cases where '::' may be inside the class name,
+    e.g siconos::graphs::IsSharedPtr< std::shared_ptr< T > >
+    --> we dont want 'siconos', 'graphs', ... 'std', 'shared_ptr ...
     """
-    shortname = headername.split(srcdir)[-1][1:]
-    shortname = shortname.replace(r"./", "")
-    outputname = "pgm_" + shortname.replace("/", "_").replace(".", "_")
-    outputname = Path(sphinx_directory, outputname + ".rst")
-    refname = sphinxref4headername(headername, srcdir)
-    title = "Program listing for file " + shortname
-    label = ".. _pgm" + refname + ":\n\n"
-    lenname = len(title)
-    title = label + title + "\n" + lenname * "=" + "\n\n"
-    doc = "* Return to documentation for :ref:`this file<file"
-    doc += refname + ">`\n\n"
-    gen = title + doc
-    if filterdox:
-        d = filter_comments(headername)
-    else:
-        with open(headername, "r") as f:
-            d = f.read()
-    gen += ".. code-block:: c++\n"
-    gen += "    :linenos:\n\n"
-    text = textwrap.indent(d, 4 * " ")
-    gen += text
+    result = []
+    current = []
+    inside = 0
+    i = 0
 
-    with open(outputname, "wt") as out:
-        out.write(gen)
+    while i < len(cppname):
+        c = cppname[i]
+
+        # we must ignore '::' inside '<' and '>'
+        if c == "<":
+            inside += 1
+            current.append(c)
+
+        elif c == ">":
+            inside -= 1
+            current.append(c)
+
+        elif (
+            c == ":" and inside == 0 and i + 1 < len(cppname) and cppname[i + 1] == ":"
+        ):
+            # collect current (namespace name) into result
+            # take :: into accound only if inside == 0
+            result.append("".join(current))
+            current = []
+            i += 1  # to jump after second :
+
+        else:
+            current.append(c)
+
+        i += 1
+
+    result.append("".join(current))
+    return result
 
 
 def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=None):
@@ -273,64 +659,79 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
     subtitle : string, optional
         text header for rst file
     """
-    basename = "/reference/cpp/" + component_name + "/"
+
     if subtitle:
-        subtitle += "\n" + len(subtitle) * "-" + "\n\n"
+        subtitle += "\n"
+        subtitle += len(subtitle) * "-"
+        subtitle += "\n\n"
     else:
         subtitle = ""
+
+    namespaces = defaultdict(list)
+    # --> default values for missing keys
+
+    if outputname.stem == "autodoc_functions":
+        for refid, (kind, name, descr, target, declared_in) in all_index.items():
+            if kind != "function":
+                continue
+            namespaces["Functions"].append(
+                (
+                    name,
+                    declared_in,
+                    descr,
+                )
+            )
+        with open(outputname, "wt") as out:
+
+            out.write(subtitle)
+            for name, target, descr in sorted(namespaces["Functions"]):
+                disp = common.rst_escape(name)
+                out.write(f"* :cpp:func:`{disp}`")
+                if descr:
+                    out.write(f" : {descr}")
+                out.write("\n")
+        return
+
     with open(outputname, "wt") as out:
         # For each file in the list,
         # create a breathe entry in outputname
         out.write(subtitle)
         for f in files_list:
-            name = f.stem
-            if "class" in name:
-                shorttitle = name.split("class")[-1]
-                text = "* :cpp:class:`" + shorttitle + "` : "
-            elif "struct" in name:
-                shorttitle = name.split("struct")[-1]
-                text = "* :cpp:class:`" + shorttitle + "` : "
-            elif name.find("file_") > -1:
-                shorttitle = name.split("file_")[-1].replace("_", ".")
-                name = basename + name
-                text = "* :doc:`" + shorttitle + "<" + name + ">` : "
-            try:
-                text += all_index[shorttitle] + "\n"
-            except:
-                text += "\n"
-            out.write(text)
-        out.write("\n\n")
+            rst_id = f.stem
+            kind, cppname, descr, _, _ = all_index[rst_id]
+            # files
+            if kind == "file":
+                namespaces["Files"].append(
+                    (
+                        cppname,
+                        rst_id,
+                        descr,
+                    )
+                )
+                continue
+            parts = split_cpp_name(cppname)
+            if len(parts) > 1:
+                namespace = "::".join(parts[:-1])
+                name = parts[-1]
+            else:
+                namespace = "Global"
+                name = cppname
+            # functions
+            # Classes / structs
+            namespaces[namespace].append((name, rst_id, descr))
 
+        for namespace in sorted(namespaces):
 
-def autodoc_collect_pgm(pgm_files, component_name, sphinx_directory):
-    """Create a rst file that list all headers of the current component
-    --> table of contents 'files documentation' in html outputs.
-    Parameters
-    ----------
-    pgm_files : list of rst files to take into account
-    component_name : string
-        current component name
-    sphinx_directory : Path
-        sphinx root dir (binary)
-    """
-    outputname = Path(sphinx_directory, "autodoc_pgm.rst")
-    basename = "/reference/cpp/" + component_name + "/"
-    sphinx_directory = sphinx_directory.as_posix()
-    label = ".. _" + component_name + "_pgm_listings:\n\n"
-    title = component_name.title() + " programs listings\n"
-    title += len(title) * "-" + "\n\n"
-    title = label + title
-    with open(outputname, "wt") as out:
-        out.write(title)
-        out.write(".. toctree::\n    :maxdepth: 2\n\n")
-        for f in pgm_files:
-            name = f.stem
-            # Transforms rst file name into header name ...
-            splits = name.split("_")
-            shorttitle = "/".join(splits[2:-1]) + "." + splits[-1]
-            name = basename + name
-            gen = textwrap.indent(shorttitle + "<" + name + ">\n", 4 * " ")
-            out.write(gen)
+            out.write(f"\n{namespace}\n")
+            out.write(f"{'-' * len(namespace)}\n\n")
+            for name, rst_id, descr in sorted(namespaces[namespace]):
+                disp_name = common.rst_escape(
+                    name.replace("< ", "<").replace(" >", ">")
+                )
+                out.write(f"* :doc:`{disp_name} <{rst_id}>`")
+                if descr:
+                    out.write(f" : {descr}")
+                out.write("\n")
 
 
 def sphinxref4headername(headername, srcdir):
@@ -372,10 +773,10 @@ def filter_comments(headername):
 
 
 def build_cpp_api_main(outputdir, components):
-    """Parse existing rst files (one for each class,
-    + those for functions) generated for C++ API
-    and collect them into  cpp_api.rst
-    in sphinx/reference directory.
+    """Parse existing autodoc_...rst files generated for C++ API
+    and collect them into  main_autodoc.rst
+    in sphinx/reference/cpp/component directory
+    (one for each component)
 
     Call: make rst_api
 
@@ -385,41 +786,46 @@ def build_cpp_api_main(outputdir, components):
          sphinx directory which contains rst files
          generated for the api
     components : list
-         list of active siconos python modules
+         list of active siconos components
     """
 
-    mainrst_filename = Path(outputdir, "index.rst")
+    mainrst_filename = Path(outputdir, "cpp_api.rst")
     # list documented (cpp) packages
     docpp_dir = Path(outputdir, "cpp")
     packages = [f for f in docpp_dir.glob("*")]
     packages = [p.name for p in packages if os.listdir(p)]
     # trick to print components in the expected order.
     packages = [p for p in components if p in packages]
-    indent = 4 * " "
+    # indent = 4 * " "
 
-    with open(mainrst_filename, "a") as f:
-        # label = '.. _siconos_cpp_reference:\n\n\n'
+    with open(mainrst_filename, "w") as f:
+        f.write(".. _cpp_api:\n\n")
         title = "Siconos C/C++ API reference"
-        title += "\n" + len(title) * "#" + "\n\n"
+        title += "\n" + len(title) * "=" + "\n\n"
         title += "This is the documentation of C/C++ interface to Siconos.\n\n\n"
-        # f.write(label)
         f.write(title)
-        header = ".. toctree::\n    :maxdepth:3\n\n"
-        f.write(header)
+        # Grid of cards
+        f.write(".. grid:: 3\n")
+        f.write("   :gutter: 3\n\n")
 
-        class_diag = "Class diagrams (UML view)"
-        class_diag += " </reference/class_diagrams>\n"
-        class_diag = textwrap.indent(class_diag, "    ")
-        f.write(class_diag)
+        # Components
         for p in packages:
-            # Create main autodoc file for the current component
+            # Generate component documentation
             write_cpp_component_autodoc(p, docpp_dir)
-            # And add it to the current toc
-            title = p.title() + ": " + components_docs[p]
-            directive = title + " <cpp/" + p + "/main_autodoc>\n"
-            directive = textwrap.indent(directive, "    ")
-            f.write(directive)
-        f.write("\n")
+            f.write(f"   .. grid-item-card:: {p.title()}\n")
+            f.write(f"      :link: cpp/{p}/main_autodoc\n")
+            f.write("      :class-card: sd-bg-code\n")
+            f.write("      :link-type: doc\n\n")
+            f.write(f"      {components_docs[p]}\n\n")
+
+        # Hidden toctree (navigation only)
+        #
+        f.write(".. toctree::\n")
+        f.write("   :hidden:\n")
+        f.write("   :maxdepth: 2\n\n")
+        # #f.write("   /reference/class_diagrams\n")
+        for p in packages:
+            f.write(f"   cpp/{p}/main_autodoc\n")
 
 
 def write_cpp_component_autodoc(component, sphinx_directory):
@@ -430,10 +836,11 @@ def write_cpp_component_autodoc(component, sphinx_directory):
         title += len(title) * "=" + "\n\n"
         ppath = "/reference/cpp/" + component
         f.write(title)
-        pgm_listings = "Check :ref:`" + component + "_pgm_listings`"
-        pgm_listings += " for a complete list of headers for this component."
-        f.write(pgm_listings + "\n\n")
+        # pgm_listings = "Check :ref:`" + component + "_pgm_listings`"
+        # pgm_listings += " for a complete list of headers for this component."
+        # f.write(pgm_listings + "\n\n")
         directive = ".. include:: " + ppath + "/autodoc_classes.rst\n\n"
+        directive += ".. include:: " + ppath + "/autodoc_functions.rst\n\n"
         directive += ".. include:: " + ppath + "/autodoc_files.rst\n"
         indent = ""
         f.write(textwrap.indent(directive, indent))

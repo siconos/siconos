@@ -63,7 +63,9 @@ static int Arrow_repr_3d_test() {
   test_failed += !(NM_get_value(Arw_mat, 4, 4) == 4.0);
   test_failed += !(NM_get_value(Arw_mat, 5, 5) == 4.0);
   if (test_failed > 0) info = 1;
-
+  free(vec);
+  NM_free(D_Arw_mat);
+  NM_free(Arw_mat);
   printf("== End of test Arrow_repr_3d_test(result = %d)\n", info);
   return info;
 }
@@ -100,6 +102,9 @@ static int Arrow_repr_2d_test() {
   test_failed += !(NM_get_value(Arw_mat, 4, 5) == 6.0);
   test_failed += !(NM_get_value(Arw_mat, 5, 4) == 6.0);
   test_failed += !(NM_get_value(Arw_mat, 5, 5) == 5.0);
+  free(vec);
+  NM_free(D_Arw_mat);
+  NM_free(Arw_mat);
 
   if (test_failed > 0) info = 1;
 
@@ -282,7 +287,7 @@ static int JA_reflect_mat_test() {
   test_failed += (fabs(NM_get_value(rm, 2, 2) + 1.0) > EPS);
   test_failed += (fabs(NM_get_value(rm, 3, 3) + 1.0) > EPS);
   test_failed += (fabs(NM_get_value(rm, 4, 4) + 1.0) > EPS);
-
+  NM_free(rm);
   if (test_failed > 0) info += 1;
 
   printf("== End of test JA_reflect_mat_test(result = %d)\n", info);

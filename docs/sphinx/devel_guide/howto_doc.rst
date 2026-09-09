@@ -10,22 +10,22 @@ Below some examples on how to write internal links to siconos objects in sphinx 
 
   .. code-block:: rst
 		  
-     Try to link to :class:`DynamicalSystem`
+     Try to link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
   **Result** : 
       
-  Try link to :class:`DynamicalSystem`
+  Try link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
 
-* Link to a file (programs listing): 
+.. * Link to a file (programs listing): 
 
-  .. code-block:: rst
+..   .. code-block:: rst
 
-     Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
+..      Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
       
-  **Result** : 
+..   **Result** : 
 
-  Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
+..   Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
 
 * Link to a file (documentation): 
 
@@ -42,19 +42,19 @@ Below some examples on how to write internal links to siconos objects in sphinx 
 
   .. code-block:: rst
 
-     Try to link to :func:`Simulation::nextStep`
+     Try to link to :cpp:func:`Simulation::nextStep`
 
   **Result** :
 
-  Try to link to :func:`Simulation::nextStep`
+  Try to link to :cpp:func:`Simulation::nextStep`
 
 
 * Link to a function : 
 
   .. code-block:: rst
 
-     Try to link to :func:`cs_dl_norm`
+     Try to link to :cpp:func:`cs_dl_norm`
 
   **Result** :
 
-  Try to link to :func:`cs_dl_norm`
+  Try to link to :cpp:func:`cs_dl_norm`

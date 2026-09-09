@@ -755,8 +755,7 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   /** Free memory **/
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_clear_block(problem->M->matrix1);
-    SBM_clear(problem->M->matrix1);
+    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
     problem->M->matrix1 = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver_contact(localproblem_contact, local_opts_contact);

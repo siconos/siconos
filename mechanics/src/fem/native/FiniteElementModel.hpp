@@ -108,11 +108,11 @@ class FiniteElementModel {
 
   ~FiniteElementModel() noexcept = default;
 
-  auto mesh() { return mesh_; }
+  auto mesh() const { return mesh_; }
 
   const std::span<const std::shared_ptr<FiniteElement>> elements() const { return elements_; }
 
-  const std::span<const std::shared_ptr<FENode>> nodes() { return nodes_; }
+  const std::span<const std::shared_ptr<FENode>> nodes() const { return nodes_; }
 
   std::shared_ptr<FENode> vertexToNode(std::shared_ptr<MeshVertex> v) const;
 
@@ -221,6 +221,25 @@ class FiniteElementModel {
    *  @return a list of FENodes (shared ptr)
    */
   std::vector<std::shared_ptr<FENode>> contactingNodes(int contact_entity_tag);
+
+  /** @brief Get contact segments on a given physical boundary.
+   *
+   *  @param contact_tag Physical tag identifier (e.g., 4 for "Contact Nodes" in gmsh)
+   *  @return Vector of segments, each an array of 4 (2D) or 6 (3D) global DOF indices
+   *  @throws If no elements with the given tag are found or element type is unsupported
+   */
+  std::vector<std::array<siconos::algebra::Index, 4>> getContactSegments(
+      int contact_tag) const;
+
+  /** @brief Convert contact vertex coordinates to global DOF indices.
+   *
+   *  @param contact_coords Nx2 matrix (2D) or Nx3 matrix (3D) of vertex coordinates, ordered
+   * along the boundary (CCW)
+   *  @return Flattened vector of global DOF indices for the contact boundary
+   *  @throws If a coordinate does not match any mesh vertex
+   */
+  std::vector<siconos::algebra::Index> getContactGlobalIndices(
+      const Eigen::Ref<const Eigen::MatrixXd>& contact_coords) const;
 
   void display(bool brief) const;
 };

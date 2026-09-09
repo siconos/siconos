@@ -23,10 +23,10 @@
 #include <stdlib.h>  // for free, malloc
 #include <string.h>  // for strlen, strncat
 
-#include "NumericsVerbose.h"    // for NUMERICS_LOG_TO_SCREEN, NUMERICS_EXTE...
+#include "NumericsVerbose.h"  // for NUMERICS_LOG_TO_SCREEN, NUMERICS_EXTE...
+#include "numerics_errors.h"
 #include "sn_error_handling.h"  // for sn_fatal_error, SN_UNKOWN_ERROR
 #include "tlsdef.h"             // for tlsvar
-#include "numerics_errors.h"
 
 /* the warning on vprintf is reported as a bug of clang ... --vacary */
 #ifdef __clang__
@@ -40,18 +40,20 @@ tlsvar void* numerics_logger = NULL;
 tlsvar enum numerics_loggers numerics_logger_type = NUMERICS_LOG_TO_SCREEN;
 
 static int numerics_printf_internal(int level, const char* fmt, const char* extra_qual,
-                                     va_list argp) {
+                                    va_list argp) {
   switch (numerics_logger_type) {
     case NUMERICS_EXTERNAL_LOGGER: {
       //    if (!numerics_logger)
       //    {
-      return numerics_error("numerics_printf_internal", "unsupported custom logger");;
+      return numerics_error("numerics_printf_internal", "unsupported custom logger");
+      ;
       //    }
       break;
     }
     case NUMERICS_LOG_TO_FILE: {
       if (!logger_f) {
-        return numerics_error("numerics_printf_internal", "no logger file opened!");;
+        return numerics_error("numerics_printf_internal", "no logger file opened!");
+        ;
       }
       fputs("[Numerics]", logger_f);
       //    fprintf(logger_f, "[%d]", level);
@@ -76,21 +78,32 @@ static int numerics_printf_internal(int level, const char* fmt, const char* extr
 
 void numerics_set_verbose(int newVerboseMode) { verbose = newVerboseMode; }
 
-int numerics_error(const char* fn_name, const char* msg, ...) {
+static void numerics_error_internal(const char* fn_name, const char* msg, va_list args) {
   char output[2048] = "[Numerics][error] ";
   size_t cur_len = strlen(output);
   strncat(output, fn_name, 2048 - cur_len - 1);
   cur_len = strlen(output);
   strncat(output, "::\t", 2048 - cur_len - 1);
   cur_len = strlen(output);
-  va_list args;
-
-  va_start(args, msg);
   vsnprintf(&output[cur_len], 2048 - cur_len - 4, msg, args);
-  va_end(args);
-  strncat(output, ".\n", 2048 - cur_len);
+  cur_len = strlen(output);
+  strncat(output, ".\n", 2048 - cur_len - 1);
   fprintf(stderr, "%s", output);
+}
+
+int numerics_error(const char* fn_name, const char* msg, ...) {
+  va_list args;
+  va_start(args, msg);
+  numerics_error_internal(fn_name, msg, args);
+  va_end(args);
   return NUMERICS_ERR_INVALID_ARGUMENT;
+}
+
+void numerics_error_log(const char* fn_name, const char* msg, ...) {
+  va_list args;
+  va_start(args, msg);
+  numerics_error_internal(fn_name, msg, args);
+  va_end(args);
 }
 
 void numerics_error_nonfatal(const char* fn_name, const char* msg, ...) {

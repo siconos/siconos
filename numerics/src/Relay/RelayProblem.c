@@ -24,9 +24,9 @@
 #include <stdio.h>   // for printf, fprintf, fscanf, FILE, stderr
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 
-#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
-#include "numerics_verbose.h"  // for check_io
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io
 
 void Relay_display(RelayProblem* p) {
   assert(p);
@@ -123,7 +123,7 @@ RelayProblem* relay_new_from_filename(const char* filename) {
 
   FILE* file = fopen(filename, "r");
   if (file == NULL) {
-    int error = numerics_error("RelayProblem", "Can not open file ", filename);
+    numerics_error_log("RelayProblem", "Can not open file ", filename);
     return NULL;
   }
 
@@ -136,18 +136,20 @@ RelayProblem* relay_new_from_filename(const char* filename) {
 void freeRelay_problem(RelayProblem* problem) {
   assert(problem);
   if (problem->M) {
-    NM_clear(problem->M);
-    free(problem->M);
+    problem->M = NM_free(problem->M);
   }
   if (problem->q) {
     free(problem->q);
   }
+  problem->q = NULL;
   if (problem->lb) {
     free(problem->lb);
   }
+  problem->lb = NULL;
   if (problem->ub) {
     free(problem->ub);
   }
+  problem->ub = NULL;
   free(problem);
 }
 

@@ -53,25 +53,22 @@ class ControlSensor : public Sensor {
    */
   ControlSensor(SensorType type, std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
                 double delay = 0)
-      : Sensor(type, ds), _delay(delay)
-  {
-  }
+      : Sensor(type, ds), _delay(delay) {}
 
  public:
   virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds);
 
   /** Get the dimension of the output
    *
-   *  \return an unsigned int
+   *  \return the size of the output vector
    */
-  unsigned int getYDim() const;
+  auto getYDim() const;
 
   /** Get a pointer to the output
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosVector> to the output
    */
-  inline const siconos::algebra::SiconosVector& y() const
-  {
+  inline const siconos::algebra::SiconosVector& y() const {
     if (_delay == 0)
       return *_storedY;
     else

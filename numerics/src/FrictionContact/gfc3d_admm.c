@@ -21,27 +21,22 @@
 #include <stdlib.h>  // for calloc, free, malloc
 #include <time.h>
 
-// #include "CSparseMatrix.h"
-#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_ADMM_I...
+#include "NumericsFwd.h"              // for SolverOptions, GlobalFrict...
+#include "NumericsMatrix.h"           // for NM_gemv, NumericsMatrix
+#include "NumericsSparseMatrix.h"     // for NSM_TRIPLET ...
+#include "SiconosBlas.h"              // for cblas_dcopy, cblas_dscal
+#include "SolverOptions.h"            // for SolverOptions, solver_opti...
 #include "fc3d_short_names.h"
-// #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
-#include "NumericsMatrix.h"                // for NM_gemv, NumericsMatrix
-#include "NumericsSparseMatrix.h"          // for NSM_TRIPLET ...
-#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-// #include "fc3d_Solvers.h"
 #include "float.h"          // for DBL_EPSILON
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
-
-/* Solver registration system */
-#include "solver_registry.h"
-#include "numerics_errors.h"
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "gfc3d_ipm.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnDualCone
+#include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -70,13 +65,14 @@ typedef struct {
 } Gfc3d_ADDM_data;
 
 /** pointer to function used to call local solver */
-typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, unsigned int nrhs);
+typedef int (*LinearSolverPtr)(NumericsMatrix* M, double* b, size_t nrhs);
 
 void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* options) {
   size_t nc = problem->numberOfContacts;
   size_t n = problem->M->size0;
   size_t m = 3 * nc;
   if (!options->dWork || options->dWorkSize < m + n) {
+    if (options->dWork) free(options->dWork);
     options->dWork = (double*)calloc(m + n, sizeof(double));
     options->dWorkSize = m + n;
   }
@@ -89,6 +85,8 @@ void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* optio
   {
     options->solverData = (Gfc3d_ADDM_data*)malloc(sizeof(Gfc3d_ADDM_data));
     Gfc3d_ADDM_data* data = (Gfc3d_ADDM_data*)options->solverData;
+    *data = (Gfc3d_ADDM_data){0};  // everybody to null
+
     data->reaction_hat = (double*)calloc(m, sizeof(double));
     data->reaction_k = (double*)calloc(m, sizeof(double));
     data->u_hat = (double*)calloc(m, sizeof(double));
@@ -104,29 +102,31 @@ void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* optio
   }
 }
 void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options) {
-  if (options->dWork) {
-    free(options->dWork);
-    options->dWorkSize = 0;
-  }
-  options->dWork = NULL;
-
   if (options->solverData) {
     Gfc3d_ADDM_data* data = (Gfc3d_ADDM_data*)options->solverData;
     free(data->reaction_hat);
+    data->reaction_hat = NULL;
     free(data->u_hat);
+    data->u_hat = NULL;
     free(data->reaction_k);
+    data->reaction_k = NULL;
     free(data->u_k);
+    data->u_k = NULL;
     free(data->b_full);
-    if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H] ==
-        SICONOS_FRICTION_3D_ADMM_FULL_H_YES) {
-      free(data->u_old);
-      free(data->sliding_direction);
-      free(data->sliding_direction_old);
-    }
-    free(data);
+    data->b_full = NULL;
+    free(data->u);
+    data->u = NULL;
+    if (data->u_old) free(data->u_old);
+    data->u_old = NULL;
+    if (data->sliding_direction) free(data->sliding_direction);
+    data->sliding_direction = NULL;
+    if (data->sliding_direction_old) free(data->sliding_direction_old);
+    data->sliding_direction_old = NULL;
+    free(options->solverData);
   }
   options->solverData = NULL;
 }
+
 static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int* is_rho_variable,
                                     SolverOptions* restrict options) {
   double rho = 0.0;
@@ -155,7 +155,7 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int* i
 
     rho = sqrt(lambda_max * lambda_min);
   } else {
-    int error = numerics_error(
+    numerics_error_log(
         "gfc3d_admm_select_rho",
         "options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] unknow value");
     return INFINITY;
@@ -358,9 +358,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
           SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY) {
     *info = numerics_error("gfc3d_admm",
-                   "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not "
-                   "implemented\n only the forced symmetry is implemented",
-                   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
+                           "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not "
+                           "implemented\n only the forced symmetry is implemented",
+                           options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
   } else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
              SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY) {
     /* The symmetric version of the algorithm is used even if
@@ -384,7 +384,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     // NM_display(Msym);
     // getchar();
     problem->M = Msym;
-    NM_clear(MT);
+    MT = NM_free(MT);
     linear_solver = &NM_Cholesky_solve;
   } else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
              SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY) {
@@ -392,9 +392,10 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
      *  that the data are symmetric */
     linear_solver = &NM_Cholesky_solve;
   } else
-    *info = numerics_error("gfc3d_admm",
-                   "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
-                   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
+    *info = numerics_error(
+        "gfc3d_admm",
+        "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
+        options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 
   assert((int)problem->H->size1 == problem->numberOfContacts * problem->dimension);
 
@@ -426,6 +427,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       b[pos] = cone_scaling / problem->mu[contact] * b[pos];
       mu[contact] = cone_scaling;
     }
+    P = NM_free(P);
     NumericsMatrix* Htrans = NM_transpose(problem->H);
     NumericsMatrix* H = problem->H;
     H = NM_create(NM_SPARSE, n, m);
@@ -434,6 +436,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     NM_copy(problem->H, H);
     NM_gemm(1.0, P, Htrans, 0.0, Htrans);
     NM_gemm(1.0, H, P, 0.0, H);
+    Htrans = NM_free(Htrans);
+    H = NM_free(H);
   }
 
   /* storage for W = M + rho H H^T */
@@ -458,7 +462,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   problem->norm_b = norm_b;
 
   int internal_allocation = 0;
-  if (!options->dWork || options->dWorkSize != 2 * m + n) {
+  if (!(Gfc3d_ADDM_data*)options->solverData || !options->dWork ||
+      options->dWorkSize != 2 * m + n) {
     gfc3d_ADMM_init(problem, options);
     internal_allocation = 1;
   }
@@ -471,13 +476,15 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   int is_rho_variable = 0;
   double rho = gfc3d_admm_select_rho(problem->M, problem->H, &is_rho_variable, options);
   if (rho <= DBL_EPSILON)
-    *info = numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
+    *info =
+        numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
   double br_phi = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI];
 
   Gfc3d_ADDM_data* data = (Gfc3d_ADDM_data*)options->solverData;
+  if (!data) *info = numerics_error("gfc3d_ADMM", "null options->solverData");
 
   double* v = globalVelocity;
 
@@ -520,7 +527,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   NumericsMatrix* M = problem->M;
   NumericsMatrix* H = problem->H;
   NumericsMatrix* Htrans = NM_transpose(problem->H);
-  ;
 
   int update_b = 1;  // this flag should be removed.
 
@@ -769,9 +775,10 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       cblas_dcopy(m, reaction_k, 1, reaction_hat, 1);
       cblas_dcopy(m, u_k, 1, u_hat, 1);
     } else {
-      *info = numerics_error("gfc3d_admm",
-                     " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
-                     "not recognized");
+      *info = numerics_error(
+          "gfc3d_admm",
+          " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
+          "not recognized");
     }
 
     rho_k = rho;
@@ -944,6 +951,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     *info = hasNotConverged;
   }
 
+  H_full = NM_free(H_full);
+
   if (iter == itermax) {
     cblas_dscal(m, rho, reaction, 1);
     if (iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] > 0) {
@@ -968,12 +977,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   /***** Free memory *****/
   problem = gfc3d_balancing_free(problem, options);
-  NM_clear(W);
-  NM_clear(Htrans);
+  W = NM_free(W);
+  Htrans = NM_free(Htrans);
 
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] ==
       SICONOS_FRICTION_3D_ADMM_SYMMETRIZE) {
-    NM_clear(Msym);
+    Msym = NM_free(Msym);
   }
 
   if (internal_allocation) {
@@ -1034,14 +1043,18 @@ void gfc3d_admm_set_default(SolverOptions* options) {
  */
 
 static int gfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
-  gfc3d_admm_set_default(options);
+  //  gfc3d_admm_set_default(options);
+  (void)problem;
+  (void)options;
+
   return NUMERICS_OK;
 }
 
-static int gfc3d_admm_solve_wrap(void* problem, double* reaction,
-                                 double* velocity, double* globalVelocity, SolverOptions* options) {
+static int gfc3d_admm_solve_wrap(void* problem, double* reaction, double* velocity,
+                                 double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_ADMM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  gfc3d_ADMM((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info,
+             options);
   return info;
 }
 
@@ -1049,15 +1062,14 @@ static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
+  gfc3d_ADMM_free((GlobalFrictionContactProblem*)problem, options);
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_ADMM, "GFC3D_ADMM",
-                "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
-                gfc3d_admm_init_wrap,
-                gfc3d_admm_solve_wrap,
-                gfc3d_admm_free_wrap,
-                NULL,   /* error function */
-                gfc3d_admm_set_default,
-                20000,  /* default_max_iter */
-                1e-6,   /* default_tol */
-                0       /* is_local_solver */);
+REGISTER_SOLVER_3VAR(
+    GFC3D_ADMM, "GFC3D_ADMM",
+    "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
+    gfc3d_admm_init_wrap, gfc3d_admm_solve_wrap, gfc3d_admm_free_wrap,
+    NULL,                          /* error function */
+    gfc3d_admm_set_default, 20000, /* default_max_iter */
+    1e-6,                          /* default_tol */
+    0 /* is_local_solver */);

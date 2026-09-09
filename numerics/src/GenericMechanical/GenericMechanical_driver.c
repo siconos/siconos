@@ -24,30 +24,28 @@
 #include <stdlib.h>  // for free, malloc
 #include <string.h>  // for NULL, memcpy
 
-#include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_ONECON...
-#include "GMPReduced.h"                    // for gmp_as_mlcp, gmp_reduced_e...
-#include "GenericMechanicalProblem.h"      // for listNumericsProblem, Gener...
-#include "GenericMechanical_Solvers.h"     // for gmp_compute_error, gmp_driver
-#include "GenericMechanical_cst.h"         // for SICONOS_GENERIC_MECHANICAL...
-#include "LCP_Solvers.h"                   // for lcp_compute_error_only
-#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NonSmoothDrivers.h"              // for fc3d_driver, linearComplem...
-#include "NumericsFwd.h"                   // for listNumericsProblem, Solve...
-#include "NumericsMatrix.h"                // for NM_row_prod_no_diag, NM_ex...
-#include "RelayProblem.h"                  // for RelayProblem
-#include "Relay_Solvers.h"                 // for relay_compute_error
-#include "SiconosBlas.h"                   // for cblas_dnrm2, cblas_dgemv
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "fc2d_compute_error.h"            // for fc3d_unitary_compute_and_a...
-#include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
-#include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
+#include "FrictionContactProblem.h"     // IWYU pragma: keep
+#include "FrictionContact_options.h"    // for SICONOS_FRICTION_3D_ONECON...
+#include "GMPReduced.h"                 // for gmp_as_mlcp, gmp_reduced_e...
+#include "GenericMechanicalProblem.h"   // for listNumericsProblem, Gener...
+#include "GenericMechanical_Solvers.h"  // for gmp_compute_error, gmp_driver
+#include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICAL...
+#include "LCP_Solvers.h"                // for lcp_compute_error_only
+#include "NonSmoothDrivers.h"           // for fc3d_driver, linearComplem...
+#include "NumericsFwd.h"                // for listNumericsProblem, Solve...
+#include "NumericsMatrix.h"             // for NM_row_prod_no_diag, NM_ex...
+#include "Relay_Solvers.h"              // for relay_compute_error
+#include "SiconosBlas.h"                // for cblas_dnrm2, cblas_dgemv
+#include "SolverOptions.h"              // for SolverOptions, solver_opti...
+#include "fc2d_compute_error.h"         // for fc3d_unitary_compute_and_a...
+#include "fc3d_compute_error.h"         // for fc3d_unitary_compute_and_a...
+#include "lcp_cst.h"                    // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
+#include "Relay_options.h"  // for SICONOS_RELAY_LEMKE
 #include "numerics_errors.h"
-#include "Relay_options.h"                     // for SICONOS_RELAY_LEMKE
+#include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -63,10 +61,8 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
   listNumericsProblem* curProblem = pGMP->firstListElem;
   NM_types storageType = pGMP->M->storageType;
   NumericsMatrix* numMat = pGMP->M;
-  int currentRowNumber = 0;
-  int ii;
-  int posInX = 0;
-  int curSize = 0;
+  size_t currentRowNumber = 0;
+  size_t curSize = 0;
   *err = 0.0;
   double localError = 0;
   double* bufForLocalProblemDense =
@@ -78,7 +74,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
   numerics_printf("GenericMechanical compute_error BEGIN:\n");
 #endif
   /*update localProblem->q and compute V = M*R+Q of the GMP */
-  posInX = 0;
+  size_t posInX = 0;
   while (curProblem) {
     curSize = curProblem->size;
 
@@ -130,7 +126,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
     curSize = curProblem->size;
     double* Vl = velocity + posInX;
     double* Rl = reaction + posInX;
-    for (ii = 0; ii < curSize; ii++)
+    for (size_t ii = 0; ii < curSize; ii++)
       if (isnan(Vl[ii]) || isnan(Rl[ii])) {
         *err = 10;
         return 1;
@@ -139,7 +135,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
       case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
         double* w = velocity + posInX;
         localError = 0.;
-        for (ii = 0; ii < curSize; ii++) {
+        for (size_t ii = 0; ii < curSize; ii++) {
           if (fabs(w[ii]) > *err) *err = fabs(w[ii]);
           if (fabs(w[ii]) > localError) localError = *err;
         }
@@ -217,7 +213,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
   }
 
   if (storageType == NM_DENSE) free(bufForLocalProblemDense);
-
+  bufForLocalProblemDense = NULL;
   if (*err > tol)
     return 1;
   else
@@ -227,8 +223,8 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
 static int SScmp = 0;
 static int SScmpTotal = 0;
 #endif
-//#define GMP_WRITE_PRB
-// static double sCoefLS=1.0;
+// #define GMP_WRITE_PRB
+//  static double sCoefLS=1.0;
 void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       int* info, SolverOptions* options) {
   DEBUG_BEGIN("gmp_gauss_seidel(...)\n");
@@ -246,7 +242,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
   NumericsMatrix* numMat = pGMP->M;
   int iterMax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   int it = 0;
-  int currentRowNumber = 0;
+  size_t currentRowNumber = 0;
   //  int diagBlockNumber =0;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   double* err = &(options->dparam[SICONOS_DPARAM_RESIDU]);
@@ -275,11 +271,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
 
-
-
-
-
-  
   while (it < iterMax && tolViolate) {
 #ifdef GENERICMECHANICAL_DEBUG_CMP
     SScmpTotal++;
@@ -287,11 +278,11 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     memcpy(pPrevReaction, reaction, pGMP->size * sizeof(double));
     currentRowNumber = 0;
     curProblem = pGMP->firstListElem;
-    int posInX = 0;
+    size_t posInX = 0;
     size_t curSize = 0;
 
     DEBUG_PRINTF("GS it %d, initial value:\n", it);
-    DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++) numerics_printf(
+    DEBUG_EXPR(for (size_t ii = 0; ii < pGMP->size; ii++) numerics_printf(
                    "R[%i]=%e | V[%i]=%e ", ii, reaction[ii], ii, velocity[ii]););
 
     while (curProblem) {
@@ -361,6 +352,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
                               relayProblem->q, NULL, 0);
           resLocalSolver = relay_driver(relayProblem, sol, w, options->internalSolvers[2]);
+
           break;
         }
         case SICONOS_NUMERICS_PROBLEM_FC3D: {
@@ -391,14 +383,14 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
 
           DEBUG_EXPR_WE(NV_display(curProblem->q, 2);
-                        for (int i = 0; i < 2; i++) numerics_printf(
+                        for (size_t i = 0; i < 2; i++) numerics_printf(
                             "curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
                             curProblem->q[i], i, fcProblem->q[i]););
 
           NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
                               fcProblem->q, NULL, 0);
 
-          DEBUG_EXPR_WE(for (int i = 0; i < 2; i++) numerics_printf(
+          DEBUG_EXPR_WE(for (size_t i = 0; i < 2; i++) numerics_printf(
                             "reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
                             reaction[i], i, fcProblem->q[i]););
 
@@ -406,6 +398,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
            * various local solvers */
           resLocalSolver = fc2d_driver(fcProblem, sol, w, options->internalSolvers[3]);
           // resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
+
           break;
         }
         default:
@@ -418,7 +411,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
         local_solver_error_occurred = 1;
       }
 
-      /* DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++) */
+      /* DEBUG_EXPR(for (size_t ii = 0; ii < pGMP->size; ii++) */
       /*              printf("R[%d]=%e | V[]=%e \n", ii, reaction[ii], velocity[ii]); */
       /*            if (resLocalSolver) */
       /*              printf("Numerics:GenericMechanical_drivers Local solver failed\n"); */
@@ -431,7 +424,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
 
     if (withLS) {
       tolViolate = gmp_compute_error(pGMP, reaction, pBuffVelocity, tol, options, err);
-      for (int i = 0; i < pGMP->size; i++)
+      for (size_t i = 0; i < pGMP->size; i++)
         pPrevReaction[i] = reaction[i] + (*pCoefLS) * (reaction[i] - pPrevReaction[i]);
       tolViolateLS = gmp_compute_error(pGMP, pPrevReaction, velocity, tol, options, errLS);
 
@@ -458,6 +451,42 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     /*next GS it*/
     it++;
     // numerics_printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
+  }
+
+  // Free
+  curProblem = pGMP->firstListElem;
+  while (curProblem) {
+    switch (curProblem->type) {
+      case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_LCP: {
+        LinearComplementarityProblem* lcpProblem =
+            (LinearComplementarityProblem*)curProblem->problem;
+        lcpProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_RELAY: {
+        RelayProblem* relayProblem = (RelayProblem*)curProblem->problem;
+        relayProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_FC3D: {
+        FrictionContactProblem* fcProblem = (FrictionContactProblem*)curProblem->problem;
+        fcProblem->M->matrix0 = NULL;
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_FC2D: {
+        FrictionContactProblem* fcProblem = (FrictionContactProblem*)curProblem->problem;
+        fcProblem->M->matrix0 = NULL;
+        break;
+      }
+      default:
+        numerics_printf(
+            "genericMechanical_GS Numerics : gmp_gauss_seidel unknown problem type %d.\n",
+            curProblem->type);
+    }
+    curProblem = curProblem->nextProblem;
   }
 
   if (tolViolate) {
@@ -487,8 +516,10 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
 
   // numerics_printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,*err);
   if (!options->dWork) free(pPrevReaction);
+  pPrevReaction = NULL;
   *info = tolViolate;
   if (storageType == NM_DENSE) free(bufForLocalProblemDense);
+  bufForLocalProblemDense = NULL;
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = it;
 
@@ -558,11 +589,11 @@ void gmp_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 4;
     options->internalSolvers = calloc(4, sizeof(SolverOptions*));
+  } else {
+    for (size_t i = 0; i < 4; ++i) solver_options_delete(options->internalSolvers[i]);
   }
   assert(options->numberOfInternalSolvers == 4);
 
-
-  
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
   // options->internalSolvers[1] =
   // solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
@@ -594,10 +625,6 @@ int gmp_working_memory_alloc(GenericMechanicalProblem* pGMP, SolverOptions* opti
   return 1;
 }
 /*free the Work memory, and set pointer to zero.*/
-void gmp_working_memory_free(GenericMechanicalProblem* pGMP, SolverOptions* options) {
-  if (options->dWork) free(options->dWork);
-  options->dWork = NULL;
-}
 int gmp_get_nb_dwork(GenericMechanicalProblem* pGMP, SolverOptions* options) {
   return 2 * pGMP->size;
 }
@@ -631,12 +658,9 @@ static void gmp_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_GENERIC_MECHANICAL_NSGS, "GMP_NSGS",
-                "Non-smooth Gauss-Seidel for Generic Mechanical Problem",
-                gmp_init_wrap,
-                gmp_solve_wrap,
-                gmp_free_wrap,
-                NULL,  /* error function */
-                gmp_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                "Non-smooth Gauss-Seidel for Generic Mechanical Problem", gmp_init_wrap,
+                gmp_solve_wrap, gmp_free_wrap, NULL, /* error function */
+                gmp_set_default,                     /* set_default */
+                1000,                                /* default_max_iter */
+                1e-4,                                /* default_tol */
+                0 /* is_local_solver */);

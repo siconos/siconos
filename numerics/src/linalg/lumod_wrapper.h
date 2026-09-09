@@ -23,7 +23,7 @@
 #define LUMOD_WRAPPER_H
 
 #include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosLapack.h"  // for lapack_int
+#include "SiconosLapack.h"  // IWYU pragma: keep - For lapack_int
 #include "assert.h"         // for assert
 
 #define SN_LUMOD_NEED_REFACTORIZATION 1

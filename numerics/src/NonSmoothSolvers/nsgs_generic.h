@@ -336,9 +336,7 @@ static inline void nsgs_generic_free_diagonal_blocks(NumericsMatrix* M,
 
   if (M->storageType == NM_SPARSE && M->matrix1) {
     /* Free the extracted diagonal blocks */
-    SBM_clear_block(M->matrix1);
-    SBM_clear(M->matrix1);
-    free(M->matrix1);
+    SBM_free(M->matrix1, SBM_FREE_ALL);
     /* Restore original matrix1 */
     M->matrix1 = (SparseBlockStructuredMatrix*)original_matrix1;
   }
@@ -455,7 +453,7 @@ static inline void nsgs_shuffle_blocks(unsigned int* sblocks, unsigned int nb_bl
   /* Shuffle each loop, or first iteration only */
   if (shuffle_mode == 2 || (shuffle_mode == 1 && iter == 1)) {
     /* Note: uint_shuffle is from NumericsArrays.h */
-    extern void uint_shuffle(unsigned int*, unsigned int);
+    extern void uint_shuffle(unsigned int*, size_t);
     uint_shuffle(sblocks, nb_blocks);
   }
 }
@@ -832,7 +830,7 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     nsgs_shuffle_blocks(sblocks, nb_blocks, toolkit->use_shuffling ? 2 : 0, iter);
 
     /* Pre-compute freezing criteria constants (like original fc3d_nsgs) */
-    double tmp_criteria1 = tolerance * tolerance  / (nb_blocks * nb_blocks * 1000.0);
+    double tmp_criteria1 = tolerance * tolerance / (nb_blocks * nb_blocks * 1000.0);
     double tmp_criteria2 = (prev_norm_z > 0.0)
                                ? (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0))
                                : 0.0;

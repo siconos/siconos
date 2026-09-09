@@ -21,23 +21,23 @@ Given a sufficiently smooth function :math:`{F}\colon {{\mathrm{I\!R}}}^{n} \to 
 Implementation in numerics
 ==========================
 
-Structure to define the problem: :class:`NonlinearComplementarityProblem`.
+Structure to define the problem: :cpp:class:`NonlinearComplementarityProblem`.
 
-The generic driver for all NCP is :func:`ncp_driver()`.
+The generic driver for all NCP is :cpp:func:`ncp_driver()`.
 
-Solvers list  :enum:`NCP_SOLVER`
+Solvers list  :cpp:enum:`NCP_SOLVER`
  
 .. _ncp_solvers:
 
 NCP available solvers
 =====================
 
-Newton, Fisher-Burmeister (:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`)
----------------------------------------------------------------------
+Newton, Fisher-Burmeister (:cpp:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`)
+-------------------------------------------------------------------------
 
 NCP Solver using the FB merit function and a Newton-based method with line-search
 
-driver: :func:`ncp_newton_FBLSA`
+driver: :cpp:func:`ncp_newton_FBLSA`
 
 parameters:
 
@@ -48,22 +48,22 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 
-Newton, min merit function (:enumerator:`SICONOS_NCP_NEWTON_MIN_FBLSA`)
------------------------------------------------------------------------
+Newton, min merit function (:cpp:enumerator:`SICONOS_NCP_NEWTON_MIN_FBLSA`)
+---------------------------------------------------------------------------
 
 NCP Solver using the min merit function (+ the FB as backup) and a Newton-based method with line-search
 
-driver: :func:`ncp_newton_minFBLSA`
+driver: :cpp:func:`ncp_newton_minFBLSA`
 
-parameters: same as :enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`
+parameters: same as :cpp:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`
 
-Path search algorithm (:enumerator:`SICONOS_NCP_PATHSEARCH`)
-------------------------------------------------------------
+Path search algorithm (:cpp:enumerator:`SICONOS_NCP_PATHSEARCH`)
+-----------------------------------------------------------------
 
 NCP Solver using a path search algorithm, following the work of D. Ralph.
 M. Ferris, and many other collaborators of the latter.
 
-driver: :func:`ncp_newton_pathsearch`
+driver: :cpp:func:`ncp_newton_pathsearch`
 
 parameters:
 
@@ -83,10 +83,10 @@ parameters:
 * dparam[SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD] = 1e-12;
 * dparam[SICONOS_DPARAM_NMS_MERIT_INCR] = 1.1
 
-PATH (Ferris) solver (:enumerator:`SICONOS_NCP_PATH`)
------------------------------------------------------
+PATH (Ferris) solver (:cpp:enumerator:`SICONOS_NCP_PATH`)
+----------------------------------------------------------
 
-driver: :func:`ncp_path`
+driver: :cpp:func:`ncp_path`
 
 parameters:
 

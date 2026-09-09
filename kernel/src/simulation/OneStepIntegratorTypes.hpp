@@ -23,7 +23,6 @@
 #ifndef OSITYPES_HPP
 #define OSITYPES_HPP
 
-/** Namespace which contains tools and classes related to one-step integrators . */
 namespace siconos::integrators {
 /** List of OneStepIntegrator types/ids */
 enum class IntegratorType {

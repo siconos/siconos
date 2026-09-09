@@ -70,9 +70,6 @@ typedef long double float_type;
 #define ON_DUAL_CONE 1
 #define NOT_ON_DUAL_CONE 0
 
-/* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
-float_type dnrm2l(const unsigned int n, const double* x);
-
 /* Returns the step length for variables update in IPM [1, p. 29] */
 /* \param x is the initial point to update. */
 /* \param dx is the Newton step. */
@@ -85,25 +82,23 @@ float_type dnrm2l(const unsigned int n, const double* x);
 /*          for semidefinite-quadratic-linear programming, version 4.0 */
 /*          Draft, 17 July 2006 */
 
-double getNewtonStepLength(const double* const x, const double* const dx,
-                           const unsigned int vecSize, const unsigned int varsCount,
-                           const double gamma);
+double getNewtonStepLength(const double* const x, const double* const dx, const size_t vecSize,
+                           const size_t varsCount, const double gamma);
 
 /* Returns array of step-lengths to the boundary reduced by a factor gamma. Uses long double.
  */
 double* array_getStepLength(const double* const x, const double* const dx,
-                            const unsigned int vecSize, const unsigned int varsCount,
-                            const double gamma);
+                            const size_t vecSize, const size_t varsCount, const double gamma);
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
  */
-double getStepLength(const double* const x, const double* const dx, const unsigned int vecSize,
-                     const unsigned int varsCount, const double gamma);
+double getStepLength(const double* const x, const double* const dx, const size_t vecSize,
+                     const size_t varsCount, const double gamma);
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
  */
-double getStepLength(const double* const x, const double* const dx, const unsigned int vecSize,
-                     const unsigned int varsCount, const double gamma);
+double getStepLength(const double* const x, const double* const dx, const size_t vecSize,
+                     const size_t varsCount, const double gamma);
 
 /**
  * Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w
@@ -154,7 +149,7 @@ void dualResidual_type(NumericsMatrix* M, const double* globalVelocity, Numerics
     \param vec is the vector
     \param vecSize the size of the vector vec
  */
-double NV_norm_type(const unsigned int vecSize, const double* const vec, const int type);
+double NV_norm_type(const size_t vecSize, const double* const vec, const int type);
 
 /**
  * Returns the scalar product of 2 vectors depending on:
@@ -163,7 +158,7 @@ double NV_norm_type(const unsigned int vecSize, const double* const vec, const i
  * type = NORM_2_INF: <x,y>_2_inf = max_i norm_2 ( xi o yi )
  *
  */
-double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double* x,
+double xdoty_type(const size_t varsCount, const size_t vecSize, const double* x,
                   const double* y, const int type);
 
 /**
@@ -196,7 +191,7 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
  * \param varsCount is a count of variables concatenated into vectors reaction and velocity.
  */
 double complemResidualNorm(const double* const velocity, const double* const reaction,
-                           const unsigned int vecSize, const unsigned int varsCount);
+                           const size_t vecSize, const size_t varsCount);
 
 /* Returns the type-norm of the complementarity residual vector = type-norm of the Jordan
  *product velocity o reaction
@@ -204,28 +199,27 @@ double complemResidualNorm(const double* const velocity, const double* const rea
  *max {ui o ri}
  */
 double complemResidualNorm_type(const double* const velocity, const double* const reaction,
-                                const unsigned int vecSize, const unsigned int varsCount,
-                                const int type);
+                                const size_t vecSize, const size_t varsCount, const int type);
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
  * (Qp*velocity) o (Qp_inv * reaction)  */
 /* This computation is done with the formula "F" */
 double complemResidualNorm_p_F(NumericsMatrix* Qp, NumericsMatrix* Qpinv,
                                const double* const velocity, const double* const reaction,
-                               const unsigned int vecSize, const unsigned int varsCount);
+                               const size_t vecSize, const size_t varsCount);
 
 double complemResidualNorm_p(const double* const velocity, const double* const reaction,
-                             const unsigned int vecSize, const unsigned int varsCount);
+                             const size_t vecSize, const size_t varsCount);
 
 /* computation of the duality gap  */
 double dualGap(NumericsMatrix* M, const double* f, const double* w,
-               const double* globalVelocity, const double* reaction, const unsigned int nd,
-               const unsigned int m);
+               const double* globalVelocity, const double* reaction, const size_t nd,
+               const size_t m);
 
 /* computation of the relative gap  */
 double relGap(NumericsMatrix* M, const double* f, const double* w,
-              const double* globalVelocity, const double* reaction, const unsigned int nd,
-              const unsigned int m, const double gapVal);
+              const double* globalVelocity, const double* reaction, const size_t nd,
+              const size_t m, const double gapVal);
 
 /* Establish an array of calculation errors  */
 void setErrorArray(double* error, const double pinfeas, const double dinfeas,
@@ -233,22 +227,21 @@ void setErrorArray(double* error, const double pinfeas, const double dinfeas,
                    const double projerr);
 
 /* Return the 2-norm of the difference between two vectors */
-double norm2VecDiff(const double* vec1, const double* vec2, const unsigned int vecSize);
+double norm2VecDiff(const double* vec1, const double* vec2, const size_t vecSize);
 
 int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reaction,
                           double* velocity, double* globalVelocity, double tolerance,
                           SolverOptions* options, double norm_q, double norm_b,
                           double* restrict error);
 
-double projectionError(const double* velocity, const double* reaction, const unsigned int nc,
+double projectionError(const double* velocity, const double* reaction, const size_t nc,
                        const double tol);
 double projectionError_norm_infinity_conic(const double* velocity, const double* reaction,
-                                           const unsigned int nc);
+                                           const size_t nc);
 double projectionError_dual_norm_infinity_conic(const double* velocity, const double* reaction,
-                                                const unsigned int nc);
+                                                const size_t nc);
 double projectionError_relative_norm_infinity_conic(const double* velocity,
-                                                    const double* reaction,
-                                                    const unsigned int nc);
+                                                    const double* reaction, const size_t nc);
 /*
  * Velocity u is re-computed by vector r
  * on_dual_cone = 0: Error projection on cone K = max{ | ri - Pi_K (ri - ui) |_2 }, i = 1,...,n
@@ -258,7 +251,7 @@ double projectionError_relative_norm_infinity_conic(const double* velocity,
 double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, NumericsMatrix* M,
                                                           const double* f, const double* w,
                                                           const double* reaction,
-                                                          const unsigned int varsCount,
+                                                          const size_t varsCount,
                                                           const int on_dual_cone);
 
 /* Routine is to read matrix-block in hdf5 file
@@ -271,28 +264,27 @@ int* read_fricprob_block(const char* path, int type, int blk_index);
 /* Return the classification BNRT of the input: u and r
  * these vectors belong to Lorentz cones
  */
-void classify_BNRT(const double* velocity, const double* reaction, const unsigned int vecSize,
-                   const unsigned int varsCount, int* nB, int* nN, int* nR, int* nT);
+void classify_BNRT(const double* velocity, const double* reaction, const size_t vecSize,
+                   const size_t varsCount, int* nB, int* nN, int* nR, int* nT);
 
 /* Return the classification BNRT of the input: orignal u (uN;uT) and r (rN; rT)
  * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
  * these u_tilde and r belong to friction cones
  */
 void classify_BNRT_velocity_original(const double* mu, const double* velocity,
-                                     const double* reaction, const unsigned int vecSize,
-                                     const unsigned int varsCount, int* nB, int* nN, int* nR,
+                                     const double* reaction, const size_t vecSize,
+                                     const size_t varsCount, int* nB, int* nN, int* nR,
                                      int* nT);
 
 /* Return the classification BNRT of the input: modified u (uN + mu*|uT|; uT) and r (rN; rT)
  * these u and r belong to friction cones
  */
 void classify_BNRT_velocity_modified(const double* mu, const double* velocity,
-                                     const double* reaction, const unsigned int vecSize,
-                                     const unsigned int varsCount, int* nB, int* nN, int* nR,
+                                     const double* reaction, const size_t vecSize,
+                                     const size_t varsCount, int* nB, int* nN, int* nR,
                                      int* nT);
 
-void classify_indices_R(const double* velocity, const double* reaction,
-                        const unsigned int vecSize, const unsigned int varsCount, int* nR,
-                        int* setR);
+void classify_indices_R(const double* velocity, const double* reaction, const size_t vecSize,
+                        const size_t varsCount, int* nR, int* setR);
 
 void printBlockVec(double* vec, int vecSize, int sizeBlock, int cl);

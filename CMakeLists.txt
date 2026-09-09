@@ -54,7 +54,7 @@ endif()
 
 # If not given, turn build type to release mode.
 if(NOT CMAKE_BUILD_TYPE)
-  if(WITH_ASAN) # asan conf will be done at component level (in ComponentSetup.cmake)
+  if(WITH_SANITIZER) # asan conf will be done at component level (in ComponentSetup.cmake)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
   else()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
@@ -233,7 +233,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
       $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
   target_precompile_headers(siconos_config INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/SiconosConfig.h>)
   siconos_component_install_setup(siconos_config)
-
+  target_precompile_headers(siconos_config INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/siconos/SiconosConfig.h>)
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 
 endif()

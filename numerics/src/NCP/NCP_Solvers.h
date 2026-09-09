@@ -29,8 +29,8 @@
 extern "C" {
 #endif
 
-/** This function compute the complementarity error of the NCP: \f$ 0 \leq z \perp F(z) \geq
- * 0\f$.
+/** This function compute the complementarity error of the NCP
+ *  \f$ 0 \leq z \perp F(z) \geq 0 \f$.
  *
  *  \param n size of the vectors
  *  \param[in] z solution

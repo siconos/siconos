@@ -21,28 +21,26 @@
 #include <stdio.h>   // for printf, fpr...
 #include <stdlib.h>  // for free, malloc
 
-#include "FrictionContactProblem.h"                       // for FrictionCon...
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"                                 // for SICONOS_FRI...
-#include "Friction_tools.h"                                                          // 
-#include "NumericsFwd.h"                                  // for SolverOptions
-#include "SOCLCP_Solvers.h"                               // for soclcp_VI_E...
-#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
-#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
-#include "SiconosBlas.h"                                  // for cblas_dnrm2
-#include "SolverOptions.h"                                // for SolverOptions
-#include "VI_cst.h"                                       // for SICONOS_VI_...
+#include "Friction_tools.h"    //
+#include "NumericsFwd.h"       // for SolverOptions
+#include "SOCLCP_Solvers.h"    // for soclcp_VI_E...
+#include "SOCLCP_cst.h"        // for SICONOS_SOC...
+#include "SiconosBlas.h"       // for cblas_dnrm2
+#include "SolverOptions.h"     // for SolverOptions
+#include "VI_cst.h"            // for SICONOS_VI_...
+#include "fc3d_short_names.h"  // for SICONOS_FRI...
+#include "safe_casts.h"
 
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
 #include "fc3d_Solvers.h"        // for fc3d_set_in...
 #include "fc3d_compute_error.h"  // for fc3d_comput...
 #include "numerics_verbose.h"
-#include "siconos_debug.h"       // lines 32-32
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityProblem*, double*,
@@ -55,13 +53,13 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   double* dparam = options->dparam;
 
   /* Number of contacts */
-  int nc = problem->numberOfContacts;
+  size_t nc = to_size_t(problem->numberOfContacts);
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
+  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
     return numerics_error("fc3d_ACLMFixedpoint",
@@ -87,9 +85,10 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   soclcp->n = problem->numberOfContacts * problem->dimension;
   soclcp->nc = problem->numberOfContacts;
   soclcp->M = problem->M;
-  soclcp->q = (double*)malloc(soclcp->n * sizeof(double));
+  soclcp->q = (double*)malloc(to_size_t(soclcp->n) * sizeof(double));
   soclcp->tau = problem->mu;
-  soclcp->coneIndex = (unsigned int*)malloc((soclcp->nc + 1) * sizeof(unsigned int));
+  soclcp->coneIndex =
+      (unsigned int*)malloc((to_size_t(soclcp->nc + 1)) * sizeof(unsigned int));
 
   for (int i = 0; i < soclcp->n; i++) {
     soclcp->q[i] = problem->q[i];
@@ -127,7 +126,7 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
     // internal solver for the regularized problem
 
     /* Compute the value of the initial value of q */
-    for (int ic = 0; ic < nc; ic++) {
+    for (size_t ic = 0; ic < nc; ic++) {
       normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] +
                     velocity[ic * 3 + 2] * velocity[ic * 3 + 2]);
       soclcp->q[3 * ic] = problem->q[3 * ic] + problem->mu[ic] * normUT;
@@ -153,7 +152,8 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
     *info = hasNotConverged;
   }
   if (verbose > 0) {
-    numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error, tolerance);
+    numerics_printf("---- FC3D - ACLMFP - | %3d | %14.7e | %7.3e | (final)", iter, error,
+                    tolerance);
     numerics_printf("---- FC3D - ACLMFP - internal iteration = %i", cumul_iter);
   }
   free(soclcp->q);
@@ -175,6 +175,8 @@ void fc3d_aclmfp_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
+  } else {
+    solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_NSGS);
@@ -192,7 +194,8 @@ static int fc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_aclmfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_aclmfp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                  SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_ACLMFixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -203,14 +206,10 @@ static void fc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_ACLMFP,
-                "FC3D_ACLMFP",
+REGISTER_SOLVER(FC3D_ACLMFP, "FC3D_ACLMFP",
                 "Augmented Cone Linear Mapping Fixed Point for 3D Friction Contact",
-                fc3d_aclmfp_init_wrap,
-                fc3d_aclmfp_solve_wrap,
-                fc3d_aclmfp_free_wrap,
-                NULL,
-                fc3d_aclmfp_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+                fc3d_aclmfp_init_wrap, fc3d_aclmfp_solve_wrap, fc3d_aclmfp_free_wrap, NULL,
+                fc3d_aclmfp_set_default, /* set_default */
+                1000,                    /* default_max_iter */
+                1e-4,                    /* default_tol */
+                0 /* is_local_solver */)

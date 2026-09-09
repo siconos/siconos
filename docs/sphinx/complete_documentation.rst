@@ -1,36 +1,9 @@
 .. _full_documentation:
 
 
-##################
-Full documentation
-##################
-
-This is the complete table of contents of Siconos documentation.
-
-.. contents::
-   :local:
-
-
-Getting and installing siconos software
-=======================================
-
-.. toctree::
-   :maxdepth: 5
-   
-
-   install_guide/install_guide
-
-
-Siconos Quickstart
-==================
-
-*Start here to get a first glimpse of siconos, with short introduction and tutorials.*
- 
-.. toctree::
-   :maxdepth: 5
-	     
-   getting_started/index
-
+######
+Guides
+######
 
 Users' guide
 ============
@@ -41,7 +14,6 @@ Users' guide
    :maxdepth: 5
 
    users_guide/index
-   examples/index
 
 Siconos API
 ===========
@@ -62,17 +34,5 @@ Developpers' corner
    :maxdepth: 5
 
    devel_guide/index
-
-More about Siconos project
-==========================
-
-.. toctree::
-   :maxdepth: 5
-	      
-   talks
-   related_projects
-   z_siconos_bibtex
-
-   
 
    

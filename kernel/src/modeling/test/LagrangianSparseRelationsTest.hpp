@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
+ * Copyright 2026 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file RelationNamespace.hpp
-  \brief Namespace related to relations
-*/
+#ifndef __LagrangianSparseRelationsTest__
+#define __LagrangianSparseRelationsTest__
 
-#ifndef RELATIONNAMESPACE_HPP
-#define RELATIONNAMESPACE_HPP
+#include <cppunit/extensions/HelperMacros.h>
 
-/** Namespace for types related to relations */
-namespace siconos::modeling {
-  
+class LagrangianSparseRelationsTest : public CppUnit::TestFixture {
+ private:
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(LagrangianSparseRelationsTest);
 
-}  // namespace siconos::modeling
+  // tests to be done ...
+  CPPUNIT_TEST(testBuildLagrangianSparseRheonomousR);
+  CPPUNIT_TEST(testBuildLagrangianSparseScleronomousR);
+  CPPUNIT_TEST_SUITE_END();
+
+  void testBuildLagrangianSparseRheonomousR();
+  void testBuildLagrangianSparseScleronomousR();
+
+ public:
+  void setUp();
+  void tearDown();
+};
 
 #endif

@@ -21,7 +21,6 @@
 
 #include "MCP_Solvers.h"                  // for mcp_old_driver_init, mcp_ol...
 #include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
-#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
 #include "NonSmoothDrivers.h"             // for mcp_old_driver
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem...
 #include "SolverOptions.h"                // for SolverOptions, solver_optio...
@@ -105,7 +104,6 @@ int main(void) {
   }
   printf("\n");
   solver_options_delete(options);
-  options = NULL;
 
   free(z);
   free(w);

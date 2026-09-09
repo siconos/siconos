@@ -58,7 +58,7 @@ void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, d
 void FB_compute_error_lcp(void* data_opaque, double* z, double* w, double* notused, double tol,
                           double* err);
 
-/** Compute F_FB : \f${F_FB}_i = \sqrt(z_i^2 + F_i^2) - (z_i + F_i)\f$
+/** Compute F_FB : \f$ {F_FB}_i = \sqrt(z_i^2 + F_i^2) - (z_i + F_i) \f$
  * \param data_opaque a LinearComplementarityProblem but casted
  * \param[in] z current value for z
  * \param[in] F current value for w

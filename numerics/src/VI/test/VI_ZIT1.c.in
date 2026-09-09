@@ -133,7 +133,7 @@ int main(void)
 //  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 10;
 
   problem->env = &sim_data;
-  problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
+  problem->nabla_F = NM_create(NM_DENSE, N, N);
 
   box_constraints box;
   double lb[] = {-1.0, -1.0};
@@ -173,10 +173,7 @@ int main(void)
   }
   printf("VI_ZIT2 final values xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
   solver_options_delete(options);
-  options = NULL;
-  free(problem->nabla_F);
-  problem->nabla_F = NULL;
-  free(problem);
-  problem = NULL;
+  problem = freeVariationalInequalityProblem(problem);
+
   return info;
 }

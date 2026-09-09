@@ -57,7 +57,7 @@ def test_solver_ids():
 
 def test_solver_options_create():
     """Test creating solver options"""
-    options = sn.solver_options_create(sn.PLASTICITY_2D_NSGS)
+    options = sn.SolverOptions(sn.solver_ids.PLASTICITY_2D_NSGS)
     assert options is not None
 
 

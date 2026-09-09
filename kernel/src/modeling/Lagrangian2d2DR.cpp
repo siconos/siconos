@@ -25,9 +25,9 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_NOCOLOR
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
@@ -36,8 +36,8 @@ void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(
-        "siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter). The size of ds "
-        "must of size 3 or 6");
+        "siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter). The ds must be "
+        "of size 3 or 6");
   }
   auto qSize = 3 * (inter.getSizeOfDS() / 3);
   if (!jacobianhOver_q_internal_storage_) {

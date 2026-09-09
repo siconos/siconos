@@ -24,6 +24,7 @@
 #include <stdlib.h>  // for calloc, free, malloc
 
 #include "FischerBurmeisterGenerated.h"  // for fc3d_FischerBurmeisterFun...
+#include "FrictionContactProblem.h"      // IWYU pragma: keep
 #include "FrictionContact_options.h"     // for FC3D_NSN_FB
 #include "fc3d_Solvers.h"
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...

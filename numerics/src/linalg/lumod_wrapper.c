@@ -24,14 +24,15 @@
 #include <stdlib.h>  // for free, malloc, NULL, calloc
 #include <string.h>  // for memset
 
-#include "NumericsMatrix.h"  // for NumericsMatrix
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "SiconosBlas.h"    // for cblas_dcopy, cblas_dgemv, CblasColMajor
-#include "SiconosLapack.h"  // for lapack_int, DGETRF, DGETRS
-#include "lumod_dense.h"    // for LUmod_dense, Lprod_dense, Usolve_dense
-#include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+#include "NumericsMatrix.h"  // IWYU pragma: keep
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dgemv, CblasColMajor
+#include "SiconosLapack.h"   // for lapack_int, DGETRF, DGETRS
+#include "lumod_dense.h"     // for LUmod_dense, Lprod_dense, Usolve_dense
 #include "numerics_errors.h"
+#include "safe_casts.h"
+#include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 
 #define TOL_BLU 1e-30
 #define BASIS_OFFSET 1
@@ -167,14 +168,16 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
    * 3. Compute x3 = x1 - Yk x2
    * 4. Compute x = x3 + Uk x2
    */
-  unsigned n = lumod_data->n;
-  unsigned k = lumod_data->k;
+  const unsigned n = lumod_data->n;
+  const unsigned k = lumod_data->k;
   unsigned maxmod = lumod_data->maxmod;
   lapack_int infoLAPACK = 0;
 
   /*  Step 1. */
   DEBUG_PRINT_VEC_STR("col", x, n);
-  DGETRS(LA_NOTRANS, n, 1, lumod_data->LU_H, n, lumod_data->ipiv_LU_H, x, n, &infoLAPACK);
+  lapack_int n_la = to_blasint(n);
+  DGETRS(LA_NOTRANS, n_la, 1, lumod_data->LU_H, n_la, lumod_data->ipiv_LU_H, x, n_la,
+         &infoLAPACK);
   assert(infoLAPACK == 0 &&
          "SN_lumod_solve :: info from DGETRS for solving H_0 X = b is not zero!\n");
   DEBUG_PRINT_VEC_STR("x1 sol to H x = col", x, n);
@@ -183,9 +186,9 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
    * Note that in practice, we need this only when the driving variable is not
    * in the basis used for factorisation*/
   if (col_tilde) {
-    cblas_dcopy(n, x, 1, col_tilde, 1);
+    cblas_dcopy(n_la, x, 1, col_tilde, 1);
   }
-
+  lapack_int k_la = to_blasint(k);
   if (k > 0) {
     feclearexcept(FE_ALL_EXCEPT);
 
@@ -196,20 +199,22 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
     /* Step 2. */
     /* Step 2.a Compute Uk^T x1  */
     /** this is just a permutation, could replace accordingly*/
-    cblas_dgemv(CblasColMajor, CblasTrans, n, k, 1.0, lumod_data->Uk, n, x, 1, 0.0,
+
+    cblas_dgemv(CblasColMajor, CblasTrans, n_la, k_la, 1.0, lumod_data->Uk, n_la, x, 1, 0.0,
                 lumod_data->y, 1);
     DEBUG_PRINT_VEC_STR("Uk^T x1", lumod_data->y, k);
 
     /* XXX: hack */
-    if (cblas_ddot(k, lumod_data->y, 1, lumod_data->y, 1) < k * TOL_BLU) {
+    if (cblas_ddot(k_la, lumod_data->y, 1, lumod_data->y, 1) < k * TOL_BLU) {
       goto exit_SN_lumod_dense_solve;
     }
     /* Step 2.b Solve C x2 = Uk^T x1 using the LU factors of C*/
     /*          compute z = Ly */
-    Lprod_dense(1, maxmod, k, lumod_data->L_C, lumod_data->y, lumod_data->z);
+    lapack_int maxmod_la = to_blasint(maxmod);
+    Lprod_dense(1, maxmod_la, k_la, lumod_data->L_C, lumod_data->y, lumod_data->z);
     DEBUG_PRINT_VEC_STR("L Uk^T x1", lumod_data->z, k);
     /*          solve U y = z */
-    Usolve_dense(1, maxmod, k, lumod_data->U_C - 1, lumod_data->z - 1);
+    Usolve_dense(1, maxmod_la, k_la, lumod_data->U_C - 1, lumod_data->z - 1);
     DEBUG_PRINT_VEC_STR("x2 sol to C x = Uk^T x1", lumod_data->z, k);
 
     if (fetestexcept(FE_ALL_EXCEPT & ~FE_INEXACT & ~FE_UNDERFLOW)) {
@@ -217,13 +222,13 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
       return SN_LUMOD_NEED_REFACTORIZATION;
     }
     /* Step 3. Compute x3 = x1 - Yk x2 */
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, k, -1., lumod_data->Yk, n, lumod_data->z, 1,
-                1., x, 1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n_la, k_la, -1., lumod_data->Yk, n_la,
+                lumod_data->z, 1, 1., x, 1);
     DEBUG_PRINT_VEC_STR("x3 = x1 - Yk x2", x, n);
 
     /* Step 4. Compute x = x3 + Uk x2  */
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, k, 1.0, lumod_data->Uk, n, lumod_data->z, 1,
-                1.0, x, 1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n_la, k_la, 1.0, lumod_data->Uk, n_la,
+                lumod_data->z, 1, 1.0, x, 1);
     DEBUG_PRINT_VEC_STR("x = x1 - Yk x2 + Uk x2", x, n);
   }
 exit_SN_lumod_dense_solve:
@@ -234,7 +239,7 @@ exit_SN_lumod_dense_solve:
 int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restrict basis,
                        NumericsMatrix* restrict M, double* covering_vector) {
   /* Construct the basis matrix  */
-  unsigned n = lumod_data->n;
+  const unsigned n = lumod_data->n;
   assert(n > 0);
   double* H = lumod_data->LU_H;
   unsigned* factorized_basis = lumod_data->factorized_basis;
@@ -245,7 +250,7 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   memset(factorized_basis, 0, (2 * n + 1) * sizeof(unsigned));
   memset(lumod_data->row_col_indx, 0, (2 * n + 1) * sizeof(int));
   DEBUG_PRINT("Variables in factorized basis\n")
-
+  lapack_int n_la = to_blasint(n);
   for (unsigned i = 0, j = 0; i < n; ++i, j += n) {
     unsigned var = basis[i] - BASIS_OFFSET;
     DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], n), basis_to_number(basis[i], n))
@@ -255,14 +260,14 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
       unsigned z_indx = var - n - 1;
       assert(var >= n + 1);
       assert(var - n - 1 < n);
-      cblas_dcopy(n, &Mlcp[z_indx * n], 1, &H[j], 1);
+      cblas_dcopy(n_la, &Mlcp[z_indx * n], 1, &H[j], 1);
     } else if (var < n) {
       unsigned w_indx = var;
       memset(&H[j], 0, n * sizeof(double));
       H[j + w_indx] = -1.;
     } else /* we have the auxiliary variable  */
     {
-      cblas_dcopy(n, covering_vector, 1, &H[j], 1);
+      cblas_dcopy(n_la, covering_vector, 1, &H[j], 1);
     }
   }
   DEBUG_PRINT("\n")

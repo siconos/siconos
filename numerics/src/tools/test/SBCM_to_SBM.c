@@ -21,20 +21,19 @@
 
  */
 
-#include "NumericsFwd.h"        // for SparseBlockCoordinateMatrix, SparseBl...
 #include "SparseBlockMatrix.h"  // for SparseBlockCoordinateMatrix, SBM_get_...
 
 #define nnz 10
 
 int main(void) {
-  unsigned int Ai[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
-  unsigned int Aj[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
+  size_t Ai[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
+  size_t Aj[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
   double Ax[nnz] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
   SparseBlockCoordinateMatrix mc;
 
-  unsigned int blocksize0[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  unsigned int blocksize1[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  size_t blocksize0[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  size_t blocksize1[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
   double* block[nnz] = {&Ax[0], &Ax[1], &Ax[2], &Ax[3], &Ax[4],
                         &Ax[5], &Ax[6], &Ax[7], &Ax[8], &Ax[9]};
@@ -57,7 +56,6 @@ int main(void) {
   int info1 = SBM_get_value(m, 0, 0) == 2.;
   int info2 = SBM_get_value(m, 8, 8) == 9.;
 
-  SBM_free_from_SBCM(m);
-
+  m = SBM_free(m, SBM_FREE_KEEP_BLOCKS_AND_SIZES);  // from sbcm -> keep blocks and blocksizes
   return 1 - info1 + 1 - info2;
 }

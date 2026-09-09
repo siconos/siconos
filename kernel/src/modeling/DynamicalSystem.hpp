@@ -146,7 +146,7 @@ class DynamicalSystem {
       result in \f$ \dot x = r \f$
    *  \param dimension size of the system (n)
    */
-  DynamicalSystem(siconos::algebra::Index dimension) : x_size_(dimension){};
+  DynamicalSystem(siconos::algebra::Index dimension) : x_size_(dimension) {};
 
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
@@ -322,7 +322,7 @@ class DynamicalSystem {
    *
    *  \param time  the current time
    */
-  virtual void updatePlugins(double time){};
+  virtual void updatePlugins(double time) {};
 
   /** reset the global DynamicSystem counter (for ids)
    *

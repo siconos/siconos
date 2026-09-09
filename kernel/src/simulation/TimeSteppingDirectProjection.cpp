@@ -26,7 +26,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
-#include "Relation.hpp"
+#include "Relation.hpp"  // IWYU pragma: keep
 #include "SiconosException.hpp"
 #include "TimeStepping.hpp"
 #include "Tools.hpp"
@@ -73,7 +73,7 @@ void siconos::simulation::TimeSteppingDirectProjection::nextStep() {
 
   // Zeroing Lambda Muliplier of indexSet()
 
-  auto indexSet = _nsds->topology()->indexSet(0);
+  auto indexSet = nonSmoothDynamicalSystem()->topology()->indexSet(0);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet->bundle(*ui);
@@ -110,8 +110,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   DEBUG_PRINT(
       "siconos::simulation::TimeSteppingDirectProjection::newtonSolve begin "
       "projection:\n");
-
-  auto dsGraph = _nsds->dynamicalSystems();
+  auto nsds = nonSmoothDynamicalSystem();
+  auto dsGraph = nsds->dynamicalSystems();
 
 #ifdef TSPROJ_CORRECTIONVELOCITIES
   for (auto& vi : *dsGraph) {
@@ -142,17 +142,17 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //   if (criteria < -_constraintTol)
   //     runningNewton=true;
   // }
-  if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+  if (nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
   // Zeroing Lambda Muliplier of indexSet()
 
-  auto indexSet = _nsds->topology()->indexSet(0);
+  auto indexSet = nsds->topology()->indexSet(0);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet->bundle(*ui);
     inter->lambda(0)->setZero();
   }
-  _nsds->updateInput(nextTime(), 0);
+  nsds->updateInput(nextTime(), 0);
 
   // Store the q vector of each DS.
 
@@ -178,21 +178,21 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n",
                  _nbProjectionIteration);
 
-    auto indexSet = _nsds->topology()->indexSet(0);
+    auto indexSet = nsds->topology()->indexSet(0);
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet->bundle(*ui);
       inter->lambda(0)->setZero();
     }
-    _nsds->updateInput(nextTime(), 0);
+    nsds->updateInput(nextTime(), 0);
     info = 0;
 
     DEBUG_PRINT("TimeSteppingProjectOnConstraint compute OSNSP.\n");
 
     info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS);
 
-    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)_nsds->topology()->indexSet(0)->size());
-    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size());
+    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)nsds->topology()->indexSet(0)->size());
+    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)nsds->topology()->indexSet(1)->size());
     DEBUG_EXPR(oneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS)->display());
 
     if (info && _newtonWarningOnNonConvergence) {
@@ -200,15 +200,15 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
                    "siconos::simulation::TimeSteppingDirectProjection::"
                    "advanceToEvent() project on constraints. solver failed.\n";
     }
-    _nsds->updateInput(nextTime(), 0);
+    nsds->updateInput(nextTime(), 0);
 
     DEBUG_EXPR_WE(
-        std ::cout << "After update input\n"; auto indexSet1 = _nsds->topology()->indexSet(1);
+        std ::cout << "After update input\n"; auto indexSet1 = nsds->topology()->indexSet(1);
         std ::cout << "lamda(1) in IndexSet1\n";
         for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet1->bundle(*ui);
           siconos::algebra::print(*inter->lambda(1));
-        } auto indexSet0 = _nsds->topology()->indexSet(0);
+        } auto indexSet0 = nsds->topology()->indexSet(0);
         std ::cout << "lamda(0) in indexSet0\n";
         for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet0->bundle(*ui);
@@ -270,8 +270,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
                   << _nbProjectionIteration << "\n";
         std ::cout << "After update state in position\n";
         std ::cout << "lamda(1) in IndexSet1\n";
-        auto indexSet1 = _nsds->topology()->indexSet(1);
-        auto indexSet0 = _nsds->topology()->indexSet(0);
+        auto indexSet1 = nsds->topology()->indexSet(1);
+        auto indexSet0 = nsds->topology()->indexSet(0);
 
         for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet1->bundle(*ui);
@@ -465,7 +465,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
 
 void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(
     bool* runningProjection) {
-  auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
+  auto indexSet =
+      nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
   siconos::graphs::InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -525,9 +526,9 @@ void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double crite
   bool isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
-
-  bool isLinear = _nsds->isLinear();
-  auto indexSet = _nsds->topology()->indexSet(0);
+  auto nsds = nonSmoothDynamicalSystem();
+  bool isLinear = nsds->isLinear();
+  auto indexSet = nsds->topology()->indexSet(0);
   initializeNewtonSolve();
 
   if ((_newtonOptions == TimeSteppingType::LINEAR ||

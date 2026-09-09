@@ -58,6 +58,7 @@ int globalFrictionContact_test_function(TestCase* current) {
   for (int i = 0; i < 5; i++) {
     if (problem_name != NULL) problem_name = strtok(NULL, separators);
   }
+  free(str);
 
   problem_name = strtok(problem_name, ".");
 
@@ -168,11 +169,10 @@ int globalFrictionContact_test_function(TestCase* current) {
   int nB, nN, nR, nT;
   if (current->options->solverId == GFC3D_IPM_SNM || current->options->solverId == GFC3D_IPM) {
     // Take projerr value from test
-    double* projerr_ptr = current->options->solverData;
     classify_BNRT_velocity_modified(problem->mu, velocity, reaction, NC * dim, NC, &nB, &nN,
                                     &nR, &nT);
-    printf("\nsumry: %d  %.2e  %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n", info,
-           current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
+    printf("\nsumry: %d  %.2e    %5i %5i   %4i %4i %4i %4i    %.6f   %s\n", info,
+           current->options->dparam[SICONOS_DPARAM_RESIDU],
            current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC, nB, nN, nR,
            NC - nB - nN - nR, (double)(t2 - t1) / (double)clk_tck, problem_name);
   } else {
@@ -190,10 +190,8 @@ int globalFrictionContact_test_function(TestCase* current) {
   free(reaction);
   free(velocity);
   free(globalvelocity);
-  free(str);
-  free(current->options->solverData);
-  current->options->solverData = NULL;
   /* fclose(foutput); */
+  free(problem->name);
   globalFrictionContact_free(problem);
   return info;
 }

@@ -33,7 +33,7 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1);
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
   double y = (inter->y(i - 1))->getValxxue(0);  // for i=1 y(i-1) is the position
   double yDot = (*(inter->y(i)))(0);            // for i=1 y(i) is the velocity
 
@@ -58,7 +58,7 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionsGraph::size_type i) {
   assert(i == 1);
-  double h = _simulation->timeStep();
+  double h = simulation()->timeStep();
   double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
   double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
@@ -113,7 +113,7 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
 
 {
   assert(i == 1);
-  //  double h = _simulation->timeStep();
+  //  double h = simulation()->timeStep();
   double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
   double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 

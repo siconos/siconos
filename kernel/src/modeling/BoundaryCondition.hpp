@@ -17,12 +17,12 @@
  */
 #ifndef BOUNDARYCONDITION_HPP
 #define BOUNDARYCONDITION_HPP
-#include <memory>
+// #include <memory>
 #include <span>
 #include <vector>
 
 #include "FunctionTypes.hpp"
-#include "SiconosMatrix.hpp"
+// #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 #include "SiconosVector.hpp"
 namespace siconos::modeling {

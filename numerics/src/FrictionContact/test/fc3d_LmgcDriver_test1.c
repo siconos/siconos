@@ -17,8 +17,8 @@
  */
 #include <stdlib.h>  // for free, malloc
 
-#include "FrictionContact_options.h"      // for SICONOS_FRICTION_3D_NSGS
-#include "NonSmoothDrivers.h"  // for fc3d_LmgcDriver
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_NSGS
+#include "NonSmoothDrivers.h"         // for fc3d_LmgcDriver
 
 int main(void) {
   int info = 0;
@@ -28,8 +28,8 @@ int main(void) {
   double q[12] = {-1, 1, 3, -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[4] = {0.1, 0.1, 0.1, 0.1};
 
-  unsigned int row[4] = {1, 2, 3, 4};
-  unsigned int column[4] = {1, 2, 3, 4};
+  size_t row[4] = {1, 2, 3, 4};
+  size_t column[4] = {1, 2, 3, 4};
   double W[36] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1,
                   1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
