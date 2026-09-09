@@ -30,8 +30,8 @@
 #include "projectionOnDisk.h"
 
 /* #define DEBUG_NOCOLOR */
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
 void cohesive_friction_3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
@@ -64,8 +64,7 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
   CHECK_NULL(error);
   CHECK_MATRIX(problem->M);
   CHECK_NULL(problem->q);
-  CHECK_NULL(problem->mu);
-
+ 
   int nc = problem->numberOfContacts;
   int ncoh = problem->numberOfCohesivePoints;
 
