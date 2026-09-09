@@ -36,8 +36,10 @@
  */
 
 #include "CohesiveFrictionContact.hpp"
-#include "FrictionContact.hpp"
+
 #include <algorithm>
+
+#include "FrictionContact.hpp"
 // #include <boost/smart_ptr/shared_ptr.hpp>
 // #include <memory>
 
@@ -71,7 +73,7 @@ struct ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
     answer = nsl.mu();
   }
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
-    DEBUG_EXPR(std::cout << "NewtonImpactFrictionNSL type " << std::endl;    );
+    DEBUG_EXPR(std::cout << "NewtonImpactFrictionNSL type " << std::endl;);
     answer = nsl.mu();
   }
 };
@@ -109,7 +111,7 @@ CohesiveFrictionContact::CohesiveFrictionContact(int dimPb, int numericsSolverId
 
 CohesiveFrictionContact::CohesiveFrictionContact(int dimPb,
                                                  std::shared_ptr<SolverOptions> options)
-    : FrictionContact(dimPb, options) {
+    : FrictionContact(dimPb, options),  _scaling_as_percussion(true) {
   _assemblyType = LinearOSNSAssemblyType::REDUCED_DIRECT;
   _numericsMatrixStorageType = NM_SPARSE;
   if (dimPb == 3) {
@@ -146,16 +148,17 @@ void CohesiveFrictionContact::initialize(
     switch (_numericsMatrixStorageType) {
       case NM_SPARSE: {
         if (!_H0) {
-	  _H0 = std::make_shared<OSNSMatrix>(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-					     simulation->indexSet(_indexSetLevel)->size(), _numericsMatrixStorageType);
-	}
+          _H0 = std::make_shared<OSNSMatrix>(
+              simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
+              simulation->indexSet(_indexSetLevel)->size(), _numericsMatrixStorageType);
+        }
         if (!_V) {
           _V = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
         }
         if (!_U) {
           _U = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
         }
-	if (!_X) {
+        if (!_X) {
           _X = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
         }
         break;
@@ -166,10 +169,7 @@ void CohesiveFrictionContact::initialize(
         }
     }
   } else {
-
-    }
-
-
+  }
 
   DEBUG_END("CohesiveFrictionContact::initialize()\n");
 }
@@ -182,7 +182,8 @@ void CohesiveFrictionContact::updateCoefficients() {
     // auto nsl = std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
     //     indexSet->bundle(*ui)->nonSmoothLaw());
     // assert(nsl);
-    auto mu_val = siconos::modeling::nonsmooth_laws::ask<siconos::nonsmooth_formulations::cohesive_friction_contact::ForMu>(
+    auto mu_val = siconos::modeling::nonsmooth_laws::ask<
+        siconos::nonsmooth_formulations::cohesive_friction_contact::ForMu>(
         *indexSet->bundle(*ui)->nonSmoothLaw());
 
     _mu->push_back(mu_val);
@@ -194,14 +195,21 @@ void CohesiveFrictionContact::updateCoefficients() {
   auto indexSet0 = simulation()->indexSet(0);
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     siconos::modeling::Interaction& inter = *indexSet0->bundle(*ui);
-    auto nslaw =
-        (std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
-            indexSet->bundle(*ui)->nonSmoothLaw()));
+    auto nslaw = (std::dynamic_pointer_cast<siconos::modeling::CohesiveZoneModelNIFNSL>(
+        indexSet->bundle(*ui)->nonSmoothLaw()));
     if (nslaw) {
       auto c_n_val = nslaw->cohesion(inter)[0];
-      _c_n->push_back(c_n_val * simulation()->currentTimeStep());
+      if (_scaling_as_percussion) {
+        _c_n->push_back(c_n_val * simulation()->currentTimeStep());
+      } else {
+	_c_n->push_back(c_n_val);
+      }
       auto c_t_val = nslaw->cohesion(inter)[1];
-      _c_t->push_back(c_t_val * simulation()->currentTimeStep());
+      if (_scaling_as_percussion) {
+        _c_t->push_back(c_t_val * simulation()->currentTimeStep());
+      } else {
+	_c_t->push_back(c_t_val);
+      }
     }
 
     // An attempt with visitor Question to avoid the dynamic cast
@@ -217,7 +225,6 @@ void CohesiveFrictionContact::updateCoefficients() {
     //     *indexSet->bundle(*ui)->nonSmoothLaw());
 
     // _c_t->push_back(c_t_val);
-
   }
   DEBUG_EXPR(
       std::cout << "_c_n = ["; bool first = true; for (double x : *_c_n) {
@@ -236,6 +243,7 @@ CohesiveFrictionContact::cohesiveFrictionContactProblem() {
   auto numerics_problem = std::make_shared<CohesiveFrictionContactProblem>();
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
+
   numerics_problem->numberOfCohesivePoints = _sizeOutput_cohesion / _contactProblemDim;
   numerics_problem->M = NULL;
   numerics_problem->W = &*_M->numericsMatrix();
@@ -322,7 +330,7 @@ void CohesiveFrictionContact::compute_q_cohesion(double time) {
     auto inter = indexSet0->bundle(*ui);
     compute_q_cohesion_block(*ui, pos);
   }
-  *_q_cohesion = *_q_cohesion /simulation()->timeStep();
+
   DEBUG_EXPR(siconos::algebra::print(*_q_cohesion););
 
   DEBUG_END("CohesiveFrictionContact::updateQWithQCohesion()\n");
@@ -348,41 +356,17 @@ void CohesiveFrictionContact::computeMatrices() {
     // fill H0
     _H0->fillH(DSG0, indexSet0);
 
-    DEBUG_EXPR(NumericsMatrix* H0_NM = &*(_H0->numericsMatrix());
-	       std::cout << "H0 :";
-	       NM_display(H0_NM););
-    //NM_scal(simulation()->currentTimeStep(), H0_NM);
+    // DEBUG_EXPR(NumericsMatrix* H0_NM = &*(_H0->numericsMatrix()); std::cout << "H0 :";
+    //            NM_display(H0_NM););
 
     // ComputeV
     _V->computeV(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
 
-    // Ugly Hack to get theta
-    // we should consider a vector of theta
-
-    double theta = 0.0;
-    for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
-      auto inter = indexSet0.bundle(*ui);
-      auto osi1 = indexSet0.properties(*ui).osi1;
-      auto osi1_type = osi1->getType();
-      auto& osi2 = *indexSet0.properties(*ui).osi1;
-      auto osi2_type = osi2.getType();
-      using siconos::integrators::IntegratorType;
-      if ((osi1_type == IntegratorType::MOREAUJEANOSI &&
-	   osi2_type == IntegratorType::MOREAUJEANOSI)) {
-
-        auto moreaujean_osi1 =
-            std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi1);
-	theta = moreaujean_osi1->theta();
-        }
-      break;
-    }
-
     // ComputeU
     _U->computeU(_H->numericsMatrix(), _W_inverse->numericsMatrix(), _H0->numericsMatrix());
-    NM_scal(theta, &*(_U->numericsMatrix()));
+
     // ComputeX
     _X->computeX(_H0->numericsMatrix(), _W_inverse->numericsMatrix());
-    NM_scal(theta, &*(_X->numericsMatrix()));
 
   } else
     THROW_EXCEPTION("CohesiveFrictionContact::computeMatrices unknown _assemblyTYPE");
@@ -400,30 +384,72 @@ void CohesiveFrictionContact::computeMatrices() {
 bool CohesiveFrictionContact::preCompute(double time) {
   DEBUG_BEGIN("CohesiveFrictionContact::preCompute()\n");
 
-  DEBUG_EXPR(std::cout << "indexSet0 size : " <<  simulation()->indexSet(0)->size() << std::endl;
-	     std::cout << "indexSet1 size : " <<  simulation()->indexSet(1)->size() << std::endl;);
-
+  DEBUG_EXPR(
+      std::cout << "indexSet0 size : " << simulation()->indexSet(0)->size() << std::endl;
+      std::cout << "indexSet1 size : " << simulation()->indexSet(1)->size() << std::endl;);
 
   // First do standard preCompute
   // _M and _q are computed on indexSet 1
   bool hasContactActive = LinearOSNS::preCompute(time);
 
   // In the case, that indexSet1 is empty, we compute M to fill en empty marix !!
-  if (!hasContactActive)
-  {
+  if (!hasContactActive) {
     LinearOSNS::computeM();
   }
 
   // Compute coupling matrices between cohesive points and contact points.
   computeMatrices();
 
-  _sizeOutput= _M->cols();
-  _sizeOutput_cohesion= _X->cols();
-
+  _sizeOutput = _M->cols();
+  _sizeOutput_cohesion = _X->cols();
 
   // Add cohesive contribution to q
   compute_q_cohesion(time);
 
+  // rescaling
+
+  // Ugly Hack to get theta
+  // we should consider a vector of theta
+
+  siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
+  double theta = 0.0;
+  for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
+    auto inter = indexSet0.bundle(*ui);
+    auto osi1 = indexSet0.properties(*ui).osi1;
+    auto osi1_type = osi1->getType();
+    auto& osi2 = *indexSet0.properties(*ui).osi1;
+    auto osi2_type = osi2.getType();
+    using siconos::integrators::IntegratorType;
+    if ((osi1_type == IntegratorType::MOREAUJEANOSI &&
+         osi2_type == IntegratorType::MOREAUJEANOSI)) {
+      auto moreaujean_osi1 =
+          std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi1);
+      theta = moreaujean_osi1->theta();
+    }
+    break;
+  }
+  if (_scaling_as_percussion) {
+    NM_scal(theta, &*(_U->numericsMatrix()));
+    NM_scal(theta, &*(_X->numericsMatrix()));
+    *_q_cohesion = *_q_cohesion / simulation()->timeStep();
+
+    // for (double val : *_c_n) {
+    //   val = val * simulation()->timeStep();
+    //   }
+    // for (double val : *_c_t) {
+    //   val = val * simulation()->timeStep();
+    //   }
+
+    // *_c_n->data() *= simulation()->timeStep();
+    // *_c_t->data() *= simulation()->timeStep();
+
+  } else {
+    NM_scal(theta * simulation()->timeStep(), &*(_U->numericsMatrix()));
+    NM_scal(simulation()->timeStep(), &*(_V->numericsMatrix()));
+    NM_scal(theta * simulation()->timeStep() * simulation()->timeStep(),
+            &*(_X->numericsMatrix()));
+  }
 
   if (_z->size() != (_sizeOutput + _sizeOutput_cohesion)) {
     _z->resize(_sizeOutput + _sizeOutput_cohesion, Eigen::NoChange);
@@ -467,8 +493,24 @@ void CohesiveFrictionContact::postCompute() {
     // Get lambda for the current Interaction
     auto lambda = inter.lambda(0);
     // Copy _z values, starting from index pos + _sizeOutput_cohesion into lambda[0].
-    lambda->segment(0, lambda->size()) =
-        _z->segment(pos + _sizeOutput, lambda->size()) / simulation()->currentTimeStep();
+    if (_scaling_as_percussion) {
+      lambda->segment(0, lambda->size()) =
+          _z->segment(pos + _sizeOutput, lambda->size()) / simulation()->currentTimeStep();
+    } else {
+      lambda->segment(0, lambda->size()) = _z->segment(pos + _sizeOutput, lambda->size());
+    }
+
+    // auto lambda_1 = inter.lambda(1);
+
+    // std::cout << "contact percussion   : ";
+    // siconos::algebra::print(_z->segment(pos, lambda->size()));
+    // std::cout << "cohesion percussion  : ";
+    // siconos::algebra::print(_z->segment(pos + _sizeOutput, lambda->size()));
+    // std::cout << "contact velocity     : ";
+    // siconos::algebra::print(_w->segment(pos, lambda->size()));
+    // std::cout << "cohesion displacement: ";
+    // siconos::algebra::print(_w->segment(pos + _sizeOutput, lambda->size()));
+
     DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
 
@@ -516,7 +558,6 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::compute(double tim
 
   updateCoefficients();
 
-
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -524,15 +565,14 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::compute(double tim
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
   DEBUG_EXPR(std::cout << "size_output :" << _sizeOutput
-	     << " _sizeOutput_cohesion : " << _sizeOutput_cohesion << std::endl;);
+                       << " _sizeOutput_cohesion : " << _sizeOutput_cohesion << std::endl;);
   if (_sizeOutput + _sizeOutput_cohesion != 0) {
     // Call Numerics Driver for FrictionContact
     info = solve();
     postCompute();
   }
   // display();
-  //getchar();
-
+  // getchar();
 
   return info;
 }
@@ -562,9 +602,7 @@ void CohesiveFrictionContact::display() const {
   }
   std::cout << std::endl;
   std::cout << "The CohesiveFrictionContact works on the index set of level  "
-            << _indexSetLevel
-	    << " for contacts points and 0 for cohesive points"
-            << std::endl;
+            << _indexSetLevel << " for contacts points and 0 for cohesive points" << std::endl;
 
   std::cout << "================================================\n";
 }

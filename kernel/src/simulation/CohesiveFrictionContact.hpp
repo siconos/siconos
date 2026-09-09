@@ -220,7 +220,7 @@ namespace siconos::nonsmooth_formulations {
  *
  * \par Problem Structure
  * The OSNS problem is formulated as:
- * \f$ M \cdot r + q = u \f$ with 
+ * \f$ M \cdot r + q = u \f$ with
  * - M = [[W, V], [U, X]] (block mass/stiffness matrix)
  * - r = [r_v, r_u] (contact and cohesive reactions)
  * - q = [q_v, q_u] (input velocity and displacement)
@@ -247,82 +247,86 @@ class CohesiveFrictionContact : public FrictionContact {
   /** \cond DEVEL */
   ACCEPT_SERIALIZATION(CohesiveFrictionContact);
   /** \endcond */
-  
+
   typedef int (*Driver)(CohesiveFrictionContactProblem *, double *, double *, SolverOptions *);
 
   /** Pointer to the Numerics driver function for cohesive friction-contact
-   * 
+   *
    * The driver solves the problem:
    * M * r + q = velocity, subject to friction and cohesive constraints
    */
   Driver _cohesiveFrictionContact_driver;
 
   /** Normal cohesion intensity vector (size: numberOfCohesivePoints).
-   * 
+   *
    * Contains the normal component of cohesive traction for each cohesive
    * interaction in indexSet0. Updated each time step from the cohesive law.
    */
   std::shared_ptr<std::vector<double>> _c_n{nullptr};
 
   /** Tangential cohesion intensity vector (size: numberOfCohesivePoints).
-   * 
+   *
    * Contains the tangential component of cohesive traction for each cohesive
    * interaction in indexSet0. Updated each time step from the cohesive law.
    */
   std::shared_ptr<std::vector<double>> _c_t{nullptr};
-  
+
   /** Matrix V: contact-cohesive coupling block.
-   * 
+   *
    * Maps cohesive reactions to contact velocity space.
    * Part of the global matrix M = [[W, V], [U, X]].
-   * 
+   *
    * Dimensions: (d*n_c) x (d*n_coh)
    * where d=dimension, n_c=contacts, n_coh=cohesive points
    */
   std::shared_ptr<OSNSMatrix> _V{nullptr};
 
   /** Matrix U: cohesive-contact coupling block.
-   * 
+   *
    * Maps contact reactions to cohesive displacement space.
    * Part of the global matrix M = [[W, V], [U, X]].
-   * 
+   *
    * Dimensions: (d*n_coh) x (d*n_c)
    */
   std::shared_ptr<OSNSMatrix> _U{nullptr};
-  
+
   /** Matrix X: cohesive-cohesive block.
-   * 
+   *
    * Stiffness of cohesive zones (from cohesive law).
    * Part of the global matrix M = [[W, V], [U, X]].
-   * 
+   *
    * Dimensions: (d*n_coh) x (d*n_coh)
    */
   std::shared_ptr<OSNSMatrix> _X{nullptr};
 
   /** Matrix H0: Jacobian storage for cohesive interactions.
-   * 
+   *
    * Stores the H matrices (Jacobians) for interactions in indexSet0,
    * used to compute the coupling blocks V, U, and X.
    */
   std::shared_ptr<OSNSMatrix> _H0{nullptr};
 
   /** Cohesive reaction vector r_u (displacement-level).
-   * 
+   *
    * Contains the cohesive reactions from all interactions in indexSet0,
    * assembled as r_u = [r_{u,1}, r_{u,2}, ..., r_{u,n_coh}].
    * Each block has dimension components (3 for 3D, 2 for 2D).
-   * 
+   *
    * These reactions are computed by the cohesive law based on
    * damage state and opening displacement.
    */
   std::shared_ptr<siconos::algebra::SiconosVector> _q_cohesion{nullptr};
 
   /** Size of the cohesive problem (number of cohesive blocks).
-   * 
+   *
    * Number of interactions in indexSet0 (potential cohesive zones).
    * Determines the dimension of r_u: d * _sizeOutput_cohesion.
    */
   siconos::algebra::Index _sizeOutput_cohesion{0};
+
+  bool _scaling_as_percussion = false;
+
+
 
  public:
   /** \brief Constructor with dimension and solver id
@@ -355,19 +359,19 @@ class CohesiveFrictionContact : public FrictionContact {
   void initialize(std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   /** \brief Update friction and cohesion coefficients
-   * 
+   *
    * Updates the mu (friction), c_n (normal cohesion), and c_t (tangential cohesion)
    * vectors from the non-smooth laws of all interactions.
    */
   void updateCoefficients();
 
   /** \return the cohesive friction contact problem from Numerics
-   * 
+   *
    * Returns the C-struct problem used by the Numerics solver,
    * containing M, q, mu, c_n, c_t, and solver options.
    */
   std::shared_ptr<CohesiveFrictionContactProblem> cohesiveFrictionContactProblem();
-  
+
   /** \brief Compute cohesive reaction for a single interaction
    *
    * Computes the cohesive reaction contribution from one interaction
@@ -397,7 +401,7 @@ class CohesiveFrictionContact : public FrictionContact {
    * Builds the block matrices of the global system:
    * - W: contact-contact (extends standard M)
    * - V: contact-cohesive coupling
-   * - U: cohesive-contact coupling  
+   * - U: cohesive-contact coupling
    * - X: cohesive-cohesive stiffness
    *
    * These are assembled from H matrices (Jacobians) of all interactions.
@@ -423,7 +427,7 @@ class CohesiveFrictionContact : public FrictionContact {
    * Ensures damage variables are properly updated via swapInMemory().
    */
   void postCompute() override;
-  
+
   /** \brief Solve the cohesive friction-contact problem
    *
    * Calls the Numerics driver to solve:
