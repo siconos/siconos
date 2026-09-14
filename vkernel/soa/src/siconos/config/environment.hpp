@@ -12,20 +12,18 @@
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
 #include "siconos/algebra/numerics.hpp"
-#include "siconos/storage/dynamic_properties.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
-#include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/storage.hpp"
 
 namespace siconos {
 
 template <typename Item>
 struct standard_environment {
+
   using boolean = uint8_t;  // not bool => cf CompactNSearch sort.
   using scalar = double;
   using indice = std::size_t;
   using integer = std::int64_t;
-  using string = std::string;
 
   template <typename K, typename V>
   using map = std::unordered_map<K, V>;
@@ -77,12 +75,6 @@ struct standard_environment {
 
   template <typename... Ts>
   using variant = std::variant<Ts...>;
-
-  template <typename K, typename V>
-  using sparse_set = storage::sparse_set<K, V>;
-
-  template <typename K>
-  using dynamic_properties = storage::dynamic_properties<K>;
 
   template <typename T>
   using default_storage = boost::container::static_vector<T, 1>;

@@ -46,9 +46,6 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
   else if constexpr (std::derived_from<T, some::integer>) {
     return typename E::integer{};
   }
-  else if constexpr (std::derived_from<T, some::string>) {
-    return typename E::string{};
-  }
   else if constexpr (std::derived_from<T, some::undefined_indice_parameter>) {
     return mp::get_m<param<T::name>>(typename E::params{});
   }
@@ -134,16 +131,6 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
     return typename E::template map<
         decltype(translate(E{}, (typename T::types{})[0_c])),
         decltype(translate(E{}, (typename T::types{})[1_c]))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_sparse_set>) {
-    return typename E::template sparse_set<
-        decltype(translate(E{}, (typename T::types{})[0_c])),
-        decltype(translate(E{}, (typename T::types{})[1_c]))>{};
-  }
-  else if constexpr (std::derived_from<T,
-                                       some::undefined_dynamic_properties>) {
-    return typename E::template dynamic_properties<decltype(translate(
-        E{}, typename T::type{}))>{};
   }
   else if constexpr (std::derived_from<T, some::undefined_graph>) {
     return typename E::template graph<

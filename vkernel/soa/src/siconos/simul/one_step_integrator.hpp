@@ -485,7 +485,7 @@ struct one_step_integrator {
 
             // BC velocities for ds1
             auto handle_ds1 = storage::make_handle(data, ids1);
-            auto& bc_vel_1 = handle_ds1.template get<std::vector<indice_t>>("bc_velocities_0");
+            auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
 
             // modification on a copy
             auto h_mat1_mod = h_mat1;
@@ -500,7 +500,7 @@ struct one_step_integrator {
               auto h_mat2_mod = h_mat2;
 
               auto handle_ds2 = storage::make_handle(data, ids2);
-              auto& bc_vel_2 = handle_ds2.template get<std::vector<indice_t>>("bc_velocities_0");
+              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
 
               // zero columns in h_mat2_mod / BC DOFs in ds2
               for (auto bc_local_idx : bc_vel_2) {
@@ -552,7 +552,7 @@ struct one_step_integrator {
 
               // BC velocities for ds1
               auto handle_ds1 = storage::make_handle(data, ids1);
-              auto& bc_vel_1 = handle_ds1.template get<std::vector<indice_t>>("bc_velocities_0");
+              auto& bc_vel_1 = storage::prop<"bc_velocities_0">(handle_ds1);
 
               // modification on a copy
               auto h_mat1_mod = h_mat1;
@@ -566,7 +566,7 @@ struct one_step_integrator {
               set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
 
               auto handle_ds2 = storage::make_handle(data, ids2);
-              auto& bc_vel_2 = handle_ds2.template get<std::vector<indice_t>>("bc_velocities_0");
+              auto& bc_vel_2 = storage::prop<"bc_velocities_0">(handle_ds2);
 
               // contact index in original mesh
               variant::visit(

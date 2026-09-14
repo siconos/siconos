@@ -168,24 +168,23 @@ problems.")
                          swig))
       (inputs (list python))
       (propagated-inputs (list boost
-                                bullet
-                                eigen
-                                fclib-devel
-                                gmp
-                                hdf5
-                                lapack
-                                nlohmann-json
-                                openblas
-                                opencascade-occt
-                                petsc
-                                python-h5py
-                                python-meshio
-                                python-numpy
-                                python-packaging
-                                python-scipy
-                                python-occ-core
-                                python-wheel
-                                suitesparse))
+                               bullet
+                               eigen
+                               fclib-devel
+                               gmp
+                               hdf5
+                               lapack
+                               nlohmann-json
+                               openblas
+                               opencascade-occt
+                               petsc
+                               python-h5py
+                               python-numpy
+                               python-packaging
+                               python-scipy
+                               python-occ-core
+                               python-wheel
+                               suitesparse))
       (home-page
        "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/index.html")
       (synopsis "Library for nonsmooth numerical simulation")

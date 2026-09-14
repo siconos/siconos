@@ -90,7 +90,7 @@ struct moreau_jean_element : item {
         }
       }
       else {
-        // compile time systems => sum dofs useless
+        // compile
       }
     }
 
@@ -403,7 +403,6 @@ struct moreau_jean_element : item {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      using indice = typename env_t::indice;
 
       scalar theta = self()->theta();
 
@@ -413,6 +412,9 @@ struct moreau_jean_element : item {
 
       auto& qs = storage::attr_values<system, "q">(data, step);
       auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
+
+      auto& bc_indices =
+          storage::prop_values<system, "bc_velocities_0">(data, step);
 
       if constexpr (system_with_k_matrix()) {
         // W = M + h^2*theta^2*K
@@ -425,19 +427,15 @@ struct moreau_jean_element : item {
             storage::attr_values<system, "mass_matrix">(data, step);
         auto& k_matrices =
             storage::attr_values<system, "k_matrix">(data, step);
+        auto& vs = storage::attr_values<system, "velocity">(data, step);
+        auto& vs_next =
+            storage::attr_values<system, "velocity">(data, step + 1);
+        auto& bc_indices =
+            storage::prop_values<system, "bc_velocities_0">(data, step);
 
-        auto n = qs.size();
-        for (std::size_t i = 0; i < n; ++i) {
-          auto& m_mat = mass_matrices[i];
-          auto& k_mat = k_matrices[i];
-          auto& q = qs[i];
-          auto& q_next = qs_next[i];
-          auto& v = vs[i];
-          auto& v_next = vs_next[i];
-          auto& f = fexts[i];
-          auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
-          auto& bc_indice = h_sys.template get<std::vector<indice>>("bc_velocities_0");
-
+        for (auto [m_mat, k_mat, q, q_next, v, v_next, f, bc_indice] :
+             view::zip(mass_matrices, k_matrices, qs, qs_next, vs, vs_next,
+                       fexts, bc_indices)) {
           using vector = typename env_t::template unbounded_vector<scalar>;
 
           // Force at step k: F_k = f_ext - K*q_k
@@ -472,17 +470,9 @@ struct moreau_jean_element : item {
         auto& minv_fs_next =
             storage::prop_values<system, "minv_f">(data, step + 1);
 
-        auto n = qs.size();
-        for (std::size_t i = 0; i < n; ++i) {
-          auto& q = qs[i];
-          auto& q_next = qs_next[i];
-          auto& v = vs[i];
-          auto& v_next = vs_next[i];
-          auto& minv_f = minv_fs[i];
-          auto& minv_f_next = minv_fs_next[i];
-          auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
-          auto& bc_indice = h_sys.template get<std::vector<indice>>("bc_velocities_0");
-
+        for (auto [q, q_next, v, v_next, minv_f, minv_f_next, bc_indice] :
+             view::zip(qs, qs_next, vs, vs_next, minv_fs, minv_fs_next,
+                       bc_indices)) {
           v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
 
           // apply boundary conditions
@@ -638,8 +628,6 @@ struct moreau_jean_element : item {
     {
       auto& data = self()->data();
       auto&& velo = velocity_vector_assembled();
-      using env_t = decltype(self()->env());
-      using indice = typename env_t::indice;
 
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
@@ -647,15 +635,12 @@ struct moreau_jean_element : item {
 
       auto& indices = storage::prop_values<system, "index">(data, step);
 
-      // involved ds velocities -> ds velocities
-      auto n = vs_next.size();
-      for (std::size_t i = 0; i < n; ++i) {
-        auto& v_next = vs_next[i];
-        auto involved = involveds[i];
-        auto index = indices[i];
-        auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
-        auto& bc_indice = h_sys.template get<std::vector<indice>>("bc_velocities_0");
+      auto& bc_indices =
+          storage::prop_values<system, "bc_velocities_0">(data, step);
 
+      // involved ds velocities -> ds velocities
+      for (auto [v_next, involved, index, bc_indice] :
+           view::zip(vs_next, involveds, indices, bc_indices)) {
         if (involved) {
           if constexpr (match::fixed_size_vector<velocity>) {
             v_next += get_vector(velo, index);

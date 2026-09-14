@@ -147,20 +147,6 @@ PYBIND11_MODULE(_nonos, m)
           });
     }
 
-    if constexpr (std::same_as<item_t, siconos::config::disks::disk> ||
-                  std::same_as<item_t, siconos::config::disks::fem>) {
-      pyhandle[1_c].def("bc_velocities_0",
-             [](handle_t& h) -> std::vector<indice_t> {
-               return h.template get<std::vector<indice_t>>(
-                   "bc_velocities_0");
-             })
-          .def("set_bc_velocities_0",
-               [](handle_t& h, std::vector<indice_t> val) {
-                 h.template get<std::vector<indice_t>>("bc_velocities_0") =
-                     std::move(val);
-               });
-    }
-
     if constexpr (match::batch_capable<item_t>) {
       mp::fold_left(
           decltype(storage::attached_storages(
