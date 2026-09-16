@@ -2446,6 +2446,76 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 dataset[current_line, 1] = ds_id
                 dataset[current_line, 2:2+len(spatial_displacements)] = spatial_displacements
 
+    def output_fem_epsilon(self):
+        """
+        Outputs strain tensor for fem objects.
+        """
+        disp_map = self._io.displacements(self._nsds)
+        for ds_id, mapping in self._fem_dof_mappings.items():
+            fem_ds = self._nsds.dynamicalSystem(ds_id)
+            displacement = disp_map.get(ds_id)
+            if displacement is None:
+                continue
+            epsilon = fem_ds._fesolid.computeStrainTensorWithDisplacement(
+                displacement)
+            if epsilon is None or len(epsilon) == 0:
+                continue
+
+            num_elements = mapping['num_elements']
+            nbcolumns = 2 + num_elements * 3
+            dataset_name = f"fem_epsilon_{ds_id}"
+
+            if dataset_name not in self._data:
+                dataset = self._data.create_dataset(
+                    dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
+                    chunks=True, compression="gzip")
+                dataset.attrs["tensor_type"] = "symmetric_2d"
+                dataset.attrs["components"] = ["exx", "eyy", "exy"]
+                dataset.attrs["num_elements"] = num_elements
+            else:
+                dataset = self._data[dataset_name]
+
+            current_line = dataset.shape[0]
+            dataset.resize(current_line + 1, 0)
+            dataset[current_line, 0] = self.current_time()
+            dataset[current_line, 1] = ds_id
+            dataset[current_line, 2:2+len(epsilon)] = epsilon
+
+    def output_fem_sigma(self):
+        """
+        Outputs stress tensor for fem objects.
+        """
+        disp_map = self._io.displacements(self._nsds)
+        for ds_id, mapping in self._fem_dof_mappings.items():
+            fem_ds = self._nsds.dynamicalSystem(ds_id)
+            displacement = disp_map.get(ds_id)
+            if displacement is None:
+                continue
+            sigma = fem_ds._fesolid.computeStressTensorWithDisplacement(
+                displacement)
+            if sigma is None or len(sigma) == 0:
+                continue
+
+            num_elements = mapping['num_elements']
+            nbcolumns = 2 + num_elements * 3
+            dataset_name = f"fem_sigma_{ds_id}"
+
+            if dataset_name not in self._data:
+                dataset = self._data.create_dataset(
+                    dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
+                    chunks=True, compression="gzip")
+                dataset.attrs["tensor_type"] = "symmetric_2d"
+                dataset.attrs["components"] = ["sxx", "syy", "sxy"]
+                dataset.attrs["num_elements"] = num_elements
+            else:
+                dataset = self._data[dataset_name]
+
+            current_line = dataset.shape[0]
+            dataset.resize(current_line + 1, 0)
+            dataset[current_line, 0] = self.current_time()
+            dataset[current_line, 1] = ds_id
+            dataset[current_line, 2:2+len(sigma)] = sigma
+
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -2821,6 +2891,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self.config.backend == "vnative":
             self.log(self.output_displacements, with_timer)()
+            self.log(self.output_fem_epsilon, with_timer)()
+            self.log(self.output_fem_sigma, with_timer)()
             self.log(self.output_p0s, with_timer)()
 
         if self._output_contact_forces:
@@ -3722,7 +3794,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._fem_dof_mappings[ds_id] = {
                     'dof_indices': dof_indices,
                     'coords': coords,
-                    'n_vertices': len(dof_to_vertex)
+                    'n_vertices': len(dof_to_vertex),
+                    'num_elements': len(fem_model.elements())
                 }
 
                 # Write coords once

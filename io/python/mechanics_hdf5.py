@@ -1071,7 +1071,9 @@ class MechanicsHdf5(object):
                 velocity = 0.0
             if translation is None:
                 translation = 0.0
-            ori = np.asarray(orientation, dtype=np.float64)
+            ori = np.atleast_1d(np.asarray(orientation, dtype=np.float64))
+            translation = np.atleast_1d(np.asarray(translation, dtype=np.float64))
+            velocity = np.atleast_1d(np.asarray(velocity, dtype=np.float64))
 
         is_center_of_mass_computed = False
 

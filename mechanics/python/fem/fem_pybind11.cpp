@@ -99,8 +99,40 @@ PYBIND11_MODULE(_fem, m) {
            [](siconos::mechanics::fem::FiniteElementLinearTIDS& self) {
              return *(self.velocity());
            })
-      .def("display", &siconos::mechanics::fem::FiniteElementLinearTIDS::display,
-           py::arg("brief") = true);
+         .def("display", &siconos::mechanics::fem::FiniteElementLinearTIDS::display,
+              py::arg("brief") = true)
+         .def("computeStrainTensor",
+              static_cast<std::vector<double> (siconos::mechanics::fem::FiniteElementLinearTIDS::*)() const>(
+                  &siconos::mechanics::fem::FiniteElementLinearTIDS::computeStrainTensor))
+         .def("computeStressTensor",
+              static_cast<std::vector<double> (siconos::mechanics::fem::FiniteElementLinearTIDS::*)() const>(
+                  &siconos::mechanics::fem::FiniteElementLinearTIDS::computeStressTensor))
+         .def("computeStrainTensorWithDisplacement",
+              [](const siconos::mechanics::fem::FiniteElementLinearTIDS& self,
+                 py::array_t<double> displacement) {
+                 auto buf = displacement.request();
+                 if (buf.ndim != 1) {
+                   throw std::runtime_error("Displacement must be a 1D array");
+                 }
+                 siconos::algebra::SiconosVector disp(buf.shape[0]);
+                 std::copy(static_cast<double*>(buf.ptr),
+                           static_cast<double*>(buf.ptr) + buf.shape[0],
+                           disp.data());
+                 return self.computeStrainTensor(disp);
+              })
+         .def("computeStressTensorWithDisplacement",
+              [](const siconos::mechanics::fem::FiniteElementLinearTIDS& self,
+                 py::array_t<double> displacement) {
+                 auto buf = displacement.request();
+                 if (buf.ndim != 1) {
+                   throw std::runtime_error("Displacement must be a 1D array");
+                 }
+                 siconos::algebra::SiconosVector disp(buf.shape[0]);
+                 std::copy(static_cast<double*>(buf.ptr),
+                           static_cast<double*>(buf.ptr) + buf.shape[0],
+                           disp.data());
+                 return self.computeStressTensor(disp);
+              });
 
   py::enum_<siconos::mechanics::fem::MeshTags>(m, "MeshTags")
       .value("bulk_material", siconos::mechanics::fem::MeshTags::bulk_material)
@@ -172,6 +204,15 @@ PYBIND11_MODULE(_fem, m) {
       .def("y", &siconos::mechanics::fem::MeshVertex::y)
       .def("z", &siconos::mechanics::fem::MeshVertex::z)
       .def("display", &siconos::mechanics::fem::MeshVertex::display);
+
+  py::class_<siconos::mechanics::fem::MeshElement, py::smart_holder>(m, "MeshElement")
+      .def("num", &siconos::mechanics::fem::MeshElement::num)
+      .def("vertices",
+           [](const siconos::mechanics::fem::MeshElement& self) {
+             auto span = self.vertices();
+             return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshVertex>>(
+                 span.begin(), span.end());
+           });
 
   py::class_<siconos::mechanics::fem::FENode, py::smart_holder>(m, "FENode")
       .def("num", &siconos::mechanics::fem::FENode::num)

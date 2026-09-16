@@ -79,6 +79,30 @@ class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
   double elasticPotentialEnergy() const;
 
   void display(bool brief = true) const override;
+
+  /** @brief Compute small-strain tensor for all elements (2D T3 only)
+   *  @return flat vector of [exx, eyy, exy] per element
+   */
+  std::vector<double> computeStrainTensor() const;
+
+  /** @brief Compute small-strain tensor for all elements using provided displacement
+   *  @param displacement current nodal displacement vector
+   *  @return flat vector of [exx, eyy, exy] per element
+   */
+  std::vector<double> computeStrainTensor(
+      const siconos::algebra::SiconosVector& displacement) const;
+
+  /** @brief Compute Cauchy stress tensor for all elements (2D T3 only)
+   *  @return flat vector of [sxx, syy, sxy] per element
+   */
+  std::vector<double> computeStressTensor() const;
+
+  /** @brief Compute Cauchy stress tensor for all elements using provided displacement
+   *  @param displacement current nodal displacement vector
+   *  @return flat vector of [sxx, syy, sxy] per element
+   */
+  std::vector<double> computeStressTensor(
+      const siconos::algebra::SiconosVector& displacement) const;
 };
 
 }  // namespace siconos::mechanics::fem
