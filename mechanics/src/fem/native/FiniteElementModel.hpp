@@ -188,6 +188,21 @@ class FiniteElementModel {
                                        siconos::algebra::SiconosDenseMatrix& Be,
                                        double thickness);
 
+  /** @brief Compute the plain (unscaled) strain-displacement matrix for a T3
+   * element, i.e. epsilon = B * u with no additional area/thickness scaling.
+   *
+   * Unlike computeElementaryBMatrix_direct(), which scales its result by
+   * sqrt(Area * thickness) for use in the global sparse B/S assembly
+   * (K = B^T * S * B), this returns the physical strain-displacement matrix
+   * directly, suitable for evaluating element strain/stress from a nodal
+   * displacement vector.
+   *
+   * @param[in] fe the (T3) finite element
+   * @param[out] Be the 3x6 strain-displacement matrix
+   **/
+  void computeElementaryStrainDisplacementMatrix_direct(
+      FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& Be);
+
   void computeBMatrix(siconos::algebra::SiconosSparseMatrix& B,
                       const std::map<int, const Material>& mat);
 

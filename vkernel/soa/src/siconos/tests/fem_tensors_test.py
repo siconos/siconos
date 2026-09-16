@@ -36,6 +36,12 @@ FEM_SCRIPT = (
     "siconos/vkernel/soa/src/siconos/tests/fem.py"
 )
 
+# Analytical affine-field regression check (see module docstring there).
+ANALYTICAL_SCRIPT = (
+    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
+    "siconos/vkernel/soa/src/siconos/tests/fem_tensor_analytical.py"
+)
+
 # Siconos Python bindings are not installed system-wide in this workspace.
 # They are built in-tree and exposed via PYTHONPATH, matching the workflow
 # documented in STATE.org / GUIX-INSTALL.org.
@@ -60,20 +66,10 @@ _SICONOS_LIBRARY_PATHS = [
 ]
 
 
-def _run_fem_simulation(tmp_path, mesh_path: str) -> None:
-    """Run ``fem.py`` in an isolated temp directory.
-
-    The script writes ``fem.hdf5`` in its current working directory, so we
-    cd into ``tmp_path`` beforehand to avoid polluting the source tree.
-    """
-    # The Siconos Python extensions in this build tree are compiled for
-    # Python 3.11, so we must use that interpreter explicitly rather than
-    # whatever ``sys.executable`` points to.
-    _PYTHON = (
-        "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-        "siconos/.venv311/bin/python"
-    )
-
+def _fem_subprocess_env():
+    """Environment (PYTHONPATH/LD_LIBRARY_PATH) needed to run the in-tree
+    Siconos Python bindings, matching the workflow documented in
+    STATE.org / GUIX-INSTALL.org."""
     env = dict(__import__("os").environ)
     existing_pythonpath = env.get("PYTHONPATH", "")
     pythonpath_extra = ":".join(_SICONOS_PYTHONPATHS)
@@ -86,13 +82,47 @@ def _run_fem_simulation(tmp_path, mesh_path: str) -> None:
     env["LD_LIBRARY_PATH"] = (
         (ld_extra + ":" + existing_ld) if existing_ld else ld_extra
     )
+    return env
 
+
+# The Siconos Python extensions in this build tree are compiled for
+# Python 3.11, so we must use that interpreter explicitly rather than
+# whatever ``sys.executable`` points to.
+_PYTHON = (
+    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
+    "siconos/.venv311/bin/python"
+)
+
+
+def _run_fem_simulation(tmp_path, mesh_path: str) -> None:
+    """Run ``fem.py`` in an isolated temp directory.
+
+    The script writes ``fem.hdf5`` in its current working directory, so we
+    cd into ``tmp_path`` beforehand to avoid polluting the source tree.
+    """
     # Run in tmp_path so fem.hdf5 is created there.
     subprocess.run(
         [_PYTHON, FEM_SCRIPT, mesh_path],
         cwd=tmp_path,
-        env=env,
+        env=_fem_subprocess_env(),
         check=True,
+    )
+
+
+def _run_analytical_check(tmp_path, mesh_path: str) -> subprocess.CompletedProcess:
+    """Run ``fem_tensor_analytical.py`` in an isolated temp directory.
+
+    Unlike ``_run_fem_simulation``, this does not assert success directly
+    (``check=False``) so the caller can print the script's diagnostic
+    output on failure.
+    """
+    return subprocess.run(
+        [_PYTHON, ANALYTICAL_SCRIPT, mesh_path],
+        cwd=tmp_path,
+        env=_fem_subprocess_env(),
+        check=False,
+        capture_output=True,
+        text=True,
     )
 
 
@@ -222,3 +252,21 @@ def test_fem_tensor_values_are_finite(tmp_path):
             assert np.all(np.isfinite(values)), (
                 f"{ds_name} contains non-finite tensor values"
             )
+
+
+def test_fem_tensor_matches_analytical_affine_field(tmp_path):
+    """Strain/stress must be numerically correct, not just finite.
+
+    Imposes a synthetic affine displacement field on the mesh (see
+    ``fem_tensor_analytical.py``) and checks that every T3 element reports
+    the exact same, analytically-known strain/stress. A CST element is
+    exact for any affine field regardless of element size, so any
+    element-size-dependent scaling bug in the strain-displacement matrix
+    (e.g. reusing an area-scaled assembly matrix instead of the plain
+    kinematic one) would show up here as per-element mismatches, even
+    though the earlier finiteness/shape checks above would still pass.
+    """
+    result = _run_analytical_check(tmp_path, MESH_PATH)
+    assert result.returncode == 0, (
+        f"analytical tensor check failed:\n{result.stdout}\n{result.stderr}"
+    )

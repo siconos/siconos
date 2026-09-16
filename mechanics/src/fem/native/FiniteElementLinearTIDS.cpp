@@ -21,6 +21,7 @@
 #include "FENode.hpp"
 #include "FiniteElementModel.hpp"
 #include "Material.hpp"
+#include "Mesh.hpp"  // MeshElement::tags()
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_STDOUT
@@ -128,17 +129,6 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
   const auto& q_vec = *q_ptr;
   siconos::algebra::SiconosVector u_vec = q_vec - q0_vec;
 
-  // Get material properties from the first material
-  double E = 0.0;
-  double nu = 0.0;
-  if (!materials_.empty()) {
-    E = materials_.begin()->second.elasticYoungModulus();
-    nu = materials_.begin()->second.Poisson_s_ratio();
-  }
-
-  // D matrix for plane stress (used only for stress, not strain)
-  // Strain is computed directly from B * u
-
   for (auto& elem : femodel->elements()) {
     auto nodes = elem->nodes();
     if (nodes.size() != 3) continue;  // T3 only for now
@@ -160,9 +150,9 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
       u_element[i] = u_vec(dofs[i]);
     }
 
-    // Compute B matrix
+    // Compute the (unscaled) strain-displacement matrix
     siconos::algebra::SiconosDenseMatrix Be(3, 6);
-    FEModel_->computeElementaryBMatrix_direct(*elem, Be, 1.0);  // thickness = 1.0
+    FEModel_->computeElementaryStrainDisplacementMatrix_direct(*elem, Be);
 
     // Compute strain = B * u
     // Be is stored as Eigen matrix internally
@@ -189,19 +179,6 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
   const auto& q_vec = *q_ptr;
   siconos::algebra::SiconosVector u_vec = q_vec - q0_vec;
 
-  // Get material properties from the first material
-  double E = 0.0;
-  double nu = 0.0;
-  if (!materials_.empty()) {
-    E = materials_.begin()->second.elasticYoungModulus();
-    nu = materials_.begin()->second.Poisson_s_ratio();
-  }
-
-  // D matrix for plane stress
-  double D11 = E / (1.0 - nu * nu);
-  double D12 = E * nu / (1.0 - nu * nu);
-  double D33 = E / (2.0 * (1.0 + nu));
-
   for (auto& elem : femodel->elements()) {
     auto nodes = elem->nodes();
     if (nodes.size() != 3) continue;  // T3 only for now
@@ -220,19 +197,27 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
     // Assemble element displacement vector
     std::vector<double> u_element(6);
     for (int i = 0; i < 6; i++) {
-      u_element[i] = q_vec(dofs[i]);
+      u_element[i] = u_vec(dofs[i]);
     }
 
-    // Compute B matrix
+    // Compute the (unscaled) strain-displacement matrix
     siconos::algebra::SiconosDenseMatrix Be(3, 6);
-    FEModel_->computeElementaryBMatrix_direct(*elem, Be, 1.0);  // thickness = 1.0
+    FEModel_->computeElementaryStrainDisplacementMatrix_direct(*elem, Be);
 
     // Compute strain = B * u
     Eigen::Map<Eigen::MatrixXd> Be_map(Be.data(), Be.rows(), Be.cols());
-    Eigen::Map<Eigen::VectorXd> u_vec(u_element.data(), 6);
-    Eigen::VectorXd eps_vec = Be_map * u_vec;
+    Eigen::Map<Eigen::VectorXd> u_elem_vec(u_element.data(), 6);
+    Eigen::VectorXd eps_vec = Be_map * u_elem_vec;
 
-    // Compute stress = D * strain
+    // Material properties for this element (per-element tag lookup)
+    const auto& material = materials_.at(elem->mElement()->tags(0));
+    double E = material.elasticYoungModulus();
+    double nu = material.Poisson_s_ratio();
+
+    // D matrix for plane stress
+    double D11 = E / (1.0 - nu * nu);
+    double D12 = E * nu / (1.0 - nu * nu);
+    double D33 = E / (2.0 * (1.0 + nu));
     Eigen::Matrix3d D_mat;
     D_mat << D11, D12, 0,
              D12, D11, 0,
@@ -274,9 +259,9 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
       u_element[i] = displacement(dofs[i]);
     }
 
-    // Compute B matrix
+    // Compute the (unscaled) strain-displacement matrix
     siconos::algebra::SiconosDenseMatrix Be(3, 6);
-    FEModel_->computeElementaryBMatrix_direct(*elem, Be, 1.0);  // thickness = 1.0
+    FEModel_->computeElementaryStrainDisplacementMatrix_direct(*elem, Be);
 
     // Compute strain = B * u
     Eigen::Map<Eigen::MatrixXd> Be_map(Be.data(), Be.rows(), Be.cols());
@@ -296,19 +281,6 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
   std::vector<double> sigma;
   auto femodel = FEModel_;
   if (!femodel) return sigma;
-
-  // Get material properties from the first material
-  double E = 0.0;
-  double nu = 0.0;
-  if (!materials_.empty()) {
-    E = materials_.begin()->second.elasticYoungModulus();
-    nu = materials_.begin()->second.Poisson_s_ratio();
-  }
-
-  // D matrix for plane stress
-  double D11 = E / (1.0 - nu * nu);
-  double D12 = E * nu / (1.0 - nu * nu);
-  double D33 = E / (2.0 * (1.0 + nu));
 
   for (auto& elem : femodel->elements()) {
     auto nodes = elem->nodes();
@@ -331,16 +303,24 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
       u_element[i] = displacement(dofs[i]);
     }
 
-    // Compute B matrix
+    // Compute the (unscaled) strain-displacement matrix
     siconos::algebra::SiconosDenseMatrix Be(3, 6);
-    FEModel_->computeElementaryBMatrix_direct(*elem, Be, 1.0);  // thickness = 1.0
+    FEModel_->computeElementaryStrainDisplacementMatrix_direct(*elem, Be);
 
     // Compute strain = B * u
     Eigen::Map<Eigen::MatrixXd> Be_map(Be.data(), Be.rows(), Be.cols());
     Eigen::Map<Eigen::VectorXd> u_vec(u_element.data(), 6);
     Eigen::VectorXd eps_vec = Be_map * u_vec;
 
-    // Compute stress = D * strain
+    // Material properties for this element (per-element tag lookup)
+    const auto& material = materials_.at(elem->mElement()->tags(0));
+    double E = material.elasticYoungModulus();
+    double nu = material.Poisson_s_ratio();
+
+    // D matrix for plane stress
+    double D11 = E / (1.0 - nu * nu);
+    double D12 = E * nu / (1.0 - nu * nu);
+    double D33 = E / (2.0 * (1.0 + nu));
     Eigen::Matrix3d D_mat;
     D_mat << D11, D12, 0,
              D12, D11, 0,

@@ -158,6 +158,19 @@ PYBIND11_MODULE(_fem, m) {
              return std::vector<std::shared_ptr<siconos::mechanics::fem::MeshElement>>(
                  span.begin(), span.end());
            })
+      // Number of T3 (3-node triangle) finite elements, i.e. the number of
+      // per-element entries produced by
+      // FiniteElementLinearTIDS::computeStrainTensor/computeStressTensor.
+      // NOT the same as len(elements()) above, which counts every raw mesh
+      // entity (points, lines, triangles).
+      .def("numT3Elements",
+           [](const siconos::mechanics::fem::FiniteElementModel& self) {
+             size_t count = 0;
+             for (const auto& elem : self.elements()) {
+               if (elem->nodes().size() == 3) count++;
+             }
+             return count;
+           })
       .def("vertexToNode", &siconos::mechanics::fem::FiniteElementModel::vertexToNode)
       .def("nodes",
            [](const siconos::mechanics::fem::FiniteElementModel& self) {

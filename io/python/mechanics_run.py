@@ -3795,7 +3795,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     'dof_indices': dof_indices,
                     'coords': coords,
                     'n_vertices': len(dof_to_vertex),
-                    'num_elements': len(fem_model.elements())
+                    # NOTE: fem_model.elements() returns every raw mesh
+                    # entity (points, lines, triangles); numT3Elements()
+                    # matches the actual number of per-element strain/
+                    # stress entries produced by computeStrainTensor()/
+                    # computeStressTensor() (T3 only).
+                    'num_elements': fem_model.numT3Elements()
                 }
 
                 # Write coords once
