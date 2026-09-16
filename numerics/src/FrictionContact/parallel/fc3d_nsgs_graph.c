@@ -559,7 +559,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   }
 
   /*****  Initialize various solver options *****/
-  localproblem = fc3d_local_problem_allocate(problem);
+  localproblem = fc3d_local_problem_allocate(problem->M->storageType);
 
   fc3d_nsgs_initialize_local_solver_parallel(localProblemFunctionToolkit, &computeError,
                                              problem, localproblem, options, local_opts);
@@ -626,7 +626,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
                reaction, nc, norm_r, tolerance, velocity)
     {
       /* Allocate localproblem for each thread */
-      localproblem = fc3d_local_problem_allocate(problem);
+      localproblem = fc3d_local_problem_allocate(problem->M->storageType);
 
       local_opts = solver_options_create(options->internalSolvers[0]->solverId);
 
@@ -634,7 +634,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
                                                  problem, localproblem, options, local_opts);
 
       while ((iter < itermax) && (hasNotConverged > 0)) {
-        fc3d_set_internalsolver_tolerance(problem, options, local_opts, error);
+        fc3d_set_internalsolver_tolerance(nc, options, local_opts, error);
 
         for (size_t color = 0; color < n_colors; color++) {
 #pragma omp for schedule(static) reduction(+ : light_error_sum)
@@ -691,7 +691,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
                partitions, reaction, freeze_contacts, norm_q, omega, tolerance, velocity)
     {
       /* Allocate localproblem for each thread */
-      localproblem = fc3d_local_problem_allocate(problem);
+      localproblem = fc3d_local_problem_allocate(problem->M->storageType);
 
       local_opts = solver_options_create(options->internalSolvers[0]->solverId);
 
@@ -699,7 +699,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
                                                  problem, localproblem, options, local_opts);
 
       while ((iter < itermax) && (hasNotConverged > 0)) {
-        fc3d_set_internalsolver_tolerance(problem, options, local_opts, error);
+        fc3d_set_internalsolver_tolerance(nc, options, local_opts, error);
 
 #pragma omp single
         {
@@ -888,7 +888,7 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
     SBM_free(problem->M->matrix1, SBM_FREE_ALL);
     problem->M->matrix1 = matrix1;
   }
-  localProblemFunctionToolkit->free_local_solver(problem, localproblem, local_opts);
+  localProblemFunctionToolkit->free_local_solver(localproblem, local_opts);
 
   free(localProblemFunctionToolkit);
 
