@@ -106,7 +106,7 @@ int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* o
  *  \param[out] err      computed maximum error
  *  \return 0 if err <= tol, 1 otherwise
  */
-int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction,
+int gmp_compute_error(const GenericMechanicalProblem* problem, const double* reaction,
                       double* velocity, double tol, SolverOptions* options, double* err);
 
 /** Return the size (number of doubles) needed for options->dWork.

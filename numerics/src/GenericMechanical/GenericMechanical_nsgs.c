@@ -268,9 +268,10 @@ static void gmp_build_local_q(const GenericMechanicalProblem* problem, int block
   assert(q_local);
 
   memcpy(q_local, &(problem->q[row_start]), block_size * sizeof(double));
-  /* Add the off-diagonal block row product.
-   * NM_row_prod_no_diag is not const-correct for the x argument but does not
-   * modify reaction when called with init=0 and xsave=NULL. */
+  /* Add the off-diagonal block row product.  NM_row_prod_no_diag temporarily
+   * zeros the diagonal block in the x vector and restores it; the cast below
+   * reflects that the function is not const-correct, but the input vector is
+   * logically unchanged on return. */
   NM_row_prod_no_diag(problem->globalSize, block_size, block_row, row_start, problem->M,
                       (double*)reaction, q_local, NULL, 0);
 }
@@ -335,8 +336,8 @@ static void gmp_gs_workspace_destroy(GMP_GS_Workspace* ws) {
   ws->buff_velocity = NULL;
 }
 
-int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction, double* velocity,
-                      double tol, SolverOptions* options, double* err) {
+int gmp_compute_error(const GenericMechanicalProblem* problem, const double* reaction,
+                      double* velocity, double tol, SolverOptions* options, double* err) {
   (void)options;
   GMP_LocalProblem* local = problem->firstLocal;
   NM_types storageType = problem->M->storageType;
@@ -347,7 +348,7 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction,
   double* bufForLocalProblemDense =
       (storageType == NM_DENSE)
           ? (double*)malloc(problem->maxLocalSize * problem->maxLocalSize * sizeof(double))
-          : 0;
+          : NULL;
 
   DEBUG_PRINT("GenericMechanical compute_error BEGIN\n");
   /* Update each local problem->q and compute V = M*R + Q of the GMP. */
@@ -389,10 +390,11 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction,
   while (local) {
     local_size = local->size;
     double* Vl = velocity + global_offset;
-    double* Rl = reaction + global_offset;
+    const double* Rl = reaction + global_offset;
     for (size_t ii = 0; ii < local_size; ii++)
       if (isnan(Vl[ii]) || isnan(Rl[ii])) {
         *err = 10;
+        if (storageType == NM_DENSE) free(bufForLocalProblemDense);
         return 1;
       }
 
@@ -419,6 +421,38 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction,
     return 0;
 }
 
+/** Apply a relaxation to the GS iterate.
+ *
+ *  Computes the unscaled residual, builds a relaxed reaction,
+ *  computes the corresponding residual, and accepts the relaxed direction if
+ *  it improves the residual. The reaction/velocity vectors and the relaxation
+ *  coefficient are updated in place.
+ *
+ *  \return 0 if the (accepted) residual is below tol, 1 otherwise
+ */
+static int gmp_gauss_seidel_relaxation(GenericMechanicalProblem* problem, double* reaction,
+                                        double* velocity, double tol, double* err, double* errRelaxation,
+                                        GMP_GS_Workspace* ws, double* pCoefRelaxation,
+                                        SolverOptions* options) {
+  int tolViolate = gmp_compute_error(problem, reaction, ws->buff_velocity, tol, options, err);
+  for (size_t i = 0; i < problem->globalSize; i++)
+    ws->prev_reaction[i] = reaction[i] + (*pCoefRelaxation) * (reaction[i] - ws->prev_reaction[i]);
+  int tolViolateRelaxation = gmp_compute_error(problem, ws->prev_reaction, velocity, tol, options, errRelaxation);
+
+  DEBUG_PRINTF("GMP :noscale error=%e error relaxation=%e\n", *err, *errRelaxation);
+  DEBUG_PRINTF("GMP :relaxation coefficient=%e\n", *pCoefRelaxation);
+
+  if (*errRelaxation < *err) {
+    if ((*pCoefRelaxation) < 10.0) (*pCoefRelaxation) = 1.0 + (*pCoefRelaxation);
+    memcpy(reaction, ws->prev_reaction, problem->globalSize * sizeof(double));
+    *err = *errRelaxation;
+    return tolViolateRelaxation;
+  }
+  *pCoefRelaxation = 1.0;
+  memcpy(velocity, ws->buff_velocity, problem->globalSize * sizeof(double));
+  return tolViolate;
+}
+
 static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double* reaction,
                                       double* velocity, int* info, SolverOptions* options,
                                       GMP_GS_Workspace* ws) {
@@ -432,15 +466,14 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
   size_t block_row = 0;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   double* err = &(options->dparam[SICONOS_DPARAM_RESIDU]);
-  double* errLS = &(options->dparam[SICONOS_DPARAM_GMP_ERROR_LS]);
+  double* errRelaxation = &(options->dparam[SICONOS_DPARAM_GMP_RELAXATION_ERROR]);
   int tolViolate = 1;
-  int tolViolateLS = 1;
   double* sol = 0;
   double* w = 0;
   int resLocalSolver = 0;
   int local_solver_error_occurred = 0;
-  int withLS = options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH];
-  double* pCoefLS = &(options->dparam[SICONOS_DPARAM_GMP_COEFF_LS]);
+  int withRelaxation = options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_RELAXATION];
+  double* pCoefRelaxation = &(options->dparam[SICONOS_DPARAM_GMP_RELAXATION_COEFF]);
 
   while (it < iterMax && tolViolate) {
     memcpy(ws->prev_reaction, reaction, problem->globalSize * sizeof(double));
@@ -501,24 +534,10 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
     }
     /* Compute global error. */
 
-    if (withLS) {
-      tolViolate = gmp_compute_error(problem, reaction, ws->buff_velocity, tol, options, err);
-      for (size_t i = 0; i < problem->globalSize; i++)
-        ws->prev_reaction[i] = reaction[i] + (*pCoefLS) * (reaction[i] - ws->prev_reaction[i]);
-      tolViolateLS = gmp_compute_error(problem, ws->prev_reaction, velocity, tol, options, errLS);
-
-      DEBUG_PRINTF("GMP :noscale error=%e error LS=%e\n", *err, *errLS);
-      DEBUG_PRINTF("GMP :scale coeff=%e\n", *pCoefLS);
-
-      if (*errLS < *err) {
-        if ((*pCoefLS) < 10.0) (*pCoefLS) = 1.0 + (*pCoefLS);
-        memcpy(reaction, ws->prev_reaction, problem->globalSize * sizeof(double));
-        tolViolate = tolViolateLS;
-        *err = *errLS;
-      } else {
-        *pCoefLS = 1.0;
-        memcpy(velocity, ws->buff_velocity, problem->globalSize * sizeof(double));
-      }
+    if (withRelaxation) {
+      tolViolate =
+          gmp_gauss_seidel_relaxation(problem, reaction, velocity, tol, err, errRelaxation, ws,
+                                       pCoefRelaxation, options);
     } else {
       tolViolate = gmp_compute_error(problem, reaction, velocity, tol, options, err);
     }

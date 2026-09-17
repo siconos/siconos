@@ -40,17 +40,17 @@ void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &s
              GENERIC_MECHANICAL_IPARAM::SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED,
              "Reduced mode flag")
       .value("SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH",
-             GENERIC_MECHANICAL_IPARAM::SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH,
+             GENERIC_MECHANICAL_IPARAM::SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_RELAXATION,
              "Line search flag")
       .export_values();
 
   py::enum_<GENERIC_MECHANICAL_DPARAM>(params, "GENERIC_MECHANICAL_DPARAM",
                                        "Generic Mechanical DPARAM enum")
       .value("SICONOS_DPARAM_GMP_ERROR_LS",
-             GENERIC_MECHANICAL_DPARAM::SICONOS_DPARAM_GMP_ERROR_LS,
+             GENERIC_MECHANICAL_DPARAM::SICONOS_DPARAM_GMP_RELAXATION_ERROR,
              "Error threshold for line search")
       .value("SICONOS_DPARAM_GMP_COEFF_LS",
-             GENERIC_MECHANICAL_DPARAM::SICONOS_DPARAM_GMP_COEFF_LS,
+             GENERIC_MECHANICAL_DPARAM::SICONOS_DPARAM_GMP_RELAXATION_COEFF,
              "Coefficient for line search")
       .export_values();
 

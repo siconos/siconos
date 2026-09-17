@@ -95,12 +95,12 @@ int gmp_driver(GenericMechanicalProblem* problem, double* reaction, double* velo
 
 void gmp_set_default(SolverOptions* options) {
   DEBUG_BEGIN("gmp_set_default(SolverOptions* options)\n");
-  /*with Line search 1 without 0.*/
-  options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH] = 0;
+  /*with relaxation 1 without 0.*/
+  options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_RELAXATION] = 0;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  /*Useful parameter for LS*/
-  options->dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.0;
+  /*Useful parameter for relaxation*/
+  options->dparam[SICONOS_DPARAM_GMP_RELAXATION_COEFF] = 1.0;
 
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 4;
@@ -136,9 +136,7 @@ static int gmp_init_wrap(void* problem, SolverOptions* options) {
 
 static int gmp_solve_wrap(void* problem, double* reaction, double* velocity,
                           SolverOptions* options) {
-  int info = NUMERICS_OK;
-  gmp_driver((GenericMechanicalProblem*)problem, reaction, velocity, options);
-  return info;
+  return gmp_driver((GenericMechanicalProblem*)problem, reaction, velocity, options);
 }
 
 static void gmp_free_wrap(void* problem, SolverOptions* options) {

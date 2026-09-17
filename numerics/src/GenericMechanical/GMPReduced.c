@@ -196,8 +196,8 @@ static void _GMPReducedGetSizes(GenericMechanicalProblem *problem, size_t *Me_si
  *  \param[out] Me_Size number of equality rows
  *  \param[out] Mi_Size number of inequality rows
  */
-static void buildReducedGMP(GenericMechanicalProblem *problem, double *Me, double *Mi,
-                            double *Qe, double *Qi, size_t *Me_Size, size_t *Mi_Size) {
+static int buildReducedGMP(GenericMechanicalProblem *problem, double *Me, double *Mi,
+                           double *Qe, double *Qi, size_t *Me_Size, size_t *Mi_Size) {
   assert(problem->M->storageType == NM_SPARSE_BLOCK);
   SparseBlockStructuredMatrix *m = problem->M->matrix1;
   DEBUG_EXPR_WE({
@@ -210,6 +210,10 @@ static void buildReducedGMP(GenericMechanicalProblem *problem, double *Me, doubl
   size_t local_size = 0;
   size_t nbBlockCol = m->blocknumber1;
   size_t *newIndexOfCol = (size_t *)malloc(nbBlockCol * sizeof(size_t));
+  if (!newIndexOfCol) {
+    (void)numerics_error("buildReducedGMP", "memory allocation failed");
+    return 1;
+  }
 
   /*Me building*/
   size_t MeRow = 0;
@@ -334,6 +338,7 @@ static void buildReducedGMP(GenericMechanicalProblem *problem, double *Me, doubl
     DEBUG_PRINT_MAT_STR("Qi", Qi, (unsigned)MiRow, 1);
   });
   free(newIndexOfCol);
+  return 0;
 }
 
 /** Assemble the reduced problem with equalities grouped in one block.
@@ -348,8 +353,8 @@ static void buildReducedGMP(GenericMechanicalProblem *problem, double *Me, doubl
  *  \param[out] Me_size number of equality rows
  *  \param[out] Mi_size number of inequality rows
  */
-static void _GMPReducedEquality(GenericMechanicalProblem *problem, double *reducedProb,
-                                double *Qreduced, size_t *Me_size, size_t *Mi_size) {
+static int _GMPReducedEquality(GenericMechanicalProblem *problem, double *reducedProb,
+                               double *Qreduced, size_t *Me_size, size_t *Mi_size) {
   SparseBlockStructuredMatrix *m = problem->M->matrix1;
   size_t nbRow = m->blocksize0[m->blocknumber0 - 1];
   size_t nbCol = m->blocksize1[m->blocknumber1 - 1];
@@ -358,13 +363,25 @@ static void _GMPReducedEquality(GenericMechanicalProblem *problem, double *reduc
   if (*Me_size == 0) {
     memcpy(Qreduced, problem->q, (*Mi_size) * sizeof(double));
     SBM_to_dense(m, reducedProb);
-    return;
+    return 0;
   }
 
-  double *Me = (*Me_size) ? (double *)malloc((*Me_size) * nbCol * sizeof(double)) : 0;
-  double *Mi = (*Mi_size) ? (double *)malloc((*Mi_size) * nbCol * sizeof(double)) : 0;
+  double *Me = (*Me_size) ? (double *)malloc((*Me_size) * nbCol * sizeof(double)) : NULL;
+  double *Mi = (*Mi_size) ? (double *)malloc((*Mi_size) * nbCol * sizeof(double)) : NULL;
   double *Qi = (double *)malloc(nbRow * sizeof(double));
-  buildReducedGMP(problem, Me, Mi, Qreduced, Qi, Me_size, Mi_size);
+  if ((*Me_size && !Me) || (*Mi_size && !Mi) || !Qi) {
+    (void)numerics_error("_GMPReducedEquality", "memory allocation failed");
+    free(Me);
+    free(Mi);
+    free(Qi);
+    return 1;
+  }
+  if (buildReducedGMP(problem, Me, Mi, Qreduced, Qi, Me_size, Mi_size)) {
+    free(Me);
+    free(Mi);
+    free(Qi);
+    return 1;
+  }
 
   DEBUG_EXPR_WE({
     double *Me1 = Me;
@@ -395,6 +412,7 @@ static void _GMPReducedEquality(GenericMechanicalProblem *problem, double *reduc
   free(Me);
   free(Mi);
   free(Qi);
+  return 0;
 }
 
 /** Solve a GenericMechanicalProblem by assembling all equalities into a single block.
@@ -432,7 +450,10 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem *problem, double *react
     goto cleanup;
   }
 
-  _GMPReducedEquality(problem, reducedProb, Qreduced, &Me_size, &Mi_size);
+  if (_GMPReducedEquality(problem, reducedProb, Qreduced, &Me_size, &Mi_size)) {
+    *info = 1;
+    goto cleanup;
+  }
 
   if (Me_size == 0) {
     gmp_gauss_seidel(problem, reaction, velocity, info, options);
@@ -552,7 +573,10 @@ void gmp_reduced_solve(GenericMechanicalProblem *problem, double *reaction,
     goto cleanup;
   }
 
-  buildReducedGMP(problem, Me, Mi, Qe, Qi, &Mesize, &Misize);
+  if (buildReducedGMP(problem, Me, Mi, Qe, Qi, &Mesize, &Misize)) {
+    *info = 1;
+    goto cleanup;
+  }
 
   if (Mesize == 0 || Misize == 0) {
     gmp_gauss_seidel(problem, reaction, velocity, info, options);
@@ -719,11 +743,68 @@ cleanup:
  *  \param[out] info solver status (0 on success)
  *  \param[in,out] options solver options
  */
+static void gmp_as_mlcp_lcp(double *reducedProb, double *Qreduced, size_t Mi_size,
+                            double *reaction, double *velocity, int *info) {
+  LinearComplementarityProblem aLCP;
+  SolverOptions *aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
+  NumericsMatrix M;
+  NM_null(&M);
+  NM_fill(&M, NM_DENSE, to_int(Mi_size), to_int(Mi_size), reducedProb);
+  aLCP.size = to_int(Mi_size);
+  aLCP.q = Qreduced;
+  aLCP.M = &M;
+  lcp_enum_init(&aLCP, aLcpOptions, 1);
+  *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
+  lcp_enum_reset(&aLCP, aLcpOptions, 1);
+  solver_options_delete(aLcpOptions);
+}
+
+static void gmp_as_mlcp_linear_system(double *reducedProb, double *Qreduced, size_t Me_size,
+                                      double *reaction, int *info) {
+  for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
+  NumericsMatrix M;
+  NM_null(&M);
+  NM_fill(&M, NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
+  *info = NM_LU_solve(&M, reaction, 1);
+  M.matrix0 = NULL;  /* reducedProb is owned by the caller, do not free it. */
+  NM_clear(&M);
+}
+
+static void gmp_as_mlcp_mlcp(double *reducedProb, double *Qreduced, size_t Me_size,
+                             size_t Mi_size, double *reaction, double *velocity, int *info,
+                             SolverOptions *options) {
+  MixedLinearComplementarityProblem aMLCP;
+  SolverOptions *aMlcpOptions = solver_options_create(SICONOS_MLCP_ENUM);
+  aMLCP.n = to_int(Me_size);
+  aMLCP.m = to_int(Mi_size);
+  aMLCP.blocksRows = NULL;
+  aMLCP.blocksIsComp = NULL;
+  aMLCP.isStorageType1 = 1;
+  aMLCP.isStorageType2 = 0;
+  aMLCP.A = NULL;
+  aMLCP.B = NULL;
+  aMLCP.C = NULL;
+  aMLCP.D = NULL;
+  aMLCP.a = NULL;
+  aMLCP.b = NULL;
+  aMLCP.q = Qreduced;
+
+  NumericsMatrix M;
+  NM_null(&M);
+  NM_fill(&M, NM_DENSE, to_int(Mi_size + Me_size), to_int(Mi_size + Me_size), reducedProb);
+  aMLCP.M = &M;
+
+  mlcp_driver_init(&aMLCP, aMlcpOptions);
+  aMlcpOptions->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
+  *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
+  mlcp_driver_reset(&aMLCP, aMlcpOptions);
+  solver_options_delete(aMlcpOptions);
+}
+
 void gmp_as_mlcp(GenericMechanicalProblem *problem, double *reaction, double *velocity,
                  int *info, SolverOptions *options) {
   /* FC3D blocks are not supported by the MLCP reformulation. */
-  GMP_LocalProblem *local = 0;
-  local = problem->firstLocal;
+  GMP_LocalProblem *local = problem->firstLocal;
   while (local) {
     switch (local->type) {
       case SICONOS_NUMERICS_PROBLEM_EQUALITY:
@@ -748,75 +829,27 @@ void gmp_as_mlcp(GenericMechanicalProblem *problem, double *reaction, double *ve
 
   double *reducedProb = (double *)malloc(nbRow * nbCol * sizeof(double));
   double *Qreduced = (double *)malloc(nbRow * sizeof(double));
-  _GMPReducedEquality(problem, reducedProb, Qreduced, &Me_size, &Mi_size);
+  if (!reducedProb || !Qreduced) {
+    *info = 1;
+    (void)numerics_error("gmp_as_mlcp", "memory allocation failed");
+    free(reducedProb);
+    free(Qreduced);
+    return;
+  }
+  if (_GMPReducedEquality(problem, reducedProb, Qreduced, &Me_size, &Mi_size)) {
+    *info = 1;
+    free(reducedProb);
+    free(Qreduced);
+    return;
+  }
 
   if (!Me_size) {
-    /*it is a lcp.*/
-    LinearComplementarityProblem aLCP;
-    SolverOptions *aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
-    NumericsMatrix M;
-    NM_null(&M);
-    M.storageType = NM_DENSE;
-    M.size0 = to_int(Mi_size);
-    M.size1 = to_int(Mi_size);
-    M.matrix0 = reducedProb;
-    M.matrix1 = NULL;
-    aLCP.size = to_int(Mi_size);
-    aLCP.q = Qreduced;
-    aLCP.M = &M;
-    lcp_enum_init(&aLCP, aLcpOptions, 1);
-    *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
-    lcp_enum_reset(&aLCP, aLcpOptions, 1);
-    solver_options_delete(aLcpOptions);
-    aLcpOptions = NULL;
-
-    goto END_GMP3;
+    gmp_as_mlcp_lcp(reducedProb, Qreduced, Mi_size, reaction, velocity, info);
+  } else if (!Mi_size) {
+    gmp_as_mlcp_linear_system(reducedProb, Qreduced, Me_size, reaction, info);
+  } else {
+    gmp_as_mlcp_mlcp(reducedProb, Qreduced, Me_size, Mi_size, reaction, velocity, info, options);
   }
-  if (!Mi_size) {
-    /*it is a linear system.*/
-    for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
-    NumericsMatrix M;
-    NM_null(&M);
-    NM_fill(&M, NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
-    // *info = NM_gesv(&M, reaction, true);
-    *info = NM_LU_solve(&M, reaction, 1);
-    M.matrix0 = NULL;
-    NM_clear(&M);
-    goto END_GMP3;
-  }
-  /*it is a MLCP*/
-  MixedLinearComplementarityProblem aMLCP;
-  SolverOptions *aMlcpOptions = solver_options_create(SICONOS_MLCP_ENUM);
-  aMLCP.n = to_int(Me_size);
-  aMLCP.m = to_int(Mi_size);
-  aMLCP.blocksRows = NULL;
-  aMLCP.blocksIsComp = NULL;
-  aMLCP.isStorageType1 = 1;
-  aMLCP.isStorageType2 = 0;
-
-  aMLCP.A = NULL;
-  aMLCP.B = NULL;
-  aMLCP.C = NULL;
-  aMLCP.D = NULL;
-  aMLCP.a = NULL;
-  aMLCP.b = NULL;
-  aMLCP.q = Qreduced;
-  NumericsMatrix M;
-  NM_null(&M);
-  M.storageType = NM_DENSE;
-  M.size0 = to_int(Mi_size + Me_size);
-  M.size1 = to_int(Mi_size + Me_size);
-  M.matrix0 = reducedProb;
-  M.matrix1 = NULL;
-  aMLCP.M = &M;
-  mlcp_driver_init(&aMLCP, aMlcpOptions);
-  aMlcpOptions->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
-  *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
-
-  mlcp_driver_reset(&aMLCP, aMlcpOptions);
-  solver_options_delete(aMlcpOptions);
-  aMlcpOptions = NULL;
-END_GMP3:;
 
   free(reducedProb);
   free(Qreduced);
