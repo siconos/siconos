@@ -2720,9 +2720,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_internal_variables = self._io.contactInternalVariables(
-                self._nsds,
-                0)
+
+            contact_internal_variables = None
+            try:
+                contact_internal_variables = self._io.contactInternalVariables(
+                    self._nsds,
+                    0)
+            except AttributeError:
+                self.print_verbose("[warning] self._io.contactInternalVariables is not defined.")
 
             # print(contact_internal_variables)
             # input()
