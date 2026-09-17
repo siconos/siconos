@@ -71,7 +71,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* problem, unsigned i
     }
 
     if (local->q_local) free(local->q_local);
-    problem->lastLocal = local->prev;
+    problem->lastLocal = local->previous;
     *local = (GMP_LocalProblem){0};
     free(local);
   }
@@ -104,7 +104,7 @@ void* gmp_add(GenericMechanicalProblem* problem, SICONOS_NUMERICS_PROBLEM_TYPE p
     problem->lastLocal = newProblem;
   } else {
     problem->lastLocal->next = newProblem;
-    newProblem->prev = problem->lastLocal;
+    newProblem->previous = problem->lastLocal;
     problem->lastLocal = newProblem;
   }
 
@@ -239,9 +239,9 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
   }
   nsubProb = m->filled1 - 1;
   global_offset = 0;
-  for (size_t ii = 0; ii < nsubProb; ii++) {
-    if (ii) global_offset = m->blocksize0[ii - 1];
-    local_size = m->blocksize0[ii] - global_offset;
+  for (size_t blockIndex = 0; blockIndex < nsubProb; blockIndex++) {
+    if (blockIndex) global_offset = m->blocksize0[blockIndex - 1];
+    local_size = m->blocksize0[blockIndex] - global_offset;
     check_io(fscanf(file, "%d\n", &prbType));
     prb = gmp_add(problem, prbType, local_size);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D) {

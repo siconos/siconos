@@ -44,9 +44,9 @@ enum GENERIC_MECHANICAL_DPARAM {
  * iparam[GENERIC_MECHANICAL_IPARAM_ISREDUCED]  */
 enum GENERIC_MECHANICAL_ISREDUCED {
   SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS = 0,  // GS on all blocks
-  SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES = 1,  // The equalities are substituated
+  SICONOS_GENERIC_MECHANICAL_SUBSTITUTE_EQUALITIES = 1,  // The equalities are substituted
   SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES =
-      2,                                     // Equalities are assemblated in one block
+      2,                                     // Equalities are assembled in one block
   SICONOS_GENERIC_MECHANICAL_MLCP_LIKE = 3,  // Try to solve like a MLCP (==> No FC3d)
 };
 

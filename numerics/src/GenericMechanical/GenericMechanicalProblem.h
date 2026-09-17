@@ -46,7 +46,7 @@
  *  \param size       dimension of the local problem
  *  \param error      non-zero if the local solver reported an error
  *  \param next       next local problem in the list
- *  \param prev       previous local problem in the list
+ *  \param previous   previous local problem in the list
  */
 struct GMP_LocalProblem {
   int type;
@@ -55,7 +55,7 @@ struct GMP_LocalProblem {
   size_t size;     /* size of the local problem */
   int error;       /* non-zero if the local solver reported an error */
   struct GMP_LocalProblem* next;
-  struct GMP_LocalProblem* prev;
+  struct GMP_LocalProblem* previous;
 };
 
 /** Backward-compatible alias for GMP_LocalProblem. */

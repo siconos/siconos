@@ -62,7 +62,7 @@ int gmp_driver(GenericMechanicalProblem* problem, double* reaction, double* velo
         numerics_printf("gmp_driver : call of gmp_gauss_seidel\n");
         gmp_gauss_seidel(problem, reaction, velocity, &info, options);
       } else if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] ==
-                 SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES) {
+                 SICONOS_GENERIC_MECHANICAL_SUBSTITUTE_EQUALITIES) {
         numerics_printf("gmp_driver : call of gmp_reduced_solve\n");
         gmp_reduced_solve(problem, reaction, velocity, &info, options);
       } else if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] ==

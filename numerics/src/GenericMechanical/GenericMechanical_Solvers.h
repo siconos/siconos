@@ -58,7 +58,7 @@ extern "C" {
  *  The behavior is controlled by
  *  options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED]:
  *  - SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS: standard NSGS on all blocks
- *  - SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES: eliminate equality blocks
+ *  - SICONOS_GENERIC_MECHANICAL_SUBSTITUTE_EQUALITIES: eliminate equality blocks
  *    before NSGS
  *  - SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES: assemble all equality
  *    blocks into a single block before NSGS
@@ -96,18 +96,18 @@ int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* o
  *
  *  The local problems are updated with the current \a reaction iterate and the
  *  corresponding local errors are evaluated. The maximum local error (scaled
- *  appropriately) is returned in \a err.
+ *  appropriately) is returned in \a error.
  *
  *  \param[in]  problem  the GenericMechanical problem
  *  \param[in]  reaction current global reaction iterate
  *  \param[out] velocity global velocity vector, M*reaction + q
- *  \param[in]  tol      requested tolerance
+ *  \param[in]  tolerance      requested tolerance
  *  \param[in]  options  solver options
- *  \param[out] err      computed maximum error
- *  \return 0 if err <= tol, 1 otherwise
+ *  \param[out] error      computed maximum error
+ *  \return 0 if error <= tolerance, 1 otherwise
  */
 int gmp_compute_error(const GenericMechanicalProblem* problem, const double* reaction,
-                      double* velocity, double tol, SolverOptions* options, double* err);
+                      double* velocity, double tolerance, SolverOptions* options, double* error);
 
 /** Return the size (number of doubles) needed for options->dWork.
  *
@@ -115,7 +115,7 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
  *  \param[in] options the solver options
  *  \return the required size of the double working array
  */
-int gmp_get_nb_dwork(GenericMechanicalProblem* problem, SolverOptions* options);
+int gmp_get_number_of_doubles(GenericMechanicalProblem* problem, SolverOptions* options);
 
 /** Non-Smooth Gauss-Seidel iteration for a GenericMechanical problem.
  *
