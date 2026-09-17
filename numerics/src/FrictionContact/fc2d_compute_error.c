@@ -34,8 +34,8 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu,
-                                        double* restrict error, double* worktmp) {
+void fc2d_unitary_compute_and_add_error(const double* restrict r, const double* restrict u,
+                                        double mu, double* restrict error, double* worktmp) {
   /* Compute the modified local velocity */
   worktmp[0] = r[0] - u[0] - mu * fabs(u[1]);
   worktmp[1] = r[1] - u[1];

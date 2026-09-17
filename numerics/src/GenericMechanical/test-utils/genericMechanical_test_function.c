@@ -27,8 +27,8 @@
 int gmp_test_function(TestCase* current) {
   int k, info = -1;
   GenericMechanicalProblem* problem = genericMechanical_new_from_filename(current->filename);
-  double* reaction = (double*)calloc(problem->size, sizeof(double));
-  double* velocity = (double*)calloc(problem->size, sizeof(double));
+  double* reaction = (double*)calloc(problem->globalSize, sizeof(double));
+  double* velocity = (double*)calloc(problem->globalSize, sizeof(double));
 
   /* printf(" iparam: \n"); */
   /* for(size_t i=0;i<20;++i) */
@@ -43,7 +43,7 @@ int gmp_test_function(TestCase* current) {
   gmp_compute_error(problem, reaction, velocity, current->options->dparam[SICONOS_DPARAM_TOL],
                     current->options, &err);
   printf("\n");
-  for (k = 0; k < problem->size; k++) {
+  for (k = 0; k < problem->globalSize; k++) {
     printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
            reaction[k]);
   }

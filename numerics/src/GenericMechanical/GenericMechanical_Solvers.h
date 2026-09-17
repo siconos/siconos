@@ -46,9 +46,9 @@ extern "C" {
 /** General driver for GenericMechanical problems.
  *
  *  \param[in]     problem  the GenericMechanical problem to solve
- *  \param[in,out] reaction global reaction vector of size problem->size
+ *  \param[in,out] reaction global reaction vector of size problem->globalSize
  *                          (input: initial guess, output: solution)
- *  \param[in,out] velocity global velocity vector of size problem->size
+ *  \param[in,out] velocity global velocity vector of size problem->globalSize
  *                          (output: M*reaction + q)
  *  \param[in,out] options  solver options; must have been created for
  *                          SICONOS_GENERIC_MECHANICAL_NSGS and initialized with
@@ -106,8 +106,8 @@ int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* o
  *  \param[out] err      computed maximum error
  *  \return 0 if err <= tol, 1 otherwise
  */
-int gmp_compute_error(GenericMechanicalProblem* problem, double* reaction, double* velocity,
-                      double tol, SolverOptions* options, double* err);
+int gmp_compute_error(const GenericMechanicalProblem* problem, double* reaction,
+                      double* velocity, double tol, SolverOptions* options, double* err);
 
 /** Return the size (number of doubles) needed for options->dWork.
  *
@@ -123,13 +123,13 @@ int gmp_get_nb_dwork(GenericMechanicalProblem* problem, SolverOptions* options);
  *  The local right-hand side is built from the global q and the off-diagonal
  *  block row product M_offdiag * reaction.
  *
- *  \param[in]     pGMP      the GenericMechanical problem
+ *  \param[in]     problem      the GenericMechanical problem
  *  \param[in,out] reaction  global reaction vector (initial guess / solution)
  *  \param[in,out] velocity  global velocity vector
  *  \param[out]    info      0 if convergence, non-zero otherwise
  *  \param[in,out] options   solver options
  */
-void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
+void gmp_gauss_seidel(GenericMechanicalProblem* problem, double* reaction, double* velocity,
                       int* info, SolverOptions* options);
 
 #if defined(__cplusplus)
