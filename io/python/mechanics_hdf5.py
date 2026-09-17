@@ -108,6 +108,7 @@ def data(h, name, nbcolumns, use_compression=False):
             chunks=[None, (4000, nbcolumns)][comp],
             compression=[None, "gzip"][comp],
             compression_opts=[None, 9][comp],
+            dtype='f4'
         )
 
 

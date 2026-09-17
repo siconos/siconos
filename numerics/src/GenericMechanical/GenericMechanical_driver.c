@@ -56,6 +56,42 @@
 #include "NumericsVector.h"
 #endif
 
+/** Build the local right-hand side q for one block of a GenericMechanicalProblem.
+ *
+ *  For the global problem
+ *      M reaction + q = velocity
+ *  the local problem associated with block \a block_row is built from the
+ *  off-diagonal contribution of the current iterate \a reaction:
+ *
+ *      q_local = q_global(block_row) + M_offdiag(block_row,:) * reaction
+ *
+ *  In practice, this function copies the corresponding block of the global
+ *  vector pGMP->q into \a q_local and then adds the row-block product of M
+ *  excluding the diagonal block (via NM_row_prod_no_diag).
+ *
+ *  \param[in]  pGMP         the global GenericMechanicalProblem
+ *  \param[in]  block_row    block-row index in M (used for SBM storage)
+ *  \param[in]  row_start    first row of the block in dense storage (unused for SBM)
+ *  \param[in]  block_size   size of the local block
+ *  \param[in]  reaction     current global reaction iterate
+ *  \param[out] q_local      local right-hand side, must be allocated with size >= block_size
+ */
+static void gmp_build_local_q(const GenericMechanicalProblem* pGMP, int block_row,
+                              size_t row_start, size_t block_size, const double* reaction,
+                              double* q_local) {
+  assert(pGMP);
+  assert(pGMP->q);
+  assert(reaction);
+  assert(q_local);
+
+  memcpy(q_local, &(pGMP->q[row_start]), block_size * sizeof(double));
+  /* Add the off-diagonal block row product.
+   * NM_row_prod_no_diag is not const-correct for the x argument but does not
+   * modify reaction when called with init=0 and xsave=NULL. */
+  NM_row_prod_no_diag(pGMP->size, block_size, block_row, row_start, pGMP->M,
+                      (double*)reaction, q_local, NULL, 0);
+}
+
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* velocity,
                       double tol, SolverOptions* options, double* err) {
   listNumericsProblem* curProblem = pGMP->firstListElem;
@@ -73,20 +109,16 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
   numerics_printf("GenericMechanical compute_error BEGIN:\n");
 #endif
-  /*update localProblem->q and compute V = M*R+Q of the GMP */
+  /* Update each local problem->q and compute V = M*R + Q of the GMP. */
   size_t posInX = 0;
   while (curProblem) {
     curSize = curProblem->size;
 
-    /*localproblem->q <-- GMP->q */
-    memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+    gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, curProblem->q);
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("q", 0, curProblem->q, curSize, 1);
     printDenseMatrice("reaction", 0, reaction, pGMP->size, 1);
 #endif
-    /*computation of the localproblem->q*/
-    NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                        curProblem->q, NULL, 0);
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("qnodiag", 0, curProblem->q, curSize, 1);
 #endif
@@ -165,7 +197,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double* reaction, double* 
         localError = localError / (1 + cblas_dnrm2(curSize, curProblem->q, 1));
         if (localError > *err) *err = localError;
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
-        numerics_printf("GenericMechanical_driver, localerror of lcp: %e\n", localError);
+        numerics_printf("GenericMechanical_driver, localerror of relay: %e\n", localError);
 #endif
         break;
       }
@@ -288,15 +320,9 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
     while (curProblem) {
       numerics_printf_verbose(1, "Gauss-Seidel iteration %d. Problem (row) number %d ", it,
                               currentRowNumber);
-      // if (currentRowNumber){
-      //   posInX = m->blocksize0[currentRowNumber-1];
-      // }
-      // curSize=m->blocksize0[currentRowNumber] - posInX;
       curSize = curProblem->size;
       curProblem->error = 0;
-      /*about the diagonal block:*/
-      // diagBlockNumber = NM_extract_diag_blockPos(m,currentRowNumber);
-      // diagBlockNumber = NM_extract_diag_blockPos(numMat,currentRowNumber,posInX,size);
+      /* Extract the diagonal block for the local solver. */
       double* diagBlock = 0;
       if (storageType == NM_DENSE) /*dense*/
       {
@@ -316,9 +342,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           NumericsMatrix M;
           NM_fill(&M, NM_DENSE, curSize, curSize, diagBlock);
 
-          memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-          NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                              curProblem->q, NULL, 0);
+          gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, curProblem->q);
           for (size_t i = 0; i < curSize; ++i) sol[i] = -curProblem->q[i];
 
           // resLocalSolver = NM_gesv(&M, sol, true);
@@ -334,10 +358,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           LinearComplementarityProblem* lcpProblem =
               (LinearComplementarityProblem*)curProblem->problem;
           lcpProblem->M->matrix0 = diagBlock;
-          /*about q.*/
-          memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-          NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                              lcpProblem->q, NULL, 0);
+          /* Local q: copy global q block and add off-diagonal M*reaction. */
+          gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, lcpProblem->q);
           resLocalSolver =
               linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers[0]);
           break;
@@ -347,10 +369,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           /*Mz*/
           RelayProblem* relayProblem = (RelayProblem*)curProblem->problem;
           relayProblem->M->matrix0 = diagBlock;
-          /*about q.*/
-          memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-          NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                              relayProblem->q, NULL, 0);
+          /* Local q: copy global q block and add off-diagonal M*reaction. */
+          gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, relayProblem->q);
           resLocalSolver = relay_driver(relayProblem, sol, w, options->internalSolvers[2]);
 
           break;
@@ -362,10 +382,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           assert(fcProblem->M);
           assert(fcProblem->q);
           fcProblem->M->matrix0 = diagBlock;
-          memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-
-          NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                              fcProblem->q, NULL, 0);
+          /* Local q: copy global q block and add off-diagonal M*reaction. */
+          gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, fcProblem->q);
 
           /* We call the generic driver (rather than the specific) since we may choose between
            * various local solvers */
@@ -380,15 +398,13 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double* reaction, double* 
           assert(fcProblem->M);
           assert(fcProblem->q);
           fcProblem->M->matrix0 = diagBlock;
-          memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+          /* Local q: copy global q block and add off-diagonal M*reaction. */
+          gmp_build_local_q(pGMP, currentRowNumber, posInX, curSize, reaction, fcProblem->q);
 
           DEBUG_EXPR_WE(NV_display(curProblem->q, 2);
                         for (size_t i = 0; i < 2; i++) numerics_printf(
                             "curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
                             curProblem->q[i], i, fcProblem->q[i]););
-
-          NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction,
-                              fcProblem->q, NULL, 0);
 
           DEBUG_EXPR_WE(for (size_t i = 0; i < 2; i++) numerics_printf(
                             "reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n", i,
