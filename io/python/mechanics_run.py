@@ -2176,7 +2176,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 max_time = None
                 id_last = None
             self.print_verbose("import dynamical systems ...")
-            for name, obj in sorted(self._input.items(), key=lambda x: x[0]):
+            for name, obj in sorted(
+                self._input.items(), key=lambda x: x[1].attrs["id"]
+            ):
                 # Check if this is an aggregate object first
                 obj_type = obj.attrs.get("type", "")
 
