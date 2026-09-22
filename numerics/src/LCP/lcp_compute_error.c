@@ -48,7 +48,7 @@
 /*   } */
 /* } */
 
-void lcp_compute_error_only(unsigned int n, double* restrict z, double* restrict w,
+void lcp_compute_error_only(unsigned int n, const double* restrict z, const double* restrict w,
                             double* restrict error) {
   *error = 0.;
   for (unsigned int i = 0; i < n; i++) {

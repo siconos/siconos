@@ -64,7 +64,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] =
-        SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES;
+        SICONOS_GENERIC_MECHANICAL_SUBSTITUTE_EQUALITIES;
 
     solver_options_update_internal(collection[current].options, 1,
                                    SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);

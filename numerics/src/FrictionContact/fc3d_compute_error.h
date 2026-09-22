@@ -99,8 +99,8 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
     \param worktmp work vector
     \param[in,out] error value
  */
-void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu, double *error,
-                                        double worktmp[3]);
+void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
+                                        double *error, double worktmp[3]);
 
 /**
     Error computation for one friction-contact 3D problem

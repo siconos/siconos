@@ -27,8 +27,8 @@
 int gmp_test_function(TestCase* current) {
   int k, info = -1;
   GenericMechanicalProblem* problem = genericMechanical_new_from_filename(current->filename);
-  double* reaction = (double*)calloc(problem->size, sizeof(double));
-  double* velocity = (double*)calloc(problem->size, sizeof(double));
+  double* reaction = (double*)calloc(problem->globalSize, sizeof(double));
+  double* velocity = (double*)calloc(problem->globalSize, sizeof(double));
 
   /* printf(" iparam: \n"); */
   /* for(size_t i=0;i<20;++i) */
@@ -39,30 +39,30 @@ int gmp_test_function(TestCase* current) {
 
   info = gmp_driver(problem, reaction, velocity, current->options);
 
-  double err = 0;
+  double error = 0;
   gmp_compute_error(problem, reaction, velocity, current->options->dparam[SICONOS_DPARAM_TOL],
-                    current->options, &err);
+                    current->options, &error);
   printf("\n");
-  for (k = 0; k < problem->size; k++) {
+  for (k = 0; k < problem->globalSize; k++) {
     printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
            reaction[k]);
   }
   printf("\n");
 
   if (!info) {
-    if (err > current->options->dparam[SICONOS_DPARAM_TOL]) {
-      printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", err, info,
+    if (error > current->options->dparam[SICONOS_DPARAM_TOL]) {
+      printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error, info,
              current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
       info = 1;
     } else
-      printf("test successful, residual = %g\t, number of iterations = %i \n", err,
+      printf("test successful, residual = %g\t, number of iterations = %i \n", error,
              current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
   } else {
-    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", err, info,
+    printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error, info,
            current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   }
-  printf("GMP TEST: Nb GS it=%i\n", current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+  printf("GMP TEST: number of GS iterations = %i\n", current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   genericMechanicalProblem_free(problem, GMP_FREE_MATRIX);
   free(reaction);
   free(velocity);

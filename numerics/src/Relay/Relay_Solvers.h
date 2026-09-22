@@ -154,7 +154,7 @@ void dr_nlgs(RelayProblem* problem, double* z, double* w, int* info, SolverOptio
  * the solution with respect to the problem \return status: 0 : convergence, 1: error >
  * tolerance
  */
-int relay_compute_error(RelayProblem* problem, double* restrict z, double* restrict w,
+int relay_compute_error(RelayProblem* problem, const double* restrict z, const double* restrict w,
                         double tolerance, double* restrict error);
 
 /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector \f$z\f$

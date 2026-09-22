@@ -39,7 +39,7 @@
 #endif
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
-void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
+void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
                                         double *restrict error, double worktmp[3]) {
   // double normUT;
   // double worktmp[3];

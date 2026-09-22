@@ -515,7 +515,7 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double* z, double* 
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] error the result of the computation
  */
-void lcp_compute_error_only(unsigned int n, double* z, double* w, double* error);
+void lcp_compute_error_only(unsigned int n, const double* z, const double* w, double* error);
 
 /*   /\** Function used to extract from LCP matrix the part which corresponds to non null z */
 /*    *\/ */

@@ -19,15 +19,16 @@
 #include "GenericMechanicalProblem.h"
 
 #include <assert.h>  // for assert
-#include <stdlib.h>  // for malloc, free, exit, EXIT_F...
+#include <stdlib.h>  // for malloc, free
 
 #include "FrictionContactProblem.h"        // IWYU pragma: keep
 #include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
 #include "RelayProblem.h"                  // IWYU pragma: keep
 #include "SparseBlockMatrix.h"             // IWYU pragma: keep
-#include "numerics_verbose.h"              // for check_io
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_warning
 #include "safe_casts.h"
+#include "siconos_debug.h"  // for DEBUG_EXPR
 
 GenericMechanicalProblem* genericMechanicalProblem_new(void) {
   GenericMechanicalProblem* paux =
@@ -36,179 +37,200 @@ GenericMechanicalProblem* genericMechanicalProblem_new(void) {
   return paux;
 }
 
-void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int level) {
-  if (!pGMP) return;
-  while (pGMP->lastListElem) {
-    listNumericsProblem* pElem = pGMP->lastListElem;
+void genericMechanicalProblem_free(GenericMechanicalProblem* problem, unsigned int level) {
+  if (!problem) return;
+  while (problem->lastLocal) {
+    GMP_LocalProblem* local = problem->lastLocal;
 
-    switch (pElem->type) {
+    switch (local->type) {
       case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_LCP: {
-        pElem->q = NULL;
-        freeLinearComplementarityProblem((LinearComplementarityProblem*)(pElem->problem));
+        /* q_local is owned by the LCP problem and will be freed there. */
+        local->q_local = NULL;
+        freeLinearComplementarityProblem((LinearComplementarityProblem*)(local->problem));
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_RELAY: {
-        freeRelay_problem((RelayProblem*)(pElem->problem));
-        pElem->problem = NULL;
+        /* q_local is owned by the Relay problem and will be freed there. */
+        local->q_local = NULL;
+        freeRelay_problem((RelayProblem*)(local->problem));
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_FC2D:
       case SICONOS_NUMERICS_PROBLEM_FC3D: {
-        pElem->q = NULL;
-        frictionContactProblem_free((FrictionContactProblem*)(pElem->problem));
+        /* q_local is owned by the FC problem and will be freed there. */
+        local->q_local = NULL;
+        frictionContactProblem_free((FrictionContactProblem*)(local->problem));
         break;
       }
       default:
-        printf("Numerics : genericMechanicalProblem_free case %d not managed.\n", pElem->type);
+        (void)numerics_warning("genericMechanicalProblem_free",
+                               "unknown problem type, possible memory leak");
     }
 
-    if (pElem->q) free(pElem->q);
-    pGMP->lastListElem = pElem->prevProblem;
-    *pElem = (listNumericsProblem){0};
-    free(pElem);
+    if (local->q_local) free(local->q_local);
+    problem->lastLocal = local->previous;
+    *local = (GMP_LocalProblem){0};
+    free(local);
   }
 
   if (level == GMP_FREE_MATRIX) {
-    pGMP->M = NM_free(pGMP->M);
-    if (pGMP->q) free(pGMP->q);
-    pGMP->q = NULL;
+    problem->M = NM_free(problem->M);
+    if (problem->q) free(problem->q);
+    problem->q = NULL;
   }
-  free(pGMP);
+  free(problem);
 }
 
-void* gmp_add(GenericMechanicalProblem* pGMP, SICONOS_NUMERICS_PROBLEM_TYPE problemType,
+void* gmp_add(GenericMechanicalProblem* problem, SICONOS_NUMERICS_PROBLEM_TYPE problemType,
               size_t size) {
-  listNumericsProblem* newProblem = (listNumericsProblem*)malloc(sizeof(listNumericsProblem));
-  newProblem->nextProblem = 0;
-  newProblem->type = problemType;
-  newProblem->q = NULL;
-  newProblem->size = size;
-  newProblem->error = 0;
-  pGMP->size += size;
-  if (size > pGMP->maxLocalSize) pGMP->maxLocalSize = size;
-  if (!pGMP->lastListElem) {
-    pGMP->firstListElem = newProblem;
-    pGMP->lastListElem = newProblem;
-    newProblem->prevProblem = 0;
-  } else {
-    pGMP->lastListElem->nextProblem = newProblem;
-    newProblem->prevProblem = pGMP->lastListElem;
-    pGMP->lastListElem = newProblem;
+  if (!problem) {
+    (void)numerics_error("gmp_add", "NULL GenericMechanicalProblem");
+    return NULL;
   }
+
+  GMP_LocalProblem* newProblem = (GMP_LocalProblem*)malloc(sizeof(GMP_LocalProblem));
+  *newProblem = (GMP_LocalProblem){0};
+  newProblem->type = problemType;
+  newProblem->size = size;
+
+  problem->globalSize += size;
+  if (size > problem->maxLocalSize) problem->maxLocalSize = size;
+
+  if (!problem->lastLocal) {
+    problem->firstLocal = newProblem;
+    problem->lastLocal = newProblem;
+  } else {
+    problem->lastLocal->next = newProblem;
+    newProblem->previous = problem->lastLocal;
+    problem->lastLocal = newProblem;
+  }
+
   switch (problemType) {
-    case (SICONOS_NUMERICS_PROBLEM_LCP): {
+    case SICONOS_NUMERICS_PROBLEM_LCP: {
       newProblem->problem = (void*)malloc(sizeof(LinearComplementarityProblem));
       LinearComplementarityProblem* pLCP = (LinearComplementarityProblem*)newProblem->problem;
       pLCP->M = NM_new();
-      pLCP->q = (double*)malloc(size * sizeof(double));
-      newProblem->q = pLCP->q;
-      pLCP->M->storageType = 0; /*local prb is dense*/
+      newProblem->q_local = (double*)malloc(size * sizeof(double));
+      pLCP->q = newProblem->q_local;
+      pLCP->M->storageType = NM_DENSE; /* local problem is dense */
       pLCP->M->size0 = to_int(size);
       pLCP->M->size1 = to_int(size);
       pLCP->size = to_int(size);
-
       break;
     }
-    case (SICONOS_NUMERICS_PROBLEM_RELAY): {
+    case SICONOS_NUMERICS_PROBLEM_RELAY: {
       newProblem->problem = (void*)malloc(sizeof(RelayProblem));
       RelayProblem* pRelay = (RelayProblem*)newProblem->problem;
       pRelay->M = NM_new();
-      pRelay->q = (double*)malloc(size * sizeof(double));
-      newProblem->q = pRelay->q;
-      pRelay->M->storageType = 0; /*local prb is dense*/
+      newProblem->q_local = (double*)malloc(size * sizeof(double));
+      pRelay->q = newProblem->q_local;
+      pRelay->M->storageType = NM_DENSE; /* local problem is dense */
       pRelay->M->size0 = to_int(size);
       pRelay->M->size1 = to_int(size);
       pRelay->size = to_int(size);
       pRelay->lb = (double*)malloc(size * sizeof(double));
       pRelay->ub = (double*)malloc(size * sizeof(double));
-
       break;
     }
-    case (SICONOS_NUMERICS_PROBLEM_EQUALITY): {
+    case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
       newProblem->problem = NULL;
-      newProblem->q = (double*)malloc(size * sizeof(double));
-      break;
+      newProblem->q_local = (double*)malloc(size * sizeof(double));
+      return newProblem->q_local;
     }
-    case (SICONOS_NUMERICS_PROBLEM_FC3D): {
+    case SICONOS_NUMERICS_PROBLEM_FC3D: {
       newProblem->problem = (void*)malloc(sizeof(FrictionContactProblem));
       FrictionContactProblem* pFC3D = (FrictionContactProblem*)newProblem->problem;
       pFC3D->mu = (double*)malloc(sizeof(double));
       pFC3D->M = NM_new();
-      pFC3D->M->storageType = 0; /*Local prb is dense*/
+      pFC3D->M->storageType = NM_DENSE; /* local problem is dense */
       pFC3D->M->size0 = to_int(size);
       pFC3D->M->size1 = to_int(size);
       pFC3D->numberOfContacts = 1;
-      pFC3D->q = (double*)malloc(size * sizeof(double));
+      newProblem->q_local = (double*)malloc(size * sizeof(double));
+      pFC3D->q = newProblem->q_local;
       pFC3D->dimension = 3;
-      newProblem->q = pFC3D->q;
       break;
     }
-    case (SICONOS_NUMERICS_PROBLEM_FC2D): {
+    case SICONOS_NUMERICS_PROBLEM_FC2D: {
       newProblem->problem = (void*)malloc(sizeof(FrictionContactProblem));
       FrictionContactProblem* pFC2D = (FrictionContactProblem*)newProblem->problem;
       pFC2D->mu = (double*)malloc(sizeof(double));
       pFC2D->M = NM_new();
-      pFC2D->M->storageType = 0; /*Local prb is dense*/
+      pFC2D->M->storageType = NM_DENSE; /* local problem is dense */
       pFC2D->M->size0 = to_int(size);
       pFC2D->M->size1 = to_int(size);
       pFC2D->numberOfContacts = 1;
-      pFC2D->q = (double*)malloc(size * sizeof(double));
-      pFC2D->dimension = 3;
-      newProblem->q = pFC2D->q;
+      newProblem->q_local = (double*)malloc(size * sizeof(double));
+      pFC2D->q = newProblem->q_local;
+      pFC2D->dimension = 2;
       break;
     }
     default:
-      printf("GenericMechanicalProblem.h gmp_add : problemType unknown: %d . \n", problemType);
-      exit(EXIT_FAILURE);
+      (void)numerics_error("gmp_add", "unknown problem type");
+      free(newProblem);
+      return NULL;
   }
   return newProblem->problem;
 }
 
-void genericMechanicalProblem_display(GenericMechanicalProblem* pGMP) {
-  listNumericsProblem* pElem = pGMP->firstListElem;
+void genericMechanicalProblem_display(GenericMechanicalProblem* problem) {
+  if (!problem) {
+    (void)numerics_warning("genericMechanicalProblem_display", "NULL problem");
+    return;
+  }
+  GMP_LocalProblem* local = problem->firstLocal;
   printf("\nBEGIN Display a GenericMechanicalProblem(Numerics):\n");
 
-  while (pElem) {
-    printf("-->An sub-problem %s.\n", ns_problem_id_to_name(pElem->type));
-    pElem = pElem->nextProblem;
+  while (local) {
+    printf("-->A sub-problem %s.\n", ns_problem_id_to_name(local->type));
+    local = local->next;
   }
-  printf("The sparce block matrice is :\n");
-  NM_display(pGMP->M);
+  printf("The sparse block matrix is :\n");
+  NM_display(problem->M);
   printf("The q vector is :\n");
-  for (size_t ii = 0; ii < pGMP->size; ii++) printf("%e ", pGMP->q[ii]);
+  for (size_t ii = 0; ii < problem->globalSize; ii++) printf("%e ", problem->q[ii]);
 
-  // SBM_print(pGMP->M->matrix1);
   printf("\nEND Display a GenericMechanicalProblem:\n");
 }
 
-void genericMechanicalProblem_printInFile(GenericMechanicalProblem* pGMP, FILE* file) {
-  listNumericsProblem* curProblem = pGMP->firstListElem;
-  /*Print M*/
-  NM_write_in_file(pGMP->M, file);
+void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file) {
+  if (!problem || !file) return;
+  GMP_LocalProblem* local_problem = problem->firstLocal;
+  /* Print M */
+  NM_write_in_file(problem->M, file);
   fprintf(file, "\n");
-  /*Print Q*/
-  for (size_t ii = 0; ii < pGMP->size; ii++) fprintf(file, "%e\n", pGMP->q[ii]);
+  /* Print Q */
+  for (size_t ii = 0; ii < problem->globalSize; ii++) fprintf(file, "%e\n", problem->q[ii]);
   fprintf(file, "\n");
-  /*Print the type and options (mu)*/
-  while (curProblem) {
-    fprintf(file, "%d\n", curProblem->type);
-    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_FC3D)
-      fprintf(file, "%e\n", ((FrictionContactProblem*)curProblem->problem)->mu[0]);
-    curProblem = curProblem->nextProblem;
+  /* Print the type and options (mu) */
+  while (local_problem) {
+    fprintf(file, "%d\n", local_problem->type);
+    if (local_problem->type == SICONOS_NUMERICS_PROBLEM_FC3D)
+      fprintf(file, "%e\n", ((FrictionContactProblem*)local_problem->problem)->mu[0]);
+    local_problem = local_problem->next;
   }
 }
 
 GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
+  if (!file) {
+    (void)numerics_error("genericMechanical_newFromFile", "NULL file descriptor");
+    return NULL;
+  }
+
   GenericMechanicalProblem* problem = genericMechanicalProblem_new();
   size_t nsubProb = 0;
   int prbType = 0;
-  size_t posInX, localSize;
+  size_t global_offset, local_size;
   void* prb;
 
   problem->M = NM_new_from_file(file);
+  if (!problem->M) {
+    genericMechanicalProblem_free(problem, GMP_FREE_GMP);
+    return NULL;
+  }
   SparseBlockStructuredMatrix* m = problem->M->matrix1;
 
   problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
@@ -216,71 +238,63 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
     check_io(fscanf(file, "%lf ", problem->q + i));
   }
   nsubProb = m->filled1 - 1;
-  posInX = 0;
-  for (size_t ii = 0; ii < nsubProb; ii++) {
-    if (ii) posInX = m->blocksize0[ii - 1];
-    localSize = m->blocksize0[ii] - posInX;
+  global_offset = 0;
+  for (size_t blockIndex = 0; blockIndex < nsubProb; blockIndex++) {
+    if (blockIndex) global_offset = m->blocksize0[blockIndex - 1];
+    local_size = m->blocksize0[blockIndex] - global_offset;
     check_io(fscanf(file, "%d\n", &prbType));
-    prb = gmp_add(problem, prbType, localSize);
+    prb = gmp_add(problem, prbType, local_size);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D) {
       check_io(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
     }
   }
 
-#ifdef GMP_DEBUG
-  genericMechanicalProblem_display(pGMP);
-#endif
+  DEBUG_EXPR(genericMechanicalProblem_display(problem););
   return problem;
 }
 
 GenericMechanicalProblem* genericMechanical_new_from_filename(const char* filename) {
-  GenericMechanicalProblem* problem = NULL;
-  FILE* file = fopen(filename, "r");
-  if (file == NULL) {
-    printf("Error! Could not open filename %s\n", filename);
-    exit(EXIT_FAILURE);
+  if (!filename) {
+    (void)numerics_error("genericMechanical_new_from_filename", "NULL filename");
+    return NULL;
   }
 
-  problem = genericMechanical_newFromFile(file);
+  FILE* file = fopen(filename, "r");
+  if (file == NULL) {
+    (void)numerics_error("genericMechanical_new_from_filename", "could not open file");
+    return NULL;
+  }
+
+  GenericMechanicalProblem* problem = genericMechanical_newFromFile(file);
   fclose(file);
   return problem;
 }
 
-/** return nonsmooth problem formulation name, from its id number. */
+/** Return the non-smooth problem formulation name from its id number. */
 const char* ns_problem_id_to_name(SICONOS_NUMERICS_PROBLEM_TYPE id) {
   switch (id) {
-    case (SICONOS_NUMERICS_PROBLEM_LCP): {
+    case SICONOS_NUMERICS_PROBLEM_LCP:
       return "LCP";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_MLCP): {
+    case SICONOS_NUMERICS_PROBLEM_MLCP:
       return "MLCP";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_NCP): {
+    case SICONOS_NUMERICS_PROBLEM_NCP:
       return "NCP";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_MCP): {
+    case SICONOS_NUMERICS_PROBLEM_MCP:
       return "MCP";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_EQUALITY): {
+    case SICONOS_NUMERICS_PROBLEM_EQUALITY:
       return "EQUALITY";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_FC2D): {
+    case SICONOS_NUMERICS_PROBLEM_FC2D:
       return "FC2D";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_FC3D): {
+    case SICONOS_NUMERICS_PROBLEM_FC3D:
       return "FC3D";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_VI): {
+    case SICONOS_NUMERICS_PROBLEM_VI:
       return "VI";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_AVI): {
+    case SICONOS_NUMERICS_PROBLEM_AVI:
       return "AVI";
-    }
-    case (SICONOS_NUMERICS_PROBLEM_RELAY): {
+    case SICONOS_NUMERICS_PROBLEM_RELAY:
       return "RELAY";
-    }
     default:
-      printf("Numerics:ns_problem_id_to_name, id unknown : %d \n", id);
+      (void)numerics_warning("ns_problem_id_to_name", "unknown problem id");
       return NULL;
   }
 }
