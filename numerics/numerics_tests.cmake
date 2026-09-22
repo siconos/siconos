@@ -296,6 +296,9 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
+  new_tests_collection(
+    DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_NSN_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc2d_1.c test_nsn_gfc2d_1.c )
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)

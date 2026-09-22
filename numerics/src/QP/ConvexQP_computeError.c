@@ -26,6 +26,7 @@
 
 #include "ConvexQP.h"        // IWYU pragma: keep
 #include "NumericsMatrix.h"  // for NM_gemv, NM_tgemv
+#include "NumericsVector.h"  // for NV_display
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
 #include "SolverOptions.h"   // IWYU pragma: keep
 #include "numerics_errors.h"

@@ -31,6 +31,7 @@
 #include "numerics_errors.h"
 #include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+#include "pivot-utils.h"    // for basis_to_name, basis_to_number
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
@@ -249,11 +250,11 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   /* Reset the factorized_basis */
   memset(factorized_basis, 0, (2 * n + 1) * sizeof(unsigned));
   memset(lumod_data->row_col_indx, 0, (2 * n + 1) * sizeof(int));
-  DEBUG_PRINT("Variables in factorized basis\n")
+  DEBUG_PRINT("Variables in factorized basis\n");
   lapack_int n_la = to_blasint(n);
   for (unsigned i = 0, j = 0; i < n; ++i, j += n) {
     unsigned var = basis[i] - BASIS_OFFSET;
-    DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], n), basis_to_number(basis[i], n))
+    DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], n), basis_to_number(basis[i], n));
     factorized_basis[var] = i + BASIS_OFFSET;
     if (var > n) /* z var */
     {
@@ -270,7 +271,7 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
       cblas_dcopy(n_la, covering_vector, 1, &H[j], 1);
     }
   }
-  DEBUG_PRINT("\n")
+  DEBUG_PRINT("\n");
 
   DEBUG_PRINT_MAT_STR("basis for factorization", H, n, n);
 

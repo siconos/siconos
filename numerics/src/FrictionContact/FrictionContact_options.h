@@ -203,6 +203,16 @@ enum FRICTION_SOLVER {
   /** IPM-SNM with proximal regularization */
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX = 620,
 
+  /* -----------------------------------------------------------------------
+   * Global 2D Frictional Contact solvers (IDs 700-799)
+   * -----------------------------------------------------------------------
+   * These solvers work on the global (aggregated) formulation of the
+   * 2D friction contact problem.
+   */
+
+  /** Non-smooth Newton Alart-Curnier, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_NSN_AC = 720,
+
 }; /* end of enum FRICTION_SOLVER */
 
 /* ===========================================================================
