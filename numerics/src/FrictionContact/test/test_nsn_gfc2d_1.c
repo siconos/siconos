@@ -38,7 +38,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     for (int d = 0; d < n_data; d++) {
       collection[current].filename = data_collection[d];
       collection[current].options = solver_options_create(solvers[s]);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-15;
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
       current++;
     }

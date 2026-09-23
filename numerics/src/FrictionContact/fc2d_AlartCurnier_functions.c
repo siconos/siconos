@@ -18,8 +18,12 @@
 
 #include "fc2d_AlartCurnier_functions.h"
 
-#include <math.h>  // for fabs
+#include <stdio.h>
 
+// #define DEBUG_MESSAGES
+// #include "siconos_debug.h"
+#include <math.h>  // for fabs
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 /**
  * \brief Compute the 2D Alart--Curnier function and its Jacobians.
  *
@@ -35,9 +39,13 @@ void computeAlartCurnier2D(double* reaction, double* velocity, double mu, double
   const double rhoN = rho[0];
   const double rhoT = rho[1];
 
+  /* DEBUG_PRINTF("rhoN = %e\n", rhoN);   */
+  /* DEBUG_PRINTF("rhoT= %e\n", rhoT); */
+
+  
   const double RVN = rN - rhoN * uN;
   const double RVT = rT - rhoT * uT;
-  const double radius = mu * rN;
+  
 
   /* Normal part. */
   if (RVN >= 0.0) {
@@ -57,7 +65,9 @@ void computeAlartCurnier2D(double* reaction, double* velocity, double mu, double
       jacobian_r[1 + 2 * 0] = 0.0;
     }
   }
-
+  
+  const double radius = mu * MAX(0,rN); //MJ variant
+  //const double radius = mu * MAX(0,RVN); //AC variant
   /* Tangential part: projection on [-radius, radius]. */
   if (fabs(RVT) <= radius) {
     if (residual) residual[1] = rhoT * uT;
@@ -68,13 +78,25 @@ void computeAlartCurnier2D(double* reaction, double* velocity, double mu, double
       jacobian_r[1 + 2 * 1] = 0.0;
     }
   } else {
-    const double sign = (RVT > 0.0) ? 1.0 : -1.0;
-    if (residual) residual[1] = rT - radius * sign;
-    if (jacobian_u && jacobian_r) {
-      jacobian_u[0 + 2 * 1] = 0.0;
-      jacobian_u[1 + 2 * 1] = 0.0;
-      jacobian_r[0 + 2 * 1] = -mu * sign;
-      jacobian_r[1 + 2 * 1] = 1.0;
+    /* Tangential part: projection on radius */    
+    if (RVT > radius) {
+      if (residual) residual[1] = rT - radius;
+      if (jacobian_u && jacobian_r) {
+        jacobian_u[0 + 2 * 1] = 0.0;
+        jacobian_u[1 + 2 * 1] = 0.0;
+        jacobian_r[0 + 2 * 1] = -mu;
+        jacobian_r[1 + 2 * 1] = 1.0;
+      }
+    }
+    /* Tangential part: projection on -radius */    
+    if (RVT < -radius) {
+      if (residual) residual[1] = rT + radius;
+      if (jacobian_u && jacobian_r) {
+        jacobian_u[0 + 2 * 1] = 0.0;
+        jacobian_u[1 + 2 * 1] = 0.0;
+        jacobian_r[0 + 2 * 1] = mu;
+        jacobian_r[1 + 2 * 1] = 1.0;
+      }
     }
   }
 }

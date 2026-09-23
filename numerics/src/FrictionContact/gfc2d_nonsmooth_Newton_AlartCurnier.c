@@ -22,7 +22,7 @@
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs, INFINITY
 
-#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR, ...
+
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
@@ -44,9 +44,15 @@
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 
+
 /* Solver registration system */
 #include "numerics_errors.h"
 #include "solver_registry.h"
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include"siconos_debug.h"
+
 
 /*!
  * \file gfc2d_nonsmooth_Newton_AlartCurnier.c
@@ -152,7 +158,7 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
   NM_gemv(-1., problem->M, global_velocity, 1, residual);
 
   /* Kinematic residual: residual[n:n+m] = b - u + H^T*v */
-  cblas_daxpy(num_contact_dofs, -1., velocity, 1, residual + num_global_dofs, 1);
+  cblas_daxpy(num_contact_dofs, -1., velocity, 1, residual + num_global_dofs, 1); // a copy of b would have been better
   cblas_daxpy(num_contact_dofs, 1., problem->b, 1, residual + num_global_dofs, 1);
   NM_tgemv(1., problem->H, global_velocity, 1, residual + num_global_dofs);
 
@@ -369,7 +375,7 @@ static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* probl
                  condition_upper);
 
     if (condition_lower && condition_upper) {
-      numerics_printf_verbose(1,
+      numerics_printf_verbose(2,
                               "---- GFC2D - NSN_AC - global line search success. "
                               "Number of ls iteration = %i  alpha = %.10e, q = %.10e",
                               ls_iter, step_length[0], merit_trial);
@@ -405,6 +411,10 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          double* reaction, double* velocity,
                                          double* globalVelocity, int* info,
                                          SolverOptions* options) {
+
+
+
+ 
   assert(problem);
   assert(reaction);
   assert(velocity);
@@ -431,13 +441,6 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
    * ====================================================================== */
   unsigned int iteration = 0;
   const unsigned int max_iterations = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  unsigned int error_evaluation_frequency =
-      options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
-
-  if (error_evaluation_frequency == 0) {
-    error_evaluation_frequency = 1;
-  }
-
   assert(max_iterations > 0);
 
   const double tolerance = options->dparam[SICONOS_DPARAM_TOL];
@@ -590,6 +593,9 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(jacobian_triplet->m == jacobian_triplet->n);
   NM_fill(nm_jacobian, NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
 
+  DEBUG_EXPR(NM_display(nm_jacobian););
+
+  
   info[0] = 1;  /* Default to non-convergence. */
 
   /* ====================================================================== *
@@ -604,7 +610,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   }
 
   DEBUG_PRINTF("norm of velocity = %e\n", cblas_dnrm2(num_contact_dofs, velocity, 1));
-  double linear_solver_residual = 0.0;
+
 
   DEBUG_EXPR(NV_display(globalVelocity, num_global_dofs););
   DEBUG_EXPR(NV_display(velocity, num_contact_dofs););
@@ -620,14 +626,21 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   memcpy(current_reaction, reaction, num_contact_dofs * sizeof(double));
 
   numerics_printf_verbose(1, "---- GFC2D - NSN_AC - Start with tolerance = %g", tolerance);
+  numerics_printf_verbose(1,
+                          "| iter |   residual   | error gfc3d  |    tol      | ls step | ls info | ");
+  numerics_printf_verbose(1,
+                          "------------------------------------------------------------------");
 
   /* ====================================================================== *
    * Main Newton loop
    * ====================================================================== */
+  double residual_norm = 0.0;
   while (iteration++ < max_iterations) {
     /* Evaluate the residual Psi(x_k). */
     compute_system_residual(problem, current_global_velocity, current_reaction, current_velocity,
                             rho, system_residual);
+
+    residual_norm = cblas_dnrm2(system_size, system_residual, 1);
 
     /* Evaluate the contact Jacobians A(x_k) and B(x_k). */
     for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
@@ -646,10 +659,17 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     cblas_dscal(system_size, -1., newton_direction, 1);
 
     /* Convert to compressed-column format and solve J(x_k) d = -Psi(x_k). */
-    CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
+    //CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
 
+    NM_clearCSC(nm_jacobian);
+    NM_clearCSCTranspose(nm_jacobian);
+    NM_clearCSR(nm_jacobian);
+    
+    
     DEBUG_PRINTF("norm of jacobian = %e\n", NM_norm_1(nm_jacobian));
-
+    DEBUG_EXPR(NM_display(nm_jacobian););
+    DEBUG_EXPR(NV_display(newton_direction, num_global_dofs + num_contact_dofs*2 ););
+    
     /* NM_preserve/unpreserve ensures that the internal factorization of
      * nm_jacobian is invalidated because the underlying triplet data has
      * changed since the previous iteration. */
@@ -660,21 +680,11 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                  cblas_dnrm2(system_size, newton_direction, 1));
 
     if (linear_solver_info != 0) {
-      fprintf(stderr, "---- GFC2D - NSN_AC - linear solver failed, info = %d\n",
-              linear_solver_info);
+      numerics_printf_verbose(-1, "---- GFC2D - NSN_AC - linear solver failed, info = %d",
+                              linear_solver_info);
       *info = NUMERICS_ERR_LINEAR_SOLVER;
-      cs_spfree(jacobian_csc);
+      //cs_spfree(jacobian_csc);
       break;
-    }
-
-    /* Check the quality of the linear solve. */
-    if (verbose > 0) {
-      cblas_dcopy_msan(system_size, system_residual, 1, linear_residual_workspace, 1);
-      NM_gemv(1., nm_jacobian, newton_direction, 1., linear_residual_workspace);
-      linear_solver_residual = cblas_dnrm2(system_size, linear_residual_workspace, 1);
-      numerics_printf_verbose(1,
-                              "---- GFC2D - NSN_AC iteration %d, linear_solver_residual = %g ",
-                              iteration, linear_solver_residual);
     }
 
     /* ====================================================================== *
@@ -690,7 +700,8 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
         line_search_status = global_linesearch_goldstein_price(
-            problem, current_solution, newton_direction, rho, system_residual, jacobian_csc,
+            problem, current_solution, newton_direction, rho, system_residual,
+            NM_csc(nm_jacobian),
             linesearch_workspace, linesearch_residual, &step_length,
             options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]);
         break;
@@ -700,8 +711,6 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                "Unknown line search option.\n");
         break;
     }
-
-    cs_spfree(jacobian_csc);
 
     /* Unknown line-search option: abort the Newton loop. */
     if (*info < 0) {
@@ -724,33 +733,32 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     DEBUG_EXPR(NV_display(current_velocity, num_contact_dofs););
     DEBUG_EXPR(NV_display(current_reaction, num_contact_dofs););
 
-    options->dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
-
     /* ====================================================================== *
      * Convergence test
      * ====================================================================== */
-    if (!(iteration % error_evaluation_frequency)) {
-      const int error_status =
-          gfc2d_compute_error(problem, current_reaction, current_velocity, current_global_velocity,
-                              tolerance, options, norm_q, norm_b,
-                              &(options->dparam[SICONOS_DPARAM_RESIDU]));
-      if (error_status != 0) {
-        numerics_printf_verbose(1,
-                                "---- GFC2D - NSN_AC iteration %d, error computation "
-                                "failed with status %d",
-                                iteration, error_status);
-        *info = NUMERICS_ERR_UNKNOWN;
-        break;
-      }
+    const int error_status =
+        gfc2d_compute_error(problem, current_reaction, current_velocity, current_global_velocity,
+                            tolerance, options, norm_q, norm_b,
+                            &(options->dparam[SICONOS_DPARAM_RESIDU]));
+    if (error_status != 0) {
+      numerics_printf_verbose(-1,
+                              "---- GFC2D - NSN_AC iteration %d, error computation "
+                              "failed with status %d",
+                              iteration, error_status);
+      *info = NUMERICS_ERR_UNKNOWN;
+      break;
     }
 
-    if (options->dparam[SICONOS_DPARAM_RESIDU] >= tolerance) {
-      numerics_printf_verbose(1, "---- GFC2D - NSN_AC iteration %d, residual = %g >= %g",
-                              iteration, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
-    } else {
+    numerics_printf_verbose(1,
+                            "| %4u | %12.4e | %12.4e | %10.2e | %4.2e | %5d |",
+                            iteration, residual_norm, options->dparam[SICONOS_DPARAM_RESIDU],
+                            tolerance, step_length, line_search_status);
+
+    if (options->dparam[SICONOS_DPARAM_RESIDU] < tolerance) {
       info[0] = 0;
       break;
     }
+
   }
 
   /* ====================================================================== *
@@ -761,14 +769,16 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   memcpy(reaction, &current_solution[num_global_dofs + num_contact_dofs],
          num_contact_dofs * sizeof(double));
 
-  if (verbose > 0) {
-    if (!info[0])
-      printf("---- GFC2D - NSN_AC - convergence after %d iterations, residual = %g\n", iteration,
-             options->dparam[SICONOS_DPARAM_RESIDU]);
-    else
-      printf("---- GFC2D - NSN_AC - no convergence after %d iterations, residual = %g\n",
-             iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
-  }
+  if (!info[0])
+    numerics_printf_verbose(1,
+                            "---- GFC2D - NSN_AC - convergence after %d iterations, "
+                            "residual = %g",
+                            iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
+  else
+    numerics_printf_verbose(1,
+                            "---- GFC2D - NSN_AC - no convergence after %d iterations, "
+                            "residual = %g",
+                            iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
@@ -787,7 +797,7 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0; /* > 0 memory is allocated */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 1000;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 10;
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
 }

@@ -300,6 +300,9 @@ if(WITH_TESTING)
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_NSN_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_nsn_gfc2d_1.c )
 
+  # Minimal sanity test for the 2D global nonsmooth Newton Alart-Curnier solver
+  new_test(NAME test_nsn_gfc2d_single_particle SOURCES test_nsn_gfc2d_single_particle.c)
+
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
 
