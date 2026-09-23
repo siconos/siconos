@@ -66,8 +66,8 @@ void computeAlartCurnier2D(double* reaction, double* velocity, double mu, double
     }
   }
   
-  const double radius = mu * MAX(0,rN); //MJ variant
-  //const double radius = mu * MAX(0,RVN); //AC variant
+  //const double radius = mu * MAX(0,rN); //MJ variant
+  const double radius = mu * MAX(0,RVN); //AC variant
   /* Tangential part: projection on [-radius, radius]. */
   if (fabs(RVT) <= radius) {
     if (residual) residual[1] = rhoT * uT;

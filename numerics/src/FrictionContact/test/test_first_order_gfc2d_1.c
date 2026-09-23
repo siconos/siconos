@@ -25,7 +25,7 @@
 
 TestCase* build_test_collection(int n_data, const char** data_collection,
                                 int* number_of_tests) {
-  int n_solvers = 1;
+  int n_solvers = 3;
   *number_of_tests = n_data * n_solvers;
   TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
@@ -37,5 +37,24 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
   }
+  for (int d = 0; d < n_data; d++) {
+    // GFC3D, NSGS, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_VI_FPP);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;    
+    current++;
+  }
+  for (int d = 0; d < n_data; d++) {
+    // GFC3D, NSGS, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_VI_EG);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-2;    
+    current++;
+  }
+  collection[7].will_fail = 1;
+  collection[8].will_fail = 1;
+  
   return collection;
 }

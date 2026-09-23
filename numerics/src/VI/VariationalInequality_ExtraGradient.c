@@ -42,15 +42,17 @@ static int determine_convergence(double error, double *tolerance, int iter,
 
 {
   int hasNotConverged = 1;
+  if (verbose > 0) {
+    printf("| %6d | %14.7e | %14.7e | %14.7e |", iter, rho, error, *tolerance);
+    if (error < *tolerance)
+      printf(" converged\n");
+    else
+      printf("\n");
+  }
   if (error < *tolerance) {
-    if (verbose > 0)
-      printf(
-          "--------------- VI - Extra Gradient (EG) - Iteration %i "
-          "Residual = %14.7e < %7.3e\n",
-          iter, error, *tolerance);
     double absolute_error = 0.0;
     variationalInequality_computeError(problem, z, w, *tolerance, options, &absolute_error);
-    if (verbose > 0)
+    if (verbose > 1)
       printf("--------------  VI - Extra Gradient (EG)- Full error criterion =  %e\n",
              absolute_error);
 
@@ -59,7 +61,7 @@ static int determine_convergence(double error, double *tolerance, int iter,
     if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] ==
         SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
       if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
-        if (verbose > 0) {
+        if (verbose > 1) {
           printf("error = %e ", error);
           printf("absolute_error = %e ", absolute_error);
           printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n",
@@ -67,26 +69,20 @@ static int determine_convergence(double error, double *tolerance, int iter,
         }
 
         *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
-        if (verbose > 0)
+        if (verbose > 1)
           printf(
               "--------------  VI - Extra Gradient (EG)- We modify the required incremental "
               "precision to reach accuracy to %e\n",
               *tolerance);
         hasNotConverged = 1;
       } else {
-        if (verbose > 0)
+        if (verbose > 1)
           printf(
               "-------------- VI - Extra Gradient (EG) - The incremental precision is "
               "sufficient to reach accuracy to %e\n",
               *tolerance);
       }
     }
-  } else {
-    if (verbose > 0)
-      printf(
-          "--------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = "
-          "%14.7e > %10.5e \n",
-          iter, rho, error, *tolerance);
   }
   return hasNotConverged;
 }
@@ -179,6 +175,10 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
   /* memcpy(w,w_k,n * sizeof(double)); */
   // isVariable=0;
   if (!isVariable) {
+    if (verbose > 0) {
+      printf("--------------- VI - Extra Gradient (EG)\n");
+      printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+    }
     /*   double minusrho  = -1.0*rho; */
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
@@ -231,6 +231,10 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
     if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] ==
         SICONOS_VI_LS_ARMIJO) /* Armijo rule with Khotbotov ratio (default)   */
     {
+      if (verbose > 0) {
+        printf("--------------- VI - Extra Gradient (EG)\n");
+        printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+      }
       while ((iter < itermax) && (hasNotConverged > 0)) {
         ++iter;
 
@@ -330,6 +334,10 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
     if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] ==
         SICONOS_VI_LS_SOLODOV) /* Armijo rule with Solodov.Tseng ratio */
     {
+      if (verbose > 0) {
+        printf("--------------- VI - Extra Gradient (EG)\n");
+        printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+      }
       while ((iter < itermax) && (hasNotConverged > 0)) {
         ++iter;
 

@@ -212,6 +212,10 @@ enum FRICTION_SOLVER {
 
   /** Non-smooth Newton Alart-Curnier, global 2D formulation */
   SICONOS_GLOBAL_FRICTION_2D_NSN_AC = 720,
+  /** VI formulation, Fixed Point Projection, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_VI_FPP = 721,
+  /** VI formulation, Extra Gradient, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_VI_EG = 722,
 
 }; /* end of enum FRICTION_SOLVER */
 

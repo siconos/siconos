@@ -23,6 +23,7 @@
 #include "frictionContact_test_utils.h"           // for build_test_collection
 #include "test_utils.h"                           // for data_collection
 
+#include "numerics_verbose.h"
 #define @PROBLEM_COLLECTION@ 1
 
 #ifdef SICONOS_HAS_MPI
@@ -43,10 +44,10 @@ int main (int argc, char *argv[])
       n_data++;
     }
   printf("number of data = %i\n", n_data);
-
+  verbose=1;
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
-
+  
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)

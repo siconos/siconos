@@ -38,15 +38,17 @@ static int determine_convergence(double error, double *tolerance, int iter,
 
 {
   int hasNotConverged = 1;
+  if (verbose > 0) {
+    printf("| %6d | %14.7e | %14.7e | %14.7e |", iter, rho, error, *tolerance);
+    if (error < *tolerance)
+      printf(" converged\n");
+    else
+      printf("\n");
+  }
   if (error < *tolerance) {
-    if (verbose > 0)
-      printf(
-          "--------------- VI - Fixed Point Projection (FPP) - Iteration %i "
-          "Residual = %14.7e < %7.3e\n",
-          iter, error, *tolerance);
     double absolute_error = 0.0;
     // variationalInequality_computeError(problem, z, w, *tolerance, options, &absolute_error);
-    if (verbose > 0)
+    if (verbose > 1)
       printf("--------------  VI - Fixed Point Projection (FPP)- Full error criterion =  %e\n",
              absolute_error);
 
@@ -56,26 +58,20 @@ static int determine_convergence(double error, double *tolerance, int iter,
         SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
       if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
         *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
-        if (verbose > 0)
+        if (verbose > 1)
           printf(
               "--------------  VI - Fixed Point Projection (FPP)- We modify the required "
               "incremental precision to reach accuracy to %e\n",
               *tolerance);
         hasNotConverged = 1;
       } else {
-        if (verbose > 0)
+        if (verbose > 1)
           printf(
               "-------------- VI - Fixed Point Projection (FPP) - The incremental precision "
               "is sufficient to reach accuracy to %e\n",
               *tolerance);
       }
     }
-  } else {
-    if (verbose > 0)
-      printf(
-          "--------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e "
-          "error = %14.7e > %10.5e \n",
-          iter, rho, error, *tolerance);
   }
   return hasNotConverged;
 }
@@ -171,6 +167,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality *problem, 
 
   // isVariable=0;
   if (!isVariable) {
+    if (verbose > 0) {
+      printf("--------------- VI - Fixed Point Projection (FPP)\n");
+      printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+    }
     /*   double minusrho  = -1.0*rho; */
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
@@ -197,6 +197,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality *problem, 
     {
       DEBUG_PRINT(
           "Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
+      if (verbose > 0) {
+        printf("--------------- VI - Fixed Point Projection (FPP)\n");
+        printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+      }
       while ((iter < itermax) && (hasNotConverged > 0)) {
         ++iter;
         /* Store the error */
@@ -292,6 +296,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality *problem, 
         SICONOS_VI_LS_SOLODOV) /* Armijo rule with Solodov.Tseng ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
+      if (verbose > 0) {
+        printf("--------------- VI - Fixed Point Projection (FPP)\n");
+        printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+      }
       while ((iter < itermax) && (hasNotConverged > 0)) {
         ++iter;
 
@@ -383,6 +391,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality *problem, 
         SICONOS_VI_LS_HANSUN) /* Armijo rule with Han.Sun ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
+      if (verbose > 0) {
+        printf("--------------- VI - Fixed Point Projection (FPP)\n");
+        printf("| %6s | %14s | %14s | %14s |\n", "iter", "rho", "error", "tol");
+      }
       while ((iter < itermax) && (hasNotConverged > 0)) {
         ++iter;
 
