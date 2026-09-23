@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   const double g = 1.0;
   const double mu = 1.0;
 
-  verbose = 0;
+  verbose = 1;
   setvbuf(stdout, NULL, _IONBF, 0);
 
   GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 
   /* q = (0, -g): gravity pulls the particle downward */
   problem->q = (double*)malloc((size_t)n * sizeof(double));
-  problem->q[0] = 0.8;
+  problem->q[0] = 1.1;
   problem->q[1] = -g;
 
   /* b = 0: zero initial gap/relative velocity */
@@ -105,7 +105,9 @@ int main(int argc, char** argv) {
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
-  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e-01;  
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e-01;
+  options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
+      SICONOS_FRICTION_2D_NSN_WARM_START_YES;
   options->isSet = 1;
 
   /* Solve */

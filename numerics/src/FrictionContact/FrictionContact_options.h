@@ -320,6 +320,24 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
 
 };
 
+/** Indices for global 2D NSN solver integer parameters */
+enum SICONOS_FRICTION_2D_NSN_IPARAM {
+  /** Warm-start strategy: run a few GFC2D_VI_FPP iterations before NSN
+   *  (see SICONOS_FRICTION_2D_NSN_WARM_START)
+   */
+  SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY = 20,
+  /** Maximum number of warm-start iterations */
+  SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER = 21,
+};
+
+/** Warm-start strategy values for GFC2D_NSN_AC */
+enum SICONOS_FRICTION_2D_NSN_WARM_START {
+  /** No warm start: use the user-provided initial guess */
+  SICONOS_FRICTION_2D_NSN_WARM_START_NO = 0,
+  /** Run GFC2D_VI_FPP for a few iterations to build the initial guess */
+  SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
+};
+
 enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
   SICONOS_FRICTION_3D_NSN_USE_CSLUSOL = 0,
   SICONOS_FRICTION_3D_NSN_USE_MUMPS = 1

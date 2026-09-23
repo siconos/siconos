@@ -29,7 +29,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  *number_of_tests = n_data * n_solvers;
+  *number_of_tests = n_data * n_solvers *2;
   TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
@@ -42,6 +42,16 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
       current++;
     }
+    for (int d = 0; d < n_data; d++) {
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
+          SICONOS_FRICTION_2D_NSN_WARM_START_YES;
+      collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;      
+      current++;
+    }
   }
 
   /* The 230-contact granular-flow problem has a very ill-conditioned mass
@@ -49,5 +59,10 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
    * Jacobian.  This is a known limitation of the current implementation. */
   collection[2].will_fail = 1;
 
+
+    
+
+
+  
   return collection;
 }

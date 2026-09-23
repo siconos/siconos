@@ -40,7 +40,9 @@
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "fc2d_AlartCurnier_functions.h"         // for computeAlartCurnier2D
 #include "fc3d_short_names.h"                    // for GFC2D_NSN_AC
+#include "VI_cst.h"                              // for SICONOS_VI_DPARAM_RHO
 #include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
+#include "gfc2d_VI_FixedPointProjection.h"       // for warm-start
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 
@@ -478,6 +480,51 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert((int)num_global_dofs == problem->H->size0);
 
   /* ====================================================================== *
+   * Optional warm start with GFC2D_VI_FPP
+   * ====================================================================== */
+  if (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] ==
+      SICONOS_FRICTION_2D_NSN_WARM_START_YES) {
+    const int warm_start_max_iter =
+        options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER];
+    if (warm_start_max_iter > 0) {
+      numerics_printf_verbose(
+          1, "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
+          warm_start_max_iter);
+
+      SolverOptions* vi_options = solver_options_create(GFC2D_VI_FPP);
+      if (vi_options) {
+        vi_options->iparam[SICONOS_IPARAM_MAX_ITER] = warm_start_max_iter;
+        vi_options->dparam[SICONOS_DPARAM_TOL] = tolerance;
+
+        int vi_info = 0;
+        gfc2d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &vi_info,
+                                      vi_options);
+
+        /* Reuse the rho that VI_FPP computed/selected as the NSN rho. */
+        const double vi_rho = fabs(vi_options->dparam[SICONOS_VI_DPARAM_RHO]);
+        if (vi_rho > 0.0) {
+          options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho;
+          numerics_printf_verbose(1,
+                                  "---- GFC2D - NSN_AC - Warm start rho = %g "
+                                  "(used as NSN rho)",
+                                  vi_rho);
+        }
+
+        solver_options_delete(vi_options);
+
+        numerics_printf_verbose(1,
+                                "---- GFC2D - NSN_AC - Warm start finished "
+                                "(vi_info = %d)",
+                                vi_info);
+      } else {
+        numerics_printf_verbose(1,
+                                "---- GFC2D - NSN_AC - Warm start skipped: "
+                                "could not create GFC2D_VI_FPP options");
+      }
+    }
+  }
+
+  /* ====================================================================== *
    * Allocate persistent solver workspace on first call
    * ====================================================================== */
   if (options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] == 0) {
@@ -800,6 +847,11 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 10;
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
+
+  /* Warm start with GFC2D_VI_FPP before launching the Newton solver. */
+  options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
+      SICONOS_FRICTION_2D_NSN_WARM_START_NO;
+  options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 100;
 }
 
 /* ===========================================================================
