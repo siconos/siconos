@@ -5,15 +5,15 @@
 #include <print>
 
 namespace siconos::config {
-using ball = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<lcp>;
-using nslaw = model::newton_impact;
-using relation = model::lagrangian_r<nslaw::size>;
-using interaction = simul::interaction<nslaw, relation>;
-using td = simul::time_discretization<>;
-using topo = simul::topology<ball, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
+struct ball : model::lagrangian_ds {};
+struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
+struct nslaw : model::newton_impact {};
+struct relation : model::lagrangian_r<nslaw::size> {};
+struct interaction : simul::interaction<nslaw, relation> {};
+struct td : simul::time_discretization<> {};
+struct topo : simul::topology<ball, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
@@ -22,7 +22,7 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>>;
 };
 
-struct make
+struct data_t
     : storage::make<
           env, simulation,
           storage::with_properties<
@@ -38,7 +38,7 @@ struct make
 int main(int argc, char* argv[])
 {
   using namespace siconos;
-  auto data = config::make();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time

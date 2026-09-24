@@ -7,41 +7,44 @@
 #include "siconos/siconos.hpp"
 
 namespace siconos::config {
-using ball = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
-using nslaw = model::newton_impact_friction;
-using relation = model::lagrangian_r<nslaw::size>;
-using interaction = simul::interaction<nslaw, relation>;
-using topo = simul::topology<ball, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
-using simulation = simul::time_stepping<td, osi, osnspb>;
+namespace some = siconos::storage::some;
+struct ball : model::lagrangian_ds {};
+struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
+struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
+struct nslaw : model::newton_impact_friction {};
+struct relation : model::lagrangian_r<nslaw::size> {};
+struct interaction : simul::interaction<nslaw, relation> {};
+struct topo : simul::topology<ball, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
+struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>>;
 };
+
+struct data_t
+    : storage::make<
+          env, simulation,
+          storage::pattern::wrap<some::unbounded_collection, ball>,
+          storage::pattern::wrap<some::bounded_collection, relation,
+                                 some::indice_value<1>>,
+          storage::pattern::wrap<some::unbounded_collection, interaction>,
+          storage::with_properties<
+              storage::time_invariant<storage::attr_t<ball, "fext">>,
+              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<typename osi::assembled_osi_t,
+                                  "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
 {
   using namespace siconos;
-  namespace some = siconos::storage::some;
-  using siconos::storage::pattern::wrap;
 
-  auto data = storage::make<
-      config::env, config::simulation,
-      wrap<some::unbounded_collection, config::ball>,
-      wrap<some::bounded_collection, config::relation, some::indice_value<1>>,
-      wrap<some::unbounded_collection, config::interaction>,
-      storage::with_properties<
-          storage::time_invariant<storage::attr_t<config::ball, "fext">>,
-          storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
-          storage::assembled_diagonal<
-              storage::attr_t<typename config::osi::assembled_osi_t,
-                              "mass_matrix_assembled">>>>();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time

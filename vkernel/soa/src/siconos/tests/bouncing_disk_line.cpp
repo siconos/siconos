@@ -5,25 +5,38 @@
 
 namespace siconos::config {
 
-using disk = model::lagrangian_ds;
-using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
+struct disk : model::lagrangian_ds {};
+struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 //  using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
 //  using osnspb = simul::one_step_nonsmooth_problem<lcp>;
-using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
-using nslaw = model::newton_impact_friction;
+struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
+struct nslaw : model::newton_impact_friction {};
 using disk_shape = collision::shape::disk;
 using diskdisk_r = collision::diskdisk_r;
 using diskline_r = collision::diskline_r;
-using interaction = simul::interaction<nslaw, diskdisk_r, diskline_r>;
-using topo = simul::topology<disk, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
-using simulation = simul::time_stepping<td, osi, osnspb>;
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskline_r> {};
+struct topo : simul::topology<disk, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
+struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>>;
 };
+
+struct data_t
+    : storage::make<
+          env, simulation, disk, disk_shape, diskdisk_r, diskline_r,
+          interaction,
+          storage::with_properties<
+              storage::attached<disk, storage::pattern::symbol<"shape">,
+                                storage::some::item_ref<disk_shape>>,
+              storage::time_invariant<storage::attr_t<disk, "fext">>,
+              storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<typename osi::assembled_osi_t,
+                                  "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -32,17 +45,7 @@ int main(int argc, char* argv[])
   using storage::pattern::wrap;
   using namespace storage;
 
-  auto data = storage::make<
-      config::env, config::simulation, config::disk, config::disk_shape,
-      config::diskdisk_r, config::diskline_r, config::interaction,
-      storage::with_properties<
-          storage::attached<config::disk, storage::pattern::symbol<"shape">,
-                            storage::some::item_ref<config::disk_shape>>,
-          storage::time_invariant<storage::attr_t<config::disk, "fext">>,
-          storage::diagonal<storage::attr_t<config::disk, "mass_matrix">>,
-          storage::assembled_diagonal<
-              storage::attr_t<typename config::osi::assembled_osi_t,
-                              "mass_matrix_assembled">>>>();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk
   double t0 = 0;               // initial computation time

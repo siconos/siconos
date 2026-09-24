@@ -16,6 +16,15 @@ struct topo : simul::topology<ball, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
+
+struct data_t : decltype(storage()
+                              .with_param<"dof", 3>()
+                              .with_items<simulation>()
+                              .with_time_invariant<ball, "fext">()
+                              .with_diagonal<ball, "mass_matrix">()
+                              .with_assembled_diagonal<osi,
+                                                       "mass_matrix_assembled">()
+                              .build()) {};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
@@ -23,17 +32,9 @@ int main(int argc, char* argv[])
   namespace storage = siconos::storage;
   namespace config = siconos::config;
   using siconos::storage::handle;
-  using siconos::storage::make;
   using siconos::storage::pattern::param_val;
 
-  make data =
-      config::storage()
-          .with_param<"dof", 3>()
-          .with_items<config::simulation>()
-          .with_time_invariant<config::ball, "fext">()
-          .with_diagonal<config::ball, "mass_matrix">()
-          .with_assembled_diagonal<config::osi, "mass_matrix_assembled">()
-          .build();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
