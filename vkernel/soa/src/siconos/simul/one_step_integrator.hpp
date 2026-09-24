@@ -212,6 +212,38 @@ struct one_step_integrator {
             });
       }
 
+      // whether this topology declares a real (non-empty) rt_ct_interaction
+      // (fem/disk contact) resp. rt_rt_interaction (fem/fem "self" contact,
+      // e.g. against a fixed ground) - distinct from with_k_matrix(), which
+      // is true for ANY rt-family element (rt_ct or rt_rt) sharing a
+      // k_matrix-bearing system, regardless of which one(s) are present.
+      static constexpr auto with_rt_ct_interaction()
+      {
+        return !std::derived_from<rt_ct_interaction, empty_item>;
+      }
+
+      static constexpr auto with_rt_rt_interaction()
+      {
+        return !std::derived_from<rt_rt_interaction, empty_item>;
+      }
+
+      // rt_rt_osi_t's position in elements() is 2 when rt_ct_osi_t is also
+      // present (declaration order ct, rt_ct, rt_rt), or 1 if rt_ct is
+      // empty_item and thus filtered out of elements(). Returned by value
+      // (not decltype(auto)): elements() is a fresh temporary tuple each
+      // call, so std::get<N>(elements()) is a reference into a temporary
+      // that dies at the end of this function - returning it by decltype
+      // would hand the caller a dangling reference.
+      auto rt_rt_element()
+      {
+        if constexpr (with_rt_ct_interaction()) {
+          return std::get<2>(elements());
+        }
+        else {
+          return std::get<1>(elements());
+        }
+      }
+
       void assemble_setup(auto step)
       {
         using env_t = decltype(self()->env());
@@ -338,6 +370,18 @@ struct one_step_integrator {
             std::size(ct_involveds), std::size(ct_activations));
 
         if constexpr (with_k_matrix()) {
+          // reset rt_system involvement once per step, regardless of which
+          // rt-family interaction type(s) (rt_ct and/or rt_rt) are actually
+          // present - both key off this same shared per-rt_system property.
+          auto& rt_involveds =
+              storage::prop_values<rt_system, "involved">(data, step);
+
+          for (auto [involved] : view::zip(rt_involveds)) {
+            involved = false;
+          };
+        }
+
+        if constexpr (with_rt_ct_interaction()) {
           auto& rt_ct_ys =
               storage::attr_values<rt_ct_interaction, "y">(data, step);
           auto& rt_ct_ydots =
@@ -353,12 +397,10 @@ struct one_step_integrator {
               storage::prop_values<rt_ct_interaction, "activation">(data,
                                                                     step);
 
+          // already reset once above, unconditionally, for the whole
+          // rt_system regardless of which rt-family interaction is present
           auto& rt_involveds =
               storage::prop_values<rt_system, "involved">(data, step);
-
-          for (auto [involved] : view::zip(rt_involveds)) {
-            involved = false;
-          };
 
           const auto& rt_ct_interactions =
               storage::handles<rt_ct_interaction>(data, step);
@@ -404,6 +446,69 @@ struct one_step_integrator {
 
           rt_elem.number_of_interactions() = rt_ct_inter_counter;
           rt_elem.number_of_involved_ds() = rt_ds_counter;
+        }
+
+        indice rt_rt_inter_counter = 0;
+
+        if constexpr (with_rt_rt_interaction()) {
+          // fem "self" contact (e.g. against a fixed ground): ds1 == ds2,
+          // both indexed into the same rt_system as rt_ct above - continue
+          // (not reset) rt_involveds/rt_ds_counter so a rt_system ds already
+          // marked involved via rt_ct keeps its index.
+          auto& rt_rt_ys =
+              storage::attr_values<rt_rt_interaction, "y">(data, step);
+          auto& rt_rt_ydots =
+              storage::attr_values<rt_rt_interaction, "ydot">(data, step);
+          auto& rt_rt_ids1s =
+              storage::prop_values<rt_rt_interaction, "ds1">(data, step);
+          auto& rt_rt_ids2s =
+              storage::prop_values<rt_rt_interaction, "ds2">(data, step);
+          auto& rt_rt_ndss =
+              storage::prop_values<rt_rt_interaction, "nds">(data, step);
+
+          auto& rt_rt_activations =
+              storage::prop_values<rt_rt_interaction, "activation">(data,
+                                                                    step);
+
+          const auto& rt_rt_interactions =
+              storage::handles<rt_rt_interaction>(data, step);
+
+          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
+               view::zip(rt_rt_ys, rt_rt_ydots, rt_rt_activations, rt_rt_ndss,
+                         rt_rt_ids1s, rt_rt_ids2s, rt_rt_interactions)) {
+            activation = ((y + gamma_v * h * ydot)(0) <=
+                          self()->constraint_activation_threshold());
+
+            if (activation) {
+              rt_rt_inter_counter++;
+
+              auto ds2 = storage::make_handle(data, ids2);
+
+              if (!prop<"involved">(ds2)) {
+                prop<"involved">(ds2) = true;
+                prop<"index">(ds2) = rt_ds_counter++;
+              }
+
+              if (nds == 2) {
+                auto ds1 = storage::make_handle(data, ids1);
+
+                if (!prop<"involved">(ds1)) {
+                  prop<"involved">(ds1) = true;
+                  prop<"index">(ds1) = rt_ds_counter++;
+                };
+              }
+            }
+          }
+
+          std::print(
+              "  [compute_active_interactions] number of activated rt rt "
+              "interactions: {}\n",
+              rt_rt_inter_counter);
+
+          auto rt_rt_elem = rt_rt_element();
+
+          rt_rt_elem.number_of_interactions() = rt_rt_inter_counter;
+          rt_rt_elem.number_of_involved_ds() = rt_ds_counter;
         }
 
         std::print(
@@ -516,7 +621,7 @@ struct one_step_integrator {
           }
         }
 
-        if constexpr (with_k_matrix()) {
+        if constexpr (with_rt_ct_interaction()) {
           auto rt_elem = std::get<1>(elements());
           auto&& rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
               assembled_osi().h_matrix_assembled(), rt_elem.inter_offset(),
@@ -536,6 +641,9 @@ struct one_step_integrator {
                storage::attr_values<rt_ct_interaction, "relation">(data, step);
             auto& rt_indices =
                 storage::prop_values<rt_system, "index">(data, step);
+
+            auto& rt_bc_velocities_0s =
+                storage::prop_values<rt_system, "bc_velocities_0">(data, step);
 
            size_t i_rt = 0;
            for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
@@ -592,7 +700,7 @@ struct one_step_integrator {
 
                // BC velocities for ds2
                for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                 for (auto bc_local_idx : ct_bc_velocities_0s[ids2.value()]) {
+                 for (auto bc_local_idx : rt_bc_velocities_0s[ids2.value()]) {
                    set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
                              j2 + bc_local_idx, 0.);
                  }
@@ -603,6 +711,55 @@ struct one_step_integrator {
              }
            }
          }
+
+        if constexpr (with_rt_rt_interaction()) {
+          auto rt_rt_elem = rt_rt_element();
+          auto&& rt_rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
+              assembled_osi().h_matrix_assembled(), rt_rt_elem.inter_offset(),
+              rt_rt_elem.ds_offset());
+
+          auto& rt_rt_activations =
+              storage::prop_values<rt_rt_interaction, "activation">(data,
+                                                                    step);
+          auto& rt_rt_h_mat1s =
+              storage::attr_values<rt_rt_interaction, "h_matrix1">(data,
+                                                                   step);
+          auto& rt_rt_ndss =
+              storage::prop_values<rt_rt_interaction, "nds">(data, step);
+          auto& rt_rt_ids2s =
+              storage::prop_values<rt_rt_interaction, "ds2">(data, step);
+
+          auto& rt_rt_indices =
+              storage::prop_values<rt_system, "index">(data, step);
+          auto& rt_rt_bc_velocities_0s =
+              storage::prop_values<rt_system, "bc_velocities_0">(data, step);
+
+          size_t i_rt_rt = 0;
+          for (auto [activation, h_mat1, nds, ids2] :
+               view::zip(rt_rt_activations, rt_rt_h_mat1s, rt_rt_ndss,
+                         rt_rt_ids2s)) {
+            if (activation) {
+              // fem "self" contact (e.g. against a fixed ground): only
+              // ds1 == ds2 (nds == 1) is supported today, matching
+              // rt_lagrangian_r's relation1-only compute_jachq and
+              // topology::link's only rt_rt-producing overload.
+              assert(nds == 1);
+
+              auto j2 = rt_rt_elem.sum_dofs()[rt_rt_indices[ids2.value()]];
+
+              auto h_mat1_mod = h_mat1;
+
+              // BC velocities for ds2 (== ds1 here)
+              for (auto bc_local_idx : rt_rt_bc_velocities_0s[ids2.value()]) {
+                h_mat1_mod.col(bc_local_idx).setZero();
+              }
+
+              set_value(rt_rt_h_matrix, i_rt_rt, j2, h_mat1_mod);
+
+              i_rt_rt++;
+            }
+          }
+        }
        }
 
       void compute_w_matrix(auto step, auto time_step)
@@ -678,7 +835,7 @@ struct one_step_integrator {
           }
         }
 
-        if constexpr (with_k_matrix()) {
+        if constexpr (with_rt_ct_interaction()) {
           auto& rt_ct_ydots_next =
               storage::attr_values<rt_ct_interaction, "ydot">(data, step + 1);
           auto& rt_ct_activations =
@@ -687,6 +844,23 @@ struct one_step_integrator {
 
           for (auto [ydot_next, activation] :
                view::zip(rt_ct_ydots_next, rt_ct_activations)) {
+            if (activation) {
+              // /!\ with ct_elem offsets (0), should be directly in
+              // global q_nsp_vector_assembled()
+              set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
+            }
+          }
+        }
+
+        if constexpr (with_rt_rt_interaction()) {
+          auto& rt_rt_ydots_next =
+              storage::attr_values<rt_rt_interaction, "ydot">(data, step + 1);
+          auto& rt_rt_activations =
+              storage::prop_values<rt_rt_interaction, "activation">(data,
+                                                                    step);
+
+          for (auto [ydot_next, activation] :
+               view::zip(rt_rt_ydots_next, rt_rt_activations)) {
             if (activation) {
               // /!\ with ct_elem offsets (0), should be directly in
               // global q_nsp_vector_assembled()
