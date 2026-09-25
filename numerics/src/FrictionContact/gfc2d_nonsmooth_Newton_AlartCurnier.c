@@ -23,6 +23,7 @@
 #include <math.h>    // for fabs, INFINITY
 
 
+
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
@@ -166,7 +167,7 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
 
   /* Contact residual: residual[n+m:n+2m] = Phi_AC(u, r, rho) */
   for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
-    computeAlartCurnier2D(reaction + 2 * contact, velocity + 2 * contact, problem->mu[contact],
+    computeAlartCurnier2D_new(reaction + 2 * contact, velocity + 2 * contact, problem->mu[contact],
                           rho + 2 * contact,
                           residual + num_global_dofs + num_contact_dofs + 2 * contact, NULL,
                           NULL);
@@ -397,12 +398,68 @@ static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* probl
     }
   }
 
-  numerics_printf_verbose(1,
+  numerics_printf_verbose(2,
                           "---- GFC2D - NSN_AC - global line search unsuccessful. "
                           "Max number of ls iteration reached = %i  with alpha = %.10e",
                           max_ls_iterations, step_length[0]);
 
   return -1;
+}
+
+/**
+ * \brief Run a VI-FPP warm start for GFC2D_NSN_AC.
+ *
+ * This can be used as a standalone fallback/preconditioner, or it is called
+ * automatically by gfc2d_nonsmooth_Newton_AlartCurnier when the warm-start
+ * option is enabled.
+ */
+int gfc2d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, SolverOptions* options) {
+  if (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] !=
+      SICONOS_FRICTION_2D_NSN_WARM_START_YES) {
+    return 0;
+  }
+
+  const int warm_start_max_iter = options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER];
+  if (warm_start_max_iter <= 0) return 0;
+
+  const double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  numerics_printf_verbose(
+      1, "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
+      warm_start_max_iter);
+
+  SolverOptions* vi_options = solver_options_create(GFC2D_VI_FPP);
+  if (!vi_options) {
+    numerics_printf_verbose(1,
+                            "---- GFC2D - NSN_AC - Warm start skipped: "
+                            "could not create GFC2D_VI_FPP options");
+    return NUMERICS_ERR_MEMORY;
+  }
+
+  vi_options->iparam[SICONOS_IPARAM_MAX_ITER] = warm_start_max_iter;
+  vi_options->dparam[SICONOS_DPARAM_TOL] = tolerance;
+
+  int vi_info = 0;
+  gfc2d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &vi_info,
+                                vi_options);
+
+  /* Reuse the rho that VI_FPP computed/selected as the NSN rho. */
+  const double vi_rho = fabs(vi_options->dparam[SICONOS_VI_DPARAM_RHO]);
+  if (vi_rho > 0.0) {
+    options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho;
+    numerics_printf_verbose(1,
+                            "---- GFC2D - NSN_AC - Warm start rho = %g "
+                            "(used as NSN rho)",
+                            vi_rho);
+  }
+
+  solver_options_delete(vi_options);
+
+  numerics_printf_verbose(1,
+                          "---- GFC2D - NSN_AC - Warm start finished "
+                          "(vi_info = %d)",
+                          vi_info);
+  return vi_info;
 }
 
 /**
@@ -482,47 +539,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   /* ====================================================================== *
    * Optional warm start with GFC2D_VI_FPP
    * ====================================================================== */
-  if (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] ==
-      SICONOS_FRICTION_2D_NSN_WARM_START_YES) {
-    const int warm_start_max_iter =
-        options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER];
-    if (warm_start_max_iter > 0) {
-      numerics_printf_verbose(
-          1, "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
-          warm_start_max_iter);
-
-      SolverOptions* vi_options = solver_options_create(GFC2D_VI_FPP);
-      if (vi_options) {
-        vi_options->iparam[SICONOS_IPARAM_MAX_ITER] = warm_start_max_iter;
-        vi_options->dparam[SICONOS_DPARAM_TOL] = tolerance;
-
-        int vi_info = 0;
-        gfc2d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &vi_info,
-                                      vi_options);
-
-        /* Reuse the rho that VI_FPP computed/selected as the NSN rho. */
-        const double vi_rho = fabs(vi_options->dparam[SICONOS_VI_DPARAM_RHO]);
-        if (vi_rho > 0.0) {
-          options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho;
-          numerics_printf_verbose(1,
-                                  "---- GFC2D - NSN_AC - Warm start rho = %g "
-                                  "(used as NSN rho)",
-                                  vi_rho);
-        }
-
-        solver_options_delete(vi_options);
-
-        numerics_printf_verbose(1,
-                                "---- GFC2D - NSN_AC - Warm start finished "
-                                "(vi_info = %d)",
-                                vi_info);
-      } else {
-        numerics_printf_verbose(1,
-                                "---- GFC2D - NSN_AC - Warm start skipped: "
-                                "could not create GFC2D_VI_FPP options");
-      }
-    }
-  }
+  gfc2d_nsn_ac_warm_start(problem, reaction, velocity, globalVelocity, options);
 
   /* ====================================================================== *
    * Allocate persistent solver workspace on first call
@@ -691,7 +708,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
     /* Evaluate the contact Jacobians A(x_k) and B(x_k). */
     for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
-      computeAlartCurnier2D(current_reaction + 2 * contact, current_velocity + 2 * contact,
+      computeAlartCurnier2D_new(current_reaction + 2 * contact, current_velocity + 2 * contact,
                             problem->mu[contact], rho + 2 * contact,
                             contact_ac_values + 2 * contact,
                             jac_A + 4 * contact, jac_B + 4 * contact);
@@ -716,6 +733,10 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     DEBUG_PRINTF("norm of jacobian = %e\n", NM_norm_1(nm_jacobian));
     DEBUG_EXPR(NM_display(nm_jacobian););
     DEBUG_EXPR(NV_display(newton_direction, num_global_dofs + num_contact_dofs*2 ););
+
+
+    /* double regul=1e-6; */
+    /* NM_add(regul, NM_eye(nm_jacobian->size0), 1.0, nm_jacobian); */
     
     /* NM_preserve/unpreserve ensures that the internal factorization of
      * nm_jacobian is invalidated because the underlying triplet data has
@@ -730,8 +751,22 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
       numerics_printf_verbose(-1, "---- GFC2D - NSN_AC - linear solver failed, info = %d",
                               linear_solver_info);
       *info = NUMERICS_ERR_LINEAR_SOLVER;
-      //cs_spfree(jacobian_csc);
+      /* // cs_spfree(jacobian_csc); */
+
+      /* double old_residual = residual_norm;       */
+      
+      /* gfc2d_nsn_ac_warm_start(problem, current_reaction, current_velocity, current_global_velocity, options); */
+
+      /* /\* Evaluate the residual Psi(x_k). *\/ */
+      /* compute_system_residual(problem, current_global_velocity, current_reaction, current_velocity, */
+      /*                       rho, system_residual); */
+
+      /* residual_norm = cblas_dnrm2(system_size, system_residual, 1); */
+      /* printf("residual_norm  =%e", residual_norm); */
+      /* printf("old_residual  =%e", old_residual); */
+      /* /\* if (residual_norm > 10 * old_residual) *\/ */
       break;
+
     }
 
     /* ====================================================================== *
@@ -766,7 +801,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
     /* Warn if the line search could not find an acceptable step. */
     if (line_search_status != 0) {
-      numerics_printf_verbose(1,
+      numerics_printf_verbose(2,
                               "---- GFC2D - NSN_AC iteration %d, line search did not "
                               "succeed; using last step length = %.10e",
                               iteration, step_length);

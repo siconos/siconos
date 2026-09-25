@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   const double g = 1.0;
   const double mu = 1.0;
 
-  verbose = 1;
+  verbose = 0;
   setvbuf(stdout, NULL, _IONBF, 0);
 
   GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();

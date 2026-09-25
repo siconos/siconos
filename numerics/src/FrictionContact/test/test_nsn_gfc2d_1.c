@@ -40,6 +40,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
       collection[current].options = solver_options_create(solvers[s]);
       collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;      
       current++;
     }
     for (int d = 0; d < n_data; d++) {
@@ -49,7 +50,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
       collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
           SICONOS_FRICTION_2D_NSN_WARM_START_YES;
-      collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;      
+      collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;
+      //collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;          
       current++;
     }
   }
