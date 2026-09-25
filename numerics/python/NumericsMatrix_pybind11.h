@@ -34,6 +34,7 @@
 #include <pybind11/pybind11.h>
 
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 
 namespace py = pybind11;
 
@@ -207,7 +208,7 @@ void set_matrix_sparse(T &self, NumericsMatrix *T::*matrix_attr, py::object pyma
           .mutable_data();
 
   sparseMat->csc->nz = -1;  // CSC format
-
+  sparseMat->origin = NSM_CSC;
   matrix->size0 = shape.first;
   matrix->size1 = shape.second;
 
@@ -308,7 +309,7 @@ NumericsMatrix *set_matrix_sparse_new(T &self, py::object scipy_matrix,
   // Build NumericsMatrix with CSparse
   auto *nsm = new NumericsSparseMatrix;
   nsm->csc = csc;
-
+  nsm->origin = NSM_CSC;
   auto *nm = new NumericsMatrix;
   nm->size0 = csc->m;
   nm->size1 = csc->n;

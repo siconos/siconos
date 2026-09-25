@@ -28,6 +28,7 @@
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
+#include "fclib_interface.h"
 #include "GenericMechanicalProblem.h"
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContactProblem.h"
@@ -39,6 +40,7 @@
 #include "RollingFrictionContact_options.h"
 #include "CohesiveFrictionContactProblem.h"
 #include "CohesiveFrictionContact_options.h"
+#include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "numerics_errors.h"
 
@@ -103,6 +105,7 @@ struct FrictionContactProblemWrapper {
     if (py::hasattr(matrix, "data") && py::hasattr(matrix, "indices") &&
         py::hasattr(matrix, "indptr")) {
       nm = set_matrix_sparse_new(*this, matrix, mem_for_Msparse);
+      printf("toto\n");
     } else if (py::isinstance<py::array>(matrix)) {
       nm = set_matrix_dense_new(*this, matrix, mem_for_Mdense);
     } else {
@@ -280,10 +283,13 @@ struct GlobalFrictionContactProblemWrapper {
   std::shared_ptr<DenseMatrixMemoryOwner> mem_for_Hdense{nullptr};
   py::array_t<double> q_array;
   py::array_t<double> mu_array;
+  py::array_t<double> b_array;
+  bool own_b_ = false;
 
   GlobalFrictionContactProblemWrapper(int dimension, int nc, py::object matrixM,
                                       py::object matrixH, py::array_t<double> q,
-                                      py::array_t<double> mu) {
+                                      py::array_t<double> mu,
+                                      py::object b_obj = py::none()) {
     // Check input vectors and matrices sizes
     if (q.ndim() != 1) throw std::runtime_error("q must be a 1D array");
 
@@ -320,18 +326,37 @@ struct GlobalFrictionContactProblemWrapper {
     problem->H = nH;
     problem->q = static_cast<double*>(q_array.mutable_data());
     problem->mu = static_cast<double*>(mu_array.mutable_data());
+
+    if (!b_obj.is_none()) {
+      b_array = b_obj.cast<py::array_t<double>>();
+      own_b_ = false;
+      if (b_array.ndim() != 1 || b_array.shape(0) != dimension * nc)
+        throw std::runtime_error("b must be a 1D array of size dimension * nc");
+      problem->b = static_cast<double*>(b_array.mutable_data());
+    } else {
+      double* b_data = (double*)calloc((size_t)dimension * nc, sizeof(double));
+      b_array = py::array_t<double>(dimension * nc, b_data);
+      own_b_ = true;
+      problem->b = b_data;
+    }
+    problem->norm_q = cblas_dnrm2(q.shape(0), problem->q, 1);
+    problem->norm_b = cblas_dnrm2(dimension * nc, problem->b, 1);
+    problem->M_inverse = nullptr;
+    problem->name = nullptr;
+    problem->env = nullptr;
+
     assert(problem->M->size0 == problem->M->size1);
     assert(problem->H->size0 == problem->M->size0);
     assert(problem->H->size1 == dimension * nc);
     assert(q.shape(0) == problem->M->size0);
   }
 
-  GlobalFrictionContactProblemWrapper(std::string fname) {
-    problem = globalFrictionContact_new_from_filename(fname.c_str());
-  }
-
   ~GlobalFrictionContactProblemWrapper() {
     if (problem) {
+      if (own_b_ && problem->b) {
+        free(problem->b);
+        problem->b = nullptr;
+      }
       if (problem->M) {
         if (problem->M->matrix2) {
           delete problem->M->matrix2->csc;
@@ -375,6 +400,85 @@ struct GlobalFrictionContactProblemWrapper {
 
   py::array_t<double> q() const { return q_array; }
   py::array_t<double> mu() const { return mu_array; }
+  py::array_t<double> b() const { return b_array; }
+
+  int solve(py::array_t<double> reaction, py::array_t<double> velocity,
+            py::array_t<double> globalVelocity, SolverOptions* solver_options) {
+    int info = -1;
+    int default_solver_options = 0;
+    if (solver_options == nullptr) {
+      solver_options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
+      default_solver_options = 1;
+    }
+    if (problem->dimension == 2) {
+      info = gfc2d_driver(problem, reaction.mutable_data(), velocity.mutable_data(),
+                          globalVelocity.mutable_data(), solver_options);
+    } else if (problem->dimension == 3) {
+      info = gfc3d_driver(problem, reaction.mutable_data(), velocity.mutable_data(),
+                          globalVelocity.mutable_data(), solver_options);
+    } else {
+      throw std::runtime_error("GlobalFrictionContactProblem solve: wrong dimension");
+    }
+    if (default_solver_options) {
+      solver_options_delete(solver_options);
+      solver_options = nullptr;
+    }
+    check_numerics_error(info, "GlobalFrictionContactProblem.solve");
+    return info;
+  }
+
+  static std::unique_ptr<GlobalFrictionContactProblemWrapper> from_file(
+      const std::string& fname) {
+    GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(fname.c_str());
+    if (!problem)
+      throw std::runtime_error(
+          "Failed to read global friction contact problem from file");
+
+    const int dim = problem->dimension;
+    const int nc = problem->numberOfContacts;
+    const int n = problem->M->size0;
+
+    py::object matrixM;
+    py::object matrixH;
+    if (problem->M->storageType == NM_DENSE && problem->H->storageType == NM_DENSE) {
+      py::array_t<double> Marray({n, n}, {sizeof(double), n * sizeof(double)});
+      std::memcpy(Marray.mutable_data(), problem->M->matrix0, n * n * sizeof(double));
+      matrixM = Marray;
+
+      py::array_t<double> Harray({n, dim * nc}, {sizeof(double), n * sizeof(double)});
+      std::memcpy(Harray.mutable_data(), problem->H->matrix0, n * dim * nc * sizeof(double));
+      matrixH = Harray;
+    } else {
+      globalFrictionContact_free(problem);
+      throw std::runtime_error(
+          "GlobalFrictionContactProblem.from_file only supports dense matrices");
+    }
+
+    py::array_t<double> qarray(problem->M->size1);
+    std::memcpy(qarray.mutable_data(), problem->q, problem->M->size1 * sizeof(double));
+    py::array_t<double> muarray(nc);
+    std::memcpy(muarray.mutable_data(), problem->mu, nc * sizeof(double));
+    py::array_t<double> barray(dim * nc);
+    std::memcpy(barray.mutable_data(), problem->b, dim * nc * sizeof(double));
+
+    globalFrictionContact_free(problem);
+
+    return std::make_unique<GlobalFrictionContactProblemWrapper>(dim, nc, matrixM, matrixH,
+                                                                  qarray, muarray, barray);
+  }
+
+  int write_to_file(const std::string& fname) const {
+    return globalFrictionContact_printInFileName(problem, fname.c_str());
+  }
+
+#if defined(WITH_FCLIB)
+  int write_to_fclib(const std::string& fname, const std::string& title,
+                     const std::string& description, const std::string& mathInfo) const {
+    return globalFrictionContact_fclib_write(
+        problem, const_cast<char*>(title.c_str()), const_cast<char*>(description.c_str()),
+        const_cast<char*>(mathInfo.c_str()), fname.c_str());
+  }
+#endif
 
   void somefunc() {
     // test function ...
@@ -612,13 +716,18 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
   py::class_<GlobalFrictionContactProblemWrapper, py::smart_holder>(
       m, "GlobalFrictionContactProblem")
       .def(py::init<int, int, py::object, py::object, py::array_t<double>,
-                    py::array_t<double>>(),
+                    py::array_t<double>, py::object>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
-           py::arg("q"), py::arg("mu"), "Build with all operators/parameters (H, M, ...)")
-      .def(py::init<std::string>(), py::arg("fname"), "Build from hdf5 file")
+           py::arg("q"), py::arg("mu"), py::arg("b") = py::none(),
+           "Build with all operators/parameters (H, M, ...)")
+      .def(py::init([](const std::string& fname) {
+             return GlobalFrictionContactProblemWrapper::from_file(fname);
+           }),
+           py::arg("fname"), "Build from file (dense matrices)")
       .def("M", &GlobalFrictionContactProblemWrapper::M)
       .def("H", &GlobalFrictionContactProblemWrapper::H)
       .def("q", &GlobalFrictionContactProblemWrapper::q)
+      .def("b", &GlobalFrictionContactProblemWrapper::b, "Contact gap velocity")
       .def("mu", &GlobalFrictionContactProblemWrapper::mu, "Friction coefficient")
       .def_property_readonly("dimension",
                              [](const GlobalFrictionContactProblemWrapper& self) {
@@ -653,7 +762,20 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
 
              return ss.str();
            })
-      .def("somefunc", &GlobalFrictionContactProblemWrapper::somefunc);
+      .def("somefunc", &GlobalFrictionContactProblemWrapper::somefunc)
+      .def("solve", &GlobalFrictionContactProblemWrapper::solve, py::arg("reaction"),
+           py::arg("velocity"), py::arg("global_velocity"), py::arg("solver_options") = nullptr,
+           "Solve the global friction contact problem")
+      .def_static("from_file", &GlobalFrictionContactProblemWrapper::from_file, py::arg("fname"),
+                  "Read a global friction contact problem from a file")
+      .def("write_to_file", &GlobalFrictionContactProblemWrapper::write_to_file, py::arg("fname"),
+           "Write the problem to a text file")
+#if defined(WITH_FCLIB)
+      .def("write_to_fclib", &GlobalFrictionContactProblemWrapper::write_to_fclib,
+           py::arg("fname"), py::arg("title") = "", py::arg("description") = "",
+           py::arg("mathInfo") = "", "Write the problem to an FCLIB HDF5 file")
+#endif
+      ;
 
   py::class_<GlobalRollingFrictionContactProblemWrapper, py::smart_holder>(
       m, "GlobalRollingFrictionContactProblem")
@@ -885,6 +1007,17 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              "Global 3D ADMM solver (wrapped)")
       .value("SICONOS_GLOBAL_FRICTION_3D_IPM", FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM,
              "Global 3D Interior-point method solver")
+
+      /** Global 2D Frictional Contact solvers */
+      .value("SICONOS_GLOBAL_FRICTION_2D_NSN_AC",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_2D_NSN_AC,
+             "Global 2D Non-smooth Newton Alart-Curnier solver")
+      .value("SICONOS_GLOBAL_FRICTION_2D_VI_FPP",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_2D_VI_FPP,
+             "Global 2D VI formulation, Fixed Point Projection")
+      .value("SICONOS_GLOBAL_FRICTION_2D_VI_EG",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_2D_VI_EG,
+             "Global 2D VI formulation, Extra-gradient")
       .export_values();
 
   // Rolling Friction solver enum (separate from FRICTION_SOLVER)
@@ -1097,6 +1230,21 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)
       .value("SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN",
              SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
+      .export_values();
+
+  py::enum_<SICONOS_FRICTION_2D_NSN_IPARAM>(params, "SICONOS_FRICTION_2D_NSN_IPARAM_enum")
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY",
+             SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY)
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER",
+             SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER)
+      .export_values();
+
+  py::enum_<enum SICONOS_FRICTION_2D_NSN_WARM_START>(
+      params, "SICONOS_FRICTION_2D_NSN_WARM_START_enum")
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_NO",
+             SICONOS_FRICTION_2D_NSN_WARM_START_NO)
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_YES",
+             SICONOS_FRICTION_2D_NSN_WARM_START_YES)
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_PROXIMAL_IPARAM>(params,
