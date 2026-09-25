@@ -403,7 +403,6 @@ struct moreau_jean_element : item {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      using indice = typename env_t::indice;
 
       scalar theta = self()->theta();
 
@@ -438,7 +437,6 @@ struct moreau_jean_element : item {
           auto& v = vs[i];
           auto& v_next = vs_next[i];
           auto& f = fexts[i];
-          auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
 
           using vector = typename env_t::template unbounded_vector<scalar>;
 
@@ -485,7 +483,6 @@ struct moreau_jean_element : item {
           auto& v_next = vs_next[i];
           auto& minv_f = minv_fs[i];
           auto& minv_f_next = minv_fs_next[i];
-          auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
 
           v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
 
@@ -642,8 +639,6 @@ struct moreau_jean_element : item {
     {
       auto& data = self()->data();
       auto&& velo = velocity_vector_assembled();
-      using env_t = decltype(self()->env());
-      using indice = typename env_t::indice;
 
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
@@ -660,7 +655,6 @@ struct moreau_jean_element : item {
         auto& v_next = vs_next[i];
         auto involved = involveds[i];
         auto index = indices[i];
-        auto h_sys = storage::make_handle(data, storage::index<system, indice>{i});
 
         if (involved) {
           if constexpr (match::fixed_size_vector<velocity>) {
