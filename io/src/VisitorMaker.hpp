@@ -59,6 +59,9 @@ class BulletR;
 namespace native::bodies {
 class Disk;
 class Circle;
+class DiskDiskR;
+class DiskPlanR;
+class CircleCircleR;
 }  // namespace native::bodies
 }  // namespace siconos::collision
 
@@ -188,7 +191,13 @@ struct GlobalRelationVisitor {
                                                                                           joints::
                                                                                               PrismaticJointR,
 
-                                                                                      T>>>>>>>>>>>>>>>>>>>>>::
+                                                                                      VisitMaker<
+                                                                                          siconos::collision::native::bodies::DiskDiskR,
+                                                                                      VisitMaker<
+                                                                                          siconos::collision::native::bodies::DiskPlanR,
+                                                                                      VisitMaker<
+                                                                                          siconos::collision::native::bodies::CircleCircleR,
+                                                                                      T>>>>>>>>>>>>>>>>>>>>>>>>::
       Action;
 };
 
@@ -222,7 +231,23 @@ struct GlobalRelationVisitor {
                                                   VisitMaker<siconos::joints::KneeJointR,
                                                              VisitMaker<siconos::joints::
                                                                             PrismaticJointR,
-                                                                        T>>>>>>>>>>>>>>::
+                                                                        VisitMaker<
+                                                                            siconos::collision::
+                                                                                native::bodies::
+                                                                                    DiskDiskR,
+                                                                            VisitMaker<
+                                                                                siconos::
+                                                                                    collision::
+                                                                                        native::
+                                                                                            bodies::
+                                                                                                DiskPlanR,
+                                                                                VisitMaker<
+                                                                                    siconos::
+                                                                                        collision::
+                                                                                            native::
+                                                                                                bodies::
+                                                                                                    CircleCircleR,
+                                                                                    T>>>>>>>>>>>>>>>>>::
       Action;
 };
 
