@@ -29,6 +29,7 @@
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "fclib_interface.h"
+#include "gfc2d_nonsmooth_Newton_AlartCurnier.h"
 #include "GenericMechanicalProblem.h"
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContactProblem.h"
@@ -427,6 +428,22 @@ struct GlobalFrictionContactProblemWrapper {
     return info;
   }
 
+  int warm_start(py::array_t<double> reaction, py::array_t<double> velocity,
+                 py::array_t<double> globalVelocity, SolverOptions* solver_options) {
+    int default_solver_options = 0;
+    if (solver_options == nullptr) {
+      solver_options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
+      default_solver_options = 1;
+    }
+    int info = gfc2d_nsn_ac_warm_start(problem, reaction.mutable_data(), velocity.mutable_data(),
+                                       globalVelocity.mutable_data(), solver_options);
+    if (default_solver_options) {
+      solver_options_delete(solver_options);
+      solver_options = nullptr;
+    }
+    return info;
+  }
+
   static std::unique_ptr<GlobalFrictionContactProblemWrapper> from_file(
       const std::string& fname) {
     GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(fname.c_str());
@@ -766,6 +783,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .def("solve", &GlobalFrictionContactProblemWrapper::solve, py::arg("reaction"),
            py::arg("velocity"), py::arg("global_velocity"), py::arg("solver_options") = nullptr,
            "Solve the global friction contact problem")
+      .def("warm_start", &GlobalFrictionContactProblemWrapper::warm_start, py::arg("reaction"),
+           py::arg("velocity"), py::arg("global_velocity"), py::arg("solver_options") = nullptr,
+           "Run a VI-FPP warm start / fallback for the NSN solver")
       .def_static("from_file", &GlobalFrictionContactProblemWrapper::from_file, py::arg("fname"),
                   "Read a global friction contact problem from a file")
       .def("write_to_file", &GlobalFrictionContactProblemWrapper::write_to_file, py::arg("fname"),

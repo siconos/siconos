@@ -885,8 +885,8 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
 
   /* Warm start with GFC2D_VI_FPP before launching the Newton solver. */
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
-      SICONOS_FRICTION_2D_NSN_WARM_START_NO;
-  options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 100;
+    SICONOS_FRICTION_2D_NSN_WARM_START_NO;
+  options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;
 }
 
 /* ===========================================================================
