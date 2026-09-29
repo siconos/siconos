@@ -446,7 +446,7 @@ int gfc2d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
   /* Reuse the rho that VI_FPP computed/selected as the NSN rho. */
   const double vi_rho = fabs(vi_options->dparam[SICONOS_VI_DPARAM_RHO]);
   if (vi_rho > 0.0) {
-    options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho;
+    options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho*2;
     numerics_printf_verbose(1,
                             "---- GFC2D - NSN_AC - Warm start rho = %g "
                             "(used as NSN rho)",
@@ -657,6 +657,15 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(jacobian_triplet->m == jacobian_triplet->n);
   NM_fill(nm_jacobian, NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
 
+  /* Optional Jacobian regularization matrix (regul * I). */
+  NumericsMatrix* reg_eye = NULL;
+  const int regularization =
+      options->iparam[SICONOS_FRICTION_2D_NSN_REGULARIZATION];
+  const double regul = options->dparam[SICONOS_FRICTION_2D_NSN_REGUL];
+  if (regularization == SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES) {
+    reg_eye = NM_eye(nm_jacobian->size0);
+  }
+
   DEBUG_EXPR(NM_display(nm_jacobian););
 
   
@@ -735,14 +744,20 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     DEBUG_EXPR(NV_display(newton_direction, num_global_dofs + num_contact_dofs*2 ););
 
 
-    /* double regul=1e-6; */
-    /* NM_add(regul, NM_eye(nm_jacobian->size0), 1.0, nm_jacobian); */
-    
+    NumericsMatrix* J_to_solve = nm_jacobian;
+    if (regularization == SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES) {
+      J_to_solve = NM_add(regul, reg_eye, 1.0, nm_jacobian);
+    }
+
     /* NM_preserve/unpreserve ensures that the internal factorization of
-     * nm_jacobian is invalidated because the underlying triplet data has
-     * changed since the previous iteration. */
+     * the Jacobian used by the linear solver is invalidated because the
+     * underlying triplet data has changed since the previous iteration. */
     const int linear_solver_info =
-        NM_LU_solve(NM_preserve(NM_unpreserve(nm_jacobian)), newton_direction, 1);
+        NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
+
+    if (J_to_solve != nm_jacobian) {
+      NM_free(J_to_solve);
+    }
 
     DEBUG_PRINTF("norm of newton_direction = %e\n",
                  cblas_dnrm2(system_size, newton_direction, 1));
@@ -864,6 +879,10 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
+  if (reg_eye) {
+    NM_free(reg_eye);
+  }
+
   NM_clear(nm_jacobian);
   free(nm_jacobian);
 }
@@ -887,6 +906,11 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
     SICONOS_FRICTION_2D_NSN_WARM_START_NO;
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;
+
+  /* Jacobian regularization: disabled by default. */
+  options->iparam[SICONOS_FRICTION_2D_NSN_REGULARIZATION] =
+    SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO;
+  options->dparam[SICONOS_FRICTION_2D_NSN_REGUL] = 1e-6;
 }
 
 /* ===========================================================================

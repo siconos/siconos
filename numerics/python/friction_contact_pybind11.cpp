@@ -1257,6 +1257,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY)
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER",
              SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER)
+      .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION",
+             SICONOS_FRICTION_2D_NSN_REGULARIZATION)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_2D_NSN_WARM_START>(
@@ -1265,6 +1267,19 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_2D_NSN_WARM_START_NO)
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_YES",
              SICONOS_FRICTION_2D_NSN_WARM_START_YES)
+      .export_values();
+
+  py::enum_<enum SICONOS_FRICTION_2D_NSN_REGULARIZATION>(
+      params, "SICONOS_FRICTION_2D_NSN_REGULARIZATION_enum")
+      .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO",
+             SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO)
+      .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES",
+             SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES)
+      .export_values();
+
+  py::enum_<SICONOS_FRICTION_2D_NSN_DPARAM>(params, "SICONOS_FRICTION_2D_NSN_DPARAM_enum")
+      .value("SICONOS_FRICTION_2D_NSN_REGUL",
+             SICONOS_FRICTION_2D_NSN_REGUL)
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_PROXIMAL_IPARAM>(params,

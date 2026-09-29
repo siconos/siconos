@@ -328,6 +328,8 @@ enum SICONOS_FRICTION_2D_NSN_IPARAM {
   SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY = 20,
   /** Maximum number of warm-start iterations */
   SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER = 21,
+  /** Jacobian regularization strategy (see SICONOS_FRICTION_2D_NSN_REGULARIZATION) */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION = 22,
 };
 
 /** Warm-start strategy values for GFC2D_NSN_AC */
@@ -338,6 +340,14 @@ enum SICONOS_FRICTION_2D_NSN_WARM_START {
   SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
 };
 
+/** Jacobian regularization values for GFC2D_NSN_AC */
+enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
+  /** No Jacobian regularization */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO = 0,
+  /** Add regul * I to the Jacobian before each linear solve */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES = 1,
+};
+
 enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
   SICONOS_FRICTION_3D_NSN_USE_CSLUSOL = 0,
   SICONOS_FRICTION_3D_NSN_USE_MUMPS = 1
@@ -346,6 +356,12 @@ enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
 enum SICONOS_FRICTION_3D_NSN_DPARAM {
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
+};
+
+/** Double parameters for global 2D NSN solver */
+enum SICONOS_FRICTION_2D_NSN_DPARAM {
+  /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
+  SICONOS_FRICTION_2D_NSN_REGUL = 4,
 };
 
 enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY {
