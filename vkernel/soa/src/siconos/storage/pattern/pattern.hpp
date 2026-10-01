@@ -542,27 +542,41 @@ struct param_type {
   using type = T;
 };
 
-template <match::attribute Attr>
-static auto item_attribute = [](auto items) constexpr {
-  using items_t = std::decay_t<decltype(items)>;
-
-  auto loop = rec([]<typename Tpl>(auto&& loop, Tpl tpl) {
-    using tpl_t = std::decay_t<Tpl>;
-    using item_t = std::decay_t<decltype(car(tpl))>;
-
-    if constexpr (match::attribute_of<Attr, item_t>) {
-      return item_t{};
-    } else if constexpr (match::attached_storage<Attr, item_t>) {
-      return item_t{};
-    } else if constexpr (mp::size(tpl_t{}) > mp::size_c<1>) {
-      return loop(cdr(tpl));
-    } else {
-      []<typename Attribute = Attr, typename LastItem = item_t, typename Items = items_t,
-         bool flag = false>() { static_assert(flag, "item not found"); }();
+namespace detail {
+/**
+ * @brief Index of the first item that owns Attr, as a plain constant-folded
+ * scan over the pack.
+ *
+ * This is called once per storage column by storage::make, so it is on the
+ * hot path of compilation. A recursive car/cdr walk costs O(N^2) compiler
+ * memory per column (one fresh tuple type per step, plus the
+ * reference_wrapper/__invoke_result trait train of the rec() combinator);
+ * the bool array below instantiates nothing at all.
+ */
+template <typename Attr, typename... Items>
+struct item_of {
+  static constexpr std::size_t index = []() constexpr {
+    constexpr bool found[] = {
+        (match::attribute_of<Attr, Items> || match::attached_storage<Attr, Items>)...};
+    for (std::size_t i = 0; i < sizeof...(Items); ++i) {
+      if (found[i]) return i;
     }
-  });
+    return sizeof...(Items);
+  }();
 
-  return loop(items);
+  static_assert(index < sizeof...(Items), "item not found");
+
+#if __has_builtin(__type_pack_element)
+  using type = __type_pack_element<index, Items...>;
+#else
+  using type = std::tuple_element_t<index, std::tuple<Items...>>;
+#endif
+};
+}  // namespace detail
+
+template <match::attribute Attr>
+static auto item_attribute = []<typename... Items>(mp::tuple<Items...>) constexpr {
+  return typename detail::item_of<Attr, Items...>::type{};
 };
 
 static auto constexpr attribute_name(match::attribute auto a) { return a.str.value; };
