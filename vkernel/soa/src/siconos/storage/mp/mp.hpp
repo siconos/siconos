@@ -9,6 +9,7 @@
 #ifdef __clang__
 #include <boost/hana/experimental/type_name.hpp>
 #endif
+#include <array>
 #include <boost/hana/ext/std/array.hpp>
 #include <boost/hana/ext/std/tuple.hpp>
 #include <boost/hana/functional/overload_linearly.hpp>
@@ -22,6 +23,7 @@
 #include <boost/hana/pair.hpp>
 #include <boost/hana/string.hpp>
 #include <boost/type_index.hpp>
+#include <cstdint>
 #include <numeric>
 #include <type_traits>
 
@@ -232,29 +234,164 @@ using pre_map = hana::tuple<Pairs...>;
 template <typename... Pairs>
 using map = hana::map<Pairs...>;
 
-// The Hana map database takes a longer time to compile!
+// Backed by a plain tuple, not a hana::map: to_map is a large share of the
+// compile-time memory of storage::make, and lookup is O(1) either way (see
+// key_index/get_internal below).
+//
+// An earlier attempt at this failed at runtime with
+//    ImportError: vector::_M_realloc_insert
+// That was not the tuple's fault: the get_internal of the time went through
+// hana::find_if, which copies the found pair into a temporary hana::optional,
+// so the reference it returned dangled. The index-based get_internal below
+// has no such temporary.
 template <typename... Pairs>
 struct database {
   using database_t = void;
   constexpr database() : store{} {};
-  database(tuple<Pairs...>&& m) : store(to_map(static_cast<tuple<Pairs...>&&>(m))) {};
-  decltype(to_map(std::declval<tuple<Pairs...>>())) store;
+  database(tuple<Pairs...>&& m) : store(static_cast<tuple<Pairs...>&&>(m)) {};
+  tuple<Pairs...> store;
 };
 
-// Faster compilation but this error occurs with python bindings:
-//    from ._nonos import __doc__, __version__, disks
-// ImportError: vector::_M_realloc_insert
+// A compile-time scalar fingerprint of a key type, plus the exact signature it
+// was derived from. Two keys are the same column when both agree, so the
+// fingerprint only has to be a cheap prefilter.
 //
-// template <typename... Pairs>
-// struct database {
-//   //  database() : store{} {};
-//   //  database(tuple<Pairs...> &&m) : store(m){};
-//   tuple<Pairs...> store;
-// };
+// The signature is the compiler's own spelling of the type. It is not a
+// standard facility, hence the #error: a wrong key match is a silent data
+// corruption, so a port without one must fail to compile rather than fall back
+// to something that might compare unequal types equal.
+template <typename K>
+static constexpr std::string_view key_signature() {
+#if defined(__clang__) || defined(__GNUC__)
+  return __PRETTY_FUNCTION__;
+#elif defined(_MSC_VER)
+  return __FUNCSIG__;
+#else
+#error "no compile-time type signature: mp::key_table cannot compare column keys"
+#endif
+};
+
+static constexpr std::uint64_t fingerprint_of(std::string_view signature) {
+  std::uint64_t h = 14695981039346656037ull;
+  for (char c : signature) {
+    h ^= static_cast<std::uint64_t>(static_cast<unsigned char>(c));
+    h *= 1099511628211ull;
+  }
+  return h;
+};
+
+// The key of one column: key_value<F, S> is hana::pair<type_c<F>, S>, so the
+// key is the pair's first member's ::type.
+template <typename Pair>
+struct column_key {
+  using type = typename std::decay_t<decltype(hana::first(std::declval<Pair>()))>::type;
+};
+
+// Everything derivable from the key pack alone, computed once.
+//
+// The previous form of key_index compared keys with std::is_same at every
+// lookup site, which instantiates one is_same per (column, site) pair: the
+// bouncing_ball configuration has 81 columns, 68 get sites and one more scan
+// per column in unique_keys, so ~12k is_same instantiations. -ftime-trace
+// attributes 1.4 s of a 31 s compile to key_index alone.
+//
+// Here a key costs one key_signature instantiation, and the tables below are
+// integer comparisons inside a single constexpr evaluation. The result is
+// O(columns) instantiations instead of O(columns * sites), and the scans in
+// find() are over uint64 instead of over types.
+template <typename... Pairs>
+struct key_table {
+  static constexpr std::size_t n = sizeof...(Pairs);
+
+  static constexpr std::array<std::string_view, n> signature = {
+      key_signature<typename column_key<Pairs>::type>()...};
+
+  static constexpr std::array<std::uint64_t, n> fingerprint = [] {
+    std::array<std::uint64_t, n> a{};
+    for (std::size_t i = 0; i < n; ++i) a[i] = fingerprint_of(signature[i]);
+    return a;
+  }();
+
+  // first_of[i] is the index of the first column carrying column i's key, so
+  // first_of[i] == i exactly where the key occurs once.
+  static constexpr std::array<std::size_t, n> first_of = [] {
+    std::array<std::size_t, n> a{};
+    for (std::size_t i = 0; i < n; ++i) {
+      a[i] = i;
+      for (std::size_t j = 0; j < i; ++j) {
+        if (fingerprint[j] == fingerprint[i] && signature[j] == signature[i]) {
+          a[i] = j;
+          break;
+        }
+      }
+    }
+    return a;
+  }();
+
+  // n when no column carries K.
+  template <typename K>
+  static constexpr std::size_t find() {
+    constexpr std::string_view s = key_signature<K>();
+    constexpr std::uint64_t h = fingerprint_of(s);
+    for (std::size_t i = 0; i < n; ++i) {
+      if (fingerprint[i] == h && signature[i] == s) return i;
+    }
+    return n;
+  }
+};
+
+// Position of the pair whose key is key<T>. A plain constant-folded scan: no
+// find_if, so no temporary hana::optional and no reference into it.
+template <typename T, typename... Pairs>
+static constexpr std::size_t key_index() {
+  return key_table<Pairs...>::template find<typename std::decay_t<decltype(key<T>)>::type>();
+};
+
+// The pipeline emits the same key more than once (97 columns, 17 duplicates
+// for the bouncing_ball configuration). hana::to_map collapsed those
+// silently, keeping the FIRST occurrence, since hana::insert is a no-op on an
+// existing key. A tuple does not, so reproduce that here. Keeping the first
+// occurrence makes key_index below agree with the old lookup exactly.
+//
+// This is a workaround, not a fix: the duplicates should not be produced in
+// the first place, and since compile memory is quadratic in the column count
+// removing them at the source is worth noticeably more than removing them
+// here.
+template <typename... Pairs>
+struct unique_keys {
+  static constexpr std::size_t n = sizeof...(Pairs);
+
+  static constexpr auto first_of = key_table<Pairs...>::first_of;
+
+  static constexpr std::size_t count = []() constexpr {
+    std::size_t c = 0;
+    for (std::size_t i = 0; i < n; ++i) {
+      if (first_of[i] == i) ++c;
+    }
+    return c;
+  }();
+
+  static constexpr auto indices = []() constexpr {
+    std::array<std::size_t, count> a{};
+    std::size_t c = 0;
+    for (std::size_t i = 0; i < n; ++i) {
+      if (first_of[i] == i) a[c++] = i;
+    }
+    return a;
+  }();
+};
+
+template <typename... Pairs, std::size_t... I>
+auto to_database_at(tuple<Pairs...>&& data, std::index_sequence<I...>) {
+  using u = unique_keys<Pairs...>;
+  return database<std::decay_t<decltype(hana::at_c<u::indices[I]>(data))>...>{
+      make_tuple(hana::at_c<u::indices[I]>(static_cast<tuple<Pairs...>&&>(data))...)};
+};
 
 template <typename... Pairs>
 auto to_database(tuple<Pairs...>&& data) {
-  return database<Pairs...>{static_cast<tuple<Pairs...>&&>(data)};
+  return to_database_at(static_cast<tuple<Pairs...>&&>(data),
+                        std::make_index_sequence<unique_keys<Pairs...>::count>{});
 };
 
 using hana::make_map;
@@ -273,17 +410,17 @@ static constexpr decltype(auto) get_internal(D&& data) {
 };
 
 template <typename T, typename... Pairs>
-static constexpr auto& get_internal(tuple<Pairs...>&& data) {
-  auto&& result = hana::find_if(static_cast<tuple<Pairs...>&&>(data),
-                                []<typename P>(P) { return hana::first(P{}) == key<T>; });
-  return hana::second(result.value());
+static constexpr decltype(auto) get_internal(tuple<Pairs...>& data) {
+  constexpr std::size_t i = key_index<T, Pairs...>();
+  static_assert(i < sizeof...(Pairs), "key not found in database");
+  return hana::second(hana::at_c<i>(data));
 };
 
 template <typename T, typename... Pairs>
-static constexpr auto& get_internal(tuple<Pairs...>& data) {
-  auto&& result =
-      hana::find_if(data, []<typename P>(P) { return hana::first(P{}) == key<T>; });
-  return hana::second(result.value());
+static constexpr decltype(auto) get_internal(tuple<Pairs...>&& data) {
+  constexpr std::size_t i = key_index<T, Pairs...>();
+  static_assert(i < sizeof...(Pairs), "key not found in database");
+  return hana::second(hana::at_c<i>(static_cast<tuple<Pairs...>&&>(data)));
 };
 
 template <typename T, typename... HPairs>
