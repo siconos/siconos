@@ -27,7 +27,7 @@ class SiconosMemoryTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(SiconosMemoryTest);
 
 

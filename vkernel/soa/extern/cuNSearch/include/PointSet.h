@@ -15,7 +15,7 @@ class PointSetImplementation;
 class cuNSearchDeviceData;
 
 template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) 
+std::unique_ptr<T> make_unique(Args&&... args)
 {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
@@ -61,7 +61,7 @@ public:
 	* @param i Point index.
 	* @returns Number of points neighboring point i in point set point_set.
 	*/
-	inline std::size_t n_neighbors(unsigned int point_set, unsigned int i) const 
+	inline std::size_t n_neighbors(unsigned int point_set, unsigned int i) const
 	{
 		return neighbors[point_set].Counts[i];
 	}
@@ -73,7 +73,7 @@ public:
 	* @param k Represents kth neighbor of point i.
 	* @returns Index of neighboring point i in point set point_set.
 	*/
-	inline unsigned int neighbor(unsigned int point_set, unsigned int i, unsigned int k) const 
+	inline unsigned int neighbor(unsigned int point_set, unsigned int i, unsigned int k) const
 	{
 		//Return index of the k-th neighbor to point i (of the given point set)
 		const auto &neighborSet = neighbors[point_set];
@@ -86,13 +86,13 @@ public:
 	* @param i Point index for which the neighbor id should be returned.
 	* @returns Pointer to ids of neighboring points of i in point set point_set.
 	*/
-	inline unsigned int * neighbor_list(unsigned int point_set, unsigned int i) const 
+	inline unsigned int * neighbor_list(unsigned int point_set, unsigned int i) const
 	{
 		//Return index of the k-th neighbor to point i (of the given point set)
 		const auto &neighborSet = neighbors[point_set];
 		return &neighborSet.Neighbors[neighborSet.Offsets[i]];
 	}
-	
+
 	/**
 	* @returns the number of points contained in the point set.
 	*/
@@ -131,7 +131,7 @@ private:
 	std::unique_ptr<PointSetImplementation> impl;
 
 	PointSet(Real const* x, std::size_t n, bool dynamic, void *user_data = nullptr);
-	
+
 	void resize(Real const* x, std::size_t n);
 
 	Real const* point(unsigned int i) const { return &m_x[3*i]; }
@@ -161,4 +161,3 @@ void PointSet::sort_field(T* lst) const
 
 
 }
-

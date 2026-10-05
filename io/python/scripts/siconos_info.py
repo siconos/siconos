@@ -37,7 +37,7 @@ def summarize(io):
 
     cf_times, cf_counts = np.unique(cf_data[:, 0], return_counts=True)
     min_cf=0
-    if len(cf_counts) !=0:  
+    if len(cf_counts) !=0:
         min_cf = cf_counts.min()
 
     # Are there times where there are no contact forces?
@@ -55,7 +55,7 @@ def summarize(io):
     else:
         print ('Contacts:   {0: >10} {1: >10} {2: >10}'
                .format(min_cf, 0, 0))
-               
+
     print ('Iterations: {0: >10} {1: >10} {2: >10}'
            .format(int(solv_data[:,1].min()), int(solv_data[:,1].mean()),
                    int(solv_data[:,1].max())))
@@ -97,14 +97,14 @@ def compute_violation(io):
     cf_data = io.contact_forces_data()
     gap =  cf_data[:,14]
     negative_gap = C = np.where(gap < 0, gap, 0.)
-    
+
     print ('            {0:>10} {1:>10} {2:>10}'.format('Min','Avg','std'))
-        
+
     print ('Violation:  {0: >10.2e} {1: >10.2e} {2: >10.2e}'
            .format( negative_gap.min(),negative_gap.mean(),
                     negative_gap.std()))
 
-        
+
 if __name__=='__main__':
     try:
         with MechanicsHdf5(mode='r', io_filename=args.file[0]) as io:

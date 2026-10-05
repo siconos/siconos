@@ -1,6 +1,6 @@
 #!bin/bash
 #
-# 
+#
 # Usage :
 #
 # export CI_PROJECT_DIR=<PATH TO SICONOS TUTORIALS REPOSITORY> (or any 'reference path')

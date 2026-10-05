@@ -29,40 +29,40 @@ double plasticity_2d_vonMises_equivalent_stress(const double stress[3]) {
   double sx = stress[0];
   double sy = stress[1];
   double txy = stress[2];
-  
+
   /* Von Mises equivalent stress: q = sqrt(sx^2 + sy^2 - sx*sy + 3*txy^2) */
   double q = sqrt(sx * sx + sy * sy - sx * sy + 3.0 * txy * txy);
-  
+
   return q;
 }
 
 int plasticity_2d_vonMises_check_yield(const double stress[3], double sigma_y) {
   double q = plasticity_2d_vonMises_equivalent_stress(stress);
-  
+
   DEBUG_PRINTF("Von Mises check: q = %e, sigma_y = %e\n", q, sigma_y);
-  
+
   return (q <= sigma_y) ? 1 : 0;
 }
 
 int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y) {
   double q = plasticity_2d_vonMises_equivalent_stress(stress);
-  
+
   DEBUG_PRINTF("Projection: q = %e, sigma_y = %e\n", q, sigma_y);
-  
+
   /* If stress is inside yield surface, no projection needed */
   if (q <= sigma_y) {
     DEBUG_PRINT("Von Mises: stress inside yield surface, no projection\n");
     return 1;
   }
-  
+
   /* Radial return: scale stress to yield surface */
   double scale = sigma_y / q;
-  
+
   DEBUG_PRINTF("Von Mises: scaling by %e\n", scale);
-  
+
   stress[0] *= scale;
   stress[1] *= scale;
   stress[2] *= scale;
-  
+
   return 0;
 }

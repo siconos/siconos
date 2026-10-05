@@ -116,34 +116,34 @@ static void cohesive_fc3d_nsgs_update(int contact, CohesiveFrictionContactProble
   cohesive_friction_3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
-  
+
   int nc = problem->numberOfContacts;
   if (contact < nc) {
-    localproblem->dimension = problem->dimension;    
+    localproblem->dimension = problem->dimension;
     localproblem->numberOfContacts = 1;
     localproblem->numberOfCohesivePoints = 0;
     localproblem->mu[0] = problem->mu[contact];
     localproblem->c_n[0] = 0.0;
     localproblem->c_t[0] = 0.0;
   } else {
-    localproblem->dimension = problem->dimension;       
+    localproblem->dimension = problem->dimension;
     localproblem->numberOfContacts = 0;
-    localproblem->numberOfCohesivePoints = 1;    
+    localproblem->numberOfCohesivePoints = 1;
     localproblem->mu[0] = 0.0;
     localproblem->c_n[0] = problem->c_n[contact-nc];
     localproblem->c_t[0] = problem->c_t[contact-nc];
 
-    }  
+    }
 }
 
 static int cohesive_fc3d_nsgs_initialize_local_solver(
     struct CohesiveLocalProblemFunctionToolkit* local_function_toolkit,
     CohesiveFrictionContactProblem* problem,
     FrictionContactProblem* localproblem_contact,
-    CohesiveFrictionContactProblem* localproblem_cohesion,    
+    CohesiveFrictionContactProblem* localproblem_cohesion,
     SolverOptions* options) {
 
-  
+
 
   SolverOptions* local_opts_contact = options->internalSolvers[0];
   SolverOptions* local_opts_cohesion = options->internalSolvers[1];
@@ -161,7 +161,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
   fc3d_problem->numberOfContacts = problem->numberOfContacts;
   fc3d_problem->M = problem->M;
 
-  
+
   /** Connect to local solver */
   switch (local_opts_contact->solverId) {
     /* Projection */
@@ -234,15 +234,15 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
           solver_options_id_to_name(local_opts_contact->solverId));
     }
   }
- 
-  
+
+
   return 0;
 }
 static unsigned int* allocShuffledContacts(CohesiveFrictionContactProblem* problem,
                                            SolverOptions* options) {
   unsigned int* scontacts = 0;
   unsigned int nc = problem->numberOfContacts;
-  unsigned int ncoh = problem->numberOfCohesivePoints;  
+  unsigned int ncoh = problem->numberOfCohesivePoints;
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
           SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
       options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -279,10 +279,10 @@ static int solveLocalReaction(
     CohesiveFrictionContactProblem* localproblem, FrictionContactProblem* localproblem_contact,
     double* reaction, SolverOptions* local_opts_contact, SolverOptions* local_opts_cohesion, double localreaction[3]) {
 
-  
+
   (*localProblemFunctionToolkit->update_local_problem)(contact, problem, localproblem, reaction, local_opts_contact);
 
- 
+
   localProblemFunctionToolkit->copy_local_reaction(&(reaction[contact * problem->dimension]), localreaction);
   if (contact < problem->numberOfContacts) {
     local_opts_contact->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
@@ -291,14 +291,14 @@ static int solveLocalReaction(
     localproblem_contact->M = localproblem->M;
     localproblem_contact->q = localproblem->q;
     localproblem_contact->mu = localproblem->mu;
-    
+
     return (*localProblemFunctionToolkit->local_solver_contact)(localproblem_contact, localreaction,
                                                                 local_opts_contact);
   } else {
-    local_opts_cohesion->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] = contact - problem->numberOfContacts;       
+    local_opts_cohesion->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] = contact - problem->numberOfContacts;
     return (*localProblemFunctionToolkit->local_solver_cohesion)(localproblem, localreaction, local_opts_cohesion);
   }
-  //  return -1;  
+  //  return -1;
 }
 
 static int file_exists(const char* fname) {
@@ -308,7 +308,7 @@ static int file_exists(const char* fname) {
     return 1;
   }
   return 0;
-}  
+}
 static void acceptLocalReactionFiltered(int dimension,
                                         SolverOptions* local_opts, unsigned int contact,
                                         unsigned int iter, double* reaction,
@@ -507,13 +507,13 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   struct CohesiveLocalProblemFunctionToolkit* localProblemFunctionToolkit =
       cohesiveLocalProblemFunctionToolkit_new();
-  
+
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
   FrictionContactProblem* localproblem_contact;
-  
+
   CohesiveFrictionContactProblem* localproblem_cohesion;
-  
+
   double localreaction[3];
 
   /*****  NSGS Iterations *****/
@@ -537,10 +537,10 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   }
 
   /*****  Initialize various solver options *****/
- 
+
   localproblem_cohesion = cohesive_friction_3d_local_problem_allocate(problem->M->storageType);
   localproblem_contact = frictionContactProblem_new(); // wrap onto the local_problem_cohesion to call friction contact solver
-  
+
 
   cohesive_fc3d_nsgs_initialize_local_solver(localProblemFunctionToolkit, problem,
                                              localproblem_contact, localproblem_cohesion, options);
@@ -604,9 +604,9 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
         for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
       }
     }
-    
+
     for (unsigned int i = 0; i < nc + ncoh; ++i) {
-        
+
       if (options->iparam[SICONOS_NSGS_SHUFFLE] == SICONOS_NSGS_SHUFFLE_TRUE ||
           options->iparam[SICONOS_NSGS_SHUFFLE] == SICONOS_NSGS_SHUFFLE_EACH_LOOP) {
         if (options->iparam[SICONOS_NSGS_SHUFFLE] == SICONOS_NSGS_SHUFFLE_EACH_LOOP)
@@ -779,11 +779,11 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
     //getchar();
 
       return NUMERICS_ERR_MAX_ITER;
-    }    
+    }
   else
     {
       return (full_error <= tolerance) ? NUMERICS_OK : NUMERICS_ERR_DIVERGENCE;
-    }    
+    }
 }
 
 /* ===========================================================================

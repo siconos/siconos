@@ -166,7 +166,7 @@ class MBTB_Contact {
 
   /** Set to true to compute the normal from face1 */
   void set_normal_from_face1(bool val){_normalFromFace1 = val;}
-  
+
   /** \return a pointer to the relation
    */
   inline auto relation() { return _Relation; }

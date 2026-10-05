@@ -193,7 +193,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* proble
     fc3d_nonsmooth_Newton_AlartCurnier(reduced_problem, reaction, velocity, info, options);
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
-    
+
     /* Number of contacts */
     int nc = problem->numberOfContacts;
     /* Dimension of the problem */

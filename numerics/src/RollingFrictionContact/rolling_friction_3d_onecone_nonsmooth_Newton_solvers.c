@@ -220,7 +220,7 @@ int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize(
     return numerics_error("rolling_friction_3d_onecone_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
   }
-  return 0;  
+  return 0;
 }
 
 int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve(
@@ -310,8 +310,8 @@ void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_free(
       localsolver_options->solverId == SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP ||
       localsolver_options->solverId == SICONOS_ROLLING_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID) {
     rolling_friction_3d_free(problem, localproblem, localsolver_options);
-  } 
-    
+  }
+
 }
 
 void rolling_friction_3d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* velocity,

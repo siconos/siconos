@@ -17,13 +17,13 @@ It consists in
   * Getting and installing Siconos software
   * Users' guide
   * Developers' guide
-  
+
   All these guides are generated with sphinx (http://www.sphinx-doc.org/en/master/index.html) from files written in reStructuredText (http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
 
   Source files and sphinx configuration file are all in docs/sphinx directory.
 
 * **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( .h and .hpp).
-  
+
   Rules and best practices to write comments leading to a proper html documentation are detailed in :ref:`documenting_source_code`.
 
 
@@ -37,8 +37,8 @@ It consists in
    Help on ...
     ...
 
-    
-    
+
+
 The complete documentation can be generated in one shot using doc target
 
 .. code-block:: bash
@@ -51,7 +51,7 @@ The complete documentation can be generated in one shot using doc target
 
 It results in html pages, generated in build-dir/docs/build/html.
 Siconos web site (http://siconos.org) is the online version of those pages.
-   
+
 The building process for documentation is described in :ref:`build_doc`.
 
 
@@ -83,13 +83,13 @@ one has to be very careful when writing those comments and follow the rules belo
 
 * Document all header files using doxygen comments, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
 * Try to follow numpydoc (https://numpydoc.readthedocs.io/en/latest/) requirements.
-    
-  
+
+
 
 
 .. rubric:: files description
 
-Each header file must contain something like 
+Each header file must contain something like
 
 .. code-block:: c++
 
@@ -109,7 +109,7 @@ Document each class like this
 
      /**
         @brief Short description of the class
-     
+
         Detailed description
         equations (see details about latex below), reference to textbooks chapter and so on
      */
@@ -162,7 +162,7 @@ Correct:
      */
 
 Wrong (missing newline and wrong indent):
-   
+
 .. code-block:: c++
 
     /** @brief brief description
@@ -170,8 +170,8 @@ Wrong (missing newline and wrong indent):
      * @param name_of_param2 description of the param
      * @return description of what is returned
      */
-  
-    
+
+
 
 .. rubric:: rst inside doxygen commments
 
@@ -189,11 +189,11 @@ it's important that each component of the enum has an explicit comment, e.g:
 
 .. code-block:: cpp
 
-    /** Global description of the enum */ 
+    /** Global description of the enum */
     enum UBLAS_TYPE
     {
      /** id for dense matrix or vector */
-     DENSE = 1, 
+     DENSE = 1,
      /** id for triangular matrix */
      TRIANGULAR,
     }
@@ -208,11 +208,11 @@ use "\\rst" / "\\endrst" tags :
 .. code :: rst
 
   /** Class used to defined friction-contact problems
-  
+
   This class deals with blabla
 
   \rst
-  
+
    See :ref:`global_fc_problem`
 
   \endrst
@@ -232,11 +232,11 @@ or with leading asterisk
    *   See :ref:`global_fc_problem`
    *
    * \endrststar
-   *  
+   *
    *
    */
 
-  
+
 
 Math and latex
 ~~~~~~~~~~~~~~
@@ -247,19 +247,19 @@ Math and latex
 
      use this \f$ \alpha \f$ to write inline math
 
-     Important: always put a space after and before \f$     
+     Important: always put a space after and before \f$
 
 * displayed math
 
   - Wrap your formula between "\f[t" and "\f]" tags and write math as you would with latex.
-  
+
 .. _build_doc:
 
 Building process
 ================
 
-One target to generate the whole documentation : 
-  
+One target to generate the whole documentation :
+
 .. code-block:: bash
 
    cmake -DWITH_DOCUMENTATION=ON ...
@@ -278,7 +278,7 @@ Tools, config and description
 * `Doxygen`_: used to generate xml files from comments in source code (hpp C/C++ headers)
 * `Breathe`_ : an extension to reStructuredText and Sphinx to be able to read and render the Doxygen xml outputs.
    Used to convert xml outputs of doxygen to rst files.
-* `SphinxApidoc`_: used to generate rst files from docstrings in Python code (pure or from pybind11) 
+* `SphinxApidoc`_: used to generate rst files from docstrings in Python code (pure or from pybind11)
 * `Sphinx`_ : powerful generator of documentation (mostly for Python). Will generate html outputs from rst files
 
 
@@ -307,14 +307,14 @@ The whole process is executed with "make doc" and is summarized on the figure be
 
 
 Remark : during generation process, siconos python packages are imported and only
-objects with non-empty docstrings are documented. 
-          
+objects with non-empty docstrings are documented.
+
 .. rubric:: Other (exotic) configuration options
 
 * Full doxygen (i.e. extract all from sources!)  html documentation.
 
   Target : developpers only. Indeed, everything is included in sphinx doc except things like callgraph or collaboration graphs.
-  Use this when those graphs are needed. 
+  Use this when those graphs are needed.
 
   Same as above, with a new cmake option :
 
@@ -335,7 +335,7 @@ But, if required (devel), use:
 
      cmake -DWITH_DOCUMENTATION=ON -DWITH_DOXYGEN_WARNINGS=ON
      make filter_warnings
-     
+
   It will generate (during compilation process) and print doxygen warnings in files
   saved in CMAKE_BINARY_DIR/doxygen_warnings. A warnings file is generated for
   each input source file. The final call to 'make filter_warnings' will concatenate all interesting
@@ -349,7 +349,7 @@ But, if required (devel), use:
    python3 -m pip install -rU ./docs/requirements.txt
 
 See also the file `ci_gitlab/make_siconos_doc.sh <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/devel/siconos/-/blob/main/ci_gitlab/make_siconos_doc.sh?ref_type=heads>`_ in siconos repository.
-It may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu. 
+It may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu.
 
 
 

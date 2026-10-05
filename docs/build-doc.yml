@@ -1,5 +1,5 @@
 # CI config (jobs) used to build documentation for siconos.
-# This file is included in main .gitlab-ci.yml only if the job build-doc is 
+# This file is included in main .gitlab-ci.yml only if the job build-doc is
 # executed (see trigger keyword).
 
 # Templates for ci jobs
@@ -23,7 +23,7 @@ pages:
   artifacts:
     paths:
     - public
-  stage: doc-deploy 
+  stage: doc-deploy
   needs: ["doc:build"]
 
 
@@ -35,7 +35,7 @@ legacy:doc:
   artifacts:
     paths:
       - ${ARCHIVE_NAME}
-    expire_in: 2 days  
+    expire_in: 2 days
   script:
       - cd build; make doc -j 32
       - cd $CI_PROJECT_DIR; tar -zcvf ${ARCHIVE_NAME} $CI_PROJECT_DIR/build/docs/build/html
@@ -59,4 +59,3 @@ publish-package:
         --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
         --upload-file ${ARCHIVE_NAME} \
         "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${PACKAGE_VERSION}/${ARCHIVE_NAME}"
-  

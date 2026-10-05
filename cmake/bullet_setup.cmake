@@ -53,7 +53,7 @@ endfunction()
   #   by providing Bullet_ROOT on cmake command line.
   #   => find it and check the version
 
-  
+
 # Full config :
 # - Download, build and install Bullet
 # - Create a target BULLET::BULLET
@@ -72,7 +72,7 @@ if(BULLET_INSTALL)
   cmake_policy(SET CMP0072 NEW) # FindOpenGL prefers GLVND
   cmake_policy(PUSH)
   if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.20")
-    cmake_policy(SET CMP0115 OLD) # 
+    cmake_policy(SET CMP0115 OLD) #
     cmake_policy(PUSH)
   endif()
   set(FETCHCONTENT_QUIET OFF) # verbose mode for fetchcontent. Comment/uncomment according to your needs.
@@ -92,7 +92,7 @@ if(BULLET_INSTALL)
     cmake_policy(POP)
   endif()
   include(${bullet_BINARY_DIR}/BulletConfig.cmake)
-  
+
   set(BULLET_INCLUDE_DIRS $<BUILD_INTERFACE:${bullet_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${bullet_INSTALL_DIR}/${BULLET_INCLUDE_DIRS}>)
   set_bullet_target()
   message(STATUS "Built, installed and used bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}.")
@@ -126,4 +126,3 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")
 
 endif()
-

@@ -25,4 +25,4 @@ option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded versi
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
 
 
-set(OpenCASCADE_ROOT "/home/install-opencascade" CACHE PATH "") 
+set(OpenCASCADE_ROOT "/home/install-opencascade" CACHE PATH "")

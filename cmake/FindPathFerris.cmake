@@ -22,7 +22,7 @@ FindPathFerris
 Find Path library
 
 Usage :
- 
+
 find_package(PathFerris REQUIRED)
 target_link_libraries(yourlib PRIVATE PathFerris::PathFerris)
 
@@ -59,7 +59,7 @@ find_package_handle_standard_args(PathFerris
   REQUIRED_VARS PathFerris_LIBRARIES)
 
 if(PathFerris_FOUND)
-  
+
   if(NOT TARGET PathFerris::PathFerris)
     add_library(PathFerris::PathFerris IMPORTED INTERFACE)
     set_property(TARGET PathFerris::PathFerris PROPERTY INTERFACE_LINK_LIBRARIES ${PathFerris_LIBRARIES})

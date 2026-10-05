@@ -5,12 +5,12 @@ Interactions between dynamical systems
 
 An Interaction is an "object" that defines the way some Dynamical Systems are linked, how they behave together. For example if you consider a set of rigid bodies, Interactions will define what will happen when contact between bodies occurs.
 
-First of all, we introduce the set of all possible interactions, indeed all interactions declared by user, 
+First of all, we introduce the set of all possible interactions, indeed all interactions declared by user,
 
 .. math::
 
    \mathcal{I}_0 = \{ \alpha \ / \ I_{\alpha} \in NSDS \}.
-   
+
 NSDS is the non-smooth dynamical system and :math:`I_{\alpha}` a single interaction.
 
 An Interaction is applied to a set of Dynamical Systems, then the set :math:`\mathcal{DS}^{\alpha}=\{ d \ / \ ds_{d} \in I_{\alpha} \}`
@@ -18,7 +18,7 @@ is the set of all dynamical systems involved in :math:`I_{\alpha}`.
 Finally, we denote :math:`\mathcal{DS}_{\alpha,\beta}` the set of dynamical systems that are involved in interactions :math:`\alpha` and :math:`\beta`;
 
 .. math::
-   
+
    \mathcal{DS}_{\alpha,\beta} =  \mathcal{DS}_{\alpha}\cap \mathcal{DS}_{\beta}
 
 Considering an interaction :math:`I_{\alpha}`, upper case letters will be used to represent the concatenation of variables from the dynamical systems of :math:`\mathcal{DS}^{\alpha}`.
@@ -28,12 +28,12 @@ Then one get the following vectors of global coordinates, say X (or Q in the Lag
 
 .. math::
 
-   X=\left[\begin{array}{c} 
+   X=\left[\begin{array}{c}
    x_0 \\
    x_1 \\
-   ...  
+   ...
    \end{array}\right], \ or \ Q=
-   \left[\begin{array}{c} 
+   \left[\begin{array}{c}
    q_0\\
    q_1 \\
    ...
@@ -53,12 +53,12 @@ Thus we define :math:`R` for the Interaction as:
 
 .. math::
 
-   R^{\alpha}=\left[\begin{array}{c} 
+   R^{\alpha}=\left[\begin{array}{c}
    r^{\alpha}_0 \\
    r^{\alpha}_1 \\
-   ...  
+   ...
    \end{array}\right], \ or \ P^{\alpha}=
-   \left[\begin{array}{c} 
+   \left[\begin{array}{c}
    p^{\alpha}_0\\
    p^{\alpha}_1 \\
    ...

@@ -26,7 +26,7 @@ class LagrangianScleronomousRTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(LagrangianScleronomousRTest);
 
 
@@ -50,7 +50,3 @@ public:
 };
 
 #endif
-
-
-
-

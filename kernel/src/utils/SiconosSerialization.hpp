@@ -25,7 +25,7 @@
 
 // tells include-what-you-use to keep this file
 // and not to suggest boost or alike.
-// IWYU pragma: begin_exports 
+// IWYU pragma: begin_exports
 
 namespace boost
 {

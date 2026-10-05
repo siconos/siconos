@@ -4,7 +4,7 @@
 #
 # The objective is to call component_setup to create the target <COMPONENT>.
 # Before, it's necessary to set:
-# 
+#
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
@@ -94,7 +94,7 @@ endif()
 # Eigen
 find_package(Eigen3 REQUIRED)
 # Should we propagate Eigen dep? Check this later ...
-target_link_libraries (kernel PUBLIC Eigen3::Eigen) 
+target_link_libraries (kernel PUBLIC Eigen3::Eigen)
 target_compile_definitions(kernel PUBLIC EIGEN_DEFAULT_DENSE_INDEX_TYPE=int) # To be complient with scipy sparse
 target_compile_definitions(kernel PUBLIC SICONOS_SPARSE_STORAGE_INDEX_TYPE=int)
 # Sparse storage
@@ -118,10 +118,10 @@ endif()
 # to prepare installation of the current target.
 #
 # Before, it's necessary to set:
-# 
+#
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
-# 
+#
 set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   ${${COMPONENT}_DIRS} # All .hpp are installed
   )

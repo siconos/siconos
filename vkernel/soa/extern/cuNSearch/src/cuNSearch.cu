@@ -157,4 +157,3 @@ namespace cuNSearch
 		updatePointSet(pointSets[i]);
 	}
 }
-

@@ -10,10 +10,7 @@ ARG BUILD_DIR=build
 RUN cmake --install $BUILD_DIR
 # install Siconos. Assume a previous built in $BUILD_DIR
 RUN siconos --info
-# Clone Siconos examples 
+# Clone Siconos examples
 ARG EXAMPLES_BRANCH_NAME=main
 RUN git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
 RUN cd siconos-tutorials; git switch $EXAMPLES_BRANCH_NAME
-
-
-

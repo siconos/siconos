@@ -38,4 +38,3 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
         freeglut3-dev \
         libmumps-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN python3 -m pip install mpi4py vtk
-

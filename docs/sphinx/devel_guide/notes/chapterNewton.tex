@@ -3,7 +3,7 @@
     \hline
     author  & O.Bonnefon, V. Acary\\
     \hline
-    date    & Sept, 07, 2007 \\ 
+    date    & Sept, 07, 2007 \\
     last update        & Feb, 2011 \\
                        & April, 2014 \\
     \hline
@@ -14,13 +14,13 @@
 
 
 
-This section is devoted to the implementation and the study  of the algorithm. The interval of integration is $[0,T]$, $T>0$, and a grid $t_{0}=0$, $t_{k+1}=t_{k}+h$, $k \geq 0$, $t_{N}=T$ is constructed. The approximation of a function $f(\cdot)$ on $[0,T]$ is denoted as $f^{N}(\cdot)$, and is a piecewise constant function, constant on the intervals $[t_{k},t_{k+1})$. We denote $f^{N}(t_{k})$ as $f_{k}$. The time-step is $h>0$. 
+This section is devoted to the implementation and the study  of the algorithm. The interval of integration is $[0,T]$, $T>0$, and a grid $t_{0}=0$, $t_{k+1}=t_{k}+h$, $k \geq 0$, $t_{N}=T$ is constructed. The approximation of a function $f(\cdot)$ on $[0,T]$ is denoted as $f^{N}(\cdot)$, and is a piecewise constant function, constant on the intervals $[t_{k},t_{k+1})$. We denote $f^{N}(t_{k})$ as $f_{k}$. The time-step is $h>0$.
 
 
 \section{Various first order dynamical systems with input/output relations}
 
 \paragraph{FirstOrderR. Fully nonlinear case}
-Let us introduce the following system, 
+Let us introduce the following system,
 \begin{equation}
 \begin{array}{l}
 M \dot{x}(t) = f(x(t),t) + r(t)  \\[2mm]
@@ -48,7 +48,7 @@ This case is implemented in Siconos with the relation {\tt FirstOrderType1R}.
 
 
 \paragraph{FirstOrderType2R}
-Let us introduce a new notation, 
+Let us introduce a new notation,
 \begin{equation}
 \begin{array}{l}
 M \dot{x}(t) = f(x(t),t) + r(t)  \\[2mm]
@@ -62,7 +62,7 @@ This case is implemented in Siconos with the relation {\tt FirstOrderType2R}.
 
 
 
-\paragraph{Linear case }Let us introduce a new notation, 
+\paragraph{Linear case }Let us introduce a new notation,
 \begin{equation}
 \begin{array}{l}
 M \dot{x}(t) = Ax(t) + r(t)  +b(t)\\[2mm]
@@ -78,7 +78,7 @@ r(t) = g(t,\lambda (t) ) = B \lambda \\[2mm]
 
 
 \subsection{Standard $\theta-\gamma$ scheme.}
-Let us now proceed with the time discretization of (\ref{first-DS3}) by a fully implicit scheme : 
+Let us now proceed with the time discretization of (\ref{first-DS3}) by a fully implicit scheme :
 \begin{equation}
   \begin{array}{l}
     \label{eq:toto1}
@@ -127,7 +127,7 @@ Another possibility for the time discretization in the nonlinear case would be
 This scheme has not been yet implemented in Siconos/Kernel.
 
 \clearpage
-\section{Newton's linearization of~(\ref{eq:toto1})} 
+\section{Newton's linearization of~(\ref{eq:toto1})}
 
 \input{MCP_linearized.tex}
 %\input{MCP_linearized_old.tex}
@@ -143,7 +143,7 @@ This scheme has not been yet implemented in Siconos/Kernel.
 
 \input{MCP-FullThetaGamma.tex}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "DevNotes"
-%%% End: 
+%%% End:

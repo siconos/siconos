@@ -7,16 +7,16 @@ create_pybind11_module(
   DEPENDENCIES kernel numerics
 )
 create_pybind11_module(
-  MODULE_NAME geometry 
-  SOURCES 
+  MODULE_NAME geometry
+  SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry_pybind11.cpp
   DEPENDENCIES kernel numerics
 )
 target_include_directories(geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 create_pybind11_module(
-  MODULE_NAME modeling 
-  SOURCES 
+  MODULE_NAME modeling
+  SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/eigen2python_pybind11.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/modeling/modeling_pybind11.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/modeling/dynamical_systems_pybind11.cpp
@@ -27,7 +27,7 @@ create_pybind11_module(
 )
 target_include_directories(modeling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-create_pybind11_module(MODULE_NAME  integrators 
+create_pybind11_module(MODULE_NAME  integrators
 SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/integrators/integrators_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
@@ -50,9 +50,9 @@ add_custom_target(py${COMPONENT}
     integrators
     simulation
     nonsmooth_formulations
-  ) 
+  )
 
- 
+
 
 install(TARGETS
   pb11_template

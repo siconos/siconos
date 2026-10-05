@@ -51,4 +51,3 @@ constexpr const T& fake_object() noexcept {
 #endif
 
 #endif // BOOST_PFR_DETAIL_FAKE_OBJECT_HPP
-

@@ -4,7 +4,7 @@
 #
 # The objective is to call component_setup to create the target <COMPONENT>.
 # Before, it's necessary to set:
-# 
+#
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
@@ -36,7 +36,7 @@ set(${COMPONENT}_EXCLUDE_DOXY)
 # ------ include interface ------
 # What is needed at build time
 # by other targets to compile with current component.
-# 
+#
 # It means that a call to
 #  target_link_libraries(truc PRIVATE kernel)
 # will imply -I<dirs> with dirs listed in
@@ -62,7 +62,7 @@ create_siconos_component(${COMPONENT})
 # Links with other Siconos components
 # Link with numerics required because of some .h files in SiconosFwd.h
 # Investigate this
-target_link_libraries(control PUBLIC numerics) 
+target_link_libraries(control PUBLIC numerics)
 target_link_libraries(control PUBLIC kernel)
 # Links with non-Siconos libraries
 
@@ -80,7 +80,7 @@ endif()
 # to prepare installation of the current target.
 #
 # Before, it's necessary to set:
-# 
+#
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
 #
@@ -91,4 +91,3 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-

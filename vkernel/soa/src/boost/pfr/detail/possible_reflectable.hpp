@@ -49,5 +49,3 @@ constexpr bool possible_reflectable(int) noexcept {
 }}} // namespace boost::pfr::detail
 
 #endif // BOOST_PFR_DETAIL_POSSIBLE_REFLECTABLE_HPP
-
-

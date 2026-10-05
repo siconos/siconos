@@ -52,16 +52,16 @@ struct CohesiveFrictionContactProblem {
   int numberOfContacts;
   /** Number of cohesive points \f$ n_{coh} \f$ (may differ from numberOfContacts) */
   int numberOfCohesivePoints;
-  
+
   /** \f$ {M} \in {{
       \mathrm{I\!R}}}^{m \times m} \f$,
      a matrix with \f$ m = d  (n_c + n_{coh}} \f$ stored in NumericsMatrix structure */
   RawNumericsMatrix *M;
-  
+
   /** \f$ {q} \in {{
       \mathrm{I\!R}}}^{m} \f$ - the local velocity and displacement vector */
   double *q;
-  
+
   /** \f$ {\mu} \in {{
       \mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
@@ -73,7 +73,7 @@ struct CohesiveFrictionContactProblem {
   /** \f$ {c_t} \in {{
       \mathrm{I\!R}}}^{n_{coh}} \f$, vector of cohesion intensity in tangent direction */
   double *c_t;
-  
+
   /** \f$ {q_v} \in {{
       \mathrm{I\!R}}}^{n} \f with \f$ m = d  n \f$ $,  vector associated with cohesive points
   */
@@ -83,16 +83,16 @@ struct CohesiveFrictionContactProblem {
       \mathrm{I\!R}}}^{n} \f with \f$ m = d  n_{coh} \f$ $,  vector associated with cohesive points
   */
   double *q_u;
-  
+
   /** Matrix W for mapping cohesive forces to contact space (required).
       \f$ {V} \in {{
       \mathrm{I\!R}}}^{m \times m} \f$*/
   RawNumericsMatrix *W;
-   
+
   /** Matrix W for mapping cohesive forces to contact space (required).
       \f$ {V} \in {{
       \mathrm{I\!R}}}^{m \times n} \f$*/
-  
+
   RawNumericsMatrix *V;
   /** Matrix X for additional cohesive contributions (required).
       Used for extended cohesive zone models.
@@ -105,7 +105,7 @@ struct CohesiveFrictionContactProblem {
       \f$ {X} \in {{
       \mathrm{I\!R}}}^{n \times m} \f$*/
   RawNumericsMatrix *U;
-  
+
   /** Internal state variables for cohesive zone models (optional).
       This stores damage parameters, displacement history, etc. */
   double *internal_state;

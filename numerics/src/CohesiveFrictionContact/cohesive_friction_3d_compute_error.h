@@ -50,7 +50,7 @@ extern "C" {
  */
 int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem *problem,
                                        double *reaction, double *velocity, double tolerance,
-				       SolverOptions * options,                                       
+				       SolverOptions * options,
                                        double norm,
                                        double *error);
 

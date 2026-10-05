@@ -60,5 +60,5 @@ int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions* optio
     return numerics_error("fc3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
-  return 0;  
+  return 0;
 }

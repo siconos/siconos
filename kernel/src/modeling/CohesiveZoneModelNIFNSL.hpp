@@ -20,9 +20,9 @@
 
   \section sec_czm_overview Overview
 
-  A cohesive zone model (CZM) describes the progressive damage and failure of an 
-  interface between two materials. Unlike standard contact laws that only act when 
-  bodies are in contact (gap <= 0), cohesive laws can sustain traction forces 
+  A cohesive zone model (CZM) describes the progressive damage and failure of an
+  interface between two materials. Unlike standard contact laws that only act when
+  bodies are in contact (gap <= 0), cohesive laws can sustain traction forces
   when the interface is intact (gap > 0 but small).
 
   \section sec_czm_physics Physical Behavior
@@ -30,15 +30,15 @@
   The cohesive interface evolves through several stages:
   - <b>Intact state</b>: The interface can sustain traction up to a critical value.
     The traction force increases as the gap opens (elastic or rigid behavior).
-  - <b>Damage initiation</b>: When traction reaches the critical value, damage 
+  - <b>Damage initiation</b>: When traction reaches the critical value, damage
     begins to accumulate.
   - <b>Softening</b>: The traction capacity decreases as the gap continues to open.
-  - <b>Complete failure</b>: When the gap exceeds a critical displacement, the 
+  - <b>Complete failure</b>: When the gap exceeds a critical displacement, the
     interface is fully broken and the standard contact law takes over.
 
   \section sec_czm_mathematical Mathematical Formulation
 
-  The cohesive traction \f$ t_c \f$ is typically a function of the displacement 
+  The cohesive traction \f$ t_c \f$ is typically a function of the displacement
   jump \f$ \delta \f$ across the interface:
   \f[
   t_c = f(\delta, \text{damage parameters})
@@ -78,7 +78,7 @@ class Interaction;
 
 /** \class CohesiveZoneModelNIFNSL
  * \brief Abstract base class for cohesive zone models extending NewtonImpactFrictionNSL
- * 
+ *
  * This class extends the Newton impact-friction law with cohesive behavior,
  * where the interface can sustain traction up to a critical value before
  * progressive damage occurs. It serves as the base class for all cohesive
@@ -104,7 +104,7 @@ class Interaction;
  *     1e-4,     // delta_c: critical displacement (m)
  *     3         // size: 3D problem
  * );
- * 
+ *
  * // Create interaction with cohesive law
  * auto inter = std::make_shared<Interaction>(nslaw, relation);
  * \endcode
@@ -131,16 +131,16 @@ class CohesiveZoneModelNIFNSL : public NewtonImpactFrictionNSL {
 
  public:
   /** \brief Constructor with size only
-   * 
-   * Creates a cohesive law with default parameters (zero restitution, 
+   *
+   * Creates a cohesive law with default parameters (zero restitution,
    * zero friction). Useful when parameters will be set later.
-   * 
+   *
    * \param size dimension of the non-smooth law (2 for 2D, 3 for 3D)
    */
   explicit CohesiveZoneModelNIFNSL(siconos::algebra::Index size);
 
   /** \brief Constructor with full parameters
-   * 
+   *
    * \param en normal restitution coefficient (0 = perfectly inelastic, 1 = elastic)
    * \param et tangent restitution coefficient
    * \param mu friction coefficient
@@ -152,32 +152,32 @@ class CohesiveZoneModelNIFNSL : public NewtonImpactFrictionNSL {
   ~CohesiveZoneModelNIFNSL() noexcept override = default;
 
   /** \brief Compute the cohesive force vector
-   * 
+   *
    * This pure virtual method must be implemented by derived classes to
    * compute the cohesive traction force based on the current state of
    * the interface (displacement jump, damage parameters, etc.).
-   * 
+   *
    * \param inter the Interaction containing internal variables (damage state)
    * \return pointer to the cohesive force vector data (typically size 3)
-   * \note The returned pointer points to internal storage that is valid 
+   * \note The returned pointer points to internal storage that is valid
    *       until the next call to updateInternalVariables()
    */
   virtual double* cohesion(Interaction& inter) const = 0;
 
   /** \brief Get the fallback law for broken interfaces
-   * 
+   *
    * When the interface is fully damaged, this law replaces the cohesive
    * behavior with standard contact mechanics.
-   * 
+   *
    * \return shared pointer to the fallback non-smooth law
    */
   std::shared_ptr<NonSmoothLaw> nslawBroken() const { return _nslaw_broken; };
 
   /** \brief Check if the NS law is active at a given level
-   * 
+   *
    * Cohesive laws are typically active at level 1 (predictor step) to
    * compute cohesive forces before the contact detection at level 0.
-   * 
+   *
    * \param inter the Interaction
    * \param level the level to check (0 = corrector, 1 = predictor)
    * \return true if the law should be applied at this level
@@ -186,7 +186,7 @@ class CohesiveZoneModelNIFNSL : public NewtonImpactFrictionNSL {
   bool isActiveAtLevel(Interaction& inter, unsigned int level) const override;
 
   /** \brief Print the law's data to the screen
-   * 
+   *
    * Displays the parameters of the cohesive law for debugging purposes.
    */
   void display() const override;

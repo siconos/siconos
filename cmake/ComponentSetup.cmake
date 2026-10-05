@@ -3,7 +3,7 @@ include(SiconosTools)
 #====================================================================
 #
 # Define and setup build process for a target for the current component
-# 
+#
 # Usage:
 #
 # create_siconos_component(COMPONENT)
@@ -100,7 +100,7 @@ endfunction()
 #
 # Define and setup documentation generation process
 # for a the current component
-# 
+#
 # Usage:
 #
 # configure_component_documentation(COMPONENT)
@@ -131,7 +131,7 @@ endfunction()
 #====================================================================
 #
 # Function to define and setup install process for a target for the current component
-# 
+#
 # Usage:
 #
 # siconos_component_install_setup(<COMPONENT>)
@@ -179,7 +179,7 @@ function(siconos_component_install_setup COMPONENT)
       DESTINATION include/siconos/${COMPONENT}
     )
 
-    # Add include dirs in target interface 
+    # Add include dirs in target interface
     target_include_directories(${COMPONENT} INTERFACE
       $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
 
@@ -195,5 +195,3 @@ function(siconos_component_install_setup COMPONENT)
     CACHE INTERNAL "List of all exported components (targets).")
 
 endfunction()
-
-

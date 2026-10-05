@@ -80,7 +80,7 @@
   ar & ::boost::serialization::make_nvp(                                \
     BOOST_PP_STRINGIZE(b),                                              \
     ::boost::serialization::base_object<b>(o) );                        \
- 
+
 /** base class members registration
  *  \param class name
  *  \param members sequence (as a boost preprocessor sequence

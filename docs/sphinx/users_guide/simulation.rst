@@ -61,7 +61,7 @@ Then, the simulation loop will be::
 
 .. toctree::
    :maxdepth: 4
-	      
+
    time_discretisation
    time_integrators
    event_capturing

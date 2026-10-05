@@ -205,7 +205,7 @@ def extract_bc_global_dofs(fesolid, mesh_data):
         mesh = meshio.read(tmp.name)
 
     # 1. "Dirichlet BC"
-    tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name 
+    tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name
                    for name, (tag, dim) in mesh.field_data.items()}
     dirichlet_tag = next((tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None)
     if dirichlet_tag is None:

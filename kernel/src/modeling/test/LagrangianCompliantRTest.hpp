@@ -26,7 +26,7 @@ class LagrangianCompliantRTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(LagrangianCompliantRTest);
 
 
@@ -50,7 +50,3 @@ public:
 };
 
 #endif
-
-
-
-

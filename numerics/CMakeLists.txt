@@ -4,7 +4,7 @@
 #
 # The objective is to call component_setup to create the target <COMPONENT>.
 # Before, it's necessary to set:
-# 
+#
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
@@ -69,7 +69,7 @@ set(${COMPONENT}_EXCLUDE_DOXY src/Unstable_or_deprecated)
 # ------ include interface ------
 # What is needed at build time
 # by other targets to compile with current component.
-# 
+#
 # It means that a call to
 #  target_link_libraries(truc PRIVATE numerics)
 # will imply -I<dirs> with dirs listed in
@@ -99,7 +99,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/MCP
   src/GenericMechanical
   src/VI
-  src/Plasticity	
+  src/Plasticity
   )
 
 # ---- Final setup for the library ----
@@ -128,7 +128,7 @@ create_siconos_component(${COMPONENT})
 include(WindowsNumericsSetup)
 
 # --- Extra setup for the component ---
-if(MLCPSIMPLEX_FOUND) 
+if(MLCPSIMPLEX_FOUND)
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
@@ -150,7 +150,7 @@ set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
   PROPERTIES COMPILE_FLAGS "-Wno-unused-value")
 
 if(HAVE_QL0001) # From externals setup
-  set_source_files_properties(src/LCP/lcp_nsqp.c src/LCP/lcp_qp.c PROPERTIES COMPILE_DEFINITIONS "HAVE_QL0001")  
+  set_source_files_properties(src/LCP/lcp_nsqp.c src/LCP/lcp_qp.c PROPERTIES COMPILE_DEFINITIONS "HAVE_QL0001")
 endif()
 
 
@@ -163,7 +163,7 @@ endif()
 # - sort -
 # --- Sort ---
 if(HAVE_SORT)
-    set_source_files_properties(src/linalg/NumericsSparseMatrix.c PROPERTIES COMPILE_DEFINITIONS "HAVE_SORT")  
+    set_source_files_properties(src/linalg/NumericsSparseMatrix.c PROPERTIES COMPILE_DEFINITIONS "HAVE_SORT")
     set_source_files_properties(src/tools/NumericsSparseMatrix.c
       PROPERTIES COMPILE_OPTIONS "-Wno-unused-function") # To remove all warnings due to include "sort.h"
 endif()
@@ -171,8 +171,8 @@ endif()
 # -- fc problems specific dump option
 if(DUMP_PROBLEM)
   set_source_files_properties(
-    src/FrictionContact/gfc2d_driver.c 
-    src/FrictionContact/gfc3d_nonsmooth_Newton_AlartCurnier.c PROPERTIES COMPILE_DEFINITIONS "DUMP_PROBLEM")  
+    src/FrictionContact/gfc2d_driver.c
+    src/FrictionContact/gfc3d_nonsmooth_Newton_AlartCurnier.c PROPERTIES COMPILE_DEFINITIONS "DUMP_PROBLEM")
 endif()
 
 # Links with non-Siconos libraries
@@ -201,7 +201,7 @@ if(LPSOLVE_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE CACHE INTERNAL "True if a LP Solver has been found and is activated.")
   # to add more tests in kernel and control
   target_link_libraries(numerics PRIVATE LPSOLVE::LPSOLVE)
-  set_source_files_properties(src/utils/vertex_extraction.c PROPERTIES COMPILE_DEFINITIONS "HAS_ONE_LP_SOLVER") 
+  set_source_files_properties(src/utils/vertex_extraction.c PROPERTIES COMPILE_DEFINITIONS "HAS_ONE_LP_SOLVER")
 endif()
 
 # - Thread -
@@ -260,7 +260,7 @@ find_package(MlcpSimplex QUIET)
 if(MlcpSimplex_FOUND)
   set(HAVE_MLCPSIMPLEX TRUE CACHE INTERNAL "True if mlcp simplex solver API has been found and is activated.")
   target_link_libraries(numerics PRIVATE $<BUILD_INTERFACE:MlcpSimplex::MlcpSimplex>)
-  set_source_files_properties(src/MLCP/mlcp_simplex.c PROPERTIES COMPILE_DEFINITIONS "HAVE_MLCPSIMPLEX")  
+  set_source_files_properties(src/MLCP/mlcp_simplex.c PROPERTIES COMPILE_DEFINITIONS "HAVE_MLCPSIMPLEX")
 endif()
 
 # - GAMS, Path -
@@ -295,7 +295,7 @@ if(WITH_SUPERLU_DIST)
   find_package(SuperLU_MT REQUIRED COMPONENTS DIST)
 endif()
 if(SuperLU_FOUND)
-  
+
   target_link_libraries(numerics PRIVATE SuperLU::SuperLU)
 endif()
 
@@ -323,11 +323,11 @@ endif()
 if(WITH_OPENSSL)
   find_package(OpenSSL REQUIRED COMPONENTS Crypto)
   target_link_libraries(numerics PRIVATE OpenSSL::Crypto)
-  target_compile_definitions(numerics PUBLIC WITH_OPENSSL)  
+  target_compile_definitions(numerics PUBLIC WITH_OPENSSL)
 endif()
 
 if(WITH_FACTORISATION_DEBUG)
-  set_source_files_properties(src/linalg/NumericsMatrix.c PROPERTIES COMPILE_DEFINITIONS "FACTORIZATION_DEBUG")  
+  set_source_files_properties(src/linalg/NumericsMatrix.c PROPERTIES COMPILE_DEFINITIONS "FACTORIZATION_DEBUG")
 endif()
 
 # -- HDF5 --
@@ -358,7 +358,7 @@ if(WITH_CUDA)
   # CUDA architectures (adjust based on target GPU)
   # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-      message(FATAL_ERROR 
+      message(FATAL_ERROR
       " CMAKE_CUDA_ARCHITECTURES is not defined!\n"
       " Please specify the target GPU architecture(s) using:\n"
       "   -DCMAKE_CUDA_ARCHITECTURES=native (for local machine, if CMake version >= 3.24)\n"
@@ -367,7 +367,7 @@ if(WITH_CUDA)
       " See: https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html"
       )
   endif()
-  
+
   enable_language(CUDA)
 
 
@@ -391,7 +391,7 @@ if(WITH_CUDA)
 
   # Add CUDA files
   add_subdirectory(src/FrictionContact/parallel/gpu)
-  target_sources(${COMPONENT} PRIVATE ${CUDA_FILES}) 
+  target_sources(${COMPONENT} PRIVATE ${CUDA_FILES})
 
   message(STATUS "CUDA support enabled for numerics")
   message(STATUS "  CUDA Toolkit version: ${CUDAToolkit_VERSION}")
@@ -401,7 +401,7 @@ endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
-  
+
 # --- python bindings ---
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
@@ -412,10 +412,10 @@ endif()
 # to prepare installation of the current target.
 #
 # Before, it's necessary to set:
-# 
+#
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
-# 
+#
 # set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
 #   src
 #   src/tools
@@ -435,7 +435,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
 ${${COMPONENT}_DIRS} # All .hpp are installed
 )
 
-# List header files (in dir above) that must not be installed 
+# List header files (in dir above) that must not be installed
 list(APPEND ${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
 
 siconos_component_install_setup(${COMPONENT})

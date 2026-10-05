@@ -47,5 +47,4 @@ inline Standard_Integer mymath_FunctionSetRoot::StateNumber() const{
 inline Standard_Integer mymath_FunctionSetRoot::NbIterations() const{
   StdFail_NotDone_Raise_if(!Done, " ");
   return Kount;
-}    
-
+}

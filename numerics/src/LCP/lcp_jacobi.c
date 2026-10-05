@@ -14,10 +14,10 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "numerics_verbose.h"              // for verbose
-#include "siconos_debug.h"  
+#include "siconos_debug.h"
 
 void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {  
+                         SolverOptions *options) {
 
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
@@ -45,7 +45,7 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
   if (*info == 2) {
     return;
   }
-  
+
   /* Solver variables */
   int iter = 0;
   double err = 1.;

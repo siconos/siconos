@@ -119,7 +119,7 @@ MACRO(CHECK_ALL_LIBRARIES LIBRARIES _name _list _flags)
  # message(STATUS "Checking for [${__list}]")
   FOREACH(_library ${_list})
     SET(_combined_name ${_combined_name}_${_library})
-    IF(_libraries_work)      
+    IF(_libraries_work)
       FIND_LIBRARY(${_prefix}_${_library}_LIBRARY NAMES ${_library} PATHS ${_libdir})
       MARK_AS_ADVANCED(${_prefix}_${_library}_LIBRARY)
       SET(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
@@ -129,7 +129,7 @@ MACRO(CHECK_ALL_LIBRARIES LIBRARIES _name _list _flags)
       ELSE(${_prefix}_${_library}_LIBRARY)
         #MESSAGE(STATUS "  Library ${_library}: not found")
       ENDIF(${_prefix}_${_library}_LIBRARY)
-      
+
     ENDIF(_libraries_work)
   ENDFOREACH(_library ${_list})
   # Test this combination of libraries.
@@ -163,7 +163,7 @@ FOREACH(mklrtl ${mklrtls} "")
            IF(MKL_LIBRARIES)
             LIST(APPEND MKL_LIBRARIES ${threading_lib})
            ENDIF(MKL_LIBRARIES)
-        ENDIF (NOT MKL_LIBRARIES AND NOT INTEL_MKL_SEQUENTIAL)          
+        ENDIF (NOT MKL_LIBRARIES AND NOT INTEL_MKL_SEQUENTIAL)
        ENDFOREACH(threading_lib ${threading_libs})
       ENDFOREACH(mklthread)
     ENDFOREACH(mkl64)
@@ -193,7 +193,7 @@ FOREACH(mklrtl ${mklrtls} "")
            IF(MKL_LIBRARIES)
             LIST(APPEND MKL_LIBRARIES ${threading_lib})
            ENDIF(MKL_LIBRARIES)
-        ENDIF (NOT MKL_LIBRARIES)          
+        ENDIF (NOT MKL_LIBRARIES)
        ENDFOREACH(threading_lib ${threading_libs})
       ENDFOREACH(mklthread)
     ENDFOREACH(mkl64)
@@ -205,7 +205,7 @@ IF (NOT MKL_LIBRARIES)
   SET(MKL_VERSION 900)
   CHECK_ALL_LIBRARIES(MKL_LIBRARIES cblas_sgemm
     "mkl;guide;pthread;m" "")
-ENDIF (NOT MKL_LIBRARIES)          
+ENDIF (NOT MKL_LIBRARIES)
 
 # Include files
 IF (MKL_LIBRARIES)
@@ -216,7 +216,7 @@ ENDIF (MKL_LIBRARIES)
 # Other libraries
 
 
-## Set env var to help find library process. 
+## Set env var to help find library process.
 
 if (WIN32)
   set(_libdir LIB)
@@ -237,7 +237,7 @@ IF (MKL_LIBRARIES)
         ENDIF(MKL_LAPACK_LIBRARIES)
       ENDIF (NOT MKL_LAPACK_LIBRARIES)
       IF (NOT MKL_SCALAPACK_LIBRARIES)
-        FIND_LIBRARY(MKL_SCALAPACK_LIBRARIES NAMES "mkl_scalapack${mkl64}${mkls}" PATHS ${_libdir}) 
+        FIND_LIBRARY(MKL_SCALAPACK_LIBRARIES NAMES "mkl_scalapack${mkl64}${mkls}" PATHS ${_libdir})
         MARK_AS_ADVANCED(MKL_SCALAPACK_LIBRARIES)
       ENDIF (NOT MKL_SCALAPACK_LIBRARIES)
       IF (NOT MKL_SOLVER_LIBRARIES)
@@ -261,7 +261,7 @@ ENDIF(NOT MKL_LAPACK_LIBRARIES)
 #if(MKL_LAPACK)
 #set(LAPACK_LIBRARY_DIR ${_bdir} CACHE PATH "Lapack libraries location." FORCE)
 
-# LibIRC: intel compiler always links this; 
+# LibIRC: intel compiler always links this;
 # gcc does not; but mkl kernels sometimes need it.
 IF (MKL_LIBRARIES)
   IF (CMAKE_COMPILER_IS_GNUCC)
@@ -299,5 +299,3 @@ ENDIF(NOT MKL_FIND_QUIETLY)
 
 # Do nothing if MKL_FOUND was set before!
 ENDIF (NOT MKL_FOUND)
-
-

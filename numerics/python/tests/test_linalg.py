@@ -157,7 +157,7 @@ def test_convert(datafile):
 
     mat = []
 
-    
+
     # TODO : implement read from file in pybind11 ...
 
     fcp = sn.GlobalFrictionContactProblem(datafile("GFC3D_TwoRods1.dat"))

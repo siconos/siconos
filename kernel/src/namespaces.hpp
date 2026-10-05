@@ -62,7 +62,7 @@ namespace siconos::integrators {}
 namespace siconos::integrators {}
 
 /** @namespace siconos::nonsmooth_formulations
- *  @brief Classes and tools dedicated to the description of the nonsmooth problem (formulation and solver) 
+ *  @brief Classes and tools dedicated to the description of the nonsmooth problem (formulation and solver)
  */
 namespace siconos::nonsmooth_formulations {}
 

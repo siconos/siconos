@@ -201,4 +201,3 @@ void for_each_field_dispatcher(T& t, F&& f, std::index_sequence<I...>) {
 
 
 #endif // BOOST_PFR_DETAIL_CORE14_LOOPHOLE_HPP
-

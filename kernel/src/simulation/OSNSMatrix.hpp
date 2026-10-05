@@ -274,7 +274,7 @@ class OSNSMatrix {
                 std::shared_ptr<NumericsMatrix> Winverse,
                 std::shared_ptr<NumericsMatrix> H0);
 
-  
+
  /** Compute U = H0^T * Winverse * H matrix given Htrans, Winverse, and H0
    *  Used for cohesive zone models to compute the contribution matrix
    *
@@ -285,7 +285,7 @@ class OSNSMatrix {
   void computeU(std::shared_ptr<NumericsMatrix> Htrans,
                 std::shared_ptr<NumericsMatrix> Winverse,
                 std::shared_ptr<NumericsMatrix> H0);
-  
+
  /** Compute X = H0^T * Winverse * H0 matrix given Winverse, and H0
    *  Used for cohesive zone models to compute the contribution matrix
    *

@@ -197,7 +197,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
       "plasticity_2d_onecone_nonsmooth_Newton_initialize"
       " Avg. rho value = %e\t%e\t%e\t",
       avg_rho[0] / (double)nc, avg_rho[1] / (double)nc, avg_rho[2] / (double)nc);
-  return 0;  
+  return 0;
 }
 
 static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem* localproblem,

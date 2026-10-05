@@ -1,6 +1,6 @@
 .. index::
    single: Second Order Cone Linear Complementarity Problem (SOCLCP)
-   
+
 .. contents::
 
 .. _soclcp_problem:
@@ -71,9 +71,9 @@ parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 * iparam[SICONOS_IPARAM_ERROR_EVALUATION] : error computation method,
-  
+
     * SICONOS_ERROR_FULL_EVALUATION Complete error computation with v computation (Default)
-    * SICONOS_ERROR_LIGHT_EVALUATION for Light error computation with incremental values on r verification of absolute error at the end 
+    * SICONOS_ERROR_LIGHT_EVALUATION for Light error computation with incremental values on r verification of absolute error at the end
     * SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE for light error computation, without update for v
 
 * iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
@@ -81,7 +81,7 @@ parameters:
 * iparam[SICONOS_IPARAM_NSGS_SHUFFLE] : if 1, shuffle the contact indices in the loop
 * dparam[SICONOS_DPARAM_TOL] = 1e-4;
 * dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1., relaxation parameter value
-  
+
 internal solver: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`.
 
 
@@ -131,4 +131,3 @@ parameters:
 
 * iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] (set by soclcp_nsgs)
 * dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.
-

@@ -6,7 +6,7 @@
 #========================================
 # Setup for tests in a given directory
 #
-# 
+#
 # Usage :
 # begin_tests(<SOURCE_DIR> DEPS <dep1> <dep2>)
 #
@@ -427,7 +427,7 @@ endmacro()
 # Most of the time, path_to_tests = 'tests'.
 #
 # This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
-# 
+#
 # binary dir will then look like :
 # wrap/tests
 # wrap/siconos/mechanics
@@ -442,7 +442,7 @@ endmacro()
 #  * DEPS : list of targets that must be linked with c/c++ plugins used by python tests
 #  * EXCLUDE : list of python files (path relative to current source dir) that
 #    must not be run as tests.
-# 
+#
 # both DEPS and EXCLUDE are optional.
 #
 function(build_python_tests)
@@ -513,7 +513,7 @@ function(build_python_tests)
     OUTPUT_VARIABLE LIBASAN_PATH
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    
+
 
   endif()
 

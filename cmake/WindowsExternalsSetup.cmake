@@ -24,4 +24,3 @@ IF(MSVC AND "${CMAKE_Fortran_COMPILER}" MATCHES "gfortran")
   target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-mno-stack-arg-probe>)
    # XXX No test :( -- xhub
 endif()
-

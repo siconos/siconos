@@ -1,6 +1,6 @@
-# Dockerfiles to produce 'Siconos-ready' images 
+# Dockerfiles to produce 'Siconos-ready' images
 
-images including 
+images including
 - a complete Siconos install
 - the siconos-tutorials repository
 - jupyter notebook install

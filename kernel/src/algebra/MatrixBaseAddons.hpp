@@ -26,4 +26,3 @@
 // Setters
 
 inline void setValue(Index row, Index col, Scalar v) { this->operator()(row, col) = v; }
- 

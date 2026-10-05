@@ -35,7 +35,7 @@
   For "mixed" problems (i.e. including equality constraints), the Fischer function is defined
   as :
 
-  \f[ 
+  \f[
   \phi_{mixed}(z,F(z)) =
   \left\lbrace \begin{array}{c}
   F_e(z) \\

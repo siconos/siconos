@@ -58,5 +58,3 @@ void aceTime::setName(char const *Name)
   strcpy(mName,Name);
 #endif
 }
-
-

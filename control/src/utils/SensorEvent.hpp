@@ -35,7 +35,7 @@ class SensorEvent : public siconos::simulation::Event {
   ACCEPT_SERIALIZATION(SensorEvent);
 
   using EventType = siconos::simulation::EventType;
-  
+
   /** The sensor linked to the present event */
   std::shared_ptr<Sensor> _sensor{nullptr};
 

@@ -47,4 +47,3 @@ add_custom_target(pyclean COMMAND rm -f ${PYCFILES}
   COMMAND make clean
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/build
   COMMENT "Clean sources and build.")
-

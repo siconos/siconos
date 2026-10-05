@@ -14,7 +14,7 @@ Let us recall the definitions of the  Lie group Theory taken from \cite{Iserles.
     \label{eq:12}
     a = \left. \frac{d}{dt} (\rho(t)) \right|_{t=0}.
   \end{equation}
-The set of all tangents at $p$ is called the tangent space at $p$ and denoted by $T\mathcal M|_p$. It has the structure of a linear space. 
+The set of all tangents at $p$ is called the tangent space at $p$ and denoted by $T\mathcal M|_p$. It has the structure of a linear space.
 \end{definition}
 \begin{definition}
    A (tangent) vector field on $\mathcal M$ is a smooth function $F : \mathcal M \rightarrow T\mathcal M$ such that $F (p) \in T\mathcal M|_p$ for all $p \in \mathcal M$. The collection of all vector fields on $\mathcal M$ is denoted by $\mathcal X(\mathcal M)$.
@@ -55,7 +55,7 @@ The commutator of vector fields satisfies the identities
 \end{lemma}
 \begin{definition}
   A Lie algebra of vector fields is a collection of vector fields which is closed under linear combination and commutation. In other words, letting $\mathfrak g$ denote the Lie algebra,
-  
+
   \begin{equation}
     \begin{array}[lclr]{l}
     B \in \mathfrak g \implies \alpha B \in \mathfrak  g \text{ for all } \alpha ∈ R .\\
@@ -71,7 +71,7 @@ Given a collection of vector fields $B = {B_1 , B_2 , \ldots}$, the least Lie al
   A Lie algebra is a linear space $V$ equipped with a Lie bracket, a bilinear, skew-symmetric mapping
   \begin{equation}
     \label{eq:18}
-    [ \cdot , \cdot ] : V \times V \rightarrow V 
+    [ \cdot , \cdot ] : V \times V \rightarrow V
   \end{equation}
 that obeys identities \eqref{eq:16} from Lemma~\ref{lemma:LieBracket}
 \end{definition}
@@ -92,7 +92,7 @@ An invertible homomorphism is called an isomorphism.
       p \glaw(q \glaw r) = (p\glaw q)\glaw r, \forall  p, q, r ∈ \mathcal G &\text{(associativity)}\\
       \exists I \in \mathcal G \text{ such that } I\glaw p = p \glaw I = p,  \forall p \in \mathcal G&\text{(identity element)}\ \\
       \forall p \in \mathcal G, \exists  p^{-1}  \in \mathcal G \text{ such that }  p^{-1}\glaw p = I&\text{(inverse) }\ \\
-      \text{ The maps}  (p, r)  \rightarrow p\glaw r \text{ and }  p  \rightarrow p^{-1} \text{are smooth functions }&\text{(smoothness)}\                                                                                                
+      \text{ The maps}  (p, r)  \rightarrow p\glaw r \text{ and }  p  \rightarrow p^{-1} \text{are smooth functions }&\text{(smoothness)}\
     \end{array}
 \end{equation}
 \end{definition}
@@ -102,7 +102,7 @@ An invertible homomorphism is called an isomorphism.
   \begin{equation}
     [a,b]= \left.\frac{\partial^2 }{\partial s\partial t} \rho(s)\sigma(t)\rho(-s)\right|_{s=t=0}\label{eq:21}
 \end{equation}
-where $\rho(s)$ and $\sigma(t)$ are two smooth curves on $\mathcal G$ such that $\rho(0) = \sigma(0) = I$, and 
+where $\rho(s)$ and $\sigma(t)$ are two smooth curves on $\mathcal G$ such that $\rho(0) = \sigma(0) = I$, and
 $\dot \rho(0) = a$ and $\dot \sigma(0) = b$.
 \end{definition}
 
@@ -132,18 +132,18 @@ $\dot \rho(0) = a$ and $\dot \sigma(0) = b$.
 A given smooth curve  $S(\cdot) : t\in \RR \mapsto S(t)\in \mathcal G$ in $\mathcal G$ such that $S(0)= I$ produces a flow $\Lambda^l(S(t),\cdot)$ (resp. $\Lambda^r(\cdot, S(t))$) on $\mathcal M$ and by differentiation we find a tangent vector field
 \begin{equation}
   \label{eq:24}
-  F(y) = \left. \frac{d}{dt} (\Lambda^l(S(t),y) \right|_{t=0}\quad( \text{resp.  }  F(y) = \left. \frac{d}{dt} (\Lambda^r(y,S(t)) \right|_{t=0} ) 
+  F(y) = \left. \frac{d}{dt} (\Lambda^l(S(t),y) \right|_{t=0}\quad( \text{resp.  }  F(y) = \left. \frac{d}{dt} (\Lambda^r(y,S(t)) \right|_{t=0} )
 \end{equation}
 that defines a ordinary differential equation on a Lie Group
 \begin{equation}
   \label{eq:25}
   \dot y(t) = F(y(t)) = \left. \frac{d}{dt} (\Lambda^l(S(t),y) \right|_{t=0}  \quad( \text{resp.  }\dot y(t) = F(y(t)) = \left. \frac{d}{dt} (\Lambda^r(y,S(t)) \right|_{t=0})
 \end{equation}
-  
+
 \begin{lemma}
   Let $\lambda^l_{*} : \mathfrak g \rightarrow \mathcal X(\mathcal M) $ (resp. $\lambda^r_{*} : \mathfrak g \rightarrow \mathcal X(\mathcal M) $ be defined as
   \begin{equation}
-  \lambda^l_{*}(a)(y) = \left.\frac{d}{ds}{ \Lambda^l (\rho(s), y)}\right|_{s=0} \quad (\text{ resp. }  \lambda^r_{*}(a)(y) = \left.\frac{d}{ds}{ \Lambda^r (y, \rho(s))}\right|_{s=0})\label{eq:26}  
+  \lambda^l_{*}(a)(y) = \left.\frac{d}{ds}{ \Lambda^l (\rho(s), y)}\right|_{s=0} \quad (\text{ resp. }  \lambda^r_{*}(a)(y) = \left.\frac{d}{ds}{ \Lambda^r (y, \rho(s))}\right|_{s=0})\label{eq:26}
 \end{equation}
  where $\rho(s)$ is a curve in $\mathcal G$ such that $\rho(0)=I$ and $\dot\rho (0)=a$. Then $\lambda^l_{8}$ is a linear
 map between Lie algebras such that
@@ -153,14 +153,14 @@ map between Lie algebras such that
 \end{lemma}
 
 
-The following product between an element of an algebra $a \in \mathfrak g$ with an element of a group $\sigma  \in \mathcal G$ 
+The following product between an element of an algebra $a \in \mathfrak g$ with an element of a group $\sigma  \in \mathcal G$
  can be defined. This will served as a basis for defining the exponential map.
 \begin{definition}
   We define the left product $(\cdot, \cdot)^l : \mathfrak g \times \mathcal G \rightarrow  \mathcal G$ of an element of an algebra $a \in \mathfrak g$ with an element of a group $\sigma  \in \mathcal G$ as
   \begin{equation}
  (a, \sigma)^l = a \cdot \sigma = \left.\frac{d}{ds} \rho(s) \glaw \sigma \right|_{s=0}\label{eq:28}
 \end{equation}
-where $\rho(s)$ is a smooth curve such that $\dot\rho(0)=a$ and $\rho(0)=I$. In the same way, we can define the right product $(\cdot, \cdot)^r : \mathcal G \times \mathfrak g  \rightarrow   \mathcal G$ 
+where $\rho(s)$ is a smooth curve such that $\dot\rho(0)=a$ and $\rho(0)=I$. In the same way, we can define the right product $(\cdot, \cdot)^r : \mathcal G \times \mathfrak g  \rightarrow   \mathcal G$
 \begin{equation}
   \label{eq:29}
   (\sigma,a)^r = \sigma \cdot a  = \left.\frac{d}{ds} \sigma \glaw \rho(s)   \right|_{s=0}
@@ -227,7 +227,7 @@ y(t) = \Lambda^r(y_0,\exp(ta)).\label{eq:39}
 
 
 \subsection{Translation (Trivialization) maps}
-The left and right translation maps defined by 
+The left and right translation maps defined by
 \begin{equation}
   \label{eq:148}
   \begin{array}{rcl}
@@ -235,12 +235,12 @@ The left and right translation maps defined by
     y &\mapsto&  z \glaw y
   \end{array}
 \end{equation}
-and 
+and
 \begin{equation}
   \label{eq:149}
   \begin{array}{rcl}
     R_z(y)  :  \mathcal G \times  \mathcal G  & \rightarrow& \mathcal G \quad \text{ (right translation map )} \\
-    y  &\mapsto&  y \glaw z 
+    y  &\mapsto&  y \glaw z
   \end{array}
 \end{equation}
 
@@ -288,7 +288,7 @@ Any tangent vector $F : \mathcal G \rightarrow T_z\mathcal G$ can be written in 
   \label{eq:155}
   F(z) = L'_z(f(a)) = R'_z(g(z))
 \end{equation}
-where $f,g \mathcal G \rightarrow \mathfrak g$. 
+where $f,g \mathcal G \rightarrow \mathfrak g$.
 \subsection{Adjoint representation}
 \begin{definition}
 Let $p \in \mathcal G$ and let $\sigma (t)$ be a smooth curve on $\mathcal G$ such that $\sigma (0)$ = I and $\dot \sigma(0) = b \in \mathfrak g$. The adjoint representation is defined as
@@ -304,7 +304,7 @@ The derivative of $\Ad$ with respect to the first argument is denoted $\ad$. Let
 The adjoint representation can also be expressed with the map
 \begin{equation}
   \label{eq:154}
-  \Ad_p(b)  = (L_p \glaw R_{p^{-1}})' (b) = (L'_p \glaw R'_{p^{-1}}) (b) = p \glaw b \glaw p^{-1}  
+  \Ad_p(b)  = (L_p \glaw R_{p^{-1}})' (b) = (L'_p \glaw R'_{p^{-1}}) (b) = p \glaw b \glaw p^{-1}
 \end{equation}
 
 For a tangent vector given in~\eqref{eq:155}, we have
@@ -330,7 +330,7 @@ Another important relation relating $\Ad$, $\ad$ and $\exp$ is
 The definition is very similar to the definition of the directional derivative of $\exp$ in the direction $v \in \mathfrak g$ at a point $a\in\mathfrak g$. Using the expression \eqref{eq:153} of the tangent space at $\exp(a)$, we can defined another expression of the differential map denoted as $\dlexp_a : \mathfrak g  \rightarrow \mathfrak g$ such that
 \begin{equation}
   \label{eq:156}
-  \dlexp_a = L'_{\exp^{-1}(a)} \glaw \exp_a' = L'_{\exp(-a)} \glaw \exp_a' 
+  \dlexp_a = L'_{\exp^{-1}(a)} \glaw \exp_a' = L'_{\exp(-a)} \glaw \exp_a'
 \end{equation}
 This expression appears as a trivialization of the differential map $\exp'_a$. Using the expression of $L'_z$ in \eqref{eq:152}.
 In~\cite[Theorem 2.14.13]{Varadarajan_book1984}, an explicit formula relates $\dlexp_{a}$ to the iteration of the adjoint operator:
@@ -349,21 +349,21 @@ where $(\ad_a)^k$ is the kth iteration of the adjoint operator:
 It is also possible to define the right trivialized differential of the exponential map
 \begin{equation}
   \label{eq:162}
-  \drexp_a = R'_{\exp^{-1}(a)} \glaw \exp_a' = R'_{\exp(-a)} \glaw \exp_a' 
+  \drexp_a = R'_{\exp^{-1}(a)} \glaw \exp_a' = R'_{\exp(-a)} \glaw \exp_a'
 \end{equation}
 that is
 \begin{equation}
   \label{eq:163}
   \drexp_a(b) = \exp'_a(b) \glaw \exp(-a)
 \end{equation}
-With these expression, we have equivalently for 
+With these expression, we have equivalently for
 \begin{equation}
   \label{eq:157}
    \exp_a'(b)  = \exp_a \glaw \dlexp_a(b)\quad \text{ and } \exp_a'(b)  = \drexp_a(b) \glaw   \exp(a)
 \end{equation}
 
 
-To avoid to burden to much the notation, we introduced the unified definition of the differential map  that corresponds to $\dexp=\drexp$ 
+To avoid to burden to much the notation, we introduced the unified definition of the differential map  that corresponds to $\dexp=\drexp$
 \begin{definition}
 The differential of the exponential mapping, denoted by $\dexp_a : \mathfrak g \times \mathfrak g \rightarrow \mathfrak g$ is defined as the ``right trivialized'' tangent of the exponential map
 \begin{equation}
@@ -390,14 +390,14 @@ As for $\Ad_a$ and $\ad_a$, the mapping $\dexp_{a}(b)$ is a linear mapping in it
 It is also possible to define the  the ``left trivialized'' tangent of the exponential map
 \begin{equation}
   \label{eq:46}
-   \frac{d}{dt} (\exp(a(t))) =  \exp(a(t)) \dlexp_{a(t)}(a'(t)) = \exp(a(t)) \dexp_{-a(t)}(a'(t)) 
+   \frac{d}{dt} (\exp(a(t))) =  \exp(a(t)) \dlexp_{a(t)}(a'(t)) = \exp(a(t)) \dexp_{-a(t)}(a'(t))
 \end{equation}
 
 \begin{ndrva}
   other notation and Lie derivative
   \begin{equation}
     \label{eq:178}
-      Df \cdot \widehat \Omega (p) = (\widehat \Omega^r f )(p) 
+      Df \cdot \widehat \Omega (p) = (\widehat \Omega^r f )(p)
   \end{equation}
 \end{ndrva}
 
@@ -409,7 +409,7 @@ It is also possible to define the  the ``left trivialized'' tangent of the expon
 The function $\dexp_{a}$ is an analytical function so it possible to invert it to get
 \begin{equation}
   \label{eq:45}
-  \dexp^{-1}_{a} = \sum_{k=0}^\infty \frac{B_k}{(k)!} (\ad_a)^k(b) 
+  \dexp^{-1}_{a} = \sum_{k=0}^\infty \frac{B_k}{(k)!} (\ad_a)^k(b)
 \end{equation}
 where $B_k$ are the Bernouilli number.
 
@@ -428,7 +428,7 @@ The image of $b$ by $f'_z$   is obtained by first identifying $b$ with an elemen
   \label{eq:167}
   f'_z(b) = \lim_{t\rightarrow 0} \frac{f(z\glaw y) - f(z)}{t}
 \end{equation}
-As we have done for the exponential mapping, it is possible to get a left trivialization of  
+As we have done for the exponential mapping, it is possible to get a left trivialization of
 \begin{equation}
   \label{eq:169}
   \dd f_z = (f\glaw L_z)' = f'_z \glaw L'_z
@@ -440,9 +440,8 @@ thus
 \end{equation}
 
 \paragraph{Newton Method}
-Let us imagine that we want to solve $f(y) = 0 $ for $y \in \mathcal G$. A newton method can be written as 
+Let us imagine that we want to solve $f(y) = 0 $ for $y \in \mathcal G$. A newton method can be written as
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "DevNotes"
 %%% End:
-

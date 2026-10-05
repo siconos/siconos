@@ -128,4 +128,3 @@ with MechanicsHdf5Runner(io_filename=io_filename, mode='r+',
                          config=runner_config) as io:
 
         io.run(run_options)
-

@@ -50,13 +50,13 @@ Notations :
 
    q_k(t^i) = q_k^i \\
    v_k(t^{i}) = v_k^i \\
-   
+
 In the following, we will use k for space (bottom) indices and i for time (top) indices.
-   
+
 MJ is based on a theta-scheme, for :math:`\theta \in [0,1]`
 
 
-MJ we consider diagonal stiffness and damping, 
+MJ we consider diagonal stiffness and damping,
 
 .. math::
    :nowrap:
@@ -82,7 +82,7 @@ Bilbao exact scheme writes:
 for :math:`\Gamma = diag(\gamma_k)` and :math:`\Sigma^* = diag(\sigma_k^*)` some diagonal matrices, with
 
 .. math::
-   
+
    \gamma_{k} &= \frac{2}{\omega_k^2\Delta t^2} - \frac{A_k}{1+e_k-A_k}, \\
    \sigma^*_{k} &= \left(\frac{1}{\Delta t} + \frac{\omega_k^2\Delta t}{2} - \gamma_k\frac{\omega_k^2\Delta t}{2} \right)\frac{1-e_k}{1+e_k} \\
    A_k &= e^{-\sigma_k\Delta t}\left(e^{\sqrt{\sigma_k^2 - \omega_k^2}\Delta t} + e^{-\sqrt{\sigma_k^2 - \omega_k^2}\Delta t}\right) \\
@@ -107,7 +107,7 @@ For MJ, this leads to
 using :math:`q^{i+1} = q^i + \Delta t(\theta v^{i+1} + (1 - \theta) v^i)`, we get
 
 .. math::
-   
+
    [M + \Delta t^2\theta^2 K + \Delta t\theta C] (v^{i+1}-v^{i}) + \Delta tKq^i + (\Delta t^2\theta K + \Delta tC) v^i = p^{i+1} \\
 
 And for BMJ:
@@ -119,21 +119,21 @@ And for BMJ:
 With :math:`q^{i+1} = q^{i} + \Delta tv^{i+1}`, we get
 
 .. math::
-   
+
    q^{i+1} - q^{i-1} &= \Delta t(v^{i+1} + v^i) \\
    q^{i+1} + q^{i-1} &= 2q^i + \Delta t(v^{i+1} - v^i) \\
 
 and
 
 .. math::
-   
+
    [M + \frac{\Delta t^2}{2}(\mathcal{I} - \Gamma)K + \Delta t\Sigma^*] (v^{i+1}-v^{i}) + \Delta tKq^i + 2\Delta t \Sigma^* v^i = p^{i+1} \\
-   
+
 
 Both discretisations writes
-   
+
 .. math::
-   
+
    W(v^{i+1}-v^{i}) = v_{free}^i + p^{i+1} \\
    or \\
    v^{i+1} = v^i_{free} + W^{-1}p^{i+1} \\
@@ -185,7 +185,7 @@ Non-smooth problem formulation
 
 
 .. math::
-   
+
    \dot y^{i+1} &= S_cv^{i} - S_cW^{-1}(\Delta tKq^i + 2\Delta t \Sigma^* v^i) + S_cW^{-1}S_c^T\lambda^{i+1} \\
            &= q_{LCP} + M_{LCP}\lambda^{i+1}
 
@@ -194,4 +194,3 @@ with
 .. math::
 
    0 \leq \dot y^{i+1} \perp \lambda^{i+1} \geq 0
-   

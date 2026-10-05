@@ -24,4 +24,3 @@ option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable. Default = ON" ON)
-

@@ -16,4 +16,3 @@ Below you will find links to documentation for all classes and files in Siconos,
 
 
 *If a file or a class you know does not appear in this page, it means it has not been (properly) documented or is not available in the high level API. Please contact us if you think it is an error.*
-

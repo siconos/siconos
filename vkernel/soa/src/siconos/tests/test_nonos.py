@@ -74,4 +74,3 @@ def test_interaction_manager():
 #    assert io.positions(0).shape[0] == 1
 
 #test_time_stepping()
-

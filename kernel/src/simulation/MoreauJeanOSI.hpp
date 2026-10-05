@@ -442,7 +442,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
-  
+
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account at the position
    *
@@ -526,7 +526,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   virtual void updateInteractionInternalState() override;
 
-  
+
   /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display() const override;

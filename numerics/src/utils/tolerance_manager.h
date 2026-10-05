@@ -43,12 +43,12 @@ typedef struct {
   /* User-specified parameters (read-only after init) */
   double user_tolerance;        /**< Original user-requested tolerance */
   double min_tolerance;         /**< Absolute floor (DBL_EPSILON * 1e-6) */
-  
+
   /* Working state (may change during iterations) */
   double working_tolerance;     /**< Current adapted tolerance */
   double local_tol_original;    /**< Saved original local solver tolerance */
   double local_tol_current;     /**< Current (possibly adapted) local tolerance */
-  
+
   /* Adaptation tracking */
   int adaptation_count;         /**< Number of times tolerance was adapted */
   double last_error_ratio;      /**< Last computed error ratio */
@@ -60,7 +60,7 @@ typedef struct {
  * \param[in] user_tol User-specified tolerance
  * \param[in] localsolver_options Local solver options (may be NULL)
  */
-static inline void tolerance_manager_init(ToleranceManager* tm, 
+static inline void tolerance_manager_init(ToleranceManager* tm,
                                           double user_tol,
                                           SolverOptions* localsolver_options) {
   tm->user_tolerance = user_tol;
@@ -68,7 +68,7 @@ static inline void tolerance_manager_init(ToleranceManager* tm,
   tm->min_tolerance = DBL_EPSILON * 1e-6;
   tm->adaptation_count = 0;
   tm->last_error_ratio = 0.0;
-  
+
   if (localsolver_options) {
     tm->local_tol_original = localsolver_options->dparam[SICONOS_DPARAM_TOL];
     tm->local_tol_current = tm->local_tol_original;
@@ -111,13 +111,13 @@ static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
     }
     return 0; /* Converged */
   }
-  
+
   /* Not converged - compute adaptation */
   if (full_error > 0.0 && incr_error > 0.0) {
     double error_ratio = incr_error / full_error;
     double new_tolerance = error_ratio * tm->user_tolerance;
     double min_tol = tolerance_manager_get_min(tm);
-    
+
     /* Cap at minimum tolerance */
     if (new_tolerance < min_tol) {
       if (verbose > 1) {
@@ -126,7 +126,7 @@ static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
       }
       new_tolerance = min_tol;
     }
-    
+
     /* Only adapt if tolerance would decrease */
     if (new_tolerance > 0.0 && new_tolerance < tm->working_tolerance) {
       if (verbose > 0) {
@@ -138,7 +138,7 @@ static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
       tm->last_error_ratio = error_ratio;
     }
   }
-  
+
   return 1; /* Not converged */
 }
 
@@ -163,18 +163,18 @@ static inline int tolerance_manager_tighten_local(ToleranceManager* tm,
     }
     return 1;
   }
-  
+
   double current_tol = tm->local_tol_current;
   double new_tol = fmax(current_tol / 100.0, tm->min_tolerance);
-  
+
   localsolver_options->dparam[SICONOS_DPARAM_TOL] = new_tol;
   tm->local_tol_current = new_tol;
-  
+
   if (verbose > 0) {
     numerics_printf("ToleranceManager: Incr error very small (%.2e), tightening local solver: %.2e -> %.2e",
                     incr_error, current_tol, new_tol);
   }
-  
+
   return 1; /* Continue iterating */
 }
 
@@ -213,7 +213,7 @@ static inline int tolerance_manager_check_convergence(ToleranceManager* tm,
     }
     return 0; /* Converged */
   }
-  
+
   /* Not converged - decide adaptation strategy */
   if (tolerance_manager_is_incr_very_small(incr_error)) {
     /* Incremental error negligible - tighten local solver */

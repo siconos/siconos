@@ -10,7 +10,7 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be foun
 RUN cmake --install $BUILD_DIR
 # install Siconos. Assume a previous built in $BUILD_DIR
 RUN siconos --info
-# Clone Siconos examples 
+# Clone Siconos examples
 ARG EXAMPLES_BRANCH_NAME=main
 RUN git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
 RUN cd siconos-tutorials; git switch $EXAMPLES_BRANCH_NAME
@@ -19,5 +19,3 @@ ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
 ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
 # WORKDIR /home/mambauser
-
-

@@ -9,7 +9,7 @@ Users' guide
 ============
 
 *Everything about modeling, simulation and control of nonsmooth dynamical systems in Siconos.*
-   
+
 .. toctree::
    :maxdepth: 5
 
@@ -22,9 +22,9 @@ Siconos API
 
 .. toctree::
    :maxdepth: 5
-      
+
    reference/index
-   
+
 Developpers' corner
 ===================
 
@@ -34,5 +34,3 @@ Developpers' corner
    :maxdepth: 5
 
    devel_guide/index
-
-   

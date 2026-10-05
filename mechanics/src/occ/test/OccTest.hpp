@@ -48,7 +48,7 @@ private:
 #ifdef HAS_FORTRAN
   void distance();
 #endif
-  
+
 public:
   void setUp();
   void tearDown();

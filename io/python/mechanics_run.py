@@ -2121,7 +2121,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         - the joints
 
         and into the interaction_manager:
-        
+
           - the nonsmooth laws that have a specified time of birth <= current time.
 
         """
@@ -3780,7 +3780,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         for name, obj in self._input.items():
             if obj.attrs.get("material") is not None:  # FEM object
                 ds_id = int(obj.attrs["id"])
-                # mapping 
+                # mapping
                 fem_ds = self._nsds.dynamicalSystem(ds_id)
                 fem_model = fem_ds._fesolid.FEModel()
                 mesh = fem_model.mesh()
@@ -3814,7 +3814,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 coord_name = f"fem_coords_{ds_id}"
                 if coord_name not in self._data:
                     self._data.create_dataset(coord_name, data=coords)
-            
+
         self.print_verbose("first output static and dynamic objects ...")
         self.output_static_objects()
         self.output_dynamic_objects()

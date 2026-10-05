@@ -48,7 +48,7 @@ endforeach()
 if(WITH_TESTING)
   list(APPEND python_excluded_tests tests/test_vi.py) # to be reviewed
   if(NOT SICONOS_HAS_MPI)
-    list(APPEND python_excluded_tests tests/test_NM_MUMPS.py) 
+    list(APPEND python_excluded_tests tests/test_NM_MUMPS.py)
   endif()
   list(APPEND python_excluded_tests tests/test_fclib.py) # fclib pybind11 not yet implemented
   list(APPEND python_excluded_tests tests/test_lcp.py) # LCP pybind11 not yet implemented

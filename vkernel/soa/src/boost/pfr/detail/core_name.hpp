@@ -26,4 +26,3 @@
 #endif
 
 #endif // BOOST_PFR_DETAIL_CORE_NAME_HPP
-

@@ -64,4 +64,3 @@ with MechanicsHdf5Runner(mode='r+', config=runner_config) as io:
                numerics_verbose_level=1,
                output_contact_forces=True,
                output_frequency=None)
-

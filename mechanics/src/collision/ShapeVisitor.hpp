@@ -67,6 +67,3 @@ class ShapeVisitor {
 
 }  // namespace siconos::collision::internal
 #endif
-
-
-

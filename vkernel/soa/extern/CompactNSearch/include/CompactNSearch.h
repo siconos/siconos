@@ -89,7 +89,7 @@ public:
 	*/
 	unsigned int add_point_set(Real const* x, std::size_t n, bool is_dynamic = true,
 		bool search_neighbors = true, bool find_neighbors = true, void *user_data = nullptr)
-	{ 
+	{
 		m_point_sets.push_back({x, n, is_dynamic, user_data});
 		m_activation_table.add_point_set(search_neighbors, find_neighbors);
 		return static_cast<unsigned int>(m_point_sets.size() - 1);
@@ -102,18 +102,18 @@ public:
 	void find_neighbors(bool points_changed = true);
 
 	/**
-	* Performs the actual query for a single point. This method returns a list of neighboring points. Note: That points_changed() must be called each time 
-	* when the positions of a point set changed. 
+	* Performs the actual query for a single point. This method returns a list of neighboring points. Note: That points_changed() must be called each time
+	* when the positions of a point set changed.
 	*/
 	void find_neighbors(unsigned int point_set_id, unsigned int point_index, std::vector<std::vector<unsigned int>> &neighbors);
-	
+
 	/**
-	* Performs the actual query for a single point x. This method returns a list of neighboring points in all existing point sets. Note: That points_changed() must be called each time 
-	* when the positions of a point set changed. 
+	* Performs the actual query for a single point x. This method returns a list of neighboring points in all existing point sets. Note: That points_changed() must be called each time
+	* when the positions of a point set changed.
 	*/
 	void find_neighbors(Real const* x, std::vector<std::vector<unsigned int>> &neighbors);
 
-	/** 
+	/**
 	* Update neighborhood search data structures after a position change.
 	* If general find_neighbors() function is called there is no requirement to manually update the point sets.
 	* Otherwise, in case of using point-wise search (find_neighbors(i, j, neighbors)) the method must be called explicitly.
@@ -121,7 +121,7 @@ public:
 	*/
 	void update_point_sets();
 
-	/** 
+	/**
 	* Update neighborhood search data structures after changing the activation table.
 	* If general find_neighbors() function is called there is no requirement to manually update the point sets.
 	* Otherwise, in case of using point-wise search (find_neighbors(i, j, neighbors)) the method must be called explicitly.
@@ -148,9 +148,9 @@ public:
 	* Sets the radius in which point point neighbors are searched.
 	* @param r Search radius.
 	*/
-	void set_radius(Real r) 
-	{ 
-		m_r2 = r * r; 
+	void set_radius(Real r)
+	{
+		m_r2 = r * r;
 		m_inv_cell_size = static_cast<Real>(1.0 / r);
 		m_initialized = false;
 	}

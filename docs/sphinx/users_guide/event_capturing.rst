@@ -6,7 +6,7 @@ Event-Capturing schemes
 General Principle
 -----------------
 
-Roughtly speaking, the event-capturing, a.k.a. time-stepping, method consists in the time-discretisation of the whole system (dynamics + relations + non-smooth laws), 
+Roughtly speaking, the event-capturing, a.k.a. time-stepping, method consists in the time-discretisation of the whole system (dynamics + relations + non-smooth laws),
 leading to a so-called one-step non smooth problem (OSNSP) solved at each time step.
 
 Indeed, the main stages of the process are:
@@ -35,18 +35,18 @@ First Order Non Linear Systems
 """"""""""""""""""""""""""""""
 
 .. math::
-   
+
    M\dot x(t) &= f(x,t,z) + r   \\
    x(t_0) &= x_0
 
-with :math:`r = r^d = \sum_{\alpha} r^{\alpha}, \alpha \in I_d`, :math:`I_d` being the set of all relations in which the current dynamical system, number :math:`d`, is involved. 
+with :math:`r = r^d = \sum_{\alpha} r^{\alpha}, \alpha \in I_d`, :math:`I_d` being the set of all relations in which the current dynamical system, number :math:`d`, is involved.
 In the following, the index "d" will be omitted to lighten notations.
 
 The integration of the ODE over a time step :math:`[t_i,t_{i+1}]`  of length :math:`h`  is :
 
 .. math::
-   
-   M\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} f(t,x,z)dt + \int_{t_i}^{t_{i+1}}r\,dt   
+
+   M\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} f(t,x,z)dt + \int_{t_i}^{t_{i+1}}r\,dt
 
 The left-hand term is :math:`M(x(t_{i+1})-x(t_i)) \approx M(x_{i+1} - x_i)` .
 
@@ -66,7 +66,7 @@ and the third integral is approximated with:
 Then, we get the following "residu"
 
 .. math::
-   
+
    \mathcal R(x_{i+1}) &= M(x_{i+1}-x_i) - h \theta f_{i+1} - h (1-\theta) f_{i} - hr_{i+1} = 0 \\
 	     &= \mathcal R^{free}(x_{i+1}) - hr_{i+1}
 
@@ -87,13 +87,13 @@ And we get (index k corresponds to the Newton iteration number):
 with
 
 .. math::
-   
+
    W_{i+1}^k = M - h \theta\left[\nabla_{x}f\right](t_{i+1},x_{i+1}^k)
 
 If we assume that :math:`W_{i+1}^k` is invertible, we get the solution at Newton iteration k+1:
 
 .. math::
-   
+
    x_{i+1}^{k+1} &= x_{i+1}^k - (W_{i+1}^k)^{-1}\mathcal R^{free}(x_{i+1}^{k}) + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1} \\
 	      &= x^{free,k}_{i+1} + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1}
 
@@ -111,7 +111,7 @@ For the integration of the ODE over a time-step, we proceed as in the previous s
 
    \mathcal R(x_{i+1}) &= M(x_{i+1}-x_i) - h \theta(A_{i+1}x_{i+1} + b_{i+1})- h (1-\theta)(A_{i}x_i + b_i) -  hr_{i+1} = 0 \\
    or \\
-   (M - h\theta A_{i+1}) x_{i+1} &= (M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i +  hr_{i+1}  
+   (M - h\theta A_{i+1}) x_{i+1} &= (M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i +  hr_{i+1}
 
 We denote:
 
@@ -124,7 +124,7 @@ and assuming it is invertible, we get:
 .. math::
 
    x_{i+1} &= W_{i+1}^{-1}\left[(M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i\right] +  hW_{i+1}^{-1}r_{i+1}  \\
-   &= x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1} 
+   &= x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1}
 
 First Order Linear Systems with time invariant coefficients
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -137,9 +137,9 @@ First Order Linear Systems with time invariant coefficients
 Using the results of the previous section, the discretisation is straightforward:
 
 .. math::
-   
+
    x_{i+1} &= x_i + h W^{-1}(A x_i + b) +  hW^{-1}r_{i+1} \\
-   &= x^{free}_{i}  +  hW^{-1}r_{i+1} 
+   &= x^{free}_{i}  +  hW^{-1}r_{i+1}
 
 with a W that does not depend on time:
 
@@ -163,7 +163,7 @@ First Order (non-linear) Relations
 Then, for the iteration :math:`k+1` of the Newton process, we get:
 
 .. math::
-   
+
    y_{i+1}^{k+1} &= h(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})\\
    R_{i+1}^{k+1} &= g(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})
 
@@ -173,7 +173,7 @@ These constraints are linearized around state :math:`(X_{i+1}^{k+1},\lambda_{i+1
 
    y_{i+1}^{k+1} &= y_{i+1}^k - H_0(S_{i+1}^k)X_{i+1}^{k} - H_1(S_{i+1}^k)\lambda_{i+1}^{k} + H_0(S_{i+1}^k)X_{i+1}^{k+1} + H_1(S_{i+1}^k)\lambda_{i+1}^{k+1}  \\
    \\
-   R_{i+1}^{k+1} &= R_{i+1}^k - G_0(S_{i+1}^k)X_{i+1}^{k} - G_1(S_{i+1}^k)\lambda_{i+1}^{k} + G_0(S_{i+1}^k)X_{i+1}^{k+1} + G_1(S_{i+1}^k)\lambda_{i+1}^{k+1} 
+   R_{i+1}^{k+1} &= R_{i+1}^k - G_0(S_{i+1}^k)X_{i+1}^{k} - G_1(S_{i+1}^k)\lambda_{i+1}^{k} + G_0(S_{i+1}^k)X_{i+1}^{k+1} + G_1(S_{i+1}^k)\lambda_{i+1}^{k+1}
 
 Where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k})` and
 
@@ -202,10 +202,10 @@ then, if there is one and only one interaction we have:
 
    (1-(W_{i+1}^k)^{-1}G_{0,i+1}^k) X_{i+1}^{k+1} = X_{i+1}^{free,k} + (W_{i+1}^k)^{-1} (R_{i+1}^k - G_{0,i+1}^k X_{i+1}^k - G_{1,i+1}^k \lambda_{i+1}^k + G_{1,i+1}^k \lambda_{i+1}^{k+1})
 
-and finally: 
+and finally:
 
 .. math::
-   
+
    y_{i+1}^{k+1} &= M_{lcp}\lambda_{i+1}^{k+1} + q_{lcp} \\
    M_{lcp} &= H_{1,i+1}^k + H_{0,i+1}^k (1-(W_{i+1}^k)^{-1} G_{0,i+1}^k)^{-1} (W_{i+1}^k)^{-1} G_{1,i+1}^k \\
    q_{lcp} &= y_{i+1} -H_{0,i+1}^k X_{i+1}^k - H_{1,i+1}^k \lambda_{i+1}^k + H_{0,i+1}^k (1-(W_{i+1}^k)^{-1} G_{0,i+1}^k)^{-1}
@@ -225,7 +225,7 @@ The Time discretization of the relations is fully implicit and may be written as
 
 .. math::
 
-   y_{i+1} &= C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\	
+   y_{i+1} &= C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\
    \\
    R_{i+1} &= B(t_{i+1})\lambda_{i+1}
 
@@ -239,13 +239,13 @@ The complementarity condition reads:
 
 .. math::
 
-   0 \leq y \, &\perp \, \lambda \geq 0 
+   0 \leq y \, &\perp \, \lambda \geq 0
 
 and the discretisation is straightforward:
 
 .. math::
 
-   0 \leq y_{i+1} \, &\perp \, \lambda_{i+1} \geq 0 
+   0 \leq y_{i+1} \, &\perp \, \lambda_{i+1} \geq 0
 
 Lagrangian systems
 ------------------
@@ -259,13 +259,13 @@ Lagrangian (second order) Non Linear Systems
 We provide in the following sections a time discretization method of the Lagrangian dynamical systems, consistent with the non smooth character of the solution.
 
 .. math::
-   
+
    M(q(t),z) dv &= f_L(t,v^+(t), q(t), z)dt + dr \\
    v^+(t) &= \dot q^+(t) \\
    q(t_0) &= q_0 \\
-   \dot q(t_0^-) &= v_0 
+   \dot q(t_0^-) &= v_0
 
-with 
+with
 
 .. math::
 
@@ -277,7 +277,7 @@ Left hand side is discretised by assuming that:
 
 .. math::
 
-   \int_{t_i}^{t_{i+1}} M(q(t),z)dv \approx M(q*,z)(v_{i+1}-v_{i}) 
+   \int_{t_i}^{t_{i+1}} M(q(t),z)dv \approx M(q*,z)(v_{i+1}-v_{i})
 
 As for first order non-linear systems, we use a :math:`\theta`-method to integrate the other terms, and obtain:
 
@@ -288,21 +288,21 @@ As for first order non-linear systems, we use a :math:`\theta`-method to integra
 and for the last term, we set a new variable :math:`p_{i+1}` such that:
 
 .. math::
-   
+
    \int_{t_i}^{t_{i+1}} dr \approx p_{i+1}
 
 Finally the full system discretisation results in:
 
 .. math::
-   
-   \mathcal R(v_{i+1}, q_{i+1}) &= M(q*,z)(v_{i+1}-v_{i}) - h\theta {f_L}_{i+1} - h(1-\theta) {f_L}_{i} - p_{i+1} = 0 \\	
-   &= \mathcal R^{free}(v_{i+1},q_{i+1}) - p_{i+1} 
 
-The "free" notation still stands for terms related to the smooth part of the system. 
+   \mathcal R(v_{i+1}, q_{i+1}) &= M(q*,z)(v_{i+1}-v_{i}) - h\theta {f_L}_{i+1} - h(1-\theta) {f_L}_{i} - p_{i+1} = 0 \\
+   &= \mathcal R^{free}(v_{i+1},q_{i+1}) - p_{i+1}
+
+The "free" notation still stands for terms related to the smooth part of the system.
 The displacement is integrated through the velocity with :
 
 .. math::
-   
+
    q_{i+1} &\approx q_i + h\theta v_{i+1} + h(1 - \theta)v_{i}
 
 Substituing this into the residu leads to a function depending only on :math:`v_{i+1}`, since state "i" and "k" are supposed to be known.
@@ -350,10 +350,10 @@ Moreover, if :math:`M` is evaluated at the first step of the Newton iteration, w
 
    M(q^*) \approx M(q_i + h\gamma v_i)
 
-Finally, if :math:`W` is invertible, the solution at iteration k+1 is given by, 
+Finally, if :math:`W` is invertible, the solution at iteration k+1 is given by,
 
 .. math::
-   
+
    v_{i+1}^{k+1} &= v_{i+1}^k - (W_{i+1}^k)^{-1} \mathcal R^{free}(v_{i+1}^k) + (W_{i+1}^k)^{-1} p_{i+1}^{k+1} \\
    &= v^{free,k}_{i+1} + (W_{i+1}^k)^{-1} p_{i+1}^{k+1}
 
@@ -364,13 +364,13 @@ Lagrangian (second order) Linear Systems with Time Invariant coefficients
 
    M dv + Cv^+(t) + K q(t) &= F_{ext}(t,z) + p \\
    q(t_0) &= q0 \\
-   \dot q(t_0^-) &= v_0 
+   \dot q(t_0^-) &= v_0
 
 Proceeding in the same way as in the previous section, with :math:`M` constant and :math:`f_L(t,v^+(t), q(t), z) = F_{ext}(t) - Cv^+(t) - Kq(t)`, integration is straightforward:
 
 .. math::
 
-   \mathcal R(v_{i+1}, q_{i+1}) &= M(v_{i+1}-v_{i}) - h\theta\left[ F_{ext}(t_{i+1}) - Cv_{i+1} - K q_{i+1}\right] - h(1-\theta)\left[ F_{ext}(t_{i}) - Cv_{i} - K q_{i}\right]  - p_{i+1} = 0  
+   \mathcal R(v_{i+1}, q_{i+1}) &= M(v_{i+1}-v_{i}) - h\theta\left[ F_{ext}(t_{i+1}) - Cv_{i+1} - K q_{i+1}\right] - h(1-\theta)\left[ F_{ext}(t_{i}) - Cv_{i} - K q_{i}\right]  - p_{i+1} = 0
 
 Using the displacement integration through the velocity,
 
@@ -382,21 +382,21 @@ Using the displacement integration through the velocity,
 we get:
 
 .. math::
-   
-   W(v_{i+1}-v_{i}) &= (- hC - h^2\theta  K )v_{i} - h K q_{i} +  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right] + p_{i+1} 
+
+   W(v_{i+1}-v_{i}) &= (- hC - h^2\theta  K )v_{i} - h K q_{i} +  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right] + p_{i+1}
 
 with :math:`W` a constant matrix:
 
 .. math::
-   
+
    W = \left[M + h\theta C + h^2 \theta^2 K \right]
 
 and if :math:`W` is invertible,
 
 .. math::
-   
+
    v_{i+1} &= v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] + W^{-1} p_{i+1} \\
-   &= v^{free}_i + W^{-1} p_{i+1} 
+   &= v^{free}_i + W^{-1} p_{i+1}
 
 The free velocity :math:`v^{free}` correponds to the velocity of the system without any constraints.
 
@@ -407,10 +407,10 @@ Lagrangian Scleronomous Relations
 """""""""""""""""""""""""""""""""
 
 .. math::
-   
+
    y &= h(Q,Z) \\
    \dot y &= G_0(Q,Z)V \\
-   P &= G_0^t(Q,Z)\lambda  
+   P &= G_0^t(Q,Z)\lambda
 
 with
 
@@ -439,16 +439,16 @@ Then we get:
 
    \dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^{k+1}))V_{i+1}^{k+1} \\
    \\
-   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^{k+1}))\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^{k+1}))\lambda_{i+1}^{k+1}
 
 These constraints are linearized around the point :math:`V_{i+1}^{k}` and we neglect the second order terms in the computation of the jacobians.
-It leads to: 
+It leads to:
 
 .. math::
 
    \dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^k))V_{i+1}^{k+1} \\
    \\
-   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1}
 
 As for the evaluation of the mass, the prediction of the position, :math:`Q^*` can be evaluated at the first iteration of the Newton process,
 
@@ -460,7 +460,7 @@ Lagrangian Rheonomous Relations
 """""""""""""""""""""""""""""""
 
 .. math::
-   
+
    y &= h(Q,t) \\
    \dot y &= G_0(Q,t)V + G_1(Q,t) \\
    P &= G_0^t(Q,t)\lambda  \\
@@ -474,7 +474,7 @@ As for scleronomous relations, we get:
 
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
    \\
-   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1}
 
 Lagrangian Compliant Relations
 """"""""""""""""""""""""""""""
@@ -488,13 +488,13 @@ Lagrangian Compliant Relations
    G_0(Q,\lambda(t)) &= \nabla_Qh(Q,\lambda(t)) \\
    G_1(Q,\lambda(t)) &= \nabla_\lambda h(Q,\lambda(t)) \\
 
-Following the same process as in the paragraph above, it comes: 
+Following the same process as in the paragraph above, it comes:
 
 .. math::
-   
+
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),\lambda_{i+1}^k)V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, \lambda_{i+1}^k))\lambda_{i+1}^{k+1} \\
    \\
-   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1}
 
 Lagrangian Linear Relations
 """""""""""""""""""""""""""
@@ -503,7 +503,7 @@ Lagrangian Linear Relations
 
    y &= HQ + D\lambda + FZ + b \\
    \dot y &= HV + D\lambda \\
-   P &= H^t\lambda  
+   P &= H^t\lambda
 
 The discretisation is straightforward:
 
@@ -545,12 +545,12 @@ To introduce a Newton impact law, consider an equivalent velocity defined by
 and apply the constraints directly on this velocity :
 
 .. math::
-   
+
    If \ y^{p} \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
 
 .. _event_capturing_summary:
-   
-Summary of the time discretized equations 
+
+Summary of the time discretized equations
 -----------------------------------------
 
 First order systems
@@ -568,7 +568,7 @@ First order systems
 * Linear dynamics:
 
 .. math::
-   
+
    x_{i+1} &= x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1} \\
    W_{i+1} &= (M - h\theta A_{i+1}) \\
    x^{free}_{i+1} &= W_{i+1}^{-1}\left[(M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i\right]
@@ -598,13 +598,13 @@ First order systems
 * Linear Relations
 
 .. math::
-   
-   y_{i+1} &= C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\	
+
+   y_{i+1} &= C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\
    R_{i+1} &= B(t_{i+1})\lambda_{i+1}
 
 Lagrangian second-order systems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   
+
 * Non Linear Dynamics:
 
 .. math::
@@ -621,7 +621,7 @@ Lagrangian second-order systems
 * Linear Dynamics with and Time--Invariant Coefficients
 
 .. math::
-   
+
    v_{i+1} &= v^{free}_i + W^{-1} p_{i+1} \\
    q_{i+1} &= q_{i} +  h\left[\theta v_{i+1}+(1-\theta) v_{i}  \right]\\
    v^{free}_i &= v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] \\
@@ -630,23 +630,23 @@ Lagrangian second-order systems
 * Lagrangian Scleronomous Relations
 
 .. math::
-     
+
    \dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^k))V_{i+1}^{k+1} \\
-   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1}
 
 * Lagrangian Rheonomous Relations
 
 .. math::
-   
+
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
-   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1}
 
 * Lagrangian Compliant Relations
 
 .. math::
 
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),\lambda_{i+1}^k)V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, \lambda_{i+1}^k))\lambda_{i+1}^{k+1} \\
-   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1} 
+   P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1}
 
 * Lagrangian Linear Relations
 
@@ -654,4 +654,3 @@ Lagrangian second-order systems
 
    \dot y_{i+1} &= HV_{i+1} + D\lambda_{i+1} \\
    P_{i+1} &= H^t\lambda_{i+1}
-

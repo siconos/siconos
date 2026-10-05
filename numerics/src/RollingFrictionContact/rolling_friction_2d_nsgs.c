@@ -105,7 +105,7 @@ int rolling_friction_2d_nsgs_initialize_local_solver(
                      solver_options_id_to_name(localsolver_options->solverId));
     }
   }
-  return 0;  
+  return 0;
 }
 
 static unsigned int *allocShuffledContacts(RollingFrictionContactProblem *problem,
@@ -362,7 +362,7 @@ void rolling_friction_2d_nsgs(RollingFrictionContactProblem *problem, double *re
     *info = numerics_error("rolling_friction_2d_nsgs",
                            "The NSGS method needs options for the internal solvers, "
                            "options[0].numberOfInternalSolvers should be >= 1");
-    return;    
+    return;
   }
   SolverOptions *localsolver_options = options->internalSolvers[0];
 

@@ -20,7 +20,7 @@ $$
 z^{n+1}_i = - \frac{1}{m_{i,i}} \left( q_i + \sum_{j=1}^{i-1} m_{i,j} z^{n+1}_j + \sum_{j=i+1}^n m_{i,j} z^{n}_j \right)
 $$
 
-then the error was computed: 
+then the error was computed:
 
 $$
 w^{n+1} = Mz^{n+1} + q, \varepsilon = \left( \sum_{i=1}^n (z^{n+1}_i - \max(0, z^{n+1}_i - w^{n+1}_i))^2 \right)^{1/2}
@@ -79,7 +79,7 @@ $$
 
 Then, when suppose we are dealing with line $i$, whose color is $k$. We go through this line, and we have to find,
 for each column $j$, if $m_{i,j} z_j$ goes to the left sum or the right sum. So we have to find if $j$ belongs to
-$\mathcal{L}_k$ or $\mathcal{R}_k$. 
+$\mathcal{L}_k$ or $\mathcal{R}_k$.
 
 $$
 \begin{align*}
@@ -127,7 +127,7 @@ CSparseMatrix* S = NULL;
 if (A->storageType == NM_SPARSE) {
     if (A->matrix2->origin == NSM_CSR) {
         S = NM_csr(A);
-    } 
+    }
     else {
         S = NM_csc_trans(A);
     }
@@ -174,7 +174,7 @@ Now when $\texttt{lcp\_pgs\_parallel}$ is called with only one thread it default
 
 - Sparse block matrices
 
-How to adapt my solvers to sparse block matrices? 
+How to adapt my solvers to sparse block matrices?
 
 - Non-symmetric matrices
 
@@ -268,11 +268,11 @@ If its too close to $0$ then partial pivoting is used to solve the system descri
 
 Else, do:
 $$
-r_{2i} = \frac{\text{zn} \cdot M_{2i+1,2i+1} - \text{zt} \cdot M_{2i, 2i+1}}{\text{det}} 
+r_{2i} = \frac{\text{zn} \cdot M_{2i+1,2i+1} - \text{zt} \cdot M_{2i, 2i+1}}{\text{det}}
 $$
 
 $$
-r_{2i+1} = \frac{-\text{zn} \cdot M_{2i+1,2i} + \text{zt} \cdot M_{2i, 2i}}{\text{det}} 
+r_{2i+1} = \frac{-\text{zn} \cdot M_{2i+1,2i} + \text{zt} \cdot M_{2i, 2i}}{\text{det}}
 $$
 
 So basically we just updated two components of $r$ by solving the 2-by-2 system:

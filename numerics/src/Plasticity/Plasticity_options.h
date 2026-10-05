@@ -23,7 +23,7 @@ enum PLASTICITY_SOLVER {
   /** Non-smooth Newton Alart-Curnier, 'damped' and hybrid with projection, one cone solver
    */
   PLASTICITY_2D_ONECONE_NSN_GP_HYBRID = 20065,
-  
+
   /** Von Mises radial return projection, one cone solver */
   PLASTICITY_2D_ONECONE_VONMISES = 20070
 };

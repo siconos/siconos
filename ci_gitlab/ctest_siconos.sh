@@ -5,11 +5,11 @@
 # Warning: this script is called by CI jobs with default values set by CI (template or .gitlab-ci.yml)
 #
 # Those values might be different from the default ones when this script is executed manualy, on the command line
-# 
-# 
+#
+#
 # Usage
 #
-# Required: 
+# Required:
 # > export CI_PROJECT_DIR=<path-to-siconos-repository>
 # > export BUILD_MODE=configure, build or test
 #
@@ -29,8 +29,8 @@
 #    - ctest_test (test) if ctest_mode=test
 #    - ctest... all steps if ctest_mode=all
 #  Results will be submitted to cdash if CDASH_SUBMIT=1.
-# 
-# 
+#
+#
 
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
 : ${BUILD_MODE:?"Please choose build mode among configure, build or test."}
@@ -40,7 +40,7 @@ set -e
 # set default config file
 CONF_FILE="${CONF_FILE:=$CI_PROJECT_DIR/config_samples/siconos_ci_default.cmake}"
 # Default build dir, if not set
-BUILD_DIR="${BUILD_DIR:=$HOME/build}" 
+BUILD_DIR="${BUILD_DIR:=$HOME/build}"
 # Default ctest mode
 CTEST_BUILD_MODEL="${CTEST_BUILD_MODEL:=Experimental}"
 # Set to 1 to allow -jN, 0 to restrict to -j1.

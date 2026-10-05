@@ -721,7 +721,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // TODO cast down btshape from BodyShapeRecord-derived classes
           // rel->btShape[0] = pairA->btshape;
           // rel->btShape[1] = pairB->btshape;
-          
+
 	  if (nslaw_CohesiveZoneModelNIFNSL)
 	    {
             rel->updateRelativeContactPointsFromManifoldPoint(

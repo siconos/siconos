@@ -34,7 +34,7 @@ enum class OsnspbType
     ED_SMOOTH_POS
   };
 
-  
+
 enum SICONOS_OSNSP { SICONOS_OSNSP_DEFAULT = 0 };
 enum SICONOS_OSNSP_ED {
   SICONOS_OSNSP_ED_SMOOTH_ACC,

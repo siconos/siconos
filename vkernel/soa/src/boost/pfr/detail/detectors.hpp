@@ -70,5 +70,3 @@ namespace boost { namespace pfr { namespace detail {
 }}} // namespace boost::pfr::detail
 
 #endif // BOOST_PFR_DETAIL_DETECTORS_HPP
-
-

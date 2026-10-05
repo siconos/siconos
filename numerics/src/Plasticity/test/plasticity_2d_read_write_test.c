@@ -52,13 +52,13 @@ int main(void) {
   double plastic_strain_rate[9] = {0.};
   plasticity2D_display(PLASTICITY_2D);
   plasticity2D_printInFilename(PLASTICITY_2D, "plasticity_2d_example1.dat");
-  
+
   PLASTICITY_2D->M = NULL;
   PLASTICITY_2D->q = NULL;
   PLASTICITY_2D->model.drucker_prager->eta = NULL;
   PLASTICITY_2D->model.drucker_prager->theta = NULL;
   plasticity2DProblem_free(PLASTICITY_2D);
-  
+
   PlasticityProblem* PLASTICITY_2D_r= plasticity2D_new_from_filename("plasticity_2d_example1.dat");
   plasticity2D_display(PLASTICITY_2D_r);
   plasticity2DProblem_free(PLASTICITY_2D_r);

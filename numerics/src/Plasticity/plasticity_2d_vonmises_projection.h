@@ -30,12 +30,12 @@ extern "C" {
 
 /**
     Project a trial stress onto the Von Mises yield surface.
-    
+
     The Von Mises yield criterion in 2D (plane strain) is:
     f(σ) = √(σ_x² + σ_y² - σ_x*σ_y + 3*τ_xy²) - σ_y ≤ 0
-    
+
     This uses the radial return algorithm (closest point projection).
-    
+
     \param[in,out] stress trial stress vector [σ_x, σ_y, τ_xy]
     \param[in] sigma_y yield stress
     \return 0 if projection successful, 1 if stress was inside yield surface (no projection needed)
@@ -44,9 +44,9 @@ int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y);
 
 /**
     Compute the Von Mises equivalent stress (q).
-    
+
     q = √(σ_x² + σ_y² - σ_x*σ_y + 3*τ_xy²)
-    
+
     \param[in] stress stress vector [σ_x, σ_y, τ_xy]
     \return Von Mises equivalent stress
 */
@@ -54,7 +54,7 @@ double plasticity_2d_vonMises_equivalent_stress(const double stress[3]);
 
 /**
     Check if stress is inside the Von Mises yield surface.
-    
+
     \param[in] stress stress vector [σ_x, σ_y, τ_xy]
     \param[in] sigma_y yield stress
     \return 1 if inside yield surface (elastic), 0 if outside (plastic)

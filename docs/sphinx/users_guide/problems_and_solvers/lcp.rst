@@ -1,6 +1,6 @@
 .. index::
    single: Linear Complementarity Problem (LCP)
-   
+
 .. contents::
 
 .. _lcp_problem:
@@ -48,7 +48,7 @@ The criterion is based on :
    error = \frac{1}{\|q\| }\sqrt(\sum_{i} (z_i - (z_i - (Mz+q)_i)^{+})^2)
 
    error = \frac{1}{\|q\| }\sum_{i} [ (z_i*(Mz+q)_i)^{+} + (z_i)^{-} + {(Mz+q)_i}^{-} ]
-   
+
 with :math:`x^{+} = max(0,x)` and :math:`x^{-} = max(0,-x)`.
 
 
@@ -56,7 +56,7 @@ with :math:`x^{+} = max(0,x)` and :math:`x^{-} = max(0,-x)`.
 * :cpp:func:`lcp_compute_error` returns 0  if  :math:`error \leq tolerance`, else 1.
 * A call to this function updates the content of the input vector w with :math:`Mz + q`.
 
-  
+
 .. _lcp_solvers:
 
 LCP available solvers
@@ -77,7 +77,7 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000
 * iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
-* dparam[2] = 0.0 
+* dparam[2] = 0.0
 * dparam[3] = 0.0
 
 Pivot based methods
@@ -86,7 +86,7 @@ Pivot based methods
 :cpp:enumerator:`SICONOS_LCP_PIVOT`, :cpp:enumerator:`SICONOS_LCP_BARD`,
 :cpp:enumerator:`SICONOS_LCP_MURTY`, :cpp:enumerator:`SICONOS_LCP_PATHSEARCH`,
 :cpp:enumerator:`SICONOS_LCP_PIVOT_LUMOD`
-            
+
 generic solver for pivot-based methods: Bard, Murty and Lemke rules are implemented.
 
 drivers:
@@ -137,7 +137,7 @@ parameters
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 
- 
+
 Iterative solvers
 -----------------
 

@@ -1085,7 +1085,7 @@ int CSparseMatrix_copy(const CSparseMatrix *const A, CSparseMatrix *B) {
   }
 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
-  return 0;  
+  return 0;
 }
 
 int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double *max) {

@@ -3,5 +3,5 @@
 BasedOnStyle: Google
 # BreakBeforeBraces: Microsoft
 IncludeBlocks: Regroup
-ColumnLimit: 95 
+ColumnLimit: 95
 SpaceBeforeCpp11BracedList: false

@@ -20,8 +20,8 @@ What is done in this file ?
 
 * if GAMS_ROOT is set, checks for gams (http://www.gams.com) in GAMS_ROOT directory
    -> list gams source files and add them to numerics build
-   -> install gams models files 
-    
+   -> install gams models files
+
 * Look for Path Ferris solver (optional hint : PathFerris_ROOT),
 if found, link numerics with Path Ferris.
 
@@ -67,29 +67,29 @@ if(GAMS_ROOT)
   endforeach()
 
   set(HAVE_GAMS_C_API TRUE BOOL "The GAMS C API has been found")
-  
+
   include(CheckCCompilerFlag)
   check_c_compiler_flag("-Werror=conversion" C_HAVE_WERR_CONV)
   if(C_HAVE_WERR_CONV)
     set_source_files_properties(${GAMS_C_API_FILES} PROPERTIES COMPILE_FLAGS "-Wno-error=conversion")
   endif()
-  
+
   # Add sources to numerics build
   target_sources(numerics PRIVATE ${GAMS_C_API_FILES})
-  
+
   # Add include only at build time
   # PUBLIC at build time to propagate gams include to test.
-  # Should we use them at runtime ? 
+  # Should we use them at runtime ?
   target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${GAMS_ROOT}/${GAMS_C_API_DIR}>)
   target_include_directories(numerics PRIVATE "${GAMS_ROOT}/testlib_ml") # XXX Hack -- xhub
-  
+
   # path to gams model : used in numerics tests, set in SiconosConfig.h
   # --> path to source hardcoded in SiconosConfig.h, bad isn't it ?
   set(GAMS_MODELS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/share/gams" CACHE FILEPATH "gams")
-  
+
   # path to gams models to be used at runtime
   set(GAMS_MODELS_SHARE_DIR  "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/gams" CACHE FILEPATH "gams")
-  
+
   # Install gams files required at runtime
   install(DIRECTORY ${GAMS_MODELS_SOURCE_DIR} DESTINATION share/${PROJECT_NAME})
 
@@ -97,7 +97,7 @@ if(GAMS_ROOT)
   if(NOT PathFerris_ROOT)
     set(PathFerris_ROOT  ${GAMS_ROOT})
   endif()
-  
+
   if(NOT PathFerris_ROOT)
     set(PathFerris_ROOT  ${GAMS_ROOT})
   endif()
@@ -132,12 +132,12 @@ if(PathVI_FOUND)
   # Should we install these headers ?
   # Should we propagate these includes at runtime ?
 
-  
+
   # # XXX hack for now ...
   if(HAVE_GAMS_C_API)
     set(HAVE_GAMS_PATHVI TRUE)
   else()
     set(HAVE_GAMS_PATHVI FALSE)
   endif()
-  
+
 endif()

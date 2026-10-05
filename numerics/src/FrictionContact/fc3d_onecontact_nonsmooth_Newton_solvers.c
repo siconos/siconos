@@ -183,7 +183,7 @@ static int  fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOptio
       avg_rho[0] / (double)nc, avg_rho[1] / (double)nc, avg_rho[2] / (double)nc);
 
   fc3d_local_problem_free(local_p, main_problem);
-  return 0;  
+  return 0;
 }
 
 static void fc3d_AC_free(FrictionContactProblem* localproblem,
@@ -214,7 +214,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_initialize(
     return numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
   }
-  return 0;  
+  return 0;
 }
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem,
@@ -301,7 +301,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* local
     NCPGlocker_free(localproblem, localsolver_options);
     ;
   }
-  
+
 }
 
 /* Forward declaration */

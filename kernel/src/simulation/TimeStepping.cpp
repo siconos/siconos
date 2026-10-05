@@ -491,7 +491,7 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   updateIndexSets();
 
   updateInteractionInternalState();
-    
+
   initializeOneStepNSProblem();
 
   computeInitialStateOfTheStep();

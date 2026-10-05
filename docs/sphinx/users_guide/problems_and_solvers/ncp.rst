@@ -1,6 +1,6 @@
 .. index::
    single: Nonlinear Complementarity Problems (NCP)
-   
+
 .. contents::
 
 .. _ncp_problem:
@@ -26,7 +26,7 @@ Structure to define the problem: :cpp:class:`NonlinearComplementarityProblem`.
 The generic driver for all NCP is :cpp:func:`ncp_driver()`.
 
 Solvers list  :cpp:enum:`NCP_SOLVER`
- 
+
 .. _ncp_solvers:
 
 NCP available solvers

@@ -56,5 +56,5 @@ int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
     return numerics_error("fc3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
-  return 0;  
+  return 0;
 }

@@ -28,7 +28,7 @@ namespace cuNSearch
 	{
 		if (pointSet.n_points() == 0)
 			return;
-			
+
 		auto pointSetImpl = pointSet.impl.get();
 
 		Int3 data[2];
@@ -41,7 +41,7 @@ namespace cuNSearch
 			(Real3*)CudaHelper::GetPointer(pointSetImpl->d_Particles),
 			static_cast<unsigned int>(pointSet.n_points()),
 			m_SearchRadius,
-			CudaHelper::GetPointer(d_MinMax), 
+			CudaHelper::GetPointer(d_MinMax),
 			CudaHelper::GetPointer(d_MinMax) + 1
 			);
 		CudaHelper::CheckLastError();
@@ -81,7 +81,7 @@ namespace cuNSearch
 	{
 		if (pointSet.n_points() == 0)
 			return;
-	
+
 		auto pointSetImpl = pointSet.impl.get();
 		Real3 sceneMin = pointSetImpl->Min;
 		Real3 sceneMax = pointSetImpl->Max;
@@ -177,7 +177,7 @@ namespace cuNSearch
 	{
 		if (queryPointSet.n_points() == 0)
 			return;
-	
+
 		auto queryPointSetImpl = queryPointSet.impl.get();
 		auto pointSetImpl = pointSet.impl.get();
 

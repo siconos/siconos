@@ -240,7 +240,7 @@ struct siconos::modeling::Interaction::SetLevels
           "nslaw ");
     }
   }
-  
+
   void visit(const CohesiveZoneModelNIFNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
@@ -256,7 +256,7 @@ struct siconos::modeling::Interaction::SetLevels
           "nslaw ");
     }
   }
-  
+
   void visit(const MohrCoulombPlasticityNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
@@ -305,11 +305,11 @@ void siconos::modeling::Interaction::reset() {
     _lambda[i]->setZero();
   }
 
-  // initialize internal variable 
+  // initialize internal variable
   _internalVariables = _nslaw->initializeInternalVariables(*this);
 
   if(_internalVariables)
-    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector3(*_internalVariables));  
+    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector3(*_internalVariables));
 }
 
 siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
@@ -728,6 +728,6 @@ void siconos::modeling::Interaction::display(bool brief) const  {
   if (_internalVariables)
     _nslaw->displayInternalVariables(*_internalVariables);
     //_nslaw->initializeInternalVariables(*this);
-   
+
   std::cout << "===================================\n";
 }

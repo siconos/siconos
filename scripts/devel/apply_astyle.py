@@ -36,4 +36,3 @@ for file in all_cxx_files:
 orig_files = list(currentdir.glob('**/*.orig'))
 for file in orig_files:
     file.unlink()
-                

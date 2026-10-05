@@ -61,9 +61,9 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
   printf("------------------------------------------------------------\n");
   printf("%-30s %12s %10s %10s\n", "Function", "Time (ms)", "Calls", "ms/call");
   printf("------------------------------------------------------------\n");
-  
+
   double total = nsgs_timers.total_time;
-  
+
   #define PRINT_TIMER(name, field) \
     if (nsgs_timers.field > 0) { \
       printf("%-30s %12.4f %10d %10.6f\n", \
@@ -72,7 +72,7 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
              nsgs_timers.field##_calls, \
              nsgs_timers.field * 1000 / (nsgs_timers.field##_calls > 0 ? nsgs_timers.field##_calls : 1)); \
     }
-  
+
   PRINT_TIMER("update_local_problem", update_local_problem_time);
   PRINT_TIMER("solve_local", solve_local_time);
   PRINT_TIMER("relaxation", relaxation_time);
@@ -80,13 +80,13 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
   PRINT_TIMER("error_computation", error_computation_time);
   PRINT_TIMER("freezing", freezing_time);
   PRINT_TIMER("other", other_time);
-  
+
   #undef PRINT_TIMER
-  
+
   printf("------------------------------------------------------------\n");
   printf("%-30s %12.4f %10s %10s\n", "TOTAL", total * 1000, "-", "-");
   printf("============================================================\n");
-  
+
   /* Print percentages */
   printf("\nTime Breakdown:\n");
   if (nsgs_timers.solve_local_time > 0)
@@ -119,7 +119,7 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
   /* Reset timers at start */
   nsgs_timers_reset();
   double global_start = nsgs_get_time();
-  
+
   /* Get solver parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -204,7 +204,7 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     nsgs_shuffle_blocks(sblocks, nb_blocks, toolkit->use_shuffling ? 2 : 0, iter);
 
     double tmp_criteria1 = tolerance * tolerance * 100.0 * 100.0;
-    double tmp_criteria2 = (prev_norm_z > 0.0) ? 
+    double tmp_criteria2 = (prev_norm_z > 0.0) ?
         (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0)) : 0.0;
 
     /* Main loop over blocks */
@@ -306,7 +306,7 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     /* Compute global error */
     prev_norm_z = norm_z;
     norm_z = cblas_dnrm2(nb_blocks * dim, var_z, 1);
-    
+
     double incremental_error = 0.0;
     if (toolkit->use_incremental_error) {
       incremental_error = sqrt(incremental_error_sum);
@@ -338,7 +338,7 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     }
 
     nsgs_print_iteration_stats(iter, incremental_error, full_error, tolerance,
-                                toolkit->user_tolerance, 
+                                toolkit->user_tolerance,
                                 nsgs_count_frozen_percent(freeze_blocks, nb_blocks, toolkit->use_freezing),
                                 hasNotConverged, toolkit->verbose);
 
@@ -355,12 +355,12 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     double final_full_error;
     int final_converged = !nsgs_check_full_error_convergence(
         problem, var_z, var_x, options, toolkit, toolkit->user_tolerance, &final_full_error);
-    
+
     if (toolkit->verbose > 0) {
-      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n", 
+      printf("Final check: Full error = %.6e, User tolerance = %.6e, Converged = %s\n",
              final_full_error, toolkit->user_tolerance, final_converged ? "YES" : "NO");
     }
-    
+
     error = final_full_error;
     *info = final_converged ? 0 : 1;
     hasNotConverged = final_converged ? 0 : 1;
@@ -380,11 +380,11 @@ nsgs_cleanup:
   if (block_errors) free(block_errors);
   if (sblocks) free(sblocks);
   if (freeze_blocks) free(freeze_blocks);
-  
+
   /* Record total time */
   nsgs_timers.total_time = nsgs_get_time() - global_start;
   /* Calculate other time */
-  nsgs_timers.other_time = nsgs_timers.total_time 
+  nsgs_timers.other_time = nsgs_timers.total_time
                          - nsgs_timers.update_local_problem_time
                          - nsgs_timers.solve_local_time
                          - nsgs_timers.relaxation_time

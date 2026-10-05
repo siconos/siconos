@@ -31,7 +31,7 @@ extern "C" {
 
 /**
    Projection on the second Order Cone in \f$ R^3 \f$
-   
+
    \f$ K \{r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected
@@ -43,7 +43,7 @@ unsigned projectionOnCone(double *r, double mu);
 /**
    Compute an element of the the subdifferential of the
    projection on the second Order Cone in \f$ R^3 \f$
-   
+
    \f$ K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[out] H an element of the the subdifferential
@@ -66,7 +66,7 @@ unsigned projectionOnDualCone(double *u, double mu);
 
 /**
    Projection on the second Order Cone in \f$ R^n \f$
-   
+
    \f$ K \{r, r_1 \geq 0, 0 \|[r_2,r_n]\| \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected

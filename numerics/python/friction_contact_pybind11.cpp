@@ -49,7 +49,7 @@ namespace py = pybind11;
  */
 inline void check_numerics_error(int info, const char* operation) {
     if (info != 0) {
-        std::string msg = std::string("Numerics error in ") + operation + 
+        std::string msg = std::string("Numerics error in ") + operation +
                          ": " + numerics_error_string((NumericsError)info);
         throw std::runtime_error(msg);
     }

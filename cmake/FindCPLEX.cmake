@@ -24,7 +24,7 @@ Find CPLEX libraries and headers
 See https://www.ibm.com/analytics/cplex-optimizer
 
 Usage :
- 
+
 find_package(CPLEX REQUIRED)
 target_link_libraries(yourlib PRIVATE CPLEX::CPLEX)
 
@@ -55,7 +55,7 @@ if(NOT CPLEX_LIBRARIES)
   find_library(CPLEX_LIBRARIES NAMES CPLEX
     ${_CPLEX_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
-  
+
 endif()
 
 # -- Library setup --
@@ -63,7 +63,7 @@ find_package_handle_standard_args(CPLEX
   REQUIRED_VARS CPLEX_LIBRARIES CPLEX_INCLUDE_DIR)
 
 if(CPLEX_FOUND)
-  
+
   if(NOT TARGET CPLEX::CPLEX)
     add_library(CPLEX::CPLEX IMPORTED INTERFACE)
     set_property(TARGET CPLEX::CPLEX PROPERTY INTERFACE_LINK_LIBRARIES ${CPLEX_LIBRARIES})
@@ -73,4 +73,3 @@ if(CPLEX_FOUND)
     endif()
   endif()
 endif()
-

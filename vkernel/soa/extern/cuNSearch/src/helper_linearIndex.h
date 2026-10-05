@@ -3,7 +3,7 @@
 #include "Types.h"
 
 __host__ __device__ inline uint CellIndicesToLinearIndex(
-	UInt3 &cellDimensions, 
+	UInt3 &cellDimensions,
 	UInt3 &xyz
 )
 {
@@ -11,7 +11,7 @@ __host__ __device__ inline uint CellIndicesToLinearIndex(
 }
 
 __host__ __device__ inline uint CellIndicesToLinearIndex(
-	const UInt3&cellDimensions, 
+	const UInt3&cellDimensions,
 	Int3 &xyz
 )
 {
@@ -41,7 +41,7 @@ __host__ __device__ inline UInt3 LinearCellIndexTo3DIndices(
 }
 
 __host__ __device__ inline Int3 LinearCellIndexTo3DIndicesInt3(
-	const UInt3 &cellDimensions, 
+	const UInt3 &cellDimensions,
 	const uint &linearIndex)
 {
 	Int3 xyz;

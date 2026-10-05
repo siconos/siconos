@@ -20,7 +20,7 @@ if(DEFINED ENV{GITLAB_CI})
     set(CI_GITLAB ON)
   endif()
 endif()
-  
+
 # if(NOT DEFINED ENV{CI_PROJECT_DIR} )
 #   message(FATAL_ERROR "Please set env variable CI_PROJECT_DIR to siconos sources directory (git repo).")
 # endif()
@@ -42,16 +42,16 @@ endif()
 if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
 
   # -- Definition of all variables required for ctest --
-  
+
   # Parallel build only for siconos_install. For examples it leads to: warning: jobserver unavailable: using -j1. Add `+' to parent make rule.
   #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
-  
+
 endif()
 
 if(NOT CTEST_CMAKE_GENERATOR)
   set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 endif()
-  
+
 include(${CTEST_SOURCE_DIRECTORY}/ci_gitlab/ctest_tools.cmake)
 
 if(NOT CTEST_BUILD_NAME)
@@ -61,13 +61,13 @@ endif()
 if(NOT CTEST_SITE)
   set_site_name()
 endif()
-  
+
 # =============  Run ctest steps ================
 # Either one by one (to split ci jobs) if CTEST_MODE=configure, build, test or
 # all in a row if CTEST_MODE=all.
 # Submit : only after test phase except if conf or build failed.
 
-# - Configure -- 
+# - Configure --
 if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
 
   # ---- CDash conf ----
@@ -85,28 +85,28 @@ if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
   # Content :
   # - info. regarding the runner, the system
   # - siconos config (user option file)
-  write_notes() 
+  write_notes()
 
-  # Current testing model. Priority: 
+  # Current testing model. Priority:
   # Nightly -> set by scheduler on gricad-gitlab
   # Continuous -> set in .gitlab-ci.yml
   # Experimental : default
   ctest_start(${model})
 
   # ----- Options to configure Siconos with cmake ---
-  
+
   if(USER_OPTIONS_FILE)
     list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_OPTIONS_FILE})
   endif()
 
   list(APPEND SICONOS_CMAKE_OPTIONS -DWITH_GIT=ON) # required to generate siconos-commit.txt to tag cdash build in the examples.
-  
+
   if(DEFINED ENV{OCE_INSTALL}) # set if oce has been installed using oce repo, in install_oce.sh
     message("Search oce in $ENV{OCE_INSTALL}.")
     list(APPEND SICONOS_CMAKE_OPTIONS -DOCE_DIR=$ENV{OCE_INSTALL})
   endif()
 
-  # Set CTEST_CONFIGURE_COMMAND to cmake followed by siconos options 
+  # Set CTEST_CONFIGURE_COMMAND to cmake followed by siconos options
   set(CTEST_CONFIGURE_COMMAND ${CMAKE_COMMAND})
   foreach(option IN LISTS SICONOS_CMAKE_OPTIONS)
     set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${option}")
@@ -123,17 +123,17 @@ if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
   )
   post_ctest(PHASE configure FORCE)
 endif()
- 
+
 # - Build -
 if(${CTEST_MODE} STREQUAL "build" OR ${CTEST_MODE} STREQUAL "all")
-  
+
   if(${CTEST_MODE} STREQUAL "build")
     ctest_start(APPEND) # Restart from existing (configure step) cdash config
   endif()
   # --- Build ---
 
   message("\n\n=============== Start ctest_build =============== ")
-  
+
   cmake_host_system_information(RESULT NP QUERY NUMBER_OF_LOGICAL_CORES)
   # if(NOT ALLOW_PARALLEL_BUILD)
   #   set(NP 1)
@@ -169,7 +169,7 @@ if(${CTEST_MODE} STREQUAL "test" OR ${CTEST_MODE} STREQUAL "all")
 
 #     ctest_coverage(
 #       CAPTURE_CMAKE_ERROR COVERAGE_STATUS
-#       RETURN_VALUE COVERAGE_RESULT  
+#       RETURN_VALUE COVERAGE_RESULT
 #       )
 #   endif()
 
@@ -190,8 +190,8 @@ endif()
 #   # -- memory check -- Skip this to 'enlight' submit process, since cdash inria is overbooked ...
 #   # if(CTEST_BUILD_CONFIGURATION MATCHES "Profiling")
 #   #   find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
-#   #   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all") 
-#   #   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all") 
+#   #   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all")
+#   #   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all")
 #   #   ctest_memcheck(PARALLEL_LEVEL NP QUIET)
 #   # endif()
 

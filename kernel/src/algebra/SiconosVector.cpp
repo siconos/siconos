@@ -36,4 +36,3 @@ std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::concatenateVe
   tmp->tail(b.size()) = b;
   return tmp;
 }
-

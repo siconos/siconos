@@ -330,7 +330,7 @@ and simplified relations as for the electrical oscillator with
 half-wave rectifier.
 
 .. math::
-   
+
    \begin{array}{ccc}
    W & = & (I - h \theta A)^{-1} \\
    x_{free} & = & W(I + h (1-\theta) A) \cdot x_{i} \\

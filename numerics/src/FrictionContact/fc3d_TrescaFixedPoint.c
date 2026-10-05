@@ -132,7 +132,7 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
   internalsolver_options->dWork = NULL;
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  return 0;  
+  return 0;
 }
 
 void fc3d_tfp_set_default(SolverOptions* options) {

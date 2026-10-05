@@ -55,7 +55,7 @@ public:
 	* @param i Point index.
 	* @returns Number of points neighboring point i in point set point_set.
 	*/
-	std::size_t n_neighbors(unsigned int point_set, unsigned int i) const 
+	std::size_t n_neighbors(unsigned int point_set, unsigned int i) const
 	{
 		return static_cast<unsigned int>(m_neighbors[point_set][i].size());
 	}
@@ -67,7 +67,7 @@ public:
 	* @param k Represents kth neighbor of point i.
 	* @returns Index of neighboring point i in point set point_set.
 	*/
-	unsigned int neighbor(unsigned int point_set, unsigned int i, unsigned int k) const 
+	unsigned int neighbor(unsigned int point_set, unsigned int i, unsigned int k) const
 	{
 		return m_neighbors[point_set][i][k];
 	}
@@ -98,7 +98,7 @@ public:
 	*/
 	void set_dynamic(bool v) { m_dynamic = v; }
 
-	/** 
+	/**
 	* Return the user data which can be attached to a point set.
 	*/
 	void *get_user_data() { return m_user_data;  }
@@ -125,13 +125,13 @@ private:
 	}
 
 	void resize(Real const* x, std::size_t n)
-	{ 
+	{
 		m_x = x;
-		m_n = n; 
+		m_n = n;
 		m_keys.resize(n, {
 			std::numeric_limits<int>::lowest(),
 			std::numeric_limits<int>::lowest(),
-			std::numeric_limits<int>::lowest() }); 
+			std::numeric_limits<int>::lowest() });
 		m_old_keys.resize(n, {
 			std::numeric_limits<int>::lowest(),
 			std::numeric_limits<int>::lowest(),
@@ -166,7 +166,7 @@ PointSet::sort_field(T* lst) const
 	}
 
 	std::vector<T> tmp(lst, lst + m_sort_table.size());
-	std::transform(m_sort_table.begin(), m_sort_table.end(), 
+	std::transform(m_sort_table.begin(), m_sort_table.end(),
 #ifdef _MSC_VER
 		stdext::unchecked_array_iterator<T*>(lst),
 #else
@@ -175,4 +175,3 @@ PointSet::sort_field(T* lst) const
 		[&](int i){ return tmp[i]; });
 }
 }
-

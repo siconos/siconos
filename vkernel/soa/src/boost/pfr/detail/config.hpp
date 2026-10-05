@@ -23,4 +23,3 @@
 #endif // !BOOST_PFR_ENABLED
 
 #endif // BOOST_PFR_DETAIL_CONFIG_HPP
-

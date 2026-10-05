@@ -36,7 +36,7 @@ The simplest way to create and use a solver is to select the corresponding id (c
    // use solver id as a parameter for the one-step nonsmooth problem constructor
    auto problem = std::make_shared<siconos::nonsmooth_formulations::LCP>(SICONOS_LCP_LEMKE);
    // get options :
-   auto options = problem->numericsSolverOptions() 
+   auto options = problem->numericsSolverOptions()
 
 
 .. code-block:: python
@@ -44,7 +44,7 @@ The simplest way to create and use a solver is to select the corresponding id (c
    // -- Python API --
    import siconos.modeling as sm
    lcp = sk.LCP(sk.SICONOS_LCP_LEMKE)
-   
+
 **Numerics (low-level) interface:**
 
 .. code-block:: c
@@ -89,7 +89,7 @@ e.g.:
 
 
 * an id (int) that uniquely identifies the solver,
-  
+
 * iparam, an array used to save integer type parameters,
 
 * dparam, an array used to save real (double) type parameters,
@@ -102,7 +102,7 @@ dparam indices common to all solvers
 
 * dparam[SICONOS_DPARAM_TOL] (in): solver tolerance
 * dparam[SICONOS_DPARAM_RESIDU] (out): computed error
-  
+
 iparam indices common to all solvers
 ------------------------------------
 
@@ -110,7 +110,7 @@ iparam indices common to all solvers
 * iparam[SICONOS_IPARAM_PREALLOC] (in): keep work space across calls (?), 0 (false) by default.
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations done
 
-  
+
 Solve a problem
 ===============
 
@@ -129,8 +129,8 @@ Solve a problem
 
    // Clear memory
    solver_options_delete(&options);
-   
-   
+
+
 .. code-block:: python
 
    // -- Python API --
@@ -138,7 +138,7 @@ Solve a problem
    options = sn.SolverOptions(sn.solver_ids.SICONOS_LCP_LEMKE)
    // ...
    sn.lcp_lexicolemke(problem, z, w, info, options)
-   
+
 
 .. toctree::
    :maxdepth: 3

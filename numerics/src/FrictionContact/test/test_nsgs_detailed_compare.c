@@ -47,32 +47,32 @@ static SolverResult run_solver(FrictionContactProblem* problem,
                                 SolverOptions* options, int use_original) {
   SolverResult res = {0};
   int nc = problem->numberOfContacts;
-  
+
   /* Reset initial guess */
   memset(reaction, 0, nc * 3 * sizeof(double));
   memset(velocity, 0, nc * 3 * sizeof(double));
-  
+
   /* IMPORTANT: Reset iteration counter before each run */
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
-  
+
   /* Initialize info to non-zero to force solver to run (not early exit) */
   res.info = -1;
-  
+
   double cpu_start = get_cpu_time();
   double wall_start = get_wall_time();
-  
+
   if (use_original) {
     fc3d_nsgs(problem, reaction, velocity, &res.info, options);
   } else {
     fc3d_nsgs_generic(problem, reaction, velocity, &res.info, options);
   }
-  
+
   res.cpu_time = get_cpu_time() - cpu_start;
   res.wall_time = get_wall_time() - wall_start;
   res.iterations = options->iparam[SICONOS_IPARAM_ITER_DONE];
   res.final_error = options->dparam[SICONOS_DPARAM_RESIDU];
-  
+
   /* Compute norms */
   for (int i = 0; i < nc * 3; i++) {
     res.reaction_norm += reaction[i] * reaction[i];
@@ -80,7 +80,7 @@ static SolverResult run_solver(FrictionContactProblem* problem,
   }
   res.reaction_norm = sqrt(res.reaction_norm);
   res.velocity_norm = sqrt(res.velocity_norm);
-  
+
   return res;
 }
 
@@ -96,13 +96,13 @@ static SolutionDiff compare_solutions(int n, double* r1, double* v1, double* r2,
   SolutionDiff diff = {0};
   diff.max_reaction_diff = 0.0;
   diff.max_diff_index = -1;
-  
+
   for (int i = 0; i < n; i++) {
     double dr = r1[i] - r2[i];
     double dv = v1[i] - v2[i];
     diff.reaction_diff += dr * dr;
     diff.velocity_diff += dv * dv;
-    
+
     if (fabs(dr) > diff.max_reaction_diff) {
       diff.max_reaction_diff = fabs(dr);
       diff.max_diff_index = i;
@@ -110,12 +110,12 @@ static SolutionDiff compare_solutions(int n, double* r1, double* v1, double* r2,
   }
   diff.reaction_diff = sqrt(diff.reaction_diff);
   diff.velocity_diff = sqrt(diff.velocity_diff);
-  
+
   return diff;
 }
 
 /* Print comparison table */
-static void print_comparison(const char* label, 
+static void print_comparison(const char* label,
                               SolverResult* orig, SolverResult* gen,
                               SolutionDiff* diff) {
   printf("\n╔══════════════════════════════════════════════════════════════════╗\n");
@@ -152,17 +152,17 @@ static void test_problem(const char* filename, double tol) {
   printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   printf("  Problem: %s (tol=%.2e)\n", filename, tol);
   printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-  
+
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   if (!problem) {
     printf("  ERROR: Failed to load %s\n", filename);
     return;
   }
-  
+
   int nc = problem->numberOfContacts;
   int n = nc * 3;
   printf("  Size: %d contacts (%d variables)\n\n", nc, n);
-  
+
   /* Setup solver options - separate for each solver */
   SolverOptions* opts_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   opts_orig->dparam[SICONOS_DPARAM_TOL] = tol;
@@ -170,39 +170,39 @@ static void test_problem(const char* filename, double tol) {
   solver_options_update_internal(opts_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
   opts_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = tol * 100;
   opts_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  
+
   /* Copy for generic solver */
   SolverOptions* opts_gen = solver_options_copy(opts_orig);
-  
+
   /* Allocate solution arrays */
   double *r_orig = (double*)calloc(n, sizeof(double));
   double *v_orig = (double*)calloc(n, sizeof(double));
   double *r_gen = (double*)calloc(n, sizeof(double));
   double *v_gen = (double*)calloc(n, sizeof(double));
-  
+
   /* Run original solver */
   printf("  Running original fc3d_nsgs...\n");
   SolverResult res_orig = run_solver(problem, r_orig, v_orig, opts_orig, 1);
-  
+
   /* Run generic solver */
   printf("  Running generic fc3d_nsgs_generic...\n");
   SolverResult res_gen = run_solver(problem, r_gen, v_gen, opts_gen, 0);
-  
+
   /* Compare solutions */
   SolutionDiff diff = compare_solutions(n, r_orig, v_orig, r_gen, v_gen);
-  
+
   /* Print results */
   print_comparison(filename, &res_orig, &res_gen, &diff);
-  
+
   /* First 6 reaction values */
   printf("\n  First 6 reaction values:\n");
   printf("  %-6s  %-16s  %-16s  %-12s\n", "Index", "Original", "Generic", "Diff");
   printf("  %-6s  %-16s  %-16s  %-12s\n", "------", "----------------", "----------------", "------------");
   for (int i = 0; i < 6 && i < n; i++) {
-    printf("  %-6d  %16.6e  %16.6e  %12.4e\n", 
+    printf("  %-6d  %16.6e  %16.6e  %12.4e\n",
            i, r_orig[i], r_gen[i], fabs(r_orig[i] - r_gen[i]));
   }
-  
+
   /* Cleanup */
   free(r_orig); free(v_orig);
   free(r_gen); free(v_gen);
@@ -214,13 +214,13 @@ static void test_problem(const char* filename, double tol) {
 int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
-  
+
   printf("\n");
   printf("╔══════════════════════════════════════════════════════════════════╗\n");
   printf("║         NSGS Detailed Comparison Test                            ║\n");
   printf("║         Original fc3d_nsgs vs Generic fc3d_nsgs_generic          ║\n");
   printf("╚══════════════════════════════════════════════════════════════════╝\n");
-  
+
   /* Test with different tolerances on different problems */
   struct {
     const char* file;
@@ -232,13 +232,13 @@ int main(int argc, char** argv) {
     {"./data/Confeti-ex13-Fc3D-SBM.dat", 1e-8},
     {"./data/KaplasTower-i1061-4.hdf5.dat", 1e-6},
   };
-  
+
   int n_tests = sizeof(tests) / sizeof(tests[0]);
-  
+
   for (int i = 0; i < n_tests; i++) {
     test_problem(tests[i].file, tests[i].tol);
   }
-  
+
   printf("\n");
   printf("╔══════════════════════════════════════════════════════════════════╗\n");
   printf("║         Summary                                                  ║\n");
@@ -249,6 +249,6 @@ int main(int argc, char** argv) {
   printf("  3. Solution differences indicate numerical equivalence\n");
   printf("  4. Convergence behavior should match closely\n");
   printf("\n");
-  
+
   return 0;
 }

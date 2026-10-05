@@ -45,7 +45,7 @@ int color_graph(int n, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
 
       // PetscInt* Mp = sparse->p;
       // PetscInt* Mi = sparse->i;
-      
+
       PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
@@ -161,7 +161,7 @@ int color_graph_permut(int n, NumericsMatrix* M, size_t* n_colors, size_t** sum_
 
       // PetscInt* Mp = sparse->p;
       // PetscInt* Mi = sparse->i;
-      
+
 
       PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
@@ -660,7 +660,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
       CS_INT* Mp_ = sparse->p;
       CS_INT* Mi_ = sparse->i;
       double* Mx_ = sparse->x;
-      
+
       size_t nnz = 0;
 
       bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
@@ -1010,7 +1010,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
       CS_INT* Mp_ = sparse->p;
       CS_INT* Mi_ = sparse->i;
       double* Mx_ = sparse->x;
-      
+
       size_t nnz = 0;
 
       bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
@@ -1255,7 +1255,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
 
   int k = 0;
   size_t current_set_size = 0;
-  
+
   for (size_t i = 0; i < *n_colors; i++) {
     PetscCall(ISGetLocalSize(is[i], &size_petsc));
     PetscCall(PetscCIntCast(size_petsc, &size_int)); // safely cast from PetscInt to int

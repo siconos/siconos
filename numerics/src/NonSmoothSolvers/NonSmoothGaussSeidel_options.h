@@ -58,34 +58,34 @@
 enum SICONOS_NSGS_IPARAM {
   /** Base offset for NSGS iparam to avoid conflicts */
   SICONOS_NSGS_IPARAM_OFFSET = 10,
-  
+
   /** index in iparam to store the relaxation strategy */
   SICONOS_NSGS_RELAXATION = 10,
-  
+
   /** index in iparam to store the shuffle strategy */
   SICONOS_NSGS_SHUFFLE = 11,
-  
+
   /** index in iparam to store the shuffle seed */
   SICONOS_NSGS_SHUFFLE_SEED = 12,
-  
+
   /** index in iparam to store the error evaluation method */
   SICONOS_NSGS_ERROR_EVALUATION_TYPE = 13,
-  
+
   /** index in iparam to store the frequency of error evaluation */
   SICONOS_NSGS_ERROR_EVALUATION_FREQUENCY = 14,
-  
+
   /** index in iparam to store the freezing contact strategy */
   SICONOS_NSGS_FREEZING_CONTACT = 15,
-  
+
   /** index in iparam to store the filter local solution flag */
   SICONOS_NSGS_FILTER_LOCAL_SOLUTION = 16,
-  
+
   /** index in iparam to store printing style (IPM-like) */
   SICONOS_NSGS_PRINTING_STYLE = 17,
-  
+
   /** index in iparam for localsolver trivial solution flag */
   SICONOS_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION = 18,
-  
+
   /** index in iparam to store the current block/contact number */
   SICONOS_NSGS_CURRENT_BLOCK_NUMBER = 19
 };
@@ -103,10 +103,10 @@ enum SICONOS_NSGS_IPARAM {
 enum SICONOS_NSGS_DPARAM {
   /** Base offset for NSGS dparam to avoid conflicts */
   SICONOS_NSGS_DPARAM_OFFSET = 10,
-  
+
   /** index in dparam to store the relaxation parameter omega */
   SICONOS_NSGS_RELAXATION_VALUE = 10,
-  
+
   /** index in dparam to store the internal error ratio */
   SICONOS_NSGS_INTERNAL_ERROR_RATIO = 11
 };
@@ -123,19 +123,19 @@ enum SICONOS_NSGS_ERROR_EVALUATION {
    * This computes the true residual but is computationally expensive.
    */
   SICONOS_NSGS_ERROR_EVALUATION_FULL = 0,
-  
+
   /** Evaluation of the error with the cheap incremental variation
    * Uses the norm of the difference between successive iterates.
    * Fast but may not reflect the true residual.
    */
   SICONOS_NSGS_ERROR_EVALUATION_LIGHT = 1,
-  
+
   /** Evaluation with incremental variation but with full final check
    * Uses incremental error during iterations, but checks full error
    * when incremental error is below tolerance. Adapts tolerance if needed.
    */
   SICONOS_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 2,
-  
+
   /** Evaluation with adaptive frequency for full error computation
    * Starts with infrequent full error checks and increases frequency
    * as convergence is approached.
@@ -152,10 +152,10 @@ enum SICONOS_NSGS_ERROR_EVALUATION {
 enum SICONOS_NSGS_SHUFFLE {
   /** No shuffling - process blocks in natural order */
   SICONOS_NSGS_SHUFFLE_FALSE = 0,
-  
+
   /** Shuffle once at the beginning */
   SICONOS_NSGS_SHUFFLE_TRUE = 1,
-  
+
   /** Reshuffle at the beginning of each iteration */
   SICONOS_NSGS_SHUFFLE_EACH_LOOP = 2
 };

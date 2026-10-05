@@ -43,7 +43,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   collection[current].filename = data_collection[d];
   collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
   current++;
-  
+
   *number_of_tests = current;
   return collection;
 }

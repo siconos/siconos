@@ -149,7 +149,7 @@ REGISTER_SOLVER(SICONOS_CONVEXQP_VI_FPP, "CONVEXQP_VI_FPP",
                 0      /* is_local_solver */);
 
 static void convexqp_vi_eg_set_default(SolverOptions* options) {
-  variationalInequality_ExtraGradient_set_default(options);  
+  variationalInequality_ExtraGradient_set_default(options);
 }
 
 static int convexqp_vi_eg_init_wrap(void* problem, SolverOptions* options) {

@@ -7,7 +7,7 @@
 private class FuncExtSS from Extrema
 
  inherits FunctionSetWithDerivatives from math
-    ---Purpose: Fonction permettant de rechercher les extrema de la 
+    ---Purpose: Fonction permettant de rechercher les extrema de la
     --          distance entre deux surfaces.
 
 uses    POnSurf           from Extrema,
@@ -30,9 +30,9 @@ is
     Initialize(me: in out; S1, S2: Surface from Adaptor3d)
     	---Purpose: sets the field mysurf of the function.
     is static;
-    
+
     ------------------------------------------------------------
-    -- In all next methods, an exception is raised if the fields 
+    -- In all next methods, an exception is raised if the fields
     -- were not initialized.
 
     NbVariables (me) returns Integer;
@@ -79,7 +79,7 @@ is
 fields
     myS1   : SurfacePtr from Adaptor3d;
     myS2   : SurfacePtr from Adaptor3d;
-    
+
     myP1   : Pnt from gp;
     myP2   : Pnt from gp;
 
@@ -91,7 +91,7 @@ fields
     myValue:  SequenceOfReal    from TColStd;
     myPoint1: SequenceOfPOnSurf from Extrema;
     myPoint2: SequenceOfPOnSurf from Extrema;
-    
+
     myS1init: Boolean;
     myS2init: Boolean;
 

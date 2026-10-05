@@ -163,7 +163,7 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   dparam[SICONOS_VI_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_DPARAM_RHO];
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  return 0;  
+  return 0;
 }
 
 void fc3d_aclmfp_set_default(SolverOptions* options) {

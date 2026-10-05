@@ -1,6 +1,6 @@
 .. index::
    single: Affine Variational Inequalities (AVI)
-   
+
 .. contents::
 
 .. _avi_problem:

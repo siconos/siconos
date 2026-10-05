@@ -105,5 +105,5 @@ void wrap_nonsmoothlaws(py::module_ &m) {
            "Get the fallback non-smooth law when interface is broken")
       .def("isActiveAtLevel", &siconos::modeling::CohesiveZoneModelNIFNSL::isActiveAtLevel,
            py::arg("inter"), py::arg("level"),
-           "Check if the NS law is active at a given level");  
+           "Check if the NS law is active at a given level");
 }

@@ -262,4 +262,3 @@ constexpr void for_each_field_with_name(T&& value, F&& func) {
 }}} // namespace boost::pfr::detail
 
 #endif // BOOST_PFR_DETAIL_CORE_NAME20_STATIC_HPP
-

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 #====================================================================================
-# cmake utility to configure pybind11 (Python wrapper for C++) interface for Siconos. 
+# cmake utility to configure pybind11 (Python wrapper for C++) interface for Siconos.
 #====================================================================================
 include(FindPythonModule)
 message(" ---- Start pybind11 configuration to generate python packages for Siconos ... ----")
@@ -27,7 +27,7 @@ find_package(Python COMPONENTS Development Interpreter NumPy REQUIRED)
 # find_python_module(pybind11 REQUIRED)
 
 # And get its cmake root dir
-execute_process(COMMAND 
+execute_process(COMMAND
   ${Python_EXECUTABLE} -m pybind11 --cmakedir # Get path to cmake-pybind11 config
   OUTPUT_VARIABLE pybind11_ROOT
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -41,4 +41,3 @@ if(WITH_TESTING)
   # Create test dir
   file(MAKE_DIRECTORY ${SICONOS_PB11_BINARY_DIR}/tests)
 endif()
-

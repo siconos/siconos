@@ -39,24 +39,24 @@ The equation of motion of a ball is given by
 with
 
 * :math:`M` the inertia term, a :math:`n\times{}n` matrix.
-* :math:`p` the force due to the non-smooth law, ie the reaction at impact. 
+* :math:`p` the force due to the non-smooth law, ie the reaction at impact.
 * :math:`F_{ext}(t):  \mathcal R \rightarrow \mathcal R^{n}` the given external force.
 
 That fits with Lagrangian, Linear and Time-Invariant Dynamical System, represented by LagrangianLinearTIDS class (see \ref dsInSiconos).
 
 Next, we will suppose that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by :math:`i`, the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
 
-Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given \ref tutGCtemplate "here" as multiBeads.cpp. 
+Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given \ref tutGCtemplate "here" as multiBeads.cpp.
 
 We start by setting some parameters, like the number of balls, their initial positions and velocities and so on::
 
-  // User-defined main parameters 
-  unsigned int dsNumber = 10;      // the number of dynamical systems 
+  // User-defined main parameters
+  unsigned int dsNumber = 10;      // the number of dynamical systems
   int nDof = 3;           // degrees of freedom for beads
   double increment_position = 1;   // initial position increment from one DS to the following
   double increment_velocity = 0;   // initial velocity increment from one DS to the following
   double t0 = 0;                   // initial computation time
-  double T = 10;                   // final computation time 
+  double T = 10;                   // final computation time
   double h = 0.005;                // time step
   double position_init = 10.5;     // initial position for lowest bead.
   double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -67,46 +67,46 @@ corresponding Dynamical Systems, all of type Lagrangian, Linear and
 Time Invariant.
 
 All the systems are inserted in a container, a DynamicalSystemsSet,
-named allDS. 
+named allDS.
 
 From now on, to simplify writing, we suppose that all
 balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
 
   // -------------------------
-  // --- Dynamical systems --- 
+  // --- Dynamical systems ---
   // -------------------------
-  
+
   // mass matrix, set to identity
   auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof,nDof);
   Mass->setIdentity();
   (*Mass)(2,2) = 3.0/5*R*R;
-  
+
   // -- Initial positions and velocities --
-  // q0[i] and v0[i] correspond to position and velocity of ball i. 
+  // q0[i] and v0[i] correspond to position and velocity of ball i.
   vector<SimpleVector *> q0;
   vector<SimpleVector *> v0;
   q0.resize(dsNumber,NULL);
   v0.resize(dsNumber,NULL);
-  
+
   for (unsigned i = 0; i < dsNumber; ++i)
   {
       // Memory allocation for q0[i] and v0[i]
       q0[i] = new SimpleVector(nDof);
-      v0[i] = new SimpleVector(nDof); 
+      v0[i] = new SimpleVector(nDof);
       // set values
       (*(q0[i]))(0) = position_init;
       (*(v0[i]))(0) = velocity_init;
       // Create a new Lagrangian Linear Dynamical System, with q0] and v0[i] as initial conditions,
-      // Mass as mass matrix and i as number of identification. 
-      // The system is then inserted in allDS. 
+      // Mass as mass matrix and i as number of identification.
+      // The system is then inserted in allDS.
       allDS.insert( new LagrangianLinearTIDS(i,nDof,*(q0[i]),*(v0[i]),*Mass));
       // Increment values for next system
       position_init+= increment_position;
       velocity_init+= increment_velocity;
   }
-  
+
 Next, it is necessary to define the external forces, the gravity, applied on each ball. According to :ref:`dsPlugins`, a plug-in function is available for those forces. (For details on plug-in functions, see :ref:`siconos_plugins`). Its signature (the type of its arguments) is given in DefaultPlugin.cpp. So we copy it in a new file, say BeadsPlugin.cpp, and we define an extern function, gravity.::
-  
+
   const double m = 1; // bead mass
   const double g = 9.81; // gravity
   extern "C" void gravity(unsigned int sizeOfq, double time,	double * fExt, double *param)
@@ -116,36 +116,36 @@ Next, it is necessary to define the external forces, the gravity, applied on eac
       fExt[i] = 0.0;
       // apply gravity
       fExt[0] = -m*g;
-  } 
+  }
 
 Warning
 
-* gravity must be an *extern "C"* function, and code is C, not C++. 
-* the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being whatever you want. 
+* gravity must be an *extern "C"* function, and code is C, not C++.
+* the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being whatever you want.
 
 
 Now we have to say "use gravity from BeadsPlugin.cpp to compute the external forces of my systems."
 This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
 
-   // 	
-   CheckInsertDS checkDS; 
+   //
+   CheckInsertDS checkDS;
    for (i=0;i<dsNumber;i++)
       {
         // Memory allocation for q0[i] and v0[i]
 	q0[i] = new SimpleVector(nDof);
-	v0[i] = new SimpleVector(nDof); 
+	v0[i] = new SimpleVector(nDof);
         // set values
 	(*(q0[i]))(0) = position_init;
 	(*(v0[i]))(0) = velocity_init;
         // Create and insert in allDS a new Lagrangian Linear Dynamical System ...
 	checkDS = allDS.insert(new LagrangianLinearTIDS(i,nDof,*(q0[i]),*(v0[i]),*Mass));
-        // Note that we now use a CheckInsertDS object: checkDS.first is 
+        // Note that we now use a CheckInsertDS object: checkDS.first is
 	// an iterator that points to the DS inserted above.
-        // 
-	// Set the external forces for the last created system. 
+        //
+	// Set the external forces for the last created system.
 	(static_cast<LagrangianDS*>(*(checkDS.first)))->setComputeFExtFunction("BeadsPlugin.so", "gravity");
-	// A cast is required, since allDS handles DynamicalSystem*, 
-	// not LagrangianLinearTIDS*. 
+	// A cast is required, since allDS handles DynamicalSystem*,
+	// not LagrangianLinearTIDS*.
 	// Increment values for next system
 	position_init+= increment_position;
 	velocity_init+= increment_velocity;
@@ -162,8 +162,8 @@ Ok, now DynamicalSystems are clearly defined and all saved in allDS. Let's turn 
 
 We start with bead-floor Interaction: the ball at the bottom bounces on the rigid plane, introducing a constraint on the position of the ball, given by:
 :math:`z-R-h\geq 0`.
-To define an Interaction, it is first necessary to set some relations between local variables at contact and the global coordinates. 
-Thus, as a local variables of the Interaction, we introduce :math:`y` as the distance between the ball and the floor and :math:`\lambda` as the multiplier that corresponds to 
+To define an Interaction, it is first necessary to set some relations between local variables at contact and the global coordinates.
+Thus, as a local variables of the Interaction, we introduce :math:`y` as the distance between the ball and the floor and :math:`\lambda` as the multiplier that corresponds to
 the reaction at contact. Then the relation is written,
 
 .. math::
@@ -175,12 +175,12 @@ the reaction at contact. Then the relation is written,
 
 .. compound::
 
-   Finally we need to define a non-smooth law to define the behavior of the ball at impact. 
+   Finally we need to define a non-smooth law to define the behavior of the ball at impact.
    The unilateral constraint is such that
 
    .. math:: 0 \leq y \perp \lambda \geq 0
 
-   completed with a Newton Impact law, for which we set the restitutive coefficient :math:`e` to 0.9: 
+   completed with a Newton Impact law, for which we set the restitutive coefficient :math:`e` to 0.9:
 
    .. math:: \textrm{if} \ y=0, \ \dot y(t^+) = -e \dot y(t^-)
 
@@ -199,8 +199,8 @@ The first Interaction can then be constructed::
   DynamicalSystemsSet dsConcerned;
   // Only the "bottom" bead is concerned by this first Interaction,
   // therefore DynamicalSystem number 0.
-  dsConcerned.insert(allDS.getDynamicalSystemPtr(0)); 
-  // -- Newton impact law -- 
+  dsConcerned.insert(allDS.getDynamicalSystemPtr(0));
+  // -- Newton impact law --
   double e = 0.9;
   NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
   // Lagrangian Relation
@@ -238,7 +238,7 @@ With the same non smooth law as for the first Interaction::
   CheckInsertInteraction checkInter;
   // A vector that will handle all the relations
   vector<Relation*> LLR(interactionNumber-1);
-  // 
+  //
   SiconosMatrix *H1 = new SimpleMatrix(1,2*nDof);
   if (dsNumber>1)
   {
@@ -263,18 +263,18 @@ With the same non smooth law as for the first Interaction::
       delete relation;
   }
 
-Note that each Relation corresponds to one and only one Interaction (which is not the case of NonSmoothLaw); that's why we need to built a new Relation LLR[i-1] for each Interaction. 
+Note that each Relation corresponds to one and only one Interaction (which is not the case of NonSmoothLaw); that's why we need to built a new Relation LLR[i-1] for each Interaction.
 
 Everything is now ready to build the NonSmoothDynamicalSystem and the related Model::
 
     // --------------------------------
-    // --- NonSmoothDynamicalSystem --- 
+    // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);    
+    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
     // -------------
     // --- Model ---
     // -------------
-    Model * multiBeads = new Model(t0,T); 
+    Model * multiBeads = new Model(t0,T);
     multiBeads->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
 The Simulation
@@ -290,9 +290,9 @@ As a first example, we will use a Moreau's time-stepping scheme, where the non-s
   // -- Time discretisation --
   TimeDiscretisation * t = new TimeDiscretisation(h,s);
   // -- OneStepIntegrators --
-  double theta = 0.5000001; 
+  double theta = 0.5000001;
   OneStepIntegrator * OSI = new Moreau(allDS , theta ,s);
-  // That means that all systems in allDS have the same theta value.	 
+  // That means that all systems in allDS have the same theta value.
   // -- OneStepNsProblem --
   OneStepNSProblem * osnspb = new LCP(s,"LCP",solverName,10001, 0.001);
 
@@ -308,15 +308,15 @@ In the present case, non smooth events will corresponds to impacts between balls
 As for the Time-stepping, we first need to built the simulation and then its time-discretisation::
 
   // The simulation belongs to Model multiBeads
-  EventDriven* s = new EventDriven(multiBeads); 
+  EventDriven* s = new EventDriven(multiBeads);
   TimeDiscretisation * t = new TimeDiscretisation(h,s);
 
 Next step is the declaration of integrators for the dynamical systems.
 The integrator will handle all the DynamicalSystems of the Model. During integration of the systems, Lsodar will search for roots of some equations (the constraints ie the Interactions of the NonSmoothDynamicalSystem). The required OSI type is Lsodar, applied to allDS::
-  
-  OneStepIntegrator * OSI = new Lsodar(allDS,s); 
 
-Each time a root is found, a new NonSmoothEvent is created and it's then necessary to write and solve a non-smooth problem. We won't detail this here but just remember that this requires two LCP, one at "velocity" level, named impact, and another at "acceleration" level, named acceleration. 
+  OneStepIntegrator * OSI = new Lsodar(allDS,s);
+
+Each time a root is found, a new NonSmoothEvent is created and it's then necessary to write and solve a non-smooth problem. We won't detail this here but just remember that this requires two LCP, one at "velocity" level, named impact, and another at "acceleration" level, named acceleration.
 The whole event-driven algorithm for Lagrangian Systems is available here: :ref:`event_driven_lagrange`::
 
   OneStepNSProblem * impact = new LCP(s, "impact",solverName,101, 0.0001,"max",0.6);
@@ -333,7 +333,7 @@ Time-Stepping
 Once again, the process is the same as in the first tutorial and won't be detailed.
 Concerning the output, we save the position and velocity of all balls::
 
-  s->initialize(); 
+  s->initialize();
   int k = 0;
   int N = t->getNSteps(); // Number of time steps
   // Prepare output and save value for the initial time
@@ -352,17 +352,17 @@ Concerning the output, we save the position and velocity of all balls::
   }
 
 Note that we use a "DSIterator", which is simply a pointer to a set of DynamicalSystems; allDS.begin() is a pointer to the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then \*it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding :math:`q` and :math:`v`.
-A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...). 
+A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...).
 
 Next, we write::
 
-  while(k < N)	
+  while(k < N)
   {
-      k++;	
-      // solve ... 
+      k++;
+      // solve ...
       s->computeOneStep();
       dataPlot(k, 0) = s->getNextTime();
-      // 
+      //
       i = 0;
       for(it = allDS.begin();it!=allDS.end();++it)
       {
@@ -398,7 +398,7 @@ Then the simulation process consists in:
 * deal with the system at event (for example, in case of a non-smooth event, formalize and solve one or more LCP)
 * next step
 
-Once again this is only a summary and we encourage you to read :ref:`event_driven` to get more details about the event-driven strategy. 
+Once again this is only a summary and we encourage you to read :ref:`event_driven` to get more details about the event-driven strategy.
 
 The resulting code is::
 
@@ -419,7 +419,7 @@ Concerning output, we first save displacements and velocities at each time step:
         // Positions and velocities for user time steps
 	i = 0; // Remember that DS are sorted in a growing order according to their number.
 	DSIterator it;
-	dataPlot(k, 0) = eventDriven->getStartingTime(); 
+	dataPlot(k, 0) = eventDriven->getStartingTime();
 	for(it = allDS.begin();it!=allDS.end();++it)
 	  {
 	    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
@@ -428,7 +428,7 @@ Concerning output, we first save displacements and velocities at each time step:
 	  }
       }
 
-But when a non-smooth event occurs, that may be interesting to get pre and post impact values. 
+But when a non-smooth event occurs, that may be interesting to get pre and post impact values.
 In Siconos, the values saved in object are usually the last computed, thus in the present case, post-impact values.
 The next-to-last values are saved in "memory" objects; we get them in case of "Non-Smooth event"::
 
@@ -442,7 +442,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
 	  {
 	    i = 0; // Remember that DS are sorted in a growing order according to their number.
 	    DSIterator it;
-	    dataPlot(k, 0) = eventDriven->getStartingTime(); 
+	    dataPlot(k, 0) = eventDriven->getStartingTime();
 	    for(it = allDS.begin();it!=allDS.end();++it)
 	      {
 		dataPlot(k,(int)i*2+1) = (*static_cast<LagrangianLinearTIDS*>(*it)->getQMemoryPtr()->getSiconosVector(1))(0);
@@ -454,7 +454,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
         // Positions and velocities for user time steps
 	i = 0; // Remember that DS are sorted in a growing order according to their number.
 	DSIterator it;
-	dataPlot(k, 0) = eventDriven->getStartingTime();  
+	dataPlot(k, 0) = eventDriven->getStartingTime();
 	for(it = allDS.begin();it!=allDS.end();++it)
 	  {
 	    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
@@ -463,7 +463,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
 	  }
       }
 
-    // Output written in result.dat 
+    // Output written in result.dat
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot,"noDim");
 

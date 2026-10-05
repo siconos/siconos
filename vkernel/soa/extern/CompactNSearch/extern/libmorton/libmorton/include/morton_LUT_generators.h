@@ -93,6 +93,6 @@ void generate3D_DecodeLUT(size_t how_many_bits, uint_fast8_t*& x_table, uint_fas
 		cout << "Y Table " << endl;
 		printTable<uint_fast8_t>(y_table, total, 16);
 		cout << "Z Table " << endl;
-		printTable<uint_fast8_t>(z_table, total, 16);	
+		printTable<uint_fast8_t>(z_table, total, 16);
 	}
 }

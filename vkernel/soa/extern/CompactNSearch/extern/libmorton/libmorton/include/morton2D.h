@@ -35,7 +35,7 @@ inline morton m2D_e_sLUT(const coord x, const coord y) {
 	for (unsigned int i = sizeof(coord); i > 0; --i) {
 		unsigned int shift = (i - 1) * 8;
 		answer =
-			answer << 16 | 
+			answer << 16 |
 			Morton2D_encode_y_256[(y >> shift) & EIGHTBITMASK] |
 			Morton2D_encode_x_256[(x >> shift) & EIGHTBITMASK];
 	}
@@ -48,7 +48,7 @@ inline morton m2D_e_LUT(const coord x, const coord y) {
 	morton answer = 0;
 	const static morton EIGHTBITMASK = 0x000000FF;
 	for (unsigned int i = sizeof(coord); i > 0; --i) {
-		unsigned int shift = (i - 1) * 8; 
+		unsigned int shift = (i - 1) * 8;
 		answer =
 			answer << 16 |
 			(Morton2D_encode_x_256[(y >> shift) & EIGHTBITMASK] << 1) |

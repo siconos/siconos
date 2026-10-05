@@ -98,26 +98,26 @@ pageheader
 %
 % Fig objects follow
 %
-% 
+%
 % here starts figure with depth 50
 % Polyline
 0 slj
 0 slc
 7.500 slw
 n 1350 1125 m 1350 1665 l
- 1800 1665 l gs col0 s gr 
+ 1800 1665 l gs col0 s gr
 % Polyline
 n 3282 3489 m 3735 3195 l
- 3490 2818 l gs col0 s gr 
+ 3490 2818 l gs col0 s gr
 % Polyline
 n 7851 5307 m 8145 5760 l
- 8522 5515 l gs col0 s gr 
+ 8522 5515 l gs col0 s gr
 % Polyline
 n 6435 4770 m
- 6570 4275 l gs col0 s gr 
+ 6570 4275 l gs col0 s gr
 % Polyline
 n 6435 4815 m
- 6885 4950 l gs col0 s gr 
+ 6885 4950 l gs col0 s gr
 % Polyline
 2 slj
 n 2475 3465 m 2481 3531 l 2489 3595 l 2499 3657 l 2509 3715 l 2519 3769 l
@@ -178,7 +178,7 @@ n 2475 3465 m 2481 3531 l 2489 3595 l 2499 3657 l 2509 3715 l 2519 3769 l
  2536 2890 l 2525 2930 l 2514 2975 l 2504 3024 l 2494 3076 l
  2486 3133 l 2479 3194 l 2475 3259 l 2472 3326 l 2472 3395 l
 
- cp gs col0 s gr 
+ cp gs col0 s gr
 % Polyline
 n 8055 4455 m 7996 4435 l 7937 4416 l 7880 4400 l 7826 4385 l 7776 4372 l
  7730 4360 l 7689 4350 l 7652 4342 l 7619 4334 l 7590 4328 l
@@ -242,7 +242,7 @@ n 8055 4455 m 7996 4435 l 7937 4416 l 7880 4400 l 7826 4385 l 7776 4372 l
  8465 4693 l 8459 4682 l 8451 4670 l 8441 4657 l 8426 4643 l
  8407 4628 l 8384 4610 l 8354 4592 l 8318 4571 l 8277 4549 l
  8229 4526 l 8175 4502 l 8117 4478 l
- cp gs col0 s gr 
+ cp gs col0 s gr
 /Times-Roman ff 190.50 scf sf
 6120 4770 m
 gs 1 -1 sc (C) col0 sh gr

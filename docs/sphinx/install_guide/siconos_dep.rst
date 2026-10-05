@@ -5,11 +5,11 @@ Siconos required and optional dependencies
 
 .. note::
 
-   Dockerfiles available in 
+   Dockerfiles available in
 .. warning::
 
    This page might be outdated. To find an up to date list of siconos dependencies, please have a look to the configurations used for the continuous integration process.
-   Dockerfiles or requirements.txt files available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_ 
+   Dockerfiles or requirements.txt files available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
    of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them.
 
 
@@ -25,14 +25,14 @@ Siconos required and optional dependencies
   .. code-block:: bash
 
      python3 -m pip install cmake
-  
+
 * Eigen https://libeigen.gitlab.io/
 
 * boost, version >= 1.75, http://www.boost.org)
 
 * blas and lapack (see :ref:`about_blas_lapack`)
 
-  
+
 To generate the documentation, you will need :
 
 * doxygen
@@ -45,8 +45,8 @@ For the python bindings:
   We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
 
   See details in :ref:`about_python`
-  
- 
+
+
   To run tests:
 
 * cppunit
@@ -58,7 +58,7 @@ About Python
 ------------
 
 We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
-  
+
 
 Siconos venv example
 """"""""""""""""""""
@@ -66,7 +66,7 @@ Siconos venv example
 Installation:
 
 .. code-block:: bash
-		
+
    python3 -m venv $HOME/siconosenv
    source $HOME/siconosenv/bin/activate
    pip install -U -r requirements.txt
@@ -77,9 +77,9 @@ A requirements.txt file for Siconos is available in the source directory in `ci_
 Activation:
 
 .. code-block:: bash
-		
+
    source $HOME/siconosenv/bin/activate
- 
+
 
 Siconos micromamba env example
 """"""""""""""""""""""""""""""
@@ -92,7 +92,7 @@ Change the name "base" to sicoenv in this file.
 Installation:
 
 .. code-block:: bash
-		
+
    micromamba install -y -f sicolabenv.yml
 
 Activation:
@@ -102,7 +102,7 @@ Activation:
    micromamba activate sicoenv
 
 
-   
+
 .. warning::
    To ensure a proper mamba conf and the right channel, it may be necessary to run the following commands beforehand
 
@@ -112,8 +112,8 @@ Activation:
       micromamba config set channel_priority strict
       micromamba self-update
 
-  
-   
+
+
 .. _about_blas_lapack:
 
 About blas and Lapack
@@ -125,7 +125,7 @@ Different implementations are available, such as:
 * openblas (http://www.openblas.net),
 * the one from MKL (https://software.intel.com/en-us/intel-mkl),
 * Accelerate framework on Macosx (https://developer.apple.com/library/prerelease/mac/documentation/Accelerate/Reference/BLAS_Ref/index.html) ...
-  
+
 For siconos we recommand:
 
 * accelerate on Macosx
@@ -158,7 +158,7 @@ If the process failed or if you need a specific implementation, the following va
 About Boost
 -----------
 
-Boost provides a lot of useful C++ binaries, especially Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities 
+Boost provides a lot of useful C++ binaries, especially Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities
 for dense, packed and sparse matrices.
 
 Ublas is used in Siconos for matrices and vectors definition and implementation.
@@ -169,13 +169,13 @@ About Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
 
 Install (note that an adequate Boost version comes with most linux distributions and thus no more install is required.)
 
-To know how to get and install Boost, see 
+To know how to get and install Boost, see
 Boost Getting Started.
 
 Note that we also use boost-bindings:
 "Boost Bindings is a bindings library (not just) for Boost.Ublas. It offers an easy way of calling BLAS, LAPACK, UMFPACK, MUMPS and many other mature legacy numerical codes from within C++."
 
-They are distributed and installed with the Siconos but you can also get the last version here: 
+They are distributed and installed with the Siconos but you can also get the last version here:
 http://mathema.tician.de/software/boost-bindings
 
 GMP

@@ -320,7 +320,7 @@ static inline void mvp2x2(const double* restrict a, const double* restrict v,
   r[0] += a[0] * v[0] + a[2] * v[1];
   r[1] += a[1] * v[0] + a[3] * v[1];
   */
-  	
+
   double* pr;
 
   pr = r;
@@ -1030,7 +1030,7 @@ static inline void solve_nxn_gepp(int n, double* a, double* b, double* x) {
 
   for (dia = 0; dia < n; dia++) {
     //max_row = dia;
-    //max = fabs(A(dia, dia));    
+    //max = fabs(A(dia, dia));
     max_row = dia, max = A(dia, dia);
 
     for (row = dia + 1; row < n; row++)

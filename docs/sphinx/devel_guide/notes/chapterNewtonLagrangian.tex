@@ -3,7 +3,7 @@
     \hline
     author  & V. Acary\\
     \hline
-    date    & Sept, 20, 2011 \\ 
+    date    & Sept, 20, 2011 \\
     \hline
     version &  \\
     \hline
@@ -12,7 +12,7 @@
 
 
 
-This section is devoted to the implementation and the study  of the algorithm. The interval of integration is $[0,T]$, $T>0$, and a grid $t_{0}=0$, $t_{k+1}=t_{k}+h$, $k \geq 0$, $t_{N}=T$ is constructed. The approximation of a function $f(\cdot)$ on $[0,T]$ is denoted as $f^{N}(\cdot)$, and is a piecewise constant function, constant on the intervals $[t_{k},t_{k+1})$. We denote $f^{N}(t_{k})$ as $f_{k}$. The time-step is $h>0$. 
+This section is devoted to the implementation and the study  of the algorithm. The interval of integration is $[0,T]$, $T>0$, and a grid $t_{0}=0$, $t_{k+1}=t_{k}+h$, $k \geq 0$, $t_{N}=T$ is constructed. The approximation of a function $f(\cdot)$ on $[0,T]$ is denoted as $f^{N}(\cdot)$, and is a piecewise constant function, constant on the intervals $[t_{k},t_{k+1})$. We denote $f^{N}(t_{k})$ as $f_{k}$. The time-step is $h>0$.
 
 
 \section{Various second  order dynamical systems with input/output relations}
@@ -22,7 +22,7 @@ This section is devoted to the implementation and the study  of the algorithm. T
 \subsection{Lagrangian dynamical systems}
 
 
-The class {\tt LagrangianDS}  defines  and computes a generic ndof-dimensional 
+The class {\tt LagrangianDS}  defines  and computes a generic ndof-dimensional
 Lagrangian Non Linear Dynamical System of the form :
 
 \begin{equation}
@@ -31,46 +31,46 @@ Lagrangian Non Linear Dynamical System of the form :
     \dot q = v
   \end{cases}
 \end{equation}
- where 
+ where
  \begin{itemize}
  \item  $q \in R^{ndof} $ is the set of the generalized
-   coordinates, 
+   coordinates,
  \item $ \dot q =v \in R^{ndof} $ the velocity,
    i. e. the time derivative of the generalized coordinates
    (Lagrangian systems).
  \item $ \ddot q =\dot v \in R^{ndof} $ the
    acceleration, i. e. the second time derivative of the generalized
-   coordinates.  
+   coordinates.
  \item $ p \in R^{ndof} $ the reaction forces due to
-   the Non Smooth Interaction.  
+   the Non Smooth Interaction.
  \item $ M(q) \in R^{ndof \times ndof}
-   $ is the inertia term saved in the SiconosMatrix mass.  
+   $ is the inertia term saved in the SiconosMatrix mass.
  \item $
    N(\dot q, q) \in R^{ndof}$ is the non linear inertia term saved
-   in the {\tt SiconosVector \_NNL}.  
+   in the {\tt SiconosVector \_NNL}.
  \item $ F_{Int}(\dot q , q , t) \in
    R^{ndof} $ are the internal forces saved in the SiconosVector
-   fInt.  
+   fInt.
  \item $ F_{Ext}(t) \in R^{ndof} $ are the external forces
-   saved in the SiconosVector fExt.  
+   saved in the SiconosVector fExt.
  \item $ z \in R^{zSize}$ is a
    vector of arbitrary algebraic variables, some sort of discrete
    state.
  \end{itemize}
 
- 
+
   The equation of motion is also shortly denoted as:
   \begin{equation}
   M(q,z) \dot v = F(v, q, t, z) + p
 \end{equation}
- 
+
   where  $F(v, q, t, z) \in R^{ndof} $ collects the total forces
-  acting on the system, that is 
+  acting on the system, that is
   \begin{equation}
-    F(v, q, t, z) =  F_{Ext}(t, z) -  NNL(v, q, z) + F_{Int}(v, q , t, z) 
+    F(v, q, t, z) =  F_{Ext}(t, z) -  NNL(v, q, z) + F_{Int}(v, q , t, z)
 \end{equation}
 
- This vector is stored in the  {\tt SiconosVector \_Forces  }  
+ This vector is stored in the  {\tt SiconosVector \_Forces  }
 
 \subsection{Fully nonlinear case}
 Let us introduce the following system,
@@ -127,7 +127,7 @@ where $\lambda(t) \in \RR^m$  and $y(t) \in \RR^m$ are  complementary variables 
 
 
 
-\section{Moreau--Jean event-capturing scheme} 
+\section{Moreau--Jean event-capturing scheme}
 
 In this section, a time-discretization method of the Lagrange dynamical equation (\ref{eq:11}), consistent with the nonsmooth character of the solution, is presented. It is assumed in this section, as in the other sections, that $v^+(\cdot)=\dot{q}^{+}(\cdot)$  is a locally bounded variation function. The equation of motion reads as,
 \begin{equation}
@@ -136,16 +136,16 @@ In this section, a time-discretization method of the Lagrange dynamical equation
     M(q(t)) {dv} +N(q(t),v^{+}(t)) dt+  F_{\mathrm{int}}(t, q(t), v^+(t))\,dt = F_{\mathrm{ext}}(t)\,dt + dr \\ \\
    v^+(t)=\dot{q}^+(t) \\ \\
   q(0)=q_{0} \in {\mathcal C}(0),\;\dot{q}(0^{-})=\dot{q}_{0}
-  \end{cases}    
+  \end{cases}
 \end{equation}
-We also assume that $F_{\mathrm{int}}(\cdot)$ and $F_{\mathrm{ext}}(\cdot)$ are continuous with respect to time. This assumption is made for the sake of simplicity to avoid the notation $F^+_{\mathrm{int}}(\cdot)$ and $F^+_{\mathrm{ext}}(\cdot)$. Finally, we will condense the nonlinear inertia terms and the internal forces to lighten the notation. We obtain 
+We also assume that $F_{\mathrm{int}}(\cdot)$ and $F_{\mathrm{ext}}(\cdot)$ are continuous with respect to time. This assumption is made for the sake of simplicity to avoid the notation $F^+_{\mathrm{int}}(\cdot)$ and $F^+_{\mathrm{ext}}(\cdot)$. Finally, we will condense the nonlinear inertia terms and the internal forces to lighten the notation. We obtain
 \begin{equation}
   \label{eq:11-c}
   \begin{cases}
     M(q(t)) {dv} + F(t, q(t), v^+(t))\,dt = F_{\mathrm{ext}}(t)\,dt + dr \\ \\
    v^+(t)=\dot{q}^+(t) \\ \\
   q(0)=q_{0} \in {\mathcal C}(0),\;\dot{q}(0^{-})=\dot{q}_{0}
-  \end{cases}    
+  \end{cases}
 \end{equation}
 
 The NSCD method, also known as the Contact Dynamics (CD) is due to the seminal works of J.J.~\cite{Moreau1983,Moreau1985,Moreau1988,Moreau1994,Moreau1999} and M.~\cite{Jean88,Jean1999}  (See also \citep{Jean.Pratt85,Jean.Moreau91,Jean.Moreau92}). A lot of improvements and variants have been proposed over the years. In this Section,  we take  liberties with these original works, but we  choose to present a version of the NSCD method which preserves the essential of the original work. Some  extra developments and interpretations are added which are only under our responsibility. To come back to the source of the NSCD method, we encourage to read the above references.
@@ -155,7 +155,7 @@ The NSCD method, also known as the Contact Dynamics (CD) is due to the seminal w
 
 
 
- For the sake of simplicity of the presentation, the linear time-invariant case is considered first. The nonlinear case will be examined later in this chapter. 
+ For the sake of simplicity of the presentation, the linear time-invariant case is considered first. The nonlinear case will be examined later in this chapter.
 \begin{equation}
   \label{eq:11-a}
   \begin{cases}
@@ -174,7 +174,7 @@ Integrating both sides of this equation over a time step $(t_k,t_{k+1}]$ of leng
     \displaystyle \int_{(t_k,t_{k+1}]} M dv + \int_{t_k}^{t_{k+1}} (C v^+(t)
       + K q(t)) \,dt = \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}\,dt +
         \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
    \end{cases}
 \end{eqnarray}
 
@@ -189,11 +189,11 @@ Note that the right velocities are involved in this formulation.  The impulsion 
      M\,(v(t_{k+1})-v(t_{k})) =   \displaystyle   \int_{t_k}^{t_{k+1}} (- C v^+(t)
       - K q(t) +  F_{\mathrm{ext}}(t))\,dt +
         \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
    \end{cases}
 \end{eqnarray}
 %
-Choosing a numerical method boils down to choose a method of approximation for the remaining integral terms. Since discontinuities of the derivative  $v(\cdot)$ are to be expected if some shocks are occurring, \ie{}. $dr$  has some  atoms within the interval $(t_k,t_{k+1}]$, it is not relevant to use high order approximations  integration schemes for $dr$ (this was pointed out in remark \ref{remark1023}). It may be shown on some examples that, on the contrary, such high order schemes may generate artefact numerical oscillations (see \citep{Vola.Pratt.ea98}). 
+Choosing a numerical method boils down to choose a method of approximation for the remaining integral terms. Since discontinuities of the derivative  $v(\cdot)$ are to be expected if some shocks are occurring, \ie{}. $dr$  has some  atoms within the interval $(t_k,t_{k+1}]$, it is not relevant to use high order approximations  integration schemes for $dr$ (this was pointed out in remark \ref{remark1023}). It may be shown on some examples that, on the contrary, such high order schemes may generate artefact numerical oscillations (see \citep{Vola.Pratt.ea98}).
 
 
 %% \paragraph{Numerical Examples}
@@ -202,22 +202,22 @@ Choosing a numerical method boils down to choose a method of approximation for t
 %% \end{ndrva}
 
 
-The following notation will be used: 
+The following notation will be used:
 
 \begin{itemize}
-\item $q_{k}$ is an approximation of $q(t_{k})$ and $q_{k+1}$ is an approximation of $q(t_{k+1})$, 
+\item $q_{k}$ is an approximation of $q(t_{k})$ and $q_{k+1}$ is an approximation of $q(t_{k+1})$,
 
-\item $v_{k}$ is an approximation of $v^+(t_{k})$ and $v_{k+1}$ is an approximation of $v^+(t_{k+1})$, 
+\item $v_{k}$ is an approximation of $v^+(t_{k})$ and $v_{k+1}$ is an approximation of $v^+(t_{k+1})$,
 
-\item $p_{k+1}$ is an approximation of $ \displaystyle \int_{(t_k,t_{k+1}]} \,dr$. 
+\item $p_{k+1}$ is an approximation of $ \displaystyle \int_{(t_k,t_{k+1}]} \,dr$.
 \end{itemize}
 %
 A popular first order numerical scheme, the so called $\theta$-method, is used for the term supposed to be sufficiently smooth:\index{$\theta$-method}
 \begin{eqnarray}
-  \displaystyle \int_{t_k}^{t_{k+1}} C v + K q \,dt  &\approx& 
+  \displaystyle \int_{t_k}^{t_{k+1}} C v + K q \,dt  &\approx&
   h \left[ \theta (C v_{k+1}+K q_{k+1}) + (1-\theta) (C v_{k}+K q_{k}) \right]   \nonumber \\
-  \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t) \,dt &\approx& 
-  h\left[\theta  (F_{\mathrm{ext}})_{k+1}+(1-\theta)  (F_{\mathrm{ext}})_{k}  \right]  \nonumber 
+  \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t) \,dt &\approx&
+  h\left[\theta  (F_{\mathrm{ext}})_{k+1}+(1-\theta)  (F_{\mathrm{ext}})_{k}  \right]  \nonumber
 \end{eqnarray}
 The displacement, assumed to be absolutely continuous, is approximated by:
 \begin{eqnarray}
@@ -249,57 +249,57 @@ where,
 %% de $\widehat{W}$.
 %% \end{ndrmj}
 \begin{itemize}
-\item the matrix   
+\item the matrix
   \begin{equation}
 \widehat{M} = \left[M+h\theta C + h^2 \theta^2 K \right]  \label{eq:2002}
 \end{equation}
 is usually called the iteration matrix\index{Iteration matrix}.
-\item The vector   
+\item The vector
 \begin{equation}
  \label{eq:2003}
 \begin{array}{ll}
-v_{\mathrm{free}}  & = v_{k} + \widehat{M}^{-1} \left[   - h  C v_{k} - h K q_{k} - h^2 \theta  K v_{k} \right. \\ \\ 
-& \left. +  h\left[ \theta  (F_{\mathrm{ext}})_{k+1})+(1-\theta)  (F_{\mathrm{ext}})_{k} \right] \right] 
+v_{\mathrm{free}}  & = v_{k} + \widehat{M}^{-1} \left[   - h  C v_{k} - h K q_{k} - h^2 \theta  K v_{k} \right. \\ \\
+& \left. +  h\left[ \theta  (F_{\mathrm{ext}})_{k+1})+(1-\theta)  (F_{\mathrm{ext}})_{k} \right] \right]
 \end{array}
 \end{equation}
 %
-is the so-called ``free'' velocity, \ie{}, the velocity of the system when reaction forces are null.     
+is the so-called ``free'' velocity, \ie{}, the velocity of the system when reaction forces are null.
 \end{itemize}
 
 
-\subsubsection{Comments} 
+\subsubsection{Comments}
 
-Let us make some  comments on the above developments: 
+Let us make some  comments on the above developments:
 
 \begin{itemize}
 
-\item The iteration matrix $ \widehat{M} = \left[M+h\theta C + h^2 \theta^2 K \right] $ is supposed to be invertible, 
-since the mass matrix $M$ is usually positive definite and $h$ is supposed to be small enough. 
+\item The iteration matrix $ \widehat{M} = \left[M+h\theta C + h^2 \theta^2 K \right] $ is supposed to be invertible,
+since the mass matrix $M$ is usually positive definite and $h$ is supposed to be small enough.
 The matrices $C$ and $K$ are  usually semi-definite positive since rigid motions are allowed to bodies.
 
 \item  When $\theta=0$, the $\theta$-scheme is the explicit Euler scheme. When $\theta=1$, the $\theta$-scheme is the fully
 implicit Euler scheme. When dealing with a plain ODE
 \begin{equation}
-    M\ddot{q}(t)  + C \dot{q}(t) + K q(t)  = F(t) 
+    M\ddot{q}(t)  + C \dot{q}(t) + K q(t)  = F(t)
 \end{equation}
-the $\theta-$scheme is unconditionally stable for $0.5 < \theta \leq 1$. It is conditionally stable otherwise. 
+the $\theta-$scheme is unconditionally stable for $0.5 < \theta \leq 1$. It is conditionally stable otherwise.
 
 
-\item The equation (\ref{eq:24}) is a linear form of the dynamical equation. It appears 
-as an affine relation between the two unknowns, $v_{k+1}$ that is an approximation of the right derivative of the Lagrange variable 
-at time $t_{k+1}$, and the impulse $p_{k+1}$. Notice that this scheme is fully implicit. Nonsmooth laws have to be treated by implicit methods. 
+\item The equation (\ref{eq:24}) is a linear form of the dynamical equation. It appears
+as an affine relation between the two unknowns, $v_{k+1}$ that is an approximation of the right derivative of the Lagrange variable
+at time $t_{k+1}$, and the impulse $p_{k+1}$. Notice that this scheme is fully implicit. Nonsmooth laws have to be treated by implicit methods.
 
 
-\item From a numerical point of view, two major features appear. First, the different terms in 
-the numerical algorithm will keep finite values. When the time step $h$ vanishes, the scheme copes with finite jumps. 
-Secondly, the use of differential measures of the time interval $(t_k,t_{k+1}]$, \ie{}., 
-$dv((t_{k},t_{k+1}])=v^+(t_{k+1})-v^+(t_{k})$ and $dr((t_{k},t_{k+1}])$, 
-offers a rigorous treatment of the nonsmooth evolutions.  It is to be noticed that approximations of the acceleration are ignored. 
+\item From a numerical point of view, two major features appear. First, the different terms in
+the numerical algorithm will keep finite values. When the time step $h$ vanishes, the scheme copes with finite jumps.
+Secondly, the use of differential measures of the time interval $(t_k,t_{k+1}]$, \ie{}.,
+$dv((t_{k},t_{k+1}])=v^+(t_{k+1})-v^+(t_{k})$ and $dr((t_{k},t_{k+1}])$,
+offers a rigorous treatment of the nonsmooth evolutions.  It is to be noticed that approximations of the acceleration are ignored.
 
 \end{itemize}
 
 These remarks on the contact dynamics method might be viewed only as some numerical tricks. In fact, the
-mathematical study of the second order MDI by Moreau provides a sound mathematical ground to this numerical scheme. 
+mathematical study of the second order MDI by Moreau provides a sound mathematical ground to this numerical scheme.
 It is noteworthy that convergence results have been proved for such time-stepping schemes \cite{Marques1993,Stewart1998,Mabrouk1998,dzonou2007}, see below.
 
 \subsection{The Nonlinear  NonSmooth Lagrangian Dynamics}
@@ -310,13 +310,13 @@ Starting from the nonlinear dynamics~(\ref{eq:11-c}), the integration of  both s
   \begin{cases}
     \displaystyle \int_{(t_k,t_{k+1}]} M(q) dv + \int_{t_k}^{t_{k+1}} F(t, q(t), v^+(t)) \,dt = \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t)\,dt +
         \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+     q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
    \end{cases}
 \end{eqnarray}
 The first term is generally approximated by
 \begin{equation}
 \label{eq:19-NL}
-  \displaystyle \int_{(t_k,t_{k+1}]} M(q) \,dv \approx  M(q_{k+\gamma})\,(v_{k+1}-v_{k}) 
+  \displaystyle \int_{(t_k,t_{k+1}]} M(q) \,dv \approx  M(q_{k+\gamma})\,(v_{k+1}-v_{k})
 \end{equation}
 where $q_{k+\gamma}$ generalizes the standard notation for $\gamma \in [0,1]$ such that
 \begin{equation}
@@ -324,12 +324,12 @@ where $q_{k+\gamma}$ generalizes the standard notation for $\gamma \in [0,1]$ su
   q_{k+\gamma} = (1-\gamma) q_{k} + \gamma\,  q_{k+1}
 \end{equation}
 %\begin{ndrva}
-%  Is there a equivalent of the mean-value theorem  for differential measure ? 
+%  Is there a equivalent of the mean-value theorem  for differential measure ?
 %\end{ndrva}
 The \textit{a priori} smooth terms are evaluated with a $\theta$-method, chosen in this context for its energy conservation ability,
 \begin{eqnarray}
-  \displaystyle \int_{t_k}^{t_{k+1}} F(t,q,v) \,dt  &\approx& 
-  h  \tilde F_{k+\theta} 
+  \displaystyle \int_{t_k}^{t_{k+1}} F(t,q,v) \,dt  &\approx&
+  h  \tilde F_{k+\theta}
 \end{eqnarray}
 where $\tilde F_{k+\theta}$ is an approximation with the following dependencies
 $$ \tilde F(t_k,q_k,v_k,t_{k+1},q_{k+1},v_{k+1},t_{k+\theta},q_{k+\theta},v_{k+\theta}) $$
@@ -357,7 +357,7 @@ where $E(:cdot)$ is the Green-Lagrange strain tensor, which leads to an energy c
 behaviors, we refer to the work of
 \citep{Gonzalez2000,Laursen.Meng2001} and references therein for the choice of the
 discretization and the value of $\theta$.
-\end{remark} 
+\end{remark}
 
 The displacement, assumed to be absolutely continuous is approximated by:
 \begin{eqnarray}
@@ -373,7 +373,7 @@ The following nonlinear time--discretized equation of motion is obtained:
     q_{k+1} = q_{k} +  h v_{k+\theta}
 \end{cases}
 \end{equation}
-In its full generality and at least formally, substituting the expression of $q_{k+\gamma},q_{k+1}$ and $q_{k+\theta}$,  the first line of the  problem can be written under the form of a residue $\mathcal R$ depending only on $v_{k+1}$ such that 
+In its full generality and at least formally, substituting the expression of $q_{k+\gamma},q_{k+1}$ and $q_{k+\theta}$,  the first line of the  problem can be written under the form of a residue $\mathcal R$ depending only on $v_{k+1}$ such that
 \begin{equation}
   \label{eq:NL3}
   \mathcal R (v_{k+1}) = p_{k+1}
@@ -387,7 +387,7 @@ The system of equations~(\ref{eq:NL3}) for $v_{k+1}$ and $p_{k+1}$ can be linear
  Let us consider that the we have to solve the following equations,
 \begin{equation}
   \label{eq:NL4}
-  \mathcal R (u) = 0 
+  \mathcal R (u) = 0
 \end{equation}
 by a Newton's method where
 \begin{equation}
@@ -417,12 +417,12 @@ One gets
   \label{eq:NL8}
   \begin{array}{ll}
     \nabla_u  \left(M(q_{k+\gamma}(u) ) (u-v_{k})\right) &=   M(q_{k+\gamma}(u))  + \left[ \nabla_u M(q_{k+\gamma}(u) ) \right] (u-v_{k}) \\ \\
-                                         &=    M(q_{k+\gamma}(u)) + \left[h \gamma\theta \nabla_{q} M(q_{k+\gamma}(u))\right]  (u-v_{k}) 
+                                         &=    M(q_{k+\gamma}(u)) + \left[h \gamma\theta \nabla_{q} M(q_{k+\gamma}(u))\right]  (u-v_{k})
 \end{array}
 \end{equation}
 
 \begin{remark}
-The notation $\nabla_{u}M(q_{k+\gamma}(u))(u-v_{k})$ is to be understood as follows: 
+The notation $\nabla_{u}M(q_{k+\gamma}(u))(u-v_{k})$ is to be understood as follows:
 
 $$\nabla_{u}M(q_{k+\gamma}(u))(u-v_{k})=\frac{\partial}{\partial u}[M(q_{k+\gamma}(u))(u-v_{k})]$$
 
@@ -445,7 +445,7 @@ The Jacobian matrix $\nabla \mathcal R (\cdot)$ is evaluated in $u^{\tau}_{k+1}$
 The prediction of the position which plays an important role will be denoted by
 \begin{equation}
   \label{eq:NL555}
-  \tilde q^{\tau}_{k+1}= q_k + \gamma h [(1-\theta)v_k+\theta u^{\tau}_{k+1}] 
+  \tilde q^{\tau}_{k+1}= q_k + \gamma h [(1-\theta)v_k+\theta u^{\tau}_{k+1}]
 \end{equation}
 
 
@@ -480,7 +480,7 @@ Using this prediction, the problem~(\ref{eq:NSCD-discret-nl}) is written as foll
 The remaining nonlinear term is  linearized providing the Jacobian matrices of $F(t,q,v)$ with respect to $q$ and $v$. This expression depends strongly on the choice of the approximation $\tilde F_{k+\theta}$. Let us consider a pedagogical example, which is not necessarily the best as the Remark~\ref{eq:Simo} suggests but which is one of the simplest,
 \begin{equation}
   \label{eq:NL13}
-  \tilde F_{k+\theta} = (1-\theta) F(t_k,q_k,v_k) + \theta F(t_{k+1},q_{k+1},v_{k+1}) 
+  \tilde F_{k+\theta} = (1-\theta) F(t_k,q_k,v_k) + \theta F(t_{k+1},q_{k+1},v_{k+1})
 \end{equation}
 The computation of the Jacobian of $  \tilde F_{k+\theta}(t,q(u),u)$ for $$q(u) = q_k+h[(1-\theta)v_k+\theta u]   $$ is given for this example by
 \begin{equation}
@@ -488,7 +488,7 @@ The computation of the Jacobian of $  \tilde F_{k+\theta}(t,q(u),u)$ for $$q(u) 
   \begin{array}{ll}
     \nabla_u  \tilde F_{k+\theta}(t,q,u) &= \theta \nabla_u  F(t,q(u),u) \\ \\
     &= \theta \nabla_q F(t_{k+1},q(u)   ,u) \nabla_{u} q(u) + \theta \nabla_{u} F(t,q(u),u)    \\ \\
-    &= h \theta^2 \nabla_q F(t, q(u)   ,u) + \theta \nabla_{u} F(t,q(u),u) \\   
+    &= h \theta^2 \nabla_q F(t, q(u)   ,u) + \theta \nabla_{u} F(t,q(u),u) \\
   \end{array}
 \end{equation}
 The standard tangent stiffness and damping matrices $K_t$ and $C_t$ are defined by
@@ -497,17 +497,17 @@ The standard tangent stiffness and damping matrices $K_t$ and $C_t$ are defined 
   \begin{array}{ll}
   K_t(t,q,u) &= \nabla_q F(t, q   ,u) \\ \\
   C_t(t,q,u) &= \nabla_u F(t, q   ,u) \\
-\end{array}  
+\end{array}
 \end{equation}
-In this case, the  Jacobian of $  \tilde F_{k+\theta}(t,q(u),u)$ may be written as 
+In this case, the  Jacobian of $  \tilde F_{k+\theta}(t,q(u),u)$ may be written as
 \begin{equation}
   \label{eq:NL15}
   \begin{array}{ll}
-    \nabla_u  \tilde F_{k+\theta}(t,q,u) &=  h \theta^2  K_t(t,q,u) + \theta C_t(t, q   ,u)  \\   
+    \nabla_u  \tilde F_{k+\theta}(t,q,u) &=  h \theta^2  K_t(t,q,u) + \theta C_t(t, q   ,u)  \\
   \end{array}
 \end{equation}
 
-The complete Newton's iteration can then be written as 
+The complete Newton's iteration can then be written as
 \begin{equation}
   \label{eq:NL16}
    \widehat M^{\tau+1}_{k+1} (u^{\tau+1}_{k+1}-u^{\tau}_{k+1})  =  \mathcal R (u^{\tau}_{k+1}) +p^{\tau+1}_{k+1}
@@ -517,12 +517,12 @@ where the iteration matrix is evaluated as
  \widehat M^{\tau+1}_{k+1} = (M(\tilde q^{\tau}_{k+1}) +  h^2 \theta^2  K_t(t_{k+1},q^{\tau}_{k+1},u^{\tau}_{k+1}) + \theta h C_t(t, q^{\tau}_{k+1}   ,u^{\tau}_{k+1}))\label{eq:NL17}
 \end{equation}
 
-(compare with (\ref{eq:2002})). 
+(compare with (\ref{eq:2002})).
 
 \begin{remark}
-  The choice of $\theta=0$ leads to an explicit evaluation of the position and the nonlinear forces terms. This choice can be interesting if the time--step has to be chosen relatively small due  to the presence a very rapid dynamical process. This can be the case in crashes applications or in fracture dynamics~\citep{Acary-Monerie2006}. In this case, the iteration matrix reduces to $\widehat M^{\tau+1}_{k+1} = M(\tilde q^{\tau}_{k+1})$ avoiding the expensive evaluation of the tangent operator at each time--step. 
+  The choice of $\theta=0$ leads to an explicit evaluation of the position and the nonlinear forces terms. This choice can be interesting if the time--step has to be chosen relatively small due  to the presence a very rapid dynamical process. This can be the case in crashes applications or in fracture dynamics~\citep{Acary-Monerie2006}. In this case, the iteration matrix reduces to $\widehat M^{\tau+1}_{k+1} = M(\tilde q^{\tau}_{k+1})$ avoiding the expensive evaluation of the tangent operator at each time--step.
 
-This choice must not be misunderstood. The treatment of the nonsmooth dynamics continues to be implicit.  
+This choice must not be misunderstood. The treatment of the nonsmooth dynamics continues to be implicit.
 \end{remark}
 
 \section{Schatzman--Paoli 'scheme and its linearizations}
@@ -530,7 +530,7 @@ This choice must not be misunderstood. The treatment of the nonsmooth dynamics c
 
 \subsection{The scheme}
 \begin{subnumcases}{}
-  M(q_{k})(q_{k+1}-2q_{k}+q_{k-1})  - h^2 F(v_{k+\theta}, q_{k+\theta}, t_{k+theta})  =  p_{k+1},\quad\,\\ \notag\\ 
+  M(q_{k})(q_{k+1}-2q_{k}+q_{k-1})  - h^2 F(v_{k+\theta}, q_{k+\theta}, t_{k+theta})  =  p_{k+1},\quad\,\\ \notag\\
   v_{k+1}=\Frac{q_{k+1}-q_{k-1}}{2h}, \\ \notag \\
   y_{k+1} = h\left(\Frac{q_{k+1}+e q_{k-1}}{1+e}\right) \\
   p_{k+1}= G\left(\Frac{q_{k+1}+e q_{k-1}}{1+e}\right) \lambda_{k+1} \\
@@ -541,7 +541,7 @@ This choice must not be misunderstood. The treatment of the nonsmooth dynamics c
 
 
 \begin{ndrva}
-Should we have 
+Should we have
   $$ v_{k+1}=\Frac{q_{k+1}-q_{k-1}}{2h}$$ or  $$ v_{k+1}=\Frac{q_{k+1}-q_{k}}{h}$$ ? This question is particularly important for the initialization and the proposed $\theta$-scheme
 \end{ndrva}
 \subsection{The Newton linearization}
@@ -551,7 +551,7 @@ Let us define the residu on $q$
   \label{eq:residu}
   \mathcal R(q) =   M(q)(q-2q_{k}+q_{k-1})  + h^2 F( (\theta v(q)+ (1-\theta) v_k),\theta q+ (1-\theta) q_k),  t_{k+\theta})  -  p_{k+1}
 \end{equation}
-with 
+with
 \begin{equation}
   \label{eq:residu-linq1}
   v(q) = \Frac{q-q_{k-1}}{2h}
@@ -562,7 +562,7 @@ that is
   \mathcal R(q) =   M(q)(q-2q_{k}+q_{k-1})  + h^2 F( (\theta \Frac{q-q_{k-1}}{2h} + (1-\theta) v_k),\theta q+ (1-\theta) q_k),  t_{k+\theta})   -  p_{k+1}
 \end{equation}
 
-Neglecting $\nabla_q  M(q)$ we get 
+Neglecting $\nabla_q  M(q)$ we get
 \begin{equation}
   \label{eq:iterationmatrix}
  \nabla_q \mathcal R(q^\nu) =   M(q^\nu) + h^2  \theta K(q^\nu,v^\nu) + \Frac 1 2 h  \theta C(q^\nu,v^\nu)
@@ -579,7 +579,7 @@ and we  have to solve
 
 
 \begin{subnumcases}{}
-  M(q_{k+1}-2q_{k}+q_{k-1})  + h^2 (K q_{k+\theta}+ C v_{k+\theta})  =  p_{k+1},\quad\,\\ \notag\\ 
+  M(q_{k+1}-2q_{k}+q_{k-1})  + h^2 (K q_{k+\theta}+ C v_{k+\theta})  =  p_{k+1},\quad\,\\ \notag\\
   v_{k+1}=\Frac{q_{k+1}-q_{k-1}}{2h}, \\ \notag \\
   y_{k+1} = h\left(\Frac{q_{k+1}+e q_{k-1}}{1+e}\right) \\
   p_{k+1}= G\left(\Frac{q_{k+1}+e q_{k-1}}{1+e}\right) \lambda_{k+1} \\
@@ -591,7 +591,7 @@ Let us define the residu on $q$
   \label{eq:residu-linq}
   \mathcal R(q) =   M(q-2q_{k}+q_{k-1})  + h^2 (K(\theta q+ (1-\theta) q_k))+ C (\theta v(q)+ (1-\theta) v_k))  -  p_{k+1}
 \end{equation}
-with 
+with
 \begin{equation}
   \label{eq:residu-linq1}
   v(q) = \Frac{q-q_{k-1}}{2h}
@@ -616,7 +616,7 @@ Let us consider that we have two simple linear Lagrangian Dynamical systems
   \label{eq:FullyLinear1}
   \begin{cases}
     M_1 \dot v_1  = F_{1,Ext}(t) + p_1   \\
-    \dot q_1 = v_1 
+    \dot q_1 = v_1
   \end{cases}
 \end{equation}
 and
@@ -627,15 +627,15 @@ and
     \dot q_2 = v_2 \\
   \end{cases}
 \end{equation}
-These Dynamical systems (\ref{eq:FullyLinear1}) and (\ref{eq:FullyLinear1}) might numerically solved by choosing two different time--stepping schemes. Let us choose for instance Moreau's scheme for(\ref{eq:FullyLinear1}) 
+These Dynamical systems (\ref{eq:FullyLinear1}) and (\ref{eq:FullyLinear1}) might numerically solved by choosing two different time--stepping schemes. Let us choose for instance Moreau's scheme for(\ref{eq:FullyLinear1})
 \begin{equation}
   \label{eq:FullyLinear1-TS}
   \begin{cases}
     M_1 (v_{1,k+1}-v_{1,k})  = F_{1,Ext}(t_{k+1}) + p_{1,k+1}   \\
-    q_{1,k+1} = q_{k}+ h  v_{1,k+\theta} 
+    q_{1,k+1} = q_{k}+ h  v_{1,k+\theta}
   \end{cases}
 \end{equation}
-and Schatzman--Paoli's sheme for (\ref{eq:FullyLinear1}) 
+and Schatzman--Paoli's sheme for (\ref{eq:FullyLinear1})
 \begin{equation}
   \label{eq:FullyLinear1-TS}
   \begin{cases}
@@ -667,12 +667,12 @@ Many questions are raised when we want to deal with the discrete systems:
 \item Which rules should we use for the discretization of~(\ref{eq:CP}) ?
   \begin{equation}
     \label{eq:CP-TS1}
-    \text{ if } \bar y_{k+1}\leq 0, \text{ then }  0\leq \dot y _{k+1} + e \dot y_{k} \perp \hat \lambda_{k+1}\geq 0 
+    \text{ if } \bar y_{k+1}\leq 0, \text{ then }  0\leq \dot y _{k+1} + e \dot y_{k} \perp \hat \lambda_{k+1}\geq 0
   \end{equation}
   or
   \begin{equation}
     \label{eq:CP-TS2}
-    0\leq y _{k+1} + e y_{k-1} \perp \tilde \lambda_{k+1}\geq 0 
+    0\leq y _{k+1} + e y_{k-1} \perp \tilde \lambda_{k+1}\geq 0
   \end{equation}
 \item Should we assume that $y_{k+1} = q_{1,k+1}-q_{2,k+1}$ and $\dot y_{k+1} = v_{1,k+1}-v_{2,k+1}$
 \item How can we link $\hat \lambda_{k+1}$ and  $\tilde \lambda_{k+1}$ with $p_{1,k+1}$ and $p_{2,k+1}$ ?
@@ -683,7 +683,7 @@ The third is the more difficult question and is seems that it is not reasonable 
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "DevNotes"
-%%% End: 
+%%% End:

@@ -26,7 +26,7 @@ class NonSmoothDynamicalSystemTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystemTest);
 
 
@@ -56,7 +56,3 @@ public:
 };
 
 #endif
-
-
-
-

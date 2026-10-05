@@ -1,5 +1,5 @@
 /************************************************************************
-  			acetime.h 
+  			acetime.h
 
 **************************************************************************/
 #include <stdio.h>
@@ -11,8 +11,8 @@ using namespace std;
 #ifndef ACETIME_H
 #define ACETIME_H
 // Class aceTime
-// 
-// 
+//
+//
 
 /** \class aceTime
     \brief simple timer utilities
@@ -25,7 +25,7 @@ public:
   void setName(char const *Name);
   void print(ostream& os = cout);
   virtual ~aceTime();
-  
+
 protected:
 private:
   long mCall;
@@ -33,8 +33,7 @@ private:
   long mCumul;
   char mName[128];
   bool mIsRunning;
-    
+
 
 };
 #endif //ACETIME_H
-

@@ -58,5 +58,5 @@ int plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, Solve
     return numerics_error("plasticity_2d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
-  return 0;  
+  return 0;
 }

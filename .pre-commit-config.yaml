@@ -1,0 +1,33 @@
+# Configuration for pre-commit : https://pre-commit.com
+# One conf for two runs:
+#  - locally --> up to current user (pre-commit and pre-push). Need to be activated
+#  - remotely --> CI job
+
+minimum_pre_commit_version: "3.2.0"
+default_install_hook_types: [pre-commit, pre-push]
+
+
+exclude: \.(dat|ref|supp|stp|step|h5|hdf5)$
+
+
+repos:
+  # ---- Hygiene git et fichiers (rapide, a chaque commit) ----
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^externals/
+      - id: end-of-file-fixer
+        exclude: ^externals/
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+
+  # ---- clang format C/C++ (rules: .clang-format) ----
+  #- repo: https://github.com/pre-commit/mirrors-clang-format
+  #  rev: v23.1.1
+  #  hooks:
+  #    - id: clang-format
+  #      types_or: [c, c++]

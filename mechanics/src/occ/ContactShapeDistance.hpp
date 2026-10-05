@@ -21,7 +21,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
 namespace siconos::mechanics::occ {
-  
+
 struct ContactShapeDistance {
   double value{0.};
 
@@ -40,7 +40,7 @@ struct ContactShapeDistance {
   gp_Pnt point1;
   gp_Pnt point2;
   gp_Dir normal;
-  
+
   bool orientates(){
   if(gp_Vec{point1.Coord() - point2.Coord()}.Dot(normal) < 0.){
     normal.Reverse();
@@ -48,7 +48,7 @@ struct ContactShapeDistance {
   }
   return false;
   }
-  
+
 };
 }  // namespace siconos::mechanics::occ
 

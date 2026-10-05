@@ -51,7 +51,7 @@ Non-Smooth Gauss Seidel solver.
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] : error computation method,
-  
+
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL : Full error computation with velocity computation
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (DEFAULT): Light error computation with incremental values on reaction verification of absolute error at the end
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT : only light error computation (velocity not computed)
@@ -62,7 +62,7 @@ Non-Smooth Gauss Seidel solver.
 * iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 
 * iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] : shuffle the contact indices in the loop
-  
+
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE : no shuffle
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE : shuffle only at the beginning
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP : shuffle in each iteration
@@ -79,7 +79,7 @@ Non-Smooth Gauss Seidel solver.
   * SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (default) relaxation is not used,
   * SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  relaxation is used with parameter dparam[8],
 
-  
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance on the loop
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
 * dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE]  the relaxation parameter omega
@@ -114,8 +114,3 @@ Projection on cone (:cpp:enumerator:`SICONOS_ROLLING_FRICTION_3D_ONECONTACT_Proj
 out :
 
 iparam[SICONOS_FRICTION_NUMBER_OF_CONTACTS] : number of contacts
-
-
-
-
-

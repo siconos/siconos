@@ -14,12 +14,12 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "numerics_verbose.h"              // for verbose
-#include "siconos_debug.h"  
+#include "siconos_debug.h"
 
 #include <omp.h>
 
 void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {  
+                         SolverOptions *options) {
 
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
@@ -47,12 +47,12 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
   if (*info == 2) {
     return;
   }
-  
+
   /* Solver variables */
   int iter = 0;
   double err = 1.;
   /* 2-norm of q, to normalize error */
-  double norm_q = cblas_dnrm2(n, q, 1); 
+  double norm_q = cblas_dnrm2(n, q, 1);
   if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
 
   double *new_z = (double *)malloc((size_t)n * sizeof(double));
@@ -60,8 +60,8 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
   /* double *true_w = (double *)malloc(n * sizeof(double));
   double true_err;
  */
-  /* 
-  Use a znew to store results 
+  /*
+  Use a znew to store results
   */
 
   /* Start solving */
@@ -89,7 +89,7 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
 
     // Update z if not last
     if (err > tol) {
-      // Not sure if paralle update is faster than  
+      // Not sure if paralle update is faster than
       #pragma omp parallel for default(none) shared(z, new_z, n)
       for (int i = 0; i < n; i++) {
         z[i] = new_z[i];

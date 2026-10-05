@@ -100,7 +100,7 @@ class NonSmoothLaw {
 
   /** Check if the NS law is active at a given level
    *  This is used for cohesive zone models and other level-dependent laws.
-   *  
+   *
    *  \param inter the Interaction using this law
    *  \param level the level to check
    *  \return true if active at the given level
@@ -114,7 +114,7 @@ class NonSmoothLaw {
   /** Update the internal state of the interaction
    *  This is called after each time step for cohesive zone models
    *  to update internal variables (damage, etc.).
-   *  
+   *
    *  \param inter the Interaction using this law
    */
   virtual void updateInteractionInternalState(Interaction& inter) {
@@ -128,8 +128,8 @@ class NonSmoothLaw {
   virtual void displayInternalVariables(siconos::algebra::blocks::SharedVector3 & internalVariables) {
   };
 
-  
-  
+
+
   /** initialize non smooth law if there is some internal variables
   */
   virtual std::shared_ptr<siconos::algebra::blocks::SharedVector3> initializeInternalVariables(

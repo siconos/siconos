@@ -1216,7 +1216,7 @@ class IOReader(VTKPythonAlgorithmBase):
             p0s_current = self._io.p0s(self._index)  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
             if p0s_current is not None and len(p0s_current) > 0:
                 # Build dict: ds_id -> p0_norm
-                p0_dict = {int(row[0]): math.sqrt(row[1]**2 + row[2]**2 + row[3]**2) 
+                p0_dict = {int(row[0]): math.sqrt(row[1]**2 + row[2]**2 + row[3]**2)
                            for row in p0s_current}
                 # Get ds_ids for current dynamic objects
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
@@ -2035,7 +2035,7 @@ class VView(object):
             if shape_type in ["msh"]:
                 shape_data = msh_to_stl(shape_data)
                 shape_type = "stl"
-                
+
             with io_tmpfile() as tmpf:
                 # fix compatibility with h5py version: to be removed in the future
                 tmpf[0].write(shape_data)

@@ -29,14 +29,14 @@ static double get_wall_time(void) {
 }
 
 /* Wrapper to call instrumented nsgs_solve from fc3d_nsgs_generic */
-static void fc3d_nsgs_generic_instrumented(FrictionContactProblem* problem, 
+static void fc3d_nsgs_generic_instrumented(FrictionContactProblem* problem,
                                            double* reaction, double* velocity,
                                            int* info, SolverOptions* options) {
   if (!problem || !reaction || !info || !options) {
     numerics_error("fc3d_nsgs_generic_instrumented", "Invalid input arguments");
     return;
   }
-  
+
   if (options->numberOfInternalSolvers < 1) {
     numerics_error("fc3d_nsgs_generic_instrumented",
                    "The NSGS method needs options for the internal solvers");
@@ -54,7 +54,7 @@ static void fc3d_nsgs_generic_instrumented(FrictionContactProblem* problem,
     *info = 1;
     return;
   }
-  
+
   /* Initialize local solver based on type */
   SolverOptions* localsolver_options = options->internalSolvers[0];
   switch (localsolver_options->solverId) {
@@ -71,7 +71,7 @@ static void fc3d_nsgs_generic_instrumented(FrictionContactProblem* problem,
       *info = 1;
       return;
   }
-  
+
   localsolver_options->solverData = (void*)local_solver;
 
   /* Setup problem data */
@@ -139,29 +139,29 @@ static ProfileResult profile_solver(FrictionContactProblem* problem,
                                     int use_original) {
   ProfileResult result = {0};
   int nc = problem->numberOfContacts;
-  
+
   double* r_tmp = (double*)calloc(nc * 3, sizeof(double));
   double* v_tmp = (double*)calloc(nc * 3, sizeof(double));
-  
+
   double start = get_wall_time();
-  
+
   if (use_original) {
     fc3d_nsgs(problem, r_tmp, v_tmp, &result.info, options);
   } else {
     fc3d_nsgs_generic_instrumented(problem, r_tmp, v_tmp, &result.info, options);
   }
-  
+
   result.total_time = get_wall_time() - start;
   result.iterations = options->iparam[SICONOS_IPARAM_ITER_DONE];
   result.final_error = options->dparam[SICONOS_DPARAM_RESIDU];
-  
+
   /* Copy solution back */
   memcpy(reaction, r_tmp, nc * 3 * sizeof(double));
   memcpy(velocity, v_tmp, nc * 3 * sizeof(double));
-  
+
   free(r_tmp);
   free(v_tmp);
-  
+
   return result;
 }
 
@@ -169,33 +169,33 @@ int main(int argc, char** argv) {
   printf("============================================================\n");
   printf("NSGS Profiling Test\n");
   printf("============================================================\n");
-  
+
   const char* data_file = (argc > 1) ? argv[1] : "./data/FC3D_Example1.dat";
-  
+
   FrictionContactProblem* problem = frictionContact_new_from_filename(data_file);
   if (!problem) {
     fprintf(stderr, "Failed to load %s\n", data_file);
     return 1;
   }
-  
+
   int nc = problem->numberOfContacts;
   printf("Problem: %s (%d contacts, %d variables)\n\n", data_file, nc, nc*3);
-  
+
   /* Setup options */
   SolverOptions* opts_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   opts_orig->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   opts_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   solver_options_update_internal(opts_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   opts_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-  
+
   SolverOptions* opts_gen = solver_options_copy(opts_orig);
-  
+
   /* Allocate solution arrays */
   double* r_orig = (double*)calloc(nc * 3, sizeof(double));
   double* v_orig = (double*)calloc(nc * 3, sizeof(double));
   double* r_gen = (double*)calloc(nc * 3, sizeof(double));
   double* v_gen = (double*)calloc(nc * 3, sizeof(double));
-  
+
   /* Profile original fc3d_nsgs */
   printf("Profiling ORIGINAL fc3d_nsgs...\n");
   printf("------------------------------------------------------------\n");
@@ -204,24 +204,24 @@ int main(int argc, char** argv) {
   printf("Iterations:   %d\n", res_orig.iterations);
   printf("Final error:  %.6e\n", res_orig.final_error);
   printf("Converged:    %s\n\n", res_orig.info == 0 ? "YES" : "NO");
-  
+
   /* Profile generic fc3d_nsgs_generic with instrumentation */
   printf("Profiling GENERIC fc3d_nsgs_generic (instrumented)...\n");
   printf("------------------------------------------------------------\n");
   ProfileResult res_gen = profile_solver(problem, r_gen, v_gen, opts_gen, 0);
-  
+
   /* Print instrumented results */
   nsgs_timers_print("fc3d_nsgs_generic", nc, res_gen.iterations);
-  
+
   printf("\nComparison:\n");
   printf("------------------------------------------------------------\n");
   printf("Total time (original):  %.4f ms\n", res_orig.total_time * 1000);
   printf("Total time (generic):   %.4f ms\n", res_gen.total_time * 1000);
-  printf("Overhead:               %.1f%%\n", 
+  printf("Overhead:               %.1f%%\n",
          (res_gen.total_time - res_orig.total_time) / res_orig.total_time * 100);
   printf("Iterations (original):  %d\n", res_orig.iterations);
   printf("Iterations (generic):   %d\n", res_gen.iterations);
-  
+
   /* Compute solution difference */
   double diff = 0.0;
   for (int i = 0; i < nc * 3; i++) {
@@ -230,32 +230,32 @@ int main(int argc, char** argv) {
   }
   diff = sqrt(diff);
   printf("Solution difference:    %.6e\n", diff);
-  
+
   /* Cleanup */
   free(r_orig); free(v_orig);
   free(r_gen); free(v_gen);
   solver_options_delete(opts_orig);
   solver_options_delete(opts_gen);
   frictionContactProblem_free(problem);
-  
+
   return 0;
 }
 
 /* Wrapper functions needed by the instrumented solver */
-extern void fc3d_nsgs_update(int, FrictionContactProblem*, FrictionContactProblem*, 
+extern void fc3d_nsgs_update(int, FrictionContactProblem*, FrictionContactProblem*,
                              double*, SolverOptions*);
 extern double fc3d_compute_error;
 
-static void fc3d_nsgs_update_wrapper(unsigned int block, void* problem, 
-                                     void* local_problem, double* var_z, 
+static void fc3d_nsgs_update_wrapper(unsigned int block, void* problem,
+                                     void* local_problem, double* var_z,
                                      SolverOptions* options) {
   fc3d_nsgs_update(block, (FrictionContactProblem*)problem,
                    (FrictionContactProblem*)local_problem, var_z, options);
 }
 
-static void fc3d_nsgs_solve_local_wrapper(void* local_problem, 
+static void fc3d_nsgs_solve_local_wrapper(void* local_problem,
                                           SolverOptions* localsolver_options,
-                                          double* var_z_local, 
+                                          double* var_z_local,
                                           double* localsolver_options_data) {
   (void)localsolver_options_data;
   SolverPtr local_solver = (SolverPtr)localsolver_options->solverData;
@@ -286,14 +286,14 @@ static void fc3d_nsgs_accept_local_wrapper(void* local_problem, SolverOptions* o
                                            double* var_z_global, double* var_z_local) {
   (void)local_problem;
   (void)iter;
-  
+
   double local_residual = options->dparam[SICONOS_DPARAM_RESIDU];
   if (isnan(local_residual) || isinf(local_residual) || local_residual > 1.0) {
     numerics_printf("Discard local reaction for block %i at iteration %i with local_error = %e",
                     block, iter, local_residual);
     return;
   }
-  
+
   var_z_global[block * 3 + 0] = var_z_local[0];
   var_z_global[block * 3 + 1] = var_z_local[1];
   var_z_global[block * 3 + 2] = var_z_local[2];

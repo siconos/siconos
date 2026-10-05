@@ -69,7 +69,7 @@ The generic drivers for friction-contact problems are:
 
 
 For details regarding global formulation and rolling-friction problems, see :ref:`gfc_problem` or :ref:`rfc_problem`.
-  
+
 .. _fc_error:
 
 Error strategy
@@ -86,18 +86,18 @@ It can be:
 * SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE
 
   internal solver tolerance = error/dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO]
-  
+
 * SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT
 
   internal solver tolerance = error/dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] * number of contacts
-  
+
 * SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
-    
+
   internal solver tolerance = value provided during initialisation of the local solver.
 
 Warning : iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] and dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] must be set properly for all solvers that are using Xfc3d_set_internal_tolerance function.
-  
-  
+
+
 .. _fc2d_solvers:
 
 Friction 2D available solvers
@@ -160,7 +160,7 @@ Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`)
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] : error computation method,
-  
+
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL : Full error computation with velocity computation
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (DEFAULT): Light error computation with incremental values on reaction verification of absolute error at the end
   * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT : only light error computation (velocity not computed)
@@ -171,7 +171,7 @@ Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`)
 * iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 
 * iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] : shuffle the contact indices in the loop
-  
+
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE : no shuffle
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE : shuffle only at the beginning
   * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP : shuffle in each iteration
@@ -188,7 +188,7 @@ Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`)
   * SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (default) relaxation is not used,
   * SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  relaxation is used with parameter dparam[8],
 
-  
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance on the loop
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
 * dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE]  the relaxation parameter omega
@@ -199,7 +199,7 @@ out
 * dparam[SICONOS_DPARAM_RESIDU]  reached error
 
 Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID`.
-      
+
 
 
 Nonsmooth Gauss-Seidel, velocity version (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGSV`)
@@ -217,7 +217,7 @@ Nonsmooth Gauss-Seidel, velocity version (:cpp:enumerator:`SICONOS_FRICTION_3D_N
  dparam[SICONOS_DPARAM_RESIDU(1)]  reached error
 
 Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN`.
-      
+
 
 Proximal point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_PROX`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -229,11 +229,11 @@ Proximal point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_PROX`)
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
 * iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]
 
-  * SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION) 
+  * SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
   * SICONOS_FRICTION_3D_PROXIMAL_PROX (default)
 * iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
-    
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance on the loop
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] = 1e4
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 5.
@@ -276,7 +276,7 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 
 * iparam[SICONOS_FRICTION_3D_NSN_FORMULATION]
 
-  * SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD 
+  * SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD
   * SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD
   * SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED, (default)
   * SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED
@@ -285,8 +285,8 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]
 
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO (default)
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP : Loop PLI-NSN strategy 
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP : NSN and after Loop PLI-NSN strategy for the hybrid solver 
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP : Loop PLI-NSN strategy
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP : NSN and after Loop PLI-NSN strategy for the hybrid solver
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN : VI_EG preconditionning to NSN
 
 * iparam[3] = 100000; /* nzmax*/
@@ -300,7 +300,7 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE
 
-* iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1,  mpi com fortran 
+* iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1,  mpi com fortran
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] Linear solver used at each Newton iteration
   * SICONOS_FRICTION_3D_NSN_USE_CSLUSOL
@@ -309,13 +309,13 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1; (must be > 0 !)
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
-  
+
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE (default)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100  maximum number of iterations allowed for the line search.
- 
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-3
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1
 
@@ -343,7 +343,7 @@ Nonsmooth Newton/ Alart-Curnier (test) (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 * dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
 
-   
+
 Fixed-Point (De Saxce formulation) (:cpp:enumerator:`SICONOS_FRICTION_3D_DSFP`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -355,7 +355,7 @@ Fixed-Point (De Saxce formulation) (:cpp:enumerator:`SICONOS_FRICTION_3D_DSFP`)
 * dparam[SICONOS_DPARAM_TOL] = 1e-3;
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.;
 
-  
+
 Fixed-Point projection (VI reformulation) (:cpp:enumerator:`SICONOS_FRICTION_3D_VI_FPP`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -390,7 +390,7 @@ Hyperplane Projection (:cpp:enumerator:`SICONOS_FRICTION_3D_HP`)
 
 * dparam[SICONOS_DPARAM_TOL] = 1e-3;
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 0.99
-  
+
 Fixed-Point projection (:cpp:enumerator:`SICONOS_FRICTION_3D_FPP`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -431,13 +431,13 @@ Nonsmooth Newton (Fischer-Burmeister formulation) (:cpp:enumerator:`SICONOS_FRIC
   * SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED,
   * SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED
   * SICONOS_FRICTION_3D_NSN_FORMULATION_NULL
-  
+
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
-  
+
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE (default)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
-    
+
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;
 
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1; (must be > 0 !)
@@ -546,11 +546,11 @@ the local (reduced) frictional contact problem in the dense form.
   * SICONOS_FRICTION_3D_NSN_FORMULATION_NULL
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
-  
+
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE (default)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
-    
+
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
@@ -588,7 +588,7 @@ Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
 
 * iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]
-  
+
   * SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY (default)
   * SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY
   * SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY
@@ -620,7 +620,7 @@ Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 
   * SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO (default)
   * SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES
-    
+
 * iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]
 
   * SICONOS_FRICTION_3D_RESCALING_NO (default)
@@ -675,7 +675,7 @@ which switches to one of the local drivers below:
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
-  
+
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE (default for NSN_GP and NSN_GP_HYBRID)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO (default for NSN)
@@ -692,10 +692,10 @@ which switches to one of the local drivers below:
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP] = 1;
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 10 (for NSN), 100 (for NSN_GP and NSN_GP_HYBRID);
 
-    
+
 * dparam[SICONOS_DPARAM_TOL] =1e-14;
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] =1.0;
- 
+
 
 Projection on cone or cylinder (:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone`, ...)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -711,7 +711,7 @@ Projection on cone or cylinder (:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_
    ":cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity`",":cpp:func:`fc3d_projectionOnCone_velocity_solve`"
    ":cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder`",":cpp:func:`fc3d_projectionOnCylinder_solve`"
    ":cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnProjectionOnCylinderWithLocalIteration`",":cpp:func:`fc3d_projectionOnCylinderWithLocalIteration_solve`"
-  
+
 **Parameters:**
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
@@ -762,4 +762,3 @@ Reformulate the problem as a convex QP and solve using :cpp:enumerator:`SICONOS_
 **Driver:** :cpp:func:`fc3d_ConvexQP_ProjectedGradient_Cylinder`
 
 **Parameters:** same as :cpp:enumerator:`SICONOS_CONVEXQP_PG`, see :ref:`convex_qp_solvers`.
-

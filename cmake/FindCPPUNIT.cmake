@@ -22,7 +22,7 @@ FindCPPUNIT
 Find cppunit libraries and headers
 
 Usage :
- 
+
 find_package(CPPUNIT REQUIRED)
 target_link_libraries(yourlib PRIVATE CPPUNIT::CPPUNIT)
 
@@ -56,7 +56,7 @@ find_package_handle_standard_args(CPPUNIT
   REQUIRED_VARS CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
 
 if(CPPUNIT_FOUND)
-  
+
   if(NOT TARGET CPPUNIT::CPPUNIT)
     add_library(CPPUNIT::CPPUNIT IMPORTED INTERFACE)
     set_property(TARGET CPPUNIT::CPPUNIT PROPERTY INTERFACE_LINK_LIBRARIES ${CPPUNIT_LIBRARIES})

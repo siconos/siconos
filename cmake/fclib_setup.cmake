@@ -1,4 +1,4 @@
-# - Fclib - 
+# - Fclib -
 if(WITH_FCLIB)
   # Three ways:
   # - No info about fclib location, try standard paths or use fetchcontent
@@ -14,7 +14,7 @@ if(WITH_FCLIB)
       GIT_TAG           origin/master
       GIT_SHALLOW TRUE
       UPDATE_DISCONNECTED TRUE # Do not update git repo at each run
-      CMAKE_ARGS 
+      CMAKE_ARGS
         -DWITH_CXX=${WITH_CXX}
         -DFCLIB_WITH_MERIT_FUNCTIONS=${TRUC_WITH_MERIT_FUNCTIONS}
         -DWITH_TESTS=${WITH_TESTING}
@@ -35,4 +35,3 @@ if(WITH_FCLIB)
   endif()
 
 endif()
-

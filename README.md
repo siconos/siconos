@@ -211,5 +211,5 @@ Siconos is distributed under the [Apache License, Version 2.0](COPYING).
 
 ---
 
-**Maintained by:** The Siconos Development Team  
+**Maintained by:** The Siconos Development Team
 **Contact:** [GitHub Issues](https://github.com/siconos/siconos/issues)

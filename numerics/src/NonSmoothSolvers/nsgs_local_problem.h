@@ -63,18 +63,18 @@ typedef struct {
   /** Update local problem for given block */
   void (*update)(void* global, unsigned int block, const double* global_sol,
                  double* local_rhs, int dim, double* workspace);
-  
+
   /** Extract local matrix for given block */
   void (*extract)(void* global, unsigned int block, double* local_mat, int dim);
-  
+
   /** Solve local problem (optional, can use registry instead) */
   int (*solve)(void* local_data, const double* rhs, const double* mat,
                const double* mu, int dim, SolverOptions* opts, double* result);
-  
+
   /** Problem type and dimension */
   NSGSLocalProblemType type;
   int dimension;
-  
+
   /** Default local solver name */
   const char* default_solver;
 } NSGSLocalProblemOps;

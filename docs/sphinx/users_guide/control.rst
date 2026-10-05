@@ -16,11 +16,11 @@ Rules:
 
 * add Sensors and Actuators to this manager::
 
-    auto t1 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);	
+    auto t1 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);
     auto s1 = cm->addSensor(typeS1,t1);
-    auto t2 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);	
+    auto t2 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);
     auto a1 = cm->addActuator(typeA1,t2);
-    // ... 
+    // ...
 
 typeS1 and typeA1 are integers which represent the type of the Sensor/Actuator. See corresponding
 sections for details and various types. \n
@@ -45,12 +45,12 @@ Sensors
 
 * tk
 * capture
-* map of vectors. Save values for all events? 
+* map of vectors. Save values for all events?
 
 Actuators
 ---------
 
-link to one DS. 
+link to one DS.
 
 * tk
 * a way to compute the value of z

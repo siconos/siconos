@@ -237,7 +237,7 @@ NeighborhoodSearch::update_point_sets()
 #pragma omp parallel for
 	for (int j = 0; j < m_point_sets.size(); j++){
 		PointSet& d = m_point_sets[j];
-		if (d.is_dynamic()) 
+		if (d.is_dynamic())
 		{
 			d.m_keys.swap(d.m_old_keys);
 			for (unsigned int i = 0; i < d.n_points(); ++i)
@@ -735,4 +735,3 @@ NeighborhoodSearch::query(Real const* xa, std::vector<std::vector<unsigned int>>
 
 
 }
-

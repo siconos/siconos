@@ -92,7 +92,7 @@ opensuse-tumbleweed:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
   extends: .docker-manual
 
-  
+
 # -------------- Configure, build and test Siconos --------------
 
 #######################
@@ -224,7 +224,7 @@ mambalab:test:
       - .siconos-test
       - .devel-rules
     needs: ["mambalab:build"]
-    
+
 # ------ with mechanisms component -------
 # Based on micromamba
 with-mechanisms:configure:
@@ -238,7 +238,7 @@ with-mechanisms:configure:
   needs:
     - job: opencascade:docker-build
       optional: true
-    
+
 with-mechanisms:build:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
@@ -318,8 +318,8 @@ ubuntu22.04-release:test:
       - .siconos-test
       - .manual-only
     needs: ["ubuntu22.04-release:build"]
-    
- 
+
+
 # --- fedora 38, default setup ---
 fedora-38:configure:
   variables:
@@ -428,18 +428,18 @@ bridge:examples:
   #variables:
   # base name of the docker image used in child project.
   # LAB_NAME: siconoslab
-  trigger: 
+  trigger:
     project: nonsmooth/siconos-tutorials
     branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!
     strategy : depend
-    #forward :  
+    #forward :
     #yaml_variables: true # to send LAB_NAME
   needs: ["mambalab:install"]
-  allow_failure: true 
+  allow_failure: true
   rules: # This job starts if the commit message contains "[with examples]" or may be triggered manualy
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
       when: on_success
-    - when: manual    
+    - when: manual
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.
@@ -451,4 +451,3 @@ generate-doc:
     include:
       - docs/build-doc.yml
   when: manual
-

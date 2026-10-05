@@ -22,7 +22,7 @@ FindSuiteSparse
 Find SuiteSparse libraries and headers
 
 Usage :
- 
+
 find_package(SuiteSparse REQUIRED COMPONENTS <name>)
 target_link_libraries(yourlib PRIVATE SuiteSparse::<name>)
 
@@ -69,10 +69,10 @@ set(_UMFPACK_lib umfpack)
 
 foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
   find_path(SuiteSparse_${_component}_INCLUDE_DIR NAMES ${_${_component}_header}
-    PATH_SUFFIXES include/suitesparse SuiteSparse suitesparse include 
+    PATH_SUFFIXES include/suitesparse SuiteSparse suitesparse include
     ${_SuiteSparse_INC_SEARCH_OPTS}
     )
- 
+
   find_library(SuiteSparse_${_component}_LIBRARY NAMES ${_${_component}_lib}
     ${_SuiteSparse_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
@@ -92,20 +92,20 @@ foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
 
   # trick required for cmake < 3.18
   list(APPEND REQUIRED_VARIABLES SuiteSparse_${_component}_LIBRARIES SuiteSparse_${_component}_INCLUDE_DIR)
-    
+
 endforeach()
 
 set(REQUIRED_VARS_ARG)
 if(${CMAKE_VERSION} VERSION_LESS "3.18")
   set(REQUIRED_VARS_ARG REQUIRED_VARS ${REQUIRED_VARIABLES})
-endif()   
+endif()
 
 
 find_package_handle_standard_args(SuiteSparse HANDLE_COMPONENTS "${REQUIRED_VARS_ARG}")
 
 # set(SuiteSparse_FOUND TRUE CACHE INTERNAL "")
 foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
-  
+
   if(SuiteSparse_${_component}_FOUND)
     if(NOT TARGET SuiteSparse::${_component})
       add_library(SuiteSparse::${_component} IMPORTED INTERFACE)

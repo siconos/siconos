@@ -61,4 +61,3 @@ BOOST_PFR_END_MODULE_EXPORT
 }} // namespace boost::pfr
 
 #endif // BOOST_PFR_TRAITS_HPP
-

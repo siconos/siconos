@@ -205,4 +205,3 @@ struct sparse_set {
 };
 
 }  // namespace siconos::storage
-

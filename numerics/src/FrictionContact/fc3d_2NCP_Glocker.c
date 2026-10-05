@@ -191,7 +191,7 @@ int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
   } else
     return numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -",
                           "unknown storage type for matrix M");
-  return 0;  
+  return 0;
 }
 
 void NCPGlocker_initialize(FrictionContactProblem* problem) {

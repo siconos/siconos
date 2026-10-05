@@ -41,7 +41,7 @@ int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
   CHECK_NULL(problem->q);
 
   assert(options->isSet);
-  
+
   /* Check storage type */
   if (problem->M->storageType != NM_DENSE) {
     fprintf(stderr, "avi_driver: forbidden type of storage for the matrix M of the AVI\n");

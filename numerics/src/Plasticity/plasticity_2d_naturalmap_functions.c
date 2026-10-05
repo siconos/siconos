@@ -71,7 +71,7 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
                 if (where == PROJCONE_INSIDE) printf("We are in the cone\n");
                 if (where == PROJCONE_BOUNDARY)
                     printf("We are outside the cone and its polar\n"););
-  
+
   if (A && B) {
     SET3X3(A);
     SET3X3(B);

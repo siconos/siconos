@@ -4,7 +4,7 @@
 #
 # Warning: this script is usually called by CI jobs inside a Docker container
 # with default values set by CI (template or .gitlab-ci.yml)
-# 
+#
 # Those values might be different from the default ones when this script is executed manualy, on the command line
 
 set -e

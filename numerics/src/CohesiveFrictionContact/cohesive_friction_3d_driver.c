@@ -71,7 +71,7 @@ int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *proble
   for (int i = 0; i < nc; i++) {
     if (q[dim * i] < -DBL_EPSILON) return NUMERICS_ERR_INFEASIBLE;
   }
-  
+
   for (int i = 0; i < m; ++i) {
     velocity[i] = q[i];
     reaction[i] = 0.;
@@ -113,7 +113,7 @@ int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem,
 
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
-  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, 
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER,
              "Solver ID not found in registry");
 
   numerics_printf_verbose(1, "cohesive_friction_3d_driver: using solver '%s' (%s)",

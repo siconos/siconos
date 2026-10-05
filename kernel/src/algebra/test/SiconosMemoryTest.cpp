@@ -54,7 +54,7 @@ void SiconosMemoryTest::setUp()
     (*q2)(i) = w[i];
     (*q3)(i) = z[i];
   }
-  
+
   c1 = std::make_shared<siconos::algebra::BlockVector>();
   c2 = std::make_shared<siconos::algebra::BlockVector>();
 

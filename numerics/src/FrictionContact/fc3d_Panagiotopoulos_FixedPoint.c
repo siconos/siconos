@@ -276,7 +276,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
   mu = NULL;
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  return 0;  
+  return 0;
 }
 
 void fc3d_pfp_set_default(SolverOptions *options) {

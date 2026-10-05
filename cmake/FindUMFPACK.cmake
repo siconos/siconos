@@ -22,7 +22,7 @@ FindUMFPACK
 Find UMFPACK libraries and headers
 
 Usage :
- 
+
 find_package(UMFPACK REQUIRED)
 target_link_libraries(yourlib PRIVATE UMFPACK::UMFPACK)
 
@@ -30,7 +30,7 @@ Set UMFPACK_ROOT=<where UMFPACK is installed>
 if it's not in a "classic" place or if you want a specific version
 
 header : umfpack.h
-lib : <prefi>umfpack.<suffix> 
+lib : <prefi>umfpack.<suffix>
 
 Note : umfpack lib usually requires linking to a blas library.
 It is up to the user of this module to find a BLAS and link to it.
@@ -70,7 +70,7 @@ if(NOT UMFPACK_LIBRARIES)
   find_library(UMFPACK_LIBRARIES NAMES umfpack
     ${_UMFPACK_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
-  
+
 endif()
 
 # -- Library setup --
@@ -86,4 +86,3 @@ if(UMFPACK_FOUND)
     endif()
   endif()
 endif()
-

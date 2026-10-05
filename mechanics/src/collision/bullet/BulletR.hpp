@@ -43,7 +43,7 @@ class BulletR : public siconos::collision::ContactR {
       const btPersistentManifold &manifold, const btManifoldPoint &point, bool flip,
       double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
       std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
-  
+
   void updateRelativeContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
                                                    const btManifoldPoint& point,
                                                    bool flip, double scaling,

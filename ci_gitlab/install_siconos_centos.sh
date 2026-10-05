@@ -6,7 +6,7 @@
 # > export CI_PROJECT_DIR=<path-to-siconos-repository>
 # > export CTEST_BUILD_MODEL=Experimental or Continuous or Nightly
 # > export IMAGE_NAME="some name for cdash build site"
-# 
+#
 # > sh install_siconos.sh user_option_filename
 #
 # will build Siconos using the configuration defined in user_option_filename.
@@ -27,7 +27,7 @@ cd $CI_PROJECT_DIR/build
 #tmp fix
 # --- Run ctest for Siconos ---
 # configure, build, test and submit to cdash.
-# 
+#
 # Input variables are :
 # - model (from gitlab-ci file), Dashboard client mode can be Continuous, Nightly, Experimental, check https://cmake.org/cmake/help/latest/manual/ctest.1.html#ctest-start-step
 # - SICONOS_INSTALL_DIR : where Siconos will be installed

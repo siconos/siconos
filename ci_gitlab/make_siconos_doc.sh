@@ -1,5 +1,5 @@
 # --- Config and build of Siconos documentation ---
-# 
+#
 # Action :
 # - fetch and install all packages and tools required to build siconos doc
 # - configure siconos project with documentation on
@@ -13,14 +13,14 @@
 # Build directory will be $CI_PROJECT_DIR/build.
 # Documentation output path will be $CI_PROJECT_DIR/build/docs/build/html
 # Siconos configuration is described in siconos/CI/siconos_docs.cmake file.
-# 
+#
 # This last path is supposed to be automatically fetched and published to https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos
 # thanks to job pages in gitlab-ci.yml.
 
 # Check if CI_PROJECT_DIR is set AND not empty
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with the path to 'siconos' repository (absolute) path."}
 
-cmake -S $CI_PROJECT_DIR -B $CI_PROJECT_DIR/build -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/config_samples/siconos_docs.cmake -DWITH_GIT=ON 
+cmake -S $CI_PROJECT_DIR -B $CI_PROJECT_DIR/build -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/config_samples/siconos_docs.cmake -DWITH_GIT=ON
 cmake --build $CI_PROJECT_DIR/build  -j 8
 cmake --install $CI_PROJECT_DIR/build  -j 8
 cd $CI_PROJECT_DIR/build

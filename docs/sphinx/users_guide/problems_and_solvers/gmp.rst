@@ -43,7 +43,7 @@ direct solver for LCP based on pivoting method principle for degenerate problem:
 * iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH] = 0 (false)
 * dparam[SICONOS_DPARAM_TOL] = 1e-4
 * dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.
-  
+
 There are 3 internal solvers :
 
 * internalSolvers[0] = :cpp:enumerator:`SICONOS_LCP_LEMKE`
@@ -52,7 +52,7 @@ There are 3 internal solvers :
 
   * internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   * internalSolvers[1]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
- 
+
 * internalSolvers[2] = :cpp:enumerator:`SICONOS_RELAY_LEMKE`
 
 out :

@@ -276,7 +276,7 @@ int  fc3d_nsgs_initialize_local_solver(
                      solver_options_id_to_name(local_opts->solverId));
     }
   }
-  return 0;  
+  return 0;
 }
 
 static unsigned int* allocShuffledContacts(FrictionContactProblem* problem,

@@ -14,4 +14,3 @@ namespace cuNSearch
 		static int getId() { return id++; }
 	};
 }
-

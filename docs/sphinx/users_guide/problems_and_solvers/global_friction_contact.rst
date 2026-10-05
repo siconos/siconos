@@ -119,16 +119,16 @@ Nonsmooth Newton, Alart-Curnier, (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NS
 * iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0, 0 if memory for internal work arrays must be allocated, else 1.
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
-  
+
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE (default)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100  maximum number of iterations allowed for the line search.
 * iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1
-    
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
-  
+
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.
 
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1
@@ -202,7 +202,7 @@ Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
   * SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN (default)
   * SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF
   * SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES;
-    
+
 * iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY]
 
   * SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING
@@ -292,4 +292,3 @@ ADMM, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM_WR`)
 **Driver:** :cpp:func:`gfc3d_admm_wr`
 
 **Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_ADMM`.
-

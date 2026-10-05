@@ -21,5 +21,3 @@ BOOST_PFR_END_MODULE_EXPORT
 }} // namespace boost::pfr
 
 #endif // BOOST_PFR_DETAIL_TRAITS_FWD_HPP
-
-

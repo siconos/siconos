@@ -160,5 +160,5 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
       .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
            py::arg("options"))
       .def("solve", &siconos::nonsmooth_formulations::CohesiveFrictionContact::solve);
-  
+
 }

@@ -12,7 +12,7 @@
    files to do its magic. Therefore the parameter names in headers are
    not meaningless.
 
-* code style c, c++ 
+* code style c, c++
 
  - cf astyle documentation. We use ansi style with
    unpad parenthesis and 2 spaces for indentation

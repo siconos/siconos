@@ -91,4 +91,3 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 }}} // namespace boost::pfr::detail
 
 #endif
-

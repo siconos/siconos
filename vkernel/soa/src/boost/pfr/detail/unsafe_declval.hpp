@@ -38,4 +38,3 @@ constexpr T unsafe_declval() noexcept {
 
 
 #endif // BOOST_PFR_DETAIL_UNSAFE_DECLVAL_HPP
-

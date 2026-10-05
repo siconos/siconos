@@ -65,7 +65,7 @@ PYBIND11_MODULE(geometry, m) {
           For a given  configuration vector q composed of a position and a quaternion,
           express the vector v given in the inertial frame into to the body frame
           w.r.t the quaternion that parametrize the rotation in q.
- 
+
           Parameters
           ----------
           q : array(7), [x,y,z,qw,qx,qy,qz]
@@ -82,7 +82,7 @@ PYBIND11_MODULE(geometry, m) {
       R"pbdoc(
           For a given  configuration vector q composed of a position and a quaternion,
           write an input vector expressed in the inertial frame into to the body frame
-          w.r.t the quaternion that parametrize the rotation in q.      
+          w.r.t the quaternion that parametrize the rotation in q.
           Parameters
           ----------
           q : array(7), [x,y,z,qw,qx,qy,qz]

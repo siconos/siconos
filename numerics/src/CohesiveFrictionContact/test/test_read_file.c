@@ -95,8 +95,8 @@ static int test_nsgs_on_filename(const char* filename) {
   options->iparam[SICONOS_NSGS_FREEZING_CONTACT] = 0;
   options->iparam[SICONOS_NSGS_SHUFFLE] = SICONOS_NSGS_SHUFFLE_TRUE;
   options->iparam[SICONOS_NSGS_ERROR_EVALUATION_TYPE] =
-    SICONOS_NSGS_ERROR_EVALUATION_FULL;  
-  
+    SICONOS_NSGS_ERROR_EVALUATION_FULL;
+
   printf("  Solver: NSGS (Non-Smooth Gauss-Seidel)\n");
   printf("  Tolerance: %.2e\n", options->dparam[SICONOS_DPARAM_TOL]);
   printf("  Max iterations: %d\n", options->iparam[SICONOS_IPARAM_MAX_ITER]);
@@ -113,11 +113,11 @@ static int test_nsgs_on_filename(const char* filename) {
   /*   //problem->mu[k] = 1.0; */
   /* }     */
 
-  
+
   int info = cohesive_friction_3d_driver(problem, reaction, velocity, options);
 
 
-  
+
 
   /* Print results */
   printf("\n=================================================================\n");
@@ -134,10 +134,10 @@ static int test_nsgs_on_filename(const char* filename) {
       printf("  v_n  = %12.6e (normal)\n", velocity[0 + dim * i]);
       printf("  v_t1 = %12.6e (tangent 1)\n", velocity[1 + dim * i]);
       printf("  v_t2 = %12.6e (tangent 2)\n", velocity[2 + dim * i]);
-      
+
       /* Verify friction cone condition */
       double r_n = reaction[dim * i];
-      double r_t_norm = sqrt(reaction[1 + dim * i] * reaction[1 + dim * i] + 
+      double r_t_norm = sqrt(reaction[1 + dim * i] * reaction[1 + dim * i] +
                              reaction[2 + dim * i] * reaction[2 + dim * i]);
       double mu_r_n = problem->mu[i] * r_n;
 
@@ -154,7 +154,7 @@ static int test_nsgs_on_filename(const char* filename) {
       printf("  Complementarity r_n * v_n = %.6e (should be ~0)\n", comp);
       printf("\n");
     }
-    
+
     for (int k = 0; k < ncoh; k++) {
       printf("Cohesive point %d reaction (r_coh):\n", k);
       printf("  r_n  = %12.6e (normal)\n", reaction[dim * nc + 0 + dim * k]);
@@ -168,7 +168,7 @@ static int test_nsgs_on_filename(const char* filename) {
       printf("\n");
     }
   if (info == 0) {
-    printf("Solver converged successfully!\n\n");    
+    printf("Solver converged successfully!\n\n");
   } else {
     printf("Solver failed with error code: %d\n", info);
   }
@@ -183,7 +183,7 @@ static int test_nsgs_on_filename(const char* filename) {
   free(velocity);
 
   return info;
-}    
+}
 
 
 int main(int argc, char** argv) {
@@ -196,14 +196,14 @@ int main(int argc, char** argv) {
 
   int info=-1;
 
-  
+
   /* Read problem from file */
   /* const char* filename_0 = "data/cohesive_test_2x2.dat"; */
   /* info = test_nsgs_on_filename(filename_0); */
-  
+
   /* const char* filename_1 = "data/sphere_2x2_mu0.dat"; */
   /* info += test_nsgs_on_filename(filename_1); */
-  
+
   /* const char* filename_2 = "data/sphere_2x2.dat"; */
   /* info += test_nsgs_on_filename(filename_2); */
 

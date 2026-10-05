@@ -1,6 +1,6 @@
 # =======================================
 # Macros and functions related to doxygen
-# 
+#
 # =======================================
 
 # ---------------------------------------------
@@ -44,26 +44,26 @@
 # For a given component (numerics, kernel ...)
 # generate rst files (for sphinx/breathe)
 # from xml outputs (doxygen).
-# 
+#
 # ---------------------------------------------
 function(doxy2rst_sphinx COMPONENT)
 
   set(multiValueArgs HEADERS)
   cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-  
-  
+
+
   # --- Target : create rst files from xml outputs (doxygen) ---
   # run : make doxy2rst
   # depends : xml4rst
   #
   # Call python script to create rst files that can be parsed by sphinx/breathe
   # to create documentation.
-  
+
   # output path, required to generate conf.py (breathe part)
   # This is the place where xml files created by doxygen
   # will be generated, for a later use by sphinx.
   set(DOXYGEN_4_RST ${DOXYGEN_OUTPUT}/xml4rst CACHE INTERNAL "doxy (xml) output path")
-  
+
   # Doxygen conf for xml outputs for breathe. It might be different
   # from the one used for xml outputs for swig.
   file(MAKE_DIRECTORY ${DOXYGEN_4_RST}/${COMPONENT})
@@ -77,10 +77,10 @@ function(doxy2rst_sphinx COMPONENT)
       ${COMPONENT}-doxy2xml ${CMAKE_SOURCE_DIR}/${COMPONENT}/src
       COMMENT "Generate xml/doxygen files for ${COMPONENT}."
       )
-  
+
     # Path where rst files will be generated.
     set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
-    
+
     # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
     # It calls a python function defined in gendoctools (create_breathe_files)
 
@@ -91,7 +91,7 @@ function(doxy2rst_sphinx COMPONENT)
       DEPENDS ${COMPONENT}-doxy2xml
       )
     add_dependencies(rst_api ${COMPONENT}-xml2rst)
-  
+
     add_custom_command(TARGET  ${COMPONENT}-xml2rst POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green  "${COMPONENT} : rst files, for c++ API, have been generated in ${SPHINX_DIR}/reference/cpp.")
   endif()
@@ -100,7 +100,7 @@ endfunction()
 # --------------------------------------
 # Call this macro when configuration
 # process is done for all components.
-# 
+#
 # It will :
 #  - create doxygen configs
 # (for breathe, docstrings and so on)
@@ -131,10 +131,10 @@ macro(finalize_doc)
 	      list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
       endif()
     endforeach()
-    
+
     # -- Read doxygen default options --
     include(doxycommon)
-    
+
     # - Doxygen to generate html -
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/docs/sphinx/doxygen)
 
@@ -149,7 +149,7 @@ macro(finalize_doc)
     doxygen_add_docs(
       doxygen-html ${DOXYGEN_INPUTS}
       COMMENT "Generate doxygen html doc (dot graphs for sphinx) ...")
-    
+
     add_custom_command(
     TARGET doxygen-html POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Doxygen documentation has been built in ${DOC_ROOT_DIR}/html/doxygen")
@@ -208,8 +208,8 @@ macro(finalize_doc)
           ${APIDOC_EXCLUDES}
       COMMENT "Generating Python API rst files with sphinx-apidoc"
       VERBATIM
-  )    
-  
+  )
+
   add_dependencies(rst_api rst_python)
 
     # --- Generates conf.py, to describe sphinx setup ---

@@ -23,7 +23,7 @@ Usage
 -----
 
 ::
-   
+
    siconos example_name.cpp
 
 or, for python files using mechanisms toolbox::

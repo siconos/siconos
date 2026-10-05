@@ -551,7 +551,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeV(
   // This maps cohesive forces from indexSet0 to the OSNS problem
 
   NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
-  
+
   _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;
@@ -572,9 +572,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeU(
 
   auto H0trans_NM = NM_transpose(H0.get());
   auto H_NM = NM_transpose(Htrans.get());
-  
+
   NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H_NM);
- 
+
   _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;
@@ -583,7 +583,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeU(
   NM_free(NM1);
   NM_free(H_NM);
   NM_free(H0trans_NM);
-  
+
   DEBUG_END(
       "siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
 }
@@ -596,7 +596,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeX(
 
   auto H0trans_NM = NM_transpose(H0.get());
   NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
-  
+
   _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;

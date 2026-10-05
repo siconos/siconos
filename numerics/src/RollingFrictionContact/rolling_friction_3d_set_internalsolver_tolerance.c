@@ -60,5 +60,5 @@ int rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProbl
     return numerics_error("rolling_friction_3d__set_internalsolver_tolerance",
                    "Unknown strategy for driving the tolerance");
   }
-  return 0;  
+  return 0;
 }

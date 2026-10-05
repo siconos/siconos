@@ -26,7 +26,7 @@ class LagrangianCompliantLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIRTest);
 
 
@@ -58,7 +58,3 @@ public:
 };
 
 #endif
-
-
-
-

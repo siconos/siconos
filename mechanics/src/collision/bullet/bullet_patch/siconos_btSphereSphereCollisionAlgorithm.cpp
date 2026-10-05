@@ -48,7 +48,7 @@ void siconos_btSphereSphereCollisionAlgorithm::processCollision(
     const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap,
     const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut) {
   (void)dispatchInfo;
-  
+
   if (!m_manifoldPtr) return;
 
   resultOut->setPersistentManifold(m_manifoldPtr);

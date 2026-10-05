@@ -23,7 +23,7 @@ When pluggin mechanism is available for an operator, two methods exist in the cl
 * setCompute<VARNAME>Function: to define the function to be used (any other c++ function, lambda function ...)
 * compute<VARNAME>
 
-So 
+So
 
 1. Check the documentation class, find de the setCompute<VARNAME>Function and identify the arguments of the required user-defined function
 
@@ -51,11 +51,10 @@ Example:
    // ...
    ds.computeFext(2.)
    // --> call external_forces with time == 2.
-   
+
 .. tip::
-   
+
    Some good places to find complete examples of user-defined functions usage:
 
    - Tests files in siconos repository; e.g. `LagrangianDSTest.cpp <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/kernel/src/modelingTools/test/LagrangianDSTest.cpp?ref_type=heads>`_
-   - Try to find setCompute... inside `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials>`_ 
-
+   - Try to find setCompute... inside `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials>`_

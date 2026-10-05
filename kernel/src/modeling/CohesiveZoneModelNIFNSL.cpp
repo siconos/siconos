@@ -71,7 +71,7 @@ bool CohesiveZoneModelNIFNSL::isActiveAtLevel(Interaction& inter, unsigned int l
 void CohesiveZoneModelNIFNSL::display() const {
   // Display base class parameters (restitution, friction)
   NewtonImpactFrictionNSL::display();
-  
+
   // Display cohesive-specific header
   std::cout << "=== CohesiveZoneModelNIFNSL data display ==============================="
             << std::endl;

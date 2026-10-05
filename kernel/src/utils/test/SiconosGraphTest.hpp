@@ -25,7 +25,7 @@ class SiconosGraphTest : public CppUnit::TestFixture
 {
 
 private:
-  
+
   ACCEPT_SERIALIZATION(SiconosGraphTest);
 
 

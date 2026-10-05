@@ -54,7 +54,7 @@ class IterateContactPoints {
     int numContacts{0};
     int manifold_index{-1};
     int contact_index{-1};
-    
+
    public:
     iterator(std::shared_ptr<btCollisionWorld> wld)
         : world{wld}, numManifolds{wld->getDispatcher()->getNumManifolds()} {
@@ -64,7 +64,7 @@ class IterateContactPoints {
     iterator() = default;
 
     ~iterator() noexcept = default;
-    
+
     const ContactPointTuple &operator*() { return data; };
     const ContactPointTuple *operator->() { return &data; };
 
