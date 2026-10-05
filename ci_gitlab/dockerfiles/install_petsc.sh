@@ -11,18 +11,19 @@ set -e
 
 # Get number of procs
 if  [ -x "$(command -v nproc)" ]; then
-   export nbprocs=`nproc --all`  # linux
+   nbprocs=$(nproc --all)  # linux
 elif  [ -x "$(command -v sysctl)" ]; then
-   export nbprocs=`sysctl -n hw.ncpu` # macos
+   nbprocs=$(sysctl -n hw.ncpu) # macos
 else
-   export nbprocs=2
+   nbprocs=2
 fi
+export nbprocs
 
-: ${PETSC_INSTALL_DIR:?"Please set environment variable PETSC_INSTALL_DIR with the place where petsc must be installed."}
+: "${PETSC_INSTALL_DIR:?"Please set environment variable PETSC_INSTALL_DIR with the place where petsc must be installed."}"
 
 WORK_DIR="${WORK_DIR:=$HOME/build}"
-mkdir -p ${WORK_DIR}
-cd ${WORK_DIR}
+mkdir -p "${WORK_DIR}"
+cd "${WORK_DIR}"
 curl -L https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-lite-3.21.4.tar.gz -o petsc-3.21.4.tar.gz
 tar -xzf petsc-3.21.4.tar.gz
 cd petsc-3.21.4
@@ -39,6 +40,6 @@ echo "----> Installing PETSc..."
 make install > /dev/null
 
 # Clean up source and build artefacts
-cd ${WORK_DIR}
+cd "${WORK_DIR}"||exit 1
 rm petsc-3.21.4.tar.gz
 rm -rf petsc-3.21.4

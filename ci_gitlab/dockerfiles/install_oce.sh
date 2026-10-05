@@ -1,4 +1,4 @@
-#!bin/bash
+#!/usr/bin/env bash
 #
 #
 # Usage :
@@ -26,34 +26,37 @@
 
 # Get number of procs
 if  [ -x "$(command -v nproc)" ]; then
-   export nbprocs=`nproc --all`  # linux
+   nbprocs=$(nproc --all)  # linux
 elif  [ -x "$(command -v sysctl)" ]; then
-   export nbprocs=`sysctl -n hw.ncpu` # macos
+   nbprocs=$(sysctl -n hw.ncpu) # macos
 else
-   export nbprocs=2
+   nbprocs=2
 fi
+export nbprocs
+
 # Check if CI_PROJECT_DIR is set AND not empty
-: ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos-tutorials' repository (absolute) path."}
+: "${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos-tutorials' repository (absolute) path."}"
 
 # Creates directories to build and install libs.
-mkdir -p $CI_PROJECT_DIR/install/
-mkdir -p $CI_PROJECT_DIR/build/pyocc
+mkdir -p "$CI_PROJECT_DIR/install/"
+mkdir -p "$CI_PROJECT_DIR/build/pyocc"
 
 # --- OCE (optional, might be installed using package manager) ---
 if [ -n "$1" ]; then
     if [[ "$1" == "clone_oce" ]]; then
-        cd $CI_PROJECT_DIR/
+        cd "$CI_PROJECT_DIR/" ||exit 1
         git clone https://github.com/tpaviot/oce.git > /dev/null
-        mkdir $CI_PROJECT_DIR/build/oce-last
-        cd $CI_PROJECT_DIR/build/oce-last
+        mkdir "$CI_PROJECT_DIR/build/oce-last"
+        cd "$CI_PROJECT_DIR/build/oce-last" ||exit 1
         # Warning : install in 'user' path, that will be transfered between jobs (artifacts)
-        cmake $CI_PROJECT_DIR/oce -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_DIR/install/oce  -Wno-deprecated -Wno-dev -DCMAKE_BUILD_TYPE=Release
-        make -j $nbprocs > /dev/null
+        cmake "$CI_PROJECT_DIR/oce" -DCMAKE_INSTALL_PREFIX="$CI_PROJECT_DIR/install/oce"  -Wno-deprecated -Wno-dev -DCMAKE_BUILD_TYPE=Release
+        make -j "$nbprocs" > /dev/null
         echo "----> install oce ..."
         make install > /dev/null
         # Save path to OCEConfig.cmake, required to configure pythonocc
-        export OCE_INSTALL=`grep OCEConfig.cmake install_manifest.txt| sed 's/OCEConfig.cmake//g'`
-        rm -rf $CI_PROJECT_DIR/oce
+        OCE_INSTALL=$(grep OCEConfig.cmake install_manifest.txt| sed 's/OCEConfig.cmake//g')
+        export OCE_INSTALL
+        rm -rf "$CI_PROJECT_DIR/oce"
     fi
 fi
 
@@ -61,23 +64,23 @@ fi
 # Clone last pythonocc version.
 # We assume it is complient with the installed oce version.
 # Maybe we should clone specific tags for oce and pythonocc?
-cd $CI_PROJECT_DIR
+cd "$CI_PROJECT_DIR"||exit 1
 git clone https://github.com/tpaviot/pythonocc-core.git  > /dev/null
-cd pythonocc-core
+cd pythonocc-core||exit 1
 git checkout 0.18.2
-cd $CI_PROJECT_DIR/build/pyocc
+cd "$CI_PROJECT_DIR/build/pyocc"||exit 1
 # Requires (in calling script):
 # installpath=`python3 -c "import site;print(site.USER_SITE)"`# Unfortunately, this cannot work, artifacts must be
 # in CI_PROJECT_DIR ...
-export pyocc_installpath=$CI_PROJECT_DIR/install/site-packages
+export pyocc_installpath="$CI_PROJECT_DIR/install/site-packages"
 # Mind the OCC at the end of the install path!
-cmake $CI_PROJECT_DIR/pythonocc-core -DCMAKE_BUILD_TYPE=Release -Wno-deprecated -DPYTHONOCC_INSTALL_DIRECTORY=$pyocc_installpath/OCC
+cmake "$CI_PROJECT_DIR/pythonocc-core" -DCMAKE_BUILD_TYPE=Release -Wno-deprecated -DPYTHONOCC_INSTALL_DIRECTORY="$pyocc_installpath/OCC"
 echo "----> install pythonocc ..."
 
-make install -j $nbprocs > /dev/null
-cd $CI_PROJECT_DIR
+make install -j "$nbprocs" > /dev/null
+cd "$CI_PROJECT_DIR"||exit 1
 # test ...
-export PYTHONPATH=$pyocc_installpath
+export PYTHONPATH="$pyocc_installpath"
 python3 -c 'import OCC; print(OCC.__file__)'
-rm -rf $CI_PROJECT_DIR/build/
-rm -rf $CI_PROJECT_DIR/pythonocc-core
+rm -rf "$CI_PROJECT_DIR/build/"
+rm -rf "$CI_PROJECT_DIR/pythonocc-core"

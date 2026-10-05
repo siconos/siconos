@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 # --- Build, test (opt) and install Siconos software ---
 #
@@ -16,14 +16,14 @@
 # - export for CI_PROJECT_DIR, IMAGE_NAME and CTEST_BUILD_MODEL is not needed when this script is called by gitlab-ci.
 #
 
-: ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
-: ${CTEST_BUILD_MODEL:?"Please set Dashboard client mode (environment variable CTEST_BUILD_MODEL). Choose among Experimental, Continuous or Nightly."}
-: ${IMAGE_NAME:?"Please set environment variable IMAGE_NAME. It will be used to name cdash build site."}
-: ${CDASH_SUBMIT:?"Please set environment variable CDASH_SUBMIT to TRUE or FALSE. If true, ctests results will be submitted to cdash server."}
+: "${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}"
+: "${CTEST_BUILD_MODEL:?"Please set Dashboard client mode (environment variable CTEST_BUILD_MODEL). Choose among Experimental, Continuous or Nightly."}"
+: "${IMAGE_NAME:?"Please set environment variable IMAGE_NAME. It will be used to name cdash build site."}"
+: "${CDASH_SUBMIT:?"Please set environment variable CDASH_SUBMIT to TRUE or FALSE. If true, ctests results will be submitted to cdash server."}"
 
 # Create build dir
-mkdir -p $CI_PROJECT_DIR/build
-cd $CI_PROJECT_DIR/build
+mkdir -p "$CI_PROJECT_DIR/build"
+cd "$CI_PROJECT_DIR/build" || exit 1
 #tmp fix
 # --- Run ctest for Siconos ---
 # configure, build, test and submit to cdash.
@@ -33,7 +33,7 @@ cd $CI_PROJECT_DIR/build
 # - SICONOS_INSTALL_DIR : where Siconos will be installed
 # - USER_FILE : user options file.
 # - OSNAME : set to IMAGE_NAME
-cmake $CI_PROJECT_DIR  -DBOOST_LIBRARYDIR=/usr/lib64/boost169 -DBOOST_INCLUDEDIR=/usr/include/boost169 -DCLAPACK_LIBRARY=/usr/lib64/libopenblas.so -DCMAKE_CXX_STANDARD=11
+cmake "$CI_PROJECT_DIR"  -DBOOST_LIBRARYDIR=/usr/lib64/boost169 -DBOOST_INCLUDEDIR=/usr/include/boost169 -DCLAPACK_LIBRARY=/usr/lib64/libopenblas.so -DCMAKE_CXX_STANDARD=11
 make -j 4
 # Install
 #make install

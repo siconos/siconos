@@ -1,25 +1,25 @@
-#!bin/bash
+#!/usr/bin/env bash
 
 # Get number of procs
 if  [ -x "$(command -v nproc)" ]; then
-   export nbprocs=`nproc --all`  # linux
+   nbprocs=$(nproc --all)  # linux
 elif  [ -x "$(command -v sysctl)" ]; then
-   export nbprocs=`sysctl -n hw.ncpu` # macos
+   nbprocs=$(sysctl -n hw.ncpu) # macos
 else
-   export nbprocs=2
+   nbprocs=2
 fi
-
+export nbprocs
 # Check if CI_PROJECT_DIR is set AND not empty
-: ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
+: "${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}"
 
-mkdir -p $CI_PROJECT_DIR/deps
-cd $CI_PROJECT_DIR/deps
+mkdir -p "$CI_PROJECT_DIR/deps"
+cd "$CI_PROJECT_DIR/deps"||exit 1
 git clone https://github.com/HDFGroup/hdf5.git
 mkdir build
-cd build
+cd build||exit 1
 #sh /opt/intel/oneapi/setvars.sh
 export CC=mpiicc
 export CXX=mpiicpc
-cmake ../hdf5 -DCMAKE_C_COMPILER="mpiicc;-cc=icx" -DCMAKE_CXX_COMPILER="mpiicpc;-cxx=icpx" -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_DIR/install/hdf5 -DHDF5_ENABLE_PARALLEL=ON
-make -j $nbprocs
+cmake ../hdf5 -DCMAKE_C_COMPILER="mpiicc;-cc=icx" -DCMAKE_CXX_COMPILER="mpiicpc;-cxx=icpx" -DCMAKE_INSTALL_PREFIX="$CI_PROJECT_DIR/install/hdf5" -DHDF5_ENABLE_PARALLEL=ON
+make -j "$nbprocs"
 make install
