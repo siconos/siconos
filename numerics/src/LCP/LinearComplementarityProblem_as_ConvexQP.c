@@ -24,16 +24,16 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"  // for DEBUG_PRINT
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINT
 
-void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX) {
+void Projection_ConvexQP_LCP(void* cqpIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)\n")
 
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  LinearComplementarityProblem_as_ConvexQP *pb =
-      (LinearComplementarityProblem_as_ConvexQP *)cqp->env;
-  LinearComplementarityProblem *lcp = pb->lcp;
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  LinearComplementarityProblem_as_ConvexQP* pb =
+      (LinearComplementarityProblem_as_ConvexQP*)cqp->env;
+  LinearComplementarityProblem* lcp = pb->lcp;
 
   int n = lcp->size;
   for (int i = 0; i < n; ++i) {

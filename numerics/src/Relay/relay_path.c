@@ -34,8 +34,8 @@
 #include "numerics_verbose.h"
 #endif /*HAVE_PATHFERRIS*/
 
-void relay_path(RelayProblem *problem, double *z, double *w, int *info,
-                SolverOptions *options) {
+void relay_path(RelayProblem* problem, double* z, double* w, int* info,
+                SolverOptions* options) {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
   /* matrix M/vector q of the relay */
@@ -44,8 +44,8 @@ void relay_path(RelayProblem *problem, double *z, double *w, int *info,
     //      return info;
   }
 
-  double *M = problem->M->matrix0;
-  double *q = problem->q;
+  double* M = problem->M->matrix0;
+  double* q = problem->q;
 
   int nnz, i, j;
   /* size of the RELAY */
@@ -55,11 +55,11 @@ void relay_path(RelayProblem *problem, double *z, double *w, int *info,
   MCP_Termination termination;
 
   nnz = nbNonNulElems(n, M, 1.0e-18);
-  int *m_i = (int *)calloc(nnz + 1, sizeof(int));
-  int *m_j = (int *)calloc(nnz + 1, sizeof(int));
-  double *m_ij = (double *)calloc(nnz + 1, sizeof(double));
-  double *lb = (double *)calloc(n + 1, sizeof(double));
-  double *ub = (double *)calloc(n + 1, sizeof(double));
+  int* m_i = (int*)calloc(nnz + 1, sizeof(int));
+  int* m_j = (int*)calloc(nnz + 1, sizeof(int));
+  double* m_ij = (double*)calloc(nnz + 1, sizeof(double));
+  double* lb = (double*)calloc(n + 1, sizeof(double));
+  double* ub = (double*)calloc(n + 1, sizeof(double));
   double err = 1e24, val;
 
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
@@ -110,23 +110,23 @@ void relay_path(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_PATH in the global solver registry.
  */
 
-static void relay_path_set_default(SolverOptions *options) {
+static void relay_path_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_path_init_wrap(void *problem, SolverOptions *options) {
+static int relay_path_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_path_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
+static int relay_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  relay_path((RelayProblem *)problem, z, w, &info, options);
+  relay_path((RelayProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_path_free_wrap(void *problem, SolverOptions *options) {
+static void relay_path_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

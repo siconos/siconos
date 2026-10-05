@@ -47,8 +47,8 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double, doubl
  * \return error code
  */
 int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
-                                                      PlasticityProblem* localproblem,
-                                                      SolverOptions* options);
+                                                              PlasticityProblem* localproblem,
+                                                              SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with Newton
  * \param localproblem to solve

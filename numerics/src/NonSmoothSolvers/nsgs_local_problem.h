@@ -31,8 +31,8 @@
 #ifndef NSGS_LOCAL_PROBLEM_H
 #define NSGS_LOCAL_PROBLEM_H
 
-#include "SolverOptions.h"
 #include "NonSmoothGaussSeidel_options.h"
+#include "SolverOptions.h"
 #include "solver_registry.h"
 
 #if defined(__cplusplus)
@@ -43,12 +43,12 @@ extern "C" {
  * \brief Local problem types
  */
 typedef enum {
-  NSGS_LP_FC3D = 0,   /**< 3D Friction Contact (dim 3) */
-  NSGS_LP_FC2D,       /**< 2D Friction Contact (dim 2) */
-  NSGS_LP_RFC3D,      /**< 3D Rolling Friction Contact (dim 5) */
-  NSGS_LP_RFC2D,      /**< 2D Rolling Friction Contact (dim 3) */
-  NSGS_LP_PLASTICITY_2D,       /**< 2D Mohr-Coulomb (dim 2) */
-  NSGS_LP_MC3D        /**< 3D Mohr-Coulomb (dim 3) */
+  NSGS_LP_FC3D = 0,      /**< 3D Friction Contact (dim 3) */
+  NSGS_LP_FC2D,          /**< 2D Friction Contact (dim 2) */
+  NSGS_LP_RFC3D,         /**< 3D Rolling Friction Contact (dim 5) */
+  NSGS_LP_RFC2D,         /**< 2D Rolling Friction Contact (dim 3) */
+  NSGS_LP_PLASTICITY_2D, /**< 2D Mohr-Coulomb (dim 2) */
+  NSGS_LP_MC3D           /**< 3D Mohr-Coulomb (dim 3) */
 } NSGSLocalProblemType;
 
 /**
@@ -61,15 +61,15 @@ typedef struct NSGSLocalProblem NSGSLocalProblem;
  */
 typedef struct {
   /** Update local problem for given block */
-  void (*update)(void* global, unsigned int block, const double* global_sol,
-                 double* local_rhs, int dim, double* workspace);
+  void (*update)(void* global, unsigned int block, const double* global_sol, double* local_rhs,
+                 int dim, double* workspace);
 
   /** Extract local matrix for given block */
   void (*extract)(void* global, unsigned int block, double* local_mat, int dim);
 
   /** Solve local problem (optional, can use registry instead) */
-  int (*solve)(void* local_data, const double* rhs, const double* mat,
-               const double* mu, int dim, SolverOptions* opts, double* result);
+  int (*solve)(void* local_data, const double* rhs, const double* mat, const double* mu,
+               int dim, SolverOptions* opts, double* result);
 
   /** Problem type and dimension */
   NSGSLocalProblemType type;
@@ -86,9 +86,8 @@ typedef struct {
 /**
  * \brief Create local problem handle
  */
-NSGSLocalProblem* nsgs_local_problem_create(void* global_problem,
-                                             unsigned int block_id,
-                                             const NSGSLocalProblemOps* ops);
+NSGSLocalProblem* nsgs_local_problem_create(void* global_problem, unsigned int block_id,
+                                            const NSGSLocalProblemOps* ops);
 
 /**
  * \brief Free local problem
@@ -103,8 +102,7 @@ void nsgs_local_problem_update(NSGSLocalProblem* local, const double* global_sol
 /**
  * \brief Solve local problem using registered solver
  */
-int nsgs_local_problem_solve(NSGSLocalProblem* local, double* result,
-                              SolverOptions* options);
+int nsgs_local_problem_solve(NSGSLocalProblem* local, double* result, SolverOptions* options);
 
 /**
  * \brief Set local solver by name

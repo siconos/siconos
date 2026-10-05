@@ -40,7 +40,7 @@
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
 void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
-                                        double *restrict error, double worktmp[3]) {
+                                        double* restrict error, double worktmp[3]) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
@@ -55,8 +55,8 @@ void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], do
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restrict u, double mu,
-                                             double *restrict error, double *worktmp) {
+void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restrict u, double mu,
+                                             double* restrict error, double* worktmp) {
   worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - r[0];
   worktmp[1] = u[1] - r[1];
   worktmp[2] = u[2] - r[2];
@@ -67,8 +67,8 @@ void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restric
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
-                       SolverOptions *options, double norm, double *error) {
+int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, double tolerance,
+                       SolverOptions* options, double norm, double* error) {
   DEBUG_BEGIN("fc3d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -82,7 +82,7 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
-  double *mu = problem->mu;
+  double* mu = problem->mu;
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
@@ -121,9 +121,9 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
   return 0;
 }
 
-int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, double *z,
-                                           double *w, double tolerance, SolverOptions *options,
-                                           double norm, double *error, int on_dual_cone) {
+int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, double* z,
+                                           double* w, double tolerance, SolverOptions* options,
+                                           double norm, double* error, int on_dual_cone) {
   DEBUG_BEGIN("fc3d_compute_error_norm_infinity_conic(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -134,7 +134,7 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
-  double *mu = problem->mu;
+  double* mu = problem->mu;
   double error_unitary = 0.;
 
   /* Compute the current velocity */
@@ -160,9 +160,9 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
   return 0;
 }
 
-int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double norm,
-                                double *error) {
+int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     return numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");
@@ -171,7 +171,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, doub
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
-  double *mu = problem->mu;
+  double* mu = problem->mu;
   double worktmp[3] = {0.0, 0.0, 0.0};
   double invmu = 0.0;
   cblas_dcopy(n, problem->q, incx, z, incy);  // z <-q
@@ -210,7 +210,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, doub
 }
 
 void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R,
-                                               double *error, double *worktmp) {
+                                               double* error, double* worktmp) {
   /* Compute the modified local velocity */
   worktmp[0] = z[0] - w[0];
   worktmp[1] = z[1] - w[1];
@@ -221,12 +221,13 @@ void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double 
   worktmp[2] = z[2] - worktmp[2];
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
-int fc3d_Tresca_compute_error(FrictionContactProblem *problem, double *z, double *w,
-                              double tolerance, SolverOptions *options, double norm,
-                              double *error) {
+int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double* z, double* w,
+                              double tolerance, SolverOptions* options, double norm,
+                              double* error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    return numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
+    return numerics_error("fc3d_Tresca_compute_error",
+                          "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

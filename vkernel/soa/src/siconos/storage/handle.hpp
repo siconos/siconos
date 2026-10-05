@@ -19,8 +19,7 @@ using namespace pattern;
  * @tparam R Index value type
  * @tparam D Data storage type
  */
-template <template <typename... Args> typename B, match::item T, typename R,
-          typename D>
+template <template <typename... Args> typename B, match::item T, typename R, typename D>
 struct handle;
 
 /**
@@ -71,9 +70,7 @@ struct index {
    * @param h Handle to copy index from
    */
   template <template <typename...> typename B, typename D>
-  index(const handle<B, T, R, D>& h) : _value(h.index().value())
-  {
-  }
+  index(const handle<B, T, R, D>& h) : _value(h.index().value()) {}
 
   /**
    * @brief Assignment operator from a handle
@@ -83,8 +80,7 @@ struct index {
    * @return Reference to this index
    */
   template <template <typename...> typename B, typename D>
-  index<T, R>& operator=(const handle<B, T, R, D>& h)
-  {
+  index<T, R>& operator=(const handle<B, T, R, D>& h) {
     _value = h.index().value();
     return *this;
   }
@@ -96,14 +92,12 @@ struct index {
   friend auto operator<=>(const index<T, R>&, const index<T, R>&) = default;
 
   template <match::item U>
-  friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs)
-  {
+  friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs) {
     return true;
   }
 
   template <match::item U>
-  friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs)
-  {
+  friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs) {
     return false;
   }
 };
@@ -147,8 +141,7 @@ struct handle_ref {
  * @tparam R Index value type
  * @tparam D Data storage type
  */
-template <template <typename... Args> typename B, match::item T, typename R,
-          typename D>
+template <template <typename... Args> typename B, match::item T, typename R, typename D>
 struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   /// Base type alias
   using base_t = B<T, R, D>;
@@ -168,9 +161,8 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   using indice = typename info_t::template env<T>::indice;
   /// Type of attached storages for this item
   using attached_storages_t = decltype(mp::filter(
-      typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
-        return match::attached_storage<X, T>;
-      }>));
+      typename info_t::all_properties_t{},
+      mp::is_a_model<[]<typename X>() { return match::attached_storage<X, T>; }>));
 
   /// @brief Get the item type managed by this handle
   auto item_type() { return type{}; }
@@ -185,10 +177,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   constexpr decltype(auto) data() { return base_t::_data; };
 
   /// @brief Get all attributes for this item type
-  constexpr decltype(auto) attributes()
-  {
-    return attributes(typename index_t::type{});
-  };
+  constexpr decltype(auto) attributes() { return attributes(typename index_t::type{}); };
 
   /**
    * @brief Access an attached storage property by tag
@@ -197,26 +186,23 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @return Reference to the attached storage value
    */
   template <typename A>
-  constexpr decltype(auto) property(A, indice step = 0)
-  {
+  constexpr decltype(auto) property(A, indice step = 0) {
     using item_t = T;
     // Filter properties to find attached storage matching the tag; excludes
     // dynamic_storage-backed properties, since they have no static slot to
     // index here (see the string_literal overload below, which dispatches
     // to the dynamic path when appropriate).
-    constexpr auto tpl = mp::filter(
-        typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
-          return match::attached_storage<X, item_t> && match::tag<X, A> &&
-                 !requires { typename X::dynamic_storage_t; };
-        }>);
+    constexpr auto tpl =
+        mp::filter(typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
+                     return match::attached_storage<X, item_t> && match::tag<X, A> &&
+                            !requires { typename X::dynamic_storage_t; };
+                   }>);
 
     // Ensure we found at least one matching attached storage
-    static_assert(mp::size(tpl) >= mp::size_c<1>,
-                  "attached storage not found");
+    static_assert(mp::size(tpl) >= mp::size_c<1>, "attached storage not found");
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-    return memory(step, mp::get<attached_storage_t>(
-                            data().store()))[this->index().value()];
+    return memory(step, mp::get<attached_storage_t>(data().store()))[this->index().value()];
   }
 
   /**
@@ -226,14 +212,11 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @return Reference to the attached storage value
    */
   template <string_literal S>
-  constexpr decltype(auto) property(indice step = 0)
-  {
+  constexpr decltype(auto) property(indice step = 0) {
     using data_t = std::decay_t<decltype(data())>;
     if constexpr (is_dynamic_storage_v<T, data_t, S>) {
-      return prop_dynamic_memory<T, S>(data()).get_or_create(
-          this->index().value());
-    }
-    else {
+      return prop_dynamic_memory<T, S>(data()).get_or_create(this->index().value());
+    } else {
       return property(symbol<S>{}, step);
     }
   }
@@ -289,8 +272,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @return Reference to this handle
    */
   template <template <typename...> typename OtherBase>
-  handle& operator=(const handle<OtherBase, T, R, D>& other)
-  {
+  handle& operator=(const handle<OtherBase, T, R, D>& other) {
     this->_index = other.index();
     return *this;
   }
@@ -300,17 +282,14 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @param h Source handle
    * @return Reference to this handle
    */
-  handle& operator=(const handle& h)
-  {
+  handle& operator=(const handle& h) {
     this->_index = h.index();
     return *this;
   };
 
   // handle operator=(handle&& h) { return handle(h); };
   /// @brief Three-way comparison operator
-  friend auto operator<=>(const handle<B, T, R, D>&,
-                          const handle<B, T, R, D>&) = default;
-
+  friend auto operator<=>(const handle<B, T, R, D>&, const handle<B, T, R, D>&) = default;
 };
 
 /**
@@ -321,8 +300,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
  * @return Handle object
  */
 template <typename T>
-auto make_full_handle(auto& data, const auto& ref)
-{
+auto make_full_handle(auto& data, const auto& ref) {
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
   using indice = typename info_t::template env<T>::indice;
@@ -337,8 +315,7 @@ auto make_full_handle(auto& data, const auto& ref)
  * @return New handle referencing the same data
  */
 template <match::item T>
-auto make_handle(auto& h)
-{
+auto make_handle(auto& h) {
   return make_full_handle<T>(h.data(), h.index().value());
 }
 
@@ -352,14 +329,12 @@ auto make_handle(auto& h)
  * @return Handle object
  */
 template <typename T, typename R, typename D>
-auto make_handle(D&& data, index<T, R>&& indx)
-{
+auto make_handle(D&& data, index<T, R>&& indx) {
   return handle<handle_base, T, R, D>{data, indx};
 }
 
 template <typename T, typename R, typename D>
-auto make_handle(D& data, index<T, R>& indx)
-{
+auto make_handle(D& data, index<T, R>& indx) {
   return handle<handle_base, T, R, D>{data, indx};
 }
 
@@ -373,8 +348,7 @@ auto make_handle(D& data, index<T, R>& indx)
  * @return Handle object
  */
 template <typename T, typename R, typename D>
-auto make_handle(D& data, index<T, R>&& indx)
-{
+auto make_handle(D& data, index<T, R>&& indx) {
   return handle<handle_base, T, R, D>{data, static_cast<index<T, R>&&>(indx)};
 }
 
@@ -388,8 +362,7 @@ auto make_handle(D& data, index<T, R>&& indx)
  * @return Reference handle object
  */
 template <typename T, typename R, typename D>
-auto make_ref_handle(D& data, index<T, R>& indx)
-{
+auto make_ref_handle(D& data, index<T, R>& indx) {
   return handle<handle_ref, T, R, D>{data, indx};
 }
 
@@ -403,8 +376,7 @@ auto make_ref_handle(D& data, index<T, R>& indx)
  * @return Reference handle object
  */
 template <typename T, typename R, typename D>
-auto make_ref_handle(D& data, index<T, R>&& indx)
-{
+auto make_ref_handle(D& data, index<T, R>&& indx) {
   return handle<handle_ref, T, R, D>{data, static_cast<index<T, R>&&>(indx)};
 }
 
@@ -417,8 +389,7 @@ auto make_ref_handle(D& data, index<T, R>&& indx)
  * @return Range of handles
  */
 template <match::item I>
-static auto handles =
-    [](auto& data, std::size_t step = 0) constexpr -> decltype(auto) {
+static auto handles = [](auto& data, std::size_t step = 0) constexpr -> decltype(auto) {
   using info_t = get_info_t<decltype(data)>;
   using env = typename info_t::template env<I>;
   using indice = typename env::indice;
@@ -429,39 +400,34 @@ static auto handles =
   // relation types
   indice num = std::size(attr_values<nth_t<0, attributes_t>>(data, step));
   return view::iota((indice)0, num) | view::transform([&data](indice i) {
-           return handle<handle_base, I, indice,
-                         std::decay_t<decltype(data)>>(data,
-                                                       index<I, indice>(i));
+           return handle<handle_base, I, indice, std::decay_t<decltype(data)>>(
+               data, index<I, indice>(i));
          });
 };
 
 // Concept check for __init__ member function presence
-static constexpr auto has_init =
-    mp::is_valid([](auto&& x) -> decltype(x.__init__()) {});
+static constexpr auto has_init = mp::is_valid([](auto&& x) -> decltype(x.__init__()) {});
 
 // Concept check for __del__ member function presence
-static constexpr auto has_del =
-    mp::is_valid([](auto&& x) -> decltype(x.__del__()) {});
+static constexpr auto has_del = mp::is_valid([](auto&& x) -> decltype(x.__del__()) {});
 
 /**
  * @brief Concept for checking if a handle's item type derives from B
  * @tparam B Base type to check against
  */
 template <typename B>
-static constexpr auto handle_derive_from =
-    mp::is_a_model<[]<typename T>() consteval {
-      return std::derived_from<typename T::type, B>;
-    }>;
+static constexpr auto handle_derive_from = mp::is_a_model<[]<typename T>() consteval {
+  return std::derived_from<typename T::type, B>;
+}>;
 
 /**
  * @brief Concept for checking if a handle's item type does not derive from B
  * @tparam B Base type to check against
  */
 template <typename B>
-static constexpr auto not_handle_derive_from =
-    mp::is_a_model<[]<typename T>() consteval {
+static constexpr auto not_handle_derive_from = mp::is_a_model<[]<typename T>() consteval {
   return std::derived_from<typename T::type, B>;
-    }>;
+}>;
 
 }  // namespace siconos::storage
 
@@ -469,8 +435,7 @@ namespace std {
 
 template <siconos::storage::pattern::match::item Item, typename R>
 struct hash<siconos::storage::index<Item, R>> {
-  std::size_t operator()(const siconos::storage::index<Item, R>& idx) const noexcept
-  {
+  std::size_t operator()(const siconos::storage::index<Item, R>& idx) const noexcept {
     return std::hash<R>{}(idx.value());
   }
 };

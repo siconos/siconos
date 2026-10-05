@@ -32,8 +32,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #define EPSDIAG DBL_EPSILON
 
@@ -211,11 +211,8 @@ static int mlcp_rpgs_solve_wrap(void* problem, double* z, double* w, SolverOptio
 
 REGISTER_SOLVER(SICONOS_MLCP_RPGS, "MLCP_RPGS",
                 "Regularized Projected Gauss-Seidel for Mixed Linear Complementarity Problems",
-                mlcp_rpgs_init_wrap,
-                mlcp_rpgs_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_rpgs_set_default,
-                50000, /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_rpgs_init_wrap, mlcp_rpgs_solve_wrap, NULL, /* free function */
+                NULL,                                            /* error function */
+                mlcp_rpgs_set_default, 50000,                    /* default_max_iter */
+                1e-6,                                            /* default_tol */
+                0 /* is_local_solver */);

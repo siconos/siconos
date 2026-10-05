@@ -91,8 +91,7 @@ std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(
   auto return_value = std::make_shared<TopoDS_Face>();
 
   TopExp_Explorer exp{data(), TopAbs_FACE};
-  for (unsigned int i = 0; i < index; ++i, exp.Next())
-    ;
+  for (unsigned int i = 0; i < index; ++i, exp.Next());
   if (exp.More()) {
     // taking a ref fail!
     *return_value = TopoDS::Face(exp.Current());
@@ -108,8 +107,7 @@ std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactShape::edge(
   auto return_value = std::make_shared<TopoDS_Edge>();
 
   TopExp_Explorer exp{data(), TopAbs_EDGE};
-  for (unsigned int i = 0; i < index; ++i, exp.Next())
-    ;
+  for (unsigned int i = 0; i < index; ++i, exp.Next());
   if (exp.More()) {
     // taking a ref fail!
     *return_value = TopoDS::Edge(exp.Current());

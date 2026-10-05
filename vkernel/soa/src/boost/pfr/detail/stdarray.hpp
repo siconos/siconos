@@ -12,33 +12,36 @@
 #ifdef BOOST_PFR_HAS_STD_MODULE
 import std;
 #else
-#include <utility> // metaprogramming stuff
 #include <array>
-#include <type_traits> // for std::common_type_t
 #include <cstddef>
+#include <type_traits>  // for std::common_type_t
+#include <utility>      // metaprogramming stuff
 #endif
 
 #include <boost/pfr/detail/sequence_tuple.hpp>
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 template <class... Types>
 constexpr auto make_stdarray(const Types&... t) noexcept {
-    return std::array<std::common_type_t<Types...>, sizeof...(Types)>{t...};
+  return std::array<std::common_type_t<Types...>, sizeof...(Types)>{t...};
 }
 
 template <class T, std::size_t... I>
-constexpr auto make_stdarray_from_tietuple(const T& t, std::index_sequence<I...>, int) noexcept {
-    return detail::make_stdarray(
-        boost::pfr::detail::sequence_tuple::get<I>(t)...
-    );
+constexpr auto make_stdarray_from_tietuple(const T& t, std::index_sequence<I...>,
+                                           int) noexcept {
+  return detail::make_stdarray(boost::pfr::detail::sequence_tuple::get<I>(t)...);
 }
 
 template <class T>
 constexpr auto make_stdarray_from_tietuple(const T&, std::index_sequence<>, long) noexcept {
-    return std::array<std::nullptr_t, 0>{};
+  return std::array<std::nullptr_t, 0>{};
 }
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_STDARRAY_HPP
+#endif  // BOOST_PFR_DETAIL_STDARRAY_HPP

@@ -44,8 +44,8 @@ extern "C" {
 
 /** The natural map function signature for a 3x3 block.
  */
-typedef void (*NaturalMapFun3x3Ptr)(double *reaction, double *velocity, double mu, double *rho,
-                                    double *F, double *A, double *B);
+typedef void (*NaturalMapFun3x3Ptr)(double* reaction, double* velocity, double mu, double* rho,
+                                    double* F, double* A, double* B);
 
 /** Nonsmooth Newton solver based on the Natural--Map function for the
  *  local (reduced) frictional contact problem in the dense form
@@ -56,8 +56,8 @@ typedef void (*NaturalMapFun3x3Ptr)(double *reaction, double *velocity, double m
  *  \param info returned info
  *  \param options  the solver options
  */
-void fc3d_nonsmooth_Newton_NaturalMap(FrictionContactProblem *problem, double *reaction,
-                                      double *velocity, int *info, SolverOptions *options);
+void fc3d_nonsmooth_Newton_NaturalMap(FrictionContactProblem* problem, double* reaction,
+                                      double* velocity, int* info, SolverOptions* options);
 
 /**
     The natural map function for several contacts.
@@ -74,18 +74,18 @@ void fc3d_nonsmooth_Newton_NaturalMap(FrictionContactProblem *problem, double *r
     \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
 */
 void fc3d_NaturalMapFunction(unsigned int problemSize, NaturalMapFun3x3Ptr computeACFun3x3,
-                             double *reaction3D, double *velocity3D, double *mu, double *rho3D,
-                             double *output_blocklist3, double *output_blocklist3x3_1,
-                             double *output_blocklist3x3_2);
+                             double* reaction3D, double* velocity3D, double* mu, double* rho3D,
+                             double* output_blocklist3, double* output_blocklist3x3_1,
+                             double* output_blocklist3x3_2);
 
-int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem *problem, double *z,
-                                                   double *w, double tolerance,
-                                                   SolverOptions *options, double *error);
+int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* problem, double* z,
+                                                   double* w, double tolerance,
+                                                   SolverOptions* options, double* error);
 
 /** Set default solver options for FC3D_NSN_NM
  *  \param options the solver options
  */
-void fc3d_nsn_nm_set_default(SolverOptions *options);
+void fc3d_nsn_nm_set_default(SolverOptions* options);
 
 #if defined(__cplusplus)
 }

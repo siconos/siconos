@@ -25,7 +25,6 @@
  */
 namespace siconos {}
 
-
 /** @namespace siconos::exception
  *  @brief Exceptions handling
  */
@@ -50,9 +49,9 @@ namespace io {}
  */
 namespace siconos::modeling {}
 
-
 /** @namespace siconos::graphs
- *  @brief Definition and description of the graph structures (ds and interactions graphs mostly)
+ *  @brief Definition and description of the graph structures (ds and interactions graphs
+ * mostly)
  */
 namespace siconos::integrators {}
 
@@ -62,12 +61,13 @@ namespace siconos::integrators {}
 namespace siconos::integrators {}
 
 /** @namespace siconos::nonsmooth_formulations
- *  @brief Classes and tools dedicated to the description of the nonsmooth problem (formulation and solver)
+ *  @brief Classes and tools dedicated to the description of the nonsmooth problem (formulation
+ * and solver)
  */
 namespace siconos::nonsmooth_formulations {}
 
-
 /** @namespace siconos::simulation
- *  @brief Classes and tools dedicated to the description of the simulation of a NSDS (time discretization, ...)
+ *  @brief Classes and tools dedicated to the description of the simulation of a NSDS (time
+ * discretization, ...)
  */
 namespace siconos::simulation {}

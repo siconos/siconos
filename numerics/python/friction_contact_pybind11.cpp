@@ -26,6 +26,8 @@
 
 // #include <cassert>
 
+#include "CohesiveFrictionContactProblem.h"
+#include "CohesiveFrictionContact_options.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "GenericMechanicalProblem.h"
@@ -37,8 +39,6 @@
 #include "NumericsMatrix_pybind11.h"
 #include "RollingFrictionContactProblem.h"
 #include "RollingFrictionContact_options.h"
-#include "CohesiveFrictionContactProblem.h"
-#include "CohesiveFrictionContact_options.h"
 #include "SolverOptions.h"
 #include "numerics_errors.h"
 
@@ -48,11 +48,11 @@ namespace py = pybind11;
  * @brief Check solver return code and throw Python exception on error
  */
 inline void check_numerics_error(int info, const char* operation) {
-    if (info != 0) {
-        std::string msg = std::string("Numerics error in ") + operation +
-                         ": " + numerics_error_string((NumericsError)info);
-        throw std::runtime_error(msg);
-    }
+  if (info != 0) {
+    std::string msg = std::string("Numerics error in ") + operation + ": " +
+                      numerics_error_string((NumericsError)info);
+    throw std::runtime_error(msg);
+  }
 }
 
 void display_csc_matrix(const CSparseMatrix* csc) {
@@ -711,16 +711,20 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
 #if defined(SICONOS_OMP) && defined(SICONOS_PETSC)
       .value("SICONOS_FRICTION_2D_NSGS_GRAPH", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH,
              "Parallel FC2D_NSGS using graph coloring")
-      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI,
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI,
              "Parallel version of FC2D_NSGS (OpenMP optimized)")
-      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
              "Parallel version of FC2D_NSGS (OpenMP, with permutation)")
 #endif
 #if defined(WITH_CUDA) && defined(SICONOS_PETSC)
-    .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA,
-           "GPU implementation of FC2D_NSGS")
-    .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY", FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY,
-           "GPU implementation of FC2D_NSGS (uses legacy API for block format)")
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA,
+             "GPU implementation of FC2D_NSGS")
+      .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY,
+             "GPU implementation of FC2D_NSGS (uses legacy API for block format)")
 #endif
       .value("SICONOS_FRICTION_2D_CPG", FRICTION_SOLVER::SICONOS_FRICTION_2D_CPG,
              "2D CPG solver")
@@ -923,7 +927,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              "Global 3D Rolling friction solver IPM")
       .export_values();
 
-    // Rolling Friction solver enum (separate from FRICTION_SOLVER)
+  // Rolling Friction solver enum (separate from FRICTION_SOLVER)
   py::enum_<COHESIVE_FRICTION_SOLVER>(solver_ids, "COHESIVE_FRICTION_SOLVER_enum",
                                       "Cohesive friction solver IDs")
       // Rolling Friction solvers (3D and 2D)

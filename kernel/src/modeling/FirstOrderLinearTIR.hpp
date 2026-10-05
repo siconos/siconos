@@ -63,7 +63,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
 
  public:
   /** minimal constuctor. Use setXXX functions to fix B,C, D ... */
-  FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR){};
+  FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR) {};
 
   /** Build a time-invariant coeff. linear relation
    *
@@ -149,7 +149,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   inline bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  void computeJach(double time, Interaction& inter) final{};
+  void computeJach(double time, Interaction& inter) final {};
 };
 }  // namespace siconos::modeling
 

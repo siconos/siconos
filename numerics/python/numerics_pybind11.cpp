@@ -35,9 +35,9 @@ class NumericsException : public std::exception {
   std::string message_;
 
  public:
-  NumericsException(int code, const std::string &msg) : error_code_(code), message_(msg) {}
+  NumericsException(int code, const std::string& msg) : error_code_(code), message_(msg) {}
 
-  const char *what() const noexcept override { return message_.c_str(); }
+  const char* what() const noexcept override { return message_.c_str(); }
 
   int error_code() const { return error_code_; }
 };
@@ -51,7 +51,7 @@ class NumericsException : public std::exception {
  * @param info The error code returned by the solver
  * @param operation Name of the operation (for error message)
  */
-inline void check_solver_error(int info, const char *operation) {
+inline void check_solver_error(int info, const char* operation) {
   if (info != 0) {
     std::string msg = std::string("Numerics error in ") + operation + ": " +
                       numerics_error_string((NumericsError)info);
@@ -62,24 +62,24 @@ inline void check_solver_error(int info, const char *operation) {
 // Forward declarations
 
 // Friction contact problems wrappers
-void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& solver_ids);
 // LCP
-void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_lcp(py::module_& m, py::module_& params, py::module_& solver_ids);
 
-void wrap_mlcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_mlcp(py::module_& m, py::module_& params, py::module_& solver_ids);
 
-void wrap_relay(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_relay(py::module_& m, py::module_& params, py::module_& solver_ids);
 
-void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_generic_mechanical(py::module_& m, py::module_& params, py::module_& solver_ids);
 
 // Plasticity
-void wrap_plasticity(py::module_ &m, py::module_ &params, py::module_ &solver_ids);
+void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_ids);
 
-py::array_t<int> get_iparam(SolverOptions &options) {
+py::array_t<int> get_iparam(SolverOptions& options) {
   return py::array_t<int>({options.iSize}, {sizeof(int)}, options.iparam, py::cast(&options));
 }
 
-py::array_t<double> get_dparam(SolverOptions &options) {
+py::array_t<double> get_dparam(SolverOptions& options) {
   return py::array_t<double>({options.dSize}, {sizeof(double)}, options.dparam,
                              py::cast(&options));
 }
@@ -120,11 +120,11 @@ PYBIND11_MODULE(_numerics, m) {
 
   py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
       .def(py::init([](int solver_id) {
-             SolverOptions *opts = solver_options_create(solver_id);
+             SolverOptions* opts = solver_options_create(solver_id);
 
              if (!opts) throw std::runtime_error("Error during Solver options creation");
 
-             return std::shared_ptr<SolverOptions>(opts, [](SolverOptions *p) {
+             return std::shared_ptr<SolverOptions>(opts, [](SolverOptions* p) {
                if (p) solver_options_delete(p);
              });
            }),
@@ -140,25 +140,25 @@ PYBIND11_MODULE(_numerics, m) {
       .def_property_readonly("iparam", &get_iparam)
       .def_property_readonly("dparam", &get_dparam)
       .def_readwrite("filterOn", &SolverOptions::filterOn)
-      .def("print", [](SolverOptions *self) { solver_options_print(self); })
+      .def("print", [](SolverOptions* self) { solver_options_print(self); })
       .def(
           "get_internal_solver",
-          [](SolverOptions *self, size_t num) {
+          [](SolverOptions* self, size_t num) {
             return solver_options_get_internal_solver(self, num);
           },
           py::return_value_policy::reference_internal)
       .def("update_internal",
-           [](SolverOptions *self, size_t num, int id) {
+           [](SolverOptions* self, size_t num, int id) {
              return solver_options_update_internal(self, num, id);
            })
       .def_property_readonly(
           "name",
-          [](SolverOptions *self) { return solver_options_id_to_name(self->solverId); })
+          [](SolverOptions* self) { return solver_options_id_to_name(self->solverId); })
 
-      .def("__repr__", [](const SolverOptions *self) {
+      .def("__repr__", [](const SolverOptions* self) {
         std::ostringstream oss;
         oss << "SolverOptions (ID: " << self->solverId << ")";
-        solver_options_print(const_cast<SolverOptions *>(self));
+        solver_options_print(const_cast<SolverOptions*>(self));
         return oss.str();
       });
 

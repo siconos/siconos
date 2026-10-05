@@ -130,8 +130,8 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
         _levelMaxForOutput{lmax_output},
         _levelMinForInput{lmin_input},
         _levelMaxForInput{lmax_input} {
-            // Set levels. This may depend on the nonsmooth law and will be updated during
-            // initializeWorkVectorsForInteraction(...) call.
+          // Set levels. This may depend on the nonsmooth law and will be updated during
+          // initializeWorkVectorsForInteraction(...) call.
         };
 
   /**
@@ -322,8 +322,9 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  \param vertex_inter of the interaction graph
    *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  virtual void computeFreeOutputPosition(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-					 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {};
+  virtual void computeFreeOutputPosition(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {};
 
   /** compute the residu of the output of the relation (y)
    *  This computation depends on the type of OSI
@@ -501,14 +502,10 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
       siconos::graphs::InteractionsGraph& indexSet) = 0;
 
-
   /** update the state of the nonsmooth law
    */
   virtual void updateInteractionInternalState() {};
-
-
 };
-
 
 }  // namespace siconos::integrators
 

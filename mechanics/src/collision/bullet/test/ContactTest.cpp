@@ -47,7 +47,7 @@ void ContactTest::setUp() {}
 void ContactTest::tearDown() {}
 
 static BounceResult bounceTest(std::string moving, std::string ground,
-                               const BounceParams &params) {
+                               const BounceParams& params) {
   // User-defined main parameters
   double t0 = 0;                           // initial computation time
   double T = 20.0;                         // end of computation time

@@ -21,8 +21,10 @@
  */
 
 #include "solver_registry.h"
+
 #include <stdio.h>
 #include <string.h>
+
 #include "numerics_errors.h"
 
 /* Static registry table */
@@ -30,65 +32,58 @@ static const SolverEntry* registry[SOLVER_REGISTRY_MAX];
 static size_t registry_count = 0;
 
 int solver_registry_register(const SolverEntry* entry) {
-    CHECK_NULL(entry);
-    if (registry_count >= SOLVER_REGISTRY_MAX) return -1;
+  CHECK_NULL(entry);
+  if (registry_count >= SOLVER_REGISTRY_MAX) return -1;
 
-    /* Check for duplicate ID */
-    for (size_t i = 0; i < registry_count; i++) {
-        if (registry[i]->id == entry->id) {
-            fprintf(stderr, "solver_registry: duplicate solver ID %d\n", entry->id);
-            return -1;
-        }
+  /* Check for duplicate ID */
+  for (size_t i = 0; i < registry_count; i++) {
+    if (registry[i]->id == entry->id) {
+      fprintf(stderr, "solver_registry: duplicate solver ID %d\n", entry->id);
+      return -1;
     }
+  }
 
-    registry[registry_count++] = entry;
-    return 0;
+  registry[registry_count++] = entry;
+  return 0;
 }
 
 const SolverEntry* solver_registry_lookup(solver_id_t id) {
-    for (size_t i = 0; i < registry_count; i++) {
-        if (registry[i]->id == id) {
-            return registry[i];
-        }
+  for (size_t i = 0; i < registry_count; i++) {
+    if (registry[i]->id == id) {
+      return registry[i];
     }
-    return NULL;
+  }
+  return NULL;
 }
 
 const SolverEntry* solver_registry_lookup_by_name(const char* name) {
-    if (!name) return NULL;
+  if (!name) return NULL;
 
-    for (size_t i = 0; i < registry_count; i++) {
-        if (registry[i]->name && strcmp(registry[i]->name, name) == 0) {
-            return registry[i];
-        }
+  for (size_t i = 0; i < registry_count; i++) {
+    if (registry[i]->name && strcmp(registry[i]->name, name) == 0) {
+      return registry[i];
     }
-    return NULL;
+  }
+  return NULL;
 }
 
-size_t solver_registry_count(void) {
-    return registry_count;
-}
+size_t solver_registry_count(void) { return registry_count; }
 
 const SolverEntry** solver_registry_get_all(size_t* count) {
-    if (count) *count = registry_count;
-    return registry;
+  if (count) *count = registry_count;
+  return registry;
 }
 
-int solver_registry_exists(solver_id_t id) {
-    return solver_registry_lookup(id) != NULL;
-}
+int solver_registry_exists(solver_id_t id) { return solver_registry_lookup(id) != NULL; }
 
 void solver_registry_print(void) {
-    printf("\nRegistered solvers (%zu):\n", registry_count);
-    printf("%-10s %-30s %-50s %s\n", "ID", "Name", "Description", "Local");
-    printf("%-10s %-30s %-50s %s\n", "--", "----", "-----------", "-----");
+  printf("\nRegistered solvers (%zu):\n", registry_count);
+  printf("%-10s %-30s %-50s %s\n", "ID", "Name", "Description", "Local");
+  printf("%-10s %-30s %-50s %s\n", "--", "----", "-----------", "-----");
 
-    for (size_t i = 0; i < registry_count; i++) {
-        const SolverEntry* e = registry[i];
-        printf("%-10d %-30s %-50s %s\n",
-               e->id,
-               e->name ? e->name : "N/A",
-               e->description ? e->description : "",
-               e->is_local_solver ? "yes" : "no");
-    }
+  for (size_t i = 0; i < registry_count; i++) {
+    const SolverEntry* e = registry[i];
+    printf("%-10d %-30s %-50s %s\n", e->id, e->name ? e->name : "N/A",
+           e->description ? e->description : "", e->is_local_solver ? "yes" : "no");
+  }
 }

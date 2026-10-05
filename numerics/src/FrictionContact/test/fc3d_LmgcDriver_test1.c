@@ -33,8 +33,8 @@ int main(void) {
   double W[36] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1,
                   1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
-  double *reaction = (double *)malloc(3 * nc * sizeof(double));
-  double *velocity = (double *)malloc(3 * nc * sizeof(double));
+  double* reaction = (double*)malloc(3 * nc * sizeof(double));
+  double* velocity = (double*)malloc(3 * nc * sizeof(double));
   for (int i = 0; i < 3 * nc; i++) {
     reaction[i] = 0.0;
     velocity[i] = 0.0;

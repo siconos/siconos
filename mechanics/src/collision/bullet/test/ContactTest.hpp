@@ -14,16 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef TestContact_h
 #define TestContact_h
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class ContactTest : public CppUnit::TestFixture
-{
-private:
-
+class ContactTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(ContactTest);
 
@@ -41,7 +39,7 @@ private:
   void t3();
   void t4();
 
-public:
+ public:
   void setUp();
   void tearDown();
 };

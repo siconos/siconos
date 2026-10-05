@@ -19,7 +19,7 @@
 
 #include <fstream>
 
-nlohmann::json siconos::fem::cable::tools::load_json_file(const std::string &filename) {
+nlohmann::json siconos::fem::cable::tools::load_json_file(const std::string& filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
     throw std::runtime_error("Cannot open file '" + filename + "'");

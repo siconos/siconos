@@ -18,18 +18,18 @@
 
 #include <math.h>  // for fmax
 
-#include "fc3d_short_names.h"
-#include "FrictionContactProblem.h"  // for FrictionContactProblem
-#include "FrictionContact_options.h"            // for SICONOS_FRICTION_3D_IPARAM_INTER...
+#include "FrictionContactProblem.h"   // for FrictionContactProblem
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IPARAM_INTER...
 #include "Friction_tools.h"
-#include "NumericsFwd.h"       // for SolverOptions, FrictionContactPr...
-#include "SolverOptions.h"     // for SolverOptions
-#include "fc3d_Solvers.h"      // for fc3d_set_internalsolver_tolerance
-#include "numerics_verbose.h"
+#include "NumericsFwd.h"    // for SolverOptions, FrictionContactPr...
+#include "SolverOptions.h"  // for SolverOptions
+#include "fc3d_Solvers.h"   // for fc3d_set_internalsolver_tolerance
+#include "fc3d_short_names.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions* options,
-                                       SolverOptions* internalsolver_options, double error) {
+                                      SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] ==
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE) {
@@ -43,8 +43,8 @@ int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions* optio
   } else if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] ==
              SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT) {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] =
-        error / (options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] *
-                 numberOfContacts);
+        error /
+        (options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] * numberOfContacts);
     numerics_printf_verbose(2,
                             "fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver "
                             "tolerance is set to %e",
@@ -58,7 +58,7 @@ int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions* optio
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
     return numerics_error("fc3d__set_internalsolver_tolerance",
-                   "Unknown strategy for driving the tolerance");
+                          "Unknown strategy for driving the tolerance");
   }
   return 0;
 }

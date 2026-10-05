@@ -26,19 +26,19 @@
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
-#include "SiconosLapack.h"     // for LA_UP, LA_NONUNIT, LA_NOTRANS, DTRTRS, DPOTRF, lapack_int
-#include "SolverOptions.h"     // for SolverOptions, solver_opti...
-#include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_LATIN_P...
+#include "SiconosLapack.h"  // for LA_UP, LA_NONUNIT, LA_NOTRANS, DTRTRS, DPOTRF, lapack_int
+#include "SolverOptions.h"  // for SolverOptions, solver_opti...
+#include "lcp_cst.h"        // for SICONOS_LCP_IPARAM_LATIN_P...
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "solver_registry.h"
 
-void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-               SolverOptions *options) {
+void lcp_latin(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+               SolverOptions* options) {
   /* matrix M of the lcp */
-  double *M = problem->M->matrix0;
+  double* M = problem->M->matrix0;
 
   /* size of the LCP */
   int n = problem->size;
@@ -76,27 +76,27 @@ void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int 
 
   /* Allocations */
 
-  ww = (double *)malloc(n * sizeof(double));
-  zz = (double *)malloc(n * sizeof(double));
-  wc = (double *)malloc(n * sizeof(double));
-  zc = (double *)malloc(n * sizeof(double));
-  znum1 = (double *)malloc(n * sizeof(double));
-  wnum1 = (double *)malloc(n * sizeof(double));
-  kinvden1 = (double *)malloc(n * sizeof(double));
-  kinvden2 = (double *)malloc(n * sizeof(double));
-  wt = (double *)malloc(n * sizeof(double));
-  maxwt = (double *)malloc(n * sizeof(double));
-  num1 = (double *)malloc(n * sizeof(double));
-  kinvnum1 = (double *)malloc(n * sizeof(double));
-  den1 = (double *)malloc(n * sizeof(double));
-  den2 = (double *)malloc(n * sizeof(double));
-  wden1 = (double *)malloc(n * sizeof(double));
-  zden1 = (double *)malloc(n * sizeof(double));
-  kinvwden1 = (double *)malloc(n * sizeof(double));
-  kzden1 = (double *)malloc(n * sizeof(double));
-  DPO = (double *)malloc(n2 * sizeof(double));
-  k = (double *)malloc(n2 * sizeof(double));
-  kinv = (double *)malloc(n2 * sizeof(double));
+  ww = (double*)malloc(n * sizeof(double));
+  zz = (double*)malloc(n * sizeof(double));
+  wc = (double*)malloc(n * sizeof(double));
+  zc = (double*)malloc(n * sizeof(double));
+  znum1 = (double*)malloc(n * sizeof(double));
+  wnum1 = (double*)malloc(n * sizeof(double));
+  kinvden1 = (double*)malloc(n * sizeof(double));
+  kinvden2 = (double*)malloc(n * sizeof(double));
+  wt = (double*)malloc(n * sizeof(double));
+  maxwt = (double*)malloc(n * sizeof(double));
+  num1 = (double*)malloc(n * sizeof(double));
+  kinvnum1 = (double*)malloc(n * sizeof(double));
+  den1 = (double*)malloc(n * sizeof(double));
+  den2 = (double*)malloc(n * sizeof(double));
+  wden1 = (double*)malloc(n * sizeof(double));
+  zden1 = (double*)malloc(n * sizeof(double));
+  kinvwden1 = (double*)malloc(n * sizeof(double));
+  kzden1 = (double*)malloc(n * sizeof(double));
+  DPO = (double*)malloc(n2 * sizeof(double));
+  k = (double*)malloc(n2 * sizeof(double));
+  kinv = (double*)malloc(n2 * sizeof(double));
 
   /* Initialization */
 
@@ -331,7 +331,7 @@ void lcp_latin(LinearComplementarityProblem *problem, double *z, double *w, int 
   free(kzden1);
 }
 
-void lcp_latin_set_default(SolverOptions *options) {
+void lcp_latin_set_default(SolverOptions* options) {
   options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER] = 0.3;
 }
 
@@ -357,13 +357,10 @@ static void lcp_latin_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_LATIN, "LCP_LATIN",
-                "LArge Time INcrements solver for LCP",
-                lcp_latin_init_wrap,
-                lcp_latin_solve_wrap,
-                lcp_latin_free_wrap,
-                NULL,  /* error function */
-                lcp_latin_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_LCP_LATIN, "LCP_LATIN", "LArge Time INcrements solver for LCP",
+                lcp_latin_init_wrap, lcp_latin_solve_wrap, lcp_latin_free_wrap,
+                NULL,                  /* error function */
+                lcp_latin_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-6,                  /* default_tol */
+                0 /* is_local_solver */)

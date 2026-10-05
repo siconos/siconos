@@ -308,8 +308,9 @@ void siconos::modeling::Interaction::reset() {
   // initialize internal variable
   _internalVariables = _nslaw->initializeInternalVariables(*this);
 
-  if(_internalVariables)
-    _internalVariables_k.reset(new siconos::algebra::blocks::SharedVector3(*_internalVariables));
+  if (_internalVariables)
+    _internalVariables_k.reset(
+        new siconos::algebra::blocks::SharedVector3(*_internalVariables));
 }
 
 siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
@@ -668,8 +669,8 @@ void siconos::modeling::Interaction::initInternalVariablesMemory() {
     _internalVariables_k->resize(_internalVariables->size());
     for (size_t i = 0; i < _internalVariables->size(); ++i) {
       if ((*_internalVariables)[i]) {
-        (*_internalVariables_k)[i] = std::make_shared<siconos::algebra::SiconosVector3>(
-            *(*_internalVariables)[i]);
+        (*_internalVariables_k)[i] =
+            std::make_shared<siconos::algebra::SiconosVector3>(*(*_internalVariables)[i]);
       }
     }
   }
@@ -688,7 +689,7 @@ void siconos::modeling::Interaction::swapInternalVariablesInMemory() {
   DEBUG_END("siconos::modeling::Interaction::swapInternalVariablesInMemory()\n");
 }
 
-void siconos::modeling::Interaction::display(bool brief) const  {
+void siconos::modeling::Interaction::display(bool brief) const {
   std::cout << "======= Interaction display number " << _number << " =======\n";
 
   std::cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << "\n";
@@ -725,9 +726,8 @@ void siconos::modeling::Interaction::display(bool brief) const  {
       siconos::algebra::print(_yMemory[i]);
     }
   }
-  if (_internalVariables)
-    _nslaw->displayInternalVariables(*_internalVariables);
-    //_nslaw->initializeInternalVariables(*this);
+  if (_internalVariables) _nslaw->displayInternalVariables(*_internalVariables);
+  //_nslaw->initializeInternalVariables(*this);
 
   std::cout << "===================================\n";
 }

@@ -1,7 +1,7 @@
-#include "siconos/siconos.hpp"
-
 #include <fstream>
 #include <print>
+
+#include "siconos/siconos.hpp"
 
 namespace siconos::config {
 
@@ -27,21 +27,18 @@ using space_filter = collision::space_filter<topo, neighborhood>;
 using params = map<iparam<"dof", 3>>;
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
   using storage::pattern::wrap;
   using namespace storage;
 
   auto data = storage::make<
       standard_environment<config::params>, config::simulation,
-      wrap<some::unbounded_collection, config::disk>, config::disk_shape,
-      config::diskdisk_r,
+      wrap<some::unbounded_collection, config::disk>, config::disk_shape, config::diskdisk_r,
       wrap<some::unbounded_collection, config::diskfsegment_r>,
       wrap<some::unbounded_collection, config::pointl>,
       wrap<some::unbounded_collection, config::pointd>,
-      wrap<some::unbounded_collection, config::interaction>,
-      config::space_filter,
+      wrap<some::unbounded_collection, config::interaction>, config::space_filter,
       storage::with_properties<
           storage::attached<config::disk, storage::pattern::symbol<"shape">,
                             storage::some::item_ref<config::disk_shape>>,
@@ -154,12 +151,10 @@ int main(int argc, char* argv[])
   std::ofstream cout("result.dat");
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
-  cout << fmt::format(
-              "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(d1, simulation.current_step())(1),
-              storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
-              0.)
+  cout << fmt::format("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                      simulation.current_step() * simulation.time_step(),
+                      storage::attr<"q">(d1, simulation.current_step())(1),
+                      storage::attr<"velocity">(d1, simulation.current_step())(1), 0., 0.)
        << std::flush;
 
   while (simulation.has_next_event()) {
@@ -168,29 +163,24 @@ int main(int argc, char* argv[])
     spacef.update_index_set0(simulation.current_step());
 
     auto ninvds = simulation.compute_one_step();
-//    auto q = storage::attr<"q">(d1, simulation.current_step())(1);
-//    auto v = storage::attr<"velocity">(d1, simulation.current_step())(1);
+    //    auto q = storage::attr<"q">(d1, simulation.current_step())(1);
+    //    auto v = storage::attr<"velocity">(d1, simulation.current_step())(1);
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(1);
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
+      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(1);
+      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+    } else {
       p0 = 0;
       lambda = 0;
     }
 
-    cout << fmt::format(
-                "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-                simulation.current_step() * simulation.time_step(),
-                storage::attr<"q">(d1, simulation.current_step())(1),
-                storage::attr<"velocity">(d1, simulation.current_step())(1),
-                p0, lambda)
+    cout << fmt::format("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                        simulation.current_step() * simulation.time_step(),
+                        storage::attr<"q">(d1, simulation.current_step())(1),
+                        storage::attr<"velocity">(d1, simulation.current_step())(1), p0,
+                        lambda)
          << std::flush;
-
   }
   //  io::close(fd);
 }

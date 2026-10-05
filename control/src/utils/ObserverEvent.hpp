@@ -45,7 +45,7 @@ class ObserverEvent : public siconos::simulation::Event {
   /** constructor with time value as a parameter
    *  \param time the starting time of the Event
    */
-  ObserverEvent(double time) : Event(time, EventType::Observer, true){};
+  ObserverEvent(double time) : Event(time, EventType::Observer, true) {};
 
   /** destructor
    */
@@ -59,10 +59,7 @@ class ObserverEvent : public siconos::simulation::Event {
   /** set the Observer linked to this Event
    *  \param newObserver the std::shared_ptr<Observer>
    */
-  void setObserverPtr(std::shared_ptr<Observer> newObserver)
-  {
-    _observer = newObserver;
-  };
+  void setObserverPtr(std::shared_ptr<Observer> newObserver) { _observer = newObserver; };
 
   /** Call the capture method of the linked Observer
    *  \param sim a std::shared_ptr<siconos::simulation::Simulation> (ignored).
@@ -70,14 +67,12 @@ class ObserverEvent : public siconos::simulation::Event {
   void process(siconos::simulation::Simulation& sim);
 };
 
-
 }  // namespace siconos::control
 
-namespace siconos::simulation{
+namespace siconos::simulation {
 // Register the event into the factory
-  static EventRegistration<siconos::control::ObserverEvent> reg_OB(EventType::Observer);
+static EventRegistration<siconos::control::ObserverEvent> reg_OB(EventType::Observer);
 
-
-}
+}  // namespace siconos::simulation
 
 #endif  // ObserverEvent_H

@@ -28,27 +28,27 @@ extern "C" {
 #endif
 
 /** pointer to function used to call local solver */
-typedef int (*SolverPtr)(PlasticityProblem *, double *, SolverOptions *);
+typedef int (*SolverPtr)(PlasticityProblem*, double*, SolverOptions*);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, PlasticityProblem *, PlasticityProblem *, double *,
-                          SolverOptions *);
+typedef void (*UpdatePtr)(int, PlasticityProblem*, PlasticityProblem*, double*,
+                          SolverOptions*);
 
 /** pointer to function used to post-processed results after a call to the
  * (local) solver */
-typedef void (*PostSolverPtr)(int, double *);
+typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalPlasticitySolverPtr)(PlasticityProblem *, PlasticityProblem *,
-                                             SolverOptions *);
+typedef void (*FreeLocalPlasticitySolverPtr)(PlasticityProblem*, PlasticityProblem*,
+                                             SolverOptions*);
 
-typedef void (*CopyLocalReactionPtr)(double *, double *);
+typedef void (*CopyLocalReactionPtr)(double*, double*);
 
-typedef void (*PerformRelaxationPtr)(double *, double *, double);
+typedef void (*PerformRelaxationPtr)(double*, double*, double);
 
-typedef double (*LightErrorSquaredPtr)(double *, double *);
+typedef double (*LightErrorSquaredPtr)(double*, double*);
 
-typedef double (*SquaredNormPtr)(double *);
+typedef double (*SquaredNormPtr)(double*);
 
 struct LocalPLASTICITY_2DProblemFunctionToolkit {
   SolverPtr local_solver;
@@ -61,21 +61,21 @@ struct LocalPLASTICITY_2DProblemFunctionToolkit {
   SquaredNormPtr squared_norm;
 };
 
-struct LocalPLASTICITY_2DProblemFunctionToolkit *localPLASTICITY_2DProblemFunctionToolkit_new(
+struct LocalPLASTICITY_2DProblemFunctionToolkit* localPLASTICITY_2DProblemFunctionToolkit_new(
     void);
 
 void localPLASTICITY_2DProblemFunctionToolkit_display(
-    struct LocalPLASTICITY_2DProblemFunctionToolkit *);
+    struct LocalPLASTICITY_2DProblemFunctionToolkit*);
 
-PlasticityProblem *plasticity_2d_local_problem_allocate(PlasticityProblem *problem);
+PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* problem);
 
-void plasticity_2d_local_problem_free(PlasticityProblem *localproblem,
-                                      PlasticityProblem *problem);
-void plasticity_2d_local_problem_compute_q(PlasticityProblem *problem,
-                                           PlasticityProblem *localproblem, double *reaction,
+void plasticity_2d_local_problem_free(PlasticityProblem* localproblem,
+                                      PlasticityProblem* problem);
+void plasticity_2d_local_problem_compute_q(PlasticityProblem* problem,
+                                           PlasticityProblem* localproblem, double* reaction,
                                            int contact);
-void plasticity_2d_local_problem_fill_M(PlasticityProblem *problem,
-                                        PlasticityProblem *localproblem, int contact);
+void plasticity_2d_local_problem_fill_M(PlasticityProblem* problem,
+                                        PlasticityProblem* localproblem, int contact);
 
 #if defined(__cplusplus)
 }

@@ -97,7 +97,8 @@ void siconos::fem::cable::Cable2d3DR::updateContactPoints(
 };
 
 void siconos::fem::cable::Cable2d3DR::updateContactPoints(double pc1[3], double pc2[3],
-                                                         double normal[3], double tangent[3]) {
+                                                          double normal[3],
+                                                          double tangent[3]) {
   contactPoint1_(0) = pc1[0];
   contactPoint1_(1) = pc1[1];
   contactPoint1_(2) = pc1[2];

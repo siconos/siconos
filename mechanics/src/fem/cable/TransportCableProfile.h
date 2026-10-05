@@ -36,7 +36,7 @@ class Point;
 /**  */
 class TransportCableProfile {
  public:
-  TransportCableProfile(const TransportCableModel &a_model, TransportCableResult &a_results);
+  TransportCableProfile(const TransportCableModel& a_model, TransportCableResult& a_results);
 
   virtual ~TransportCableProfile() noexcept = default;
 
@@ -53,23 +53,23 @@ class TransportCableProfile {
   void initializeFEM(int nb_elem, double a_eps = 0.1, double a_tol = 1e-3);
 
  private:
-  const TransportCableModel &r_model;
-  TransportCableResult &r_results;
+  const TransportCableModel& r_model;
+  TransportCableResult& r_results;
 
   /**
      \param a_X vector of positions, coordinates of cable 'particles'
      \param a_tol tolerance used to activate contacts
    */
-  void compute_ineq_constraint(const siconos::algebra::SiconosVector &a_X,
+  void compute_ineq_constraint(const siconos::algebra::SiconosVector& a_X,
                                double a_tol = 1e-3);
 
-  void computeConstraints(const siconos::algebra::SiconosVector &cableNodesPositions,
+  void computeConstraints(const siconos::algebra::SiconosVector& cableNodesPositions,
                           double tol, Eigen::Ref<siconos::algebra::SiconosVector> distances,
                           Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jacobian);
-  void computeConstraintsSparse(const siconos::algebra::SiconosVector &cableNodesPositions,
+  void computeConstraintsSparse(const siconos::algebra::SiconosVector& cableNodesPositions,
                                 double tol,
                                 Eigen::Ref<siconos::algebra::SiconosVector> distances,
-                                siconos::algebra::SiconosSparseMatrix &jacobian);
+                                siconos::algebra::SiconosSparseMatrix& jacobian);
 };
 // Free functions
 
@@ -80,7 +80,7 @@ class TransportCableProfile {
     \param totalLength total length of the cable (up, down and stations)
     \return weight vector, with positive values at indices where vehicles are supposed to be
   */
-siconos::algebra::SiconosVector distribute_carriers_weight(const Carriers &carriers,
+siconos::algebra::SiconosVector distribute_carriers_weight(const Carriers& carriers,
                                                            int nb_elem, double totalLength);
 
 }  // namespace siconos::fem::cable

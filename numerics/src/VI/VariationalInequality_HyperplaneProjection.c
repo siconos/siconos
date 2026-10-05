@@ -27,11 +27,10 @@
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "siconos_debug.h"                       // for DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_...
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_errors.h"
 
 void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double* x,
                                                 double* w, int* info, SolverOptions* options) {
@@ -209,7 +208,8 @@ static int vi_hp_init_wrap(void* problem, SolverOptions* options) {
 
 static int vi_hp_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
   int info = NUMERICS_OK;
-  variationalInequality_HyperplaneProjection((VariationalInequality*)problem, x, F, &info, options);
+  variationalInequality_HyperplaneProjection((VariationalInequality*)problem, x, F, &info,
+                                             options);
   return info;
 }
 
@@ -218,14 +218,9 @@ static void vi_hp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_VI_HP,
-                "VI_HP",
-                "Hyperplane Projection for Variational Inequality",
-                vi_hp_init_wrap,
-                vi_hp_solve_wrap,
-                vi_hp_free_wrap,
-                NULL,
-                variationalInequality_HyperplaneProjection_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_VI_HP, "VI_HP", "Hyperplane Projection for Variational Inequality",
+                vi_hp_init_wrap, vi_hp_solve_wrap, vi_hp_free_wrap, NULL,
+                variationalInequality_HyperplaneProjection_set_default, /* set_default */
+                1000,                                                   /* default_max_iter */
+                1e-4,                                                   /* default_tol */
+                0 /* is_local_solver */)

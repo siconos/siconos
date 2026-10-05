@@ -43,17 +43,16 @@
 #include "solver_registry.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
-typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem *, double *, double *,
-                                        int *, SolverOptions *);
-typedef void (*tangentInternalSolverPtr)(ConvexQP *, double *, double *, int *,
-                                         SolverOptions *);
+typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem*, double*, double*, int*,
+                                        SolverOptions*);
+typedef void (*tangentInternalSolverPtr)(ConvexQP*, double*, double*, int*, SolverOptions*);
 
-int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *reaction,
-                                     double *velocity, int *info, SolverOptions *options) {
+int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* reaction,
+                                    double* velocity, int* info, SolverOptions* options) {
   /* verbose=1; */
   /* int and double parameters */
-  int *iparam = options->iparam;
-  double *dparam = options->dparam;
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
 
   /* Number of contacts */
   size_t nc = to_size_t(problem->numberOfContacts);
@@ -64,7 +63,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
   double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
-  SolverOptions **internalsolver_options = options->internalSolvers;
+  SolverOptions** internalsolver_options = options->internalSolvers;
 
   if (verbose) solver_options_print(options);
 
@@ -75,37 +74,37 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
 
   normalInternalSolverPtr internalsolver_normal = 0;
   tangentInternalSolverPtr internalsolver_tangent = 0;
-  options->dWork = (double *)calloc(nc, sizeof(double));
+  options->dWork = (double*)calloc(nc, sizeof(double));
   options->dWorkSize = nc;
-  double *mu = options->dWork;
+  double* mu = options->dWork;
   // Warning : same dwork for current and internal solver !!
   internalsolver_options[0]->dWork = options->dWork;
 
-  double *r_n = (double *)malloc(nc * sizeof(double));
+  double* r_n = (double*)malloc(nc * sizeof(double));
 
-  double *r_t = (double *)malloc(2 * nc * sizeof(double));
+  double* r_t = (double*)malloc(2 * nc * sizeof(double));
   for (size_t contact = 0; contact < nc; contact++) {
     r_n[contact] = reaction[contact * 3];
     r_t[2 * contact] = reaction[contact * 3 + 1];
     r_t[2 * contact + 1] = reaction[contact * 3 + 2];
   }
 
-  SplittedFrictionContactProblem *splitted_problem =
-      (SplittedFrictionContactProblem *)malloc(sizeof(SplittedFrictionContactProblem));
+  SplittedFrictionContactProblem* splitted_problem =
+      (SplittedFrictionContactProblem*)malloc(sizeof(SplittedFrictionContactProblem));
 
   createSplittedFrictionContactProblem(problem, splitted_problem);
 
-  LinearComplementarityProblem *normal_lcp_problem = 0;
-  ConvexQP *tangent_cqp = 0;
+  LinearComplementarityProblem* normal_lcp_problem = 0;
+  ConvexQP* tangent_cqp = 0;
 
   if (options->numberOfInternalSolvers != 2)
     return numerics_error("fc3d_Panagiotopoulos_FixedPoint",
-                   " the solver requires 2 internal solver");
+                          " the solver requires 2 internal solver");
 
   if (internalsolver_options[0]->solverId == SICONOS_LCP_PGS ||
       internalsolver_options[0]->solverId == SICONOS_LCP_CONVEXQP_PG) {
     normal_lcp_problem =
-        (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
+        (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
     normal_lcp_problem->size = to_int(nc);
     normal_lcp_problem->M = splitted_problem->M_nn;
 
@@ -118,23 +117,23 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
     /* SBM_to_dense(splitted_problem->M_nn->matrix1, splitted_problem->M_nn->matrix0); */
     /* splitted_problem->M_nn->storageType=NM_DENSE; */
 
-    normal_lcp_problem->q = (double *)malloc(nc * sizeof(double));
+    normal_lcp_problem->q = (double*)malloc(nc * sizeof(double));
 
   } else {
     return numerics_error("fc3d_Panagiotopoulos_FixedPoint",
-                   "Unknown internal solver for the normal part.");
+                          "Unknown internal solver for the normal part.");
   }
-  FrictionContactProblem_as_ConvexQP *fc3d_as_cqp = NULL;
+  FrictionContactProblem_as_ConvexQP* fc3d_as_cqp = NULL;
   if (internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG ||
       internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_FPP ||
       internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_EG) {
-    tangent_cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
+    tangent_cqp = (ConvexQP*)malloc(sizeof(ConvexQP));
     tangent_cqp->M = splitted_problem->M_tt;
-    tangent_cqp->q = (double *)malloc(2 * nc * sizeof(double));
+    tangent_cqp->q = (double*)malloc(2 * nc * sizeof(double));
     tangent_cqp->ProjectionOnC = &Projection_ConvexQP_FC3D_Disk;
     tangent_cqp->A = NULL;
     tangent_cqp->b = NULL;
-    fc3d_as_cqp = (FrictionContactProblem_as_ConvexQP *)malloc(
+    fc3d_as_cqp = (FrictionContactProblem_as_ConvexQP*)malloc(
         sizeof(FrictionContactProblem_as_ConvexQP));
     tangent_cqp->env = fc3d_as_cqp;
     tangent_cqp->size = to_int(nc * 2);
@@ -149,7 +148,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
     fc3d_as_cqp->options = options;
   } else {
     return numerics_error("fc3d_Panagiotopoulos_FixedPoint",
-                   "Unknown internal solver for the tangent part.");
+                          "Unknown internal solver for the tangent part.");
   }
 
   if (internalsolver_options[0]->solverId == SICONOS_LCP_PGS) {
@@ -166,7 +165,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
     internalsolver_normal = &lcp_ConvexQP_ProjectedGradient;
   } else {
     return numerics_error("fc3d_Panagiotopoulos_FixedPoint",
-                   "Unknown internal solver for the normal part.");
+                          "Unknown internal solver for the normal part.");
   }
 
   if (internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG) {
@@ -184,7 +183,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
     internalsolver_tangent = &convexQP_VI_solver;
   } else
     return numerics_error("fc3d_Panagiotopoulos_FixedPoint",
-                   "Unknown internal solver for the tangent part.");
+                          "Unknown internal solver for the tangent part.");
 
   int cumul_internal = 0;
   // verbose=1;
@@ -279,7 +278,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem *problem, double *rea
   return 0;
 }
 
-void fc3d_pfp_set_default(SolverOptions *options) {
+void fc3d_pfp_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
@@ -287,7 +286,7 @@ void fc3d_pfp_set_default(SolverOptions *options) {
   // Internal solvers - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 2;
-    options->internalSolvers = calloc(2, sizeof(SolverOptions *));
+    options->internalSolvers = calloc(2, sizeof(SolverOptions*));
   } else {
     solver_options_delete(options->internalSolvers[0]);
     solver_options_delete(options->internalSolvers[1]);
@@ -308,21 +307,21 @@ void fc3d_pfp_set_default(SolverOptions *options) {
  * ===========================================================================
  */
 
-static int fc3d_pfp_init_wrap(void *problem, SolverOptions *options) {
+static int fc3d_pfp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   fc3d_pfp_set_default(options);
   return NUMERICS_OK;
 }
 
-static int fc3d_pfp_solve_wrap(void *problem, double *reaction, double *velocity,
-                               SolverOptions *options) {
+static int fc3d_pfp_solve_wrap(void* problem, double* reaction, double* velocity,
+                               SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_Panagiotopoulos_FixedPoint((FrictionContactProblem *)problem, reaction, velocity, &info,
+  fc3d_Panagiotopoulos_FixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info,
                                   options);
   return info;
 }
 
-static void fc3d_pfp_free_wrap(void *problem, SolverOptions *options) {
+static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
 }

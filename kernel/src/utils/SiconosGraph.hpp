@@ -130,7 +130,7 @@ class SiconosGraph {
  public:
   /** default constructor
    */
-  SiconosGraph() : _stamp(0){};
+  SiconosGraph() : _stamp(0) {};
 
   ~SiconosGraph() noexcept { g.clear(); };
 

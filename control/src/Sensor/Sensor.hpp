@@ -28,10 +28,9 @@
 #include <memory>
 #include <string>
 
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class DynamicalSystem;
@@ -168,7 +167,7 @@ class Sensor {
    *
    *  \param td the TimeDiscretisation for this Sensor
    */
-  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td){};
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td) {};
 
   /* get all the data saved for this sensor
    *  \return a DataSet
@@ -180,7 +179,7 @@ class Sensor {
    *
    *  \param nsds the Model
    */
-  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds){};
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds) {};
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */
@@ -224,21 +223,18 @@ class SensorFactory {
       \return a pointer to sensor
   */
   std::shared_ptr<Sensor> create(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                                 SensorType type)
-  {
+                                 SensorType type) {
     assert(m_factories.contains(type) && "unknown Sensor type");
     return m_factories[type](ds);
   }
 
   /** access to the (singleton) factory instance */
-  static SensorFactory* instance()
-  {
+  static SensorFactory* instance() {
     static SensorFactory factory;
     return &factory;
   }
 
-  void registerCreator(SensorType newtype, SensorCreator caller)
-  {
+  void registerCreator(SensorType newtype, SensorCreator caller) {
     m_factories[newtype] = caller;
   }
 };
@@ -246,8 +242,7 @@ class SensorFactory {
 template <class T>
 class SensorRegistration {
  public:
-  SensorRegistration(SensorType newtype)
-  {
+  SensorRegistration(SensorType newtype) {
     SensorFactory::instance()->registerCreator(
         newtype, [](std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
           return std::make_shared<T>(ds);

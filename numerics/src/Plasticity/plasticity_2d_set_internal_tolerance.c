@@ -18,45 +18,50 @@
 
 #include <math.h>  // for fmax
 
-#include "PlasticityProblem.h"  // for PlasticityProblem
-#include "NumericsFwd.h"           // for SolverOptions, MohrCoulomb2DPr...
-#include "Plasticity_options.h"        // for PLASTICITY_IPARAM_INTER...
-#include "SolverOptions.h"         // for SolverOptions
-#include "plasticity_2d_solvers.h"          // for plasticity_2d_set_internalsolver_tolerance
-#include "numerics_verbose.h"
+#include "NumericsFwd.h"         // for SolverOptions, MohrCoulomb2DPr...
+#include "PlasticityProblem.h"   // for PlasticityProblem
+#include "Plasticity_options.h"  // for PLASTICITY_IPARAM_INTER...
+#include "SolverOptions.h"       // for SolverOptions
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "plasticity_2d_solvers.h"  // for plasticity_2d_set_internalsolver_tolerance
 
-int plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem, SolverOptions* options,
-                                       SolverOptions* internalsolver_options, double error) {
+int plasticity_2d_set_internalsolver_tolerance(PlasticityProblem* problem,
+                                               SolverOptions* options,
+                                               SolverOptions* internalsolver_options,
+                                               double error) {
   int* iparam = options->iparam;
   if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
       PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE) {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] =
         fmax(error / options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO],
              options->dparam[SICONOS_DPARAM_TOL] / problem->numberOfCones);
-    numerics_printf_verbose(2,
-                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
-                            "tolerance is set to %e\n",
-                            internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
+    numerics_printf_verbose(
+        2,
+        "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+        "tolerance is set to %e\n",
+        internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
              PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONE) {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] =
         error /
         (options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] * problem->numberOfCones);
-    numerics_printf_verbose(2,
-                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
-                            "tolerance is set to %e",
-                            internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
+    numerics_printf_verbose(
+        2,
+        "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+        "tolerance is set to %e",
+        internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
              PLASTICITY_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE) {
     // We use the user value for the error of the local solver
-    numerics_printf_verbose(2,
-                            "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
-                            "tolerance is set to %e",
-                            internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
+    numerics_printf_verbose(
+        2,
+        "plasticity_2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
+        "tolerance is set to %e",
+        internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
     return numerics_error("plasticity_2d__set_internalsolver_tolerance",
-                   "Unknown strategy for driving the tolerance");
+                          "Unknown strategy for driving the tolerance");
   }
   return 0;
 }

@@ -47,7 +47,7 @@ typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityPro
                                          double*, int*, SolverOptions*);
 
 int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
-                         int* info, SolverOptions* options) {
+                        int* info, SolverOptions* options) {
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -62,9 +62,10 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
-    return numerics_error("fc3d_ACLMFixedpoint",
-                   "The ACLM Fixed Point method needs options for the internal solvers, "
-                   "please check your options.");
+    return numerics_error(
+        "fc3d_ACLMFixedpoint",
+        "The ACLM Fixed Point method needs options for the internal solvers, "
+        "please check your options.");
   }
 
   SolverOptions* internalsolver_options = options->internalSolvers[0];

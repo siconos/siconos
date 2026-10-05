@@ -50,18 +50,22 @@ extern "C" {
     dparam[2] : localtolerance
     dparam[1] : (out) error
 */
-void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                    double* velocity, double* globalVelocity, int* info,
-                    SolverOptions* options);
+void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
+                                        double* reaction, double* velocity,
+                                        double* globalVelocity, int* info,
+                                        SolverOptions* options);
 
-int global_rolling_friction_3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction,
-                                  double* globalVelocity, SolverOptions* options);
+int global_rolling_friction_3d_checkTrivialCaseGlobal(int n, double* q, double* velocity,
+                                                      double* reaction, double* globalVelocity,
+                                                      SolverOptions* options);
 
 /* initialize solver (allocate memory) */
-void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem* problem, SolverOptions* options);
+void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem* problem,
+                                         SolverOptions* options);
 
 /* deallocate memory */
-void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem* problem, SolverOptions* options);
+void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem* problem,
+                                         SolverOptions* options);
 
 /* setup default solver parameters */
 void global_rolling_friction_3d_IPM_set_default(SolverOptions* options);
@@ -71,8 +75,9 @@ void global_rolling_friction_3d_IPM_set_default(SolverOptions* options);
  * an AVI reformulation Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy
  * computation of rolling friction contact problems. 2022. https://hal.inria.fr/hal-03741048
  */
-void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                double* velocity, double* globalVelocity, int* info, SolverOptions* options);
+void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* problem,
+                                    double* reaction, double* velocity, double* globalVelocity,
+                                    int* info, SolverOptions* options);
 
 /* /\** \addtogroup SetSolverOptions @{ */
 /*  *\/ */

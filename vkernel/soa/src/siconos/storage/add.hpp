@@ -2,12 +2,12 @@
 
 #include <assert.h>
 
-#include "siconos/storage/mp/mp.hpp"
+#include "siconos/storage/handle.hpp"
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/memory.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
-#include "siconos/storage/handle.hpp"
 
 namespace siconos::storage {
 
@@ -22,12 +22,11 @@ decltype(auto) add(auto&& data) {
   using indice = typename info_t::template env<Item>::indice;
 
   // get attached storages from all properties
-  constexpr auto attached_storages = mp::filter(
-      typename info_t::all_properties_t{}, is_attached_storage<Item>);
+  constexpr auto attached_storages =
+      mp::filter(typename info_t::all_properties_t{}, is_attached_storage<Item>);
 
   // attrs = attributes + attached_storages
-  constexpr auto attrs =
-      mp::tuple_unique(concat(attributes(Item{}), attached_storages));
+  constexpr auto attrs = mp::tuple_unique(concat(attributes(Item{}), attached_storages));
 
   using attrs_t = std::decay_t<decltype(attrs)>;
 
@@ -35,42 +34,35 @@ decltype(auto) add(auto&& data) {
     // there is some attributes or attached_storages
     indice index = 0;
     mp::for_each(attrs, [&data, &index]<match::attribute A>(A) {
-      mp::for_each(
-          mp::range<memory_size<A, all_keeps_t>()>,
-          // memory keep is taken into account
-          [&data, &index](auto step) {
-            auto&& storage = memory(
-                step, mp::get<A>(static_cast<data_t&&>(data).store()));
+      mp::for_each(mp::range<memory_size<A, all_keeps_t>()>,
+                   // memory keep is taken into account
+                   [&data, &index](auto step) {
+                     auto&& storage =
+                         memory(step, mp::get<A>(static_cast<data_t&&>(data).store()));
 
-            using storage_t = std::decay_t<decltype(storage)>;
+                     using storage_t = std::decay_t<decltype(storage)>;
 
-            if constexpr (match::push_back<storage_t>) {
-              if constexpr (match::static_capacity<storage_t>) {
-                  // boost::container::static_vector or similar
-                  if (storage.size() == storage.capacity())
-                  {}
-                  else
-                  {
-                    storage.push_back(typename storage_t::value_type{});
-                    assert(index > 0 ? index == std::size(storage) - 1
-                           : index == 0);
-                    index = std::size(storage) - 1;
-                  }
-                }
-                else
-              // item has been wrapped into a std::vector or similar
-              storage.push_back(typename storage_t::value_type{});
-              assert(index > 0 ? index == std::size(storage) - 1
-                               : index == 0);
-              index = std::size(storage) - 1;
-            }
-            else {
-              // FIX maybe ?
-              // std::array or similar : creation only in the first element
-              storage[0] = typename storage_t::value_type{};
-              index = 0;
-            }
-          });
+                     if constexpr (match::push_back<storage_t>) {
+                       if constexpr (match::static_capacity<storage_t>) {
+                         // boost::container::static_vector or similar
+                         if (storage.size() == storage.capacity()) {
+                         } else {
+                           storage.push_back(typename storage_t::value_type{});
+                           assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
+                           index = std::size(storage) - 1;
+                         }
+                       } else
+                         // item has been wrapped into a std::vector or similar
+                         storage.push_back(typename storage_t::value_type{});
+                       assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
+                       index = std::size(storage) - 1;
+                     } else {
+                       // FIX maybe ?
+                       // std::array or similar : creation only in the first element
+                       storage[0] = typename storage_t::value_type{};
+                       index = 0;
+                     }
+                   });
     });
 
     // build handle
@@ -81,8 +73,7 @@ decltype(auto) add(auto&& data) {
       h.__init__();
     }
     return h;
-  }
-  else {
+  } else {
     // item without attribute or attached storage
     return make_full_handle<Item>(data, indice{0});
   }
@@ -90,8 +81,7 @@ decltype(auto) add(auto&& data) {
 
 // Multiple add at once.
 template <match::item Item>
-decltype(auto) add(auto&&data, std::size_t count)
-{
+decltype(auto) add(auto&& data, std::size_t count) {
   return view::iota(std::size_t{0}, count) |
          view::transform([&data](auto&&) { return add<Item>(data); });
 }

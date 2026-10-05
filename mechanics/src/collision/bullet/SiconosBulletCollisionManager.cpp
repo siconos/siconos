@@ -44,24 +44,21 @@
 #include <BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h>
 
 // Custom Siconos sphere-sphere collision algorithm
-#include "bullet_patch/siconos_btSphereSphereCollisionAlgorithm.h"
-
-
 #include <algorithm>
 #include <map>
 
 #include "Bullet1DR.hpp"
 #include "Bullet2d3DR.hpp"
 #include "Bullet2dR.hpp"
-#include "BulletVelocityAngularVelocityR.hpp"
 #include "BulletR.hpp"
+#include "BulletVelocityAngularVelocityR.hpp"
+#include "CohesiveZoneModelNIFNSL.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
 #include "IterateContactPoint.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
-#include "FremondImpactFrictionNSL.hpp"
-#include "CohesiveZoneModelNIFNSL.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosBulletCollisionManager_impl.hpp"
@@ -72,6 +69,7 @@
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
+#include "bullet_patch/siconos_btSphereSphereCollisionAlgorithm.h"
 //  #define DEBUG_NOCOLOR
 //  #define DEBUG_STDOUT
 //  #define DEBUG_MESSAGES
@@ -145,8 +143,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
         CONVEX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, _impl->m_convexAlgo2d_.get());
     _impl->_dispatcher->registerCollisionCreateFunc(
         BOX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, _impl->m_box2dbox2dAlgo_.get());
-  } else
-    {
+  } else {
     btGImpactCollisionAlgorithm::registerAlgorithm(&*_impl->_dispatcher);
 
     // Register custom Siconos sphere-sphere collision algorithm
@@ -154,8 +151,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
     siconos_btSphereSphereCollisionAlgorithm::CreateFunc* sphereSphereAlgo =
         new siconos_btSphereSphereCollisionAlgorithm::CreateFunc();
     _impl->_dispatcher->registerCollisionCreateFunc(SPHERE_SHAPE_PROXYTYPE,
-                                                    SPHERE_SHAPE_PROXYTYPE,
-                                                    sphereSphereAlgo);
+                                                    SPHERE_SHAPE_PROXYTYPE, sphereSphereAlgo);
   }
 
   _impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
@@ -233,9 +229,10 @@ bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactCle
   DEBUG_PRINTF("unlinking interaction %p, number %zu \n", &**p_inter, (*p_inter)->number());
 
   // std::shared_ptr<BulletR>
-  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation())); BulletVelocityAngularVelocityR
-  // rel_bullet5DR(std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation())); Bullet2dR
-  // rel_bullet2dR(std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
+  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation()));
+  // BulletVelocityAngularVelocityR
+  // rel_bullet5DR(std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation()));
+  // Bullet2dR rel_bullet2dR(std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
   // auto
   // rel_bullet2d3DR(std::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation())); if
   // (rel_bulletR)
@@ -540,8 +537,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       int num_contact_points = 0;
 
-      for (auto it
-           : t) { num_contact_points++; }
+      for (auto it : t) { num_contact_points++; }
 
       std::cout
       << "Number of contacts points detected by bullet: " << num_contact_points << "\n";);
@@ -634,7 +630,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           (std::shared_ptr<siconos::modeling::Interaction>*)it->point->m_userPersistentData;
 
       auto rel_bulletR = std::dynamic_pointer_cast<BulletR>((*p_inter)->relation());
-      auto rel_bullet5DR = std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation());
+      auto rel_bullet5DR =
+          std::dynamic_pointer_cast<BulletVelocityAngularVelocityR>((*p_inter)->relation());
       auto rel_bullet2dR = std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation());
       auto rel_bullet2d3DR = std::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation());
 
@@ -700,7 +697,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if (nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL|| nslaw_CohesiveZoneModelNIFNSL)) {
+      if (nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL ||
+                    nslaw_CohesiveZoneModelNIFNSL)) {
         if (nslaw->size() == 3) {
           DEBUG_PRINT("Creation of a relation for 3D frictional contact\n");
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
@@ -722,14 +720,11 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // rel->btShape[0] = pairA->btshape;
           // rel->btShape[1] = pairB->btshape;
 
-	  if (nslaw_CohesiveZoneModelNIFNSL)
-	    {
+          if (nslaw_CohesiveZoneModelNIFNSL) {
             rel->updateRelativeContactPointsFromManifoldPoint(
-                *it->manifold, *it->point,
-		flip, _options->worldScale,
-		rbdsA,
-		rbdsB ? rbdsB :  std::shared_ptr<siconos::modeling::NewtonEulerDS>());
-	    }
+                *it->manifold, *it->point, flip, _options->worldScale, rbdsA,
+                rbdsB ? rbdsB : std::shared_ptr<siconos::modeling::NewtonEulerDS>());
+          }
           rel->updateContactPointsFromManifoldPoint(
               *it->manifold, *it->point, flip, _options->worldScale,
               rbdsA ? rbdsA : std::shared_ptr<siconos::modeling::NewtonEulerDS>(),
@@ -745,20 +740,18 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
                 rel->distance());
             _stats.interaction_warnings++;
           }
-	  if(nslaw_CohesiveZoneModelNIFNSL )
-	    {
-	      double current_time = simulation->getTk();
-	      double t0 = simulation->nonSmoothDynamicalSystem()->t0();
-	      //std::cout << "time = "<< current_time << " t0 "<< t0 << std::endl;
-	      if (fabs(current_time-t0) >= DBL_EPSILON )
-		{
-		  std::cout << "a creation of Cohesive interaction not at in the initial time :" << current_time << std::endl;
-		  nslaw = nslaw_CohesiveZoneModelNIFNSL->nslawBroken();
-		  //nslaw->display();
-		  //getchar();
-		}
-
-	    }
+          if (nslaw_CohesiveZoneModelNIFNSL) {
+            double current_time = simulation->getTk();
+            double t0 = simulation->nonSmoothDynamicalSystem()->t0();
+            // std::cout << "time = "<< current_time << " t0 "<< t0 << std::endl;
+            if (fabs(current_time - t0) >= DBL_EPSILON) {
+              std::cout << "a creation of Cohesive interaction not at in the initial time :"
+                        << current_time << std::endl;
+              nslaw = nslaw_CohesiveZoneModelNIFNSL->nslawBroken();
+              // nslaw->display();
+              // getchar();
+            }
+          }
           inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
           _stats.new_interactions_created++;
         } else if (nslaw && nslaw->size() == 2) {
@@ -808,7 +801,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
           auto rbdsB = std::static_pointer_cast<RigidBodyDS>(pairB->ds);
 
-          auto rel = makeBulletVelocityAngularVelocityR(rbdsA, pairA->sshape, rbdsB, pairB->sshape, *it->point);
+          auto rel = makeBulletVelocityAngularVelocityR(rbdsA, pairA->sshape, rbdsB,
+                                                        pairB->sshape, *it->point);
 
           if (!rel) continue;
 

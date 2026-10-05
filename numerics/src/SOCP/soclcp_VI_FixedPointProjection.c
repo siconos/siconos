@@ -31,16 +31,16 @@
 #include "soclcp_compute_error.h"
 
 /* Solver registration system */
+#include "numerics_errors.h"  // for soclc...
 #include "solver_registry.h"
-#include "numerics_errors.h"                               // for soclc...
 
-void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem *problem,
-                                    double *reaction, double *velocity, int *info,
-                                    SolverOptions *options) {
+void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem,
+                                    double* reaction, double* velocity, int* info,
+                                    SolverOptions* options) {
   /* Dimension of the problem */
   int n = problem->n;
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   // vi.self = &vi;
   vi->F = &Function_VI_SOCLCP;
@@ -48,8 +48,8 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem 
 
   double error = 1e24;
 
-  SecondOrderConeLinearComplementarityProblem_as_VI *soclcp_as_vi =
-      (SecondOrderConeLinearComplementarityProblem_as_VI *)malloc(
+  SecondOrderConeLinearComplementarityProblem_as_VI* soclcp_as_vi =
+      (SecondOrderConeLinearComplementarityProblem_as_VI*)malloc(
           sizeof(SecondOrderConeLinearComplementarityProblem_as_VI));
   vi->env = soclcp_as_vi;
   vi->size = n;
@@ -100,11 +100,11 @@ static int soclcp_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int soclcp_vi_fpp_solve_wrap(void* problem, double* reaction,
-                                    double* velocity, SolverOptions* options) {
+static int soclcp_vi_fpp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                    SolverOptions* options) {
   int info = NUMERICS_OK;
-  soclcp_VI_FixedPointProjection(
-      (SecondOrderConeLinearComplementarityProblem*)problem, reaction, velocity, &info, options);
+  soclcp_VI_FixedPointProjection((SecondOrderConeLinearComplementarityProblem*)problem,
+                                 reaction, velocity, &info, options);
   return info;
 }
 
@@ -116,11 +116,9 @@ static void soclcp_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_SOCLCP_VI_FPP, "SOCLCP_VI_FPP",
                 "Variational Inequality Fixed Point Projection for SOCLCP",
-                soclcp_vi_fpp_init_wrap,
-                soclcp_vi_fpp_solve_wrap,
-                soclcp_vi_fpp_free_wrap,
-                NULL,  /* error function */
-                soclcp_vi_fpp_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                soclcp_vi_fpp_init_wrap, soclcp_vi_fpp_solve_wrap, soclcp_vi_fpp_free_wrap,
+                NULL,                      /* error function */
+                soclcp_vi_fpp_set_default, /* set_default */
+                1000,                      /* default_max_iter */
+                1e-4,                      /* default_tol */
+                0 /* is_local_solver */);

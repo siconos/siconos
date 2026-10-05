@@ -30,8 +30,8 @@
 */
 struct LinearComplementarityProblem {
   int size;          /**< size of the problem */
-  NumericsMatrix *M; /**< M matrix of the LCP (see the mathematical description)*/
-  double *q;         /**< vector of the LCP (see the mathematical description)*/
+  NumericsMatrix* M; /**< M matrix of the LCP (see the mathematical description)*/
+  double* q;         /**< vector of the LCP (see the mathematical description)*/
 };
 
 #if defined(__cplusplus)
@@ -42,7 +42,7 @@ extern "C" {
  *
  *  \param  problem pointer to a LinearComplementarityProblem to display
  */
-void linearComplementarity_display(LinearComplementarityProblem *problem);
+void linearComplementarity_display(LinearComplementarityProblem* problem);
 
 /** function to write in a file a LinearComplementarityProblem
  *
@@ -50,7 +50,7 @@ void linearComplementarity_display(LinearComplementarityProblem *problem);
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int linearComplementarity_printInFile(LinearComplementarityProblem *problem, FILE *file);
+int linearComplementarity_printInFile(LinearComplementarityProblem* problem, FILE* file);
 
 /** Read and create a LinearComplementarityProblem
  *  from a file
@@ -59,7 +59,7 @@ int linearComplementarity_printInFile(LinearComplementarityProblem *problem, FIL
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int linearComplementarity_newFromFile(LinearComplementarityProblem *problem, FILE *file);
+int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
 /** Read and create a LinearComplementarityProblem
  *  from a file
@@ -68,20 +68,20 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem *problem, FIL
  *  \param filename that contains the lcp
  *  \return 0 if ok
  */
-int linearComplementarity_newFromFilename(LinearComplementarityProblem *problem,
-                                          const char *filename);
+int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
+                                          const char* filename);
 
 /** Delete a LinearComplementarityProblem
  *
  *  \param problem  pointer to a LinearComplementarityProblem to delete
  */
-void freeLinearComplementarityProblem(LinearComplementarityProblem *problem);
+void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
 
 /** Create new LCP and clear its fields
  *
  *  \return a LinearComplementarityProblem
  */
-LinearComplementarityProblem *newLCP(void);
+LinearComplementarityProblem* newLCP(void);
 
 #if defined(__cplusplus)
 }

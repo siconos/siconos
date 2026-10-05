@@ -1,7 +1,7 @@
-#include "siconos/siconos.hpp"
-
 #include <fstream>
 #include <print>
+
+#include "siconos/siconos.hpp"
 
 namespace siconos::config {
 
@@ -26,21 +26,17 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<
-          env, simulation, disk, disk_shape, diskdisk_r, diskline_r,
-          interaction,
-          storage::with_properties<
-              storage::attached<disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<disk_shape>>,
-              storage::time_invariant<storage::attr_t<disk, "fext">>,
-              storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::attr_t<typename osi::assembled_osi_t,
-                                  "mass_matrix_assembled">>>> {};
+    : storage::make<env, simulation, disk, disk_shape, diskdisk_r, diskline_r, interaction,
+                    storage::with_properties<
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<storage::attr_t<
+                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
   using storage::pattern::wrap;
   using namespace storage;
@@ -148,8 +144,7 @@ int main(int argc, char* argv[])
   std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
              simulation.current_step() * simulation.time_step(),
              storage::attr<"q">(d1, simulation.current_step())(1),
-             storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
-             0.);
+             storage::attr<"velocity">(d1, simulation.current_step())(1), 0., 0.);
 
   while (simulation.has_next_event()) {
     auto ninvds = simulation.compute_one_step();
@@ -159,12 +154,9 @@ int main(int argc, char* argv[])
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(1);
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
+      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(1);
+      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+    } else {
       p0 = 0;
       lambda = 0;
     }
@@ -172,8 +164,7 @@ int main(int argc, char* argv[])
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(d1, simulation.current_step())(1),
-               storage::attr<"velocity">(d1, simulation.current_step())(1),
-               p0, lambda);
+               storage::attr<"velocity">(d1, simulation.current_step())(1), p0, lambda);
   }
   //  io::close(fd);
 }

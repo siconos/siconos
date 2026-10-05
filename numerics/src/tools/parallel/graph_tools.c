@@ -1,8 +1,9 @@
 #include "graph_tools.h"
-#include "safe_casts.h"
 
 #include <petscmat.h>
 #include <petscsys.h>
+
+#include "safe_casts.h"
 
 int color_graph(int n, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
                 size_t*** set_indices) {
@@ -161,7 +162,6 @@ int color_graph_permut(int n, NumericsMatrix* M, size_t* n_colors, size_t** sum_
 
       // PetscInt* Mp = sparse->p;
       // PetscInt* Mi = sparse->i;
-
 
       PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
@@ -644,7 +644,8 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -663,7 +664,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
 
       size_t nnz = 0;
 
-      bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
+      bool* block_is_zero = (bool*)malloc(nc * sizeof(bool));
 
       for (size_t contact = 0; contact < nc; contact++) {
         for (size_t i = 0; i < nc; i++) {
@@ -763,7 +764,8 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
 
       free(block_is_zero);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
@@ -793,8 +795,10 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
       size_t nnz = 0;  // Number of non zero blocks
 
       // Number of rows and columns in each block
-      unsigned int* nb_row_blocks = (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
-      unsigned int* nb_col_blocks = (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
+      unsigned int* nb_row_blocks =
+          (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
+      unsigned int* nb_col_blocks =
+          (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
       unsigned int tmp = 0;
 
       for (unsigned int i = 0; i < sbm->blocknumber0; i++) {
@@ -859,7 +863,8 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
       free(nb_row_blocks);
       free(nb_col_blocks);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -890,7 +895,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
   IS* is;
   size_t* size = NULL;      // Array of sizes of each color set
   size_t** indexes = NULL;  // Array of pointers to index sets
-  int size_int = 0; // used for conversions
+  int size_int = 0;         // used for conversions
   const PetscInt* idxin = NULL;
   PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is));  // Get index sets
 
@@ -905,7 +910,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
 
   for (size_t i = 0; i < *n_colors; i++) {
     PetscCall(ISGetLocalSize(is[i], &size_petsc));
-    PetscCall(PetscCIntCast(size_petsc, &size_int)); // safely cast from PetscInt to int
+    PetscCall(PetscCIntCast(size_petsc, &size_int));  // safely cast from PetscInt to int
     size[i] = to_size_t(size_petsc);
     indexes[i] = (size_t*)malloc(size[i] * sizeof(size_t));  // allocate indexes
     PetscCall(ISGetIndices(is[i], &idxin));                  // Get indices for i-th color
@@ -939,8 +944,8 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
   return 0;
 }
 
-int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** sum_sizes,
-                             size_t* inv_permutation) {
+int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
+                             size_t** sum_sizes, size_t* inv_permutation) {
   assert(M->size0 == M->size1);  // Check M is a squared matrix
   size_t n = (size_t)M->size0;
   size_t d = n / nc;  // dimension of contact space
@@ -994,7 +999,8 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
         }
       }
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -1013,7 +1019,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
 
       size_t nnz = 0;
 
-      bool *block_is_zero = (bool *)malloc(nc * sizeof(bool));
+      bool* block_is_zero = (bool*)malloc(nc * sizeof(bool));
 
       for (size_t contact = 0; contact < nc; contact++) {
         for (size_t i = 0; i < nc; i++) {
@@ -1113,7 +1119,8 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
 
       free(block_is_zero);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
@@ -1143,8 +1150,10 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
       size_t nnz = 0;  // Number of non zero blocks
 
       // Number of rows and columns in each block
-      unsigned int* nb_row_blocks = (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
-      unsigned int* nb_col_blocks = (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
+      unsigned int* nb_row_blocks =
+          (unsigned int*)malloc(sbm->blocknumber0 * sizeof(unsigned int));
+      unsigned int* nb_col_blocks =
+          (unsigned int*)malloc(sbm->blocknumber1 * sizeof(unsigned int));
       unsigned int tmp = 0;
 
       for (unsigned int i = 0; i < sbm->blocknumber0; i++) {
@@ -1210,7 +1219,8 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
       free(nb_row_blocks);
       free(nb_col_blocks);
 
-      PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
+      PetscCall(
+          MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc_petsc, nc_petsc, Mp, Mi, Mx, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
       break;
@@ -1240,7 +1250,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
   PetscInt nn;
   IS* is;
   size_t* sum_size = NULL;  // Array of sizes of each color set
-  int size_int = 0; // used for conversions
+  int size_int = 0;         // used for conversions
   const PetscInt* idxin = NULL;
   PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is));  // Get index sets
 
@@ -1258,14 +1268,14 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors, siz
 
   for (size_t i = 0; i < *n_colors; i++) {
     PetscCall(ISGetLocalSize(is[i], &size_petsc));
-    PetscCall(PetscCIntCast(size_petsc, &size_int)); // safely cast from PetscInt to int
+    PetscCall(PetscCIntCast(size_petsc, &size_int));  // safely cast from PetscInt to int
     current_set_size = to_size_t(size_int);
     sum_size[i + 1] = sum_size[i] + current_set_size;
     PetscCall(ISGetIndices(is[i], &idxin));  // Get indices for i-th color
 
     // Copy index sets
     for (size_t j = 0; j < current_set_size; j++) {
-      PetscCall(PetscCIntCast(idxin[j], &size_int)); // safely cast from PetscInt to int
+      PetscCall(PetscCIntCast(idxin[j], &size_int));  // safely cast from PetscInt to int
       inv_permutation[k] = to_size_t(size_int);
       k++;
     }

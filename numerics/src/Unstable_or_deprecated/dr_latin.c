@@ -24,14 +24,13 @@
 
 #include "Relay_Solvers.h"
 #include "SiconosLapack.h"
-
 #include "numerics_errors.h"
-void dr_latin(RelayProblem *problem, double *z, double *w, int *info, SolverOptions *options) {
-  double *vec = problem->M->matrix0;
-  double *qq = problem->q;
+void dr_latin(RelayProblem* problem, double* z, double* w, int* info, SolverOptions* options) {
+  double* vec = problem->M->matrix0;
+  double* qq = problem->q;
   int n = problem->size;
-  double *a = problem->ub;
-  double *b = problem->lb;
+  double* a = problem->ub;
+  double* b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
   for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
@@ -56,16 +55,16 @@ void dr_latin(RelayProblem *problem, double *z, double *w, int *info, SolverOpti
 
   /*             Allocations                           */
 
-  k = (double *)malloc(n * n * sizeof(double));
-  DPO = (double *)malloc(n * n * sizeof(double));
-  kinv = (double *)malloc(n * n * sizeof(double));
-  wc = (double *)malloc(n * sizeof(double));
-  zc = (double *)malloc(n * sizeof(double));
-  znum1 = (double *)malloc(n * sizeof(double));
-  wnum1 = (double *)malloc(n * sizeof(double));
-  wt = (double *)malloc(n * sizeof(double));
-  zt = (double *)malloc(n * sizeof(double));
-  kinvnum1 = (double *)malloc(n * sizeof(double));
+  k = (double*)malloc(n * n * sizeof(double));
+  DPO = (double*)malloc(n * n * sizeof(double));
+  kinv = (double*)malloc(n * n * sizeof(double));
+  wc = (double*)malloc(n * sizeof(double));
+  zc = (double*)malloc(n * sizeof(double));
+  znum1 = (double*)malloc(n * sizeof(double));
+  wnum1 = (double*)malloc(n * sizeof(double));
+  wt = (double*)malloc(n * sizeof(double));
+  zt = (double*)malloc(n * sizeof(double));
+  kinvnum1 = (double*)malloc(n * sizeof(double));
 
   /*             Initialisation                   */
 

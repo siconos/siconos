@@ -59,13 +59,13 @@ void siconos::fem::cable::TransportCableResult::prepareIneqConstraint(int nb_nod
   T->setZero();
 }
 
-int siconos::fem::cable::TransportCableResult::exportTC(const std::string &a_fileName,
-                                                        nlohmann::ordered_json &a_output,
-                                                        const std::string &a_option) {
+int siconos::fem::cable::TransportCableResult::exportTC(const std::string& a_fileName,
+                                                        nlohmann::ordered_json& a_output,
+                                                        const std::string& a_option) {
   int res = EXIT_SUCCESS;
   try {
     res = to_json(a_output, a_option);
-  } catch (const nlohmann::json::exception &ex) {
+  } catch (const nlohmann::json::exception& ex) {
     // "Error exporting model " << ex.what());
     throw ex;
   }
@@ -80,8 +80,8 @@ int siconos::fem::cable::TransportCableResult::exportTC(const std::string &a_fil
   return res;
 }
 
-int siconos::fem::cable::TransportCableResult::to_json(nlohmann::ordered_json &j,
-                                                       const std::string &a_option) {
+int siconos::fem::cable::TransportCableResult::to_json(nlohmann::ordered_json& j,
+                                                       const std::string& a_option) {
   if (a_option == "fem") {
     j["g"] = gVector;
   } else if (a_option == "ropeway") {

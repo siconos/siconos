@@ -20,8 +20,7 @@ struct topology : item {
   using dynamic_dof_fixed_dof_interaction = DynamicDofFixedDofInteraction;
   using dynamic_dof_dynamic_dof_interaction = DynamicDofDynamicDofInteraction;
 
-  using items = gather<fixed_dof_system, dynamic_dof_system,
-                       dynamic_dof_fixed_dof_interaction,
+  using items = gather<fixed_dof_system, dynamic_dof_system, dynamic_dof_fixed_dof_interaction,
                        dynamic_dof_dynamic_dof_interaction>;
 
   using nslaw = typename fixed_dof_interaction::nslaw;
@@ -38,9 +37,8 @@ struct topology : item {
     some::map<some::indice, some::item_ref<fsystem>> system_id;
   };
 
-  using bc_velocities_0_fsys_attr =
-      storage::attached<fsystem, symbol<"bc_velocities_0">,
-                        some::unbounded_vector<some::indice>>;
+  using bc_velocities_0_fsys_attr = storage::attached<fsystem, symbol<"bc_velocities_0">,
+                                                      some::unbounded_vector<some::indice>>;
   using bc_velocities_0_dsys_attr =
       storage::attached<dsystem, symbol<"bc_velocities_0">,
                         some::unbounded_collection<some::indice>>;
@@ -54,47 +52,42 @@ struct topology : item {
                          storage::dynamic_storage<bc_velocities_0_dsys_attr>,
                          bc_velocities_0_dsys_attr>;
 
-  using properties = gather<
-      storage::attached<fsystem, symbol<"involved">, some::boolean>,
-      storage::attached<fsystem, symbol<"index">, some::indice>,
-      storage::attached<fsystem, symbol<"id">, some::indice>,
-      storage::attached<fsystem, symbol<"p0">,
-                        some::array<some::vector<some::scalar, dof>,
-                                    std::integral_constant<int, 2>>>,
+  using properties =
+      gather<storage::attached<fsystem, symbol<"involved">, some::boolean>,
+             storage::attached<fsystem, symbol<"index">, some::indice>,
+             storage::attached<fsystem, symbol<"id">, some::indice>,
+             storage::attached<
+                 fsystem, symbol<"p0">,
+                 some::array<some::vector<some::scalar, dof>, std::integral_constant<int, 2>>>,
 
-      bc_velocities_0_fsys,
+             bc_velocities_0_fsys,
 
-      storage::attached<dsystem, symbol<"q0">,
-                        some::unbounded_vector<some::scalar>>,
-      storage::attached<dsystem, symbol<"involved">, some::boolean>,
-      storage::attached<dsystem, symbol<"index">, some::indice>,
-      storage::attached<dsystem, symbol<"id">, some::indice>,
-       storage::without_binding<storage::attached<
-           dsystem, symbol<"p0">,
-           some::array<some::unbounded_vector<some::vector<
-                           some::scalar, std::integral_constant<int, 1>>>,
-                       std::integral_constant<int, 2>>>>,
+             storage::attached<dsystem, symbol<"q0">, some::unbounded_vector<some::scalar>>,
+             storage::attached<dsystem, symbol<"involved">, some::boolean>,
+             storage::attached<dsystem, symbol<"index">, some::indice>,
+             storage::attached<dsystem, symbol<"id">, some::indice>,
+             storage::without_binding<storage::attached<
+                 dsystem, symbol<"p0">,
+                 some::array<some::unbounded_vector<
+                                 some::vector<some::scalar, std::integral_constant<int, 1>>>,
+                             std::integral_constant<int, 2>>>>,
 
-      bc_velocities_0_dsys,
+             bc_velocities_0_dsys,
 
-      storage::attached<finteraction, symbol<"nds">, some::indice>,
-      storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,
-      storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
-      storage::attached<finteraction, symbol<"activation">, some::boolean>,
+             storage::attached<finteraction, symbol<"nds">, some::indice>,
+             storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,
+             storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
+             storage::attached<finteraction, symbol<"activation">, some::boolean>,
 
-      storage::attached<dfinteraction, symbol<"nds">, some::indice>,
-      storage::attached<dfinteraction, symbol<"ds1">,
-                        some::item_ref<fsystem>>,
-      storage::attached<dfinteraction, symbol<"ds2">,
-                        some::item_ref<dsystem>>,
-      storage::attached<dfinteraction, symbol<"activation">, some::boolean>,
+             storage::attached<dfinteraction, symbol<"nds">, some::indice>,
+             storage::attached<dfinteraction, symbol<"ds1">, some::item_ref<fsystem>>,
+             storage::attached<dfinteraction, symbol<"ds2">, some::item_ref<dsystem>>,
+             storage::attached<dfinteraction, symbol<"activation">, some::boolean>,
 
-      storage::attached<ddinteraction, symbol<"nds">, some::indice>,
-      storage::attached<ddinteraction, symbol<"ds1">,
-                        some::item_ref<dsystem>>,
-      storage::attached<ddinteraction, symbol<"ds2">,
-                        some::item_ref<dsystem>>,
-      storage::attached<ddinteraction, symbol<"activation">, some::boolean>>;
+             storage::attached<ddinteraction, symbol<"nds">, some::indice>,
+             storage::attached<ddinteraction, symbol<"ds1">, some::item_ref<dsystem>>,
+             storage::attached<ddinteraction, symbol<"ds2">, some::item_ref<dsystem>>,
+             storage::attached<ddinteraction, symbol<"activation">, some::boolean>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -102,8 +95,7 @@ struct topology : item {
 
     /* self rigid */
     template <match::handle<fsystem> Hds>
-    decltype(auto) link(Hds ds)
-    {
+    decltype(auto) link(Hds ds) {
       auto& data = self()->data();
 
       auto inter = storage::add<finteraction>(data);
@@ -121,8 +113,7 @@ struct topology : item {
 
     /* rigid <-> rigid */
     template <match::handle<fsystem> Hds>
-    decltype(auto) link(Hds ds1, Hds ds2)
-    {
+    decltype(auto) link(Hds ds1, Hds ds2) {
       auto& data = self()->data();
 
       auto inter = storage::add<finteraction>(data);
@@ -140,8 +131,7 @@ struct topology : item {
 
     /* rigid <-> fem */
     template <match::handle<fsystem> Hfds, match::handle<dsystem> Hdds>
-    decltype(auto) link(Hfds ds1, Hdds ds2)
-    {
+    decltype(auto) link(Hfds ds1, Hdds ds2) {
       auto& data = self()->data();
 
       auto inter = storage::add<dfinteraction>(data);
@@ -160,8 +150,7 @@ struct topology : item {
 
     /* self fem */
     template <match::handle<dsystem> Hdds>
-    decltype(auto) link(Hdds ds)
-    {
+    decltype(auto) link(Hdds ds) {
       auto& data = self()->data();
 
       auto inter = storage::add<ddinteraction>(data);
@@ -177,30 +166,23 @@ struct topology : item {
       return inter;
     };
 
-    void set_dynamical_system_id(auto hds, auto id)
-    {
+    void set_dynamical_system_id(auto hds, auto id) {
       attr<"system_id">(*self())[id] = hds.index();
     }
 
-    decltype(auto) dynamical_system(auto id)
-    {
-      return storage::make_handle(self()->data(),
-                                  attr<"system_id">(*self())[id]);
+    decltype(auto) dynamical_system(auto id) {
+      return storage::make_handle(self()->data(), attr<"system_id">(*self())[id]);
     }
 
-    auto methods()
-    {
+    auto methods() {
       using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
-      using hds_t =
-          storage::handle<storage::handle_base, fsystem, indice, data_t>;
+      using hds_t = storage::handle<storage::handle_base, fsystem, indice, data_t>;
 
-      return collect(
-          method("set_dynamical_system_id",
-                 &interface<Handle>::set_dynamical_system_id<hds_t, indice>),
-          method("dynamical_system",
-                 &interface<Handle>::dynamical_system<indice>));
+      return collect(method("set_dynamical_system_id",
+                            &interface<Handle>::set_dynamical_system_id<hds_t, indice>),
+                     method("dynamical_system", &interface<Handle>::dynamical_system<indice>));
     }
   };
 };

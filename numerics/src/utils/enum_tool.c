@@ -3,17 +3,16 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for printf
 
-#include "numerics_verbose.h"  // for verbose
-
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose
 unsigned long long int enum_compute_nb_cases(int M) {
   unsigned long long int nbCase = 1;
   for (int cmp = 0; cmp < M; cmp++) nbCase = nbCase << 1;
   return nbCase;
 }
 
-EnumerationStruct *enum_init(int M) {
-  EnumerationStruct *enum_struct = (EnumerationStruct *)malloc(sizeof(EnumerationStruct));
+EnumerationStruct* enum_init(int M) {
+  EnumerationStruct* enum_struct = (EnumerationStruct*)malloc(sizeof(EnumerationStruct));
 
   enum_struct->current = 0;
   /*  scurrent = 0;*/
@@ -30,7 +29,7 @@ EnumerationStruct *enum_init(int M) {
   return enum_struct;
 }
 
-static void enum_affect_zw(int *zw, int size, EnumerationStruct *enum_struct) {
+static void enum_affect_zw(int* zw, int size, EnumerationStruct* enum_struct) {
   unsigned long int aux = enum_struct->current;
   for (int i = 0; i < size; i++) {
     zw[i] = aux & 1;
@@ -42,7 +41,7 @@ static void enum_affect_zw(int *zw, int size, EnumerationStruct *enum_struct) {
     printf("\n");
   }
 }
-int enum_next(int *zw, int size, EnumerationStruct *enum_struct) {
+int enum_next(int* zw, int size, EnumerationStruct* enum_struct) {
   if (enum_struct->counter == enum_struct->nb_cases) return 0;
   if (enum_struct->current >= enum_struct->nb_cases) enum_struct->current = 0;
 

@@ -25,8 +25,8 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "SiconosBlas.h"             // for cblas_dcopy
-#include "numerics_verbose.h"        // for numerics_error, verbose
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_error, verbose
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */

@@ -18,8 +18,8 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
-#include "FrictionContact_options.h"      // for SICONOS_FRICTION_3D_NSGS
-#include "NonSmoothDrivers.h"  // for fc3d_LmgcDriver
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_NSGS
+#include "NonSmoothDrivers.h"         // for fc3d_LmgcDriver
 
 int main(void) {
   int info = 0;
@@ -109,8 +109,8 @@ int main(void) {
                    2.416443759665753976406677e+00,  -2.166000013862399153907745e+00,
                    2.416443759665754420495887e+00,  5.589668874593003877748743e+00};
 
-  double *reaction = (double *)malloc(3 * nc * sizeof(double));
-  double *velocity = (double *)malloc(3 * nc * sizeof(double));
+  double* reaction = (double*)malloc(3 * nc * sizeof(double));
+  double* velocity = (double*)malloc(3 * nc * sizeof(double));
   for (int i = 0; i < 3 * nc; i++) {
     reaction[i] = 0.0;
     velocity[i] = 0.0;

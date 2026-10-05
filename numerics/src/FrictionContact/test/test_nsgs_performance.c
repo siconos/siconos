@@ -26,9 +26,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
@@ -62,9 +62,9 @@ typedef struct {
   double reaction_norm;
 } SolverStats;
 
-static SolverStats run_solver_once(FrictionContactProblem* problem,
-                                   double* reaction, double* velocity,
-                                   SolverOptions* options, int use_original) {
+static SolverStats run_solver_once(FrictionContactProblem* problem, double* reaction,
+                                   double* velocity, SolverOptions* options,
+                                   int use_original) {
   SolverStats stats = {0};
   int nc = problem->numberOfContacts;
 
@@ -114,11 +114,9 @@ typedef struct {
   int converged_count;
 } SolverBenchmark;
 
-static SolverBenchmark benchmark_solver(FrictionContactProblem* problem,
-                                        double* reaction, double* velocity,
-                                        SolverOptions* options,
-                                        int n_trials, int use_original,
-                                        const char* solver_name) {
+static SolverBenchmark benchmark_solver(FrictionContactProblem* problem, double* reaction,
+                                        double* velocity, SolverOptions* options, int n_trials,
+                                        int use_original, const char* solver_name) {
   SolverBenchmark bench = {0};
   SolverStats* stats = (SolverStats*)malloc(n_trials * sizeof(SolverStats));
 
@@ -152,8 +150,10 @@ static SolverBenchmark benchmark_solver(FrictionContactProblem* problem,
 
   /* Compute standard deviations */
   if (n_trials > 1) {
-    bench.cpu_time_std = sqrt((cpu_sq_sum - n_trials * bench.cpu_time_avg * bench.cpu_time_avg) / (n_trials - 1));
-    bench.wall_time_std = sqrt((wall_sq_sum - n_trials * bench.wall_time_avg * bench.wall_time_avg) / (n_trials - 1));
+    bench.cpu_time_std = sqrt(
+        (cpu_sq_sum - n_trials * bench.cpu_time_avg * bench.cpu_time_avg) / (n_trials - 1));
+    bench.wall_time_std = sqrt(
+        (wall_sq_sum - n_trials * bench.wall_time_avg * bench.wall_time_avg) / (n_trials - 1));
   }
 
   free(stats);
@@ -163,9 +163,12 @@ static SolverBenchmark benchmark_solver(FrictionContactProblem* problem,
 /* Print benchmark results */
 static void print_benchmark_results(const char* name, SolverBenchmark* bench, int n_trials) {
   printf("\n%s:\n", name);
-  printf("  CPU time:   %.6f +/- %.6f ms\n", bench->cpu_time_avg * 1000, bench->cpu_time_std * 1000);
-  printf("  Wall time:  %.6f +/- %.6f ms\n", bench->wall_time_avg * 1000, bench->wall_time_std * 1000);
-  printf("  Iterations: %d (min: %d, max: %d)\n", bench->iter_avg, bench->iter_min, bench->iter_max);
+  printf("  CPU time:   %.6f +/- %.6f ms\n", bench->cpu_time_avg * 1000,
+         bench->cpu_time_std * 1000);
+  printf("  Wall time:  %.6f +/- %.6f ms\n", bench->wall_time_avg * 1000,
+         bench->wall_time_std * 1000);
+  printf("  Iterations: %d (min: %d, max: %d)\n", bench->iter_avg, bench->iter_min,
+         bench->iter_max);
   printf("  Converged:  %d/%d\n", bench->converged_count, n_trials);
 }
 
@@ -219,7 +222,8 @@ int main(int argc, char** argv) {
     SolverOptions* options_orig = solver_options_create(SICONOS_FRICTION_3D_NSGS);
     options_orig->dparam[SICONOS_DPARAM_TOL] = tol;
     options_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    solver_options_update_internal(options_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
+    solver_options_update_internal(options_orig, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
     options_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = tol * 100;
     options_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
@@ -237,14 +241,12 @@ int main(int argc, char** argv) {
     }
 
     /* Benchmark original fc3d_nsgs */
-    SolverBenchmark bench_orig = benchmark_solver(problem, reaction, velocity,
-                                                  options_orig, n_trials, 1,
-                                                  "fc3d_nsgs (original)");
+    SolverBenchmark bench_orig = benchmark_solver(problem, reaction, velocity, options_orig,
+                                                  n_trials, 1, "fc3d_nsgs (original)");
 
     /* Benchmark generic fc3d_nsgs_generic */
-    SolverBenchmark bench_gen = benchmark_solver(problem, reaction, velocity,
-                                                 options_gen, n_trials, 0,
-                                                 "fc3d_nsgs_generic");
+    SolverBenchmark bench_gen = benchmark_solver(problem, reaction, velocity, options_gen,
+                                                 n_trials, 0, "fc3d_nsgs_generic");
 
     /* Print results */
     print_benchmark_results("Original fc3d_nsgs", &bench_orig, n_trials);
@@ -253,7 +255,8 @@ int main(int argc, char** argv) {
     /* Compute speedup/overhead */
     double speedup_cpu = bench_orig.cpu_time_avg / bench_gen.cpu_time_avg;
     double speedup_wall = bench_orig.wall_time_avg / bench_gen.wall_time_avg;
-    double overhead_cpu = ((bench_gen.cpu_time_avg - bench_orig.cpu_time_avg) / bench_orig.cpu_time_avg) * 100.0;
+    double overhead_cpu =
+        ((bench_gen.cpu_time_avg - bench_orig.cpu_time_avg) / bench_orig.cpu_time_avg) * 100.0;
 
     printf("\nComparison:\n");
     printf("  CPU speedup:   %.2fx (%+.1f%%)\n", speedup_cpu, overhead_cpu);
@@ -292,10 +295,10 @@ int main(int argc, char** argv) {
   diff_r = sqrt(diff_r);
   diff_v = sqrt(diff_v);
 
-  printf("Original:  iter=%d, error=%.6e, time=%.6f ms\n",
-         stats_orig.iterations, stats_orig.final_error, stats_orig.cpu_time * 1000);
-  printf("Generic:   iter=%d, error=%.6e, time=%.6f ms\n",
-         stats_gen.iterations, stats_gen.final_error, stats_gen.cpu_time * 1000);
+  printf("Original:  iter=%d, error=%.6e, time=%.6f ms\n", stats_orig.iterations,
+         stats_orig.final_error, stats_orig.cpu_time * 1000);
+  printf("Generic:   iter=%d, error=%.6e, time=%.6f ms\n", stats_gen.iterations,
+         stats_gen.final_error, stats_gen.cpu_time * 1000);
   printf("Solution diff (reaction): %.6e\n", diff_r);
   printf("Solution diff (velocity): %.6e\n", diff_v);
 

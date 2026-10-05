@@ -111,7 +111,7 @@ CohesiveFrictionContact::CohesiveFrictionContact(int dimPb, int numericsSolverId
 
 CohesiveFrictionContact::CohesiveFrictionContact(int dimPb,
                                                  std::shared_ptr<SolverOptions> options)
-    : FrictionContact(dimPb, options),  _scaling_as_percussion(true) {
+    : FrictionContact(dimPb, options), _scaling_as_percussion(true) {
   _assemblyType = LinearOSNSAssemblyType::REDUCED_DIRECT;
   _numericsMatrixStorageType = NM_SPARSE;
   if (dimPb == 3) {
@@ -202,13 +202,13 @@ void CohesiveFrictionContact::updateCoefficients() {
       if (_scaling_as_percussion) {
         _c_n->push_back(c_n_val * simulation()->currentTimeStep());
       } else {
-	_c_n->push_back(c_n_val);
+        _c_n->push_back(c_n_val);
       }
       auto c_t_val = nslaw->cohesion(inter)[1];
       if (_scaling_as_percussion) {
         _c_t->push_back(c_t_val * simulation()->currentTimeStep());
       } else {
-	_c_t->push_back(c_t_val);
+        _c_t->push_back(c_t_val);
       }
     }
 
@@ -523,7 +523,7 @@ int siconos::nonsmooth_formulations::CohesiveFrictionContact::solve()
   //  if (!problem) {
   auto problem = cohesiveFrictionContactProblem();
   //}
-  //cohesiveFrictionContact_display(&*problem);
+  // cohesiveFrictionContact_display(&*problem);
   cohesiveFrictionContactProblem_build_M_q_from_blocks(&*problem);
   // getchar();
   return (*_cohesiveFrictionContact_driver)(&*problem, &*_z->data(), &*_w->data(),

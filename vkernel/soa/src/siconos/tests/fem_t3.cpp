@@ -34,9 +34,8 @@ struct relation : model::lagrangian_r<nslaw::size> {};
 struct rt_relation : model::rt_lagrangian_r {};
 struct interaction : simul::interaction<nslaw, relation> {};
 struct rt_rt_interaction : simul::rt_rt_interaction<nslaw, rt_relation> {};
-struct topo
-    : simul::topology<ball, interaction, fem_ds,
-                      storage::pattern::empty_item, rt_rt_interaction> {};
+struct topo : simul::topology<ball, interaction, fem_ds, storage::pattern::empty_item,
+                              rt_rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
@@ -45,38 +44,29 @@ template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 1>>;
 };
-struct make : storage::make<
-                  env, fem_ds, simulation,
-                  storage::with_properties<
-                      storage::wrapped<config::interaction,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::relation,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::rt_rt_interaction,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::rt_relation,
-                                       storage::some::unbounded_collection>,
-                      storage::unbounded<storage::attr_t<fem_ds, "q">>,
-                      storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
-                      storage::unbounded<storage::attr_t<fem_ds, "fext">>,
-                      storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
-                      storage::sparse<storage::attr_t<fem_ds, "k_matrix">>,
-                      storage::dynamic_storage<
-                          storage::attached<config::ball,
-                                            storage::pattern::symbol<"bc_velocities_0">,
-                                            storage::some::unbounded_vector<
-                                                storage::some::indice>>>,
-                      storage::dynamic_storage<
-                          storage::attached<config::fem_ds,
-                                            storage::pattern::symbol<"bc_velocities_0">,
-                                            storage::some::unbounded_collection<
-                                                storage::some::indice>>>>> {
-};
+struct make
+    : storage::make<
+          env, fem_ds, simulation,
+          storage::with_properties<
+              storage::wrapped<config::interaction, storage::some::unbounded_collection>,
+              storage::wrapped<config::relation, storage::some::unbounded_collection>,
+              storage::wrapped<config::rt_rt_interaction, storage::some::unbounded_collection>,
+              storage::wrapped<config::rt_relation, storage::some::unbounded_collection>,
+              storage::unbounded<storage::attr_t<fem_ds, "q">>,
+              storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
+              storage::unbounded<storage::attr_t<fem_ds, "fext">>,
+              storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
+              storage::sparse<storage::attr_t<fem_ds, "k_matrix">>,
+              storage::dynamic_storage<
+                  storage::attached<config::ball, storage::pattern::symbol<"bc_velocities_0">,
+                                    storage::some::unbounded_vector<storage::some::indice>>>,
+              storage::dynamic_storage<storage::attached<
+                  config::fem_ds, storage::pattern::symbol<"bc_velocities_0">,
+                  storage::some::unbounded_collection<storage::some::indice>>>>> {};
 
 }  // namespace siconos::config
 
-int main(int args, char* argv[])
-{
+int main(int args, char* argv[]) {
   double Ly = 1.0;
 
   auto gmsh_filename = "square_200.msh";
@@ -101,8 +91,7 @@ int main(int args, char* argv[])
 
   double t0 = 0;     // initial computation time
   double T = 1e-02;  // final computation time
-  auto solid =
-      std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
+  auto solid = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
   // add the dynamical system in the non smooth dynamical system
   solid->insertDynamicalSystem(FEsolid);
   // Contact Conditions
@@ -150,8 +139,7 @@ int main(int args, char* argv[])
 
   for (auto node : femodel->nodes()) {
     if (fabs(node->y()) <= 1e-16 and fabs(node->x()) >= 1e-16) {
-      std::cout << "contact node number : " << node->num() << " " << node->y()
-                << "\n";
+      std::cout << "contact node number : " << node->num() << " " << node->y() << "\n";
       auto idx_y = node->global_dof_index()[1];
       Hv.emplace_back(1, FEsolid->dimension());
       Hv.back().setZero();
@@ -182,11 +170,9 @@ int main(int args, char* argv[])
   //     storage::attr<"q">(fe_solid, 0) +
   //     h * storage::attr<"velocity">(fe_solid, 0);
 
-
   auto indices = FEsolid->boundaryConditions()->velocityIndices();
-  static_assert(storage::is_dynamic_storage_v<
-                config::fem_ds, std::decay_t<decltype(data)>,
-                "bc_velocities_0">);
+  static_assert(storage::is_dynamic_storage_v<config::fem_ds, std::decay_t<decltype(data)>,
+                                              "bc_velocities_0">);
   auto& bc_set = storage::prop_values<config::fem_ds, "bc_velocities_0">(data, 0);
   auto& bc_vel = bc_set.emplace(fe_solid.index().value());
   bc_vel.resize(indices.size());
@@ -215,11 +201,9 @@ int main(int args, char* argv[])
   dataPlot(0, 4) = q(169);
   dataPlot(0, 5) = v(169);
 
-  auto filename =
-      siconos::mechanics::fem::prepareWriteDisplacementforPython("T3");
+  auto filename = siconos::mechanics::fem::prepareWriteDisplacementforPython("T3");
   auto mesh = femodel->mesh();
-  siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q,
-                                                      filename);
+  siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q, filename);
 
   auto ds_index = storage::prop<"index">(fe_solid);
 
@@ -254,29 +238,25 @@ int main(int args, char* argv[])
     dataPlot(k, 5) = v_current(169);
 
     if (k % 1 == 0)
-      siconos::mechanics::fem::writeDisplacementforPython(
-          *mesh, *femodel, q_current, filename);
+      siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q_current,
+                                                          filename);
 
     k++;
     siconos::tools::progressBar((double)k / N);
   }
 
   auto end = std::chrono::system_clock::now();
-  auto elapsed =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-          .count();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "\nEnd of computation - Number of iterations done: " << k - 1;
   std::cout << "\nComputation time : " << elapsed << " ms\n";
 
   // --- Output files ---
   std::cout << "====> Output file writing ...\n";
   dataPlot.conservativeResize(k, outputSize);
-  siconos::algebra::io::write("fem_t3.dat", dataPlot,
-                              siconos::algebra::io::ASCII_OUT,
+  siconos::algebra::io::write("fem_t3.dat", dataPlot, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double eps = 1e-11;
-  if (siconos::algebra::io::compareRefFile(dataPlot, "T3_square_200.ref",
-                                           eps) >= eps)
+  if (siconos::algebra::io::compareRefFile(dataPlot, "T3_square_200.ref", eps) >= eps)
     return 1;
 
   return 0;

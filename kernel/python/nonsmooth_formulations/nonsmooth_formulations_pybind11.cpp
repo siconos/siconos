@@ -6,6 +6,7 @@
 
 #include "FrictionContact.hpp"
 // #include "FrictionContactProblem.h"
+#include "CohesiveFrictionContact.hpp"
 #include "GenericMechanical.hpp"
 #include "GlobalFrictionContact.hpp"
 #include "GlobalFrictionContactProblem.h"
@@ -18,8 +19,6 @@
 #include "Relay.hpp"
 #include "RollingFrictionContact.hpp"
 #include "RollingFrictionContactProblem.h"
-#include "CohesiveFrictionContact.hpp"
-
 #include "SolverOptions.h"
 // #include "Relay_options.h"
 
@@ -150,15 +149,12 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu)
       .def("solve", &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve);
 
-
-
   py::class_<siconos::nonsmooth_formulations::CohesiveFrictionContact,
-             siconos::nonsmooth_formulations::FrictionContact, py::smart_holder>(m,
-                                                                            "CohesiveFrictionContact")
+             siconos::nonsmooth_formulations::FrictionContact, py::smart_holder>(
+      m, "CohesiveFrictionContact")
       .def(py::init<int, int>(), py::arg("dimPb") = 3,
            py::arg("numericsSolverId") = solver_ids.attr("SICONOS_FRICTION_3D_NSGS"))
       .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
            py::arg("options"))
       .def("solve", &siconos::nonsmooth_formulations::CohesiveFrictionContact::solve);
-
 }

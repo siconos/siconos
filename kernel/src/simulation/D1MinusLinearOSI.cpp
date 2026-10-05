@@ -41,7 +41,7 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
     siconos::nonsmooth_formulations::OneStepNSProblem* p,
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionProperties& interProp)
-    : _osnsp(p), _inter(inter), _interProp(interProp){};
+    : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL& nslaw) {

@@ -23,8 +23,9 @@
 #ifndef NSGS_GENERIC_INSTRUMENTED_H
 #define NSGS_GENERIC_INSTRUMENTED_H
 
-#include "nsgs_generic.h"
 #include <sys/time.h>
+
+#include "nsgs_generic.h"
 
 /* Timer structure for profiling */
 typedef struct {
@@ -64,14 +65,13 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
 
   double total = nsgs_timers.total_time;
 
-  #define PRINT_TIMER(name, field) \
-    if (nsgs_timers.field > 0) { \
-      printf("%-30s %12.4f %10d %10.6f\n", \
-             name, \
-             nsgs_timers.field * 1000, \
-             nsgs_timers.field##_calls, \
-             nsgs_timers.field * 1000 / (nsgs_timers.field##_calls > 0 ? nsgs_timers.field##_calls : 1)); \
-    }
+#define PRINT_TIMER(name, field)                                                 \
+  if (nsgs_timers.field > 0) {                                                   \
+    printf("%-30s %12.4f %10d %10.6f\n", name, nsgs_timers.field * 1000,         \
+           nsgs_timers.field##_calls,                                            \
+           nsgs_timers.field * 1000 /                                            \
+               (nsgs_timers.field##_calls > 0 ? nsgs_timers.field##_calls : 1)); \
+  }
 
   PRINT_TIMER("update_local_problem", update_local_problem_time);
   PRINT_TIMER("solve_local", solve_local_time);
@@ -81,7 +81,7 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
   PRINT_TIMER("freezing", freezing_time);
   PRINT_TIMER("other", other_time);
 
-  #undef PRINT_TIMER
+#undef PRINT_TIMER
 
   printf("------------------------------------------------------------\n");
   printf("%-30s %12.4f %10s %10s\n", "TOTAL", total * 1000, "-", "-");
@@ -92,9 +92,11 @@ static inline void nsgs_timers_print(const char* solver_name, int nb_blocks, int
   if (nsgs_timers.solve_local_time > 0)
     printf("  solve_local:        %5.1f%%\n", nsgs_timers.solve_local_time / total * 100);
   if (nsgs_timers.update_local_problem_time > 0)
-    printf("  update_local:       %5.1f%%\n", nsgs_timers.update_local_problem_time / total * 100);
+    printf("  update_local:       %5.1f%%\n",
+           nsgs_timers.update_local_problem_time / total * 100);
   if (nsgs_timers.error_computation_time > 0)
-    printf("  error_computation:  %5.1f%%\n", nsgs_timers.error_computation_time / total * 100);
+    printf("  error_computation:  %5.1f%%\n",
+           nsgs_timers.error_computation_time / total * 100);
   if (nsgs_timers.freezing_time > 0)
     printf("  freezing:           %5.1f%%\n", nsgs_timers.freezing_time / total * 100);
   if (nsgs_timers.relaxation_time > 0)
@@ -113,9 +115,10 @@ static inline double nsgs_get_time(void) {
 }
 
 /** Instrumented NSGS solver - SINGLE LOOP VERSION */
-static inline void nsgs_solve_instrumented(void* problem, double* var_z, double* var_x, int* info,
-                              SolverOptions* options, NSGSLocalToolkit* toolkit,
-                              NSGSProblemData* problem_data) {
+static inline void nsgs_solve_instrumented(void* problem, double* var_z, double* var_x,
+                                           int* info, SolverOptions* options,
+                                           NSGSLocalToolkit* toolkit,
+                                           NSGSProblemData* problem_data) {
   /* Reset timers at start */
   nsgs_timers_reset();
   double global_start = nsgs_get_time();
@@ -204,8 +207,9 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     nsgs_shuffle_blocks(sblocks, nb_blocks, toolkit->use_shuffling ? 2 : 0, iter);
 
     double tmp_criteria1 = tolerance * tolerance * 100.0 * 100.0;
-    double tmp_criteria2 = (prev_norm_z > 0.0) ?
-        (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0)) : 0.0;
+    double tmp_criteria2 = (prev_norm_z > 0.0)
+                               ? (prev_norm_z * prev_norm_z / (nb_blocks * nb_blocks * 1000.0))
+                               : 0.0;
 
     /* Main loop over blocks */
     for (unsigned int i = 0; i < nb_blocks; ++i) {
@@ -320,27 +324,29 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     double full_error = 0.0;
     int computed_full_error = 0;
 
-    nsgs_early_tolerance_adapt(problem, var_z, var_x, options, toolkit,
-                                incremental_error, &tolerance, &full_error, iter);
+    nsgs_early_tolerance_adapt(problem, var_z, var_x, options, toolkit, incremental_error,
+                               &tolerance, &full_error, iter);
     if (iter == 10) computed_full_error = 1;
 
     if (incremental_error <= tolerance) {
       hasNotConverged = nsgs_check_convergence_with_full_error(
-          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance,
-          &full_error, computed_full_error, localsolver_options, iter);
+          problem, var_z, var_x, options, toolkit, incremental_error, &tolerance, &full_error,
+          computed_full_error, localsolver_options, iter);
       error = full_error;
     } else {
       if (toolkit->check_convergence) {
-        hasNotConverged = toolkit->check_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            toolkit->check_convergence(incremental_error, tolerance, iter, options);
       } else {
-        hasNotConverged = nsgs_determine_convergence(incremental_error, tolerance, iter, options);
+        hasNotConverged =
+            nsgs_determine_convergence(incremental_error, tolerance, iter, options);
       }
     }
 
-    nsgs_print_iteration_stats(iter, incremental_error, full_error, tolerance,
-                                toolkit->user_tolerance,
-                                nsgs_count_frozen_percent(freeze_blocks, nb_blocks, toolkit->use_freezing),
-                                hasNotConverged, toolkit->verbose);
+    nsgs_print_iteration_stats(
+        iter, incremental_error, full_error, tolerance, toolkit->user_tolerance,
+        nsgs_count_frozen_percent(freeze_blocks, nb_blocks, toolkit->use_freezing),
+        hasNotConverged, toolkit->verbose);
 
     if (toolkit->stats_callback) {
       toolkit->stats_callback(problem, options, var_z, var_x, error);
@@ -384,13 +390,10 @@ nsgs_cleanup:
   /* Record total time */
   nsgs_timers.total_time = nsgs_get_time() - global_start;
   /* Calculate other time */
-  nsgs_timers.other_time = nsgs_timers.total_time
-                         - nsgs_timers.update_local_problem_time
-                         - nsgs_timers.solve_local_time
-                         - nsgs_timers.relaxation_time
-                         - nsgs_timers.accept_local_time
-                         - nsgs_timers.error_computation_time
-                         - nsgs_timers.freezing_time;
+  nsgs_timers.other_time = nsgs_timers.total_time - nsgs_timers.update_local_problem_time -
+                           nsgs_timers.solve_local_time - nsgs_timers.relaxation_time -
+                           nsgs_timers.accept_local_time - nsgs_timers.error_computation_time -
+                           nsgs_timers.freezing_time;
 }
 
 #endif /* NSGS_GENERIC_INSTRUMENTED_H */

@@ -78,7 +78,7 @@ class FrictionContact : public LinearOSNS {
  protected:
   ACCEPT_SERIALIZATION(FrictionContact);
 
-  typedef int (*Driver)(FrictionContactProblem *, double *, double *, SolverOptions *);
+  typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim{3};
@@ -183,11 +183,10 @@ class FrictionContact : public LinearOSNS {
   int compute(double time) override;
 
   /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 
   /** print the data to the screen */
   void display() const override;
-
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // FrictionContact_H

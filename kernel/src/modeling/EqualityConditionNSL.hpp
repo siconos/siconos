@@ -39,7 +39,7 @@ class EqualityConditionNSL : public NonSmoothLaw {
    *
    *  \param size of the non smooth law
    */
-  EqualityConditionNSL(siconos::algebra::Index size) : NonSmoothLaw(size){};
+  EqualityConditionNSL(siconos::algebra::Index size) : NonSmoothLaw(size) {};
 
   /** Destructor */
   ~EqualityConditionNSL() noexcept = default;
@@ -47,12 +47,14 @@ class EqualityConditionNSL : public NonSmoothLaw {
   /** display the data of the NonSmoothLaw on the standard output
    *
    */
-  void display() const override{};
+  void display() const override {};
 
   // visitors hook
-    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

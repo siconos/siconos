@@ -23,15 +23,15 @@
 // #include <memory>
 // #include <span>
 
+#include "CohesiveZoneModelNIFNSL.hpp"
 #include "ComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
 #include "FremondImpactFrictionNSL.hpp"
+#include "Interaction.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "RelayNSL.hpp"
-#include "CohesiveZoneModelNIFNSL.hpp"
-#include "Interaction.hpp"
 
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
@@ -40,7 +40,7 @@ namespace py = pybind11;
 
 // PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-void wrap_nonsmoothlaws(py::module_ &m) {
+void wrap_nonsmoothlaws(py::module_& m) {
   py::class_<siconos::modeling::NonSmoothLaw, py::smart_holder>(m, "NonSmoothLaw")
       .def_property_readonly("size", &siconos::modeling::NonSmoothLaw::size);
 

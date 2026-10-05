@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianCompliantRTest__
 #define __LagrangianCompliantRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "LagrangianCompliantR.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-class LagrangianCompliantRTest : public CppUnit::TestFixture
-{
-
-private:
-
+class LagrangianCompliantRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianCompliantRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianCompliantRTest);
@@ -43,10 +40,9 @@ private:
   void testBuildLagrangianCompliantR0();
   // Members
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

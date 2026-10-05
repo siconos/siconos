@@ -35,8 +35,8 @@
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_PRINTF
 
-int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, double tolerance,
-                                   SolverOptions *options, double norm, double *error) {
+int convexQP_compute_error_reduced(ConvexQP* problem, double* z, double* w, double tolerance,
+                                   SolverOptions* options, double norm, double* error) {
   CHECK_NULL(problem);
   CHECK_NULL(z);
   CHECK_NULL(w);
@@ -47,10 +47,10 @@ int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, doub
 
   *error = 0.;
   if (!options->dWork) {
-    options->dWork = (double *)calloc(2 * n, sizeof(double));
+    options->dWork = (double*)calloc(2 * n, sizeof(double));
   }
-  double *ztmp = options->dWork;
-  double *wtmp = &(options->dWork[n]);
+  double* ztmp = options->dWork;
+  double* wtmp = &(options->dWork[n]);
 
   /* q --> w */
   cblas_dcopy(n, problem->q, 1, w, 1);
@@ -80,9 +80,9 @@ int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, doub
     return 0;
 }
 
-int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, double *u,
-                           double tolerance, double scaling, SolverOptions *options,
-                           double norm_q, double norm_b, double *error) {
+int convexQP_compute_error(ConvexQP* problem, double* z, double* xi, double* w, double* u,
+                           double tolerance, double scaling, SolverOptions* options,
+                           double norm_q, double norm_b, double* error) {
   DEBUG_BEGIN("convexQP_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -110,14 +110,14 @@ int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, 
 
   if (!options->dWork || options->dWorkSize < 2 * m + n) {
     if (options->dWork) free(options->dWork);
-    options->dWork = (double *)calloc(2 * n, sizeof(double));
+    options->dWork = (double*)calloc(2 * n, sizeof(double));
     options->dWorkSize = 2 * m + n;
   }
 
-  double *tmp_m = options->dWork;
-  double *tmp_m1 = &(options->dWork[m]);
+  double* tmp_m = options->dWork;
+  double* tmp_m1 = &(options->dWork[m]);
 
-  double *tmp_n = &(options->dWork[m + m]);
+  double* tmp_n = &(options->dWork[m + m]);
 
   /****************************************/
   /* error in Mz + q - rho A^T xi =0      */

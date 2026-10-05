@@ -14,28 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __NonSmoothDynamicalSystemTest__
 #define __NonSmoothDynamicalSystemTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "LagrangianLinearTIDS.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
-class NonSmoothDynamicalSystemTest : public CppUnit::TestFixture
-{
-
-private:
-
+class NonSmoothDynamicalSystemTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystemTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(NonSmoothDynamicalSystemTest);
 
   // tests to be done ...
 
-  //CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem);
+  // CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem);
   CPPUNIT_TEST(testinsertDynamicalSystem);
   CPPUNIT_TEST(testinsertInteraction);
   CPPUNIT_TEST(testremoveDynamicalSystem);
@@ -49,10 +46,9 @@ private:
   void testremoveDynamicalSystem();
   void testremoveInteraction();
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

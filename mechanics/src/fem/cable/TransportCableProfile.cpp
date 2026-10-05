@@ -30,7 +30,7 @@
 #include "TransportCableResult.h"
 
 siconos::fem::cable::TransportCableProfile::TransportCableProfile(
-    const TransportCableModel &a_model, TransportCableResult &a_results)
+    const TransportCableModel& a_model, TransportCableResult& a_results)
     : r_model(a_model), r_results(a_results) {}
 
 void siconos::fem::cable::TransportCableProfile::computeInitialProfile(int nb_nodes,
@@ -40,7 +40,7 @@ void siconos::fem::cable::TransportCableProfile::computeInitialProfile(int nb_no
 
   // Get mechanical properties and carriers from the model
   MechanicalProperties meca = r_model.mechanicalProperties();
-  const auto &vehicles = r_model.get_carriers();
+  const auto& vehicles = r_model.get_carriers();
   // Update rho as the sum of both cable and vehicles rho
   meca.set_rho(meca.linearDensity() + vehicles.linearDensity);
 
@@ -90,11 +90,11 @@ void siconos::fem::cable::TransportCableProfile::initializeFEM(int nb_elem, doub
       nElemInTopPulley + nElemUpCable + nElemInDownPulley + nElemDownCable;
 
   // -- Initialize positions, tension and reaction vectors --
-  auto &q = r_results.q;
+  auto& q = r_results.q;
   q.resize(3 * r_results.numberOfElements);
-  auto &R = r_results.R;
+  auto& R = r_results.R;
   R.resize(3 * r_results.numberOfElements);
-  auto &TS = r_results.TS;
+  auto& TS = r_results.TS;
   TS.resize(r_results.numberOfElements);
 
   // Fills q, R and TS corresponding to the ropes in the up cable.
@@ -144,7 +144,7 @@ void siconos::fem::cable::TransportCableProfile::initializeFEM(int nb_elem, doub
 }
 
 void siconos::fem::cable::TransportCableProfile::compute_ineq_constraint(
-    const siconos::algebra::SiconosVector &a_X, double a_tol) {
+    const siconos::algebra::SiconosVector& a_X, double a_tol) {
   /*
   @author: charl
 
@@ -184,12 +184,12 @@ void siconos::fem::cable::TransportCableProfile::compute_ineq_constraint(
 }
 
 void siconos::fem::cable::TransportCableProfile::computeConstraints(
-    const siconos::algebra::SiconosVector &cableNodesPositions, double tol,
+    const siconos::algebra::SiconosVector& cableNodesPositions, double tol,
     Eigen::Ref<siconos::algebra::SiconosVector> distances,
     Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jacobian) {
   const int nb = cableNodesPositions.size() / 3;
-  for (auto &s : r_results.supports) {
-    const auto &center = s->center();
+  for (auto& s : r_results.supports) {
+    const auto& center = s->center();
     auto radius = s->radius();
     if (auto pulley = std::dynamic_pointer_cast<PulleyWrapping>(s)) {
       for (int i = 0; i < nb; ++i) {
@@ -223,14 +223,14 @@ void siconos::fem::cable::TransportCableProfile::computeConstraints(
 }
 
 void siconos::fem::cable::TransportCableProfile::computeConstraintsSparse(
-    const siconos::algebra::SiconosVector &cableNodesPositions, double tol,
+    const siconos::algebra::SiconosVector& cableNodesPositions, double tol,
     Eigen::Ref<siconos::algebra::SiconosVector> distances,
-    siconos::algebra::SiconosSparseMatrix &jacobian) {
+    siconos::algebra::SiconosSparseMatrix& jacobian) {
   const siconos::algebra::Index nb = cableNodesPositions.size() / 3;
   std::vector<Eigen::Triplet<double>> triplets;
   triplets.reserve(2 * siconos::algebra::to_unsigned<size_t>(nb));  // max 2 per col¨
-  for (auto &s : r_results.supports) {
-    const auto &center = s->center();
+  for (auto& s : r_results.supports) {
+    const auto& center = s->center();
     auto radius = s->radius();
     if (auto pulley = std::dynamic_pointer_cast<PulleyWrapping>(s)) {
       for (siconos::algebra::Index i = 0; i < nb; ++i) {
@@ -268,7 +268,7 @@ void siconos::fem::cable::TransportCableProfile::computeConstraintsSparse(
 // Free functions
 
 siconos::algebra::SiconosVector siconos::fem::cable::distribute_carriers_weight(
-    const Carriers &vehicles, int nb_elem, double totalLength) {
+    const Carriers& vehicles, int nb_elem, double totalLength) {
   siconos::algebra::SiconosVector weight;
   weight.resize(nb_elem);
   weight.setZero();

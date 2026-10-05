@@ -24,8 +24,8 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
 #include "fc2d_Solvers.h"                  // for fc2d_tolcp
-#include "numerics_verbose.h"              // for numerics_error
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_error
 
 int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem* lcp_problem) {
   if (problem->dimension != 2) {

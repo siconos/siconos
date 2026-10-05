@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 #include <stdlib.h>  // for malloc
-#include "RollingFrictionContact_options.h"                // for SICONOS_ROLLING_FRICTION_3D_...
-#include "NumericsFwd.h"                 // for SolverOptions
-#include "SolverOptions.h"               // for SolverOptions, solver_option...
-#include "frictionContact_test_utils.h"  // for build_test_collection
+
+#include "NumericsFwd.h"                     // for SolverOptions
+#include "RollingFrictionContact_options.h"  // for SICONOS_ROLLING_FRICTION_3D_...
+#include "SolverOptions.h"                   // for SolverOptions, solver_option...
+#include "frictionContact_test_utils.h"      // for build_test_collection
 #include "numerics_verbose.h"
 #include "test_utils.h"  // for TestCase
 
@@ -37,8 +38,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(
         collection[current].options, 0,
-	SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-     current++;
+        SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    current++;
   }
 
   for (int d = 0; d < n_data; d++) {
@@ -46,7 +47,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-04;
     solver_options_update_internal(collection[current].options, 0,
-				   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     current++;
   }
   for (int d = 0; d < n_data; d++) {

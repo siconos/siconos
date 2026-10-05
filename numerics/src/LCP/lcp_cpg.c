@@ -21,24 +21,24 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_cpg
-#include "lcp_cst.h"                       // for SICONOS_LCP_CPG
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"                       // for SICONOS_LCP_CPG
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-             SolverOptions *options) {
+void lcp_cpg(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+             SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  double *M = problem->M->matrix0;
+  double* M = problem->M->matrix0;
 
-  double *q = problem->q;
+  double* q = problem->q;
 
   /* size of the LCP */
   int n = problem->size;
@@ -52,7 +52,7 @@ void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *i
   double alpha, beta, rp, pMp;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
-  int *status;
+  int* status;
   double *zz, *pp, *rr, *ww, *Mp;
 
   *info = 1;
@@ -69,14 +69,14 @@ void lcp_cpg(LinearComplementarityProblem *problem, double *z, double *w, int *i
 
   /* Allocations */
 
-  status = (int *)malloc(n * sizeof(int));
+  status = (int*)malloc(n * sizeof(int));
 
-  ww = (double *)malloc(n * sizeof(double));
-  rr = (double *)malloc(n * sizeof(double));
-  pp = (double *)malloc(n * sizeof(double));
-  zz = (double *)malloc(n * sizeof(double));
+  ww = (double*)malloc(n * sizeof(double));
+  rr = (double*)malloc(n * sizeof(double));
+  pp = (double*)malloc(n * sizeof(double));
+  zz = (double*)malloc(n * sizeof(double));
 
-  Mp = (double *)malloc(n * sizeof(double));
+  Mp = (double*)malloc(n * sizeof(double));
 
   incx = 1;
 
@@ -281,13 +281,10 @@ static void lcp_cpg_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_CPG, "LCP_CPG",
-                       "Conjugated Projected Gradient for LCP",
-                       lcp_cpg_init_wrap,
-                       lcp_cpg_solve_wrap,
-                       lcp_cpg_free_wrap,
-                       NULL,  /* error function */
-                       lcp_cpg_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_CPG, "LCP_CPG", "Conjugated Projected Gradient for LCP",
+                lcp_cpg_init_wrap, lcp_cpg_solve_wrap, lcp_cpg_free_wrap,
+                NULL,                /* error function */
+                lcp_cpg_set_default, /* set_default */
+                1000,                /* default_max_iter */
+                1e-6,                /* default_tol */
+                0);                  /* is_local_solver */

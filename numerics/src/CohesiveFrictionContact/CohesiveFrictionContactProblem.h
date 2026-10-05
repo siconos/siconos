@@ -56,59 +56,60 @@ struct CohesiveFrictionContactProblem {
   /** \f$ {M} \in {{
       \mathrm{I\!R}}}^{m \times m} \f$,
      a matrix with \f$ m = d  (n_c + n_{coh}} \f$ stored in NumericsMatrix structure */
-  RawNumericsMatrix *M;
+  RawNumericsMatrix* M;
 
   /** \f$ {q} \in {{
       \mathrm{I\!R}}}^{m} \f$ - the local velocity and displacement vector */
-  double *q;
+  double* q;
 
   /** \f$ {\mu} \in {{
       \mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
-  double *mu;
+  double* mu;
 
   /** \f$ {c_n} \in {{
       \mathrm{I\!R}}}^{n_{coh}} \f$, vector of cohesion intensity in normal direction */
-  double *c_n;
+  double* c_n;
   /** \f$ {c_t} \in {{
       \mathrm{I\!R}}}^{n_{coh}} \f$, vector of cohesion intensity in tangent direction */
-  double *c_t;
+  double* c_t;
 
   /** \f$ {q_v} \in {{
       \mathrm{I\!R}}}^{n} \f with \f$ m = d  n \f$ $,  vector associated with cohesive points
   */
-  double *q_v;
+  double* q_v;
 
   /** \f$ {q_u} \in {{
-      \mathrm{I\!R}}}^{n} \f with \f$ m = d  n_{coh} \f$ $,  vector associated with cohesive points
+      \mathrm{I\!R}}}^{n} \f with \f$ m = d  n_{coh} \f$ $,  vector associated with cohesive
+     points
   */
-  double *q_u;
+  double* q_u;
 
   /** Matrix W for mapping cohesive forces to contact space (required).
       \f$ {V} \in {{
       \mathrm{I\!R}}}^{m \times m} \f$*/
-  RawNumericsMatrix *W;
+  RawNumericsMatrix* W;
 
   /** Matrix W for mapping cohesive forces to contact space (required).
       \f$ {V} \in {{
       \mathrm{I\!R}}}^{m \times n} \f$*/
 
-  RawNumericsMatrix *V;
+  RawNumericsMatrix* V;
   /** Matrix X for additional cohesive contributions (required).
       Used for extended cohesive zone models.
       \f$ {X} \in {{
       \mathrm{I\!R}}}^{n \times n} \f$*/
-  RawNumericsMatrix *X;
+  RawNumericsMatrix* X;
 
   /** Matrix U for coupling terms (required).
       Used for coupling between different contact modes.
       \f$ {X} \in {{
       \mathrm{I\!R}}}^{n \times m} \f$*/
-  RawNumericsMatrix *U;
+  RawNumericsMatrix* U;
 
   /** Internal state variables for cohesive zone models (optional).
       This stores damage parameters, displacement history, etc. */
-  double *internal_state;
+  double* internal_state;
   /** Size of internal state vector per contact */
   int internal_state_size;
 };
@@ -121,7 +122,7 @@ extern "C" {
  * Create an empty CohesiveFrictionContactProblem
  * \return an empty cohesive friction-contact problem
  */
-CohesiveFrictionContactProblem *cohesiveFrictionContactProblem_new(void);
+CohesiveFrictionContactProblem* cohesiveFrictionContactProblem_new(void);
 
 /** new CohesiveFrictionContactProblem from minimal set of data
  *
@@ -136,21 +137,21 @@ CohesiveFrictionContactProblem *cohesiveFrictionContactProblem_new(void);
  *  \param[in] U the U matrix (required)
  *  \return a pointer to a CohesiveFrictionContactProblem structure
  */
-CohesiveFrictionContactProblem *cohesiveFrictionContactProblem_new_with_data(
-    int dim, int nc, int n_coh, NumericsMatrix *M, double *q, double *mu, NumericsMatrix *V,
-    NumericsMatrix *X, NumericsMatrix *U);
+CohesiveFrictionContactProblem* cohesiveFrictionContactProblem_new_with_data(
+    int dim, int nc, int n_coh, NumericsMatrix* M, double* q, double* mu, NumericsMatrix* V,
+    NumericsMatrix* X, NumericsMatrix* U);
 
 /** free a CohesiveFrictionContactProblem
  *
  *  \param problem the problem to free
  */
-void cohesiveFrictionContactProblem_free(CohesiveFrictionContactProblem *problem);
+void cohesiveFrictionContactProblem_free(CohesiveFrictionContactProblem* problem);
 
 /** display a CohesiveFrictionContactProblem
  *
  *  \param problem the problem to display
  */
-void cohesiveFrictionContact_display(CohesiveFrictionContactProblem *problem);
+void cohesiveFrictionContact_display(CohesiveFrictionContactProblem* problem);
 
 /** print a CohesiveFrictionContactProblem in a file (numerics .dat format)
  *
@@ -158,7 +159,7 @@ void cohesiveFrictionContact_display(CohesiveFrictionContactProblem *problem);
  *  \param file the destination file
  *  \return 0 if successful
  */
-int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem *problem, FILE *file);
+int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem* problem, FILE* file);
 
 /** print a CohesiveFrictionContactProblem in a file (numerics .dat format) from
  *  its filename
@@ -167,15 +168,15 @@ int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem *problem,
  *  \param filename the destination file
  *  \return 0 if successful
  */
-int cohesiveFrictionContact_printInFilename(CohesiveFrictionContactProblem *problem,
-                                            char *filename);
+int cohesiveFrictionContact_printInFilename(CohesiveFrictionContactProblem* problem,
+                                            char* filename);
 
 /** read a CohesiveFrictionContactProblem from a file (numerics .dat format)
  *
  *  \param file the source file
  *  \return a pointer to a CohesiveFrictionContactProblem structure
  */
-CohesiveFrictionContactProblem *cohesiveFrictionContact_newFromFile(FILE *file);
+CohesiveFrictionContactProblem* cohesiveFrictionContact_newFromFile(FILE* file);
 
 /** read a CohesiveFrictionContactProblem from a file (numerics .dat format) from
  *  its filename
@@ -183,7 +184,7 @@ CohesiveFrictionContactProblem *cohesiveFrictionContact_newFromFile(FILE *file);
  *  \param filename the source file
  *  \return a pointer to a CohesiveFrictionContactProblem structure
  */
-CohesiveFrictionContactProblem *cohesiveFrictionContact_newFromFilename(char *filename);
+CohesiveFrictionContactProblem* cohesiveFrictionContact_newFromFilename(char* filename);
 
 /**
  * Update the cohesion intensity vectors in the problem
@@ -195,8 +196,8 @@ CohesiveFrictionContactProblem *cohesiveFrictionContact_newFromFilename(char *fi
  * \param c_n the new normal cohesion intensity vector
  * \param c_t the new tangent cohesion intensity vector
  */
-void cohesiveFrictionContactProblem_set_cohesion(CohesiveFrictionContactProblem *problem,
-                                                 double *c_n, double *c_t);
+void cohesiveFrictionContactProblem_set_cohesion(CohesiveFrictionContactProblem* problem,
+                                                 double* c_n, double* c_t);
 
 /**
  * Compute the effective q vector including cohesive contribution
@@ -207,7 +208,7 @@ void cohesiveFrictionContactProblem_set_cohesion(CohesiveFrictionContactProblem 
  * \param q_eff output vector for effective q (must be pre-allocated)
  */
 void cohesiveFrictionContactProblem_compute_effective_q(
-    CohesiveFrictionContactProblem *problem, double *q_eff);
+    CohesiveFrictionContactProblem* problem, double* q_eff);
 
 /**
  * Build the global matrix M and vector q from block components
@@ -219,10 +220,11 @@ void cohesiveFrictionContactProblem_compute_effective_q(
  * \return 0 if successful, error code otherwise
  *
  * \note This function allocates M and q if they are NULL, or reuses them if already allocated.
- *       The matrices W, V, U, X and vectors q_v, q_u must be set in the problem before calling.
+ *       The matrices W, V, U, X and vectors q_v, q_u must be set in the problem before
+ * calling.
  */
 int cohesiveFrictionContactProblem_build_M_q_from_blocks(
-    CohesiveFrictionContactProblem *problem);
+    CohesiveFrictionContactProblem* problem);
 
 #if defined(__cplusplus)
 }

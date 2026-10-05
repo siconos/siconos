@@ -206,7 +206,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
   if (!allOSNS->empty()) {
     if (indexSet1->size() > 0) {
-      //sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
+      // sim->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       std::shared_ptr<siconos::modeling::Interaction> inter;
       for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {

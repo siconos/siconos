@@ -70,7 +70,9 @@ class SphereLDSPlanR : public siconos::modeling::LagrangianScleronomousR,
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 
-  virtual void accept(modeling::relations::Visitor& tourist) const override { tourist.visit(*this); }
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereLDSPlanR_h */

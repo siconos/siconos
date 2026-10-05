@@ -41,23 +41,23 @@
 
 static int fccounter = -1;
 
-int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
-                    size_t *row, size_t *column, size_t nc, size_t nb, int solver_id,
+int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, double* W,
+                    size_t* row, size_t* column, size_t nc, size_t nb, int solver_id,
                     double tolerance, int itermax, int verbose, int outputFile,
                     int freq_output, int ndof) {
   numerics_set_verbose(verbose);
 
-  SparseBlockCoordinateMatrix *MC = SBCM_new_3x3(nc, nc, nb, row, column, W);
+  SparseBlockCoordinateMatrix* MC = SBCM_new_3x3(nc, nc, nb, row, column, W);
 
-  SparseBlockStructuredMatrix *M = SBCM_to_SBM(MC);
+  SparseBlockStructuredMatrix* M = SBCM_to_SBM(MC);
 
-  NumericsMatrix *NM = NM_new_SBM(nc * 3, nc * 3, M);
+  NumericsMatrix* NM = NM_new_SBM(nc * 3, nc * 3, M);
 
-  FrictionContactProblem *FC = frictionContactProblem_new_with_data(3, nc, NM, q, mu);
+  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, nc, NM, q, mu);
 
   /* frictionContact_display(FC); */
 
-  SolverOptions *numerics_solver_options = solver_options_create(solver_id);
+  SolverOptions* numerics_solver_options = solver_options_create(solver_id);
 
   if (solver_id == FC3D_NSGS) {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] =
@@ -72,13 +72,13 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
   numerics_solver_options->dparam[SICONOS_DPARAM_TOL] = tolerance;
   numerics_solver_options->iparam[SICONOS_IPARAM_MAX_ITER] = itermax;
 
-  double *reaction_guess;
-  double *velocity_guess;
+  double* reaction_guess;
+  double* velocity_guess;
   if (outputFile == 3) {
     // Save guesses.
 
-    reaction_guess = (double *)malloc(nc * 3 * sizeof(double));
-    velocity_guess = (double *)malloc(nc * 3 * sizeof(double));
+    reaction_guess = (double*)malloc(nc * 3 * sizeof(double));
+    velocity_guess = (double*)malloc(nc * 3 * sizeof(double));
     for (unsigned int k = 0; k < 3 * nc; k++) reaction_guess[k] = reaction[k];
     for (unsigned int k = 0; k < 3 * nc; k++) velocity_guess[k] = velocity[k];
   }
@@ -90,7 +90,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
   //  uncomment to save FrictionContactProblem
 
   if (outputFile == 1) {
-    FILE *file = fopen("tutu.c", "w");
+    FILE* file = fopen("tutu.c", "w");
 
     fprintf(file, "int nc = %i ;\n ", (int)nc);
     fprintf(file, "int nb = %i ;\n ", (int)nb);
@@ -134,7 +134,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     printf("LMGC_FC3D-i%.5d-%zu-%.5d.dat",
            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
-    FILE *foutput = fopen(fname, "w");
+    FILE* foutput = fopen(fname, "w");
     frictionContact_printInFile(FC, foutput);
     fclose(foutput);
   } else if (outputFile == 3) {
@@ -148,18 +148,18 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
 
-      FILE *foutput = fopen(fname, "w");
+      FILE* foutput = fopen(fname, "w");
       int n = 100;
 
-      char *title = (char *)malloc(n * sizeof(char));
+      char* title = (char*)malloc(n * sizeof(char));
 
       strcpy(title, "LMGC dump in hdf5");
 
-      char *description = (char *)malloc(n * sizeof(char));
+      char* description = (char*)malloc(n * sizeof(char));
       strcpy(description, "Rewriting in hdf5 through siconos of  ");
       strcat(description, fname);
       strcat(description, " in FCLIB format");
-      char *mathInfo = (char *)malloc(n * sizeof(char));
+      char* mathInfo = (char*)malloc(n * sizeof(char));
       strcpy(mathInfo, "unknown");
 
       frictionContact_fclib_write(FC, title, description, mathInfo, fname, ndof);

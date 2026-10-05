@@ -48,11 +48,8 @@ extern "C" {
  * \note The cohesion vectors c_n and c_t in the problem are used to modify
  *       the effective q vector through matrices V, X, U.
  */
-int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem *problem,
-                              double *reaction,
-                              double *velocity,
-                              SolverOptions *options);
-
+int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* reaction,
+                              double* velocity, SolverOptions* options);
 
 #if defined(__cplusplus)
 }

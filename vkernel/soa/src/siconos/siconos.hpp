@@ -6,14 +6,15 @@
 #include <typeinfo>
 
 #include "siconos/algebra/numerics.hpp"
-#include "siconos/collision/point.hpp"
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskline_r.hpp"
+#include "siconos/collision/neighborhood.hpp"
+#include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/line.hpp"
-#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/config/config.hpp"
+#include "siconos/config/environment.hpp"
 #include "siconos/io/io.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
@@ -28,7 +29,6 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
-#include "siconos/config/environment.hpp"
 #if defined(__clang__)
 #include <boost/hana/experimental/type_name.hpp>
 #endif

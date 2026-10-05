@@ -24,7 +24,7 @@
 
 namespace py = pybind11;
 
-void wrap_relay(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
+void wrap_relay(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // RELAY_SOLVER enum
 
   py::enum_<RELAY_SOLVER>(solver_ids, "RELAY_SOLVER", "Relay solvers enum")

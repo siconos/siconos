@@ -103,7 +103,7 @@ namespace siconos::geometry {
  *  \ingroup QuaternionConversions
  */
 double axisAngleFromQuaternion(double q0, double q1, double q2, double q3,
-                               Eigen::Ref<siconos::algebra::SiconosVector3> &axis);
+                               Eigen::Ref<siconos::algebra::SiconosVector3>& axis);
 
 /** \brief Extract axis-angle from a configuration vector
  *
@@ -113,7 +113,7 @@ double axisAngleFromQuaternion(double q0, double q1, double q2, double q3,
  *  \see axisAngleFromQuaternion
  *  \ingroup QuaternionConversions
  */
-double axisAngleFromConfiguration(const Eigen::Ref<siconos::algebra::SiconosVector7> &q,
+double axisAngleFromConfiguration(const Eigen::Ref<siconos::algebra::SiconosVector7>& q,
                                   Eigen::Ref<siconos::algebra::SiconosVector3> axis);
 
 /** \brief Convert a quaternion to rotation vector (exponential map)
@@ -141,7 +141,7 @@ siconos::algebra::SiconosVector3 rotationVectorFromQuaternion(double q0, double 
  *  \ingroup QuaternionConversions
  */
 siconos::algebra::SiconosVector3 rotationVectorFromConfiguration(
-    siconos::algebra::SiconosVector7 &q);
+    siconos::algebra::SiconosVector7& q);
 
 /** \brief Convert axis-angle to quaternion and store in configuration
  *
@@ -151,8 +151,8 @@ siconos::algebra::SiconosVector3 rotationVectorFromConfiguration(
  *               The position part (first 3 components) is left unchanged.
  *  \ingroup QuaternionConversions
  */
-void quaternionFromAxisAngle(const siconos::algebra::SiconosVector3 &axis, double angle,
-                             siconos::algebra::SiconosVector7 &q);
+void quaternionFromAxisAngle(const siconos::algebra::SiconosVector3& axis, double angle,
+                             siconos::algebra::SiconosVector7& q);
 
 /** \brief Convert rotation vector to quaternion
  *
@@ -167,7 +167,7 @@ void quaternionFromAxisAngle(const siconos::algebra::SiconosVector3 &axis, doubl
  *  \ingroup QuaternionConversions
  */
 siconos::algebra::SiconosVector7 quaternionFromRotationVector(
-    const siconos::algebra::SiconosVector3 &rotationVector);
+    const siconos::algebra::SiconosVector3& rotationVector);
 
 /** \brief Compute sin(x)/x with Taylor expansion for small x
  *
@@ -190,7 +190,7 @@ double sinc(double x);
  *  \param[out] q configuration vector with quaternion set from angular part
  *  \ingroup QuaternionConversions
  */
-void quaternionFromTwistVector(const siconos::algebra::SiconosVector6 &twist,
+void quaternionFromTwistVector(const siconos::algebra::SiconosVector6& twist,
                                Eigen::Ref<siconos::algebra::SiconosVector7> q);
 
 /** \brief Compute the norm of the quaternion part of a configuration
@@ -199,7 +199,7 @@ void quaternionFromTwistVector(const siconos::algebra::SiconosVector6 &twist,
  *  \return the norm of the quaternion part sqrt(qw² + qx² + qy² + qz²)
  *  \ingroup QuaternionOperations
  */
-double quaternionNorm(const siconos::algebra::SiconosVector7 &q);
+double quaternionNorm(const siconos::algebra::SiconosVector7& q);
 
 /** \brief Normalize the quaternion part of a configuration
  *
@@ -229,7 +229,7 @@ void normalizeQuaternion(Eigen::Ref<siconos::algebra::SiconosVector7> q);
  *  \ingroup QuaternionConversions
  */
 void computeRotationMatrix(double q0, double q1, double q2, double q3,
-                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
+                           siconos::algebra::SiconosMatrix33& rotationMatrix);
 
 /** \brief Compute rotation matrix from configuration
  *
@@ -238,8 +238,8 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
  *  \see computeRotationMatrix(double, double, double, double, SiconosMatrix33&)
  *  \ingroup QuaternionConversions
  */
-void computeRotationMatrix(const siconos::algebra::SiconosVector7 &q,
-                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
+void computeRotationMatrix(const siconos::algebra::SiconosVector7& q,
+                           siconos::algebra::SiconosMatrix33& rotationMatrix);
 
 /** \brief Compute transposed rotation matrix from configuration
  *
@@ -250,8 +250,8 @@ void computeRotationMatrix(const siconos::algebra::SiconosVector7 &q,
  *  \param[out] rotationMatrix the transposed 3x3 rotation matrix, modified in-place
  *  \ingroup QuaternionConversions
  */
-void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector7 &q,
-                                     siconos::algebra::SiconosMatrix33 &rotationMatrix);
+void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector7& q,
+                                     siconos::algebra::SiconosMatrix33& rotationMatrix);
 
 /** \brief Rotate a vector using quaternion (inertial frame rotation)
  *
@@ -266,7 +266,7 @@ void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector7 &q,
  *  \param[in,out] v the vector to rotate, modified in-place
  *  \ingroup QuaternionOperations
  */
-void rotateVector(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+void rotateVector(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
                   Eigen::Ref<siconos::algebra::SiconosVector3> v);
 
 /** \brief Rotate a matrix using quaternion (inertial frame rotation)
@@ -277,7 +277,7 @@ void rotateVector(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
  *  \param[in,out] m the matrix to rotate (3x3), modified in-place
  *  \ingroup QuaternionOperations
  */
-void rotateMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+void rotateMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
                   Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 /** \brief Transform vector from inertial frame to body frame
@@ -291,8 +291,9 @@ void rotateMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
  *  \see rotateVectorFromBodyToInertialFrame for the inverse operation
  *  \ingroup FrameTransformations
  */
-void rotateVectorFromInertialToBodyFrame(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
-                                         Eigen::Ref<siconos::algebra::SiconosVector3> v);
+void rotateVectorFromInertialToBodyFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
+    Eigen::Ref<siconos::algebra::SiconosVector3> v);
 
 /** \brief Transform matrix from inertial frame to body frame
  *
@@ -303,8 +304,9 @@ void rotateVectorFromInertialToBodyFrame(const Eigen::Ref<const siconos::algebra
  *  \see rotateMatrixFromBodyToInertialFrame for the inverse operation
  *  \ingroup FrameTransformations
  */
-void rotateMatrixFromInertialToBodyFrame(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
-                                         Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
+void rotateMatrixFromInertialToBodyFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 /** \brief Transform vector from body frame to inertial frame
  *
@@ -317,8 +319,9 @@ void rotateMatrixFromInertialToBodyFrame(const Eigen::Ref<const siconos::algebra
  *  \see rotateVectorFromInertialToBodyFrame for the inverse operation
  *  \ingroup FrameTransformations
  */
-void rotateVectorFromBodyToInertialFrame(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
-                                         Eigen::Ref<siconos::algebra::SiconosVector3> v);
+void rotateVectorFromBodyToInertialFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
+    Eigen::Ref<siconos::algebra::SiconosVector3> v);
 
 /** \brief Transform matrix from body frame to inertial frame
  *
@@ -329,8 +332,9 @@ void rotateVectorFromBodyToInertialFrame(const Eigen::Ref<const siconos::algebra
  *  \see rotateMatrixFromInertialToBodyFrame for the inverse operation
  *  \ingroup FrameTransformations
  */
-void rotateMatrixFromBodyToInertialFrame(const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
-                                         Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
+void rotateMatrixFromBodyToInertialFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 /** \brief Compose two rigid body configurations (SE(3) group operation)
  *
@@ -343,9 +347,9 @@ void rotateMatrixFromBodyToInertialFrame(const Eigen::Ref<const siconos::algebra
  *  \param[out] ab result configuration, modified in-place
  *  \ingroup QuaternionOperations
  */
-void compositionLawLieGroup(const siconos::algebra::SiconosVector7 &a,
-                            siconos::algebra::SiconosVector7 &b,
-                            siconos::algebra::SiconosVector7 &ab);
+void compositionLawLieGroup(const siconos::algebra::SiconosVector7& a,
+                            siconos::algebra::SiconosVector7& b,
+                            siconos::algebra::SiconosVector7& ab);
 
 /** \brief In-place composition of rigid body configurations
  *
@@ -356,7 +360,7 @@ void compositionLawLieGroup(const siconos::algebra::SiconosVector7 &a,
  *  \see compositionLawLieGroup
  *  \ingroup QuaternionOperations
  */
-void compositionLawLieGroup(const siconos::algebra::SiconosVector7 &a,
+void compositionLawLieGroup(const siconos::algebra::SiconosVector7& a,
                             Eigen::Ref<siconos::algebra::SiconosVector7> b);
 
 /** \brief Copy rotation quaternion from configuration
@@ -365,8 +369,8 @@ void compositionLawLieGroup(const siconos::algebra::SiconosVector7 &a,
  *  \param[out] to boost quaternion [qw, qx, qy, qz]
  *  \ingroup QuaternionAccessors
  */
-void extractRotationQuaternion(const siconos::algebra::SiconosVector7 &from,
-                               boost::math::quaternion<double> &to);
+void extractRotationQuaternion(const siconos::algebra::SiconosVector7& from,
+                               boost::math::quaternion<double>& to);
 
 /** \brief Copy vector part from pure quaternion to 3D vector
  *
@@ -374,8 +378,8 @@ void extractRotationQuaternion(const siconos::algebra::SiconosVector7 &from,
  *  \param[out] to 3D vector [x, y, z]
  *  \ingroup QuaternionAccessors
  */
-void extractVectorFromQuaternion(const boost::math::quaternion<double> &from,
-                                 siconos::algebra::SiconosVector3 &to);
+void extractVectorFromQuaternion(const boost::math::quaternion<double>& from,
+                                 siconos::algebra::SiconosVector3& to);
 
 /** \brief Copy position from configuration to pure quaternion
  *
@@ -383,8 +387,8 @@ void extractVectorFromQuaternion(const boost::math::quaternion<double> &from,
  *  \param[out] to boost quaternion [0, x, y, z]
  *  \ingroup QuaternionAccessors
  */
-void extractPositionToQuaternion(const siconos::algebra::SiconosVector7 &from,
-                                 boost::math::quaternion<double> &to);
+void extractPositionToQuaternion(const siconos::algebra::SiconosVector7& from,
+                                 boost::math::quaternion<double>& to);
 
 /** \brief Copy 2D rotation to quaternion
  *
@@ -394,8 +398,8 @@ void extractPositionToQuaternion(const siconos::algebra::SiconosVector7 &from,
  *  \param[out] to boost quaternion
  *  \ingroup QuaternionAccessors
  */
-void extractRotationQuaternion2d(const siconos::algebra::SiconosVector &from,
-                                 boost::math::quaternion<double> &to);
+void extractRotationQuaternion2d(const siconos::algebra::SiconosVector& from,
+                                 boost::math::quaternion<double>& to);
 
 /** \brief Copy 2D position from quaternion
  *
@@ -403,8 +407,8 @@ void extractRotationQuaternion2d(const siconos::algebra::SiconosVector &from,
  *  \param[out] to 2D vector where to(0)=x, to(1)=y
  *  \ingroup QuaternionAccessors
  */
-void extractPositionFromQuaternion2d(const boost::math::quaternion<double> &from,
-                                     siconos::algebra::SiconosVector &to);
+void extractPositionFromQuaternion2d(const boost::math::quaternion<double>& from,
+                                     siconos::algebra::SiconosVector& to);
 
 /** \brief Copy 2D position to quaternion
  *
@@ -412,8 +416,8 @@ void extractPositionFromQuaternion2d(const boost::math::quaternion<double> &from
  *  \param[out] to boost quaternion [0, x, y, 0]
  *  \ingroup QuaternionAccessors
  */
-void extractPositionToQuaternion2d(const siconos::algebra::SiconosVector &from,
-                                   boost::math::quaternion<double> &to);
+void extractPositionToQuaternion2d(const siconos::algebra::SiconosVector& from,
+                                   boost::math::quaternion<double>& to);
 
 /** \brief Get rotation quaternion from configuration
  *
@@ -421,7 +425,8 @@ void extractPositionToQuaternion2d(const siconos::algebra::SiconosVector &from,
  *  \return boost quaternion [qw, qx, qy, qz]
  *  \ingroup QuaternionAccessors
  */
-boost::math::quaternion<double> getRotationQuaternion(const siconos::algebra::SiconosVector7 &q);
+boost::math::quaternion<double> getRotationQuaternion(
+    const siconos::algebra::SiconosVector7& q);
 
 /** \brief Get position quaternion from configuration
  *
@@ -429,7 +434,8 @@ boost::math::quaternion<double> getRotationQuaternion(const siconos::algebra::Si
  *  \return boost quaternion [0, x, y, z]
  *  \ingroup QuaternionAccessors
  */
-boost::math::quaternion<double> getPositionQuaternion(const siconos::algebra::SiconosVector &v);
+boost::math::quaternion<double> getPositionQuaternion(
+    const siconos::algebra::SiconosVector& v);
 
 /** \brief Compute an orthonormal basis from a given input axis (Gram-Schmidt)
  *
@@ -442,9 +448,9 @@ boost::math::quaternion<double> getPositionQuaternion(const siconos::algebra::Si
  *  \throw std::invalid_argument if axis0 has near-zero norm
  *  \ingroup QuaternionOperations
  */
-void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3 &axis0,
-                                    siconos::algebra::SiconosVector3 &axis1,
-                                    siconos::algebra::SiconosVector3 &axis2);
+void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3& axis0,
+                                    siconos::algebra::SiconosVector3& axis1,
+                                    siconos::algebra::SiconosVector3& axis2);
 
 /** \brief Compute an orthonormal basis from a vector (branchless method)
  *
@@ -465,9 +471,9 @@ void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3 &axis0,
  *  Journal of Computer Graphics Techniques, vol. 6, no. 1, 2017
  *  http://jcgt.org/published/0006/01/01/
  */
-bool orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
-                         siconos::algebra::SiconosVector3 &A1,
-                         siconos::algebra::SiconosVector3 &A2);
+bool orthoBaseFromVector(siconos::algebra::SiconosVector3& A,
+                         siconos::algebra::SiconosVector3& A1,
+                         siconos::algebra::SiconosVector3& A2);
 
 /** @name Deprecated Function Names
  *  Old function names kept for backward compatibility.
@@ -475,82 +481,81 @@ bool orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
  */
 //@{
 [[deprecated("Use rotateVector instead")]] inline void quaternionRotateVector(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   rotateVector(q, v);
 }
 
 [[deprecated("Use rotateMatrix instead")]] inline void quaternionRotateMatrix(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   rotateMatrix(q, m);
 }
 
-[[deprecated("Use rotateVectorFromInertialToBodyFrame instead")]] inline void rewriteVectorFromAbsoluteToBodyFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+[[deprecated("Use rotateVectorFromInertialToBodyFrame instead")]] inline void
+rewriteVectorFromAbsoluteToBodyFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   rotateVectorFromInertialToBodyFrame(q, v);
 }
 
-[[deprecated("Use rotateMatrixFromInertialToBodyFrame instead")]] inline void rewriteMatrixFromAbsoluteToBodyFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+[[deprecated("Use rotateMatrixFromInertialToBodyFrame instead")]] inline void
+rewriteMatrixFromAbsoluteToBodyFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   rotateMatrixFromInertialToBodyFrame(q, m);
 }
 
-[[deprecated("Use rotateVectorFromBodyToInertialFrame instead")]] inline void rewriteVectorFromBodyToAbsoluteFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+[[deprecated("Use rotateVectorFromBodyToInertialFrame instead")]] inline void
+rewriteVectorFromBodyToAbsoluteFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   rotateVectorFromBodyToInertialFrame(q, v);
 }
 
-[[deprecated("Use rotateMatrixFromBodyToInertialFrame instead")]] inline void rewriteMatrixFromBodyToAbsoluteFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+[[deprecated("Use rotateMatrixFromBodyToInertialFrame instead")]] inline void
+rewriteMatrixFromBodyToAbsoluteFrame(
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   rotateMatrixFromBodyToInertialFrame(q, m);
 }
 
-[[deprecated("Use normalizeQuaternion instead")]] inline void normalizeq(Eigen::Ref<siconos::algebra::SiconosVector7> q) {
+[[deprecated("Use normalizeQuaternion instead")]] inline void normalizeq(
+    Eigen::Ref<siconos::algebra::SiconosVector7> q) {
   normalizeQuaternion(q);
 }
 
 [[deprecated("Use extractRotationQuaternion instead")]] inline void copyQuatRot(
-    const siconos::algebra::SiconosVector7 &from,
-    boost::math::quaternion<double> &to) {
+    const siconos::algebra::SiconosVector7& from, boost::math::quaternion<double>& to) {
   extractRotationQuaternion(from, to);
 }
 
 [[deprecated("Use extractPositionToQuaternion instead")]] inline void copyQuatPos(
-    const siconos::algebra::SiconosVector7 &from,
-    boost::math::quaternion<double> &to) {
+    const siconos::algebra::SiconosVector7& from, boost::math::quaternion<double>& to) {
   extractPositionToQuaternion(from, to);
 }
 
 [[deprecated("Use extractRotationQuaternion2d instead")]] inline void copyQuatRot2d(
-    const siconos::algebra::SiconosVector &from,
-    boost::math::quaternion<double> &to) {
+    const siconos::algebra::SiconosVector& from, boost::math::quaternion<double>& to) {
   extractRotationQuaternion2d(from, to);
 }
 
 [[deprecated("Use extractPositionToQuaternion2d instead")]] inline void copyQuatPos2d(
-    const siconos::algebra::SiconosVector &from,
-    boost::math::quaternion<double> &to) {
+    const siconos::algebra::SiconosVector& from, boost::math::quaternion<double>& to) {
   extractPositionToQuaternion2d(from, to);
 }
 
-[[deprecated("Use getRotationQuaternion instead")]] inline boost::math::quaternion<double> rotquat(
-    const siconos::algebra::SiconosVector7 &v) {
+[[deprecated("Use getRotationQuaternion instead")]] inline boost::math::quaternion<double>
+rotquat(const siconos::algebra::SiconosVector7& v) {
   return getRotationQuaternion(v);
 }
 
-[[deprecated("Use getPositionQuaternion instead")]] inline boost::math::quaternion<double> posquat(
-    const siconos::algebra::SiconosVector &v) {
+[[deprecated("Use getPositionQuaternion instead")]] inline boost::math::quaternion<double>
+posquat(const siconos::algebra::SiconosVector& v) {
   return getPositionQuaternion(v);
 }
 
-[[deprecated("Use sinc instead")]] inline double sin_x(double x) {
-  return sinc(x);
-}
+[[deprecated("Use sinc instead")]] inline double sin_x(double x) { return sinc(x); }
 //@}
 
 }  // namespace siconos::geometry

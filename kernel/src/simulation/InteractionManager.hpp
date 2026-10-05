@@ -25,9 +25,9 @@
 
 #include <memory>
 
+#include "DynamicalSystem.hpp"
 #include "NSLawMatrix.hpp"
 #include "SiconosSerialization.hpp"
-#include "DynamicalSystem.hpp"
 
 namespace siconos::modeling {
 class NonSmoothLaw;

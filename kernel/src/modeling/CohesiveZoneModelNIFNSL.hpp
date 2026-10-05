@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file CohesiveZoneModelNIFNSL.hpp
   \brief Base class for cohesive zone models based on NewtonImpactFrictionNSL
 
@@ -194,9 +194,7 @@ class CohesiveZoneModelNIFNSL : public NewtonImpactFrictionNSL {
   /** \brief Visitor pattern support
    * \cond DEVEL
    */
-  void accept(nonsmooth_laws::Visitor& tourist) const override {
-    tourist.visit(*this);
-  }
+  void accept(nonsmooth_laws::Visitor& tourist) const override { tourist.visit(*this); }
 
   Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
   /** \endcond */

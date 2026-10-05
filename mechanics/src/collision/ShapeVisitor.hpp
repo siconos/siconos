@@ -32,10 +32,10 @@ namespace siconos::collision::internal {
 class ShapeVisitor {
  protected:
   ShapeVisitor() = default;
-  ShapeVisitor(const ShapeVisitor &) = delete;
-  ShapeVisitor(ShapeVisitor &&) = delete;
-  ShapeVisitor &operator=(ShapeVisitor &&) = delete;
-  ShapeVisitor &operator=(const ShapeVisitor &) = delete;
+  ShapeVisitor(const ShapeVisitor&) = delete;
+  ShapeVisitor(ShapeVisitor&&) = delete;
+  ShapeVisitor& operator=(ShapeVisitor&&) = delete;
+  ShapeVisitor& operator=(const ShapeVisitor&) = delete;
 
   virtual ~ShapeVisitor() noexcept = default;
 

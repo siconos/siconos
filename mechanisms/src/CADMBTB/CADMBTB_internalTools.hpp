@@ -107,10 +107,10 @@ namespace siconos::mechanisms {
  *  \param[out] MinDist the distance between the points
  */
 void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(
-    unsigned int idContact, unsigned int idFace1, unsigned int idFace2,
-    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2,
-    Standard_Real& Y2, Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY,
-    Standard_Real& nZ, unsigned int normalFromFace1, Standard_Real& MinDist);
+    unsigned int idContact, unsigned int idFace1, unsigned int idFace2, Standard_Real& X1,
+    Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2, Standard_Real& Y2,
+    Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+    unsigned int normalFromFace1, Standard_Real& MinDist);
 /** To compute distance using n2qn1 algorithm
  * This function manages the case where the object idFace1 contains one or two
  faces
@@ -135,10 +135,10 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(
  *  \param[out] MinDist the distance between the points
  */
 void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
-    unsigned int idContact, unsigned int idFace1, unsigned int idFace2,
-    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2,
-    Standard_Real& Y2, Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY,
-    Standard_Real& nZ, unsigned int normalFromFace1, Standard_Real& MinDist);
+    unsigned int idContact, unsigned int idFace1, unsigned int idFace2, Standard_Real& X1,
+    Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2, Standard_Real& Y2,
+    Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+    unsigned int normalFromFace1, Standard_Real& MinDist);
 /*! @} */
 }  // namespace siconos::mechanisms
 #endif

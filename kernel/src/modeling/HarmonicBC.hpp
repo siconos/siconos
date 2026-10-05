@@ -70,7 +70,7 @@ class HarmonicBC : public BoundaryCondition {
         aCoeff_(a),
         bCoeff_(b),
         omega_(omega),
-        phi_(phi){};
+        phi_(phi) {};
 
   HarmonicBC(Indices newVelocityIndices,
              const Eigen::Ref<const siconos::algebra::SiconosVector>& newa,

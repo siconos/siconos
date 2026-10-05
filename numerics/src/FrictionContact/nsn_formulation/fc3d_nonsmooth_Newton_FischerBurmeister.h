@@ -44,8 +44,8 @@ extern "C" {
 
 /** The Fischer Burmeister function signature for a 3x3 block.
  */
-typedef void (*FischerBurmeisterFun3x3Ptr)(double *reaction, double *velocity, double mu,
-                                           double *rho, double *F, double *A, double *B);
+typedef void (*FischerBurmeisterFun3x3Ptr)(double* reaction, double* velocity, double mu,
+                                           double* rho, double* F, double* A, double* B);
 
 /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
  *  local (reduced) frictional contact problem in the dense form
@@ -56,9 +56,9 @@ typedef void (*FischerBurmeisterFun3x3Ptr)(double *reaction, double *velocity, d
  *  \param info returned info
  *  \param options  the solver options
  */
-void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem *problem, double *reaction,
-                                             double *velocity, int *info,
-                                             SolverOptions *options);
+void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem* problem, double* reaction,
+                                             double* velocity, int* info,
+                                             SolverOptions* options);
 
 /**
     The Fischer & Burmeister function for several contacts.
@@ -77,21 +77,21 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem *problem, do
 */
 void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
                                     FischerBurmeisterFun3x3Ptr computeACFun3x3,
-                                    double *reaction3D, double *velocity3D, double *mu,
-                                    double *rho3D, double *output_blocklist3,
-                                    double *output_blocklist3x3_1,
-                                    double *output_blocklist3x3_2);
+                                    double* reaction3D, double* velocity3D, double* mu,
+                                    double* rho3D, double* output_blocklist3,
+                                    double* output_blocklist3x3_1,
+                                    double* output_blocklist3x3_2);
 
-int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem *problem,
-                                                          double *z, double *w,
+int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem* problem,
+                                                          double* z, double* w,
                                                           double tolerance,
-                                                          SolverOptions *options,
-                                                          double *error);
+                                                          SolverOptions* options,
+                                                          double* error);
 
 /** Set default solver options for FC3D_NSN_FB
  *  \param options the solver options
  */
-void fc3d_nsn_fb_set_default(SolverOptions *options);
+void fc3d_nsn_fb_set_default(SolverOptions* options);
 
 #if defined(__cplusplus)
 }

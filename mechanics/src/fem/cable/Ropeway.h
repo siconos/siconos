@@ -49,10 +49,10 @@ class Ropeway {
   /** true if the ropeway goes down */
   bool is_down_{false};
 
-  Ropeway(const Ropeway &) = delete;
-  Ropeway &operator=(const Ropeway &) = delete;
-  Ropeway(Ropeway &&) = delete;
-  Ropeway &operator=(Ropeway &&) = delete;
+  Ropeway(const Ropeway&) = delete;
+  Ropeway& operator=(const Ropeway&) = delete;
+  Ropeway(Ropeway&&) = delete;
+  Ropeway& operator=(Ropeway&&) = delete;
 
   /** Create new support from the lower pile of a given rope
 
@@ -60,8 +60,8 @@ class Ropeway {
      \param[in,out] a_supports the vector of all supports
      \param[in,out] a_pulleyIdx current number of added support (internal counter)
    */
-  void addSupport(const Rope &a_rope, std::vector<std::shared_ptr<Support>> &a_supports,
-                  int &a_pulleyIdx) const;
+  void addSupport(const Rope& a_rope, std::vector<std::shared_ptr<Support>>& a_supports,
+                  int& a_pulleyIdx) const;
 
  public:
   /** Default and only constructor */
@@ -77,7 +77,7 @@ class Ropeway {
      \param a_tol tolerance used to compute admissibility conditions
      \param a_nmax max number of iterations used to compute admissibility conditions
   */
-  void computeCatenary(const MechanicalProperties &a_meca, const std::vector<Pylon> &a_piles,
+  void computeCatenary(const MechanicalProperties& a_meca, const std::vector<Pylon>& a_piles,
                        int nb_nodes, double a_tol = 1e-20, int a_nmax = 20);
 
   /**
@@ -87,8 +87,8 @@ class Ropeway {
      \param[in,out] a_supports the vector of all supports
      \param[in,out] a_pulleyIdx current number of added support (internal counter)
    */
-  void prepareSupport(std::vector<std::shared_ptr<Support>> &a_supports,
-                      int &a_pulleyIdx) const;
+  void prepareSupport(std::vector<std::shared_ptr<Support>>& a_supports,
+                      int& a_pulleyIdx) const;
 
   /** Compute the number of elements to be used in the current cable
 
@@ -103,11 +103,11 @@ class Ropeway {
    * \param[out] a_TS tension at nodes
    * \param[in] q_offset offset (index) in a_q vector
    */
-  int initializeFEM(siconos::algebra::SiconosVector &a_q, siconos::algebra::SiconosVector &a_R,
-                    siconos::algebra::SiconosVector &a_TS, int q_offset) const;
+  int initializeFEM(siconos::algebra::SiconosVector& a_q, siconos::algebra::SiconosVector& a_R,
+                    siconos::algebra::SiconosVector& a_TS, int q_offset) const;
 
-  const Pylon &getFirstPylon();
-  const Pylon &getLastPylon();
+  const Pylon& getFirstPylon();
+  const Pylon& getLastPylon();
   double initialTension();
   double getTensionAtLastNode();
 
@@ -116,7 +116,7 @@ class Ropeway {
    */
   double length() const;
 
-  const MechanicalProperties &mechanicalProperties0() const;
+  const MechanicalProperties& mechanicalProperties0() const;
 
   void set_Down(bool a_value);
 
@@ -129,18 +129,18 @@ class Ropeway {
 namespace nlohmann {
 template <>
 struct adl_serializer<siconos::fem::cable::Ropeway> {
-  static siconos::fem::cable::Ropeway from_json(const json &j) {
+  static siconos::fem::cable::Ropeway from_json(const json& j) {
     return siconos::fem::cable::Ropeway(j);
   }
 
-  static void to_json(ordered_json &j, const siconos::fem::cable::Ropeway &input) {
+  static void to_json(ordered_json& j, const siconos::fem::cable::Ropeway& input) {
     j = {{"catenaryUnknowns", nlohmann::ordered_json::array()},
          {"q", nlohmann::ordered_json::array()},
          {"TS", nlohmann::ordered_json::array()},
          {"R", nlohmann::ordered_json::array()},
          {"SR", nlohmann::ordered_json::array()},
          {"meca_global", nlohmann::ordered_json::array()}};
-    for (auto &r : input.ropes_) {
+    for (auto& r : input.ropes_) {
       nlohmann::adl_serializer<siconos::fem::cable::Rope>::to_json(j, r);
     }
   }

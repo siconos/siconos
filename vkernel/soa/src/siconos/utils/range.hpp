@@ -3,5 +3,5 @@
 #include <ranges>
 
 namespace siconos {
-  namespace view = std::ranges::views;
+namespace view = std::ranges::views;
 }

@@ -190,16 +190,16 @@ void siconos::modeling::FirstOrderType2R::computeJacobiangOver_lambda(
     computejacobiangOver_lambda_(lambda, *jacobiangOver_lambda_view_);
 }
 
-void siconos::modeling::FirstOrderType2R::computeOutput(double time, Interaction& inter,
-                                                        siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderType2R::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
   if (computeh_) computeh_(*ds_vars[FirstOrderR::Xxx], lambda, y);
 }
 
-void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction& inter,
-                                                       siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderType2R::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(level);
   if (computeg_) computeg_(lambda, *ds_vars[FirstOrderR::Rrr]);

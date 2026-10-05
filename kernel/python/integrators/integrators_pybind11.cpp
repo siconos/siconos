@@ -58,7 +58,7 @@ PYBIND11_MODULE(integrators, m) {
                     &siconos::integrators::MoreauJeanOSI::gamma,    // getter
                     &siconos::integrators::MoreauJeanOSI::setGamma  // setter
                     )
-      .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
+      .def("__repr__", [](const siconos::integrators::MoreauJeanOSI& a) {
         a.display();
         return "\n";
       });
@@ -86,7 +86,7 @@ PYBIND11_MODULE(integrators, m) {
                     &siconos::integrators::EulerMoreauOSI::useGammaForRelation,
                     &siconos::integrators::EulerMoreauOSI::setUseGammaForRelation)
 
-      .def("__repr__", [](const siconos::integrators::EulerMoreauOSI &a) {
+      .def("__repr__", [](const siconos::integrators::EulerMoreauOSI& a) {
         a.display();
         return "\n";
       });

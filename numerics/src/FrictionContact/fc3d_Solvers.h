@@ -146,7 +146,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
    \return error code
 */
 int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
-                           int* info, SolverOptions* options);
+                          int* info, SolverOptions* options);
 
 /**
     Fixed point solver for friction-contact 3D problem based on the
@@ -161,7 +161,7 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
     \return error code
 */
 int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* reaction,
-                                     double* velocity, int* info, SolverOptions* options);
+                                    double* velocity, int* info, SolverOptions* options);
 
 void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velocity,
                  int* info, SolverOptions* options);
@@ -177,7 +177,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velo
    \retuen error code
 */
 int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
-                         int* info, SolverOptions* options);
+                        int* info, SolverOptions* options);
 
 /**
     Projected Gradient on Cylinder solver for  Friction-contact 3D problem

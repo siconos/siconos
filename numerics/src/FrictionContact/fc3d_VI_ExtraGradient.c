@@ -27,22 +27,22 @@
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
 #include "fc3d_Solvers.h"
-#include "fc3d_short_names.h"                   // for fc3d_VI_ExtraGradient
-#include "fc3d_compute_error.h"             // for fc3d_compute_error
+#include "fc3d_compute_error.h"  // for fc3d_compute_error
+#include "fc3d_short_names.h"    // for fc3d_VI_ExtraGradient
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, double *velocity,
-                           int *info, SolverOptions *options) {
+void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double* reaction, double* velocity,
+                           int* info, SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   // vi.self = &vi;
   vi->F = &Function_VI_FC3D;
@@ -50,8 +50,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, do
 
   double error = 1e24;
 
-  FrictionContactProblem_as_VI *fc3d_as_vi =
-      (FrictionContactProblem_as_VI *)malloc(sizeof(FrictionContactProblem_as_VI));
+  FrictionContactProblem_as_VI* fc3d_as_vi =
+      (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
   vi->env = fc3d_as_vi;
   vi->size = n;
 
@@ -84,7 +84,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem *problem, double *reaction, do
  * ===========================================================================
  */
 
-static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_vi_eg_solve_wrap(void* problem, double* reaction, double* velocity,
+                                 SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_VI_ExtraGradient((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -96,14 +97,10 @@ static void fc3d_vi_eg_set_default(SolverOptions* options) {
   variationalInequality_ExtraGradient_set_default(options);
 }
 
-REGISTER_SOLVER(FC3D_VI_EG,
-                             "FC3D_VI_EG",
-                             "VI Extra Gradient for 3D Friction Contact",
-                             NULL,   /* init_wrap */
-                             fc3d_vi_eg_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_vi_eg_set_default,
-                             1000,   /* default_max_iter */
-                             1e-4,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_VI_EG, "FC3D_VI_EG", "VI Extra Gradient for 3D Friction Contact",
+                NULL,                         /* init_wrap */
+                fc3d_vi_eg_solve_wrap, NULL,  /* free_wrap */
+                NULL,                         /* err_fn */
+                fc3d_vi_eg_set_default, 1000, /* default_max_iter */
+                1e-4,                         /* default_tol */
+                0)                            /* is_local_solver */

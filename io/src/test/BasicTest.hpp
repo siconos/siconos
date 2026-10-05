@@ -3,8 +3,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class BasicTest : public CppUnit::TestFixture
-{
+class BasicTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(BasicTest);
 
   CPPUNIT_TEST(t0);
@@ -23,7 +22,7 @@ class BasicTest : public CppUnit::TestFixture
   void t4();
   void t5();
 
-public:
+ public:
   void setUp();
   void tearDown();
 };

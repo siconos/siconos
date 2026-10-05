@@ -38,7 +38,6 @@
 #include "NumericsVerbose.h"
 #include "SolverOptions.h"
 #include "cohesive_friction_3d_driver.h"
-
 #include "numerics_verbose.h"
 
 /* Helper function to print a vector */
@@ -53,7 +52,8 @@ static void print_vector(const char* name, double* vec, int size) {
 
 static int test_nsgs_on_filename(const char* filename) {
   printf("Reading problem from file: %s\n", filename);
-  CohesiveFrictionContactProblem* problem = cohesiveFrictionContact_newFromFilename((char*)filename);
+  CohesiveFrictionContactProblem* problem =
+      cohesiveFrictionContact_newFromFilename((char*)filename);
   if (!problem) {
     fprintf(stderr, "ERROR: Failed to read problem from file: %s\n", filename);
     return 1;
@@ -94,8 +94,7 @@ static int test_nsgs_on_filename(const char* filename) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_NSGS_FREEZING_CONTACT] = 0;
   options->iparam[SICONOS_NSGS_SHUFFLE] = SICONOS_NSGS_SHUFFLE_TRUE;
-  options->iparam[SICONOS_NSGS_ERROR_EVALUATION_TYPE] =
-    SICONOS_NSGS_ERROR_EVALUATION_FULL;
+  options->iparam[SICONOS_NSGS_ERROR_EVALUATION_TYPE] = SICONOS_NSGS_ERROR_EVALUATION_FULL;
 
   printf("  Solver: NSGS (Non-Smooth Gauss-Seidel)\n");
   printf("  Tolerance: %.2e\n", options->dparam[SICONOS_DPARAM_TOL]);
@@ -113,60 +112,55 @@ static int test_nsgs_on_filename(const char* filename) {
   /*   //problem->mu[k] = 1.0; */
   /* }     */
 
-
   int info = cohesive_friction_3d_driver(problem, reaction, velocity, options);
-
-
-
 
   /* Print results */
   printf("\n=================================================================\n");
   printf("=== Results =====================================================\n");
   printf("=================================================================\n");
 
+  for (int i = 0; i < nc; i++) {
+    printf("Contact %d reaction (r):\n", i);
+    printf("  r_n  = %12.6e (normal)\n", reaction[0 + dim * i]);
+    printf("  r_t1 = %12.6e (tangent 1)\n", reaction[1 + dim * i]);
+    printf("  r_t2 = %12.6e (tangent 2)\n", reaction[2 + dim * i]);
+    printf("\nContact %d velocity (v):\n", i);
+    printf("  v_n  = %12.6e (normal)\n", velocity[0 + dim * i]);
+    printf("  v_t1 = %12.6e (tangent 1)\n", velocity[1 + dim * i]);
+    printf("  v_t2 = %12.6e (tangent 2)\n", velocity[2 + dim * i]);
 
-    for (int i = 0; i < nc; i++) {
-      printf("Contact %d reaction (r):\n", i);
-      printf("  r_n  = %12.6e (normal)\n", reaction[0 + dim * i]);
-      printf("  r_t1 = %12.6e (tangent 1)\n", reaction[1 + dim * i]);
-      printf("  r_t2 = %12.6e (tangent 2)\n", reaction[2 + dim * i]);
-      printf("\nContact %d velocity (v):\n", i);
-      printf("  v_n  = %12.6e (normal)\n", velocity[0 + dim * i]);
-      printf("  v_t1 = %12.6e (tangent 1)\n", velocity[1 + dim * i]);
-      printf("  v_t2 = %12.6e (tangent 2)\n", velocity[2 + dim * i]);
+    /* Verify friction cone condition */
+    double r_n = reaction[dim * i];
+    double r_t_norm = sqrt(reaction[1 + dim * i] * reaction[1 + dim * i] +
+                           reaction[2 + dim * i] * reaction[2 + dim * i]);
+    double mu_r_n = problem->mu[i] * r_n;
 
-      /* Verify friction cone condition */
-      double r_n = reaction[dim * i];
-      double r_t_norm = sqrt(reaction[1 + dim * i] * reaction[1 + dim * i] +
-                             reaction[2 + dim * i] * reaction[2 + dim * i]);
-      double mu_r_n = problem->mu[i] * r_n;
+    printf("\nVerification:\n");
+    printf("  Normal reaction r_n = %.6e\n", r_n);
+    printf("  Tangential reaction ||r_t|| = %.6e\n", r_t_norm);
+    printf("  Friction bound mu*r_n = %.6e\n", mu_r_n);
+    printf("  Friction cone condition: ||r_t|| <= mu*r_n : %s\n",
+           (r_t_norm <= mu_r_n + 1e-10) ? "SATISFIED" : "VIOLATED");
 
-      printf("\nVerification:\n");
-      printf("  Normal reaction r_n = %.6e\n", r_n);
-      printf("  Tangential reaction ||r_t|| = %.6e\n", r_t_norm);
-      printf("  Friction bound mu*r_n = %.6e\n", mu_r_n);
-      printf("  Friction cone condition: ||r_t|| <= mu*r_n : %s\n",
-             (r_t_norm <= mu_r_n + 1e-10) ? "SATISFIED" : "VIOLATED");
+    /* Check complementarity */
+    double u_n = velocity[dim * i];
+    double comp = r_n * u_n;
+    printf("  Complementarity r_n * v_n = %.6e (should be ~0)\n", comp);
+    printf("\n");
+  }
 
-      /* Check complementarity */
-      double u_n = velocity[dim * i];
-      double comp = r_n * u_n;
-      printf("  Complementarity r_n * v_n = %.6e (should be ~0)\n", comp);
-      printf("\n");
-    }
+  for (int k = 0; k < ncoh; k++) {
+    printf("Cohesive point %d reaction (r_coh):\n", k);
+    printf("  r_n  = %12.6e (normal)\n", reaction[dim * nc + 0 + dim * k]);
+    printf("  r_t1 = %12.6e (tangent 1)\n", reaction[dim * nc + 1 + dim * k]);
+    printf("  r_t2 = %12.6e (tangent 2)\n", reaction[dim * nc + 2 + dim * k]);
 
-    for (int k = 0; k < ncoh; k++) {
-      printf("Cohesive point %d reaction (r_coh):\n", k);
-      printf("  r_n  = %12.6e (normal)\n", reaction[dim * nc + 0 + dim * k]);
-      printf("  r_t1 = %12.6e (tangent 1)\n", reaction[dim * nc + 1 + dim * k]);
-      printf("  r_t2 = %12.6e (tangent 2)\n", reaction[dim * nc + 2 + dim * k]);
-
-      printf("\nCohesive point %d displacement rate (u):\n", k);
-      printf("  u_n  = %12.6e (normal)\n", velocity[dim * nc + 0 + dim * k]);
-      printf("  u_t1 = %12.6e (tangent 1)\n", velocity[dim * nc + 1 + dim * k]);
-      printf("  u_t2 = %12.6e (tangent 2)\n", velocity[dim * nc + 2 + dim * k]);
-      printf("\n");
-    }
+    printf("\nCohesive point %d displacement rate (u):\n", k);
+    printf("  u_n  = %12.6e (normal)\n", velocity[dim * nc + 0 + dim * k]);
+    printf("  u_t1 = %12.6e (tangent 1)\n", velocity[dim * nc + 1 + dim * k]);
+    printf("  u_t2 = %12.6e (tangent 2)\n", velocity[dim * nc + 2 + dim * k]);
+    printf("\n");
+  }
   if (info == 0) {
     printf("Solver converged successfully!\n\n");
   } else {
@@ -185,7 +179,6 @@ static int test_nsgs_on_filename(const char* filename) {
   return info;
 }
 
-
 int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
@@ -194,8 +187,7 @@ int main(int argc, char** argv) {
   printf("=== Cohesive Friction 3D Test - Read from File =================\n");
   printf("=================================================================\n\n");
 
-  int info=-1;
-
+  int info = -1;
 
   /* Read problem from file */
   /* const char* filename_0 = "data/cohesive_test_2x2.dat"; */

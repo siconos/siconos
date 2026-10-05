@@ -40,21 +40,21 @@
 
 static int SBM_add_test1(double tol, double alpha, double beta) {
   int info = 0;
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   /* SBM_print(M); */
 
-  SparseBlockStructuredMatrix *C = SBM_add(M, M, alpha, beta);
+  SparseBlockStructuredMatrix* C = SBM_add(M, M, alpha, beta);
   /* SBM_print(C); */
 
   int nm = M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1];
-  double *M_dense = (double *)malloc(nm * sizeof(double));
+  double* M_dense = (double*)malloc(nm * sizeof(double));
 
   SBM_to_dense(M, M_dense);
   SBM_free(M, SBM_FREE_ALL);
 
-  double *C_dense = (double *)malloc(nm * sizeof(double));
+  double* C_dense = (double*)malloc(nm * sizeof(double));
 
   cblas_dscal(nm, 0.0, C_dense, 1);
   cblas_daxpy(nm, alpha, M_dense, 1, C_dense, 1);
@@ -73,29 +73,29 @@ static int SBM_add_test2(double tol, double alpha, double beta) {
   printf("========= Starts SBM tests SBM_add_test2 for alpha = %e and beta = %e ========= \n",
          alpha, beta);
   int info = 0;
-  NumericsMatrix *M2 = test_matrix_2();
-  SparseBlockStructuredMatrix *SBM2 = M2->matrix1;
+  NumericsMatrix* M2 = test_matrix_2();
+  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
   DEBUG_EXPR(SBM_print(SBM2););
 
-  NumericsMatrix *M10 = test_matrix_10();
-  SparseBlockStructuredMatrix *SBM10 = M10->matrix1;
+  NumericsMatrix* M10 = test_matrix_10();
+  SparseBlockStructuredMatrix* SBM10 = M10->matrix1;
   DEBUG_EXPR(SBM_print(SBM10););
 
-  SparseBlockStructuredMatrix *C2 = SBM_add(SBM2, SBM10, alpha, beta);
+  SparseBlockStructuredMatrix* C2 = SBM_add(SBM2, SBM10, alpha, beta);
   DEBUG_EXPR(SBM_print(C2););
 
-  SparseBlockStructuredMatrix *C3 = SBM_add(SBM10, SBM2, alpha, beta);
+  SparseBlockStructuredMatrix* C3 = SBM_add(SBM10, SBM2, alpha, beta);
   DEBUG_EXPR(SBM_print(C3););
 
   int n = M2->size0;
   int m = M2->size1;
   int nm = n * m;
-  double *M2_dense = (double *)malloc(nm * sizeof(double));
-  double *M10_dense = (double *)malloc(nm * sizeof(double));
+  double* M2_dense = (double*)malloc(nm * sizeof(double));
+  double* M10_dense = (double*)malloc(nm * sizeof(double));
   SBM_to_dense(SBM2, M2_dense);
   SBM_to_dense(SBM10, M10_dense);
 
-  double *C2_dense = (double *)malloc(nm * sizeof(double));
+  double* C2_dense = (double*)malloc(nm * sizeof(double));
 
   cblas_dscal(nm, 0.0, C2_dense, 1);
 
@@ -107,7 +107,7 @@ static int SBM_add_test2(double tol, double alpha, double beta) {
   info = SBM_dense_equal(C2, C2_dense, tol);
   if (info == 1) goto clean_mem;
 
-  double *C3_dense = (double *)malloc(nm * sizeof(double));
+  double* C3_dense = (double*)malloc(nm * sizeof(double));
 
   cblas_dscal(nm, 0.0, C3_dense, 1);
   cblas_daxpy(nm, alpha, M10_dense, 1, C3_dense, 1);
@@ -208,8 +208,8 @@ int SBM_add_test_all(void) {
 int test_SBM_column_permutation_all(void) {
   printf("========= Starts SBM tests 3 for SBM ========= \n");
 
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   /*alloc enough memory */
   int res = test_SBM_column_permutation(M);
@@ -233,11 +233,11 @@ int test_SBM_column_permutation_all(void) {
 
 int SBM_extract_component_3x3_all(void) {
   printf("========= Starts SBM tests 7 for SBM ========= \n");
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   SBM_print(M);
-  SparseBlockStructuredMatrix *N = SBM_new();
+  SparseBlockStructuredMatrix* N = SBM_new();
   size_t row_components[1] = {0};
   size_t row_components_size = 1;
   size_t col_components[1] = {0};
@@ -246,7 +246,7 @@ int SBM_extract_component_3x3_all(void) {
                             col_components_size);
   SBM_print(N);
 
-  SparseBlockStructuredMatrix *T = SBM_new();
+  SparseBlockStructuredMatrix* T = SBM_new();
   size_t row_components_T[2] = {1, 2};
   size_t row_components_size_T = 2;
   size_t col_components_T[2] = {1, 2};
@@ -255,7 +255,7 @@ int SBM_extract_component_3x3_all(void) {
                             col_components_size_T);
   SBM_print(T);
   SBM_free(T, SBM_FREE_ALL);
-  SparseBlockStructuredMatrix *NT = SBM_new();
+  SparseBlockStructuredMatrix* NT = SBM_new();
   size_t row_components_NT[2] = {0};
   size_t row_components_size_NT = 1;
 
@@ -266,7 +266,7 @@ int SBM_extract_component_3x3_all(void) {
   SBM_print(NT);
   SBM_free(NT, SBM_FREE_ALL);
 
-  SparseBlockStructuredMatrix *TN = SBM_new();
+  SparseBlockStructuredMatrix* TN = SBM_new();
   size_t row_components_TN[2] = {1, 2};
   size_t row_components_size_TN = 2;
 
@@ -292,7 +292,7 @@ int SBM_extract_component_3x3_all(void) {
 /* ==============================================================================================================================
  */
 
-static void add_initial_value_square_1(NumericsMatrix *M) {
+static void add_initial_value_square_1(NumericsMatrix* M) {
   int i = 0, j = 0;
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) NM_entry(M, i, j, 1.0 + i + j);
@@ -313,7 +313,7 @@ static void add_initial_value_square_1(NumericsMatrix *M) {
     for (j = 6; j < 8; j++) NM_entry(M, i, j, 6.0 + i + j);
   }
 }
-static void add_initial_value_square_2(NumericsMatrix *M) {
+static void add_initial_value_square_2(NumericsMatrix* M) {
   int i = 0, j = 0;
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) NM_entry(M, i, j, 1.0 + i + j);
@@ -329,7 +329,7 @@ static void add_initial_value_square_2(NumericsMatrix *M) {
   }
 }
 
-static void add_initial_value_rectangle_1(NumericsMatrix *M) {
+static void add_initial_value_rectangle_1(NumericsMatrix* M) {
   int i = 0, j = 0;
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) NM_entry(M, i, j, 1.0 + i + j);
@@ -340,8 +340,8 @@ static void add_initial_value_rectangle_1(NumericsMatrix *M) {
 }
 
 /* hand made gemm of nxp A matrix and pxm B matrix */
-static void dense_gemm_by_hand(double alpha, double *A, double *B, int n, int m, int p,
-                               double beta, double *C) {
+static void dense_gemm_by_hand(double alpha, double* A, double* B, int n, int m, int p,
+                               double beta, double* C) {
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
       double sum = beta * C[i + j * n];
@@ -353,7 +353,7 @@ static void dense_gemm_by_hand(double alpha, double *A, double *B, int n, int m,
   }
 }
 
-static double dense_comparison(double *C, int n, int m, double *Cref) {
+static double dense_comparison(double* C, int n, int m, double* Cref) {
   double err = 0.0;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
@@ -366,11 +366,11 @@ static double dense_comparison(double *C, int n, int m, double *Cref) {
   return err;
 }
 
-static int SBM_gemm_without_allocation_test_1(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_1(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 1 == \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
-  NumericsMatrix *M1 = MM[0];
+  NumericsMatrix* M1 = MM[0];
 
   int info = -1;
 
@@ -386,14 +386,14 @@ static int SBM_gemm_without_allocation_test_1(NumericsMatrix **MM, double alpha,
   C.storageType = NM_DENSE;
   C.size0 = M1->size0;
   C.size1 = M1->size1;
-  C.matrix0 = (double *)calloc(C.size0 * C.size1, sizeof(double));
+  C.matrix0 = (double*)calloc(C.size0 * C.size1, sizeof(double));
   MSAN_INIT_VAR(C.matrix0, C.size0 * C.size1);
   add_initial_value_square_1(&C);
   DEBUG_EXPR(NM_display(&C));
 
   NM_gemm(alpha, M1, M1, beta, &C);
 
-  NumericsMatrix *Cref = NM_create(NM_DENSE, C.size0, C.size1);
+  NumericsMatrix* Cref = NM_create(NM_DENSE, C.size0, C.size1);
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -414,12 +414,12 @@ static int SBM_gemm_without_allocation_test_1(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_2(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_2(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 2== \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
-  NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M3 = MM[2];
+  NumericsMatrix* M1 = MM[0];
+  NumericsMatrix* M3 = MM[2];
 
   int info = -1;
 
@@ -435,13 +435,13 @@ static int SBM_gemm_without_allocation_test_2(NumericsMatrix **MM, double alpha,
   C2.storageType = NM_DENSE;
   C2.size0 = M1->size0;
   C2.size1 = M3->size1;
-  C2.matrix0 = (double *)calloc(C2.size0 * C2.size1, sizeof(double));
+  C2.matrix0 = (double*)calloc(C2.size0 * C2.size1, sizeof(double));
   MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
   add_initial_value_rectangle_1(&C2);
 
   NM_gemm(alpha, M1, M3, beta, &C2);
 
-  NumericsMatrix *C2ref = NM_create(NM_DENSE, C2.size0, C2.size1);
+  NumericsMatrix* C2ref = NM_create(NM_DENSE, C2.size0, C2.size1);
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -463,12 +463,12 @@ static int SBM_gemm_without_allocation_test_2(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_3(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_3(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 3 == \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
-  NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M2 = MM[1];
+  NumericsMatrix* M1 = MM[0];
+  NumericsMatrix* M2 = MM[1];
 
   int info = -1;
 
@@ -492,7 +492,7 @@ static int SBM_gemm_without_allocation_test_3(NumericsMatrix **MM, double alpha,
   DEBUG_EXPR(NM_display(&C3));
   DEBUG_EXPR(NM_dense_display(Cref->matrix0, M2->size0, M2->size1, M2->size0));
 
-  NumericsMatrix *Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -523,14 +523,14 @@ static int SBM_gemm_without_allocation_test_3(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_4(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_4(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 4== \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
-  NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M2 = MM[1];
-  NumericsMatrix *M3 = MM[2];
-  NumericsMatrix *M4 = MM[3];
+  NumericsMatrix* M1 = MM[0];
+  NumericsMatrix* M2 = MM[1];
+  NumericsMatrix* M3 = MM[2];
+  NumericsMatrix* M4 = MM[3];
 
   int info = -1;
 
@@ -554,7 +554,7 @@ static int SBM_gemm_without_allocation_test_4(NumericsMatrix **MM, double alpha,
   DEBUG_EXPR(NM_dense_display(C2ref->matrix0, M2->size0, M4->size1, M2->size0));
   /*     Check if it is correct */
   /* C4 and C2Ref must have the same values.*/
-  NumericsMatrix *C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  NumericsMatrix* C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -586,7 +586,7 @@ static int SBM_gemm_without_allocation_test_4(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_5(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_5(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 5 == \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
@@ -598,16 +598,16 @@ static int SBM_gemm_without_allocation_test_5(NumericsMatrix **MM, double alpha,
   /* C = alpha*A*B + beta*C, double* storage, square matrix, empty column of blocks  */
   /***********************************************************/
 
-  NumericsMatrix *M9 = test_matrix_9();
+  NumericsMatrix* M9 = test_matrix_9();
 
-  NumericsMatrix *C7 = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C7 = NM_create(NM_DENSE, M9->size0, M9->size1);
   MSAN_INIT_VAR(C7->matrix0, C7->size0 * C7->size1);
 
   add_initial_value_square_2(C7);
 
   NM_gemm(alpha, M9, M9, beta, C7);
 
-  NumericsMatrix *C3ref = NM_create(NM_DENSE, C7->size0, C7->size1);
+  NumericsMatrix* C3ref = NM_create(NM_DENSE, C7->size0, C7->size1);
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -635,14 +635,14 @@ static int SBM_gemm_without_allocation_test_5(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_6(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_6(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 6 == \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
-  NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M2 = MM[1];
-  NumericsMatrix *M3 = MM[2];
-  NumericsMatrix *M4 = MM[3];
+  NumericsMatrix* M1 = MM[0];
+  NumericsMatrix* M2 = MM[1];
+  NumericsMatrix* M3 = MM[2];
+  NumericsMatrix* M4 = MM[3];
 
   int info = -1;
 
@@ -652,12 +652,12 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix **MM, double alpha,
   /* /\* C = alpha*A*B + beta*C, SBM storage, empty column of blocks        *\/ */
   /* /\**********************************************************************\/ */
 
-  NumericsMatrix *M10 = test_matrix_10();
-  NumericsMatrix *M9 = test_matrix_9();
+  NumericsMatrix* M10 = test_matrix_10();
+  NumericsMatrix* M9 = test_matrix_9();
 
   DEBUG_EXPR(NM_display(M10););
 
-  NumericsMatrix *C8 = NM_create(NM_SPARSE_BLOCK, M10->size0, M10->size1);
+  NumericsMatrix* C8 = NM_create(NM_SPARSE_BLOCK, M10->size0, M10->size1);
   /* This step is not necessary for NM_gemm but conveniently creates a zero matrix with the
    * right structure */
   SBM_free(C8->matrix1, SBM_FREE_ALL);
@@ -666,7 +666,7 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix **MM, double alpha,
   add_initial_value_square_2(C8);
 
   NM_gemm(alpha, M10, M10, beta, C8);
-  NumericsMatrix *C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -697,7 +697,7 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix **MM, double alpha,
   return info;
 }
 
-static int SBM_gemm_without_allocation_test_7(NumericsMatrix **MM, double alpha, double beta) {
+static int SBM_gemm_without_allocation_test_7(NumericsMatrix** MM, double alpha, double beta) {
   printf("\n == Numerics tests: SBM_gemm_without_allocation_test 7 == \n");
   printf("Starts SBM_gemm_without_allocation_test for alpha = %e and beta=%e\n", alpha, beta);
 
@@ -712,9 +712,9 @@ static int SBM_gemm_without_allocation_test_7(NumericsMatrix **MM, double alpha,
   /* /\************************************************************************************\/
    */
 
-  NumericsMatrix *C20 = test_matrix_20();
-  NumericsMatrix *M10 = test_matrix_10();
-  NumericsMatrix *M9 = test_matrix_9();
+  NumericsMatrix* C20 = test_matrix_20();
+  NumericsMatrix* M10 = test_matrix_10();
+  NumericsMatrix* M9 = test_matrix_9();
 
   DEBUG_EXPR(NM_display(C20););
 
@@ -726,7 +726,7 @@ static int SBM_gemm_without_allocation_test_7(NumericsMatrix **MM, double alpha,
 
   DEBUG_EXPR(NM_display(C20));
   DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
-  NumericsMatrix *C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -756,7 +756,7 @@ int SBM_gemm_without_allocation_all(void) {
   printf("========= Starts Numerics tests for SBM_gemm_without_allocation ========= \n");
 
   int i, nmm = 4;
-  NumericsMatrix **NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *));
+  NumericsMatrix** NMM = (NumericsMatrix**)malloc(nmm * sizeof(NumericsMatrix*));
 
   int info = test_build_first_4_NM(NMM);
   if (info != 0) {
@@ -765,7 +765,7 @@ int SBM_gemm_without_allocation_all(void) {
   }
   printf("Construction ok ...\n");
 
-  typedef int (*func_t)(NumericsMatrix **, double, double);
+  typedef int (*func_t)(NumericsMatrix**, double, double);
   func_t funcs[] = {SBM_gemm_without_allocation_test_1, SBM_gemm_without_allocation_test_2,
                     SBM_gemm_without_allocation_test_3, SBM_gemm_without_allocation_test_4,
                     SBM_gemm_without_allocation_test_5, SBM_gemm_without_allocation_test_6,
@@ -805,22 +805,22 @@ clean_mem:
 static int SBM_multiply_test1(double tol) {
   int info = 0;
 
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   DEBUG_EXPR(SBM_print(M););
 
-  SparseBlockStructuredMatrix *C = SBM_multiply(M, M);
+  SparseBlockStructuredMatrix* C = SBM_multiply(M, M);
   DEBUG_EXPR(SBM_print(C););
 
   int n = M->blocksize0[M->blocknumber0 - 1];
   int m = M->blocksize1[M->blocknumber1 - 1];
   int nm = n * m;
 
-  double *M_dense = (double *)malloc(nm * sizeof(double));
+  double* M_dense = (double*)malloc(nm * sizeof(double));
   SBM_to_dense(M, M_dense);
 
-  double *C_dense = (double *)malloc(nm * sizeof(double));
+  double* C_dense = (double*)malloc(nm * sizeof(double));
 
   double beta = 0.0;
   double alpha = 1.0;
@@ -842,29 +842,29 @@ static int SBM_multiply_test1(double tol) {
 static int SBM_multiply_test2(double tol) {
   printf("========= Starts SBM tests SBM_multiply_test2 ========= \n");
   int info = 0;
-  NumericsMatrix *M2 = test_matrix_2();
-  SparseBlockStructuredMatrix *SBM2 = M2->matrix1;
+  NumericsMatrix* M2 = test_matrix_2();
+  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
   DEBUG_EXPR(SBM_print(SBM2););
 
-  NumericsMatrix *M10 = test_matrix_10();
-  SparseBlockStructuredMatrix *SBM10 = M10->matrix1;
+  NumericsMatrix* M10 = test_matrix_10();
+  SparseBlockStructuredMatrix* SBM10 = M10->matrix1;
   DEBUG_EXPR(SBM_print(SBM10););
 
-  SparseBlockStructuredMatrix *C2 = SBM_multiply(SBM2, SBM10);
+  SparseBlockStructuredMatrix* C2 = SBM_multiply(SBM2, SBM10);
   DEBUG_EXPR(SBM_print(C2););
 
-  SparseBlockStructuredMatrix *C3 = SBM_multiply(SBM10, SBM2);
+  SparseBlockStructuredMatrix* C3 = SBM_multiply(SBM10, SBM2);
   DEBUG_EXPR(SBM_print(C3););
 
   int n = M2->size0;
   int m = M2->size1;
   int nm = n * m;
-  double *M2_dense = (double *)malloc(nm * sizeof(double));
-  double *M10_dense = (double *)malloc(nm * sizeof(double));
+  double* M2_dense = (double*)malloc(nm * sizeof(double));
+  double* M10_dense = (double*)malloc(nm * sizeof(double));
   SBM_to_dense(SBM2, M2_dense);
   SBM_to_dense(SBM10, M10_dense);
 
-  double *C2_dense = (double *)malloc(nm * sizeof(double));
+  double* C2_dense = (double*)malloc(nm * sizeof(double));
 
   double beta = 0.0;
   double alpha = 1.0;
@@ -876,7 +876,7 @@ static int SBM_multiply_test2(double tol) {
   info = SBM_dense_equal(C2, C2_dense, tol);
   if (info == 1) return info;
 
-  double *C3_dense = (double *)malloc(nm * sizeof(double));
+  double* C3_dense = (double*)malloc(nm * sizeof(double));
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n, alpha, M10_dense, n,
               M2_dense, n, beta, C3_dense, n);
 
@@ -901,27 +901,27 @@ static int SBM_multiply_test2(double tol) {
 static int SBM_multiply_test3(double tol) {
   printf("========= Starts SBM tests SBM_multiply_test3  ========= \n");
   int info = 0;
-  NumericsMatrix *M2 = test_matrix_2();
-  SparseBlockStructuredMatrix *SBM2 = M2->matrix1;
+  NumericsMatrix* M2 = test_matrix_2();
+  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
   DEBUG_EXPR(SBM_print(SBM2););
 
-  NumericsMatrix *M4 = test_matrix_4();
-  SparseBlockStructuredMatrix *SBM4 = M4->matrix1;
+  NumericsMatrix* M4 = test_matrix_4();
+  SparseBlockStructuredMatrix* SBM4 = M4->matrix1;
   DEBUG_EXPR(SBM_print(SBM4););
 
-  SparseBlockStructuredMatrix *C2 = SBM_multiply(SBM2, SBM4);
+  SparseBlockStructuredMatrix* C2 = SBM_multiply(SBM2, SBM4);
   DEBUG_EXPR(SBM_print(C2););
 
   int n = M2->size0;
 
   int m = M4->size1;
 
-  double *M2_dense = (double *)malloc(n * n * sizeof(double));
-  double *M4_dense = (double *)malloc(n * m * sizeof(double));
+  double* M2_dense = (double*)malloc(n * n * sizeof(double));
+  double* M4_dense = (double*)malloc(n * m * sizeof(double));
   SBM_to_dense(SBM2, M2_dense);
   SBM_to_dense(SBM4, M4_dense);
 
-  double *C2_dense = (double *)malloc(n * m * sizeof(double));
+  double* C2_dense = (double*)malloc(n * m * sizeof(double));
 
   double beta = 0.0;
   double alpha = 1.0;
@@ -969,8 +969,8 @@ int SBM_multiply_test_all(void) {
 
 int test_SBM_row_permutation_all(void) {
   printf("========= Starts SBM tests 2 for SBM ========= \n");
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   /*alloc enough memory */
   int res = test_SBM_row_permutation(M);
@@ -982,7 +982,7 @@ int test_SBM_row_permutation_all(void) {
   }
 
   file = fopen("data/SBM2.dat", "r");
-  SparseBlockStructuredMatrix *M2 = SBM_new_from_file(file);
+  SparseBlockStructuredMatrix* M2 = SBM_new_from_file(file);
   fclose(file);
   res = test_SBM_row_permutation(M2);
   SBM_free(M2, SBM_FREE_ALL);
@@ -998,8 +998,8 @@ int test_SBM_row_permutation_all(void) {
 int test_SBM_row_to_dense_all(void) {
   printf("========= Starts SBM tests 1 for SBM ========= \n");
 
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   fclose(file);
   /*alloc enough memory */
   int res = test_SBM_row_to_dense(M);
@@ -1011,7 +1011,7 @@ int test_SBM_row_to_dense_all(void) {
   SBM_free(M, SBM_FREE_ALL);
 
   file = fopen("data/SBM2.dat", "r");
-  SparseBlockStructuredMatrix *M2 = SBM_new_from_file(file);
+  SparseBlockStructuredMatrix* M2 = SBM_new_from_file(file);
   fclose(file);
   res = test_SBM_row_to_dense(M2);
   if (res) {
@@ -1027,8 +1027,8 @@ int SBM_to_dense_all(void) {
   int res;
   printf("========= Starts SBM tests 4 for SBM ========= \n");
 
-  FILE *file = fopen("data/SBM2.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM2.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   SBM_print(M);
   fclose(file);
   /*alloc enough memory */
@@ -1049,7 +1049,7 @@ int SBM_to_dense_all(void) {
 
   int n = M->blocksize0[M->blocknumber0 - 1];
   int m = M->blocksize1[M->blocknumber1 - 1];
-  double *denseMat = (double *)malloc(n * m * sizeof(double));
+  double* denseMat = (double*)malloc(n * m * sizeof(double));
   SBM_to_dense(M, denseMat);
   if (res) {
     printf("========= Failed SBM tests 4 for SBM  ========= \n");
@@ -1072,8 +1072,8 @@ int SBM_to_dense_all(void) {
 int SBM_to_sparse_all(void) {
   int res;
   printf("========= Starts SBM tests 4 for SBM ========= \n");
-  FILE *file = fopen("data/SBM2.dat", "r");
-  SparseBlockStructuredMatrix *M = SBM_new_from_file(file);
+  FILE* file = fopen("data/SBM2.dat", "r");
+  SparseBlockStructuredMatrix* M = SBM_new_from_file(file);
   SBM_print(M);
   fclose(file);
   /*alloc enough memory */
@@ -1094,7 +1094,7 @@ int SBM_to_sparse_all(void) {
 
   int n = M->blocksize0[M->blocknumber0 - 1];
   int m = M->blocksize1[M->blocknumber1 - 1];
-  double *denseMat = (double *)malloc(n * m * sizeof(double));
+  double* denseMat = (double*)malloc(n * m * sizeof(double));
   SBM_to_dense(M, denseMat);
 
   printf("[");
@@ -1111,7 +1111,7 @@ int SBM_to_sparse_all(void) {
   return 0;
 }
 
-static void add_initial_value_square_1a(NumericsMatrix *M) {
+static void add_initial_value_square_1a(NumericsMatrix* M) {
   int i = 0, j = 0;
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) NM_entry(M, i, j, 1.0);
@@ -1132,7 +1132,7 @@ static void add_initial_value_square_1a(NumericsMatrix *M) {
     for (j = 6; j < 8; j++) NM_entry(M, i, j, 6.0);
   }
 }
-static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix *M) {
+static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix* M) {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) CHECK_RETURN(SBM_entry(M, i, j, 1.0));
   }
@@ -1156,12 +1156,12 @@ static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix *M) {
 static int SBM_entry_test1(double tol) {
   int info = 0;
 
-  NumericsMatrix *M2 = test_matrix_2();
+  NumericsMatrix* M2 = test_matrix_2();
 
-  NumericsMatrix *C = NM_create(NM_DENSE, M2->size0, M2->size1);
+  NumericsMatrix* C = NM_create(NM_DENSE, M2->size0, M2->size1);
   add_initial_value_square_1a(C);
 
-  NumericsMatrix *C2 = NM_create(NM_SPARSE_BLOCK, M2->size0, M2->size1);
+  NumericsMatrix* C2 = NM_create(NM_SPARSE_BLOCK, M2->size0, M2->size1);
   SBM_free(C2->matrix1, SBM_FREE_ALL);
   C2->matrix1 = SBM_zero_matrix_for_multiply(M2->matrix1, M2->matrix1);
   add_initial_value_square_SBM_1(C2->matrix1);
@@ -1176,7 +1176,7 @@ static int SBM_entry_test1(double tol) {
 }
 
 static int SBM_entry_test2(double tol) {
-  NumericsMatrix *M2 = test_matrix_2();
+  NumericsMatrix* M2 = test_matrix_2();
 
   /* CHECK_RETURN(SBM_entry(M2->matrix1,0,8,1.0)); */
   /* CHECK_RETURN(SBM_entry(M2->matrix1,8,0,1.0)); */

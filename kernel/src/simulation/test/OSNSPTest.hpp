@@ -14,16 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __OSNSPTest__
 #define __OSNSPTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class OSNSPTest : public CppUnit::TestFixture
-{
-
-private:
+class OSNSPTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(OSNSPTest);
 
@@ -37,12 +35,9 @@ private:
   void testOSNSBuild_solverid();
   void testOSNSBuild_options();
 
-
-public:
-
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

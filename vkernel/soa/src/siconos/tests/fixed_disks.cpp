@@ -17,16 +17,13 @@ using translated_disk_shape = collision::translated<disk_shape>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
-struct interaction
-    : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
 struct topo : simul::topology<disk, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
-using pointl =
-    collision::point<storage::pattern::empty_item, collision::shape::segment>;
-using pointtds =
-    collision::point<storage::pattern::empty_item, translated_disk_shape>;
+using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointtds = collision::point<storage::pattern::empty_item, translated_disk_shape>;
 struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
@@ -39,37 +36,31 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<
-          env, simulation, interaction_manager, neighborhood, space_filter,
-          io, disk, diskdisk_r, diskfdisk_r, diskfsegment_r, pointl, pointd,
-          pointtds, interaction, segment_shape, disk_shape,
-          storage::with_properties<
-              storage::wrapped<disk_shape, some::unbounded_collection>,
-              storage::wrapped<disk, some::unbounded_collection>,
-              storage::wrapped<diskdisk_r, some::unbounded_collection>,
-              storage::wrapped<diskfdisk_r, some::unbounded_collection>,
-              storage::wrapped<diskfsegment_r, some::unbounded_collection>,
-              storage::wrapped<pointl, some::unbounded_collection>,
-              storage::wrapped<pointd, some::unbounded_collection>,
-              storage::wrapped<pointtds, some::unbounded_collection>,
-              storage::wrapped<interaction, some::unbounded_collection>,
-              storage::wrapped<segment_shape, some::unbounded_collection>,
-              storage::wrapped<disk_shape, some::unbounded_collection>,
-              storage::wrapped<translated_disk_shape,
-                               some::unbounded_collection>,
-              storage::attached<disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<disk_shape>>,
-              storage::time_invariant<
-                  storage::pattern::attr_t<disk, "fext">>,
-              storage::diagonal<
-                  storage::pattern::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<storage::pattern::attr_t<
-                  typename osi::assembled_osi_t,
-                  "mass_matrix_assembled">>>> {};
+    : storage::make<env, simulation, interaction_manager, neighborhood, space_filter, io, disk,
+                    diskdisk_r, diskfdisk_r, diskfsegment_r, pointl, pointd, pointtds,
+                    interaction, segment_shape, disk_shape,
+                    storage::with_properties<
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::wrapped<disk, some::unbounded_collection>,
+                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+                        storage::wrapped<pointl, some::unbounded_collection>,
+                        storage::wrapped<pointd, some::unbounded_collection>,
+                        storage::wrapped<pointtds, some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
+                        storage::wrapped<segment_shape, some::unbounded_collection>,
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::wrapped<translated_disk_shape, some::unbounded_collection>,
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<storage::pattern::attr_t<
+                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
   using storage::pattern::wrap;
   using namespace storage;
@@ -191,14 +182,12 @@ int main(int argc, char* argv[])
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
   // std::ofstream cout("result.dat");
-  std::print(result_file,
-             "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
              simulation.current_step() * simulation.time_step(),
              storage::attr<"q">(disk1, simulation.current_step())(1),
              storage::attr<"q">(disk2, simulation.current_step())(1),
              storage::attr<"velocity">(disk1, simulation.current_step())(1),
-             storage::attr<"velocity">(disk2, simulation.current_step())(1),
-             0., 0.);
+             storage::attr<"velocity">(disk2, simulation.current_step())(1), 0., 0.);
 
   // auto& vds = storage::prop_values<config::interaction, "vd">(
   //     data, simulation.current_step());
@@ -214,24 +203,19 @@ int main(int argc, char* argv[])
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(0);
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
+      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+    } else {
       p0 = 0;
       lambda = 0;
     }
 
-    std::print(result_file,
-               "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+    std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(disk1, simulation.current_step())(1),
                storage::attr<"q">(disk2, simulation.current_step())(1),
                storage::attr<"velocity">(disk1, simulation.current_step())(1),
-               storage::attr<"velocity">(disk2, simulation.current_step())(1),
-               p0, lambda);
+               storage::attr<"velocity">(disk2, simulation.current_step())(1), p0, lambda);
   }
   //  io::close(fd);
 }

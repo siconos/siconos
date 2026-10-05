@@ -17,7 +17,6 @@
  */
 
 #include "rolling_friction_2d_compute_error.h"
-#include "rolling_friction_3d_short_names.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
@@ -26,8 +25,9 @@
 #include "NumericsMatrix.h"                 // for NM_gemv
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SiconosBlas.h"                    // for cblas_dcopy
-#include "projectionOnRollingCone.h"        // for projectionOnRollingCone
 #include "numerics_errors.h"
+#include "projectionOnRollingCone.h"  // for projectionOnRollingCone
+#include "rolling_friction_3d_short_names.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -37,8 +37,8 @@
 #endif
 
 void rolling_friction_2d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
-                                                double mur, double *restrict error,
-                                                double *worktmp) {
+                                                       double mur, double* restrict error,
+                                                       double* worktmp) {
   DEBUG_BEGIN("rolling_friction_2d_unitary_compute_and_add_error(...)\n");
   DEBUG_EXPR(NV_display(r, 3););
   DEBUG_EXPR(NV_display(u, 3););
@@ -61,9 +61,9 @@ void rolling_friction_2d_unitary_compute_and_add_error(double r[3], double u[3],
   DEBUG_END("rolling_friction_2d_unitary_compute_and_add_error(...)\n");
 }
 
-int rolling_friction_2d_compute_error(RollingFrictionContactProblem *problem, double *reaction,
-                               double *velocity, double tolerance, SolverOptions *options,
-                               double norm, double *error) {
+int rolling_friction_2d_compute_error(RollingFrictionContactProblem* problem, double* reaction,
+                                      double* velocity, double tolerance,
+                                      SolverOptions* options, double norm, double* error) {
   DEBUG_BEGIN("rolling_friction_2d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
@@ -74,8 +74,8 @@ int rolling_friction_2d_compute_error(RollingFrictionContactProblem *problem, do
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
-  double *mu = problem->mu;
-  double *mur = problem->mu_r;
+  double* mu = problem->mu;
+  double* mur = problem->mu_r;
 
   cblas_dcopy(n, problem->q, incx, velocity, incy);  // velocity <-q
   // Compute the current velocity
@@ -91,8 +91,8 @@ int rolling_friction_2d_compute_error(RollingFrictionContactProblem *problem, do
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    rolling_friction_2d_unitary_compute_and_add_error(reaction + ic3, velocity + ic3, mu[ic], mur[ic],
-                                               error, worktmp);
+    rolling_friction_2d_unitary_compute_and_add_error(reaction + ic3, velocity + ic3, mu[ic],
+                                                      mur[ic], error, worktmp);
     DEBUG_PRINTF("squared absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
   }
   *error = sqrt(*error);

@@ -1,8 +1,8 @@
 /* Debug test 4 - check local residual inside the loop */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
@@ -14,7 +14,8 @@ int main() {
   printf("=====================================================\n\n");
 
   /* Load problem */
-  FrictionContactProblem* problem = frictionContact_new_from_filename("./data/FC3D_Example1.dat");
+  FrictionContactProblem* problem =
+      frictionContact_new_from_filename("./data/FC3D_Example1.dat");
   if (!problem) {
     printf("Failed to load problem\n");
     return 1;
@@ -30,7 +31,8 @@ int main() {
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
 
   printf("Internal solver options: %p\n", (void*)options->internalSolvers[0]);
-  printf("Initial residual: %.4e\n", options->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
+  printf("Initial residual: %.4e\n",
+         options->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
 
   /* Allocate */
   double* r = (double*)calloc(nc * 3, sizeof(double));
@@ -48,7 +50,8 @@ int main() {
   printf("  Reaction: [%.4e, %.4e, %.4e, ...]\n", r[0], r[1], r[2]);
 
   /* Cleanup */
-  free(r); free(v);
+  free(r);
+  free(v);
   solver_options_delete(options);
   frictionContactProblem_free(problem);
   return 0;

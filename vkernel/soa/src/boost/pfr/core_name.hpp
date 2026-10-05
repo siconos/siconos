@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
 // Initial implementation by Bela Schaum, https://github.com/schaumb
 // The way to make it union and UB free by X-Ryl669, https://github.com/X-Ryl669
 //
@@ -13,25 +12,23 @@
 #pragma once
 
 #include <boost/pfr/detail/config.hpp>
-
 #include <boost/pfr/detail/core_name.hpp>
-
+#include <boost/pfr/detail/make_integer_sequence.hpp>
 #include <boost/pfr/detail/sequence_tuple.hpp>
 #include <boost/pfr/detail/stdarray.hpp>
-#include <boost/pfr/detail/make_integer_sequence.hpp>
-
-#include <cstddef> // for std::size_t
-
 #include <boost/pfr/tuple_size.hpp>
+#include <cstddef>  // for std::size_t
 
 /// \file boost/pfr/core_name.hpp
-/// Contains functions \forcedlink{get_name} and \forcedlink{names_as_array} to know which names each field of any \aggregate has.
+/// Contains functions \forcedlink{get_name} and \forcedlink{names_as_array} to know which
+/// names each field of any \aggregate has.
 ///
 /// \fnrefl for details.
 ///
 /// \b Synopsis:
 
-namespace boost { namespace pfr {
+namespace boost {
+namespace pfr {
 
 BOOST_PFR_BEGIN_MODULE_EXPORT
 
@@ -47,12 +44,12 @@ BOOST_PFR_BEGIN_MODULE_EXPORT
 template <std::size_t I, class T>
 constexpr
 #ifdef BOOST_PFR_DOXYGEN_INVOKED
-std::string_view
+    std::string_view
 #else
-auto
+    auto
 #endif
-get_name() noexcept {
-    return detail::get_name<T, I>();
+    get_name() noexcept {
+  return detail::get_name<T, I>();
 }
 
 // FIXME: implement this
@@ -72,25 +69,23 @@ get_name() noexcept {
 template <class T>
 constexpr
 #ifdef BOOST_PFR_DOXYGEN_INVOKED
-std::array<std::string_view, boost::pfr::tuple_size_v<T>>
+    std::array<std::string_view, boost::pfr::tuple_size_v<T>>
 #else
-auto
+    auto
 #endif
-names_as_array() noexcept {
-    return detail::make_stdarray_from_tietuple(
-        detail::tie_as_names_tuple<T>(),
-        detail::make_index_sequence< tuple_size_v<T> >(),
-        1L
-    );
+    names_as_array() noexcept {
+  return detail::make_stdarray_from_tietuple(
+      detail::tie_as_names_tuple<T>(), detail::make_index_sequence<tuple_size_v<T>>(), 1L);
 }
-
 
 /// Calls `func` for each field with its name of a `value`
 ///
 /// \param func must have one of the following signatures:
-///     * any_return_type func(std::string_view name, U&& field)                // field of value is perfect forwarded to function
+///     * any_return_type func(std::string_view name, U&& field)                // field of
+///     value is perfect forwarded to function
 ///     * any_return_type func(std::string_view name, U&& field, std::size_t i)
-///     * any_return_type func(std::string_view name, U&& value, I i)           // Here I is an `std::integral_constant<size_t, field_index>`
+///     * any_return_type func(std::string_view name, U&& value, I i)           // Here I is an
+///     `std::integral_constant<size_t, field_index>`
 ///
 /// \param value To each field of this variable will be the `func` applied.
 ///
@@ -98,16 +93,18 @@ names_as_array() noexcept {
 /// \code
 ///     struct Toto { int a; char c; };
 ///     Toto t {5, 'c'};
-///     auto print = [](std::string_view name, const auto& value){ std::cout << "Name: " << name << " Value: " << value << std::endl; };
-///     for_each_field_with_name(t, print);
+///     auto print = [](std::string_view name, const auto& value){ std::cout << "Name: " <<
+///     name << " Value: " << value << std::endl; }; for_each_field_with_name(t, print);
 /// \endcode
 template <class T, class F>
 constexpr void for_each_field_with_name(T&& value, F&& func) {
-    return boost::pfr::detail::for_each_field_with_name(std::forward<T>(value), std::forward<F>(func));
+  return boost::pfr::detail::for_each_field_with_name(std::forward<T>(value),
+                                                      std::forward<F>(func));
 }
 
 BOOST_PFR_END_MODULE_EXPORT
 
-}} // namespace boost::pfr
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_CORE_NAME_HPP
+#endif  // BOOST_PFR_CORE_NAME_HPP

@@ -36,9 +36,9 @@
 #include "NumericsVector.h"
 #endif
 
-static int determine_convergence(double error, double *tolerance, int iter,
-                                 SolverOptions *options, VariationalInequality *problem,
-                                 double *z, double *w, double rho)
+static int determine_convergence(double error, double* tolerance, int iter,
+                                 SolverOptions* options, VariationalInequality* problem,
+                                 double* z, double* w, double rho)
 
 {
   int hasNotConverged = 1;
@@ -91,8 +91,8 @@ static int determine_convergence(double error, double *tolerance, int iter,
   return hasNotConverged;
 }
 
-static double compute_error(VariationalInequality *problem, double *z, double *w,
-                            double norm_z_z_k, double tolerance, SolverOptions *options) {
+static double compute_error(VariationalInequality* problem, double* z, double* w,
+                            double norm_z_z_k, double tolerance, SolverOptions* options) {
   double error;
   if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL)
     variationalInequality_computeError(problem, z, w, tolerance, options, &error);
@@ -114,13 +114,13 @@ static double compute_error(VariationalInequality *problem, double *z, double *w
   }
   return error;
 }
-void variationalInequality_ExtraGradient(VariationalInequality *problem, double *x, double *w,
-                                         int *info, SolverOptions *options) {
+void variationalInequality_ExtraGradient(VariationalInequality* problem, double* x, double* w,
+                                         int* info, SolverOptions* options) {
   // verbose=1;
   DEBUG_BEGIN("variationalInequality_ExtraGradient(VariationalInequality* problem, ...)\n")
   /* /\* int and double parameters *\/ */
-  int *iparam = options->iparam;
-  double *dparam = options->dparam;
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
   /* Number of contacts */
   int n = problem->size;
   /* Maximum number of iterations */
@@ -135,8 +135,8 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double *xtmp = (double *)calloc(n, sizeof(double));
-  double *wtmp = (double *)calloc(n, sizeof(double));
+  double* xtmp = (double*)calloc(n, sizeof(double));
+  double* wtmp = (double*)calloc(n, sizeof(double));
 
   double rho = 0.0, rho_k = 0.0;
   int isVariable = 0;
@@ -168,12 +168,12 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
   double tau = dparam[SICONOS_VI_DPARAM_LS_TAU], tauinv = dparam[SICONOS_VI_DPARAM_LS_TAUINV],
          L = dparam[SICONOS_VI_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_DPARAM_LS_LMIN];
   double a1 = 0.0, a2 = 0.0;
-  double *x_k = 0;
-  double *w_k = 0;
+  double* x_k = 0;
+  double* w_k = 0;
 
   if (isVariable) {
-    x_k = (double *)malloc(n * sizeof(double));
-    w_k = (double *)malloc(n * sizeof(double));
+    x_k = (double*)malloc(n * sizeof(double));
+    w_k = (double*)malloc(n * sizeof(double));
   }
   /* memcpy(x,x_k,n * sizeof(double)); */
   /* memcpy(w,w_k,n * sizeof(double)); */
@@ -446,7 +446,7 @@ void variationalInequality_ExtraGradient(VariationalInequality *problem, double 
   DEBUG_END("variationalInequality_ExtraGradient(VariationalInequality* problem, ...)\n")
 }
 
-void variationalInequality_ExtraGradient_set_default(SolverOptions *options) {
+void variationalInequality_ExtraGradient_set_default(SolverOptions* options) {
   options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO;
   /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
   options->iparam[SICONOS_VI_IPARAM_DECREASE_RHO] =
@@ -469,20 +469,20 @@ void variationalInequality_ExtraGradient_set_default(SolverOptions *options) {
  * ===========================================================================
  */
 
-static int vi_eg_init_wrap(void *problem, SolverOptions *options) {
+static int vi_eg_init_wrap(void* problem, SolverOptions* options) {
   /* set_default already called by solver_options_create */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int vi_eg_solve_wrap(void *problem, double *x, double *F, SolverOptions *options) {
+static int vi_eg_solve_wrap(void* problem, double* x, double* F, SolverOptions* options) {
   int info = NUMERICS_OK;
-  variationalInequality_ExtraGradient((VariationalInequality *)problem, x, F, &info, options);
+  variationalInequality_ExtraGradient((VariationalInequality*)problem, x, F, &info, options);
   return info;
 }
 
-static void vi_eg_free_wrap(void *problem, SolverOptions *options) {
+static void vi_eg_free_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
 }

@@ -62,8 +62,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeH_NE_(double time, siconos::modeling::Interaction &inter,
-                            const siconos::algebra::BlockVector &q0) override;
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
   /** Cross product matrices that correspond the lever arm from
    *  contact point to center of mass  - Internal buffer*/
@@ -81,10 +81,10 @@ class NewtonEuler1DR : public NewtonEulerR {
   Eigen::RowVector3d rotationAbsoluteToContactFrame_ = Eigen::RowVector3d::Zero();
 
   void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7> &q1);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
   void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7> &q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector7> &q2);
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
 
  public:
   using NewtonEulerR::NewtonEulerR;
@@ -99,7 +99,7 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   virtual ~NewtonEuler1DR() noexcept = default;
 
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** Default implementation consists in multiplying jachq and T (see
    *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
@@ -108,8 +108,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeH_NE_prod_T(const Interaction &inter,
-                          const siconos::algebra::BlockVector &q0) override;
+  void computeH_NE_prod_T(const Interaction& inter,
+                          const siconos::algebra::BlockVector& q0) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation
@@ -122,8 +122,8 @@ class NewtonEuler1DR : public NewtonEulerR {
       \param[in,out] y the resulting vector
    */
   void computehFromRelativeContactPoints(
-      double time, const Eigen::Ref<const siconos::algebra::SiconosVector7> &q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>> &q2,
+      double time, const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
@@ -133,34 +133,34 @@ class NewtonEuler1DR : public NewtonEulerR {
     return siconos::algebra::ConstMapVector3Type(contactPoint1_.data(), 3);
   }
 
-  inline const siconos::algebra::SiconosVector3 &pc2() const { return contactPoint2_; }
+  inline const siconos::algebra::SiconosVector3& pc2() const { return contactPoint2_; }
 
-  inline const siconos::algebra::SiconosVector3 &nc() const { return nc_; }
+  inline const siconos::algebra::SiconosVector3& nc() const { return nc_; }
 
-  inline const siconos::algebra::SiconosVector3 &relPc1() const { return relPc1_; }
-  inline const siconos::algebra::SiconosVector3 &relPc2() const { return relPc2_; }
-  inline const siconos::algebra::SiconosVector3 &relNc() const { return relNc_; }
+  inline const siconos::algebra::SiconosVector3& relPc1() const { return relPc1_; }
+  inline const siconos::algebra::SiconosVector3& relPc2() const { return relPc2_; }
+  inline const siconos::algebra::SiconosVector3& relNc() const { return relNc_; }
 
   /** Set the coordinates of first contact point in ds1 frame.
    *  It will be used to compute contactPoint1_ during computeh().
    *
    *  \param npc new coordinates
    */
-  void setRelPc1(const siconos::algebra::SiconosVector3 &npc) { relPc1_ = npc; };
+  void setRelPc1(const siconos::algebra::SiconosVector3& npc) { relPc1_ = npc; };
 
   /** Set the coordinates of second contact point in ds2 frame
    *  It will be used to compute contactPoint2_ during computeh().
    *
    *  \param npc new coordinates
    */
-  void setRelPc2(const siconos::algebra::SiconosVector3 &npc) { relPc2_ = npc; };
+  void setRelPc2(const siconos::algebra::SiconosVector3& npc) { relPc2_ = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
    *  frame. It will be used to compute _Nc during computeh().
    *
    *  \param nnc new coordinates
    */
-  void setRelNc(const siconos::algebra::SiconosVector3 &nnc) { relNc_ = nnc; };
+  void setRelNc(const siconos::algebra::SiconosVector3& nnc) { relNc_ = nnc; };
 
   /** Compute current contact points from relative contact points stored in cohesive zone model
    *  This is used for cohesive zone models to track the evolution of contact points.
@@ -178,20 +178,16 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param t2 computed absolute tangent 2 (output)
    */
   void computeContactPointsFromRelativeContactPoints(
-      const siconos::algebra::BlockVector &q0,
-      const siconos::algebra::SiconosVector3 &r_pc1,
-      const siconos::algebra::SiconosVector3 &r_pc2,
-      const siconos::algebra::SiconosVector3 &r_nc,
-      const siconos::algebra::SiconosVector3 &r_t1,
-      const siconos::algebra::SiconosVector3 &r_t2,
-      siconos::algebra::SiconosVector3 &pc1,
-      siconos::algebra::SiconosVector3 &pc2,
-      siconos::algebra::SiconosVector3 &nc,
-      siconos::algebra::SiconosVector3 &t1,
-      siconos::algebra::SiconosVector3 &t2);
+      const siconos::algebra::BlockVector& q0, const siconos::algebra::SiconosVector3& r_pc1,
+      const siconos::algebra::SiconosVector3& r_pc2,
+      const siconos::algebra::SiconosVector3& r_nc,
+      const siconos::algebra::SiconosVector3& r_t1,
+      const siconos::algebra::SiconosVector3& r_t2, siconos::algebra::SiconosVector3& pc1,
+      siconos::algebra::SiconosVector3& pc2, siconos::algebra::SiconosVector3& nc,
+      siconos::algebra::SiconosVector3& t1, siconos::algebra::SiconosVector3& t2);
 
   void display() const override {}
-  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif

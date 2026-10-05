@@ -18,8 +18,8 @@
 #ifndef ContactShapeDistance_hpp
 #define ContactShapeDistance_hpp
 
-#include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
+#include <gp_Pnt.hxx>
 namespace siconos::mechanics::occ {
 
 struct ContactShapeDistance {
@@ -41,14 +41,13 @@ struct ContactShapeDistance {
   gp_Pnt point2;
   gp_Dir normal;
 
-  bool orientates(){
-  if(gp_Vec{point1.Coord() - point2.Coord()}.Dot(normal) < 0.){
-    normal.Reverse();
-    return true;
+  bool orientates() {
+    if (gp_Vec{point1.Coord() - point2.Coord()}.Dot(normal) < 0.) {
+      normal.Reverse();
+      return true;
+    }
+    return false;
   }
-  return false;
-  }
-
 };
 }  // namespace siconos::mechanics::occ
 

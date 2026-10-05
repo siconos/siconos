@@ -27,14 +27,12 @@ template <typename F>
 struct recursive {
   F f;
   template <typename... Ts>
-  constexpr decltype(auto) operator()(Ts&&... ts) const
-  {
+  constexpr decltype(auto) operator()(Ts&&... ts) const {
     return f(std::ref(*this), std::forward<Ts>(ts)...);
   }
 
   template <typename... Ts>
-  constexpr decltype(auto) operator()(Ts&&... ts)
-  {
+  constexpr decltype(auto) operator()(Ts&&... ts) {
     return f(std::ref(*this), std::forward<Ts>(ts)...);
   }
 };
@@ -42,14 +40,11 @@ struct recursive {
 template <typename F>
 recursive(F) -> recursive<F>;
 
-static auto const rec = [](auto f) constexpr {
-  return recursive{std::move(f)};
-};
+static auto const rec = [](auto f) constexpr { return recursive{std::move(f)}; };
 
 static auto proj = [](auto& data) constexpr -> decltype(auto) {
   return ([&data](auto&& fun) constexpr -> decltype(auto) {
-    return ([&data,
-             &fun]<typename... As>(As&&... args) constexpr -> decltype(auto) {
+    return ([&data, &fun]<typename... As>(As&&... args) constexpr -> decltype(auto) {
       return fun(std::forward<As>(args)..., data);
     });
   });
@@ -69,16 +64,14 @@ static auto car = []<typename Tpl>(Tpl tpl) constexpr {
 // static_assert(std::is_same_v<decltype(car(gather<int, float, char>{})),
 // int>);
 
-static auto cdr =
-    []<typename A0, typename... As>(mp::tuple<A0, As...> tpl) constexpr {
-      return mp::drop_front(tpl, mp::size_c<1_c>);
-    };
+static auto cdr = []<typename A0, typename... As>(mp::tuple<A0, As...> tpl) constexpr {
+  return mp::drop_front(tpl, mp::size_c<1_c>);
+};
 
 // static_assert(std::is_same_v<decltype(cdr(gather<int, float, char>{})),
 //                              gather<float, char>>);
 
-static auto cons = []<typename A, typename... As>(
-                       A a, mp::tuple<As...> tpl) constexpr {
+static auto cons = []<typename A, typename... As>(A a, mp::tuple<As...> tpl) constexpr {
   return mp::insert(tpl, 0_c, a);
 };
 
@@ -158,14 +151,12 @@ struct hold {
   static constexpr auto value = T{};
 };
 template <typename T>
-static constexpr auto make_instance(T&&)
-{
+static constexpr auto make_instance(T&&) {
   return instance<T>;
 };
 
 template <typename U>
-static auto contains_type =
-    []<typename... Attrs>(gather<Attrs...>) constexpr -> bool {
+static auto contains_type = []<typename... Attrs>(gather<Attrs...>) constexpr -> bool {
   return (std::is_same_v<U, Attrs> || ...);
 };
 
@@ -188,23 +179,20 @@ template <typename T>
 concept attribute = requires { typename T::attribute_t; };
 
 template <typename T>
-concept attribute_with_internal_type =
-    attribute<T> && requires { typename T::type; };
+concept attribute_with_internal_type = attribute<T> && requires { typename T::type; };
 
 template <typename T>
 concept attribute_or_item = attribute<T> || item<T>;
 
 template <typename T, typename I>
-concept attached_storage =
-    requires { typename T::tag; } && attribute<T> && item<I> &&
-    (std::derived_from<I, typename T::item> ||
-     std::derived_from<typename T::item, I>
-     // wrap case
-     || std::derived_from<typename I::type, typename T::item>);
+concept attached_storage = requires { typename T::tag; } && attribute<T> && item<I> &&
+                           (std::derived_from<I, typename T::item> ||
+                            std::derived_from<typename T::item, I>
+                            // wrap case
+                            || std::derived_from<typename I::type, typename T::item>);
 
 template <typename T>
-concept item_property =
-    requires { typename T::item; } && std::derived_from<T, some::property>;
+concept item_property = requires { typename T::item; } && std::derived_from<T, some::property>;
 
 template <typename T, typename Tag>
 concept tag = std::derived_from<typename T::tag, Tag>;
@@ -219,14 +207,12 @@ template <typename T>
 concept bounded_storage = std::derived_from<T, some::bounded_storage>;
 
 template <typename T>
-concept abstract_vector =
-    std::derived_from<T, some::undefined_vector> ||
-    std::derived_from<T, some::undefined_unbounded_vector>;
+concept abstract_vector = std::derived_from<T, some::undefined_vector> ||
+                          std::derived_from<T, some::undefined_unbounded_vector>;
 
 template <typename T>
-concept abstract_matrix =
-    std::derived_from<T, some::undefined_matrix> ||
-    std::derived_from<T, some::undefined_unbounded_matrix>;
+concept abstract_matrix = std::derived_from<T, some::undefined_matrix> ||
+                          std::derived_from<T, some::undefined_unbounded_matrix>;
 
 template <typename T, std::size_t N>
 concept cvector = requires(T a) { a[N - 1]; };
@@ -238,8 +224,8 @@ template <typename T, typename K>
 concept property_of = property<T> && property<K> && std::derived_from<T, K>;
 
 template <typename T, typename Ks>
-concept any_of_property = mp::any_of(
-    Ks{}, []<match::property K>(K) { return std::derived_from<T, K>; });
+concept any_of_property =
+    mp::any_of(Ks{}, []<match::property K>(K) { return std::derived_from<T, K>; });
 
 }  // namespace match
 
@@ -270,12 +256,11 @@ struct frame {
   using args = gather<Args...>;
 
   static constexpr std::size_t dof =
-      mp::find_if(args{},
-                  []<typename T>(T) { return degrees_of_freedom_p<T>{}; })
-          .value_or([]<bool flag = false>() {
-            static_assert(flag, "need some dof");
-          })
-          .value;
+      mp::find_if(args{}, []<typename T>(T) {
+        return degrees_of_freedom_p<T>{};
+      }).value_or([]<bool flag = false>() {
+          static_assert(flag, "need some dof");
+        }).value;
 };
 
 struct item {
@@ -285,8 +270,7 @@ struct item {
 
   template <typename H>
   struct interface {
-    decltype(auto) self()
-    {
+    decltype(auto) self() {
       return static_cast<H*>(this);  // handle inherits from default_interface
     }
   };
@@ -300,8 +284,7 @@ struct any_wrapper {};
 struct any_bounded_wrapper : any_wrapper {};
 struct any_unbounded_wrapper : any_wrapper {};
 
-template <template <typename... Ts> typename Wrapper, match::item Item,
-          typename... Args>
+template <template <typename... Ts> typename Wrapper, match::item Item, typename... Args>
 struct wrap : Wrapper<Item, Args...>, Item, any_wrapper {
   using wrap_t = void;
   template <typename T>
@@ -330,8 +313,7 @@ concept vertex_item_t = requires(T t) {
 
 // Helper to build compile-time string from string_view
 template <std::size_t N>
-consteval auto string_view_to_fixed_string(std::string_view sv)
-{
+consteval auto string_view_to_fixed_string(std::string_view sv) {
   return [&sv]<std::size_t... Is>(std::index_sequence<Is...>) {
     const char arr[N] = {(Is < sv.size() ? sv[Is] : '\0')...};
     return string_literal<N>{arr};
@@ -375,10 +357,8 @@ struct pfr_field_attr {
 
 // Convert entire struct to gather<>
 template <typename AttrStruct>
-using struct_to_gather = decltype([]<std::size_t... Is>(
-                                      std::index_sequence<Is...>) {
-  return gather<
-      typename detail::pfr_field_attr<AttrStruct, Is>::attribute_type...>{};
+using struct_to_gather = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+  return gather<typename detail::pfr_field_attr<AttrStruct, Is>::attribute_type...>{};
 }(std::make_index_sequence<boost::pfr::tuple_size_v<AttrStruct>>{}));
 
 // association for non nested type (should be the default now)
@@ -390,9 +370,8 @@ struct paired : A {
 
 namespace match {
 template <typename PairedA, typename PairedB>
-concept paired_similar =
-    std::derived_from<typename PairedA::type, typename PairedB::type> ||
-    std::derived_from<typename PairedB::type, typename PairedA::type>;
+concept paired_similar = std::derived_from<typename PairedA::type, typename PairedB::type> ||
+                         std::derived_from<typename PairedB::type, typename PairedA::type>;
 
 template <typename T>
 concept paired = requires { typename T::paired_t; };
@@ -401,16 +380,14 @@ concept paired = requires { typename T::paired_t; };
 namespace must {
 
 template <typename T, typename Tpl>
-concept contains_similar_attribute =
-    mp::any_of(Tpl{}, []<match::attribute A>(A) -> bool {
-      if constexpr (match::paired<A> && match::paired<T>) {
-        return std::derived_from<typename T::item, typename A::item> ||
-               std::derived_from<typename A::item, typename T::item>;
-      }
-      else {
-        return std::is_same_v<T, A>;
-      }
-    })();
+concept contains_similar_attribute = mp::any_of(Tpl{}, []<match::attribute A>(A) -> bool {
+  if constexpr (match::paired<A> && match::paired<T>) {
+    return std::derived_from<typename T::item, typename A::item> ||
+           std::derived_from<typename A::item, typename T::item>;
+  } else {
+    return std::is_same_v<T, A>;
+  }
+})();
 
 }  // namespace must
 
@@ -420,49 +397,39 @@ concept named_item = item<T> && std::derived_from<T, any_symbol>;
 }
 
 template <match::item Item, match::attribute A>
-static constexpr decltype(auto) named_attribute_maybe(Item, A)
-{
+static constexpr decltype(auto) named_attribute_maybe(Item, A) {
   // Always attach Item (or its underlying type) to make attributes unique per
   // item
   if constexpr (match::wrap<Item>) {
     return paired<typename Item::type, A>{};
-  }
-  else if constexpr (match::named_item<Item>) {
+  } else if constexpr (match::named_item<Item>) {
     return paired<typename Item::item, A>{};
-  }
-  else {
+  } else {
     return paired<Item, A>{};  // Always pair, never return A{}
   }
 }
 
-static auto attributes =
-    []<match::item Item>(Item) constexpr -> decltype(auto) {
+static auto attributes = []<match::item Item>(Item) constexpr -> decltype(auto) {
   if constexpr (std::is_aggregate_v<typename Item::attributes>) {
     auto unpaired_attrs = struct_to_gather<typename Item::attributes>{};
-    return mp::transform(unpaired_attrs,
-                         [&]<typename A>(A) { return paired<Item, A>{}; });
-  }
-  else if constexpr (match::attributes<Item>) {
-    return mp::transform(typename Item::attributes{},
-                         [&]<match::attribute A>(A) {
-                           return named_attribute_maybe(Item{}, A{});
-                         });
-  }
-  else {
+    return mp::transform(unpaired_attrs, [&]<typename A>(A) { return paired<Item, A>{}; });
+  } else if constexpr (match::attributes<Item>) {
+    return mp::transform(typename Item::attributes{}, [&]<match::attribute A>(A) {
+      return named_attribute_maybe(Item{}, A{});
+    });
+  } else {
     return gather<>{};
   }
 };
 
 template <typename Attrs, string_literal S>
-using get_attr_t = std::decay_t<decltype(mp::filter(
-    Attrs{}, mp::derive_from<symbol<S>>)[0_c])>;
+using get_attr_t =
+    std::decay_t<decltype(mp::filter(Attrs{}, mp::derive_from<symbol<S>>)[0_c])>;
 
-static auto properties =
-    []<match::item Item>(Item) constexpr -> decltype(auto) {
+static auto properties = []<match::item Item>(Item) constexpr -> decltype(auto) {
   if constexpr (match::properties<Item>) {
     return typename Item::properties{};
-  }
-  else {
+  } else {
     return gather<>{};
   }
 };
@@ -470,9 +437,8 @@ static auto properties =
 static auto is_a_ref =
     mp::is_a_model<[]<typename T>() consteval { return match::item_ref<T>; }>;
 
-static auto is_a_poly_ref = mp::is_a_model<[]<typename T>() consteval {
-  return match::polymorphic_type<T>;
-}>;
+static auto is_a_poly_ref =
+    mp::is_a_model<[]<typename T>() consteval { return match::polymorphic_type<T>; }>;
 
 static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
   using type_t = std::decay_t<decltype(root_item)>;
@@ -481,44 +447,36 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
     if constexpr (match::attributes<type_t>) {
       return transform(mp::filter(attributes(root_item), is_a_ref),
                        []<typename T>(T) { return typename T::type{}; });
-    }
-    else {
+    } else {
       return gather<>{};
     }
   };
 
   auto poly_ref = [&root_item]() {
     if constexpr (match::attributes<type_t>) {
-      return transform(flatten(transform(
-                           mp::filter(attributes(root_item), is_a_poly_ref),
-                           []<typename T>(T) { return typename T::type{}; })),
+      return transform(flatten(transform(mp::filter(attributes(root_item), is_a_poly_ref),
+                                         []<typename T>(T) { return typename T::type{}; })),
                        []<typename T>(T) { return typename T::type{}; });
-    }
-    else {
+    } else {
       return gather<>{};
     }
   };
 
   if constexpr (match::items<type_t>) {
-    return cons(root_item, flatten(transform(
-                               concat(items_ref(), typename type_t::items{}),
-                               all_items)));
-  }
-  else {
-    return cons(root_item, flatten(transform(concat(items_ref(), poly_ref()),
-                                             all_items)));
+    return cons(root_item,
+                flatten(transform(concat(items_ref(), typename type_t::items{}), all_items)));
+  } else {
+    return cons(root_item, flatten(transform(concat(items_ref(), poly_ref()), all_items)));
     ;
   }
 });
 
 static auto all_attributes = []<match::item Item>(Item) constexpr {
-  return mp::tuple_unique(
-      mp::concat_all(transform(all_items(Item{}), attributes)));
+  return mp::tuple_unique(mp::concat_all(transform(all_items(Item{}), attributes)));
 };
 
 static auto all_properties = []<match::item Item>(Item) constexpr {
-  return mp::tuple_unique(
-      mp::concat_all(transform(all_items(Item{}), properties)));
+  return mp::tuple_unique(mp::concat_all(transform(all_items(Item{}), properties)));
 };
 
 //  template<typename K>
@@ -537,40 +495,34 @@ concept index = requires { typename I::index_t; };
 template <typename H, typename A>
 concept handle_attribute =
     attribute<A> && item<typename H::type> &&
-    must::contains<A, decltype(siconos::storage::pattern::attributes(
-                          typename H::type{}))>;
+    must::contains<A, decltype(siconos::storage::pattern::attributes(typename H::type{}))>;
 
 template <typename H, typename A>
 concept handle_attached_storage =
     item<typename H::type> &&
-    std::tuple_size_v<
-        std::decay_t<decltype(filter<hold<decltype([]<typename T>(T) {
-          return (match::attached_storage<T, typename H::type> &&
-                  match::tag<T, A>);
-        })>>(typename H::info_t::all_properties_t{}))>> >=
-        1;  // not an attached storage
+    std::tuple_size_v<std::decay_t<decltype(filter<hold<decltype([]<typename T>(T) {
+      return (match::attached_storage<T, typename H::type> && match::tag<T, A>);
+    })>>(typename H::info_t::all_properties_t{}))>> >= 1;  // not an attached storage
 
 template <typename T, typename I>
-concept attribute_of =
-    attribute<T> && item<I> &&
-    must::contains<T, decltype(siconos::storage::pattern::attributes(I{}))>;
+concept attribute_of = attribute<T> && item<I> &&
+                       must::contains<T, decltype(siconos::storage::pattern::attributes(I{}))>;
 }  // namespace match
 namespace types {
 template <template <typename T> typename Transform, typename... Args>
-using transform = decltype(transform(
-    []<typename A>(A) { return Transform<A>{}; }, gather<Args...>{}));
+using transform =
+    decltype(transform([]<typename A>(A) { return Transform<A>{}; }, gather<Args...>{}));
 template <match::attribute... Attrs>
 using attributes = gather<Attrs...>;
 
 template <match::item... Items>
-using properties_of_items =
-    decltype(mp::concat_all(typename Items::properties{}...));
+using properties_of_items = decltype(mp::concat_all(typename Items::properties{}...));
 
 }  // namespace types
 
 template <match::item... Items>
-using attributes_of_items = decltype(mp::concat_all(
-    siconos::storage::pattern::attributes(Items{})...));
+using attributes_of_items =
+    decltype(mp::concat_all(siconos::storage::pattern::attributes(Items{})...));
 
 template <string_literal S>
 struct indice_value : symbol<S> {
@@ -600,50 +552,38 @@ static auto item_attribute = [](auto items) constexpr {
 
     if constexpr (match::attribute_of<Attr, item_t>) {
       return item_t{};
-    }
-    else if constexpr (match::attached_storage<Attr, item_t>) {
+    } else if constexpr (match::attached_storage<Attr, item_t>) {
       return item_t{};
-    }
-    else if constexpr (mp::size(tpl_t{}) > mp::size_c<1>) {
+    } else if constexpr (mp::size(tpl_t{}) > mp::size_c<1>) {
       return loop(cdr(tpl));
-    }
-    else {
-      []<typename Attribute = Attr, typename LastItem = item_t,
-         typename Items = items_t, bool flag = false>() {
-        static_assert(flag, "item not found");
-      }();
+    } else {
+      []<typename Attribute = Attr, typename LastItem = item_t, typename Items = items_t,
+         bool flag = false>() { static_assert(flag, "item not found"); }();
     }
   });
 
   return loop(items);
 };
 
-static auto constexpr attribute_name(match::attribute auto a)
-{
-  return a.str.value;
-};
+static auto constexpr attribute_name(match::attribute auto a) { return a.str.value; };
 
 template <typename... Ts>
-std::tuple<Ts...> collect(Ts... ts)
-{
+std::tuple<Ts...> collect(Ts... ts) {
   return std::make_tuple(ts...);
 };
 
 template <typename F>
-auto method(auto s, F f, auto doc)
-{
+auto method(auto s, F f, auto doc) {
   return std::make_tuple(s, f, doc);
 };
 
 template <typename F>
-auto method(auto s, F f)
-{
+auto method(auto s, F f) {
   return std::make_tuple(s, f);
 };
 
 template <typename Tpl1, typename Tpl2>
-auto concat_methods(Tpl1 m1, Tpl2 m2)
-{
+auto concat_methods(Tpl1 m1, Tpl2 m2) {
   return std::tuple_cat(m1, m2);
 }
 
@@ -661,16 +601,15 @@ static auto constexpr method_def(auto m) { return std::get<1>(m); }
 
 namespace match {
 template <typename T>
-concept npy_format = (requires { typename T::value_type; } &&
-                      std::is_scalar_v<typename T::value_type>) ||
-                     requires { typename T; };
+concept npy_format =
+    (requires { typename T::value_type; } && std::is_scalar_v<typename T::value_type>) ||
+    requires { typename T; };
 
 template <typename D>
 concept store = requires(D d) { d.store(); };
 
 template <typename Item>
-concept without_attributes_bindings =
-    requires { typename Item::without_attributes_bindings; };
+concept without_attributes_bindings = requires { typename Item::without_attributes_bindings; };
 
 template <typename Item>
 concept without_attached_storages_bindings =
@@ -689,12 +628,11 @@ template <typename Item, typename Symb>
 concept with_attribute = requires {
   // Check that filter returns at least one element
   {
-    mp::size(mp::filter(storage::pattern::attributes(Item{}),
-                        mp::derive_from<Symb>))
+    mp::size(mp::filter(storage::pattern::attributes(Item{}), mp::derive_from<Symb>))
   } -> std::convertible_to<std::size_t>;
   requires(mp::size(mp::filter(storage::pattern::attributes(Item{}),
                                mp::derive_from<Symb>)) > mp::size_c<0_c>)
-  .value; // hana specific => hide under mp.hpp
+              .value;  // hana specific => hide under mp.hpp
 };
 
 }  // namespace match
@@ -704,8 +642,8 @@ struct empty_item : item {
 };
 
 template <match::item Item, string_literal S>
-using attr_t = std::decay_t<decltype(mp::filter(
-    attributes(Item{}), mp::derive_from<symbol<S>>)[0_c])>;
+using attr_t =
+    std::decay_t<decltype(mp::filter(attributes(Item{}), mp::derive_from<symbol<S>>)[0_c])>;
 
 template <match::item Item, string_literal S>
   requires match::with_attribute<Item, symbol<S>>

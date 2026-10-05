@@ -29,8 +29,7 @@ using SiconosMemory = siconos::algebra::SiconosMemory;
 
 constexpr auto sizeVect = 3;
 
-void SiconosMemoryTest::setUp()
-{
+void SiconosMemoryTest::setUp() {
   _sizeMem = 3;
 
   std::vector<double> v(sizeVect);
@@ -48,8 +47,7 @@ void SiconosMemoryTest::setUp()
   q1 = std::make_shared<siconos::algebra::SiconosVector>(v.size());
   q2 = std::make_shared<siconos::algebra::SiconosVector>(w.size());
   q3 = std::make_shared<siconos::algebra::SiconosVector>(z.size());
-  for (int i = 0; i < 3; i++)
-  {
+  for (int i = 0; i < 3; i++) {
     (*q1)(i) = v[i];
     (*q2)(i) = w[i];
     (*q3)(i) = z[i];
@@ -77,8 +75,7 @@ void SiconosMemoryTest::setUp()
 void SiconosMemoryTest::tearDown() {}
 
 // Constructor: data=memorySize
-void SiconosMemoryTest::testBuildMemory1()
-{
+void SiconosMemoryTest::testBuildMemory1() {
   std::cout << "=====================================" << std::endl;
   std::cout << "===  SiconosMemory tests start ...=== " << std::endl;
   std::cout << "=====================================" << std::endl;
@@ -93,8 +90,7 @@ void SiconosMemoryTest::testBuildMemory1()
 }
 
 // setVectorMemory
-void SiconosMemoryTest::testSetVectorMemory()
-{
+void SiconosMemoryTest::testSetVectorMemory() {
   std::cout << "--> Test: setVectorMemory." << std::endl;
   //  auto tmp1=std::make_shared<SiconosMemory(*V1);
   //
@@ -108,8 +104,7 @@ void SiconosMemoryTest::testSetVectorMemory()
 }
 
 // getSiconosVector
-void SiconosMemoryTest::testGetSiconosVector()
-{
+void SiconosMemoryTest::testGetSiconosVector() {
   std::cout << "--> Test: getSiconosVector." << std::endl;
   auto tmp1 = std::make_shared<SiconosMemory>(2, sizeVect);
   tmp1->swap((*V1)[0]);
@@ -124,8 +119,7 @@ void SiconosMemoryTest::testGetSiconosVector()
 
 // swap
 
-void SiconosMemoryTest::testSwap()
-{
+void SiconosMemoryTest::testSwap() {
   std::cout << "--> Test: swap." << std::endl;
   auto tmp1 = std::make_shared<SiconosMemory>(2, sizeVect);
   tmp1->swap(((*V1)[0]));
@@ -150,8 +144,7 @@ void SiconosMemoryTest::testSwap()
   std::cout << "-->  swap test ended with success." << std::endl;
 }
 
-void SiconosMemoryTest::End()
-{
+void SiconosMemoryTest::End() {
   //   std::cout <<"======================================" <<std::endl;
   //   std::cout <<" ===== End of SiconosMemory Tests ===== " <<std::endl;
   //   std::cout <<"======================================" <<std::endl;

@@ -36,8 +36,8 @@ void project_on_box(int n, double* restrict z, double* restrict lb, double* rest
   }
 }
 
-int relay_compute_error(RelayProblem* problem, const double* restrict z, const double* restrict w,
-                        double tolerance, double* restrict error) {
+int relay_compute_error(RelayProblem* problem, const double* restrict z,
+                        const double* restrict w, double tolerance, double* restrict error) {
   /* Checks inputs */
   CHECK_NULL(problem);
   CHECK_NULL(z);

@@ -14,19 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "RegularTwisting.hpp"
 
-
-siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor, double gain, double beta):
-  Twisting(sensor, gain, beta, 0.)
-{
+siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor,
+                                                   double gain, double beta)
+    : Twisting(sensor, gain, beta, 0.) {
   _type = ActuatorType::RegularTwisting;
 }
 
-siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor):
-  Twisting(sensor, 0.)
-{
+siconos::control::RegularTwisting::RegularTwisting(std::shared_ptr<ControlSensor> sensor)
+    : Twisting(sensor, 0.) {
   _type = ActuatorType::RegularTwisting;
 }

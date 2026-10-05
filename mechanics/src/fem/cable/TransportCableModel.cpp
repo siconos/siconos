@@ -23,10 +23,11 @@
 
 using json = nlohmann::json;
 
-siconos::fem::cable::TransportCableModel::TransportCableModel(const nlohmann::json &input)
+siconos::fem::cable::TransportCableModel::TransportCableModel(const nlohmann::json& input)
     : m_carriers(input.at("carriers")) {
   // -- Read cable (mechanical properties) and carriers (vehicle positions) --
-  if (!input.contains("mechanicalProperties")) throw std::runtime_error("Missing 'cable' key in json input.");
+  if (!input.contains("mechanicalProperties"))
+    throw std::runtime_error("Missing 'cable' key in json input.");
 
   if (!input.contains("carriers"))
     throw std::runtime_error("Missing 'carriers' key in json input.");
@@ -51,10 +52,10 @@ siconos::fem::cable::TransportCableModel::TransportCableModel(const nlohmann::js
 
   // -- Read pylons positions (excluding station up and down) --
   std::vector<Pylon> list_of_pylons = {};
-  const json &jpiles = input["piles"];
+  const json& jpiles = input["piles"];
   assert(jpiles.is_array());
   list_of_pylons.reserve(jpiles.size());
-  for (const auto &jp : jpiles) {
+  for (const auto& jp : jpiles) {
     list_of_pylons.emplace_back(jp, false);
   }
   assert(list_of_pylons.size());
@@ -66,14 +67,14 @@ siconos::fem::cable::TransportCableModel::TransportCableModel(const nlohmann::js
 
   // Build the list corresponding to "up" pylons (including stations) from list_of_pylons
   list_of_pylons_up_.emplace_back(stationDown);
-  for (auto &p : list_of_pylons) {
+  for (auto& p : list_of_pylons) {
     list_of_pylons_up_.push_back(p);  // copy
   }
   list_of_pylons_up_.emplace_back(stationUp);
 
   // Now the list of "down" pylons (no stations) with a shift corresponding to the distance
   // between the ropes
-  for (auto &p : list_of_pylons_up_) {
+  for (auto& p : list_of_pylons_up_) {
     list_of_pylons_down_.push_back(p);  // copy
     list_of_pylons_down_.back().shift_y();
   }

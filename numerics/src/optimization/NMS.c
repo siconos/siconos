@@ -26,10 +26,10 @@
 #include "NumericsMatrix.h"  // for NM_create, NM_clear, NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SiconosSets.h"     // for free_siconos_set, project_on_set
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
 
 #ifdef __cplusplus
 #undef restrict

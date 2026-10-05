@@ -9,14 +9,11 @@ namespace siconos::storage {
 
 template <typename Handle>
 struct default_interface {
-  decltype(auto) self()
-  {
-    return static_cast<Handle*>(
-        this);  // handle inherits from default_interface
+  decltype(auto) self() {
+    return static_cast<Handle*>(this);  // handle inherits from default_interface
   };
 
-  auto env()
-  {
+  auto env() {
     auto& data = self()->data();
     using info_t = get_info_t<decltype(data)>;
     return typename info_t::template env<typename Handle::type>{};
@@ -25,15 +22,11 @@ struct default_interface {
   auto params() { return typename decltype(env())::params{}; }
 
   template <string_literal S>
-  constexpr auto env_param()
-  {
+  constexpr auto env_param() {
     return mp::get<pattern::param<S>>(self()->params()).value;
   }
 
-  auto make_handle(auto& index)
-  {
-    return storage::make_handle(self()->data(), index);
-  }
+  auto make_handle(auto& index) { return storage::make_handle(self()->data(), index); }
 };
 
 }  // namespace siconos::storage

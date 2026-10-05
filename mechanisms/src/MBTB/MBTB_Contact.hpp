@@ -103,10 +103,10 @@ class MBTB_Contact {
 
   // Rule of five
   MBTB_Contact() = delete;
-  MBTB_Contact(const MBTB_Contact &) = delete;
-  MBTB_Contact(MBTB_Contact &&) = delete;
-  MBTB_Contact &operator=(const MBTB_Contact &) = delete;
-  MBTB_Contact &operator=(MBTB_Contact &&) = delete;
+  MBTB_Contact(const MBTB_Contact&) = delete;
+  MBTB_Contact(MBTB_Contact&&) = delete;
+  MBTB_Contact& operator=(const MBTB_Contact&) = delete;
+  MBTB_Contact& operator=(MBTB_Contact&&) = delete;
 
  public:
   /** Builds the member _Relation either MBTB_ContactRelation or
@@ -122,8 +122,8 @@ class MBTB_Contact {
          used to define the surface of the indexBody2
       \param[in] withFriction if 0, the contact is without friction.
    */
-  MBTB_Contact(int id, const std::string &contactName, int indexBody1,
-               int indexBody2, int indexCAD1, int indexCAD2, bool withFriction);
+  MBTB_Contact(int id, const std::string& contactName, int indexBody1, int indexBody2,
+               int indexCAD1, int indexCAD2, bool withFriction);
 
   virtual ~MBTB_Contact() noexcept = default;
 
@@ -161,21 +161,17 @@ class MBTB_Contact {
   void set_offset(double val) { _Offset = val; }
 
   /** \return offset value */
-  auto offset() const {return _Offset;}
-
+  auto offset() const { return _Offset; }
 
   /** Set to true to compute the normal from face1 */
-  void set_normal_from_face1(bool val){_normalFromFace1 = val;}
+  void set_normal_from_face1(bool val) { _normalFromFace1 = val; }
 
   /** \return a pointer to the relation
    */
   inline auto relation() { return _Relation; }
 
-  inline std::shared_ptr<siconos::modeling::Interaction> interaction() {
-    return _interaction;
-  }
-  void setInteraction(
-      std::shared_ptr<siconos::modeling::Interaction> newInteraction);
+  inline std::shared_ptr<siconos::modeling::Interaction> interaction() { return _interaction; }
+  void setInteraction(std::shared_ptr<siconos::modeling::Interaction> newInteraction);
 
   /** To get the name of the contact.
    * \return char * contactName

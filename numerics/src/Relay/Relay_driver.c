@@ -18,14 +18,14 @@
 
 #include <stdio.h>  // for fprintf, NULL, printf, stderr
 
-#include "NumericsFwd.h"       // for SolverOptions, RelayProblem, NumericsM...
-#include "NumericsMatrix.h"    // for NumericsMatrix
-#include "RelayProblem.h"      // for RelayProblem
-#include "Relay_Solvers.h"     // for relay_avi_caoferris, relay_avi_caoferr...
-#include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
-#include "numerics_verbose.h"
+#include "NumericsFwd.h"     // for SolverOptions, RelayProblem, NumericsM...
+#include "NumericsMatrix.h"  // for NumericsMatrix
+#include "RelayProblem.h"    // for RelayProblem
+#include "Relay_Solvers.h"   // for relay_avi_caoferris, relay_avi_caoferr...
+#include "Relay_options.h"   // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "SolverOptions.h"   // for SolverOptions, solver_options_id_to_name
 #include "numerics_errors.h"
-#include "Relay_options.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "numerics_verbose.h"
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"  // for relay_driver

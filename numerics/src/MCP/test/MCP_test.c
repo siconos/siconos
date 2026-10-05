@@ -25,11 +25,11 @@
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem...
 #include "SolverOptions.h"                // for solver_options_delete, Solv...
 
-void testF(int size, double *z, double *F);
-void testF(int size, double *z, double *F) { printf("call to MCP function F(z) ...\n"); }
+void testF(int size, double* z, double* F);
+void testF(int size, double* z, double* F) { printf("call to MCP function F(z) ...\n"); }
 
-void testNablaF(int size, double *z, double *F);
-void testNablaF(int size, double *z, double *F) {
+void testNablaF(int size, double* z, double* F);
+void testNablaF(int size, double* z, double* F) {
   printf("call to MCP function nablaF(z) ...\n");
 }
 
@@ -39,10 +39,10 @@ int main(void) {
   int info = 0;
 
   /* Set solver options */
-  SolverOptions *options = solver_options_create(SICONOS_MCP_OLD_FB);
+  SolverOptions* options = solver_options_create(SICONOS_MCP_OLD_FB);
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem_old *problem =
-      (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
+  MixedComplementarityProblem_old* problem =
+      (MixedComplementarityProblem_old*)malloc(sizeof(MixedComplementarityProblem_old));
 
   problem->sizeEqualities = 2;
   problem->sizeInequalities = 3;

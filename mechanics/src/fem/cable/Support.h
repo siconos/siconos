@@ -63,10 +63,10 @@ class Support {
 
   // Rule of 5
   Support() = delete;
-  Support(const Support &) = delete;
-  Support(Support &&) = delete;
-  Support &operator=(const Support &) = delete;
-  Support &operator=(Support &&) = delete;
+  Support(const Support&) = delete;
+  Support(Support&&) = delete;
+  Support& operator=(const Support&) = delete;
+  Support& operator=(Support&&) = delete;
 
  public:
   /** Build from center coordinates and radius of the roller
@@ -74,7 +74,7 @@ class Support {
     \param coordinates roller center position
     \param radius roller radius
    */
-  explicit Support(const siconos::algebra::SiconosVector3 &coordinates, double radius);
+  explicit Support(const siconos::algebra::SiconosVector3& coordinates, double radius);
 
   virtual ~Support() noexcept = default;
 
@@ -83,24 +83,24 @@ class Support {
   Eigen::Ref<const siconos::algebra::SiconosVector3> center() const { return center_pos_; }
 
   //------------ static -------------
-  virtual void prepare(const Rope &a_rope);
-  virtual void prepare(const Pylon &a_start, const Pylon &a_end, double T) {
+  virtual void prepare(const Rope& a_rope);
+  virtual void prepare(const Pylon& a_start, const Pylon& a_end, double T) {
     // does nothing
   };
 
-  virtual void compute(const siconos::algebra::SiconosVector3 &a_p, double a_tol, double &g,
+  virtual void compute(const siconos::algebra::SiconosVector3& a_p, double a_tol, double& g,
                        Eigen::Ref<siconos::algebra::SiconosVector3> G,
-                       Eigen::Ref<siconos::algebra::SiconosVector3> T, int &c);
+                       Eigen::Ref<siconos::algebra::SiconosVector3> T, int& c);
 
   //------------ dynamic -------------
 
   /** \return true if contact is on */
-  virtual bool isContact(const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p,
+  virtual bool isContact(const Eigen::Ref<siconos::algebra::SiconosVector3>& a_p,
                          double a_tol);
 
   /** \return true if contact is on */
-  bool isContact(double a_tol, double dx, double dy, double dz, double &g, double &nx,
-                 double &ny, double &nz, double &tx, double &ty, double &tz);
+  bool isContact(double a_tol, double dx, double dy, double dz, double& g, double& nx,
+                 double& ny, double& nz, double& tx, double& ty, double& tz);
 
   /** Build the nonsmooth law (if required) */
   virtual void InitFriction(double a_mu);
@@ -132,7 +132,7 @@ struct adl_serializer<siconos::fem::cable::Support> {
   //     return siconos::fem::cable::PulleyWrapping(j);
   //   }
 
-  static void to_json(ordered_json &j, const siconos::fem::cable::Support &input) {
+  static void to_json(ordered_json& j, const siconos::fem::cable::Support& input) {
     j = json{{"radius", input.radius()}, {"center", input.center()}};
   }
 };

@@ -383,9 +383,10 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
       cblas_dcopy(m, xi_k, 1, xi_hat, 1);
       cblas_dcopy(m, z_k, 1, z_hat, 1);
     } else {
-      *info = numerics_error("fc3d_admm",
-                     " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
-                     "not recognize");
+      *info = numerics_error(
+          "fc3d_admm",
+          " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
+          "not recognize");
       return;
     }
     /*********************************/
@@ -810,9 +811,10 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
       cblas_dcopy(2 * m, xi_k, 1, xi_hat, 1);
       cblas_dcopy(2 * m, z_k, 1, z_hat, 1);
     } else {
-      *info = numerics_error("fc3d_admm",
-                     " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
-                     "not recognize");
+      *info = numerics_error(
+          "fc3d_admm",
+          " options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] value is "
+          "not recognize");
       return;
     }
 
@@ -993,7 +995,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   double rho = fc3d_admm_select_rho(M, &is_rho_variable, options);
 
   if (rho <= DBL_EPSILON) {
-    *info = numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
+    *info = numerics_error("fc3d_admm",
+                           "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
     return;
   }
 
@@ -1054,9 +1057,10 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho, is_rho_variable,
                         norm_q, &NM_Cholesky_solve);
   } else {
-    *info = numerics_error("fc3d_admm",
-                   "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
-                   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
+    *info = numerics_error(
+        "fc3d_admm",
+        "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented",
+        options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
     return;
   }
 

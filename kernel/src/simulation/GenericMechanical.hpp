@@ -53,7 +53,7 @@ class GenericMechanical : public LinearOSNS {
  protected:
   ACCEPT_SERIALIZATION(GenericMechanical);
 
-  GenericMechanicalProblem *_pnumerics_GMP{nullptr};
+  GenericMechanicalProblem* _pnumerics_GMP{nullptr};
 
  public:
   /** constructor from solver id
@@ -97,14 +97,14 @@ class GenericMechanical : public LinearOSNS {
    *  \param ed an edge descriptor
    */
   void computeInteractionBlock(
-      const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
+      const siconos::graphs::InteractionsGraph::EDescriptor& ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd  a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) override;
 
   /** print the data to the screen */
   void display() const override;
@@ -116,7 +116,7 @@ class GenericMechanical : public LinearOSNS {
   void updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 };
 }  // namespace siconos::nonsmooth_formulations
 

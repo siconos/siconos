@@ -33,21 +33,20 @@
 
 /* #define DEBUG_STDOUT  */
 /* #define DEBUG_MESSAGES  */
-#include "lcp_cst.h"           // for SICONOS_LCP_IPARAM_PIVOTIN...
+#include "lcp_cst.h"  // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"
-#include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINT
+#include "siconos_debug.h"  // for DEBUG_EXPR_WE, DEBUG_PRINT
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-//#ifdef DEBUG_MESSAGES
+// #ifdef DEBUG_MESSAGES
 #include "pivot-utils.h"
-//#endif
+// #endif
 
-void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double *wlem,
-                     int *info, SolverOptions *options) {
-
+void lcp_lexicolemke(LinearComplementarityProblem* problem, double* zlem, double* wlem,
+                     int* info, SolverOptions* options) {
   /* size of the LCP */
   int dim = problem->size;
   assert(dim > 0);
@@ -61,7 +60,7 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
 
   i = 0;
   int n = problem->size;
-  double *q = problem->q;
+  double* q = problem->q;
 
   while ((i < (n - 1)) && (q[i] >= 0.)) i++;
 
@@ -83,30 +82,25 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
     return;
   }
   /* matrix M of the lcp */
-  double *M = NULL;
-  NumericsMatrix* M_dense= NULL;
+  double* M = NULL;
+  NumericsMatrix* M_dense = NULL;
 
-
-  if (problem->M->storageType == NM_DENSE)
-    {
+  if (problem->M->storageType == NM_DENSE) {
     assert(problem->M->matrix0);
     M = problem->M->matrix0;
-    }
-  else if (problem->M->storageType == NM_SPARSE)
-    {
-      M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
-      NM_to_dense(problem->M, M_dense);
-      M = M_dense->matrix0;
-    }
-  else {
+  } else if (problem->M->storageType == NM_SPARSE) {
+    M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
+    NM_to_dense(problem->M, M_dense);
+    M = M_dense->matrix0;
+  } else {
     *info = numerics_error("lcp_lexicolemke", "not implemented for this storage type");
   }
 
   double z0, zb, delta_lexico;
   double pivot, tovip, ratio;
   double tmp;
-  int *basis;
-  double **A;
+  int* basis;
+  double** A;
 
   /*output*/
 
@@ -114,11 +108,11 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
 
   /* Allocation */
 
-  unsigned *candidate_pivots_indx = (unsigned *)malloc(dim * sizeof(unsigned));
-  basis = (int *)malloc(dim * sizeof(int));
-  A = (double **)malloc(dim * sizeof(double *));
+  unsigned* candidate_pivots_indx = (unsigned*)malloc(dim * sizeof(unsigned));
+  basis = (int*)malloc(dim * sizeof(int));
+  A = (double**)malloc(dim * sizeof(double*));
 
-  for (ic = 0; ic < dim; ++ic) A[ic] = (double *)malloc(dim2 * sizeof(double));
+  for (ic = 0; ic < dim; ++ic) A[ic] = (double*)malloc(dim2 * sizeof(double));
 
   /* construction of A matrix such that
    * A = [ q | Id | -d | -M ] with d = (1,...1)
@@ -342,8 +336,8 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
                      delta_lexico);
               unsigned block_number = basis_to_number(basis[block], dim);
               unsigned var_number = basis_to_number(basis[var], dim);
-              const char *block_name = basis_to_name(basis[block], dim);
-              const char *var_name = basis_to_name(basis[var], dim);
+              const char* block_name = basis_to_name(basis[block], dim);
+              const char* var_name = basis_to_name(basis[var], dim);
               printf(
                   "lexicomin: A[%s%d][jc] / A[%s%d][drive] = %e / %e vs A[%s%d][jc] / "
                   "A[%s%d][drive] = %e / %e\n",
@@ -502,11 +496,11 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
   free(A);
   free(candidate_pivots_indx);
   if (M_dense) {
-    M_dense= NM_free(M_dense);
+    M_dense = NM_free(M_dense);
   }
 }
 
-void lcp_lexicolemke_set_default(SolverOptions *options) {
+void lcp_lexicolemke_set_default(SolverOptions* options) {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
   options->dparam[2] = 0.0;
   options->dparam[3] = 0.0;
@@ -523,7 +517,8 @@ static int lcp_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_lexicolemke_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_lexicolemke_solve_wrap(void* problem, double* z, double* w,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_lexicolemke((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -534,13 +529,10 @@ static void lcp_lexicolemke_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_LEMKE, "LCP_LEMKE",
-                "Lexicographic Lemke solver for LCP",
-                lcp_lexicolemke_init_wrap,
-                lcp_lexicolemke_solve_wrap,
-                lcp_lexicolemke_free_wrap,
-                NULL,  /* error function */
-                lcp_lexicolemke_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_LCP_LEMKE, "LCP_LEMKE", "Lexicographic Lemke solver for LCP",
+                lcp_lexicolemke_init_wrap, lcp_lexicolemke_solve_wrap,
+                lcp_lexicolemke_free_wrap, NULL, /* error function */
+                lcp_lexicolemke_set_default,     /* set_default */
+                1000,                            /* default_max_iter */
+                1e-6,                            /* default_tol */
+                0 /* is_local_solver */)

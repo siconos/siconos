@@ -232,19 +232,13 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
   }
 }
 
-
 void siconos::modeling::NewtonEuler1DR::computeContactPointsFromRelativeContactPoints(
-    const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector3& r_pc1,
+    const siconos::algebra::BlockVector& q0, const siconos::algebra::SiconosVector3& r_pc1,
     const siconos::algebra::SiconosVector3& r_pc2,
-    const siconos::algebra::SiconosVector3& r_nc,
-    const siconos::algebra::SiconosVector3& r_t1,
-    const siconos::algebra::SiconosVector3& r_t2,
-    siconos::algebra::SiconosVector3& pc1,
-    siconos::algebra::SiconosVector3& pc2,
-    siconos::algebra::SiconosVector3& nc,
-    siconos::algebra::SiconosVector3& t1,
-    siconos::algebra::SiconosVector3& t2) {
+    const siconos::algebra::SiconosVector3& r_nc, const siconos::algebra::SiconosVector3& r_t1,
+    const siconos::algebra::SiconosVector3& r_t2, siconos::algebra::SiconosVector3& pc1,
+    siconos::algebra::SiconosVector3& pc2, siconos::algebra::SiconosVector3& nc,
+    siconos::algebra::SiconosVector3& t1, siconos::algebra::SiconosVector3& t2) {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
 

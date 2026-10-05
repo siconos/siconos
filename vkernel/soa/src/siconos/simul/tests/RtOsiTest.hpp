@@ -3,12 +3,12 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class RtOsiTest : public CppUnit::TestFixture
-{
+class RtOsiTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(RtOsiTest);
   CPPUNIT_TEST(testOsi0);
   CPPUNIT_TEST_SUITE_END();
-public:
+
+ public:
   void setUp() override;
   void tearDown() override;
   void testOsi0();

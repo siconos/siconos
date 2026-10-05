@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "LCP_Solvers.h"    // for lcp_compute_error_only
-#include "NCP_Solvers.h"    // for ncp_compute_error
-#include "siconos_debug.h"  // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
+#include "LCP_Solvers.h"  // for lcp_compute_error_only
+#include "NCP_Solvers.h"  // for ncp_compute_error
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
 
 int ncp_compute_error(int n, double* z, double* F, double tol, double* err) {
   DEBUG_BEGIN("ncp_compute_error(int n, double* z, double * F, double tol, double* err)\n")

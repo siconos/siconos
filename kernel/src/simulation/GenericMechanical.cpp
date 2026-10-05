@@ -228,7 +228,8 @@ void siconos::nonsmooth_formulations::GenericMechanical::display() const {
   LinearOSNS::display();
 }
 
-void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) {
+void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks(
+    siconos::graphs::InteractionsGraph& indexSet) {
   if (!_hasBeenUpdated) {
     _pnumerics_GMP = genericMechanicalProblem_new();
   }

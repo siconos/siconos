@@ -13,8 +13,7 @@ struct time_stepping : item {
   using one_step_nonsmooth_problem_t = nth_t<2, items>;
   using topology_t = typename one_step_integrator_t::topology;
 
-  using formulation_t =
-      typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
+  using formulation_t = typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
 
   struct attributes {
     some::item_ref<time_discretization_t> time_discretization;
@@ -27,18 +26,15 @@ struct time_stepping : item {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    void __init__()
-    {
+    void __init__() {
       auto& data = self()->data();
       time_discretization() = storage::add<time_discretization_t>(data);
       one_step_integrator() = storage::add<one_step_integrator_t>(data);
-      one_step_nonsmooth_problem() =
-          storage::add<one_step_nonsmooth_problem_t>(data);
+      one_step_nonsmooth_problem() = storage::add<one_step_nonsmooth_problem_t>(data);
       topology() = storage::add<topology_t>(data);
     }
 
-    void __del__()
-    {
+    void __del__() {
       // not implemented
       throw std::runtime_error("Stable pointers need to be implemented");
       storage::remove(time_discretization());
@@ -47,37 +43,26 @@ struct time_stepping : item {
       storage::remove(topology());
     }
 
-    decltype(auto) time_discretization()
-    {
-      return storage::make_ref_handle(
-          self()->data(), storage::attr<"time_discretization">(*self()));
+    decltype(auto) time_discretization() {
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"time_discretization">(*self()));
     }
-    decltype(auto) one_step_integrator()
-    {
+    decltype(auto) one_step_integrator() {
+      return make_ref_handle(self()->data(), storage::attr<"one_step_integrator">(*self()));
+    }
+    decltype(auto) one_step_nonsmooth_problem() {
       return make_ref_handle(self()->data(),
-                             storage::attr<"one_step_integrator">(*self()));
+                             storage::attr<"one_step_nonsmooth_problem">(*self()));
     }
-    decltype(auto) one_step_nonsmooth_problem()
-    {
-      return make_ref_handle(
-          self()->data(),
-          storage::attr<"one_step_nonsmooth_problem">(*self()));
-    }
-    decltype(auto) topology()
-    {
-      return make_ref_handle(self()->data(),
-                             storage::attr<"topology">(*self()));
+    decltype(auto) topology() {
+      return make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
 
-    decltype(auto) current_step()
-    {
-      return (*self()).time_discretization().step();
-    }
+    decltype(auto) current_step() { return (*self()).time_discretization().step(); }
 
     decltype(auto) time_step() { return self()->time_discretization().h(); }
 
-    auto compute_one_step()
-    {
+    auto compute_one_step() {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
@@ -159,10 +144,9 @@ struct time_stepping : item {
     }
 
     template <typename Formulation>
-    void solve_nonsmooth_problem(auto step)
-    {  // for a LCP:
-       // M z = w + q
-       // 0 <= z _|_ w >= 0
+    void solve_nonsmooth_problem(auto step) {  // for a LCP:
+                                               // M z = w + q
+                                               // 0 <= z _|_ w >= 0
       auto osi = self()->one_step_integrator();
       //      resize(osi.lambda_vector_assembled(), ninter);
       //      resize(osi.ydot_vector_assembled(), ninter);
@@ -175,27 +159,23 @@ struct time_stepping : item {
           osi.mu_vector_assembled());     // mu
     }
 
-    bool has_next_event()
-    {
-      return time_discretization().t0() +
-                 current_step() * time_discretization().h() <
+    bool has_next_event() {
+      return time_discretization().t0() + current_step() * time_discretization().h() <
              time_discretization().tmax();
     }
 
     void initialize() { one_step_integrator().initialize(current_step()); }
 
-    auto methods()
-    {
+    auto methods() {
       // using env_t = decltype(self()->env());
       // using indice = typename env_t::indice;
       // using scalar = typename env_t::scalar;
 
-      return collect(
-          method("initialize", &interface<Handle>::initialize),
-          method("current_step", &interface<Handle>::current_step),
-          method("time_step", &interface<Handle>::time_step),
-          method("compute_one_step", &interface<Handle>::compute_one_step),
-          method("has_next_event", &interface<Handle>::has_next_event));
+      return collect(method("initialize", &interface<Handle>::initialize),
+                     method("current_step", &interface<Handle>::current_step),
+                     method("time_step", &interface<Handle>::time_step),
+                     method("compute_one_step", &interface<Handle>::compute_one_step),
+                     method("has_next_event", &interface<Handle>::has_next_event));
     }
   };
 };

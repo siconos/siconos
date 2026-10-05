@@ -54,7 +54,7 @@ struct Question : public Visitor {
   std::optional<type> answer;
   Question() = default;
 
-  Question(AnswerType ref) : answer(ref){};
+  Question(AnswerType ref) : answer(ref) {};
 };
 
 /** get some value from a visitable object with the help of a

@@ -141,7 +141,9 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
       DGELS(LA_NOTRANS, n_row, npm, NRHS, M_linear_system, n_row, q_linear_system, n_row,
             &LAinfo);
       numerics_printf_verbose(1, "Solution of dgels");
-      { NM_dense_display(q_linear_system, n_row, 1, 0); }
+      {
+        NM_dense_display(q_linear_system, n_row, 1, 0);
+      }
     } else {
       DGESV(npm, NRHS, M_linear_system, npm, ipiv, q_linear_system, npm, &LAinfo);
       numerics_printf_verbose(1, "Solution of dgesv");

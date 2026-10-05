@@ -21,19 +21,19 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_DSFP
-#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"          // for NM_gemv
-#include "SiconosBlas.h"             // for cblas_dcopy, cblas_dnrm2
-#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
-#include "fc3d_Solvers.h"            // for fc3d_DeSaxceFixedPoint, fc3d_DeS...
-#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "NumericsFwd.h"         // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"      // for NM_gemv
+#include "SiconosBlas.h"         // for cblas_dcopy, cblas_dnrm2
+#include "SolverOptions.h"       // for SolverOptions, solver_options_nu...
+#include "fc3d_Solvers.h"        // for fc3d_DeSaxceFixedPoint, fc3d_DeS...
+#include "fc3d_compute_error.h"  // for fc3d_compute_error
+#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_DSFP
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"        // for projectionOnCone
+#include "projectionOnCone.h"  // for projectionOnCone
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,
                             double* velocity, int* info, SolverOptions* options) {
@@ -73,9 +73,10 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,
     }
 
   } else {
-    *info =  numerics_error("fc3d_DeSaxceFixedPoint",
-                   "The De Saxce fixed point is implemented with a fixed time--step. Use "
-                   "FixedPointProjection (VI_FPP) method for a variable time--step");
+    *info =
+        numerics_error("fc3d_DeSaxceFixedPoint",
+                       "The De Saxce fixed point is implemented with a fixed time--step. Use "
+                       "FixedPointProjection (VI_FPP) method for a variable time--step");
   }
 
   double alpha = 1.0;
@@ -144,7 +145,8 @@ static int fc3d_dsfp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_dsfp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_dsfp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                SolverOptions* options) {
   int info = NUMERICS_OK;
   fc3d_DeSaxceFixedPoint((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -155,14 +157,9 @@ static void fc3d_dsfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_DSFP,
-                "FC3D_DSFP",
-                "De Saxce Fixed Point for 3D Friction Contact",
-                fc3d_dsfp_init_wrap,
-                fc3d_dsfp_solve_wrap,
-                fc3d_dsfp_free_wrap,
-                NULL,
-                fc3d_dsfp_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(FC3D_DSFP, "FC3D_DSFP", "De Saxce Fixed Point for 3D Friction Contact",
+                fc3d_dsfp_init_wrap, fc3d_dsfp_solve_wrap, fc3d_dsfp_free_wrap, NULL,
+                fc3d_dsfp_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-4,                  /* default_tol */
+                0 /* is_local_solver */)

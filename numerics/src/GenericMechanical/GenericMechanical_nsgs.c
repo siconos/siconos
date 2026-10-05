@@ -42,9 +42,8 @@
 #include "SolverOptions.h"              // for SolverOptions, solver_opti...
 #include "fc2d_compute_error.h"         // for fc2d_unitary_compute_and_a...
 #include "fc3d_compute_error.h"         // for fc3d_unitary_compute_and_a...
-#include "numerics_verbose.h"
-
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -94,7 +93,8 @@ static int gmp_equality_solve_local(GMP_LocalProblem* local, double* diag_block,
 }
 
 static int gmp_equality_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                      const double* velocity, double tolerance, double* error) {
+                                      const double* velocity, double tolerance,
+                                      double* error) {
   (void)local;
   (void)reaction;
   (void)tolerance;
@@ -142,7 +142,8 @@ static int gmp_relay_solve_local(GMP_LocalProblem* local, double* diag_block, do
 static int gmp_relay_compute_error(GMP_LocalProblem* local, const double* reaction,
                                    const double* velocity, double tolerance, double* error) {
   double localError = 0.;
-  relay_compute_error((RelayProblem*)local->problem, reaction, velocity, tolerance, &localError);
+  relay_compute_error((RelayProblem*)local->problem, reaction, velocity, tolerance,
+                      &localError);
   localError = localError / (1 + cblas_dnrm2(local->size, local->q_local, 1));
   if (localError > *error) *error = localError;
   return 0;
@@ -170,7 +171,8 @@ static int gmp_fc3d_compute_error(GMP_LocalProblem* local, const double* reactio
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
   double localError = 0.;
   double worktmp[3];
-  fc3d_unitary_compute_and_add_error(reaction, velocity, fcProblem->mu[0], &localError, worktmp);
+  fc3d_unitary_compute_and_add_error(reaction, velocity, fcProblem->mu[0], &localError,
+                                     worktmp);
   localError = sqrt(localError) / (1 + cblas_dnrm2(local->size, local->q_local, 1));
   if (localError > *error) *error = localError;
   return 0;
@@ -198,7 +200,8 @@ static int gmp_fc2d_compute_error(GMP_LocalProblem* local, const double* reactio
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
   double localError = 0.;
   double worktmp[2];
-  fc2d_unitary_compute_and_add_error(reaction, velocity, fcProblem->mu[0], &localError, worktmp);
+  fc2d_unitary_compute_and_add_error(reaction, velocity, fcProblem->mu[0], &localError,
+                                     worktmp);
   localError = sqrt(localError) / (1 + cblas_dnrm2(local->size, local->q_local, 1));
   if (localError > *error) *error = localError;
   return 0;
@@ -214,10 +217,10 @@ static const GMP_ProblemOps* gmp_get_ops(int type) {
   static const GMP_ProblemOps equality_ops = {"EQUALITY", -1, gmp_equality_solve_local,
                                               gmp_equality_compute_error,
                                               gmp_equality_detach_diag_block};
-  static const GMP_ProblemOps lcp_ops = {"LCP", 0, gmp_lcp_solve_local,
-                                         gmp_lcp_compute_error, gmp_lcp_detach_diag_block};
-  static const GMP_ProblemOps relay_ops = {"RELAY", 2, gmp_relay_solve_local,
-                                           gmp_relay_compute_error, gmp_relay_detach_diag_block};
+  static const GMP_ProblemOps lcp_ops = {"LCP", 0, gmp_lcp_solve_local, gmp_lcp_compute_error,
+                                         gmp_lcp_detach_diag_block};
+  static const GMP_ProblemOps relay_ops = {
+      "RELAY", 2, gmp_relay_solve_local, gmp_relay_compute_error, gmp_relay_detach_diag_block};
   static const GMP_ProblemOps fc2d_ops = {"FC2D", 3, gmp_fc2d_solve_local,
                                           gmp_fc2d_compute_error, gmp_fc2d_detach_diag_block};
   static const GMP_ProblemOps fc3d_ops = {"FC3D", 1, gmp_fc3d_solve_local,
@@ -300,21 +303,21 @@ typedef struct {
  *  The dense diagonal buffer is allocated only when needed.
  */
 static GMP_GS_Workspace gmp_gs_workspace_create(GenericMechanicalProblem* problem,
-                                                SolverOptions* options,
-                                                NM_types storageType) {
+                                                SolverOptions* options, NM_types storageType) {
   GMP_GS_Workspace ws = {0};
   if (options->dWork) {
     ws.previous_reaction = options->dWork;
     ws.owns_memory = 0;
   } else {
-    ws.previous_reaction = (double*)malloc(gmp_get_number_of_doubles(problem, options) * sizeof(double));
+    ws.previous_reaction =
+        (double*)malloc(gmp_get_number_of_doubles(problem, options) * sizeof(double));
     ws.owns_memory = 1;
   }
   ws.buff_velocity = ws.previous_reaction + problem->globalSize;
 
   if (storageType == NM_DENSE) {
-    ws.diag_dense_buffer = (double*)malloc(problem->maxLocalSize * problem->maxLocalSize *
-                                           sizeof(double));
+    ws.diag_dense_buffer =
+        (double*)malloc(problem->maxLocalSize * problem->maxLocalSize * sizeof(double));
   }
   return ws;
 }
@@ -337,7 +340,8 @@ static void gmp_gs_workspace_destroy(GMP_GS_Workspace* ws) {
 }
 
 int gmp_compute_error(const GenericMechanicalProblem* problem, const double* reaction,
-                      double* velocity, double tolerance, SolverOptions* options, double* error) {
+                      double* velocity, double tolerance, SolverOptions* options,
+                      double* error) {
   (void)options;
   GMP_LocalProblem* local = problem->firstLocal;
   NM_types storageType = problem->M->storageType;
@@ -356,7 +360,8 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
   while (local) {
     local_size = local->size;
 
-    gmp_build_local_q(problem, blockRowIndex, global_offset, local_size, reaction, local->q_local);
+    gmp_build_local_q(problem, blockRowIndex, global_offset, local_size, reaction,
+                      local->q_local);
     DEBUG_PRINT_MAT_STR("q", local->q_local, (unsigned)local_size, 1);
     DEBUG_PRINT_MAT_STR("reaction", reaction, (unsigned)problem->globalSize, 1);
     DEBUG_PRINT_MAT_STR("qnodiag", local->q_local, (unsigned)local_size, 1);
@@ -374,8 +379,8 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
     }
     DEBUG_PRINT_MAT_STR("diagBlock", diagBlock, (unsigned)local_size, (unsigned)local_size);
     DEBUG_PRINT_MAT_STR("Rlocal", reaction + global_offset, (unsigned)local_size, 1);
-    cblas_dgemv(CblasColMajor, CblasNoTrans, local_size, local_size, 1.0, diagBlock, local_size,
-                reaction + global_offset, 1, 1.0, velocity + global_offset, 1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, local_size, local_size, 1.0, diagBlock,
+                local_size, reaction + global_offset, 1, 1.0, velocity + global_offset, 1);
     DEBUG_PRINT_MAT_STR("velocity", velocity + global_offset, (unsigned)local_size, 1);
     /* Next block. */
     global_offset += local->size;
@@ -403,8 +408,7 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
       ops->compute_error(local, Rl, Vl, tolerance, error);
       DEBUG_PRINTF("GenericMechanical_driver, localerror of %s: %e\n", ops->name, *error);
     } else {
-      numerics_printf("Numerics : gmp_compute_error unknown problem type %d.\n",
-                      local->type);
+      numerics_printf("Numerics : gmp_compute_error unknown problem type %d.\n", local->type);
     }
 
     /* Next block. */
@@ -431,19 +435,23 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
  *  \return 0 if the (accepted) residual is below tolerance, 1 otherwise
  */
 static int gmp_gauss_seidel_relaxation(GenericMechanicalProblem* problem, double* reaction,
-                                        double* velocity, double tolerance, double* error, double* relaxationError,
-                                        GMP_GS_Workspace* ws, double* relaxationCoefficient,
-                                        SolverOptions* options) {
-  int toleranceViolation = gmp_compute_error(problem, reaction, ws->buff_velocity, tolerance, options, error);
+                                       double* velocity, double tolerance, double* error,
+                                       double* relaxationError, GMP_GS_Workspace* ws,
+                                       double* relaxationCoefficient, SolverOptions* options) {
+  int toleranceViolation =
+      gmp_compute_error(problem, reaction, ws->buff_velocity, tolerance, options, error);
   for (size_t i = 0; i < problem->globalSize; i++)
-    ws->previous_reaction[i] = reaction[i] + (*relaxationCoefficient) * (reaction[i] - ws->previous_reaction[i]);
-  int relaxationToleranceViolation = gmp_compute_error(problem, ws->previous_reaction, velocity, tolerance, options, relaxationError);
+    ws->previous_reaction[i] =
+        reaction[i] + (*relaxationCoefficient) * (reaction[i] - ws->previous_reaction[i]);
+  int relaxationToleranceViolation = gmp_compute_error(
+      problem, ws->previous_reaction, velocity, tolerance, options, relaxationError);
 
   DEBUG_PRINTF("GMP :noscale error=%e error relaxation=%e\n", *error, *relaxationError);
   DEBUG_PRINTF("GMP :relaxation coefficient=%e\n", *relaxationCoefficient);
 
   if (*relaxationError < *error) {
-    if ((*relaxationCoefficient) < 10.0) (*relaxationCoefficient) = 1.0 + (*relaxationCoefficient);
+    if ((*relaxationCoefficient) < 10.0)
+      (*relaxationCoefficient) = 1.0 + (*relaxationCoefficient);
     memcpy(reaction, ws->previous_reaction, problem->globalSize * sizeof(double));
     *error = *relaxationError;
     return relaxationToleranceViolation;
@@ -487,8 +495,8 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
                    "R[%i]=%e | V[%i]=%e ", ii, reaction[ii], ii, velocity[ii]););
 
     while (local) {
-      numerics_printf_verbose(1, "Gauss-Seidel iteration %d. Problem (row) number %d ", iteration,
-                              blockRowIndex);
+      numerics_printf_verbose(1, "Gauss-Seidel iteration %d. Problem (row) number %d ",
+                              iteration, blockRowIndex);
       local_size = local->size;
       local->error = 0;
 
@@ -506,20 +514,21 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
       w = velocity + global_offset;
 
       /* Build local q and solve the local problem. */
-      gmp_build_local_q(problem, blockRowIndex, global_offset, local_size, reaction, local->q_local);
+      gmp_build_local_q(problem, blockRowIndex, global_offset, local_size, reaction,
+                        local->q_local);
 
       const GMP_ProblemOps* ops = gmp_get_ops(local->type);
       if (ops) {
         numerics_printf_verbose(1, "solve SICONOS_NUMERICS_PROBLEM_%s", ops->name);
-        SolverOptions* local_opts =
-            (ops->solver_options_index >= 0)
-                ? options->internalSolvers[ops->solver_options_index]
-                : NULL;
+        SolverOptions* local_opts = (ops->solver_options_index >= 0)
+                                        ? options->internalSolvers[ops->solver_options_index]
+                                        : NULL;
         resLocalSolver = ops->solve_local(local, diagBlock, sol, w, local_opts);
       } else {
-        numerics_printf("genericMechanical_GS Numerics : gmp_gauss_seidel unknown problem type "
-                        "%d.\n",
-                        local->type);
+        numerics_printf(
+            "genericMechanical_GS Numerics : gmp_gauss_seidel unknown problem type "
+            "%d.\n",
+            local->type);
         resLocalSolver = 1;
       }
 
@@ -536,14 +545,15 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
 
     if (withRelaxation) {
       toleranceViolation =
-          gmp_gauss_seidel_relaxation(problem, reaction, velocity, tolerance, error, relaxationError, ws,
-                                       relaxationCoefficient, options);
+          gmp_gauss_seidel_relaxation(problem, reaction, velocity, tolerance, error,
+                                      relaxationError, ws, relaxationCoefficient, options);
     } else {
-      toleranceViolation = gmp_compute_error(problem, reaction, velocity, tolerance, options, error);
+      toleranceViolation =
+          gmp_compute_error(problem, reaction, velocity, tolerance, options, error);
     }
     numerics_printf_verbose(
-        1, "--------------- GMP - GS - Iteration %i Residual = %14.7e <= %7.3e\n", iteration, *error,
-        options->dparam[SICONOS_DPARAM_TOL]);
+        1, "--------------- GMP - GS - Iteration %i Residual = %14.7e <= %7.3e\n", iteration,
+        *error, options->dparam[SICONOS_DPARAM_TOL]);
 
     /* Next GS iteration. */
     iteration++;
@@ -652,7 +662,8 @@ void gmp_gauss_seidel(GenericMechanicalProblem* problem, double* reaction, doubl
 int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* options) {
   if (options->dWork) return 0;
 
-  options->dWork = (double*)malloc(gmp_get_number_of_doubles(problem, options) * sizeof(double));
+  options->dWork =
+      (double*)malloc(gmp_get_number_of_doubles(problem, options) * sizeof(double));
   return 1;
 }
 

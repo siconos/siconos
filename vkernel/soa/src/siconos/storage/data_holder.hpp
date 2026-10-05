@@ -1,15 +1,13 @@
 #pragma once
 
-#include "siconos/storage/some/some.hpp"
 #include "siconos/storage/default_interface.hpp"
+#include "siconos/storage/some/some.hpp"
 
 namespace siconos::storage {
 
-
 template <typename Struct>
 struct data_holder : item {
-  using attributes =
-      gather<attribute<"instance", some::specific<pointer<Struct>>>>;
+  using attributes = gather<attribute<"instance", some::specific<pointer<Struct>>>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

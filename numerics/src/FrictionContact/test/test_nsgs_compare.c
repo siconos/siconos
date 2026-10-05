@@ -23,12 +23,12 @@
  * iteration-by-iteration behavior using stats callbacks.
  */
 
-#define _POSIX_C_SOURCE 200809L  /* for clock_gettime and timespec */
+#define _POSIX_C_SOURCE 200809L /* for clock_gettime and timespec */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
 
 #include "FrictionContactProblem.h"
@@ -55,8 +55,8 @@ static int original_count = 0;
 static int generic_count = 0;
 
 /* Stats callback for original fc3d_nsgs */
-static void stats_callback_original(void* problem, SolverOptions* options,
-                                    double* reaction, double* velocity, double error) {
+static void stats_callback_original(void* problem, SolverOptions* options, double* reaction,
+                                    double* velocity, double error) {
   (void)problem;
   (void)options;
   (void)velocity;
@@ -77,8 +77,8 @@ static void stats_callback_original(void* problem, SolverOptions* options,
 }
 
 /* Stats callback for generic fc3d_nsgs_generic */
-static void stats_callback_generic(void* problem, SolverOptions* options,
-                                   double* reaction, double* velocity, double error) {
+static void stats_callback_generic(void* problem, SolverOptions* options, double* reaction,
+                                   double* velocity, double error) {
   (void)problem;
   (void)options;
   (void)velocity;
@@ -103,7 +103,8 @@ static FrictionContactProblem* create_test_problem(void) {
   int nc = 5;
   int n = nc * 3;
 
-  FrictionContactProblem* problem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
+  FrictionContactProblem* problem =
+      (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   problem->numberOfContacts = nc;
   problem->dimension = 3;
   problem->q = (double*)malloc(n * sizeof(double));
@@ -114,11 +115,11 @@ static FrictionContactProblem* create_test_problem(void) {
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       if (i == j) {
-        M_data[i * n + j] = 2.0;  /* Diagonal */
-      } else if (i/3 == j/3) {
-        M_data[i * n + j] = 0.3;  /* Same contact coupling */
+        M_data[i * n + j] = 2.0; /* Diagonal */
+      } else if (i / 3 == j / 3) {
+        M_data[i * n + j] = 0.3; /* Same contact coupling */
       } else {
-        M_data[i * n + j] = 0.05;  /* Weak coupling between contacts */
+        M_data[i * n + j] = 0.05; /* Weak coupling between contacts */
       }
     }
   }
@@ -144,13 +145,12 @@ static void print_iteration_comparison(void) {
   printf("=================================================================\n");
   printf("Iteration-by-iteration Comparison\n");
   printf("=================================================================\n");
-  printf("%-6s | %-20s | %-20s | %-12s\n",
-         "Iter", "Original Error", "Generic Error", "Diff");
+  printf("%-6s | %-20s | %-20s | %-12s\n", "Iter", "Original Error", "Generic Error", "Diff");
   printf("-------+----------------------+----------------------+-------------\n");
 
   int max_iter = (original_count > generic_count) ? original_count : generic_count;
 
-  for (int i = 0; i < max_iter && i < 50; i++) {  /* Limit to 50 iterations for display */
+  for (int i = 0; i < max_iter && i < 50; i++) { /* Limit to 50 iterations for display */
     double orig_err = (i < original_count) ? original_iters[i].error : 0.0;
     double gen_err = (i < generic_count) ? generic_iters[i].error : 0.0;
     double diff = fabs(orig_err - gen_err);
@@ -168,7 +168,7 @@ static void print_iteration_comparison(void) {
       snprintf(gen_str, 32, "%s", "N/A");
     }
 
-    printf("%-6d | %-20s | %-20s | %.6e\n", i+1, orig_str, gen_str, diff);
+    printf("%-6d | %-20s | %-20s | %.6e\n", i + 1, orig_str, gen_str, diff);
   }
 
   if (max_iter > 50) {
@@ -201,7 +201,8 @@ int main(int argc, char** argv) {
   options_orig->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
   /* Setup internal solver (projection on cone) */
-  solver_options_update_internal(options_orig, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+  solver_options_update_internal(options_orig, 0,
+                                 SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options_orig->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options_orig->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
@@ -263,8 +264,8 @@ int main(int argc, char** argv) {
   printf("%-8s | %-15s | %-15s | %-12s\n", "Index", "Original", "Generic", "Diff");
   printf("---------+-----------------+-----------------+-------------\n");
   for (int i = 0; i < 6 && i < nc * 3; i++) {
-    printf("%-8d | %15.6e | %15.6e | %12.6e\n",
-           i, r_orig[i], r_gen[i], fabs(r_orig[i] - r_gen[i]));
+    printf("%-8d | %15.6e | %15.6e | %12.6e\n", i, r_orig[i], r_gen[i],
+           fabs(r_orig[i] - r_gen[i]));
   }
 
   /* Performance comparison */

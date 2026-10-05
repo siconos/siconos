@@ -57,7 +57,7 @@ CohesiveFrictionContactProblem* cohesive_friction_3d_local_problem_allocate(
   localproblem->numberOfContacts = 0;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->mu =  (double*)malloc(sizeof(double));
+  localproblem->mu = (double*)malloc(sizeof(double));
   localproblem->c_n = (double*)malloc(sizeof(double));
   localproblem->c_t = (double*)malloc(sizeof(double));
 

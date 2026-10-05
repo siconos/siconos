@@ -40,7 +40,7 @@ static const double ZERO = DBL_EPSILON * 500.;
 static const double ZERO_SQR = DBL_EPSILON * 500. * DBL_EPSILON * 500.;
 
 #ifdef FB_ASSERT
-#define FB_WARN(M, X) assert(X &&M)
+#define FB_WARN(M, X) assert(X&& M)
 #elif FB_DEBUG
 #define FB_WARN(M, X) ({ (X) ? 0 : ((DEBUG_PRINTF("%s, %s failed\n", #M, #X))); })
 #else
@@ -91,7 +91,7 @@ static inline double safe_sqrt(double x) {
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
 void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, double un,
                                         double ut1, double ut2, double mu, double rhon,
-                                        double rhot1, double rhot2, double *result) {
+                                        double rhot1, double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -5147,7 +5147,7 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
 }
 void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double un, double ut1,
                                       double ut2, double mu, double rhon, double rhot1,
-                                      double rhot2, double *result) {
+                                      double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -5352,7 +5352,7 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
 }
 void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double un,
                                        double ut1, double ut2, double mu, double rhon,
-                                       double rhot1, double rhot2, double *result) {
+                                       double rhot1, double rhot2, double* result) {
   double x1;
   double x11;
   double x12;
@@ -10639,7 +10639,7 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
 }
 void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, double un,
                                            double ut1, double ut2, double mu, double rhon,
-                                           double rhot1, double rhot2, double *result) {
+                                           double rhot1, double rhot2, double* result) {
   /* Assignment result=0.5*(rt1 + x13*x19 - x14*x19 + x7)**2 + 0.5*(rt2 + x13*x20 - x14*x20 +
    * x9)**2 + 0.5*(x4 - x13 - x14 + x3)**2 */
   double x1;
@@ -10719,7 +10719,7 @@ void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, do
 }
 void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2, double un,
                                                double ut1, double ut2, double mu, double rhon,
-                                               double rhot1, double rhot2, double *result) {
+                                               double rhot1, double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -11816,8 +11816,8 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
   }
 }
 
-void fc3d_FischerBurmeisterFunctionGenerated(double *reaction, double *velocity, double mu,
-                                             double *rho, double *f, double *A, double *B) {
+void fc3d_FischerBurmeisterFunctionGenerated(double* reaction, double* velocity, double mu,
+                                             double* rho, double* f, double* A, double* B) {
   double result[21];
 
   assert(reaction);
@@ -11855,9 +11855,9 @@ void fc3d_FischerBurmeisterFunctionGenerated(double *reaction, double *velocity,
   }
 }
 
-void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double *reaction, double *velocity,
-                                                      double mu, double *rho, double *gf,
-                                                      double *dummy1, double *dummy2) {
+void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double* reaction, double* velocity,
+                                                      double mu, double* rho, double* gf,
+                                                      double* dummy1, double* dummy2) {
   double result[3];
 
   assert(reaction);

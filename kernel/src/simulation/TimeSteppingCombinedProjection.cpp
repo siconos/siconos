@@ -444,7 +444,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       //   siconos::algebra::print(*inter->lambda(1));
       // }
       auto indexSet2 = _nsds->topology()->indexSet(2);
-      std ::cout << "lambda(0) in indexSet2\n";
+      std::cout << "lambda(0) in indexSet2\n";
       for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet2->bundle(*ui);
         siconos::algebra::print(*inter->lambda(0));

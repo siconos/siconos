@@ -25,54 +25,54 @@
 #include "SiconosBlas.h"      // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
 #include "SiconosLapack.h"    // for DGESV, lapack_int
 #include "SolverOptions.h"
-#include "math.h"              // for fabs, pow
-#include "numerics_verbose.h"
+#include "math.h"  // for fabs, pow
 #include "numerics_errors.h"
-#include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
-#include "stdlib.h"            // for exit, rand, EXIT_FAILURE
+#include "numerics_verbose.h"
+#include "stdio.h"   // for printf, fprintf, fclose, fopen, stderr
+#include "stdlib.h"  // for exit, rand, EXIT_FAILURE
 static int sN;
 static int sN2;
 
-static double *sphi_z;
-static double *sdir_descent;
-static double *sphi_zaux;
-static double *sjacobianPhi_z;
-static double *sjacobianPhi_zaux;
-static double *sgrad_psi_z;
-static double *sgrad_psi_zaux;
-static double *sPrevDirDescent;
-static double *szaux;
-static double *szzaux;
-static double *sz2;
-static lapack_int *sipiv;
-static int *sW2V;
+static double* sphi_z;
+static double* sdir_descent;
+static double* sphi_zaux;
+static double* sjacobianPhi_z;
+static double* sjacobianPhi_zaux;
+static double* sgrad_psi_z;
+static double* sgrad_psi_zaux;
+static double* sPrevDirDescent;
+static double* szaux;
+static double* szzaux;
+static double* sz2;
+static lapack_int* sipiv;
+static int* sW2V;
 
 static int sPlotMerit = 1;
 static char fileName[64];
 /* static char fileId[16]; */
 
-static double *sZsol = 0;
+static double* sZsol = 0;
 
-static NewtonFunctionPtr *sFphi;
-static NewtonFunctionPtr *sFjacobianPhi;
+static NewtonFunctionPtr* sFphi;
+static NewtonFunctionPtr* sFjacobianPhi;
 
-static void plotMerit(double *z, double psi_k, double descentCondition);
+static void plotMerit(double* z, double psi_k, double descentCondition);
 // static void plotMeritToZsol(double *z);
-static int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition);
+static int linesearch2_Armijo(int n, double* z, double psi_k, double descentCondition);
 // static int lineSearch_Wolfe(double *z, double qp_0);
 // static int NonMonotomnelineSearch(double *z, double Rk);
 
 /************************************************************************/
 /*useful for debug*/
-void NSNN_thisIsTheSolution(int n, double *z) {
-  sZsol = (double *)malloc(n * sizeof(double));
+void NSNN_thisIsTheSolution(int n, double* z) {
+  sZsol = (double*)malloc(n * sizeof(double));
   memcpy(sZsol, z, n * sizeof(double));
 }
 void NSNN_reset() {
   if (sZsol) free(sZsol);
   sZsol = 0;
 }
-void plotMerit(double *z, double psi_k, double descentCondition) {
+void plotMerit(double* z, double psi_k, double descentCondition) {
   int incx = 1, incy = 1;
   double q_0, q_tk, qp_tk, merit_k;
   /* double tmin = 1e-12; */
@@ -81,7 +81,7 @@ void plotMerit(double *z, double psi_k, double descentCondition) {
   double Nstep = 0;
   int i = 0;
 
-  FILE *fp;
+  FILE* fp;
 
   (*sFphi)(sN, z, sphi_z, 0);
   aux = cblas_dnrm2(sN, sphi_z, 1);
@@ -180,7 +180,7 @@ void plotMerit(double *z, double psi_k, double descentCondition) {
 /************************************************************************/
 
 /* Linesearch */
-int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition) {
+int linesearch2_Armijo(int n, double* z, double psi_k, double descentCondition) {
   /* IN :
      psi_k (merit function for current iteration)
      jacobian_psi_k (jacobian of the merit function)
@@ -375,7 +375,7 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition) 
 int nonSmoothNewtonNeigh_getNbIWork(int n, int m) { return 2 * (n + m); }
 int nonSmoothNewtonNeigh_getNbDWork(int n, int m) { return (11 + 2 * (n + m)) * (n + m) + 1; }
 
-double *nonSmoothNewtonNeighInitMemory(int n, double *dWork, int *iWork) {
+double* nonSmoothNewtonNeighInitMemory(int n, double* dWork, int* iWork) {
   if (dWork == NULL || iWork == NULL) {
     fprintf(stderr, "nonSmoothNewtonNeighInitMemory, memory allocation failed.\n");
     return NULL;
@@ -400,8 +400,8 @@ double *nonSmoothNewtonNeighInitMemory(int n, double *dWork, int *iWork) {
   return sz2 + sN;
 }
 
-int nonSmoothNewtonNeigh(int n, double *z, NewtonFunctionPtr *phi,
-                         NewtonFunctionPtr *jacobianPhi, int *iparam, double *dparam) {
+int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi,
+                         NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam) {
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];  // maximum number of iterations allowed
   int iterMaxWithSameZ = itermax / 4;
   int niter = 0;  // current iteration number

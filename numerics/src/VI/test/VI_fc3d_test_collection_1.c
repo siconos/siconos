@@ -32,14 +32,14 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 typedef struct {
-  VariationalInequality *vi;
-  FrictionContactProblem *fc3d;
+  VariationalInequality* vi;
+  FrictionContactProblem* fc3d;
 } Problems;
 
-static void Ftest_0(void *self, int n_unused, double *x, double *F) {
-  VariationalInequality *vi = (VariationalInequality *)self;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void Ftest_0(void* self, int n_unused, double* x, double* F) {
+  VariationalInequality* vi = (VariationalInequality*)self;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
@@ -57,10 +57,10 @@ static void Ftest_0(void *self, int n_unused, double *x, double *F) {
   }
 }
 
-static void PXtest_0(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void PXtest_0(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int contact = 0;
@@ -86,12 +86,12 @@ static int test_0(void) {
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions *options = solver_options_create(SICONOS_VI_EG);
+  SolverOptions* options = solver_options_create(SICONOS_VI_EG);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   vi.env = pb;
 
   pb->vi = &vi;
@@ -101,8 +101,8 @@ static int test_0(void) {
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;
 
-  double *x = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
+  double* x = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
 
   PXtest_0(&vi, x, w);
 
@@ -125,10 +125,10 @@ static int test_0(void) {
   return info;
 }
 
-static void Ftest_1(void *self, int n_unused, double *x, double *F) {
-  VariationalInequality *vi = (VariationalInequality *)self;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void Ftest_1(void* self, int n_unused, double* x, double* F) {
+  VariationalInequality* vi = (VariationalInequality*)self;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
@@ -146,10 +146,10 @@ static void Ftest_1(void *self, int n_unused, double *x, double *F) {
   }
 }
 
-static void PXtest_1(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void PXtest_1(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int contact = 0;
@@ -175,13 +175,13 @@ static int test_1(void) {
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions *options = solver_options_create(SICONOS_VI_FPP);
+  SolverOptions* options = solver_options_create(SICONOS_VI_FPP);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   vi.env = pb;
 
   pb->vi = &vi;
@@ -191,8 +191,8 @@ static int test_1(void) {
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;
 
-  double *x = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
+  double* x = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
 
   PXtest_1(&vi, x, w);
 
@@ -213,10 +213,10 @@ static int test_1(void) {
   return info;
 }
 
-static void Ftest_2(void *self, int n_unused, double *x, double *F) {
-  VariationalInequality *vi = (VariationalInequality *)self;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void Ftest_2(void* self, int n_unused, double* x, double* F) {
+  VariationalInequality* vi = (VariationalInequality*)self;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
@@ -234,10 +234,10 @@ static void Ftest_2(void *self, int n_unused, double *x, double *F) {
   }
 }
 
-static void PXtest_2(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  Problems *pb = (Problems *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+static void PXtest_2(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  Problems* pb = (Problems*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int contact = 0;
@@ -263,12 +263,12 @@ static int test_2(void) {
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions *options = solver_options_create(SICONOS_VI_HP);
+  SolverOptions* options = solver_options_create(SICONOS_VI_HP);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   // char filename[50] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   vi.env = pb;
 
   pb->vi = &vi;
@@ -278,8 +278,8 @@ static int test_2(void) {
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;
 
-  double *x = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
+  double* x = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
 
   PXtest_2(&vi, x, w);
 

@@ -15,20 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MohrCoulombPlasticityNSL.hpp"
-#include "SiconosException.hpp"
 #include <iostream>
 
-bool siconos::modeling::MohrCoulombPlasticityNSL::isVerified() const
-{
+#include "MohrCoulombPlasticityNSL.hpp"
+#include "SiconosException.hpp"
+
+bool siconos::modeling::MohrCoulombPlasticityNSL::isVerified() const {
   bool res = false;
   // to do
   THROW_EXCEPTION("MohrCoulombPlasticityNSL:: isVerified, not yet implemented!");
   return res;
 }
 
-void siconos::modeling::MohrCoulombPlasticityNSL::display() const
-{
+void siconos::modeling::MohrCoulombPlasticityNSL::display() const {
   std::cout << "=== Mohr Coulomb Plasticity non-smooth law data display ===" << std::endl;
   std::cout << " Cohesion: " << _c << std::endl;
   std::cout << " Friction Angle: " << _phi << std::endl;

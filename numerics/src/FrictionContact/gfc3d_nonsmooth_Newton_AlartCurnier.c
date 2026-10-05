@@ -53,9 +53,9 @@
 #include "solver_registry.h"
 
 /* compute psi function */
-void ACPsi(GlobalFrictionContactProblem *problem, AlartCurnierFun3x3Ptr computeACFun3x3,
-           double *globalVelocity, double *reaction, double *velocity, double *rho,
-           double *psi) {
+void ACPsi(GlobalFrictionContactProblem* problem, AlartCurnierFun3x3Ptr computeACFun3x3,
+           double* globalVelocity, double* reaction, double* velocity, double* rho,
+           double* psi) {
   assert(problem->H->size1 == problem->dimension * problem->numberOfContacts);
   unsigned int m = problem->H->size1;
   unsigned int n = problem->M->size0;
@@ -81,8 +81,8 @@ void ACPsi(GlobalFrictionContactProblem *problem, AlartCurnierFun3x3Ptr computeA
 }
 
 /* init memory for jacobian */
-CS_INT initACPsiJacobian(CSparseMatrix *M, CSparseMatrix *H, CSparseMatrix *A,
-                         CSparseMatrix *B, CSparseMatrix *J, double rescaling) {
+CS_INT initACPsiJacobian(CSparseMatrix* M, CSparseMatrix* H, CSparseMatrix* A,
+                         CSparseMatrix* B, CSparseMatrix* J, double rescaling) {
   /* only triplet matrix */
   assert(M->nz >= 0);
   assert(H->nz >= 0);
@@ -141,8 +141,8 @@ CS_INT initACPsiJacobian(CSparseMatrix *M, CSparseMatrix *H, CSparseMatrix *A,
 }
 
 /* update J with new A and B */
-void updateACPsiJacobian(CSparseMatrix *M, CSparseMatrix *H, CSparseMatrix *A,
-                         CSparseMatrix *B, CSparseMatrix *J, CS_INT Astart) {
+void updateACPsiJacobian(CSparseMatrix* M, CSparseMatrix* H, CSparseMatrix* A,
+                         CSparseMatrix* B, CSparseMatrix* J, CS_INT Astart) {
   /* only triplet matrix */
   assert(M->nz >= 0);
   assert(H->nz >= 0);
@@ -195,7 +195,7 @@ void updateACPsiJacobian(CSparseMatrix *M, CSparseMatrix *H, CSparseMatrix *A,
 }
 
 /* 3D lists blocks => sparse matrix */
-void init3x3DiagBlocks(int nc, double *P, CSparseMatrix *R) {
+void init3x3DiagBlocks(int nc, double* P, CSparseMatrix* R) {
   R->m = 3 * nc;
   R->n = 3 * nc;
   R->x = P;
@@ -214,10 +214,10 @@ void init3x3DiagBlocks(int nc, double *P, CSparseMatrix *R) {
 
 /*
  */
-int _globalLineSearchSparseGP(GlobalFrictionContactProblem *problem,
-                              AlartCurnierFun3x3Ptr computeACFun3x3, double *solution,
-                              double *direction, double *mu, double *rho, double *F,
-                              double *psi, CSparseMatrix *J, double *tmp, double alpha[1],
+int _globalLineSearchSparseGP(GlobalFrictionContactProblem* problem,
+                              AlartCurnierFun3x3Ptr computeACFun3x3, double* solution,
+                              double* direction, double* mu, double* rho, double* F,
+                              double* psi, CSparseMatrix* J, double* tmp, double alpha[1],
                               unsigned int maxiter_ls) {
   double inf = 1e10;
   double alphamin = 1e-16;
@@ -292,13 +292,13 @@ int _globalLineSearchSparseGP(GlobalFrictionContactProblem *problem,
   return -1;
 }
 
-void gfc3d_sparseGlobalAlartCurnierInit(SolverOptions *SO) {}
+void gfc3d_sparseGlobalAlartCurnierInit(SolverOptions* SO) {}
 
 /* Alart & Curnier solver for sparse global problem */
-void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
-                                         double *reaction, double *velocity,
-                                         double *globalVelocity, int *info,
-                                         SolverOptions *options) {
+void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
+                                         double* reaction, double* velocity,
+                                         double* globalVelocity, int* info,
+                                         SolverOptions* options) {
   assert(problem);
   assert(reaction);
   assert(velocity);
@@ -363,7 +363,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - inf-norm of H = %g ",
                           NM_norm_inf(problem->H));
 
-  DEBUG_EXPR(NumericsMatrix *Mdense =
+  DEBUG_EXPR(NumericsMatrix* Mdense =
                  NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
              ; NM_to_dense(problem->M, Mdense);
              // NM_display(Mdense);
@@ -416,14 +416,14 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
                           problem_size + /* tmp2 */
                           problem_size + /* tmp3 */
                           problem_size /* solution */);
-    options->dWork = (double *)calloc(options->dWorkSize, sizeof(double));
+    options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
 
     /* XXX big hack here */
-    options->iWork = (int *)malloc((3 * m + /* iA */
-                                    3 * m + /* iB */
-                                    3 * m + /* pA */
-                                    3 * m)  /* pB */
-                                   * sizeof(CS_INT));
+    options->iWork = (int*)malloc((3 * m + /* iA */
+                                   3 * m + /* iB */
+                                   3 * m + /* pA */
+                                   3 * m)  /* pB */
+                                  * sizeof(CS_INT));
 
     options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 1;
   }
@@ -432,7 +432,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
   size_t required_size = (size_t)(8 * m + 5 * problem_size) + 2 * problem->M->size0;
 
   if (!options->dWork || options->dWorkSize < required_size) {
-    double *p = (double *)realloc(options->dWork, required_size * sizeof(double));
+    double* p = (double*)realloc(options->dWork, required_size * sizeof(double));
     if (!p) {
       numerics_error_log("gfc3d_nonsmooth_Newton_AlartCurnier", "bad alloc");
       return;
@@ -441,27 +441,27 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
     options->dWorkSize = required_size;
   }
 
-  double *F = options->dWork + 2 * problem->M->size0;
+  double* F = options->dWork + 2 * problem->M->size0;
   // shift to let space for dwork internal buffer in gfc3d_compute_error
-  double *A = F + m;
-  double *B = A + 3 * m;
-  double *rho = B + 3 * m;
+  double* A = F + m;
+  double* B = A + 3 * m;
+  double* rho = B + 3 * m;
 
-  double *psi = rho + m;
-  double *rhs = psi + problem_size;
-  double *tmp2 = rhs + problem_size;
-  double *tmp3 = tmp2 + problem_size;
-  double *solution = tmp3 + problem_size;
+  double* psi = rho + m;
+  double* rhs = psi + problem_size;
+  double* tmp2 = rhs + problem_size;
+  double* tmp3 = tmp2 + problem_size;
+  double* solution = tmp3 + problem_size;
 
   /* XXX big hack --xhub*/
-  CS_INT *iA = (CS_INT *)options->iWork;
-  CS_INT *iB = iA + 3 * m;
-  CS_INT *pA = iB + 3 * m;
-  CS_INT *pB = pA + 3 * m;
+  CS_INT* iA = (CS_INT*)options->iWork;
+  CS_INT* iB = iA + 3 * m;
+  CS_INT* pA = iB + 3 * m;
+  CS_INT* pB = pA + 3 * m;
 
   CSparseMatrix A_;
   CSparseMatrix B_;
-  CSparseMatrix *J;
+  CSparseMatrix* J;
 
   A_.p = pA;
   B_.p = pB;
@@ -478,7 +478,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
                  1, 1);
 
   /* needed to build the NumericsMatrix for J */
-  NumericsSparseMatrix *NSM_J = NSM_new();
+  NumericsSparseMatrix* NSM_J = NSM_new();
   NSM_J->triplet = J;
 
   DEBUG_PRINTF("NM_triplet(problem->M)->n= %li\t,NM_triplet(problem->M)->nzmax = %li\n",
@@ -520,7 +520,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
   for (unsigned int i = 0; i < problem_size; ++i) rhs[i] = 0.;
 
   /* NM_J wraps NSM_J, which wraps J */
-  NumericsMatrix *NM_J = NM_new();
+  NumericsMatrix* NM_J = NM_new();
   NM_fill(NM_J, NM_SPARSE, J->n, J->m, NSM_J);
 
   info[0] = 1;
@@ -554,9 +554,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
 
   /* store the current solution */
 
-  double *globalVelocity_k = solution;
-  double *velocity_k = &(solution[n]);
-  double *reaction_k = &(solution[n + m]);
+  double* globalVelocity_k = solution;
+  double* velocity_k = &(solution[n]);
+  double* reaction_k = &(solution[n + m]);
 
   memcpy(globalVelocity_k, globalVelocity, n * sizeof(double));
   memcpy(velocity_k, velocity, m * sizeof(double));
@@ -590,7 +590,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
     cblas_dscal(problem_size, -1., rhs, 1);
 
     /* get compress column storage for linear ops */
-    CSparseMatrix *Jcsc = cs_compress(J);
+    CSparseMatrix* Jcsc = cs_compress(J);
 
     /* Solve: J X = -psi */
     DEBUG_PRINTF("norm of AA = %e\n", NM_norm_1(NM_J));
@@ -715,7 +715,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
     char filename[64];
     printf("GLOBALAC: dumping problem\n");
     snprintf(filename, sizeof(filename), "GLOBALAC_failure%d.dat", file_counter++);
-    FILE *file = fopen(filename, "w");
+    FILE* file = fopen(filename, "w");
     frictionContact_printInFile(problem, file);
     fclose(file);
   }
@@ -725,7 +725,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
   free(NM_J);
 }
 
-void gfc3d_nsn_ac_set_default(SolverOptions *options) {
+void gfc3d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;
@@ -749,22 +749,22 @@ void gfc3d_nsn_ac_set_default(SolverOptions *options) {
  * - Elimination of giant switch statements in drivers
  */
 
-static int gfc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
+static int gfc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
   /* set_default is now called by the registry before init_wrap */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int gfc3d_nsn_ac_solve_wrap(void *problem, double *reaction, double *velocity,
-                                   double *globalVelocity, SolverOptions *options) {
+static int gfc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem *)problem, reaction,
+  gfc3d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem*)problem, reaction,
                                       velocity, globalVelocity, &info, options);
   return info;
 }
 
-static void gfc3d_nsn_ac_free_wrap(void *problem, SolverOptions *options) {
+static void gfc3d_nsn_ac_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

@@ -42,9 +42,9 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double norm,
-                                double *error);
+int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error);
 
 /**
     Error computation (using the normal map residual) for one Mohr Coulomb 2D plasticity
@@ -56,9 +56,9 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
     \param worktmp work vector
     \param[in,out] error value
  */
-void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u,
-                                                 double eta, double theta, double *error,
-                                                 double *worktmp);
+void plasticity_2d_unitary_compute_and_add_error(double* restrict r, double* restrict u,
+                                                 double eta, double theta, double* error,
+                                                 double* worktmp);
 
 #if defined(__cplusplus)
 }

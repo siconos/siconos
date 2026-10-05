@@ -14,23 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+
 #include <iostream>
 
-int main()
-{
-    // The object to run tests
-    CppUnit::TextUi::TestRunner runner;
+int main() {
+  // The object to run tests
+  CppUnit::TextUi::TestRunner runner;
 
-    // Get test classes that have been registered
-    CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+  // Get test classes that have been registered
+  CppUnit::TestFactoryRegistry& registry = CppUnit::TestFactoryRegistry::getRegistry();
 
-    // Put tests into the runner
-    runner.addTest(registry.makeTest());
+  // Put tests into the runner
+  runner.addTest(registry.makeTest());
 
-    // Run tests
-    runner.run("", false, true, false);
+  // Run tests
+  runner.run("", false, true, false);
 }

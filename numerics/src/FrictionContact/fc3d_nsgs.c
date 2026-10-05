@@ -131,7 +131,7 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
   localproblem->mu[0] = problem->mu[contact];
 }
 
-int  fc3d_nsgs_initialize_local_solver(
+int fc3d_nsgs_initialize_local_solver(
     struct LocalProblemFunctionToolkit* local_function_toolkit, ComputeErrorPtr* computeError,
     FrictionContactProblem* problem, FrictionContactProblem* localproblem,
     SolverOptions* options) {
@@ -183,8 +183,7 @@ int  fc3d_nsgs_initialize_local_solver(
     /* Newton solver (Alart-Curnier) */
     case OC_NSN: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -192,8 +191,7 @@ int  fc3d_nsgs_initialize_local_solver(
     }
     case OC_NSN_GP: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -201,8 +199,7 @@ int  fc3d_nsgs_initialize_local_solver(
     }
     case OC_NSN_GP_HYBRID: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -271,9 +268,9 @@ int  fc3d_nsgs_initialize_local_solver(
       break;
     }
     default: {
-      return  numerics_error("fc3d_nsgs_initialize_local_solver",
-                     "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n",
-                     solver_options_id_to_name(local_opts->solverId));
+      return numerics_error("fc3d_nsgs_initialize_local_solver",
+                            "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n",
+                            solver_options_id_to_name(local_opts->solverId));
     }
   }
   return 0;
@@ -574,8 +571,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   double norm_r[] = {1e24};
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("fc3d_nsgs",
-                   "The NSGS method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >= 1");
+                           "The NSGS method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >= 1");
     return;
   }
 
@@ -635,11 +632,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
         options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
-    *info = numerics_error("fc3d_nsgs",
-                   "options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
+    *info =
+        numerics_error("fc3d_nsgs",
+                       "options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
     return;
   }
 
@@ -651,13 +649,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
-
-    *info = numerics_error("fc3d_nsgs",
-                   "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
+    *info = numerics_error(
+        "fc3d_nsgs",
+        "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
 
     return;
   }

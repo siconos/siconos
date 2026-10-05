@@ -11,7 +11,7 @@
 import std;
 #else
 #include <type_traits>
-#include <utility>      // std::enable_if_t
+#include <utility>  // std::enable_if_t
 #endif
 
 // This header provides aliases rvalue_t and lvalue_t.
@@ -19,21 +19,27 @@ import std;
 // Usage: template <class T> void foo(rvalue<T> rvalue);
 //
 // Those are useful for
-//  * better type safety - you can validate at compile time that only rvalue reference is passed into the function
+//  * better type safety - you can validate at compile time that only rvalue reference is
+//  passed into the function
 //  * documentation and readability - rvalue_t<T> is much better than T&&+SFINAE
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 /// Binds to rvalues only, no copying allowed.
 template <class T
 #ifdef BOOST_PFR_DETAIL_STRICT_RVALUE_TESTING
-    , class = std::enable_if_t<std::is_rvalue_reference<T&&>::value>
+          ,
+          class = std::enable_if_t<std::is_rvalue_reference<T&&>::value>
 #endif
->
+          >
 using rvalue_t = T&&;
 
 /// Binds to mutable lvalues only
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_RVALUE_T_HPP
+#endif  // BOOST_PFR_DETAIL_RVALUE_T_HPP

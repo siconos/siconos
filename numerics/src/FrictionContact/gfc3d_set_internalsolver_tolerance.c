@@ -15,18 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "fc3d_short_names.h"
-#include "FrictionContact_options.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "FrictionContact_options.h"       // for SICONOS_FRICTION_3D_IPARAM...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SolverOptions.h"                 // for SolverOptions
-#include "gfc3d_Solvers.h"                 // for gfc3d_set_internalsolver_t...
-#include "numerics_verbose.h"
+#include "fc3d_short_names.h"
+#include "gfc3d_Solvers.h"  // for gfc3d_set_internalsolver_t...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
-                                        SolverOptions* options,
-                                        SolverOptions* internalsolver_options, double error) {
+                                       SolverOptions* options,
+                                       SolverOptions* internalsolver_options, double error) {
   int* iparam = options->iparam;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] ==
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE) {
@@ -54,7 +54,7 @@ int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else {
     return numerics_error("fc3d__set_internalsolver_tolerance",
-                   "Unknown strategy for driving the tolerance");
+                          "Unknown strategy for driving the tolerance");
   }
   return 0;
 }

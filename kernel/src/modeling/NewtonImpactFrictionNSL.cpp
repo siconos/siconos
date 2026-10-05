@@ -16,19 +16,19 @@
  * limitations under the License.
  */
 #include "NewtonImpactFrictionNSL.hpp"
-#include "SiconosException.hpp"
+
 #include <iostream>
 
-bool siconos::modeling::NewtonImpactFrictionNSL::isVerified() const
-{
+#include "SiconosException.hpp"
+
+bool siconos::modeling::NewtonImpactFrictionNSL::isVerified() const {
   bool res = false;
   // to do
   THROW_EXCEPTION("NewtonImpactFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 
-void siconos::modeling::NewtonImpactFrictionNSL::display() const
-{
+void siconos::modeling::NewtonImpactFrictionNSL::display() const {
   std::cout << "=== Newton impact-friction non-smooth law data display ===" << std::endl;
   std::cout << " Normal Newton coefficient of restitution: " << _en << std::endl;
   std::cout << " Tangential Newton coefficient of restitution: " << _et << std::endl;

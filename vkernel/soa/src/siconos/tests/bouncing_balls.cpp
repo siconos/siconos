@@ -1,7 +1,7 @@
 
 #include <chrono>
-#include <numeric>
 #include <fstream>
+#include <numeric>
 #include <print>
 
 #include "siconos/siconos.hpp"
@@ -27,21 +27,18 @@ struct env : standard_environment<T> {
 
 struct data_t
     : storage::make<
-          env, simulation,
-          storage::pattern::wrap<some::unbounded_collection, ball>,
-          storage::pattern::wrap<some::bounded_collection, relation,
-                                 some::indice_value<1>>,
+          env, simulation, storage::pattern::wrap<some::unbounded_collection, ball>,
+          storage::pattern::wrap<some::bounded_collection, relation, some::indice_value<1>>,
           storage::pattern::wrap<some::unbounded_collection, interaction>,
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<
-                  storage::attr_t<typename osi::assembled_osi_t,
-                                  "mass_matrix_assembled">>>> {};
+                  storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
+};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
 
   config::data_t data;
@@ -157,14 +154,12 @@ int main(int argc, char* argv[])
 
   std::ofstream result_file("result-many.dat");
 
-  std::print(result_file,
-             "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
              simulation.current_step() * simulation.time_step(),
              storage::attr<"q">(ball1, simulation.current_step())(0),
              storage::attr<"q">(ball2, simulation.current_step())(0),
              storage::attr<"velocity">(ball1, simulation.current_step())(0),
-             storage::attr<"velocity">(ball2, simulation.current_step())(0),
-             0., 0.);
+             storage::attr<"velocity">(ball2, simulation.current_step())(0), 0., 0.);
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
@@ -173,28 +168,20 @@ int main(int argc, char* argv[])
 
     double p01, p02, lambda1, lambda2;
     if (ninvds > 1) {
-      p01 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                       0)(0);
-      p02 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                       0)(1);
+      p01 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+      p02 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(1);
 
-      lambda1 = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      lambda1 = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
 
-      lambda2 = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 1)(0);
-    }
-    else if (ninvds == 1) {
-      p01 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                       0)(0);
+      lambda2 = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 1)(0);
+    } else if (ninvds == 1) {
+      p01 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
       p02 = 0;
 
-      lambda1 = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      lambda1 = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
 
       lambda2 = 0;
-    }
-    else {
+    } else {
       p01 = 0;
       p02 = 0;
       lambda1 = 0;
@@ -206,15 +193,13 @@ int main(int argc, char* argv[])
                storage::attr<"q">(ball1, simulation.current_step())(0),
                storage::attr<"q">(ball2, simulation.current_step())(0),
                storage::attr<"velocity">(ball1, simulation.current_step())(0),
-               storage::attr<"velocity">(ball2, simulation.current_step())(0),
-               p01, p02, lambda1, lambda2);
+               storage::attr<"velocity">(ball2, simulation.current_step())(0), p01, p02,
+               lambda1, lambda2);
   }
 
   std::print("Computation Time \n");
   end = std::chrono::system_clock::now();
-  int elapsed =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-          .count();
+  int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::print("Computation time : {} ms \n", elapsed);
 
   //  io::close(fd);

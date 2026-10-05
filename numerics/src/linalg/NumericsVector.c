@@ -43,7 +43,6 @@ void NV_display(const double* const m, int nRow) {
     else
       printf("]\n");
   }
-
 }
 
 void NV_copy(const double* const vec, size_t vecSize, double* out) {

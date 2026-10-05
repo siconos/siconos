@@ -91,14 +91,13 @@ class MyDirFunction : public math_Function {
   math_FunctionSetWithDerivatives* F;
 
  public:
-  MyDirFunction(math_Vector& V1, math_Vector& V2, math_Vector& V3,
-                math_Vector& V4, math_FunctionSetWithDerivatives& f);
+  MyDirFunction(math_Vector& V1, math_Vector& V2, math_Vector& V3, math_Vector& V4,
+                math_FunctionSetWithDerivatives& f);
 
   void Initialize(const math_Vector& p0, const math_Vector& dir) const;
   // For hp :
-  Standard_Boolean Value(const math_Vector& Sol, math_Vector& FF,
-                         math_Matrix& DF, math_Vector& GH, Standard_Real& F2,
-                         Standard_Real& Gnr1);
+  Standard_Boolean Value(const math_Vector& Sol, math_Vector& FF, math_Matrix& DF,
+                         math_Vector& GH, Standard_Real& F2, Standard_Real& Gnr1);
   //     Standard_Boolean MyDirFunction::Value(const math_Vector& Sol,
   //     math_Vector& FF,
   //					   math_Matrix& DF, math_Vector& GH,
@@ -108,8 +107,7 @@ class MyDirFunction : public math_Function {
 };
 
 MyDirFunction::MyDirFunction(math_Vector& V1, math_Vector& V2, math_Vector& V3,
-                             math_Vector& V4,
-                             math_FunctionSetWithDerivatives& f) {
+                             math_Vector& V4, math_FunctionSetWithDerivatives& f) {
   P0 = &V1;
   Dir = &V2;
   P = &V3;
@@ -117,14 +115,12 @@ MyDirFunction::MyDirFunction(math_Vector& V1, math_Vector& V2, math_Vector& V3,
   F = &f;
 }
 
-void MyDirFunction::Initialize(const math_Vector& p0,
-                               const math_Vector& dir) const {
+void MyDirFunction::Initialize(const math_Vector& p0, const math_Vector& dir) const {
   *P0 = p0;
   *Dir = dir;
 }
 
-Standard_Boolean MyDirFunction::Value(const Standard_Real x,
-                                      Standard_Real& fval) {
+Standard_Boolean MyDirFunction::Value(const Standard_Real x, Standard_Real& fval) {
   Standard_Real p;
   for (Standard_Integer i = P->Lower(); i <= P->Upper(); i++) {
     p = Dir->Value(i);
@@ -151,9 +147,9 @@ Standard_Boolean MyDirFunction::Value(const Standard_Real x,
   return Standard_False;
 }
 
-Standard_Boolean MyDirFunction::Value(const math_Vector& Sol, math_Vector& FF,
-                                      math_Matrix& DF, math_Vector& GH,
-                                      Standard_Real& F2, Standard_Real& Gnr1) {
+Standard_Boolean MyDirFunction::Value(const math_Vector& Sol, math_Vector& FF, math_Matrix& DF,
+                                      math_Vector& GH, Standard_Real& F2,
+                                      Standard_Real& Gnr1) {
   if (F->Values(Sol, FF, DF)) {
     Standard_Real aVal = 0.;
 
@@ -180,9 +176,9 @@ Standard_Boolean MyDirFunction::Value(const math_Vector& Sol, math_Vector& FF,
 }
 
 Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
-                                   const math_Vector& P2,
-                                   const Standard_Real F1, math_Vector& Delta,
-                                   const math_Vector& Tol, MyDirFunction& F)
+                                   const math_Vector& P2, const Standard_Real F1,
+                                   math_Vector& Delta, const math_Vector& Tol,
+                                   MyDirFunction& F)
 // Purpose : minimisation a partir de 3 points
 //-------------------------------------------------------
 {
@@ -210,8 +206,7 @@ Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
   F.Initialize(P1, Delta);
 
   // (2) On minimise
-  if (kMyDebug)
-    std::cout << "      minimisation dans la direction" << std::endl;
+  if (kMyDebug) std::cout << "      minimisation dans la direction" << std::endl;
   ax = -1;
   bx = 0;
   cx = (P2 - P1).Norm() * invnorme;
@@ -230,10 +225,8 @@ Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
 
 //----------------------------------------------------------------------
 Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
-                                   const Standard_Real& PValue,
-                                   const Standard_Real& PDirValue,
-                                   const math_Vector& Gradient,
-                                   const math_Vector& DGradient,
+                                   const Standard_Real& PValue, const Standard_Real& PDirValue,
+                                   const math_Vector& Gradient, const math_Vector& DGradient,
                                    const math_Vector& Tol, MyDirFunction& F)
 // Purpose: minimisation a partir de 2 points et une derives
 //----------------------------------------------------------------------
@@ -296,8 +289,7 @@ Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
     good = Standard_True;
     Result = fsol;
     if (kMyDebug)
-      std::cout << "t= " << tsol << " F = " << fsol << " OldF = " << PValue
-                << std::endl;
+      std::cout << "t= " << tsol << " F = " << fsol << " OldF = " << PValue << std::endl;
   }
 
   // (2) Si l'on a pas assez progresser on realise une recherche
@@ -320,8 +312,8 @@ Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
         tsol = Sol.Location();
         good = Standard_True;
         if (kMyDebug)
-          std::cout << "t= " << tsol << " F =" << Sol.Minimum()
-                    << " OldF = " << Result << std::endl;
+          std::cout << "t= " << tsol << " F =" << Sol.Minimum() << " OldF = " << Result
+                    << std::endl;
       }
     }
   }
@@ -333,10 +325,9 @@ Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
 }
 
 //------------------------------------------------------
-void SearchDirection(const math_Matrix& DF, const math_Vector& GH,
-                     const math_Vector& FF, Standard_Boolean ChangeDirection,
-                     const math_Vector& InvLengthMax, math_Vector& Direction,
-                     Standard_Real& Dy)
+void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
+                     Standard_Boolean ChangeDirection, const math_Vector& InvLengthMax,
+                     math_Vector& Direction, Standard_Real& Dy)
 
 {
   Standard_Integer Ninc = DF.ColNumber(), Neq = DF.RowNumber();
@@ -350,8 +341,7 @@ void SearchDirection(const math_Matrix& DF, const math_Vector& GH,
       if (Solut.IsDone())
         Solut.Solve(Direction);
       else {  // we have to "forget" singular directions.
-        if (kMyDebug)
-          std::cout << " Matrice singuliere : On prend SVD" << std::endl;
+        if (kMyDebug) std::cout << " Matrice singuliere : On prend SVD" << std::endl;
         math_SVD SolvebySVD(DF);
         if (SolvebySVD.IsDone())
           SolvebySVD.Solve(-1 * FF, Direction);
@@ -377,8 +367,7 @@ void SearchDirection(const math_Matrix& DF, const math_Vector& GH,
   // PMN 12/05/97 Traitement des singularite dans les conges
   // Sur des surfaces periodiques
 
-  Standard_Real ratio =
-      Abs(Direction(Direction.Lower()) * InvLengthMax(Direction.Lower()));
+  Standard_Real ratio = Abs(Direction(Direction.Lower()) * InvLengthMax(Direction.Lower()));
   Standard_Integer i;
   for (i = Direction.Lower() + 1; i <= Direction.Upper(); i++) {
     ratio = Max(ratio, Abs(Direction(i) * InvLengthMax(i)));
@@ -404,13 +393,12 @@ void SearchDirection(const math_Matrix& DF, const math_Vector& GH,
 }
 
 //=====================================================================
-void SearchDirection(
-    const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
-    const math_IntegerVector& Constraints,
-    //			    const math_Vector& X, // Le point d'init
-    const math_Vector&,  // Le point d'init
-    Standard_Boolean ChangeDirection, const math_Vector& InvLengthMax,
-    math_Vector& Direction, Standard_Real& Dy)
+void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
+                     const math_IntegerVector& Constraints,
+                     //			    const math_Vector& X, // Le point d'init
+                     const math_Vector&,  // Le point d'init
+                     Standard_Boolean ChangeDirection, const math_Vector& InvLengthMax,
+                     math_Vector& Direction, Standard_Real& Dy)
 // Purpose : Recherche une direction (et un pas si Newton Fonctionne) le long
 //           d'une frontiere
 //=====================================================================
@@ -450,8 +438,7 @@ void SearchDirection(
       }
     }
     //(2) On le resoud
-    SearchDirection(DF2, MyGH, FF, ChangeDirection, MyInvLengthMax, MyDirection,
-                    Dy);
+    SearchDirection(DF2, MyGH, FF, ChangeDirection, MyInvLengthMax, MyDirection, Dy);
 
     // (3) On l'interprete...
     // Reconstruction de Direction:
@@ -472,9 +459,8 @@ void SearchDirection(
 }  // namespace siconos::mechanisms::internal
 
 //====================================================
-Standard_Boolean Bounds(const math_Vector& InfBound,
-                        const math_Vector& SupBound, const math_Vector& Tol,
-                        math_Vector& Sol, const math_Vector& SolSave,
+Standard_Boolean Bounds(const math_Vector& InfBound, const math_Vector& SupBound,
+                        const math_Vector& Tol, math_Vector& Sol, const math_Vector& SolSave,
                         math_IntegerVector& Constraints, math_Vector& Delta)
 //
 // Purpose : Troncate un pas d'optimisation pour rester
@@ -581,8 +567,8 @@ siconos::mechanisms::mymath_FunctionSetRoot::mymath_FunctionSetRoot(
 
 siconos::mechanisms::mymath_FunctionSetRoot::mymath_FunctionSetRoot(
     math_FunctionSetWithDerivatives& F, const math_Vector& StartingPoint,
-    const math_Vector& Tolerance, const math_Vector& infBound,
-    const math_Vector& supBound, const Standard_Integer NbIterations)
+    const math_Vector& Tolerance, const math_Vector& infBound, const math_Vector& supBound,
+    const Standard_Integer NbIterations)
     : Delta(1, F.NbVariables()),
       Sol(1, F.NbVariables()),
       DF(1, F.NbEquations(), 1, F.NbVariables()),
@@ -648,20 +634,20 @@ siconos::mechanisms::mymath_FunctionSetRoot::mymath_FunctionSetRoot(
 
 void siconos::mechanisms::mymath_FunctionSetRoot::Delete() {}
 
-void siconos::mechanisms::mymath_FunctionSetRoot::SetTolerance(
-    const math_Vector& Tolerance) {
+void siconos::mechanisms::mymath_FunctionSetRoot::SetTolerance(const math_Vector& Tolerance) {
   for (Standard_Integer i = 1; i <= Tol.Length(); i++) {
     Tol(i) = Tolerance(i);
   }
 }
 
-void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
-    math_FunctionSetWithDerivatives& F, const math_Vector& StartingPoint,
-    const math_Vector& InfBound, const math_Vector& SupBound) {
+void siconos::mechanisms::mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
+                                                          const math_Vector& StartingPoint,
+                                                          const math_Vector& InfBound,
+                                                          const math_Vector& SupBound) {
   Standard_Integer Ninc = F.NbVariables(), Neq = F.NbEquations();
 
-  if ((Neq <= 0) || (StartingPoint.Length() != Ninc) ||
-      (InfBound.Length() != Ninc) || (SupBound.Length() != Ninc)) {
+  if ((Neq <= 0) || (StartingPoint.Length() != Ninc) || (InfBound.Length() != Ninc) ||
+      (SupBound.Length() != Ninc)) {
     Standard_DimensionError::Raise();
   }
 
@@ -672,9 +658,8 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
   Standard_Real Eps = 1.e-32, Progres = 0.005;
   Standard_Real F2, PreviousMinimum, Dy, OldF;
   Standard_Real Ambda, Ambda2, Gnr1, Oldgr;
-  math_Vector InvLengthMax(1, Ninc);  // Pour bloquer les pas a 1/4 du domaine
-  math_IntegerVector Constraints(
-      1, Ninc);  // Pour savoir sur quels bord on se trouve
+  math_Vector InvLengthMax(1, Ninc);        // Pour bloquer les pas a 1/4 du domaine
+  math_IntegerVector Constraints(1, Ninc);  // Pour savoir sur quels bord on se trouve
   for (i = 1; i <= Ninc; i++) {
     // modified by NIZHNY-MKK  Mon Oct  3 18:03:50 2005
     //      InvLengthMax(i) = 1. / Max(Abs(SupBound(i) - InfBound(i))/4, 1.e-9);
@@ -702,8 +687,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
     Done = Standard_False;
     State = F.GetStateNumber();
     if (internal::kMyDebug) {
-      std::cout << "Failure - Perform stop because F_Dir.Value failed."
-                << std::endl;
+      std::cout << "Failure - Perform stop because F_Dir.Value failed." << std::endl;
     }
     return;
   }
@@ -733,8 +717,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
     PreviousSolution = Sol;
     SolSave = Sol;
 
-    internal::SearchDirection(DF, GH, FF, ChangeDirection, InvLengthMax, DH,
-                              Dy);
+    internal::SearchDirection(DF, GH, FF, ChangeDirection, InvLengthMax, DH, Dy);
     if (internal::kMyDebug) {
       std::cout << "Search direction Dy = " << Dy << std::endl;
     }
@@ -780,8 +763,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
 
     if ((F2 <= Eps) || (Sqrt(Gnr1) <= Eps)) {
       if (internal::kMyDebug) {
-        std::cout << "Perform stop because of small value of F2 and Gnr1."
-                  << std::endl;
+        std::cout << "Perform stop because of small value of F2 and Gnr1." << std::endl;
       }
       Done = Standard_True;
       State = F.GetStateNumber();
@@ -804,16 +786,14 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
           if (F2 < OldF && (Dy < 0.0)) {
             // On essaye de progresser dans cette direction.
             if (internal::kMyDebug)
-              std::cout << " iteration de descente = " << DescenteIter
-                        << std::endl;
+              std::cout << " iteration de descente = " << DescenteIter << std::endl;
             DescenteIter++;
             SolSave = Sol;
             OldF = F2;
             for (i = Sol.Lower(); i <= Sol.Upper(); i++) {
               Sol(i) = Sol(i) + Ambda * DH(i);
             }
-            Stop = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints,
-                          Delta);
+            Stop = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
             if (internal::kMyDebug) {
               std::cout << " Augmentation de lambda" << std::endl;
             }
@@ -825,14 +805,12 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
                 // C'est le premier pas qui flanche, on fait une interpolation.
                 // et on minimise si necessaire.
                 DescenteIter++;
-                Good = MinimizeDirection(SolSave, Delta, OldF, F2, DHSave, GH,
-                                         Tol, F_Dir);
-              } else if (ChangeDirection || (DescenteIter > 1) ||
-                         (OldF > PreviousMinimum)) {
+                Good = MinimizeDirection(SolSave, Delta, OldF, F2, DHSave, GH, Tol, F_Dir);
+              } else if (ChangeDirection || (DescenteIter > 1) || (OldF > PreviousMinimum)) {
                 // La progression a ete utile, on minimise...
                 DescenteIter++;
-                Good = MinimizeDirection(PreviousSolution, SolSave, Sol, OldF,
-                                         Delta, Tol, F_Dir);
+                Good =
+                    MinimizeDirection(PreviousSolution, SolSave, Sol, OldF, Delta, Tol, F_Dir);
               }
               if (!Good) {
                 Sol = SolSave;
@@ -840,8 +818,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
               } else {
                 Sol = SolSave + Delta;
               }
-              Sort = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints,
-                            Delta);
+              Sort = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
               Sort = Standard_False;  // On a rejete le point sur la frontiere
             }
             Stop = Standard_True;  // et on sort dans tous les cas...
@@ -872,8 +849,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
         }
         if (internal::kMyDebug) {
           std::cout << "--- Sortie du Traitement Standard" << std::endl;
-          std::cout << "    DescenteIter = " << DescenteIter << " F2 = " << F2
-                    << std::endl;
+          std::cout << "    DescenteIter = " << DescenteIter << " F2 = " << F2 << std::endl;
         }
       }
       // ------------------------------------
@@ -888,11 +864,10 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
           // On essaye de progresser sur le bord
           SolSave = Sol;
           OldF = F2;
-	  internal::SearchDirection(DF, GH, FF, Constraints, Sol, ChangeDirection,
-                          InvLengthMax, DH, Dy);
+          internal::SearchDirection(DF, GH, FF, Constraints, Sol, ChangeDirection,
+                                    InvLengthMax, DH, Dy);
           if (internal::kMyDebug) {
-            std::cout << " Conditional Direction = " << ChangeDirection
-                      << std::endl;
+            std::cout << " Conditional Direction = " << ChangeDirection << std::endl;
           }
           if (Dy < -Eps) {  // Pour eviter des calculs inutiles et des /0...
             if (ChangeDirection) {
@@ -907,8 +882,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
             for (i = Sol.Lower(); i <= Sol.Upper(); i++) {
               Sol(i) = Sol(i) + Ambda * DH(i);
             }
-            Sortbis = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints,
-                             Delta);
+            Sortbis = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
 
             DHSave = GH;
             //	    F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
@@ -922,8 +896,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
             }
             Ambda2 = Gnr1;
             if (internal::kMyDebug) {
-              std::cout << "---  Iteration au bords : " << DescenteIter
-                        << std::endl;
+              std::cout << "---  Iteration au bords : " << DescenteIter << std::endl;
               std::cout << "---  F2 = " << F2 << std::endl;
             }
           } else {
@@ -933,8 +906,8 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
           while ((F2 / PreviousMinimum > Progres) && (F2 < OldF) && (!Stop)) {
             DescenteIter++;
             if (internal::kMyDebug)
-              std::cout << "--- Iteration de descente conditionnel = "
-                        << DescenteIter << std::endl;
+              std::cout << "--- Iteration de descente conditionnel = " << DescenteIter
+                        << std::endl;
             if (F2 < OldF && Dy < 0.0) {
               // On essaye de progresser dans cette direction.
               SolSave = Sol;
@@ -942,8 +915,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
               for (i = Sol.Lower(); i <= Sol.Upper(); i++) {
                 Sol(i) = Sol(i) + Ambda * DH(i);
               }
-              Sortbis = Bounds(InfBound, SupBound, Tol, Sol, SolSave,
-                               Constraints, Delta);
+              Sortbis = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
             }
             DHSave = GH;
             //	    F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
@@ -961,19 +933,16 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
           }
           Stop = ((Dy >= 0) || (DescenteIter >= 10));
         }
-        if (((F2 / PreviousMinimum > Progres) && (F2 >= OldF)) ||
-            (F2 >= PreviousMinimum)) {
+        if (((F2 / PreviousMinimum > Progres) && (F2 >= OldF)) || (F2 >= PreviousMinimum)) {
           // On minimise par Brent
           DescenteIter++;
-          Good = MinimizeDirection(SolSave, Delta, OldF, F2, DHSave, GH, Tol,
-                                   F_Dir);
+          Good = MinimizeDirection(SolSave, Delta, OldF, F2, DHSave, GH, Tol, F_Dir);
           if (!Good) {
             Sol = SolSave;
           } else {
             Sol = SolSave + Delta;
           }
-          Sort =
-              Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
+          Sort = Bounds(InfBound, SupBound, Tol, Sol, SolSave, Constraints, Delta);
           //	  F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
           if (!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
             if (internal::kMyDebug) {
@@ -987,8 +956,7 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Perform(
         }
         if (internal::kMyDebug) {
           std::cout << "--- Sortie du Traitement des Bords" << std::endl;
-          std::cout << "--- DescenteIter = " << DescenteIter << " F2 = " << F2
-                    << std::endl;
+          std::cout << "--- DescenteIter = " << DescenteIter << " F2 = " << F2 << std::endl;
         }
       }
     }
@@ -1103,8 +1071,7 @@ Standard_Boolean siconos::mechanisms::mymath_FunctionSetRoot::IsSolutionReached(
   return Standard_True;
 }
 
-void siconos::mechanisms::mymath_FunctionSetRoot::Dump(
-    Standard_OStream& o) const {
+void siconos::mechanisms::mymath_FunctionSetRoot::Dump(Standard_OStream& o) const {
   o << " mymath_FunctionSetRoot";
   if (Done) {
     o << " Status = Done\n";
@@ -1115,15 +1082,13 @@ void siconos::mechanisms::mymath_FunctionSetRoot::Dump(
   }
 }
 
-void siconos::mechanisms::mymath_FunctionSetRoot::Root(
-    math_Vector& Root) const {
+void siconos::mechanisms::mymath_FunctionSetRoot::Root(math_Vector& Root) const {
   StdFail_NotDone_Raise_if(!Done, " ");
   Standard_DimensionError_Raise_if(Root.Length() != Sol.Length(), " ");
   Root = Sol;
 }
 
-void siconos::mechanisms::mymath_FunctionSetRoot::FunctionSetErrors(
-    math_Vector& Err) const {
+void siconos::mechanisms::mymath_FunctionSetRoot::FunctionSetErrors(math_Vector& Err) const {
   StdFail_NotDone_Raise_if(!Done, " ");
   Standard_DimensionError_Raise_if(Err.Length() != Sol.Length(), " ");
   Err = Delta;

@@ -13,151 +13,110 @@ using siconos::storage::pattern::param;
 using siconos::storage::pattern::rec;
 namespace match = siconos::storage::pattern::match;
 
-static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
-                                                       T) {
+static auto translate = rec([]<typename E, typename T>(auto&& translate, E, T) {
   if constexpr (match::type_t<T>) {
     // return the embedded type
     return typename T::xtype{};
-  }
-  else if constexpr (!match::attribute<T>) {
+  } else if constexpr (!match::attribute<T>) {
     // return the type itself
     return T{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_polymorphic_type>) {
+  } else if constexpr (std::derived_from<T, some::undefined_polymorphic_type>) {
     return mp::unpack((typename T::types{}), []<typename... Ts>(Ts...) {
-      return
-          typename E::template variant<decltype(translate(E{}, Ts{}))...>{};
+      return typename E::template variant<decltype(translate(E{}, Ts{}))...>{};
     });
-  }
-  else if constexpr (std::derived_from<T, some::undefined_tuple>) {
+  } else if constexpr (std::derived_from<T, some::undefined_tuple>) {
     return mp::unpack((typename T::types{}), []<typename... Ts>(Ts...) {
       return typename E::template tuple<decltype(translate(E{}, Ts{}))...>{};
     });
-  }
-  else if constexpr (std::derived_from<T, some::boolean>) {
+  } else if constexpr (std::derived_from<T, some::boolean>) {
     return typename E::boolean{};
-  }
-  else if constexpr (std::derived_from<T, some::scalar>) {
+  } else if constexpr (std::derived_from<T, some::scalar>) {
     return typename E::scalar{};
-  }
-  else if constexpr (std::derived_from<T, some::indice>) {
+  } else if constexpr (std::derived_from<T, some::indice>) {
     return typename E::indice{};
-  }
-  else if constexpr (std::derived_from<T, some::integer>) {
+  } else if constexpr (std::derived_from<T, some::integer>) {
     return typename E::integer{};
-  }
-  else if constexpr (std::derived_from<T, some::string>) {
+  } else if constexpr (std::derived_from<T, some::string>) {
     return typename E::string{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_indice_parameter>) {
+  } else if constexpr (std::derived_from<T, some::undefined_indice_parameter>) {
     return mp::get_m<param<T::name>>(typename E::params{});
-  }
-  else if constexpr (std::derived_from<T, some::undefined_indice_value>) {
+  } else if constexpr (std::derived_from<T, some::undefined_indice_value>) {
     return T{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_type_parameter>) {
+  } else if constexpr (std::derived_from<T, some::undefined_type_parameter>) {
     return mp::get_m<param<T::name>>(typename E::params{});
   }
 
-  else if constexpr (std::derived_from<
-                         T, some::undefined_unbounded_collection>) {
+  else if constexpr (std::derived_from<T, some::undefined_unbounded_collection>) {
     return typename E::template unbounded_collection<decltype(translate(
         E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T,
-                                       some::undefined_bounded_collection>) {
+  } else if constexpr (std::derived_from<T, some::undefined_bounded_collection>) {
     return typename E::template bounded_collection<
         decltype(translate(E{}, typename T::type{})),
         decltype(translate(E{}, nth_t<0, typename T::sizes>{}))::value>{};
   }
 
-  else if constexpr (std::derived_from<T,
-                                       some::structure_for_assembled_data>) {
+  else if constexpr (std::derived_from<T, some::structure_for_assembled_data>) {
     if constexpr (std::derived_from<T, some::undefined_diagonal_matrix> &&
                   std::derived_from<T, some::unbounded_storage>) {
-      return
-          typename E::template assembled_diagonal_matrix<decltype(translate(
-              E{}, typename T::type{}))>{};
-    }
-    else if constexpr (std::derived_from<T,
-                                         some::undefined_unbounded_matrix>) {
-      return typename E::template assembled_matrix<decltype(translate(
+      return typename E::template assembled_diagonal_matrix<decltype(translate(
           E{}, typename T::type{}))>{};
+    } else if constexpr (std::derived_from<T, some::undefined_unbounded_matrix>) {
+      return typename E::template assembled_matrix<decltype(translate(E{},
+                                                                      typename T::type{}))>{};
+    } else if constexpr (std::derived_from<T, some::undefined_unbounded_vector>) {
+      return typename E::template assembled_vector<decltype(translate(E{},
+                                                                      typename T::type{}))>{};
     }
-    else if constexpr (std::derived_from<T,
-                                         some::undefined_unbounded_vector>) {
-      return typename E::template assembled_vector<decltype(translate(
-          E{}, typename T::type{}))>{};
-    }
-  }
-  else if constexpr (std::derived_from<T, some::undefined_vector>) {
-    return typename E::template vector<
-        decltype(translate(E{}, typename T::type{})),
-        decltype(translate(E{}, nth_t<0, typename T::sizes>{}))::value>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_array>) {
-    return typename E::template array<
-        decltype(translate(E{}, typename T::type{})),
-        decltype(translate(E{}, nth_t<0, typename T::sizes>{}))::value>{};
+  } else if constexpr (std::derived_from<T, some::undefined_vector>) {
+    return typename E::template vector<decltype(translate(E{}, typename T::type{})),
+                                       decltype(translate(
+                                           E{}, nth_t<0, typename T::sizes>{}))::value>{};
+  } else if constexpr (std::derived_from<T, some::undefined_array>) {
+    return typename E::template array<decltype(translate(E{}, typename T::type{})),
+                                      decltype(translate(
+                                          E{}, nth_t<0, typename T::sizes>{}))::value>{};
   }
 
   else if constexpr (std::derived_from<T, some::undefined_diagonal_matrix> &&
                      std::derived_from<T, some::unbounded_storage>) {
     return typename E::template unbounded_diagonal_matrix<decltype(translate(
         E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_diagonal_matrix>) {
+  } else if constexpr (std::derived_from<T, some::undefined_diagonal_matrix>) {
     return typename E::template diagonal_matrix<
         decltype(translate(E{}, typename T::type{})),
         decltype(translate(E{}, nth_t<0, typename T::sizes>{}))::value>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_matrix>) {
+  } else if constexpr (std::derived_from<T, some::undefined_matrix>) {
     using nrows = decltype(translate(E{}, nth_t<0, typename T::sizes>{}));
     using ncols = decltype(translate(E{}, nth_t<1, typename T::sizes>{}));
-    return typename E::template matrix<decltype(translate(
-                                           E{}, typename T::type{})),
+    return typename E::template matrix<decltype(translate(E{}, typename T::type{})),
                                        nrows::value, ncols::value>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_unbounded_matrix>) {
-    return typename E::template unbounded_matrix<decltype(translate(
-        E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_sparse_matrix>) {
-    return typename E::template sparse_matrix<decltype(translate(
-        E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_unbounded_vector>) {
-    return typename E::template unbounded_vector<decltype(translate(
-        E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_map>) {
-    return typename E::template map<
-        decltype(translate(E{}, (typename T::types{})[0_c])),
-        decltype(translate(E{}, (typename T::types{})[1_c]))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_sparse_set>) {
-    return typename E::template sparse_set<
-        decltype(translate(E{}, (typename T::types{})[0_c])),
-        decltype(translate(E{}, (typename T::types{})[1_c]))>{};
-  }
-  else if constexpr (std::derived_from<T,
-                                       some::undefined_dynamic_properties>) {
-    return typename E::template dynamic_properties<decltype(translate(
-        E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_graph>) {
-    return typename E::template graph<
-        decltype(translate(E{}, (typename T::types{}[0_c]))),
-        decltype(translate(E{}, (typename T::types{}[1_c])))>{};
-  }
-  else if constexpr (std::derived_from<T, some::undefined_vdescriptor>) {
-    return typename E::template vdescriptor<decltype(translate(
-        E{}, typename T::type{}))>{};
-  }
-  else if constexpr (std::derived_from<T, some::item_ref<typename T::type>>) {
+  } else if constexpr (std::derived_from<T, some::undefined_unbounded_matrix>) {
+    return
+        typename E::template unbounded_matrix<decltype(translate(E{}, typename T::type{}))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_sparse_matrix>) {
+    return typename E::template sparse_matrix<decltype(translate(E{}, typename T::type{}))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_unbounded_vector>) {
+    return
+        typename E::template unbounded_vector<decltype(translate(E{}, typename T::type{}))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_map>) {
+    return typename E::template map<decltype(translate(E{}, (typename T::types{})[0_c])),
+                                    decltype(translate(E{}, (typename T::types{})[1_c]))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_sparse_set>) {
+    return
+        typename E::template sparse_set<decltype(translate(E{}, (typename T::types{})[0_c])),
+                                        decltype(translate(E{},
+                                                           (typename T::types{})[1_c]))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_dynamic_properties>) {
+    return typename E::template dynamic_properties<decltype(translate(E{},
+                                                                      typename T::type{}))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_graph>) {
+    return typename E::template graph<decltype(translate(E{}, (typename T::types{}[0_c]))),
+                                      decltype(translate(E{}, (typename T::types{}[1_c])))>{};
+  } else if constexpr (std::derived_from<T, some::undefined_vdescriptor>) {
+    return typename E::template vdescriptor<decltype(translate(E{}, typename T::type{}))>{};
+  } else if constexpr (std::derived_from<T, some::item_ref<typename T::type>>) {
     return typename E::template item_ref<typename T::type>{};
-  }
-  else {
+  } else {
     []<typename Attr = T, bool flag = false>() {
       static_assert(flag, "cannot translate attribute");
     }();

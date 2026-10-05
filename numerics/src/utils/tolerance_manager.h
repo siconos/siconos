@@ -31,6 +31,7 @@
 
 #include <float.h>
 #include <math.h>
+
 #include "SolverOptions.h"
 #include "numerics_verbose.h"
 
@@ -41,17 +42,17 @@
  */
 typedef struct {
   /* User-specified parameters (read-only after init) */
-  double user_tolerance;        /**< Original user-requested tolerance */
-  double min_tolerance;         /**< Absolute floor (DBL_EPSILON * 1e-6) */
+  double user_tolerance; /**< Original user-requested tolerance */
+  double min_tolerance;  /**< Absolute floor (DBL_EPSILON * 1e-6) */
 
   /* Working state (may change during iterations) */
-  double working_tolerance;     /**< Current adapted tolerance */
-  double local_tol_original;    /**< Saved original local solver tolerance */
-  double local_tol_current;     /**< Current (possibly adapted) local tolerance */
+  double working_tolerance;  /**< Current adapted tolerance */
+  double local_tol_original; /**< Saved original local solver tolerance */
+  double local_tol_current;  /**< Current (possibly adapted) local tolerance */
 
   /* Adaptation tracking */
-  int adaptation_count;         /**< Number of times tolerance was adapted */
-  double last_error_ratio;      /**< Last computed error ratio */
+  int adaptation_count;    /**< Number of times tolerance was adapted */
+  double last_error_ratio; /**< Last computed error ratio */
 } ToleranceManager;
 
 /** Initialize tolerance manager
@@ -60,8 +61,7 @@ typedef struct {
  * \param[in] user_tol User-specified tolerance
  * \param[in] localsolver_options Local solver options (may be NULL)
  */
-static inline void tolerance_manager_init(ToleranceManager* tm,
-                                          double user_tol,
+static inline void tolerance_manager_init(ToleranceManager* tm, double user_tol,
                                           SolverOptions* localsolver_options) {
   tm->user_tolerance = user_tol;
   tm->working_tolerance = user_tol;
@@ -99,15 +99,14 @@ static inline double tolerance_manager_get_min(ToleranceManager* tm) {
  * \param[in] verbose Verbosity level
  * \return 0 if converged (full_error <= user_tolerance), 1 if not converged
  */
-static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
-                                                  double incr_error,
-                                                  double full_error,
-                                                  int verbose) {
+static inline int tolerance_manager_adapt_working(ToleranceManager* tm, double incr_error,
+                                                  double full_error, int verbose) {
   /* Check if full error is within user tolerance */
   if (full_error <= tm->user_tolerance) {
     if (verbose > 0) {
-      numerics_printf("ToleranceManager: CONVERGED - Full error (%.2e) <= user tolerance (%.2e)",
-                      full_error, tm->user_tolerance);
+      numerics_printf(
+          "ToleranceManager: CONVERGED - Full error (%.2e) <= user tolerance (%.2e)",
+          full_error, tm->user_tolerance);
     }
     return 0; /* Converged */
   }
@@ -130,8 +129,9 @@ static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
     /* Only adapt if tolerance would decrease */
     if (new_tolerance > 0.0 && new_tolerance < tm->working_tolerance) {
       if (verbose > 0) {
-        numerics_printf("ToleranceManager: Adapting working tolerance: %.4e -> %.4e (ratio=%.4f)",
-                        tm->working_tolerance, new_tolerance, error_ratio);
+        numerics_printf(
+            "ToleranceManager: Adapting working tolerance: %.4e -> %.4e (ratio=%.4f)",
+            tm->working_tolerance, new_tolerance, error_ratio);
       }
       tm->working_tolerance = new_tolerance;
       tm->adaptation_count++;
@@ -155,8 +155,7 @@ static inline int tolerance_manager_adapt_working(ToleranceManager* tm,
  */
 static inline int tolerance_manager_tighten_local(ToleranceManager* tm,
                                                   SolverOptions* localsolver_options,
-                                                  double incr_error,
-                                                  int verbose) {
+                                                  double incr_error, int verbose) {
   if (!localsolver_options) {
     if (verbose > 0) {
       numerics_printf("ToleranceManager: Warning - No local solver options to tighten");
@@ -171,8 +170,10 @@ static inline int tolerance_manager_tighten_local(ToleranceManager* tm,
   tm->local_tol_current = new_tol;
 
   if (verbose > 0) {
-    numerics_printf("ToleranceManager: Incr error very small (%.2e), tightening local solver: %.2e -> %.2e",
-                    incr_error, current_tol, new_tol);
+    numerics_printf(
+        "ToleranceManager: Incr error very small (%.2e), tightening local solver: %.2e -> "
+        "%.2e",
+        incr_error, current_tol, new_tol);
   }
 
   return 1; /* Continue iterating */
@@ -202,8 +203,7 @@ static inline int tolerance_manager_is_incr_very_small(double incr_error) {
  */
 static inline int tolerance_manager_check_convergence(ToleranceManager* tm,
                                                       SolverOptions* localsolver_options,
-                                                      double full_error,
-                                                      double incr_error,
+                                                      double full_error, double incr_error,
                                                       int verbose) {
   /* First check: is full error within user tolerance? */
   if (full_error <= tm->user_tolerance) {
@@ -249,8 +249,8 @@ static inline void tolerance_manager_print(ToleranceManager* tm) {
   numerics_printf("  User tolerance:     %.6e", tm->user_tolerance);
   numerics_printf("  Working tolerance:  %.6e", tm->working_tolerance);
   numerics_printf("  Minimum tolerance:  %.6e", tm->min_tolerance);
-  numerics_printf("  Local tolerance:    %.6e (original: %.6e)",
-                  tm->local_tol_current, tm->local_tol_original);
+  numerics_printf("  Local tolerance:    %.6e (original: %.6e)", tm->local_tol_current,
+                  tm->local_tol_original);
   numerics_printf("  Adaptation count:   %d", tm->adaptation_count);
 }
 

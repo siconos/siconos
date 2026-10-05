@@ -24,7 +24,7 @@
 #include "NumericsFwd.h"             // for FrictionContactProblem
 #include "fclib_interface.h"         // for frictionContact_fclib_read, fric...
 
-static int write_test_fclib(char *filename) {
+static int write_test_fclib(char* filename) {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
@@ -32,10 +32,10 @@ static int write_test_fclib(char *filename) {
   printf("sizeoffilename %ld\n", sizeoffilename);
   char extension[5];  // Don't forget the NUL byte ... --xhub
   strncpy(extension, &filename[sizeoffilename - sizeof(extension) + 1], sizeof(extension));
-  char *basename;
+  char* basename;
 
   if (strcmp(extension, ".dat") == 0) {
-    basename = (char *)malloc((sizeoffilename + 2) * sizeof(char *));
+    basename = (char*)malloc((sizeoffilename + 2) * sizeof(char*));
     strcpy(basename, filename);
     strncpy(&basename[sizeoffilename - 5], ".hdf5", 6);
     printf("basename %s\n", basename);
@@ -46,25 +46,25 @@ static int write_test_fclib(char *filename) {
   }
 
   /* Remove file if it exists */
-  FILE *foutput = fopen(basename, "w");
+  FILE* foutput = fopen(basename, "w");
   fclose(foutput);
 
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   int n = 100;
-  char *title = (char *)malloc(n * sizeof(char *));
+  char* title = (char*)malloc(n * sizeof(char*));
   strncpy(title, "Confeti-ex03-Fc3D-SBM", n);
-  char *description = (char *)malloc(n * sizeof(char *));
+  char* description = (char*)malloc(n * sizeof(char*));
 
   strncpy(description, "Rewriting Siconos Numerics test ", n);
   strncat(description, filename, n - strlen(description) - 1);
   strncat(description, " in FCLIB format", n - strlen(description) - 1);
-  char *mathInfo = (char *)malloc(n * sizeof(char *));
+  char* mathInfo = (char*)malloc(n * sizeof(char*));
   strncpy(mathInfo, "unknown", n);
 
   frictionContact_fclib_write(problem, title, description, mathInfo, basename, 0);
 
   /* read fclib problem */
-  FrictionContactProblem *problem1 = frictionContact_fclib_read(basename);
+  FrictionContactProblem* problem1 = frictionContact_fclib_read(basename);
 
   info += abs(problem->numberOfContacts - problem1->numberOfContacts);
   info += abs(problem->dimension - problem1->dimension);
@@ -111,14 +111,14 @@ static int write_test_fclib(char *filename) {
   return info;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   int info = -1;
   printf("argc %i\n", argc);
   if (argc == 1) {
     info = write_test_fclib("./data/Confeti-ex03-Fc3D-SBM.dat");
   } else if (argc == 2) {
     // We assume argv[1] is a filename to open
-    FILE *file = fopen(argv[1], "r");
+    FILE* file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
     if (file == 0) {

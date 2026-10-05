@@ -39,8 +39,8 @@ dim(v)=nn
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
@@ -123,7 +123,8 @@ static int mlcp_direct_enum_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_direct_enum_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_direct_enum_solve_wrap(void* problem, double* z, double* w,
+                                       SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_direct_enum((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -137,11 +138,9 @@ static void mlcp_direct_enum_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_MLCP_DIRECT_ENUM, "MLCP_DIRECT_ENUM",
                 "Direct-Enum hybrid solver for Mixed Linear Complementarity Problems",
-                mlcp_direct_enum_init_wrap,
-                mlcp_direct_enum_solve_wrap,
-                mlcp_direct_enum_free_wrap,
-                NULL,  /* error function */
-                mlcp_direct_enum_set_default,  /* set_default */
-                100000000,  /* default_max_iter */
-                1e-12, /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_direct_enum_init_wrap, mlcp_direct_enum_solve_wrap,
+                mlcp_direct_enum_free_wrap, NULL, /* error function */
+                mlcp_direct_enum_set_default,     /* set_default */
+                100000000,                        /* default_max_iter */
+                1e-12,                            /* default_tol */
+                0 /* is_local_solver */);

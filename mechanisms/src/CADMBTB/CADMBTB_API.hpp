@@ -91,8 +91,7 @@ void CADMBTB_moveModelFromModel(unsigned int idModel1, unsigned int idModel2);
  *  \param [in] idGraphicModel the identifier of the graphical model
  *  \param [in] idModel the identifier of the referenced object
  */
-void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel,
-                                         unsigned int idModel);
+void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel, unsigned int idModel);
 
 /** To move an object using quaternion.
  *  Implementation:
@@ -109,8 +108,8 @@ void CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel,
  *   \param [in] q3
  *   \param [in] q4
  */
-void CADMBTB_moveObjectFromQ(unsigned int id, double& x, double& y, double& z,
-                             double& q1, double& q2, double& q3, double& q4);
+void CADMBTB_moveObjectFromQ(unsigned int id, double& x, double& y, double& z, double& q1,
+                             double& q2, double& q3, double& q4);
 
 /**  Set the location of an object WITHOUT moving it. Useful to defined the
  *   coordinate system attatched to an object during the initialization
@@ -137,8 +136,7 @@ void CADMBTB_computeUVBounds(unsigned int id);
  *  \param[out] V1  inf V bound.
  *  \param[out] V2  sup V bound.
  */
-void CADMBTB_getUVBounds2(unsigned int id, double& U1, double& U2, double& V1,
-                          double& V2);
+void CADMBTB_getUVBounds2(unsigned int id, double& U1, double& U2, double& V1, double& V2);
 
 /** To get UV bound of the first elem (face or edge) of a shape
  *
@@ -148,8 +146,7 @@ void CADMBTB_getUVBounds2(unsigned int id, double& U1, double& U2, double& V1,
  *  \param[out] V1  inf V bound.
  *  \param[out] V2  sup V bound.
  */
-void CADMBTB_getUVBounds(unsigned int id, double& U1, double& U2, double& V1,
-                         double& V2);
+void CADMBTB_getUVBounds(unsigned int id, double& U1, double& U2, double& V1, double& V2);
 
 /** To compute de distance between two objects, P1, P2 are the contact points in
  *  the abs frame. n is the nornmal, in the abs frame
@@ -169,10 +166,9 @@ void CADMBTB_getUVBounds(unsigned int id, double& U1, double& U2, double& V1,
  *  \param normalFromFace1
  *  \param  MinDist distance
  */
-void CADMBTB_getMinDistance(unsigned int idContact, unsigned int id1,
-                            unsigned int id2, double& X1, double& Y1,
-                            double& Z1, double& X2, double& Y2, double& Z2,
-                            double& nX, double& nY, double& nZ,
+void CADMBTB_getMinDistance(unsigned int idContact, unsigned int id1, unsigned int id2,
+                            double& X1, double& Y1, double& Z1, double& X2, double& Y2,
+                            double& Z2, double& nX, double& nY, double& nZ,
                             unsigned int normalFromFace1, double& MinDist);
 
 /** Declares the number of artefacts: ie graphical decoration(forces, normal,
@@ -192,9 +188,8 @@ void CADMBTB_setNbOfArtefacts(unsigned int nb);
  * \param Y2
  * \param Z2
  */
-void CADMBTB_buildLineArtefactLine(unsigned int id, double* X1, double* Y1,
-                                   double* Z1, double* X2, double* Y2,
-                                   double* Z2);
+void CADMBTB_buildLineArtefactLine(unsigned int id, double* X1, double* Y1, double* Z1,
+                                   double* X2, double* Y2, double* Z2);
 
 /** To build a oriented line artefact (n)
  *
@@ -206,9 +201,8 @@ void CADMBTB_buildLineArtefactLine(unsigned int id, double* X1, double* Y1,
  * \param Y2
  * \param Z2
  */
-void CADMBTB_buildOrientedLineArtefactLine(unsigned int id, double* X1,
-                                           double* Y1, double* Z1, double* X2,
-                                           double* Y2, double* Z2);
+void CADMBTB_buildOrientedLineArtefactLine(unsigned int id, double* X1, double* Y1, double* Z1,
+                                           double* X2, double* Y2, double* Z2);
 /** To build a cylinder artefact (forces).
  *
  * \param id
@@ -219,9 +213,8 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id, double* X1,
  * \param Y2
  * \param Z2
  */
-void CADMBTB_buildOrientedLineArtefactLine1(unsigned int id, double* X1,
-                                            double* Y1, double* Z1, double* X2,
-                                            double* Y2, double* Z2);
+void CADMBTB_buildOrientedLineArtefactLine1(unsigned int id, double* X1, double* Y1,
+                                            double* Z1, double* X2, double* Y2, double* Z2);
 
 /** To build a cylinder artefact (forces).
  *
@@ -234,9 +227,8 @@ void CADMBTB_buildOrientedLineArtefactLine1(unsigned int id, double* X1,
  * \param Z2
  * \param radius
  */
-void CADMBTB_buildCylinderArtefactLine(unsigned int id, double* X1, double* Y1,
-                                       double* Z1, double* X2, double* Y2,
-                                       double* Z2, double* radius);
+void CADMBTB_buildCylinderArtefactLine(unsigned int id, double* X1, double* Y1, double* Z1,
+                                       double* X2, double* Y2, double* Z2, double* radius);
 
 TopoDS_Shape CADMBTB_TopoDS(unsigned int num);
 

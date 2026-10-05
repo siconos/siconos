@@ -14,22 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __SiconosMemoryTest__
 #define __SiconosMemoryTest__
 
-#include "SiconosMemory.hpp"
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "BlockVector.hpp"
+#include "SiconosMemory.hpp"
 
-
-class SiconosMemoryTest : public CppUnit::TestFixture
-{
-
-private:
-
+class SiconosMemoryTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(SiconosMemoryTest);
-
 
   // Test suite
   CPPUNIT_TEST_SUITE(SiconosMemoryTest);
@@ -55,10 +51,10 @@ private:
   std::shared_ptr<siconos::algebra::SiconosVector> q1, q2, q3;
   std::shared_ptr<siconos::algebra::BlockVector> c1, c2;
   unsigned int _sizeMem;
-public:
+
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

@@ -38,7 +38,8 @@ extern "C" {
 
     \param[in,out] stress trial stress vector [σ_x, σ_y, τ_xy]
     \param[in] sigma_y yield stress
-    \return 0 if projection successful, 1 if stress was inside yield surface (no projection needed)
+    \return 0 if projection successful, 1 if stress was inside yield surface (no projection
+   needed)
 */
 int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y);
 

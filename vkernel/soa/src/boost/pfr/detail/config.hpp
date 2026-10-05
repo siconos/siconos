@@ -20,6 +20,6 @@
        4. update your compiler;                                            \
        or disable this error by '-DBOOST_PFR_ENABLED=1' if you really know what are you doing.
 
-#endif // !BOOST_PFR_ENABLED
+#endif  // !BOOST_PFR_ENABLED
 
-#endif // BOOST_PFR_DETAIL_CONFIG_HPP
+#endif  // BOOST_PFR_DETAIL_CONFIG_HPP

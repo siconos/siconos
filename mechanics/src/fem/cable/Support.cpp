@@ -24,7 +24,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-siconos::fem::cable::Support::Support(const siconos::algebra::SiconosVector3 &coordinates,
+siconos::fem::cable::Support::Support(const siconos::algebra::SiconosVector3& coordinates,
                                       double radius)
     : center_pos_{coordinates}, radius_{radius} {
   m_pc2 = std::make_shared<siconos::algebra::SiconosVector3>();
@@ -32,16 +32,15 @@ siconos::fem::cable::Support::Support(const siconos::algebra::SiconosVector3 &co
   m_tangent = std::make_shared<siconos::algebra::SiconosVector3>();
 }
 
-void siconos::fem::cable::Support::prepare(const Rope &a_rope) {
+void siconos::fem::cable::Support::prepare(const Rope& a_rope) {
   center_pos_(2) -= siconos::fem::cable::tools::sgn(a_rope.supportReaction()(2)) * radius_;
 }
 
-
-void siconos::fem::cable::Support::compute(const siconos::algebra::SiconosVector3 &a_p,
-                                           double a_tol, double &g,
+void siconos::fem::cable::Support::compute(const siconos::algebra::SiconosVector3& a_p,
+                                           double a_tol, double& g,
                                            Eigen::Ref<siconos::algebra::SiconosVector3> G,
                                            Eigen::Ref<siconos::algebra::SiconosVector3> T,
-                                           int &c) {
+                                           int& c) {
   c = isContact(a_tol, a_p(0) - center_pos_(0), 0, a_p(2) - center_pos_(2), g, G(0), G(1),
                 G(2), T(0), T(1), T(2))
           ? 1
@@ -49,7 +48,7 @@ void siconos::fem::cable::Support::compute(const siconos::algebra::SiconosVector
 }
 
 bool siconos::fem::cable::Support::isContact(
-    const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p, double a_tol) {
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& a_p, double a_tol) {
   // Roller support is assumed to be in the x-z plan
   double dx = a_p(0) - center_pos_(0);
   double dz = a_p(2) - center_pos_(2);
@@ -71,8 +70,8 @@ void siconos::fem::cable::Support::InitFriction(double a_mu) {
 }
 
 bool siconos::fem::cable::Support::isContact(double a_tol, double dx, double dy, double dz,
-                                             double &g, double &nx, double &ny, double &nz,
-                                             double &tx, double &ty, double &tz) {
+                                             double& g, double& nx, double& ny, double& nz,
+                                             double& tx, double& ty, double& tz) {
   double d = sqrt(dx * dx + dy * dy + dz * dz);
   double go = d - radius_;
   bool isCt = (go <= a_tol);

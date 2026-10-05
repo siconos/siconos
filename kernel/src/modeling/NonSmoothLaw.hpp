@@ -110,7 +110,6 @@ class NonSmoothLaw {
     return (level == 1);
   }
 
-
   /** Update the internal state of the interaction
    *  This is called after each time step for cohesive zone models
    *  to update internal variables (damage, etc.).
@@ -125,24 +124,23 @@ class NonSmoothLaw {
   /** Display internal variables for debugging
    * \param inter the Interaction containing internal variables
    */
-  virtual void displayInternalVariables(siconos::algebra::blocks::SharedVector3 & internalVariables) {
-  };
-
-
+  virtual void displayInternalVariables(
+      siconos::algebra::blocks::SharedVector3& internalVariables) {};
 
   /** initialize non smooth law if there is some internal variables
-  */
+   */
   virtual std::shared_ptr<siconos::algebra::blocks::SharedVector3> initializeInternalVariables(
-      Interaction&)
-      { return std::shared_ptr<siconos::algebra::blocks::SharedVector3>();}
+      Interaction&) {
+    return std::shared_ptr<siconos::algebra::blocks::SharedVector3>();
+  }
 
- /** update non smooth law if there is some internal variables
-  */
-  virtual void updateInternalVariables(Interaction &) {}
+  /** update non smooth law if there is some internal variables
+   */
+  virtual void updateInternalVariables(Interaction&) {}
 
   /** Ask if the Nslaw is active at a given level
-  */
-  virtual bool isActiveAtLevel(Interaction & inter, unsigned int level) { return false;}
+   */
+  virtual bool isActiveAtLevel(Interaction& inter, unsigned int level) { return false; }
 
   // visitors stuff.
   virtual void accept(nonsmooth_laws::Visitor&) const {

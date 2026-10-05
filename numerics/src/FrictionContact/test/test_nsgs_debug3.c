@@ -1,8 +1,8 @@
 /* Debug test 3 - check local residual value */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
@@ -18,7 +18,8 @@ int main() {
   printf("=========================================\n\n");
 
   /* Load problem */
-  FrictionContactProblem* problem = frictionContact_new_from_filename("./data/FC3D_Example1.dat");
+  FrictionContactProblem* problem =
+      frictionContact_new_from_filename("./data/FC3D_Example1.dat");
   if (!problem) {
     printf("Failed to load problem\n");
     return 1;
@@ -45,7 +46,8 @@ int main() {
   fc3d_nsgs(problem, r, v, &info, options);
 
   printf("After 1 iteration of fc3d_nsgs:\n");
-  printf("  Local solver residual: %.4e\n", options->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
+  printf("  Local solver residual: %.4e\n",
+         options->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
   printf("  Reaction: [%.4e, %.4e, %.4e, ...]\n", r[0], r[1], r[2]);
 
   /* Now try with fresh options */
@@ -65,12 +67,15 @@ int main() {
   fc3d_nsgs(problem, r2, v2, &info, options2);
 
   printf("\nAfter 1 iteration with NaN initial residual:\n");
-  printf("  Local solver residual: %.4e\n", options2->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
+  printf("  Local solver residual: %.4e\n",
+         options2->internalSolvers[0]->dparam[SICONOS_DPARAM_RESIDU]);
   printf("  Reaction: [%.4e, %.4e, %.4e, ...]\n", r2[0], r2[1], r2[2]);
 
   /* Cleanup */
-  free(r); free(v);
-  free(r2); free(v2);
+  free(r);
+  free(v);
+  free(r2);
+  free(v2);
   solver_options_delete(options);
   solver_options_delete(options2);
   frictionContactProblem_free(problem);

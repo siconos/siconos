@@ -23,8 +23,8 @@
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
 #include "SiconosBlas.h"                        // for cblas_dnrm2, cblas_dgemv
-#include "numerics_verbose.h"                   // for numerics_error, verbose
 #include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_error, verbose
 
 /*
  * (input) double *z : size n+m
@@ -32,8 +32,8 @@
  *
  *
  */
-int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, double *w,
-                       double tolerance, double *error) {
+int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                       double tolerance, double* error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     return numerics_error("mlcp_compute_error", "null input for problem and/or z and/or w");
@@ -65,12 +65,12 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
       return numerics_error("mlcp_compute_error: ", "null input for a or b");
     }
     /* Links to problem data */
-    double *a = problem->a;
-    double *b = problem->b;
-    double *A = problem->A;
-    double *B = problem->B;
-    double *C = problem->C;
-    double *D = problem->D;
+    double* a = problem->a;
+    double* b = problem->b;
+    double* A = problem->A;
+    double* B = problem->B;
+    double* C = problem->C;
+    double* D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
     cblas_dcopy(n, a, incx, w, incy);  //  we = w[0..n-1] <-- a
@@ -80,7 +80,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
                 incy);  // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
-    double *pwi = w + n;                 // No copy!!
+    double* pwi = w + n;                 // No copy!!
     cblas_dcopy(m, b, incx, pwi, incy);  //  wi = w[n..m] <-- b
     // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
     // The test is then more severe if we compute w because it checks that the linear equation
@@ -98,7 +98,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, do
   /* Checks complementarity (only for rows number n to size) */
   double error_i = 0.;
   double zi, wi;
-  double *q = problem->q;
+  double* q = problem->q;
   double norm_e = 1;
   double norm_i = 1;
   if (problem->blocksRows) {

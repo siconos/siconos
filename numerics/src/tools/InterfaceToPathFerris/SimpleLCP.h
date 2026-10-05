@@ -65,16 +65,16 @@ typedef void MCP_Termination;
 #if defined(__cplusplus)
 extern "C" {
 #endif
-void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-               double *lb, double *ub, MCP_Termination *status, double *z);
+void SimpleLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+               double* lb, double* ub, MCP_Termination* status, double* z);
 
-void printLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-              double *lb, double *ub);
+void printLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+              double* lb, double* ub);
 
-int nbNonNulElems(int n, double *M, double tol);
-void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij);
-void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b,
-             double *M, double *q);
+int nbNonNulElems(int n, double* M, double tol);
+void FortranToPathSparse(int n, double* M, double tol, int* m_i, int* m_j, double* m_ij);
+void ABCDtoM(int n, int m, double* A, double* B, double* C, double* D, double* a, double* b,
+             double* M, double* q);
 
 #if defined(__cplusplus)
 }

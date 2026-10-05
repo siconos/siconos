@@ -92,7 +92,6 @@
     EXPR;         \
   } while (0)
 
-
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
  * warning the pointer a is modified (use a00 instead) and is ready
  * for a next SET3X3
@@ -128,7 +127,6 @@
     V##12 = V++;                  \
     V##22 = V++;                  \
   }
-
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
  * Warning: the pointer v is modified and is ready for a next SET3
@@ -315,7 +313,6 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
  */
 static inline void mvp2x2(const double* restrict a, const double* restrict v,
                           double* restrict r) {
-
   /*
   r[0] += a[0] * v[0] + a[2] * v[1];
   r[1] += a[1] * v[0] + a[3] * v[1];
@@ -1029,8 +1026,8 @@ static inline void solve_nxn_gepp(int n, double* a, double* b, double* x) {
   double max, tmp;
 
   for (dia = 0; dia < n; dia++) {
-    //max_row = dia;
-    //max = fabs(A(dia, dia));
+    // max_row = dia;
+    // max = fabs(A(dia, dia));
     max_row = dia, max = A(dia, dia);
 
     for (row = dia + 1; row < n; row++)

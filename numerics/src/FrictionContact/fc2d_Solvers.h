@@ -219,8 +219,8 @@ void fc2d_nsgs_set_default(SolverOptions* options);
 /** @} */
 
 /* Driver and convenience functions */
-int fc2d_driver(FrictionContactProblem* problem, double* reaction,
-                double* velocity, SolverOptions* options);
+int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
+                SolverOptions* options);
 
 SolverOptions* fc2d_solver_options_create(solver_id_t solver_id);
 

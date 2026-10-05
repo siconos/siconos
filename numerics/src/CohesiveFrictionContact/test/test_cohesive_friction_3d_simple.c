@@ -235,7 +235,6 @@ static CohesiveFrictionContactProblem* build_problem0x1() {
   return problem;
 }
 
-
 static CohesiveFrictionContactProblem* build_problem1x0() {
   /* Test parameters */
   int dim = 3;          // 3D problem
@@ -282,8 +281,8 @@ static CohesiveFrictionContactProblem* build_problem1x0() {
   // q_v: contact part (initial gap/velocity)
   problem->q_v = (double*)malloc(m * sizeof(double));
   problem->q_v[0] = -0.1;  // normal gap (negative = penetration)
-  problem->q_v[1] = 1.0;  // tangent 1
-  problem->q_v[2] = 1.0;  // tangent 2
+  problem->q_v[1] = 1.0;   // tangent 1
+  problem->q_v[2] = 1.0;   // tangent 2
   print_vector("  q_v", problem->q_v, m);
 
   /* // q_u: cohesive part (initial displacement) */
@@ -401,8 +400,6 @@ int test_problem(CohesiveFrictionContactProblem* problem) {
       printf("  u_t1 = %12.6e (tangent 1)\n", velocity[1 + 3 * i]);
       printf("  u_t2 = %12.6e (tangent 2)\n", velocity[2 + 3 * i]);
     }
-
-
 
   } else {
     printf("Solver failed with error code: %d\n", info);

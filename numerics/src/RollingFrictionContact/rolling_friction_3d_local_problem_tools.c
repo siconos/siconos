@@ -24,11 +24,11 @@
 
 #include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
-#include "numerics_errors.h"
 #include "SparseBlockMatrix.h"
+#include "numerics_errors.h"
 void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
-                                          RollingFrictionContactProblem* localproblem,
-                                          double* reaction, int contact) {
+                                                 RollingFrictionContactProblem* localproblem,
+                                                 double* reaction, int contact) {
   double* qLocal = localproblem->q;
   int n = 5 * problem->numberOfContacts;
 
@@ -46,13 +46,12 @@ void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* 
 }
 
 void rolling_friction_3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
-                                       RollingFrictionContactProblem* localproblem,
-                                       int contact) {
- if (problem->M->storageType == NM_SPARSE) {
+                                              RollingFrictionContactProblem* localproblem,
+                                              int contact) {
+  if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->matrix0 = problem->M->matrix1->block[contact];
   } else
     NM_extract_diag_block5(problem->M, contact, &localproblem->M->matrix0);
-
 }
 
 RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(
@@ -77,8 +76,7 @@ RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(
 }
 
 void rolling_friction_3d_local_problem_free(RollingFrictionContactProblem* localproblem,
-                                     RollingFrictionContactProblem* problem) {
-
+                                            RollingFrictionContactProblem* problem) {
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/

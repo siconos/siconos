@@ -14,20 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SiconosGraphTest_h
 #define SiconosGraphTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "SiconosGraph.hpp"
 
-class SiconosGraphTest : public CppUnit::TestFixture
-{
-
-private:
-
+class SiconosGraphTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(SiconosGraphTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SiconosGraphTest);
@@ -60,10 +57,9 @@ private:
   void t7();
   void t8();
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

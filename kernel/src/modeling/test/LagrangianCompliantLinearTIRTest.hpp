@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianCompliantLinearTIRTest__
 #define __LagrangianCompliantLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "LagrangianCompliantLinearTIR.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
-class LagrangianCompliantLinearTIRTest : public CppUnit::TestFixture
-{
-
-private:
-
+class LagrangianCompliantLinearTIRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianCompliantLinearTIRTest);
@@ -51,10 +48,9 @@ private:
   std::shared_ptr<siconos::algebra::SiconosVector> e;
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

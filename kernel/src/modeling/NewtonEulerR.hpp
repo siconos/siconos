@@ -138,7 +138,7 @@ class NewtonEulerR : public Relation {
 
  public:
   /** Default and only constructor */
-  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR){};
+  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR) {};
 
   /** destructor */
   virtual ~NewtonEulerR() noexcept = default;

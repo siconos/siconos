@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianScleronomousRTest__
 #define __LagrangianScleronomousRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "LagrangianScleronomousR.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-class LagrangianScleronomousRTest : public CppUnit::TestFixture
-{
-
-private:
-
+class LagrangianScleronomousRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianScleronomousRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianScleronomousRTest);
@@ -43,10 +40,9 @@ private:
   void testBuildLagrangianScleronomousR0();
   void testBuildLagrangianScleronomousR2();
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

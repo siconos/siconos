@@ -83,9 +83,8 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
 }
 
 static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* problem,
-                                                      PlasticityProblem* localproblem,
-                                                      SolverOptions* options) {
-
+                                                             PlasticityProblem* localproblem,
+                                                             SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
    * that will be used to build local problem for each considered cone.
    * Local problem is built during call to update (which depends on the storage type for M).
@@ -162,10 +161,10 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
     } else if (options->iparam[PLASTICITY_NSN_RHO_STRATEGY] ==
                PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
       return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
-                     "Adaptive strategy for computing rho not yet implemented");
+                            "Adaptive strategy for computing rho not yet implemented");
     } else
       return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
-                     "unknown strategy for computing rho");
+                            "unknown strategy for computing rho");
 
     if (verbose > 0) {
       avg_rho[0] += rho[0];
@@ -208,11 +207,9 @@ static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem*
   localsolver_options->dWork = NULL;
 }
 
-
-int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem* problem,
-                                                      PlasticityProblem* localproblem,
-                                                      SolverOptions* localsolver_options) {
-
+int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(
+    PlasticityProblem* problem, PlasticityProblem* localproblem,
+    SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
    * formulation. */
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
@@ -225,7 +222,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(PlasticityProblem*
 
   } else {
     return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize",
-                   "Unknown formulation type.");
+                          "Unknown formulation type.");
   }
 }
 
@@ -269,7 +266,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
           localproblem, local_reaction, options);
     } else {
       return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve",
-                     "Unknown local nsn hybrid solver");
+                            "Unknown local nsn hybrid solver");
     }
   } else {
     info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF, options);
@@ -899,7 +896,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(
         options->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] ==
             PLASTICITY_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)) {
     return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_hybrid",
-                   "Unknown local nsn hybrid solver");
+                          "Unknown local nsn hybrid solver");
   }
 
   /* 0 - Perform a first call to NSN solver to see if it succeeds quickly */

@@ -40,7 +40,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
  * (not allocation of memory)
  */
 int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
-                        const size_t varsCount);
+                       const size_t varsCount);
 
 /**
  * Returns reflection matrix.

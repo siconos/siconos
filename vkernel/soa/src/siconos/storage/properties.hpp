@@ -170,8 +170,7 @@ struct sparse : property::sparse_matrix {
 };
 
 template <match::property K>
-static auto pre_map_all_properties_as =
-    []<typename D>(D& data) constexpr -> auto {
+static auto pre_map_all_properties_as = []<typename D>(D& data) constexpr -> auto {
   using info_t = get_info_t<D>;
   using all_properties_t = typename info_t::all_properties_t;
 
@@ -191,27 +190,24 @@ static auto attribute_properties = [](auto& data) constexpr -> auto {
   using info_t = get_info_t<decltype(data)>;
   using all_properties_t = typename info_t::all_properties_t;
 
-  return filter<hold<decltype([]<typename T>(T) {
-    return std::derived_from<typename T::type, Attr>;
-  })>>(all_properties_t{});
+  return filter<
+      hold<decltype([]<typename T>(T) { return std::derived_from<typename T::type, Attr>; })>>(
+      all_properties_t{});
 };
 
 template <match::item Item, typename properties>
-static constexpr auto item_properties_from()
-{
+static constexpr auto item_properties_from() {
   return mp::filter(properties{}, mp::is_a_model<[]<typename T>() consteval {
                       if constexpr (match::item_property<T>) {
                         return std::derived_from<Item, typename T::item>;
-                      }
-                      else {
+                      } else {
                         return false;
                       };
                     }>);
 };
 
 template <match::item Item, typename Data>
-static constexpr auto item_properties(Data&& data)
-{
+static constexpr auto item_properties(Data&& data) {
   using info_t = get_info_t<Data>;
   using all_properties_t = typename info_t::all_properties_t;
 
@@ -219,39 +215,31 @@ static constexpr auto item_properties(Data&& data)
 };
 
 template <match::attribute Attr, match::property K>
-static constexpr bool has_property(auto& data)
-{
+static constexpr bool has_property(auto& data) {
   return mp::any_of(all_properties_as<K>(data), []<match::property P>(P) {
     return std::derived_from<Attr, typename P::type>;
   });
 }
 
 template <match::item Item, match::property K, typename properties>
-static constexpr bool has_property_from()
-{
-  return mp::any_of(
-      item_properties_from<Item, properties>(),
-      []<match::property P>(P) { return std::derived_from<P, K>; });
+static constexpr bool has_property_from() {
+  return mp::any_of(item_properties_from<Item, properties>(),
+                    []<match::property P>(P) { return std::derived_from<P, K>; });
 };
 
 template <match::item Item, match::property K>
-static constexpr bool has_property(auto&& data)
-{
-  return mp::any_of(item_properties<Item>(data), []<match::property P>(P) {
-    return std::derived_from<P, K>;
-  });
+static constexpr bool has_property(auto&& data) {
+  return mp::any_of(item_properties<Item>(data),
+                    []<match::property P>(P) { return std::derived_from<P, K>; });
 };
 
 template <match::item Item, typename Properties>
-static constexpr auto bind_name()
-{
+static constexpr auto bind_name() {
   return mp::find_if(item_properties_from<Item, Properties>(),
                      mp::is_a_model<[]<match::property P>() {
                        return std::derived_from<P, property::bind>;
                      }>)
-      .value_or([]<bool flag = false>() {
-        static_assert(flag, "no binding found!");
-      })
+      .value_or([]<bool flag = false>() { static_assert(flag, "no binding found!"); })
       .str.value;
 };
 
@@ -259,16 +247,13 @@ template <typename A, typename K, typename D>
 using has_property_t = std::decay_t<decltype(has_property<A, K>(D{}))>;
 
 static auto refine_attribute = []<match::attribute Attr, typename D>(
-                                   const D& data,
-                                   Attr) constexpr -> decltype(auto) {
-  using refines =
-      decltype(mp::filter(pre_map_all_properties_as<property::refine>(data),
-                          mp::is_inside_type_parent<Attr>));
+                                   const D& data, Attr) constexpr -> decltype(auto) {
+  using refines = decltype(mp::filter(pre_map_all_properties_as<property::refine>(data),
+                                      mp::is_inside_type_parent<Attr>));
 
   if constexpr (mp::size(refines{}) > mp::size_c<0_c>) {
     return typename nth_t<0, refines>::template refine<Attr>{};
-  }
-  else {
+  } else {
     // return attribute as it is
     return Attr{};
   }
@@ -282,46 +267,41 @@ struct recursive_rebuild {
 
 // specialization for internal attribute types
 template <typename Attr>
-  requires(match::attribute_with_internal_type<Attr> &&
-           match::attribute<typename Attr::type>)
+  requires(match::attribute_with_internal_type<Attr> && match::attribute<typename Attr::type>)
 struct recursive_rebuild<Attr> {
   using inner = typename recursive_rebuild<typename Attr::type>::type;
   using type = refine_with_type<Attr, inner>;
 };
 
-static constexpr auto refine_recursively_attribute =
-    []<match::attribute Attr>(auto& data, Attr) {
-      using data_t = std::decay_t<decltype(data)>;
+static constexpr auto refine_recursively_attribute = []<match::attribute Attr>(auto& data,
+                                                                               Attr) {
+  using data_t = std::decay_t<decltype(data)>;
 
-      // rebuild
-      using recursed = typename recursive_rebuild<Attr>::type;
+  // rebuild
+  using recursed = typename recursive_rebuild<Attr>::type;
 
-      // user-defined refinements at the top level
-      return refine_attribute(data_t{}, recursed{});
-    };
+  // user-defined refinements at the top level
+  return refine_attribute(data_t{}, recursed{});
+};
 
 template <typename Handle, typename Data>
 using attached_storages_t =
     std::decay_t<decltype(attached_storages(Handle{}.item_type(), Data{}))>;
 
 template <typename Item>
-constexpr decltype(auto) attached_storages(Item, auto& data)
-{
+constexpr decltype(auto) attached_storages(Item, auto& data) {
   using info_t = get_info_t<decltype(data)>;
   using item_t = Item;
 
-  return mp::filter(typename info_t::all_properties_t{},
-                    mp::is_a_model<[]<typename T>() {
-                      return match::attached_storage<T, item_t>;
-                    }>);
+  return mp::filter(
+      typename info_t::all_properties_t{},
+      mp::is_a_model<[]<typename T>() { return match::attached_storage<T, item_t>; }>);
 };
 
 template <typename Item>
-constexpr decltype(auto) all_storages(Item, auto& data)
-{
+constexpr decltype(auto) all_storages(Item, auto& data) {
   using item_t = Item;
-  return mp::tuple_unique(
-      concat(attributes(item_t{}), attached_storages(item_t{}, data)));
+  return mp::tuple_unique(concat(attributes(item_t{}), attached_storages(item_t{}, data)));
 }
 
 // Attached storage that lives in the static store, excluding
@@ -329,11 +309,9 @@ constexpr decltype(auto) all_storages(Item, auto& data)
 // storage::attached_storages(...) for the unfiltered, exposure-facing
 // variant that includes them).
 template <typename Item>
-static constexpr auto is_attached_storage =
-    mp::is_a_model<[]<typename T>() constexpr {
-      return match::attached_storage<T, Item> &&
-             !requires { typename T::dynamic_storage_t; };
-    }>;
+static constexpr auto is_attached_storage = mp::is_a_model<[]<typename T>() constexpr {
+  return match::attached_storage<T, Item> && !requires { typename T::dynamic_storage_t; };
+}>;
 
 // For dynamic properties (one per item, holds heterogeneous runtime
 // properties)

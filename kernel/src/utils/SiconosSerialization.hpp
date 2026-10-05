@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosSerialization.hpp
   serialization for Siconos
@@ -27,13 +27,11 @@
 // and not to suggest boost or alike.
 // IWYU pragma: begin_exports
 
-namespace boost
-{
-namespace serialization
-{
+namespace boost {
+namespace serialization {
 class access;
 }
-}
+}  // namespace boost
 
 /** install serialization hooks. Must be used inside a protected zone
     of class definition
@@ -41,7 +39,7 @@ class access;
 */
 #define ACCEPT_SERIALIZATION(CLASS)                             \
   typedef void serializable;                                    \
-  template<typename Archive>                                    \
+  template <typename Archive>                                   \
   friend void siconos_io(Archive&, CLASS&, const unsigned int); \
   friend class boost::serialization::access
 

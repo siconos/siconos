@@ -21,22 +21,22 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_daxpy, cblas_dcopy
 #include "SiconosLapack.h"                 // for lapack_int, DGESV
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"
 #include "numerics_verbose.h"
 
-void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                    SolverOptions *options) {
+void lcp_newton_min(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+                    SolverOptions* options) {
   /* matrix M/vector q of the lcp */
   assert(problem);
   assert(problem->M);
-  double *M = problem->M->matrix0;
-  double *q = problem->q;
+  double* M = problem->M->matrix0;
+  double* q = problem->q;
 
   /* size of the LCP */
   int n = problem->size;
@@ -50,11 +50,11 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
   double alpha;
   lapack_int infoDGESV = 0;
 
-  lapack_int *ipiv;
+  lapack_int* ipiv;
 
   double *JacH, *H, *A;
 
-  double *rho;
+  double* rho;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
@@ -73,7 +73,7 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
   }
 
   /* rho*/
-  rho = (double *)malloc(n * sizeof(double));
+  rho = (double*)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) rho[i] = 1.0 / M[i * n + i];
   /* /for (i=0;i<n;i++) rho[i]=1.0/n ;
   // Sizw of the problem*/
@@ -81,8 +81,8 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
   mm = m * m;
   /* / Creation of the gradient of the function H*/
 
-  JacH = (double *)malloc(m * m * sizeof(double));
-  A = (double *)malloc(m * m * sizeof(double));
+  JacH = (double*)malloc(m * m * sizeof(double));
+  A = (double*)malloc(m * m * sizeof(double));
 
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++)
@@ -97,7 +97,7 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
   }
 
   /* / Creation of the RHS H, */
-  H = (double *)malloc(m * sizeof(double));
+  H = (double*)malloc(m * sizeof(double));
   /* / Construction of the RHS*/
   a1 = -1.;
   b1 = -1.;
@@ -116,7 +116,7 @@ void lcp_newton_min(LinearComplementarityProblem *problem, double *z, double *w,
       H[ii + n] = w[ii];
   }
 
-  ipiv = (lapack_int *)malloc(m * sizeof(lapack_int));
+  ipiv = (lapack_int*)malloc(m * sizeof(lapack_int));
 
   iter = 0;
   err = 1.;
@@ -218,8 +218,8 @@ static void lcp_newton_min_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_NEWTONMIN in the global solver registry.
  */
 
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 static int lcp_newton_min_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -227,7 +227,8 @@ static int lcp_newton_min_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_newton_min_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_newton_min_solve_wrap(void* problem, double* z, double* w,
+                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_newton_min((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -238,13 +239,10 @@ static void lcp_newton_min_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_NEWTONMIN, "LCP_NEWTONMIN",
-                       "Newton min solver for LCP",
-                       lcp_newton_min_init_wrap,
-                       lcp_newton_min_solve_wrap,
-                       lcp_newton_min_free_wrap,
-                       NULL,  /* error function */
-                       lcp_newton_min_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_NEWTONMIN, "LCP_NEWTONMIN", "Newton min solver for LCP",
+                lcp_newton_min_init_wrap, lcp_newton_min_solve_wrap, lcp_newton_min_free_wrap,
+                NULL,                       /* error function */
+                lcp_newton_min_set_default, /* set_default */
+                1000,                       /* default_max_iter */
+                1e-6,                       /* default_tol */
+                0);                         /* is_local_solver */

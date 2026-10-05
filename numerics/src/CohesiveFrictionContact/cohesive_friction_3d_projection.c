@@ -15,24 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "cohesive_friction_3d_projection.h"
+
 #include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-
 #include "CohesiveFrictionContactProblem.h"
 #include "CohesiveFrictionContact_options.h"
-#include "SolverOptions.h"
 #include "NumericsMatrix.h"
-#include "cohesive_friction_3d_projection.h"
+#include "SolverOptions.h"
 #include "cohesive_friction_3d_compute_error.h"
-
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "projectionOnDisk.h"
-
 #include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
@@ -45,12 +43,12 @@
 #include "NumericsVector.h"
 
 void cohesive_friction_3d_projection_initialize(CohesiveFrictionContactProblem* main_problem,
-						SolverOptions* localsolver_options) {
+                                                SolverOptions* localsolver_options) {
   size_t n_coh = main_problem->numberOfCohesivePoints;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork || localsolver_options->dWorkSize < n_coh) {
     localsolver_options->dWork =
-      (double*)realloc(localsolver_options->dWork, n_coh * sizeof(double));
+        (double*)realloc(localsolver_options->dWork, n_coh * sizeof(double));
     localsolver_options->dWorkSize = n_coh;
   }
   for (size_t i = 0; i < n_coh; i++) {
@@ -58,14 +56,11 @@ void cohesive_friction_3d_projection_initialize(CohesiveFrictionContactProblem* 
   }
 }
 
-void cohesive_friction_3d_projection_free(CohesiveFrictionContactProblem* main_problem, SolverOptions * options) {}
+void cohesive_friction_3d_projection_free(CohesiveFrictionContactProblem* main_problem,
+                                          SolverOptions* options) {}
 
-
-int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localproblem, double* reaction,
-					  SolverOptions* options) {
-
-
-
+int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localproblem,
+                                          double* reaction, SolverOptions* options) {
   DEBUG_BEGIN("cohesive_friction_3d_projection_solve(...)\n");
 
   DEBUG_EXPR(cohesiveFrictionContact_display(localproblem););
@@ -79,20 +74,18 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
   double c_n = localproblem->c_n[0];
   double c_t = localproblem->c_t[0];
 
-
-  reaction[0] = - c_n;
+  reaction[0] = -c_n;
   /* reaction[1] = 0.0; */
   /* reaction[2] = 0.0; */
   /* int nLocal = 3; */
 
-
   int cohesive_idx = options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER];
 
-
-  double rho = options->dWork[cohesive_idx],
-         rho_k;
-  DEBUG_PRINTF(" Contact options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] = %i\n",
-              cohesive_idx);
+  double rho = options->dWork[cohesive_idx], rho_k;
+  DEBUG_PRINTF(
+      " Contact options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] = "
+      "%i\n",
+      cohesive_idx);
   DEBUG_PRINTF("saved rho = %14.7e\n", rho);
   assert(rho > 0);
 
@@ -114,18 +107,21 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
 
   double tau = 2.0 / 3.0, tauinv = 3.0 / 2.0, L = 0.9, Lmin = 0.3;
 
-  numerics_printf_verbose(2, "--  cohesive_friction_3d_projectionOnConeWithLocalIteration_solve contact = %i",
-                          cohesive_idx);
-  numerics_printf_verbose(2,
-                          "--  cohesive_friction_3d_projectionOnConeWithLocalIteration_solve | localiter \t| "
-                          "rho \t\t\t| error\t\t\t|");
   numerics_printf_verbose(
-      2,                  "--                                                                | %i \t\t| %.10e\t| %.10e\t|",
-      localiter, rho, localerror);
+      2, "--  cohesive_friction_3d_projectionOnConeWithLocalIteration_solve contact = %i",
+      cohesive_idx);
+  numerics_printf_verbose(
+      2,
+      "--  cohesive_friction_3d_projectionOnConeWithLocalIteration_solve | localiter \t| "
+      "rho \t\t\t| error\t\t\t|");
+  numerics_printf_verbose(2,
+                          "--                                                                "
+                          "| %i \t\t| %.10e\t| %.10e\t|",
+                          localiter, rho, localerror);
 
   /* printf ("localtolerance = %14.7e\n",localtolerance ); */
   /* printf("iparam[SICONOS_IPARAM_MAX_ITER] %i \n", iparam[SICONOS_IPARAM_MAX_ITER]); */
-  while ((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER] )) {
+  while ((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER])) {
     DEBUG_PRINTF("\n Local iteration starts % i \n", localiter);
     localiter++;
 
@@ -167,8 +163,8 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
       DEBUG_EXPR(NV_display(reaction, 3););
 
       reaction[0] = -c_n;
-      //reaction[1] = -qLocal[1];
-      //reaction[2] = 0;
+      // reaction[1] = -qLocal[1];
+      // reaction[2] = 0;
       projectionOnDisk(&reaction[1], c_t);
 
       DEBUG_PRINT("reaction after projection:  \n");
@@ -181,9 +177,8 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
        * incx, 1.0, velocity, incy); */
 
       for (int i = 0; i < 3; i++)
-        velocity[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i]
-	  + MLocal[i + 1 * 3] * reaction[1]
-	  + MLocal[i + 2 * 3] * reaction[2];
+        velocity[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
+                      MLocal[i + 1 * 3] * reaction[1] + MLocal[i + 2 * 3] * reaction[2];
 
       a1 = sqrt((velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
                 (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +
@@ -214,36 +209,35 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
     cohesive_friction_3d_unitary_compute_and_add_error(reaction, velocity, c_t, &localerror,
                                                        worktmp);
     localerror = sqrt(localerror);
-    DEBUG_PRINTF("localerror = %e\n", localerror)
-    ;
+    DEBUG_PRINTF("localerror = %e\n", localerror);
     /*Update rho*/
     if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {
       rho = rho_k * tauinv;
     } else
       rho = rho_k;
 
-    numerics_printf_verbose(
-      2,                  "--                                                                | %i \t\t| %.10e\t| %.10e\t|",
-      localiter, rho, localerror);
+    numerics_printf_verbose(2,
+                            "--                                                               "
+                            " | %i \t\t| %.10e\t| %.10e\t|",
+                            localiter, rho, localerror);
   }
   options->dWork[cohesive_idx] = rho;
   options->dparam[SICONOS_DPARAM_RESIDU] = localerror;
   DEBUG_PRINTF("final rho  =%e\n", rho);
   /* printf("velocity:");NV_display(velocity,3); */
   /* printf("reaction:");NV_display(reaction,3); */
-  /* printf("norm reaction: %e\n", sqrt(reaction[1]*reaction[1] + reaction[2]* reaction[2])); */
+  /* printf("norm reaction: %e\n", sqrt(reaction[1]*reaction[1] + reaction[2]* reaction[2]));
+   */
 
   DEBUG_END("cohesive_friction_3d_projectionOnConeWithLocalIteration_solve(...)\n");
   if (localerror > localtolerance) return 1;
-
-
-
 
   return 0;
 }
 
 /* Projection on Cone */
-static void cohesive_friction_3d_proj_set_default(SolverOptions* options) { /* No specific defaults */ }
+static void cohesive_friction_3d_proj_set_default(
+    SolverOptions* options) { /* No specific defaults */ }
 
 static int cohesive_friction_3d_proj_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -251,15 +245,15 @@ static int cohesive_friction_3d_proj_init_wrap(void* problem, SolverOptions* opt
   return NUMERICS_OK;
 }
 
-static int cohesive_friction_3d_proj_solve_wrap(void* problem, double* reaction, double* velocity,
-                                     SolverOptions* options) {
+static int cohesive_friction_3d_proj_solve_wrap(void* problem, double* reaction,
+                                                double* velocity, SolverOptions* options) {
   (void)velocity;
-  return cohesive_friction_3d_projection_solve((CohesiveFrictionContactProblem*)problem, reaction, options);
+  return cohesive_friction_3d_projection_solve((CohesiveFrictionContactProblem*)problem,
+                                               reaction, options);
 }
 
 REGISTER_SOLVER(SICONOS_COHESIVE_FRICTION_3D_PROJECTION,
-                "SICONOS_COHESIVE_FRICTION_3D_PROJECTION", "Projection solver (local solver) for cohesion",
-                cohesive_friction_3d_proj_init_wrap,
-                cohesive_friction_3d_proj_solve_wrap, NULL, NULL,
-                cohesive_friction_3d_proj_set_default,
-                100, 1e-14, 1)
+                "SICONOS_COHESIVE_FRICTION_3D_PROJECTION",
+                "Projection solver (local solver) for cohesion",
+                cohesive_friction_3d_proj_init_wrap, cohesive_friction_3d_proj_solve_wrap,
+                NULL, NULL, cohesive_friction_3d_proj_set_default, 100, 1e-14, 1)

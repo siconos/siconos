@@ -81,12 +81,12 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** initialize LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** check sizes LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    */
-  void checkSize(const Interaction &inter) const override;
+  void checkSize(const Interaction& inter) const override;
 
   /** \return a read-only view on the C matrix */
   inline auto CMatrix() const { return jacobianhOver_q(); }
@@ -117,7 +117,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param derivativeNumber the derivative of y we want to compute
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** default function to compute r
@@ -125,7 +125,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param level the derivative of lambda we want to compute
    */
-  void computeInput(double time, Interaction &inter,
+  void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
 
   /* compute all the H Jacobian
@@ -133,7 +133,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction &inter) override {}
+  void computeJach(double time, Interaction& inter) override {}
 
   /** print the data to the screen
    */

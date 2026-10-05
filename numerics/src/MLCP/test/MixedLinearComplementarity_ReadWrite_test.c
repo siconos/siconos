@@ -22,8 +22,8 @@
 
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
-int write_newformat(char *filename);
-int write_newformat(char *filename) {
+int write_newformat(char* filename);
+int write_newformat(char* filename) {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
@@ -32,10 +32,10 @@ int write_newformat(char *filename) {
   char extension[4] = "ext";
   strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n", extension);
-  char *basename;
+  char* basename;
 
   if (strcmp(extension, "dat") == 0) {
-    basename = (char *)malloc((sizeoffilename + 5) * sizeof(char));
+    basename = (char*)malloc((sizeoffilename + 5) * sizeof(char));
     basename[sizeoffilename + 4] = 0;
     strcpy(basename, filename);
     strncpy(&basename[sizeoffilename - 4], ".dat.tmp", 8);
@@ -46,12 +46,12 @@ int write_newformat(char *filename) {
     return 0;
   }
   /* Remove file if it exists */
-  FILE *foutput = fopen(basename, "w");
+  FILE* foutput = fopen(basename, "w");
   fclose(foutput);
 
-  FILE *f = fopen(filename, "r");
-  MixedLinearComplementarityProblem *problem =
-      (MixedLinearComplementarityProblem *)malloc(sizeof(MixedLinearComplementarityProblem));
+  FILE* f = fopen(filename, "r");
+  MixedLinearComplementarityProblem* problem =
+      (MixedLinearComplementarityProblem*)malloc(sizeof(MixedLinearComplementarityProblem));
 
   info = mixedLinearComplementarity_newFromFileOld(problem, f);
   mixedLinearComplementarity_display(problem);
@@ -66,7 +66,7 @@ int write_newformat(char *filename) {
   assert(n > 0);
   assert(m > 0);
   int i;
-  double *sol = (double *)malloc((n + m + m) * sizeof(double));
+  double* sol = (double*)malloc((n + m + m) * sizeof(double));
 
   if (!feof(f)) {
     withSol = 1;
@@ -103,7 +103,7 @@ int write_newformat(char *filename) {
   return info;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   int info = 0;
   printf("argc %i\n", argc);
   if (argc == 1) {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     info = write_newformat(filename);
   } else if (argc == 2) {
     // We assume argv[1] is a filename to open
-    FILE *file = fopen(argv[1], "r");
+    FILE* file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
     if (file == 0) {

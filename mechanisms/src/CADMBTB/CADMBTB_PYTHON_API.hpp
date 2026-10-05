@@ -67,8 +67,7 @@ void CADMBTB_disableGraphic();
  *  \param idShape identifier of the shape.
  *  \param v : value.
  */
-void CADMBTB_setShapeDParam(unsigned int IdParam, unsigned int idShape,
-                            double v);
+void CADMBTB_setShapeDParam(unsigned int IdParam, unsigned int idShape, double v);
 
 /** To set a double parameter.(extendable, without modifie the API)
  *  This type of function has been chosen to easily set any parameters without

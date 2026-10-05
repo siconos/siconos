@@ -36,7 +36,7 @@ ensures \is_finite((double) result[19]);
 ensures \is_finite((double) result[20]);*/
 void fc3d_AlartCurnierJeanMoreauFABGenerated(double rn, double rt1, double rt2, double un,
                                              double ut1, double ut2, double mu, double rhon,
-                                             double rhot1, double rhot2, double *result) {
+                                             double rhot1, double rhot2, double* result) {
   /*@ assert \is_finite((double) un); */
   /*@ assert \is_finite((double) rn); */
   /*@ assert \is_finite((double) rhon); */

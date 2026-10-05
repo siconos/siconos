@@ -4,6 +4,7 @@
 #ifndef __cplusplus
 #include <stdbool.h>  // for false
 #endif
+#include <omp.h>
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
@@ -16,13 +17,10 @@
 #include "numerics_verbose.h"              // for verbose
 #include "siconos_debug.h"
 
-#include <omp.h>
-
-void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {
-
-  NumericsMatrix *M = problem->M;
-  double *q = problem->q;
+void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, double* w,
+                         int* info, SolverOptions* options) {
+  NumericsMatrix* M = problem->M;
+  double* q = problem->q;
 
   assert(M);
   assert(q);
@@ -40,7 +38,7 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Preparation of the diagonal of the inverse matrix */
-  double *diag = (double *)malloc((size_t)n * sizeof(double));
+  double* diag = (double*)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
 
   /* Check if diagonal has a zero */
@@ -55,7 +53,7 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
   double norm_q = cblas_dnrm2(n, q, 1);
   if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
 
-  double *new_z = (double *)malloc((size_t)n * sizeof(double));
+  double* new_z = (double*)malloc((size_t)n * sizeof(double));
 
   /* double *true_w = (double *)malloc(n * sizeof(double));
   double true_err;
@@ -66,11 +64,10 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
-
     err = 0.;
 
-    // Compute new_z
-    #pragma omp parallel for reduction(+:err) default(none) shared(q, z, new_z, w, diag, M, n)
+// Compute new_z
+#pragma omp parallel for reduction(+ : err) default(none) shared(q, z, new_z, w, diag, M, n)
     for (int i = 0; i < n; i++) {
       w[i] = q[i];
       DEBUG_PRINTF("zi = %e\n", new_z[i]);
@@ -79,18 +76,17 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
       err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
 
       new_z[i] = w[i] - z[i] / diag[i];
-      new_z[i] = -(new_z[i])*diag[i];
+      new_z[i] = -(new_z[i]) * diag[i];
 
-      if (new_z[i] < 0)
-        new_z[i] = 0.0;
+      if (new_z[i] < 0) new_z[i] = 0.0;
     }
 
     err = sqrt(err) / norm_q;
 
     // Update z if not last
     if (err > tol) {
-      // Not sure if paralle update is faster than
-      #pragma omp parallel for default(none) shared(z, new_z, n)
+// Not sure if paralle update is faster than
+#pragma omp parallel for default(none) shared(z, new_z, n)
       for (int i = 0; i < n; i++) {
         z[i] = new_z[i];
       }
@@ -124,7 +120,6 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
     printf("\n");
 
     printf("\n"); */
-
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -146,5 +141,4 @@ void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, doubl
 
   free(diag);
   free(new_z);
-
 }

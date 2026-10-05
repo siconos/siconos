@@ -39,34 +39,34 @@
 #include "SOCLCP_cst.h"
 
 /** pointer to function used to call local solver */
-typedef int (*Solver_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem *, double *,
-                                 SolverOptions *);
+typedef int (*Solver_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*, double*,
+                                 SolverOptions*);
 
 /** pointer to function used to update local problem */
-typedef void (*Update_soclcp_Ptr)(int, SecondOrderConeLinearComplementarityProblem *,
-                                  SecondOrderConeLinearComplementarityProblem *, double *,
-                                  SolverOptions *);
+typedef void (*Update_soclcp_Ptr)(int, SecondOrderConeLinearComplementarityProblem*,
+                                  SecondOrderConeLinearComplementarityProblem*, double*,
+                                  SolverOptions*);
 
 /** pointer to function used to post-processed results after a call to the
  * (local) solver */
-typedef void (*PostSolver_soclcp_Ptr)(int, double *);
+typedef void (*PostSolver_soclcp_Ptr)(int, double*);
 
 /** pointer to function used to update v and compute error */
-typedef int (*ComputeError_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem *, double *,
-                                       double *, double, SolverOptions *, double *);
+typedef int (*ComputeError_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*, double*,
+                                       double*, double, SolverOptions*, double*);
 
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolver_soclcp_Ptr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverNSGS_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem *,
-                                          SecondOrderConeLinearComplementarityProblem *,
-                                          SolverOptions *);
+typedef void (*FreeSolverNSGS_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*,
+                                          SecondOrderConeLinearComplementarityProblem*,
+                                          SolverOptions*);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
-typedef void (*internalSolver_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem *,
-                                          double *, double *, int *, SolverOptions *);
+typedef void (*internalSolver_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*,
+                                          double*, double*, int*, SolverOptions*);
 
 #if defined(__cplusplus)
 extern "C" {
@@ -97,16 +97,16 @@ extern "C" {
     parameter omega [out] dparam[SICONOS_DPARAM_RESIDU]  reached error
 
 */
-void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem *problem, double *r, double *v,
-                 int *info, SolverOptions *options);
+void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
+                 int* info, SolverOptions* options);
 
-void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem *problem,
-                            SecondOrderConeLinearComplementarityProblem *localproblem,
+void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem* problem,
+                            SecondOrderConeLinearComplementarityProblem* localproblem,
                             int contact);
 
-void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem *problem,
-                               SecondOrderConeLinearComplementarityProblem *localproblem,
-                               double *r, int contact, SolverOptions *options);
+void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem* problem,
+                               SecondOrderConeLinearComplementarityProblem* localproblem,
+                               double* r, int contact, SolverOptions* options);
 
 /* /\** Non-Smooth Gauss Seidel in v solver for SOCLCP problem */
 /*    \param problem the SOCLCP problem to solve */
@@ -158,8 +158,8 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem *prob
  * soclcp_ProjectedGradientOnCylinder(SecondOrderConeLinearComplementarityProblem*
  * problem, double *r, double *v, int* info, SolverOptions* options); */
 
-void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem *problem,
-                                    double *r, double *v, int *info, SolverOptions *options);
+void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem,
+                                    double* r, double* v, int* info, SolverOptions* options);
 
 /**
 
@@ -173,8 +173,8 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem 
    iparam[0] : Maximum iteration number
    dparam[3] : rho >0
 */
-void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *problem, double *r,
-                             double *v, int *info, SolverOptions *options);
+void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* problem, double* r,
+                             double* v, int* info, SolverOptions* options);
 
 /* /\** Hyperplane Projection solver for SOCLCP problem based on the De Saxce
  * Formulation */
@@ -198,14 +198,14 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem *proble
     \param options the pointer to the array of options to set
     \return info  =0 if a trivial solution has been found, else = -1
 */
-int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem *problem, double *v,
-                            double *r, SolverOptions *options);
+int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem* problem, double* v,
+                            double* r, SolverOptions* options);
 
 /** \addtogroup SetSolverOptions
  * @{
  */
-void soclcp_nsgs_set_default(SolverOptions *options);
-void soclcp_projection_set_default(SolverOptions *options);
+void soclcp_nsgs_set_default(SolverOptions* options);
+void soclcp_projection_set_default(SolverOptions* options);
 
 /** @} */
 

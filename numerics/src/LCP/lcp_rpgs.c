@@ -30,16 +30,16 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #define EPSDIAG DBL_EPSILON
-void lcp_rpgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-              SolverOptions *options) {
+void lcp_rpgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+              SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  double *M = problem->M->matrix0;
+  double* M = problem->M->matrix0;
 
-  double *q = problem->q;
+  double* q = problem->q;
 
   /* size of the LCP */
   int n = problem->size;
@@ -47,7 +47,7 @@ void lcp_rpgs(LinearComplementarityProblem *problem, double *z, double *w, int *
   int incx, incy;
   int i, iter;
   double qs, err, zi;
-  double *diag;
+  double* diag;
   double Mii, ziprev;
 
   /*  double *buffer_errors;
@@ -71,7 +71,7 @@ void lcp_rpgs(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   /*  ww   = ( double* )malloc( n*sizeof( double ) );*/
   /*  zprev = ( double* )malloc( n*sizeof( double ) );*/
-  diag = (double *)malloc(n * sizeof(double));
+  diag = (double*)malloc(n * sizeof(double));
   /*  diagprev = ( int* )malloc( n*sizeof( int ) );*/
 
   /*  qs = 0.;*/
@@ -205,7 +205,7 @@ void lcp_rpgs(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   return;
 }
-void lcp_rpgs_set_default(SolverOptions *options) {
+void lcp_rpgs_set_default(SolverOptions* options) {
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 1.0;
 }
 
@@ -231,13 +231,10 @@ static void lcp_rpgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_RPGS, "LCP_RPGS",
-                "Regularized Projected Gauss-Seidel for LCP",
-                lcp_rpgs_init_wrap,
-                lcp_rpgs_solve_wrap,
-                lcp_rpgs_free_wrap,
-                NULL,  /* error function */
-                lcp_rpgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(SICONOS_LCP_RPGS, "LCP_RPGS", "Regularized Projected Gauss-Seidel for LCP",
+                lcp_rpgs_init_wrap, lcp_rpgs_solve_wrap, lcp_rpgs_free_wrap,
+                NULL,                 /* error function */
+                lcp_rpgs_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-6,                 /* default_tol */
+                0 /* is_local_solver */);

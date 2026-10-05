@@ -18,7 +18,7 @@ ensures \is_finite((double) result[1]);
 ensures \is_finite((double) result[2]);*/
 void fc3d_AlartCurnierFGenerated(double rn, double rt1, double rt2, double un, double ut1,
                                  double ut2, double mu, double rhon, double rhot1,
-                                 double rhot2, double *result) {
+                                 double rhot2, double* result) {
   /*@ assert \is_finite((double) un); */
   /*@ assert \is_finite((double) rn); */
   /*@ assert \is_finite((double) rhon); */

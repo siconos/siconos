@@ -10,13 +10,11 @@ using namespace pattern;
 struct info {};
 
 template <typename D>
-auto get_info(D&& data)
-{
+auto get_info(D&& data) {
   if constexpr (match::store<std::decay_t<D>>) {
     // database case
     return mp::get<info>(data.store());
-  }
-  else {
+  } else {
     // pre-map case
     return mp::second(mp::at(data, mp::size_c<0>));
   }

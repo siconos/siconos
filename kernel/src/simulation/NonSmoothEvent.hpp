@@ -39,7 +39,7 @@ class NonSmoothEvent : public Event {
   /** constructor with time value as a parameter
    *  \param time the time of the first event (a double)
    */
-  NonSmoothEvent(double time) : Event(time, EventType::NS){};
+  NonSmoothEvent(double time) : Event(time, EventType::NS) {};
 
   /** destructor
    */

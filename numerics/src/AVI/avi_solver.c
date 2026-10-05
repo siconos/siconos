@@ -27,8 +27,8 @@
 #include "NumericsMatrix.h"                 // for NM_DENSE, NumericsMatrix
 #include "SolverOptions.h"                  // for solver_options_id_to_name
 #include "assert.h"                         // for assert
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 int avi_driver(AffineVariationalInequalities* problem, double* z, double* w,
                SolverOptions* options) {

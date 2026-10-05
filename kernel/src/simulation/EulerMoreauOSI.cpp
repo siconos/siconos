@@ -963,7 +963,7 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
       "siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned int "
       "level)\n");
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  //simulation()->nonSmoothDynamicalSystem()->updateOutput(time,level);
+  // simulation()->nonSmoothDynamicalSystem()->updateOutput(time,level);
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   auto indexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {

@@ -449,8 +449,9 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  @param vertex_inter vertex of the interaction graph
    *  @param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutputPosition(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-				 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
+  void computeFreeOutputPosition(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** Update the input (right-hand side) of the dynamical systems using
    *  the multiplier lambda at the given level.
@@ -525,7 +526,6 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** update the state of the nonsmooth law
    */
   virtual void updateInteractionInternalState() override;
-
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

@@ -35,8 +35,7 @@ std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactFace::contact() 
 
 void siconos::mechanics::occ::OccContactFace::computeUVBounds() {
   TopExp_Explorer exp{data(), TopAbs_FACE};
-  for (auto i = 0; i < _index; ++i, exp.Next())
-    ;
+  for (auto i = 0; i < _index; ++i, exp.Next());
   if (exp.More()) {
     const TopoDS_Face& face = TopoDS::Face(exp.Current());
     BRepTools::UVBounds(face, binf1[0], bsup1[0], binf1[1], bsup1[1]);

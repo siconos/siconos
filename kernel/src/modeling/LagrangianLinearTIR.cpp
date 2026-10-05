@@ -82,8 +82,8 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(
   DEBUG_END("siconos::modeling::LagrangianLinearTIR::computeOutput()\n");
 }
 
-void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& inter,
-                                                          siconos::algebra::blocks::size_type level) {
+void siconos::modeling::LagrangianLinearTIR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN("void siconos::modeling::LagrangianLinearTIR::computeInput()\n")
   // get lambda of the concerned interaction
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);

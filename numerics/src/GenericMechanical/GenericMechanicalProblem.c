@@ -26,7 +26,7 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
 #include "RelayProblem.h"                  // IWYU pragma: keep
 #include "SparseBlockMatrix.h"             // IWYU pragma: keep
-#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_warning
+#include "numerics_verbose.h"              // for check_io, numerics_error, numerics_warning
 #include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
 

@@ -55,7 +55,6 @@ void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction& inter) const {
-
   if (jacobianhOver_state_view_) {
     assert(jacobianhOver_state_view_->rows() == inter.dimension());
     assert(jacobianhOver_state_view_->cols() == inter.getSizeOfDS());
@@ -136,8 +135,8 @@ void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
 //   if (_F) siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
 // }
 
-void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction& inter,
-                                                           siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderLinearTIR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   // We get y and lambda of the interaction (pointers)
   siconos::algebra::SiconosVector& y = *inter.y(level);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
@@ -160,8 +159,8 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
 //   siconos::algebra::matrixVector_prod_toBlock(*_B, lambda, r, false);
 // }
 
-void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& inter,
-                                                          siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderLinearTIR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   DEBUG_BEGIN(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")

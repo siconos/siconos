@@ -34,13 +34,15 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 bool siconos::nonsmooth_formulations::OneStepNSProblem::hasInteractions() const {
-  return simulation()->nonSmoothDynamicalSystem()
+  return simulation()
+             ->nonSmoothDynamicalSystem()
              ->topology()
              ->indexSet(_indexSetLevel)
              ->size() > 0;
 }
 
-void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet) {
+void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
+    siconos::graphs::InteractionsGraph& indexSet) {
   DEBUG_PRINT(
       "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks() starts\n");
   // The present functions checks various conditions and possibly
@@ -63,7 +65,6 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
   //  - If 1 == true, 2 == false, 3 == true, it computes the interactionBlock.
   //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
   //
-
 
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
@@ -289,7 +290,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 }
 
 void siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(
-								      siconos::graphs::InteractionsGraph& indexSet) {
+    siconos::graphs::InteractionsGraph& indexSet) {
   std::cout << "siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(std::shared_"
                "ptr<siconos::"
                "graphs::InteractionsGraph> indexSet) "
@@ -437,9 +438,9 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseLevel(
   numerics_set_verbose(level);
 }
 
-
 void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState() {
-  DEBUG_BEGIN("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
   // Update internal state of all interactions in the current index set
   auto& indexSet = *simulation()->indexSet(_indexSetLevel);
   for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
@@ -447,5 +448,6 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInterna
     auto& nslaw = *inter.nonSmoothLaw();
     nslaw.updateInteractionInternalState(inter);
   }
-  DEBUG_END("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
 }

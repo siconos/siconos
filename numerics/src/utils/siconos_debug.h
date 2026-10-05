@@ -73,8 +73,8 @@ extern unsigned int debug_counter;
 
 #endif  // DEBUG_STDOUT
 
-//#define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i <
-// debug_counter; i++) printf(".");
+// #define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i <
+//  debug_counter; i++) printf(".");
 #define DEBUG_PREFIX                                                    \
   ((debug_counter > 0) ? ({                                             \
     for (unsigned int i = 0; i < debug_counter - 1; i++) printf("|  "); \

@@ -18,7 +18,7 @@
 #include "NSSTools.h"  // for diffns
 #include "numerics_errors.h"
 
-void diffns(int *na, int *a, int *nb, int *b, int *nc, int *c) {
+void diffns(int* na, int* a, int* nb, int* b, int* nc, int* c) {
   int pta, ptb, ptc;
   int aa, i;
 

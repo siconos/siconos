@@ -39,7 +39,7 @@ class TimeDiscretisationEvent : public Event {
   /** constructor with time value as a parameter
    *  \param time starting time (a double)
    */
-  TimeDiscretisationEvent(double time) : Event(time, EventType::TD){};
+  TimeDiscretisationEvent(double time) : Event(time, EventType::TD) {};
 
   /** destructor
    */

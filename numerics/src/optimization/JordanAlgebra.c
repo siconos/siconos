@@ -72,7 +72,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
 }
 
 int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const size_t vecSize,
-                        const size_t varsCount) {
+                       const size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
     assert(0);
@@ -90,7 +90,8 @@ int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const s
   // Note FP: convert from or compare size_t to/with int --> need to be careful
   // Anyway the best option is to use size_t in NumericsMatrix ...
   if (!(vecSize <= INT_MAX)) {
-    return numerics_error("Arrow_repr_replace", "value too large for an int");;
+    return numerics_error("Arrow_repr_replace", "value too large for an int");
+    ;
   }
   if (Arw_mat->size0 != (int)vecSize && Arw_mat->size1 != (int)vecSize) {
     assert(0);

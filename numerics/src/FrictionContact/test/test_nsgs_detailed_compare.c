@@ -1,12 +1,12 @@
 /* Detailed comparison test between fc3d_nsgs and fc3d_nsgs_generic */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <time.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
@@ -42,9 +42,8 @@ typedef struct {
 } SolverResult;
 
 /* Run solver and collect results */
-static SolverResult run_solver(FrictionContactProblem* problem,
-                                double* reaction, double* velocity,
-                                SolverOptions* options, int use_original) {
+static SolverResult run_solver(FrictionContactProblem* problem, double* reaction,
+                               double* velocity, SolverOptions* options, int use_original) {
   SolverResult res = {0};
   int nc = problem->numberOfContacts;
 
@@ -115,9 +114,8 @@ static SolutionDiff compare_solutions(int n, double* r1, double* v1, double* r2,
 }
 
 /* Print comparison table */
-static void print_comparison(const char* label,
-                              SolverResult* orig, SolverResult* gen,
-                              SolutionDiff* diff) {
+static void print_comparison(const char* label, SolverResult* orig, SolverResult* gen,
+                             SolutionDiff* diff) {
   printf("\n╔══════════════════════════════════════════════════════════════════╗\n");
   printf("║  %s\n", label);
   printf("╠══════════════════════════════════════════════════════════════════╣\n");
@@ -129,18 +127,20 @@ static void print_comparison(const char* label,
   printf("║  Wall Time (ms)        │  %12.4f  │  %12.4f  │ %+6.1f%% ║\n",
          orig->wall_time * 1000, gen->wall_time * 1000,
          (gen->wall_time - orig->wall_time) / orig->wall_time * 100);
-  printf("║  Iterations            │  %12d  │  %12d  │ %+6d  ║\n",
-         orig->iterations, gen->iterations, gen->iterations - orig->iterations);
-  printf("║  Final Error           │  %12.4e  │  %12.4e  │        ║\n",
-         orig->final_error, gen->final_error);
+  printf("║  Iterations            │  %12d  │  %12d  │ %+6d  ║\n", orig->iterations,
+         gen->iterations, gen->iterations - orig->iterations);
+  printf("║  Final Error           │  %12.4e  │  %12.4e  │        ║\n", orig->final_error,
+         gen->final_error);
   printf("║  Converged             │  %12s  │  %12s  │        ║\n",
          orig->info == 0 ? "YES" : "NO", gen->info == 0 ? "YES" : "NO");
-  printf("║  Reaction Norm         │  %12.4e  │  %12.4e  │        ║\n",
-         orig->reaction_norm, gen->reaction_norm);
+  printf("║  Reaction Norm         │  %12.4e  │  %12.4e  │        ║\n", orig->reaction_norm,
+         gen->reaction_norm);
   printf("╠══════════════════════════════════════════════════════════════════╣\n");
   printf("║  Solution Differences                                            ║\n");
-  printf("║  Reaction L2-norm:     %12.4e                                 ║\n", diff->reaction_diff);
-  printf("║  Velocity L2-norm:     %12.4e                                 ║\n", diff->velocity_diff);
+  printf("║  Reaction L2-norm:     %12.4e                                 ║\n",
+         diff->reaction_diff);
+  printf("║  Velocity L2-norm:     %12.4e                                 ║\n",
+         diff->velocity_diff);
   printf("║  Max reaction diff:    %12.4e  at index %d                     ║\n",
          diff->max_reaction_diff, diff->max_diff_index);
   printf("╚══════════════════════════════════════════════════════════════════╝\n");
@@ -175,10 +175,10 @@ static void test_problem(const char* filename, double tol) {
   SolverOptions* opts_gen = solver_options_copy(opts_orig);
 
   /* Allocate solution arrays */
-  double *r_orig = (double*)calloc(n, sizeof(double));
-  double *v_orig = (double*)calloc(n, sizeof(double));
-  double *r_gen = (double*)calloc(n, sizeof(double));
-  double *v_gen = (double*)calloc(n, sizeof(double));
+  double* r_orig = (double*)calloc(n, sizeof(double));
+  double* v_orig = (double*)calloc(n, sizeof(double));
+  double* r_gen = (double*)calloc(n, sizeof(double));
+  double* v_gen = (double*)calloc(n, sizeof(double));
 
   /* Run original solver */
   printf("  Running original fc3d_nsgs...\n");
@@ -197,15 +197,18 @@ static void test_problem(const char* filename, double tol) {
   /* First 6 reaction values */
   printf("\n  First 6 reaction values:\n");
   printf("  %-6s  %-16s  %-16s  %-12s\n", "Index", "Original", "Generic", "Diff");
-  printf("  %-6s  %-16s  %-16s  %-12s\n", "------", "----------------", "----------------", "------------");
+  printf("  %-6s  %-16s  %-16s  %-12s\n", "------", "----------------", "----------------",
+         "------------");
   for (int i = 0; i < 6 && i < n; i++) {
-    printf("  %-6d  %16.6e  %16.6e  %12.4e\n",
-           i, r_orig[i], r_gen[i], fabs(r_orig[i] - r_gen[i]));
+    printf("  %-6d  %16.6e  %16.6e  %12.4e\n", i, r_orig[i], r_gen[i],
+           fabs(r_orig[i] - r_gen[i]));
   }
 
   /* Cleanup */
-  free(r_orig); free(v_orig);
-  free(r_gen); free(v_gen);
+  free(r_orig);
+  free(v_orig);
+  free(r_gen);
+  free(v_gen);
   solver_options_delete(opts_orig);
   solver_options_delete(opts_gen);
   frictionContactProblem_free(problem);
@@ -226,11 +229,11 @@ int main(int argc, char** argv) {
     const char* file;
     double tol;
   } tests[] = {
-    {"./data/FC3D_Example1.dat", 1e-6},
-    {"./data/FC3D_Example1.dat", 1e-8},
-    {"./data/Confeti-ex13-Fc3D-SBM.dat", 1e-6},
-    {"./data/Confeti-ex13-Fc3D-SBM.dat", 1e-8},
-    {"./data/KaplasTower-i1061-4.hdf5.dat", 1e-6},
+      {"./data/FC3D_Example1.dat", 1e-6},
+      {"./data/FC3D_Example1.dat", 1e-8},
+      {"./data/Confeti-ex13-Fc3D-SBM.dat", 1e-6},
+      {"./data/Confeti-ex13-Fc3D-SBM.dat", 1e-8},
+      {"./data/KaplasTower-i1061-4.hdf5.dat", 1e-6},
   };
 
   int n_tests = sizeof(tests) / sizeof(tests[0]);

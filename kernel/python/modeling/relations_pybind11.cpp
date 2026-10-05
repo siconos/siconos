@@ -28,14 +28,14 @@
 #include "LagrangianR.hpp"
 #include "LagrangianScleronomousR.hpp"
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEulerVelocityAngularVelocityR.hpp"
 #include "NewtonEulerR.hpp"
+#include "NewtonEulerVelocityAngularVelocityR.hpp"
 
 namespace py = pybind11;
 
 // PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-void wrap_relations(py::module_ &m) {
+void wrap_relations(py::module_& m) {
   // ============================ Relation BASE CLASS ===================================
   auto relpy = py::class_<siconos::modeling::Relation, py::smart_holder>(m, "Relation");
 
@@ -50,7 +50,7 @@ void wrap_relations(py::module_ &m) {
              py::smart_holder>(m, "LagrangianLinearTIR")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>>(), py::keep_alive<1, 2>())
       .def("display", &siconos::modeling::LagrangianLinearTIR::display)
-      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {
+      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR& a) {
         a.display();
         return "\n";
       });
@@ -85,7 +85,7 @@ void wrap_relations(py::module_ &m) {
            py::keep_alive<1, 2>(), "To define a constant B operator")
       .def("setConstantCAlias", &siconos::modeling::FirstOrderLinearR::setConstantC,
            py::keep_alive<1, 2>(), "To define a constant C operator")
-      .def("__repr__", [](const siconos::modeling::FirstOrderLinearR &a) {
+      .def("__repr__", [](const siconos::modeling::FirstOrderLinearR& a) {
         a.display();
         return "\n";
       });
@@ -99,7 +99,7 @@ void wrap_relations(py::module_ &m) {
       .def("setConstantD", &siconos::modeling::FirstOrderLinearTIR::setConstantD,
            py::keep_alive<1, 2>(), "To define a constant D operator")
       .def("display", &siconos::modeling::FirstOrderLinearTIR::display)
-      .def("__repr__", [](const siconos::modeling::FirstOrderLinearTIR &a) {
+      .def("__repr__", [](const siconos::modeling::FirstOrderLinearTIR& a) {
         a.display();
         return "\n";
       });
@@ -124,6 +124,7 @@ void wrap_relations(py::module_ &m) {
 
   auto ne3dR = py::class_<siconos::modeling::NewtonEuler3DR, siconos::modeling::NewtonEuler1DR,
                           py::smart_holder>(m, "NewtonEuler3DR");
-  auto ne5dR = py::class_<siconos::modeling::NewtonEulerVelocityAngularVelocityR, siconos::modeling::NewtonEuler1DR,
-                          py::smart_holder>(m, "NewtonEulerVelocityAngularVelocityR");
+  auto ne5dR = py::class_<siconos::modeling::NewtonEulerVelocityAngularVelocityR,
+                          siconos::modeling::NewtonEuler1DR, py::smart_holder>(
+      m, "NewtonEulerVelocityAngularVelocityR");
 }

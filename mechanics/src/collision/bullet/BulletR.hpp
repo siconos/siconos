@@ -40,18 +40,17 @@ class BulletR : public siconos::collision::ContactR {
   std::shared_ptr<btCollisionShape> btShape[2] = {nullptr, nullptr};
 
   virtual void updateContactPointsFromManifoldPoint(
-      const btPersistentManifold &manifold, const btManifoldPoint &point, bool flip,
+      const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
       double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
       std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
 
-  void updateRelativeContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                                   const btManifoldPoint& point,
-                                                   bool flip, double scaling,
-                                                   std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
-                                                   std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
+  void updateRelativeContactPointsFromManifoldPoint(
+      const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+      double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
+      std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
   void display() const override;
 
-  virtual void accept(modeling::relations::Visitor &tourist) const override {
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 };

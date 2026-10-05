@@ -6,7 +6,6 @@ namespace siconos::simul {
 
 template <typename... Params>
 struct time_discretization : item {
-
   struct attributes {
     some::scalar h;
     some::scalar t0;

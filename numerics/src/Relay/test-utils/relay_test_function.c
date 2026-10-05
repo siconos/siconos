@@ -26,11 +26,11 @@
 #include "relay_test_utils.h"  // for relay_test_function
 #include "test_utils.h"        // for TestCase
 
-int relay_test_function(TestCase *current) {
+int relay_test_function(TestCase* current) {
   int i, info = 0;
-  RelayProblem *problem = relay_new_from_filename(current->filename);
+  RelayProblem* problem = relay_new_from_filename(current->filename);
 
-  FILE *foutput = fopen("./relay.verif", "w");
+  FILE* foutput = fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
   fclose(foutput);
 
@@ -39,8 +39,8 @@ int relay_test_function(TestCase *current) {
   current->options->iparam[SICONOS_IPARAM_MAX_ITER] = maxIter;
   current->options->dparam[SICONOS_DPARAM_TOL] = tolerance;
 
-  double *z = (double *)calloc(problem->size, sizeof(double));
-  double *w = (double *)calloc(problem->size, sizeof(double));
+  double* z = (double*)calloc(problem->size, sizeof(double));
+  double* w = (double*)calloc(problem->size, sizeof(double));
 
   info = relay_driver(problem, z, w, current->options);
 

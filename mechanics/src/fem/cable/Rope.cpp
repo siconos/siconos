@@ -25,9 +25,9 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-siconos::fem::cable::Rope::Rope(const Pylon &start_pylon, const Pylon &end_pylon,
+siconos::fem::cable::Rope::Rope(const Pylon& start_pylon, const Pylon& end_pylon,
                                 MechanicalProperties meca_prop, double T0,
-                                const siconos::algebra::SiconosVector3 &R0, int nb_nodes,
+                                const siconos::algebra::SiconosVector3& R0, int nb_nodes,
                                 double tol, int max_iter)
 
     : mechanicalProp_{meca_prop},
@@ -89,9 +89,9 @@ int siconos::fem::cable::Rope::computeNumberOfElements(double element_length, do
   return number_of_elements_;
 }
 
-int siconos::fem::cable::Rope::initializeFEM(siconos::algebra::SiconosVector &a_q,
-                                             siconos::algebra::SiconosVector &a_R,
-                                             siconos::algebra::SiconosVector &a_TS,
+int siconos::fem::cable::Rope::initializeFEM(siconos::algebra::SiconosVector& a_q,
+                                             siconos::algebra::SiconosVector& a_R,
+                                             siconos::algebra::SiconosVector& a_TS,
                                              int q_offset, bool a_reverse) const {
   if (!m_last_) {
     computeCatenary(mechanicalProp_, end_pylon_.coords(), catenaryUnknowns_,
@@ -134,8 +134,8 @@ void siconos::fem::cable::Rope::display() const {
 }
 
 siconos::algebra::SiconosVector3 siconos::fem::cable::guess(
-    const siconos::algebra::SiconosVector3 &start,
-    const siconos::algebra::SiconosVector3 &end) {
+    const siconos::algebra::SiconosVector3& start,
+    const siconos::algebra::SiconosVector3& end) {
   siconos::algebra::SiconosVector3 delta = end - start;
   auto L = delta.norm();
   delta.normalize();
@@ -144,8 +144,8 @@ siconos::algebra::SiconosVector3 siconos::fem::cable::guess(
 }
 
 siconos::algebra::SiconosVector3 siconos::fem::cable::computeAdmissibilityConditions(
-    const MechanicalProperties &a_meca, const siconos::algebra::SiconosVector3 &start,
-    const siconos::algebra::SiconosVector3 &end, int max_iter, double tol) {
+    const MechanicalProperties& a_meca, const siconos::algebra::SiconosVector3& start,
+    const siconos::algebra::SiconosVector3& end, int max_iter, double tol) {
   // Initial guess for length and slopes
   auto cable_inc = siconos::fem::cable::guess(start, end);
 
@@ -226,13 +226,13 @@ siconos::algebra::SiconosVector3 siconos::fem::cable::computeAdmissibilityCondit
   return cable_inc;  // RVO
 }
 
-void siconos::fem::cable::computeCatenary(const MechanicalProperties &a_meca,
-                                          const siconos::algebra::SiconosVector3 &end,
-                                          const siconos::algebra::SiconosVector3 &cable_inc,
+void siconos::fem::cable::computeCatenary(const MechanicalProperties& a_meca,
+                                          const siconos::algebra::SiconosVector3& end,
+                                          const siconos::algebra::SiconosVector3& cable_inc,
                                           int nb_nodes,
-                                          siconos::algebra::SiconosVector &positions,
-                                          siconos::algebra::SiconosVector &internal_forces,
-                                          siconos::algebra::SiconosVector &tension,
+                                          siconos::algebra::SiconosVector& positions,
+                                          siconos::algebra::SiconosVector& internal_forces,
+                                          siconos::algebra::SiconosVector& tension,
                                           int q_offset, bool a_reverse) {
   //  a_meca:
   //           T0  : initial tension

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <any>
-#include <unordered_map>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace siconos::storage {
 
@@ -34,8 +34,7 @@ struct dynamic_properties {
     operator Value&() { return storage.get_or_create<Value>(key); }
 
     // Assignment from Value
-    proxy& operator=(const Value& v)
-    {
+    proxy& operator=(const Value& v) {
       storage.get_or_create<Value>(key) = v;
       return *this;
     }
@@ -53,39 +52,33 @@ struct dynamic_properties {
 
     // Allow: auto& v = storage["key"]; (deduces from LHS)
     template <typename Value>
-    operator Value&()
-    {
+    operator Value&() {
       return storage.get_or_create<Value>(key);
     }
 
     // Allow: storage["key"] = value; (deduces from RHS)
     template <typename Value>
-    generic_proxy& operator=(const Value& v)
-    {
+    generic_proxy& operator=(const Value& v) {
       storage.get_or_create<Value>(key) = v;
       return *this;
     }
 
     // Allow: storage["key"].method(); (deduces from member access)
     template <typename Value>
-    Value* operator->()
-    {
+    Value* operator->() {
       return &storage.get_or_create<Value>(key);
     }
   };
 
   generic_proxy operator[](const Key& key) { return {*this, key}; }
 
-
   template <typename Value>
-  Value& get(const Key& key)
-  {
+  Value& get(const Key& key) {
     return get_or_create<Value>(key);
   }
 
   template <typename Value>
-  const Value& get(const Key& key) const
-  {
+  const Value& get(const Key& key) const {
     auto it = _data.find(key);
     if (it == _data.end()) {
       throw std::out_of_range("Key not found in dynamic_properties");
@@ -94,18 +87,15 @@ struct dynamic_properties {
   }
 
   template <typename Value>
-  Value* try_get(const Key& key)
-  {
+  Value* try_get(const Key& key) {
     auto it = _data.find(key);
     return it != _data.end() ? std::any_cast<Value>(&it->second) : nullptr;
   }
 
   template <typename Value>
-  const Value* try_get(const Key& key) const
-  {
+  const Value* try_get(const Key& key) const {
     auto it = _data.find(key);
-    return it != _data.end() ? std::any_cast<const Value>(&it->second)
-                             : nullptr;
+    return it != _data.end() ? std::any_cast<const Value>(&it->second) : nullptr;
   }
 
   bool contains(const Key& key) const { return _data.contains(key); }

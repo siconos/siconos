@@ -31,10 +31,10 @@ Ferris solves the subsequent AVI.
 #include "RelayProblem.h"                   // for RelayProblem
 #include "Relay_Solvers.h"                  // for relay_avi_caoferris_test
 #include "SiconosSets.h"                    // for polyhedron, free_polyhedron
-#include "siconos_debug.h"                  // for DEBUG_EXPR_WE, DEBUG_PRINT
 #include "numerics_errors.h"
-void relay_avi_caoferris_test(RelayProblem *problem, double *z, double *w, int *info,
-                              SolverOptions *options) {
+#include "siconos_debug.h"  // for DEBUG_EXPR_WE, DEBUG_PRINT
+void relay_avi_caoferris_test(RelayProblem* problem, double* z, double* w, int* info,
+                              SolverOptions* options) {
   unsigned int n = problem->size;
   assert(n > 0);
   assert(problem->M);
@@ -52,8 +52,8 @@ void relay_avi_caoferris_test(RelayProblem *problem, double *z, double *w, int *
   poly.size_ineq = s;
   poly.size_eq = 0;
   poly.H = NM_create_from_data(NM_DENSE, s, n, calloc(s * n, sizeof(double)));
-  double *H = poly.H->matrix0;
-  poly.K = (double *)malloc(s * sizeof(double));
+  double* H = poly.H->matrix0;
+  poly.K = (double*)malloc(s * sizeof(double));
   poly.Heq = NULL;
   poly.Keq = NULL;
 

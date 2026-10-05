@@ -7,12 +7,16 @@
 #define BOOST_PFR_DETAIL_SIZE_T_HPP
 #pragma once
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 ///////////////////// General utility stuff
 template <std::size_t Index>
-using size_t_ = std::integral_constant<std::size_t, Index >;
+using size_t_ = std::integral_constant<std::size_t, Index>;
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_SIZE_T_HPP
+#endif  // BOOST_PFR_DETAIL_SIZE_T_HPP

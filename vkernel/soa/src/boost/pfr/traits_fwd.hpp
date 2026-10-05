@@ -9,15 +9,17 @@
 
 #include <boost/pfr/detail/config.hpp>
 
-namespace boost { namespace pfr {
+namespace boost {
+namespace pfr {
 
 BOOST_PFR_BEGIN_MODULE_EXPORT
 
-template<class T, class WhatFor>
+template <class T, class WhatFor>
 struct is_reflectable;
 
 BOOST_PFR_END_MODULE_EXPORT
 
-}} // namespace boost::pfr
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_TRAITS_FWD_HPP
+#endif  // BOOST_PFR_DETAIL_TRAITS_FWD_HPP

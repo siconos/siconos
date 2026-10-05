@@ -32,8 +32,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void convexQP_VI_solver(ConvexQP* problem, double* z, double* w, int* info,
                         SolverOptions* options);
@@ -124,7 +124,8 @@ static int convexqp_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int convexqp_vi_fpp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int convexqp_vi_fpp_solve_wrap(void* problem, double* z, double* w,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
   options->solverId = SICONOS_CONVEXQP_VI_FPP;
   convexQP_VI_solver((ConvexQP*)problem, z, w, &info, options);
@@ -139,14 +140,11 @@ static void convexqp_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_CONVEXQP_VI_FPP, "CONVEXQP_VI_FPP",
                 "Variational Inequality Fixed Point Projection for Convex QP",
-                convexqp_vi_fpp_init_wrap,
-                convexqp_vi_fpp_solve_wrap,
-                convexqp_vi_fpp_free_wrap,
-                NULL,  /* error function */
-                convexqp_vi_fpp_set_default,
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                convexqp_vi_fpp_init_wrap, convexqp_vi_fpp_solve_wrap,
+                convexqp_vi_fpp_free_wrap, NULL,   /* error function */
+                convexqp_vi_fpp_set_default, 1000, /* default_max_iter */
+                1e-4,                              /* default_tol */
+                0 /* is_local_solver */);
 
 static void convexqp_vi_eg_set_default(SolverOptions* options) {
   variationalInequality_ExtraGradient_set_default(options);
@@ -158,7 +156,8 @@ static int convexqp_vi_eg_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int convexqp_vi_eg_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int convexqp_vi_eg_solve_wrap(void* problem, double* z, double* w,
+                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   options->solverId = SICONOS_CONVEXQP_VI_EG;
   convexQP_VI_solver((ConvexQP*)problem, z, w, &info, options);
@@ -173,11 +172,8 @@ static void convexqp_vi_eg_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(SICONOS_CONVEXQP_VI_EG, "CONVEXQP_VI_EG",
                 "Variational Inequality Extra Gradient for Convex QP",
-                convexqp_vi_eg_init_wrap,
-                convexqp_vi_eg_solve_wrap,
-                convexqp_vi_eg_free_wrap,
-                NULL,  /* error function */
-                convexqp_vi_eg_set_default,
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+                convexqp_vi_eg_init_wrap, convexqp_vi_eg_solve_wrap, convexqp_vi_eg_free_wrap,
+                NULL,                             /* error function */
+                convexqp_vi_eg_set_default, 1000, /* default_max_iter */
+                1e-4,                             /* default_tol */
+                0 /* is_local_solver */);

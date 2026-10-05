@@ -29,17 +29,17 @@
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#define DEBUG_NO_MATRIX
-#include "lcp_cst.h"           // for SICONOS_LCP_PIVOT_PATHSEARCH
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_NO_MATRIX
+#include "lcp_cst.h"  // for SICONOS_LCP_PIVOT_PATHSEARCH
 #include "numerics_verbose.h"
-#include "pivot-utils.h"       // for do_pivot_driftless, do_pivot
-#include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "pivot-utils.h"    // for do_pivot_driftless, do_pivot
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR_WE
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void lcp_pivot(LinearComplementarityProblem* problem, double* u, double* s, int* info,
                SolverOptions* options) {
@@ -547,16 +547,13 @@ static void lcp_pivot_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PIVOT, "LCP_PIVOT",
-                "Pivot solver for LCP (Lemke/Bard/Murty)",
-                lcp_pivot_init_wrap,
-                lcp_pivot_solve_wrap,
-                lcp_pivot_free_wrap,
-                NULL,  /* error function */
-                lcp_pivot_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_PIVOT, "LCP_PIVOT", "Pivot solver for LCP (Lemke/Bard/Murty)",
+                lcp_pivot_init_wrap, lcp_pivot_solve_wrap, lcp_pivot_free_wrap,
+                NULL,                  /* error function */
+                lcp_pivot_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-6,                  /* default_tol */
+                0);                    /* is_local_solver */
 
 /* Additional registrations for pivot variants */
 static int lcp_bard_init_wrap(void* problem, SolverOptions* options) {
@@ -565,16 +562,13 @@ static int lcp_bard_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_BARD, "LCP_BARD",
-                       "Bard-type pivoting method for LCP",
-                       lcp_bard_init_wrap,
-                       lcp_pivot_solve_wrap,
-                       lcp_pivot_free_wrap,
-                       NULL,  /* error function */
-                       lcp_pivot_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_BARD, "LCP_BARD", "Bard-type pivoting method for LCP",
+                lcp_bard_init_wrap, lcp_pivot_solve_wrap, lcp_pivot_free_wrap,
+                NULL,                  /* error function */
+                lcp_pivot_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-6,                  /* default_tol */
+                0);                    /* is_local_solver */
 
 static int lcp_murty_init_wrap(void* problem, SolverOptions* options) {
   lcp_pivot_set_default(options);
@@ -582,13 +576,10 @@ static int lcp_murty_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_MURTY, "LCP_MURTY",
-                       "Murty's least index pivoting method for LCP",
-                       lcp_murty_init_wrap,
-                       lcp_pivot_solve_wrap,
-                       lcp_pivot_free_wrap,
-                       NULL,  /* error function */
-                       lcp_pivot_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_MURTY, "LCP_MURTY", "Murty's least index pivoting method for LCP",
+                lcp_murty_init_wrap, lcp_pivot_solve_wrap, lcp_pivot_free_wrap,
+                NULL,                  /* error function */
+                lcp_pivot_set_default, /* set_default */
+                1000,                  /* default_max_iter */
+                1e-6,                  /* default_tol */
+                0);                    /* is_local_solver */

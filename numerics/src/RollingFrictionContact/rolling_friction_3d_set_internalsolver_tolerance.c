@@ -17,19 +17,19 @@
  */
 #include <math.h>  // for fmax
 
-#include "FrictionContact_options.h"                   // for SICONOS_FRICTION_3D_IPARA...
-#include "rolling_friction_3d_short_names.h"
+#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_IPARA...
 #include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SolverOptions.h"                  // for SolverOptions
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
-#include "rolling_fc_Solvers.h"             // for rolling_friction_3d_set_internal...
+#include "numerics_verbose.h"
+#include "rolling_fc_Solvers.h"  // for rolling_friction_3d_set_internal...
+#include "rolling_friction_3d_short_names.h"
 
 int rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
-                                               SolverOptions* options,
-                                               SolverOptions* internalsolver_options,
-                                               double error) {
+                                                     SolverOptions* options,
+                                                     SolverOptions* internalsolver_options,
+                                                     double error) {
   int* iparam = options->iparam;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] ==
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE) {
@@ -58,7 +58,7 @@ int rolling_friction_3d_set_internalsolver_tolerance(RollingFrictionContactProbl
                             internalsolver_options->dparam[0]);
   } else {
     return numerics_error("rolling_friction_3d__set_internalsolver_tolerance",
-                   "Unknown strategy for driving the tolerance");
+                          "Unknown strategy for driving the tolerance");
   }
   return 0;
 }

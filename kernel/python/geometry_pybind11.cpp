@@ -56,7 +56,7 @@ PYBIND11_MODULE(geometry, m) {
 
   m.def(
       "rotateVectorFromInertialToBodyFrame",
-      [](const siconos::algebra::SiconosVector7 &q,
+      [](const siconos::algebra::SiconosVector7& q,
          Eigen::Ref<siconos::algebra::SiconosVector3> v) {
         siconos::geometry::rotateVectorFromInertialToBodyFrame(q, v);
       },
@@ -74,7 +74,7 @@ PYBIND11_MODULE(geometry, m) {
 
   m.def(
       "rotateVectorFromBodyToInertialFrame",
-      [](const siconos::algebra::SiconosVector7 &q,
+      [](const siconos::algebra::SiconosVector7& q,
          Eigen::Ref<siconos::algebra::SiconosVector3> v) {
         siconos::geometry::rotateVectorFromBodyToInertialFrame(q, v);
       },

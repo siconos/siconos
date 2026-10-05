@@ -27,14 +27,14 @@
 #include "projectionOnCone.h"              // for projectionOnCone
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 
-void Function_VI_GFC3D(void *self, int n_notused, double *x, double *F) {
+void Function_VI_GFC3D(void* self, int n_notused, double* x, double* F) {
   DEBUG_BEGIN("Function_VI_FC3D(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  GlobalFrictionContactProblem_as_VI *pb = (GlobalFrictionContactProblem_as_VI *)vi->env;
-  GlobalFrictionContactProblem *gfc3d = pb->gfc3d;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
+  GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
 
   // DEBUG_EXPR(globalFrictionContact_display(gfc3d););
   int nLocal = gfc3d->dimension;
@@ -43,8 +43,8 @@ void Function_VI_GFC3D(void *self, int n_notused, double *x, double *F) {
   int n = gfc3d->M->size0;
   DEBUG_EXPR(NM_vector_display(x, n + m));
 
-  double *globalVelocity = &x[0];
-  double *reaction = &x[n];
+  double* globalVelocity = &x[0];
+  double* reaction = &x[n];
 
   cblas_dcopy(n, gfc3d->q, 1, F, 1);
   for (int i = 0; i < n; i++) F[i] *= -1.0; /* F= -q*/
@@ -57,7 +57,7 @@ void Function_VI_GFC3D(void *self, int n_notused, double *x, double *F) {
   /* NM_gemv(-1.0, gfc3d->M, globalVelocity, 1.0, F); /\* F= M v -q *\/ */
   /* NM_gemv(1.0, gfc3d->H, reaction, 1.0, F); /\* F= M v -q - Hr  *\/ */
 
-  double *localvelocity = &F[n];
+  double* localvelocity = &F[n];
   cblas_dcopy(m, gfc3d->b, 1, localvelocity, 1);             /* localvelocity = b */
   NM_tgemv(1., gfc3d->H, globalVelocity, 1., localvelocity); /* localvelocity = b + H^T V*/
 
@@ -73,12 +73,12 @@ void Function_VI_GFC3D(void *self, int n_notused, double *x, double *F) {
   DEBUG_END("Function_VI_FC3D(void * self, double *x, double *F)\n")
 }
 
-void Projection_VI_GFC3D(void *viIn, double *x, double *PX) {
+void Projection_VI_GFC3D(void* viIn, double* x, double* PX) {
   DEBUG_BEGIN("Projection_VI_FC3D(void *viIn, double *x, double *PX)\n");
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  GlobalFrictionContactProblem_as_VI *pb = (GlobalFrictionContactProblem_as_VI *)vi->env;
-  GlobalFrictionContactProblem *gfc3d = pb->gfc3d;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
+  GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
   // frictionContact_display(fc3d);
 
   int nLocal = gfc3d->dimension;
@@ -87,7 +87,7 @@ void Projection_VI_GFC3D(void *viIn, double *x, double *PX) {
   DEBUG_EXPR(NM_vector_display(x, n + m));
   cblas_dcopy(n + m, x, 1, PX, 1);
 
-  double *reaction = &PX[n];
+  double* reaction = &PX[n];
 
   for (int contact = 0; contact < gfc3d->numberOfContacts; ++contact) {
     projectionOnCone(&reaction[contact * nLocal], gfc3d->mu[contact]);

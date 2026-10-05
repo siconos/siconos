@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "siconos_debug.h"
+
 #include "numerics_errors.h"
 
 /* add a global counter for the incrementation in debug output */

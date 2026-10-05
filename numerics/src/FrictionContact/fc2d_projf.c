@@ -20,7 +20,7 @@
 #include "fc2d_Solvers.h"  // for fc2d_projf
 #include "numerics_errors.h"
 
-void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[]) {
+void fc2d_projf(int etat[], int* nn, double y[], double fric[], double projf1[]) {
   int i, nc, n = *nn;
 
   double mina, maxa, bb;

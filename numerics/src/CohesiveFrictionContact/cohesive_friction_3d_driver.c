@@ -34,6 +34,8 @@
  * - Runtime solver introspection
  */
 
+#include "cohesive_friction_3d_driver.h"
+
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,30 +43,29 @@
 
 #include "CohesiveFrictionContactProblem.h"
 #include "CohesiveFrictionContact_options.h"
-#include "SolverOptions.h"
 #include "NumericsMatrix.h"
-#include "cohesive_friction_3d_driver.h"
+#include "SolverOptions.h"
 #include "cohesive_friction_3d_nsgs.h"
 #include "cohesive_friction_3d_projection.h"
 #include "naming_conventions.h"
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "solver_registry.h"
 
 /* ===========================================================================
  * Trivial Case Check
  * =========================================================================== */
 
-int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *problem,
-                                          double *velocity, double *reaction,
-                                          SolverOptions *options) {
+int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem* problem,
+                                          double* velocity, double* reaction,
+                                          SolverOptions* options) {
   (void)options;
   assert(problem);
   assert(problem->q);
 
   int nc = problem->numberOfContacts;
   int dim = problem->dimension;
-  double *q = problem->q;
+  double* q = problem->q;
   int m = dim * nc;
 
   // Check for no contact (gap > 0 for all contacts)
@@ -77,7 +78,8 @@ int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *proble
     reaction[i] = 0.;
   }
 
-  numerics_printf("cohesive_friction_3d: trivial solution (take-off), reaction = 0, velocity = q.");
+  numerics_printf(
+      "cohesive_friction_3d: trivial solution (take-off), reaction = 0, velocity = q.");
   return NUMERICS_OK;
 }
 
@@ -85,10 +87,8 @@ int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *proble
  * Main Driver - Registration-Based
  * =========================================================================== */
 
-int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem,
-                                double *reaction,
-                                double *velocity,
-                                SolverOptions *options) {
+int cohesive_friction_3d_driver(CohesiveFrictionContactProblem* problem, double* reaction,
+                                double* velocity, SolverOptions* options) {
   /* Input validation using standardized macros */
   CHECK_NULL(problem);
   CHECK_NULL(reaction);
@@ -106,23 +106,25 @@ int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem,
   SET_SOLVER_RESIDUAL(options, 0.0);
 
   /* /\* Check for trivial case *\/ */
-  /* int trivial_status = cohesive_friction_3d_checkTrivialCase(problem, velocity, reaction, options); */
+  /* int trivial_status = cohesive_friction_3d_checkTrivialCase(problem, velocity, reaction,
+   * options); */
   /* if (trivial_status == NUMERICS_OK) { */
   /*   return NUMERICS_OK; */
   /* } */
 
   /* Lookup solver in registry */
   const SolverEntry* solver = solver_registry_lookup(options->solverId);
-  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER,
-             "Solver ID not found in registry");
+  CHECK_COND(solver != NULL, NUMERICS_ERR_INVALID_SOLVER, "Solver ID not found in registry");
 
   numerics_printf_verbose(1, "cohesive_friction_3d_driver: using solver '%s' (%s)",
                           solver->name, solver->description);
 
   /* Validate solver is appropriate for this problem type */
   if (solver->is_local_solver) {
-    numerics_printf("cohesive_friction_3d_driver: solver '%s' is a local solver, "
-                    "cannot be used as main solver", solver->name);
+    numerics_printf(
+        "cohesive_friction_3d_driver: solver '%s' is a local solver, "
+        "cannot be used as main solver",
+        solver->name);
     return NUMERICS_ERR_INVALID_SOLVER;
   }
 
@@ -134,7 +136,8 @@ int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem,
   if (solver->init) {
     int init_status = solver->init(problem, options);
     if (init_status != NUMERICS_OK) {
-      fprintf(stderr, "[ERROR] cohesive_friction_3d_driver: solver initialization failed: %s\n",
+      fprintf(stderr,
+              "[ERROR] cohesive_friction_3d_driver: solver initialization failed: %s\n",
               numerics_error_string(init_status));
       return init_status;
     }
@@ -169,18 +172,21 @@ SolverOptions* cohesive_friction_3d_solver_options_create(solver_id_t solver_id)
   const SolverEntry* solver = solver_registry_lookup(solver_id);
 
   if (!solver) {
-    fprintf(stderr, "[ERROR] cohesive_friction_3d_solver_options_create: solver ID %d not registered\n",
-            solver_id);
+    fprintf(
+        stderr,
+        "[ERROR] cohesive_friction_3d_solver_options_create: solver ID %d not registered\n",
+        solver_id);
     fprintf(stderr, "[INFO] Available cohesive friction 3D solvers:\n");
     cohesive_friction_3d_list_available_solvers();
     return NULL;
   }
 
   if (solver->is_local_solver) {
-    fprintf(stderr,
-            "[ERROR] cohesive_friction_3d_solver_options_create: solver '%s' is a local solver, "
-            "use it within NSGS instead\n",
-            solver->name);
+    fprintf(
+        stderr,
+        "[ERROR] cohesive_friction_3d_solver_options_create: solver '%s' is a local solver, "
+        "use it within NSGS instead\n",
+        solver->name);
     return NULL;
   }
 
@@ -188,7 +194,8 @@ SolverOptions* cohesive_friction_3d_solver_options_create(solver_id_t solver_id)
   SolverOptions* options = solver_options_create(solver_id);
 
   if (!options) {
-    fprintf(stderr, "[ERROR] cohesive_friction_3d_solver_options_create: failed to create options\n");
+    fprintf(stderr,
+            "[ERROR] cohesive_friction_3d_solver_options_create: failed to create options\n");
     return NULL;
   }
 
@@ -196,7 +203,9 @@ SolverOptions* cohesive_friction_3d_solver_options_create(solver_id_t solver_id)
   if (solver->init) {
     int init_status = solver->init(NULL, options);
     if (init_status != NUMERICS_OK) {
-      fprintf(stderr, "cohesive_friction_3d_solver_options_create: init failed with status %d\n", init_status);
+      fprintf(stderr,
+              "cohesive_friction_3d_solver_options_create: init failed with status %d\n",
+              init_status);
       solver_options_delete(options);
       return NULL;
     }
@@ -237,8 +246,12 @@ void cohesive_friction_3d_list_available_solvers(void) {
          solver_count);
   printf("+=============================================================================+\n");
   printf("\n");
-  printf("Usage: SolverOptions* options = cohesive_friction_3d_solver_options_create(SICONOS_COHESIVE_FRICTION_3D_NSGS);\n");
-  printf("       int info = cohesive_friction_3d_driver(problem, reaction, velocity, options);\n");
+  printf(
+      "Usage: SolverOptions* options = "
+      "cohesive_friction_3d_solver_options_create(SICONOS_COHESIVE_FRICTION_3D_NSGS);\n");
+  printf(
+      "       int info = cohesive_friction_3d_driver(problem, reaction, velocity, "
+      "options);\n");
   printf("\n");
 }
 

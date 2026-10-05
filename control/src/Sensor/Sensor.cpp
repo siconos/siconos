@@ -25,13 +25,11 @@
 
 siconos::control::Sensor::Sensor(SensorType type,
                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-    : _type(type), _id("none"), _DS(ds)
-{
+    : _type(type), _id("none"), _DS(ds) {
   _DSx = _DS->x();
 }
 
-void siconos::control::Sensor::display() const
-{
+void siconos::control::Sensor::display() const {
   std::cout << "=====> Sensor of type " << siconos::tools::enum_to_string(_type) << ", named "
             << _id;
   if (_DS)

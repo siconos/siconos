@@ -27,8 +27,8 @@
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for MSAN_INIT_VAR
 
-void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-            SolverOptions *options) {
+void lcp_qp(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+            SolverOptions* options) {
   /* size of the LCP */
   int n = problem->size;
 
@@ -40,11 +40,11 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
   double *Q, *A;
   double *p, *b, *xl, *xu;
 
-  double *lambda;
+  double* lambda;
 
   int lwar, liwar, iout, un;
-  int *iwar;
-  double *war;
+  int* iwar;
+  double* war;
 
   double tol = options->dparam[SICONOS_DPARAM_TOL] / 10.0;
 
@@ -69,28 +69,28 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
   function p
 
   // Q= M;*/
-  double *vec = problem->M->matrix0;
-  Q = (double *)malloc(nmax * nmax * sizeof(double));
+  double* vec = problem->M->matrix0;
+  Q = (double*)malloc(nmax * nmax * sizeof(double));
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
   }
 
-  p = (double *)malloc(nmax * sizeof(double));
+  p = (double*)malloc(nmax * sizeof(double));
   for (i = 0; i < n; i++) p[i] = problem->q[i];
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the
    * linear constraints b*/
-  A = (double *)calloc(mmax * nmax, sizeof(double));
+  A = (double*)calloc(mmax * nmax, sizeof(double));
 
-  b = (double *)calloc(mmax, sizeof(double));
+  b = (double*)calloc(mmax, sizeof(double));
 
   /* Creation of the the lower and upper bounds for the variables.*/
-  xu = (double *)malloc(n * sizeof(double));
+  xu = (double*)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xu[i] = 1e32;
-  xl = (double *)calloc(n, sizeof(double));
+  xl = (double*)calloc(n, sizeof(double));
 
   /*  on return, lambda contains the lagrange multipliers.*/
-  lambda = (double *)malloc(mnn * sizeof(double));
+  lambda = (double*)malloc(mnn * sizeof(double));
   MSAN_INIT_VAR(lambda, mnn);
 
   /* /   integer indicating the desired output unit number,*/
@@ -101,10 +101,10 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
 
   /* / real working array. */
   lwar = 3 * nmax * nmax / 2 + 10 * nmax + 2 * mmax;
-  war = (double *)malloc(lwar * sizeof(double));
+  war = (double*)malloc(lwar * sizeof(double));
   /* / integer working array. */
   liwar = n;
-  iwar = (int *)malloc(liwar * sizeof(int));
+  iwar = (int*)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 #ifdef HAVE_QL0001
@@ -137,7 +137,7 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
   free(Q);
 }
 
-static void lcp_qp_set_default(SolverOptions *options) {
+static void lcp_qp_set_default(SolverOptions* options) {
   /* No specific defaults needed */
   (void)options;
 }
@@ -151,19 +151,19 @@ static void lcp_qp_set_default(SolverOptions *options) {
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
-static int lcp_qp_init_wrap(void *problem, SolverOptions *options) {
+static int lcp_qp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   lcp_qp_set_default(options);
   return NUMERICS_OK;
 }
 
-static int lcp_qp_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
+static int lcp_qp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_qp((LinearComplementarityProblem *)problem, z, w, &info, options);
+  lcp_qp((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void lcp_qp_free_wrap(void *problem, SolverOptions *options) {
+static void lcp_qp_free_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
 }

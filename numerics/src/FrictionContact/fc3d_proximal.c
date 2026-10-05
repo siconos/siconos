@@ -67,8 +67,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
 
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("fc3d_proximal",
-                   "The PROX method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+                           "The PROX method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >1");
     return;
   }
   SolverOptions* internalsolver_options = options->internalSolvers[0];
@@ -150,8 +150,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
     }
   } else {
     *info = numerics_error("fc3d_proximal",
-                   "The PROX method needs options for the internal solvers, "
-                   "soptions->internalSolvers should be different from NULL");
+                           "The PROX method needs options for the internal solvers, "
+                           "soptions->internalSolvers should be different from NULL");
     return;
   }
 

@@ -38,7 +38,7 @@ extern "C" {
    \param[in] mu the angle of the cone
    \return the type of projection
 */
-unsigned projectionOnCone(double *r, double mu);
+unsigned projectionOnCone(double* r, double mu);
 
 /**
    Compute an element of the the subdifferential of the
@@ -51,7 +51,7 @@ unsigned projectionOnCone(double *r, double mu);
    \param[in] mu the angle of the cone
    \return the type of projection
 */
-unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
+unsigned subdifferentialProjectionOnCone(double* H, double* r, double mu);
 
 /**
     Projection on the second Order Cone in \f$ R^3 \f$
@@ -62,7 +62,7 @@ unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
     \param[in] mu the angle of the cone
     \return the type of projection
 */
-unsigned projectionOnDualCone(double *u, double mu);
+unsigned projectionOnDualCone(double* u, double mu);
 
 /**
    Projection on the second Order Cone in \f$ R^n \f$
@@ -73,7 +73,7 @@ unsigned projectionOnDualCone(double *u, double mu);
    \param[in] mu the angle of the cone
    \param[in] size dimension
 */
-void projectionOnSecondOrderCone(double *r, double mu, int size);
+void projectionOnSecondOrderCone(double* r, double mu, int size);
 
 #if defined(__cplusplus)
 }

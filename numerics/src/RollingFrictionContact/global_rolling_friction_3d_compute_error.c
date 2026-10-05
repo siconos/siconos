@@ -26,18 +26,19 @@
 #include "GlobalRollingFrictionContactProblem.h"  // for GlobalRollingFrictionContactPro...
 #include "NumericsMatrix.h"                       // for NM_gemv, NM_tgemv, Numeric...
 #include "NumericsVector.h"
-#include "SiconosBlas.h"              // for cblas_dcopy
-#include "numerics_verbose.h"         // for numerics_error, numerics_w...
+#include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
+#include "numerics_verbose.h"         // for numerics_error, numerics_w...
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 #include "sanitizer.h"                // for cblas_dcopy_msan
 #include "siconos_debug.h"            // for DEBUG_EXPR, DEBUG_PRINTF
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)  // = sqrt(1e-16)
 
-void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
-                                          double* error, double* worktmp,
-                                          int problemIsNotConvex) {
+void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu,
+                                                              double mur, double* error,
+                                                              double* worktmp,
+                                                              int problemIsNotConvex) {
   DEBUG_BEGIN("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 
   if (problemIsNotConvex == 0) {
@@ -66,9 +67,10 @@ void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double*
   DEBUG_END("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 }
 
-int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                         double* velocity, double* globalVelocity, double tolerance,
-                         double* error, int problemIsNotConvex) {
+int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem,
+                                             double* reaction, double* velocity,
+                                             double* globalVelocity, double tolerance,
+                                             double* error, int problemIsNotConvex) {
   DEBUG_BEGIN("global_rolling_friction_3d_compute_error(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL || velocity == NULL || reaction == NULL ||
@@ -144,8 +146,9 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   double error_complementarity = 0.0;
   double worktmp[5];
   for (int ic = 0; ic < nc; ic++) {
-    global_rolling_friction_3d_unitary_compute_and_add_error(&reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic],
-                                         &error_complementarity, worktmp, problemIsNotConvex);
+    global_rolling_friction_3d_unitary_compute_and_add_error(
+        &reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic], &error_complementarity, worktmp,
+        problemIsNotConvex);
   }
 
   error_complementarity = sqrt(error_complementarity);

@@ -31,12 +31,12 @@
 #include "SolverOptions.h"                      // for SolverOptions, solver...
 #include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
 #include "lcp_cst.h"
-#include "mlcp_cst.h"          // for SICONOS_MLCP_PGS_SBM
+#include "mlcp_cst.h"  // for SICONOS_MLCP_PGS_SBM
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
                                            SparseBlockStructuredMatrix* const blmat,
@@ -144,9 +144,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] = 0.0;
 
   if (options->numberOfInternalSolvers < 1) {
-    * info = numerics_error("mlcp_nsgs_SBM",
-                   "The MLCP_PGS_SBM method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+    *info = numerics_error("mlcp_nsgs_SBM",
+                           "The MLCP_PGS_SBM method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >1");
   }
 
   // Current local solver options
@@ -239,7 +239,7 @@ void mlcp_pgs_sbm_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
-  }else {
+  } else {
     solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
@@ -257,7 +257,8 @@ static int mlcp_pgs_sbm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w,
+                                   SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_pgs_SBM((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -265,11 +266,9 @@ static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOp
 
 REGISTER_SOLVER(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
                 "Projected Gauss-Seidel for MLCP with Sparse Block Matrix",
-                mlcp_pgs_sbm_init_wrap,
-                mlcp_pgs_sbm_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_pgs_sbm_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_pgs_sbm_init_wrap, mlcp_pgs_sbm_solve_wrap, NULL, /* free function */
+                NULL,                                                  /* error function */
+                mlcp_pgs_sbm_set_default,                              /* set_default */
+                1000,                                                  /* default_max_iter */
+                1e-6,                                                  /* default_tol */
+                0 /* is_local_solver */);

@@ -7,9 +7,9 @@
 
 // Constructor with parameters
 siconos::modeling::MultipleImpactNSL::MultipleImpactNSL(double newResCof, double newStiff,
-                                                        double newElasCoeff, siconos::algebra::Index _dim)
-    : NonSmoothLaw(_dim)
-{
+                                                        double newElasCoeff,
+                                                        siconos::algebra::Index _dim)
+    : NonSmoothLaw(_dim) {
   _ResCof = newResCof;
   _Stiff = newStiff;
   _ElasCof = newElasCoeff;
@@ -22,8 +22,7 @@ siconos::modeling::MultipleImpactNSL::MultipleImpactNSL(double newResCof, double
     THROW_EXCEPTION("In MultipleImpactNSL, the elasticity coefficient must be positive!");
 }
 
-void siconos::modeling::MultipleImpactNSL::setResCof(double newResCof)
-{
+void siconos::modeling::MultipleImpactNSL::setResCof(double newResCof) {
   _ResCof = newResCof;
   if ((_ResCof < 0.0) || (_ResCof > 1.0))
     THROW_EXCEPTION(
@@ -31,23 +30,20 @@ void siconos::modeling::MultipleImpactNSL::setResCof(double newResCof)
         "1.0!");
 }
 //
-void siconos::modeling::MultipleImpactNSL::setStiff(double newStiff)
-{
+void siconos::modeling::MultipleImpactNSL::setStiff(double newStiff) {
   _Stiff = newStiff;
   if (_Stiff < 0.0)
     THROW_EXCEPTION("MultipleImpactNSL::setStiff, the stiffness must be positive!");
 }
 //
-void siconos::modeling::MultipleImpactNSL::setElasCoeff(double _newElasCoef)
-{
+void siconos::modeling::MultipleImpactNSL::setElasCoeff(double _newElasCoef) {
   _ElasCof = _newElasCoef;
   if (_newElasCoef < 0.0)
     THROW_EXCEPTION(
         "MultipleImpactNSL::setElasCoeff, the elasticity coefficient must be positive!");
 }
 //
-void siconos::modeling::MultipleImpactNSL::display() const
-{
+void siconos::modeling::MultipleImpactNSL::display() const {
   std::cout
       << "===============================MultipleImpactNSL===================================="
       << std::endl;
@@ -58,8 +54,7 @@ void siconos::modeling::MultipleImpactNSL::display() const
       << "===================================================================================="
       << std::endl;
 }
-bool siconos::modeling::MultipleImpactNSL::isVerified() const
-{
+bool siconos::modeling::MultipleImpactNSL::isVerified() const {
   bool res = false;
   THROW_EXCEPTION("MultipleImpactNSL::isVerified is not yet implemented!");
   return res;

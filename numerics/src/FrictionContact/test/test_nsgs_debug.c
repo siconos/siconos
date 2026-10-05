@@ -1,23 +1,24 @@
 /* Debug test for NSGS generic */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
 
-extern void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double* velocity,
-                              int* info, SolverOptions* options);
+extern void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction,
+                              double* velocity, int* info, SolverOptions* options);
 
 int main() {
   printf("NSGS Debug Test\n");
   printf("===============\n\n");
 
   /* Load problem */
-  FrictionContactProblem* problem = frictionContact_new_from_filename("./data/FC3D_Example1.dat");
+  FrictionContactProblem* problem =
+      frictionContact_new_from_filename("./data/FC3D_Example1.dat");
   if (!problem) {
     printf("Failed to load problem\n");
     return 1;
@@ -32,7 +33,7 @@ int main() {
   /* Setup options for generic */
   SolverOptions* options = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;  /* Just 10 iterations for debug */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10; /* Just 10 iterations for debug */
   solver_options_update_internal(options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
 
@@ -52,7 +53,8 @@ int main() {
   printf("Info: %d, Error: %.4e\n", info, options->dparam[SICONOS_DPARAM_RESIDU]);
 
   /* Cleanup */
-  free(r); free(v);
+  free(r);
+  free(v);
   solver_options_delete(options);
   frictionContactProblem_free(problem);
   return 0;

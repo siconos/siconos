@@ -2,7 +2,6 @@
 
 namespace siconos::collision::shape {
 struct disk : item {
-
   struct attributes {
     some::scalar radius;
     some::indice maxpoints;
@@ -18,8 +17,7 @@ struct disk : item {
 
     decltype(auto) maxpoints() { return attr<"maxpoints">(*self()); };
 
-    decltype(auto) point_coord(auto point_index)
-    {
+    decltype(auto) point_coord(auto point_index) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
       using vector_t = typename env_t::template vector<scalar, 3>;
@@ -28,8 +26,7 @@ struct disk : item {
         // not enough points, returns the center of the disk
         vector_t coord = {0., 0., 0.};
         return coord;
-      }
-      else {
+      } else {
         // returns a point on the circle.
         scalar t = 2 * std::numbers::pi_v<scalar> * point_index / maxpoints();
         vector_t coord = {radius() * cos(t), radius() * sin(t), 0.};

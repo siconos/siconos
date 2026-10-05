@@ -30,18 +30,18 @@
  */
 struct SecondOrderConeLinearComplementarityProblem_as_VI {
   /* the VI associated with the FC3D probelem */
-  VariationalInequality *vi;
+  VariationalInequality* vi;
   /* the SOCLCP associated with the VI  */
-  SecondOrderConeLinearComplementarityProblem *soclcp;
+  SecondOrderConeLinearComplementarityProblem* soclcp;
 };
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-void Function_VI_SOCLCP(void *self, int n, double *x, double *F);
+void Function_VI_SOCLCP(void* self, int n, double* x, double* F);
 
-void Projection_VI_SOCLCP(void *viIn, double *x, double *PX);
+void Projection_VI_SOCLCP(void* viIn, double* x, double* PX);
 
 #if defined(__cplusplus)
 }

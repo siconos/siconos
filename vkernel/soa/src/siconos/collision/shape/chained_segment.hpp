@@ -18,12 +18,8 @@ struct chained_segment : item {
   struct attributes {
     // fixed vector of size 1 => same interface for an unbounded vector
     // in the case of chained segment
-    some::unbounded_collection<
-        some::vector<some::scalar, some::indice_value<3>>>
-        nodes;
-    some::unbounded_collection<
-        some::vector<some::scalar, some::indice_value<3>>>
-        dp2p1;
+    some::unbounded_collection<some::vector<some::scalar, some::indice_value<3>>> nodes;
+    some::unbounded_collection<some::vector<some::scalar, some::indice_value<3>>> dp2p1;
     some::scalar maxpoints;
     some::unbounded_collection<some::scalar> length_sq;
   };
@@ -37,55 +33,42 @@ struct chained_segment : item {
     auto size() { return std::size(nodes()) - 1; }
 
     decltype(auto) p1(indice_t seg_index = 0) { return nodes()[seg_index]; };
-    decltype(auto) p2(indice_t seg_index = 0)
-    {
-      return nodes()[seg_index + 1];
-    };
+    decltype(auto) p2(indice_t seg_index = 0) { return nodes()[seg_index + 1]; };
     decltype(auto) x1(indice_t seg_index = 0) { return p1(seg_index)[0]; };
     decltype(auto) y1(indice_t seg_index = 0) { return p1(seg_index)[1]; };
     decltype(auto) x2(indice_t seg_index = 0) { return p2(seg_index)[0]; };
     decltype(auto) y2(indice_t seg_index = 0) { return p2(seg_index)[1]; };
-    decltype(auto) dp2p1(indice_t seg_index = 0)
-    {
-      return attr<"dp2p1">(*self())[seg_index];
-    };
+    decltype(auto) dp2p1(indice_t seg_index = 0) { return attr<"dp2p1">(*self())[seg_index]; };
     decltype(auto) maxpoints() { return attr<"maxpoints">(*self()); };
-    decltype(auto) length_sq(indice_t seg_index = 0)
-    {
+    decltype(auto) length_sq(indice_t seg_index = 0) {
       return attr<"length_sq">(*self())[seg_index];
     };
 
-    void compute_dp2p1(indice_t seg_index = 0)
-    {
+    void compute_dp2p1(indice_t seg_index = 0) {
       attr<"dp2p1">(*self()).emplace_back(p2(seg_index) - p1(seg_index));
     };
-    void compute_length_sq(indice_t seg_index = 0)
-    {
+    void compute_length_sq(indice_t seg_index = 0) {
       const auto& v = dp2p1(seg_index);
       attr<"length_sq">(*self()).emplace_back(algebra::dot(v, v));
     };
 
-    void initialize(indice_t seg_index = 0)
-    {
+    void initialize(indice_t seg_index = 0) {
       compute_dp2p1(seg_index);
       compute_length_sq(seg_index);
     }
 
-    decltype(auto) distance(match::vector auto& q, indice_t seg_index = 0)
-    {
+    decltype(auto) distance(match::vector auto& q, indice_t seg_index = 0) {
       /* dof 3 -> 2D + 1 (CompactNSearch) */
       auto qp = q;
       qp[2] = 0.;
 
-      const auto t =
-          fmax(0, fmin(1, algebra::dot(qp - p1(seg_index), dp2p1(seg_index)) /
-                              length_sq(seg_index)));
+      const auto t = fmax(0, fmin(1, algebra::dot(qp - p1(seg_index), dp2p1(seg_index)) /
+                                         length_sq(seg_index)));
       const auto p = p1(seg_index) + t * dp2p1(seg_index);
       return collision::distance(qp, p);
     }
 
-    decltype(auto) point_coord(indice_t point_index, indice_t seg_index = 0)
-    {
+    decltype(auto) point_coord(indice_t point_index, indice_t seg_index = 0) {
       const auto p = p1(seg_index);
       const auto dir = dp2p1(seg_index);
       const auto pstep = 1. / maxpoints();
@@ -95,8 +78,7 @@ struct chained_segment : item {
       return return_value;
     }
 
-    decltype(auto) points_coords(indice_t seg_index = 0)
-    {
+    decltype(auto) points_coords(indice_t seg_index = 0) {
       const auto p = p1(seg_index);
       const auto dir = dp2p1(seg_index);
       const auto pstep = 1. / maxpoints();
@@ -107,8 +89,7 @@ struct chained_segment : item {
              view::transform([=](auto i) { return p + i * pstep * dir; });
     }
 
-    void set_p1_p2(auto nodes_array, indice_t seg_index = 0)
-    {
+    void set_p1_p2(auto nodes_array, indice_t seg_index = 0) {
       p1(seg_index) = {nodes_array[0], nodes_array[1], nodes_array[2]};
       p2(seg_index) = {nodes_array[3], nodes_array[4], nodes_array[5]};
     }
@@ -116,8 +97,7 @@ struct chained_segment : item {
     void set_maxpoints(indice_t mp) { maxpoints() = mp; }
 
     template <typename Scalar>
-    auto insert(Scalar x, Scalar y, Scalar z = 0)
-    {
+    auto insert(Scalar x, Scalar y, Scalar z = 0) {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
 
@@ -130,24 +110,20 @@ struct chained_segment : item {
         if (number_of_nodes > 1) {
           self()->initialize(number_of_nodes - 2);
         }
-      }
-      else {
+      } else {
         // throw an exception ?
       };
     }
 
-    auto methods()
-    {
+    auto methods() {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      return collect(
-          method("size", &interface<Handle>::size),
-          method("initialize", &interface<Handle>::initialize),
-          method("set_maxpoints", &interface<Handle>::set_maxpoints),
-          method("set_p1_p2",
-                 &interface<Handle>::set_p1_p2<vector_t<scalar>>),
-          method("insert", &interface<Handle>::insert<scalar>));
+      return collect(method("size", &interface<Handle>::size),
+                     method("initialize", &interface<Handle>::initialize),
+                     method("set_maxpoints", &interface<Handle>::set_maxpoints),
+                     method("set_p1_p2", &interface<Handle>::set_p1_p2<vector_t<scalar>>),
+                     method("insert", &interface<Handle>::insert<scalar>));
     }
   };
 };

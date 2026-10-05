@@ -1,8 +1,8 @@
 /* Debug test 2 - trace accept_local */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
@@ -10,14 +10,13 @@
 #include "fc3d_Solvers.h"
 
 /* Custom accept wrapper with debug output */
-static void debug_accept_local(void* local_problem, SolverOptions* options,
-                               unsigned int block, int iter,
-                               double* var_z_global, double* var_z_local) {
+static void debug_accept_local(void* local_problem, SolverOptions* options, unsigned int block,
+                               int iter, double* var_z_global, double* var_z_local) {
   (void)local_problem;
 
   double local_residual = options->dparam[SICONOS_DPARAM_RESIDU];
-  printf("  Accept block %d, iter %d: local=[%.4e, %.4e, %.4e], residual=%.4e ",
-         block, iter, var_z_local[0], var_z_local[1], var_z_local[2], local_residual);
+  printf("  Accept block %d, iter %d: local=[%.4e, %.4e, %.4e], residual=%.4e ", block, iter,
+         var_z_local[0], var_z_local[1], var_z_local[2], local_residual);
 
   if (isnan(local_residual) || isinf(local_residual) || local_residual > 1.0) {
     printf("[DISCARDED]\n");
@@ -35,7 +34,8 @@ int main() {
   printf("===================================\n\n");
 
   /* Load problem */
-  FrictionContactProblem* problem = frictionContact_new_from_filename("./data/FC3D_Example1.dat");
+  FrictionContactProblem* problem =
+      frictionContact_new_from_filename("./data/FC3D_Example1.dat");
   if (!problem) {
     printf("Failed to load problem\n");
     return 1;
@@ -47,7 +47,7 @@ int main() {
   /* Setup options for generic - use original fc3d_nsgs first to compare */
   SolverOptions* options = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 3;  /* Just 3 iterations for debug */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 3; /* Just 3 iterations for debug */
   solver_options_update_internal(options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-2;
 
@@ -72,7 +72,8 @@ int main() {
          options->iparam[SICONOS_IPARAM_ITER_DONE], r[0], r[1], r[2]);
 
   /* Cleanup */
-  free(r); free(v);
+  free(r);
+  free(v);
   solver_options_delete(options);
   frictionContactProblem_free(problem);
   return 0;

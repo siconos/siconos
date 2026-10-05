@@ -40,7 +40,7 @@ class Support;
 class CableCollisionManager : public siconos::simulation::InteractionManager {
  public:
   CableCollisionManager(const std::shared_ptr<CableDS> a_cableDS,
-                        const std::vector<std::shared_ptr<Support>> &a_supports,
+                        const std::vector<std::shared_ptr<Support>>& a_supports,
                         double a_tolContact = 1e-3)
       : cable_ds_{a_cableDS}, supports_{a_supports}, tolAtContact_{a_tolContact} {};
 

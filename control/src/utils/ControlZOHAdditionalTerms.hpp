@@ -58,4 +58,4 @@ struct ControlZOHAdditionalTerms : siconos::integrators::ExtraAdditionalTerms {
       const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
       siconos::algebra::SiconosVector& jacRhs);
 };
-}
+}  // namespace siconos::control

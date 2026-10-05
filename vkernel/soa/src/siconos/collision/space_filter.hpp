@@ -59,7 +59,8 @@ struct hash<siconos::storage::mp::pair<First, Second>> {
 // siconos::storage::mp::tuple<First, Second, Third>
 template <typename First, typename Second, typename Third>
 struct hash<siconos::storage::mp::tuple<First, Second, Third>> {
-  size_t operator()(const siconos::storage::mp::tuple<First, Second, Third>& p) const noexcept {
+  size_t operator()(
+      const siconos::storage::mp::tuple<First, Second, Third>& p) const noexcept {
     size_t h1 = std::hash<First>{}(siconos::storage::mp::tuple_first(p));
     size_t h2 = std::hash<Second>{}(siconos::storage::mp::tuple_second(p));
     size_t h3 = std::hash<Third>{}(siconos::storage::mp::tuple_third(p));
@@ -89,14 +90,11 @@ struct space_filter : item {
     some::item_ref<neighborhood> neighborhood;
     some::item_ref<nslaw> nslaw;
     some::item_ref<diskdisk_r> diskdisk_r;
-    some::map<some::array<some::indice, some::indice_value<2>>,
-              some::item_ref<diskmesh_r>>
+    some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<diskmesh_r>>
         diskmeshes;
-    some::map<some::array<some::scalar, some::indice_value<4>>,
-              some::item_ref<diskfsegment_r>>
+    some::map<some::array<some::scalar, some::indice_value<4>>, some::item_ref<diskfsegment_r>>
         diskfsegments;
-    some::map<some::array<some::scalar, some::indice_value<2>>,
-              some::item_ref<diskfdisk_r>>
+    some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
         diskfdisks;
   };
 
@@ -105,38 +103,23 @@ struct space_filter : item {
     using default_interface<Handle>::self;
 
     decltype(auto) nslaw() { return storage::attr<"nslaw">(*self()); }
-    decltype(auto) topology()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"topology">(*self()));
+    decltype(auto) topology() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
 
-    decltype(auto) neighborhood()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"neighborhood">(*self()));
+    decltype(auto) neighborhood() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"neighborhood">(*self()));
     }
 
-    decltype(auto) diskdisk_r()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"diskdisk_r">(*self()));
+    decltype(auto) diskdisk_r() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"diskdisk_r">(*self()));
     }
 
-    decltype(auto) diskmeshes()
-    {
-      return storage::attr<"diskmeshes">(*self());
-    }
+    decltype(auto) diskmeshes() { return storage::attr<"diskmeshes">(*self()); }
 
-    decltype(auto) diskfsegments()
-    {
-      return storage::attr<"diskfsegments">(*self());
-    }
+    decltype(auto) diskfsegments() { return storage::attr<"diskfsegments">(*self()); }
 
-    decltype(auto) diskfdisks()
-    {
-      return storage::attr<"diskfdisks">(*self());
-    }
+    decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
 
     // void create_relations()
     // {
@@ -180,8 +163,7 @@ struct space_filter : item {
 
     // void __init__() { create_relations(); }
 
-    void remove_static_item(auto step, auto item_handle)
-    {
+    void remove_static_item(auto step, auto item_handle) {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using item_t = typename std::decay_t<decltype(item_handle)>::type;
@@ -192,8 +174,7 @@ struct space_filter : item {
 
       auto& points_flags = storage::attr_values<point_t, "flag">(data, step);
       auto& points_items = storage::attr_values<point_t, "item">(data, step);
-      auto& points_coords =
-          storage::attr_values<point_t, "coord">(data, step);
+      auto& points_coords = storage::attr_values<point_t, "coord">(data, step);
 
       auto ps_indx = mp::index_of<point_t>(mp::std_tuple(points_t{}));
 
@@ -220,26 +201,22 @@ struct space_filter : item {
 
       while (ff != points_flags.end()) {
         auto ff_index = ff - points_flags.begin();
-        auto point = storage::make_handle(
-            data, storage::index<point_t, indice>(ff_index));
+        auto point = storage::make_handle(data, storage::index<point_t, indice>(ff_index));
         storage::remove(data, point);
 
-        auto remaining_points_flags =
-            std::ranges::subrange(ff, points_flags.end());
+        auto remaining_points_flags = std::ranges::subrange(ff, points_flags.end());
         auto rff = std::ranges::find(remaining_points_flags, true);
 
         ff = ff + (rff - remaining_points_flags.begin());
       };
 
-      neighborhood().instance()->resize_point_set(
-          ps_indx, points_coords.front().data(), points_coords.size());
+      neighborhood().instance()->resize_point_set(ps_indx, points_coords.front().data(),
+                                                  points_coords.size());
     }
 
-    void insert_diskfsegment_r(auto hdl)
-    {
-      storage::attr<"diskfsegments">(
-          *self())[{hdl.segment().x1(), hdl.segment().x2(),
-                    hdl.segment().y1(), hdl.segment().y2()}] = hdl;
+    void insert_diskfsegment_r(auto hdl) {
+      storage::attr<"diskfsegments">(*self())[{hdl.segment().x1(), hdl.segment().x2(),
+                                               hdl.segment().y1(), hdl.segment().y2()}] = hdl;
 
       // for (auto hds : storage::handles<dynamical_system>(self()->data())) {
       //   auto inter = self()->topology().link(hds);
@@ -248,11 +225,10 @@ struct space_filter : item {
       // }
     }
 
-    void insert_diskfdisk_r(auto tds)
-    {
+    void insert_diskfdisk_r(auto tds) {
       auto htds = tds.translated_disk_shape();
-      storage::attr<"diskfdisks">(
-          *self())[{htds.translation()[0], htds.translation()[1]}] = tds;
+      storage::attr<"diskfdisks">(*self())[{htds.translation()[0], htds.translation()[1]}] =
+          tds;
 
       // for (auto hds : storage::handles<dynamical_system>(self()->data())) {
       //   auto inter = self()->topology().link(hds);
@@ -261,8 +237,7 @@ struct space_filter : item {
       // }
     }
 
-    void make_points()
-    {
+    void make_points() {
       auto& data = self()->data();
       using env = decltype(self()->env());
       using indice = typename env::indice;
@@ -273,35 +248,28 @@ struct space_filter : item {
         using item_t = typename Point::item_t;
 
         if constexpr (std::derived_from<item_t, model::lagrangian_ds> ||
-                      std::derived_from<item_t,
-                                        model::elastic_lagrangian_ds>) {
+                      std::derived_from<item_t, model::elastic_lagrangian_ds>) {
           auto all_ds = storage::handles<item_t>(data);
           for (auto ds : all_ds) {
             //            print("add disk point : {}\n", ds.get());
             auto shape_idx = storage::prop<"shape">(ds);
             using shape_t = typename std::decay_t<decltype(shape_idx)>::type;
-            if constexpr (std::derived_from<shape_t,
-                                            collision::shape::mesh>) {
-              auto shape_handle =
-                  storage::make_handle(self()->data(), shape_idx);
+            if constexpr (std::derived_from<shape_t, collision::shape::mesh>) {
+              auto shape_handle = storage::make_handle(self()->data(), shape_idx);
 
-              auto nbsegments =
-                  std::size(shape_handle.segments().nodes()) - 1;
+              auto nbsegments = std::size(shape_handle.segments().nodes()) - 1;
               // multiple points are associated to the system
               for (std::size_t index = 0; index < nbsegments; ++index) {
                 for (auto [i, point_coord] :
-                     shape_handle.segments().points_coords(index) |
-                         view::enumerate) {
+                     shape_handle.segments().points_coords(index) | view::enumerate) {
                   auto new_point = storage::add<Point>(data);
                   new_point.item() = ds;
-                  new_point.coord() =
-                      algebra::cast(mp::type_c<float>, point_coord);
+                  new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
                   new_point.seg_index() = index;
                   new_point.point_index() = i;
                 }
               }
-            }
-            else {
+            } else {
               // the system has just one point associated
               auto new_point = storage::add<Point>(data);
               new_point.item() = ds;
@@ -310,32 +278,26 @@ struct space_filter : item {
           }
         }
         // fixed segment
-        else if constexpr (std::derived_from<item_t,
-                                             collision::shape::segment>) {
+        else if constexpr (std::derived_from<item_t, collision::shape::segment>) {
           auto all_segments = storage::handles<item_t>(data);
           for (auto segment : all_segments) {
-            for (auto [i, point_coord] :
-                 segment.points_coords() | view::enumerate) {
+            for (auto [i, point_coord] : segment.points_coords() | view::enumerate) {
               auto new_point = storage::add<Point>(data);
               new_point.item() = segment;
-              new_point.coord() =
-                  algebra::cast(mp::type_c<float>, point_coord);
+              new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
               new_point.point_index() = i;
             }
           }
         }
         // fixed disk
         else if constexpr (std::derived_from<item_t,
-                                             collision::translated<
-                                                 collision::shape::disk>>) {
+                                             collision::translated<collision::shape::disk>>) {
           auto all_fdisks = storage::handles<item_t>(data);
           for (auto fdisk : all_fdisks) {
-            for (auto [i, point_coord] :
-                 fdisk.points_coords() | view::enumerate) {
+            for (auto [i, point_coord] : fdisk.points_coords() | view::enumerate) {
               auto new_point = storage::add<Point>(data);
               new_point.item() = fdisk;
-              new_point.coord() =
-                  algebra::cast(mp::type_c<float>, point_coord);
+              new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
               new_point.point_index() = (indice)i;
             }
           }
@@ -344,8 +306,7 @@ struct space_filter : item {
     }
 
     template <typename Index1, typename Index2>
-    decltype(auto) make_ipair(Index1 ids1, Index2 ids2)
-    {
+    decltype(auto) make_ipair(Index1 ids1, Index2 ids2) {
       auto i1 = ids1.value();
       auto i2 = ids2.value();
 
@@ -354,46 +315,38 @@ struct space_filter : item {
       {
         if (i1 < i2) {
           return mp::make_pair(i1, i2);
-        }
-        else {
+        } else {
           return mp::make_pair(i2, i1);
         }
-      }
-      else {
+      } else {
         // not same type of indices: no permutation!
         return mp::make_pair(i1, i2);
       }
     }
 
-    void build_proximity_maps(auto& ds_ds_prox, auto& ds_segment_prox,
-                              auto& ds_fdisk_prox, const auto& ds1s,
-                              const auto& ds2s, const auto& interactions)
-    {
+    void build_proximity_maps(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox,
+                              const auto& ds1s, const auto& ds2s, const auto& interactions) {
       auto& data = self()->data();
 
       // build (ds ds -> inter) & (ds segment -> inter) maps
       for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, interactions)) {
         if (ds1 != ds2) {
           ds_ds_prox[make_ipair(ds1, ds2)] = inter;
-        }
-        else {
+        } else {
           siconos::variant::visit(
               data, inter.relation(),
               mp::overload(
                   // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
                   // capture by value ok with handles
-                  [&, ds1 = ds1,
-                   inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
+                  [&, ds1 = ds1, inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
                       DiskSegmentR rel) {
                     auto segment = rel.segment();
-                    auto coefs = std::array{segment.x1(), segment.x2(),
-                                            segment.y1(), segment.y2()};
-                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] =
-                        inter;
+                    auto coefs =
+                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
                   [&, ds1 = ds1,
-                   inter = inter]<match::handle<diskfdisk_r> DiskFdiskR>(
-                      DiskFdiskR rel) {
+                   inter = inter]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
                     auto fdisk = rel.translated_disk_shape();
                     auto& translat = fdisk.translation();
                     auto coefs = std::array{translat[0], translat[1]};
@@ -410,23 +363,19 @@ struct space_filter : item {
       }
     }
 
-    void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s,
-                               const auto& ds2s, const auto& dinteractions)
-    {
+    void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s, const auto& ds2s,
+                               const auto& dinteractions) {
       auto& data = self()->data();
 
       // build (ds ds -> inter) & (ds segment -> inter) maps
       for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, dinteractions)) {
-        auto contact_index =
-            variant::visit(data, inter.relation(),
-                           [](auto& rrel) { return rrel.contact_index(); });
-        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(), contact_index)] =
-            inter;
+        auto contact_index = variant::visit(data, inter.relation(),
+                                            [](auto& rrel) { return rrel.contact_index(); });
+        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(), contact_index)] = inter;
       }
     }
 
-    void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2)
-    {
+    void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
       auto nslaw = self()->nslaw();
@@ -439,8 +388,7 @@ struct space_filter : item {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation">(inter) = true;
-      }
-      else {
+      } else {
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment
@@ -452,9 +400,7 @@ struct space_filter : item {
       }
     }
 
-    void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1,
-                          auto hp2)
-    {
+    void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
       auto nslaw = self()->nslaw();
@@ -463,39 +409,34 @@ struct space_filter : item {
       auto mesh = hp2.shape();
       auto contact_index = hp2.seg_index();
       // at most one edge between 2 ds !!
-      auto find_inter = dmap.find(mp::make_tuple(
-          ds1.index().value(), ds2.index().value(), contact_index));
+      auto find_inter =
+          dmap.find(mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index));
       if (find_inter != dmap.end()) {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation">(inter) = true;
-      }
-      else {
+      } else {
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment
 
         storage::prop<"activation">(inter) = true;
 
-        if (auto search =
-                diskmeshes.find({mesh.index().value(), contact_index});
+        if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
             search != diskmeshes.end()) {
           inter.relation() = search->second;
-        }
-        else {
+        } else {
           auto rel = storage::add<collision::diskmesh_r>(data);
           rel.mesh() = mesh;
           rel.contact_index() = contact_index;
           inter.relation() = rel;
           diskmeshes[{mesh.index().value(), contact_index}] = rel;
         }
-        dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(),
-                            contact_index)] = inter;
+        dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index)] = inter;
       }
     }
 
-    void diskfsegment_activation(auto& body1, auto& body2, auto& intermap)
-    {
+    void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
       auto nslaw = self()->nslaw();
       auto topo = self()->topology();
@@ -509,8 +450,8 @@ struct space_filter : item {
 
       auto& ds1 = body1;
 
-      auto find_inter = intermap.find(
-          mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
+      auto find_inter =
+          intermap.find(mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
 
       if (find_inter != intermap.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
@@ -520,8 +461,7 @@ struct space_filter : item {
         // print("interaction FOUND for
         // {},{},{}\n", a, b,
         //       c);
-      }
-      else {
+      } else {
         // print("interaction NOT FOUND for
         // {},{},{}\n", a,
         //       b, c);
@@ -529,11 +469,9 @@ struct space_filter : item {
         auto inter = topo.link(body1);
         inter.nslaw() = nslaw;  // one nslaw for the moment
 
-        if (auto search = relmap.find({x1, x2, y1, y2});
-            search != relmap.end()) {
+        if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
           inter.relation() = search->second;
-        }
-        else {
+        } else {
           auto dl = storage::add<diskfsegment_r>(data);
 
           // set segment pointer toward body2
@@ -543,13 +481,11 @@ struct space_filter : item {
           relmap[{x1, x2, y1, y2}] = dl;
         }
         storage::prop<"activation">(inter) = true;
-        intermap[mp::make_pair(ds1.index().value(),
-                               std::array{x1, x2, y1, y2})] = inter;
+        intermap[mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2})] = inter;
       }
     }
 
-    void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox)
-    {
+    void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
       auto nslaw = self()->nslaw();
       auto topo = self()->topology();
@@ -561,22 +497,18 @@ struct space_filter : item {
 
       auto& ds1 = body1;
 
-      auto find_inter =
-          ds_fdisk_prox.find(mp::make_pair(ds1.index().value(), coefs));
+      auto find_inter = ds_fdisk_prox.find(mp::make_pair(ds1.index().value(), coefs));
 
       if (find_inter != ds_fdisk_prox.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation">(inter) = true;
-      }
-      else {
+      } else {
         auto inter = topo.link(body1);
         inter.nslaw() = nslaw;
 
-        if (auto search = diskfdisks.find(coefs);
-            search != diskfdisks.end()) {
+        if (auto search = diskfdisks.find(coefs); search != diskfdisks.end()) {
           inter.relation() = search->second;
-        }
-        else {
+        } else {
           auto dfd = storage::add<diskfdisk_r>(data);
 
           // set disk pointer toward body2
@@ -591,16 +523,13 @@ struct space_filter : item {
     }
 
     template <typename Interaction>
-    void remove_interactions(auto& ds_ds_prox, auto& ds_segment_prox,
-                             auto& ds_fdisk_prox)
-    {
+    void remove_interactions(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox) {
       using env = decltype(self()->env());
       using indice = typename env::indice;
 
       auto& data = self()->data();
 
-      auto& activations =
-          storage::prop_values<Interaction, "activation">(data, 0);
+      auto& activations = storage::prop_values<Interaction, "activation">(data, 0);
 
       auto interactions = storage::handles<Interaction>(data, 0);
 
@@ -611,8 +540,8 @@ struct space_filter : item {
           //          print("START REMOVE interaction {}\n", inter.get());
 
           if (storage::prop<"ds1">(inter) != storage::prop<"ds2">(inter)) {
-            auto finter = ds_ds_prox.find(make_ipair(
-                storage::prop<"ds1">(inter), storage::prop<"ds2">(inter)));
+            auto finter = ds_ds_prox.find(
+                make_ipair(storage::prop<"ds1">(inter), storage::prop<"ds2">(inter)));
 
             assert(inter.index().value() == std::get<1>(*finter).value());
 
@@ -621,27 +550,23 @@ struct space_filter : item {
             //            {}\n",
             //                  storage::prop<"ds1">(inter).get(),
             //                  storage::prop<"ds2">(inter).get());
-          }
-          else {
+          } else {
             siconos::variant::visit(
                 data, inter.relation(),
                 mp::overload(
-                    [&]<match::handle<diskfsegment_r> DiskSegmentR>(
-                        DiskSegmentR rel) {
+                    [&]<match::handle<diskfsegment_r> DiskSegmentR>(DiskSegmentR rel) {
                       auto segment = rel.segment();
-                      auto coefs = std::array{segment.x1(), segment.x2(),
-                                              segment.y1(), segment.y2()};
-                      auto finter = ds_segment_prox.find(mp::make_pair(
-                          storage::prop<"ds1">(inter).value(), coefs));
+                      auto coefs =
+                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                      auto finter = ds_segment_prox.find(
+                          mp::make_pair(storage::prop<"ds1">(inter).value(), coefs));
                       ds_segment_prox.erase(finter);
                     },
-                    [&]<match::handle<diskfdisk_r> DiskFdiskR>(
-                        DiskFdiskR rel) {
-                      auto& translat =
-                          rel.translated_disk_shape().translation();
+                    [&]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
+                      auto& translat = rel.translated_disk_shape().translation();
                       auto coefs = std::array{translat[0], translat[1]};
-                      auto finter = ds_fdisk_prox.find(mp::make_pair(
-                          storage::prop<"ds1">(inter).value(), coefs));
+                      auto finter = ds_fdisk_prox.find(
+                          mp::make_pair(storage::prop<"ds1">(inter).value(), coefs));
                       ds_fdisk_prox.erase(finter);
                     },
                     []<bool flag = false>(auto) {
@@ -669,8 +594,8 @@ struct space_filter : item {
       while (fact != activations.end()) {
         auto fact_index = fact - activations.begin();
         //        print("  activation of {} is false\n", fact_index);
-        auto inter = storage::make_handle(
-            data, storage::index<Interaction, indice>(fact_index));
+        auto inter =
+            storage::make_handle(data, storage::index<Interaction, indice>(fact_index));
 
         // with move_back : order is modified
 
@@ -681,8 +606,7 @@ struct space_filter : item {
 
         // activations has been modified, search first false element
         // starting at current position
-        auto remaining_activations =
-            std::ranges::subrange(fact, activations.end());
+        auto remaining_activations = std::ranges::subrange(fact, activations.end());
 
         auto ifact = std::ranges::find(remaining_activations, false);
 
@@ -699,8 +623,7 @@ struct space_filter : item {
       //      print("size of ds segment map: {}\n", ds_segment_prox.size());
     }
 
-    void update_index_set0(auto step)
-    {
+    void update_index_set0(auto step) {
       using env = decltype(self()->env());
       using indice = typename env::indice;
       using scalar = typename env::scalar;
@@ -743,19 +666,17 @@ struct space_filter : item {
 
       auto interactions = storage::handles<finteraction>(data, step);
 
-      build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s,
-                           ds2s, interactions);
+      build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s, ds2s,
+                           interactions);
 
       if constexpr (!std::derived_from<dfinteraction, empty_item>) {
         auto dinteractions = storage::handles<dfinteraction>(data, step);
         build_dproximity_maps(ds_dds_prox, dds1s, dds2s, dinteractions);
       }
 
-      auto& activations =
-          storage::prop_values<finteraction, "activation">(data, 0);
+      auto& activations = storage::prop_values<finteraction, "activation">(data, 0);
 
-      auto& dactivations =
-          storage::prop_values<dfinteraction, "activation">(data, 0);
+      auto& dactivations = storage::prop_values<dfinteraction, "activation">(data, 0);
 
       int activations_size = activations.size();
       int dactivations_size = dactivations.size();
@@ -777,8 +698,7 @@ struct space_filter : item {
         using p1_t = decltype(p1);
         auto psid1 = ngbh.point_set_id()[ip1];
 
-        mp::for_each(mp::range_c<std::size_t, ip1, npointsets>, [&](auto
-                                                                        ip2) {
+        mp::for_each(mp::range_c<std::size_t, ip1, npointsets>, [&](auto ip2) {
           auto p2 = points_t{}[mp::size_c<ip2>];
           using p2_t = decltype(p2);
           auto psid2 = ngbh.point_set_id()[ip2];
@@ -813,38 +733,25 @@ struct space_filter : item {
                 //       handle_point2.coord()(0),
                 //       handle_point2.coord()(1));
 
-                if constexpr (std::derived_from<system1_t,
-                                                model::lagrangian_ds>) {
+                if constexpr (std::derived_from<system1_t, model::lagrangian_ds>) {
                   // proximity with another disk, only disks are
                   // dynamics check if interaction already exists
 
-                  if constexpr (std::derived_from<system2_t,
-                                                  model::lagrangian_ds>) {
-                    dsds_activation(body1, body2, ds_ds_prox, handle_point1,
-                                    handle_point2);
-                  }
-                  else {
-                    if constexpr (std::derived_from<
-                                      system2_t,
-                                      model::elastic_lagrangian_ds>) {
-                      dsdds_activation(body1, body2, ds_dds_prox,
-                                       handle_point1, handle_point2);
-                    }
-                    else if constexpr (std::derived_from<
-                                           system1_t, model::lagrangian_ds>) {
-                      if constexpr (std::derived_from<
-                                        system2_t,
-                                        collision::shape::segment>) {
+                  if constexpr (std::derived_from<system2_t, model::lagrangian_ds>) {
+                    dsds_activation(body1, body2, ds_ds_prox, handle_point1, handle_point2);
+                  } else {
+                    if constexpr (std::derived_from<system2_t, model::elastic_lagrangian_ds>) {
+                      dsdds_activation(body1, body2, ds_dds_prox, handle_point1,
+                                       handle_point2);
+                    } else if constexpr (std::derived_from<system1_t, model::lagrangian_ds>) {
+                      if constexpr (std::derived_from<system2_t, collision::shape::segment>) {
                         // body2 is a static segment
                         // for all self edges find the one with the
                         // corresponding segment
-                        diskfsegment_activation(body1, body2,
-                                                ds_segment_prox);
-                      }
-                      else if constexpr (std::derived_from<
-                                             system2_t,
-                                             collision::translated<
-                                                 collision::shape::disk>>) {
+                        diskfsegment_activation(body1, body2, ds_segment_prox);
+                      } else if constexpr (std::derived_from<system2_t,
+                                                             collision::translated<
+                                                                 collision::shape::disk>>) {
                         diskfdisk_activation(body1, body2, ds_fdisk_prox);
                       }
                     }
@@ -855,14 +762,12 @@ struct space_filter : item {
           };
         });
       });
-      remove_interactions<finteraction>(ds_ds_prox, ds_segment_prox,
-                                        ds_fdisk_prox);
+      remove_interactions<finteraction>(ds_ds_prox, ds_segment_prox, ds_fdisk_prox);
       //      remove_interactions<dfinteraction>(ds_dds_prox, ds_segment_prox,
       //                                         ds_fdisk_prox);
     }
 
-    auto methods()
-    {
+    auto methods() {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
@@ -876,15 +781,12 @@ struct space_filter : item {
 
       return collect(
           method("make_points", &interface<Handle>::make_points),
-          method("update_index_set0",
-                 &interface<Handle>::update_index_set0<indice>),
+          method("update_index_set0", &interface<Handle>::update_index_set0<indice>),
           method("insert_diskfsegment_r",
                  &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
-          method("insert_diskfdisk_r",
-                 &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
+          method("insert_diskfdisk_r", &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
           method("remove_static_segment",
-                 &interface<Handle>::template remove_static_item<
-                     indice, segment_handle_t>));
+                 &interface<Handle>::template remove_static_item<indice, segment_handle_t>));
     }
   };
 };

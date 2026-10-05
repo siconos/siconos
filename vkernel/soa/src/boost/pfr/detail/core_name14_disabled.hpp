@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
 // Initial implementation by Bela Schaum, https://github.com/schaumb
 // The way to make it union and UB free by X-Ryl669, https://github.com/X-Ryl669
 //
@@ -15,37 +14,37 @@
 #include <boost/pfr/detail/config.hpp>
 #include <boost/pfr/detail/sequence_tuple.hpp>
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 template <class T, std::size_t I>
 constexpr auto get_name() noexcept {
-    static_assert(
-        sizeof(T) && false,
-        "====================> Boost.PFR: Field's names extracting functionality requires C++20."
-    );
+  static_assert(sizeof(T) && false,
+                "====================> Boost.PFR: Field's names extracting functionality "
+                "requires C++20.");
 
-    return nullptr;
+  return nullptr;
 }
 
 template <class T>
 constexpr auto tie_as_names_tuple() noexcept {
-    static_assert(
-        sizeof(T) && false,
-        "====================> Boost.PFR: Field's names extracting functionality requires C++20."
-    );
+  static_assert(sizeof(T) && false,
+                "====================> Boost.PFR: Field's names extracting functionality "
+                "requires C++20.");
 
-    return detail::sequence_tuple::make_sequence_tuple();
+  return detail::sequence_tuple::make_sequence_tuple();
 }
-
 
 template <class T, class F>
 constexpr void for_each_field_with_name(T&& /* value */, F&& /* func */) {
-    static_assert(
-        sizeof(T) && false,
-        "====================> Boost.PFR: Field's names extracting functionality requires C++20."
-    );
+  static_assert(sizeof(T) && false,
+                "====================> Boost.PFR: Field's names extracting functionality "
+                "requires C++20.");
 }
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_CORE_NAME14_DISABLED_HPP
+#endif  // BOOST_PFR_DETAIL_CORE_NAME14_DISABLED_HPP

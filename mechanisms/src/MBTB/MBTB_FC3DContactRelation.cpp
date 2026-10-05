@@ -79,7 +79,7 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
           n1x, n1y, n1z);
   }
 
-  //contactPoint1_(0) = X1); contactPoint1_(1) = Y1; _Pc1->setValue(2,Z1;
+  // contactPoint1_(0) = X1); contactPoint1_(1) = Y1; _Pc1->setValue(2,Z1;
   if (_pContact->_OffsetP1) {
     contactPoint1_ << X1 + _pContact->_Offset * n1x, Y1 + _pContact->_Offset * n1y,
         Z1 + _pContact->_Offset * n1z;

@@ -271,11 +271,9 @@ class OSNSMatrix {
    *  \param H0 the H matrix for indexSet0
    */
   void computeV(std::shared_ptr<NumericsMatrix> Htrans,
-                std::shared_ptr<NumericsMatrix> Winverse,
-                std::shared_ptr<NumericsMatrix> H0);
+                std::shared_ptr<NumericsMatrix> Winverse, std::shared_ptr<NumericsMatrix> H0);
 
-
- /** Compute U = H0^T * Winverse * H matrix given Htrans, Winverse, and H0
+  /** Compute U = H0^T * Winverse * H matrix given Htrans, Winverse, and H0
    *  Used for cohesive zone models to compute the contribution matrix
    *
    *  \param Htrans the transpose of H matrix
@@ -283,18 +281,16 @@ class OSNSMatrix {
    *  \param H0 the H matrix for indexSet0
    */
   void computeU(std::shared_ptr<NumericsMatrix> Htrans,
-                std::shared_ptr<NumericsMatrix> Winverse,
-                std::shared_ptr<NumericsMatrix> H0);
+                std::shared_ptr<NumericsMatrix> Winverse, std::shared_ptr<NumericsMatrix> H0);
 
- /** Compute X = H0^T * Winverse * H0 matrix given Winverse, and H0
+  /** Compute X = H0^T * Winverse * H0 matrix given Winverse, and H0
    *  Used for cohesive zone models to compute the contribution matrix
    *
    *  \param Htrans the transpose of H matrix
    *  \param Winverse the inverse of W matrix
    *  \param H0 the H matrix for indexSet0
    */
-  void computeX(std::shared_ptr<NumericsMatrix> H0,
-                std::shared_ptr<NumericsMatrix> Winverse);
+  void computeX(std::shared_ptr<NumericsMatrix> H0, std::shared_ptr<NumericsMatrix> Winverse);
 
   /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();

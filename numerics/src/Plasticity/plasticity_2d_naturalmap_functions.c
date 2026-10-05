@@ -23,16 +23,16 @@
 #include "op3x3.h"  // for SET3, eig_3x3
 #include "projectionOnCone.h"
 
-//extern computeNonsmoothFunction Function;
+// extern computeNonsmoothFunction Function;
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "siconos_debug.h"  // for DEBUG_PRINTF
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta, double theta,
-                            double Rho[3], double F[3], double A[9], double B[9]) {
+                                     double Rho[3], double F[3], double A[9], double B[9]) {
   DEBUG_PRINT("plasticity_2d_computeNaturalMap starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
                                                    i, R[i], i, velocity[i]););
@@ -40,8 +40,6 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
   SET3(R);
   SET3(velocity);
   SET3(Rho);
-
-
 
   double RV[3]; /* = {0. , 0., 0.}; */
   double rho = *Rho0;

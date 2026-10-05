@@ -20,8 +20,7 @@ struct empty_shape : empty_item {
 // by default is not defined.
 template <match::item Item, match::item Shape>
 struct point : item {
-  static_assert(always_false<Item, Shape>,
-                "point is not defined for this association");
+  static_assert(always_false<Item, Shape>, "point is not defined for this association");
 };
 
 // Direct association to a lagrangian_ds: just a point associated at
@@ -44,14 +43,11 @@ struct point<Item, empty_shape> : item {
 
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
-    decltype(auto) item()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"item">(*self()));
+    decltype(auto) item() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     };
 
-    void update(auto step)
-    {
+    void update(auto step) {
       // one body / one point
       coord()[0] = item().q(step)(0);
       coord()[1] = item().q(step)(1);
@@ -81,18 +77,12 @@ struct point<empty_item, Shape> {
 
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
-    decltype(auto) item()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"item">(*self()));
+    decltype(auto) item() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     };
-    decltype(auto) point_index()
-    {
-      return storage::attr<"point_index">(*self());
-    };
+    decltype(auto) point_index() { return storage::attr<"point_index">(*self()); };
 
-    void update(auto step)
-    {
+    void update(auto step) {
       // associated to static shapes for the moment
       // coord() = item().point_coord(point_index());
     }
@@ -124,25 +114,17 @@ struct point<Item, Shape> {
 
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
-    decltype(auto) item()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"item">(*self()));
+    decltype(auto) item() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     }
-    decltype(auto) shape()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"shape">(*self()));
+    decltype(auto) shape() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"shape">(*self()));
     }
 
-    decltype(auto) point_index()
-    {
-      return storage::attr<"point_index">(*self());
-    }
+    decltype(auto) point_index() { return storage::attr<"point_index">(*self()); }
     decltype(auto) seg_index() { return storage::attr<"seg_index">(*self()); }
 
-    void update(auto step)
-    {
+    void update(auto step) {
       // coord() = algebra::cast(
       //     mp::type_c<float>,
       //     storage::make_handle(self()->data(),

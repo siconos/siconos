@@ -48,13 +48,9 @@ extern "C" {
  * \param[out] error the computed error value
  * \return 0 if error <= tolerance (converged), 1 otherwise
  */
-int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem *problem,
-                                       double *reaction, double *velocity, double tolerance,
-				       SolverOptions * options,
-                                       double norm,
-                                       double *error);
-
-
+int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
+                                       double* reaction, double* velocity, double tolerance,
+                                       SolverOptions* options, double norm, double* error);
 
 /**
  * Unitary error computation for a single cohesive friction-contact
@@ -68,11 +64,8 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem *problem,
  * \param[in,out] error accumulator for error sum of squares
  * \param[out] worktmp work vector (size 3)
  */
-void cohesive_friction_3d_unitary_compute_and_add_error(double r[3],
-                                                        double u[3],
-                                                        double mu,
-                                                        double *error,
-                                                        double worktmp[3]);
+void cohesive_friction_3d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
+                                                        double* error, double worktmp[3]);
 
 /**
  * Compute dual cone error for a single cohesive friction-contact
@@ -85,10 +78,8 @@ void cohesive_friction_3d_unitary_compute_and_add_error(double r[3],
  * \param[in,out] error accumulator for error sum of squares
  * \param[out] worktmp work vector (size 3)
  */
-void cohesive_friction_3d_unitary_compute_dual_and_add_error(double r[3],
-                                                             double u[3],
-                                                             double mu,
-                                                             double *error,
+void cohesive_friction_3d_unitary_compute_dual_and_add_error(double r[3], double u[3],
+                                                             double mu, double* error,
                                                              double worktmp[3]);
 
 #if defined(__cplusplus)

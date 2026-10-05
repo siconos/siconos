@@ -73,7 +73,7 @@ class FirstOrderType1R : public FirstOrderR {
 
  public:
   /** Default and only constructor */
-  FirstOrderType1R() : FirstOrderR(RelationSubType::Type1R){};
+  FirstOrderType1R() : FirstOrderR(RelationSubType::Type1R) {};
 
   /** destructor */
   virtual ~FirstOrderType1R() noexcept = default;
@@ -82,41 +82,41 @@ class FirstOrderType1R : public FirstOrderR {
    *
    *  \param inter the interaction that owns this relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  inline void checkSize(const Interaction &inter) const override;
+  inline void checkSize(const Interaction& inter) const override;
 
   /** set a user-defined function to compute \f$ h(x) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V &fct);
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V& fct);
 
   /** To compute  \f$ h(x) \f$
    *
    *  \param[in] x state vector (for all DS involved in the relation)
    *  \param[out] y result, \f$ y\f$ value from interaction
    */
-  virtual void computeh(const siconos::algebra::BlockVector &state,
+  virtual void computeh(const siconos::algebra::BlockVector& state,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** set a user-defined function to compute \f$ g(\lambda) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputegFunction(const siconos::modeling::func_prototypes::FunctionV_BV &fct);
+  void setComputegFunction(const siconos::modeling::func_prototypes::FunctionV_BV& fct);
 
   /** To compute  \f$ g(\lambda) \f$
    *
    *  \param[in] lambda \f$ \lambda\f$ value from interaction
    *  \param[out] res result, \f$ r\f$ value (for all DS involved in the relation)
    */
-  virtual void computeg(const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
-                        siconos::algebra::BlockVector &res);
+  virtual void computeg(const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+                        siconos::algebra::BlockVector& res);
 
   /** Set a constant \f$ \nabla_x h(x) \f$ matrix for the system
    *
@@ -131,13 +131,13 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianhOver_stateFunction(
-      const siconos::modeling::func_prototypes::FunctionBV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBV_M& fct);
 
   /** Computes \f$ \nabla_x h(x) \f$
    *  \param x coordinates of the dynamical systems involved in the relation
    *  \param time current time value
    */
-  virtual void computeJacobianhOver_state(const siconos::algebra::BlockVector &state);
+  virtual void computeJacobianhOver_state(const siconos::algebra::BlockVector& state);
 
   /** Set a constant \f$ \nabla_{\lambda} g(\lambda) \f$ matrix for the system
    *
@@ -152,14 +152,14 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobiangOver_lambdaFunction(
-      const siconos::modeling::func_prototypes::FunctionV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionV_M& fct);
 
   /** Computes \f$ \nabla_{\lambda} g(x, t, \lambda) \f$
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param time current time value
    */
   virtual void computeJacobiangOver_lambda(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
 
   /** default function to compute y, using the data from the Interaction and DS
    *
@@ -167,7 +167,7 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
@@ -176,12 +176,12 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  void computeInput(double time, Interaction &inter,
+  void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
 
-  void computeJach(double time, Interaction &inter) override;
+  void computeJach(double time, Interaction& inter) override;
 
-  void computeJacg(double time, Interaction &inter) override;
+  void computeJacg(double time, Interaction& inter) override;
 
   /**
      return true if the relation requires the computation of residu
@@ -190,7 +190,7 @@ class FirstOrderType1R : public FirstOrderR {
    */
   bool requireResidu() override { return true; }
 
-  void display() const override{};
+  void display() const override {};
 };
 }  // namespace siconos::modeling
 

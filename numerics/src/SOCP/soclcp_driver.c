@@ -26,8 +26,8 @@
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 #include "SolverOptions.h"                                // for SolverOptions
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* r, double* v,
                   SolverOptions* options) {
@@ -148,7 +148,9 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* 
     /*   break; */
     /* } */
     default: {
-      CHECK_ARG(0, "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
+      CHECK_ARG(
+          0,
+          "Numerics, SecondOrderConeLinearComplementarity_driver failed. Unknown solver.\n");
     }
   }
 

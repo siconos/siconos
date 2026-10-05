@@ -23,17 +23,17 @@
 #include "VI_cst.h"                 // for SICONOS_VI_HP, SICONOS_VI_EG, SIC...
 #include "VariationalInequality.h"  // for VariationalInequality, variationa...
 
-static void Ftest_0(void *viIn, int n, double *x, double *F) {
+static void Ftest_0(void* viIn, int n, double* x, double* F) {
   int i;
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   printf("Size of vi :%i\n", vi->size);
 
   for (i = 0; i < vi->size; i++) {
     F[i] = x[i];
   }
 }
-static void PXtest_0(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+static void PXtest_0(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   printf("Size of vi :%i\n", vi->size);
   int i;
   for (i = 0; i < vi->size; i++) {
@@ -71,15 +71,15 @@ static int test_0(void) {
   return 0;
 }
 
-static void Ftest_1(void *viIn, int n, double *x, double *F) {
+static void Ftest_1(void* viIn, int n, double* x, double* F) {
   int i;
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   for (i = 0; i < vi->size; i++) {
     F[i] = x[i] - i + 4;
   }
 }
-static void PXtest_1(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+static void PXtest_1(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   int i;
   for (i = 0; i < vi->size; i++) {
     PX[i] = x[i];
@@ -112,7 +112,7 @@ static int test_1(void) {
     printf("F[%i]=%f\t", i, F[i]);
     printf("PX[%i]=%f\n", i, PX[i]);
   }
-  SolverOptions *options = solver_options_create(SICONOS_VI_EG);
+  SolverOptions* options = solver_options_create(SICONOS_VI_EG);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
 
   int info = variationalInequality_driver(&vi, x, F, options);
@@ -127,15 +127,15 @@ static int test_1(void) {
   return info;
 }
 
-static void Ftest_2(void *viIn, int n, double *x, double *F) {
+static void Ftest_2(void* viIn, int n, double* x, double* F) {
   int i;
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   for (i = 0; i < vi->size; i++) {
     F[i] = x[i] - i + 4;
   }
 }
-static void PXtest_2(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+static void PXtest_2(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   int i;
   for (i = 0; i < vi->size; i++) {
     PX[i] = x[i];
@@ -168,7 +168,7 @@ static int test_2(void) {
     printf("F[%i]=%f\t", i, F[i]);
     printf("PX[%i]=%f\n", i, PX[i]);
   }
-  SolverOptions *options = solver_options_create(SICONOS_VI_FPP);
+  SolverOptions* options = solver_options_create(SICONOS_VI_FPP);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
 
   int info = variationalInequality_driver(&vi, x, F, options);
@@ -183,15 +183,15 @@ static int test_2(void) {
   return info;
 }
 
-static void Ftest_3(void *viIn, int n, double *x, double *F) {
+static void Ftest_3(void* viIn, int n, double* x, double* F) {
   int i;
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   for (i = 0; i < vi->size; i++) {
     F[i] = x[i] - i + 4;
   }
 }
-static void PXtest_3(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+static void PXtest_3(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   int i;
   for (i = 0; i < vi->size; i++) {
     PX[i] = x[i];
@@ -224,7 +224,7 @@ static int test_3(void) {
     printf("F[%i]=%f\t", i, F[i]);
     printf("PX[%i]=%f\n", i, PX[i]);
   }
-  SolverOptions *options = solver_options_create(SICONOS_VI_HP);
+  SolverOptions* options = solver_options_create(SICONOS_VI_HP);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-02;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
@@ -240,15 +240,15 @@ static int test_3(void) {
   return info;
 }
 
-static void Ftest_4(void *viIn, int n, double *x, double *F) {
+static void Ftest_4(void* viIn, int n, double* x, double* F) {
   int i;
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   for (i = 0; i < vi->size; i++) {
     F[i] = x[i] - 4;
   }
 }
-static void PXtest_4(void *viIn, double *x, double *PX) {
-  VariationalInequality *vi = (VariationalInequality *)viIn;
+static void PXtest_4(void* viIn, double* x, double* PX) {
+  VariationalInequality* vi = (VariationalInequality*)viIn;
   int i;
   for (i = 0; i < vi->size; i++) {
     PX[i] = x[i];
@@ -281,7 +281,7 @@ static int test_4(void) {
     printf("F[%i]=%f\t", i, F[i]);
     printf("PX[%i]=%f\n", i, PX[i]);
   }
-  SolverOptions *options = solver_options_create(SICONOS_VI_HP);
+  SolverOptions* options = solver_options_create(SICONOS_VI_HP);
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 50000000;

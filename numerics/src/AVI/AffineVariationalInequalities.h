@@ -45,13 +45,13 @@
 */
 struct AffineVariationalInequalities {
   size_t size;         /**< size of the problem */
-  NumericsMatrix *M;   /**< M matrix of the AVI (see the mathematical description)*/
-  double *q;           /**< vector of the AVI (see the mathematical description)*/
-  double *d;           /**< Covering vector (optional) */
+  NumericsMatrix* M;   /**< M matrix of the AVI (see the mathematical description)*/
+  double* q;           /**< vector of the AVI (see the mathematical description)*/
+  double* d;           /**< Covering vector (optional) */
   polyhedron_set poly; /**< Polyhedra where the solution has to belong */
-  double *lb;          /**< Lower bounds for the variables */
-  double *ub;          /**< Upper bounds for the variables */
-  void *cones;         /**< Non-polyhedral Cones where the variable lives (not
+  double* lb;          /**< Lower bounds for the variables */
+  double* ub;          /**< Upper bounds for the variables */
+  void* cones;         /**< Non-polyhedral Cones where the variable lives (not
                           implemented yet) */
 };
 
@@ -62,7 +62,7 @@ extern "C" {
  *
  *  \param avi pointer to the AffineVariationalInequalities to display
  */
-void AVI_display(AffineVariationalInequalities *avi);
+void AVI_display(AffineVariationalInequalities* avi);
 
 /** write AVI to file
  *
@@ -70,7 +70,7 @@ void AVI_display(AffineVariationalInequalities *avi);
  *  \param file pointer to a FILE
  *  \return 1 if successfull
  */
-int AVI_printInFile(AffineVariationalInequalities *avi, FILE *file);
+int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file);
 
 /** read from file and create AffineVariationalInequalities
  *
@@ -78,7 +78,7 @@ int AVI_printInFile(AffineVariationalInequalities *avi, FILE *file);
  *  \param file pointer to a FILE
  *  \return 1 if successfull
  */
-int AVI_newFromFile(AffineVariationalInequalities *avi, FILE *file);
+int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file);
 
 /** function to read and create a AffineVariationalInequalities
  *  from a file
@@ -87,18 +87,18 @@ int AVI_newFromFile(AffineVariationalInequalities *avi, FILE *file);
  *  \param filename that contains the AVI
  *  \return 1 if successfull
  */
-int AVI_newFromFilename(AffineVariationalInequalities *avi, char *filename);
+int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename);
 
 /** function to delete a AffineVariationalInequalities
  *
  *  \param avi  pointer to a AffineVariationalInequalities to delete
  */
-void freeAVI(AffineVariationalInequalities *avi);
+void freeAVI(AffineVariationalInequalities* avi);
 
 /** Create an empty AVI struct
  *
  *  \return an empty AffineVariationalInequalities*/
-AffineVariationalInequalities *newAVI(void);
+AffineVariationalInequalities* newAVI(void);
 
 #if defined(__cplusplus)
 }

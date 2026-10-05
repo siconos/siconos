@@ -35,16 +35,16 @@
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
-void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
-               SolverOptions *options) {
+void mlcp_path(MixedLinearComplementarityProblem* problem, double* z, double* w, int* info,
+               SolverOptions* options) {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
   *info = 0;
   MCP_Termination termination;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
-  double *M = problem->M->matrix0;
-  double *q = problem->q;
+  double* M = problem->M->matrix0;
+  double* q = problem->q;
   int nnz, i, j, n, m, dim, numLine;
   n = problem->n;
   m = problem->m;
@@ -59,11 +59,11 @@ void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
 
       }*/
   nnz = nbNonNulElems(dim, M, 1.0e-18);
-  int *m_i = (int *)calloc(nnz + 1, sizeof(int));
-  int *m_j = (int *)calloc(nnz + 1, sizeof(int));
-  double *m_ij = (double *)calloc(nnz + 1, sizeof(double));
-  double *lb = (double *)calloc(dim + 1, sizeof(double));
-  double *ub = (double *)calloc(dim + 1, sizeof(double));
+  int* m_i = (int*)calloc(nnz + 1, sizeof(int));
+  int* m_j = (int*)calloc(nnz + 1, sizeof(int));
+  double* m_ij = (double*)calloc(nnz + 1, sizeof(double));
+  double* lb = (double*)calloc(dim + 1, sizeof(double));
+  double* ub = (double*)calloc(dim + 1, sizeof(double));
   //  double * u = z;
   //  double * v = z+n;
   double err;
@@ -182,20 +182,20 @@ void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
  * This registers SICONOS_MLCP_PATH in the global solver registry.
  */
 
-static void mlcp_path_set_default(SolverOptions *options) {
+static void mlcp_path_set_default(SolverOptions* options) {
   /* No specific defaults for PATH solver */
 }
 
-static int mlcp_path_init_wrap(void *problem, SolverOptions *options) {
+static int mlcp_path_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   /* PATH solver uses external library initialization */
   return NUMERICS_OK;
 }
 
-static int mlcp_path_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
+static int mlcp_path_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  mlcp_path((MixedLinearComplementarityProblem *)problem, z, w, &info, options);
+  mlcp_path((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 

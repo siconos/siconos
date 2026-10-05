@@ -50,26 +50,26 @@ class Pylon {
   Pylon() = delete;
 
  public:
-  Pylon(const Pylon &) = default;
-  Pylon(Pylon &&) = default;
-  Pylon &operator=(const Pylon &) = delete;
-  Pylon &operator=(Pylon &&) = default;
+  Pylon(const Pylon&) = default;
+  Pylon(Pylon&&) = default;
+  Pylon& operator=(const Pylon&) = delete;
+  Pylon& operator=(Pylon&&) = default;
 
   /** Build a pylon from a json input
     \param j json input
     \param is_station true if the pylon defines a station
     */
-  Pylon(const nlohmann::json &j, bool is_station) : isAStation_(is_station) { from_json(j); };
+  Pylon(const nlohmann::json& j, bool is_station) : isAStation_(is_station) { from_json(j); };
 
   ~Pylon() noexcept = default;
 
   /** \return the coordinates of the pylon (read-only) */
-  const siconos::algebra::SiconosVector3 &coords() const { return coordinates_; }
+  const siconos::algebra::SiconosVector3& coords() const { return coordinates_; }
 
   /** \return the  */
   inline auto get_radius() const { return radius_; }
 
-  void from_json(const nlohmann::json &j);
+  void from_json(const nlohmann::json& j);
 
   /** \return true if the pylon is a station (up or down) */
   bool isStation() const { return isAStation_; };
@@ -83,6 +83,6 @@ class Pylon {
 
 // Required to be able to insert a Pylon into a set
 // Comparison based on first coordinate (x)
-bool operator<(const Pylon &p1, const Pylon &p2);
+bool operator<(const Pylon& p1, const Pylon& p2);
 
 }  // namespace siconos::fem::cable
