@@ -11,8 +11,8 @@ considered as failing the comparison.
 """
 
 # Lighter imports before command line parsing
-from __future__ import print_function
-import os, sys, argparse, re
+import argparse
+import sys
 
 parser = argparse.ArgumentParser(
     description = __doc__)
@@ -58,34 +58,33 @@ if __name__ == '__main__':
             tablenames.update([table])
 
 # Heavier imports after command line parsing
-import numpy as np
 import h5py
+import numpy as np
+
 
 def verify_tables(tablenames, columns, io1, io2):
     """Verify files contain tables and tables have same columns."""
     for table in tablenames:
         if not table in io1['data']:
-            print('File "{}" does not have table "{}".'.format(
-                args.fns_in[0], table), file=sys.stderr)
+            print(f'File "{args.fns_in[0]}" does not have table "{table}".', file=sys.stderr)
             sys.exit(2)
         if not table in io2['data']:
-            print('File "{}" does not have table "{}".'.format(
-                args.fns_in[1], table), file=sys.stderr)
+            print(f'File "{args.fns_in[1]}" does not have table "{table}".', file=sys.stderr)
             sys.exit(2)
         for c in columns:
             if c[1] is None:
                 continue
             if c[0] == table and c[1] >= io1['data'][table].shape[1]:
-                print('Table "{}" in file "{}" does not have specified column {}.'
-                      .format(table, args.fns_in[0], c[1]), file=sys.stderr)
+                print(f'Table "{table}" in file "{args.fns_in[0]}" does not have specified column {c[1]}.'
+                      , file=sys.stderr)
                 sys.exit(2)
             if c[0] == table and c[1] >= io2['data'][table].shape[1]:
-                print('Table "{}" in file "{}" does not have specified column {}.'
-                      .format(table, args.fns_in[1], c[1]), file=sys.stderr)
+                print(f'Table "{table}" in file "{args.fns_in[1]}" does not have specified column {c[1]}.'
+                      , file=sys.stderr)
                 sys.exit(2)
         if io1['data'][table].shape[1] != io2['data'][table].shape[1]:
-            print('Tables "{}" do not have same number of columns in each file.'
-                  .format(table), file=sys.stderr)
+            print(f'Tables "{table}" do not have same number of columns in each file.'
+                  , file=sys.stderr)
             sys.exit(2)
 
 def compare_tables(tablenames, columns, io1, io2):
@@ -115,8 +114,8 @@ def compare_tables(tablenames, columns, io1, io2):
                                (E1,args.end,'End',t1,args.fns_in[0]),
                                (E2,args.end,'End',t2,args.fns_in[1])]:
                 if t >= T.shape[0]:
-                    print('{} time {} beyond the end of table "{}" for file "{}".'
-                          .format(s, n, table, fn), file=sys.stderr)
+                    print(f'{s} time {n} beyond the end of table "{table}" for file "{fn}".'
+                          , file=sys.stderr)
                     sys.exit(2)
 
             # TODO: we assume same sampling rate for now, later,
@@ -132,8 +131,7 @@ def compare_tables(tablenames, columns, io1, io2):
                 cols = range(t1.shape[1])
             for j in cols:
                 d = np.abs(t1[S1:E1,j] - t2[S2:E2,j]).max()
-                if d > maxdiff:
-                    maxdiff = d
+                maxdiff = max(maxdiff, d)
     print(maxdiff)
     return int(maxdiff >= args.threshold)
 

@@ -18,10 +18,10 @@
 
 
 # this may be run with mpirun -np <nb processes>
-from siconos import numerics
-from mpi4py import MPI
-import scipy.sparse
 import numpy
+import scipy.sparse
+from mpi4py import MPI
+from siconos import numerics
 
 
 def test_nm_mumps():

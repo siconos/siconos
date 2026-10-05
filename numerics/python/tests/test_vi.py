@@ -1,18 +1,15 @@
 # Copyright 2024 INRIA
 
 import numpy as np
-
 import siconos.numerics as sn
 
 
 def vi_function_1D(n, x, F):
     F[0] = 1.0 + x[0]
-    pass
 
 
 def vi_nabla_function_1D(n, x, nabla_F):
     nabla_F[0] = 1.0
-    pass
 
 
 def vi_function_2D(n, z, F):
@@ -20,13 +17,11 @@ def vi_function_2D(n, z, F):
 
     q = np.array([-5.0, -6.0])
     F[:] = np.dot(M, z) + q
-    pass
 
 
 def vi_nabla_function_2D(n, z, nabla_F):
     M = np.array([[2.0, 1.0], [1.0, 2.0]])
     nabla_F[:] = M
-    pass
 
 
 def vi_function_3D(n, z, F):
@@ -34,13 +29,11 @@ def vi_function_3D(n, z, F):
 
     q = np.array((-3.0, 6.0, -1))
     F[:] = np.dot(M, z) + q
-    pass
 
 
 def vi_nabla_function_3D(n, z, nabla_F):
     M = np.array(((0.0, -1.0, 2.0), (2.0, 0.0, -2.0), (-1.0, 1.0, 0.0)))
     nabla_F[:] = M
-    pass
 
 
 # solution
@@ -93,9 +86,7 @@ def test_vi_2D():
     info = sn.variationalInequality_box_newton_QiLSA(vi, x, F, SO)
     print(info)
     print(
-        "number of iteration {:} ; precision {:}".format(
-            SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]
-        )
+        f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
     )
     print("x = ", x)
     print("F = ", F)
@@ -116,9 +107,7 @@ def test_vi_3D():
     info = sn.variationalInequality_box_newton_QiLSA(vi, x, F, SO)
     print(info)
     print(
-        "number of iteration {:} ; precision {:}".format(
-            SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]
-        )
+        f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
     )
     print("x = ", x)
     print("F = ", F)
@@ -222,14 +211,10 @@ def test_vi_C_interface():
                     print(lambda_)
                 info = sn.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
                 print(
-                    "iter {:} ; solver iter = {:} ; prec = {:}".format(
-                        k,
-                        SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE],
-                        SO.dparam[sn.params.SICONOS_DPARAM_RESIDU],
-                    )
+                    f"iter {k} ; solver iter = {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; prec = {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
                 )
                 if info > 0:
-                    print("VI solver failed ! info = {:}".format(info))
+                    print(f"VI solver failed ! info = {info}")
                     print(xk)
                     print(lambda_)
                     print(xkp1)

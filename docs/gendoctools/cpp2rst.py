@@ -30,12 +30,13 @@ Siconos is a program dedicated to modeling, simulation and control
 """
 
 import os
-import textwrap
 import re
-import buildtools as bt
-from pathlib import Path
-from gendoctools import common
+import textwrap
 from collections import defaultdict
+from pathlib import Path
+
+import buildtools as bt
+from gendoctools import common
 
 try:
     import lxml.etree as ET
@@ -223,7 +224,7 @@ def write_breathe_type_rst(
     )
     # title
     gen = ":orphan:\n\n"
-    gen += ".. _{}:\n\n".format(refid)
+    gen += f".. _{refid}:\n\n"
     gen += title
     gen += len(title) * "-" + "\n\n"
 
@@ -247,7 +248,7 @@ def write_breathe_type_rst(
         info["directive"],
         name,
     )
-    gen += "   :project: {}\n".format(component_name)
+    gen += f"   :project: {component_name}\n"
     # Only classes/structs have members
     if kind in ("class", "struct"):
         gen += "   :members:\n"

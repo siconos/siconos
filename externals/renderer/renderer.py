@@ -17,23 +17,21 @@
 #
 
 # ignore flake8 warning for line too long, only for this file
-# noqa: E501
 
-import webbrowser
-from OCC.Visualization import Tesselator
-import OCC
-from time import time
-import os
-import tempfile
-
-from OCC.STEPControl import STEPControl_Reader
-from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-import sys
 import math
-import vtk
-
-import siconos.io.mechanics_run as IO
+import os
+import sys
+import tempfile
+import webbrowser
 from operator import itemgetter
+from time import time
+
+import OCC
+import siconos.io.mechanics_run as IO
+import vtk
+from OCC.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
+from OCC.STEPControl import STEPControl_Reader
+from OCC.Visualization import Tesselator
 
 vtkmath = vtk.vtkMath()
 
@@ -2090,7 +2088,7 @@ def different_elements(seq):
     return len(c)
 
 
-class HTMLHeader(object):
+class HTMLHeader:
     def __init__(self, background_color="#000000"):
         self._background_color = background_color
 
@@ -2100,7 +2098,7 @@ class HTMLHeader(object):
         return header_str
 
 
-class HTMLBody(object):
+class HTMLBody:
     def __init__(
         self,
         background_color="#000000",
@@ -2466,7 +2464,7 @@ class HTMLBody(object):
         return body_str
 
 
-class ThreejsRenderer(object):
+class ThreejsRenderer:
     def __init__(
         self,
         background_color="#123345",
@@ -2533,7 +2531,7 @@ class ThreejsRenderer(object):
         print("Opening html output in the default webbrowser ...")
         # previous version us a os.system call to the "open" command
         # but this is a platform (osx) specific solution
-        _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
+        _path = f"file:///{os.path.join(os.getcwd(), self._html_filename)}"
         webbrowser.open_new_tab(_path)
 
     def CreateDictionaryOfShapes(self, dictionaryOfShapes):
@@ -2770,7 +2768,7 @@ if __name__ == "__main__":
 
         # for a given vector arrow it is also important to take the maximum norm of this vector in the entire cycle of the animation
         listOfMaxima = []
-        for key in interstellarVectors.keys():
+        for key in interstellarVectors:
             liste = []
             for i in range(len(interstellarVectors[key]["forceDirectionX"])):
                 u = 0

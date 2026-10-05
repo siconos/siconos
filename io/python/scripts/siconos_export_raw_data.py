@@ -3,8 +3,8 @@
 Description: Export a Siconos mechanics-IO HDF5 file to raw data .dat file
 """
 
-from siconos.io.vview import VView, VRawDataExportOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from siconos.io.vview import VRawDataExportOptions, VView
 
 if __name__=='__main__':
     # Parse command-line

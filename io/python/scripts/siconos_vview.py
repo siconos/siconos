@@ -3,8 +3,8 @@
 Description: Viewer for Siconos mechanics-IO HDF5 files based on VTK.
 """
 
-from siconos.io.vview import VView, VViewConfig, VViewOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from siconos.io.vview import VView, VViewConfig, VViewOptions
 
 if __name__=='__main__':
     ## Persistent configuration

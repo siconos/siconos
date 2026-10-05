@@ -22,16 +22,16 @@
 #
 
 
-import numpy
 from math import sqrt
-from siconos.mechanics.collision.tools import Contactor
+
+import numpy
+import siconos
+import siconos.numerics as sn
 from siconos.io.mechanics_run import (
     MechanicsHdf5Runner,
     MechanicsHdf5Runner_run_options,
 )
-import siconos.numerics as sn
-
-import siconos
+from siconos.mechanics.collision.tools import Contactor
 
 config_native = siconos.io.mechanics_run.RunnerConfig(backend="native")
 

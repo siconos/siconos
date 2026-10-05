@@ -17,15 +17,13 @@
 #
 import math
 
-from siconos.mechanics.collision.tools import Volume, Material
-from siconos.io.mechanics_run import MechanicsHdf5Runner
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
-from OCC.Core.gp import gp_Pnt, gp_Ax2, gp_Dir
-from OCC.Core.BRep import BRep_Builder
-from OCC.Core.TopoDS import TopoDS_Compound
-
 import siconos.io.mechanics_run
-
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
+from OCC.Core.gp import gp_Ax2, gp_Dir, gp_Pnt
+from OCC.Core.TopoDS import TopoDS_Compound
+from siconos.io.mechanics_run import MechanicsHdf5Runner
+from siconos.mechanics.collision.tools import Material, Volume
 
 config_occ = siconos.io.mechanics_run.RunnerConfig(backend="occ")
 

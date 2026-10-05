@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-import os, os.path, sys
-from glob import glob
-import lxml.etree
+import os
+import os.path
 import re
+import sys
+from glob import glob
 
+import lxml.etree
 from builder_common import *
+
 
 def get_classes_conditional(doxy_xml_files, cond):
     """Get classes and members from a list of Doxygen XML files that
@@ -28,7 +31,7 @@ def get_classes_conditional(doxy_xml_files, cond):
                 graphmems = []
 
                 if len(graphvars)>0:
-                    r = re.compile('\(\(\w+,\s*[\w: ]+,\s*(\w+)\)\)')
+                    r = re.compile(r'\(\(\w+,\s*[\w: ]+,\s*(\w+)\)\)')
                     for g in graphvars:
                         for a in g.xpath('../argsstring'):
                             graphmems += r.findall(a.text)
@@ -109,7 +112,10 @@ def classes_from_headers(all_headers, include_paths):
     """Use compiler preprocessor to find an approximate list of classes
        referenced by a set of headers.  May return some words which
        are not classes."""
-    import os, os.path, tempfile, shutil
+    import os
+    import os.path
+    import shutil
+    import tempfile
     classes = []
     try:
         d = tempfile.mkdtemp()
@@ -162,7 +168,7 @@ if __name__=='__main__':
     classes = {k: v for k,v in doxygen_classes.items()
                if in_maybe_inner(k, header_classes) and not unwanted(k)}
 
-    print('{:} classes found.'.format(len(classes)))
+    print(f'{len(classes)} classes found.')
 
     if len(classes) < 10:
         print('%s: Error, not enough classes found.'%sys.argv[0])

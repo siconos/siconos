@@ -1,6 +1,5 @@
 # Copyright 2024 INRIA
 import numpy as np
-
 import siconos.numerics as sn
 
 

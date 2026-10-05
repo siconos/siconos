@@ -39,7 +39,7 @@ def filter_sphinx_warnings(warnfile):
     for msg in expected_warnings:
         with open(warnfile) as ff:
             # remove useless lines
-            current = [n for n in ff.readlines() if not n.find(msg) > -1]
+            current = [n for n in ff if not n.find(msg) > -1]
         keep_msg = [msg for msg in current if msg in keep_msg]
 
     with open(warnfile, 'w') as ff:
@@ -78,5 +78,4 @@ def filter_doxygen_warnings_files(warnings_path, outputfile):
     with open(outputfile, 'w') as outfile:
         for fname in real_warnings:
             with open(fname) as infile:
-                for line in infile:
-                    outfile.write(line)
+                outfile.writelines(infile)

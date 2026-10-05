@@ -21,10 +21,9 @@
 """
 
 import addons.computeLDS
-
 import numpy as np
-import siconos.modeling as sm
 import scipy.sparse as sp
+import siconos.modeling as sm
 from scipy.sparse import csc_array
 
 rng = np.random.default_rng(seed=42)
@@ -343,7 +342,6 @@ def call_ds_alias(dstype, ndof):
         assert False
     except Exception:
         print("ok")
-        pass
 
     M = ds.mass_alias
     mass[0, 0] = -99.0
@@ -372,7 +370,6 @@ def call_ds_copy(dstype, ndof):
 
     except Exception:
         print("ok")
-        pass
 
     M = ds.mass_view
     vec = rng.random(ds.dimension)

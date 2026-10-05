@@ -17,11 +17,12 @@
 # limitations under the License.
 #
 import math
+
 import numpy
 import scipy.spatial  # For convexHull
 
 
-class Simplex(object):
+class Simplex:
     def __init__(self, coordinates):
         if not len(coordinates) == 4:
             raise RuntimeError("You must provide only 4 coordinates!")
@@ -49,7 +50,6 @@ class Simplex(object):
         """
         inertia : Return the inertia w.r.t the global axis and the point G
         """
-        #
         det = self.det()
 
         # change of variable
@@ -217,7 +217,7 @@ class Simplex(object):
         return imat
 
 
-class ConvexHull(object):
+class ConvexHull:
 
     def __init__(self, coordinates):
         """
@@ -337,26 +337,26 @@ class ConvexHull2d(ConvexHull):
             else:
                 coord_3d[i] = numpy.append(v, 1.0)
 
-        super(ConvexHull2d, self).__init__(coord_3d)
+        super().__init__(coord_3d)
 
     def centroid(self):
-        cm = super(ConvexHull2d, self).centroid()
+        cm = super().centroid()
         return cm[0:2]
 
     def barycenter(self):
-        b = super(ConvexHull2d, self).barycenter()
+        b = super().barycenter()
         return b[0:2]
 
     def area(self):
 
-        area = super(ConvexHull2d, self).volume()
+        area = super().volume()
         return area
 
     def inertia(self, G):
 
         G = list(G)
         G.append(0.5)
-        imat, area = super(ConvexHull2d, self).inertia(G)
+        imat, area = super().inertia(G)
         return imat[2, 2], area
 
 

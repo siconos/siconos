@@ -1,11 +1,11 @@
 #!/usr/bin/env @Python_EXECUTABLE@
 
-import sys
-import numpy as np
-import h5py
-import os
-
 import getopt
+import os
+import sys
+
+import h5py
+import numpy as np
 import siconos.plot_config as sicoplot
 
 plt, enable_plot = sicoplot.choose_backend()
@@ -328,7 +328,7 @@ def plot_energy(filename):
 
 def usage(long=False):
     print()
-    print("Usage: {0} [OPTION]... <HDF5>".format(os.path.split(sys.argv[0])[1]))
+    print(f"Usage: {os.path.split(sys.argv[0])[1]} [OPTION]... <HDF5>")
 
     print("""[--help] [--details] [--save] """)
 
@@ -343,7 +343,7 @@ try:
     )
 
 except getopt.GetoptError as err:
-    sys.stderr.write("{0}\n".format(str(err)))
+    sys.stderr.write(f"{err!s}\n")
     usage()
     exit(2)
 

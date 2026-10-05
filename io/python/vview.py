@@ -4,29 +4,27 @@ Description: Viewer and exporter for Siconos mechanics-IO HDF5 files based on VT
 """
 
 # Lighter imports before command line parsing
-import sys
-import os
-import json
 import getopt
+import json
 import math
+import os
+import random
+import sys
 import traceback
 from math import pi
-from numpy.linalg import norm
-import numpy
-import random
 
-import vtk
-from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
-from vtk.numpy_interface import dataset_adapter as dsa
-
-from vtkmodules.vtkRenderingCore import vtkTextActor
 import h5py
-from siconos.io.tools import tmpfile as io_tmpfile
+import numpy
 import siconos.mechanics
-
+import vtk
+from numpy.linalg import norm
+from siconos.io.tools import tmpfile as io_tmpfile
+from vtk.numpy_interface import dataset_adapter as dsa
+from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
+from vtkmodules.vtkRenderingCore import vtkTextActor
 
 # Exports from this module
-__all__ = ["VView", "VViewOptions", "VExportOptions", "VViewConfig"]
+__all__ = ["VExportOptions", "VView", "VViewConfig", "VViewOptions"]
 
 if hasattr(math, "inf"):
     infinity = math.inf
@@ -39,8 +37,9 @@ def print_io_vview(*args, **kwargs):
 
 def msh_to_stl(msh_data):
     """Convert msh data to stl format using meshio"""
-    import meshio
     import tempfile
+
+    import meshio
 
     with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmp_msh, \
          tempfile.NamedTemporaryFile(suffix='.stl') as tmp_stl:
@@ -80,10 +79,10 @@ class VViewConfig(dict):
                 for k in self:
                     print_io_vview("  ", k, ": ", self[k])
                 self.should_save_config = True
-            except IOError:
+            except OSError:
                 self.should_save_config = False
                 print_io_vview(
-                    "Warning: Error loading configuration `{}'".format(self.filename)
+                    f"Warning: Error loading configuration `{self.filename}'"
                 )
 
     def save_configuration(self, force=False):
@@ -93,11 +92,11 @@ class VViewConfig(dict):
             if not os.path.exists(os.path.join(os.environ["HOME"], ".config")):
                 os.mkdir(os.path.join(os.environ["HOME"], ".config"))
             json.dump(self, open(self.filename, "w"))
-        except IOError:
-            print("Error saving configuration `{}'".format(self.filename))
+        except OSError:
+            print(f"Error saving configuration `{self.filename}'")
 
 
-class VViewOptions(object):
+class VViewOptions:
     def __init__(self):
         self.min_time = None
         self.max_time = None
@@ -138,7 +137,7 @@ class VViewOptions(object):
     def usage(self, long=False):
         print(__doc__)
         print()
-        print("Usage: {0} [OPTION]... <HDF5>".format(os.path.split(sys.argv[0])[1]))
+        print(f"Usage: {os.path.split(sys.argv[0])[1]} [OPTION]... <HDF5>")
         print()
         if not long:
             print(
@@ -283,7 +282,7 @@ class VViewOptions(object):
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
             exit(2)
 
@@ -294,7 +293,7 @@ class VViewOptions(object):
                 exit(0)
 
             elif o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
                 exit(0)
 
             elif o == "--tmin":
@@ -452,9 +451,7 @@ class VExportOptions(VViewOptions):
         print(__doc__)
         print()
         print(
-            "Usage:  {0} [--help] [--version] [--ascii] <HDF5>".format(
-                os.path.split(sys.argv[0])[1]
-            )
+            f"Usage:  {os.path.split(sys.argv[0])[1]} [--help] [--version] [--ascii] <HDF5>"
         )
         if long:
             print()
@@ -495,7 +492,7 @@ class VExportOptions(VViewOptions):
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
             exit(2)
 
@@ -505,7 +502,7 @@ class VExportOptions(VViewOptions):
                 self.usage(long=True)
                 exit(0)
             if o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
                 exit(0)
             if o == "--global-filter":
                 self.global_filter = True
@@ -553,7 +550,7 @@ class VRawDataExportOptions(VViewOptions):
     def usage(self, long=False):
         print(__doc__)
         print()
-        print("Usage:  {0} [--help]  <HDF5>".format(os.path.split(sys.argv[0])[1]))
+        print(f"Usage:  {os.path.split(sys.argv[0])[1]} [--help]  <HDF5>")
         if long:
             print()
             print(
@@ -596,7 +593,7 @@ class VRawDataExportOptions(VViewOptions):
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
             exit(2)
 
@@ -606,7 +603,7 @@ class VRawDataExportOptions(VViewOptions):
                 self.usage(long=True)
                 exit(0)
             if o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
                 exit(0)
             if o == "--start-step":
                 self.start_step = int(a)
@@ -779,7 +776,7 @@ class InputObserver:
         elif key == "p":
             self._image_counter += 1
             self.vview.image_maker.Update()
-            self.vview.writer.SetFileName("vview-{0}.png".format(self._image_counter))
+            self.vview.writer.SetFileName(f"vview-{self._image_counter}.png")
             self.vview.writer.Write()
 
         elif key == "Up":
@@ -1608,7 +1605,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
 
 # Read file and open VTK interaction window
-class VView(object):
+class VView:
     def __init__(self, io, options, config=None):
         self.opts = options
         self.config = [config, VViewConfig()][config is None]
@@ -1966,8 +1963,9 @@ class VView(object):
         ConvexSource = makeConvexSourceClass()
 
         if shape_type in ["msh"]:
-            import meshio
             import tempfile
+
+            import meshio
 
             # Keep original msh data for FEM visualization
             if h5py.version.version_tuple.major >= 3:
@@ -2095,7 +2093,7 @@ class VView(object):
             elif shape_type in ["stp", "step", "igs", "iges"]:
                 with io_tmpfile(
                     debug=True,
-                    suffix=".{0}".format(shape_type),
+                    suffix=f".{shape_type}",
                     contents=(self.io.shapes()[shape_name][:][0]).decode("utf-8"),
                 ) as tmpf:
                     shape = occ_load_file(tmpf[1])
@@ -2377,9 +2375,7 @@ class VView(object):
 
         if "shape_name" not in contactor.attrs:
             print(
-                "Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(
-                    contactor_instance_name
-                )
+                f"Warning: old format: ctr.name must be ctr.shape_name for contact {contactor_instance_name}"
             )
             shape_attr_name = "name"
         else:
@@ -2754,11 +2750,7 @@ class VView(object):
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.dynamic_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all":
-                    actor.VisibilityOn()
-                elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
-                    actor.VisibilityOn()
-                elif (
+                if not has_avatar or self.opts.visible_mode == "all" or self.opts.visible_mode == "avatars" and group == -1 and has_avatar or (
                     self.opts.visible_mode == "contactors"
                     and group != -1
                     and has_avatar
@@ -2785,11 +2777,7 @@ class VView(object):
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.static_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all":
-                    actor.VisibilityOn()
-                elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
-                    actor.VisibilityOn()
-                elif (
+                if not has_avatar or self.opts.visible_mode == "all" or self.opts.visible_mode == "avatars" and group == -1 and has_avatar or (
                     self.opts.visible_mode == "contactors"
                     and group != -1
                     and has_avatar
@@ -3261,7 +3249,7 @@ class VView(object):
             ntimes_proc = int(ntime / self.opts.nprocs)
             s = ""
             for i in range(self.opts.nprocs):
-                s += "{0}/{1} ".format(ntimes_proc * i, ntimes_proc * (i + 1))
+                s += f"{ntimes_proc * i}/{ntimes_proc * (i + 1)} "
             print("#!/bin/sh")
             print(
                 "parallel --verbose",
@@ -3355,11 +3343,7 @@ class VView(object):
                 self.set_instance_v(pos_data[:, 1])
 
                 big_data_writer.SetFileName(
-                    "{0}-{1}.{2}".format(
-                        os.path.splitext(os.path.basename(self.opts.io_filename))[0],
-                        k,
-                        big_data_writer.GetDefaultFileExtension(),
-                    )
+                    f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-{k}.{big_data_writer.GetDefaultFileExtension()}"
                 )
                 if self.opts.global_filter:
                     self.big_data_geometry_filter.Update()
@@ -3458,25 +3442,19 @@ class VView(object):
                     velocity_absolute_output_body[-1].extend(velo[:])
                     velocity_absolute_output_body[-1].append(bdy_id)
 
-        for bdy_id in position_output.keys():
+        for bdy_id in position_output:
             output = numpy.array(position_output[bdy_id])
-            filename_output = "{0}-position-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-position-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
-        for bdy_id in velocity_output.keys():
+        for bdy_id in velocity_output:
             output = numpy.array(velocity_output[bdy_id])
-            filename_output = "{0}-velocity-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-velocity-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
-        for bdy_id in velocity_absolute_output.keys():
+        for bdy_id in velocity_absolute_output:
             output = numpy.array(velocity_absolute_output[bdy_id])
-            filename_output = "{0}-velocity-absolute-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-velocity-absolute-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
         cf_output = {}
@@ -3508,11 +3486,9 @@ class VView(object):
                     cf_output_contact[-1].extend(cf_data[i, 2:nvalue])
                     cf_output_contact[-1].append(contact_id)
 
-        for contact_id in cf_output.keys():
+        for contact_id in cf_output:
             output = numpy.array(cf_output[contact_id])
-            filename_output = "{0}-cf-contact_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], contact_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-cf-contact_{contact_id}.dat"
             numpy.savetxt(filename_output, output)
 
         sys.stdout.write("\n")
@@ -3664,16 +3640,16 @@ if __name__ == "__main__":
     opts.parse()
 
 # Heavier imports after command line parsing
-from vtk.util import numpy_support
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from vtk.util import numpy_support
 
 have_occ = siconos.mechanics.have_occ
 if have_occ:
     from siconos.io.occ_tools import (
-        occ_topo_list,
-        occ_load_file,
-        topods_shape_reader,
         brep_reader,
+        occ_load_file,
+        occ_topo_list,
+        topods_shape_reader,
     )
 
 nan = numpy.nan

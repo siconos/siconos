@@ -18,6 +18,7 @@
 ##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 from OCC import VERSION
 
 
@@ -29,18 +30,15 @@ def get_backend():
     is much preferred
     """
     try:
-        from PyQt4 import QtCore, QtGui
         return 'qt-pyqt4'
     except:
         pass
     try:
-        from PySide import QtCore, QtGui
         return 'qt-pyside'
     except:
         pass
     # Check wxPython
     try:
-        import wx
         return 'wx'
     except:
         raise ImportError("No compliant GUI library found. You must have either PySide, PyQt4 or wxPython installed.")
@@ -106,7 +104,7 @@ def init_display(backend_str=None, size=(1024, 768)):
             app.MainLoop()
     # Qt based simple GUI
     elif 'qt' in USED_BACKEND:
-        from OCC.Display.qtDisplay import qtViewer3d, get_qt_modules
+        from OCC.Display.qtDisplay import get_qt_modules, qtViewer3d
         QtCore, QtGui, QtOpenGL = get_qt_modules()
 
         class MainWindow(QtGui.QMainWindow):
@@ -178,7 +176,7 @@ def init_display(backend_str=None, size=(1024, 768)):
 
 if __name__ == '__main__':
     display, start_display, add_menu, add_function_to_menu = init_display()
-    from OCC.BRepPrimAPI import BRepPrimAPI_MakeSphere, BRepPrimAPI_MakeBox
+    from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 
     def sphere(event=None):
         display.DisplayShape(BRepPrimAPI_MakeSphere(100).Shape(), update=True)

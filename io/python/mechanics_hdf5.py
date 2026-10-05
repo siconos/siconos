@@ -16,14 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import sys
-import numpy as np
-import h5py
 import pickle
+import sys
+
+import h5py
+import numpy as np
 import siconos.io.tools
-from siconos.mechanics.quaternions import quaternion_get
 import siconos.mechanics.collision.tools as smct
 from siconos.mechanics import have_occ  # , have_bullet
+from siconos.mechanics.quaternions import quaternion_get
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
@@ -139,7 +140,7 @@ contactor {0} attribute 'name': renamed in 'shape_name'
                     del contactor["name"]
 
 
-class MechanicsHdf5(object):
+class MechanicsHdf5:
     """a MechanicsHdf5 context manager, used to prepare a simulation description
     to be executed by MechanicsRunner.
 
@@ -172,16 +173,12 @@ class MechanicsHdf5(object):
         verbose=True,
     ):
         if io_filename is None:
-            self._io_filename = "{0}.hdf5".format(
-                os.path.splitext(os.path.basename(sys.argv[0]))[0]
-            )
+            self._io_filename = f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]}.hdf5"
         else:
             self._io_filename = io_filename
 
         if io_filename_backup is None:
-            self._io_filename_backup = "{0}_last.hdf5".format(
-                os.path.splitext(self._io_filename)[0]
-            )
+            self._io_filename_backup = f"{os.path.splitext(self._io_filename)[0]}_last.hdf5"
         else:
             self._io_filename_backup = io_filename_backup
 
@@ -790,7 +787,7 @@ class MechanicsHdf5(object):
         if name in self._ref:
             return
 
-        from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
+        from OCC.Core.STEPControl import STEPControl_AsIs, STEPControl_Writer
 
         # step format is used for the storage.
         step_writer = STEPControl_Writer()
@@ -820,7 +817,7 @@ class MechanicsHdf5(object):
             shape.attrs["id"] = self._number_of_shapes
             try:
                 shape.attrs["type"] = os.path.splitext(filename)[1][1:]
-            except IOError:
+            except OSError:
                 shape.attrs["type"] = "unknown"
 
             self._number_of_shapes += 1
@@ -1108,22 +1105,22 @@ class MechanicsHdf5(object):
                     )
                 )
 
-                self.print_verbose("{0}: computed mass from Volume".format(name))
+                self.print_verbose(f"{name}: computed mass from Volume")
                 self.print_verbose(
-                    "{0}: computed center of mass:".format(name),
+                    f"{name}: computed center of mass:",
                     com[0],
                     com[1],
                     com[2],
                 )
-                self.print_verbose("{0}: computed mass:".format(name), computed_mass)
+                self.print_verbose(f"{name}: computed mass:", computed_mass)
                 self.print_verbose(
-                    "{0}: computed inertia:".format(name),
+                    f"{name}: computed inertia:",
                     computed_inertia[0],
                     computed_inertia[1],
                     computed_inertia[2],
                 )
                 self.print_verbose(
-                    "{0}: computed inertia matrix:".format(name),
+                    f"{name}: computed inertia matrix:",
                     computed_inertia_matrix,
                 )
                 is_center_of_mass_computed = True
@@ -1192,7 +1189,7 @@ class MechanicsHdf5(object):
                 instance_name = ctor.instance_name
             else:
                 # the default name for contactor
-                instance_name = "{0}-{1}".format(ctor.shape_name, num)
+                instance_name = f"{ctor.shape_name}-{num}"
 
             dat = data(obj, instance_name, 0, use_compression=self._use_compression)
 
@@ -1553,7 +1550,7 @@ class MechanicsHdf5(object):
         add a joint between two objects
         """
         if name in self.joints():
-            raise ValueError("Joint {} already in simulation!".format(name))
+            raise ValueError(f"Joint {name} already in simulation!")
         else:
             joint = self.joints().create_dataset(name, (0,))
             joint.attrs["object1"] = object1

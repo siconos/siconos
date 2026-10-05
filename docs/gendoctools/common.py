@@ -20,8 +20,8 @@ Siconos is a program dedicated to modeling, simulation and control
  limitations under the License.
 """
 
-import shutil
 import pickle
+import shutil
 import textwrap
 from pathlib import Path
 
@@ -162,7 +162,7 @@ def parse_doxygen_config(filename):
         # remove comment lines
         conf = [
             n.strip()
-            for n in ff.readlines()
+            for n in ff
             if (not n.startswith("#") and not n.startswith("\n"))
         ]
         for d in conf:
@@ -176,7 +176,7 @@ def parse_doxygen_config(filename):
 
 
 def filter_dot_in_xml_formulas(xmlfile):
-    """Replace \\dot with \dot in xml input.
+    """Replace \\dot with \\dot in xml input.
 
     dot is confusing for doxygen (may be latex or graphviz),
     so in latex formula inside \rst

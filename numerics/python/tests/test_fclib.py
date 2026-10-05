@@ -1,9 +1,9 @@
-import siconos.numerics as sn
 import os.path
+
+import numpy as np
 import scipy.sparse
 import scipy.sparse.linalg
-import numpy as np
-
+import siconos.numerics as sn
 
 # this could be changed at install time
 data_dir = "data/"
@@ -82,16 +82,12 @@ def test_gfc3d():
                 res = solve_global(fcp, s)
                 if res:
                     print(
-                        "Solver {:} on problem {:} failed with info = {:}".format(
-                            sn.solver_options_id_to_name(s), d, res
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} failed with info = {res}"
                     )
                     mark_as_failed = True
                 else:
                     print(
-                        "Solver {:} on problem {:} is ok".format(
-                            sn.solver_options_id_to_name(s), d
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} is ok"
                     )
 
             fcp_reduced = condensed_from_global(fcp)
@@ -99,16 +95,12 @@ def test_gfc3d():
                 res = solve_reduced(fcp_reduced, s)
                 if res:
                     print(
-                        "Solver {:} on problem {:} in reduced form failed with info = {:}".format(
-                            sn.solver_options_id_to_name(s), d, res
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} in reduced form failed with info = {res}"
                     )
                     mark_as_failed = True
                 else:
                     print(
-                        "Solver {:} on problem {:} is ok".format(
-                            sn.solver_options_id_to_name(s), d
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} is ok"
                     )
 
     assert mark_as_failed is False
@@ -127,16 +119,12 @@ def test_fc3d():
                 res = solve_reduced(fcp, s)
                 if res:
                     print(
-                        "Solver {:} on problem {:} failed with info = {:}".format(
-                            sn.solver_options_id_to_name(s), d, res
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} failed with info = {res}"
                     )
                     mark_as_failed = True
                 else:
                     print(
-                        "Solver {:} on problem {:} is ok".format(
-                            sn.solver_options_id_to_name(s), d
-                        )
+                        f"Solver {sn.solver_options_id_to_name(s)} on problem {d} is ok"
                     )
 
     assert mark_as_failed is False

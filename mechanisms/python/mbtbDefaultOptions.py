@@ -1,9 +1,10 @@
 """"Default values for bodies and contact parameters.
 Should be change in bodydef.py if needed.
 """
-from siconos.mechanisms import mbtb
-import numpy as np
 import array
+
+import numpy as np
+from siconos.mechanisms import mbtb
 
 mbtb.MBTB_MAX_BODIES_NUMBER
 mbtb.MBTB_MAX_CONTACTS_NUMBER

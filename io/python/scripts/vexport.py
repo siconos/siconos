@@ -21,10 +21,9 @@ Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
 """
 
 # Lighter imports before command line parsing
-from __future__ import print_function
-import sys
-import os
 import getopt
+import os
+import sys
 
 #
 # a replacement for vview --vtk-export
@@ -35,9 +34,7 @@ def usage(long=False):
     print(__doc__)
     print()
     print(
-        "Usage:  {0} [--help] [--version] [--ascii] <HDF5>".format(
-            os.path.split(sys.argv[0])[1]
-        )
+        f"Usage:  {os.path.split(sys.argv[0])[1]} [--help] [--version] [--ascii] <HDF5>"
     )
     if long:
         print()
@@ -53,7 +50,7 @@ def usage(long=False):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["help", "version", "ascii"])
 except getopt.GetoptError as err:
-    sys.stderr.write("{0}\n".format(str(err)))
+    sys.stderr.write(f"{err!s}\n")
     usage()
     exit(2)
 
@@ -64,7 +61,7 @@ for o, a in opts:
         usage(long=True)
         exit(0)
     if o == "--version":
-        print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
+        print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
         exit(0)
     if o in ("--ascii"):
         ascii_mode = True
@@ -84,14 +81,13 @@ else:
     exit(1)
 
 # Heavier imports after command line parsing
-import vtk
-from vtk.util import numpy_support
-from math import atan2, pi
 import bisect
-from numpy.linalg import norm
+from math import pi
+
 import numpy
-import random
+import vtk
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from vtk.util import numpy_support
 
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
@@ -237,11 +233,11 @@ def build_set_displacement(dico):
 
 def step_reader(step_string):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.STEPControl import STEPControl_Reader
     from OCC.BRep import BRep_Builder
+    from OCC.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
+    from OCC.STEPControl import STEPControl_Reader
+    from OCC.StlAPI import StlAPI_Writer
     from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
     builder = BRep_Builder()
     comp = TopoDS_Compound()
@@ -282,9 +278,8 @@ def step_reader(step_string):
 
 def brep_reader(brep_string, indx):
 
-    from OCC.StlAPI import StlAPI_Writer
-
     from OCC.BRepTools import BRepTools_ShapeSet
+    from OCC.StlAPI import StlAPI_Writer
 
     shape_set = BRepTools_ShapeSet()
     shape_set.ReadFromString(brep_string)
@@ -707,11 +702,7 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
         # ) # should be w.r.t initial position
 
         big_data_writer.SetFileName(
-            "{0}-{1}.{2}".format(
-                os.path.splitext(os.path.basename(io_filename))[0],
-                index,
-                big_data_writer.GetDefaultFileExtension(),
-            )
+            f"{os.path.splitext(os.path.basename(io_filename))[0]}-{index}.{big_data_writer.GetDefaultFileExtension()}"
         )
         big_data_writer.SetTimeStep(times[index])
         big_data_source.Update()

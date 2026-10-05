@@ -20,11 +20,11 @@
 """Class and tools to handle shapes in siconos.io.mechanics_run"""
 
 import os
-import numpy as np
-import h5py
-import siconos.mechanics.collision
-import siconos.io.tools
 
+import h5py
+import numpy as np
+import siconos.io.tools
+import siconos.mechanics.collision
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
@@ -253,7 +253,7 @@ class ShapeCollection:
 
                     content = shape_ref[:][0].decode("utf-8")
                     with siconos.io.tools.tmpfile(
-                        contents=content, suffix=".{0}".format(shape_type)
+                        contents=content, suffix=f".{shape_type}"
                     ) as tmpf:
                         comp = siconos.io.occ_tools.occ_load_file(tmpf[1])
                     self._shapes[shape_name] = comp

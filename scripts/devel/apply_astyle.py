@@ -8,31 +8,31 @@ in the siconos source dir.
 
 """
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
-astyle_cmd = ['astyle', '--style=ansi', '-U', '-v', '-s2']
+astyle_cmd = ["astyle", "--style=ansi", "-U", "-v", "-s2"]
 
 currentdir = Path.cwd()
 
 # Get a list of all C files
-all_c_files = list(currentdir.glob('**/*.c'))
+all_c_files = list(currentdir.glob("**/*.c"))
 # Get a list of all CXX files
-all_cxx_files = list(currentdir.glob('**/*.cpp'))
+all_cxx_files = list(currentdir.glob("**/*.cpp"))
 
 
 # Apply astyle command to all of them
 
 for file in all_c_files:
     cmd = astyle_cmd + [file]
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=False)
 
 for file in all_cxx_files:
     cmd = astyle_cmd + [file]
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=False)
 
 
 # clean .orig files
-orig_files = list(currentdir.glob('**/*.orig'))
+orig_files = list(currentdir.glob("**/*.orig"))
 for file in orig_files:
     file.unlink()

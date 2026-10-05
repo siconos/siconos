@@ -2,10 +2,10 @@
 # Copyright 2024 INRIA
 
 import numpy as np
+import siconos
 
 # import siconos.numerics * fails with py.test!
 import siconos.numerics as SN
-import siconos
 
 
 def ncp_function(n, z, F):
@@ -13,13 +13,11 @@ def ncp_function(n, z, F):
 
     q = np.array([-5.0, -6.0])
     F[:] = np.dot(M, z) + q
-    pass
 
 
 def ncp_Nablafunction(n, z, nabla_F):
     M = np.array([[2.0, 1.0], [1.0, 2.0]])
     nabla_F[:] = M
-    pass
 
 
 # solution

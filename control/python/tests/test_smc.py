@@ -17,12 +17,13 @@
 #
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 
-import siconos.modeling as sm
-import numpy as np
 from math import ceil, sin
-import siconos.integrators
-import siconos.simulation
+
+import numpy as np
 import scipy.linalg as la
+import siconos.integrators
+import siconos.modeling as sm
+import siconos.simulation
 
 
 def test_smc1():

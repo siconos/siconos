@@ -17,13 +17,11 @@ def mcp_function(n, z, F):
 
     q = np.array([-5.0, -6.0])
     F[:] = np.dot(M, z) + q
-    pass
 
 
 def mcp_Nablafunction(n, z, nabla_F):
     M = np.array([[2.0, 1.0], [1.0, 2.0]])
     nabla_F[:] = M
-    pass
 
 
 def test_new():
@@ -84,14 +82,12 @@ def mcp_function_2(n, z, F):
     M, q = build_problem(n)
     # F=np.dot(M,z) + q  pointer assignment is not working
     F[:] = np.dot(M, z) + q
-    return
 
 
 def mcp_Nablafunction_2(n, z, nablaF):
     M, q = build_problem(n)
     # nablaF= M pointer assignment is not working
     nablaF[:] = M
-    return
 
 
 def test_mcp_newton_FB_FBLSA_2():

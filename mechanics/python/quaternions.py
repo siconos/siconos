@@ -25,8 +25,9 @@ usage example:
     >>> phi, theta, psi = quat.euler_from_quaternion(q0, q1, q2, q3)
 
 """
-import numpy as np
 from math import cos, sin
+
+import numpy as np
 
 
 def euler_from_quaternion(q0, q1, q2, q3):

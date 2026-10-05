@@ -21,6 +21,7 @@ repos:
         exclude: ^externals/
       - id: check-yaml
       - id: check-json
+      - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
       - id: mixed-line-ending
@@ -39,3 +40,13 @@ repos:
     rev: v0.9.0.6
     hooks:
       - id: shellcheck
+
+
+  # ---- Lint/format Python ----
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9
+    hooks:
+      - id: ruff         # lint (--fix=default)
+        exclude: ^(vkernel/|python/scripts/xml_parser.py$)
+        args: [--fix]
+      - id: ruff-format  # format

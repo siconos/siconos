@@ -19,7 +19,6 @@
 
 
 import siconos.numerics as sn
-
 from siconos.nonsmooth_formulations import (
     FrictionContact,
     GlobalFrictionContact,
@@ -39,9 +38,10 @@ except ImportError:
     has_fclib = False
     print("No module named siconos.fclib.")
 
-import random
-import h5py
 import os
+import random
+
+import h5py
 
 
 class FrictionContactTraceParams:
@@ -86,7 +86,7 @@ class FrictionContactTrace(FrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(FrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -231,7 +231,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalFrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -329,7 +329,7 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalRollingFrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter

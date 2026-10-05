@@ -4,7 +4,6 @@ Description: Run a pre-generated Siconos mechanics-IO HDF5 simulation file.
 """
 
 # Lighter imports before command line parsing
-from __future__ import print_function
 import argparse
 
 parser = argparse.ArgumentParser(

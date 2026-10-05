@@ -4,8 +4,9 @@ Description: Filter the contents of a Siconos mechanics-IO HDF5 simulation file.
 """
 
 # Lighter imports before command line parsing
-from __future__ import print_function
-import os, sys, argparse, re
+import argparse
+import os
+import sys
 
 parser = argparse.ArgumentParser(
     description = __doc__)
@@ -34,10 +35,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 # Heavier imports after command line parsing
-import numpy as np
 import h5py
+import numpy as np
 
-class CopyVisitor(object):
+
+class CopyVisitor:
     """The CopyVisitor is called for each group and dataset in the HDF5
        file, and is responsible for copying the structure to the new
        HDF5 file."""
@@ -67,8 +69,8 @@ class CopyVisitor(object):
             if self.object_filter is not None:
                 inp = obj.file['data/input']
                 self.excluded_objects = [x.attrs['id'] for name,x in inp.items()
-                                         if not self.object_filter(name, inp[name])]
-                print('Excluding object IDs {}'.format(self.excluded_objects))
+                                         if not self.object_filter(name, x)]
+                print(f'Excluding object IDs {self.excluded_objects}')
 
         # If we are copying an excluded object, return early
         if self.excluded_objects is not None and 'data/input/' in path:
@@ -165,11 +167,11 @@ class CopyVisitor(object):
                     gr.attrs[a] = obj.attrs[a]
 
         else:
-            print('Unknown type "{0}": {1}'.format(path, str(obj.__class__)))
+            print(f'Unknown type "{path}": {obj.__class__!s}')
 
 if __name__ == '__main__':
     if os.path.exists(args.fn_out[0]):
-        print('Output file "{0}" already exists!'.format(args.fn_out[0]))
+        print(f'Output file "{args.fn_out[0]}" already exists!')
         sys.exit(1)
 
     re_exclude = lambda _: False
@@ -178,7 +180,7 @@ if __name__ == '__main__':
         ex = args.exclude.split(',')
         re_exclude = lambda x: x in ex
 
-    class TimeFilter(object):
+    class TimeFilter:
         def __init__(self):
             self.marker = None
             self.last = None
@@ -205,7 +207,7 @@ if __name__ == '__main__':
                         self.last = None
             return res
 
-    class AttrFilter(object):
+    class AttrFilter:
         """Return a value to assign to a given attribute,
            or None to copy the original value"""
         def __init__(self, attr_values):

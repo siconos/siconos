@@ -16,11 +16,11 @@
 # limitations under the License.
 #
 
-import siconos.numerics as sn
-import scipy.sparse
-import numpy as np
 import copy
 
+import numpy as np
+import scipy.sparse
+import siconos.numerics as sn
 
 dbl_eps = np.finfo(np.float64).eps
 

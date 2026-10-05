@@ -17,8 +17,8 @@
 #
 
 import siconos.numerics as sn
-from siconos.numerics import solver_ids
 from siconos.numerics import params as pnames
+from siconos.numerics import solver_ids
 
 
 def test_solver_options_create():

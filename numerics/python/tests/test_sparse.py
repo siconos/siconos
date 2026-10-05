@@ -15,16 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from numpy import finfo, double
-
-from siconos.numerics import SBM_from_csparse, SBM_get_value
-from scipy.sparse.csr import csr_matrix, csc_matrix
+from numpy import double, finfo
 from scipy.sparse import lil_matrix
+from scipy.sparse.csr import csc_matrix, csr_matrix
 from siconos.numerics import (
+    SBM_from_csparse,
     SBM_get_value,
     SBM_new_from_file,
     SBM_to_sparse,
-    SBM_from_csparse,
 )
 
 eps = finfo(double).eps

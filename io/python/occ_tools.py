@@ -19,28 +19,24 @@
 """Tools for mechanics_run or hdf5, based on occ API."""
 
 import os
+
 import numpy as np
-
-import vtk
-
-from OCC.Core.GProp import GProp_GProps
-from OCC.Core.gp import gp_Ax1, gp_Dir
+import OCC.Core.BRepGProp
+import siconos.io.tools
 import siconos.mechanics.occ
-from OCC.Core.TopAbs import TopAbs_FACE
-from OCC.Core.TopAbs import TopAbs_EDGE
-from OCC.Core.TopExp import TopExp_Explorer
-from OCC.Core.TopoDS import topods_Face, topods_Edge
-from OCC.Core.STEPControl import STEPControl_Reader
-from OCC.Core.IGESControl import IGESControl_Reader
+import vtk
 from OCC.Core.BRep import BRep_Builder
-from OCC.Core.TopoDS import TopoDS_Compound
-from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-from OCC.Core.StlAPI import StlAPI_Writer
 from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 from OCC.Core.BRepTools import BRepTools_ShapeSet
-import OCC.Core.BRepGProp
-
-import siconos.io.tools
+from OCC.Core.gp import gp_Ax1, gp_Dir
+from OCC.Core.GProp import GProp_GProps
+from OCC.Core.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
+from OCC.Core.IGESControl import IGESControl_Reader
+from OCC.Core.STEPControl import STEPControl_Reader
+from OCC.Core.StlAPI import StlAPI_Writer
+from OCC.Core.TopAbs import TopAbs_EDGE, TopAbs_FACE
+from OCC.Core.TopExp import TopExp_Explorer
+from OCC.Core.TopoDS import TopoDS_Compound, topods_Edge, topods_Face
 
 
 #
@@ -68,7 +64,7 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
             if io is not None:
                 shape.data = io._shape.get(shape.shape_name, new_instance=True)
             else:
-                siconos.io.tools.warn("cannot get shape {0}".format(shape.shape_name))
+                siconos.io.tools.warn(f"cannot get shape {shape.shape_name}")
                 return None
 
         ishape = siconos.mechanics.occ.OccContactShape(shape.data)
@@ -103,8 +99,8 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
 
     gp_mat = system.MatrixOfInertia()
     inertia_matrix = np.zeros((3, 3), dtype=np.float64)
-    for i in range(0, 3):
-        for j in range(0, 3):
+    for i in range(3):
+        for j in range(3):
             inertia_matrix[i, j] = gp_mat.Value(i + 1, j + 1)
 
     I1 = system.MomentOfInertia(gp_Ax1(computed_com, gp_Dir(1, 0, 0)))

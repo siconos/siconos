@@ -10,3 +10,10 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[tool.ruff]
+line-length = 104
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E203"]

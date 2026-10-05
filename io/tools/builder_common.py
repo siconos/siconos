@@ -1,22 +1,22 @@
 __all__ = [
-    "unwanted",
-    "get_priority",
-    "parse_args",
     "get_headers",
-    "write_header",
+    "get_priority",
+    "get_target",
+    "parse_args",
+    "unwanted",
+    "write_classes",
     "write_footer",
+    "write_header",
     "write_includes",
     "write_register_with_bases",
-    "write_classes",
-    "get_target",
 ]
 
+import getopt
+import itertools
 import os
 import os.path
-import sys
 import re
-import itertools
-import getopt
+import sys
 
 input_headers = {
     "kernel": ["SiconosKernel.hpp"],
@@ -67,11 +67,11 @@ def unwanted(s):
 def get_target(source_dir, header_path):
     prefix = os.path.commonprefix([source_dir, header_path])
     firstdir = header_path[len(prefix) :].split(os.path.sep)[0]
-    for t in input_headers.keys():
+    for t in input_headers:
         if firstdir == t:
             return t
     raise RuntimeError(
-        "target not found for {} (found {}?)".format(header_path, firstdir)
+        f"target not found for {header_path} (found {firstdir}?)"
     )
 
 
@@ -111,7 +111,7 @@ def get_priority(name, source_dir, header_path, header_line):
         "Topology": 7e-3,
     }
 
-    if name in big_hack_prio.keys():
+    if name in big_hack_prio:
         return 200 + 5 + big_hack_prio[name]
     prio = header_line / 10000.0
     for e in sorted(module_prio, key=lambda k: k[1]):
@@ -125,7 +125,7 @@ def get_priority(name, source_dir, header_path, header_line):
                         return prio
             else:
                 return prio
-    print("Error proccessing header {:}".format(header_path))
+    print(f"Error proccessing header {header_path}")
 
 
 def resolve_path(source_dir, header_path):
@@ -138,21 +138,19 @@ def resolve_path(source_dir, header_path):
             return path, files[0]
         elif len(files) > 1:
             raise ValueError("Multiple matches found for " + header_file)
-    raise ValueError("Error while finding {:}, no match found.".format(header_file))
+    raise ValueError(f"Error while finding {header_file}, no match found.")
 
 
 def usage():
     myname = sys.argv[0]
     print(
         " ".join(
-            """{0} [--namespace=<namespace>] -I<path> [-I<path> ...]
+            f"""{myname} [--namespace=<namespace>] -I<path> [-I<path> ...]
     [--targets=<Mod1>[,Mod2[,...]]]
     [--output=<filename>]
     [--source=<siconos source dir>]
     [--build=<siconos build dir>]
-    header""".format(
-                myname
-            ).split()
+    header""".split()
         )
     )
 
@@ -197,17 +195,17 @@ def parse_args(need_build_path=False):
 
     if generated_file is None:
         usage()
-        print("{0} --output option is mandatory.".format(myname))
+        print(f"{myname} --output option is mandatory.")
         sys.exit(1)
 
     if source_dir is None:
         usage()
-        print("{0} --source  option is mandatory.".format(myname))
+        print(f"{myname} --source  option is mandatory.")
         sys.exit(1)
 
     if need_build_path and build_path is None:
         usage()
-        print("{0} --build  option is mandatory.".format(myname))
+        print(f"{myname} --build  option is mandatory.")
         sys.exit(1)
 
     generated_header = os.path.splitext(os.path.basename(generated_file))[0]
@@ -244,11 +242,11 @@ def get_headers(targets):
 
 
 def write_header(dest_file, cmd, generated_header):
-    dest_file.write("// generated with {0}\n".format(os.path.split(sys.argv[0])[-1]))
-    dest_file.write("#ifndef {0}_hpp\n".format(generated_header))
-    dest_file.write("#define {0}_hpp\n".format(generated_header))
-    dest_file.write("#include <SiconosConfig.h>\n".format(generated_header))
-    dest_file.write("#ifdef WITH_SERIALIZATION\n".format(generated_header))
+    dest_file.write(f"// generated with {os.path.split(sys.argv[0])[-1]}\n")
+    dest_file.write(f"#ifndef {generated_header}_hpp\n")
+    dest_file.write(f"#define {generated_header}_hpp\n")
+    dest_file.write("#include <SiconosConfig.h>\n")
+    dest_file.write("#ifdef WITH_SERIALIZATION\n")
 
 
 def write_footer(dest_file):
@@ -258,7 +256,7 @@ def write_footer(dest_file):
 
 def write_includes(dest_file, all_headers):
     for header in all_headers:
-        dest_file.write('#include "{0}"\n'.format(header))
+        dest_file.write(f'#include "{header}"\n')
 
 
 def write_register_with_bases(dest_file, with_base):
@@ -271,14 +269,12 @@ def write_register_with_bases(dest_file, with_base):
         dest_file.write("\n")
         dest_file.write("template <class Archive>\n")
         dest_file.write(
-            "void siconos_io_register_generated_{}(Archive& ar)\n".format(
-                target.capitalize()
-            )
+            f"void siconos_io_register_generated_{target.capitalize()}(Archive& ar)\n"
         )
         dest_file.write(
             "{{\n{0}\n}}\n".format(
                 "\n".join(
-                    "  ar.register_type(static_cast<{0}*>(NULL));".format(x)
+                    f"  ar.register_type(static_cast<{x}*>(NULL));"
                     for x in with_base_s
                 )
             )
@@ -301,10 +297,10 @@ def write_classes(dest_file, classes):
                 )
             )
         else:
-            dest_file.write("SICONOS_IO_REGISTER({0},\n".format(clname))
+            dest_file.write(f"SICONOS_IO_REGISTER({clname},\n")
 
         # Write (wanted) member variables
         dest_file.write(
-            "\n".join(sorted("  ({0})".format(m) for m in members if not unwanted(m)))
+            "\n".join(sorted(f"  ({m})" for m in members if not unwanted(m)))
             + ")\n"
         )

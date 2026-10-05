@@ -18,15 +18,16 @@
 
 """Functions and tools used in mechanics_run and mechanics_hdf5"""
 
-import tempfile
-import sys
+import os
 import shutil
 import subprocess
-import os
-from contextlib import contextmanager
-import numpy as np
+import sys
+import tempfile
 import time
 import warnings
+from contextlib import contextmanager
+
+import numpy as np
 import siconos.mechanics.collision
 
 warnings.simplefilter("always", UserWarning)
@@ -162,7 +163,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
     if polydata.GetCellType(0) == 5:
         apoints = np.empty((3, num_points), dtype=np.float64, order="F")
-        for i in range(0, points.GetNumberOfTuples()):
+        for i in range(points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[0, i] = p[0]
             apoints[1, i] = p[1]
@@ -173,7 +174,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
         aindices = np.empty(num_triangles * 3, dtype=int)
 
-        for i in range(0, num_triangles):
+        for i in range(num_triangles):
             c = polydata.GetCell(i)
             aindices[i * 3 + 0] = c.GetPointIds().GetId(0)
             aindices[i * 3 + 1] = c.GetPointIds().GetId(1)
@@ -184,7 +185,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
     else:  # assume convex shape
         coors = dict()
-        for i in range(0, points.GetNumberOfTuples()):
+        for i in range(points.GetNumberOfTuples()):
             coors[points.GetTuple(i)] = 1
         coors = np.array(coors.keys())
         dims = coors.max(axis=0) - coors.min(axis=0)
@@ -196,8 +197,9 @@ def extract_bc_global_dofs(fesolid, mesh_data):
     """
     Return global DOF indices for vertices with physical tag 2 ("Dirichlet BC").
     """
-    import meshio
     import tempfile
+
+    import meshio
 
     with tempfile.NamedTemporaryFile(suffix='.msh', mode='w') as tmp:
         tmp.write(mesh_data)

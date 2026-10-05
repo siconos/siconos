@@ -21,10 +21,10 @@
 Tools to generate random convex blocks (mostly used in rockfall simulations)
 """
 
-import numpy as np
-import trimesh
 from dataclasses import dataclass
 
+import numpy as np
+import trimesh
 from siconos.mechanics.collision.convexhull import ConvexHull
 from siconos.mechanics.collision.tools import Contactor
 
@@ -221,7 +221,7 @@ def generate_random_blocks(io, drop_config, rock_config):
     prob = areas / areas.sum()
 
     # creation the set of blocks
-    for i in range(0, drop_config.number_of_rocks):
+    for i in range(drop_config.number_of_rocks):
         # print("n_rock", i)
         nameDs = "block" + str(i)
         nameShape = "block" + str(i) + "-shape"
