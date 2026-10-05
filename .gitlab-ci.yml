@@ -92,6 +92,21 @@ opensuse-tumbleweed:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
   extends: .docker-manual
 
+# Run pre-commit hooks (linter, formaters ...)
+pre-commit:
+  stage: configure
+  image: $SICONOS_REGISTRY/sources/ubuntu24.04
+  variables:
+    PRE_COMMIT_HOME: $CI_PROJECT_DIR/.cache/pre-commit
+  script:
+    - pip install prek pre-commit
+    - prek run --all-files
+  cache:
+    key: prek
+    paths:
+      - .cache/pre-commit
+  rules:
+    - when: always
 
 # -------------- Configure, build and test Siconos --------------
 

@@ -3,9 +3,10 @@ Check examples manual for details.
 
 """
 
-import numpy as np
 import array
-import siconos.mechanisms.mbtb as mbtb
+
+import numpy as np
+from siconos.mechanisms import mbtb
 
 WITH_CLEARANCE_ON_RODE = 1
 """if true, add clearance between rodes 1 and 2."""
