@@ -115,7 +115,6 @@ def test_sphere_1m():
 
 def test_two_sphere_1m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("two_spheres_r1_shp", comp)
 
         #################
@@ -220,7 +219,6 @@ def test_two_sphere_1m_steel_water():
 
 def test_sphere_01m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("sphere_r01_shp", sphere_r01_shape)
 
         ###############
@@ -257,7 +255,6 @@ def test_sphere_01m():
 
 def test_sphere_001m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("sphere_r001_shp", sphere_r001_shape)
 
         ###############

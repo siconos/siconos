@@ -109,7 +109,7 @@ def data(h, name, nbcolumns, use_compression=False):
             chunks=[None, (4000, nbcolumns)][comp],
             compression=[None, "gzip"][comp],
             compression_opts=[None, 9][comp],
-            dtype='f4'
+            dtype="f4",
         )
 
 
@@ -126,7 +126,6 @@ def add_line(dataset, line):
 def upgrade_io_format(filename):
 
     with MechanicsHdf5(filename, mode="a") as io:
-
         for instance_name in io.instances():
             for contactor_instance_name in io.instances()[instance_name]:
                 contactor = io.instances()[instance_name][contactor_instance_name]
@@ -173,12 +172,16 @@ class MechanicsHdf5:
         verbose=True,
     ):
         if io_filename is None:
-            self._io_filename = f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]}.hdf5"
+            self._io_filename = (
+                f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]}.hdf5"
+            )
         else:
             self._io_filename = io_filename
 
         if io_filename_backup is None:
-            self._io_filename_backup = f"{os.path.splitext(self._io_filename)[0]}_last.hdf5"
+            self._io_filename_backup = (
+                f"{os.path.splitext(self._io_filename)[0]}_last.hdf5"
+            )
         else:
             self._io_filename_backup = io_filename_backup
 
@@ -295,22 +298,22 @@ class MechanicsHdf5:
                 self._cf_data.attrs["info"] = (
                     "[0] : time,\n [1] : mu,\n [2:4] : contact point A,\n"
                 )
-                self._cf_data.attrs[
-                    "info"
-                ] += " [5:7] : contact point B,\n [8:10] : contact normal,\n"
-                self._cf_data.attrs[
-                    "info"
-                ] += " [11:13] : reaction impulse (global frame),\n"
-                self._cf_data.attrs[
-                    "info"
-                ] += " [14:16] : relative gap,\n [17:19] : reaction velocity,\n"
-                self._cf_data.attrs[
-                    "info"
-                ] += " [20:22] : reaction impulse (local frame),\n"
+                self._cf_data.attrs["info"] += (
+                    " [5:7] : contact point B,\n [8:10] : contact normal,\n"
+                )
+                self._cf_data.attrs["info"] += (
+                    " [11:13] : reaction impulse (global frame),\n"
+                )
+                self._cf_data.attrs["info"] += (
+                    " [14:16] : relative gap,\n [17:19] : reaction velocity,\n"
+                )
+                self._cf_data.attrs["info"] += (
+                    " [20:22] : reaction impulse (local frame),\n"
+                )
                 self._cf_data.attrs["info"] += "[23] : interaction id,\n"
-                self._cf_data.attrs[
-                    "info"
-                ] += " [24] : ds 1 number,\n [25] : ds 2 number"
+                self._cf_data.attrs["info"] += (
+                    " [24] : ds 1 number,\n [25] : ds 2 number"
+                )
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_data in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_data, log ) : ", e)
@@ -323,9 +326,9 @@ class MechanicsHdf5:
                 self._cf_info.attrs["info"] = (
                     "[0] : time [0],\n [1] : interaction id,\n"
                 )
-                self._cf_info.attrs[
-                    "info"
-                ] += " [1] : ds 1 number,\n [3] : ds 2 number,\n"
+                self._cf_info.attrs["info"] += (
+                    " [1] : ds 1 number,\n [3] : ds 2 number,\n"
+                )
                 self._cf_info.attrs["info"] += " [4] : static body number"
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_info in the hdf5 file")
@@ -337,33 +340,40 @@ class MechanicsHdf5:
 
             if self._mode == "w":
                 self._cf_work.attrs["info"] = "[0] : time,\n [1] : interaction id,\n"
-                self._cf_work.attrs[
-                    "info"
-                ] += " [2] : normal contact work,\n [3] : tangent contact work,\n"
-                self._cf_work.attrs[
-                    "info"
-                ] += " [4] : normal contact work theta average,\n"
+                self._cf_work.attrs["info"] += (
+                    " [2] : normal contact work,\n [3] : tangent contact work,\n"
+                )
+                self._cf_work.attrs["info"] += (
+                    " [4] : normal contact work theta average,\n"
+                )
 
-                self._cf_work.attrs[
-                    "info"
-                ] += " [5] : tangent contact work theta average,\n"
-                self._cf_work.attrs[
-                    "info"
-                ] += " [6] : contact status,\n [7] : positive norma contact work,\n"
+                self._cf_work.attrs["info"] += (
+                    " [5] : tangent contact work theta average,\n"
+                )
+                self._cf_work.attrs["info"] += (
+                    " [6] : contact status,\n [7] : positive norma contact work,\n"
+                )
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
 
         try:
             self._cf_internal_variables = data(
-                self._data, "cf_internal_variables", 41, use_compression=self._use_compression
+                self._data,
+                "cf_internal_variables",
+                41,
+                use_compression=self._use_compression,
             )
             if self._mode == "w":
-                self._cf_internal_variables.attrs["info"] = "[0] : time,\n [1] : interaction id,\n"
+                self._cf_internal_variables.attrs["info"] = (
+                    "[0] : time,\n [1] : interaction id,\n"
+                )
                 self._cf_internal_variables.attrs["info"] += " ,\n"
         except Exception as e:
             self.print_io_mechanics("Warning -  cf_internal_variables in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._cf_internal_variables, log ) : ", e)
+            self.print_io_mechanics(
+                "        -  group(self._cf_internal_variables, log ) : ", e
+            )
 
         try:
             self._energy_work = data(
@@ -375,16 +385,16 @@ class MechanicsHdf5:
                     "[0] : time,\n [1] : kinetic energy,\n"
                 )
                 self._energy_work.attrs["info"] += " [2] : force work, \n"
-                self._energy_work.attrs[
-                    "info"
-                ] += " [3] : normal contact work,\n [4] : tangent contact work,\n"
-                self._energy_work.attrs[
-                    "info"
-                ] += " [5] : normal contact work theta average,\n"
+                self._energy_work.attrs["info"] += (
+                    " [3] : normal contact work,\n [4] : tangent contact work,\n"
+                )
+                self._energy_work.attrs["info"] += (
+                    " [5] : normal contact work theta average,\n"
+                )
 
-                self._energy_work.attrs[
-                    "info"
-                ] += " [6] tangent contact work theta average \n"
+                self._energy_work.attrs["info"] += (
+                    " [6] tangent contact work theta average \n"
+                )
 
                 self._energy_work.attrs["info"] += "[7,8] only negative part "
         except Exception as e:
@@ -496,8 +506,9 @@ class MechanicsHdf5:
         Displacements
         """
         nbcolumns = self._data[f"fem_displacements_{fem_id}"].attrs["dof_count"]
-        return data(self._data, f"fem_displacements_{fem_id}", nbcolumns,
-                    use_compression=False)
+        return data(
+            self._data, f"fem_displacements_{fem_id}", nbcolumns, use_compression=False
+        )
 
     def velocities_data(self):
         """
@@ -620,7 +631,6 @@ class MechanicsHdf5:
         r_end = min(r_start + entries_per_step, len(radii_all))
         return radii_all[r_start:r_end]
 
-
     def add_plugin_source(self, name, filename):
         """
         Add C source plugin
@@ -664,7 +674,6 @@ class MechanicsHdf5:
         """
 
         if name not in self._ref:
-
             shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
             shape[:] = shape_data
             shape.attrs["id"] = self._number_of_shapes
@@ -691,7 +700,6 @@ class MechanicsHdf5:
                 os.path.split(os.path.abspath(sys.argv[0]))[0], filename
             )
         if name not in self._ref:
-
             if os.path.splitext(filename)[-1][1:] == "stl":
                 reader = vtk.vtkSTLReader()
                 reader.SetFileName(filename)
@@ -796,7 +804,6 @@ class MechanicsHdf5:
         shape_data = None
 
         with siconos.io.tools.tmpfile() as tmpf:
-
             step_writer.Write(tmpf[1])
 
             tmpf[0].flush()
@@ -930,7 +937,6 @@ class MechanicsHdf5:
         self._out.attrs["dimension"] = self._dimension
 
         if name not in self._ref:
-
             shape = self._ref.create_dataset(name, (1, len(params)))
             shape.attrs["id"] = self._number_of_shapes
             shape.attrs["type"] = "primitive"
@@ -1086,7 +1092,6 @@ class MechanicsHdf5:
                     shapes,
                 )
             ):
-
                 # --- We compute inertia and center of mass ---
                 # This part requires occ.
                 assert have_occ
@@ -1158,7 +1163,6 @@ class MechanicsHdf5:
             obj.attrs["mass"] = mass
             obj.attrs["type"] = "dynamic"
             if np.isscalar(mass) and mass <= 0.0:
-
                 self.print_verbose(
                     "The use of a mass equal to zero"
                     " to define a static object is deprecated."
@@ -1183,7 +1187,6 @@ class MechanicsHdf5:
         contactors = shapes
 
         for num, ctor in enumerate(contactors):
-
             if ctor.instance_name is not None:
                 # a specified name
                 instance_name = ctor.instance_name
@@ -1377,10 +1380,17 @@ class MechanicsHdf5:
         nslaw.attrs["gid1"] = collision_group1
         nslaw.attrs["gid2"] = collision_group2
 
-    def add_binary_cohesive_nsl(self, name, mu,  e=0, sigma_c=0, delta_c=0,
-                                gamma=0.0,
-                                collision_group1=0,
-                                collision_group2=0):
+    def add_binary_cohesive_nsl(
+        self,
+        name,
+        mu,
+        e=0,
+        sigma_c=0,
+        delta_c=0,
+        gamma=0.0,
+        collision_group1=0,
+        collision_group2=0,
+    ):
         """
         Add a nonsmooth law for contact between 2 groups.
         Only BinaryCohesionNSL are supported.
@@ -1393,15 +1403,14 @@ class MechanicsHdf5:
         """
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs['type'] = 'BinaryCohesiveNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['e'] = e
-            nslaw.attrs['sigma_c'] = sigma_c
-            nslaw.attrs['delta_c'] = delta_c
-            nslaw.attrs['gamma'] = gamma
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
-
+            nslaw.attrs["type"] = "BinaryCohesiveNSL"
+            nslaw.attrs["mu"] = mu
+            nslaw.attrs["e"] = e
+            nslaw.attrs["sigma_c"] = sigma_c
+            nslaw.attrs["delta_c"] = delta_c
+            nslaw.attrs["gamma"] = gamma
+            nslaw.attrs["gid1"] = collision_group1
+            nslaw.attrs["gid2"] = collision_group2
 
     def add_Fremond_impact_friction_nsl(
         self, name, mu, e=0, collision_group1=0, collision_group2=0
@@ -1528,7 +1537,6 @@ class MechanicsHdf5:
         nslaw.attrs["ub"] = ub
         nslaw.attrs["gid1"] = collision_group1
         nslaw.attrs["gid2"] = collision_group2
-
 
     def add_joint(
         self,

@@ -94,20 +94,20 @@ def test_create_h5run():
     try:
         with h5py.File(outputfile_name, "r") as f:
             # Verify that the 'data' group exists
-            assert (
-                "data" in f
-            ), "Error: The HDF5 file does not contain the 'data' group."
+            assert "data" in f, (
+                "Error: The HDF5 file does not contain the 'data' group."
+            )
 
             # Verify the 'dimension' attribute exists
-            assert (
-                "dimension" in f.attrs
-            ), "Error: The 'dimension' attribute is missing."
+            assert "dimension" in f.attrs, (
+                "Error: The 'dimension' attribute is missing."
+            )
 
             # Check results of add_convex_shape
             # Verify if the 'dimension' attribute exists
-            assert (
-                "dimension" in f.attrs
-            ), "Error: The 'dimension' attribute is missing."
+            assert "dimension" in f.attrs, (
+                "Error: The 'dimension' attribute is missing."
+            )
 
             assert f.attrs["dimension"] == 3
             assert "Cube" in f["data"]["ref"]

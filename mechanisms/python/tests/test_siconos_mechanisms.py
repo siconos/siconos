@@ -2,5 +2,4 @@
 
 
 def test_slider_crank():
-    """Run siconos_mechanisms for bodydef and local options of slider crank
-    """
+    """Run siconos_mechanisms for bodydef and local options of slider crank"""

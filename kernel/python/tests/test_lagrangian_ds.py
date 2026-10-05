@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 """Python tests for Lagrangian dynamical systems classes and functions
-   from kernel/modelingtools
+from kernel/modelingtools
 
 """
 

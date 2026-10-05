@@ -30,33 +30,44 @@ def get_backend():
     is much preferred
     """
     try:
-        return 'qt-pyqt4'
+        return "qt-pyqt4"
     except:
         pass
     try:
-        return 'qt-pyside'
+        return "qt-pyside"
     except:
         pass
     # Check wxPython
     try:
-        return 'wx'
+        return "wx"
     except:
-        raise ImportError("No compliant GUI library found. You must have either PySide, PyQt4 or wxPython installed.")
+        raise ImportError(
+            "No compliant GUI library found. You must have either PySide, PyQt4 or wxPython installed."
+        )
         sys.exit(1)
 
 
 def init_display(backend_str=None, size=(1024, 768)):
-    global display, add_menu, add_function_to_menu, start_display, app, win, USED_BACKEND
+    global \
+        display, \
+        add_menu, \
+        add_function_to_menu, \
+        start_display, \
+        app, \
+        win, \
+        USED_BACKEND
 
     if not backend_str:
         USED_BACKEND = get_backend()
-    elif backend_str in ['wx', 'qt-pyside', 'qt-pyqt4']:
+    elif backend_str in ["wx", "qt-pyside", "qt-pyqt4"]:
         USED_BACKEND = backend_str
     else:
-        raise ValueError("You should pass either 'wx','qt' or 'tkinter' to the init_display function.")
+        raise ValueError(
+            "You should pass either 'wx','qt' or 'tkinter' to the init_display function."
+        )
         sys.exit(1)
     # wxPython based simple GUI
-    if USED_BACKEND == 'wx':
+    if USED_BACKEND == "wx":
         try:
             import wx
         except:
@@ -65,7 +76,15 @@ def init_display(backend_str=None, size=(1024, 768)):
 
         class AppFrame(wx.Frame):
             def __init__(self, parent):
-                wx.Frame.__init__(self, parent, -1, "Siconos mechanisms visualization based on pythonOCC-%s 3d viewer ('wx' backend)" % VERSION, style=wx.DEFAULT_FRAME_STYLE, size=size)
+                wx.Frame.__init__(
+                    self,
+                    parent,
+                    -1,
+                    "Siconos mechanisms visualization based on pythonOCC-%s 3d viewer ('wx' backend)"
+                    % VERSION,
+                    style=wx.DEFAULT_FRAME_STYLE,
+                    size=size,
+                )
                 self.canva = wxViewer3d(self)
                 self.menuBar = wx.MenuBar()
                 self._menus = {}
@@ -73,19 +92,22 @@ def init_display(backend_str=None, size=(1024, 768)):
 
             def add_menu(self, menu_name):
                 _menu = wx.Menu()
-                self.menuBar.Append(_menu, "&"+menu_name)
+                self.menuBar.Append(_menu, "&" + menu_name)
                 self.SetMenuBar(self.menuBar)
                 self._menus[menu_name] = _menu
 
             def add_function_to_menu(self, menu_name, _callable):
                 # point on curve
                 _id = wx.NewId()
-                assert callable(_callable), 'the function supplied is not callable'
+                assert callable(_callable), "the function supplied is not callable"
                 try:
-                    self._menus[menu_name].Append(_id, _callable.__name__.replace('_', ' ').lower())
+                    self._menus[menu_name].Append(
+                        _id, _callable.__name__.replace("_", " ").lower()
+                    )
                 except KeyError:
-                    raise ValueError('the menu item %s does not exist' % menu_name)
+                    raise ValueError("the menu item %s does not exist" % menu_name)
                 self.Bind(wx.EVT_MENU, _callable, id=_id)
+
         app = wx.PySimpleApp()
         win = AppFrame(None)
         win.Show(True)
@@ -103,18 +125,22 @@ def init_display(backend_str=None, size=(1024, 768)):
         def start_display():
             app.MainLoop()
     # Qt based simple GUI
-    elif 'qt' in USED_BACKEND:
+    elif "qt" in USED_BACKEND:
         from OCC.Display.qtDisplay import get_qt_modules, qtViewer3d
+
         QtCore, QtGui, QtOpenGL = get_qt_modules()
 
         class MainWindow(QtGui.QMainWindow):
             def __init__(self, *args):
                 QtGui.QMainWindow.__init__(self, *args)
                 self.canva = qtViewer3d(self)
-                self.setWindowTitle("Siconos mechanisms visualization based on  pythonOCC-%s 3d viewer ('%s' backend)" % (VERSION, USED_BACKEND))
+                self.setWindowTitle(
+                    "Siconos mechanisms visualization based on  pythonOCC-%s 3d viewer ('%s' backend)"
+                    % (VERSION, USED_BACKEND)
+                )
                 self.resize(size[0], size[1])
                 self.setCentralWidget(self.canva)
-                if not sys.platform == 'darwin':
+                if not sys.platform == "darwin":
                     self.menu_bar = self.menuBar()
                 else:
                     # create a parentless menubar
@@ -129,25 +155,30 @@ def init_display(backend_str=None, size=(1024, 768)):
                 self.centerOnScreen()
 
             def centerOnScreen(self):
-                '''Centers the window on the screen.'''
+                """Centers the window on the screen."""
                 resolution = QtGui.QDesktopWidget().screenGeometry()
-                self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
-                          (resolution.height() / 2) - (self.frameSize().height() / 2))
+                self.move(
+                    (resolution.width() / 2) - (self.frameSize().width() / 2),
+                    (resolution.height() / 2) - (self.frameSize().height() / 2),
+                )
 
             def add_menu(self, menu_name):
-                _menu = self.menu_bar.addMenu("&"+menu_name)
+                _menu = self.menu_bar.addMenu("&" + menu_name)
                 self._menus[menu_name] = _menu
 
             def add_function_to_menu(self, menu_name, _callable):
-                assert callable(_callable), 'the function supplied is not callable'
+                assert callable(_callable), "the function supplied is not callable"
                 try:
-                    _action = QtGui.QAction(_callable.__name__.replace('_', ' ').lower(), self)
+                    _action = QtGui.QAction(
+                        _callable.__name__.replace("_", " ").lower(), self
+                    )
                     # if not, the "exit" action is now shown...
                     _action.setMenuRole(QtGui.QAction.NoRole)
                     self.connect(_action, QtCore.SIGNAL("triggered()"), _callable)
                     self._menus[menu_name].addAction(_action)
                 except KeyError:
-                    raise ValueError('the menu item %s does not exist' % menu_name)
+                    raise ValueError("the menu item %s does not exist" % menu_name)
+
         # following couple of lines is a twek to enable ipython --gui='qt'
         app = QtGui.QApplication.instance()  # checks if QApplication already exists
         if not app:  # create QApplication if it doesnt exist
@@ -172,9 +203,11 @@ def init_display(backend_str=None, size=(1024, 768)):
         def start_display():
             win.raise_()  # make the application float to the top
             app.exec_()
+
     return display, start_display, add_menu, add_function_to_menu, win, app
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     display, start_display, add_menu, add_function_to_menu = init_display()
     from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 
@@ -187,8 +220,8 @@ if __name__ == '__main__':
     def exit(event=None):
         sys.exit()
 
-    add_menu('primitives')
-    add_function_to_menu('primitives', sphere)
-    add_function_to_menu('primitives', cube)
-    add_function_to_menu('primitives', exit)
+    add_menu("primitives")
+    add_function_to_menu("primitives", sphere)
+    add_function_to_menu("primitives", cube)
+    add_function_to_menu("primitives", exit)
     start_display()

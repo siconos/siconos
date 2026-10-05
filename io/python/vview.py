@@ -35,25 +35,28 @@ else:
 def print_io_vview(*args, **kwargs):
     print("[io.vview]", *args, **kwargs)
 
+
 def msh_to_stl(msh_data):
     """Convert msh data to stl format using meshio"""
     import tempfile
 
     import meshio
 
-    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmp_msh, \
-         tempfile.NamedTemporaryFile(suffix='.stl') as tmp_stl:
-
+    with (
+        tempfile.NamedTemporaryFile(suffix=".msh", mode="w+") as tmp_msh,
+        tempfile.NamedTemporaryFile(suffix=".stl") as tmp_stl,
+    ):
         tmp_msh.write(msh_data)
         tmp_msh.flush()
 
         mesh = meshio.read(tmp_msh.name)
         mesh.write(tmp_stl.name)
 
-        with open(tmp_stl.name, 'r') as f:
+        with open(tmp_stl.name, "r") as f:
             stl_data = f.read()
 
     return stl_data
+
 
 # Persistent configuration
 class VViewConfig(dict):
@@ -277,7 +280,7 @@ class VViewOptions:
                     "with-charts=",
                     "depth-2d=",
                     "verbose=",
-                    'cohesive-force'
+                    "cohesive-force",
                 ],
             )
             self.configure(opts, args)
@@ -311,7 +314,7 @@ class VViewOptions:
             elif o == "--no-cf":
                 self.cf_disable = True
 
-            elif o == '--cohesive-force':
+            elif o == "--cohesive-force":
                 self.cf_cohesive = True
 
             elif o == "--imr":
@@ -683,7 +686,6 @@ class Quaternion:
 
 
 class InputObserver:
-
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
@@ -1004,7 +1006,6 @@ def makeConvexSourceClass():
             return vtk.vtkProgrammableSource.GetOutputPort(self, 3)
 
     class ConvexSource(UnstructuredGridSource):
-
         def __init__(self, convex, points):
             self._convex = convex
             self._points = points
@@ -1025,7 +1026,6 @@ def makeConvexSourceClass():
 # only half the way, the reading part is ok but the output is only used
 # in vview and export from python members
 class IOReader(VTKPythonAlgorithmBase):
-
     def __init__(self, opts):
         VTKPythonAlgorithmBase.__init__(
             self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
@@ -1127,7 +1127,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.stream_actor = vtk.vtkActor()
         self.stream_actor.SetMapper(self.stream_mapper)
 
-
     def RequestInformation(self, request, inInfo, outInfo):
 
         info = outInfo.GetInformationObject(0)
@@ -1194,7 +1193,9 @@ class IOReader(VTKPythonAlgorithmBase):
         self.vtk_velo_data.SetName("velocity")
 
         try:
-            radii_current = self._io.radii(self._index)  # shape: (n_disks, 2) -> [ds_id, radius]
+            radii_current = self._io.radii(
+                self._index
+            )  # shape: (n_disks, 2) -> [ds_id, radius]
             if radii_current is not None and len(radii_current) > 0:
                 radii_dict = {int(row[0]): row[1] for row in radii_current}
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
@@ -1208,17 +1209,22 @@ class IOReader(VTKPythonAlgorithmBase):
             pass
 
         if len(self._p0s_data) > 0:
-
             # Get p0 data for current time step (only for disks/fixed-dof systems)
-            p0s_current = self._io.p0s(self._index)  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
+            p0s_current = self._io.p0s(
+                self._index
+            )  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
             if p0s_current is not None and len(p0s_current) > 0:
                 # Build dict: ds_id -> p0_norm
-                p0_dict = {int(row[0]): math.sqrt(row[1]**2 + row[2]**2 + row[3]**2)
-                           for row in p0s_current}
+                p0_dict = {
+                    int(row[0]): math.sqrt(row[1] ** 2 + row[2] ** 2 + row[3] ** 2)
+                    for row in p0s_current
+                }
                 # Get ds_ids for current dynamic objects
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
                 # Map to p0_norm, default 0 for FEM objects
-                self.current_p0_norm = numpy.array([p0_dict.get(ds_id, 0.0) for ds_id in ds_ids])
+                self.current_p0_norm = numpy.array(
+                    [p0_dict.get(ds_id, 0.0) for ds_id in ds_ids]
+                )
             else:
                 self.current_p0_norm = numpy.zeros(len(self._id_t_m))
 
@@ -1268,7 +1274,7 @@ class IOReader(VTKPythonAlgorithmBase):
         # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(self.vtk_velo_data)
-        if hasattr(self, 'vtk_radii_data') and self.vtk_radii_data is not None:
+        if hasattr(self, "vtk_radii_data") and self.vtk_radii_data is not None:
             output.GetPointData().AddArray(self.vtk_radii_data)
             output.GetPointData().SetActiveScalars("radii")
         if self.vtk_p0_norm_data is not None:
@@ -1324,7 +1330,6 @@ class IOReader(VTKPythonAlgorithmBase):
                 data = self.cf_data
 
                 for mu in self._mu_coefs:
-
                     imu = numpy.where(abs(data[:, 1] - mu) < 1e-15)[0]
 
                     # dom_imu = None
@@ -1448,10 +1453,10 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self._icf_data = self._io.contact_forces_data()
 
-        if self._with_cohesive_forces :
-            print('display cohesive forces')
+        if self._with_cohesive_forces:
+            print("display cohesive forces")
             self._icf_data = self._io.contact_internal_variable_data()
-            #input()
+            # input()
         else:
             self._icf_data = self._io.contact_forces_data()
 
@@ -1494,7 +1499,9 @@ class IOReader(VTKPythonAlgorithmBase):
             for actor, contact_shape_indx, _ in actors:
                 # Get shape_name from contact_shape_indx
                 if isinstance(contact_shape_indx, tuple):
-                    shape_name = contact_shape_indx[1]  # ('Face', shape_name, index) or similar
+                    shape_name = contact_shape_indx[
+                        1
+                    ]  # ('Face', shape_name, index) or similar
                 else:
                     shape_name = contact_shape_indx
 
@@ -1527,7 +1534,6 @@ class IOReader(VTKPythonAlgorithmBase):
                 mapper = actor.GetMapper()
                 mapper.SetScalarRange(disp_array.GetRange())
                 mapper.Modified()
-
 
     def SetTime(self, time):
         self.GetOutputInformation(0).Set(
@@ -1660,7 +1666,7 @@ class VView:
         self.io_reader = IOReader(self.opts)
 
         if self.opts.cf_cohesive:
-            self.io_reader._with_cohesive_forces =True
+            self.io_reader._with_cohesive_forces = True
 
         self.io_reader.SetIO(io=self.io)
 
@@ -1794,7 +1800,6 @@ class VView:
         # If domain information is available, we turn on the color
         # table and turn on scalars
         if self.io_reader.dom_at_time is not None:
-
             # Random color map, up to 256 domains
             self.cLUT[mu] = vtk.vtkLookupTable()
             self.cLUT[mu].SetNumberOfColors(256)
@@ -1973,7 +1978,7 @@ class VView:
             else:
                 shape_data = str(self.io.shapes()[shape_name][:][0])
 
-            with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmpf:
+            with tempfile.NamedTemporaryFile(suffix=".msh", mode="w+") as tmpf:
                 tmpf.write(shape_data)
                 tmpf.flush()
                 mesh = meshio.read(tmpf.name)
@@ -2405,9 +2410,10 @@ class VView:
         actor = None
         actor_edge = None
 
-        if (instance.attrs.get("mass", 0) > 0 or len(instance.attrs.get("material", [])) > 0) \
-           and not self.opts.view_as_glyphs:
-
+        if (
+            instance.attrs.get("mass", 0) > 0
+            or len(instance.attrs.get("material", [])) > 0
+        ) and not self.opts.view_as_glyphs:
             # objects that may move
             actor = vtk.vtkActor()
             if self.opts.with_edges:
@@ -2419,7 +2425,9 @@ class VView:
 
             if len(instance.attrs.get("material", [])) > 0:
                 self.with_fem = True
-                self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
+                self.io_reader.fem_actors[instid] = [
+                    (actor, contact_shape_indx, collision_group)
+                ]
 
             actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
 
@@ -2439,8 +2447,8 @@ class VView:
                 actor_edge.GetProperty().SetRepresentationToWireframe()
 
         else:
-            assert (instance.attrs.get("mass", 0) <= 0)
-            assert (len(instance.attrs.get("material", [])) == 0)
+            assert instance.attrs.get("mass", 0) <= 0
+            assert len(instance.attrs.get("material", [])) == 0
 
             # objects that are not supposed to move
             actor = vtk.vtkActor()
@@ -2458,7 +2466,6 @@ class VView:
             )
 
         if actor is not None:
-
             if self.opts.with_random_color:
                 actor.GetProperty().SetColor(random_color())
                 if self.opts.with_edges:
@@ -2466,9 +2473,7 @@ class VView:
 
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
             if self.opts.with_edges:
-                actor_edge.SetMapper(
-                    self.unfrozen_mappers_edges[contact_shape_indx]
-                )
+                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
             self.renderer.AddActor(actor)
             if self.opts.with_edges:
@@ -2526,10 +2531,7 @@ class VView:
             # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
             # we propose to erase it.
             try:
-                if (
-                    self.io.shapes()[contact_shape_name].attrs["primitive"]
-                    == "Disk"
-                ):
+                if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
                     offset_orientation = [
                         math.cos(pi / 4.0),
                         math.sin(pi / 4.0),
@@ -2651,7 +2653,6 @@ class VView:
             for transform, offset in zip(
                 self.transforms[instance], self.offsets[instance]
             ):
-
                 p = q.rotate(offset[0])
 
                 r = q * Quaternion(offset[1])
@@ -2750,10 +2751,17 @@ class VView:
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.dynamic_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all" or self.opts.visible_mode == "avatars" and group == -1 and has_avatar or (
-                    self.opts.visible_mode == "contactors"
-                    and group != -1
+                if (
+                    not has_avatar
+                    or self.opts.visible_mode == "all"
+                    or self.opts.visible_mode == "avatars"
+                    and group == -1
                     and has_avatar
+                    or (
+                        self.opts.visible_mode == "contactors"
+                        and group != -1
+                        and has_avatar
+                    )
                 ):
                     actor.VisibilityOn()
                 else:
@@ -2777,10 +2785,17 @@ class VView:
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.static_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all" or self.opts.visible_mode == "avatars" and group == -1 and has_avatar or (
-                    self.opts.visible_mode == "contactors"
-                    and group != -1
+                if (
+                    not has_avatar
+                    or self.opts.visible_mode == "all"
+                    or self.opts.visible_mode == "avatars"
+                    and group == -1
                     and has_avatar
+                    or (
+                        self.opts.visible_mode == "contactors"
+                        and group != -1
+                        and has_avatar
+                    )
                 ):
                     actor.VisibilityOn()
                 else:
@@ -3496,7 +3511,6 @@ class VView:
     def initialize_vtk(self):
         self.print_verbose("initialize_vtk")
         if not self.opts.gen_para_script:
-
             self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
             add_compatiblity_methods(self.objects_collector)
             self.cf_collector = vtk.vtkMultiBlockDataGroupFilter()
@@ -3510,7 +3524,6 @@ class VView:
             )
 
             if self.opts.global_filter:
-
                 self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
                 add_compatiblity_methods(self.big_data_geometry_filter)
                 self.big_data_geometry_filter.SetInputConnection(

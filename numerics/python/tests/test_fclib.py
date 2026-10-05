@@ -76,7 +76,6 @@ def test_gfc3d():
     for d in data_files:
         full_path = data_dir + d
         if os.path.isfile(full_path):
-
             fcp = sn.globalFrictionContact_fclib_read(full_path)
             for s in solvers:
                 res = solve_global(fcp, s)

@@ -74,14 +74,14 @@ def _fem_subprocess_env():
     existing_pythonpath = env.get("PYTHONPATH", "")
     pythonpath_extra = ":".join(_SICONOS_PYTHONPATHS)
     env["PYTHONPATH"] = (
-        (pythonpath_extra + ":" + existing_pythonpath) if existing_pythonpath else pythonpath_extra
+        (pythonpath_extra + ":" + existing_pythonpath)
+        if existing_pythonpath
+        else pythonpath_extra
     )
 
     existing_ld = env.get("LD_LIBRARY_PATH", "")
     ld_extra = ":".join(_SICONOS_LIBRARY_PATHS)
-    env["LD_LIBRARY_PATH"] = (
-        (ld_extra + ":" + existing_ld) if existing_ld else ld_extra
-    )
+    env["LD_LIBRARY_PATH"] = (ld_extra + ":" + existing_ld) if existing_ld else ld_extra
     return env
 
 
@@ -89,8 +89,7 @@ def _fem_subprocess_env():
 # Python 3.11, so we must use that interpreter explicitly rather than
 # whatever ``sys.executable`` points to.
 _PYTHON = (
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/.venv311/bin/python"
+    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/siconos/.venv311/bin/python"
 )
 
 

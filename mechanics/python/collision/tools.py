@@ -30,6 +30,7 @@ Classes
 - Volume : A Shape with mass and density parameters.
 - Contactor : A Shape belonging to a collision group, with contact metadata.
 """
+
 from dataclasses import dataclass, field
 from math import cos, sin
 
@@ -79,7 +80,9 @@ class MovedShape:
     shape_name: str
     data: object | None = None
     relative_translation: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    relative_orientation: tuple[float, float, float, float] | tuple[tuple[float, float, float], float] = (1.0, 0.0, 0.0, 0.0)
+    relative_orientation: (
+        tuple[float, float, float, float] | tuple[tuple[float, float, float], float]
+    ) = (1.0, 0.0, 0.0, 0.0)
     translation: np.ndarray = field(init=False)
     orientation: np.ndarray = field(init=False)
 

@@ -66,7 +66,6 @@ class FrictionContactTraceParams:
 
 
 class FrictionContactTrace(FrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = FrictionContactTraceParams()
@@ -111,7 +110,6 @@ class FrictionContactTrace(FrictionContact):
         self.updateMu()
 
         if self.getSizeOutput() != 0:
-
             #            M = BlockCSRMatrix()
             # M.fillW(model.nonSmoothDynamicalSystem().topology().indexSet(1))
             # M.convert()
@@ -127,7 +125,6 @@ class FrictionContactTrace(FrictionContact):
             SO = self.numericsSolverOptions()
             fclib_written = False
             if self.condition(SO) and has_fclib:
-
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
 
@@ -178,7 +175,6 @@ class FrictionContactTrace(FrictionContact):
             info = self.solve()
 
             if fclib_written:
-
                 solution = F.fclib_solution()
                 solution.u = self.w()
                 solution.z = self.z()
@@ -211,7 +207,6 @@ class GlobalFrictionContactTraceParams:
 
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = GlobalFrictionContactTraceParams()
@@ -309,7 +304,6 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
 
 class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = GlobalFrictionContactTraceParams()

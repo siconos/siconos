@@ -143,7 +143,6 @@ def create_breathe_files(
 
     # -- Create rst for classes, structs and files found in xml directory --
     for hfile in headers:
-
         xml2rst(
             Path(hfile),
             srcdir,
@@ -494,7 +493,6 @@ def xml2rst(
 
     # Round 3 write rst files for headers
     for xmlfile in xml_files:
-
         common.filter_dot_in_xml_formulas(xmlfile)
 
         root = ET.parse(xmlfile).getroot()
@@ -520,7 +518,7 @@ def xml2rst(
             gen += f"Generated from commit `{git_commit[:7]}`\n\n"
             repo_url = git_url.rstrip("/")
             source_url = f"{repo_url}/-/blob/{git_commit}/{relpath}"
-            gen += "Source code: " f"`{relpath} <{source_url}>`_\n\n"
+            gen += f"Source code: `{relpath} <{source_url}>`_\n\n"
 
         rst_id = file_rst
         outputname = Path(sphinx_directory, rst_id + ".rst")
@@ -683,7 +681,6 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
                 )
             )
         with open(outputname, "wt") as out:
-
             out.write(subtitle)
             for name, target, descr in sorted(namespaces["Functions"]):
                 disp = common.rst_escape(name)
@@ -722,7 +719,6 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
             namespaces[namespace].append((name, rst_id, descr))
 
         for namespace in sorted(namespaces):
-
             out.write(f"\n{namespace}\n")
             out.write(f"{'-' * len(namespace)}\n\n")
             for name, rst_id, descr in sorted(namespaces[namespace]):

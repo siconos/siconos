@@ -50,3 +50,4 @@ repos:
         exclude: ^(vkernel/|python/scripts/xml_parser.py$)
         args: [--fix]
       - id: ruff-format  # format
+        exclude: ^externals/

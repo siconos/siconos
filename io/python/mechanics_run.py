@@ -814,9 +814,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             flush=True,
                         )
                     else:
-                        print(
-                            f"[io.mechanics] | {fun.__name__:50s} .... {endt:6.2e} s"
-                        )
+                        print(f"[io.mechanics] | {fun.__name__:50s} .... {endt:6.2e} s")
                 else:
                     output, endt = fun(*args)
 
@@ -872,7 +870,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
             self.print_verbose("Import nonsmooth law name:", name)
-            self.print_verbose("              type: {0} ".format(self._nslaws_data[name].attrs["type"]))
+            self.print_verbose(
+                "              type: {0} ".format(self._nslaws_data[name].attrs["type"])
+            )
             if hasattr(sm, self._nslaws_data[name].attrs["type"]):
                 nslawClass = getattr(sm, self._nslaws_data[name].attrs["type"])
             elif hasattr(czm, self._nslaws_data[name].attrs["type"]):
@@ -880,7 +880,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 raise RuntimeError("The nonsmoothlaw is not found is siconos")
 
-            if nslawClass == sm.NewtonImpactFrictionNSL or nslawClass == sm.FremondImpactFrictionNSL:
+            if (
+                nslawClass == sm.NewtonImpactFrictionNSL
+                or nslawClass == sm.FremondImpactFrictionNSL
+            ):
                 nslaw = nslawClass(
                     float(self._nslaws_data[name].attrs["e"]),
                     0.0,
@@ -914,12 +917,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             elif nslawClass == czm.BinaryCohesiveNSL:
                 nslaw = nslawClass(
-                    float(self._nslaws_data[name].attrs['e']), 0.,
-                    float(self._nslaws_data[name].attrs['mu']),
-                    float(self._nslaws_data[name].attrs['sigma_c']),
-                    float(self._nslaws_data[name].attrs['delta_c']),
+                    float(self._nslaws_data[name].attrs["e"]),
+                    0.0,
+                    float(self._nslaws_data[name].attrs["mu"]),
+                    float(self._nslaws_data[name].attrs["sigma_c"]),
+                    float(self._nslaws_data[name].attrs["delta_c"]),
                     3,
-                    float(self._nslaws_data[name].attrs.get('gamma', 1.0)))
+                    float(self._nslaws_data[name].attrs.get("gamma", 1.0)),
+                )
             if not nslaw:
                 raise AssertionError("no nslaw")
             # assert(nslaw)
@@ -1069,12 +1074,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
 
                     if boundary_conditions is None:
-                         # from mesh
+                        # from mesh
                         shape_name = contactors[0].shape_name
-                        shape_data = self._shape._io.shapes()[shape_name][:][0].decode("utf-8")
+                        shape_data = self._shape._io.shapes()[shape_name][:][0].decode(
+                            "utf-8"
+                        )
 
                         # get global dof from bc node indices
-                        boundary_conditions = siconos.io.tools.extract_bc_global_dofs(fesolid, mesh_data)
+                        boundary_conditions = siconos.io.tools.extract_bc_global_dofs(
+                            fesolid, mesh_data
+                        )
 
                     if boundary_conditions is not None:
                         fesolid.applyDirichletBoundaryConditions(
@@ -1083,7 +1092,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         )
 
                     if nodal_forces is None:
-                        nodal_forces = [0, 0] # need fext storage.
+                        nodal_forces = [0, 0]  # need fext storage.
 
                     if nodal_forces is not None:
                         fesolid.applyNodalForces(
@@ -1115,7 +1124,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     for seg in segments:
                         dof_x = seg[0]
                         if dof_x in dof_to_coord:
-                            contact_nodes.append([dof_to_coord[dof_x][0], dof_to_coord[dof_x][1], 0.0])
+                            contact_nodes.append(
+                                [dof_to_coord[dof_x][0], dof_to_coord[dof_x][1], 0.0]
+                            )
                         else:
                             v_idx = dof_x // 2
                             vertex = mesh.vertices()[v_idx]
@@ -1124,7 +1135,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     contact_nodes = np.array(contact_nodes, dtype=np.float64)
 
                     # global_indices: 4 DOFs per segment (vertex_i + vertex_{i+1}) - FLATTEN SEGMENTS
-                    global_indices = np.array(segments, dtype=np.uint64).flatten()  # 20 × 4 = 80 DOFs
+                    global_indices = np.array(
+                        segments, dtype=np.uint64
+                    ).flatten()  # 20 × 4 = 80 DOFs
 
                     body.init_fem(mesh_data, fesolid, contact_nodes, global_indices)
 
@@ -1281,7 +1294,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         contactor.orientation,
                     )
                 else:
-
                     self.config.occ.occ_move(
                         reference_shape,
                         np.concatenate([contactor.translation, contactor.orientation]),
@@ -2412,14 +2424,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if mapping is None:
                     continue
 
-                spatial_displacements = displacements[mapping['dof_indices']]
+                spatial_displacements = displacements[mapping["dof_indices"]]
 
                 dataset_name = f"fem_displacements_{ds_id}"
                 nbcolumns = 2 + len(spatial_displacements)
                 if dataset_name not in self._data:
                     dataset = self._data.create_dataset(
-                        dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
-                        chunks=True, compression="gzip")
+                        dataset_name,
+                        (0, nbcolumns),
+                        maxshape=(None, nbcolumns),
+                        chunks=True,
+                        compression="gzip",
+                    )
                     dataset.attrs["dof_count"] = len(spatial_displacements)
                     dataset.attrs["spatial_order"] = True
                 else:
@@ -2429,7 +2445,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 dataset.resize(current_line + 1, 0)
                 dataset[current_line, 0] = self.current_time()
                 dataset[current_line, 1] = ds_id
-                dataset[current_line, 2:2+len(spatial_displacements)] = spatial_displacements
+                dataset[current_line, 2 : 2 + len(spatial_displacements)] = (
+                    spatial_displacements
+                )
 
     def output_fem_epsilon(self):
         """
@@ -2441,19 +2459,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             displacement = disp_map.get(ds_id)
             if displacement is None:
                 continue
-            epsilon = fem_ds._fesolid.computeStrainTensorWithDisplacement(
-                displacement)
+            epsilon = fem_ds._fesolid.computeStrainTensorWithDisplacement(displacement)
             if epsilon is None or len(epsilon) == 0:
                 continue
 
-            num_elements = mapping['num_elements']
+            num_elements = mapping["num_elements"]
             nbcolumns = 2 + num_elements * 3
             dataset_name = f"fem_epsilon_{ds_id}"
 
             if dataset_name not in self._data:
                 dataset = self._data.create_dataset(
-                    dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
-                    chunks=True, compression="gzip")
+                    dataset_name,
+                    (0, nbcolumns),
+                    maxshape=(None, nbcolumns),
+                    chunks=True,
+                    compression="gzip",
+                )
                 dataset.attrs["tensor_type"] = "symmetric_2d"
                 dataset.attrs["components"] = ["exx", "eyy", "exy"]
                 dataset.attrs["num_elements"] = num_elements
@@ -2464,7 +2485,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             dataset.resize(current_line + 1, 0)
             dataset[current_line, 0] = self.current_time()
             dataset[current_line, 1] = ds_id
-            dataset[current_line, 2:2+len(epsilon)] = epsilon
+            dataset[current_line, 2 : 2 + len(epsilon)] = epsilon
 
     def output_fem_sigma(self):
         """
@@ -2476,19 +2497,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             displacement = disp_map.get(ds_id)
             if displacement is None:
                 continue
-            sigma = fem_ds._fesolid.computeStressTensorWithDisplacement(
-                displacement)
+            sigma = fem_ds._fesolid.computeStressTensorWithDisplacement(displacement)
             if sigma is None or len(sigma) == 0:
                 continue
 
-            num_elements = mapping['num_elements']
+            num_elements = mapping["num_elements"]
             nbcolumns = 2 + num_elements * 3
             dataset_name = f"fem_sigma_{ds_id}"
 
             if dataset_name not in self._data:
                 dataset = self._data.create_dataset(
-                    dataset_name, (0, nbcolumns), maxshape=(None, nbcolumns),
-                    chunks=True, compression="gzip")
+                    dataset_name,
+                    (0, nbcolumns),
+                    maxshape=(None, nbcolumns),
+                    chunks=True,
+                    compression="gzip",
+                )
                 dataset.attrs["tensor_type"] = "symmetric_2d"
                 dataset.attrs["components"] = ["sxx", "syy", "sxy"]
                 dataset.attrs["num_elements"] = num_elements
@@ -2499,7 +2523,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             dataset.resize(current_line + 1, 0)
             dataset[current_line, 0] = self.current_time()
             dataset[current_line, 1] = ds_id
-            dataset[current_line, 2:2+len(sigma)] = sigma
+            dataset[current_line, 2 : 2 + len(sigma)] = sigma
 
     def output_dynamic_objects(self, initial=False):
         """
@@ -2598,7 +2622,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
 
                 elif self._dimension == 2:
-
                     # VA. change the contact info such that
                     # this corresponds to a 3D object
                     new_contact_points = np.zeros((contact_points.shape[0], 25))
@@ -2709,10 +2732,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             contact_internal_variables = None
             try:
                 contact_internal_variables = self._io.contactInternalVariables(
-                    self._nsds,
-                    0)
+                    self._nsds, 0
+                )
             except AttributeError:
-                self.print_verbose("[warning] self._io.contactInternalVariables is not defined.")
+                self.print_verbose(
+                    "[warning] self._io.contactInternalVariables is not defined."
+                )
 
             # print(contact_internal_variables)
             # input()
@@ -2720,7 +2745,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 current_line = self._cf_internal_variables.shape[0]
                 # Increase the number of lines in cf_data
                 # (h5 dataset with chunks)
-                self._cf_internal_variables.resize(current_line + contact_internal_variables.shape[0], 0)
+                self._cf_internal_variables.resize(
+                    current_line + contact_internal_variables.shape[0], 0
+                )
                 times = np.empty((contact_internal_variables.shape[0], 1))
                 times.fill(time)
 
@@ -3375,7 +3402,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._output_energy_work = run_options["output_energy_work"]
 
         if run_options["output_contact_internal_variables"] is not None:
-            self._output_contact_internal_variables = run_options["output_contact_internal_variables"]
+            self._output_contact_internal_variables = run_options[
+                "output_contact_internal_variables"
+            ]
 
         if run_options["gravity_scale"] is not None:
             self._gravity_scale = run_options["gravity_scale"]
@@ -3589,15 +3618,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb = nsf.GenericMechanical()
                     else:
                         osnspb = nsf.GenericMechanical(solver_options)
-                elif 'BinaryCohesiveNSL' in set(nslaw_type_list):
-                    if self._dimension ==3:
-                        dimension_contact=3
-                    elif self._dimension ==2:
-                        dimension_contact=2
-                    if (solver_options is None):
+                elif "BinaryCohesiveNSL" in set(nslaw_type_list):
+                    if self._dimension == 3:
+                        dimension_contact = 3
+                    elif self._dimension == 2:
+                        dimension_contact = 2
+                    if solver_options is None:
                         osnspb = nsf.CohesiveFrictionContact(dimension_contact)
                     else:
-                        osnspb = nsf.CohesiveFrictionContact(dimension_contact, solver_options)
+                        osnspb = nsf.CohesiveFrictionContact(
+                            dimension_contact, solver_options
+                        )
                 else:
                     if (
                         ("NewtonImpactFrictionNSL" in set(nslaw_type_list))
@@ -3773,23 +3804,29 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     if node:
                         dofs = node.global_dof_index()
                         if len(dofs) >= 2:
-                            dof_to_vertex.append((dofs[0], dofs[1], v_idx, vertex.y(), vertex.x()))
+                            dof_to_vertex.append(
+                                (dofs[0], dofs[1], v_idx, vertex.y(), vertex.x())
+                            )
 
                 dof_to_vertex.sort(key=lambda x: (x[3], x[4]))  # spatial order
 
-                dof_indices = np.array([(d[0], d[1]) for d in dof_to_vertex], dtype=np.int32).flatten()
-                coords = np.array([[d[4], d[3], 0.0] for d in dof_to_vertex], dtype=np.float64)
+                dof_indices = np.array(
+                    [(d[0], d[1]) for d in dof_to_vertex], dtype=np.int32
+                ).flatten()
+                coords = np.array(
+                    [[d[4], d[3], 0.0] for d in dof_to_vertex], dtype=np.float64
+                )
 
                 self._fem_dof_mappings[ds_id] = {
-                    'dof_indices': dof_indices,
-                    'coords': coords,
-                    'n_vertices': len(dof_to_vertex),
+                    "dof_indices": dof_indices,
+                    "coords": coords,
+                    "n_vertices": len(dof_to_vertex),
                     # NOTE: fem_model.elements() returns every raw mesh
                     # entity (points, lines, triangles); numT3Elements()
                     # matches the actual number of per-element strain/
                     # stress entries produced by computeStrainTensor()/
                     # computeStressTensor() (T3 only).
-                    'num_elements': fem_model.numT3Elements()
+                    "num_elements": fem_model.numT3Elements(),
                 }
 
                 # Write coords once
@@ -4097,7 +4134,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             print("run_options = MechanicsHdf5Runner_run_options()")
             for k in self._run_options.keys():
                 if k in kwargs:
-
                     # print('arg', kwargs[k],run_options_default[k] )
                     if kwargs[k] is not run_options_default[k]:
                         # print('diff', kwargs[k],run_options_default[k] )

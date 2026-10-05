@@ -70,9 +70,7 @@ def get_target(source_dir, header_path):
     for t in input_headers:
         if firstdir == t:
             return t
-    raise RuntimeError(
-        f"target not found for {header_path} (found {firstdir}?)"
-    )
+    raise RuntimeError(f"target not found for {header_path} (found {firstdir}?)")
 
 
 # try to provide an ordering for registering a class
@@ -274,8 +272,7 @@ def write_register_with_bases(dest_file, with_base):
         dest_file.write(
             "{{\n{0}\n}}\n".format(
                 "\n".join(
-                    f"  ar.register_type(static_cast<{x}*>(NULL));"
-                    for x in with_base_s
+                    f"  ar.register_type(static_cast<{x}*>(NULL));" for x in with_base_s
                 )
             )
         )
@@ -288,7 +285,6 @@ def write_classes(dest_file, classes):
     Input is a list of tuples of (class name, list of
     serializable bases, list of wanted members)."""
     for clname, bases, members in classes:
-
         # Write classes according to whether they have serializable bases
         if len(bases) > 0:
             dest_file.write(
@@ -301,6 +297,5 @@ def write_classes(dest_file, classes):
 
         # Write (wanted) member variables
         dest_file.write(
-            "\n".join(sorted(f"  ({m})" for m in members if not unwanted(m)))
-            + ")\n"
+            "\n".join(sorted(f"  ({m})" for m in members if not unwanted(m))) + ")\n"
         )

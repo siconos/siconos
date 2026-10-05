@@ -6,7 +6,7 @@ Description: Viewer for Siconos mechanics-IO HDF5 files based on VTK.
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
 from siconos.io.vview import VView, VViewConfig, VViewOptions
 
-if __name__=='__main__':
+if __name__ == "__main__":
     ## Persistent configuration
     config = VViewConfig()
 
@@ -18,10 +18,10 @@ if __name__=='__main__':
     opts.parse()
 
     ## Options and config already loaded above
-    with MechanicsHdf5(io_filename=opts.io_filename, mode='r') as io:
+    with MechanicsHdf5(io_filename=opts.io_filename, mode="r") as io:
         vview = VView(io, opts, config)
         vview.run()
 
     # Update configuration and save it
-    config['window_size'] = vview.renderer_window.GetSize()
+    config["window_size"] = vview.renderer_window.GetSize()
     config.save_configuration(force=False)

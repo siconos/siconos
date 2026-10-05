@@ -218,7 +218,6 @@ class Simplex:
 
 
 class ConvexHull:
-
     def __init__(self, coordinates):
         """
         Constructor
@@ -251,7 +250,6 @@ class ConvexHull:
 
     def centroid(self):
         return self.centroid_3d()
-
 
     def barycenter(self):
         # compute barycenter
@@ -318,7 +316,6 @@ class ConvexHull:
 
 
 class ConvexHull2d(ConvexHull):
-
     def __init__(self, coordinates):
         """
         Constructor

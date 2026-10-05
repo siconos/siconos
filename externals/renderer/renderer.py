@@ -2583,7 +2583,6 @@ def usage():
 
 # -----------------------------MODIFICATIONS------------------------------------#
 if __name__ == "__main__":
-
     output_path = os.getcwd()
     bin_path = os.path.dirname(os.path.realpath(__file__))
     share_path = os.path.join(bin_path, "../share/siconos/")
@@ -2628,20 +2627,12 @@ if __name__ == "__main__":
         print("########### Load shapes")
         obj_by_id = dict()
         # ----------------------Loading .step and .stp Files ( begin)------------------------#
-        dictionaryOfShapes = (
-            {}
-        )  # dictionaryOfShapes will contain the mesh of the objects
-        translation = (
-            {}
-        )  # translation and orientation are dictionaries that will contain the offset of translation and quaternion
+        dictionaryOfShapes = {}  # dictionaryOfShapes will contain the mesh of the objects
+        translation = {}  # translation and orientation are dictionaries that will contain the offset of translation and quaternion
         orientation = {}
 
         print("%s" % dictionaryOfShapes)
-        for (
-            instance
-        ) in (
-            io.instances()
-        ):  # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
+        for instance in io.instances():  # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
             id = io.instances()[instance].attrs["id"]
             obj_by_id[id] = instance
             obj = instance
@@ -2718,8 +2709,8 @@ if __name__ == "__main__":
         lastRowNumber = 0
         j = 0
         while (
-            i + j
-        ) < numberOfTimeStepsVectors * numberOfVectors:  # while the whole file is not overflied
+            (i + j) < numberOfTimeStepsVectors * numberOfVectors
+        ):  # while the whole file is not overflied
             timeStepNow = cf_data[rowNumber][
                 0
             ]  # timesteps represents the first arrow at a given time
@@ -2814,24 +2805,16 @@ if __name__ == "__main__":
                 ]  # initial translation
                 interstellar[_id]["initialQuaternion"]["quaternionX"] = orientation[
                     _id
-                ][
-                    0
-                ]  # initial quaternion
+                ][0]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionY"] = orientation[
                     _id
-                ][
-                    1
-                ]  # initial quaternion
+                ][1]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionZ"] = orientation[
                     _id
-                ][
-                    2
-                ]  # initial quaternion
+                ][2]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionW"] = orientation[
                     _id
-                ][
-                    3
-                ]  # initial quaternion
+                ][3]  # initial quaternion
             if _id < 0:
                 interstellar[_id]["positionX"] = translation[_id][0]
                 interstellar[_id]["positionY"] = translation[_id][1]

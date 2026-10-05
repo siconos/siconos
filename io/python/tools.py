@@ -58,7 +58,6 @@ def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
         fid.flush()
 
     class TmpFile:
-
         def __init__(self, fid, name):
             self.fid = fid
             self.name = name
@@ -129,7 +128,6 @@ if sys.version_info.major + 0.1 * sys.version_info.minor < 3.3:
 
 
 class Timer:
-
     def __init__(self):
         self._t0 = time_measure()
 
@@ -193,6 +191,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
     return shape, dims
 
+
 def extract_bc_global_dofs(fesolid, mesh_data):
     """
     Return global DOF indices for vertices with physical tag 2 ("Dirichlet BC").
@@ -201,22 +200,28 @@ def extract_bc_global_dofs(fesolid, mesh_data):
 
     import meshio
 
-    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w') as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".msh", mode="w") as tmp:
         tmp.write(mesh_data)
         tmp.flush()
         mesh = meshio.read(tmp.name)
 
     # 1. "Dirichlet BC"
-    tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name
-                   for name, (tag, dim) in mesh.field_data.items()}
-    dirichlet_tag = next((tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None)
+    tag_to_name = {
+        int(tag): name.decode() if isinstance(name, bytes) else name
+        for name, (tag, dim) in mesh.field_data.items()
+    }
+    dirichlet_tag = next(
+        (tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None
+    )
     if dirichlet_tag is None:
         return []
 
     # 2. collect boundary vertex IDs (1-based GMSH indices) with tag 2
     bc_vertex_ids = set()
-    for cell_block, data_block in zip(mesh.cells, mesh.cell_data.get('gmsh:physical', [])):
-        if cell_block.type == 'vertex':
+    for cell_block, data_block in zip(
+        mesh.cells, mesh.cell_data.get("gmsh:physical", [])
+    ):
+        if cell_block.type == "vertex":
             tags = data_block[0] if isinstance(data_block, list) else data_block
             for i, tag in enumerate(tags):
                 if tag == dirichlet_tag:
@@ -233,7 +238,7 @@ def extract_bc_global_dofs(fesolid, mesh_data):
     dim = 2  # 2D FEM
 
     for cell_block in mesh.cells:
-        if cell_block.type != 'triangle':
+        if cell_block.type != "triangle":
             continue
         for tri in cell_block.data:
             for vid_1based in tri:

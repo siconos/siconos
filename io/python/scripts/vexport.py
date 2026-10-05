@@ -94,14 +94,12 @@ from vtk.util import numpy_support
 
 
 class UnstructuredGridSource(vtk.vtkProgrammableSource):
-
     def GetOutputPort(self):
         # 3: UnstructuredGridOutput for vtkProgrammableSource
         return vtk.vtkProgrammableSource.GetOutputPort(self, 3)
 
 
 class ConvexSource(UnstructuredGridSource):
-
     def __init__(self, convex, points):
         self._convex = convex
         self._points = points
@@ -145,7 +143,6 @@ vtkmath = vtk.vtkMath()
 
 
 class Quaternion:
-
     def __init__(self, *args):
         self._data = vtk.vtkQuaternion[float](*args)
 
@@ -179,7 +176,6 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
     q = Quaternion((q3, q4, q5, q6))
 
     for transform, offset in zip(transforms[instance], offsets[instance]):
-
         p = q.rotate(offset[0])
 
         r = q * Quaternion(offset[1])
@@ -323,7 +319,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
     spos_data, dpos_data, velo_data, cf_data, solv_data = load()
 
     class DataConnector:
-
         def __init__(self, instance, data_name="velocity", data_size=6):
 
             self._instance = instance
@@ -352,7 +347,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
     # contact forces provider
     class ContactInfoSource:
-
         def __init__(self, data):
             self._data = None
 
@@ -428,7 +422,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
     vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
 
     for shape_name in io.shapes():
-
         shape_type = io.shapes()[shape_name].attrs["type"]
 
         if shape_type in ["vtp", "stl"]:
@@ -541,7 +534,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
             readers[shape_name] = source
 
     for instance_name in io.instances():
-
         instance = int(io.instances()[instance_name].attrs["id"])
         contactors[instance] = []
         transforms[instance] = []

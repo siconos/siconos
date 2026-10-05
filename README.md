@@ -142,15 +142,15 @@ import siconos.simulation as ss
 import numpy as np
 
 # Parameters
-t0, T, h = 0, 10, 0.005    # Time settings
-r, g, m = 0.1, 9.81, 1      # Ball properties
-e = 0.9                     # Restitution coefficient
+t0, T, h = 0, 10, 0.005  # Time settings
+r, g, m = 0.1, 9.81, 1  # Ball properties
+e = 0.9  # Restitution coefficient
 
 # Create dynamical system (ball)
 position = [1, 0, 0]
 velocity = [0, 0, 0]
 mass = np.eye(3) * m
-mass[2, 2] = 2./5 * r * r
+mass[2, 2] = 2.0 / 5 * r * r
 
 ball = sm.LagrangianLinearTIDS(position, velocity, mass)
 ball.set_constant_fext(np.array([-m * g, 0, 0]))

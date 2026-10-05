@@ -109,9 +109,9 @@ def test_mcp_newton_min_FBLSA_2():
     z = np.zeros(n)
     w = np.zeros(n)
     options = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_MIN_FBLSA)
-    options.iparam[
-        sn.params.SICONOS_IPARAM_STOPPING_CRITERION
-    ] = sn.params.SICONOS_STOPPING_CRITERION_RESIDU
+    options.iparam[sn.params.SICONOS_IPARAM_STOPPING_CRITERION] = (
+        sn.params.SICONOS_STOPPING_CRITERION_RESIDU
+    )
 
     sn.solver_options_print(options)
 

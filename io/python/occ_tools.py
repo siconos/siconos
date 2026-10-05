@@ -57,7 +57,6 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     system = GProp_GProps()
 
     for shape in shapes:
-
         iprops = GProp_GProps()
 
         if shape.data is None:

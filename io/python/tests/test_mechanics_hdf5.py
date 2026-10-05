@@ -44,15 +44,15 @@ def test_create_h5():
     try:
         with h5py.File(outputfile_name, "r") as f:
             # Verify that the 'data' group exists
-            assert (
-                "data" in f
-            ), "Error: The HDF5 file does not contain the 'data' group."
+            assert "data" in f, (
+                "Error: The HDF5 file does not contain the 'data' group."
+            )
 
             # Verify that 'static' and 'velocities' datasets exist
             assert "static" in f["data"], "The 'static' dataset is missing."
-            assert (
-                "velocities" in f["data"]
-            ), "Error: The 'velocities' dataset is missing."
+            assert "velocities" in f["data"], (
+                "Error: The 'velocities' dataset is missing."
+            )
 
             # Check the dimensions of the datasets
             static_shape = f["data"]["static"].shape

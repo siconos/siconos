@@ -34,7 +34,6 @@ elif hasattr(h5py, "new_vlen"):
 
 
 class NativeShape:
-
     def setInsideMargin(self, m):
         self.insidemargin = m
 
@@ -226,7 +225,6 @@ class ShapeCollection:
     ):
 
         if new_instance or shape_name not in self._shapes:
-
             shape_ref = self.shape(shape_name)
 
             # load shape if it is an existing file
@@ -330,7 +328,6 @@ class ShapeCollection:
                 # Where does it supposed to come from?
 
             else:
-
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):
                     name = self.url(shape_name)

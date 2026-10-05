@@ -69,7 +69,6 @@ def make_slider(minv, maxv, vstep):
     from PyQt4 import QtCore, QtGui  # , QtOpenGL
 
     class SlidersGroup(QtGui.QGroupBox):
-
         valueChanged = QtCore.pyqtSignal(int)
 
         def __init__(self, orientation, title, parent=None):
@@ -173,7 +172,6 @@ warnings.warn(
 )
 
 with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r") as io:
-
     display, start_display, add_menu, add_function_to_menu, win, app = init_display()
 
     dpos_data = io.dynamic_data()[:]
@@ -205,7 +203,6 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
         )
 
         with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
-
             step_reader = STEPControl_Reader()
 
             status = step_reader.ReadFile(tmpfile[1])
@@ -280,7 +277,6 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
         builder.MakeCompound(comp)
 
         for _id in range(positions.shape[0]):
-
             q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_id, :]]
 
             obj = obj_by_id[_id + 1]
