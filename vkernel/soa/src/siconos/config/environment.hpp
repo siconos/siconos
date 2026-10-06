@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <boost/container/static_vector.hpp>  // c++26 std::inplace_vector
+#include <boost/container/small_vector.hpp>   // c++26 std::inplace_vector
 #include <cstddef>                            // std::size_t
 #include <cstdint>
 #include <tuple>
@@ -85,6 +85,10 @@ struct standard_environment {
   using dynamic_properties = storage::dynamic_properties<K>;
 
   template <typename T>
-  using default_storage = boost::container::static_vector<T, 1>;
+  // std::inplace_vector semantics: one element inline, then heap. It must be
+  // small_vector and NOT static_vector: static_vector has a fixed capacity of
+  // N and throws boost::container::bad_alloc on the N+1-th push_back, so every
+  // column would only ever hold a single item.
+  using default_storage = boost::container::small_vector<T, 1>;
 };
 }  // namespace siconos

@@ -44,13 +44,12 @@ decltype(auto) add(auto&& data) {
 
                      if constexpr (match::push_back<storage_t>) {
                        if constexpr (match::static_capacity<storage_t>) {
-                         // boost::container::static_vector or similar
-                         if (storage.size() == storage.capacity()) {
-                         } else {
-                           storage.push_back(typename storage_t::value_type{});
-                           assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
-                           index = std::size(storage) - 1;
-                         }
+                         // boost::container::static_vector or similar: the inline
+                         // capacity is only a hint, the container grows on the heap,
+                         // so push_back always accepts the element.
+                         storage.push_back(typename storage_t::value_type{});
+                         assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
+                         index = std::size(storage) - 1;
                        } else
                          // item has been wrapped into a std::vector or similar
                          storage.push_back(typename storage_t::value_type{});
