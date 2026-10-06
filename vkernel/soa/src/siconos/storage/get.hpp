@@ -3,6 +3,7 @@
 #include <any>
 
 #include "siconos/storage/info.hpp"
+#include "siconos/storage/memory.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
