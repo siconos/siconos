@@ -62,9 +62,11 @@ def msh_to_stl(msh_data):
 class VViewConfig(dict):
     def __init__(
         self,
-        d={"background_color": [0.0, 0.0, 0.0], "window_size": [600, 600]},
+        d=None,
         filename=None,
     ):
+        if d is None:
+            d = {"background_color": [0.0, 0.0, 0.0], "window_size": [600, 600]}
         super(self.__class__, self).__init__(d)
         self.should_save_config = True
         if filename is not None:
@@ -287,17 +289,17 @@ class VViewOptions:
         except getopt.GetoptError as err:
             sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
 
             elif o == "--version":
                 print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
-                exit(0)
+                sys.exit(0)
 
             elif o == "--tmin":
                 self.min_time = float(a)
@@ -405,7 +407,7 @@ class VViewOptions:
 
         else:
             self.usage()
-            exit(1)
+            sys.exit(1)
 
     def display(self):
         display_str = f"""[io.VViewOptions] Display vview options:
@@ -497,16 +499,16 @@ class VExportOptions(VViewOptions):
         except getopt.GetoptError as err:
             sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
             if o == "--version":
                 print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
-                exit(0)
+                sys.exit(0)
             if o == "--global-filter":
                 self.global_filter = True
             if o == "--start-step":
@@ -533,7 +535,7 @@ class VExportOptions(VViewOptions):
 
         else:
             self.usage()
-            exit(1)
+            sys.exit(1)
 
 
 class VRawDataExportOptions(VViewOptions):
@@ -598,16 +600,16 @@ class VRawDataExportOptions(VViewOptions):
         except getopt.GetoptError as err:
             sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
             if o == "--version":
                 print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
-                exit(0)
+                sys.exit(0)
             if o == "--start-step":
                 self.start_step = int(a)
             if o == "--end-step":
@@ -628,7 +630,7 @@ class VRawDataExportOptions(VViewOptions):
                 self.io_filename = args[0]
             else:
                 self.usage()
-                exit(1)
+                sys.exit(1)
 
 
 # Utilities
@@ -747,12 +749,12 @@ class InputObserver:
         self.vview.renderer_window.Render()
 
     def set_opacity(self):
-        for instance, actors in self.vview.dynamic_actors.items():
+        for actors in self.vview.dynamic_actors.values():
             for actor, _, _ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
     def set_opacity_static(self):
-        for instance, actors in self.vview.static_actors.items():
+        for actors in self.vview.static_actors.values():
             for actor, _, _ in actors:
                 actor.GetProperty().SetOpacity(self._opacity_static)
 
@@ -1041,8 +1043,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self.polydata = vtk.vtkPolyData()
         self.stream_actor = None
         self.ctf = vtk.vtkColorTransferFunction()
-        self.fem_actors = dict()
-        self.fem_disp_arrays = dict()
+        self.fem_actors = {}
+        self.fem_disp_arrays = {}
         self.options = opts
 
     def InitGlyphs(self):
@@ -1556,32 +1558,32 @@ class IOReader(VTKPythonAlgorithmBase):
         )
         self._mu_coefs = numpy.unique(self._icf_data[:, 1], return_index=False)
 
-        self.cpa_at_time = dict()
-        self.cpa = dict()
+        self.cpa_at_time = {}
+        self.cpa = {}
 
-        self.cpb_at_time = dict()
-        self.cpb = dict()
+        self.cpb_at_time = {}
+        self.cpb = {}
 
-        self.cf_at_time = dict()
-        self.cf = dict()
+        self.cf_at_time = {}
+        self.cf = {}
 
-        self.cn_at_time = dict()
-        self.cn = dict()
+        self.cn_at_time = {}
+        self.cn = {}
 
-        self.ids_at_time = dict()
-        self.ids = dict()
+        self.ids_at_time = {}
+        self.ids = {}
 
-        self.dom_at_time = [dict(), None][self._idom_data is None]
-        self.dom = dict()
+        self.dom_at_time = [{}, None][self._idom_data is None]
+        self.dom = {}
 
-        self._all_objs_pos = dict()
-        self._all_objs_pos_vtk = dict()
+        self._all_objs_pos = {}
+        self._all_objs_pos_vtk = {}
 
-        self._points = dict()
-        self._contact_field = dict()
-        self._output = dict()
-        self._objs_points = dict()
-        self._objs_output = dict()
+        self._points = {}
+        self._contact_field = {}
+        self._output = {}
+        self._objs_points = {}
+        self._objs_output = {}
 
         for mu in self._mu_coefs:
             # the contact points
@@ -1620,48 +1622,48 @@ class VView:
         self.io = io
         self.refs = []
         self.refs_attrs = []
-        self.shape = dict()
-        self.pos = dict()
-        self.mass = dict()
-        self.inertia = dict()
+        self.shape = {}
+        self.pos = {}
+        self.mass = {}
+        self.inertia = {}
 
-        self.contact_posa = dict()
-        self.contact_posb = dict()
-        self.contact_pos_force = dict()
-        self.contact_pos_norm = dict()
+        self.contact_posa = {}
+        self.contact_posb = {}
+        self.contact_pos_force = {}
+        self.contact_pos_norm = {}
 
-        self.cone = dict()
-        self.cone_glyph = dict()
-        self.cmapper = dict()
-        self.cLUT = dict()
-        self.cactor = dict()
-        self.arrow = dict()
-        self.cylinder = dict()
-        self.sphere = dict()
-        self.arrow_glyph = dict()
-        self.gmapper = dict()
-        self.gactor = dict()
-        self.ctransform = dict()
-        self.cylinder_glyph = dict()
-        self.clmapper = dict()
-        self.sphere_glypha = dict()
-        self.sphere_glyphb = dict()
-        self.smappera = dict()
-        self.smapperb = dict()
-        self.sactora = dict()
-        self.sactorb = dict()
-        self.clactor = dict()
-        self.cell_connectors = dict()
-        self.times_of_birth = dict()
-        self.times_of_death = dict()
+        self.cone = {}
+        self.cone_glyph = {}
+        self.cmapper = {}
+        self.cLUT = {}
+        self.cactor = {}
+        self.arrow = {}
+        self.cylinder = {}
+        self.sphere = {}
+        self.arrow_glyph = {}
+        self.gmapper = {}
+        self.gactor = {}
+        self.ctransform = {}
+        self.cylinder_glyph = {}
+        self.clmapper = {}
+        self.sphere_glypha = {}
+        self.sphere_glyphb = {}
+        self.smappera = {}
+        self.smapperb = {}
+        self.sactora = {}
+        self.sactorb = {}
+        self.clactor = {}
+        self.cell_connectors = {}
+        self.times_of_birth = {}
+        self.times_of_death = {}
         self.min_time = self.opts.min_time
         self.max_time = self.opts.max_time
 
         self.with_fem = False
-        self.transforms = dict()
-        self.transformers = dict()
+        self.transforms = {}
+        self.transformers = {}
 
-        self.offsets = dict()
+        self.offsets = {}
 
         self.io_reader = IOReader(self.opts)
 
@@ -2360,11 +2362,11 @@ class VView:
         for shape_name in self.io.shapes():
             self.init_shape(shape_name)
 
-        for shape_name in self.mappers.keys():
+        for shape_name in self.mappers:
             if shape_name not in self.unfrozen_mappers:
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
         if self.opts.with_edges:
-            for shape_name in self.mappers_edges.keys():
+            for shape_name in self.mappers_edges:
                 if shape_name not in self.unfrozen_mappers_edges:
                     self.unfrozen_mappers_edges[shape_name] = next(
                         self.mappers_edges[shape_name]
@@ -2610,9 +2612,9 @@ class VView:
             pass
 
         if instid >= 0:
-            self.dynamic_actors[instid] = list()
+            self.dynamic_actors[instid] = []
         else:
-            self.static_actors[instid] = list()
+            self.static_actors[instid] = []
 
         for contactor_instance_name in instance:
             self.init_contactor(contactor_instance_name, instance, instid)
@@ -3556,15 +3558,15 @@ class VView:
             if len(times) == 0:
                 print("No dynamic data found!  Empty simulation.")
 
-            self.readers = dict()
-            self.datasets = dict()
-            self.mappers = dict()
-            self.mappers_edges = dict()
-            self.dynamic_actors = dict()
-            self.static_actors = dict()
+            self.readers = {}
+            self.datasets = {}
+            self.mappers = {}
+            self.mappers_edges = {}
+            self.dynamic_actors = {}
+            self.static_actors = {}
             self.vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
-            self.unfrozen_mappers = dict()
-            self.unfrozen_mappers_edges = dict()
+            self.unfrozen_mappers = {}
+            self.unfrozen_mappers_edges = {}
 
             self.build_set_functions()
 

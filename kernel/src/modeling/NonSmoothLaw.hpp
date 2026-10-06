@@ -138,10 +138,6 @@ class NonSmoothLaw {
    */
   virtual void updateInternalVariables(Interaction&) {}
 
-  /** Ask if the Nslaw is active at a given level
-   */
-  virtual bool isActiveAtLevel(Interaction& inter, unsigned int level) { return false; }
-
   // visitors stuff.
   virtual void accept(nonsmooth_laws::Visitor&) const {
     throw std::logic_error("accept (nonsmooth law): no visitor defined");

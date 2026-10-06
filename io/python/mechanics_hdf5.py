@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -94,6 +93,7 @@ def group(h, name, must_exist=True):
             except ValueError:
                 # could not create group, return None
                 # (file is probably in read-only mode)
+                # Note FP: maybe this should be fatal rather than returning None?
                 return None
 
 
@@ -203,7 +203,7 @@ class MechanicsHdf5:
         self._log_data = None
         self._input = None
         self._nslaws_data = None
-        self._nslaws = dict()
+        self._nslaws = {}
         self._out = None
         self._data = None
         self._ref = None
@@ -219,7 +219,8 @@ class MechanicsHdf5:
         self._use_compression = use_compression
         self._should_output_domains = output_domains
         self._verbose = verbose
-        self._fem_dof_mappings = {}  # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
+        self._fem_dof_mappings = {}
+        # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
 
     def __enter__(self):
         """Reminder: this function will be called when a 'with'
@@ -250,22 +251,22 @@ class MechanicsHdf5:
             self._boundary_conditions = group(
                 self._data, "boundary_conditions", must_exist=(self._mode == "w")
             )
-        except Exception as e:
+        except (ValueError, OSError) as e:
             print("Warning -  group(self._data, boundary_conditions ) : ", e)
 
         try:
             self._radii_data = data(
                 self._data, "radii", 2, use_compression=self._use_compression
             )
-        except Exception as e:
-            print("Warning -  group(self._data, radii ) : ", e)
+        except (ValueError, OSError, TypeError) as e:
+            print("Warning -  data(self._data, radii ) : ", e)
 
         try:
             self._p0s_data = data(
                 self._data, "p0s", 4, use_compression=self._use_compression
             )
-        except Exception as e:
-            print("Warning -  group(self._data, p0s ) : ", e)
+        except (ValueError, OSError, TypeError) as e:
+            print("Warning -  data(self._data, p0s ) : ", e)
             self._p0s_data = None
 
         self._static_data = data(
@@ -314,7 +315,7 @@ class MechanicsHdf5:
                 self._cf_data.attrs["info"] += (
                     " [24] : ds 1 number,\n [25] : ds 2 number"
                 )
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics("Warning -  cf_data in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_data, log ) : ", e)
 
@@ -330,7 +331,7 @@ class MechanicsHdf5:
                     " [1] : ds 1 number,\n [3] : ds 2 number,\n"
                 )
                 self._cf_info.attrs["info"] += " [4] : static body number"
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics("Warning -  cf_info in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_info, log ) : ", e)
         try:
@@ -353,7 +354,7 @@ class MechanicsHdf5:
                 self._cf_work.attrs["info"] += (
                     " [6] : contact status,\n [7] : positive norma contact work,\n"
                 )
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
 
@@ -369,7 +370,7 @@ class MechanicsHdf5:
                     "[0] : time,\n [1] : interaction id,\n"
                 )
                 self._cf_internal_variables.attrs["info"] += " ,\n"
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics("Warning -  cf_internal_variables in the hdf5 file")
             self.print_io_mechanics(
                 "        -  group(self._cf_internal_variables, log ) : ", e
@@ -397,7 +398,7 @@ class MechanicsHdf5:
                 )
 
                 self._energy_work.attrs["info"] += "[7,8] only negative part "
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
             self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
 
@@ -416,7 +417,7 @@ class MechanicsHdf5:
                 1,
                 use_compression=self._use_compression,
             )
-        except Exception as e:
+        except (ValueError, OSError, TypeError) as e:
             self.print_io_mechanics(
                 "Warning -  _data siconos_mechanics_run_options in the hdf5 file"
             )
@@ -431,7 +432,7 @@ class MechanicsHdf5:
 
         try:
             self._log_data = group(self._data, "log")
-        except Exception as e:
+        except (ValueError, OSError) as e:
             self.print_io_mechanics("Warning -  _data in the hdf5 file")
             self.print_io_mechanics("        -  group(self._data, log ) : ", e)
 
@@ -596,13 +597,13 @@ class MechanicsHdf5:
         unique_times, indices = np.unique(step_times, return_index=True)
         if step >= len(indices):
             return None
-        start_idx = indices[step]
-        if step + 1 < len(indices):
-            end_idx = indices[step + 1]
-        else:
-            end_idx = len(dyn_data)
+        # start_idx = indices[step]
+        # if step + 1 < len(indices):
+        #     end_idx = indices[step + 1]
+        # else:
+        #     end_idx = len(dyn_data)
         # Count dynamic objects at this step
-        n_dyn = end_idx - start_idx
+        # n_dyn = end_idx - start_idx
         # p0s_data is appended per step, so calculate offset
         # This assumes constant number of fixed-dof objects per step
         # Better: store count per step, but for now assume fixed
@@ -892,7 +893,7 @@ class MechanicsHdf5:
                 raise ValueError(
                     "It is not yet possible to mix 2D and 3D primitives shapes"
                 )
-            self._dimension == 3
+            self._dimension = 3
         self._out.attrs["dimension"] = self._dimension
 
         if name not in self._ref:
@@ -933,7 +934,7 @@ class MechanicsHdf5:
                 raise ValueError(
                     "It is not yet possible to mix 2D and 3D primitives shapes"
                 )
-            self._dimension == 3
+            self._dimension = 3
         self._out.attrs["dimension"] = self._dimension
 
         if name not in self._ref:
@@ -1081,59 +1082,54 @@ class MechanicsHdf5:
 
         is_center_of_mass_computed = False
 
-        if (inertia is None) or (mass is None):
-            # if :
-            # - we need to compute mass or inertia
-            # - and a Volume is present in the shapes list
-            # - and occ is available
-            if any(
-                map(
-                    lambda s: isinstance(s, smct.Volume),
-                    shapes,
-                )
-            ):
-                # --- We compute inertia and center of mass ---
-                # This part requires occ.
-                assert have_occ
-                import siconos.io.occ_tools
+        # - we need to compute mass or inertia
+        # - and a Volume is present in the shapes list
+        # - and occ is available
+        if (
+            (inertia is None)
+            or (mass is None)
+            and any(isinstance(s, smct.Volume) for s in shapes)
+        ):
+            # --- We compute inertia and center of mass ---
+            # This part requires occ.
+            assert have_occ
+            import siconos.io.occ_tools
 
-                # get the list of volumes (as an iterator)
-                volumes = filter(
-                    lambda s: isinstance(s, smct.Volume),
-                    shapes,
-                )
+            # get the list of volumes (as an iterator)
+            volumes = filter(
+                lambda s: isinstance(s, smct.Volume),
+                shapes,
+            )
 
-                # compute mass, inertia for these volumes
-                computed_mass, com, computed_inertia, computed_inertia_matrix = (
-                    siconos.io.occ_tools.compute_inertia_and_center_of_mass(
-                        volumes, self
-                    )
-                )
+            # compute mass, inertia for these volumes
+            computed_mass, com, computed_inertia, computed_inertia_matrix = (
+                siconos.io.occ_tools.compute_inertia_and_center_of_mass(volumes, self)
+            )
 
-                self.print_verbose(f"{name}: computed mass from Volume")
-                self.print_verbose(
-                    f"{name}: computed center of mass:",
-                    com[0],
-                    com[1],
-                    com[2],
-                )
-                self.print_verbose(f"{name}: computed mass:", computed_mass)
-                self.print_verbose(
-                    f"{name}: computed inertia:",
-                    computed_inertia[0],
-                    computed_inertia[1],
-                    computed_inertia[2],
-                )
-                self.print_verbose(
-                    f"{name}: computed inertia matrix:",
-                    computed_inertia_matrix,
-                )
-                is_center_of_mass_computed = True
-                if mass is None:
-                    mass = computed_mass
+            self.print_verbose(f"{name}: computed mass from Volume")
+            self.print_verbose(
+                f"{name}: computed center of mass:",
+                com[0],
+                com[1],
+                com[2],
+            )
+            self.print_verbose(f"{name}: computed mass:", computed_mass)
+            self.print_verbose(
+                f"{name}: computed inertia:",
+                computed_inertia[0],
+                computed_inertia[1],
+                computed_inertia[2],
+            )
+            self.print_verbose(
+                f"{name}: computed inertia matrix:",
+                computed_inertia_matrix,
+            )
+            is_center_of_mass_computed = True
+            if mass is None:
+                mass = computed_mass
 
-                if inertia is None:
-                    inertia = computed_inertia_matrix
+            if inertia is None:
+                inertia = computed_inertia_matrix
 
         obj = group(self._input, name)
 
@@ -1543,8 +1539,8 @@ class MechanicsHdf5:
         name,
         object1,
         object2=None,
-        points=[[0, 0, 0]],
-        axes=[[0, 1, 0]],
+        points=None,
+        axes=None,
         joint_class="PivotJointR",
         absolute=None,
         allow_self_collide=None,
@@ -1557,6 +1553,10 @@ class MechanicsHdf5:
         """
         add a joint between two objects
         """
+        if axes is None:
+            axes = [[0, 1, 0]]
+        if points is None:
+            points = [[0, 0, 0]]
         if name in self.joints():
             raise ValueError(f"Joint {name} already in simulation!")
         else:

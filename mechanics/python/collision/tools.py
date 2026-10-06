@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -107,7 +106,7 @@ class MovedShape:
             self.orientation = ori
             return
 
-        if isinstance(ori, tuple) or isinstance(ori, list):
+        if isinstance(ori, (tuple, list)):
             if len(ori) != 2:  # ori is a tuple
                 raise AssertionError("Wrong input format for orientation")
             # axis + angle
@@ -115,7 +114,7 @@ class MovedShape:
             if len(axis) != 3:
                 raise ValueError("Axis must be a 3D vector.")
             if not isinstance(angle, float):
-                raise ValueError("Angle must be a float.")
+                raise TypeError("Angle must be a float.")
             axis_norm = np.linalg.norm(axis)
             if axis_norm == 0:
                 raise ValueError("Axis vector cannot be the zero vector.")
@@ -125,7 +124,7 @@ class MovedShape:
             )
             return
         else:
-            raise ValueError(
+            raise TypeError(
                 "Orientation must be either an axis-angle pair (3D vector + float)"
                 + " or a quaternion."
             )

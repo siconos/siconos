@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -79,7 +78,7 @@ def quaternion_get(orientation):
             raise AssertionError("quaternion_get. The quaternion must be of size 4")
         return orientation
 
-    if isinstance(orientation, tuple) or isinstance(orientation, list):
+    if isinstance(orientation, (tuple, list)):
         if len(orientation) != 2:  # orientation is a tuple
             raise AssertionError("quaternion_get. Wrong input format")
         # axis + angle
@@ -87,7 +86,7 @@ def quaternion_get(orientation):
         if len(axis) != 3:
             raise ValueError("Axis must be a 3D vector.")
         if not isinstance(angle, float):
-            raise ValueError("Angle must be a float.")
+            raise TypeError("Angle must be a float.")
         axis_norm = np.linalg.norm(axis)
         if axis_norm == 0:
             raise ValueError("Axis vector cannot be the zero vector.")
@@ -95,7 +94,7 @@ def quaternion_get(orientation):
         return np.array([cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n])
 
     else:
-        raise ValueError(
+        raise TypeError(
             "Orientation must be either an axis-angle pair (3D vector + float)"
             + " or a quaternion."
         )

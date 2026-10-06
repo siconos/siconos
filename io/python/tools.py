@@ -51,11 +51,12 @@ def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
     """
     A context manager for a named temporary file.
     """
-    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
-    fid = open(tfilename, "w")
-    if contents is not None:
-        fid.write(contents)
-        fid.flush()
+
+    _fid, tfilename = tempfile.mkstemp(suffix=suffix, prefix=prefix)
+
+    with os.fdopen(_fid, "w") as fid:
+        if contents is not None:
+            fid.write(contents)
 
     class TmpFile:
         def __init__(self, fid, name):
@@ -182,7 +183,7 @@ def load_siconos_mesh(shape_filename, scale=None):
         dims = apoints.max(axis=0) - apoints.min(axis=0)
 
     else:  # assume convex shape
-        coors = dict()
+        coors = {}
         for i in range(points.GetNumberOfTuples()):
             coors[points.GetTuple(i)] = 1
         coors = np.array(coors.keys())

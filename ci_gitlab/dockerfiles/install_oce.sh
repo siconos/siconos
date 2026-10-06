@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 #
 # Usage :
@@ -43,7 +43,7 @@ mkdir -p "$CI_PROJECT_DIR/build/pyocc"
 
 # --- OCE (optional, might be installed using package manager) ---
 if [ -n "$1" ]; then
-    if [[ "$1" == "clone_oce" ]]; then
+    if [ "$1" = "clone_oce" ]; then
         cd "$CI_PROJECT_DIR/" ||exit 1
         git clone https://github.com/tpaviot/oce.git > /dev/null
         mkdir "$CI_PROJECT_DIR/build/oce-last"

@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -209,7 +208,7 @@ class Simplex:
             / 120.0
         )
         imat[1, 0] = imat[0, 1]
-        [p, v] = numpy.linalg.eig(imat)
+        [_p, _v] = numpy.linalg.eig(imat)
         # print('Principal inertia:')
         # print(p)
         # print('Principal direction :')

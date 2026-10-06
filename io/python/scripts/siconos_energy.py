@@ -1,5 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
-
 import getopt
 import os
 import sys
@@ -30,7 +28,7 @@ def plot_min_max_cf_work(filename):
     times = get_data_cf_work(data, 0)
     if times.shape[0] == 0:
         print("no data on in /data/energy_work")
-        exit(0)
+        sys.exit(0)
     # print('times', times)
     times_set = set(times.tolist())
     # print('times_set', times_set)
@@ -145,11 +143,11 @@ def plot_energy(filename):
     time = get_data_energy(data, 0)
     if time.shape[0] == 0:
         print("no data on in /data/energy_work")
-        exit(0)
+        sys.exit(0)
     kinetic = get_data_energy(data, 1)
 
     force_work = np.cumsum(get_data_energy(data, 2))
-    force_work = force_work  # - force_work[-1]
+    # force_work = force_work  # - force_work[-1]
     normal_contact_work = np.cumsum(get_data_energy(data, 3))
     tangent_contact_work = np.cumsum(get_data_energy(data, 4))
 
@@ -345,7 +343,7 @@ try:
 except getopt.GetoptError as err:
     sys.stderr.write(f"{err!s}\n")
     usage()
-    exit(2)
+    sys.exit(2)
 
 with_details = False
 with_save = False
@@ -353,7 +351,7 @@ with_min_max_cf_work = False
 for o, a in opts:
     if o == "--help":
         usage(long=True)
-        exit(0)
+        sys.exit(0)
     if o == "--details":
         with_details = True
     if o == "--save":
@@ -363,7 +361,7 @@ for o, a in opts:
 
 if len(args) < 1:
     usage()
-    exit(0)
+    sys.exit(0)
 else:
     filename = args[0]
 

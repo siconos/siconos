@@ -1,5 +1,7 @@
 # Copyright 2024 INRIA
 
+import sys
+
 import numpy as np
 import siconos.numerics as sn
 
@@ -85,9 +87,8 @@ def test_vi_2D():
     vi.set_box_constraints(lb, ub)
     info = sn.variationalInequality_box_newton_QiLSA(vi, x, F, SO)
     print(info)
-    print(
-        f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
-    )
+    print(f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]}")
+    print(f"; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}")
     print("x = ", x)
     print("F = ", F)
     assert np.linalg.norm(x - xsol_2D) <= xtol
@@ -106,9 +107,8 @@ def test_vi_3D():
     vi.set_box_constraints(lb, ub)
     info = sn.variationalInequality_box_newton_QiLSA(vi, x, F, SO)
     print(info)
-    print(
-        f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
-    )
+    print(f"number of iteration {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]}")
+    print(f"; precision {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}")
     print("x = ", x)
     print("F = ", F)
     assert np.linalg.norm(x - xsol_3D) <= xtol
@@ -211,14 +211,16 @@ def test_vi_C_interface():
                     print(lambda_)
                 info = sn.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
                 print(
-                    f"iter {k} ; solver iter = {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]} ; prec = {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}"
+                    f"iter {k} ; solver iter = {SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]}"
                 )
+                print(f" ; prec = {SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]}")
+
                 if info > 0:
                     print(f"VI solver failed ! info = {info}")
                     print(xk)
                     print(lambda_)
                     print(xkp1)
-                    kaboom()
+                    sys.exit(1)
             sol[k, 0:2] = xkp1
             np.copyto(xk, xkp1, casting="no")
             signs[k, 0:2] = lambda_

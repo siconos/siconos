@@ -7,12 +7,12 @@ import array
 import numpy as np
 from siconos.mechanisms import mbtb
 
-mbtb.MBTB_MAX_BODIES_NUMBER
-mbtb.MBTB_MAX_CONTACTS_NUMBER
-mbtb.MBTB_MAX_JOINTS_NUMBER
+# mbtb.MBTB_MAX_BODIES_NUMBER
+# mbtb.MBTB_MAX_CONTACTS_NUMBER
+# mbtb.MBTB_MAX_JOINTS_NUMBER
 
 initVel = np.array([(0, 0, 0, 0, 0, 0) for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
-fctfext = np.array(["" for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
+# fctfext = np.array(["" for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 fctmext = np.array(["" for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 fctfint = np.array(["" for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])
 fctmint = np.array(["" for i in range(mbtb.MBTB_MAX_BODIES_NUMBER)])

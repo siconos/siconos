@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-
+#!/bin/sh
 # Get number of procs
 if  [ -x "$(command -v nproc)" ]; then
    nbprocs=$(nproc --all)  # linux

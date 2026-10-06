@@ -27,7 +27,7 @@ try:
     import siconos.mechanics.collision.tools as smct
 
     has_mechanics_run = True
-except Exception:
+except ImportError:
     pass
 
 config_native = smrun.RunnerConfig(backend="native")

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # --- Script used to configure, build and test siconos software ---
 #
@@ -54,9 +54,9 @@ CMAKE_VERBOSE_MODE="${CMAKE_VERBOSE_MODE:=-VV}"
 
 # Read conf file from previous step, if any
 # The name of the conf. file is required to set CTEST_BUILD_NAME and ensure proper cdash submissions
-if [[ "$BUILD_MODE" != "configure" ]] &&
-   [[ "$BUILD_MODE" != "all" ]] &&
-   [[ -f "$BUILD_DIR/options.env" ]]; then
+if [ "$BUILD_MODE" != "configure" ] &&
+   [ "$BUILD_MODE" != "all" ] &&
+   [ -f "$BUILD_DIR/options.env" ]; then
     CONF_FILE="$(cat "$BUILD_DIR/options.env")"
     export CONF_FILE
 fi

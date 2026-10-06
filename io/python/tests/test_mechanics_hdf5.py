@@ -26,7 +26,7 @@ try:
     import siconos.io.mechanics_hdf5 as sh5
 
     has_mechanics_io = True
-except Exception:
+except ImportError:
     pass
 
 

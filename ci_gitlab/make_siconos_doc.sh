@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # --- Config and build of Siconos documentation ---
 #
 # Action :

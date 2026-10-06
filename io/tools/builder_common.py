@@ -270,7 +270,7 @@ def write_register_with_bases(dest_file, with_base):
             f"void siconos_io_register_generated_{target.capitalize()}(Archive& ar)\n"
         )
         dest_file.write(
-            "{{\n{0}\n}}\n".format(
+            "{{\n{}\n}}\n".format(
                 "\n".join(
                     f"  ar.register_type(static_cast<{x}*>(NULL));" for x in with_base_s
                 )
@@ -288,7 +288,7 @@ def write_classes(dest_file, classes):
         # Write classes according to whether they have serializable bases
         if len(bases) > 0:
             dest_file.write(
-                "SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n".format(
+                "SICONOS_IO_REGISTER_WITH_BASES({},{},\n".format(
                     clname, "(" + ")(".join(bases) + ")"
                 )
             )

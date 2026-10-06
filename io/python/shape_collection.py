@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -20,6 +19,7 @@
 """Class and tools to handle shapes in siconos.io.mechanics_run"""
 
 import os
+import sys
 
 import h5py
 import numpy as np
@@ -164,8 +164,8 @@ class ShapeCollection:
 
     def __init__(self, io, collision_margin=None, backend="bullet"):
         self._io = io
-        self._shapes = dict()
-        self._tri = dict()
+        self._shapes = {}
+        self._tri = {}
         if collision_margin is None:
             collision_margin = 0.04
         self._collision_margin = collision_margin
@@ -321,12 +321,13 @@ class ShapeCollection:
             elif isinstance(self.url(shape_name), str) and os.path.exists(
                 self.url(shape_name)
             ):
-                self._tri[shape_name], self._shapes[shape_name] = loadMesh(
-                    self.url(shape_name), self._collision_margin
-                )
                 # Warning FP: can't find the function loadMesh anywhere?
                 # Where does it supposed to come from?
-
+                # --> comment next call
+                # self._tri[shape_name], self._shapes[shape_name] = loadMesh(
+                #     self.url(shape_name), self._collision_margin
+                # )
+                sys.exit(1)
             else:
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):

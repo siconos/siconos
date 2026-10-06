@@ -403,7 +403,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
 
   /** update the input of the Interaction attached to this Integrator
    */
-  virtual void updateInput(double time);
+  void updateInput(double time);
 
   /** update the output of the Interaction attached to this Integrator
    *

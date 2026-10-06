@@ -75,7 +75,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEulerR.hpp"
@@ -237,9 +236,10 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
   double* surface = &(*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(1);
   double beta_k = (*internalVariables_k[BinaryCohesiveNSL::BETA_SURFACE])(0);
 
-  double u_N = 0.0;
-  double u_T = 0.0;
-  double u_S = 0.0;
+  // I comment this variables: they are not passed or used anywhere
+  // double u_N = 0.0;
+  // double u_T = 0.0;
+  // double u_S = 0.0;
 
   if (beta_k > 0.0) {
     double delta = 0.0;
@@ -299,9 +299,9 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
       delta = u.norm();
       DEBUG_EXPR_WE(std::cout << "delta :" << delta << std::endl;);
 
-      u_N = u.dot(nc_0);
-      u_T = u.dot(t1_0);
-      u_S = u.dot(t2_0);
+      // u_N = u.dot(nc_0);
+      // u_T = u.dot(t1_0);
+      // u_S = u.dot(t2_0);
 
       siconos::algebra::SiconosVector3 jump_in_contact_frame;
 
@@ -321,9 +321,9 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
         delta = (*inter.y(0))(0);
       } else {
         delta = inter.y(0)->norm();
-        const auto& y = *inter.y(0);
-        u_T = y(1);
-        u_S = y(2);
+        // const auto& y = *inter.y(0);
+        // u_T = y(1);
+        // u_S = y(2);
       }
     }
 
@@ -371,7 +371,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
 }
 
 bool BinaryCohesiveNSL::isActiveAtLevel(siconos::modeling::Interaction& inter,
-                                        unsigned int level) {
+                                        unsigned int level) const {
   auto internalVars = inter.internalVariables();
   if (!internalVars) return (level == 1);  // Default behavior
 

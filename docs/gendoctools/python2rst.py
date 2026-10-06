@@ -95,14 +95,14 @@ def build_python_api_main(outputdir):
 
         f.write(".. grid:: 3\n")
         f.write(f"{first_indent}:gutter: 3\n\n")
-        for name in modules_docs:
+        for name, value in modules_docs.items():
             rst = rst_dir / f"{name}.rst"
             if rst.exists():
                 f.write(f"{first_indent}.. grid-item-card:: {name}\n")
                 f.write(f"{second_indent}:link: python/{name}\n")
                 f.write(f"{second_indent}:class-card: sd-bg-code\n")
                 f.write(f"{second_indent}:link-type: doc\n\n")
-                f.write(f"{second_indent}{modules_docs[name]}\n\n")
+                f.write(f"{second_indent}{value}\n\n")
                 # f.write(f"* :doc:`{name} <python/{name}>` : {modules_docs[name]}\n")
         f.write("\n")
 

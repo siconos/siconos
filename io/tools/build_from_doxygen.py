@@ -58,7 +58,7 @@ def classes_from_build_path(build_path, targets):
     provided build path."""
     doxy_xml_path = os.path.join(build_path, "docs/build/doxygen/xml4rst")
     if not os.path.exists(doxy_xml_path):
-        print('%s: Error, path "%s" does not exist.' % (sys.argv[0], doxy_xml_path))
+        print(f'{sys.argv[0]}: Error, path "{doxy_xml_path}" does not exist.')
         sys.exit(1)
 
     doxy_xml_files = []
@@ -132,7 +132,7 @@ def classes_from_headers(all_headers, include_paths):
         hpp = os.path.join(d, "headers.hpp")
         compiled = os.path.join(d, "out.cpp")
         with open(hpp, "w") as h:
-            [print('#include "%s"' % i, file=h) for i in all_headers]
+            [print(f'#include "{i}"', file=h) for i in all_headers]
         cxx = "g++"
         if "CXX" in os.environ:
             cxx = os.environ["CXX"]
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         if "::" in k:
             # (a bit loose but we can't forward-declare them so match
             # individual elements instead)
-            return all([c in h for c in k.split("::")])
+            return all(c in h for c in k.split("::"))
         return k in h
 
     # Find the join of the two lists
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     print(f"{len(classes)} classes found.")
 
     if len(classes) < 10:
-        print("%s: Error, not enough classes found." % sys.argv[0])
+        print(f"{sys.argv[0]}: Error, not enough classes found.")
         sys.exit(1)
 
     assign_targets(classes, source_dir)

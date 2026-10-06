@@ -52,17 +52,17 @@ try:
 except getopt.GetoptError as err:
     sys.stderr.write(f"{err!s}\n")
     usage()
-    exit(2)
+    sys.exit(2)
 
 ascii_mode = False
 
 for o, a in opts:
     if o == "--help":
         usage(long=True)
-        exit(0)
+        sys.exit(0)
     if o == "--version":
         print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
-        exit(0)
+        sys.exit(0)
     if o in ("--ascii"):
         ascii_mode = True
 
@@ -78,7 +78,7 @@ if len(args) > 0:
 
 else:
     usage()
-    exit(1)
+    sys.exit(1)
 
 # Heavier imports after command line parsing
 import bisect
@@ -124,11 +124,11 @@ def add_compatiblity_methods(obj):
         obj.AddInputData = obj.AddInput
 
 
-transforms = dict()
-transformers = dict()
-data_connectors_v = dict()
-data_connectors_t = dict()
-data_connectors_d = dict()
+transforms = {}
+transformers = {}
+data_connectors_v = {}
+data_connectors_t = {}
+data_connectors_d = {}
 
 big_data_source = vtk.vtkMultiBlockDataGroupFilter()
 add_compatiblity_methods(big_data_source)
@@ -136,8 +136,8 @@ add_compatiblity_methods(big_data_source)
 big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
 add_compatiblity_methods(big_data_writer)
 
-contactors = dict()
-offsets = dict()
+contactors = {}
+offsets = {}
 
 vtkmath = vtk.vtkMath()
 
@@ -252,10 +252,9 @@ def step_reader(step_string):
             step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
             step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
 
-            ok = step_reader.TransferRoot(1)
+            step_reader.TransferRoot(1)
             nbs = step_reader.NbShapes()
 
-            l = []
             for i in range(1, nbs + 1):
                 shape = step_reader.Shape(i)
 
@@ -298,10 +297,10 @@ def brep_reader(brep_string, indx):
 
 refs = []
 refs_attrs = []
-shape = dict()
+shape = {}
 
-pos = dict()
-instances = dict()
+pos = {}
+instances = {}
 
 with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
@@ -418,7 +417,7 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
     #  Step 2
     #
     #
-    readers = dict()
+    readers = {}
     vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
 
     for shape_name in io.shapes():

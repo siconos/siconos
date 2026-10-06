@@ -38,7 +38,7 @@ def test_from_csr1():
 
     blocksize = 3
 
-    r, SBM = SBM_from_csparse(blocksize, M)
+    _, SBM = SBM_from_csparse(blocksize, M)
 
     assert SBM_get_value(SBM, 0, 0) == 1
     assert SBM_get_value(SBM, 0, 1) == 2
@@ -61,7 +61,7 @@ def test_from_csc1():
 
     blocksize = 3
 
-    r, SBM = SBM_from_csparse(blocksize, M)
+    _, SBM = SBM_from_csparse(blocksize, M)
 
     assert SBM_get_value(SBM, 0, 0) == 1
     assert SBM_get_value(SBM, 0, 1) == 2
@@ -83,7 +83,7 @@ def test_from_csr2():
     print(M.indptr)
     print(M.data)
     blocksize = 1
-    r, SBM = SBM_from_csparse(blocksize, M)
+    _, SBM = SBM_from_csparse(blocksize, M)
 
     assert SBM_get_value(SBM, 0, 0) == 1
     assert SBM_get_value(SBM, 0, 1) == 2
@@ -108,7 +108,7 @@ def test_from_csc162x162(datafile):  # uses datafile pytest fixture
     # M = load_npz('data/csc162x162.npz')
 
     blocksize = 9
-    r, SBM = SBM_from_csparse(blocksize, M)
+    _, SBM = SBM_from_csparse(blocksize, M)
     assert SBM_get_value(SBM, 0, 0) == M[0, 0]
     assert SBM_get_value(SBM, 161, 161) == M[161, 161]
 
@@ -139,7 +139,7 @@ def test_SBM_to_sparse1(datafile):  # uses datafile pytest fixture
 
     SBM = SBM_new_from_file(datafile("SBM1.dat"))
 
-    r, A = SBM_to_sparse(SBM)
+    _, A = SBM_to_sparse(SBM)
 
     for i in range(A.shape[0]):
         for j in range(A.shape[1]):
@@ -155,7 +155,7 @@ def test_SBM_from_csparse1():
 
     M = csr_matrix(A)
 
-    v, SBM = SBM_from_csparse(2, M)
+    _, SBM = SBM_from_csparse(2, M)
 
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
@@ -166,9 +166,9 @@ def test_SBM_to_SBM_from_csparse(datafile):  # uses datafile pytest fixture
 
     SBM1 = SBM_new_from_file(datafile("SBM1.dat"))
 
-    r, SPARSE = SBM_to_sparse(SBM1)
+    _, SPARSE = SBM_to_sparse(SBM1)
 
-    v, SBM2 = SBM_from_csparse(3, SPARSE)
+    _, SBM2 = SBM_from_csparse(3, SPARSE)
 
     assert SBM1.nbblocks == SBM2.nbblocks
     assert SBM1.blocknumber0 == SBM2.blocknumber0

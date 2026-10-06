@@ -228,7 +228,7 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
 
                 return result
 
-    obj_by_id = dict()
+    obj_by_id = {}
     for instance in io.instances():
         obj_by_id[io.instances()[instance].attrs["id"]] = instance
 

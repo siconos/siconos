@@ -18,6 +18,8 @@
 
 
 # this may be run with mpirun -np <nb processes>
+import sys
+
 import numpy
 import scipy.sparse
 from mpi4py import MPI
@@ -41,7 +43,7 @@ def test_nm_mumps():
 
     if comm.Get_rank() > 0:
         # when rank 0 executes NM_MUMPS(M, 0)
-        exit(0)
+        sys.exit(0)
 
     # only on rank 0:
 

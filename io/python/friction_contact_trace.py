@@ -1,22 +1,20 @@
-#!/usr/bin/env python
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
-
-# Copyright 2024 INRIA.
-
+#
+# Copyright 2026 INRIA.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 
 import siconos.numerics as sn
 from siconos.nonsmooth_formulations import (
@@ -256,47 +254,44 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
         info = self.solve()
         problem = self.globalFrictionContactProblemPtr()
-        if problem.numberOfContacts > 0:
-            if self.condition(SO) and has_fclib:
-                # problem = self.getNumericsProblemPtr()
-                # print(problem, type(problem))
+        if problem.numberOfContacts > 0 and self.condition(SO) and has_fclib:
+            # problem = self.getNumericsProblemPtr()
+            # print(problem, type(problem))
 
-                # solver_maxiter = SO.iparam[0]
-                # n_format_string = len(str(solver_maxiter))
-                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+            # solver_maxiter = SO.iparam[0]
+            # n_format_string = len(str(solver_maxiter))
+            format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
-                filename = format_string.format(
-                    self._params._fileName,
-                    problem.q.shape[0],
-                    problem.numberOfContacts,
-                    self._counter,
+            filename = format_string.format(
+                self._params._fileName,
+                problem.q.shape[0],
+                problem.numberOfContacts,
+                self._counter,
+            )
+            print(filename)
+            if os.path.exists(filename):
+                os.remove(filename)
+                print(
+                    "WARNING: file " + filename + " was existing and has been replaced"
                 )
-                print(filename)
-                if os.path.exists(filename):
-                    os.remove(filename)
-                    print(
-                        "WARNING: file "
-                        + filename
-                        + " was existing and has been replaced"
-                    )
 
-                self._counter += 1
-                sn.globalFrictionContact_fclib_write(
-                    problem,
-                    self._params._title,
-                    self._params._description,
-                    self._params._mathInfo,
-                    filename,
-                )
-                guess = F.fclib_solution()
-                guess.u = w_backup
-                guess.r = z_backup
-                F.fclib_write_guesses(1, guess, filename)
+            self._counter += 1
+            sn.globalFrictionContact_fclib_write(
+                problem,
+                self._params._title,
+                self._params._description,
+                self._params._mathInfo,
+                filename,
+            )
+            guess = F.fclib_solution()
+            guess.u = w_backup
+            guess.r = z_backup
+            F.fclib_write_guesses(1, guess, filename)
 
-                solution = F.fclib_solution()
-                solution.u = self.w()
-                solution.z = self.z()
-                F.fclib_write_solution(solution, filename)
+            solution = F.fclib_solution()
+            solution.u = self.w()
+            solution.z = self.z()
+            F.fclib_write_solution(solution, filename)
 
         self.postCompute()
 
@@ -354,51 +349,48 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
 
         info = self.solve()
         problem = self.globalRollingFrictionContactProblemPtr()
-        if problem.numberOfContacts > 0:
-            if self.condition(SO) and has_fclib:
-                # if True:
-                # problem = self.getNumericsProblemPtr()
-                # print(problem, type(problem))
+        if problem.numberOfContacts > 0 and self.condition(SO) and has_fclib:
+            # if True:
+            # problem = self.getNumericsProblemPtr()
+            # print(problem, type(problem))
 
-                # solver_maxiter = SO.iparam[0]
-                # n_format_string = len(str(solver_maxiter))
-                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+            # solver_maxiter = SO.iparam[0]
+            # n_format_string = len(str(solver_maxiter))
+            format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
-                filename = format_string.format(
-                    self._params._fileName,
-                    problem.q.shape[0],
-                    problem.numberOfContacts,
-                    self._counter,
+            filename = format_string.format(
+                self._params._fileName,
+                problem.q.shape[0],
+                problem.numberOfContacts,
+                self._counter,
+            )
+            print(filename)
+            if os.path.exists(filename):
+                os.remove(filename)
+                print(
+                    "WARNING: file " + filename + " was existing and has been replaced"
                 )
-                print(filename)
-                if os.path.exists(filename):
-                    os.remove(filename)
-                    print(
-                        "WARNING: file "
-                        + filename
-                        + " was existing and has been replaced"
-                    )
 
-                self._counter += 1
+            self._counter += 1
 
-                print(type(problem))
+            print(type(problem))
 
-                sn.globalRollingFrictionContact_fclib_write(
-                    problem,
-                    self._params._title,
-                    self._params._description,
-                    self._params._mathInfo,
-                    filename,
-                )
-                guess = F.fclib_solution()
-                guess.u = w_backup
-                guess.r = z_backup
-                F.fclib_write_guesses(1, guess, filename)
+            sn.globalRollingFrictionContact_fclib_write(
+                problem,
+                self._params._title,
+                self._params._description,
+                self._params._mathInfo,
+                filename,
+            )
+            guess = F.fclib_solution()
+            guess.u = w_backup
+            guess.r = z_backup
+            F.fclib_write_guesses(1, guess, filename)
 
-                solution = F.fclib_solution()
-                solution.u = self.w()
-                solution.z = self.z()
-                F.fclib_write_solution(solution, filename)
+            solution = F.fclib_solution()
+            solution.u = self.w()
+            solution.z = self.z()
+            F.fclib_write_solution(solution, filename)
 
         self.postCompute()
 

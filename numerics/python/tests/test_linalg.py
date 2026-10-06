@@ -166,14 +166,14 @@ def test_convert(datafile):
 
     hacklist = [fcp]
 
-    try:
-        # cheap test ...
-        data_fclib = (
-            datafile("LMGC_GFC3D_CubeH8.hdf5"),
-            datafile("LMGC_GlobalFrictionContactProblem00046.hdf5"),
-        )
+    # cheap test ...
+    data_fclib = (
+        datafile("LMGC_GFC3D_CubeH8.hdf5"),
+        datafile("LMGC_GlobalFrictionContactProblem00046.hdf5"),
+    )
 
-        for d in data_fclib:
+    for d in data_fclib:
+        try:
             fcp = sn.globalFrictionContact_fclib_read(d)
             hacklist.append(fcp)
 
@@ -188,8 +188,8 @@ def test_convert(datafile):
 
             mat.append(MM)
             mat.append(HH)
-    except:
-        pass
+        except RuntimeError:
+            pass
 
     for m in mat:
         print("testing")

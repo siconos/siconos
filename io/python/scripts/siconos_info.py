@@ -30,7 +30,7 @@ from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 
 def summarize(io):
-    spos_data = io.static_data()
+    io.static_data()
     dpos_data = io.dynamic_data()
     cf_data = io.contact_forces_data()
     solv_data = io.solver_data()
@@ -49,8 +49,8 @@ def summarize(io):
         min_cf = 0
 
     print()
-    print("            {0:>10} {1:>10} {2:>10}".format("Min", "Avg", "Max"))
-    print("            {0:->10} {1:->10} {2:->10}".format("", "", ""))
+    print("            {:>10} {:>10} {:>10}".format("Min", "Avg", "Max"))
+    print("            {:->10} {:->10} {:->10}".format("", "", ""))
     print(
         f"Objects:    {counts.min(): >10} {int(counts.mean()): >10} {counts.max(): >10}"
     )
@@ -76,11 +76,11 @@ def list_objects(io):
     print()
     print("Objects:")
     print()
-    print("{0:>5} {1:>15} {2:>6} {3:>6}".format("Id", "Name", "Mass", "ToB"))
+    print("{:>5} {:>15} {:>6} {:>6}".format("Id", "Name", "Mass", "ToB"))
     print("{0:->5} {0:->15} {0:->6} {0:->6}".format(""))
     for name, obj in io.instances().items():
         print(
-            "{0:>5} {1:>15} {2:>6.4g} {3:>6.4g}".format(
+            "{:>5} {:>15} {:>6.4g} {:>6.4g}".format(
                 obj.attrs["id"], name, obj.attrs["mass"], obj.attrs["time_of_birth"]
             )
         )
@@ -90,15 +90,15 @@ def list_contactors(io):
     print()
     print("Contactors:")
     print()
-    print("{0:>5} {1:>15} {2:>9} {3:>9}".format("Id", "Name", "Type", "Primitive"))
+    print("{:>5} {:>15} {:>9} {:>9}".format("Id", "Name", "Type", "Primitive"))
     print("{0:->5} {0:->15} {0:->9} {0:->9}".format(""))
     for name, obj in io.shapes().items():
         print(
-            "{0:>5} {1:>15} {2:>9} {3:>9}".format(
+            "{:>5} {:>15} {:>9} {:>9}".format(
                 obj.attrs["id"],
                 name,
                 obj.attrs["type"],
-                obj.attrs["primitive"] if "primitive" in obj.attrs else "",
+                obj.attrs.get("primitive", ""),
             )
         )
 
@@ -106,9 +106,9 @@ def list_contactors(io):
 def compute_violation(io):
     cf_data = io.contact_forces_data()
     gap = cf_data[:, 14]
-    negative_gap = C = np.where(gap < 0, gap, 0.0)
+    negative_gap = np.where(gap < 0, gap, 0.0)
 
-    print("            {0:>10} {1:>10} {2:>10}".format("Min", "Avg", "std"))
+    print("            {:>10} {:>10} {:>10}".format("Min", "Avg", "std"))
 
     print(
         f"Violation:  {negative_gap.min(): >10.2e} {negative_gap.mean(): >10.2e} {negative_gap.std(): >10.2e}"

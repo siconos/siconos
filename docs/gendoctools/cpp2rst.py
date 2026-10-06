@@ -670,7 +670,7 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
     # --> default values for missing keys
 
     if outputname.stem == "autodoc_functions":
-        for refid, (kind, name, descr, target, declared_in) in all_index.items():
+        for refid, (kind, name, descr, target, declared_in) in all_index.values():
             if kind != "function":
                 continue
             namespaces["Functions"].append(

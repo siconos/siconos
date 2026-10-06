@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # -- Fclib download --
 cd "$HOME"||exit 1

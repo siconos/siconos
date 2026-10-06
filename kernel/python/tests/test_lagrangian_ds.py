@@ -22,6 +22,7 @@ from kernel/modelingtools
 
 import addons.computeLDS
 import numpy as np
+import pytest
 import scipy.sparse as sp
 import siconos.modeling as sm
 from scipy.sparse import csc_array
@@ -337,11 +338,8 @@ def call_ds_alias(dstype, ndof):
     ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
     ds.setConstantMass(mass, sm.alias_t)
-    try:
+    with pytest.raises(RuntimeError):
         M = ds.mass_view
-        assert False
-    except Exception:
-        print("ok")
 
     M = ds.mass_alias
     mass[0, 0] = -99.0
@@ -364,12 +362,9 @@ def call_ds_copy(dstype, ndof):
     ds = dstype(initial_position, initial_velocity, sm.alias_t)
 
     ds.setConstantMass(mass, sm.copy_t)
-    try:
-        M = ds.mass_alias
-        assert False
 
-    except Exception:
-        print("ok")
+    with pytest.raises(RuntimeError):
+        M = ds.mass_alias
 
     M = ds.mass_view
     vec = rng.random(ds.dimension)

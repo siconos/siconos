@@ -151,7 +151,7 @@ def normalize_shape(vertices, y_aspect_ratio, z_aspect_ratio, dest_vol):
     # 4- Set volume
     # assume density:=1 for now, so inertia will be recomputed later as
     # it is proportionnal to density
-    base_inertia, start_volume = siconos_convex_hull.inertia([0.0, 0.0, 0.0])
+    _base_inertia, start_volume = siconos_convex_hull.inertia([0.0, 0.0, 0.0])
     vol_factor = dest_vol / start_volume
     coord_factor = vol_factor ** (1 / 3)
     vertices *= coord_factor  # homothetic transform -> now vol=dest_vol
@@ -267,7 +267,7 @@ def generate_random_blocks(io, drop_config, rock_config):
         vertices = np.array(vertices)[:] - cm[:]
         # ch = ConvexHull(vertices)
         # cm = ch.centroid()
-        inertia, area = ch.inertia(cm)
+        inertia, _area = ch.inertia(cm)
         mass_block = rock_config.density * rock_config.volume_max
 
         inertia = inertia * mass_block

@@ -37,7 +37,7 @@
 
 #include "CohesiveFrictionContact.hpp"
 
-#include <algorithm>
+// #include <algorithm>
 
 #include "FrictionContact.hpp"
 // #include <boost/smart_ptr/shared_ptr.hpp>
@@ -342,7 +342,7 @@ void CohesiveFrictionContact::computeMatrices() {
   // This is similar to the M matrix computation but for indexSet0 interactions
 
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
-    siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+    // siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
     siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
     siconos::graphs::DynamicalSystemsGraph& DSG0 =
         *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -411,7 +411,7 @@ bool CohesiveFrictionContact::preCompute(double time) {
   // Ugly Hack to get theta
   // we should consider a vector of theta
 
-  siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  // siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
   double theta = 0.0;
   for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {

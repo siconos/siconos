@@ -99,6 +99,8 @@ pre-commit:
   variables:
     PRE_COMMIT_HOME: $CI_PROJECT_DIR/.cache/pre-commit
   script:
+    # to avoid "fatal: detected dubious ownership in repository "
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - pip install prek pre-commit
     - prek run --all-files
   cache:

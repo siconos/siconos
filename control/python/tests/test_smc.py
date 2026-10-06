@@ -17,6 +17,7 @@
 #
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 
+import sys
 from math import ceil, sin
 
 import numpy as np
@@ -42,7 +43,7 @@ def test_smc1():
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
-    N = int(ceil((T - t0) / h + 10))  # number of time steps
+    N = ceil((T - t0) / h + 10)  # number of time steps
     outputSize = 4  # number of variable to store at each time step
 
     # Matrix declaration
@@ -56,7 +57,7 @@ def test_smc1():
     # Simple check
     if h > hControl:
         print("hControl must be bigger than h")
-        exit(1)
+        sys.exit(1)
 
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
@@ -114,7 +115,7 @@ def test_smc1():
         processSimulation.nextStep()
     #    print processSimulation.nextTime()
     # Resize matrix
-    ### dataPlot.resize(k, outputSize)
+    # dataPlot.resize(k, outputSize)
 
 
 # Same test, but with the simplified interface
@@ -146,7 +147,7 @@ def test_smc2(datafile):  # uses datafile pytest fixture
     # Simple check
     if h > hControl:
         print("hControl must be bigger than h")
-        exit(1)
+        sys.exit(1)
 
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
@@ -172,7 +173,7 @@ def test_smc2(datafile):  # uses datafile pytest fixture
     # compare with the reference
     ref = np.loadtxt(datafile("smc_2.ref.gz"))
     np.savetxt("smc_2.dat", dataPlot)
-    print("%e" % la.norm(dataPlot - ref))
+    print(f"{la.norm(dataPlot - ref):}")
     if la.norm(dataPlot - ref) > 5e-12:
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
