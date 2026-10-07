@@ -148,14 +148,15 @@ void dr_nlgs(RelayProblem* problem, double* z, double* w, int* info, SolverOptio
  * This error is divided by \f$ \|q\| \f$ and then compared to tol.
  * \param[in] problem structure that represents the Relay (M, q...)
  * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- * solution of the problem. \param[in,out] w a n-vector of doubles which returns the solution
- * of the problem. \param[in] tolerance threshold used to validate the solution: if the error
- * is less than this value, the solution is accepted \param[in,out] error the actual error of
- * the solution with respect to the problem \return status: 0 : convergence, 1: error >
- * tolerance
+ * solution of the problem.
+ * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ * \param[in] tolerance threshold used to validate the solution: if the error
+ * is less than this value, the solution is accepted
+ * \param[in,out] error the actual error of the solution with respect to the problem
+ * \return status: 0 : convergence, 1: error > tolerance
  */
-int relay_compute_error(RelayProblem* problem, const double* restrict z,
-                        const double* restrict w, double tolerance, double* restrict error);
+int relay_compute_error(RelayProblem* problem, const double* restrict z, double* restrict w,
+                        double tolerance, double* restrict error);
 
 /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector \f$z\f$
  * \param[in,out] z a n-vector of doubles which returns the projection

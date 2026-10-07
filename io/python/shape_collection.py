@@ -92,10 +92,10 @@ def load_vtp_file(shape_ref):
         data = shape_ref[:][0]
         # fix compatibility with h5py version
         # to be removed in the future
-        tmpf[0].write(data.decode("utf-8"))
-        tmpf[0].flush()
+        tmpf.fid.write(data.decode("utf-8"))
+        tmpf.fid.flush()
         scale = shape_ref.attrs.get("scale", None)
-        mesh, dims = siconos.io.tools.load_siconos_mesh(tmpf[1], scale=scale)
+        mesh, dims = siconos.io.tools.load_siconos_mesh(tmpf.name, scale=scale)
         mesh.setInsideMargin(shape_ref.attrs.get("insideMargin", min(dims) * 0.02))
         mesh.setOutsideMargin(shape_ref.attrs.get("outsideMargin", 0))
     return mesh

@@ -425,10 +425,10 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
         if shape_type in ["vtp", "stl"]:
             with io.tmpfile() as tmpf:
-                tmpf[0].write(str(io.shapes()[shape_name][:][0]))
-                tmpf[0].flush()
+                tmpf.fid.write(str(io.shapes()[shape_name][:][0]))
+                tmpf.fid.flush()
                 reader = vtk_reader[shape_type]()
-                reader.SetFileName(tmpf[1])
+                reader.SetFileName(tmpf.name)
                 reader.Update()
                 readers[shape_name] = reader
 

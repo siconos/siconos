@@ -51,33 +51,28 @@ def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
     """
     A context manager for a named temporary file.
     """
+    fd, filename = tempfile.mkstemp(
+        suffix=suffix,
+        prefix=prefix,
+    )
+    fid = os.fdopen(fd, "w")
 
-    _fid, tfilename = tempfile.mkstemp(suffix=suffix, prefix=prefix)
-
-    with os.fdopen(_fid, "w") as fid:
+    try:
         if contents is not None:
             fid.write(contents)
+            fid.flush()
 
-    class TmpFile:
-        def __init__(self, fid, name):
-            self.fid = fid
-            self.name = name
+        class TmpFile:
+            def __init__(self, fid, name):
+                self.fid = fid
+                self.name = name
 
-        def __getitem__(self, n):
-            if n == 0:
-                return self.fid
-            elif n == 1:
-                return self.name
-            else:
-                raise IndexError
+        yield TmpFile(fid, filename)
 
-    r = TmpFile(fid, tfilename)
-
-    yield r
-    fid.close()
-    os.close(_fid)
-    if not debug:
-        os.remove(tfilename)
+    finally:
+        fid.close()
+        if not debug:
+            os.remove(filename)
 
 
 def warn(msg):

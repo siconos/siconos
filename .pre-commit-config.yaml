@@ -48,6 +48,6 @@ repos:
     hooks:
       - id: ruff         # lint (--fix=default)
         exclude: ^(externals|vkernel/|io/python/vview.py|io/python/scripts/siconos_filter.py|io/python/scripts/siconos_compare.py|python/scripts/xml_parser.py$)
-        args: [--fix, --unsafe-fixes]
+        args: [--fix]
       - id: ruff-format  # format
         exclude: ^externals/

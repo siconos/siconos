@@ -70,7 +70,7 @@ typedef struct {
   int solver_options_index; /* index in options->internalSolvers used by this type */
   int (*solve_local)(GMP_LocalProblem* local, double* diag_block, double* sol, double* w,
                      SolverOptions* options);
-  int (*compute_error)(GMP_LocalProblem* local, const double* reaction, const double* velocity,
+  int (*compute_error)(GMP_LocalProblem* local, const double* reaction, double* velocity,
                        double tolerance, double* error);
   void (*detach_diag_block)(GMP_LocalProblem* local);
 } GMP_ProblemOps;
@@ -93,8 +93,7 @@ static int gmp_equality_solve_local(GMP_LocalProblem* local, double* diag_block,
 }
 
 static int gmp_equality_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                      const double* velocity, double tolerance,
-                                      double* error) {
+                                      double* velocity, double tolerance, double* error) {
   (void)local;
   (void)reaction;
   (void)tolerance;
@@ -117,7 +116,7 @@ static int gmp_lcp_solve_local(GMP_LocalProblem* local, double* diag_block, doub
 }
 
 static int gmp_lcp_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                 const double* velocity, double tolerance, double* error) {
+                                 double* velocity, double tolerance, double* error) {
   (void)tolerance;
   double localError = 0.;
   lcp_compute_error_only(local->size, reaction, velocity, &localError);
@@ -140,7 +139,7 @@ static int gmp_relay_solve_local(GMP_LocalProblem* local, double* diag_block, do
 }
 
 static int gmp_relay_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                   const double* velocity, double tolerance, double* error) {
+                                   double* velocity, double tolerance, double* error) {
   double localError = 0.;
   relay_compute_error((RelayProblem*)local->problem, reaction, velocity, tolerance,
                       &localError);
@@ -166,7 +165,7 @@ static int gmp_fc3d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
 }
 
 static int gmp_fc3d_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                  const double* velocity, double tolerance, double* error) {
+                                  double* velocity, double tolerance, double* error) {
   (void)tolerance;
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
   double localError = 0.;
@@ -195,7 +194,7 @@ static int gmp_fc2d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
 }
 
 static int gmp_fc2d_compute_error(GMP_LocalProblem* local, const double* reaction,
-                                  const double* velocity, double tolerance, double* error) {
+                                  double* velocity, double tolerance, double* error) {
   (void)tolerance;
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
   double localError = 0.;

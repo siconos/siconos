@@ -1,8 +1,8 @@
 #pragma once
 
 #include <array>
-#include <boost/container/small_vector.hpp>   // c++26 std::inplace_vector
-#include <cstddef>                            // std::size_t
+#include <boost/container/small_vector.hpp>  // c++26 std::inplace_vector
+#include <cstddef>                           // std::size_t
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>

@@ -713,10 +713,10 @@ class MechanicsHdf5:
                 with siconos.io.tools.tmpfile() as tmpf:
                     writer = vtk.vtkXMLPolyDataWriter()
                     writer.SetInputData(reader.GetOutput())
-                    writer.SetFileName(tmpf[1])
+                    writer.SetFileName(tmpf.name)
                     writer.Write()
 
-                    shape_data = siconos.io.tools.str_of_file(tmpf[1])
+                    shape_data = siconos.io.tools.str_of_file(tmpf.name)
 
             else:
                 assert os.path.splitext(filename)[-1][1:] == "vtp"
@@ -805,10 +805,10 @@ class MechanicsHdf5:
         shape_data = None
 
         with siconos.io.tools.tmpfile() as tmpf:
-            step_writer.Write(tmpf[1])
+            step_writer.Write(tmpf.name)
 
-            tmpf[0].flush()
-            shape_data = siconos.io.tools.str_of_file(tmpf[1])
+            tmpf.fid.flush()
+            shape_data = siconos.io.tools.str_of_file(tmpf.name)
             shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
             shape[:] = shape_data
             shape.attrs["id"] = self._number_of_shapes
@@ -1085,10 +1085,8 @@ class MechanicsHdf5:
         # - we need to compute mass or inertia
         # - and a Volume is present in the shapes list
         # - and occ is available
-        if (
-            (inertia is None)
-            or (mass is None)
-            and any(isinstance(s, smct.Volume) for s in shapes)
+        if (inertia is None or mass is None) and any(
+            isinstance(s, smct.Volume) for s in shapes
         ):
             # --- We compute inertia and center of mass ---
             # This part requires occ.
