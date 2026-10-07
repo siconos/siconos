@@ -1,0 +1,216 @@
+{
+  "doc": {
+    "source": "describes the format written by mechanics_hdf5.py and mechanics_run.py (v1, no version attribute); same grammar as format_v2.json, with the differences below",
+    "dtype": "f32: every table created by data() (dtype 'f4' forced, integers included); f64: datasets created directly; vlen: variable-length string; S: byte string",
+    "shape": "full dataset shape; N = rows appended step after step",
+    "by": "t: the rows of a step are those whose column t equals the step time (search, no index); step: implicit block per step, no time column; none: written once",
+    "layout": "columns of the last dimension, same grammar as v2 ('x[k]' = k columns)",
+    "attrs": "HDF5 attributes of the dataset or group; opt: written only if provided",
+    "<name>": "dataset or group named by the user or at write time",
+    "when": "write condition",
+    "2D": "dynamic, static: x, y, 0, then cos(θ/2), 0, 0, sin(θ/2); velocities: vx, vy, 0, 0, 0, ω (checked in output_static_objects, output_dynamic_objects, output_velocities)",
+    "ids": "ds_id > 0 dynamic bodies, < 0 static bodies (input/<object>.attrs['id'])"
+  },
+  "attributes": {
+    "dimension": {"enum": [2, 3], "default": 3}
+  },
+  "data": {
+    "ref": {
+      "<shape>": {
+        "dtype": "f32 | f64 | vlen", "by": "none",
+        "shape": "by type: primitive (1,k); convex (n,dim); heightmap (nx,ny); file (1,) vlen",
+        "attrs": {
+          "id": {"dtype": "int"},
+          "type": {"dtype": "str", "enum": ["primitive", "convex", "heightmap", "vtp", "step", "stp", "brep", "msh", "mesh", "unknown"]},
+          "primitive": {"dtype": "str", "opt": true, "enum": ["Sphere", "Box", "Cylinder", "Capsule", "Cone", "Plane", "Disk", "Circle", "Box2d", "Segment", "Line"]},
+          "insideMargin": {"dtype": "float", "opt": true},
+          "outsideMargin": {"dtype": "float", "opt": true},
+          "avoid_internal_edge_contact": {"dtype": "bool", "opt": true},
+          "rect": {"dtype": "float", "shape": [2], "opt": true, "note": "heightmap"},
+          "scale": {"dtype": "float", "opt": true, "note": "mesh vtp"},
+          "occ_indx": {"dtype": "int", "opt": true, "note": "brep"}
+        }
+      }
+    },
+    "input": {
+      "<object>": {
+        "group": true, "by": "none",
+        "attrs": {
+          "id": {"dtype": "int"},
+          "type": {"dtype": "str", "enum": ["dynamic", "static", "dynamic_aggregate", "static_aggregate"]},
+          "translation": {"dtype": "float", "shape": ["dim"]},
+          "orientation": {"dtype": "float", "shape": ["rot"]},
+          "velocity": {"dtype": "f64", "shape": ["twist"]},
+          "center_of_mass": {"dtype": "f64", "shape": ["dim"]},
+          "mass": {"dtype": "float", "opt": true},
+          "inertia": {"dtype": "float", "shape": "(3,) or (3,3)", "opt": true},
+          "fext": {"dtype": "f64", "opt": true},
+          "allow_self_collide": {"dtype": "bool", "opt": true},
+          "time_of_birth": {"dtype": "float", "opt": true},
+          "time_of_death": {"dtype": "float", "opt": true},
+          "material": {"dtype": "f64", "opt": true, "note": "FEM"},
+          "boundary_conditions": {"dtype": "f64", "opt": true, "note": "FEM"},
+          "nodal_forces": {"dtype": "f64", "opt": true, "note": "FEM"},
+          "shape_name": {"dtype": "str", "opt": true, "note": "aggregates"},
+          "group": {"dtype": "int", "opt": true, "note": "aggregates"},
+          "count": {"dtype": "int", "opt": true, "note": "aggregates"}
+        },
+        "<contactor>": {
+          "dtype": "f32", "shape": [0, 0], "by": "none", "note": "one empty dataset per contactor",
+          "attrs": {
+            "instance_name": {"dtype": "str"},
+            "shape_name": {"dtype": "str", "note": "→ ref/<shape>"},
+            "group": {"dtype": "int", "opt": true},
+            "parameters": {"dtype": "void", "opt": true, "note": "pickle"},
+            "type": {"dtype": "str", "opt": true, "note": "Face, Edge (OCC)"},
+            "contact_index": {"dtype": "int", "opt": true},
+            "translation": {"dtype": "float", "shape": ["dim"]},
+            "orientation": {"dtype": "float", "shape": [4]}
+          }
+        },
+        "translations": {"dtype": "f64", "shape": ["count", "dim"], "by": "none", "note": "aggregates"},
+        "orientations": {"dtype": "f64", "shape": ["count", "rot"], "by": "none", "note": "aggregates"},
+        "velocities": {"dtype": "f64", "shape": ["count", "twist"], "by": "none", "note": "aggregates"}
+      }
+    },
+    "nslaws": {
+      "<nslaw>": {
+        "dtype": "f32", "shape": [0], "by": "none",
+        "attrs": {
+          "type": {"dtype": "str", "enum": ["NewtonImpactFrictionNSL", "NewtonImpactRollingFrictionNSL", "NewtonImpactNSL", "RelayNSL", "FremondImpactFrictionNSL", "BinaryCohesiveNSL"]},
+          "gid1": {"dtype": "int"},
+          "gid2": {"dtype": "int"},
+          "e": {"dtype": "float", "opt": true},
+          "mu": {"dtype": "float", "opt": true},
+          "mu_r": {"dtype": "float", "opt": true},
+          "size": {"dtype": "int", "opt": true},
+          "lb": {"dtype": "float", "opt": true},
+          "ub": {"dtype": "float", "opt": true},
+          "sigma_c": {"dtype": "float", "opt": true},
+          "delta_c": {"dtype": "float", "opt": true},
+          "gamma": {"dtype": "float", "opt": true}
+        }
+      }
+    },
+    "joints": {
+      "<joint>": {
+        "dtype": "f32", "shape": [0], "by": "none",
+        "attrs": {
+          "type": {"dtype": "str", "note": "joint class, e.g. PivotJointR"},
+          "object1": {"dtype": "str", "note": "name of input/<object>"},
+          "object2": {"dtype": "str", "opt": true},
+          "points": {"dtype": "float", "shape": ["n", 3], "opt": true},
+          "axes": {"dtype": "float", "shape": ["n", 3], "opt": true},
+          "absolute": {"dtype": "bool", "opt": true},
+          "allow_self_collide": {"dtype": "bool", "opt": true},
+          "nslaws": {"dtype": "S", "opt": true},
+          "stops": {"dtype": "float", "shape": ["n", 3], "opt": true, "note": "[axis, position, direction]"},
+          "friction": {"dtype": "S", "opt": true},
+          "coupled": {"dtype": "float", "opt": true},
+          "references": {"dtype": "S", "opt": true}
+        }
+      }
+    },
+    "permanent_interactions": {
+      "<interaction>": {
+        "dtype": "vlen", "shape": [1], "by": "none",
+        "attrs": {
+          "id": {"dtype": "int"},
+          "type": {"dtype": "str", "enum": ["permanent_interaction"]},
+          "body1_name": {"dtype": "str"},
+          "body2_name": {"dtype": "str"},
+          "contactor1_name": {"dtype": "str", "opt": true},
+          "contactor2_name": {"dtype": "str", "opt": true},
+          "distance_calculator": {"dtype": "str"},
+          "offset1": {"dtype": "float"},
+          "offset2": {"dtype": "float"}
+        }
+      }
+    },
+    "boundary_conditions": {
+      "<bc>": {
+        "dtype": "f32", "shape": [0], "by": "none",
+        "attrs": {
+          "type": {"dtype": "str", "enum": ["HarmonicBC", "BoundaryCondition"]},
+          "object1": {"dtype": "str", "note": "body name"},
+          "indices": {"dtype": "int", "shape": ["n"]},
+          "a": {"dtype": "float", "opt": true}, "b": {"dtype": "float", "opt": true},
+          "omega": {"dtype": "float", "opt": true}, "phi": {"dtype": "float", "opt": true},
+          "v": {"dtype": "float", "opt": true}
+        }
+      }
+    },
+    "plugins": {
+      "<plugin>": {"dtype": "vlen", "shape": [1], "by": "none",
+                   "attrs": {"filename": {"dtype": "str"}}}
+    },
+    "external_functions": {
+      "<function>": {
+        "group": true, "by": "none",
+        "attrs": {
+          "body_name": {"dtype": "str"},
+          "plugin_name": {"dtype": "str"},
+          "plugin_function_name": {"dtype": "str"},
+          "function_name": {"dtype": "str", "opt": true},
+          "bc_indices": {"dtype": "int", "opt": true}
+        }
+      }
+    },
+    "dynamic": {"dtype": "f32", "shape": ["N", 9], "by": "t",
+                "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "orientation wxyz"},
+    "velocities": {"dtype": "f32", "shape": ["N", 8], "by": "t",
+                   "layout": ["t", "ds_id", "v[3]", "omega[3]"]},
+    "static": {"dtype": "f32", "shape": ["N", 9], "by": "t",
+               "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "ds_id < 0"},
+    "cf": {"dtype": "f32", "shape": ["N", 26], "by": "t", "when": "output_contact_forces",
+           "layout": ["t", "mu", "point_a[3]", "point_b[3]", "normal[3]", "reaction_global[3]",
+                      "gap[3]", "relative_velocity[3]", "reaction_local[3]", "interaction_id",
+                      "ds1", "ds2"],
+           "note": "variable width: MechanicsIO::contactPoints follows the data size"},
+    "cf_info": {"dtype": "f32", "shape": ["N", 5], "by": "t", "when": "output_contact_info",
+                "layout": ["t", "interaction_id", "ds1", "ds2", "static_body"]},
+    "cf_work": {"dtype": "f32", "shape": ["N", 8], "by": "t", "when": "output_contact_work",
+                "layout": ["t", "interaction_id", "w_n", "w_t", "w_n_theta", "w_t_theta",
+                           "status", "w_n_pos"]},
+    "cf_internal_variables": {"dtype": "f32", "shape": ["N", 41], "by": "t",
+                              "when": "output_contact_internal_variables",
+                              "layout": ["t", "interaction_id", "values[*]"]},
+    "energy_work": {"dtype": "f32", "shape": ["N", 9], "by": "t", "when": "output_energy_work",
+                    "layout": ["t", "kinetic", "force_work", "w_n", "w_t", "w_n_theta",
+                               "w_t_theta", "w_n_neg", "w_t_neg"]},
+    "solv": {"dtype": "f32", "shape": ["N", 4], "by": "t",
+             "layout": ["t", "n_iterations", "precision", "local_precision"]},
+    "domain": {"dtype": "f32", "shape": ["N", 3], "by": "t", "when": "output_domains",
+               "layout": ["t", "domain", "interaction_id"], "note": "domain = (x > 0) of the contact point"},
+    "radii": {"dtype": "f32", "shape": ["N", 2], "by": "step", "when": "backend vnative",
+              "note": "no time column; columns provided by self._io.radii, undocumented"},
+    "p0s": {"dtype": "f32", "shape": ["N", 4], "by": "step", "when": "backend vnative",
+            "note": "no time column; columns provided by self._io.p0s, undocumented"},
+    "siconos_mechanics_run_options": {
+      "dtype": "f32", "shape": [0, 1], "by": "none",
+      "attrs": {"options": {"dtype": "str", "note": "run_options as JSON"}}
+    },
+    "fem_coords_<ds_id>": {"dtype": "f64", "shape": ["n_nodes", "dim"], "by": "none"},
+    "fem_displacements_<ds_id>": {"dtype": "f64", "shape": ["N", "2+dof_count"], "by": "t",
+                                  "layout": ["t", "ds_id", "displacement[*]"],
+                                  "attrs": {"dof_count": {"dtype": "int"},
+                                            "spatial_order": {"dtype": "bool"}}},
+    "fem_epsilon_<ds_id>": {"dtype": "f64", "shape": ["N", "2+3*num_elements"], "by": "t",
+                            "layout": ["t", "ds_id", "epsilon[*]"],
+                            "attrs": {"tensor_type": {"dtype": "str"},
+                                      "components": {"dtype": "str", "note": "exx, eyy, exy"},
+                                      "num_elements": {"dtype": "int"}}},
+    "fem_sigma_<ds_id>": {"dtype": "f64", "shape": ["N", "2+3*num_elements"], "by": "t",
+                          "layout": ["t", "ds_id", "sigma[*]"],
+                          "attrs": {"tensor_type": {"dtype": "str"},
+                                    "components": {"dtype": "str"},
+                                    "num_elements": {"dtype": "int"}}},
+    "log": {
+      "<fn>": {
+        "timing": {"dtype": "f32", "shape": ["N", 1], "by": "none", "note": "one call per row"},
+        "value": {"dtype": "f32", "shape": ["M", 1], "by": "none",
+                  "note": "only if the function returns a number; not aligned with timing"}
+      }
+    }
+  }
+}

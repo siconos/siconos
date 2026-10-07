@@ -1,0 +1,254 @@
+{
+// Plan 2.0 : portage et boundary sans distinction entre Neumann & Dirichlet.
+// Plan 2.1 : gestion des boundary conditions avec un type, Un rechargement à froid devrait marcher
+// Plan 2.2 : le rechargement à chaud devrait marcher
+// compression param : tjrs, compress var : optionnel
+  "doc": {
+    "dtype": "f64, f32, i64, i32, u64, u32, u8: fixed types; float_type, int_type; bool; str: short utf-8 string (names); vlen: large text (STEP, BREP, mesh, scripts)",
+    "mode": "0: light, 1: classic, 2: heavy; a field of mode m is written if the file mode >= m",
+    "shape": "dimensions after the first one; the first one is set by 'by' (S for index_*, N for a registry, T for a state)",
+    "by": "what addresses the dataset: index_param, index_var, *_range, *_id, the index of another group (relative path), ../time, or none",
+    "attributes": "const: imposed value; enum: list of allowed values",
+    "attrs": "HDF5 attributes of a group, written when the group is created; enum: allowed values, stored as strings",
+    "enum": "on a u8 field: stored value = position of the name in the list",
+    "<name>": "group named at write time: log/<fn> (one logged function), script/plugins/<plugin> (one plugin), fem/fields/<field> (one field)",
+    "layout": "content of a params buffer: list of names, or dict type -> list; 'x[k]' = block of k values, k an integer, the name of a field already read, 'n' (number of dofs in dof_range) or '*' (rest of the block)",
+    "registries": "a registry that only grows keeps the same start: index_param[k] = (0, n_k); the block is rewritten only when rows disappear",
+    "alignment": "in bodies, fixed_bodies and fem/fields/<field>, row i of the state block k describes row i of the registry block k (same length, same order): no per-row id in the states",
+    "state reuse": "an index_var row may repeat the previous block when the state did not change (e.g. motionless fixed bodies)",
+    "interactions": "one row = one Siconos Interaction (relation + nonsmooth law), declared (joints, OccR) or created at run time (contacts); the block of step k lists the interactions alive at step k; contacts/interaction = row in that block, not a Siconos number: the writer keeps a hash table Siconos number -> row of the current block, the reader indexes directly; bodies and contactors are read from the interaction row",
+    "log": "log/<fn>/timing[i] = i-th call; index_var[k] = calls made between output k-1 and output k; value[value_range[i,0]:value_range[i,1]] = its value, empty if it is not a number",
+    "boundary_conditions": "body -> bodies/id (object1 in v1, which was a name); a v1 scalar is repeated n times; BoundaryCondition without v (zero velocity): empty param_range",
+    "fem": "a FE body is a body (fem/body -> bodies/id); mesh of simplices only (triangles 2D, tetrahedra 3D), node indices local to the body; remeshing rewrites the registry block",
+    "fem fields": "values of row i: n_entities(space) rows of ncomp(kind) values; n_entities: P0DG = n_cells, P1 = n_nodes, P1DG = n_cells * (dim + 1) (cell by cell, nodes in cell order); ncomp: scalar = 1, vector = dim, sym_tensor = 3 in 2D (xx, yy, xy) / 6 in 3D (xx, yy, zz, yz, xz, xy), tensor = dim * dim (row-major)",
+    "symbols": "value depends on the dimension attribute; runtime: set by the writer when the dataset is created",
+    "margins": "geometry/inside_margin, outside_margin: bullet backend only (empty otherwise); the effective value is written, defaults included (inside = 2 % of the smallest dimension, outside = 0)",
+    "reaction": "width = maximum over the scene's laws (dim, +1 in 2D / +2 in 3D if a law has rolling); columns unused by the contact's law = 0 (zero rolling moment)"
+  },
+  "attributes": {
+    "version_major": {"const": 2},
+    "version_minor": {"const": 0},
+    "dimension": {"enum": [2, 3]},
+    "float_type": {"enum": ["f64", "f32"]},
+    "int_type": {"enum": ["i64", "i32"]},
+    "mode": {"enum": [0, 1, 2]},
+    "backend": {"enum": ["occ", "native", "vnative", "bullet"]}
+  },
+  "symbols": {
+    "dim": {"2": 2, "3": 3},
+    "rot": {"2": 1, "3": 4},
+    "twist": {"2": 3, "3": 6},
+    "idof": {"2": 1, "3": 3},
+    "simplex": {"2": 3, "3": 4},
+    "reaction": "runtime",
+    "n_internal": "runtime",
+    "ncomp": "runtime"
+  },
+  "time": {"dtype": "f64", "mode": 0, "by": "none", "shape": []},
+  "geometry": {
+    "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "name": {"dtype": "str", "mode": 0, "by": "index_param", "shape": []},
+    "type": {"dtype": "u8", "mode": 0, "by": "index_param", "shape": [],
+             "enum": ["sphere", "box", "cylinder", "capsule", "cone", "disk", "circle", "box2d",
+                      "segment", "line", "convex", "heightmap", "mesh", "step", "brep", "vtp",
+                      "msh", "other"]},
+    "param_range": {"dtype": "u64", "mode": 0, "by": "index_param", "shape": [2]},
+    "params": {"dtype": "float_type", "mode": 0, "by": "param_range", "shape": [],
+               "layout": {"sphere": ["radius"], "box": ["width", "height", "depth"],
+                          "cylinder": ["radius", "length"], "capsule": ["radius", "length"],
+                          "cone": ["radius", "length"], "disk": ["radius"], "circle": ["radius"],
+                          "box2d": ["thickness", "size"], "segment": ["x1", "y1", "x2", "y2"],
+                          "line": ["a", "b", "c"], "convex": ["vertices[*]"],
+                          "heightmap": ["rect[2]", "nrows", "ncols", "heights[*]"]}},
+    "inside_margin": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": []},
+    "outside_margin": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": []},
+    "content_id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "content": {"dtype": "vlen", "mode": 0, "by": "content_id", "shape": []}
+  },
+  "bodies": {
+    "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "index_var": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "name": {"dtype": "str", "mode": 0, "by": "index_param", "shape": []},
+    "center_of_mass": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["dim"]},
+    "mass": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": []}, //runtime
+    "inertia": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": ["idof", "idof"]},
+    "allow_self_collide": {"dtype": "bool", "mode": 2, "by": "index_param", "shape": []},
+    "position": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["dim"]},
+    "orientation": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["rot"]},
+    "velocity": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["twist"]}
+  },
+  "fixed_bodies": {
+    "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "index_var": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "name": {"dtype": "str", "mode": 0, "by": "index_param", "shape": []},
+    "center_of_mass": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["dim"]},
+    "position": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["dim"]},
+    "orientation": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["rot"]}
+  },
+
+  "contactors": {
+    "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "name": {"dtype": "str", "mode": 0, "by": "index_param", "shape": []},
+    "body": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "geometry": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "translation": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["dim"]},
+    "orientation": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["rot"]},
+    "group": {"dtype": "int_type", "mode": 1, "by": "index_param", "shape": []},
+    "subshape": {"dtype": "u8", "mode": 1, "by": "index_param", "shape": [], // Verifier les noms dans occ sinon subgeometry
+                 "enum": ["shape", "face", "edge"]},
+    "subshape_range": {"dtype": "u64", "mode": 1, "by": "index_param", "shape": [2]},
+    "subshape_index": {"dtype": "int_type", "mode": 1, "by": "subshape_range", "shape": []}
+  },
+  "nslaws": {
+    "index_param": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
+    "id": {"dtype": "int_type", "mode": 1, "by": "index_param", "shape": []},
+    "name": {"dtype": "str", "mode": 1, "by": "index_param", "shape": []},
+    "type": {"dtype": "u8", "mode": 1, "by": "index_param", "shape": [],
+             "enum": ["NewtonImpactFrictionNSL", "NewtonImpactRollingFrictionNSL",
+                      "NewtonImpactNSL", "RelayNSL", "FremondImpactFrictionNSL",
+                      "BinaryCohesiveNSL", "EqualityConditionNSL", "other"]},
+    "group_ids": {"dtype": "int_type", "mode": 1, "by": "index_param", "shape": [2]},
+    "param_range": {"dtype": "u64", "mode": 1, "by": "index_param", "shape": [2]},
+    "params": {"dtype": "float_type", "mode": 1, "by": "param_range", "shape": [],
+               "layout": {"NewtonImpactFrictionNSL": ["e", "mu"],
+                          "NewtonImpactRollingFrictionNSL": ["e", "mu", "mu_r"],
+                          "NewtonImpactNSL": ["e"],
+                          "RelayNSL": ["size", "lb", "ub"],
+                          "FremondImpactFrictionNSL": ["e", "mu"],
+                          "BinaryCohesiveNSL": ["e", "mu", "sigma_c", "delta_c", "gamma"],
+                          "EqualityConditionNSL": ["size"]}}
+  },
+  "interactions": {
+    "index_var": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
+    "name": {"dtype": "str", "mode": 1, "by": "index_var", "shape": []},
+    "type": {"dtype": "u8", "mode": 1, "by": "index_var", "shape": [],
+             "enum": ["PivotJointR", "KneeJointR", "PrismaticJointR", "CylindricalJointR",
+                      "FixedJointR", "CouplerJointR", "OccR",
+                      "NewtonEuler3DR", "ContactR", "Contact2dR", "Contact2d3DR", "other"]},
+    "nslaw": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": []},
+    "bodies": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": [2]},
+    "contactors": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": [2]},
+    "param_range": {"dtype": "u64", "mode": 1, "by": "index_var", "shape": [2]},
+    "params": {"dtype": "float_type", "mode": 1, "by": "param_range", "shape": [],
+               "layout": {"OccR": ["offset1", "offset2", "distance_calculator"],
+                          "PivotJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "KneeJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "PrismaticJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "CylindricalJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "FixedJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "CouplerJointR": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"],
+                          "other": ["absolute", "n_points", "points[3*n_points]", "n_axes", "axes[3*n_axes]", "n_coupled", "coupled[3*n_coupled]"]}}
+  },
+  "contacts": {
+    "index_var": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
+    "interaction": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": []}, // ligne dans le bloc k de interactions
+    "point_a": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
+    "point_b": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
+    "normal": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
+    "reaction_local": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["reaction"]},
+    "subshape1": {"dtype": "int_type", "mode": 2, "by": "index_var", "shape": []},
+    "subshape2": {"dtype": "int_type", "mode": 2, "by": "index_var", "shape": []}
+  },
+  "contacts_diagnostics": {
+
+  },
+  "solvers": {
+    "contact_solver": {
+      "index_var": {"dtype": "u64", "mode": 2, "by": "../../time", "shape": [2]},
+      "index_param": {"dtype": "u64", "mode": 2, "by": "../../time", "shape": [2]},
+      "solver_name": {"dtype": "str", "mode": 2, "by": "index_param", "shape": []},
+      "integer_param_range": {"dtype": "u64", "mode": 2, "by": "index_param", "shape": [2]},
+      "double_param_range": {"dtype": "u64", "mode": 2, "by": "index_param", "shape": [2]},
+      "integer_params": {"dtype": "i32", "mode": 2, "by": "integer_param_range", "shape": []}, // verifier int type
+      "double_params": {"dtype": "f64", "mode": 2, "by": "double_param_range", "shape": []},
+      "n_iterations": {"dtype": "int_type", "mode": 2, "by": "index_var", "shape": []},
+      "precision": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
+      "local_precision": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}
+    },
+    "newton_solver": {
+      "index_var": {"dtype": "u64", "mode": 2, "by": "../../time", "shape": [2]},
+      "n_iterations": {"dtype": "int_type", "mode": 2, "by": "index_var", "shape": []},
+      "precision": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}
+    }
+  },
+  "diagnostics": {
+    "index_var": {"dtype": "u64", "mode": 2, "by": "../time", "shape": [2]},
+    "kinetic": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
+    "force_work": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
+    "work_n": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_t": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_n_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_t_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_n_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_t_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "contact_gap": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
+    "contact_relative_velocity": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
+    "contact_reaction_global": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
+    "contact_work": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": [5],
+             "layout": ["w_n", "w_t", "w_n_theta", "w_t_theta", "w_n_pos"]},
+    "contact_status": {"dtype": "int_type", "mode": 2, "by": "../contacts/index_var", "shape": []},
+    "contact_internal_variables": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["n_internal"]}
+  },
+  // Groups : Finite element problems
+  // Registre : maillage par corps FE (remaillage rare -> nouveau bloc). Champs : un groupe par champ,
+  // espace et nature en attributs, une ligne par corps FE et par pas, alignée sur le registre.
+  "fem": {
+    "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
+    "body": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
+    "node_range": {"dtype": "u64", "mode": 0, "by": "index_param", "shape": [2]},
+    "nodes": {"dtype": "float_type", "mode": 0, "by": "node_range", "shape": ["dim"]},
+    "cell_range": {"dtype": "u64", "mode": 0, "by": "index_param", "shape": [2]},
+    "cells": {"dtype": "int_type", "mode": 0, "by": "cell_range", "shape": ["simplex"]},
+    "fields": {
+      "<field>": {
+        "attrs": {
+          "space": {"enum": ["P0DG", "P1", "P1DG"]},
+          "kind": {"enum": ["scalar", "vector", "sym_tensor", "tensor"]}
+        },
+        "index_var": {"dtype": "u64", "mode": 0, "by": "../../../time", "shape": [2]},
+        "value_range": {"dtype": "u64", "mode": 0, "by": "index_var", "shape": [2]},
+        "values": {"dtype": "float_type", "mode": 0, "by": "value_range", "shape": ["ncomp"]}
+      }
+    }
+  },
+  "log": {
+    "<fn>": {
+      "index_var": {"dtype": "u64", "mode": 2, "by": "../../time", "shape": [2]},
+      "timing": {"dtype": "f64", "mode": 2, "by": "index_var", "shape": []},
+      "value_range": {"dtype": "u64", "mode": 2, "by": "index_var", "shape": [2]},
+      "value": {"dtype": "f64", "mode": 2, "by": "value_range", "shape": []}
+    }
+  },
+  "boundary_conditions": { // Dirichlet, Neumann, Robin, Periodic -> v2.1
+    "Dirichlet": { //
+    },
+    "Neumann" : { // Spring
+
+    },
+    "index_param": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
+    "name": {"dtype": "str", "mode": 1, "by": "index_param", "shape": []},
+    "type": {"dtype": "u8", "mode": 1, "by": "index_param", "shape": [],
+             "enum": ["HarmonicBC", "BoundaryCondition", "other"]},
+    "body": {"dtype": "int_type", "mode": 1, "by": "index_param", "shape": []},
+    "dof_range": {"dtype": "u64", "mode": 1, "by": "index_param", "shape": [2]},
+    "indices": {"dtype": "int_type", "mode": 1, "by": "dof_range", "shape": []},
+    "param_range": {"dtype": "u64", "mode": 1, "by": "index_param", "shape": [2]},
+    "params": {"dtype": "float_type", "mode": 1, "by": "param_range", "shape": [],
+               "layout": {"HarmonicBC": ["a[n]", "b[n]", "omega[n]", "phi[n]"],
+                          "BoundaryCondition": ["v[n]"]}}
+  },
+  "script": {
+    "source": {"dtype": "vlen", "mode": 1, "by": "none", "shape": []},
+    "plugins": {
+      "<plugin>": {
+        "source": {"dtype": "vlen", "mode": 1, "by": "none", "shape": []},
+        "filename": {"dtype": "str", "mode": 1, "by": "none", "shape": []}
+      }
+    },
+    "run_options": {"dtype": "vlen", "mode": 1, "by": "none", "shape": []}
+  }
+}
