@@ -39,6 +39,7 @@
 #include "NumericsVector.h"                      // for NV_display
 #include "SiconosBlas.h"                         // for cblas_daxpy, cblas_d...
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
+#include "VI_cst.h"                              // for SICONOS_VI_DPARAM_RHO
 #include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
 #include "fc3d_short_names.h"                    // for GFC3D_NSN_AC
@@ -537,6 +538,118 @@ static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* probl
 }
 
 /**
+ * \brief Internal VI-FPP warm start, unconditionally executed.
+ */
+static int gfc3d_nsn_ac_warm_start_internal(GlobalFrictionContactProblem* problem,
+                                            double* reaction, double* velocity,
+                                            double* globalVelocity,
+                                            SolverOptions* options) {
+  const int warm_start_max_iter = options->iparam[SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER];
+  if (warm_start_max_iter <= 0) return 0;
+
+  const double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  numerics_printf_verbose(
+      1, "---- GFC3D - NSN_AC - Warm start with GFC3D_VI_FPP (%d iterations)",
+      warm_start_max_iter);
+
+  SolverOptions* vi_options = solver_options_create(GFC3D_VI_FPP);
+  if (!vi_options) {
+    numerics_printf_verbose(1,
+                            "---- GFC3D - NSN_AC - Warm start skipped: "
+                            "could not create GFC3D_VI_FPP options");
+    return NUMERICS_ERR_MEMORY;
+  }
+
+  vi_options->iparam[SICONOS_IPARAM_MAX_ITER] = warm_start_max_iter;
+  vi_options->dparam[SICONOS_DPARAM_TOL] = tolerance;
+
+  int vi_info = 0;
+  gfc3d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &vi_info,
+                                vi_options);
+
+  /* Reuse the rho that VI_FPP computed/selected as the NSN rho. */
+  const double vi_rho = fabs(vi_options->dparam[SICONOS_VI_DPARAM_RHO]);
+  if (vi_rho > 0.0) {
+    options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = vi_rho * 2;
+    numerics_printf_verbose(1,
+                            "---- GFC3D - NSN_AC - Warm start rho = %g "
+                            "(used as NSN rho)",
+                            vi_rho);
+  }
+
+  solver_options_delete(vi_options);
+
+  numerics_printf_verbose(1,
+                          "---- GFC3D - NSN_AC - Warm start finished "
+                          "(vi_info = %d)",
+                          vi_info);
+  return vi_info;
+}
+
+/**
+ * \brief Run a VI-FPP warm start for GFC3D_NSN_AC.
+ *
+ * This can be used as a standalone fallback/preconditioner, or it is called
+ * automatically by gfc3d_nonsmooth_Newton_AlartCurnier when the warm-start
+ * option is enabled.
+ */
+int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, SolverOptions* options) {
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY] !=
+      SICONOS_FRICTION_3D_NSN_WARM_START_YES) {
+    return 0;
+  }
+
+  return gfc3d_nsn_ac_warm_start_internal(problem, reaction, velocity, globalVelocity, options);
+}
+
+/**
+ * \brief Classify a single 3D contact into a discrete status.
+ *
+ * \return 0 = no-contact, 1 = stick, 2 = slip.
+ */
+static int gfc3d_contact_status_3d(double rN, double rT1, double rT2, double uT1, double uT2,
+                                   double mu) {
+  const double tol = 1e-10;
+  const double radius = mu * rN;
+  const double rT_norm = sqrt(rT1 * rT1 + rT2 * rT2);
+  const double uT_norm = sqrt(uT1 * uT1 + uT2 * uT2);
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  if (rT_norm < radius - tol && uT_norm <= tol) {
+    return 1; /* stick */
+  }
+  return 2; /* slip */
+}
+
+/**
+ * \brief Print a contact-status summary for a 3D global friction contact solution.
+ */
+static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* problem,
+                                              double* reaction, double* velocity) {
+  const unsigned int nc = (unsigned int)problem->numberOfContacts;
+  unsigned int no_contact = 0, stick = 0, slip = 0;
+
+  for (unsigned int i = 0; i < nc; ++i) {
+    const int status = gfc3d_contact_status_3d(
+        reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], velocity[3 * i + 1],
+        velocity[3 * i + 2], problem->mu[i]);
+    if (status == 0)
+      no_contact++;
+    else if (status == 1)
+      stick++;
+    else
+      slip++;
+  }
+
+  numerics_printf_verbose(1,
+                          "---- GFC3D - NSN_AC - contact status: "
+                          "no-contact=%u, stick=%u, slip=%u",
+                          no_contact, stick, slip);
+}
+
+/**
  * \brief No-op initialization hook for the sparse global Alart--Curnier
  *        solver.
  *
@@ -675,6 +788,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   }
 
   /* ====================================================================== *
+   * Optional warm start with GFC3D_VI_FPP
+   * ====================================================================== */
+  gfc3d_nsn_ac_warm_start(problem, reaction, velocity, globalVelocity, options);
+
+  /* ====================================================================== *
    * Allocate persistent solver workspace on first call
    * ====================================================================== */
   if (options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] == 0) {
@@ -785,15 +903,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   /* ====================================================================== *
    * Initialize rho and the constant Jacobian pattern
    * ====================================================================== */
-  for (unsigned int i = 0; i < num_contact_dofs; ++i) {
-    rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-
-  }
-
-  DEBUG_EXPR(for (unsigned int i = 0; i < num_contact_dofs; ++i)
-                 printf("rho[%i]=%e\t", i, rho[i]);
-             printf("\n"););
-
   const CS_INT contact_block_start =
       build_jacobian_pattern(NM_triplet(problem->M), NM_triplet(problem->H), &jac_A_sparse,
                              &jac_B_sparse, jacobian_triplet, /* scaling = */ 1.0);
@@ -803,16 +912,51 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(jac_B_sparse.m == jac_B_sparse.n);
   assert(jac_A_sparse.m == problem->H->size1);
 
-  /* Initialize the Newton direction to zero. */
-  for (unsigned int i = 0; i < system_size; ++i) newton_direction[i] = 0.;
-
   NumericsMatrix* nm_jacobian = NM_new();
   /* jacobian_triplet is square; rows = jacobian_triplet->m, cols =
    * jacobian_triplet->n. */
   assert(jacobian_triplet->m == jacobian_triplet->n);
   NM_fill(nm_jacobian, NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
 
+  /* Optional Jacobian regularization matrix (regul * I). */
+  NumericsMatrix* reg_eye = NULL;
+  const int regularization = options->iparam[SICONOS_FRICTION_3D_NSN_REGULARIZATION];
+  const double regul = options->dparam[SICONOS_FRICTION_3D_NSN_REGUL];
+  if (regularization == SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES) {
+    reg_eye = NM_eye(nm_jacobian->size0);
+  }
+
+  /* Store the initial iterate as the current solution. */
+  double* current_global_velocity = current_solution;
+  double* current_velocity = &(current_solution[num_global_dofs]);
+  double* current_reaction = &(current_solution[num_global_dofs + num_contact_dofs]);
+
+  /* Track contact statuses across Newton iterations to report how many
+   * contacts have reached a stable status. */
+  int* previous_contact_status = (int*)malloc(problem->numberOfContacts * sizeof(int));
+
+  /* Automatic warm start: only run VI-FPP if the first Newton linear solve
+   * fails.  Warm start is applied at most once. */
+  const int warm_start_auto =
+      (options->iparam[SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY] ==
+       SICONOS_FRICTION_3D_NSN_WARM_START_AUTO);
+  int warm_start_done = 0;
+
+restart:
   info[0] = 1;  /* Default to non-convergence. */
+  iteration = 0;
+
+  /* Initialize rho from the current NSN rho parameter. */
+  for (unsigned int i = 0; i < num_contact_dofs; ++i) {
+    rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+  }
+
+  DEBUG_EXPR(for (unsigned int i = 0; i < num_contact_dofs; ++i)
+                 printf("rho[%i]=%e\t", i, rho[i]);
+             printf("\n"););
+
+  /* Initialize the Newton direction to zero. */
+  for (unsigned int i = 0; i < system_size; ++i) newton_direction[i] = 0.;
 
   /* ====================================================================== *
    * Initialize local velocity from the provided global velocity
@@ -832,18 +976,25 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   DEBUG_EXPR(NV_display(velocity, num_contact_dofs););
   DEBUG_EXPR(NV_display(reaction, num_contact_dofs););
 
-  /* Store the initial iterate as the current solution. */
-  double* current_global_velocity = current_solution;
-  double* current_velocity = &(current_solution[num_global_dofs]);
-  double* current_reaction = &(current_solution[num_global_dofs + num_contact_dofs]);
-
-
   memcpy(current_global_velocity, globalVelocity, num_global_dofs * sizeof(double));
   memcpy(current_velocity, velocity, num_contact_dofs * sizeof(double));
   memcpy(current_reaction, reaction, num_contact_dofs * sizeof(double));
 
+  if (warm_start_done)
+    numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Restarting after automatic warm start");
+  else
+    numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Start with tolerance = %g", tolerance);
 
-  numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Start with tolerance = %g", tolerance);
+  numerics_printf_verbose(1,
+                          "| iter |   residual   | error gfc3d  |    tol      | ls step | ls info | "
+                          "no-c | stick | slip | stab%% |");
+  numerics_printf_verbose(1,
+                          "--------------------------------------------------------------------------------"
+                          "---------------------------");
+
+  for (unsigned int i = 0; i < problem->numberOfContacts; ++i) {
+    previous_contact_status[i] = -1;
+  }
 
   /* ====================================================================== *
    * Main Newton loop
@@ -853,6 +1004,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     compute_system_residual(problem, compute_ac_fun_3x3, current_global_velocity,
                             current_reaction, current_velocity, rho, system_residual);
 
+    const double residual_norm = cblas_dnrm2(system_size, system_residual, 1);
+
     /* Evaluate the contact Jacobians A(x_k) and B(x_k).  The Alart--Curnier
      * function values are written to contact_ac_values; some underlying 3x3
      * functions do not tolerate a NULL result pointer even though these values
@@ -860,6 +1013,12 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     fc3d_AlartCurnierFunction(num_contact_dofs, compute_ac_fun_3x3, current_reaction,
                               current_velocity, problem->mu, rho, contact_ac_values, jac_A,
                               jac_B);
+
+    /* Invalidate cached CSC/CSR/transpose views because the triplet values
+     * will change. */
+    NM_clearCSC(nm_jacobian);
+    NM_clearCSCTranspose(nm_jacobian);
+    NM_clearCSR(nm_jacobian);
 
     /* Refresh the contact blocks of the global Jacobian. */
     update_jacobian_blocks(NM_triplet(problem->M), NM_triplet(problem->H), &jac_A_sparse,
@@ -870,25 +1029,50 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     cblas_dscal(system_size, -1., newton_direction, 1);
 
 
-    /* Convert to compressed-column format and solve J(x_k) d = -Psi(x_k). */
-    CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
+    /* Convert to compressed-column format.  The unregularized CSC view is
+     * used by the Goldstein--Price line search. */
+    CSparseMatrix* jacobian_csc = NM_csc(nm_jacobian);
 
     DEBUG_PRINTF("norm of jacobian = %e\n", NM_norm_1(nm_jacobian));
 
+    /* If regularization is enabled, solve the regularized system
+     * (J + regul * I) d = -Psi(x_k). */
+    NumericsMatrix* J_to_solve = nm_jacobian;
+    if (regularization == SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES) {
+      J_to_solve = NM_add(regul, reg_eye, 1.0, nm_jacobian);
+    }
+
     /* NM_preserve/unpreserve ensures that the internal factorization of
-     * nm_jacobian is invalidated because the underlying triplet data has
-     * changed since the previous iteration. */
+     * the Jacobian used by the linear solver is invalidated because the
+     * underlying triplet data has changed since the previous iteration. */
     const int linear_solver_info =
-        NM_LU_solve(NM_preserve(NM_unpreserve(nm_jacobian)), newton_direction, 1);
+        NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
+
+    if (J_to_solve != nm_jacobian) {
+      NM_free(J_to_solve);
+    }
 
     DEBUG_PRINTF("norm of newton_direction = %e\n",
                  cblas_dnrm2(system_size, newton_direction, 1));
 
     if (linear_solver_info != 0) {
-      fprintf(stderr, "---- GFC3D - NSN_AC - linear solver failed, info = %d\n",
-              linear_solver_info);
+      numerics_printf_verbose(-1, "---- GFC3D - NSN_AC - linear solver failed, info = %d",
+                              linear_solver_info);
+
+      /* Automatic warm start: if this is the first linear-solve failure and
+       * the AUTO strategy is active, run VI-FPP once and restart Newton. */
+      if (warm_start_auto && !warm_start_done) {
+        numerics_printf_verbose(
+            1, "---- GFC3D - NSN_AC - first linear solve failed, triggering automatic warm start");
+        warm_start_done = 1;
+        gfc3d_nsn_ac_warm_start_internal(problem, reaction, velocity, globalVelocity, options);
+        memcpy(current_global_velocity, globalVelocity, num_global_dofs * sizeof(double));
+        memcpy(current_velocity, velocity, num_contact_dofs * sizeof(double));
+        memcpy(current_reaction, reaction, num_contact_dofs * sizeof(double));
+        goto restart;
+      }
+
       *info = NUMERICS_ERR_LINEAR_SOLVER;
-      cs_spfree(jacobian_csc);
       break;
     }
 
@@ -926,8 +1110,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
         break;
     }
 
-    cs_spfree(jacobian_csc);
-
     /* Unknown formulation or line-search option: abort the Newton loop. */
     if (*info < 0) {
       break;
@@ -961,7 +1143,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
           gfc3d_compute_error(problem, current_reaction, current_velocity,
                               current_global_velocity, tolerance, options, norm_q, norm_b,
                               &(options->dparam[SICONOS_DPARAM_RESIDU]));
-      if (error_status != 0) {
+      if (error_status < 0) {
         numerics_printf_verbose(1,
                                 "---- GFC3D - NSN_AC iteration %d, error computation "
                                 "failed with status %d",
@@ -969,12 +1151,47 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
         *info = NUMERICS_ERR_UNKNOWN;
         break;
       }
+      /* A positive status simply means the residual is still above the
+       * tolerance.  Keep iterating instead of aborting the Newton loop. */
     }
 
-    if (options->dparam[SICONOS_DPARAM_RESIDU] >= tolerance) {
-      numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, residual = %g >= %g",
-                              iteration, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
-    } else {
+    /* Classify contacts and count stabilized ones (status unchanged from
+     * the previous Newton iteration). */
+    unsigned int no_contact = 0, stick = 0, slip = 0;
+    unsigned int stabilized = 0;
+    for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+      const double rN = current_reaction[3 * contact];
+      const double rT1 = current_reaction[3 * contact + 1];
+      const double rT2 = current_reaction[3 * contact + 2];
+      const double uT1 = current_velocity[3 * contact + 1];
+      const double uT2 = current_velocity[3 * contact + 2];
+      const int status =
+          gfc3d_contact_status_3d(rN, rT1, rT2, uT1, uT2, problem->mu[contact]);
+      if (status == 0)
+        no_contact++;
+      else if (status == 1)
+        stick++;
+      else
+        slip++;
+      if (previous_contact_status[contact] != -1 &&
+          previous_contact_status[contact] == status) {
+        stabilized++;
+      }
+      previous_contact_status[contact] = status;
+    }
+    const double stabilized_pct =
+        (problem->numberOfContacts > 0)
+            ? (100.0 * stabilized) / problem->numberOfContacts
+            : 0.0;
+
+    numerics_printf_verbose(1,
+                            "| %4u | %12.4e | %12.4e | %10.2e | %4.2e | %5d | "
+                            "%4u | %5u | %4u | %5.1f |",
+                            iteration, residual_norm, options->dparam[SICONOS_DPARAM_RESIDU],
+                            tolerance, step_length, line_search_status, no_contact, stick,
+                            slip, stabilized_pct);
+
+    if (options->dparam[SICONOS_DPARAM_RESIDU] < tolerance) {
       info[0] = 0;
       break;
     }
@@ -988,14 +1205,18 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   memcpy(reaction, &current_solution[num_global_dofs + num_contact_dofs],
          num_contact_dofs * sizeof(double));
 
-  if (verbose > 0) {
-    if (!info[0])
-      printf("---- GFC3D - NSN_AC - convergence after %d iterations, residual = %g\n", iteration,
-             options->dparam[SICONOS_DPARAM_RESIDU]);
-    else
-      printf("---- GFC3D - NSN_AC - no convergence after %d iterations, residual = %g\n",
-             iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
-  }
+  if (!info[0])
+    numerics_printf_verbose(1,
+                            "---- GFC3D - NSN_AC - convergence after %d iterations, "
+                            "residual = %g",
+                            iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
+  else
+    numerics_printf_verbose(1,
+                            "---- GFC3D - NSN_AC - no convergence after %d iterations, "
+                            "residual = %g",
+                            iteration, options->dparam[SICONOS_DPARAM_RESIDU]);
+
+  gfc3d_nsn_ac_print_contact_status(problem, reaction, velocity);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
@@ -1013,6 +1234,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   NM_clear(nm_jacobian);
   free(nm_jacobian);
+  if (reg_eye) {
+    NM_free(reg_eye);
+  }
+  free(previous_contact_status);
 }
 
 
@@ -1035,6 +1260,18 @@ void gfc3d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 1000;
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
+
+  /* Warm start with GFC3D_VI_FPP before launching the Newton solver.
+   * By default the warm start is automatic: it is triggered only if the
+   * first Newton Jacobian factorization fails. */
+  options->iparam[SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY] =
+      SICONOS_FRICTION_3D_NSN_WARM_START_AUTO;
+  options->iparam[SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER] = 50;
+
+  /* Jacobian regularization: disabled by default. */
+  options->iparam[SICONOS_FRICTION_3D_NSN_REGULARIZATION] =
+      SICONOS_FRICTION_3D_NSN_REGULARIZATION_NO;
+  options->dparam[SICONOS_FRICTION_3D_NSN_REGUL] = 1e-6;
 }
 
 /* ===========================================================================

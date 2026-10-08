@@ -315,7 +315,15 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
   /** Flag: internal work array allocated (1=yes, 0=no) */
   SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED = 17,
   /** MPI communicator for distributed solving */
-  SICONOS_FRICTION_3D_NSN_MPI_COM = 18
+  SICONOS_FRICTION_3D_NSN_MPI_COM = 18,
+  /** Warm-start strategy for GFC3D_NSN_AC (see SICONOS_FRICTION_3D_NSN_WARM_START) */
+  SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY = 20,
+  /** Maximum number of warm-start iterations for GFC3D_NSN_AC */
+  SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER = 21,
+  /** Jacobian regularization strategy for GFC3D_NSN_AC
+   *  (see SICONOS_FRICTION_3D_NSN_REGULARIZATION)
+   */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION = 22
 
 };
 
@@ -345,6 +353,24 @@ enum SICONOS_FRICTION_2D_NSN_WARM_START {
   SICONOS_FRICTION_2D_NSN_WARM_START_AUTO = 2,
 };
 
+/** Warm-start strategy values for GFC3D_NSN_AC */
+enum SICONOS_FRICTION_3D_NSN_WARM_START {
+  /** No warm start: use the user-provided initial guess */
+  SICONOS_FRICTION_3D_NSN_WARM_START_NO = 0,
+  /** Run GFC3D_VI_FPP for a few iterations to build the initial guess */
+  SICONOS_FRICTION_3D_NSN_WARM_START_YES = 1,
+  /** Run GFC3D_VI_FPP only if the first Newton linear solve fails */
+  SICONOS_FRICTION_3D_NSN_WARM_START_AUTO = 2,
+};
+
+/** Jacobian regularization values for GFC3D_NSN_AC */
+enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
+  /** No Jacobian regularization */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION_NO = 0,
+  /** Add regul * I to the Jacobian before each linear solve */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES = 1,
+};
+
 /** Jacobian regularization values for GFC2D_NSN_AC */
 enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
   /** No Jacobian regularization */
@@ -369,6 +395,8 @@ enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
 enum SICONOS_FRICTION_3D_NSN_DPARAM {
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
+  /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
+  SICONOS_FRICTION_3D_NSN_REGUL = 4,
 };
 
 /** Double parameters for global 2D NSN solver */

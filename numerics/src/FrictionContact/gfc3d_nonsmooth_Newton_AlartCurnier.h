@@ -83,6 +83,24 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          SolverOptions* options);
 
 /**
+ * \brief Run a VI-FPP warm start for GFC3D_NSN_AC.
+ *
+ * This function can be called before the Newton solver (it is called
+ * automatically by gfc3d_nonsmooth_Newton_AlartCurnier when the warm-start
+ * option is set to YES) or as a standalone fallback/preconditioner.
+ *
+ * \param[in] problem the global 3D friction contact problem
+ * \param[in,out] reaction initial guess / warm-started reaction
+ * \param[in,out] velocity initial guess / warm-started local velocity
+ * \param[in,out] globalVelocity initial guess / warm-started global velocity
+ * \param[in,out] options GFC3D_NSN_AC solver options; on output the rho
+ *                        parameter may be overwritten with the VI-FPP rho
+ * \return 0 if the warm start ran (or was disabled), nonzero on error
+ */
+int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, SolverOptions* options);
+
+/**
  * \brief Set default solver options for GFC3D_NSN_AC.
  *
  * \param[in,out] options the solver options structure to initialize

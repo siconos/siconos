@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include <math.h>    // for sqrt
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
@@ -42,6 +43,84 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
+
+/**
+ * \brief Classify a single 3D contact into a discrete status.
+ *
+ * \return 0 = no-contact, 1 = stick, 2 = slip.
+ */
+static int gfc3d_contact_status_3d(double rN, double rT1, double rT2, double uT1, double uT2,
+                                   double mu) {
+  const double tol = 1e-10;
+  const double radius = mu * rN;
+  const double rT_norm = sqrt(rT1 * rT1 + rT2 * rT2);
+  const double uT_norm = sqrt(uT1 * uT1 + uT2 * uT2);
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  if (rT_norm < radius - tol && uT_norm <= tol) {
+    return 1; /* stick */
+  }
+  return 2; /* slip */
+}
+
+typedef struct {
+  GlobalFrictionContactProblem* problem;
+  int n_global;
+  int iteration;
+  int* previous_status;
+  int* current_status;
+} GFC3D_VIFPP_StatusEnv;
+
+/**
+ * \brief Per-iteration callback that prints the 3D contact status counts and
+ *        the percentage of contacts whose status did not change since the
+ *        previous VI-FPP iteration.
+ */
+static void gfc3d_vi_fpp_status_callback(void* env, size_t size, double* x, double* velocity,
+                                         double error, void* extra_data) {
+  (void)size;
+  (void)error;
+  (void)extra_data;
+
+  GFC3D_VIFPP_StatusEnv* status_env = (GFC3D_VIFPP_StatusEnv*)env;
+  GlobalFrictionContactProblem* problem = status_env->problem;
+  const int nc = problem->numberOfContacts;
+  const int n_global = status_env->n_global;
+  const double* reaction = &x[n_global];
+  const double* local_velocity = &velocity[n_global];
+
+  unsigned int no_contact = 0, stick = 0, slip = 0;
+  unsigned int stabilized = 0;
+
+  for (int i = 0; i < nc; ++i) {
+    const int status = gfc3d_contact_status_3d(
+        reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], local_velocity[3 * i + 1],
+        local_velocity[3 * i + 2], problem->mu[i]);
+    status_env->current_status[i] = status;
+    if (status == 0)
+      no_contact++;
+    else if (status == 1)
+      stick++;
+    else
+      slip++;
+    if (status_env->previous_status[i] != -1 && status_env->previous_status[i] == status) {
+      stabilized++;
+    }
+    status_env->previous_status[i] = status;
+  }
+
+  const double stabilized_pct = (nc > 0) ? (100.0 * stabilized) / nc : 0.0;
+
+  if (verbose > 0) {
+    if (status_env->iteration == 1) {
+      printf("Contact status: no-c | stick | slip | stab%%\n");
+    }
+    printf("                %4u | %5u | %4u | %5.1f%%\n", no_contact, stick, slip,
+           stabilized_pct);
+  }
+  status_env->iteration++;
+}
 
 void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double* reaction,
                                    double* velocity, double* globalVelocity, int* info,
@@ -89,8 +168,32 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
   memcpy(&z[n], reaction, m * sizeof(double));
   DEBUG_EXPR(NV_display(z, m + n););
   DEBUG_EXPR(NV_display(Fz, m + n););
+
+  /* Set up a per-iteration callback that prints 3D contact statuses.
+   * We preserve any user-defined callback that may already be installed. */
+  GFC3D_VIFPP_StatusEnv status_env;
+  status_env.problem = problem;
+  status_env.n_global = n;
+  status_env.iteration = 1;
+  status_env.previous_status = (int*)malloc(nc * sizeof(int));
+  status_env.current_status = (int*)malloc(nc * sizeof(int));
+  for (int i = 0; i < nc; ++i) {
+    status_env.previous_status[i] = -1;
+  }
+
+  Callback status_callback;
+  status_callback.env = &status_env;
+  status_callback.collectStatsIteration = gfc3d_vi_fpp_status_callback;
+
+  Callback* saved_callback = options->callback;
+  options->callback = &status_callback;
+
   // Warning : tolerance might be updated by VI determine_convergence function !
   variationalInequality_FixedPointProjection(vi, z, Fz, info, options);
+
+  options->callback = saved_callback;
+  free(status_env.previous_status);
+  free(status_env.current_status);
 
   memcpy(globalVelocity, z, n * sizeof(double));
   memcpy(reaction, &z[n], m * sizeof(double));
@@ -130,6 +233,21 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
   /* } */
 
   if (verbose > 0) {
+    unsigned int no_contact = 0, stick = 0, slip = 0;
+    for (int i = 0; i < nc; ++i) {
+      const int status = gfc3d_contact_status_3d(
+          reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], velocity[3 * i + 1],
+          velocity[3 * i + 2], problem->mu[i]);
+      if (status == 0)
+        no_contact++;
+      else if (status == 1)
+        stick++;
+      else
+        slip++;
+    }
+    printf("---- GFC3D - VI_FPP - contact status: "
+           "no-contact=%u, stick=%u, slip=%u\n",
+           no_contact, stick, slip);
     printf(
         "--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final "
         "Residual = %14.7e\n",
