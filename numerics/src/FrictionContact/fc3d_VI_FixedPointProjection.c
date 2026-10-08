@@ -28,22 +28,22 @@
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Fix...
 #include "fc3d_Solvers.h"
-#include "fc3d_short_names.h"                   // for fc3d_VI_FixedPointProjection
-#include "fc3d_compute_error.h"             // for fc3d_Tresca_compute_error
+#include "fc3d_compute_error.h"  // for fc3d_Tresca_compute_error
+#include "fc3d_short_names.h"    // for fc3d_VI_FixedPointProjection
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void fc3d_VI_FixedPointProjection(FrictionContactProblem *problem, double *reaction,
-                                  double *velocity, int *info, SolverOptions *options) {
+void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double* reaction,
+                                  double* velocity, int* info, SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   // vi.self = &vi;
   vi->F = &Function_VI_FC3D;
@@ -51,8 +51,8 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem *problem, double *react
 
   double error = 1e24;
 
-  FrictionContactProblem_as_VI *fc3d_as_vi =
-      (FrictionContactProblem_as_VI *)malloc(sizeof(FrictionContactProblem_as_VI));
+  FrictionContactProblem_as_VI* fc3d_as_vi =
+      (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
   vi->env = fc3d_as_vi;
   vi->size = n;
 
@@ -86,15 +86,15 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem *problem, double *react
   free(fc3d_as_vi);
 }
 
-void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem *problem, double *reaction,
-                                           double *velocity, int *info,
-                                           SolverOptions *options) {
+void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, double* reaction,
+                                           double* velocity, int* info,
+                                           SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   // vi.self = &vi;
   vi->F = &Function_VI_FC3D_Cylinder;
@@ -102,8 +102,8 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem *problem, doub
 
   double error = 1e24;
 
-  FrictionContactProblem_as_VI *fc3d_as_vi =
-      (FrictionContactProblem_as_VI *)malloc(sizeof(FrictionContactProblem_as_VI));
+  FrictionContactProblem_as_VI* fc3d_as_vi =
+      (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
   vi->env = fc3d_as_vi;
   vi->size = n;
 
@@ -145,9 +145,11 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem *problem, doub
  * ===========================================================================
  */
 
-static int fc3d_vi_fpp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_vi_fpp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                  SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_VI_FixedPointProjection((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc3d_VI_FixedPointProjection((FrictionContactProblem*)problem, reaction, velocity, &info,
+                               options);
   return info;
 }
 
@@ -157,21 +159,19 @@ static void fc3d_vi_fpp_set_default(SolverOptions* options) {
   variationalInequality_FixedPointProjection_set_default(options);
 }
 
-REGISTER_SOLVER(FC3D_VI_FPP,
-                             "FC3D_VI_FPP",
-                             "VI Fixed Point Projection for 3D Friction Contact",
-                             NULL,   /* init_wrap */
-                             fc3d_vi_fpp_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_vi_fpp_set_default,
-                             1000,   /* default_max_iter */
-                             1e-4,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_VI_FPP, "FC3D_VI_FPP",
+                "VI Fixed Point Projection for 3D Friction Contact", NULL, /* init_wrap */
+                fc3d_vi_fpp_solve_wrap, NULL,                              /* free_wrap */
+                NULL,                                                      /* err_fn */
+                fc3d_vi_fpp_set_default, 1000, /* default_max_iter */
+                1e-4,                          /* default_tol */
+                0)                             /* is_local_solver */
 
-static int fc3d_vi_fpp_cyl_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_vi_fpp_cyl_solve_wrap(void* problem, double* reaction, double* velocity,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_VI_FixedPointProjection_Cylinder((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc3d_VI_FixedPointProjection_Cylinder((FrictionContactProblem*)problem, reaction, velocity,
+                                        &info, options);
   return info;
 }
 
@@ -180,14 +180,11 @@ static void fc3d_vi_fpp_cyl_set_default(SolverOptions* options) {
   /* No special defaults needed - uses standard SolverOptions */
 }
 
-REGISTER_SOLVER(FC3D_VI_FPP_Cylinder,
-                             "FC3D_VI_FPP_Cylinder",
-                             "VI Fixed Point Projection on Cylinder for 3D Friction Contact",
-                             NULL,   /* init_wrap */
-                             fc3d_vi_fpp_cyl_solve_wrap,
-                             NULL,   /* free_wrap */
-                             NULL,   /* err_fn */
-                             fc3d_vi_fpp_cyl_set_default,
-                             1000,   /* default_max_iter */
-                             1e-4,   /* default_tol */
-                             0)      /* is_local_solver */
+REGISTER_SOLVER(FC3D_VI_FPP_Cylinder, "FC3D_VI_FPP_Cylinder",
+                "VI Fixed Point Projection on Cylinder for 3D Friction Contact",
+                NULL,                              /* init_wrap */
+                fc3d_vi_fpp_cyl_solve_wrap, NULL,  /* free_wrap */
+                NULL,                              /* err_fn */
+                fc3d_vi_fpp_cyl_set_default, 1000, /* default_max_iter */
+                1e-4,                              /* default_tol */
+                0)                                 /* is_local_solver */

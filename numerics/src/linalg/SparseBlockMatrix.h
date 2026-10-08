@@ -236,8 +236,8 @@ typedef enum {
   /**< Free sbm and index; keep block[], block[i] and sizes */
   SBM_FREE_KEEP_BLOCKS_AND_SIZES = SBM_FREE_SBM | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX,
   /**< Free sbm, index and blocl; keep block[i] and sizes */
-  SBM_FREE_ALL =
-      SBM_FREE_BLOCKS | SBM_FREE_SBM | SBM_FREE_SIZES | SBM_FREE_BLOCK_ARRAY | SBM_FREE_INDEX
+  SBM_FREE_ALL = SBM_FREE_BLOCKS | SBM_FREE_SBM | SBM_FREE_SIZES | SBM_FREE_BLOCK_ARRAY |
+      SBM_FREE_INDEX
   /**< Free everything */
 } SBMFreeLevel;
 

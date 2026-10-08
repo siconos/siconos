@@ -130,14 +130,14 @@ class MLCP : public LinearOSNS {
    *  \param ed an edge descriptor
    */
   void computeInteractionBlock(
-      const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
+      const siconos::graphs::InteractionsGraph::EDescriptor& ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) override;
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *
@@ -160,7 +160,7 @@ class MLCP : public LinearOSNS {
   void display() const override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // MLCP_H

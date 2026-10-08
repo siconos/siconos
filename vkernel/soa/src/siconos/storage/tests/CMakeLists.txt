@@ -21,5 +21,3 @@ endif()
 
 set_target_properties(tground PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
 set_target_properties(tpattern PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-
-

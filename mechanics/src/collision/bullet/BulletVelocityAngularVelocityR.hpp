@@ -27,7 +27,8 @@ class NewtonEulerDS;
 }
 
 namespace siconos::collision::bullet {
-class BulletVelocityAngularVelocityR : public siconos::collision::ContactVelocityAngularVelocityR {
+class BulletVelocityAngularVelocityR
+    : public siconos::collision::ContactVelocityAngularVelocityR {
  private:
   ACCEPT_SERIALIZATION(BulletVelocityAngularVelocityR);
 

@@ -99,7 +99,7 @@ class exception : public virtual std::exception, public virtual boost::exception
 }  // namespace siconos
 
 /**
- * @brief Wrap exception throwing inside siconos. 
+ * @brief Wrap exception throwing inside siconos.
  * @param X comment to be displayed
  */
 #define THROW_EXCEPTION(X)                                       \

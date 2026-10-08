@@ -5,3 +5,4 @@
 /.vs
 build_guix/
 .vscode/
+compile_commands.json

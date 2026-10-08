@@ -8,8 +8,8 @@
 #include "NumericsSparseMatrix.h"  // for NSM_TRIPLET, NumericsSparseMatrix
 #include "SolverOptions.h"         // for SolverOptions, solver_options_delete
 
-static void PXtest_0(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_0(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   printf("Size of cqp :%i\n", cqp->size);
   int i;
   for (i = 0; i < cqp->size; i++) {
@@ -28,7 +28,7 @@ static int test_0(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -37,7 +37,7 @@ static int test_0(void) {
   }
   /* NM_display(M); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = k;
   }
@@ -67,8 +67,8 @@ static int test_0(void) {
   return 0;
 }
 
-static void PXtest_1(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_1(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   int i;
   for (i = 0; i < cqp->m; i++) {
     PX[i] = x[i];
@@ -86,7 +86,7 @@ static int test_1(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -95,7 +95,7 @@ static int test_1(void) {
   }
   /* NM_display(M); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = -k - 1;
   }
@@ -118,7 +118,7 @@ static int test_1(void) {
     printf("x[%i]=%f\t", i, x[i]);
     printf("PX[%i]=%f\n", i, PX[i]);
   }
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_PG);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_PG);
   /* verbose=1; */
   options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
   options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = 1.0;
@@ -136,8 +136,8 @@ static int test_1(void) {
   return info;
 }
 
-static void PXtest_2(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_2(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   int i;
   for (i = 0; i < cqp->m; i++) {
     PX[i] = x[i];
@@ -154,7 +154,7 @@ static int test_2(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -163,7 +163,7 @@ static int test_2(void) {
   }
   /* NM_display(M); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = -k - 1;
   }
@@ -194,7 +194,7 @@ static int test_2(void) {
     printf("q[%i]=%f\t", i, q[i]);
   }
   printf("\n");
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   // options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
@@ -217,8 +217,8 @@ static int test_2(void) {
   return info;
 }
 
-static void PXtest_3(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_3(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   int i;
   for (i = 0; i < cqp->m; i++) {
     PX[i] = x[i];
@@ -235,7 +235,7 @@ static int test_3(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -244,13 +244,13 @@ static int test_3(void) {
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = -k - 1;
   }
 
   cqp.m = 5;
-  NumericsMatrix *A = NM_create(NM_SPARSE, cqp.m, cqp.size);
+  NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
   A->matrix2->origin = NSM_TRIPLET;
 
@@ -259,7 +259,7 @@ static int test_3(void) {
   }
   /* DEBUG_EXPR(NM_display(A)); */
 
-  double *b = (double *)malloc(cqp.size * sizeof(double));
+  double* b = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.m; k++) {
     b[k] = 1.0;
   }
@@ -291,7 +291,7 @@ static int test_3(void) {
     printf("q[%i]=%f\t", i, q[i]);
   }
   printf("\n");
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   // options->iparam[0]=30;
@@ -320,8 +320,8 @@ static int test_3(void) {
   return info;
 }
 
-static void PXtest_4(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_4(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   int i;
   for (i = 0; i < cqp->m; i++) {
     PX[i] = x[i];
@@ -338,7 +338,7 @@ static int test_4(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -347,13 +347,13 @@ static int test_4(void) {
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = -k - 1;
   }
 
   cqp.m = 5;
-  NumericsMatrix *A = NM_create(NM_SPARSE, cqp.m, cqp.size);
+  NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
   A->matrix2->origin = NSM_TRIPLET;
 
@@ -362,7 +362,7 @@ static int test_4(void) {
   }
   /* DEBUG_EXPR(NM_display(A)); */
 
-  double *b = (double *)malloc(cqp.size * sizeof(double));
+  double* b = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.m; k++) {
     b[k] = 1.0;
   }
@@ -394,7 +394,7 @@ static int test_4(void) {
     printf("q[%i]=%f\t", i, q[i]);
   }
   printf("\n");
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   // options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
@@ -422,8 +422,8 @@ static int test_4(void) {
   return info;
 }
 
-static void PXtest_5(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
+static void PXtest_5(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
   int i;
   for (i = 0; i < cqp->m; i++) {
     PX[i] = x[i];
@@ -440,7 +440,7 @@ static int test_5(void) {
 
   cqp.env = &cqp;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, cqp.size, cqp.size);
+  NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;
 
@@ -449,13 +449,13 @@ static int test_5(void) {
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
-  double *q = (double *)malloc(cqp.size * sizeof(double));
+  double* q = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.size; k++) {
     q[k] = -k - 1;
   }
 
   cqp.m = 5;
-  NumericsMatrix *A = NM_create(NM_SPARSE, cqp.m, cqp.size);
+  NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
   A->matrix2->origin = NSM_TRIPLET;
 
@@ -464,7 +464,7 @@ static int test_5(void) {
   }
   /* DEBUG_EXPR(NM_display(A)); */
 
-  double *b = (double *)malloc(cqp.size * sizeof(double));
+  double* b = (double*)malloc(cqp.size * sizeof(double));
   for (int k = 0; k < cqp.m; k++) {
     b[k] = 1.0;
   }
@@ -496,7 +496,7 @@ static int test_5(void) {
     printf("q[%i]=%f\t", i, q[i]);
   }
   printf("\n");
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   // options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
@@ -524,7 +524,7 @@ static int test_5(void) {
   return info;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif

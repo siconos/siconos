@@ -27,4 +27,3 @@ COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home
 RUN sh /home/install_bullet.sh
 RUN apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
-

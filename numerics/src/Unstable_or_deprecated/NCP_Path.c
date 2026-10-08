@@ -28,14 +28,14 @@
 static int fill_structure; /* Do we need to fill in the structure of    */
 /* the Jacobian?                             */
 
-int NCP_Path(int n, double *z, FuncEvalPtr F, JacEvalPtr jacobianF, int *iparam,
-             double *dparam) {
+int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam,
+             double* dparam) {
   /* Lower bounds on the variables = 0 for NCP */
-  double *lb = (double *)malloc(sizeof(double) * n);
+  double* lb = (double*)malloc(sizeof(double) * n);
   /* Upper bounds on the variables = +inf for NCP */
-  double *ub = (double *)malloc(sizeof(double) * n);
+  double* ub = (double*)malloc(sizeof(double) * n);
   /* Function evaluation */
-  double *f = (double *)malloc(sizeof(double) * n);
+  double* f = (double*)malloc(sizeof(double) * n);
   ;
   /* Number of nonzeros */
   int nnz = n * n;

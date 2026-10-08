@@ -505,7 +505,7 @@ endfunction()
 
 # --------------------------------------------------------
 # Function : copy_directory_contents
-# Copy all files from a given source dir into a target 
+# Copy all files from a given source dir into a target
 # BUT using configure_file
 #   SRC_DIR : répertoire source
 #   DST_DIR : répertoire de destination

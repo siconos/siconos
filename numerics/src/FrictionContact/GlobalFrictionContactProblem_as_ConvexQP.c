@@ -25,16 +25,16 @@
 #include "projectionOnCone.h"              // for projectionOnCone
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"
 #include "numerics_errors.h"
+#include "siconos_debug.h"
 
-void Projection_ConvexQP_GFC3D_DualCone(void *cqpIn, double *x, double *PX) {
+void Projection_ConvexQP_GFC3D_DualCone(void* cqpIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")
 
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  GlobalFrictionContactProblem_as_ConvexQP *pb =
-      (GlobalFrictionContactProblem_as_ConvexQP *)cqp->env;
-  GlobalFrictionContactProblem *gfc3d = pb->gfc3d;
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  GlobalFrictionContactProblem_as_ConvexQP* pb =
+      (GlobalFrictionContactProblem_as_ConvexQP*)cqp->env;
+  GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
 
   // globalFrictionContact_display(gfc3d);
 

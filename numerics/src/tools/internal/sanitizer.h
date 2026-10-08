@@ -49,7 +49,7 @@
  * \param dest destination
  * \param inc_src increment on the destination
  */
-static inline void cblas_dcopy_msan(int n, double* src, int inc_src, double* dest,
+static inline void cblas_dcopy_msan(int n, const double* src, int inc_src, double* dest,
                                     int inc_dest) {
   MSAN_INIT_VAR(dest, n);
   cblas_dcopy(n, src, inc_src, dest, inc_dest);

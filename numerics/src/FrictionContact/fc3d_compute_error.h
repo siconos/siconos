@@ -42,9 +42,9 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, double *z,
-                                           double *w, double tolerance, SolverOptions *options,
-                                           double norm, double *error, int on_dual_cone);
+int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, double* z,
+                                           double* w, double tolerance, SolverOptions* options,
+                                           double norm, double* error, int on_dual_cone);
 
 /**
     Error computation on dual cone (using the normal map residual) for one friction-contact 3D
@@ -56,8 +56,8 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, doub
     \param worktmp work vector
     \param[in,out] error value
  */
-void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restrict u, double mu,
-                                             double *error, double *worktmp);
+void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restrict u, double mu,
+                                             double* error, double* worktmp);
 
 /**
     Error computation for a friction-contact 3D problem
@@ -71,9 +71,9 @@ void fc3d_unitary_compute_dual_and_add_error(double *restrict r, double *restric
     \param[in,out] error value
     \return 0 if ok
  */
-int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double norm,
-                                double *error);
+int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error);
 
 /**
     Error computation for a friction-contact 3D problem
@@ -87,8 +87,8 @@ int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, doub
     \param[in,out] error value
     \return 0 if ok
 */
-int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
-                       SolverOptions *options, double norm, double *error);
+int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, double tolerance,
+                       SolverOptions* options, double norm, double* error);
 
 /**
     Error computation (using the normal map residual) for one friction-contact 3D problem
@@ -100,7 +100,7 @@ int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, do
     \param[in,out] error value
  */
 void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
-                                        double *error, double worktmp[3]);
+                                        double* error, double worktmp[3]);
 
 /**
     Error computation for one friction-contact 3D problem
@@ -112,7 +112,7 @@ void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], do
     \param[in,out] error value
  */
 void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R,
-                                               double *error, double *worktmp);
+                                               double* error, double* worktmp);
 
 /**
     Error computation for friction-contact 3D problem with Tresca Friction
@@ -126,9 +126,9 @@ void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double 
     \param[in,out] error value
     \return 0 if ok
  */
-int fc3d_Tresca_compute_error(FrictionContactProblem *problem, double *z, double *w,
-                              double tolerance, SolverOptions *options, double norm,
-                              double *error);
+int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double* z, double* w,
+                              double tolerance, SolverOptions* options, double norm,
+                              double* error);
 
 #if defined(__cplusplus)
 }

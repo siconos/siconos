@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 
-import siconos.numerics as sn
 import numpy as np
 import scipy.sparse as sp
+import siconos.numerics as sn
 
 
 def create_fcpb(dim, nc):

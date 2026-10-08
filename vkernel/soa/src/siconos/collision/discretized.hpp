@@ -2,8 +2,8 @@
 
 #include <numbers>
 
-#include "collision_head.hpp"
 #include "collision.hpp"
+#include "collision_head.hpp"
 
 namespace siconos::collision {
 

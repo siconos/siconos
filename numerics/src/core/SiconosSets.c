@@ -23,7 +23,6 @@
 #include <stdlib.h>
 
 #include "NumericsMatrix.h"
-
 #include "numerics_errors.h"
 
 #ifdef __cplusplus

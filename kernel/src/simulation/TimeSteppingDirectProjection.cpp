@@ -203,13 +203,13 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     nsds->updateInput(nextTime(), 0);
 
     DEBUG_EXPR_WE(
-        std ::cout << "After update input\n"; auto indexSet1 = nsds->topology()->indexSet(1);
-        std ::cout << "lamda(1) in IndexSet1\n";
+        std::cout << "After update input\n"; auto indexSet1 = nsds->topology()->indexSet(1);
+        std::cout << "lamda(1) in IndexSet1\n";
         for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet1->bundle(*ui);
           siconos::algebra::print(*inter->lambda(1));
         } auto indexSet0 = nsds->topology()->indexSet(0);
-        std ::cout << "lamda(0) in indexSet0\n";
+        std::cout << "lamda(0) in indexSet0\n";
         for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet0->bundle(*ui);
           siconos::algebra::print(*inter->lambda(0));
@@ -235,7 +235,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
               neds->p_read(0);  // Why it works like that and not with the previous line ?
         }
 
-        DEBUG_EXPR_WE(std ::cout << "q after  update \n"; siconos::algebra::print(*q););
+        DEBUG_EXPR_WE(std::cout << "q after  update \n"; siconos::algebra::print(*q););
 
         neds->normalizeq();
         neds->computeT(neds->q_read());
@@ -268,9 +268,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
                      "Projection end : "
                      "Number of iterations="
                   << _nbProjectionIteration << "\n";
-        std ::cout << "After update state in position\n";
-        std ::cout << "lamda(1) in IndexSet1\n";
-        auto indexSet1 = nsds->topology()->indexSet(1);
+        std::cout << "After update state in position\n";
+        std::cout << "lamda(1) in IndexSet1\n"; auto indexSet1 = nsds->topology()->indexSet(1);
         auto indexSet0 = nsds->topology()->indexSet(0);
 
         for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
@@ -278,17 +277,17 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
           siconos::algebra::print(*inter->lambda(1));
         }
 
-        std ::cout
+        std::cout
         << "lamda(0) in indexSet0\n";
         for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet0->bundle(*ui);
           siconos::algebra::print(*inter->lambda(0));
-        } std ::cout
+        } std::cout
         << "y(1) in IndexSet1\n";
         for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet1->bundle(*ui);
           siconos::algebra::print(*inter->y(1));
-        } std ::cout
+        } std::cout
         << "y(0) in indexSet0\n";
         for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
           auto inter = indexSet0->bundle(*ui);

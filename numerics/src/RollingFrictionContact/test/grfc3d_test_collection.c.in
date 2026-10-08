@@ -62,11 +62,11 @@ int main (int argc, char *argv[])
   free_test_collection(collection, number_of_tests);
   free(_data_collection);
 
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
 
-  
+
   return out;
 }

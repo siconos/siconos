@@ -23,7 +23,7 @@
 #ifdef SICONOS_HAS_MPI
 #include "mpi.h"
 #endif
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
       -2.166000e+00, 2.416444e+00,  5.589669e+00,  9.733100e+00,  2.142000e+00,  -2.166000e+00,
       2.142000e+00,  5.643519e+00,  2.416444e+00,  -2.166000e+00, 2.416444e+00,  5.589669e+00};
 
-  double *reaction = (double *)malloc(3 * nc * sizeof(double));
-  double *velocity = (double *)malloc(3 * nc * sizeof(double));
+  double* reaction = (double*)malloc(3 * nc * sizeof(double));
+  double* velocity = (double*)malloc(3 * nc * sizeof(double));
   for (int i = 0; i < 3 * nc; i++) {
     reaction[i] = 0.0;
     velocity[i] = 0.0;

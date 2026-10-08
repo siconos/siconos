@@ -14,23 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NewtonImpactNSL.hpp"
-#include "SiconosException.hpp"
+
 #include <iostream>
 
+#include "SiconosException.hpp"
 
-bool siconos::modeling::NewtonImpactNSL::isVerified() const
-{
+bool siconos::modeling::NewtonImpactNSL::isVerified() const {
   bool res = false;
   // to do
   THROW_EXCEPTION("NewtonImpactFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 
-void siconos::modeling::NewtonImpactNSL::display() const
-{
-  std::cout << "===============================================================================" <<std::endl;
-  std::cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e <<std::endl;
-  std::cout << "===============================================================================" <<std::endl;
+void siconos::modeling::NewtonImpactNSL::display() const {
+  std::cout
+      << "==============================================================================="
+      << std::endl;
+  std::cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: "
+            << _e << std::endl;
+  std::cout
+      << "==============================================================================="
+      << std::endl;
 }

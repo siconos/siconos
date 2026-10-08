@@ -17,9 +17,9 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "fc3d_short_names.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
+#include "fc3d_short_names.h"
 
 #if 0
 //#ifdef HAVE_GAMS_C_API
@@ -67,6 +67,7 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 #include "naming_conventions.h"  // Standardized naming conventions
 #include "numerics_errors.h"
 static int cp(const char *to, const char *from)
@@ -1419,14 +1420,14 @@ void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, dou
 
 #else
 
-void fc3d_lcp_gams_path(FrictionContactProblem *problem, double *reaction, double *velocity,
-                        int *info, SolverOptions *options) {
+void fc3d_lcp_gams_path(FrictionContactProblem* problem, double* reaction, double* velocity,
+                        int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
 
-void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
-                          int *info, SolverOptions *options) {
+void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
+                          int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }

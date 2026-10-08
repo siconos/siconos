@@ -26,4 +26,3 @@ option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
 option(WITH_SANITIZER "Activate asan" ON)
-

@@ -19,16 +19,16 @@
 
 #include <stdlib.h>  // for free, malloc, NULL, calloc
 
-#include "Newton_methods.h"    // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
-#include "NumericsMatrix.h"    // for NM_create, NM_clear, NM_DENSE, Numerics...
-#include "SiconosBlas.h"       // for cblas_dnrm2, cblas_daxpy, cblas_dscal
-#include "SiconosLapack.h"     // for lapack_int, DGESV
-#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "math.h"              // for fmax, pow
-#include "numerics_verbose.h"
+#include "Newton_methods.h"  // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
+#include "NumericsMatrix.h"  // for NM_create, NM_clear, NM_DENSE, Numerics...
+#include "SiconosBlas.h"     // for cblas_dnrm2, cblas_daxpy, cblas_dscal
+#include "SiconosLapack.h"   // for lapack_int, DGESV
+#include "SolverOptions.h"   // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "math.h"            // for fmax, pow
 #include "numerics_errors.h"
-#include "stdio.h"             // for fprintf, stderr
-#include "stdlib.h"            // for exit, EXIT_FAILURE
+#include "numerics_verbose.h"
+#include "stdio.h"   // for fprintf, stderr
+#include "stdlib.h"  // for exit, EXIT_FAILURE
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"

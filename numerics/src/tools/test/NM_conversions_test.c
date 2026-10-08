@@ -16,17 +16,18 @@
  * limitations under the License.
  */
 
+#include "NM_conversions.h"  // for NV_display
+
 #include <cs.h>
 #include <stdio.h>   // for printf, fclose, fopen, FILE, NULL
 #include <stdlib.h>  // for malloc
 
 #include "CSparseMatrix.h"
-#include "NM_conversions.h"        // for NV_display
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
 
-static int compare_csc(CSparseMatrix *A, CSparseMatrix *B) {
+static int compare_csc(CSparseMatrix* A, CSparseMatrix* B) {
   CS_INT m, n, nz, p, k, j, *Ap, *Ai, *Bi, *Bp;
   CS_ENTRY *Ax, *Bx;
 
@@ -64,15 +65,15 @@ static int compare_csc(CSparseMatrix *A, CSparseMatrix *B) {
   return 0;
 }
 
-static int test_NM_conversion(NumericsMatrix *M) {
-  CSparseMatrix *triplet = NM_triplet(M);
+static int test_NM_conversion(NumericsMatrix* M) {
+  CSparseMatrix* triplet = NM_triplet(M);
 
   printf("\n ###### conversion triplet to csc\n");
-  CSparseMatrix *csc = NM_csc(M);
+  CSparseMatrix* csc = NM_csc(M);
   /* CSparseMatrix_print(csc, 1); */
 
   printf("\n ###### conversion csc to triplet\n");
-  CSparseMatrix *triplet_2 = NM_csc_to_triplet(csc);
+  CSparseMatrix* triplet_2 = NM_csc_to_triplet(csc);
   /* CSparseMatrix_print(triplet_2, 1); */
 
   bool is_equal = CSparseMatrix_is_equal(triplet, triplet_2, 1e-14);
@@ -85,7 +86,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
     printf("triplet and triplet_2 are equal\n");
 
   printf("\n ###### conversion triplet to csr\n");
-  CSparseMatrix *csr = NM_triplet_to_csr(NM_triplet(M));
+  CSparseMatrix* csr = NM_triplet_to_csr(NM_triplet(M));
   printf("csr from triplet \n:");
   /* CSparseMatrix_print(csr, 1); */
 
@@ -98,7 +99,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
     printf("triplet and csr are equal\n");
 
   printf("\n ###### conversion csr to csc\n");
-  CSparseMatrix *csc_2 = NM_csr_to_csc(NM_csr(M));
+  CSparseMatrix* csc_2 = NM_csr_to_csc(NM_csr(M));
   is_equal = CSparseMatrix_is_equal(csc, csc_2, 1e-14);
   if (!is_equal) {
     printf("csc and csc_2 are not equal\n\n");
@@ -107,7 +108,7 @@ static int test_NM_conversion(NumericsMatrix *M) {
     printf("csc and csc_2 are equal\n\n");
 
   printf("\n ###### conversion csc to triplet\n");
-  CSparseMatrix *triplet_3 = NM_csc_to_triplet(csc_2);
+  CSparseMatrix* triplet_3 = NM_csc_to_triplet(csc_2);
   cs_spfree(csc_2);
 
   /* CSparseMatrix_print(triplet_3, 1); */
@@ -123,17 +124,17 @@ static int test_NM_conversion(NumericsMatrix *M) {
   return 0;
 };
 
-static int test_read_write_sparse(NumericsMatrix *M_orig) {
-  NumericsMatrix *M = NM_new();
+static int test_read_write_sparse(NumericsMatrix* M_orig) {
+  NumericsMatrix* M = NM_new();
 
   NM_copy(M_orig, M);
 
-  FILE *foutput = fopen("matrix_sparse_triplet.dat", "w");
+  FILE* foutput = fopen("matrix_sparse_triplet.dat", "w");
   NM_write_in_file(M, foutput);
   fclose(foutput);
 
-  FILE *finput = fopen("matrix_sparse_triplet.dat", "r");
-  NumericsMatrix *M_new = NM_new_from_file(finput);
+  FILE* finput = fopen("matrix_sparse_triplet.dat", "r");
+  NumericsMatrix* M_new = NM_new_from_file(finput);
   fclose(finput);
 
   int is_equal = NM_equal(M, M_new);
@@ -143,7 +144,7 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   else
     printf("equal not triplet\n");
 
-  CSparseMatrix *csc = NM_csc(M);
+  CSparseMatrix* csc = NM_csc(M);
 
   NM_clearSparseStorage(M_new);
   M_new->matrix2->origin = NSM_CSC;
@@ -155,7 +156,7 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csc.dat", "r");
-  NumericsMatrix *M_csc = NM_new_from_file(finput);
+  NumericsMatrix* M_csc = NM_new_from_file(finput);
   fclose(finput);
 
   is_equal = NM_equal(M_new, M_csc);
@@ -166,7 +167,7 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   else
     printf("equal not csc\n");
 
-  CSparseMatrix *csr = NM_csr(M);
+  CSparseMatrix* csr = NM_csr(M);
 
   NM_clearSparseStorage(M_new);
   M_new->matrix2->origin = NSM_CSR;
@@ -178,7 +179,7 @@ static int test_read_write_sparse(NumericsMatrix *M_orig) {
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csr.dat", "r");
-  NumericsMatrix *M_csr = NM_new_from_file(finput);
+  NumericsMatrix* M_csr = NM_new_from_file(finput);
   // NM_display(M_csr);
   fclose(finput);
 
@@ -200,7 +201,7 @@ int main() {
   int n = 5;
   int m = 5;
 
-  NumericsMatrix *M = NM_create(NM_SPARSE, n, m);
+  NumericsMatrix* M = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(M, 0);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {

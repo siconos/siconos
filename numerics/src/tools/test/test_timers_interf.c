@@ -22,13 +22,13 @@
   } while (0)
 
 int main() {
-  double *a;
-  double *b;
-  double *c;
+  double* a;
+  double* b;
+  double* c;
 
-  a = (double *)malloc(SIZE * sizeof(double));
-  b = (double *)malloc(SIZE * sizeof(double));
-  c = (double *)malloc(SIZE * sizeof(double));
+  a = (double*)malloc(SIZE * sizeof(double));
+  b = (double*)malloc(SIZE * sizeof(double));
+  c = (double*)malloc(SIZE * sizeof(double));
 
   DECL_TIMER(T0);
   DECL_TIMER(T1);

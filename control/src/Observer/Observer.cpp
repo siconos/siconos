@@ -17,16 +17,16 @@
  */
 
 #include "Observer.hpp"
-#include "Tools.hpp" // enum_to_string
+
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "TimeDiscretisation.hpp"
+#include "Tools.hpp"  // enum_to_string
 
 siconos::control::Observer::Observer(ObserverType type, std::shared_ptr<ControlSensor> sensor,
                                      const siconos::algebra::SiconosVector& xHat0,
                                      const std::string& newId)
-    : _type(type), _sensor(sensor), _id(newId)
-{
+    : _type(type), _sensor(sensor), _id(newId) {
   _xHat = std::make_shared<siconos::algebra::SiconosVector>(xHat0);
 }
 
@@ -34,15 +34,13 @@ siconos::control::Observer::Observer(ObserverType type, std::shared_ptr<ControlS
                                      const siconos::algebra::SiconosVector& xHat0,
                                      std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
                                      const std::string& newId)
-    : _type(type), _DS(ds), _sensor(sensor), _id(newId)
-{
-  _xHat= std::make_shared<siconos::algebra::SiconosVector>(xHat0);
+    : _type(type), _DS(ds), _sensor(sensor), _id(newId) {
+  _xHat = std::make_shared<siconos::algebra::SiconosVector>(xHat0);
 }
 
 void siconos::control::Observer::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
   if (!_sensor) {
@@ -50,13 +48,12 @@ void siconos::control::Observer::initialize(
   }
 }
 
-void siconos::control::Observer::display() const
-{
-  std::cout << "=====> Observer of type " << siconos::tools::enum_to_string(_type) << ", named " << _id << "\n";
+void siconos::control::Observer::display() const {
+  std::cout << "=====> Observer of type " << siconos::tools::enum_to_string(_type)
+            << ", named " << _id << "\n";
 }
 
 void siconos::control::Observer::setTimeDiscretisation(
-    const siconos::simulation::TimeDiscretisation& td)
-{
-  _td= std::make_shared<siconos::simulation::TimeDiscretisation>(td);
+    const siconos::simulation::TimeDiscretisation& td) {
+  _td = std::make_shared<siconos::simulation::TimeDiscretisation>(td);
 }

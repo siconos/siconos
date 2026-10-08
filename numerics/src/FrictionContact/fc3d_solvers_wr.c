@@ -33,32 +33,32 @@
 
 /* Global Variable for the reformulation of the problem */
 
-GlobalFrictionContactProblem *fc3d_reformulation_global_problem(
-    FrictionContactProblem *problem) {
+GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
+    FrictionContactProblem* problem) {
   int dimension = problem->dimension;
   int nc = problem->numberOfContacts;
   int m = dimension * nc;
 
-  GlobalFrictionContactProblem *globalproblem = globalFrictionContactProblem_new();
+  GlobalFrictionContactProblem* globalproblem = globalFrictionContactProblem_new();
 
   globalproblem->numberOfContacts = problem->numberOfContacts;
   globalproblem->dimension = problem->dimension;
 
-  globalproblem->mu = (double *)malloc(m * sizeof(double));
+  globalproblem->mu = (double*)malloc(m * sizeof(double));
   cblas_dcopy(nc, problem->mu, 1, globalproblem->mu, 1);
-  globalproblem->q = (double *)malloc(m * sizeof(double));
+  globalproblem->q = (double*)malloc(m * sizeof(double));
   cblas_dcopy(m, problem->q, 1, globalproblem->q, 1);
-  globalproblem->b = (double *)calloc(m, sizeof(double));
+  globalproblem->b = (double*)calloc(m, sizeof(double));
 
-  NumericsMatrix *M = problem->M;
+  NumericsMatrix* M = problem->M;
 
-  NumericsMatrix *Mglobal = NM_create(NM_SPARSE, m, m);
-  CSparseMatrix *M_triplet = NM_triplet(M);
+  NumericsMatrix* Mglobal = NM_create(NM_SPARSE, m, m);
+  CSparseMatrix* M_triplet = NM_triplet(M);
   Mglobal->matrix2->triplet = M_triplet;
   Mglobal->matrix2->origin = NSM_TRIPLET;
   globalproblem->M = Mglobal;
 
-  NumericsMatrix *Hglobal = NM_eye(m);
+  NumericsMatrix* Hglobal = NM_eye(m);
   NM_display(Hglobal);
   globalproblem->H = M = Hglobal;
 

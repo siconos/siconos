@@ -897,7 +897,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
                 free(pts);*/
 
       } else  // r = 0, or r in int(cone) but other interactions moved u
-      bad_angle: {
+      bad_angle:
+      {
         double offset_angle = atan2(ri[2], ri[1]);
         if (offset_angle >= 0.) {
           offset_angle -= M_PI;
@@ -1019,8 +1020,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
         offset_row += NB_APPROX;
       }
 
-        /* Update the dimension of Ak */
-        Akmat.size0 = offset_row;
+      /* Update the dimension of Ak */
+      Akmat.size0 = offset_row;
     }
     double* xtmp2 = (double*)calloc(Akmat.size0, sizeof(double));
     DEBUG_PRINT_VEC(xtmp, size);

@@ -1,4 +1,4 @@
-# 
+#
 # Siconos is a program dedicated to modeling, simulation and control
 #  of non smooth dynamical systems.
 #  Siconos is a free software; you can redistribute it and/or modify
@@ -9,11 +9,11 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
-# 
+#
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Siconos; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-# 
+#
 #  Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 
 #[=======================================================================[.rst:
@@ -54,11 +54,11 @@ Result Variables
 ^^^^^^^^^^^^^^^^
 
 Same as https://cmake.org/cmake/help/latest/module/FindBLAS.html
-plus a target 'BLAS::BLAS' 
+plus a target 'BLAS::BLAS'
 
 
 Usage :
-  
+
 .. code-block:: cmake
 
     set(BLA_VENDOR OpenBLAS
@@ -149,7 +149,7 @@ check_interface(BLAS
   FUNCTIONS ${cblas_functions}
   EXTRA_LIBS cblas
   PREFIX cblas_)
-  
+
 list(APPEND BLAS_LIBRARIES ${CBLAS_LIBRARY})
 list(REMOVE_DUPLICATES BLAS_LIBRARIES)
 

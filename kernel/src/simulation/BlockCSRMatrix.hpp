@@ -100,7 +100,7 @@ namespace siconos::simulation {
 class BlockCSRMatrix {
  private:
   using CompressedRowMat = boost::numeric::ublas::compressed_matrix<
-      double *, boost::numeric::ublas::basic_row_major<std::size_t>, 0,
+      double*, boost::numeric::ublas::basic_row_major<std::size_t>, 0,
       boost::numeric::ublas::unbounded_array<std::size_t>>;
 
   ACCEPT_SERIALIZATION(BlockCSRMatrix);
@@ -135,10 +135,10 @@ class BlockCSRMatrix {
 
   // Rule of five
   BlockCSRMatrix() = delete;
-  BlockCSRMatrix(const BlockCSRMatrix &) = delete;
-  BlockCSRMatrix(BlockCSRMatrix &&) = delete;
-  BlockCSRMatrix &operator=(const BlockCSRMatrix &) = delete;
-  BlockCSRMatrix &operator=(BlockCSRMatrix &&) = delete;
+  BlockCSRMatrix(const BlockCSRMatrix&) = delete;
+  BlockCSRMatrix(BlockCSRMatrix&&) = delete;
+  BlockCSRMatrix& operator=(const BlockCSRMatrix&) = delete;
+  BlockCSRMatrix& operator=(BlockCSRMatrix&&) = delete;
 
  public:
   /** Constructor with dimension (number of blocks)
@@ -151,7 +151,7 @@ class BlockCSRMatrix {
    *
    *  \param indexSet the index set of the active constraints
    */
-  BlockCSRMatrix(siconos::graphs::InteractionsGraph &indexSet);
+  BlockCSRMatrix(siconos::graphs::InteractionsGraph& indexSet);
 
   /** destructor
    */
@@ -209,7 +209,7 @@ class BlockCSRMatrix {
    *
    *  \param indexSet set of the active constraints
    */
-  void fill(siconos::graphs::InteractionsGraph &indexSet);
+  void fill(siconos::graphs::InteractionsGraph& indexSet);
 
   /** fill the matrix with the Mass matrix
    *
@@ -217,7 +217,7 @@ class BlockCSRMatrix {
    *
    *  \param indexSet of the active constraints
    */
-  void fillW(siconos::graphs::InteractionsGraph &indexSet);
+  void fillW(siconos::graphs::InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix
    *
@@ -225,7 +225,7 @@ class BlockCSRMatrix {
    *
    *  \param indexSet of the active constraints
    */
-  void fillH(siconos::graphs::InteractionsGraph &indexSet);
+  void fillH(siconos::graphs::InteractionsGraph& indexSet);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR
    */

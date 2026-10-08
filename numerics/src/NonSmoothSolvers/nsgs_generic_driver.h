@@ -26,8 +26,8 @@
 #ifndef NSGS_GENERIC_DRIVER_H
 #define NSGS_GENERIC_DRIVER_H
 
-#include "nsgs_generic.h"
 #include "NonSmoothGaussSeidel_options.h"
+#include "nsgs_generic.h"
 
 /** Generic NSGS solver function signature */
 typedef void (*NSGSSolver)(void* problem, double* reaction, double* velocity, int* info,

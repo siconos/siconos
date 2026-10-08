@@ -23,15 +23,15 @@
 #include "VariationalInequality.h"  // for VariationalInequality
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "SiconosBlas.h"    // for cblas_dcopy
-#include "siconos_debug.h"  // for DEBUG_PRINT
+#include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINT
 
-void Function_VI_CQP(void *self, int n_notused, double *x, double *F) {
+void Function_VI_CQP(void* self, int n_notused, double* x, double* F) {
   DEBUG_PRINT("Function_VI_CQP(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  ConvexQP_as_VI *pb = (ConvexQP_as_VI *)vi->env;
-  ConvexQP *cqp = pb->cqp;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  ConvexQP_as_VI* pb = (ConvexQP_as_VI*)vi->env;
+  ConvexQP* cqp = pb->cqp;
 
   int n = cqp->size;
 
@@ -39,12 +39,12 @@ void Function_VI_CQP(void *self, int n_notused, double *x, double *F) {
   NM_gemv(1.0, cqp->M, x, 1.0, F);
 }
 
-void Projection_VI_CQP(void *viIn, double *x, double *PX) {
+void Projection_VI_CQP(void* viIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_VI_CQP(void *viIn, double *x, double *PX)\n")
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  ConvexQP_as_VI *pb = (ConvexQP_as_VI *)vi->env;
-  ConvexQP *cqp = pb->cqp;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  ConvexQP_as_VI* pb = (ConvexQP_as_VI*)vi->env;
+  ConvexQP* cqp = pb->cqp;
 
   cqp->ProjectionOnC(cqp, x, PX);
 }

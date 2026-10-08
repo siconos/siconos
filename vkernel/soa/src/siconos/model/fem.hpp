@@ -1,10 +1,9 @@
 #pragma once
 #include "FENode.hpp"
-#include "FiniteElementModel.hpp"
 #include "FiniteElementLinearTIDS.hpp"
+#include "FiniteElementModel.hpp"
 #include "Material.hpp"
 #include "MeshUtils.hpp"
-
 #include "siconos/model/model_head.hpp"
 #include "siconos/storage/data_holder.hpp"
 

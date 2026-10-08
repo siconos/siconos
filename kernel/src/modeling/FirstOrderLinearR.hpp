@@ -76,17 +76,17 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param inter Interaction using this Relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(const Interaction &inter) const override;
+  void checkSize(const Interaction& inter) const override;
 
  public:
   /** default (and only) constructor */
-  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR){};
+  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR) {};
 
   /** destructor
    */
@@ -106,7 +106,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_M& fct);
 
   /** Computes B(t)
    *  \param time current time value
@@ -127,7 +127,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_M& fct);
 
   /** Computes C(t)
    *  \param time current time value
@@ -148,7 +148,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeDFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+  void setComputeDFunction(const siconos::modeling::func_prototypes::FunctionS_M& fct);
 
   /** Computes D(t)
    *  \param time current time value
@@ -173,7 +173,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeeVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+  void setComputeeVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Computes e(t)
    *  \param time current time value
@@ -186,7 +186,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level dummy parameter, always=0
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      siconos::algebra::blocks::size_type level = 0) override;
 
   /** default function to compute r
@@ -195,7 +195,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param inter Interaction using this Relation
    *  \param level dummy parameter, always=0
    */
-  void computeInput(double time, Interaction &inter,
+  void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
 
   /** print the data to the screen
@@ -209,7 +209,7 @@ class FirstOrderLinearR : public FirstOrderR {
   bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
-  void computeJach(double time, Interaction &inter) final{};
+  void computeJach(double time, Interaction& inter) final {};
 };
 }  // namespace siconos::modeling
 

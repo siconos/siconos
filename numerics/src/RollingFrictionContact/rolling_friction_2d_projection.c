@@ -24,30 +24,30 @@
 #include <stdlib.h>  // for calloc, realloc, free
 #include <string.h>  // for memcpy, NULL
 
-#include "FrictionContact_options.h"                      // for SICONOS_FRICTION_3D_NS...
-#include "NumericsFwd.h"                       // for SolverOptions, Rolling...
-#include "NumericsMatrix.h"                    // for NumericsMatrix
-#include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
-#include "SiconosLapack.h"                     // for DGETRF, DGETRS, LA_NOTRANS
-#include "SolverOptions.h"                     // for SolverOptions, solver_...
+#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_NS...
+#include "NumericsFwd.h"                    // for SolverOptions, Rolling...
+#include "NumericsMatrix.h"                 // for NumericsMatrix
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContact...
+#include "SiconosLapack.h"                  // for DGETRF, DGETRS, LA_NOTRANS
+#include "SolverOptions.h"                  // for SolverOptions, solver_...
 #include "numerics_verbose.h"
-#include "projectionOnRollingCone.h"           // for projectionOnRollingCone
-#include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_2d_local_pro...
+#include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 #include "rolling_fc_Solvers.h"
+#include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_2d_local_pro...
 #include "rolling_friction_3d_short_names.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
 
 void rolling_friction_2d_projection_update(int contact, RollingFrictionContactProblem* problem,
-                                    RollingFrictionContactProblem* localproblem,
-                                    double* reaction, SolverOptions* options) {
+                                           RollingFrictionContactProblem* localproblem,
+                                           double* reaction, SolverOptions* options) {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
   */
@@ -71,14 +71,14 @@ void rolling_friction_2d_projection_update(int contact, RollingFrictionContactPr
 }
 
 void rolling_friction_2d_projection_initialize(RollingFrictionContactProblem* problem,
-                                        RollingFrictionContactProblem* localproblem) {}
+                                               RollingFrictionContactProblem* localproblem) {}
 
 void rolling_friction_2d_projection_free(RollingFrictionContactProblem* problem,
-                                  RollingFrictionContactProblem* localproblem,
-                                  SolverOptions* localsolver_options) {}
+                                         RollingFrictionContactProblem* localproblem,
+                                         SolverOptions* localsolver_options) {}
 
 int rolling_friction_2d_projectionOnCone_solve(RollingFrictionContactProblem* localproblem,
-                                        double* reaction, SolverOptions* options) {
+                                               double* reaction, SolverOptions* options) {
   DEBUG_BEGIN("rolling_friction_2d_projectionOnCone_solve(...)\n");
 
   double* MLocal = localproblem->M->matrix0;
@@ -187,9 +187,9 @@ void rolling_friction_2d_projectionOnConeWithLocalIteration_free(
 }
 
 static int rolling_friction_2d_check_trivial_solution(unsigned int contact, unsigned int nc,
-                                               double* q, double mu, double mur,
-                                               double* reaction,
-                                               SolverOptions* localsolver_options) {
+                                                      double* q, double mu, double mur,
+                                                      double* reaction,
+                                                      SolverOptions* localsolver_options) {
   if (q[0] > 0) {
     reaction[0] = 0.0;
     reaction[1] = 0.0;
@@ -281,8 +281,7 @@ int rolling_friction_2d_projectionOnConeWithLocalIteration_solve(
 
   // double trivial_error=0.0;
 
-  if (options
-      ->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] ==
+  if (options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] ==
       SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE) {
     int trivial = rolling_friction_2d_check_trivial_solution(
         options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER],
@@ -491,7 +490,6 @@ void rolling_friction_2d_poc_set_default(SolverOptions* options) {
       SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_FALSE;
 }
 
-
 /* Solver registration wrapper functions for ProjectionOnCone */
 static int rolling_friction_2d_poc_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -500,10 +498,11 @@ static int rolling_friction_2d_poc_init_wrap(void* problem, SolverOptions* optio
 }
 
 static int rolling_friction_2d_poc_solve_wrap(void* problem, double* reaction,
-                                double* velocity, SolverOptions* options) {
+                                              double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
   (void)velocity;
-  info = rolling_friction_2d_projectionOnCone_solve((RollingFrictionContactProblem*)problem, reaction, options);
+  info = rolling_friction_2d_projectionOnCone_solve((RollingFrictionContactProblem*)problem,
+                                                    reaction, options);
   return info;
 }
 
@@ -515,14 +514,11 @@ static void rolling_friction_2d_poc_free_wrap(void* problem, SolverOptions* opti
 
 REGISTER_SOLVER(RFC2D_OC_PROJ, "RFC2D_OC_PROJ",
                 "Projection on Rolling Cone for 2D Rolling Friction Contact",
-                rolling_friction_2d_poc_init_wrap,
-                rolling_friction_2d_poc_solve_wrap,
-                rolling_friction_2d_poc_free_wrap,
-                NULL,  /* error function */
-                rolling_friction_2d_poc_set_default,
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
-                1      /* is_local_solver */);
+                rolling_friction_2d_poc_init_wrap, rolling_friction_2d_poc_solve_wrap,
+                rolling_friction_2d_poc_free_wrap, NULL,  /* error function */
+                rolling_friction_2d_poc_set_default, 100, /* default_max_iter */
+                1e-6,                                     /* default_tol */
+                1 /* is_local_solver */);
 
 /* Solver registration wrapper functions for ProjectionOnConeWithLocalIteration */
 static int rolling_friction_2d_poc_li_init_wrap(void* problem, SolverOptions* options) {
@@ -532,10 +528,11 @@ static int rolling_friction_2d_poc_li_init_wrap(void* problem, SolverOptions* op
 }
 
 static int rolling_friction_2d_poc_li_solve_wrap(void* problem, double* reaction,
-                                   double* velocity, SolverOptions* options) {
+                                                 double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
   (void)velocity;
-  info = rolling_friction_2d_projectionOnConeWithLocalIteration_solve((RollingFrictionContactProblem*)problem, reaction, options);
+  info = rolling_friction_2d_projectionOnConeWithLocalIteration_solve(
+      (RollingFrictionContactProblem*)problem, reaction, options);
   return info;
 }
 
@@ -545,13 +542,11 @@ static void rolling_friction_2d_poc_li_free_wrap(void* problem, SolverOptions* o
   (void)options;
 }
 
-REGISTER_SOLVER(RFC2D_OC_PROJ_LI, "RFC2D_OC_PROJ_LI",
-                "Projection on Rolling Cone with Local Iteration for 2D Rolling Friction Contact",
-                rolling_friction_2d_poc_li_init_wrap,
-                rolling_friction_2d_poc_li_solve_wrap,
-                rolling_friction_2d_poc_li_free_wrap,
-                NULL,  /* error function */
-                rolling_friction_2d_poc_withLocalIteration_set_default,
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
-                1      /* is_local_solver */);
+REGISTER_SOLVER(
+    RFC2D_OC_PROJ_LI, "RFC2D_OC_PROJ_LI",
+    "Projection on Rolling Cone with Local Iteration for 2D Rolling Friction Contact",
+    rolling_friction_2d_poc_li_init_wrap, rolling_friction_2d_poc_li_solve_wrap,
+    rolling_friction_2d_poc_li_free_wrap, NULL,                  /* error function */
+    rolling_friction_2d_poc_withLocalIteration_set_default, 100, /* default_max_iter */
+    1e-6,                                                        /* default_tol */
+    1 /* is_local_solver */);

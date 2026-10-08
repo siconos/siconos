@@ -28,11 +28,11 @@
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
-void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-              SolverOptions *options) {
+void lcp_nsqp(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+              SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  double *M = problem->M->matrix0;
-  double *q = problem->q;
+  double* M = problem->M->matrix0;
+  double* q = problem->q;
   /* size of the LCP */
   int n = problem->size;
 
@@ -44,11 +44,11 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   double *Q, *A;
   double *p, *b, *xl, *xu;
 
-  double *lambda;
+  double* lambda;
 
   int lwar, liwar, iout, un;
-  int *iwar;
-  double *war;
+  int* iwar;
+  double* war;
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
@@ -72,38 +72,38 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   /* / Creation of objective function matrix Q and the the constant vector of the objective
    * function p*/
 
-  Q = (double *)malloc(nmax * nmax * sizeof(double));
+  Q = (double*)malloc(nmax * nmax * sizeof(double));
   for (i = 0; i < n; i++) {
     for (j = 0; j < n; j++) Q[j * n + i] = (M[j * n + i] + M[i * n + j]);
   }
   /* /for (i=0;i<n*n;i++) printf("Q[%i] = %g\n",i,Q[i]);*/
 
-  p = (double *)malloc(nmax * sizeof(double));
+  p = (double*)malloc(nmax * sizeof(double));
   for (i = 0; i < n; i++) p[i] = q[i];
   /* /for (i=0;i<n;i++) printf("p[%i] = %g\n",i,p[i]);*/
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the
    * linear constraints b*/
-  A = (double *)malloc(mmax * nmax * sizeof(double));
+  A = (double*)malloc(mmax * nmax * sizeof(double));
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) A[j * mmax + i] = M[j * n + i];
   }
 
   /* /for (i=0;i<mmax*mmax;i++) printf("A[%i] = %g\n",i,A[i]);*/
 
-  b = (double *)malloc(mmax * sizeof(double));
+  b = (double*)malloc(mmax * sizeof(double));
   for (i = 0; i < m; i++) b[i] = q[i];
 
   /* /for (i=0;i<m;i++) printf("b[%i] = %g\n",i,b[i]);*/
 
   /* / Creation of the the lower and upper bounds for the variables.*/
-  xu = (double *)malloc(n * sizeof(double));
+  xu = (double*)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xu[i] = 1e300;
-  xl = (double *)malloc(n * sizeof(double));
+  xl = (double*)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xl[i] = 0.0;
 
   /* / on return, lambda contains the lagrange multipliers.*/
-  lambda = (double *)malloc(mnn * sizeof(double));
+  lambda = (double*)malloc(mnn * sizeof(double));
   for (i = 0; i < mnn; i++) lambda[i] = 0.0;
 
   /* /   integer indicating the desired output unit number,*/
@@ -114,10 +114,10 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   /* / real working array. */
   lwar = 3 * nmax * nmax / 2 + 10 * nmax + 2 * mmax;
-  war = (double *)malloc(lwar * sizeof(double));
+  war = (double*)malloc(lwar * sizeof(double));
   /* / integer working array. */
   liwar = n;
-  iwar = (int *)malloc(liwar * sizeof(int));
+  iwar = (int*)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 #ifdef HAVE_QL0001
@@ -154,7 +154,7 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   free(war);
 }
 
-static void lcp_nsqp_set_default(SolverOptions *options) {
+static void lcp_nsqp_set_default(SolverOptions* options) {
   /* No specific defaults needed */
   (void)options;
 }
@@ -165,19 +165,19 @@ static void lcp_nsqp_set_default(SolverOptions *options) {
  * This registers SICONOS_LCP_NSQP in the global solver registry.
  */
 
-static int lcp_nsqp_init_wrap(void *problem, SolverOptions *options) {
+static int lcp_nsqp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   lcp_nsqp_set_default(options);
   return NUMERICS_OK;
 }
 
-static int lcp_nsqp_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
+static int lcp_nsqp_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  lcp_nsqp((LinearComplementarityProblem *)problem, z, w, &info, options);
+  lcp_nsqp((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void lcp_nsqp_free_wrap(void *problem, SolverOptions *options) {
+static void lcp_nsqp_free_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
 }

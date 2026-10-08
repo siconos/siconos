@@ -35,11 +35,11 @@ if(WITH_TESTING)
     new_test(SOURCES NM_MUMPS_test.c)
   endif()
 
-  # Specfic tests for SBM matrices 
+  # Specfic tests for SBM matrices
   new_test(SOURCES SBM_test.c DEPS "SuiteSparse::CXSparse;externals")
   new_test(SOURCES SBCM_to_SBM.c)
 
-  # Specfic tests for sparse matrices 
+  # Specfic tests for sparse matrices
   new_test(SOURCES SparseMatrix_test.c DEPS "SuiteSparse::CXSparse")
 
 
@@ -335,7 +335,7 @@ if(WITH_TESTING)
           EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_nsgs_1.c DEPS fclib::fclib
           HDF5 ON
           )
-          
+
         new_tests_collection(
           DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
           EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_admm_1.c DEPS fclib::fclib
@@ -345,7 +345,7 @@ if(WITH_TESTING)
         new_tests_collection(
           DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB
           EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_ipm_snm_fc3d_1.c DEPS fclib::fclib
-          HDF5 ON 
+          HDF5 ON
           )
 
         # new_tests_collection(
@@ -499,12 +499,12 @@ if(WITH_TESTING)
   new_test(SOURCES plasticity_2d_read_write_test.c)
   new_test(SOURCES plasticity_2d_simple_solve_test.c)
   new_test(SOURCES test_plasticity_2d_nsgs_generic.c)
-  
+
   # Collection tests using new infrastructure
   new_tests_collection(
     DRIVER plasticity_test_collection.c.in FORMULATION plasticity_2d COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
-  
+
   new_tests_collection(
     DRIVER plasticity_test_collection.c.in FORMULATION plasticity_2d COLLECTION TEST_NSGS_COMPARE
     EXTRA_SOURCES data_collection_1.c test_nsgs_compare.c)

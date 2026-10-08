@@ -69,10 +69,10 @@ extern "C" {
    - >0 : otherwise (see specific solvers for more information about the log info)
 
 */
-int lcp_solver_pred(double *vec, double *q, int *n, method_lcp *ptvec, double *z, double *w,
-                    int firsttime, int *soltype, int *indic, int *indicop, double *submatlcp,
-                    double *submatlcpop, int *ipiv, int *sizesublcp, int *sizesublcpop,
-                    double *subq, double *bufz, double *newz, double *workspace);
+int lcp_solver_pred(double* vec, double* q, int* n, method_lcp* ptvec, double* z, double* w,
+                    int firsttime, int* soltype, int* indic, int* indicop, double* submatlcp,
+                    double* submatlcpop, int* ipiv, int* sizesublcp, int* sizesublcpop,
+                    double* subq, double* bufz, double* newz, double* workspace);
 /**
  *  lcp_solver_block_pred_vec solves a LCP with a matrix stored block by block.\n
  *  - It iterates by solving successively diagonal sub-LCPs (Gauss-Seidel block by block).\n
@@ -149,10 +149,10 @@ int lcp_solver_pred(double *vec, double *q, int *n, method_lcp *ptvec, double *z
  *   ...\n
  *   blmat.block[5] = {2,-1,2,2}
  */
-int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
-                              SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
-                              int maxiterglob, double tolglob, double *q, method_lcp **ptvec,
-                              double *z, double *w, int *it_end, int *itt_end, double *res);
+int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix* blmat,
+                              SparseBlockStructuredMatrixPred* blmatpred, int nbmethod,
+                              int maxiterglob, double tolglob, double* q, method_lcp** ptvec,
+                              double* z, double* w, int* it_end, int* itt_end, double* res);
 
 #if defined(__cplusplus)
 }

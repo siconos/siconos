@@ -28,8 +28,8 @@ int main(void) {
   int info = 0;
   printf("Test on ./data/Capsules-i122-1617.dat \n");
 
-  FILE *finput = fopen("./data/Capsules-i122-1617.dat", "r");
-  SolverOptions *options = (SolverOptions *)malloc(sizeof(SolverOptions));
+  FILE* finput = fopen("./data/Capsules-i122-1617.dat", "r");
+  SolverOptions* options = (SolverOptions*)malloc(sizeof(SolverOptions));
   info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_VI_FPP);
   options->dparam[0] = 1e-10;
   options->iparam[0] = 2000000;

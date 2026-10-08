@@ -111,18 +111,18 @@ using RecordVariant =
                  std::shared_ptr<BodyDiskRecord>, std::shared_ptr<BodyBox2dRecord>>;
 
 using BodyShapeMap =
-    std::map<const siconos::modeling::SecondOrderDS *, std::vector<RecordVariant>>;
+    std::map<const siconos::modeling::SecondOrderDS*, std::vector<RecordVariant>>;
 
-using StaticBodyShapeMap = std::map<const siconos::collision::StaticBody *,
+using StaticBodyShapeMap = std::map<const siconos::collision::StaticBody*,
                                     std::vector<std::shared_ptr<BodyBulletShapeRecord>>>;
 
 /* We derive a specific callback for filtering the broadphase of Bullet
  * based on collision group */
 struct SiconosBulletFilterCallback : public btOverlapFilterCallback {
-  siconos::simulation::InteractionManager *interactionManager{nullptr};
+  siconos::simulation::InteractionManager* interactionManager{nullptr};
   // return true when pairs need collision
-  virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0,
-                                       btBroadphaseProxy *proxy1) const override;
+  virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0,
+                                       btBroadphaseProxy* proxy1) const override;
 };
 
 class SiconosBulletCollisionManager_impl
@@ -154,12 +154,11 @@ class SiconosBulletCollisionManager_impl
 
   // Rule of five
   SiconosBulletCollisionManager_impl() = delete;
-  SiconosBulletCollisionManager_impl(const SiconosBulletCollisionManager_impl &) = delete;
-  SiconosBulletCollisionManager_impl(SiconosBulletCollisionManager_impl &&) = delete;
-  SiconosBulletCollisionManager_impl &operator=(const SiconosBulletCollisionManager_impl &) =
+  SiconosBulletCollisionManager_impl(const SiconosBulletCollisionManager_impl&) = delete;
+  SiconosBulletCollisionManager_impl(SiconosBulletCollisionManager_impl&&) = delete;
+  SiconosBulletCollisionManager_impl& operator=(const SiconosBulletCollisionManager_impl&) =
       delete;
-  SiconosBulletCollisionManager_impl &operator=(SiconosBulletCollisionManager_impl &&) =
-      delete;
+  SiconosBulletCollisionManager_impl& operator=(SiconosBulletCollisionManager_impl&&) = delete;
 
   // Create collision objects for each shape type
   friend class CreateCollisionObjectShapeVisitor;
@@ -269,8 +268,8 @@ class SiconosBulletCollisionManager_impl
   template <typename ST, typename BT, typename DST, typename BR>
   std::shared_ptr<btCollisionObject> createCollisionObjectHelper(
       std::shared_ptr<siconos::algebra::SiconosVector> base, const std::shared_ptr<DST> ds,
-      std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap &bodyShapeMap,
-      std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap &StaticBodyShapeMap,
+      std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap& bodyShapeMap,
+      std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap& StaticBodyShapeMap,
       std::shared_ptr<StaticBody> staticBody,
       std::shared_ptr<btConvexShape> childShape = nullptr);
   void updateShape(std::shared_ptr<BodySphereRecord> record);
@@ -287,15 +286,15 @@ class SiconosBulletCollisionManager_impl
   void updateShape(std::shared_ptr<BodyBox2dRecord> record);
   void updateShape(std::shared_ptr<BodyCH2dRecord> record);
 
-  void updateAllShapesForDS(const siconos::modeling::SecondOrderDS &bds);
+  void updateAllShapesForDS(const siconos::modeling::SecondOrderDS& bds);
   void updateShapePosition(std::shared_ptr<BodyBulletShapeRecord> record);
 
   /* Helper to apply an offset transform to a position and return as a
    * btTransform */
-  btTransform offsetTransform(const siconos::algebra::SiconosVector &position,
-                              const siconos::algebra::SiconosVector &offset);
+  btTransform offsetTransform(const siconos::algebra::SiconosVector& position,
+                              const siconos::algebra::SiconosVector& offset);
 
-  btTransform offsetTransform(const siconos::algebra::SiconosVector &position);
+  btTransform offsetTransform(const siconos::algebra::SiconosVector& position);
 
   /** Helper to set the inertia of a NewtonEulerDS based on a
    * btCollisionShape */

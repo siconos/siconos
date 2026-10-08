@@ -22,14 +22,13 @@
 
 #include "Relay_Solvers.h"
 #include "SiconosBlas.h"
-
 #include "numerics_errors.h"
-void dr_nlgs(RelayProblem *problem, double *z, double *w, int *info, SolverOptions *options) {
-  double *vec = problem->M->matrix0;
-  double *q = problem->q;
+void dr_nlgs(RelayProblem* problem, double* z, double* w, int* info, SolverOptions* options) {
+  double* vec = problem->M->matrix0;
+  double* q = problem->q;
   int n = problem->size;
-  double *a = problem->ub;
-  double *b = problem->lb;
+  double* a = problem->ub;
+  double* b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
   for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
@@ -42,8 +41,8 @@ void dr_nlgs(RelayProblem *problem, double *z, double *w, int *info, SolverOptio
   double err1, num, den, avn, xn, apn;
   double *zt, *wnum1;
 
-  wnum1 = (double *)malloc(n * sizeof(double));
-  zt = (double *)malloc(n * sizeof(double));
+  wnum1 = (double*)malloc(n * sizeof(double));
+  zt = (double*)malloc(n * sizeof(double));
 
   for (i = 0; i < n; i++) {
     w[i] = 0.;

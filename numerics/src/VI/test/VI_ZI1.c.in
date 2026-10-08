@@ -126,10 +126,10 @@ int main(void)
   options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
   options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 250;
-  
+
 //  options->dparam[SICONOS_VI_DPARAM_RHO] = 2;
 //  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 10;
-  
+
   problem->env = &sim_data;
   problem->nabla_F = NM_create(NM_DENSE, N, N);
 

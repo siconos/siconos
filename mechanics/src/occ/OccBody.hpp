@@ -97,8 +97,6 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
           std::nullopt);
 
-
-
   /** Update positions and orientations of contact shapes.
    */
   void updateContactShapes();

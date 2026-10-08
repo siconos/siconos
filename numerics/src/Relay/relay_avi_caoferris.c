@@ -33,8 +33,8 @@ Ferris solves the subsequent AVI.
 #include "numerics_errors.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT_VEC_INT
 #include "solver_registry.h"
-void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {
+void relay_avi_caoferris(RelayProblem* problem, double* z, double* w, int* info,
+                         SolverOptions* options) {
   unsigned int n = problem->size;
   assert(n > 0);
   unsigned int s = 2 * n;
@@ -47,8 +47,8 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
 
   lcplike_pb.M = &num_mat;
 
-  lcplike_pb.q = (double *)malloc(s * sizeof(double));
-  double *b_bar = (double *)malloc(s * sizeof(double));
+  lcplike_pb.q = (double*)malloc(s * sizeof(double));
+  double* b_bar = (double*)malloc(s * sizeof(double));
 
   /* We can always choose the extreme point such that the matrix of active
    * constrains is the identity and the other matrix is minus the identity.
@@ -73,18 +73,18 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
     /* \bar{a} =  -\tilde{a} + Ay_e */
     lcplike_pb.q[i] += tmp;
   }
-  double *d_vec = (double *)malloc(s * sizeof(double));
+  double* d_vec = (double*)malloc(s * sizeof(double));
   for (unsigned i = 0; i < n; ++i) {
     d_vec[i] = -1.0;
     d_vec[i + n] = 0;
   }
 
   /* Set of active constraint is trivial */
-  unsigned *A = (unsigned *)malloc(n * sizeof(unsigned));
+  unsigned* A = (unsigned*)malloc(n * sizeof(unsigned));
   for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
-  double *u_vec = (double *)calloc(s, sizeof(double));
-  double *s_vec = (double *)calloc(s, sizeof(double));
+  double* u_vec = (double*)calloc(s, sizeof(double));
+  double* s_vec = (double*)calloc(s, sizeof(double));
   /* Call directly the 3rd stage
    * Here w is used as u and z as s in the AVI */
   *info = avi_caoferris_stage3(&lcplike_pb, u_vec, s_vec, d_vec, n, A, options);
@@ -109,24 +109,24 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_AVI_CAOFERRIS in the global solver registry.
  */
 
-static void relay_avi_caoferris_set_default(SolverOptions *options) {
+static void relay_avi_caoferris_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_avi_caoferris_init_wrap(void *problem, SolverOptions *options) {
+static int relay_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_avi_caoferris_solve_wrap(void *problem, double *z, double *w,
-                                          SolverOptions *options) {
+static int relay_avi_caoferris_solve_wrap(void* problem, double* z, double* w,
+                                          SolverOptions* options) {
   int info = NUMERICS_OK;
-  relay_avi_caoferris((RelayProblem *)problem, z, w, &info, options);
+  relay_avi_caoferris((RelayProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_avi_caoferris_free_wrap(void *problem, SolverOptions *options) {
+static void relay_avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

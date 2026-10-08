@@ -42,13 +42,13 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0() {
       "testBuildLagrangianRheonomousR3b : ",
       rel->getSubType() == siconos::modeling::RelationSubType::RheonomousR, true);
 
-  auto hfunc = [](const siconos::algebra::BlockVector &pos, double time,
+  auto hfunc = [](const siconos::algebra::BlockVector& pos, double time,
                   Eigen::Ref<siconos::algebra::MapVectorType> result) { result.setZero(); };
 
-  auto jachq = [](const siconos::algebra::BlockVector &pos, double time,
+  auto jachq = [](const siconos::algebra::BlockVector& pos, double time,
                   Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); };
 
-  auto hdot = [](const siconos::algebra::BlockVector &pos, double time,
+  auto hdot = [](const siconos::algebra::BlockVector& pos, double time,
                  Eigen::Ref<siconos::algebra::MapVectorType> result) { result.setZero(); };
 
   rel->setComputehFunction(hfunc);

@@ -59,10 +59,10 @@ class TransportCableModel {
   std::vector<Pylon> list_of_pylons_down_ = {};
 
   // Rule of five
-  TransportCableModel(const TransportCableModel &) = delete;
-  TransportCableModel(TransportCableModel &&) = delete;
-  TransportCableModel &operator=(const TransportCableModel &) = delete;
-  TransportCableModel &operator=(TransportCableModel &&) = delete;
+  TransportCableModel(const TransportCableModel&) = delete;
+  TransportCableModel(TransportCableModel&&) = delete;
+  TransportCableModel& operator=(const TransportCableModel&) = delete;
+  TransportCableModel& operator=(TransportCableModel&&) = delete;
 
  public:
   TransportCableModel() = delete;
@@ -72,24 +72,24 @@ class TransportCableModel {
   /** Read data from a json input
       \param input json object
   */
-  explicit TransportCableModel(const nlohmann::json &input);
+  explicit TransportCableModel(const nlohmann::json& input);
 
   /** \return true if the model has been loaded and validated */
   bool isLoaded() const;
 
   /** \return the mechanical properties of the cable */
-  inline const MechanicalProperties &mechanicalProperties() const {
+  inline const MechanicalProperties& mechanicalProperties() const {
     return mechanicalProperties_;
   }
 
   /** \return the set of vehicles */
-  inline const Carriers &get_carriers() const { return m_carriers; };
+  inline const Carriers& get_carriers() const { return m_carriers; };
 
   /** \return the list of pylons corresponding to the 'up' ropeway */
-  inline const std::vector<Pylon> &get_pylons_up() const { return list_of_pylons_up_; };
+  inline const std::vector<Pylon>& get_pylons_up() const { return list_of_pylons_up_; };
 
   /** \return the list of pylons corresponding to the 'down' ropeway */
-  inline const std::vector<Pylon> &get_pylons_down() const { return list_of_pylons_down_; };
+  inline const std::vector<Pylon>& get_pylons_down() const { return list_of_pylons_down_; };
 };
 
 }  // namespace siconos::fem::cable
@@ -98,7 +98,7 @@ class TransportCableModel {
 namespace nlohmann {
 template <>
 struct adl_serializer<siconos::fem::cable::TransportCableModel> {
-  static siconos::fem::cable::TransportCableModel from_json(const json &j) {
+  static siconos::fem::cable::TransportCableModel from_json(const json& j) {
     return siconos::fem::cable::TransportCableModel(j);
   }
   // static void to_json(json &j, const siconos::fem::cable::TransportCableModel &input) {

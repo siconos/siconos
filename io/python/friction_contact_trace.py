@@ -1,15 +1,14 @@
-#!/usr/bin/env python
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
-
-# Copyright 2024 INRIA.
-
+#
+# Copyright 2026 INRIA.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +16,7 @@
 # limitations under the License.
 #
 
-
 import siconos.numerics as sn
-
 from siconos.nonsmooth_formulations import (
     FrictionContact,
     GlobalFrictionContact,
@@ -39,9 +36,10 @@ except ImportError:
     has_fclib = False
     print("No module named siconos.fclib.")
 
-import random
-import h5py
 import os
+import random
+
+import h5py
 
 
 class FrictionContactTraceParams:
@@ -66,7 +64,6 @@ class FrictionContactTraceParams:
 
 
 class FrictionContactTrace(FrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = FrictionContactTraceParams()
@@ -86,7 +83,7 @@ class FrictionContactTrace(FrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(FrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -111,7 +108,6 @@ class FrictionContactTrace(FrictionContact):
         self.updateMu()
 
         if self.getSizeOutput() != 0:
-
             #            M = BlockCSRMatrix()
             # M.fillW(model.nonSmoothDynamicalSystem().topology().indexSet(1))
             # M.convert()
@@ -127,7 +123,6 @@ class FrictionContactTrace(FrictionContact):
             SO = self.numericsSolverOptions()
             fclib_written = False
             if self.condition(SO) and has_fclib:
-
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
 
@@ -178,7 +173,6 @@ class FrictionContactTrace(FrictionContact):
             info = self.solve()
 
             if fclib_written:
-
                 solution = F.fclib_solution()
                 solution.u = self.w()
                 solution.z = self.z()
@@ -211,7 +205,6 @@ class GlobalFrictionContactTraceParams:
 
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = GlobalFrictionContactTraceParams()
@@ -231,7 +224,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalFrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -261,47 +254,44 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
         info = self.solve()
         problem = self.globalFrictionContactProblemPtr()
-        if problem.numberOfContacts > 0:
-            if self.condition(SO) and has_fclib:
-                # problem = self.getNumericsProblemPtr()
-                # print(problem, type(problem))
+        if problem.numberOfContacts > 0 and self.condition(SO) and has_fclib:
+            # problem = self.getNumericsProblemPtr()
+            # print(problem, type(problem))
 
-                # solver_maxiter = SO.iparam[0]
-                # n_format_string = len(str(solver_maxiter))
-                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+            # solver_maxiter = SO.iparam[0]
+            # n_format_string = len(str(solver_maxiter))
+            format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
-                filename = format_string.format(
-                    self._params._fileName,
-                    problem.q.shape[0],
-                    problem.numberOfContacts,
-                    self._counter,
+            filename = format_string.format(
+                self._params._fileName,
+                problem.q.shape[0],
+                problem.numberOfContacts,
+                self._counter,
+            )
+            print(filename)
+            if os.path.exists(filename):
+                os.remove(filename)
+                print(
+                    "WARNING: file " + filename + " was existing and has been replaced"
                 )
-                print(filename)
-                if os.path.exists(filename):
-                    os.remove(filename)
-                    print(
-                        "WARNING: file "
-                        + filename
-                        + " was existing and has been replaced"
-                    )
 
-                self._counter += 1
-                sn.globalFrictionContact_fclib_write(
-                    problem,
-                    self._params._title,
-                    self._params._description,
-                    self._params._mathInfo,
-                    filename,
-                )
-                guess = F.fclib_solution()
-                guess.u = w_backup
-                guess.r = z_backup
-                F.fclib_write_guesses(1, guess, filename)
+            self._counter += 1
+            sn.globalFrictionContact_fclib_write(
+                problem,
+                self._params._title,
+                self._params._description,
+                self._params._mathInfo,
+                filename,
+            )
+            guess = F.fclib_solution()
+            guess.u = w_backup
+            guess.r = z_backup
+            F.fclib_write_guesses(1, guess, filename)
 
-                solution = F.fclib_solution()
-                solution.u = self.w()
-                solution.z = self.z()
-                F.fclib_write_solution(solution, filename)
+            solution = F.fclib_solution()
+            solution.u = self.w()
+            solution.z = self.z()
+            F.fclib_write_solution(solution, filename)
 
         self.postCompute()
 
@@ -309,7 +299,6 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
 
 class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
-
     def __init__(self, dim, solver_id, params=None, nsds=None):
         if params is None:
             self._params = GlobalFrictionContactTraceParams()
@@ -329,7 +318,7 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalRollingFrictionContactTrace, self).__init__(dim, solver_id)
+        super().__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -360,51 +349,48 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
 
         info = self.solve()
         problem = self.globalRollingFrictionContactProblemPtr()
-        if problem.numberOfContacts > 0:
-            if self.condition(SO) and has_fclib:
-                # if True:
-                # problem = self.getNumericsProblemPtr()
-                # print(problem, type(problem))
+        if problem.numberOfContacts > 0 and self.condition(SO) and has_fclib:
+            # if True:
+            # problem = self.getNumericsProblemPtr()
+            # print(problem, type(problem))
 
-                # solver_maxiter = SO.iparam[0]
-                # n_format_string = len(str(solver_maxiter))
-                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+            # solver_maxiter = SO.iparam[0]
+            # n_format_string = len(str(solver_maxiter))
+            format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
-                filename = format_string.format(
-                    self._params._fileName,
-                    problem.q.shape[0],
-                    problem.numberOfContacts,
-                    self._counter,
+            filename = format_string.format(
+                self._params._fileName,
+                problem.q.shape[0],
+                problem.numberOfContacts,
+                self._counter,
+            )
+            print(filename)
+            if os.path.exists(filename):
+                os.remove(filename)
+                print(
+                    "WARNING: file " + filename + " was existing and has been replaced"
                 )
-                print(filename)
-                if os.path.exists(filename):
-                    os.remove(filename)
-                    print(
-                        "WARNING: file "
-                        + filename
-                        + " was existing and has been replaced"
-                    )
 
-                self._counter += 1
+            self._counter += 1
 
-                print(type(problem))
+            print(type(problem))
 
-                sn.globalRollingFrictionContact_fclib_write(
-                    problem,
-                    self._params._title,
-                    self._params._description,
-                    self._params._mathInfo,
-                    filename,
-                )
-                guess = F.fclib_solution()
-                guess.u = w_backup
-                guess.r = z_backup
-                F.fclib_write_guesses(1, guess, filename)
+            sn.globalRollingFrictionContact_fclib_write(
+                problem,
+                self._params._title,
+                self._params._description,
+                self._params._mathInfo,
+                filename,
+            )
+            guess = F.fclib_solution()
+            guess.u = w_backup
+            guess.r = z_backup
+            F.fclib_write_guesses(1, guess, filename)
 
-                solution = F.fclib_solution()
-                solution.u = self.w()
-                solution.z = self.z()
-                F.fclib_write_solution(solution, filename)
+            solution = F.fclib_solution()
+            solution.u = self.w()
+            solution.z = self.z()
+            F.fclib_write_solution(solution, filename)
 
         self.postCompute()
 

@@ -32,8 +32,8 @@
 #include "NumericsSparseMatrix.h"  // for NSM_CSC, NumericsSparseMatrix
 #include "SparseBlockMatrix.h"     // for SparseBlockStructuredMatrix, SBM_new
 
-NumericsMatrix *test_matrix_1() {
-  NumericsMatrix *M1 = NM_new();
+NumericsMatrix* test_matrix_1() {
+  NumericsMatrix* M1 = NM_new();
   int n = 8;
   /* Double * storage (column-major) */
   double m0[64] = {1, 2, 0, 5, 0,  0, 0, 0, 2, 1, 0, 0,  0, 0, 0, 0, 0, 0, 1,  -1, 0, 0,
@@ -42,14 +42,14 @@ NumericsMatrix *test_matrix_1() {
   M1->storageType = 0;
   M1->size0 = n;
   M1->size1 = n;
-  M1->matrix0 = (double *)malloc(n * n * sizeof(double));
+  M1->matrix0 = (double*)malloc(n * n * sizeof(double));
 
   for (int i = 0; i < n * n; i++) M1->matrix0[i] = m0[i];
   return M1;
 }
 
-NumericsMatrix *test_matrix_3() {
-  NumericsMatrix *M3 = NM_new();
+NumericsMatrix* test_matrix_3() {
+  NumericsMatrix* M3 = NM_new();
   int n = 8;
 
   int nn = 4;
@@ -59,13 +59,13 @@ NumericsMatrix *test_matrix_3() {
   M3->storageType = 0;
   M3->size0 = n;
   M3->size1 = nn;
-  M3->matrix0 = (double *)malloc(nn * n * sizeof(double));
+  M3->matrix0 = (double*)malloc(nn * n * sizeof(double));
   for (int i = 0; i < nn * n; i++) M3->matrix0[i] = m00[i];
 
   return M3;
 }
-NumericsMatrix *test_matrix_2() {
-  NumericsMatrix *M2 = NM_new();
+NumericsMatrix* test_matrix_2() {
+  NumericsMatrix* M2 = NM_new();
   int n = 8;
 
   /* Build a NumericsMatrix with sparse-block storage */
@@ -73,13 +73,13 @@ NumericsMatrix *test_matrix_2() {
   M2->size0 = n;
   M2->size1 = n;
 
-  SparseBlockStructuredMatrix *SBM = SBM_new();
+  SparseBlockStructuredMatrix* SBM = SBM_new();
   M2->matrix1 = SBM;
   SBM->nbblocks = 6;
   SBM->blocknumber0 = 3;
   SBM->blocknumber1 = SBM->blocknumber0;
 
-  SBM->blocksize0 = (size_t *)malloc(3 * sizeof(size_t));
+  SBM->blocksize0 = (size_t*)malloc(3 * sizeof(size_t));
   SBM->blocksize0[0] = 4;
   SBM->blocksize0[1] = 6;
   SBM->blocksize0[2] = 8;
@@ -88,13 +88,13 @@ NumericsMatrix *test_matrix_2() {
   SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
 
-  SBM->index1_data = (size_t *)malloc((SBM->filled1) * sizeof(size_t));
+  SBM->index1_data = (size_t*)malloc((SBM->filled1) * sizeof(size_t));
   SBM->index1_data[0] = 0;
   SBM->index1_data[1] = 2;
   SBM->index1_data[2] = 4;
   SBM->index1_data[3] = 6;
 
-  SBM->index2_data = (size_t *)malloc((SBM->filled2) * sizeof(size_t));
+  SBM->index2_data = (size_t*)malloc((SBM->filled2) * sizeof(size_t));
   SBM->index2_data[0] = 0;
   SBM->index2_data[1] = 1;
   SBM->index2_data[2] = 1;
@@ -102,19 +102,19 @@ NumericsMatrix *test_matrix_2() {
   SBM->index2_data[4] = 0;
   SBM->index2_data[5] = 2;
 
-  SBM->block = (double **)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+  SBM->block = (double**)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
   double block0[16] = {1, 2, 0, 5, 2, 1, 0, 0, 0, 0, 1, -1, 4, 0, -1, 6};
   double block1[8] = {3, 4, 0, 0, -1, 1, 0, 6};
   double block2[4] = {1, 0, 0, 2};
   double block3[4] = {0, 0, 5, 2};
   double block4[8] = {0, 0, 0, 0, 2, 2, 1, 2};
   double block5[4] = {2, -1, 2, 2};
-  SBM->block[0] = (double *)malloc(16 * sizeof(double));
-  SBM->block[1] = (double *)malloc(8 * sizeof(double));
-  SBM->block[2] = (double *)malloc(4 * sizeof(double));
-  SBM->block[3] = (double *)malloc(4 * sizeof(double));
-  SBM->block[4] = (double *)malloc(8 * sizeof(double));
-  SBM->block[5] = (double *)malloc(4 * sizeof(double));
+  SBM->block[0] = (double*)malloc(16 * sizeof(double));
+  SBM->block[1] = (double*)malloc(8 * sizeof(double));
+  SBM->block[2] = (double*)malloc(4 * sizeof(double));
+  SBM->block[3] = (double*)malloc(4 * sizeof(double));
+  SBM->block[4] = (double*)malloc(8 * sizeof(double));
+  SBM->block[5] = (double*)malloc(4 * sizeof(double));
   for (int i = 0; i < 16; i++) SBM->block[0][i] = block0[i];
   for (int i = 0; i < 8; i++) SBM->block[1][i] = block1[i];
   for (int i = 0; i < 4; i++) SBM->block[2][i] = block2[i];
@@ -126,8 +126,8 @@ NumericsMatrix *test_matrix_2() {
   return M2;
 }
 
-NumericsMatrix *test_matrix_4() {
-  NumericsMatrix *M4 = NM_new();
+NumericsMatrix* test_matrix_4() {
+  NumericsMatrix* M4 = NM_new();
   int n = 8;
 
   /* Build a NumericsMatrix with sparse-block storage */
@@ -136,46 +136,46 @@ NumericsMatrix *test_matrix_4() {
   M4->size1 = 4;
 
   M4->matrix1 = SBM_new();
-  SparseBlockStructuredMatrix *SBM4 = M4->matrix1;
+  SparseBlockStructuredMatrix* SBM4 = M4->matrix1;
 
   SBM4->nbblocks = 2;
   SBM4->blocknumber0 = 3;
 
-  SBM4->blocksize0 = (size_t *)malloc(SBM4->blocknumber0 * sizeof(size_t));
+  SBM4->blocksize0 = (size_t*)malloc(SBM4->blocknumber0 * sizeof(size_t));
   SBM4->blocksize0[0] = 4;
   SBM4->blocksize0[1] = 6;
   SBM4->blocksize0[2] = 8;
 
   SBM4->blocknumber1 = 1;
-  SBM4->blocksize1 = (size_t *)malloc(SBM4->blocknumber1 * sizeof(size_t));
+  SBM4->blocksize1 = (size_t*)malloc(SBM4->blocknumber1 * sizeof(size_t));
   SBM4->blocksize1[0] = 4;
 
   SBM4->filled1 = 4;
   SBM4->filled2 = SBM4->nbblocks;
 
-  SBM4->index1_data = (size_t *)malloc((SBM4->filled1) * sizeof(size_t));
+  SBM4->index1_data = (size_t*)malloc((SBM4->filled1) * sizeof(size_t));
   SBM4->index1_data[0] = 0;
   SBM4->index1_data[1] = 1;
   SBM4->index1_data[2] = 1;
   SBM4->index1_data[3] = 2;
 
-  SBM4->index2_data = (size_t *)malloc((SBM4->filled2) * sizeof(size_t));
+  SBM4->index2_data = (size_t*)malloc((SBM4->filled2) * sizeof(size_t));
   SBM4->index2_data[0] = 0;
   SBM4->index2_data[1] = 0;
 
-  SBM4->block = (double **)malloc(SBM4->nbblocks * sizeof(*(SBM4->block)));
+  SBM4->block = (double**)malloc(SBM4->nbblocks * sizeof(*(SBM4->block)));
   double block00[16] = {1, 2, 0, 5, 2, 1, 0, 0, 0, 0, 1, -1, 4, 0, -1, 6};
   double block40[8] = {0, 0, 0, 0, 2, 2, 1, 2};
-  SBM4->block[0] = (double *)malloc(16 * sizeof(double));
-  SBM4->block[1] = (double *)malloc(8 * sizeof(double));
+  SBM4->block[0] = (double*)malloc(16 * sizeof(double));
+  SBM4->block[1] = (double*)malloc(8 * sizeof(double));
   for (int i = 0; i < 16; i++) SBM4->block[0][i] = block00[i];
   for (int i = 0; i < 8; i++) SBM4->block[1][i] = block40[i];
 
   return M4;
 }
 
-NumericsMatrix *test_matrix_5() {
-  NumericsMatrix *M2 = test_matrix_2();
+NumericsMatrix* test_matrix_5() {
+  NumericsMatrix* M2 = test_matrix_2();
 
   NM_csc(M2);
 
@@ -185,8 +185,8 @@ NumericsMatrix *test_matrix_5() {
   numericsSparseMatrix(M2)->origin = NSM_CSC;
   return M2;
 }
-NumericsMatrix *test_matrix_6() {
-  NumericsMatrix *M4 = test_matrix_4();
+NumericsMatrix* test_matrix_6() {
+  NumericsMatrix* M4 = test_matrix_4();
 
   NM_csc(M4);
 
@@ -198,8 +198,8 @@ NumericsMatrix *test_matrix_6() {
   return M4;
 }
 
-NumericsMatrix *test_matrix_9() {
-  NumericsMatrix *M = NM_new();
+NumericsMatrix* test_matrix_9() {
+  NumericsMatrix* M = NM_new();
   int n = 8;
   /* Double * storage (column-major) */
   double m0[64] = {1, 2, 0, 5,  0, 0, 0, 0,  2, 1, 0,  0, 0, 0, 0, 0,
@@ -211,14 +211,14 @@ NumericsMatrix *test_matrix_9() {
   M->storageType = 0;
   M->size0 = n;
   M->size1 = n;
-  M->matrix0 = (double *)malloc(n * n * sizeof(double));
+  M->matrix0 = (double*)malloc(n * n * sizeof(double));
 
   for (int i = 0; i < n * n; i++) M->matrix0[i] = m0[i];
   return M;
 }
 
-NumericsMatrix *test_matrix_10() {
-  NumericsMatrix *M = NM_new();
+NumericsMatrix* test_matrix_10() {
+  NumericsMatrix* M = NM_new();
   int n = 8;
 
   /* Build a NumericsMatrix with sparse-block storage */
@@ -226,13 +226,13 @@ NumericsMatrix *test_matrix_10() {
   M->size0 = n;
   M->size1 = n;
 
-  SparseBlockStructuredMatrix *SBM = SBM_new();
+  SparseBlockStructuredMatrix* SBM = SBM_new();
   M->matrix1 = SBM;
   SBM->nbblocks = 4;
   SBM->blocknumber0 = 3;
   SBM->blocknumber1 = SBM->blocknumber0;
 
-  SBM->blocksize0 = (size_t *)malloc(3 * sizeof(size_t));
+  SBM->blocksize0 = (size_t*)malloc(3 * sizeof(size_t));
   SBM->blocksize0[0] = 4;
   SBM->blocksize0[1] = 6;
   SBM->blocksize0[2] = 8;
@@ -241,19 +241,19 @@ NumericsMatrix *test_matrix_10() {
   SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
 
-  SBM->index1_data = (size_t *)malloc((SBM->filled1) * sizeof(size_t));
+  SBM->index1_data = (size_t*)malloc((SBM->filled1) * sizeof(size_t));
   SBM->index1_data[0] = 0;
   SBM->index1_data[1] = 1;
   SBM->index1_data[2] = 2;
   SBM->index1_data[3] = 4;
 
-  SBM->index2_data = (size_t *)malloc((SBM->filled2) * sizeof(size_t));
+  SBM->index2_data = (size_t*)malloc((SBM->filled2) * sizeof(size_t));
   SBM->index2_data[0] = 0;
   SBM->index2_data[1] = 2;
   SBM->index2_data[2] = 0;
   SBM->index2_data[3] = 2;
 
-  SBM->block = (double **)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+  SBM->block = (double**)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
   double block0[16] = {1, 2, 0, 5, 2, 1, 0, 0, 0, 0, 1, -1, 4, 0, -1, 6};
   /* double block1[8] = {3, 4, 0, 0, -1, 1, 0, 6}; */
   /* double block2[4] = {1, 0, 0, 2}; */
@@ -261,12 +261,12 @@ NumericsMatrix *test_matrix_10() {
   double block4[8] = {0, 0, 0, 0, 2, 2, 1, 2};
   double block5[4] = {2, -1, 2, 2};
 
-  SBM->block[0] = (double *)malloc(16 * sizeof(double));
+  SBM->block[0] = (double*)malloc(16 * sizeof(double));
   /* SBM->block[1] = (double *)malloc(8 * sizeof(double)); */
   /* SBM->block[2] = (double *)malloc(4 * sizeof(double)); */
-  SBM->block[1] = (double *)malloc(4 * sizeof(double));
-  SBM->block[2] = (double *)malloc(8 * sizeof(double));
-  SBM->block[3] = (double *)malloc(4 * sizeof(double));
+  SBM->block[1] = (double*)malloc(4 * sizeof(double));
+  SBM->block[2] = (double*)malloc(8 * sizeof(double));
+  SBM->block[3] = (double*)malloc(4 * sizeof(double));
   for (int i = 0; i < 16; i++) SBM->block[0][i] = block0[i];
   /* for (int i = 0; i < 8; i++) */
   /*   SBM->block[1][i] = block1[i]; */
@@ -279,8 +279,8 @@ NumericsMatrix *test_matrix_10() {
 
   return M;
 }
-NumericsMatrix *test_matrix_20() {
-  NumericsMatrix *M = NM_new();
+NumericsMatrix* test_matrix_20() {
+  NumericsMatrix* M = NM_new();
   int n = 8;
 
   /* Build a NumericsMatrix with sparse-block storage */
@@ -288,13 +288,13 @@ NumericsMatrix *test_matrix_20() {
   M->size0 = n;
   M->size1 = n;
 
-  SparseBlockStructuredMatrix *SBM = SBM_new();
+  SparseBlockStructuredMatrix* SBM = SBM_new();
   M->matrix1 = SBM;
   SBM->nbblocks = 9;
   SBM->blocknumber0 = 3;
   SBM->blocknumber1 = SBM->blocknumber0;
 
-  SBM->blocksize0 = (size_t *)malloc(3 * sizeof(size_t));
+  SBM->blocksize0 = (size_t*)malloc(3 * sizeof(size_t));
   SBM->blocksize0[0] = 4;
   SBM->blocksize0[1] = 6;
   SBM->blocksize0[2] = 8;
@@ -303,13 +303,13 @@ NumericsMatrix *test_matrix_20() {
   SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
 
-  SBM->index1_data = (size_t *)malloc((SBM->filled1) * sizeof(size_t));
+  SBM->index1_data = (size_t*)malloc((SBM->filled1) * sizeof(size_t));
   SBM->index1_data[0] = 0;
   SBM->index1_data[1] = 3;
   SBM->index1_data[2] = 6;
   SBM->index1_data[3] = 9;
 
-  SBM->index2_data = (size_t *)malloc((SBM->filled2) * sizeof(size_t));
+  SBM->index2_data = (size_t*)malloc((SBM->filled2) * sizeof(size_t));
   SBM->index2_data[0] = 0;
   SBM->index2_data[1] = 1;
   SBM->index2_data[2] = 2;
@@ -320,7 +320,7 @@ NumericsMatrix *test_matrix_20() {
   SBM->index2_data[7] = 1;
   SBM->index2_data[8] = 2;
 
-  SBM->block = (double **)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+  SBM->block = (double**)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
 
   for (size_t currentRowNumber = 0; currentRowNumber < SBM->filled1 - 1; ++currentRowNumber) {
     for (size_t blockNum = SBM->index1_data[currentRowNumber];
@@ -332,14 +332,14 @@ NumericsMatrix *test_matrix_20() {
       size_t blocksize1 = SBM->blocksize1[colNumber];
       if (colNumber != 0) blocksize1 -= SBM->blocksize1[colNumber - 1];
 
-      SBM->block[blockNum] = (double *)calloc(blocksize0 * blocksize1, sizeof(double));
+      SBM->block[blockNum] = (double*)calloc(blocksize0 * blocksize1, sizeof(double));
     }
   }
 
   return M;
 }
 
-int SBM_dense_equal(SparseBlockStructuredMatrix *M, double *mat, double tol) {
+int SBM_dense_equal(SparseBlockStructuredMatrix* M, double* mat, double tol) {
   int info = 0;
 
   int n = M->blocksize0[M->blocknumber0 - 1];
@@ -358,7 +358,7 @@ int SBM_dense_equal(SparseBlockStructuredMatrix *M, double *mat, double tol) {
   }
   return info;
 }
-int NM_dense_equal(NumericsMatrix *M, double *mat, double tol) {
+int NM_dense_equal(NumericsMatrix* M, double* mat, double tol) {
   int info = 0;
 
   int n = M->size0;
@@ -377,16 +377,16 @@ int NM_dense_equal(NumericsMatrix *M, double *mat, double tol) {
   }
   return info;
 }
-int test_build_first_4_NM(NumericsMatrix **MM) {
+int test_build_first_4_NM(NumericsMatrix** MM) {
   MM[0] = test_matrix_1();
   MM[1] = test_matrix_2();
   MM[2] = test_matrix_3();
   MM[3] = test_matrix_4();
 
-  NumericsMatrix *M1 = MM[0];
-  NumericsMatrix *M2 = MM[1];
-  NumericsMatrix *M3 = MM[2];
-  NumericsMatrix *M4 = MM[3];
+  NumericsMatrix* M1 = MM[0];
+  NumericsMatrix* M2 = MM[1];
+  NumericsMatrix* M3 = MM[2];
+  NumericsMatrix* M4 = MM[3];
 
   int info = 0;
   /* Build two equal Numerics Matrices, one with double* storage (MM1), the other with sparse
@@ -407,9 +407,9 @@ int test_build_first_4_NM(NumericsMatrix **MM) {
 /* ==============================================================================================================================
  */
 
-int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M) {
-  double *denseRes = (double *)malloc(M->blocksize0[M->blocknumber0 - 1] *
-                                      M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+int test_SBM_row_to_dense(SparseBlockStructuredMatrix* M) {
+  double* denseRes = (double*)malloc(M->blocksize0[M->blocknumber0 - 1] *
+                                     M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
   size_t curRow = 0;
   size_t nbCol = M->blocksize1[M->blocknumber1 - 1];
   for (size_t i = 0; i < M->blocknumber0; i++) {
@@ -437,8 +437,8 @@ int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M) {
     curRow = M->blocksize0[i];
   }
 
-  double *denseRes2 = (double *)malloc(M->blocksize0[M->blocknumber0 - 1] *
-                                       M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
+  double* denseRes2 = (double*)malloc(M->blocksize0[M->blocknumber0 - 1] *
+                                      M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
 
   SBM_to_dense(M, denseRes2);
   for (size_t n = 0;
@@ -454,12 +454,12 @@ int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M) {
   return 0;
 }
 
-int test_SBM_row_permutation(SparseBlockStructuredMatrix *input) {
+int test_SBM_row_permutation(SparseBlockStructuredMatrix* input) {
   SparseBlockStructuredMatrix MRes;
   SBM_null(&MRes);
   size_t nbRow = input->blocknumber0;
-  size_t *rowBlockIndex = (size_t *)malloc(nbRow * sizeof(size_t));
-  size_t *mark = (size_t *)malloc(nbRow * sizeof(size_t));
+  size_t* rowBlockIndex = (size_t*)malloc(nbRow * sizeof(size_t));
+  size_t* mark = (size_t*)malloc(nbRow * sizeof(size_t));
   for (size_t i = 0; i < nbRow; i++) {
     mark[i] = 0;
   }
@@ -472,13 +472,13 @@ int test_SBM_row_permutation(SparseBlockStructuredMatrix *input) {
   }
   SBM_row_permutation(rowBlockIndex, input, &MRes);
 
-  double *denseMRes =
-      (double *)malloc(input->blocksize0[input->blocknumber0 - 1] *
-                       input->blocksize1[input->blocknumber1 - 1] * sizeof(double));
+  double* denseMRes =
+      (double*)malloc(input->blocksize0[input->blocknumber0 - 1] *
+                      input->blocksize1[input->blocknumber1 - 1] * sizeof(double));
   SBM_to_dense(&MRes, denseMRes);
-  double *denseM =
-      (double *)malloc(input->blocksize0[input->blocknumber0 - 1] *
-                       input->blocksize1[input->blocknumber1 - 1] * sizeof(double));
+  double* denseM =
+      (double*)malloc(input->blocksize0[input->blocknumber0 - 1] *
+                      input->blocksize1[input->blocknumber1 - 1] * sizeof(double));
   size_t curRow = 0;
   size_t nbRowInM = input->blocksize0[input->blocknumber0 - 1];
   for (size_t i = 0; i < nbRow; i++) {
@@ -509,12 +509,12 @@ clean_mem:
   return info;
 }
 
-int test_SBM_column_permutation(SparseBlockStructuredMatrix *M) {
+int test_SBM_column_permutation(SparseBlockStructuredMatrix* M) {
   SparseBlockStructuredMatrix MRes;
   SBM_null(&MRes);
   int nbCol = M->blocknumber1;
-  size_t *colBlockIndex = (size_t *)malloc(nbCol * sizeof(size_t));
-  int *mark = (int *)malloc(nbCol * sizeof(int));
+  size_t* colBlockIndex = (size_t*)malloc(nbCol * sizeof(size_t));
+  int* mark = (int*)malloc(nbCol * sizeof(int));
   for (int i = 0; i < nbCol; i++) mark[i] = 0;
   for (int i = 0; i < nbCol; i++) {
     int candidate = rand() % nbCol;

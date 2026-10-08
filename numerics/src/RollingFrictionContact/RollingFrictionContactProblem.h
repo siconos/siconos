@@ -37,16 +37,16 @@ struct RollingFrictionContactProblem {
   int numberOfContacts;
   /** \f$ {M} \in {{\mathrm{I\!R}}}^{m \times m} \f$,
      a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
-  NumericsMatrix *M;
+  NumericsMatrix* M;
   /** \f$ {q} \in {{\mathrm{I\!R}}}^{m} \f$ */
-  double *q;
+  double* q;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
-  double *mu;
+  double* mu;
   /** \f$ {\mu_r} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
       coefficients
       (\f$ n_c = \f$ numberOfContacts) */
-  double *mu_r;
+  double* mu_r;
 };
 
 #if defined(__cplusplus)
@@ -55,7 +55,7 @@ extern "C" {
 
 /* create an empty RollingFrictionContactProblem
  * \return an empty fcp */
-RollingFrictionContactProblem *rollingFrictionContactProblem_new(void);
+RollingFrictionContactProblem* rollingFrictionContactProblem_new(void);
 
 /** new RollingFrictionContactProblem from minimal set of data
  *
@@ -66,20 +66,20 @@ RollingFrictionContactProblem *rollingFrictionContactProblem_new(void);
  *  \param[in] mu the mu vector
  *  \return a pointer to a RollingFrictionContactProblem structure
  */
-RollingFrictionContactProblem *rollingFrictionContactProblem_new_with_data(
-    int dim, int nc, NumericsMatrix *M, double *q, double *mu, double *mu_r);
+RollingFrictionContactProblem* rollingFrictionContactProblem_new_with_data(
+    int dim, int nc, NumericsMatrix* M, double* q, double* mu, double* mu_r);
 
 /** free a RollingFrictionContactProblem
  *
  *  \param problem the problem to free
  */
-void rollingFrictionContactProblem_free(RollingFrictionContactProblem *problem);
+void rollingFrictionContactProblem_free(RollingFrictionContactProblem* problem);
 
 /** display a RollingFrictionContactProblem
  *
  *  \param problem the problem to display
  */
-void rollingFrictionContact_display(RollingFrictionContactProblem *problem);
+void rollingFrictionContact_display(RollingFrictionContactProblem* problem);
 
 /** print a RollingFrictionContactProblem in a file (numerics .dat format)
  *
@@ -87,7 +87,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem *problem);
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem, FILE *file);
+int rollingFrictionContact_printInFile(RollingFrictionContactProblem* problem, FILE* file);
 
 /** print a RollingFrictionContactProblem in a file (numerics .dat format) from
  *  its filename
@@ -96,15 +96,15 @@ int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem, F
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int rollingFrictionContact_printInFilename(RollingFrictionContactProblem *problem,
-                                           char *filename);
+int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* problem,
+                                           char* filename);
 
 /** read a RollingFrictionContactProblem from a file descriptor
  *
  *  \param file descriptor
  *  \return problem the problem to read
  */
-RollingFrictionContactProblem *rollingFrictionContact_newFromFile(FILE *file);
+RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file);
 
 /** read a RollingFrictionContactProblem from a file (.dat or hdf5 if fclib is
  *  on) from its filename
@@ -112,10 +112,10 @@ RollingFrictionContactProblem *rollingFrictionContact_newFromFile(FILE *file);
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-RollingFrictionContactProblem *rollingFrictionContact_new_from_filename(const char *filename);
+RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char* filename);
 
-void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem *problem,
-                                                      double *reaction, double *velocity,
+void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem* problem,
+                                                      double* reaction, double* velocity,
                                                       double tol, int do_print);
 
 #if defined(__cplusplus)

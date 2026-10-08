@@ -66,11 +66,7 @@ namespace siconos::model {
  * - any_lagrangian_relation: General Lagrangian relation marker
  */
 template <auto NSLSize>
-struct lagrangian_r : item,
-                      linear,
-                      relation1,
-                      relation2,
-                      any_lagrangian_relation {
+struct lagrangian_r : item, linear, relation1, relation2, any_lagrangian_relation {
   /**
    * @brief Type representing the non-smooth law size (number of constraints)
    *
@@ -165,9 +161,8 @@ struct lagrangian_r : item,
      * The Jacobian with respect to q1 is H, and with respect to q2 is -H.
      * This is used for contact constraints between two moving bodies.
      */
-    decltype(auto) compute_jachq(auto step, auto& ds1, auto& ds2,
-                                 auto& h_matrix1, auto& h_matrix2)
-    {
+    decltype(auto) compute_jachq(auto step, auto& ds1, auto& ds2, auto& h_matrix1,
+                                 auto& h_matrix2) {
       h_matrix1 = h_matrix();
       h_matrix2 = -h_matrix();
     }
@@ -190,8 +185,7 @@ struct lagrangian_r : item,
      * obstacle). This is used for contact constraints between a body and a
      * fixed obstacle.
      */
-    decltype(auto) compute_jachq(auto step, auto& ds, auto& h_matrix1)
-    {
+    decltype(auto) compute_jachq(auto step, auto& ds, auto& h_matrix1) {
       h_matrix1 << -h_matrix();
     }
   };
@@ -280,8 +274,7 @@ struct rt_lagrangian_r : item, model::linear, model::relation1 {
      * equation. Positive values typically indicate penetration (for contact
      * constraints).
      */
-    auto compute_h(auto step, auto& ds)
-    {
+    auto compute_h(auto step, auto& ds) {
       return h_matrix() * storage::attr<"q">(ds, step) + b();
     }
 
@@ -299,10 +292,7 @@ struct rt_lagrangian_r : item, model::linear, model::relation1 {
      * generalized coordinates. For linear constraints, this is simply the
      * constraint matrix H.
      */
-    void compute_jachq(auto step, auto& ds, auto& h_mat)
-    {
-      h_mat = h_matrix();
-    }
+    void compute_jachq(auto step, auto& ds, auto& h_mat) { h_mat = h_matrix(); }
   };
 };
 

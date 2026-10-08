@@ -21,11 +21,11 @@
 #include "EulerMoreauOSI.hpp"
 #include "EventsManager.hpp"
 #include "FirstOrderLinearTIR.hpp"
+#include "NormalConeNSL.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "io.hpp"
-#include "NormalConeNSL.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

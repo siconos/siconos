@@ -73,7 +73,7 @@ std::vector<T> linspace(T start, T end, S num) {
  *
  */
 template <typename T>
-T getParam(const nlohmann::json &a_arg, const std::string &a_name, T a_default) {
+T getParam(const nlohmann::json& a_arg, const std::string& a_name, T a_default) {
   T vRet = a_default;
   if (!a_arg.is_null()) {
     if (a_arg.contains(a_name)) {
@@ -88,7 +88,7 @@ T getParam(const nlohmann::json &a_arg, const std::string &a_name, T a_default) 
   \param filename name of the input file
   \return a json object
 */
-nlohmann::json load_json_file(const std::string &filename);
+nlohmann::json load_json_file(const std::string& filename);
 
 }  // namespace siconos::fem::cable::tools
 

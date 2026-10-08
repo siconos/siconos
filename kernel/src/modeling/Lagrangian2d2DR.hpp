@@ -60,30 +60,30 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   /** destructor */
   virtual ~Lagrangian2d2DR() noexcept = default;
 
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** to compute the output y = h(q,z) of the Relation
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
      \param y the resulting vector
  */
-  void computeh(const siconos::algebra::BlockVector &q,
+  void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q) override;
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
+  inline const siconos::algebra::SiconosVector2& pc1() const { return contactPoint1_; }
 
-  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
+  inline const siconos::algebra::SiconosVector2& pc2() const { return contactPoint2_; }
 
-  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
+  inline const siconos::algebra::SiconosVector2& nc() const { return nc_; }
 
   /** @brief Update contact point info.
    *
@@ -91,9 +91,9 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
    *  @param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
    *  @param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  inline void updateContactPoints(const siconos::algebra::SiconosVector2 &pos1,
-                                  const siconos::algebra::SiconosVector2 &pos2,
-                                  const siconos::algebra::SiconosVector2 &normal) {
+  inline void updateContactPoints(const siconos::algebra::SiconosVector2& pos1,
+                                  const siconos::algebra::SiconosVector2& pos2,
+                                  const siconos::algebra::SiconosVector2& normal) {
     assert(normal.norm() != 0);
     contactPoint1_ = pos1;
     contactPoint2_ = pos2;
@@ -101,7 +101,7 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   }
 
   void display() const override;
-  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRIMPACT_H

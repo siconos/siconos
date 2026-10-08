@@ -22,7 +22,7 @@ if(WITH_TESTING)
   set(path_to_test_sources ${CMAKE_SOURCE_DIR}/mechanisms/python/tests/slider_crank)
   configure_file(${path_to_test_sources}/bodydef.py ${EXAMPLE_PATH}/bodydef.py COPYONLY)
   configure_file(${path_to_test_sources}/mbtbLocalOptions.py ${EXAMPLE_PATH} COPYONLY)
-  
+
   # TO BE REVIEWED
 #  build_python_tests(
     # DEPS Boost::boost # for quaternions

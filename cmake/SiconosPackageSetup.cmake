@@ -30,7 +30,7 @@ configure_file(
   IMMEDIATE @ONLY)
 
 if(WITH_PYB11_WRAPPER)
-  # deal with files installed for python 
+  # deal with files installed for python
   add_custom_target(uninstall
     echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
     #COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
@@ -59,7 +59,7 @@ endif()
 
 # ===== Siconos Package configuration file ====
 # https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages
-# 
+#
 include(CMakePackageConfigHelpers)
 
 # Generate ${PROJECT_NAME}Config.cmake
@@ -80,7 +80,7 @@ export(EXPORT siconosTargets
 
 install(EXPORT siconosTargets
   NAMESPACE Siconos::
-  DESTINATION ${SiconosConfigPackageLocation}) 
+  DESTINATION ${SiconosConfigPackageLocation})
 
 # install config files
 install(
@@ -89,9 +89,9 @@ install(
 
 if(WITH_GIT)
   # Save and install a file which contain git references for the current source directory
-  # (branch and short commit number), mostly used by continuous integration and cdash 
+  # (branch and short commit number), mostly used by continuous integration and cdash
   # to tag cdash builds.
-  # git reference name (branch, tag ...) 
+  # git reference name (branch, tag ...)
   execute_process(COMMAND
     ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
     OUTPUT_VARIABLE COMMIT_REF_NAME

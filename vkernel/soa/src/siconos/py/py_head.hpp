@@ -47,8 +47,7 @@ struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
 using trace_params = simul::trace_params;
-struct ct_interaction
-    : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
+struct ct_interaction : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
 struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r> {};
 struct topo : simul::topology<disk, ct_interaction, fem, rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
@@ -56,10 +55,8 @@ struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
 using pointf = collision::point<fem, mesh_shape>;
 using pointl = collision::point<storage::pattern::empty_item, segment_shape>;
-using pointtds =
-    collision::point<storage::pattern::empty_item, translated_disk_shape>;
-struct neighborhood
-    : collision::neighborhood<pointd, pointf, pointl, pointtds> {};
+using pointtds = collision::point<storage::pattern::empty_item, translated_disk_shape>;
+struct neighborhood : collision::neighborhood<pointd, pointf, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
@@ -82,59 +79,38 @@ namespace config = siconos::config::disks;
 
 struct maker
     : storage::make<
-          config::env, config::simulation, config::interaction_manager,
-          config::io, config::segment_shape, config::disk_shape,
-          config::mesh_shape,
+          config::env, config::simulation, config::interaction_manager, config::io,
+          config::segment_shape, config::disk_shape, config::mesh_shape,
           storage::with_properties<
               storage::wrapped<config::disk, some::unbounded_collection>,
-              storage::wrapped<config::diskdisk_r,
-                               some::unbounded_collection>,
-              storage::wrapped<config::diskfsegment_r,
-                               some::unbounded_collection>,
-              storage::wrapped<config::diskmesh_r,
-                               some::unbounded_collection>,
-              storage::wrapped<config::diskfdisk_r,
-                               some::unbounded_collection>,
+              storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
+              storage::wrapped<config::diskfsegment_r, some::unbounded_collection>,
+              storage::wrapped<config::diskmesh_r, some::unbounded_collection>,
+              storage::wrapped<config::diskfdisk_r, some::unbounded_collection>,
               storage::wrapped<config::pointl, some::unbounded_collection>,
               storage::wrapped<config::pointd, some::unbounded_collection>,
               storage::wrapped<config::pointf, some::unbounded_collection>,
               storage::wrapped<config::pointtds, some::unbounded_collection>,
-              storage::wrapped<config::ct_interaction,
-                               some::unbounded_collection>,
-              storage::wrapped<config::rt_interaction,
-                               some::unbounded_collection>,
-              storage::wrapped<config::segment_shape,
-                               some::unbounded_collection>,
-              storage::wrapped<config::mesh_shape,
-                               some::unbounded_collection>,
-              storage::wrapped<config::disk_shape,
-                               some::unbounded_collection>,
-              storage::wrapped<config::translated_disk_shape,
-                               some::unbounded_collection>,
-              storage::attached<config::disk,
-                                storage::pattern::symbol<"shape">,
+              storage::wrapped<config::ct_interaction, some::unbounded_collection>,
+              storage::wrapped<config::rt_interaction, some::unbounded_collection>,
+              storage::wrapped<config::segment_shape, some::unbounded_collection>,
+              storage::wrapped<config::mesh_shape, some::unbounded_collection>,
+              storage::wrapped<config::disk_shape, some::unbounded_collection>,
+              storage::wrapped<config::translated_disk_shape, some::unbounded_collection>,
+              storage::attached<config::disk, storage::pattern::symbol<"shape">,
                                 storage::some::item_ref<config::disk_shape>>,
-              storage::attached<config::fem,
-                                storage::pattern::symbol<"shape">,
+              storage::attached<config::fem, storage::pattern::symbol<"shape">,
                                 storage::some::item_ref<config::mesh_shape>>,
-              storage::sparse<
-                  storage::pattern::attr_t<config::fem, "mass_matrix">>,
-              storage::sparse<
-                  storage::pattern::attr_t<config::fem, "k_matrix">>,
+              storage::sparse<storage::pattern::attr_t<config::fem, "mass_matrix">>,
+              storage::sparse<storage::pattern::attr_t<config::fem, "k_matrix">>,
               storage::unbounded<storage::pattern::attr_t<config::fem, "q">>,
-              storage::unbounded<
-                  storage::pattern::attr_t<config::fem, "velocity">>,
-              storage::unbounded<
-                  storage::pattern::attr_t<config::fem, "fext">>,
-              storage::time_invariant<
-                  storage::pattern::attr_t<config::disk, "fext">>,
-              storage::diagonal<
-                  storage::pattern::attr_t<config::disk, "mass_matrix">>,
+              storage::unbounded<storage::pattern::attr_t<config::fem, "velocity">>,
+              storage::unbounded<storage::pattern::attr_t<config::fem, "fext">>,
+              storage::time_invariant<storage::pattern::attr_t<config::disk, "fext">>,
+              storage::diagonal<storage::pattern::attr_t<config::disk, "mass_matrix">>,
               storage::assembled_diagonal<storage::pattern::attr_t<
-                  typename config::osi::assembled_osi_t,
-                  "mass_matrix_assembled">>,
-              storage::bind<config::disk, "disk">,
-              storage::bind<config::fem, "fem">,
+                  typename config::osi::assembled_osi_t, "mass_matrix_assembled">>,
+              storage::bind<config::disk, "disk">, storage::bind<config::fem, "fem">,
               storage::bind<config::nslaw, "nslaw">,
               storage::bind<config::diskdisk_r, "diskdisk_r">,
               storage::bind<config::diskfdisk_r, "diskfdisk_r">,
@@ -146,10 +122,8 @@ struct maker
               storage::bind<config::chained_segment_shape, "chained_segment">,
               storage::bind<config::disk_shape, "disk_shape">,
               storage::bind<config::mesh_shape, "mesh_shape">,
-              storage::bind<config::translated_disk_shape,
-                            "translated_disk_shape">,
-              storage::bind<config::interaction_manager,
-                            "interaction_manager">,
+              storage::bind<config::translated_disk_shape, "translated_disk_shape">,
+              storage::bind<config::interaction_manager, "interaction_manager">,
               storage::bind<config::ct_interaction, "ct_interaction">,
               storage::bind<config::rt_interaction, "rt_interaction">,
               storage::bind<config::solver_options, "solver_options">,
@@ -159,10 +133,8 @@ struct maker
               storage::bind<config::topo, "topology">,
               storage::bind<config::simulation, "simulation">,
               storage::bind<config::osnspb, "osnspb">,
-              storage::bind<typename config::osi::assembled_osi_t,
-                            "assembled_osi">,
-              storage::bind<config::fc2d, "fc2d">,
-              storage::bind<config::io, "io">>> {};
+              storage::bind<typename config::osi::assembled_osi_t, "assembled_osi">,
+              storage::bind<config::fc2d, "fc2d">, storage::bind<config::io, "io">>> {};
 
 static auto imake_storage() { return maker(); }
 
@@ -184,39 +156,33 @@ struct data_t {
 namespace ground = siconos::storage::mp;
 namespace match = siconos::storage::pattern::match;
 template <typename H, typename T>
-static decltype(auto) out_formatter(H h, T&& out_value)
-{
+static decltype(auto) out_formatter(H h, T&& out_value) {
   using out_t = std::decay_t<T>;
 
   if constexpr (!match::diagonal_matrix<out_t>) {
     if constexpr (match::matrix<out_t>) {
       return algebra::matrix_ref<out_t>(static_cast<T&&>(out_value));
-    }
-    else if constexpr (match::index<out_t>) {
-      auto ret_val = siconos::storage::handle<
-          siconos::storage::handle_base, typename out_t::type,
-          typename out_t::value_t, siconos::python::disks::idata_t>(
-          h.data(), out_value);
+    } else if constexpr (match::index<out_t>) {
+      auto ret_val =
+          siconos::storage::handle<siconos::storage::handle_base, typename out_t::type,
+                                   typename out_t::value_t, siconos::python::disks::idata_t>(
+              h.data(), out_value);
       return ret_val;
-    }
-    else {
+    } else {
       return static_cast<T&&>(out_value);
     }
-  }
-  else {
+  } else {
     return out_value.diagonal();
   }
 }
 
 template <typename H, typename T>
-static decltype(auto) in_formatter(H&& h, T&& in_value)
-{
+static decltype(auto) in_formatter(H&& h, T&& in_value) {
   using in_t = std::decay_t<T>;
 
   if constexpr (!match::diagonal_matrix<in_t>) {
     return static_cast<T&&>(in_value);
-  }
-  else {
+  } else {
     return in_value.diagonal();
   }
 }

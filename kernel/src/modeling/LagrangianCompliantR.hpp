@@ -77,7 +77,7 @@ class LagrangianCompliantR : public LagrangianR {
    *
    *  \param inter : the Interaction
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
  public:
   /** default and only constructor */
@@ -90,7 +90,7 @@ class LagrangianCompliantR : public LagrangianR {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVV_V &fct);
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVV_V& fct);
 
   /**
     to compute the output y = h(q, \lambda) of the Relation
@@ -99,8 +99,8 @@ class LagrangianCompliantR : public LagrangianR {
     \param lambda interaction  \f$ \lambda \f$  vector
     \param y the resulting vector
   */
-  virtual void computeh(const siconos::algebra::BlockVector &q,
-                        const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+  virtual void computeh(const siconos::algebra::BlockVector& q,
+                        const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** set a user-defined function to compute \f$ \nabla^\top_q h(q, \lambda) \f$ \f$
@@ -108,30 +108,30 @@ class LagrangianCompliantR : public LagrangianR {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianhOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionBVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBVV_M& fct);
 
   /** Computes \f$ \nabla^\top_q h(q, \lambda) \f$
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param lambda interaction  \f$ \lambda \f$  vector
    */
   virtual void computeJacobianhOver_q(
-      const siconos::algebra::BlockVector &q,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+      const siconos::algebra::BlockVector& q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
 
   /** set a user-defined function to compute \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$ \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianhOver_lambdaFunction(
-      const siconos::modeling::func_prototypes::FunctionBVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionBVV_M& fct);
 
   /** Computes \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param lambda interaction  \f$ \lambda \f$  vector
    */
   virtual void computeJacobianhOver_lambda(
-      const siconos::algebra::BlockVector &q,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+      const siconos::algebra::BlockVector& q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
 
   /*  \return a read-only view on the matrix \f$ \nabla^\top_{\lambda}h(q,\lambda) \f$*/
   inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
@@ -146,7 +146,7 @@ class LagrangianCompliantR : public LagrangianR {
    *  \param inter the Interaction owning y
    *  \param derivativeNumber the number of the derivative to compute, optional, default = 0.
    */
-  void computeOutput(double time, Interaction &inter,
+  void computeOutput(double time, Interaction& inter,
                      siconos::algebra::blocks::size_type derivativeNumber = 0) override;
   /** to compute the input
    *
@@ -154,10 +154,11 @@ class LagrangianCompliantR : public LagrangianR {
    *  \param inter the Interaction owning lambda
    *  \param level "derivative" order of lambda used to compute input
    */
-  void computeInput(double time, Interaction &inter, siconos::algebra::blocks::size_type level = 0) override;
+  void computeInput(double time, Interaction& inter,
+                    siconos::algebra::blocks::size_type level = 0) override;
 
   /** compute all the H Jacobian */
-  void computeJach(double time, Interaction &inter) override;
+  void computeJach(double time, Interaction& inter) override;
 };
 }  // namespace siconos::modeling
 

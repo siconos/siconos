@@ -17,7 +17,7 @@ Nonsmooth laws are defined in classes which name ends with "NSL". All of them ar
 *Available classes*: NonSmoothLaw, ComplementarityConditionNSL, EqualityConditionNSL, MixedComplementarityConditionNSL, MultipleImpactNSL,  NewtonImpactNSL, NewtonImpactFrictionNSL, RelayNSL, NormalConeNSL.
 
 .. image:: /figures/classNonSmoothLaw.*
-	   
+
 Complementarity Condition
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -36,7 +36,7 @@ nsLawSize: 1.
 parameter: *e*, the Newton normal coefficient of restitution.
 
 .. math::
-   
+
    if \ y(t)=0,\ 0 \leq \dot y(t^+) +e   \dot y(t^-) \perp \lambda\geq 0
 
 Newton Impact-Friction
@@ -58,7 +58,7 @@ In this case, y components are in the following order:
 
 and so on .
 
-Note also that usually only normal part definition is required for y[0]. 
+Note also that usually only normal part definition is required for y[0].
 
 Relay
 ^^^^^

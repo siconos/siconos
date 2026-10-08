@@ -19,6 +19,7 @@
 #include "io_tools.h"
 
 #include <string.h>  // for strcmp, strrchr
+
 #include "numerics_errors.h"
 
 int check_hdf5_file(const char* filename) {

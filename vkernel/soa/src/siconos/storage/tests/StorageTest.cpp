@@ -32,16 +32,12 @@ struct item_b : item {
 
     decltype(auto) ref() { return attr<"ref">(*self()); };
 
-    decltype(auto) href()
-    {
-      return make_ref_handle(self()->data(), attr<"ref">(*self()));
-    };
+    decltype(auto) href() { return make_ref_handle(self()->data(), attr<"ref">(*self())); };
   };
 };
 
 template <typename Item>
 struct env {
-
   using boolean = bool;
   using scalar = float;
   using indice = std::size_t;
@@ -59,11 +55,9 @@ struct env {
 
 struct params {};
 
-struct make
-    : storage::make<
-          env, item_a, item_b,
-          with_properties<wrapped<item_a, some::unbounded_collection>,
-                          wrapped<item_b, some::unbounded_collection>>> {};
+struct make : storage::make<env, item_a, item_b,
+                            with_properties<wrapped<item_a, some::unbounded_collection>,
+                                            wrapped<item_b, some::unbounded_collection>>> {};
 
 }  // namespace siconos::config
 
@@ -78,8 +72,7 @@ void StorageTest::setUp() {}
 void StorageTest::tearDown() {}
 
 // Tests on index and handle
-void StorageTest::testStorage0()
-{
+void StorageTest::testStorage0() {
   auto data = siconos::config::make();
 
   auto a1 = store::add<config::item_a>(data);

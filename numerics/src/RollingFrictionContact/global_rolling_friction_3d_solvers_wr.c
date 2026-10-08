@@ -25,24 +25,25 @@
 #include "NumericsMatrix.h"                       // for NumericsMatrix, NM_gemv
 #include "RollingFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "SiconosBlas.h"                          // for cblas_dcopy, cblas_d...
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
-#include "rolling_fc_Solvers.h"                   // for fc3d_DeSaxceFixedPoint
+#include "numerics_verbose.h"
+#include "rolling_fc_Solvers.h"  // for fc3d_DeSaxceFixedPoint
 #include "rolling_friction_3d_short_names.h"
 // #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"  // for SICONOS_DPARAM_TOL
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_P...
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                    double* velocity, double* globalVelocity, int* info,
-                    SolverOptions* options) {
+void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
+                                        double* reaction, double* velocity,
+                                        double* globalVelocity, int* info,
+                                        SolverOptions* options) {
   /* verbose=1; */
   DEBUG_BEGIN("global_rolling_friction_3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;
@@ -81,14 +82,11 @@ void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* pro
   }
   DEBUG_END("global_rolling_friction_3d_nsgs_wr\n");
 }
-REGISTER_SOLVER_3VAR(GRFC3D_NSGS_WR,
-                "GRFC3D_NSGS_WR",
-                "Non-smooth Gauss-Seidel for Global 3D Rolling Friction Contact with reduction",
-                NULL,
-                NULL,
-                NULL,
-                NULL,  /* error function */
-                rolling_friction_3d_nsgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */)
+REGISTER_SOLVER_3VAR(
+    GRFC3D_NSGS_WR, "GRFC3D_NSGS_WR",
+    "Non-smooth Gauss-Seidel for Global 3D Rolling Friction Contact with reduction", NULL,
+    NULL, NULL, NULL,                     /* error function */
+    rolling_friction_3d_nsgs_set_default, /* set_default */
+    1000,                                 /* default_max_iter */
+    1e-4,                                 /* default_tol */
+    0 /* is_local_solver */)

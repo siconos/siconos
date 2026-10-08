@@ -39,8 +39,8 @@ extern "C" {
 #endif
 
 int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
-                                        SolverOptions* options,
-                                        SolverOptions* internalsolver_options, double error);
+                                       SolverOptions* options,
+                                       SolverOptions* internalsolver_options, double error);
 
 /**
    Check for trivial solution in the friction-contact 3D problem

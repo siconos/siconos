@@ -1,6 +1,6 @@
 .. index:: single: example; bouncing ball
 .. _bouncing_ball_example:
- 
+
 
 Bouncing Ball
 -------------

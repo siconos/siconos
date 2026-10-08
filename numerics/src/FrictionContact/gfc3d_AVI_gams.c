@@ -233,14 +233,14 @@ void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reacti
 
 #else
 
-void gfc3d_AVI_gams_path(GlobalFrictionContactProblem *problem, double *reaction,
-                         double *velocity, int *info, SolverOptions *options) {
+void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double* reaction,
+                         double* velocity, int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
 
-void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem *problem, double *reaction,
-                           double *velocity, int *info, SolverOptions *options) {
+void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reaction,
+                           double* velocity, int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }

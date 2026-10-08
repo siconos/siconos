@@ -60,6 +60,7 @@ set(fconcepts_diagnostics)
 check_cxx_compiler_flag("-fbracket-depth=900" fbracket_depth)
 check_cxx_compiler_flag("-fconcepts-diagnostics-depth=1" fconcepts_diagnostics)
 check_cxx_compiler_flag("-ftemplate-backtrace-limit=1" ftemplate_backtrace_limit)
+check_cxx_compiler_flag("-ftime-trace" ftime_trace)
 if(fconcepts_diagnostics)
   set(flags "${flags} -fconcepts-diagnostics-depth=0")
 endif()
@@ -98,6 +99,12 @@ python_add_library(_nonos MODULE
   WITH_SOABI)
 
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
+
+if(ftime_trace)
+  target_compile_options(_nonos PRIVATE
+    -ftime-trace=${CMAKE_CURRENT_BINARY_DIR}/time-trace-nonos.json
+  )
+endif()
 
 if(WITH_GPU)
   target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread cuNSearch pybind11::headers)

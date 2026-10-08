@@ -7,11 +7,11 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/nslaws.hpp"
 #include "siconos/simul/interaction.hpp"
-#include "siconos/simul/topology.hpp"
 #include "siconos/simul/one_step_integrator.hpp"
 #include "siconos/simul/one_step_nonsmooth_problem.hpp"
 #include "siconos/simul/time_discretization.hpp"
 #include "siconos/simul/time_stepping.hpp"
+#include "siconos/simul/topology.hpp"
 #include "siconos/storage/mp/mp.hpp"
 
 namespace siconos::config {
@@ -34,14 +34,12 @@ struct env : standard_environment<T> {
 };
 
 struct make
-    : storage::make<
-          config::env, fem_ds, simulation,
-          storage::with_properties<
-              storage::time_invariant<storage::attr_t<ball, "fext">>,
-              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-              storage::assembled_diagonal<storage::attr_t<
-                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+    : storage::make<config::env, fem_ds, simulation,
+                    storage::with_properties<
+                        storage::time_invariant<storage::attr_t<ball, "fext">>,
+                        storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+                        storage::assembled_diagonal<storage::attr_t<
+                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 
@@ -57,8 +55,7 @@ void RtOsiTest::setUp() {}
 void RtOsiTest::tearDown() {}
 
 // check that osi elements exist and that offsets can be modified
-void RtOsiTest::testOsi0()
-{
+void RtOsiTest::testOsi0() {
   auto data = siconos::config::make();
 
   auto osi = store::add<config::osi>(data);

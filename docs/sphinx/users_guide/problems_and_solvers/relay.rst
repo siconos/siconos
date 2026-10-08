@@ -1,6 +1,6 @@
 .. index::
    single: Relay or box-constrained AVI problems
-   
+
 .. contents::
 
 .. _relay_problem:
@@ -84,7 +84,7 @@ driver:  :cpp:func:`relay_avi_caoferris()`
 parameters: same as :cpp:enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
 
 
-There also exists a test version :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS_TEST` with 
+There also exists a test version :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS_TEST` with
 
 driver:  :cpp:func:`relay_avi_caoferris_test()`
 

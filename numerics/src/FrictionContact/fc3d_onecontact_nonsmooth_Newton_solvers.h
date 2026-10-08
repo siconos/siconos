@@ -46,7 +46,7 @@ typedef void (*computeNonsmoothFunction)(double*, double*, double, double*, doub
  * \return error code
  */
 int fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem* main_problem,
-                                                         SolverOptions* options);
+                                                        SolverOptions* options);
 
 /** solve friction-contact 3D problem with Newton
  * \param localproblem to solve

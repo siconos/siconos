@@ -29,20 +29,20 @@ extern "C" {
 #endif
 
 /** pointer to function used to update velocity and compute error */
-typedef int (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *, double,
-                               SolverOptions *, double, double *);
+typedef int (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double,
+                               SolverOptions*, double, double*);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
-typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, int *,
-                                  SolverOptions *);
+typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int*,
+                                  SolverOptions*);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverPtr)(FrictionContactProblem *, FrictionContactProblem *,
-                              SolverOptions *);
+typedef void (*FreeSolverPtr)(FrictionContactProblem*, FrictionContactProblem*,
+                              SolverOptions*);
 
-int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions *options,
-                                       SolverOptions *internalsolver_options, double error);
+int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions* options,
+                                      SolverOptions* internalsolver_options, double error);
 
 /**
     Check for trivial solution in the friction-contact 3D problem
@@ -53,8 +53,8 @@ int fc3d_set_internalsolver_tolerance(int numberOfContacts, SolverOptions *optio
     \param options the pointer to the array of options to set
     \return info  =0 if a trivial solution has been found, else = -1
 */
-int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity, double *reaction,
-                          SolverOptions *options);
+int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, double* reaction,
+                          SolverOptions* options);
 
 /** @} */
 

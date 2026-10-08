@@ -22,7 +22,7 @@ FindMUMPS
 Find mumps libraries and headers
 
 Usage :
- 
+
 find_package(MUMPS REQUIRED  COMPONENTS <name>)
 target_link_libraries(yourlib PRIVATE MUMPS::MUMPS)
 
@@ -107,11 +107,11 @@ foreach(extra IN LISTS extras_libs)
   if(MUMPS_${extra}_LIBRARY)
     list(APPEND ${MUMPS_LIBRARIES} ${MUMPS_${extra}_LIBRARY})
   endif()
-    
+
 endforeach()
 
 if(MUMPS_FOUND)
-  
+
   if(NOT TARGET MUMPS::MUMPS)
     add_library(MUMPS::MUMPS IMPORTED INTERFACE)
     set_property(TARGET MUMPS::MUMPS PROPERTY INTERFACE_LINK_LIBRARIES ${MUMPS_LIBRARIES})
@@ -121,4 +121,3 @@ if(MUMPS_FOUND)
     endif()
   endif()
 endif()
-

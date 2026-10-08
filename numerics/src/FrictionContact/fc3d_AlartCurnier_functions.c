@@ -25,10 +25,10 @@
 #include "NumericsMatrix.h"                            // for NumericsMatrix
 #include "NumericsVector.h"                            // for NV_display
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
-#include "numerics_verbose.h"                          // for numerics_printf
 #include "numerics_errors.h"
-#include "op3x3.h"                                     // for SET3, eig_3x3
-#include "siconos_debug.h"                             // for DEBUG_PRINTF
+#include "numerics_verbose.h"  // for numerics_printf
+#include "op3x3.h"             // for SET3, eig_3x3
+#include "siconos_debug.h"     // for DEBUG_PRINTF
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

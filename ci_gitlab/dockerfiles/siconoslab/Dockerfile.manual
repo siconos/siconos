@@ -22,8 +22,8 @@
 # ARG DEFAULT_IMAGE=sources/jupyterlab
 # ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
 # FROM $IMAGENAME AS jupyterlab-mamba
-# ARG MAMBA_DOCKERFILE_ACTIVATE=1 
-# # Jupyter setup 
+# ARG MAMBA_DOCKERFILE_ACTIVATE=1
+# # Jupyter setup
 # ENV JUPYTER_PORT=8888
 # ENV JUPYTER_ENABLE_LAB yes
 # EXPOSE $JUPYTER_PORT
@@ -45,7 +45,7 @@ WORKDIR $WORK
 COPY . siconos
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
 ARG CONF_FILE=/home/siconos-user/siconos/config_samples/numerics_with_fclib.cmake
-RUN cmake -S $WORK/siconos -B $BUILD_DIR  -DUSER_OPTIONS_FILE=$CONF_FILE && cmake --build $BUILD_DIR -j 8 
+RUN cmake -S $WORK/siconos -B $BUILD_DIR  -DUSER_OPTIONS_FILE=$CONF_FILE && cmake --build $BUILD_DIR -j 8
 
 
 # - Prepare a jupyter notebook, based on a Docker image with a complete Siconos install. Add (clone) the siconos-tutorials repository
@@ -57,8 +57,6 @@ ENV SHELL /bin/bash
 RUN cmake --install $BUILD_DIR
 # install Siconos. Assume a previous built in $BUILD_DIR
 RUN siconos --info
-# Clone Siconos examples 
+# Clone Siconos examples
 RUN git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
 RUN cd siconos-tutorials; git switch $EXAMPLES_BRANCH_NAME
-
-

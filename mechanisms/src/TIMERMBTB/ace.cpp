@@ -1,17 +1,14 @@
 #include "ace.h"
+
 #include <math.h>
+
 #include <cstdlib>
 
 aceTime ACE_times[ACE_TIMER_LAST];
 
-
 using namespace std;
 
-
-
-
-void ACE_INIT_TIME()
-{
+void ACE_INIT_TIME() {
   ACE_times[ACE_TIMER_MAIN].setName("main ");
   ACE_times[ACE_TIMER_GRAPHIC].setName("OCC Graphic Update ");
   ACE_times[ACE_TIMER_DIST].setName("OCC Distance computation ");
@@ -33,8 +30,6 @@ void ACE_INIT_TIME()
   ACE_times[ACE_TIMER_CAD_17].setName("CAD 17 ");
   ACE_times[ACE_TIMER_CAD_OK].setName("CAD OK ");
 }
-void ACE_PRINT_TIME()
-{
-  for(int i=0; i <ACE_TIMER_LAST; i++)
-    ACE_times[i].print();
+void ACE_PRINT_TIME() {
+  for (int i = 0; i < ACE_TIMER_LAST; i++) ACE_times[i].print();
 }

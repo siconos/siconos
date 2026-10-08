@@ -334,7 +334,8 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    * \return true if the law should be applied at this level
    * \note Returns true only for level == 1 and when beta > 0
    */
-  bool isActiveAtLevel(siconos::modeling::Interaction& inter, unsigned int level) override;
+  bool isActiveAtLevel(siconos::modeling::Interaction& inter,
+                       unsigned int level) const override;
 
   /** \brief Get the cohesive force vector
    *

@@ -121,7 +121,7 @@ class TimeSteppingDirectProjection : public TimeStepping {
 
   void nextStep() override;
 
-  void computeCriteria(bool *runningProjection);
+  void computeCriteria(bool* runningProjection);
 
   void newtonSolve(double criterion, unsigned int maxStep) override;
 };

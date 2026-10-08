@@ -20,7 +20,7 @@ RUN zypper install -n -y \
     doxygen \
     suitesparse-devel \
     valgrind && zypper clean --all
-RUN useradd -ms /bin/bash siconos-user   
+RUN useradd -ms /bin/bash siconos-user
 
 FROM siconos-base AS siconos-base-python
 USER siconos-user
@@ -30,5 +30,3 @@ ENV VIRTUAL_ENV=/home/siconos-user/siconosenv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --no-cache-dir -U -r requirements.txt
-
-

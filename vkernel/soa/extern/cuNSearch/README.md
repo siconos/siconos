@@ -6,7 +6,7 @@ The library interface is similar to the CPU neighborhood search [CompactNSearch]
 
 * [SPlisHSPlasH](https://github.com/InteractiveComputerGraphics/SPlisHSPlasH) - A C++ library for the physically-based simulation of fluids using Smoothed Particle Hydrodynamics (see screenshot)
 
-![](images/screenshot.jpg)	
+![](images/screenshot.jpg)
 
 ## Build Instructions
 

@@ -30,17 +30,17 @@
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "solver_registry.h"
 
 /*\warning omega is not explicitely used. must be completed    */
-void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-              SolverOptions *options) {
+void lcp_psor(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+              SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  double *M = problem->M->matrix0;
+  double* M = problem->M->matrix0;
 
-  double *q = problem->q;
+  double* q = problem->q;
 
   /* size of the LCP */
   int n = problem->size;
@@ -64,8 +64,8 @@ void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   /* Allocation */
 
-  ww = (double *)malloc(n * sizeof(double));
-  diag = (double *)malloc(n * sizeof(double));
+  ww = (double*)malloc(n * sizeof(double));
+  diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
 
@@ -171,7 +171,7 @@ void lcp_psor(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   return;
 }
-void lcp_psor_set_default(SolverOptions *options) {
+void lcp_psor_set_default(SolverOptions* options) {
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 0.1;
 }
 
@@ -197,13 +197,10 @@ static void lcp_psor_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PSOR, "LCP_PSOR",
-                "Projected Successive Over-Relaxation for LCP",
-                lcp_psor_init_wrap,
-                lcp_psor_solve_wrap,
-                lcp_psor_free_wrap,
-                NULL,  /* error function */
-                lcp_psor_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_LCP_PSOR, "LCP_PSOR", "Projected Successive Over-Relaxation for LCP",
+                lcp_psor_init_wrap, lcp_psor_solve_wrap, lcp_psor_free_wrap,
+                NULL,                 /* error function */
+                lcp_psor_set_default, /* set_default */
+                1000,                 /* default_max_iter */
+                1e-6,                 /* default_tol */
+                0 /* is_local_solver */)

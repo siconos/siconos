@@ -24,7 +24,7 @@
 
 namespace py = pybind11;
 
-void wrap_mlcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
+void wrap_mlcp(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // MLCP solvers
 
   // Exposing the SICONOS_IPARAM_MLCP enum for integer parameters in MLCP solvers

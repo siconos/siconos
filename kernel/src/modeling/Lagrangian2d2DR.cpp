@@ -25,9 +25,9 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-//#define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {

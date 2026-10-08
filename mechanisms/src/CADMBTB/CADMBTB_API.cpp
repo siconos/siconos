@@ -267,7 +267,7 @@ void siconos::mechanisms::CADMBTB_loadCADFile(unsigned int id, const char* fileN
     int nbr = aReader.NbRootsForTransfer();
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
     for (Standard_Integer n = 1; n <= nbr; n++) {
-      // bool ok = 
+      // bool ok =
       aReader.TransferRoot(n);
       int nbs = aReader.NbShapes();
       printf("importSTEP Solid, nb shapes: %d", nbs);

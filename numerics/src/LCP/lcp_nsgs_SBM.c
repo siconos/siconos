@@ -141,8 +141,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
 
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("lcp_nsgs_SBM",
-                   "The NSGS_SBM method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+                           "The NSGS_SBM method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >1");
   }
 
   /*Number of the local solver */

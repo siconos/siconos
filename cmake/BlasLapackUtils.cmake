@@ -1,4 +1,4 @@
-# 
+#
 # Siconos is a program dedicated to modeling, simulation and control
 #  of non smooth dynamical systems.
 #  Siconos is a free software; you can redistribute it and/or modify
@@ -9,11 +9,11 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
-# 
+#
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Siconos; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-# 
+#
 #  Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 
 #[=======================================================================[.rst:
@@ -119,7 +119,7 @@ function(check_interface NAME)
   set(multiValueArgs FUNCTIONS OPT_FUNCTIONS EXTRA_LIBS)
   set(oneValueArgs PREFIX SUFFIX)
   cmake_parse_arguments(${NAME} "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-  
+
   set(CMAKE_REQUIRED_INCLUDES ${${NAME}_INCLUDE_DIR})
   set(CMAKE_REQUIRED_LIBRARIES ${${NAME}_LIBRARIES})
   if(${NAME}DEV_FIND_QUIETLY)

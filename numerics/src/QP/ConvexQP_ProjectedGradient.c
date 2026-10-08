@@ -28,13 +28,13 @@
 #include "SiconosBlas.h"            // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
 #include "numerics_verbose.h"
-#include "siconos_debug.h"          // for DEBUG_PRINTF
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-//#define VERBOSE_DEBUG
+// #define VERBOSE_DEBUG
 void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* info,
                                 SolverOptions* options) {
   /* int and double parameters */
@@ -86,8 +86,8 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* in
   }
 
   if (rho == 0.0) {
-    *info  = numerics_error("ConvexQP_ProjectedGradient",
-			    "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+    *info = numerics_error("ConvexQP_ProjectedGradient",
+                           "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
     return;
   }
 
@@ -139,14 +139,14 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* in
     double tau = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU];
     if ((tau <= 0.0) || (tau >= 1.0)) {
       *info = numerics_error("fc3d_ProjectedGradientOnCylinder",
-                     "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] must in (0,1)");
+                             "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] must in (0,1)");
       return;
     }
 
     double mu = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU];
     if ((mu <= 0.0) || (mu >= 1.0)) {
       *info = numerics_error("fc3d_ProjectedGradientOnCylinder",
-                     "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
+                             "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
       return;
     }
 
@@ -300,7 +300,8 @@ static int convexqp_pg_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int convexqp_pg_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int convexqp_pg_solve_wrap(void* problem, double* z, double* w,
+                                  SolverOptions* options) {
   int info = NUMERICS_OK;
   convexQP_ProjectedGradient((ConvexQP*)problem, z, w, &info, options);
   return info;
@@ -312,13 +313,9 @@ static void convexqp_pg_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_CONVEXQP_PG, "CONVEXQP_PG",
-                "Projected Gradient solver for Convex QP",
-                convexqp_pg_init_wrap,
-                convexqp_pg_solve_wrap,
-                convexqp_pg_free_wrap,
-                NULL,  /* error function */
-                convexQP_ProjectedGradient_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(SICONOS_CONVEXQP_PG, "CONVEXQP_PG", "Projected Gradient solver for Convex QP",
+                convexqp_pg_init_wrap, convexqp_pg_solve_wrap, convexqp_pg_free_wrap,
+                NULL,                                         /* error function */
+                convexQP_ProjectedGradient_set_default, 1000, /* default_max_iter */
+                1e-6,                                         /* default_tol */
+                0 /* is_local_solver */);

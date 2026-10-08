@@ -38,8 +38,8 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, double *z,
-                         double *w, double tolerance, SolverOptions *options, double *error);
+int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, double* z,
+                         double* w, double tolerance, SolverOptions* options, double* error);
 
 /** Error computation for one SOCLCP problem
     \param z vector
@@ -50,7 +50,7 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, d
     \param worktmp
  */
 void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim,
-                                          double mu, double *error, double *worktmp);
+                                          double mu, double* error, double* worktmp);
 
 /** Error computation for SOCLCP problem
     \param problem the structure which defines the SOCLCP
@@ -61,8 +61,8 @@ void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int
     \param[in,out] error value
     \return 0 if ok
  */
-int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem, double *z,
-                           double *w, double tolerance, SolverOptions *options, double *error);
+int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double* z,
+                           double* w, double tolerance, SolverOptions* options, double* error);
 
 #if defined(__cplusplus)
 }

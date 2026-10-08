@@ -14,17 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef OccTest_h
 #define OccTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class OccTest : public CppUnit::TestFixture
-{
-
-private:
-
+class OccTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(OccTest);
 
@@ -48,8 +45,8 @@ private:
 #ifdef HAS_FORTRAN
   void distance();
 #endif
-  
-public:
+
+ public:
   void setUp();
   void tearDown();
 };

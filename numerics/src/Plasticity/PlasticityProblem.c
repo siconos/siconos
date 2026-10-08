@@ -63,7 +63,7 @@
  * Model Type Functions
  * ============================================================================ */
 
-const char *plasticity_model_type_to_string(PlasticityModelType model_type) {
+const char* plasticity_model_type_to_string(PlasticityModelType model_type) {
   switch (model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER:
       return "Drucker-Prager";
@@ -80,16 +80,16 @@ const char *plasticity_model_type_to_string(PlasticityModelType model_type) {
  * Drucker-Prager Model Functions
  * ============================================================================ */
 
-Plasticity_DruckerPrager_model *plasticity_DruckerPrager_model_new(double *eta,
-                                                                   double *theta) {
-  Plasticity_DruckerPrager_model *model =
-      (Plasticity_DruckerPrager_model *)malloc(sizeof(Plasticity_DruckerPrager_model));
+Plasticity_DruckerPrager_model* plasticity_DruckerPrager_model_new(double* eta,
+                                                                   double* theta) {
+  Plasticity_DruckerPrager_model* model =
+      (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
   model->eta = eta;
   model->theta = theta;
   return model;
 }
 
-void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model *model) {
+void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model* model) {
   if (model) {
     free(model);
   }
@@ -99,14 +99,14 @@ void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model *model) 
  * Von Mises Model Functions
  * ============================================================================ */
 
-Plasticity_VonMises_model *plasticity_VonMises_model_new(double *sigma_y) {
-  Plasticity_VonMises_model *model =
-      (Plasticity_VonMises_model *)malloc(sizeof(Plasticity_VonMises_model));
+Plasticity_VonMises_model* plasticity_VonMises_model_new(double* sigma_y) {
+  Plasticity_VonMises_model* model =
+      (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
   model->sigma_y = sigma_y;
   return model;
 }
 
-void plasticity_VonMises_model_free(Plasticity_VonMises_model *model) {
+void plasticity_VonMises_model_free(Plasticity_VonMises_model* model) {
   if (model) {
     free(model);
   }
@@ -116,7 +116,7 @@ void plasticity_VonMises_model_free(Plasticity_VonMises_model *model) {
  * Problem Functions
  * ============================================================================ */
 
-void plasticity_display(PlasticityProblem *problem) {
+void plasticity_display(PlasticityProblem* problem) {
   assert(problem);
   int n = problem->dimension * problem->numberOfCones;
   printf("PlasticityProblem Display :\n-------------\n");
@@ -139,8 +139,8 @@ void plasticity_display(PlasticityProblem *problem) {
   /* Display model-specific parameters based on model_type */
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
-      double *eta = GET_ETA(problem);
-      double *theta = GET_THETA(problem);
+      double* eta = GET_ETA(problem);
+      double* theta = GET_THETA(problem);
       if (eta) {
         printf("eta vector (Drucker-Prager):\n");
         NM_vector_display(eta, problem->numberOfCones);
@@ -155,7 +155,7 @@ void plasticity_display(PlasticityProblem *problem) {
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
-      double *sigma_y = GET_SIGMA_Y(problem);
+      double* sigma_y = GET_SIGMA_Y(problem);
       if (sigma_y) {
         printf("sigma_y vector (Von Mises):\n");
         NM_vector_display(sigma_y, problem->numberOfCones);
@@ -170,7 +170,7 @@ void plasticity_display(PlasticityProblem *problem) {
   }
 }
 
-int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
+int plasticity_printInFile(PlasticityProblem* problem, FILE* file) {
   if (!problem) {
     CHECK_ARG(0, "Numerics, PlasticityProblem printInFile failed, NULL input.\n");
   }
@@ -196,8 +196,8 @@ int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
   /* Write model-specific parameters */
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
-      double *eta = GET_ETA(problem);
-      double *theta = GET_THETA(problem);
+      double* eta = GET_ETA(problem);
+      double* theta = GET_THETA(problem);
       if (eta) {
         for (i = 0; i < nc; i++) {
           fprintf(file, "%32.24e ", eta[i]);
@@ -213,7 +213,7 @@ int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
-      double *sigma_y = GET_SIGMA_Y(problem);
+      double* sigma_y = GET_SIGMA_Y(problem);
       if (sigma_y) {
         for (i = 0; i < nc; i++) {
           fprintf(file, "%32.24e ", sigma_y[i]);
@@ -228,9 +228,9 @@ int plasticity_printInFile(PlasticityProblem *problem, FILE *file) {
   return 0;
 }
 
-int plasticity_printInFilename(PlasticityProblem *problem, char *filename) {
+int plasticity_printInFilename(PlasticityProblem* problem, char* filename) {
   int info = 0;
-  FILE *file = fopen(filename, "w");
+  FILE* file = fopen(filename, "w");
   printf("filename %s", filename);
   if (!file) {
     return errno;
@@ -242,8 +242,8 @@ int plasticity_printInFilename(PlasticityProblem *problem, char *filename) {
   return info;
 }
 
-PlasticityProblem *plasticity_newFromFile(FILE *file) {
-  PlasticityProblem *problem = plasticityProblem_new();
+PlasticityProblem* plasticity_newFromFile(FILE* file) {
+  PlasticityProblem* problem = plasticityProblem_new();
   if (!file) return NULL;
   DEBUG_PRINT(
       "Start -- int plasticity_newFromFile(PlasticityProblem* problem, FILE* "
@@ -266,7 +266,7 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
 
   problem->M = NM_new_from_file(file);
 
-  problem->q = (double *)malloc(to_size_t(problem->M->size1) * sizeof(double));
+  problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
   for (int i = 0; i < problem->M->size1; i++) {
     check_io(fscanf(file, "%lf ", &(problem->q[i])));
   }
@@ -274,13 +274,13 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
   /* Read model-specific parameters based on model_type */
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
-      Plasticity_DruckerPrager_model *model =
-          (Plasticity_DruckerPrager_model *)malloc(sizeof(Plasticity_DruckerPrager_model));
-      model->eta = (double *)malloc(nc * sizeof(double));
+      Plasticity_DruckerPrager_model* model =
+          (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+      model->eta = (double*)malloc(nc * sizeof(double));
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->eta[i])));
       }
-      model->theta = (double *)malloc(nc * sizeof(double));
+      model->theta = (double*)malloc(nc * sizeof(double));
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->theta[i])));
       }
@@ -288,9 +288,9 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
-      Plasticity_VonMises_model *model =
-          (Plasticity_VonMises_model *)malloc(sizeof(Plasticity_VonMises_model));
-      model->sigma_y = (double *)malloc(nc * sizeof(double));
+      Plasticity_VonMises_model* model =
+          (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+      model->sigma_y = (double*)malloc(nc * sizeof(double));
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->sigma_y[i])));
       }
@@ -308,8 +308,8 @@ PlasticityProblem *plasticity_newFromFile(FILE *file) {
   return problem;
 }
 
-PlasticityProblem *plasticity_new_from_filename(const char *filename) {
-  PlasticityProblem *problem = NULL;
+PlasticityProblem* plasticity_new_from_filename(const char* filename) {
+  PlasticityProblem* problem = NULL;
   int is_hdf5 = check_hdf5_file(filename);
   // if the input file is an hdf5 file, we try to read it with fclib interface function.
   if (is_hdf5) {
@@ -323,7 +323,7 @@ PlasticityProblem *plasticity_new_from_filename(const char *filename) {
     return NULL;
     // #endif
   } else {
-    FILE *file = fopen(filename, "r");
+    FILE* file = fopen(filename, "r");
     if (!file) {
       numerics_error_log("PlasticityProblem", "Can not open file ", filename);
       return NULL;
@@ -334,14 +334,14 @@ PlasticityProblem *plasticity_new_from_filename(const char *filename) {
   return problem;
 }
 
-void plasticityProblem_free(PlasticityProblem *problem) {
+void plasticityProblem_free(PlasticityProblem* problem) {
   assert(problem);
   problem->M = NM_free(problem->M);
 
   /* Free model-specific data based on model_type */
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
-      Plasticity_DruckerPrager_model *model = GET_DRUCKER_PRAGER(problem);
+      Plasticity_DruckerPrager_model* model = GET_DRUCKER_PRAGER(problem);
       if (model) {
         if (model->theta) {
           free(model->theta);
@@ -357,7 +357,7 @@ void plasticityProblem_free(PlasticityProblem *problem) {
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
-      Plasticity_VonMises_model *model = GET_VON_MISES(problem);
+      Plasticity_VonMises_model* model = GET_VON_MISES(problem);
       if (model) {
         if (model->sigma_y) {
           free(model->sigma_y);
@@ -384,8 +384,8 @@ void plasticityProblem_free(PlasticityProblem *problem) {
   free(problem);
 }
 
-PlasticityProblem *plasticityProblem_new(void) {
-  PlasticityProblem *problem = (PlasticityProblem *)malloc(sizeof(PlasticityProblem));
+PlasticityProblem* plasticityProblem_new(void) {
+  PlasticityProblem* problem = (PlasticityProblem*)malloc(sizeof(PlasticityProblem));
   problem->dimension = 0;
   problem->numberOfCones = 0;
   problem->M = NULL;
@@ -396,10 +396,10 @@ PlasticityProblem *plasticityProblem_new(void) {
   return problem;
 }
 
-PlasticityProblem *plasticityProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                   double *q,
-                                                   Plasticity_DruckerPrager_model *model) {
-  PlasticityProblem *problem = (PlasticityProblem *)malloc(sizeof(PlasticityProblem));
+PlasticityProblem* plasticityProblem_new_with_data(int dim, int nc, NumericsMatrix* M,
+                                                   double* q,
+                                                   Plasticity_DruckerPrager_model* model) {
+  PlasticityProblem* problem = (PlasticityProblem*)malloc(sizeof(PlasticityProblem));
 
   problem->dimension = dim;
   problem->numberOfCones = nc;
@@ -416,30 +416,30 @@ PlasticityProblem *plasticityProblem_new_with_data(int dim, int nc, NumericsMatr
   return problem;
 }
 
-PlasticityProblem *plasticity_copy(PlasticityProblem *problem) {
+PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
   if (!problem) return NULL;
 
   size_t nc = to_size_t(problem->numberOfCones);
   size_t n = to_size_t(problem->M->size0);
-  PlasticityProblem *new_problem = (PlasticityProblem *)malloc(sizeof(PlasticityProblem));
+  PlasticityProblem* new_problem = (PlasticityProblem*)malloc(sizeof(PlasticityProblem));
   new_problem->dimension = problem->dimension;
   new_problem->numberOfCones = problem->numberOfCones;
   new_problem->model_type = problem->model_type;
   new_problem->M = NM_new();
   NM_copy(problem->M, new_problem->M);
-  new_problem->q = (double *)malloc(n * sizeof(double));
+  new_problem->q = (double*)malloc(n * sizeof(double));
   memcpy(new_problem->q, problem->q, n * sizeof(double));
 
   /* Copy model-specific data based on model_type */
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
-      Plasticity_DruckerPrager_model *model = GET_DRUCKER_PRAGER(problem);
+      Plasticity_DruckerPrager_model* model = GET_DRUCKER_PRAGER(problem);
       if (model) {
         new_problem->model.drucker_prager =
-            (Plasticity_DruckerPrager_model *)malloc(sizeof(Plasticity_DruckerPrager_model));
-        new_problem->model.drucker_prager->eta = (double *)malloc(nc * sizeof(double));
+            (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+        new_problem->model.drucker_prager->eta = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.drucker_prager->eta, model->eta, nc * sizeof(double));
-        new_problem->model.drucker_prager->theta = (double *)malloc(nc * sizeof(double));
+        new_problem->model.drucker_prager->theta = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.drucker_prager->theta, model->theta, nc * sizeof(double));
       } else {
         new_problem->model.drucker_prager = NULL;
@@ -447,11 +447,11 @@ PlasticityProblem *plasticity_copy(PlasticityProblem *problem) {
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
-      Plasticity_VonMises_model *model = GET_VON_MISES(problem);
+      Plasticity_VonMises_model* model = GET_VON_MISES(problem);
       if (model) {
         new_problem->model.von_mises =
-            (Plasticity_VonMises_model *)malloc(sizeof(Plasticity_VonMises_model));
-        new_problem->model.von_mises->sigma_y = (double *)malloc(nc * sizeof(double));
+            (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+        new_problem->model.von_mises->sigma_y = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.von_mises->sigma_y, model->sigma_y, nc * sizeof(double));
       } else {
         new_problem->model.von_mises = NULL;
@@ -465,7 +465,7 @@ PlasticityProblem *plasticity_copy(PlasticityProblem *problem) {
   return new_problem;
 }
 
-void plasticity_rescaling(PlasticityProblem *problem, double alpha, double gamma) {
+void plasticity_rescaling(PlasticityProblem* problem, double alpha, double gamma) {
   int n = problem->M->size0;
   /* scaling of M */
   NM_scal(alpha * gamma * gamma, problem->M);
@@ -477,44 +477,44 @@ void plasticity_rescaling(PlasticityProblem *problem, double alpha, double gamma
  * Backward compatibility functions
  * ============================================================================ */
 
-void plasticity2D_display(Plasticity2DProblem *problem) { plasticity_display(problem); }
+void plasticity2D_display(Plasticity2DProblem* problem) { plasticity_display(problem); }
 
-int plasticity2D_printInFile(Plasticity2DProblem *problem, FILE *file) {
+int plasticity2D_printInFile(Plasticity2DProblem* problem, FILE* file) {
   return plasticity_printInFile(problem, file);
 }
 
-int plasticity2D_printInFilename(Plasticity2DProblem *problem, char *filename) {
+int plasticity2D_printInFilename(Plasticity2DProblem* problem, char* filename) {
   return plasticity_printInFilename(problem, filename);
 }
 
-Plasticity2DProblem *plasticity2D_newFromFile(FILE *file) {
+Plasticity2DProblem* plasticity2D_newFromFile(FILE* file) {
   return plasticity_newFromFile(file);
 }
 
-Plasticity2DProblem *plasticity2D_new_from_filename(const char *filename) {
+Plasticity2DProblem* plasticity2D_new_from_filename(const char* filename) {
   return plasticity_new_from_filename(filename);
 }
 
-void plasticity2DProblem_free(Plasticity2DProblem *problem) {
+void plasticity2DProblem_free(Plasticity2DProblem* problem) {
   plasticityProblem_free(problem);
 }
 
-Plasticity2DProblem *plasticity2DProblem_new(void) { return plasticityProblem_new(); }
+Plasticity2DProblem* plasticity2DProblem_new(void) { return plasticityProblem_new(); }
 
-Plasticity2DProblem *plasticity2DProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                       double *q, double *eta, double *theta) {
+Plasticity2DProblem* plasticity2DProblem_new_with_data(int dim, int nc, NumericsMatrix* M,
+                                                       double* q, double* eta, double* theta) {
   /* Create model from eta and theta for backward compatibility */
-  Plasticity_DruckerPrager_model *model = NULL;
+  Plasticity_DruckerPrager_model* model = NULL;
   if (eta || theta) {
     model = plasticity_DruckerPrager_model_new(eta, theta);
   }
   return plasticityProblem_new_with_data(dim, nc, M, q, model);
 }
 
-Plasticity2DProblem *plasticity2D_copy(Plasticity2DProblem *problem) {
+Plasticity2DProblem* plasticity2D_copy(Plasticity2DProblem* problem) {
   return plasticity_copy(problem);
 }
 
-void plasticity2D_rescaling(Plasticity2DProblem *problem, double alpha, double gamma) {
+void plasticity2D_rescaling(Plasticity2DProblem* problem, double alpha, double gamma) {
   plasticity_rescaling(problem, alpha, gamma);
 }

@@ -37,22 +37,22 @@ struct FrictionContactProblem {
   int numberOfContacts;
   /** \f$ {M} \in {{\mathrm{I\!R}}}^{m \times m} \f$,
      a matrix with \f$ m = d  n_c \f$ stored in NumericsMatrix structure */
-  RawNumericsMatrix *M;
+  RawNumericsMatrix* M;
   /** \f$ {q} \in {{\mathrm{I\!R}}}^{m} \f$ */
-  double *q;
+  double* q;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c = \f$ numberOfContacts) */
-  double *mu;
+  double* mu;
 };
 
 struct SplittedFrictionContactProblem {
-  FrictionContactProblem *fc3d;
-  NumericsMatrix *M_nn;
-  NumericsMatrix *M_tn;
-  NumericsMatrix *M_nt;
-  NumericsMatrix *M_tt;
-  double *q_n;
-  double *q_t;
+  FrictionContactProblem* fc3d;
+  NumericsMatrix* M_nn;
+  NumericsMatrix* M_tn;
+  NumericsMatrix* M_nt;
+  NumericsMatrix* M_tt;
+  double* q_n;
+  double* q_t;
 };
 
 #if defined(__cplusplus)
@@ -61,7 +61,7 @@ extern "C" {
 
 /* create an empty FrictionContactProblem
  * \return an empty fcp */
-FrictionContactProblem *frictionContactProblem_new(void);
+FrictionContactProblem* frictionContactProblem_new(void);
 
 /** new FrictionContactProblem from minimal set of data
  *
@@ -72,21 +72,21 @@ FrictionContactProblem *frictionContactProblem_new(void);
  *  \param[in] mu the mu vector
  *  \return a pointer to a FrictionContactProblem structure
  */
-FrictionContactProblem *frictionContactProblem_new_with_data(int dim, size_t nc,
-                                                             NumericsMatrix *M, double *q,
-                                                             double *mu);
+FrictionContactProblem* frictionContactProblem_new_with_data(int dim, size_t nc,
+                                                             NumericsMatrix* M, double* q,
+                                                             double* mu);
 
 /** free a FrictionContactProblem
  *
  *  \param problem the problem to free
  */
-void frictionContactProblem_free(FrictionContactProblem *problem);
+void frictionContactProblem_free(FrictionContactProblem* problem);
 
 /** display a FrictionContactProblem
  *
  *  \param problem the problem to display
  */
-void frictionContact_display(FrictionContactProblem *problem);
+void frictionContact_display(FrictionContactProblem* problem);
 
 /** print a FrictionContactProblem in a file (numerics .dat format)
  *
@@ -94,7 +94,7 @@ void frictionContact_display(FrictionContactProblem *problem);
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int frictionContact_printInFile(FrictionContactProblem *problem, FILE *file);
+int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file);
 
 /** print a FrictionContactProblem in a file (numerics dat format)
  *
@@ -102,14 +102,14 @@ int frictionContact_printInFile(FrictionContactProblem *problem, FILE *file);
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int frictionContact_printInFilename(FrictionContactProblem *problem, char *filename);
+int frictionContact_printInFilename(FrictionContactProblem* problem, char* filename);
 
 /** read a FrictionContactProblem from a file descriptor
  *
  *  \param file descriptor
  *  \return problem the problem to read
  */
-FrictionContactProblem *frictionContact_newFromFile(FILE *file);
+FrictionContactProblem* frictionContact_newFromFile(FILE* file);
 
 /** read a FrictionContactProblem from a file (.dat or hdf5 if fclib is on) from
  *  its filename
@@ -117,7 +117,7 @@ FrictionContactProblem *frictionContact_newFromFile(FILE *file);
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
+FrictionContactProblem* frictionContact_new_from_filename(const char* filename);
 
 /** @brief create a SplittedFrictionContactProblem
  *
@@ -125,17 +125,17 @@ FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
  *  @param splitted_problem the new (splitted) problem
  *  @return error code
  */
-int createSplittedFrictionContactProblem(FrictionContactProblem *problem,
-                                         SplittedFrictionContactProblem *splitted_problem);
+int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
+                                         SplittedFrictionContactProblem* splitted_problem);
 
 /** @brief free a SplittedFrictionContactProblem
  *
  *  @param problem the problem to free
  */
-void splittedFrictionContactProblem_free(SplittedFrictionContactProblem *problem);
+void splittedFrictionContactProblem_free(SplittedFrictionContactProblem* problem);
 
-void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,
-                                               double *reaction, double *velocity, double tol,
+void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
+                                               double* reaction, double* velocity, double tol,
                                                int do_print);
 
 /**
@@ -145,7 +145,7 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,
     \param problem the source problem to be copied
     \return a pointer to a new FrictionContactProblem
 */
-FrictionContactProblem *frictionContact_copy(FrictionContactProblem *problem);
+FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
 
 /**
     Rescales M matrix and q vector of a given FrictionContactProblem.
@@ -158,7 +158,7 @@ FrictionContactProblem *frictionContact_copy(FrictionContactProblem *problem);
     \param alpha rescaling factor
     \param gamma rescaling factor
 */
-void frictionContact_rescaling(FrictionContactProblem *problem, double alpha, double gamma);
+void frictionContact_rescaling(FrictionContactProblem* problem, double alpha, double gamma);
 
 #if defined(__cplusplus)
 }

@@ -134,7 +134,7 @@ void initDataSummary() {
 /*
  ******************************************************************************
  */
-void printSolution(const char *name, int n, int m, int NbLines, double *z, double *w) {
+void printSolution(const char* name, int n, int m, int NbLines, double* z, double* w) {
   int i;
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
@@ -148,16 +148,16 @@ void printSolution(const char *name, int n, int m, int NbLines, double *z, doubl
  *sol = (z,w)
  *
  */
-void solTozw(int n, int m, double *z, double *w, double *sol) {
+void solTozw(int n, int m, double* z, double* w, double* sol) {
   int i;
   for (i = 0; i < n + m; i++) z[i] = sol[i];
   for (i = 0; i < m; i++) w[i] = sol[n + m + i];
 }
 
-void test_mlcp_series(MixedLinearComplementarityProblem *problem, double *z, double *w,
-                      double *sol) {
+void test_mlcp_series(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                      double* sol) {
   int info = -1;
-  SolverOptions *mlcpOptions;
+  SolverOptions* mlcpOptions;
   double tol1 = 1e-15;
   double tol2 = 1e-6;
   double error = 0;
@@ -466,7 +466,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem *problem, double *z, dou
 }
 
 void test_matrix(void) {
-  FILE *MLCPfile;
+  FILE* MLCPfile;
 
   int i, j;
   int isol;
@@ -663,8 +663,8 @@ void test_matrix(void) {
         exit(1);
     }
 
-    MixedLinearComplementarityProblem *problem =
-        (MixedLinearComplementarityProblem *)malloc(sizeof(MixedLinearComplementarityProblem));
+    MixedLinearComplementarityProblem* problem =
+        (MixedLinearComplementarityProblem*)malloc(sizeof(MixedLinearComplementarityProblem));
 
     mixedLinearComplementarity_newFromFile(problem, MLCPfile);
     // mixedLinearComplementarity_newFromFileOld(problem, MLCPfile);
@@ -681,10 +681,10 @@ void test_matrix(void) {
     assert(n > 0);
     assert(m > 0);
 
-    z = (double *)calloc((n + m), sizeof(double));
-    w = (double *)calloc((n + m), sizeof(double));
+    z = (double*)calloc((n + m), sizeof(double));
+    w = (double*)calloc((n + m), sizeof(double));
 
-    sol = (double *)malloc((n + m + m) * sizeof(double));
+    sol = (double*)malloc((n + m + m) * sizeof(double));
 
     // for(i = 0 ; i < NbLines-m ; ++i)
     // {

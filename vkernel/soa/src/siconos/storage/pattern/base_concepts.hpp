@@ -8,9 +8,8 @@ namespace siconos::storage::pattern {
 
 template <typename Attrs>
 static auto tags = []() constexpr {
-  return transform(
-      []<typename Attr>(Attr) { return std::tuple<typename Attr::tag>{}; },
-      Attrs{});
+  return transform([]<typename Attr>(Attr) { return std::tuple<typename Attr::tag>{}; },
+                   Attrs{});
 };
 
 namespace concepts {
@@ -19,17 +18,14 @@ namespace concepts {
 template <class T, std::size_t N>
 concept has_tuple_element = requires(T t) {
   typename std::tuple_element_t<N, std::remove_const_t<T>>;
-  {
-    std::get<N>(t)
-  } -> std::convertible_to<const std::tuple_element_t<N, T>&>;
+  { std::get<N>(t) } -> std::convertible_to<const std::tuple_element_t<N, T>&>;
 };
 
 template <class T>
 concept tuple_like_ = !std::is_reference_v<T> && requires(T t) {
   typename std::tuple_size<T>::type;
-  requires std::derived_from<
-      std::tuple_size<T>,
-      std::integral_constant<std::size_t, std::tuple_size_v<T>>>;
+  requires std::derived_from<std::tuple_size<T>,
+                             std::integral_constant<std::size_t, std::tuple_size_v<T>>>;
 } && []<std::size_t... N>(std::index_sequence<N...>) {
   return (has_tuple_element<T, N> && ...);
 }(std::make_index_sequence<std::tuple_size_v<T>>());
@@ -41,9 +37,7 @@ template <typename T>
 concept array_like = requires(T a) {
   typename T::size_type;
   typename T::value_type;
-  {
-    std::size(a)
-  } -> std::convertible_to<std::size_t>;
+  { std::size(a) } -> std::convertible_to<std::size_t>;
 } && []<std::size_t... N>(std::index_sequence<N...>) {
   return (has_tuple_element<T, N> && ...);
 }(std::make_index_sequence<std::tuple_size_v<T>>());
@@ -51,9 +45,7 @@ concept array_like = requires(T a) {
 template <typename T>
 concept keep = requires(T t) {
   typename T::tag;
-  {
-    t.size
-  };
+  { t.size };
 };
 
 template <typename T>
@@ -81,27 +73,23 @@ template <typename T>
 concept has_attributes = requires { typename T::attributes; };
 
 template <typename T>
-concept terminal_attribute =
-    attribute<T> && requires { typename T::structure::type; };
+concept terminal_attribute = attribute<T> && requires { typename T::structure::type; };
 
 template <typename... Ts>
 concept at_least_one_terminal_attribute = (terminal_attribute<Ts> || ...);
 
 template <typename T>
 concept has_at_least_one_terminal_attribute =
-    has_attributes<T> &&
-    at_least_one_terminal_attribute<typename T::attributes>;
+    has_attributes<T> && at_least_one_terminal_attribute<typename T::attributes>;
 
 template <typename T>
 concept item = has_attributes<typename T::definition>;
 
 template <typename T>
 concept vertex_item = requires {
-  {
-    T::definition::vertex_item == true
-  };
+  { T::definition::vertex_item == true };
 };
 
 }  // namespace concepts
 
-}  // namespace siconos::pattern
+}  // namespace siconos::storage::pattern

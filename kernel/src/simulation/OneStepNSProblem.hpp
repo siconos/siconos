@@ -144,7 +144,7 @@ class OneStepNSProblem {
    *  \param options the options set
    */
   OneStepNSProblem(std::shared_ptr<SolverOptions> options)
-      : _numerics_solver_options(options){};
+      : _numerics_solver_options(options) {};
 
   /** destructor
    */

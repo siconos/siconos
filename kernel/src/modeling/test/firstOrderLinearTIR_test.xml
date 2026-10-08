@@ -1,8 +1,8 @@
 <SiconosModel>
   <NSDS bvp='false'>
-	<DS_Definition>		
+	<DS_Definition>
 	  <LagrangianLinearTIDS number='3'>
-	 	<StepsInMemory>1</StepsInMemory>				
+	 	<StepsInMemory>1</StepsInMemory>
 		<q0 vectorSize='3'>
 		  1.0 0.0 0.0
 		</q0>
@@ -10,14 +10,14 @@
 		  0.0 0.0 0.0
 		</Velocity0>
 		<FExt vectorPlugin="TestPlugin:computeFExt"/>
-		<Mass matrixRowSize='3' matrixColSize='3'>	
+		<Mass matrixRowSize='3' matrixColSize='3'>
 		  <row>1.0 0.0 0.0</row>
 		  <row>0.0 1.0 0.0</row>
 		  <row>0.0 0.0 1.0</row>
-		</Mass>			
+		</Mass>
 	  </LagrangianLinearTIDS>
 	  <LagrangianLinearTIDS number='4'>
-	 	<StepsInMemory>1</StepsInMemory>				
+	 	<StepsInMemory>1</StepsInMemory>
 		<q0 vectorSize='3'>
 		  1.0 0.0 0.0
 		</q0>
@@ -25,31 +25,31 @@
 		  0.0 0.0 0.0
 		</Velocity0>
 		<FExt vectorPlugin="TestPlugin:computeFExt"/>
-		<Mass matrixRowSize='3' matrixColSize='3'>	
+		<Mass matrixRowSize='3' matrixColSize='3'>
 		  <row>1.0 0.0 0.0</row>
 		  <row>0.0 1.0 0.0</row>
 		  <row>0.0 0.0 1.0</row>
-		</Mass>			
+		</Mass>
 	  </LagrangianLinearTIDS>
 	</DS_Definition>
 	<Interaction_Definition>
 	  <Interaction number='1' Id='test-of-rel'>
 		<size>1</size>
 		<DS_Concerned vectorSize='2'>3 4</DS_Concerned>
-		<Interaction_Content>		
+		<Interaction_Content>
 		  <FirstOrderRelation type ="LinearTI">
-            <C matrixFile="matC.dat"/>	
+            <C matrixFile="matC.dat"/>
 			<D matrixFile="matD.dat"/>
-			<B matrixFile="matB.dat"/>	
+			<B matrixFile="matB.dat"/>
 		  	<F matrixFile="matF.dat"/>
             <e vectorSize = '1'>0.1</e>
-          </FirstOrderRelation>			
+          </FirstOrderRelation>
 		  <NewtonImpactLaw>
 			<e>0.9</e>
-			<size>1</size>				
+			<size>1</size>
 		  </NewtonImpactLaw>
-		</Interaction_Content>	
-	  </Interaction>				
-	</Interaction_Definition>		
+		</Interaction_Content>
+	  </Interaction>
+	</Interaction_Definition>
   </NSDS>
 </SiconosModel>

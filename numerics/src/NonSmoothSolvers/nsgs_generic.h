@@ -46,11 +46,11 @@
 
 /** Callback type for updating local problem for a given block */
 typedef int (*NSGSUpdateLocalProblem)(unsigned int block, void* problem, void* local_problem,
-                                       double* var_z_global, SolverOptions* options);
+                                      double* var_z_global, SolverOptions* options);
 
 /** Callbavk type for solving the local problem */
-typedef int (*NSGSSolveLocal)(void* local_problem, SolverOptions* options,
-                               double* var_z_local, double* localsolver_options_data);
+typedef int (*NSGSSolveLocal)(void* local_problem, SolverOptions* options, double* var_z_local,
+                              double* localsolver_options_data);
 
 /** Callback type for computing global error */
 typedef double (*NSGSComputeError)(void* problem, double* var_z, double* var_x,
@@ -64,9 +64,8 @@ typedef void (*NSGSCopyLocal)(unsigned int block, double* var_z_global, double* 
 typedef double (*NSGSIncrError)(double* var_z_local_new, double* var_z_local_old);
 
 /** Callback type for accepting local solution into global solution */
-typedef int (*NSGSAcceptLocal)(void* local_problem, SolverOptions* options,
-                                unsigned int block, int iter, double* var_z_global,
-                                double* var_z_local);
+typedef int (*NSGSAcceptLocal)(void* local_problem, SolverOptions* options, unsigned int block,
+                               int iter, double* var_z_global, double* var_z_local);
 
 /** Callback type for checking convergence */
 typedef int (*NSGSCheckConvergence)(double error, double tolerance, int iter,
@@ -273,17 +272,16 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
  * \param[in] var_z_global Global solution vector
  * \param[in] options Solver options (contains problem_data in solverData)
  */
-static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
-                                                              void* problem,
-                                                              void* local_problem,
-                                                              double* var_z_global,
-                                                              SolverOptions* options) {
+static inline int nsgs_generic_update_local_problem_callback(unsigned int block, void* problem,
+                                                             void* local_problem,
+                                                             double* var_z_global,
+                                                             SolverOptions* options) {
   (void)problem; /* Not used, data comes from options->solverData */
 
   NSGSProblemData* problem_data = (NSGSProblemData*)options->solverData;
   if (!problem_data) {
     return numerics_error("nsgs_generic_update_local_problem_callback",
-                   "options->solverData must contain NSGSProblemData pointer");
+                          "options->solverData must contain NSGSProblemData pointer");
   }
 
   nsgs_generic_update_local_problem(block, problem_data, (NSGSLocalProblem*)local_problem,

@@ -34,14 +34,13 @@
 #include <time.h>
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
-
 #include "numerics_errors.h"
 #endif
 
-int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
-                              SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
-                              int maxiterglob, double tolglob, double *q, method_lcp **ptvec,
-                              double *z, double *w, int *it_end, int *itt_end, double *res) {
+int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix* blmat,
+                              SparseBlockStructuredMatrixPred* blmatpred, int nbmethod,
+                              int maxiterglob, double tolglob, double* q, method_lcp** ptvec,
+                              double* z, double* w, int* it_end, int* itt_end, double* res) {
   static int firsttime = 1;
   int info;
   int n, nbbl, nbblrow, blsizemax;
@@ -56,24 +55,24 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   double qs, err, den;
 
   double *adrcurbl, *adrbldiag;
-  double *rhs;
+  double* rhs;
   /*  double *ww;*/
 
   int iterrow0;
-  method_lcp *pt;
+  method_lcp* pt;
   int numsolver;
-  int *soltype;
-  int *indic;
-  int *indicop;
-  double *submatlcp;
-  double *submatlcpop;
-  int *ipiv;
-  int *sizesublcp;
-  int *sizesublcpop;
-  double *subq;
-  double *bufz;
-  double *newz;
-  double *workspace;
+  int* soltype;
+  int* indic;
+  int* indicop;
+  double* submatlcp;
+  double* submatlcpop;
+  int* ipiv;
+  int* sizesublcp;
+  int* sizesublcpop;
+  double* subq;
+  double* bufz;
+  double* newz;
+  double* workspace;
 
   int sizelcp;
 
@@ -116,7 +115,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   }
 
   /*  ww   = ( double* )malloc(         n * sizeof( double ) );*/
-  rhs = (double *)malloc(blsizemax * sizeof(double));
+  rhs = (double*)malloc(blsizemax * sizeof(double));
 
   incx = 1;
   qs = cblas_dnrm2(n, q, incx);

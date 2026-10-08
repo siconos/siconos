@@ -11,7 +11,7 @@ For a more detailed description of Siconos and its functionnalities please check
 What is Siconos?
 ----------------
 
-Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :cite:`Acary.Brogliato2008`: 
+Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :cite:`Acary.Brogliato2008`:
 
 * **Mechanical systems** (rigid or solid) with unilateral contact and Coulomb friction and impact
   (Nonsmooth mechanics, contact dynamics, multibody systems dynamics or granular materials).
@@ -20,11 +20,11 @@ Siconos is an open-source scientific software primarily targeted at modeling and
 * Biology Gene regulatory networks.
 
 Other applications are found in Systems and Control (hybrid systems, differential inclusions,
-optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
+optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities),
 Fluid Mechanics, Computer Graphics, ...
 
 Check :ref:`siconos_examples` manual for an overview of the various problems handled with Siconos.
-  
+
 
 Try it
 ------
@@ -63,8 +63,8 @@ There are two ways to use Siconos
   and then run siconos to build and execute your program.
 * As a Python package.
 
-Python API is generated (pybind11) from C++ and thus both API are quite equivalent although C++ might be more complete. 
- 
+Python API is generated (pybind11) from C++ and thus both API are quite equivalent although C++ might be more complete.
+
 Anyway, for new users we recommend the Python API which is easier to understand.
 
 Below are two examples (Python and C++) of a Siconos process. We just build and print a first-order dynamical
@@ -111,7 +111,7 @@ And:
 Write a c++ file, e.g. run.cpp
 
 .. code-block:: c++
-   
+
    // File run.cpp
    #include "SiconosKernel.hpp"
    int main()
@@ -129,11 +129,11 @@ And, compile, link and execute (in one shot, thanks to siconos script)::
 
 .. code-block:: shell
 
-   siconos run.cpp    
+   siconos run.cpp
 
 For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
 or try to mimic one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
-  
+
 
 More
 ----
@@ -143,4 +143,3 @@ More
 * :doc:`tutorial_python/index`
 * :doc:`tutorial_cpp/siconos_tutorial`
 * :ref:`running_siconos`
-

@@ -22,7 +22,7 @@ FindSuperLU
 Find SuperLU libraries and headers
 
 Usage :
- 
+
 find_package(SuperLU REQUIRED COMPONENTS <name>)
 target_link_libraries(yourlib PRIVATE SuperLU::SuperLU)
 
@@ -66,7 +66,7 @@ elseif(${SuperLU_FIND_COMPONENTS} STREQUAL DIST)
 else()
   message(FATAL_ERROR "Unknown SuperLU component ${SuperLU_FIND_COMPONENTS}. Search failed.")
 endif()
-    
+
 if(NOT SuperLU_ROOT)
   set(SuperLU_ROOT $ENV{SuperLU_ROOT})
 endif()
@@ -84,7 +84,7 @@ if(NOT SuperLU_LIBRARIES)
   find_library(SuperLU_LIBRARIES NAMES ${SuperLU_LIBNAME}
     ${_SuperLU_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
-  
+
 endif()
 
 # -- Library setup --
@@ -101,4 +101,3 @@ if(SuperLU_FOUND)
     endif()
   endif()
 endif()
-

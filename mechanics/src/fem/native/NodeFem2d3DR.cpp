@@ -28,7 +28,7 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Interaction &inter) {
+void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto sizeDS = inter.getSizeOfDS();
 
   if (!jacobianhOver_q_internal_storage_) {
@@ -45,7 +45,7 @@ void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Intera
 }
 
 void siconos::mechanics::fem::NodeFem2d3DR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector &q) {
+    const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN("NodeFem2d3DR::computeJachq(const BlockVector& q, BlockVector& z \n");
 
   jacobianhOver_q_view_->setValue(0, _node_index * 3, nc_.x());
@@ -75,7 +75,7 @@ double siconos::mechanics::fem::NodeFem2d3DR::distance() const {
 }
 
 void siconos::mechanics::fem::NodeFem2d3DR::computeh(
-    const siconos::algebra::BlockVector &q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("NodeFem2d3DR::computeh(...)\n");
 
   siconos::modeling::LagrangianScleronomousR::computeh(q, y);

@@ -8,7 +8,7 @@ This directory contains tests for the cohesive friction-contact solver.
 
 A simple test case with:
 - 1 contact point
-- 1 cohesive point  
+- 1 cohesive point
 - All matrices (W, V, U, X) set to identity
 - Simple q_v and q_u vectors
 

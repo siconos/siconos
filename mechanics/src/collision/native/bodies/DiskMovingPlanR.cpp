@@ -51,7 +51,7 @@ double siconos::collision::native::bodies::DiskMovingPlanR::distance(double x, d
 
 /* Called compute h, but only the gap function is needed! */
 void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
-    const siconos::algebra::BlockVector &q, double time,
+    const siconos::algebra::BlockVector& q, double time,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   init(time);
 
@@ -62,7 +62,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector &q, double time) {
+    const siconos::algebra::BlockVector& q, double time) {
   init(time);
 
   double x = q(0);
@@ -80,7 +80,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
-    const siconos::algebra::BlockVector &q, double time) {
+    const siconos::algebra::BlockVector& q, double time) {
   init(time);
 
   double x = q(0);
@@ -93,38 +93,38 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeAFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeA_ = fct;
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeBFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeB_ = fct;
 }
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeCFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeC_ = fct;
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeAdotFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeAdot_ = fct;
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeBdotFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeBdot_ = fct;
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::setComputeCdotFunction(
-    const siconos::modeling::func_prototypes::FunctionS_S &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_S& fct) {
   computeCdot_ = fct;
 }
 
 bool siconos::collision::native::bodies::DiskMovingPlanR::equal(
-    const siconos::modeling::func_prototypes::FunctionS_S &pA,
-    const siconos::modeling::func_prototypes::FunctionS_S &pB,
-    const siconos::modeling::func_prototypes::FunctionS_S &pC, double pr) const {
+    const siconos::modeling::func_prototypes::FunctionS_S& pA,
+    const siconos::modeling::func_prototypes::FunctionS_S& pB,
+    const siconos::modeling::func_prototypes::FunctionS_S& pC, double pr) const {
   // Note FP How can we compare user-defined functions ???
   // And why ... ?
   return false;  // (computeC_ == pA && computeB_ == pB && computeC_ == pC && radius_ == pr);

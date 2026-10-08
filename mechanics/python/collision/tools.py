@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -30,9 +29,10 @@ Classes
 - Volume : A Shape with mass and density parameters.
 - Contactor : A Shape belonging to a collision group, with contact metadata.
 """
+
 from dataclasses import dataclass, field
-from typing import Optional, Union, Tuple
 from math import cos, sin
+
 import numpy as np
 
 
@@ -47,7 +47,7 @@ class Material:
         The material density (default is None).
     """
 
-    density: Optional[float] = None
+    density: float | None = None
 
 
 @dataclass
@@ -77,11 +77,11 @@ class MovedShape:
     """
 
     shape_name: str
-    data: Optional[object] = None
-    relative_translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
-    relative_orientation: Union[
-        Tuple[float, float, float, float], Tuple[Tuple[float, float, float], float]
-    ] = (1.0, 0.0, 0.0, 0.0)
+    data: object | None = None
+    relative_translation: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    relative_orientation: (
+        tuple[float, float, float, float] | tuple[tuple[float, float, float], float]
+    ) = (1.0, 0.0, 0.0, 0.0)
     translation: np.ndarray = field(init=False)
     orientation: np.ndarray = field(init=False)
 
@@ -106,7 +106,7 @@ class MovedShape:
             self.orientation = ori
             return
 
-        if isinstance(ori, tuple) or isinstance(ori, list):
+        if isinstance(ori, (tuple, list)):
             if len(ori) != 2:  # ori is a tuple
                 raise AssertionError("Wrong input format for orientation")
             # axis + angle
@@ -114,7 +114,7 @@ class MovedShape:
             if len(axis) != 3:
                 raise ValueError("Axis must be a 3D vector.")
             if not isinstance(angle, float):
-                raise ValueError("Angle must be a float.")
+                raise TypeError("Angle must be a float.")
             axis_norm = np.linalg.norm(axis)
             if axis_norm == 0:
                 raise ValueError("Axis vector cannot be the zero vector.")
@@ -124,7 +124,7 @@ class MovedShape:
             )
             return
         else:
-            raise ValueError(
+            raise TypeError(
                 "Orientation must be either an axis-angle pair (3D vector + float)"
                 + " or a quaternion."
             )
@@ -155,7 +155,7 @@ class Shape(MovedShape):
         Defaults to (1.0, 0.0, 0.0, 0.0), i.e., identity rotation.
     """
 
-    instance_name: Optional[str] = None
+    instance_name: str | None = None
 
 
 @dataclass
@@ -189,7 +189,7 @@ class Volume(Shape):
         Orientation as quaternion [w, x, y, z] or (axis, angle).
     """
 
-    mass: Optional[float] = None
+    mass: float | None = None
     parameters: Material = field(default_factory=lambda: Material(density=1.0))
 
 
@@ -234,9 +234,9 @@ class Contactor(Shape):
     """
 
     collision_group: int = 0
-    parameters: Optional[object] = None
-    contact_type: Optional[object] = None
-    contact_index: Optional[int] = None
+    parameters: object | None = None
+    contact_type: object | None = None
+    contact_index: int | None = None
 
     def __post_init__(self):
         super().__post_init__()

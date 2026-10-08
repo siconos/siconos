@@ -31,13 +31,13 @@
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"  // for DEBUG_PRINT
 #include "numerics_errors.h"
-void Function_VI_FC3D(void *self, int n_notused, double *x, double *F) {
+#include "siconos_debug.h"  // for DEBUG_PRINT
+void Function_VI_FC3D(void* self, int n_notused, double* x, double* F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int nLocal = fc3d->dimension;
@@ -55,12 +55,12 @@ void Function_VI_FC3D(void *self, int n_notused, double *x, double *F) {
   }
 }
 
-void Projection_VI_FC3D(void *viIn, double *x, double *PX) {
+void Projection_VI_FC3D(void* viIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_VI_FC3D(void *viIn, double *x, double *PX)\n")
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int contact = 0;
@@ -72,11 +72,11 @@ void Projection_VI_FC3D(void *viIn, double *x, double *PX) {
   }
 }
 
-void Function_VI_FC3D_Cylinder(void *self, int n_notused, double *x, double *F) {
+void Function_VI_FC3D_Cylinder(void* self, int n_notused, double* x, double* F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
   // frictionContact_display(fc3d);
 
   int n = fc3d->numberOfContacts * fc3d->dimension;
@@ -85,13 +85,13 @@ void Function_VI_FC3D_Cylinder(void *self, int n_notused, double *x, double *F) 
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
 }
 
-void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX) {
+void Projection_VI_FC3D_Cylinder(void* viIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)\n")
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  SolverOptions *options = pb->options;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  SolverOptions* options = pb->options;
   // frictionContact_display(fc3d);
 
   int contact = 0;
@@ -103,14 +103,14 @@ void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX) {
   }
 }
 
-void Function_VI_FC3D_Disk(void *self, int n_notused, double *x, double *F) {
+void Function_VI_FC3D_Disk(void* self, int n_notused, double* x, double* F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  SolverOptions *options = pb->options;
-  SplittedFrictionContactProblem *splitted_problem =
-      (SplittedFrictionContactProblem *)options->solverData;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  SolverOptions* options = pb->options;
+  SplittedFrictionContactProblem* splitted_problem =
+      (SplittedFrictionContactProblem*)options->solverData;
 
   int n = 2 * fc3d->numberOfContacts;
 
@@ -118,13 +118,13 @@ void Function_VI_FC3D_Disk(void *self, int n_notused, double *x, double *F) {
   NM_gemv(1.0, splitted_problem->M_tt, x, 1.0, F);
 }
 
-void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX) {
+void Projection_VI_FC3D_Disk(void* viIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)\n")
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  FrictionContactProblem_as_VI *pb = (FrictionContactProblem_as_VI *)vi->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  SolverOptions *options = pb->options;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  SolverOptions* options = pb->options;
   // frictionContact_display(fc3d);
 
   int nLocal = 2;

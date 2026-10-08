@@ -22,8 +22,8 @@
 #endif
 #include <stdlib.h>  // for NULL, abort, size_t
 
-#include "tlsdef.h"  // for tlsvar
 #include "numerics_errors.h"
+#include "tlsdef.h"  // for tlsvar
 
 tlsvar jmp_buf internal_jmp_buf;
 tlsvar jmp_buf external_jmp_buf;

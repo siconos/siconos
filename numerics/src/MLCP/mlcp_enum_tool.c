@@ -22,15 +22,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "numerics_verbose.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
-void mlcp_enum_build_M(int *zw, double *M, double *Mref, int n, int m, int NbLines) {
+void mlcp_enum_build_M(int* zw, double* M, double* Mref, int n, int m, int NbLines) {
   /*First, copy the n first collums.*/
   memcpy(M, Mref, n * NbLines * sizeof(double));
 
-  double *current_col_M = M + n * NbLines;
-  double *current_col_MRef = Mref + n * NbLines;
+  double* current_col_M = M + n * NbLines;
+  double* current_col_MRef = Mref + n * NbLines;
 
   for (int col = 0; col < m; col++) {
     if (zw[col] == 0) {
@@ -46,10 +46,10 @@ void mlcp_enum_build_M(int *zw, double *M, double *Mref, int n, int m, int NbLin
     current_col_MRef = current_col_MRef + NbLines;
   }
 }
-void mlcp_enum_build_M_Block(int *zw, double *M, double *Mref, int n, int m, int NbLines,
-                             int *indexInBlock) {
+void mlcp_enum_build_M_Block(int* zw, double* M, double* Mref, int n, int m, int NbLines,
+                             int* indexInBlock) {
   int col, i;
-  double *current_col_M;
+  double* current_col_M;
   memcpy(M, Mref, NbLines * NbLines * sizeof(double));
   // current_col_M=M+n*NbLines;
   // current_col_MRef = Mref+n*NbLines;
@@ -63,8 +63,8 @@ void mlcp_enum_build_M_Block(int *zw, double *M, double *Mref, int n, int m, int
   }
 }
 
-void mlcp_enum_fill_solution(double *z1, double *z2, double *w1, double *w2, int n, int m,
-                             int NbLines, int *zw, double *Q) {
+void mlcp_enum_fill_solution(double* z1, double* z2, double* w1, double* w2, int n, int m,
+                             int NbLines, int* zw, double* Q) {
   int lin;
   for (lin = 0; lin < n; lin++) {
     z1[lin] = Q[lin];
@@ -82,8 +82,8 @@ void mlcp_enum_fill_solution(double *z1, double *z2, double *w1, double *w2, int
   }
 }
 
-void mlcp_enum_fill_solution_Block(double *z, double *w, int n, int m, int NbLines, int *zw,
-                                   double *Q, int *indexInBlock) {
+void mlcp_enum_fill_solution_Block(double* z, double* w, int n, int m, int NbLines, int* zw,
+                                   double* Q, int* indexInBlock) {
   int lin;
   for (lin = 0; lin < NbLines; lin++) {
     z[lin] = Q[lin];
@@ -98,7 +98,7 @@ void mlcp_enum_fill_solution_Block(double *z, double *w, int n, int m, int NbLin
   }
 }
 
-void mlcp_enum_display_solution(double *z1, double *z2, double *w1, double *w2, int n, int m,
+void mlcp_enum_display_solution(double* z1, double* z2, double* w1, double* w2, int n, int m,
                                 int Nblines) {
   int lin;
   printf("z1:\n");
@@ -111,8 +111,8 @@ void mlcp_enum_display_solution(double *z1, double *z2, double *w1, double *w2, 
     printf("z2[%d],w2[%d],=%.15e\t%.15e\n", lin, lin, z2[lin], w2[lin]);
 }
 
-void mlcp_enum_display_solution_Block(double *z, double *w, int n, int m, int Nblines,
-                                      int *indexInBlock) {
+void mlcp_enum_display_solution_Block(double* z, double* w, int n, int m, int Nblines,
+                                      int* indexInBlock) {
   int lin;
   int curCompIndex = 0;
 
@@ -125,8 +125,8 @@ void mlcp_enum_display_solution_Block(double *z, double *w, int n, int m, int Nb
     }
 }
 
-void mlcp_enum_build_indexInBlock(MixedLinearComplementarityProblem *problem,
-                                  int *indexInBlock) {
+void mlcp_enum_build_indexInBlock(MixedLinearComplementarityProblem* problem,
+                                  int* indexInBlock) {
   int numBlock = 0;
   int n = problem->n; /* Equalities */
   int m = problem->m; /* Inequalities */

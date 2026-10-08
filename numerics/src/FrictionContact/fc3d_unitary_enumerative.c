@@ -37,10 +37,10 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-static void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1,
-                     double *x, double *y);
+static void solve2x2(double* a, double* b, double* c, double* a1, double* b1, double* c1,
+                     double* x, double* y);
 
-void compute_roots(double *Poly, int *nbRealRoots, double *Roots) {
+void compute_roots(double* Poly, int* nbRealRoots, double* Roots) {
   double r[3][5];
   // Roots of poly p[0] x^4 + p[1] x^3...+p[4]=0
   // x=r[1][k] + i r[2][k]  k=1,...,4
@@ -104,8 +104,8 @@ M=|ac|
      |V2_x V2_y|
 
  */
-void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1, double *l2,
-                                    double *V) {
+void FC3D_unitary_enum_factorize2x2(double* a, double* b, double* c, double* l1, double* l2,
+                                    double* V) {
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_unitary_enum_factorize2x2 matrix:\n %e %e \n %e %e \n", *a, *c, *c, *b);
 #endif
@@ -157,22 +157,22 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
       *l1, VM_Vt[0], VM_Vt[1], VM_Vt[2], *l2, VM_Vt[3]);
 #endif
 }
-void fc3d_unitary_enumerative_free(FrictionContactProblem *localproblem,
-                                   SolverOptions *dummy2) {
+void fc3d_unitary_enumerative_free(FrictionContactProblem* localproblem,
+                                   SolverOptions* dummy2) {
   free(localproblem->M->matrix0);
   localproblem->M->matrix0 = NULL;
 }
-void fc3d_unitary_enumerative_initialize(FrictionContactProblem *localproblem) {
+void fc3d_unitary_enumerative_initialize(FrictionContactProblem* localproblem) {
   if (!localproblem->M->matrix0)
-    localproblem->M->matrix0 = (double *)malloc(9 * sizeof(double));
+    localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
 }
 
-int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem *problem,
-                                              double *reaction, double *velocity,
-                                              SolverOptions *options) {
-  double *M = problem->M->matrix0;
-  double *Q = problem->q;
-  double *mu = problem->mu;
+int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem,
+                                              double* reaction, double* velocity,
+                                              SolverOptions* options) {
+  double* M = problem->M->matrix0;
+  double* Q = problem->q;
+  double* mu = problem->mu;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   SET3X3(M);
   M = M00;
@@ -257,14 +257,14 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem *problem,
   return 1;
 }
 /*API for the nsgs*/
-int fc3d_unitary_enumerative_solve(FrictionContactProblem *problem, double *reaction,
-                                   SolverOptions *options) {
+int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double* reaction,
+                                   SolverOptions* options) {
   int info;
   double velocity[3];
   return fc3d_unitary_enumerative(problem, reaction, velocity, &info, options);
 }
-int fc3d_unitary_enumerative(FrictionContactProblem *problem, double *reaction,
-                             double *velocity, int *info, SolverOptions *options) {
+int fc3d_unitary_enumerative(FrictionContactProblem* problem, double* reaction,
+                             double* velocity, int* info, SolverOptions* options) {
   *info = fc3d_unitary_enumerative_test_non_sliding(problem, reaction, velocity, options);
   if (!(*info)) return *info;
 #ifdef FC3D_UE_DEBUG
@@ -276,8 +276,8 @@ int fc3d_unitary_enumerative(FrictionContactProblem *problem, double *reaction,
     *info = fc3d_unitary_enumerative_solve_sliding(problem, reaction, options);
   }
   if (!(*info)) {
-    double *M = problem->M->matrix0;
-    double *Q = problem->q;
+    double* M = problem->M->matrix0;
+    double* Q = problem->q;
     SET3(Q);
     Q = Q0;
     SET3(reaction);
@@ -302,11 +302,11 @@ int fc3d_unitary_enumerative(FrictionContactProblem *problem, double *reaction,
 #endif
   return *info;
 }
-int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem *problem, double *reaction,
-                                           SolverOptions *options) {
-  double *M = problem->M->matrix0;
-  double *Q = problem->q;
-  double *mu = problem->mu;
+int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double* reaction,
+                                           SolverOptions* options) {
+  double* M = problem->M->matrix0;
+  double* Q = problem->q;
+  double* mu = problem->mu;
   double D1, D2;
   double alpha;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
@@ -339,7 +339,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem *problem, doub
   }
 
 #endif
-  double *Q_2 = Q + 1;
+  double* Q_2 = Q + 1;
   double V[4];
   double *V00 = V, *V10 = V00 + 1, *V01 = V10 + 1, *V11 = V01 + 1;
   /*D is the projection of the origine on the directrice of the conic (R_T1,R_T2)*/
@@ -558,8 +558,8 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem *problem, doub
 
 /*ax+by+c=0
   a1x+b1y+c1=0*/
-void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x,
-              double *y) {
+void solve2x2(double* a, double* b, double* c, double* a1, double* b1, double* c1, double* x,
+              double* y) {
   double delta = *a * *b1 - *a1 * *b;
   if (delta == 0) {
     *x = NAN;
@@ -573,10 +573,10 @@ void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c
 /*
  *Implementation from Gilles Daviet : quartic formulation with respect to alpha.
  */
-int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem *problem,
-                                                   double *reaction, SolverOptions *options) {
-  double *M = problem->M->matrix0;
-  double *Q = problem->q;
+int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem,
+                                                   double* reaction, SolverOptions* options) {
+  double* M = problem->M->matrix0;
+  double* Q = problem->q;
 
   SET3X3(M);
   M = M00;
@@ -693,7 +693,7 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem *probl
 
 #ifdef FC3D_UE_DEBUG
     double velocity_[3];
-    double *velocity = velocity_;
+    double* velocity = velocity_;
     SET3(velocity);
     velocity = velocity0;
     mv3x3(M, reaction, velocity);
@@ -743,21 +743,21 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem *probl
 #include "solver_registry.h"
 
 /* Minimal set_default functions for QUARTIC solvers */
-static void fc3d_quartic_set_default(SolverOptions *options) { (void)options; }
+static void fc3d_quartic_set_default(SolverOptions* options) { (void)options; }
 
-static void fc3d_quartic_nu_set_default(SolverOptions *options) { (void)options; }
+static void fc3d_quartic_nu_set_default(SolverOptions* options) { (void)options; }
 
 /* SICONOS_FRICTION_3D_ONECONTACT_QUARTIC (562) - Quartic solver for one contact */
-static int quartic_init_wrap(void *problem, SolverOptions *options) {
+static int quartic_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int quartic_solve_wrap(void *problem, double *reaction, double *velocity,
-                              SolverOptions *options) {
+static int quartic_solve_wrap(void* problem, double* reaction, double* velocity,
+                              SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_unitary_enumerative((FrictionContactProblem *)problem, reaction, velocity, &info,
+  fc3d_unitary_enumerative((FrictionContactProblem*)problem, reaction, velocity, &info,
                            options);
   return info;
 }
@@ -768,16 +768,16 @@ REGISTER_SOLVER(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, "FC3D_QUARTIC",
                 1000, 1e-12, 1) /* is_local_solver=1 */
 
 /* SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU (563) - Quartic NU solver for one contact */
-static int quartic_nu_init_wrap(void *problem, SolverOptions *options) {
+static int quartic_nu_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int quartic_nu_solve_wrap(void *problem, double *reaction, double *velocity,
-                                 SolverOptions *options) {
+static int quartic_nu_solve_wrap(void* problem, double* reaction, double* velocity,
+                                 SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_unitary_enumerative((FrictionContactProblem *)problem, reaction, velocity, &info,
+  fc3d_unitary_enumerative((FrictionContactProblem*)problem, reaction, velocity, &info,
                            options);
   return info;
 }

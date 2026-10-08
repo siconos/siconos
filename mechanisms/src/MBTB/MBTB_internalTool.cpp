@@ -16,20 +16,21 @@
  * limitations under the License.
  */
 
-#include "MBTB_DATA.hpp"
-#include "MBTB_PYTHON_API.hpp"
+#include "MBTB_internalTool.hpp"
+
 #include "CADMBTB_API.hpp"
 #include "MBTB_Body.hpp"
 #include "MBTB_Contact.hpp"
+#include "MBTB_DATA.hpp"
 #include "MBTB_JointR.hpp"
-#include "MBTB_internalTool.hpp"
-#include "ace.h"
+#include "MBTB_PYTHON_API.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RotationQuaternion.hpp"
 #include "SolverOptions.h"  // for SolverOptions struct
+#include "ace.h"
 
 void siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS() {
   for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {

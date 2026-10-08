@@ -11,11 +11,11 @@ To use the software, you need to fulfill some prerequesites, download build and 
 
 Binaries for Debian are also available.
 
- 
+
 
 Installation from sources
 =========================
-      
+
 Prerequisites
 -------------
 
@@ -24,7 +24,7 @@ Whatever your system is, you will need first to :
 * Download the sources of Siconos as explained in :ref:`download`.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
-  
+
 The quick way
 -------------
 
@@ -35,17 +35,17 @@ If you do not want to bother with all installations details and only need a 'sta
 * Run
 
 .. code-block:: bash
-  
+
   cmake -S path_to_sources -B build-siconos
   cmake --build build-siconos -j N
   cmake --install build-siconos -j N
   ctest --test-dir build-siconos # optional
-  
+
 
 * N being the number of processes available on your system to run the compilation.
 * path-to-sources: full path to Siconos sources
 * build-siconos: the binary dir (where compilation, link, build take place). Choose any name/path. It must be different from path-to-sources.
-  
+
 If all went fine, you will get a full siconos installation as detailed in :ref:`siconos_whatsinstalled`
 If not, step to :ref:`siconos_detailed_install`.
 
@@ -54,9 +54,9 @@ To check the install, try
 .. code-block:: bash
 
    siconos --info
-   
+
 .. _siconos_detailed_install:
-   
+
 Detailed installation
 ---------------------
 
@@ -85,7 +85,7 @@ Choose any place/name for build-siconos, the only requirement is that it must be
       ccmake path_to_sources ...
 
    to open some dialog-interface to cmake configuration. 'cmake-gui' is also another option. For details check cmake documentation : https://cmake.org/runningcmake/ .
-   
+
 
 Once the cmake process is done, generated files stay in *build-siconos*, including a Makefile and a CMakeCache.txt. The latter contains all
 the variables set during configuration. Do not forget to check the screen output of cmake to be sure that everything went fine.
@@ -107,16 +107,16 @@ Optionnaly (if WITH_TESTING is ON), you can run tests to check you build. See :r
 
 The last step is the installation of all required libraries, headers and so on in the right place::
 
-  
+
   cmake --install build-siconos -j N
 
-By default, everything will be installed 
+By default, everything will be installed
 
 - in your python env if it exists ($CONDA_PREFIX or $VIRTUAL_ENV)
 - in $HOME/.siconos if not. In that case, add $HOME/.siconos/bin to your PATH so that siconos command can be found, e.g.::
 
     export PATH=$HOME/.siconos/bin:$PATH
-  
+
 Run
 
 .. code-block:: bash
@@ -145,17 +145,17 @@ What will be installed?
 .. note::
 
    Check the output of cmake to get info on where things will be installed for your current config
-   
+
 
 We denote *siconos_install_path* as the Siconos install root dir
 
 * default:
-  
+
   * *siconos_install_path* = $CONDA_PREFIX or $VIRTUAL_ENV if they exist
-  * *siconos_install_path* = $HOME/.siconos if not 
+  * *siconos_install_path* = $HOME/.siconos if not
 
 * *siconos_install_path* = <someplace> if SICONOS_CUSTOM_INSTALL=<someplace> option was used with cmake
-    
+
 Then, the following files will be installed:
 
 * *siconos_install_path*/lib/ with all shared libraries of the siconos components you asked for.
@@ -172,7 +172,7 @@ Then, the following files will be installed:
 
 
 .. warning::
-   
+
    if *siconos_install_path* is not a standard path of your system, you may need to set some environment variables, mainly:
 
    * append *siconos_install_path*/bin to PATH
@@ -233,12 +233,12 @@ To run python tests only::
   py.test
 
 Or in verbose mode::
-  
+
   cd build-siconos
   py.test -s -v
 
 Just a specific python test::
-  
+
   cd build-siconos
   py.test -s -v wrap/siconos/tests/test_lcp.py
 
@@ -248,7 +248,7 @@ Concerning py.test, see http://pytest.org/latest/ or::
 
 Developers or advanced users options
 ------------------------------------
-  
+
 
 * WARNINGS_LEVEL: to set compiler diagnostics level.
 
@@ -258,7 +258,7 @@ Developers or advanced users options
 
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
 
-* WITH_FCLIB=ON/OFF : to enable/disable fclib interface (https://github.com/FrictionalContactLibrary/fclib). 
+* WITH_FCLIB=ON/OFF : to enable/disable fclib interface (https://github.com/FrictionalContactLibrary/fclib).
   This option is ON by default.
   The last version of fclib (master branch of the github repository) will be downloaded and installed automatically as part of Siconos
   If you need a specific version or prefer using a version already installed on your system, add the following option to your cmake command:
@@ -266,11 +266,11 @@ Developers or advanced users options
   .. code-block:: bash
 
 	cmake -DFCLIB_ROOT=<path-to-your-fclib-installation> ...
-	
+
 * WITH_BULLET=ON/OFF : enable/disable bullet (http://bulletphysics.org/wordpress/) for contact detection.
 
   Bullet minimal required version is 3.17.
-  
+
   WITH_BULLET can be replaced by Bullet_ROOT=<some_path> to specify the path to your Bullet installation.
 
   Moreover, if you don't want to bother you with Bullet install, run
@@ -286,7 +286,7 @@ Developers or advanced users options
   .. code-block:: bash
 
         export CI_PROJECT_DIR=<some path where bullet will be cloned and built>
-	source ci_gitlab/Dockerfiles/install_bullet.sh 
+	source ci_gitlab/Dockerfiles/install_bullet.sh
 
 
 * WITH_OpenCASCADE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/pythonocc-core)
@@ -296,7 +296,7 @@ Developers or advanced users options
   help cmake find them by using the option 'XXX_ROOT=<install_path>', XXX being the name of the package to be searched.
   For example::
 
-    cmake -DFCLIB_ROOT=... 
+    cmake -DFCLIB_ROOT=...
 
 .. _siconos_runexample:
 
@@ -314,14 +314,14 @@ Try one of the numerous files provided in `Siconos Tutorial project <https://gri
 
    siconos BouncingBallTS.cpp
 
-   
+
 
 You can also test all examples in a raw::
 
   git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
   cmake -S siconos-tutorials/examples -B build-examples
   cmake --build build-examples -jN
-  ctest --test-dir build-examples 
+  ctest --test-dir build-examples
 
 This will compile, link and execute all the examples distributed with siconos.
 
@@ -337,7 +337,7 @@ for the distributions listed below.
 
    The packages below are not frequently updated and the Siconos versions available might be outdated.
 
-Debian bullseye 
+Debian bullseye
 ----------------
 
 (thanks to Steven Sinclair's work)
@@ -346,12 +346,11 @@ Debian bullseye
 
    apt install siconos
 
-FreeBSD 
+FreeBSD
 --------
 
-(thanks to yurivict, yuri@freebsd) 
+(thanks to yurivict, yuri@freebsd)
 
 .. code-block:: bash
 
   pkg install siconos
-  

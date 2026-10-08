@@ -20,8 +20,3 @@ To do.
 `Unpolished developement notes`_.
 
 .. _Unpolished developement notes: ./notes/DevNotes.pdf
-
-
-
-
-	      

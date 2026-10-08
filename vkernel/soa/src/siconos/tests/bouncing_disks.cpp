@@ -4,8 +4,9 @@
 #include "siconos/siconos.hpp"
 
 namespace siconos::config {
-using disk = model::lagrangian_ds;
-using nslaw = model::newton_impact_friction;
+namespace some = siconos::storage::some;
+struct disk : model::lagrangian_ds {};
+struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;
@@ -13,63 +14,56 @@ using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
 using translated_disk_shape = collision::translated<disk_shape>;
 
-using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
+struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
-using interaction =
-    simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r>;
-using topo = simul::topology<disk, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
+struct topo : simul::topology<disk, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
-using pointl =
-    collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
 // using pointtds = collision::point<translated_disk_shape>;
-using neighborhood = collision::neighborhood<pointd, pointl>;
-using space_filter = collision::space_filter<topo, neighborhood>;
-using interaction_manager = simul::interaction_manager<space_filter>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+struct neighborhood : collision::neighborhood<pointd, pointl> {};
+struct space_filter : collision::space_filter<topo, neighborhood> {};
+struct interaction_manager : simul::interaction_manager<space_filter> {};
+struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
-using io = io::io<osi>;
+struct io : siconos::io::io<osi> {};
 
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
+
+struct data_t
+    : storage::make<env, simulation, interaction_manager, io, segment_shape, disk_shape,
+                    storage::with_properties<
+                        storage::wrapped<disk, some::unbounded_collection>,
+                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+                        storage::wrapped<pointl, some::unbounded_collection>,
+                        storage::wrapped<pointd, some::unbounded_collection>,
+                        //          storage::wrapped<pointtds,
+                        //          some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
+                        storage::wrapped<segment_shape, some::unbounded_collection>,
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::wrapped<translated_disk_shape, some::unbounded_collection>,
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<storage::pattern::attr_t<
+                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
   using storage::pattern::wrap;
   using namespace storage;
 
-  auto data = storage::make<
-      config::env, config::simulation, config::interaction_manager,
-      config::io, config::segment_shape, config::disk_shape,
-      storage::with_properties<
-          storage::wrapped<config::disk, some::unbounded_collection>,
-          storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
-          storage::wrapped<config::diskfsegment_r,
-                           some::unbounded_collection>,
-          storage::wrapped<config::pointl, some::unbounded_collection>,
-          storage::wrapped<config::pointd, some::unbounded_collection>,
-          //          storage::wrapped<config::pointtds,
-          //          some::unbounded_collection>,
-          storage::wrapped<config::interaction, some::unbounded_collection>,
-          storage::wrapped<config::segment_shape, some::unbounded_collection>,
-          storage::wrapped<config::disk_shape, some::unbounded_collection>,
-          storage::wrapped<config::translated_disk_shape,
-                           some::unbounded_collection>,
-          storage::attached<config::disk, storage::pattern::symbol<"shape">,
-                            storage::some::item_ref<config::disk_shape>>,
-          storage::time_invariant<
-              storage::pattern::attr_t<config::disk, "fext">>,
-          storage::diagonal<
-              storage::pattern::attr_t<config::disk, "mass_matrix">>,
-          storage::assembled_diagonal<
-              storage::pattern::attr_t<typename config::osi::assembled_osi_t,
-                                       "mass_matrix_assembled">>>>();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk
   double t0 = 0;               // initial computation time
@@ -186,14 +180,12 @@ int main(int argc, char* argv[])
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
   // std::ofstream cout("result.dat");
-  std::print(result_file,
-             "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
              simulation.current_step() * simulation.time_step(),
              storage::attr<"q">(disk1, simulation.current_step())(1),
              storage::attr<"q">(disk2, simulation.current_step())(1),
              storage::attr<"velocity">(disk1, simulation.current_step())(1),
-             storage::attr<"velocity">(disk2, simulation.current_step())(1),
-             0., 0.);
+             storage::attr<"velocity">(disk2, simulation.current_step())(1), 0., 0.);
 
   // auto& vds = storage::prop_values<config::interaction, "vd">(
   //     data, simulation.current_step());
@@ -209,24 +201,19 @@ int main(int argc, char* argv[])
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(0);
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
+      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+    } else {
       p0 = 0;
       lambda = 0;
     }
 
-    std::print(result_file,
-               "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+    std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(disk1, simulation.current_step())(1),
                storage::attr<"q">(disk2, simulation.current_step())(1),
                storage::attr<"velocity">(disk1, simulation.current_step())(1),
-               storage::attr<"velocity">(disk2, simulation.current_step())(1),
-               p0, lambda);
+               storage::attr<"velocity">(disk2, simulation.current_step())(1), p0, lambda);
   }
   //  io::close(fd);
 }

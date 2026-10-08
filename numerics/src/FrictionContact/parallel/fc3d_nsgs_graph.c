@@ -683,8 +683,8 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
     double tmp_criteria1, tmp_criteria2;
     unsigned int number_of_freezed_contact;
 
-#pragma omp parallel default(none) private(contact, localproblem, localreaction,       \
-                                               light_error_2, local_opts)              \
+#pragma omp parallel default(none)                                                     \
+    private(contact, localproblem, localreaction, light_error_2, local_opts)           \
     shared(problem, localProblemFunctionToolkit, computeError, options, iter, itermax, \
                hasNotConverged, error, number_of_freezed_contact, tmp_criteria1,       \
                tmp_criteria2, norm_r, nc, n_colors, light_error_sum, partition_size,   \

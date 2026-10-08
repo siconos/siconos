@@ -1,27 +1,28 @@
-#!bin/bash
+#!/bin/bash
 
 # Get number of procs
 if  [ -x "$(command -v nproc)" ]; then
-   export nbprocs=`nproc --all`  # linux
+   nbprocs=$(nproc --all)  # linux
 elif  [ -x "$(command -v sysctl)" ]; then
-   export nbprocs=`sysctl -n hw.ncpu` # macos
+   nbprocs=$(sysctl -n hw.ncpu) # macos
 else
-   export nbprocs=2
+   nbprocs=2
 fi
+export nbprocs
 
 # Check if CI_PROJECT_DIR is set AND not empty
-: ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
+: "${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}"
 
-mkdir -p $CI_PROJECT_DIR/build/bullet3
-cd $CI_PROJECT_DIR/
+mkdir -p "$CI_PROJECT_DIR/build/bullet3"
+cd "$CI_PROJECT_DIR/"||exit 1
 git clone https://github.com/bulletphysics/bullet3.git > /dev/null
-cd bullet3
+cd bullet3||exit 1
 git checkout tags/3.21
-cd $CI_PROJECT_DIR/build/bullet3
-cmake -DBUILD_PYBULLET=ON -DBUILD_PYBULLET_NUMPY=ON -DCMAKE_BUILD_TYPE=Release -DOpenGL_GL_PREFERENCE=GLVND $CI_PROJECT_DIR/bullet3 -Wno-dev
-make -j $nbprocs > /dev/null
+cd "$CI_PROJECT_DIR/build/bullet3"||exit 1
+cmake -DBUILD_PYBULLET=ON -DBUILD_PYBULLET_NUMPY=ON -DCMAKE_BUILD_TYPE=Release -DOpenGL_GL_PREFERENCE=GLVND "$CI_PROJECT_DIR/bullet3" -Wno-dev
+make -j "$nbprocs" > /dev/null
 echo "----> install bullet ..."
 make install > /dev/null
 # Clean up
-rm -rf $CI_PROJECT_DIR/bullet3
-rm -rf $CI_PROJECT_DIR/build/bullet3
+rm -rf "$CI_PROJECT_DIR/bullet3"
+rm -rf "$CI_PROJECT_DIR/build/bullet3"

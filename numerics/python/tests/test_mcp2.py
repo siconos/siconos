@@ -1,5 +1,20 @@
-#!/usr/bin/env python
-# Copyright 2024 INRIA
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2026 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 import numpy as np
 
@@ -17,13 +32,11 @@ def mcp_function(n, z, F):
 
     q = np.array([-5.0, -6.0])
     F[:] = np.dot(M, z) + q
-    pass
 
 
 def mcp_Nablafunction(n, z, nabla_F):
     M = np.array([[2.0, 1.0], [1.0, 2.0]])
     nabla_F[:] = M
-    pass
 
 
 def test_new():
@@ -84,14 +97,12 @@ def mcp_function_2(n, z, F):
     M, q = build_problem(n)
     # F=np.dot(M,z) + q  pointer assignment is not working
     F[:] = np.dot(M, z) + q
-    return
 
 
 def mcp_Nablafunction_2(n, z, nablaF):
-    M, q = build_problem(n)
+    M, _ = build_problem(n)
     # nablaF= M pointer assignment is not working
     nablaF[:] = M
-    return
 
 
 def test_mcp_newton_FB_FBLSA_2():
@@ -113,9 +124,9 @@ def test_mcp_newton_min_FBLSA_2():
     z = np.zeros(n)
     w = np.zeros(n)
     options = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_MIN_FBLSA)
-    options.iparam[
-        sn.params.SICONOS_IPARAM_STOPPING_CRITERION
-    ] = sn.params.SICONOS_STOPPING_CRITERION_RESIDU
+    options.iparam[sn.params.SICONOS_IPARAM_STOPPING_CRITERION] = (
+        sn.params.SICONOS_STOPPING_CRITERION_RESIDU
+    )
 
     sn.solver_options_print(options)
 

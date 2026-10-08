@@ -42,8 +42,8 @@ namespace cadmbtb {
 auto distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
                       std::shared_ptr<OccContactFace> csh2) -> ContactShapeDistance;
 
-auto distanceFaceEdge(std::shared_ptr<OccContactFace> sh1,
-                      std::shared_ptr<OccContactEdge> sh2) -> ContactShapeDistance;
+auto distanceFaceEdge(std::shared_ptr<OccContactFace> sh1, std::shared_ptr<OccContactEdge> sh2)
+    -> ContactShapeDistance;
 
 namespace tools {
 

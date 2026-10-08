@@ -22,30 +22,30 @@
 
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
-#include "gfc3d_Solvers.h"
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "gfc3d_Solvers.h"                       // for gfc3d_VI_FixedPointP...
-#include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
 #include "fc3d_short_names.h"                    // for GFC3D_VI_FPP
+#include "gfc3d_Solvers.h"
+#include "gfc3d_Solvers.h"        // for gfc3d_VI_FixedPointP...
+#include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "numerics_verbose.h"
-#include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_BEGIN
+#include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
 
-void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double *reaction,
-                                   double *velocity, double *globalVelocity, int *info,
-                                   SolverOptions *options) {
+void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double* reaction,
+                                   double* velocity, double* globalVelocity, int* info,
+                                   SolverOptions* options) {
   DEBUG_BEGIN("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n");
   DEBUG_EXPR(verbose = 1;);
   /* Number of contacts */
@@ -58,7 +58,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NM_vector_display(velocity, m););
   DEBUG_EXPR(NM_vector_display(globalVelocity, n););
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   // vi.self = &vi;
   vi->F = &Function_VI_GFC3D;
@@ -66,8 +66,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
 
   double error = 1e24;
 
-  GlobalFrictionContactProblem_as_VI *gfc3d_as_vi =
-      (GlobalFrictionContactProblem_as_VI *)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
+  GlobalFrictionContactProblem_as_VI* gfc3d_as_vi =
+      (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
   vi->env = gfc3d_as_vi;
   vi->size = n + m;
 
@@ -82,8 +82,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NV_display(reaction, m););
   DEBUG_EXPR(NV_display(globalVelocity, n););
 
-  double *z = (double *)malloc((n + m) * sizeof(double));
-  double *Fz = (double *)calloc((n + m), sizeof(double));
+  double* z = (double*)malloc((n + m) * sizeof(double));
+  double* Fz = (double*)calloc((n + m), sizeof(double));
 
   memcpy(z, globalVelocity, n * sizeof(double));
   memcpy(&z[n], reaction, m * sizeof(double));
@@ -151,7 +151,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
  */
 
 void gfc3d_vi_fpp_set_default(SolverOptions* options) {
-  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper initialization */
+  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper
+   * initialization */
   variationalInequality_FixedPointProjection_set_default(options);
 }
 
@@ -162,10 +163,11 @@ static int gfc3d_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int gfc3d_vi_fpp_solve_wrap(void* problem, double* reaction,
-                                   double* velocity, double* globalVelocity, SolverOptions* options) {
+static int gfc3d_vi_fpp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_VI_FixedPointProjection((GlobalFrictionContactProblem*)problem, reaction, velocity, globalVelocity, &info, options);
+  gfc3d_VI_FixedPointProjection((GlobalFrictionContactProblem*)problem, reaction, velocity,
+                                globalVelocity, &info, options);
   return info;
 }
 
@@ -175,13 +177,12 @@ static void gfc3d_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_VI_FPP, "GFC3D_VI_FPP",
-                "Variational Inequality Fixed Point Projection for 3D Global Friction Contact",
-                gfc3d_vi_fpp_init_wrap,
-                gfc3d_vi_fpp_solve_wrap,
-                gfc3d_vi_fpp_free_wrap,
-                NULL,  /* error function */
-                gfc3d_vi_fpp_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-4,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER_3VAR(
+    GFC3D_VI_FPP, "GFC3D_VI_FPP",
+    "Variational Inequality Fixed Point Projection for 3D Global Friction Contact",
+    gfc3d_vi_fpp_init_wrap, gfc3d_vi_fpp_solve_wrap, gfc3d_vi_fpp_free_wrap,
+    NULL,                     /* error function */
+    gfc3d_vi_fpp_set_default, /* set_default */
+    1000,                     /* default_max_iter */
+    1e-4,                     /* default_tol */
+    0 /* is_local_solver */);

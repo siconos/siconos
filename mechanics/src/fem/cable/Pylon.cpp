@@ -20,7 +20,7 @@
 
 #include "SiconosMatrix.hpp"
 
-void siconos::fem::cable::Pylon::from_json(const nlohmann::json &j) {
+void siconos::fem::cable::Pylon::from_json(const nlohmann::json& j) {
   coordinates_ << j.at("x"), j.at("y"), j.at("z");
   j.at("R").get_to(radius_);
   distanceToUpRope_ = j.value("dUp", 0.);  // 0 default for station pylons
@@ -50,7 +50,7 @@ void siconos::fem::cable::Pylon::display() const {
             << distanceToDownRope_ << "\n --------------\n\n";
 }
 
-bool siconos::fem::cable::operator<(const siconos::fem::cable::Pylon &p1,
-                                    const siconos::fem::cable::Pylon &p2) {
+bool siconos::fem::cable::operator<(const siconos::fem::cable::Pylon& p1,
+                                    const siconos::fem::cable::Pylon& p2) {
   return (p1.coords()(0) < p2.coords()(0));
 }

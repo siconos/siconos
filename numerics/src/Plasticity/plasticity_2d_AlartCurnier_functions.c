@@ -20,14 +20,14 @@
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
-#include "PlasticityProblem.h"                   // for MohrCoulomb2D...
-#include "NumericsFwd.h"                            // for MohrCoulomb2D...
-#include "NumericsMatrix.h"                         // for NumericsMatrix
-#include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  // for plasticity_2d_computeNonsmoo...
-#include "numerics_verbose.h"                       // for numerics_printf
+#include "NumericsFwd.h"        // for MohrCoulomb2D...
+#include "NumericsMatrix.h"     // for NumericsMatrix
+#include "PlasticityProblem.h"  // for MohrCoulomb2D...
 #include "numerics_errors.h"
-#include "op3x3.h"                                  // for SET3, eig_3x3
-#include "siconos_debug.h"                          // for DEBUG_PRINTF
+#include "numerics_verbose.h"                                // for numerics_printf
+#include "op3x3.h"                                           // for SET3, eig_3x3
+#include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  // for plasticity_2d_computeNonsmoo...
+#include "siconos_debug.h"                                   // for DEBUG_PRINTF
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -35,8 +35,9 @@ extern computeNonsmoothFunction Function;
 /* #define VERBOSE_DEBUG */
 
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void plasticity_2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta, double theta,
-                                    double rho[3], double F[3], double A[9], double B[9]) {
+void plasticity_2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
+                                             double theta, double rho[3], double F[3],
+                                             double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
   double RhoT = rho[1];
@@ -201,8 +202,9 @@ void plasticity_2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], do
 }
 
 /* Alart & Curnier version (Radius = theta*max(0,RVN)) */
-void plasticity_2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, double theta,
-                                 double rho[3], double F[3], double A[9], double B[9]) {
+void plasticity_2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta,
+                                          double theta, double rho[3], double F[3],
+                                          double A[9], double B[9]) {
   DEBUG_PRINT("plasticity_2d_computeAlartCurnierSTD starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
                                                    i, R[i], i, velocity[i]););
@@ -345,7 +347,8 @@ void plasticity_2d_computeAlartCurnierSTD(double R[3], double velocity[3], doubl
 
 /* Christensen & Pang version (Radius = theta* R[0])*/
 void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double theta,
-                                        double rho[3], double F[3], double A[9], double B[9]) {
+                                                 double rho[3], double F[3], double A[9],
+                                                 double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
   double RhoT = rho[1];
@@ -360,14 +363,17 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
   // Compute the value of the Alart--Curnier Function and its gradient for the normal part
   DEBUG_PRINTF("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - RVN = %e\n", RVN);
   if (RVN >= 0.0) {
-    DEBUG_PRINT("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Normal part in the cone\n");
+    DEBUG_PRINT(
+        "[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Normal part in the cone\n");
     F[0] = RhoN * (velocity[0]);
     if (A && B) {
       A[0 + 3 * 0] = RhoN;
       B[0 + 3 * 0] = 0.0;
     }
   } else {
-    DEBUG_PRINT("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Normal part out the cone\n");
+    DEBUG_PRINT(
+        "[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Normal part out the "
+        "cone\n");
     F[0] = R[0];
     if (A && B) {
       A[0 + 3 * 0] = 0.0;
@@ -377,11 +383,13 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
 
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
-  DEBUG_PRINTF("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Radius=%le\n", Radius);
+  DEBUG_PRINTF("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - Radius=%le\n",
+               Radius);
   DEBUG_PRINTF("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - RV=%le\n", RV);
   if (RV < Radius || RV < 1e-20)  // We are in the disk
   {
-    DEBUG_PRINT("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - We are in the disk \n");
+    DEBUG_PRINT(
+        "[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - We are in the disk \n");
 
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
@@ -399,7 +407,8 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
     }
   } else  // We are out the disk
   {
-    DEBUG_PRINT("[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - We are out the disk\n");
+    DEBUG_PRINT(
+        "[Numerics]  plasticity_2d_computeAlartCurnierJeanMoreau - We are out the disk\n");
 
     /*        RV1 = 1.0/RV; */
     /*        F[1] = R[1] - Radius*RVT*RV1; */
@@ -451,7 +460,7 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
 }
 
 void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* localproblem,
-                                               double* rho) {
+                                                        double* rho) {
   double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
 
@@ -480,7 +489,8 @@ void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* local
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 }
 
-void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem, double* rho) {
+void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem,
+                                                   double* rho) {
   double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
 

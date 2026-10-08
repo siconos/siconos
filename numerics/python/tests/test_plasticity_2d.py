@@ -19,7 +19,6 @@
 import numpy as np
 import siconos.numerics as sn
 
-
 NC = 1
 
 M = np.eye(3 * NC)

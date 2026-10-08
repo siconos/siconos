@@ -40,17 +40,17 @@ extern "C" {
     \param[in,out] error value
     \return 0 if ok
  */
-int rolling_friction_2d_compute_error(RollingFrictionContactProblem *problem, double *z,
-                                      double *w, double tolerance, SolverOptions *options,
-                                      double norm, double *error);
+int rolling_friction_2d_compute_error(RollingFrictionContactProblem* problem, double* z,
+                                      double* w, double tolerance, SolverOptions* options,
+                                      double norm, double* error);
 
 /** Error computation (using the normal map residual) for one rolling friction-contact 2D
    problem \param r the reaction force \param u the local velocity \param mu coeficient of
    friction \param worktmp work vector \param[in,out] error value
  */
 void rolling_friction_2d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
-                                                       double mur, double *error,
-                                                       double *worktmp);
+                                                       double mur, double* error,
+                                                       double* worktmp);
 
 #if defined(__cplusplus)
 }

@@ -23,10 +23,11 @@
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatpos
 
-void siconos::collision::bullet::BulletVelocityAngularVelocityR::updateContactPointsFromManifoldPoint(
-    const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
-    double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {
+void siconos::collision::bullet::BulletVelocityAngularVelocityR::
+    updateContactPointsFromManifoldPoint(
+        const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+        double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
+        std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2) {
   if (flip) {
     siconos::collision::bullet::copyBtVector3(-1.0 * point.m_normalWorldOnB, nc_);
     siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling,

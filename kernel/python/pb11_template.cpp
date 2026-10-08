@@ -35,7 +35,7 @@ PYBIND11_MODULE(pb11_template, m) {
   m.doc() = "Reference for developpers - How to write a pybind11 wrapper for Siconos";
 
   py::class_<siconos::internal::devel_model::ClassA, py::smart_holder>(m, "ClassA")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &>(),
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
            py::arg("vector1"))
@@ -45,7 +45,7 @@ PYBIND11_MODULE(pb11_template, m) {
 
       .def(
           "setComputeVector2Function",
-          [](siconos::internal::devel_model::ClassA &self, py::function f) {
+          [](siconos::internal::devel_model::ClassA& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeVector2Function(
                 [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -66,7 +66,7 @@ PYBIND11_MODULE(pb11_template, m) {
 
       .def(
           "setComputeVectorNameDirectFunction",
-          [](siconos::internal::devel_model::ClassA &self, py::function f) {
+          [](siconos::internal::devel_model::ClassA& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeVectorNameDirectFunction(
                 [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -88,7 +88,7 @@ PYBIND11_MODULE(pb11_template, m) {
 
       .def(
           "setComputeVectorNameSpanFunction",
-          [](siconos::internal::devel_model::ClassA &self, py::function f) {
+          [](siconos::internal::devel_model::ClassA& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeVectorNameSpanFunction([f](double val, std::span<double> span) {
               // Build numpy pointer, sharing memory with std::span. No copy !
@@ -114,7 +114,7 @@ PYBIND11_MODULE(pb11_template, m) {
 
       .def(
           "setComputeMatrix1Function",
-          [](siconos::internal::devel_model::ClassA &self, py::function f) {
+          [](siconos::internal::devel_model::ClassA& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeMatrix1Function([f](Eigen::Ref<siconos::algebra::MapVectorType> pos,
                                                double val,

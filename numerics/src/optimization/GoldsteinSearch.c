@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "GoldsteinSearch.h"
 
 #include <assert.h>  // for assert

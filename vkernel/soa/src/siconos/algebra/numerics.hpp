@@ -14,15 +14,13 @@ template <typename T>
 concept vec = requires { typename std::decay_t<T>::vec_t; };
 
 template <typename T>
-concept any_mat =
-    !vec<T> && requires { typename std::decay_t<T>::any_mat_t; };
+concept any_mat = !vec<T> && requires { typename std::decay_t<T>::any_mat_t; };
 
 template <typename T>
 concept mat = any_mat<T> && requires { typename std::decay_t<T>::mat_t; };
 
 template <typename T>
-concept diag_mat =
-    any_mat<T> && requires { typename std::decay_t<T>::diag_mat_t; };
+concept diag_mat = any_mat<T> && requires { typename std::decay_t<T>::diag_mat_t; };
 
 }  // namespace siconos::storage::pattern::match
 
@@ -45,8 +43,7 @@ struct mat : any_mat {
     if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::ColsAtCompileTime;
-    }
-    else {
+    } else {
       // runtime
       return 1;
     }
@@ -55,8 +52,7 @@ struct mat : any_mat {
     if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::RowsAtCompileTime;
-    }
-    else {
+    } else {
       // runtime
       return 1;
     }
@@ -71,13 +67,11 @@ struct mat : any_mat {
 
   constexpr mat() {}
 
-  virtual ~mat()
-  {
+  virtual ~mat() {
     if (_m) {
       if (_view) {
         _m = nullptr;
-      }
-      else {
+      } else {
         _m = NM_free(_m);
       }
     }
@@ -95,8 +89,7 @@ struct diag_mat : mat<T> {
 };
 
 template <typename T>
-diag_mat<T> cast_to_diag_mat(mat<T>& m)
-{
+diag_mat<T> cast_to_diag_mat(mat<T>& m) {
   diag_mat<T> result;
   result._m = m._m;
   result._offsets[0] = m._offsets[0];
@@ -115,8 +108,7 @@ struct vec {
     if constexpr (match::fixed_size_matrix<T>) {
       // only eigen
       return T::RowsAtCompileTime;
-    }
-    else {
+    } else {
       // runtime
       return 1;
     }
@@ -128,13 +120,11 @@ struct vec {
 
   constexpr vec() {}
 
-  ~vec()
-  {
+  ~vec() {
     if (_v) {
       if (_view) {
         _v = nullptr;
-      }
-      else {
+      } else {
         _v = NM_free(_v);
       }
     }
@@ -166,9 +156,7 @@ struct vec {
 // };
 
 template <typename T>
-diag_mat<T> mat_view(match::diag_mat auto& m, indice_t row_offset,
-                     indice_t col_offset)
-{
+diag_mat<T> mat_view(match::diag_mat auto& m, indice_t row_offset, indice_t col_offset) {
   diag_mat<T> vm;
   /* pointers copy */
   vm._m = m._m;
@@ -181,16 +169,12 @@ diag_mat<T> mat_view(match::diag_mat auto& m, indice_t row_offset,
 }
 
 template <typename T>
-diag_mat<T> mat_view(T, match::diag_mat auto& m, indice_t row_offset,
-                     indice_t col_offset)
-{
+diag_mat<T> mat_view(T, match::diag_mat auto& m, indice_t row_offset, indice_t col_offset) {
   return mat_view<T>(m, row_offset, col_offset);
 }
 
 template <typename T>
-mat<T> mat_view(match::any_mat auto& m, indice_t row_offset,
-                indice_t col_offset)
-{
+mat<T> mat_view(match::any_mat auto& m, indice_t row_offset, indice_t col_offset) {
   mat<T> vm;
   /* pointers copy */
   vm._m = m._m;
@@ -203,15 +187,12 @@ mat<T> mat_view(match::any_mat auto& m, indice_t row_offset,
 }
 
 template <typename T>
-mat<T> mat_view(T, match::any_mat auto& m, indice_t row_offset,
-                indice_t col_offset)
-{
+mat<T> mat_view(T, match::any_mat auto& m, indice_t row_offset, indice_t col_offset) {
   return mat_view<T>(m, row_offset, col_offset);
 }
 
 template <typename T>
-vec<T> vec_view(match::vec auto& v, indice_t offset)
-{
+vec<T> vec_view(match::vec auto& v, indice_t offset) {
   vec<T> vv;
   /* pointers copy */
   vv._v = v._v;
@@ -221,8 +202,7 @@ vec<T> vec_view(match::vec auto& v, indice_t offset)
 }
 
 template <typename T>
-decltype(auto) vec_view(T, match::vec auto& v, indice_t offset)
-{
+decltype(auto) vec_view(T, match::vec auto& v, indice_t offset) {
   return vec_view<T>(v, offset);
 }
 
@@ -234,9 +214,7 @@ const auto raw_size0(match::any_mat auto& m) { return m._m->size0; };
 const auto raw_size0(match::vec auto& v) { return v._v->size0; };
 const auto raw_size1(match::any_mat auto& m) { return m._m->size1; };
 
-void resize(match::any_mat auto& m, match::indice auto nrows,
-            match::indice auto ncols)
-{
+void resize(match::any_mat auto& m, match::indice auto nrows, match::indice auto ncols) {
   if (m._m) m._m = NM_free(m._m);
   if (m._mt) m._mt = NM_free(m._mt);
 
@@ -245,8 +223,7 @@ void resize(match::any_mat auto& m, match::indice auto nrows,
   NM_triplet_alloc(m._m, 1);
 }
 
-void resize(match::vec auto& v, match::indice auto nrows)
-{
+void resize(match::vec auto& v, match::indice auto nrows) {
   if (v._v) v._v = NM_free(v._v);
 
   //  static_assert(m.vncols == 1);  // only vector of vectors
@@ -259,8 +236,7 @@ void resize(match::vec auto& v, match::indice auto nrows)
 auto nnz(match::any_mat auto& m) { return NM_triplet(m._m)->nz; }
 
 template <typename T>
-vec<T> copy(vec<T>& v)
-{
+vec<T> copy(vec<T>& v) {
   vec<T> new_vec;
 
   auto* new_v = NM_new();
@@ -272,20 +248,16 @@ vec<T> copy(vec<T>& v)
   return new_vec;
 }
 
-void insert(match::any_mat auto& am, match::any_mat auto& bm,
-            match::indice auto offset0, match::indice auto offset1)
-{
+void insert(match::any_mat auto& am, match::any_mat auto& bm, match::indice auto offset0,
+            match::indice auto offset1) {
   NM_insert(am, bm, offset0, offset1);
 }
 
-void insert(match::vec auto& va, match::vec auto& vb,
-            match::indice auto offset0)
-{
+void insert(match::vec auto& va, match::vec auto& vb, match::indice auto offset0) {
   NM_insert(va, vb, offset0, 1);
 }
 
-void transpose(match::any_mat auto& m)
-{
+void transpose(match::any_mat auto& m) {
   if (!m._mt) {
     m._mt = NM_transpose(m._m);
   }
@@ -294,55 +266,45 @@ void transpose(match::any_mat auto& m)
 void setup(match::any_mat auto& m) { resize(m, 1, 1); }
 
 template <match::any_mat M, typename T>
-void set_value(M&& m, match::indice auto i, match::indice auto j,
-               const T& value)
-{
+void set_value(M&& m, match::indice auto i, match::indice auto j, const T& value) {
   assert(i >= 0 && j >= 0);
   assert(i * m.vnrows + m._offsets[0] < m._m->size0);
   assert(j * m.vncols + m._offsets[1] < m._m->size1);
 
   if constexpr (match::scalar<T>) {
-    NM_zentry(m._m, i * m.vnrows + m._offsets[0],
-              j * m.vncols + m._offsets[1], value, zero_threshold);
+    NM_zentry(m._m, i * m.vnrows + m._offsets[0], j * m.vncols + m._offsets[1], value,
+              zero_threshold);
   }
   // diagonal block
   else if constexpr (match::diagonal_matrix<T>) {
     for (decltype(i) k = 0; k < ncols(value); ++k) {
-      NM_zentry(m._m, i * m.vnrows + k + m._offsets[0],
-                j * m.vncols + k + m._offsets[1], value.diagonal()(k),
-                zero_threshold);
+      NM_zentry(m._m, i * m.vnrows + k + m._offsets[0], j * m.vncols + k + m._offsets[1],
+                value.diagonal()(k), zero_threshold);
     }
   }
   // full block
   else if constexpr (match::matrix<T>) {
     for (decltype(i) k = 0; k < nrows(value); ++k) {
       for (decltype(j) l = 0; l < ncols(value); ++l) {
-        NM_zentry(m._m, i * m.vnrows + k + m._offsets[0],
-                  j * m.vncols + l + m._offsets[1], value(k, l),
-                  zero_threshold);
+        NM_zentry(m._m, i * m.vnrows + k + m._offsets[0], j * m.vncols + l + m._offsets[1],
+                  value(k, l), zero_threshold);
       }
     }
-  }
-  else if constexpr (match::sparse_matrix<T>) {
+  } else if constexpr (match::sparse_matrix<T>) {
     for (typename T::Index k = 0; k < value.outerSize(); ++k) {
       // /!\ specific to eigen
       for (typename T::InnerIterator it(value, k); it; ++it) {
         NM_zentry(m._m, i * m.vnrows + it.row() + m._offsets[0],
-                  j * m.vncols + it.col() + m._offsets[1], it.value(),
-                  zero_threshold);
+                  j * m.vncols + it.col() + m._offsets[1], it.value(), zero_threshold);
       }
     }
-  }
-  else {
-    []<bool flag = false>() {
-      static_assert(flag, "set_value: cannot insert this value");
-    }();
+  } else {
+    []<bool flag = false>() { static_assert(flag, "set_value: cannot insert this value"); }();
   }
 }
 
 template <typename T>
-void set_value(match::vec auto&& m, match::indice auto i, const T& value)
-{
+void set_value(match::vec auto&& m, match::indice auto i, const T& value) {
   assert(i >= 0);
   assert(i * m.vnrows + m._offset < m._v->size0);
 
@@ -352,21 +314,17 @@ void set_value(match::vec auto&& m, match::indice auto i, const T& value)
   // vector block
   else if constexpr (match::vector<T>) {
     for (decltype(i) k = 0; k < nrows(value); ++k) {
-      NM_zentry(m._v, i * m.vnrows + k + m._offset, 0, value(k),
-                zero_threshold);
+      NM_zentry(m._v, i * m.vnrows + k + m._offset, 0, value(k), zero_threshold);
     }
   }
   // compile time error
   else {
-    []<bool flag = false>() {
-      static_assert(flag, "set_value: cannot insert this value");
-    }();
+    []<bool flag = false>() { static_assert(flag, "set_value: cannot insert this value"); }();
   }
 }
 
 template <match::diagonal_or_1x1 A>
-void invert_diagonal_matrix(diag_mat<A>& a)
-{
+void invert_diagonal_matrix(diag_mat<A>& a) {
   if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
       a._m->matrix2->triplet->x[i] = 1.0 / a._m->matrix2->triplet->x[i];
@@ -376,8 +334,7 @@ void invert_diagonal_matrix(diag_mat<A>& a)
 
 // b += a
 template <typename T>
-void add(const vec<T>& a, vec<T>& b)
-{
+void add(const vec<T>& a, vec<T>& b) {
   // improve Numerics  cblas_daxpy(size0(a), 1, a._v->matrix0, 1,
   // b._v->matrix0);
 
@@ -388,14 +345,12 @@ void add(const vec<T>& a, vec<T>& b)
 
 // alpha * A + beta * B
 template <match::scalar scalar, match::any_matrix M>
-mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
-{
+mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B) {
   NumericsMatrix* nm;
 
   if (nnz(B) > 0) {
     nm = NM_add(alpha, A._m, beta, B._m);
-  }
-  else {
+  } else {
     nm = NM_new();
     NM_copy(A._m, nm);
   }
@@ -406,13 +361,10 @@ mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
 
 // c = alpha * A + beta * B
 template <match::scalar scalar, match::any_matrix M>
-void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
-         mat<M>& C)
-{
+void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B, mat<M>& C) {
   if (nnz(B) > 0) {
     C._m = NM_add(alpha, A._m, beta, B._m);
-  }
-  else {
+  } else {
     NumericsMatrix* nm = NM_new();
     NM_copy(A._m, nm);
     C._m = nm;
@@ -423,8 +375,7 @@ void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
 
 // b <- a
 template <typename V>
-void copy(const vec<V>& a, vec<V>& b)
-{
+void copy(const vec<V>& a, vec<V>& b) {
   for (auto i = 0; i < size0(a) * a.vnrows; ++i) {
     b._v->matrix0[i] = a._v->matrix0[i];
   }
@@ -432,56 +383,46 @@ void copy(const vec<V>& a, vec<V>& b)
 
 // v <- h*v
 template <typename T>
-void scal(match::scalar auto h, vec<T>& v)
-{
+void scal(match::scalar auto h, vec<T>& v) {
   NM_scal(h, v._v);
 }
 
 template <typename T>
-decltype(auto) get_vector(vec<T>& v, match::indice auto i)
-{
+decltype(auto) get_vector(vec<T>& v, match::indice auto i) {
   return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
 }
 
 template <typename T>
-decltype(auto) get_vector(const vec<T>& v, match::indice auto i)
-{
+decltype(auto) get_vector(const vec<T>& v, match::indice auto i) {
   return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
 }
 
 template <typename T>
-decltype(auto) get_vector(vec<T>&& v, match::indice auto i)
-{
+decltype(auto) get_vector(vec<T>&& v, match::indice auto i) {
   return get_vector(v, i);
 }
 
 template <typename T>
-decltype(auto) get_vector(vec<T>& v, match::indice auto i,
-                          match::indice auto vector_size)
-{
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset,
-                        vector_size);
+decltype(auto) get_vector(vec<T>& v, match::indice auto i, match::indice auto vector_size) {
+  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset, vector_size);
 }
 //
 // c <- a b
 // Matrix Matrix
 template <typename A, typename B>
-void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c)
-{
+void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c) {
   NM_gemm(1, a._m, b._m, 1, c._m);
 }
 
 // Matrix Vector
 template <typename A, typename B>
-void prod(const mat<A>& a, const vec<B>& b, vec<prod_t<A, B>>&& c)
-{
+void prod(const mat<A>& a, const vec<B>& b, vec<prod_t<A, B>>&& c) {
   NM_gemv(1, a._m, b._v->matrix0, 1, c._v->matrix0);
 }
 
 // c <- a^t b
 template <typename A, typename B>
-void prodt1(const mat<A>& a, const vec<B>& b, vec<prod_t<trans_t<A>, B>>& c)
-{
+void prodt1(const mat<A>& a, const vec<B>& b, vec<prod_t<trans_t<A>, B>>& c) {
   assert(a._mt);
   assert(a._mt->size1 == b._v->size0);  // transpose mult
   assert(c._v->size0 == a._mt->size0);
@@ -489,66 +430,52 @@ void prodt1(const mat<A>& a, const vec<B>& b, vec<prod_t<trans_t<A>, B>>& c)
 }
 // c <- a b^t
 template <typename A, typename B>
-void prodt2(const diag_mat<A>& a, const mat<B>& b,
-            mat<prod_t<A, trans_t<B>>>& c)
-{
+void prodt2(const diag_mat<A>& a, const mat<B>& b, mat<prod_t<A, trans_t<B>>>& c) {
   assert(b._mt);
   NM_gemm(1, a._m, b._mt, 1, c._m);
 }
 
 // c <- a^-1 b
 template <match::diagonal_matrix A, typename B>
-void solve_linear_system(diag_mat<A>& a, vec<B>& b, vec<B>& c)
-{
+void solve_linear_system(diag_mat<A>& a, vec<B>& b, vec<B>& c) {
   invert_diagonal_matrix(a);
   prod(a, b, c);
 }
 
 template <match::any_matrix A, typename B>
-void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c)
-{
+void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c) {
   if (!NM_internalData(a._m)->isInversed) {
     copy(b, c);
     if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
-      throw std::runtime_error(
-          "NumericsMatrix solve failed in NM_gesv_expert.");
+      throw std::runtime_error("NumericsMatrix solve failed in NM_gesv_expert.");
     }
-  }
-  else {
+  } else {
     // this case occurs if a solve has been done with a diagonal view.
     prod(a, b, vec_view<prod_t<A, B>>(c, 0));
   }
 }
 
 template <match::any_matrix A, typename B>
-void solve_in_place(const mat<A>& a, const vec<B>& b)
-{
+void solve_in_place(const mat<A>& a, const vec<B>& b) {
   if (NM_gesv_expert(a._m, b._v->matrix0, 1) != 0) {
-    throw std::runtime_error(
-        "NumericsMatrix solve_in_place failed in NM_gesv_expert.");
+    throw std::runtime_error("NumericsMatrix solve_in_place failed in NM_gesv_expert.");
   }
 }
 
 template <match::diagonal_or_1x1 A, match::matrix B>
-void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b,
-                                        mat<trans_t<B>>& c)
-{
+void solve_linear_system_with_transpose(diag_mat<A>& a, mat<B>& b, mat<trans_t<B>>& c) {
   invert_diagonal_matrix(a);
   transpose(b);
   prodt2(a, b, c);
 }
 
 template <match::diagonal_or_1x1 A, match::matrix B>
-void solve_linear_system_with_transpose(diag_mat<A>&& a, mat<B>& b,
-                                        mat<trans_t<B>>& c)
-{
+void solve_linear_system_with_transpose(diag_mat<A>&& a, mat<B>& b, mat<trans_t<B>>& c) {
   solve_linear_system_with_transpose(a, b, c);
 }
 
 template <match::any_matrix H, match::any_matrix M, typename W>
-void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
-                        mat<W>& w_matrix)
-{
+void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix, mat<W>& w_matrix) {
   // Ensure mass_matrix is square
   assert(mass_matrix._m->size0 == mass_matrix._m->size1);
 
@@ -564,8 +491,7 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
     if (w_matrix._m) w_matrix._m = NM_free(w_matrix._m);
     w_matrix._m = NM_create(NM_SPARSE, n, n);
     NM_triplet_alloc(w_matrix._m, 1);
-  }
-  else if (w_matrix._m->storageType != NM_SPARSE) {
+  } else if (w_matrix._m->storageType != NM_SPARSE) {
     w_matrix._m = NM_free(w_matrix._m);
     w_matrix._m = NM_create(NM_SPARSE, n, n);
     NM_triplet_alloc(w_matrix._m, 1);
@@ -595,8 +521,7 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
             rhs_vec[col_idx] = H_sparse->triplet->x[l];
           }
         }
-      }
-      else if (H_sparse->csr) {
+      } else if (H_sparse->csr) {
         // Compressed Sparse Row format: iterate shared row structure
         CS_INT* row_ptr = H_sparse->csr->p;
         CS_INT* col_ind = H_sparse->csr->i;
@@ -607,20 +532,17 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
             rhs_vec[col_idx] = values[idx];
           }
         }
-      }
-      else {
+      } else {
         std::runtime_error("solve_kkt: unknown sparse format");
       }
-    }
-    else {
+    } else {
       // fallback to dense (should not happen if h_matrix is actually sparse,
       // but for completeness)
       if (h_matrix._mt && h_matrix._mt->matrix0) {
         for (int j = 0; j < d; ++j) {
           rhs_vec[j] = h_matrix._mt->matrix0[k * d + j];
         }
-      }
-      else {
+      } else {
         for (int j = 0; j < d; ++j) {
           rhs_vec[j] = 0.0;
         }
@@ -629,8 +551,7 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
 
     if (NM_gesv_expert(mass_matrix._m, rhs_vec.data(), 0) != 0) {
       NM_free(Minv_ht);
-      throw std::runtime_error(
-          "NumericsMatrix solve failed in solve_kkt: M^{-1} * col(H^T)");
+      throw std::runtime_error("NumericsMatrix solve failed in solve_kkt: M^{-1} * col(H^T)");
     }
 
     for (int i = 0; i < d; ++i) {

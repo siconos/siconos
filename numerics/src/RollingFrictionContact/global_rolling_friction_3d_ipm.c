@@ -52,37 +52,37 @@
 #define EPS 1e-40
 
 typedef struct {
-  double *globalVelocity;  // v
-  double *velocity;        // u
-  double *reaction;        // r
+  double* globalVelocity;  // v
+  double* velocity;        // u
+  double* reaction;        // r
 } IPM_point;
 
 typedef struct {
-  double *velocity_1;  // velocity_1 = (t, u_bar)
-  double *velocity_2;  // velocity_2 = (t_prime, u_tilde)
-  double *reaction_1;  // reaction_1 = (r0, r_bar)
-  double *reaction_2;  // reaction_2 = (r0, r_tilde)
-  double *t;
-  double *t_prime;
+  double* velocity_1;  // velocity_1 = (t, u_bar)
+  double* velocity_2;  // velocity_2 = (t_prime, u_tilde)
+  double* reaction_1;  // reaction_1 = (r0, r_bar)
+  double* reaction_2;  // reaction_2 = (r0, r_tilde)
+  double* t;
+  double* t_prime;
 } global_rolling_friction_3d_ipm_point;
 
 typedef struct {
   /* initial interior points */
-  IPM_point *starting_point;  // initial point
-  IPM_point *original_point;  // original point which is not changed by the matrix P_mu
-  global_rolling_friction_3d_ipm_point *global_rolling_friction_3d_point;
+  IPM_point* starting_point;  // initial point
+  IPM_point* original_point;  // original point which is not changed by the matrix P_mu
+  global_rolling_friction_3d_ipm_point* global_rolling_friction_3d_point;
 
   /* change of variable matrix */
-  IPM_change_of_variable *P_mu;
+  IPM_change_of_variable* P_mu;
 
   /* initial internal solver parameters */
-  IPM_internal_params *internal_params;
+  IPM_internal_params* internal_params;
 
-  double **tmp_vault_m;
-  double **tmp_vault_nd;
-  double **tmp_vault_n_dminus2;
-  double **tmp_vault_n;
-  double **tmp_vault_n_dplus1;
+  double** tmp_vault_m;
+  double** tmp_vault_nd;
+  double** tmp_vault_n_dminus2;
+  double** tmp_vault_n;
+  double** tmp_vault_n_dplus1;
 } Grfc3d_IPM_data;
 
 // Note FP: these functions (getStepLength ...) are also defined in gfc3d_ipm with the same
@@ -90,8 +90,8 @@ typedef struct {
 // whoever is concerned with the ipm implementation.
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
  */
-static double global_rolling_friction_3d_ipm_getStepLength(const double *const x,
-                                                           const double *const dx,
+static double global_rolling_friction_3d_ipm_getStepLength(const double* const x,
+                                                           const double* const dx,
                                                            const size_t vecSize,
                                                            const size_t varsCount,
                                                            const double gamma) {
@@ -134,12 +134,12 @@ static double global_rolling_friction_3d_ipm_getStepLength(const double *const x
 }
 
 /* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
-static double global_rolling_friction_3d_ipm_relGap(NumericsMatrix *M, const double *f,
-                                                    const double *w,
-                                                    const double *globalVelocity,
-                                                    const double *reaction, const size_t nd,
+static double global_rolling_friction_3d_ipm_relGap(NumericsMatrix* M, const double* f,
+                                                    const double* w,
+                                                    const double* globalVelocity,
+                                                    const double* reaction, const size_t nd,
                                                     const size_t m, const double gapVal) {
-  double *Mv = (double *)calloc(m, sizeof(double));
+  double* Mv = (double*)calloc(m, sizeof(double));
   double vMv, pval, dval;
 
   NM_gemv(0.5, M, globalVelocity, 0.0, Mv);
@@ -152,11 +152,11 @@ static double global_rolling_friction_3d_ipm_relGap(NumericsMatrix *M, const dou
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
  * velocity o reaction  */
-static double global_rolling_friction_3d_ipm_complemResidualNorm(const double *const velocity,
-                                                                 const double *const reaction,
+static double global_rolling_friction_3d_ipm_complemResidualNorm(const double* const velocity,
+                                                                 const double* const reaction,
                                                                  const size_t vecSize,
                                                                  const size_t varsCount) {
-  double *resid = (double *)calloc(vecSize, sizeof(double));
+  double* resid = (double*)calloc(vecSize, sizeof(double));
   JA_prod(velocity, reaction, vecSize, varsCount, resid);
   double norm2 = cblas_dnrm2(vecSize, resid, 1);
   free(resid);
@@ -169,9 +169,9 @@ static double global_rolling_friction_3d_ipm_complemResidualNorm(const double *c
  * so do from i-th to j-th elements,
  * starting index is 1
  */
-static void extract_vector(const double *const vec, const size_t vecSize,
+static void extract_vector(const double* const vec, const size_t vecSize,
                            const size_t varsCount, const size_t i, const size_t j,
-                           double *out) {
+                           double* out) {
   if (!vec) return;
   assert(i >= 1);
   assert(i <= j);
@@ -218,12 +218,12 @@ static void extract_vector(const double *const vec, const size_t vecSize,
  *      |                                                                      |
  *      | ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ...  |
  */
-static NumericsMatrix *compute_J_matrix(const size_t varsCount) {
+static NumericsMatrix* compute_J_matrix(const size_t varsCount) {
   assert(varsCount > 0);
 
-  NumericsMatrix *J = NM_create(NM_SPARSE, 5 * varsCount, 3 * varsCount * 2);
-  NumericsMatrix *J_1 = NM_create(NM_SPARSE, 5, 3);
-  NumericsMatrix *J_2 = NM_create(NM_SPARSE, 5, 3);
+  NumericsMatrix* J = NM_create(NM_SPARSE, 5 * varsCount, 3 * varsCount * 2);
+  NumericsMatrix* J_1 = NM_create(NM_SPARSE, 5, 3);
+  NumericsMatrix* J_2 = NM_create(NM_SPARSE, 5, 3);
 
   long J_nzmax = 3 * 2 * varsCount;
   long J_1_nzmax = 3;
@@ -237,11 +237,11 @@ static NumericsMatrix *compute_J_matrix(const size_t varsCount) {
   J_1->matrix2->origin = NSM_TRIPLET;
   J_2->matrix2->origin = NSM_TRIPLET;
 
-  NumericsMatrix *N3 = NM_eye(3);
+  NumericsMatrix* N3 = NM_eye(3);
   NM_insert(J_1, N3, 0, 0);
-  NumericsMatrix *N1 = NM_eye(1);
+  NumericsMatrix* N1 = NM_eye(1);
   NM_insert(J_2, N1, 0, 0);
-  NumericsMatrix *N2 = NM_eye(2);
+  NumericsMatrix* N2 = NM_eye(2);
   NM_insert(J_2, N2, 3, 1);
 
   N3 = NM_free(N3);
@@ -265,9 +265,9 @@ static NumericsMatrix *compute_J_matrix(const size_t varsCount) {
  * A member computed must be allocated before.
  * If an input is NULL, then this member will not be computed.
  */
-static void family_of_F(const double *const x, const double *const z, const size_t vecSize,
-                        const size_t varsCount, double *f, float_type *wf, NumericsMatrix *F,
-                        NumericsMatrix *Finv, NumericsMatrix *F2, NumericsMatrix *Finv2) {
+static void family_of_F(const double* const x, const double* const z, const size_t vecSize,
+                        const size_t varsCount, double* f, float_type* wf, NumericsMatrix* F,
+                        NumericsMatrix* Finv, NumericsMatrix* F2, NumericsMatrix* Finv2) {
   size_t dimension = (size_t)(vecSize / varsCount);
   int f_NULL, wf_NULL;
   f_NULL = 0;
@@ -277,11 +277,11 @@ static void family_of_F(const double *const x, const double *const z, const size
   if (!f)  // f is always allocated to use
   {
     f_NULL = 1;
-    f = (double *)calloc(vecSize, sizeof(double));
+    f = (double*)calloc(vecSize, sizeof(double));
   }
   if (!wf) {
     wf_NULL = 1;
-    wf = (float_type *)calloc(varsCount, sizeof(float_type));
+    wf = (float_type*)calloc(varsCount, sizeof(float_type));
   }
   if (F) {
     F_block = NM_create(NM_DENSE, dimension, dimension);
@@ -406,18 +406,18 @@ static void family_of_F(const double *const x, const double *const z, const size
 
 /* [OLD VERSION] Return the matrix P^-1 where P is the matrix satisfying Jac = P*P'. Using the
  * formula F for the construction  */
-static NumericsMatrix *Pinv_F(const double *const f, const double *const g,
-                              const float_type *const wf, const float_type *const wg,
+static NumericsMatrix* Pinv_F(const double* const f, const double* const g,
+                              const float_type* const wf, const float_type* const wg,
                               const size_t vecSize, const size_t varsCount) {
   size_t dim = (size_t)(vecSize / varsCount);  // dim must be 3
   size_t d5 = dim + 2;                         // d5 must be 5
 
-  NumericsMatrix *out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
+  NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (5 + 2 * (2 * 2)) * varsCount);
 
-  NumericsMatrix *out15 = NM_create(NM_DENSE, 1, 5);
-  NumericsMatrix *out22 = NM_create(NM_DENSE, 2, 2);
-  double *othor = (double *)calloc(2, sizeof(double));
+  NumericsMatrix* out15 = NM_create(NM_DENSE, 1, 5);
+  NumericsMatrix* out22 = NM_create(NM_DENSE, 2, 2);
+  double* othor = (double*)calloc(2, sizeof(double));
 
   float_type coef, coef_tmp, tmp1, tmp2, tmp3, tmp4;
   coef = 1.0;
@@ -481,22 +481,22 @@ static NumericsMatrix *Pinv_F(const double *const f, const double *const g,
 
 /* Return the matrix P^-1 where P is the matrix satisfying Jac = P*P'. Using the formula Qp for
  * the construction */
-static NumericsMatrix *Pinv(const double *u1, const double *r1, const double *u2,
-                            const double *r2, const size_t vecSize, const size_t varsCount) {
+static NumericsMatrix* Pinv(const double* u1, const double* r1, const double* u2,
+                            const double* r2, const size_t vecSize, const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  NumericsMatrix *out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
+  NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (5 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix *out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->matrix2->triplet;
 
-  double *othor = (double *)calloc(2, sizeof(double));
+  double* othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv = 0., data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
   float_type nxb = 0., nzb = 0., nx = 0., nz = 0., nx2 = 0., nz2 = 0.;
@@ -600,8 +600,8 @@ static NumericsMatrix *Pinv(const double *u1, const double *r1, const double *u2
 
 /* Return the matrix P^-1*y where P is the matrix satisfying Jac = P*P'. Using the formula Qp
  * for the construction */
-static void Pinvy(const double *u1, const double *r1, const double *u2, const double *r2,
-                  const size_t vecSize, const size_t varsCount, const double *y, double *out) {
+static void Pinvy(const double* u1, const double* r1, const double* u2, const double* r2,
+                  const size_t vecSize, const size_t varsCount, const double* y, double* out) {
   if (!out) {
     printf("\n[ERROR] Pinvy - output has not been yet allocated.\n");
     return;
@@ -611,12 +611,12 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  double *othor = (double *)calloc(2, sizeof(double));
+  double* othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
   float_type nxb = 0., nzb = 0., nx = 0., nz = 0., nx2 = 0., nz2 = 0.;
@@ -706,9 +706,9 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
 
 /* Return the matrix (P^-1)'*y where P is the matrix satisfying Jac = P*P'. Using the formula
  * Qp for the construction */
-static void PinvTy(const double *u1, const double *r1, const double *u2, const double *r2,
-                   const size_t vecSize, const size_t varsCount, const double *y,
-                   double *out) {
+static void PinvTy(const double* u1, const double* r1, const double* u2, const double* r2,
+                   const size_t vecSize, const size_t varsCount, const double* y,
+                   double* out) {
   if (!out) {
     printf("\n[ERROR] PinvTy - output has not been yet allocated.\n");
     return;
@@ -718,12 +718,12 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  double *othor = (double *)calloc(2, sizeof(double));
+  double* othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
   float_type nxb = 0., nzb = 0., nx = 0., nz = 0., nx2 = 0., nz2 = 0.;
@@ -1190,21 +1190,21 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
 //   return (cs_ndone(N, E, c, x, 1)); /* success: free E,s,x; return N */
 // }
 
-static NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, const double *u2,
-                                        const double *r2, const size_t vecSize,
+static NumericsMatrix* compute_JQinv2Jt(const double* u1, const double* r1, const double* u2,
+                                        const double* r2, const size_t vecSize,
                                         const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  NumericsMatrix *out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
+  NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (9 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix *out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->matrix2->triplet;
 
   float_type data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
 
@@ -1448,8 +1448,8 @@ static NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, cons
 // static  NumericsMatrix *  multiply_LinvH(const double *u1, const double *r1, const double
 // *u2, const double *r2, const size_t vecSize, const size_t varsCount, NumericsMatrix *H,
 // CSparseMatrix **chol_L, FILE *file)
-static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) {
-  NumericsMatrix *UinvH = NM_new();
+static NumericsMatrix* multiply_UinvH(CSparseMatrix* chol_U, NumericsMatrix* H) {
+  NumericsMatrix* UinvH = NM_new();
 
   NM_types storage = H->storageType;
 
@@ -1457,11 +1457,11 @@ static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) 
       /* case NM_DENSE: */
       /*   break; */
     case NM_SPARSE: {
-      CSparseMatrix *B = NM_csc(H);
+      CSparseMatrix* B = NM_csc(H);
       CS_INT n = chol_U->n;
 
       // X = U\B
-      CSparseMatrix *X = cs_spalloc(B->m, B->n, B->nzmax, 1, 0); /* allocate result */
+      CSparseMatrix* X = cs_spalloc(B->m, B->n, B->nzmax, 1, 0); /* allocate result */
 
       CS_ENTRY *x, *b, *Xx;
       CS_INT *xi, top, k, i, p, *Xp, *Xi;
@@ -1525,22 +1525,22 @@ static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) 
   return UinvH;
 }
 
-static NumericsMatrix *compute_factor_U(const double *u1, const double *r1, const double *u2,
-                                        const double *r2, const size_t vecSize,
+static NumericsMatrix* compute_factor_U(const double* u1, const double* r1, const double* u2,
+                                        const double* r2, const size_t vecSize,
                                         const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
 
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x);  // x = pinv2_bar
   Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z);  // z = pinv2_tilde
 
-  NumericsMatrix *out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
+  NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, 11 * varsCount);
-  CSparseMatrix *out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->matrix2->triplet;
 
   float_type p0 = 0., detx = 0., detz = 0., tmpx = 0., tmpz = 0., nx2 = 0., nz2 = 0.;
   float_type nxb = 0., nzb = 0.;
@@ -1605,9 +1605,9 @@ static NumericsMatrix *compute_factor_U(const double *u1, const double *r1, cons
    f = m-vector
    H = n*d x m matrix
    w = n*d-vector */
-static void printDataProbMatlabFile(NumericsMatrix *M, double *f, NumericsMatrix *H, double *w,
-                                    int d, int n, int m, double *mu, double *mu_r,
-                                    FILE *file) {
+static void printDataProbMatlabFile(NumericsMatrix* M, double* f, NumericsMatrix* H, double* w,
+                                    int d, int n, int m, double* mu, double* mu_r,
+                                    FILE* file) {
   // printf("\n\n printDataProbMatlabFile OK \n\n");
   fprintf(file, "d = %3i;\n", d);
   fprintf(file, "n = %6i;\n", n);
@@ -1659,9 +1659,9 @@ static void printDataProbMatlabFile(NumericsMatrix *M, double *f, NumericsMatrix
    n = number of contact points
    m = number of degrees of freedom
 */
-static void printInteresProbMatlabFile(int iteration, double *v, double *u_1, double *u_2,
-                                       double *r_1, double *r_2, int d, int n, int m,
-                                       FILE *file) {
+static void printInteresProbMatlabFile(int iteration, double* v, double* u_1, double* u_2,
+                                       double* r_1, double* r_2, int d, int n, int m,
+                                       FILE* file) {
   fprintf(file, "v(%3i,:) = [", iteration + 1);
   for (int i = 0; i < m; i++) {
     fprintf(file, "%20.26e, ", v[i]);
@@ -1695,9 +1695,9 @@ static void printInteresProbMatlabFile(int iteration, double *v, double *u_1, do
   return;
 }
 
-static void printInteresProbPythonFile(int iteration, double *v, double *u, double *u_1,
-                                       double *u_2, double *r, double *r_1, double *r_2, int d,
-                                       int n, int m, FILE *file) {
+static void printInteresProbPythonFile(int iteration, double* v, double* u, double* u_1,
+                                       double* u_2, double* r, double* r_1, double* r_2, int d,
+                                       int n, int m, FILE* file) {
   int n_dminus2 = n * (d - 2);
   int nd = n * d;
 
@@ -1828,11 +1828,11 @@ static void printInteresProbPythonFile(int iteration, double *v, double *u, doub
       ++ error_proj   = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}  if
    max >= tol = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|                otherwise
 */
-static int compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w,
-                           const double *f, double *r, double *u, double *v,
-                           double *primalConstraint, double *pinfeas, double *dualConstraint,
-                           double *dinfeas, double tolerance, double *proj_error,
-                           double *full_error, int problemIsNotConvex) {
+static int compute_errors(NumericsMatrix* M, NumericsMatrix* H, const double* w,
+                          const double* f, double* r, double* u, double* v,
+                          double* primalConstraint, double* pinfeas, double* dualConstraint,
+                          double* dinfeas, double tolerance, double* proj_error,
+                          double* full_error, int problemIsNotConvex) {
   /* Checks inputs */
   if (M == NULL || H == NULL || w == NULL || f == NULL || r == NULL || u == NULL || v == NULL)
     return numerics_error("compute_errors", "null input");
@@ -1848,7 +1848,7 @@ static int compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w,
   double worktmp[5];
 
   /* --- Relative dual residual = |-Mv + Hr + f|/max{|Mv|, |Hr|, |f|} --- */
-  double *HTr = (double *)calloc(m, sizeof(double));
+  double* HTr = (double*)calloc(m, sizeof(double));
 
   NM_gemv(1.0, M, v, 0.0, dualConstraint);  // dualConstraint = Mv
   max_val = cblas_dnrm2(m, dualConstraint, 1);
@@ -2008,7 +2008,7 @@ static int compute_errors(NumericsMatrix *M, NumericsMatrix *H, const double *w,
 //   }
 // }
 
-static void update_w(double *w, double *w_origin, const double *velocity, const size_t vecSize,
+static void update_w(double* w, double* w_origin, const double* velocity, const size_t vecSize,
                      const size_t varsCount, int update) {
   if (update == 0) return;
 
@@ -2061,22 +2061,22 @@ static void update_w(double *w, double *w_origin, const double *velocity, const 
  *      | ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ...  |
  */
 
-static NumericsMatrix *compute_JQinv(const double *u1, const double *r1, const double *u2,
-                                     const double *r2, const size_t vecSize,
+static NumericsMatrix* compute_JQinv(const double* u1, const double* r1, const double* u2,
+                                     const double* r2, const size_t vecSize,
                                      const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
 
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
 
-  double *x = (double *)calloc(vecSize, sizeof(double));
-  double *z = (double *)calloc(vecSize, sizeof(double));
+  double* x = (double*)calloc(vecSize, sizeof(double));
+  double* z = (double*)calloc(vecSize, sizeof(double));
   Nesterov_Todd_vector(1, u1, r1, vecSize, varsCount, x);  // x = pinv_bar
   Nesterov_Todd_vector(1, u2, r2, vecSize, varsCount, z);  // z = pinv_tilde
 
-  NumericsMatrix *out = NM_create(NM_SPARSE, 5 * varsCount, 6 * varsCount);
+  NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 6 * varsCount);
   NM_triplet_alloc(out, (10 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix *out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->matrix2->triplet;
 
   float_type data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
 
@@ -2238,10 +2238,10 @@ static NumericsMatrix *compute_JQinv(const double *u1, const double *r1, const d
    H = n*d x m matrix
    w = n*d-vector */
 
-void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restrict problem,
-                                    double *restrict reaction, double *restrict velocity,
-                                    double *restrict globalVelocity, int *restrict info,
-                                    SolverOptions *restrict options) {
+void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restrict problem,
+                                    double* restrict reaction, double* restrict velocity,
+                                    double* restrict globalVelocity, int* restrict info,
+                                    SolverOptions* restrict options) {
   //  clock_t t1 = clock();
 
   printf(
@@ -2265,19 +2265,19 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
   size_t id3 = 0;  // id3 = i*d_minus_2 used for the loop of cones
   size_t id5 = 0;  // id5 = i*d         used for the loop of cones
 
-  NumericsMatrix *M = NULL;
+  NumericsMatrix* M = NULL;
   NumericsMatrix *minus_M = NULL, *Minv = NULL, *HMinv = NULL, *HMinvHt = NULL;
-  NumericsMatrix *H_origin = NULL;
+  NumericsMatrix* H_origin = NULL;
   NumericsMatrix *minus_H = NULL, *minus_Ht = NULL, *Ht = NULL;
 
   /* symmetrization of the matrix M */
   if (!(NM_is_symmetric(problem->M))) {
     printf("#################### SYMMETRIZATION ####################\n");
-    NumericsMatrix *MT = NM_transpose(problem->M);
-    NumericsMatrix *temp = NM_add(1 / 2., problem->M, 1 / 2., MT);
+    NumericsMatrix* MT = NM_transpose(problem->M);
+    NumericsMatrix* temp = NM_add(1 / 2., problem->M, 1 / 2., MT);
     NM_free(problem->M);  // else leak
     problem->M = temp;
-    //temp = NM_free(temp);
+    // temp = NM_free(temp);
     MT = NM_free(MT);
   }
 
@@ -2299,7 +2299,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
   }
   size_t M_nzmax = NM_nnz(M);
   int block_number_of_M = M->size0 / 3;
-  size_t *blocksizes_of_M = NULL;
+  size_t* blocksizes_of_M = NULL;
 
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->H->storageType);
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
@@ -2323,11 +2323,11 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
     internal_allocation = 1;
   }
 
-  Grfc3d_IPM_data *data = (Grfc3d_IPM_data *)options->solverData;
-  NumericsMatrix *P_mu = data->P_mu->mat;
+  Grfc3d_IPM_data* data = (Grfc3d_IPM_data*)options->solverData;
+  NumericsMatrix* P_mu = data->P_mu->mat;
 
-  double *w_origin = problem->b;
-  double *f = problem->q;
+  double* w_origin = problem->b;
+  double* f = problem->q;
 
   double alpha_primal_1 = 0.0;
   double alpha_primal_2 = 0.0;
@@ -2346,32 +2346,32 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
 
   size_t no_n = 0, no_m = 0, no_nd = 0, no_ndm2 = 0;
 
-  double *t = data->tmp_vault_n[no_n++];
-  double *t_prime = data->tmp_vault_n[no_n++];
+  double* t = data->tmp_vault_n[no_n++];
+  double* t_prime = data->tmp_vault_n[no_n++];
   for (size_t i = 0; i < n; ++i) {
     t[i] = 2.0;
     t_prime[i] = 1.0;
   }
-  double *velocity_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (t, u_bar)
-  double *velocity_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (t', u_tilde)
-  double *reaction_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (r0, r_bar)
-  double *reaction_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (r0, r_tilde)
+  double* velocity_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (t, u_bar)
+  double* velocity_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (t', u_tilde)
+  double* reaction_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (r0, r_bar)
+  double* reaction_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // = (r0, r_tilde)
 
   // For Newton directions
-  double *d_globalVelocity = data->tmp_vault_m[no_m++];
+  double* d_globalVelocity = data->tmp_vault_m[no_m++];
 
-  double *d_velocity = data->tmp_vault_nd[no_nd++];
-  double *d_reaction = data->tmp_vault_nd[no_nd++];
+  double* d_velocity = data->tmp_vault_nd[no_nd++];
+  double* d_reaction = data->tmp_vault_nd[no_nd++];
 
-  double *d_velocity_1 = data->tmp_vault_n_dminus2[no_ndm2++];
-  double *d_velocity_2 = data->tmp_vault_n_dminus2[no_ndm2++];
-  double *d_reaction_1 = data->tmp_vault_n_dminus2[no_ndm2++];
-  double *d_reaction_2 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* d_velocity_1 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* d_velocity_2 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* d_reaction_1 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* d_reaction_2 = data->tmp_vault_n_dminus2[no_ndm2++];
 
-  double *d_t = data->tmp_vault_n[no_n++];
-  double *d_t_prime = data->tmp_vault_n[no_n++];
+  double* d_t = data->tmp_vault_n[no_n++];
+  double* d_t_prime = data->tmp_vault_n[no_n++];
 
-  double *rhs = options->dWork;
+  double* rhs = options->dWork;
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   size_t max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -2404,19 +2404,19 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
 
   // long blocks_nzmax = 3 * 2 * n;  // for 3x3 no scaling
 
-  NumericsMatrix *Jac = NULL; /* Jacobian matrix */
+  NumericsMatrix* Jac = NULL; /* Jacobian matrix */
 
   long Jac_nzmax;
   int jacobian_is_nan = 0;
 
-  NumericsMatrix *J = compute_J_matrix(n); /* use for Jac */
-  NumericsMatrix *Jt = NULL;
+  NumericsMatrix* J = compute_J_matrix(n); /* use for Jac */
+  NumericsMatrix* Jt = NULL;
 
   double full_error = 1e300;
   int nRefine = 0;            // = info of refinement solver, otherwise refine is empty
   double residu_refine = 0.;  // = residu of refinement solver
 
-  double *w = data->tmp_vault_nd[no_nd++];
+  double* w = data->tmp_vault_nd[no_nd++];
   NM_gemv(1.0, P_mu, w_origin, 0.0, w);  // w_origin --> w
 
   double gmm = gmmp0;
@@ -2432,7 +2432,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
 
   // change of variable
   // H_origin --> H
-  NumericsMatrix *H = NM_multiply(P_mu, H_origin);
+  NumericsMatrix* H = NM_multiply(P_mu, H_origin);
   size_t H_nzmax = NM_nnz(H);
 
   /* -------------------------- Declaration -------------------------- */
@@ -2449,14 +2449,14 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
   NumericsMatrix *Qpinv2_bar = NULL, *Qpinv2_tilde = NULL;
   NumericsMatrix *Qinv = NULL, *Qinv2 = NULL;
   NumericsMatrix *JQinv = NULL, *JQinvT = NULL;
-  NumericsMatrix *JQinv2 = NULL;
-  NumericsMatrix *JQJ = NULL;
+  NumericsMatrix* JQinv2 = NULL;
+  NumericsMatrix* JQJ = NULL;
   NumericsMatrix *P_inv = NULL, *P_invT = NULL, *HMHP = NULL, *PHMHP = NULL;
-  NumericsMatrix *P_inv_F = NULL;
+  NumericsMatrix* P_inv_F = NULL;
   NumericsMatrix *PinvH = NULL, *PinvH_T = NULL;
-  NumericsMatrix *identity = NULL;
+  NumericsMatrix* identity = NULL;
 
-  NumericsMatrix *chol_U = NULL;
+  NumericsMatrix* chol_U = NULL;
   CSparseMatrix *chol_L = NULL, *chol_U_csc = NULL, *chol_UT_csc = NULL;
 
   double *p_bar = NULL, *p_tilde = NULL;
@@ -2469,44 +2469,44 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
   double *velocity_1_hat_inv = NULL, *velocity_2_hat_inv = NULL;
   double *velocity_1_hat_inv_dvhat_drcheck_1 = NULL,
          *velocity_2_hat_inv_dvhat_drcheck_2 = NULL;
-  double *velocity_hat_inv_dvhat_drcheck = NULL;
+  double* velocity_hat_inv_dvhat_drcheck = NULL;
 
-  double *tmp_nd = NULL;
+  double* tmp_nd = NULL;
 
   double *Qinv2x_bar = NULL, *Qinv2x_tilde = NULL;
 
-  double *Hvw = NULL;
+  double* Hvw = NULL;
   double *rhs_save = NULL, *rhs_dx = NULL;
-  double *iden = NULL;
+  double* iden = NULL;
 
   double *Hrf = NULL, *HMHrfw = NULL, *rdr = NULL, *MfHrdr = NULL;
 
   /* -------------------------- Allocation -------------------------- */
   // For residuals
-  double *dualConstraint = data->tmp_vault_m[no_m++];
+  double* dualConstraint = data->tmp_vault_m[no_m++];
 
-  double *primalConstraint = data->tmp_vault_nd[no_nd++];
+  double* primalConstraint = data->tmp_vault_nd[no_nd++];
 
   // For predictor step
-  double *v_plus_dv = data->tmp_vault_nd[no_nd++];  // v_plus_dv = velocity +
+  double* v_plus_dv = data->tmp_vault_nd[no_nd++];  // v_plus_dv = velocity +
                                                     // alpha_primal * d_velocity
-  double *r_plus_dr = data->tmp_vault_nd[no_nd++];  // r_plus_dr = reaction +
+  double* r_plus_dr = data->tmp_vault_nd[no_nd++];  // r_plus_dr = reaction +
                                                     // alpha_primal * d_reaction
 
-  double *complemConstraint_1 = data->tmp_vault_n_dminus2[no_ndm2++];
-  double *complemConstraint_2 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* complemConstraint_1 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* complemConstraint_2 = data->tmp_vault_n_dminus2[no_ndm2++];
 
   // For RHS
-  double *dvdr_jprod_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // dvdr_jprod_1 = dv_1 o dr_1
-  double *dvdr_jprod_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // dvdr_jprod_2 = dv_2 o dr_2
+  double* dvdr_jprod_1 = data->tmp_vault_n_dminus2[no_ndm2++];  // dvdr_jprod_1 = dv_1 o dr_1
+  double* dvdr_jprod_2 = data->tmp_vault_n_dminus2[no_ndm2++];  // dvdr_jprod_2 = dv_2 o dr_2
 
-  double *tmp_n_dminus2_1 = data->tmp_vault_n_dminus2[no_ndm2++];
-  double *tmp_n_dminus2_2 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* tmp_n_dminus2_1 = data->tmp_vault_n_dminus2[no_ndm2++];
+  double* tmp_n_dminus2_2 = data->tmp_vault_n_dminus2[no_ndm2++];
 
   switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
-      rhs_save = (double *)calloc(m + nd + n_dplus1, sizeof(double));
-      rhs_dx = (double *)calloc(m + nd + n_dplus1, sizeof(double));
+      rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));
+      rhs_dx = (double*)calloc(m + nd + n_dplus1, sizeof(double));
 
       minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
       NM_copy(H, minus_H);
@@ -2538,7 +2538,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       velocity_1_hat_inv_dvhat_drcheck_1 = data->tmp_vault_n_dminus2[no_ndm2++];
       velocity_2_hat_inv_dvhat_drcheck_2 = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      rhs_save = (double *)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
+      rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
 
       minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
       NM_copy(H, minus_H);
@@ -2567,7 +2567,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       velocity_1_hat_inv_dvhat_drcheck_1 = data->tmp_vault_n_dminus2[no_ndm2++];
       velocity_2_hat_inv_dvhat_drcheck_2 = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      rhs_save = (double *)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
+      rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
 
       minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
       NM_copy(H, minus_H);
@@ -2598,7 +2598,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       Qinv2x_bar = data->tmp_vault_n_dminus2[no_ndm2++];
       Qinv2x_tilde = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      rhs_save = (double *)calloc(m + nd, sizeof(double));  // for printing
+      rhs_save = (double*)calloc(m + nd, sizeof(double));  // for printing
 
       Ht = NM_transpose(H);  // H'
       minus_M = NM_create(M->storageType, M->size0, M->size1);
@@ -2628,7 +2628,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       Qinv2x_bar = data->tmp_vault_n_dminus2[no_ndm2++];
       Qinv2x_tilde = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      rhs_save = (double *)calloc(m + nd, sizeof(double));  // for printing
+      rhs_save = (double*)calloc(m + nd, sizeof(double));  // for printing
 
       minus_M = NM_create(M->storageType, M->size0, M->size1);
       NM_copy(M, minus_M);
@@ -2660,14 +2660,14 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       Qinv2x_bar = data->tmp_vault_n_dminus2[no_ndm2++];
       Qinv2x_tilde = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      blocksizes_of_M = (size_t *)malloc(block_number_of_M * sizeof(size_t));
+      blocksizes_of_M = (size_t*)malloc(block_number_of_M * sizeof(size_t));
       for (int i = 0; i < block_number_of_M; i++) *(blocksizes_of_M + i) = 3;
       Minv = NM_inverse_diagonal_block_matrix(M, block_number_of_M, blocksizes_of_M);
       free(blocksizes_of_M);
       blocksizes_of_M = NULL;
 
-      rhs_save = (double *)calloc(nd, sizeof(double));  // for printing
-      Ht = NM_transpose(H);                             // H'
+      rhs_save = (double*)calloc(nd, sizeof(double));  // for printing
+      Ht = NM_transpose(H);                            // H'
       HMinv = NM_multiply(H, Minv);
       HMinvHt = NM_multiply(HMinv, Ht);
 
@@ -2699,14 +2699,14 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
       Qinv2x_bar = data->tmp_vault_n_dminus2[no_ndm2++];
       Qinv2x_tilde = data->tmp_vault_n_dminus2[no_ndm2++];
 
-      blocksizes_of_M = (size_t *)malloc(block_number_of_M * sizeof(size_t));
+      blocksizes_of_M = (size_t*)malloc(block_number_of_M * sizeof(size_t));
       for (int i = 0; i < block_number_of_M; i++) *(blocksizes_of_M + i) = 3;
       Minv = NM_inverse_diagonal_block_matrix(M, block_number_of_M, blocksizes_of_M);
       free(blocksizes_of_M);
       blocksizes_of_M = NULL;
 
-      rhs_save = (double *)calloc(nd, sizeof(double));  // for printing
-      Ht = NM_transpose(H);                             // H'
+      rhs_save = (double*)calloc(nd, sizeof(double));  // for printing
+      Ht = NM_transpose(H);                            // H'
       HMinv = NM_multiply(H, Minv);
       HMinvHt = NM_multiply(HMinv, Ht);
 
@@ -3912,7 +3912,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
 
           if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
               SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
-            double *rhs_TMP = (double *)calloc(m + nd + n_dplus1, sizeof(double));
+            double* rhs_TMP = (double*)calloc(m + nd + n_dplus1, sizeof(double));
             cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_TMP, 1);
             NM_LDLT_refine(Jac, rhs, rhs_TMP, 1, 1e-12, 10, 0);
             free(rhs_TMP);
@@ -3984,10 +3984,10 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
             NM_triplet_alloc(Qpinv_tilde, d_minus_2 * d_minus_2 * n);
             NM_triplet_alloc(Qpinv2_tilde, d_minus_2 * d_minus_2 * n);
 
-            double *f_NT = (double *)calloc(n_dminus2, sizeof(double));
-            double *g_NT = (double *)calloc(n_dminus2, sizeof(double));
-            float_type *wf_NT = (float_type *)calloc(n, sizeof(float_type));
-            float_type *wg_NT = (float_type *)calloc(n, sizeof(float_type));
+            double* f_NT = (double*)calloc(n_dminus2, sizeof(double));
+            double* g_NT = (double*)calloc(n_dminus2, sizeof(double));
+            float_type* wf_NT = (float_type*)calloc(n, sizeof(float_type));
+            float_type* wg_NT = (float_type*)calloc(n, sizeof(float_type));
 
             family_of_F(velocity_1, reaction_1, n_dminus2, n, f_NT, wf_NT, Qp_bar, Qpinv_bar,
                         NULL, Qpinv2_bar);
@@ -4374,10 +4374,10 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
             NM_triplet_alloc(Qpinv_tilde, d_minus_2 * d_minus_2 * n);
             NM_triplet_alloc(Qpinv2_tilde, d_minus_2 * d_minus_2 * n);
 
-            double *f_NT = (double *)calloc(n_dminus2, sizeof(double));
-            double *g_NT = (double *)calloc(n_dminus2, sizeof(double));
-            float_type *wf_NT = (float_type *)calloc(n, sizeof(float_type));
-            float_type *wg_NT = (float_type *)calloc(n, sizeof(float_type));
+            double* f_NT = (double*)calloc(n_dminus2, sizeof(double));
+            double* g_NT = (double*)calloc(n_dminus2, sizeof(double));
+            float_type* wf_NT = (float_type*)calloc(n, sizeof(float_type));
+            float_type* wg_NT = (float_type*)calloc(n, sizeof(float_type));
 
             family_of_F(velocity_1, reaction_1, n_dminus2, n, f_NT, wf_NT, Qp_bar, Qpinv_bar,
                         NULL, Qpinv2_bar);
@@ -5748,8 +5748,8 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
     global_rolling_friction_3d_IPM_free(problem, options);
   }
 
-  options->solverData = (double *)malloc(sizeof(double));
-  double *projerr_ptr = (double *)options->solverData;
+  options->solverData = (double*)malloc(sizeof(double));
+  double* projerr_ptr = (double*)options->solverData;
   *projerr_ptr = proj_error;
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) fclose(iterates);
@@ -5763,8 +5763,8 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem *restric
 }  // end of global_rolling_friction_3d_IPM
 
 /* initialize solver (allocate memory) */
-void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem *problem,
-                                         SolverOptions *options) {
+void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem* problem,
+                                         SolverOptions* options) {
   size_t m = problem->M->size0;
   size_t nd = problem->H->size1;
   size_t d = problem->dimension;  // d must be 5 because of rolling friction problem
@@ -5778,19 +5778,19 @@ void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem *pr
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv:
-        options->dWork = (double *)calloc(m + nd + n_dplus1, sizeof(double));
+        options->dWork = (double*)calloc(m + nd + n_dplus1, sizeof(double));
         options->dWorkSize = m + nd + n_dplus1;
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ:
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH:
-        options->dWork = (double *)calloc(m + nd, sizeof(double));
+        options->dWork = (double*)calloc(m + nd, sizeof(double));
         options->dWorkSize = m + nd;
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ:
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
-        options->dWork = (double *)calloc(nd, sizeof(double));
+        options->dWork = (double*)calloc(nd, sizeof(double));
         options->dWorkSize = nd;
         break;
 
@@ -5800,38 +5800,38 @@ void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem *pr
   }
 
   /* ------------- initialize starting point ------------- */
-  options->solverData = (Grfc3d_IPM_data *)malloc(sizeof(Grfc3d_IPM_data));
-  Grfc3d_IPM_data *data = (Grfc3d_IPM_data *)options->solverData;
+  options->solverData = (Grfc3d_IPM_data*)malloc(sizeof(Grfc3d_IPM_data));
+  Grfc3d_IPM_data* data = (Grfc3d_IPM_data*)options->solverData;
 
   /* --------- allocate memory for IPM point ----------- */
-  data->starting_point = (IPM_point *)malloc(sizeof(IPM_point));
+  data->starting_point = (IPM_point*)malloc(sizeof(IPM_point));
 
   /* 1. v */
-  data->starting_point->globalVelocity = (double *)calloc(m, sizeof(double));
+  data->starting_point->globalVelocity = (double*)calloc(m, sizeof(double));
   for (size_t i = 0; i < m; ++i) data->starting_point->globalVelocity[i] = 0.01;
 
   /* 2. u */
-  data->starting_point->velocity = (double *)calloc(nd, sizeof(double));
+  data->starting_point->velocity = (double*)calloc(nd, sizeof(double));
   for (size_t i = 0; i < nd; ++i) {
     data->starting_point->velocity[i] = 0.001;
     if (i % d == 0) data->starting_point->velocity[i] = 3.0;
   }
 
   /* 3. r */
-  data->starting_point->reaction = (double *)calloc(nd, sizeof(double));
+  data->starting_point->reaction = (double*)calloc(nd, sizeof(double));
   for (size_t i = 0; i < nd; ++i) {
     data->starting_point->reaction[i] = 0.04;
     if (i % d == 0) data->starting_point->reaction[i] = 0.5;
   }
 
   /* original point which is not changed by the matrix P_mu */
-  data->original_point = (IPM_point *)malloc(sizeof(IPM_point));
-  data->original_point->globalVelocity = (double *)calloc(m, sizeof(double));
-  data->original_point->velocity = (double *)calloc(nd, sizeof(double));
-  data->original_point->reaction = (double *)calloc(nd, sizeof(double));
+  data->original_point = (IPM_point*)malloc(sizeof(IPM_point));
+  data->original_point->globalVelocity = (double*)calloc(m, sizeof(double));
+  data->original_point->velocity = (double*)calloc(nd, sizeof(double));
+  data->original_point->reaction = (double*)calloc(nd, sizeof(double));
 
   /* ------ initialize the change of variable matrix P_mu ------- */
-  data->P_mu = (IPM_change_of_variable *)malloc(sizeof(IPM_change_of_variable));
+  data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
   data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->mat, nd);
   data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
@@ -5860,37 +5860,37 @@ void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem *pr
   }
 
   /* ------ initial parameters initialization ---------- */
-  data->internal_params = (IPM_internal_params *)malloc(sizeof(IPM_internal_params));
+  data->internal_params = (IPM_internal_params*)malloc(sizeof(IPM_internal_params));
   data->internal_params->alpha_primal = 1.0;
   data->internal_params->alpha_dual = 1.0;
   data->internal_params->sigma = 0.1;
   data->internal_params->barr_param = 1.0;
 
   /* ----- temporary vaults initialization ------- */
-  data->tmp_vault_m = (double **)malloc(5 * sizeof(double *));
-  for (size_t i = 0; i < 5; ++i) data->tmp_vault_m[i] = (double *)calloc(m, sizeof(double));
+  data->tmp_vault_m = (double**)malloc(5 * sizeof(double*));
+  for (size_t i = 0; i < 5; ++i) data->tmp_vault_m[i] = (double*)calloc(m, sizeof(double));
 
-  data->tmp_vault_n = (double **)malloc(5 * sizeof(double *));
-  for (size_t i = 0; i < 5; ++i) data->tmp_vault_n[i] = (double *)calloc(n, sizeof(double));
+  data->tmp_vault_n = (double**)malloc(5 * sizeof(double*));
+  for (size_t i = 0; i < 5; ++i) data->tmp_vault_n[i] = (double*)calloc(n, sizeof(double));
 
-  data->tmp_vault_n_dminus2 = (double **)malloc(30 * sizeof(double *));
+  data->tmp_vault_n_dminus2 = (double**)malloc(30 * sizeof(double*));
   for (size_t i = 0; i < 30; ++i)
-    data->tmp_vault_n_dminus2[i] = (double *)calloc(n_dminus2, sizeof(double));
+    data->tmp_vault_n_dminus2[i] = (double*)calloc(n_dminus2, sizeof(double));
 
-  data->tmp_vault_nd = (double **)malloc(10 * sizeof(double *));
-  for (size_t i = 0; i < 10; ++i) data->tmp_vault_nd[i] = (double *)calloc(nd, sizeof(double));
+  data->tmp_vault_nd = (double**)malloc(10 * sizeof(double*));
+  for (size_t i = 0; i < 10; ++i) data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
 
-  data->tmp_vault_n_dplus1 = (double **)malloc(2 * sizeof(double *));
+  data->tmp_vault_n_dplus1 = (double**)malloc(2 * sizeof(double*));
   for (size_t i = 0; i < 2; ++i)
-    data->tmp_vault_n_dplus1[i] = (double *)calloc(n_dplus1, sizeof(double));
+    data->tmp_vault_n_dplus1[i] = (double*)calloc(n_dplus1, sizeof(double));
 
 }  // end of global_rolling_friction_3d_IPM_init
 
 /* deallocate memory */
-void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem *problem,
-                                         SolverOptions *options) {
+void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem* problem,
+                                         SolverOptions* options) {
   if (options->solverData) {
-    Grfc3d_IPM_data *data = (Grfc3d_IPM_data *)options->solverData;
+    Grfc3d_IPM_data* data = (Grfc3d_IPM_data*)options->solverData;
 
     free(data->starting_point->globalVelocity);
     data->starting_point->globalVelocity = NULL;
@@ -5956,7 +5956,7 @@ void global_rolling_friction_3d_IPM_free(GlobalRollingFrictionContactProblem *pr
 }  // end of global_rolling_friction_3d_IPM_free
 
 /* setup default solver parameters */
-void global_rolling_friction_3d_IPM_set_default(SolverOptions *options) {
+void global_rolling_friction_3d_IPM_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
@@ -6005,31 +6005,31 @@ void global_rolling_friction_3d_IPM_set_default(SolverOptions *options) {
 }  // end of global_rolling_friction_3d_IPM_set_default
 
 /* Solver registration wrapper functions */
-static int global_rolling_friction_3d_ipm_init_wrap(void *problem, SolverOptions *options) {
+static int global_rolling_friction_3d_ipm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int global_rolling_friction_3d_ipm_solve_wrap(void *problem, double *reaction,
-                                                     double *velocity,
-                                                     SolverOptions *options) {
+static int global_rolling_friction_3d_ipm_solve_wrap(void* problem, double* reaction,
+                                                     double* velocity,
+                                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   /* Note: GRFC3D_IPM requires globalVelocity as an additional argument.
    * We allocate a temporary array for it here. */
-  GlobalRollingFrictionContactProblem *p = (GlobalRollingFrictionContactProblem *)problem;
+  GlobalRollingFrictionContactProblem* p = (GlobalRollingFrictionContactProblem*)problem;
   size_t m = p->M->size0;
-  double *globalVelocity = (double *)calloc(m, sizeof(double));
+  double* globalVelocity = (double*)calloc(m, sizeof(double));
   global_rolling_friction_3d_IPM(p, reaction, velocity, globalVelocity, &info, options);
   free(globalVelocity);
   return info;
 }
 
-static void global_rolling_friction_3d_ipm_free_wrap(void *problem, SolverOptions *options) {
+static void global_rolling_friction_3d_ipm_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   if (options->solverData) {
-    global_rolling_friction_3d_IPM_free((GlobalRollingFrictionContactProblem *)problem,
+    global_rolling_friction_3d_IPM_free((GlobalRollingFrictionContactProblem*)problem,
                                         options);
   }
 }

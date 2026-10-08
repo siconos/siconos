@@ -22,7 +22,7 @@ FindLPSOLVE
 Find lpsolve libraries and headers
 
 Usage :
- 
+
 find_package(LPSOLVE REQUIRED)
 target_link_libraries(yourlib PRIVATE LPSOLVE::LPSOLVE)
 
@@ -69,7 +69,7 @@ find_package_handle_standard_args(LPSOLVE
   REQUIRED_VARS LPSOLVE_LIBRARIES LPSOLVE_INCLUDE_DIR)
 
 if(LPSOLVE_FOUND)
-  
+
   if(NOT TARGET LPSOLVE::LPSOLVE)
     add_library(LPSOLVE::LPSOLVE IMPORTED INTERFACE)
     set_property(TARGET LPSOLVE::LPSOLVE PROPERTY INTERFACE_LINK_LIBRARIES ${LPSOLVE_LIBRARIES})
@@ -79,5 +79,3 @@ if(LPSOLVE_FOUND)
     endif()
   endif()
 endif()
-
-

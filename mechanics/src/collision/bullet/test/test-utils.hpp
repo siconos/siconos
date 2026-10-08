@@ -60,8 +60,4 @@ struct BounceResult {
   double displacement_on_first_contact;
 };
 
-
-
-
-
 #endif

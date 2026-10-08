@@ -239,7 +239,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   auto dsGraph = hem5osi->_dynamicalSystemsGraph;
 
   int ifcn = (int)(*IFCN);
-auto indexSet2 = hem5osi->simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  auto indexSet2 = hem5osi->simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   if ((ifcn == 1) || (ifcn >= 7))  // compute Mass AM
   {
     int pos = 0;
@@ -419,9 +419,8 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
   auto ds2 = interProp.target;
 
   if (!interProp.workVectors) {
-    interProp.workVectors =
-        std::make_shared<siconos::algebra::blocks::SharedVector>(
-            siconos::integrators::Hem5OSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors = std::make_shared<siconos::algebra::blocks::SharedVector>(
+        siconos::integrators::Hem5OSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {

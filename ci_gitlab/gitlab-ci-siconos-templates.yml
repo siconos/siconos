@@ -1,5 +1,5 @@
 # ---  Siconos ci templates ---
-# 
+#
 # This file contains common definitions and templates for
 # continuous integration job of siconos project.
 #
@@ -49,15 +49,15 @@ stages:
   # - run tests
   # - submit to cdash
   # To execute cmake and configure the project
-  - configure 
+  - configure
   # To execute make and build the project
   - build
   # Build and publish html pages
-  - doc-deploy 
+  - doc-deploy
   # To install software, generate a "siconos-ready" docker image and asave it in the registry.
   - install
   # To run all tests, examples ...
-  - test      
+  - test
   # Create and provide a release
   - release
 
@@ -101,7 +101,7 @@ stages:
    rules:
     - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/ # if commit message contains "[docker-build]"
     - if: $CI_COMMIT_TAG
-    
+
 .docker-manual-rules:
     rules:
     - when: manual
@@ -121,13 +121,13 @@ workflow:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
       when: never
-    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PROJECT_NAMESPACE == "nonsmooth/devel"
       when: never  # avoid duplicate pipeline: ci with main branch  only for public siconos
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
     - if: $CI_OPEN_MERGE_REQUESTS # If a MR is created
     - if: $CI_COMMIT_MESSAGE =~ /\[all-jobs\]/  # If the commit message contains "all jobs"
-    - if: $CI_COMMIT_TAG  
+    - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH       # If a branch is updated -> delegates specific behavior control to the jobs
 
 .full-rules:
@@ -143,8 +143,8 @@ workflow:
 .manual-only:
   rules:
     - when: manual
-    
-  
+
+
 # -- Template used for siconos configure-build-test-install jobs  --
 # .siconos-ctest must be overloaded by a specific template like
 # .siconos-configure, .siconos-build ...
@@ -160,7 +160,7 @@ workflow:
     - env
     - sh ci_gitlab/ctest_siconos.sh
   extends: .full-rules   # default behavior = full-rules
-  
+
 # - Template to complete .siconos-ctest
 # Configure (cmake) step.
 # Keeps build directory for next stages (build/install/test)
@@ -170,7 +170,7 @@ workflow:
   artifacts:
     paths:
       - build
-    expire_in: 2 days  
+    expire_in: 2 days
 
 # - Template to complete .siconos-ctest
 # build (make) step.
@@ -199,7 +199,7 @@ workflow:
   artifacts:
       paths:
         - build/
-      expire_in: 3 days 
+      expire_in: 3 days
       reports:
         junit: $BUILD_DIR/test_results.xml
 
@@ -213,7 +213,7 @@ workflow:
   artifacts:
     paths:
       - build
-    expire_in: 2 days  
+    expire_in: 2 days
 
 .siconos-full-with-examples:
   image: $IMAGE_NAME
@@ -226,7 +226,7 @@ workflow:
   artifacts:
     paths:
       - build
-    expire_in: 2 days  
+    expire_in: 2 days
 
 
 # A template to install siconos and generates a docker image with a full/uptodate install of siconos
@@ -256,7 +256,7 @@ workflow:
 # that:
 #   - can be started as a Jupyter notebook.
 #   - contains siconos-tutorials examples
-# 
+#
 # It uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
 # The docker image is saved in the project registries indicated by RESULT_NAME var.
 # Source : ci_gitlab/dockerfiles/siconoslab/Dockerfile

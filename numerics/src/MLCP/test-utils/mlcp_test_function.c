@@ -23,16 +23,16 @@
 #include "MLCP_Solvers.h"
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplementarityProblem
 #include "NonSmoothDrivers.h"                   // for mixedlinearComplementarity_driver
-//#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+// #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "SolverOptions.h"    // for SICONOS_DPARAM_RESIDU, Sol...
 #include "mlcp_test_utils.h"  // for lcp_test_function
 #include "test_utils.h"       // for TestCase
 
-int mlcp_test_function(TestCase *current) {
+int mlcp_test_function(TestCase* current) {
   // numerics_set_verbose(2);
   int i, info = 0;
-  MixedLinearComplementarityProblem *problem =
-      (MixedLinearComplementarityProblem *)malloc(sizeof(MixedLinearComplementarityProblem));
+  MixedLinearComplementarityProblem* problem =
+      (MixedLinearComplementarityProblem*)malloc(sizeof(MixedLinearComplementarityProblem));
   info = mixedLinearComplementarity_newFromFilename(problem, current->filename);
 
   if (info) {
@@ -42,8 +42,8 @@ int mlcp_test_function(TestCase *current) {
 
   /* mixedLinearComplementarity_display(problem); */
 
-  double *z = (double *)calloc(problem->n + problem->m, sizeof(double));
-  double *w = (double *)calloc(problem->n + problem->m, sizeof(double));
+  double* z = (double*)calloc(problem->n + problem->m, sizeof(double));
+  double* w = (double*)calloc(problem->n + problem->m, sizeof(double));
 
   mlcp_driver_init(problem, current->options);
   info = mlcp_driver(problem, z, w, current->options);

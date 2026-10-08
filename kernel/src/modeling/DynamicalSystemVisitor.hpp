@@ -79,13 +79,13 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "DynamicalSystem in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::modeling::DynamicalSystem &) {
+  virtual void visit(siconos::modeling::DynamicalSystem&) {
     THROW_EXCEPTION(
         "you must define a visit function for DynamicalSystem in "
         "a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(const siconos::modeling::DynamicalSystem &) {
+  virtual void visit(const siconos::modeling::DynamicalSystem&) {
     THROW_EXCEPTION(
         "you must define a visit function for DynamicalSystem in "
         "a derived class of dynamical_systems::Visitor");
@@ -96,12 +96,12 @@ struct Visitor {
         "you must define a visit function for SP :: LagrangianDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::modeling::LagrangianDS &) {
+  virtual void visit(siconos::modeling::LagrangianDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianDS in a "
         "derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::modeling::LagrangianDS &) {
+  virtual void visit(const siconos::modeling::LagrangianDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianDS in a "
         "derived class of dynamical_systems::Visitor");
@@ -112,12 +112,12 @@ struct Visitor {
         "you must define a visit function for SP :: LagrangianLinearTIDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::modeling::LagrangianLinearTIDS &) {
+  virtual void visit(siconos::modeling::LagrangianLinearTIDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianLinearTIDS in a "
         "derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::modeling::LagrangianLinearTIDS &) {
+  virtual void visit(const siconos::modeling::LagrangianLinearTIDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianLinearTIDS in a "
         "derived class of dynamical_systems::Visitor");
@@ -128,12 +128,12 @@ struct Visitor {
         "you must define a visit function for SP :: NewtonEulerDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::modeling::NewtonEulerDS &) {
+  virtual void visit(siconos::modeling::NewtonEulerDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerDS in a "
         "derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::modeling::NewtonEulerDS &) {
+  virtual void visit(const siconos::modeling::NewtonEulerDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerDS in a "
         "derived class of dynamical_systems::Visitor");
@@ -146,12 +146,12 @@ struct Visitor {
         "RigidBody2dDS in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::RigidBody2dDS &) {
+  virtual void visit(siconos::collision::RigidBody2dDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBody2dDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::RigidBody2dDS &) {
+  virtual void visit(const siconos::collision::RigidBody2dDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBody2dDS "
         "in a derived class of dynamical_systems::Visitor");
@@ -162,12 +162,12 @@ struct Visitor {
         "RigidBodyDS in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::RigidBodyDS &) {
+  virtual void visit(siconos::collision::RigidBodyDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBodyDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::RigidBodyDS &) {
+  virtual void visit(const siconos::collision::RigidBodyDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBodyDS "
         "in a derived class of dynamical_systems::Visitor");
@@ -178,12 +178,12 @@ struct Visitor {
         "SphereNEDS in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereNEDS &) {
+  virtual void visit(siconos::collision::native::bodies::SphereNEDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereNEDS &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereNEDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDS "
         "in a derived class of dynamical_systems::Visitor");
@@ -193,12 +193,12 @@ struct Visitor {
         "you must define a visit function for SP :: ExternalBody "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::collision::native::bodies::ExternalBody &) {
+  virtual void visit(siconos::collision::native::bodies::ExternalBody&) {
     THROW_EXCEPTION(
         "you must define a visit function for ExternalBody in a "
         "derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::ExternalBody &) {
+  virtual void visit(const siconos::collision::native::bodies::ExternalBody&) {
     THROW_EXCEPTION(
         "you must define a visit function for ExternalBody in a "
         "derived class of dynamical_systems::Visitor");
@@ -210,12 +210,12 @@ struct Visitor {
         "Disk in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::Disk &) {
+  virtual void visit(siconos::collision::native::bodies::Disk&) {
     THROW_EXCEPTION(
         "you must define a visit function for Disk "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::Disk &) {
+  virtual void visit(const siconos::collision::native::bodies::Disk&) {
     THROW_EXCEPTION(
         "you must define a visit function for Disk "
         "in a derived class of dynamical_systems::Visitor");
@@ -227,12 +227,12 @@ struct Visitor {
         "Circle in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::Circle &) {
+  virtual void visit(siconos::collision::native::bodies::Circle&) {
     THROW_EXCEPTION(
         "you must define a visit function for Circle "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::Circle &) {
+  virtual void visit(const siconos::collision::native::bodies::Circle&) {
     THROW_EXCEPTION(
         "you must define a visit function for Circle "
         "in a derived class of dynamical_systems::Visitor");
@@ -244,12 +244,12 @@ struct Visitor {
         "SphereLDS in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereLDS &) {
+  virtual void visit(siconos::collision::native::bodies::SphereLDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereLDS &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereLDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDS "
         "in a derived class of dynamical_systems::Visitor");
@@ -261,22 +261,22 @@ struct Visitor {
         "CableDS in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::fem::cable::CableDS &) {
+  virtual void visit(siconos::fem::cable::CableDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for CableDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::fem::cable::CableDS &) {
+  virtual void visit(const siconos::fem::cable::CableDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for CableDS "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(siconos::collision::native::bodies::CircularDS &) {
+  virtual void visit(siconos::collision::native::bodies::CircularDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for CircularDS in a "
         "derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::CircularDS &) {
+  virtual void visit(const siconos::collision::native::bodies::CircularDS&) {
     THROW_EXCEPTION(
         "you must define a visit function for CircularDS in a "
         "derived class of dynamical_systems::Visitor");
@@ -288,12 +288,12 @@ struct Visitor {
         "OccBody in a derived class of dynamical_systems::Visitor");
   }
 
-  virtual void visit(siconos::mechanics::occ::OccBody &) {
+  virtual void visit(siconos::mechanics::occ::OccBody&) {
     THROW_EXCEPTION(
         "you must define a visit function for OccBody "
         "in a derived class of dynamical_systems::Visitor");
   }
-  virtual void visit(const siconos::mechanics::occ::OccBody &) {
+  virtual void visit(const siconos::mechanics::occ::OccBody&) {
     THROW_EXCEPTION(
         "you must define a visit function for OccBody "
         "in a derived class of dynamical_systems::Visitor");

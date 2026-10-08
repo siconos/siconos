@@ -1,19 +1,19 @@
 
-#include "siconos/siconos.hpp"
-
 #include <fstream>
 #include <print>
 
+#include "siconos/siconos.hpp"
+
 namespace siconos::config {
-using ball = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<lcp>;
-using nslaw = model::newton_impact;
-using relation = model::lagrangian_r<nslaw::size>;
-using interaction = simul::interaction<nslaw, relation>;
-using td = simul::time_discretization<>;
-using topo = simul::topology<ball, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
+struct ball : model::lagrangian_ds {};
+struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
+struct nslaw : model::newton_impact {};
+struct relation : model::lagrangian_r<nslaw::size> {};
+struct interaction : simul::interaction<nslaw, relation> {};
+struct td : simul::time_discretization<> {};
+struct topo : simul::topology<ball, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
@@ -22,23 +22,20 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>>;
 };
 
-struct make
-    : storage::make<
-          env, simulation,
-          storage::with_properties<
-              storage::time_invariant<storage::attr_t<ball, "fext">>,
-              storage::unbounded<storage::attr_t<ball, "q">>,
-              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-              storage::assembled_diagonal<storage::attr_t<
-                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+struct data_t
+    : storage::make<env, simulation,
+                    storage::with_properties<
+                        storage::time_invariant<storage::attr_t<ball, "fext">>,
+                        storage::unbounded<storage::attr_t<ball, "q">>,
+                        storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+                        storage::assembled_diagonal<storage::attr_t<
+                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace siconos;
-  auto data = config::make();
+  config::data_t data;
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
@@ -125,31 +122,26 @@ int main(int argc, char* argv[])
   std::ofstream result_file("result.dat");
 
   std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-            simulation.current_step() * simulation.time_step(),
-            storage::attr<"q">(ball, simulation.current_step())(0),
-            storage::attr<"velocity">(ball, simulation.current_step())(0), 0.,
-            0.);
+             simulation.current_step() * simulation.time_step(),
+             storage::attr<"q">(ball, simulation.current_step())(0),
+             storage::attr<"velocity">(ball, simulation.current_step())(0), 0., 0.);
 
   while (simulation.has_next_event()) {
     auto ninvds = simulation.compute_one_step();
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(0);
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
+      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+    } else {
       p0 = 0;
       lambda = 0;
     }
 
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(ball, simulation.current_step())(0),
-              storage::attr<"velocity">(ball, simulation.current_step())(0),
-              p0, lambda);
+               simulation.current_step() * simulation.time_step(),
+               storage::attr<"q">(ball, simulation.current_step())(0),
+               storage::attr<"velocity">(ball, simulation.current_step())(0), p0, lambda);
   }
   //  io::close(fd);
 }

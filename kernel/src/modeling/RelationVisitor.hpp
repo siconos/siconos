@@ -95,13 +95,13 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "Relation in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::modeling::Relation &) {
+  virtual void visit(siconos::modeling::Relation&) {
     THROW_EXCEPTION(
         "you must define a visit function for Relation in "
         "a derived class of relations::Visitor");
   }
 
-  virtual void visit(const siconos::modeling::Relation &) {
+  virtual void visit(const siconos::modeling::Relation&) {
     THROW_EXCEPTION(
         "you must define a visit function for Relation in "
         "a derived class of relations::Visitor");
@@ -112,12 +112,12 @@ struct Visitor {
         "you must define a visit function for SP :: LagrangianScleronomousR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::modeling::LagrangianScleronomousR &) {
+  virtual void visit(siconos::modeling::LagrangianScleronomousR&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianScleronomousR in a "
         "derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::modeling::LagrangianScleronomousR &) {
+  virtual void visit(const siconos::modeling::LagrangianScleronomousR&) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianScleronomousR in a "
         "derived class of relations::Visitor");
@@ -130,12 +130,12 @@ struct Visitor {
         "DiskDiskR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::DiskDiskR &) {
+  virtual void visit(siconos::collision::native::bodies::DiskDiskR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskDiskR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::DiskDiskR &) {
+  virtual void visit(const siconos::collision::native::bodies::DiskDiskR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskDiskR "
         "in a derived class of relations::Visitor");
@@ -146,12 +146,12 @@ struct Visitor {
         "CircleCircleR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::CircleCircleR &) {
+  virtual void visit(siconos::collision::native::bodies::CircleCircleR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CircleCircleR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::CircleCircleR &) {
+  virtual void visit(const siconos::collision::native::bodies::CircleCircleR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CircleCircleR "
         "in a derived class of relations::Visitor");
@@ -162,12 +162,12 @@ struct Visitor {
         "DiskMovingPlanR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::DiskMovingPlanR &) {
+  virtual void visit(siconos::collision::native::bodies::DiskMovingPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskMovingPlanR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::DiskMovingPlanR &) {
+  virtual void visit(const siconos::collision::native::bodies::DiskMovingPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskMovingPlanR "
         "in a derived class of relations::Visitor");
@@ -178,12 +178,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to DiskPlanR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::collision::native::bodies::DiskPlanR &) {
+  virtual void visit(siconos::collision::native::bodies::DiskPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskPlanR in a "
         "derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::DiskPlanR &) {
+  virtual void visit(const siconos::collision::native::bodies::DiskPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for DiskPlanR in a "
         "derived class of relations::Visitor");
@@ -196,12 +196,12 @@ struct Visitor {
         "SphereLDSSphereLDSR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereLDSSphereLDSR &) {
+  virtual void visit(siconos::collision::native::bodies::SphereLDSSphereLDSR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDSSphereLDSR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDSSphereLDSR "
         "in a derived class of relations::Visitor");
@@ -214,12 +214,12 @@ struct Visitor {
         "SphereNEDSSphereNEDSR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereNEDSSphereNEDSR &) {
+  virtual void visit(siconos::collision::native::bodies::SphereNEDSSphereNEDSR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDSSphereNEDSR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereNEDSSphereNEDSR &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereNEDSSphereNEDSR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDSSphereNEDSR "
         "in a derived class of relations::Visitor");
@@ -231,12 +231,12 @@ struct Visitor {
         "SphereLDSPlanR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereLDSPlanR &) {
+  virtual void visit(siconos::collision::native::bodies::SphereLDSPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDSPlanR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereLDSPlanR &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereLDSPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDSPlanR "
         "in a derived class of relations::Visitor");
@@ -248,12 +248,12 @@ struct Visitor {
         "SphereNEDSPlanR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::native::bodies::SphereNEDSPlanR &) {
+  virtual void visit(siconos::collision::native::bodies::SphereNEDSPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDSPlanR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::native::bodies::SphereNEDSPlanR &) {
+  virtual void visit(const siconos::collision::native::bodies::SphereNEDSPlanR&) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDSPlanR "
         "in a derived class of relations::Visitor");
@@ -264,12 +264,12 @@ struct Visitor {
         "ContactR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::ContactR &) {
+  virtual void visit(siconos::collision::ContactR&) {
     THROW_EXCEPTION(
         "you must define a visit function for ContactR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::ContactR &) {
+  virtual void visit(const siconos::collision::ContactR&) {
     THROW_EXCEPTION(
         "you must define a visit function for ContactR "
         "in a derived class of relations::Visitor");
@@ -280,12 +280,12 @@ struct Visitor {
         "ContactVelocityAngularVelocityR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::ContactVelocityAngularVelocityR &) {
+  virtual void visit(siconos::collision::ContactVelocityAngularVelocityR&) {
     THROW_EXCEPTION(
         "you must define a visit function for ContactVelocityAngularVelocityR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::ContactVelocityAngularVelocityR &) {
+  virtual void visit(const siconos::collision::ContactVelocityAngularVelocityR&) {
     THROW_EXCEPTION(
         "you must define a visit function for ContactVelocityAngularVelocityR "
         "in a derived class of relations::Visitor");
@@ -297,12 +297,12 @@ struct Visitor {
         "Contact2dR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::Contact2dR &) {
+  virtual void visit(siconos::collision::Contact2dR&) {
     THROW_EXCEPTION(
         "you must define a visit function for Contact2dR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::Contact2dR &) {
+  virtual void visit(const siconos::collision::Contact2dR&) {
     THROW_EXCEPTION(
         "you must define a visit function for Contact2dR "
         "in a derived class of relations::Visitor");
@@ -313,12 +313,12 @@ struct Visitor {
         "Contact2d3DR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::Contact2d3DR &) {
+  virtual void visit(siconos::collision::Contact2d3DR&) {
     THROW_EXCEPTION(
         "you must define a visit function for Contact2d3DR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::Contact2d3DR &) {
+  virtual void visit(const siconos::collision::Contact2d3DR&) {
     THROW_EXCEPTION(
         "you must define a visit function for Contact2d3DR "
         "in a derived class of relations::Visitor");
@@ -331,12 +331,12 @@ struct Visitor {
         "BulletR in a derived class of relations::Visitor");
   }
 
-  virtual void visit(siconos::collision::bullet::BulletR &) {
+  virtual void visit(siconos::collision::bullet::BulletR&) {
     THROW_EXCEPTION(
         "you must define a visit function for BulletR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::collision::bullet::BulletR &) {
+  virtual void visit(const siconos::collision::bullet::BulletR&) {
     THROW_EXCEPTION(
         "you must define a visit function for BulletR "
         "in a derived class of relations::Visitor");
@@ -347,12 +347,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "CouplerJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::CouplerJointR &) {
+  virtual void visit(siconos::joints::CouplerJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CouplerJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::CouplerJointR &) {
+  virtual void visit(const siconos::joints::CouplerJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CouplerJointR "
         "in a derived class of relations::Visitor");
@@ -362,12 +362,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "CylindricalJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::CylindricalJointR &) {
+  virtual void visit(siconos::joints::CylindricalJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CylindricalJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::CylindricalJointR &) {
+  virtual void visit(const siconos::joints::CylindricalJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for CylindricalJointR "
         "in a derived class of relations::Visitor");
@@ -377,12 +377,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "FixedJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::FixedJointR &) {
+  virtual void visit(siconos::joints::FixedJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for FixedJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::FixedJointR &) {
+  virtual void visit(const siconos::joints::FixedJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for FixedJointR "
         "in a derived class of relations::Visitor");
@@ -392,12 +392,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "JointFrictionR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::JointFrictionR &) {
+  virtual void visit(siconos::joints::JointFrictionR&) {
     THROW_EXCEPTION(
         "you must define a visit function for JointFrictionR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::JointFrictionR &) {
+  virtual void visit(const siconos::joints::JointFrictionR&) {
     THROW_EXCEPTION(
         "you must define a visit function for JointFrictionR "
         "in a derived class of relations::Visitor");
@@ -407,12 +407,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "JointStopR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::JointStopR &) {
+  virtual void visit(siconos::joints::JointStopR&) {
     THROW_EXCEPTION(
         "you must define a visit function for JointStopR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::JointStopR &) {
+  virtual void visit(const siconos::joints::JointStopR&) {
     THROW_EXCEPTION(
         "you must define a visit function for JointStopR "
         "in a derived class of relations::Visitor");
@@ -422,12 +422,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "KneeJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::KneeJointR &) {
+  virtual void visit(siconos::joints::KneeJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for KneeJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::KneeJointR &) {
+  virtual void visit(const siconos::joints::KneeJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for KneeJointR "
         "in a derived class of relations::Visitor");
@@ -437,12 +437,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "NewtonEulerJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::NewtonEulerJointR &) {
+  virtual void visit(siconos::joints::NewtonEulerJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::NewtonEulerJointR &) {
+  virtual void visit(const siconos::joints::NewtonEulerJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerJointR "
         "in a derived class of relations::Visitor");
@@ -452,12 +452,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "PivotJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::PivotJointR &) {
+  virtual void visit(siconos::joints::PivotJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for PivotJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::PivotJointR &) {
+  virtual void visit(const siconos::joints::PivotJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for PivotJointR "
         "in a derived class of relations::Visitor");
@@ -467,12 +467,12 @@ struct Visitor {
         "you must define a visit function for shared ptr to "
         "PrismaticJointR in a derived class of relations::Visitor");
   }
-  virtual void visit(siconos::joints::PrismaticJointR &) {
+  virtual void visit(siconos::joints::PrismaticJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for PrismaticJointR "
         "in a derived class of relations::Visitor");
   }
-  virtual void visit(const siconos::joints::PrismaticJointR &) {
+  virtual void visit(const siconos::joints::PrismaticJointR&) {
     THROW_EXCEPTION(
         "you must define a visit function for PrismaticJointR "
         "in a derived class of relations::Visitor");

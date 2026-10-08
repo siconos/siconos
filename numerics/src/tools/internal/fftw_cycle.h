@@ -312,8 +312,7 @@ typedef unsigned __int64 ticks;
 #ifdef __cplusplus
 extern "C"
 #endif
-    ticks
-    __getReg(int whichReg);
+    ticks __getReg(int whichReg);
 #pragma intrinsic(__getReg)
 
 static __inline ticks getticks(void) {

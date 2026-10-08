@@ -18,6 +18,7 @@
 #include "projectionOnCylinder.h"
 
 #include <math.h>
+
 #include "numerics_errors.h"
 
 void projectionOnCylinder(double* r, double R) {

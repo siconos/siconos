@@ -19,7 +19,7 @@
 
 
 # # create_pybind11_module(
-# #   MODULE_NAME pymechanics 
+# #   MODULE_NAME pymechanics
 # #   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_pybind11.cpp
 # #   DEPENDENCIES kernel mechanics
 # #   PARENT_NAME mechanics
@@ -139,7 +139,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in
   ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/__init__.py @ONLY)
 
 
-add_custom_target(py${COMPONENT} DEPENDS py${COMPONENT}_modules ) 
+add_custom_target(py${COMPONENT} DEPENDS py${COMPONENT}_modules )
 
 if(WITH_TESTING)
   if(NOT WITH_OpenCASCADE)

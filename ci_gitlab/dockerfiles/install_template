@@ -3,6 +3,3 @@ WORKDIR /home
 ARG BUILD_DIR=build
 RUN env ; cmake --install $BUILD_DIR
 RUN siconos --info
-
-
-

@@ -7,8 +7,7 @@
 namespace siconos::variant {
 
 template <typename D, typename V, typename F>
-decltype(auto) visit(D& data, V&& var, F&& fun)
-{
+decltype(auto) visit(D& data, V&& var, F&& fun) {
   return std::visit(
       [&data, &fun](auto& rvar) {
         auto h = storage::make_handle(data, rvar);

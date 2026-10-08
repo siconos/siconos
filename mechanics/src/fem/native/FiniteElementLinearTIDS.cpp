@@ -118,7 +118,8 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::display(bool brief) const
   FEModel_->display(brief);
 }
 
-std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStrainTensor() const {
+std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStrainTensor()
+    const {
   std::vector<double> epsilon;
   auto femodel = FEModel_;
   if (!femodel) return epsilon;
@@ -168,7 +169,8 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
   return epsilon;
 }
 
-std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStressTensor() const {
+std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStressTensor()
+    const {
   std::vector<double> sigma;
   auto femodel = FEModel_;
   if (!femodel) return sigma;
@@ -219,9 +221,7 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
     double D12 = E * nu / (1.0 - nu * nu);
     double D33 = E / (2.0 * (1.0 + nu));
     Eigen::Matrix3d D_mat;
-    D_mat << D11, D12, 0,
-             D12, D11, 0,
-             0,   0,   D33;
+    D_mat << D11, D12, 0, D12, D11, 0, 0, 0, D33;
     Eigen::Vector3d sigma_vec = D_mat * eps_vec;
 
     sigma.push_back(sigma_vec[0]);  // sxx
@@ -322,9 +322,7 @@ std::vector<double> siconos::mechanics::fem::FiniteElementLinearTIDS::computeStr
     double D12 = E * nu / (1.0 - nu * nu);
     double D33 = E / (2.0 * (1.0 + nu));
     Eigen::Matrix3d D_mat;
-    D_mat << D11, D12, 0,
-             D12, D11, 0,
-             0,   0,   D33;
+    D_mat << D11, D12, 0, D12, D11, 0, 0, 0, D33;
     Eigen::Vector3d sigma_vec = D_mat * eps_vec;
 
     sigma.push_back(sigma_vec[0]);  // sxx

@@ -24,13 +24,13 @@
 #define PID_H
 
 #include <boost/circular_buffer_fwd.hpp>
+
 #include "Actuator.hpp"
 
 namespace siconos::control {
 
 class PID : public Actuator {
  private:
-
   ACCEPT_SERIALIZATION(PID);
 
   /** error vector */

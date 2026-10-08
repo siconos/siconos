@@ -49,33 +49,33 @@ typedef struct {
   int n;
   int nnz;
 
-  double *z;
-  double *lb;
-  double *ub;
+  double* z;
+  double* lb;
+  double* ub;
 
-  int *m_start;
-  int *m_len;
-  int *m_row;
-  double *m_data;
+  int* m_start;
+  int* m_len;
+  int* m_row;
+  double* m_data;
 
-  double *q;
+  double* q;
 } Problem;
 
 static Problem problem;
 static int filled;
 
-static CB_FUNC(void) start(void *v) {
+static CB_FUNC(void) start(void* v) {
   filled = 0;
   return;
 }
 
-static CB_FUNC(void) problem_size(void *v, int *n, int *nnz) {
+static CB_FUNC(void) problem_size(void* v, int* n, int* nnz) {
   *n = problem.n;
   *nnz = problem.nnz + 1;
   return;
 }
 
-static CB_FUNC(void) bounds(void *v, int n, double *z, double *lb, double *ub) {
+static CB_FUNC(void) bounds(void* v, int n, double* z, double* lb, double* ub) {
   int i;
 
   for (i = 0; i < n; i++) {
@@ -86,7 +86,7 @@ static CB_FUNC(void) bounds(void *v, int n, double *z, double *lb, double *ub) {
   return;
 }
 
-static CB_FUNC(int) function_evaluation(void *v, int n, double *z, double *f) {
+static CB_FUNC(int) function_evaluation(void* v, int n, double* z, double* f) {
   int col, colStart, colEnd, row;
   double value;
 
@@ -113,8 +113,8 @@ static CB_FUNC(int) function_evaluation(void *v, int n, double *z, double *f) {
 }
 
 static CB_FUNC(int)
-    jacobian_evaluation(void *v, int n, double *z, int wantf, double *f, int *nnz,
-                        int *col_start, int *col_len, int *row, double *data) {
+    jacobian_evaluation(void* v, int n, double* z, int wantf, double* f, int* nnz,
+                        int* col_start, int* col_len, int* row, double* data) {
   int element;
 
   if (wantf) {
@@ -139,7 +139,7 @@ static CB_FUNC(int)
   return 0;
 }
 
-static CB_FUNC(void) mcp_typ(void *d, int nnz, int *typ) {
+static CB_FUNC(void) mcp_typ(void* d, int nnz, int* typ) {
   int i;
 
   for (i = 0; i < nnz; i++) {
@@ -154,24 +154,24 @@ static MCP_Interface mcp_interface = {
 
 static Presolve_Interface mcp_presolve = {NULL, NULL, NULL, NULL, NULL, mcp_typ, NULL};
 
-static void install_interface(MCP *m) {
+static void install_interface(MCP* m) {
   MCP_SetInterface(m, &mcp_interface);
   MCP_SetPresolveInterface(m, &mcp_presolve);
   return;
 }
 
-static void sort(int rows, int cols, int elements, int *row, int *col, double *data) {
-  double *m_data;
-  int *m_start;
-  int *m_len;
-  int *m_row;
+static void sort(int rows, int cols, int elements, int* row, int* col, double* data) {
+  double* m_data;
+  int* m_start;
+  int* m_len;
+  int* m_row;
 
   int i, cs, ce;
 
-  m_start = (int *)Memory_Allocate(sizeof(int) * (cols + 1));
-  m_len = (int *)Memory_Allocate(sizeof(int) * (cols + 1));
-  m_row = (int *)Memory_Allocate(sizeof(int) * (elements + 1));
-  m_data = (double *)Memory_Allocate(sizeof(double) * (elements + 1));
+  m_start = (int*)Memory_Allocate(sizeof(int) * (cols + 1));
+  m_len = (int*)Memory_Allocate(sizeof(int) * (cols + 1));
+  m_row = (int*)Memory_Allocate(sizeof(int) * (elements + 1));
+  m_data = (double*)Memory_Allocate(sizeof(double) * (elements + 1));
 
   for (i = 0; i < cols; i++) {
     m_len[i] = 0;
@@ -225,8 +225,8 @@ static void sort(int rows, int cols, int elements, int *row, int *col, double *d
   return;
 }
 
-static void create(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-                   double *z, double *lb, double *ub) {
+static void create(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+                   double* z, double* lb, double* ub) {
   int m_index;
   int m_count;
   int i;
@@ -234,16 +234,16 @@ static void create(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, d
   problem.n = variables;
   problem.nnz = m_nnz;
 
-  problem.z = (double *)Memory_Allocate(sizeof(double) * problem.n);
-  problem.lb = (double *)Memory_Allocate(sizeof(double) * problem.n);
-  problem.ub = (double *)Memory_Allocate(sizeof(double) * problem.n);
+  problem.z = (double*)Memory_Allocate(sizeof(double) * problem.n);
+  problem.lb = (double*)Memory_Allocate(sizeof(double) * problem.n);
+  problem.ub = (double*)Memory_Allocate(sizeof(double) * problem.n);
 
-  problem.m_start = (int *)Memory_Allocate(sizeof(int) * problem.n);
-  problem.m_len = (int *)Memory_Allocate(sizeof(int) * problem.n);
-  problem.m_row = (int *)Memory_Allocate(sizeof(int) * problem.nnz + 1);
-  problem.m_data = (double *)Memory_Allocate(sizeof(double) * problem.nnz + 1);
+  problem.m_start = (int*)Memory_Allocate(sizeof(int) * problem.n);
+  problem.m_len = (int*)Memory_Allocate(sizeof(int) * problem.n);
+  problem.m_row = (int*)Memory_Allocate(sizeof(int) * problem.nnz + 1);
+  problem.m_data = (double*)Memory_Allocate(sizeof(double) * problem.nnz + 1);
 
-  problem.q = (double *)Memory_Allocate(sizeof(double) * problem.n);
+  problem.q = (double*)Memory_Allocate(sizeof(double) * problem.n);
 
   sort(variables, variables, m_nnz, m_i, m_j, m_ij);
 
@@ -286,8 +286,8 @@ static void destroy(void) {
   Memory_Free(problem.q);
   return;
 }
-void printLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-              double *lb, double *ub) {
+void printLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+              double* lb, double* ub) {
   int i = 0;
   printf("********PRINT PATH INPUT***************\n");
   printf("***************************************\n");
@@ -302,7 +302,7 @@ void printLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double
   printf("***************************************\n");
 }
 
-int nbNonNulElems(int n, double *M, double tol) {
+int nbNonNulElems(int n, double* M, double tol) {
   int i, j;
   int cmp = 0;
   for (i = 0; i < n; i++)
@@ -313,7 +313,7 @@ int nbNonNulElems(int n, double *M, double tol) {
     }
   return cmp;
 }
-void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij) {
+void FortranToPathSparse(int n, double* M, double tol, int* m_i, int* m_j, double* m_ij) {
   int i, j;
   int cmp = 0;
   for (j = 0; j < n; j++)
@@ -326,8 +326,8 @@ void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, doubl
       }
     }
 }
-void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b,
-             double *M, double *q) {
+void ABCDtoM(int n, int m, double* A, double* B, double* C, double* D, double* a, double* b,
+             double* M, double* q) {
   int i = 0, j = 0;
   int NM = n + m;
   /*A in M*/
@@ -348,17 +348,17 @@ void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a
   for (i = 0; i < m; i++) q[n + i] = b[i];
 }
 
-void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-               double *lb, double *ub, MCP_Termination *status, double *z) {
-  Options_Interface *o;
-  MCP *m;
+void SimpleLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+               double* lb, double* ub, MCP_Termination* status, double* z) {
+  Options_Interface* o;
+  MCP* m;
   Information info;
 
-  double *x;
+  double* x;
   double dnnz;
   int i;
 #ifdef PATHFERRIS_LOG_IN_FILE
-  FILE *f;
+  FILE* f;
   f = fopen("path.log", "w");
   Output_SetLog(f);
 #endif
@@ -422,19 +422,19 @@ void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, doubl
 }
 #else
 
-void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-               double *lb, double *ub, MCP_Termination *status, double *z) {
+void SimpleLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+               double* lb, double* ub, MCP_Termination* status, double* z) {
   ;
 }
-void printLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-              double *lb, double *ub) {
+void printLCP(int variables, int m_nnz, int* m_i, int* m_j, double* m_ij, double* q,
+              double* lb, double* ub) {
   ;
 }
 
-int nbNonNulElems(int n, double *M, double tol) { return 0; }
-void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij) { ; }
-void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b,
-             double *M, double *q) {
+int nbNonNulElems(int n, double* M, double tol) { return 0; }
+void FortranToPathSparse(int n, double* M, double tol, int* m_i, int* m_j, double* m_ij) { ; }
+void ABCDtoM(int n, int m, double* A, double* B, double* C, double* D, double* a, double* b,
+             double* M, double* q) {
   ;
 }
 

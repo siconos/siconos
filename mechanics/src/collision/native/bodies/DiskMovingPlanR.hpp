@@ -64,20 +64,20 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
     \param time current time value
     \param y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector &q, double time,
+  void computeh(const siconos::algebra::BlockVector& q, double time,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Computes \f$ \nabla^\top_q h(q, t) \f$
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param time current time value
    */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q, double time) override;
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q, double time) override;
 
   /** Update \f$ \frac{\partial }{\partial t}h(q,t) \f$
    *  \param position 'list' of state vectors (for all ds involved in the interaction)
    *  \param time the current time
    */
-  void computehdot(const siconos::algebra::BlockVector &position, double time) override;
+  void computehdot(const siconos::algebra::BlockVector& position, double time) override;
 
   double distance(double, double, double);
 
@@ -85,41 +85,41 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
   /** set a user-defined function to compute B(t)
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
   /** set a user-defined function to compute C(t)
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
   /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} A(t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeAdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeAdotFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
   /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} B(t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeBdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeBdotFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
   /** set a user-defined function to compute \f$ \frac{\partial }{\partial t} C(t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeCdotFunction(const siconos::modeling::func_prototypes::FunctionS_S &fct);
+  void setComputeCdotFunction(const siconos::modeling::func_prototypes::FunctionS_S& fct);
 
-  bool equal(const siconos::modeling::func_prototypes::FunctionS_S &pA,
-             const siconos::modeling::func_prototypes::FunctionS_S &pB,
-             const siconos::modeling::func_prototypes::FunctionS_S &pC, double) const;
+  bool equal(const siconos::modeling::func_prototypes::FunctionS_S& pA,
+             const siconos::modeling::func_prototypes::FunctionS_S& pB,
+             const siconos::modeling::func_prototypes::FunctionS_S& pC, double) const;
 
   /**
      compute A
@@ -163,8 +163,9 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
   */
   inline void computeCDot(double t);
 
-  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
-
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::native::bodies
 

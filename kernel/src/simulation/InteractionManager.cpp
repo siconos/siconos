@@ -24,9 +24,9 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Relation.hpp"
+#include "SiconosMemory.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
-#include "SiconosMemory.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -46,13 +46,11 @@ void siconos::simulation::InteractionManager::insertNonSmoothLaw(
   DEBUG_PRINTF("group1 = %li\t group2 = %li\n", group1, group2);
   _nslaws(group1, group2) = nslaw;
   DEBUG_END("siconos::simulation::InteractionManager::insertNonSmoothLaw\n");
-
 }
 
 std::shared_ptr<siconos::modeling::NonSmoothLaw>
 siconos::simulation::InteractionManager::nonSmoothLaw(long unsigned int group1,
                                                       long unsigned int group2) {
-
   DEBUG_BEGIN("siconos::simulation::InteractionManager::nonSmoothLaw\n");
   DEBUG_PRINTF("group1 = %i\t group2 = %i\n", group1, group2);
   if (group1 < _nslaws.size1() && group2 < _nslaws.size2())

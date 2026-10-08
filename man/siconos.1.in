@@ -19,7 +19,7 @@ siconos \- Siconos C++ Compilation.
 .B \-c | \--clean
 ]
 [
-.B \-D 
+.B \-D
 .I KEY [=VALUE]
 ]
 [
@@ -32,11 +32,11 @@ siconos \- Siconos C++ Compilation.
 .B \-j JOBS
 ]
 [
-.B \-L  
+.B \-L
 .I DIRECTORY
 ]
 [
-.B \-l  
+.B \-l
 .I LIBRARY
 ]
 [
@@ -46,11 +46,11 @@ siconos \- Siconos C++ Compilation.
 .B \--nocomp
 ]
 [
-.B \--opt 
+.B \--opt
 .I C++ COMPILER OPTION
 ]
 [
-.B \--ldopt 
+.B \--ldopt
 .I LINKER OPTION
 ]
 [
@@ -99,7 +99,7 @@ The following command-line options are recognized by
 .BR siconos (1).
 .TP
 .BI \-a
- Find and compile all sources files in 
+ Find and compile all sources files in
 .I sample[.cpp|.py]
  directory.
 .TP
@@ -110,19 +110,19 @@ The following command-line options are recognized by
 .BI \--clean-build
  Clean build directory.
 .TP
-.BI \-c 
+.BI \-c
 |
 .B \--clean
  Clean the current directory (deletes binary files, etc.).
 .TP
-.BI -D 
+.BI -D
 .I KEY [=VALUE]
  Define a 'cmake' and a 'cpp' variable.
 .TP
 .BI \-g
  Compile with debug information.
 .TP
-.BI \-h 
+.BI \-h
 |
 .B \--help
  Print help.
@@ -149,14 +149,14 @@ The following command-line options are recognized by
 .I N
  set compiler optimization.
 .TP
-.BI \--opt 
+.BI \--opt
 .I COMPILER OPTION
  Add option to compiler.
 .TP
-.BI \--ldopt 
+.BI \--ldopt
 .I LINKER OPTION
  Add option to linker.
-.TP 
+.TP
 .BI \-P
 .I PREFIX COMMAND
  Run a prefix command (time, valgrind, gdb, etc.).
@@ -175,8 +175,8 @@ The following command-line options are recognized by
  add all source files under the specified directory to the compilation of the executable.
 .TP
 .BI \-v
- Print 
-.BR make (1) 
+ Print
+.BR make (1)
 commands as they are executed.
 .TP
 .BI \--generator
@@ -185,11 +185,10 @@ commands as they are executed.
 
 .SH EXAMPLES
 
- siconos -gv -P "time --format '%U'" BouncingBallTS.cpp 
+ siconos -gv -P "time --format '%U'" BouncingBallTS.cpp
 
 
 .SH SEE ALSO
 .I The Siconos Software Documentation
 .TP
 http://siconos.org
-

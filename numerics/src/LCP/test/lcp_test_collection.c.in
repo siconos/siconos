@@ -127,11 +127,11 @@ int main(void)
   collection[0].will_fail = 1;
 #endif
 
-  
+
   int number_of_tests = n_data * n_solvers;
   int out = run_test_collection(collection, number_of_tests, lcp_test_function);
   free_test_collection(collection, number_of_tests);
   free(_data_collection);
-  
+
   return out;
 }

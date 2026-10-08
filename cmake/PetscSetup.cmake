@@ -25,4 +25,3 @@ if(WITH_HDF5)
   set(HDF5_PREFER_PARALLEL TRUE)
   find_package(HDF5 COMPONENTS C REQUIRED)
 endif()
-

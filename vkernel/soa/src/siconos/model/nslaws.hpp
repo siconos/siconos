@@ -23,8 +23,7 @@ struct newton_impact_friction : item {
 
   /// Attributes defining the law's parameters
   struct attributes {
-    some::scalar
-        e;  ///< Coefficient of restitution (0 = inelastic, 1 = fully elastic)
+    some::scalar e;   ///< Coefficient of restitution (0 = inelastic, 1 = fully elastic)
     some::scalar mu;  ///< Friction coefficient (Coulomb friction)
   };
 
@@ -53,8 +52,7 @@ struct newton_impact : item {
 
   /// Attributes defining the law's parameter
   struct attributes {
-    some::scalar
-        e;  ///< Coefficient of restitution (0 = inelastic, 1 = fully elastic)
+    some::scalar e;  ///< Coefficient of restitution (0 = inelastic, 1 = fully elastic)
   };
 
   /// Interface for accessing law parameter

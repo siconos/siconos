@@ -26,7 +26,7 @@ extern "C" {
 /** Solve lcp using parameters and reference from a pre-defined TestCase
     return 1 if the test has succeeded.
  */
-int mlcp_test_function(TestCase *);
+int mlcp_test_function(TestCase*);
 
 #if defined(__cplusplus)
 }

@@ -54,10 +54,10 @@ class Rope {
   MechanicalProperties mechanicalProp_;
 
   /** First pylon supporting the rope */
-  const Pylon &start_pylon_;
+  const Pylon& start_pylon_;
 
   /** Second pylon supporting the rope */
-  const Pylon &end_pylon_;
+  const Pylon& end_pylon_;
 
   /** Support reaction at contact [H,V,B]*/
   siconos::algebra::SiconosVector3 support_reaction_ = {0., 0., 0.};
@@ -75,9 +75,9 @@ class Rope {
   int number_of_elements_{0};
 
   Rope() = delete;
-  Rope &operator=(const Rope &) = delete;
-  Rope &operator=(Rope &&) = delete;
-  Rope(const Rope &) = delete;
+  Rope& operator=(const Rope&) = delete;
+  Rope& operator=(Rope&&) = delete;
+  Rope(const Rope&) = delete;
 
  public:
   /** Build a rope span (a piece of cable between two pylons)
@@ -94,12 +94,12 @@ class Rope {
       \param tol tolerance used to perform (stop) Newton-Raphson iterations
       \param max max. number of iterations used in Newton-Raphson
   */
-  explicit Rope(const Pylon &start_pylon, const Pylon &end_pylon,
+  explicit Rope(const Pylon& start_pylon, const Pylon& end_pylon,
                 MechanicalProperties meca_prop, double T0,
-                const siconos::algebra::SiconosVector3 &R0, int nb_nodes, double tol,
+                const siconos::algebra::SiconosVector3& R0, int nb_nodes, double tol,
                 int max_iter);
 
-  Rope(Rope &&) noexcept = default;  // Required for std::vector<Rope> in Ropeway
+  Rope(Rope&&) noexcept = default;  // Required for std::vector<Rope> in Ropeway
 
   ~Rope() noexcept = default;
 
@@ -118,8 +118,8 @@ class Rope {
    * \param[in] a_reverse true when 'down' ropeway is concerned
    * \return the number of elements to be used in the rope
    */
-  int initializeFEM(siconos::algebra::SiconosVector &a_q, siconos::algebra::SiconosVector &a_R,
-                    siconos::algebra::SiconosVector &a_TS, int q_offset,
+  int initializeFEM(siconos::algebra::SiconosVector& a_q, siconos::algebra::SiconosVector& a_R,
+                    siconos::algebra::SiconosVector& a_TS, int q_offset,
                     bool a_reverse = false) const;
 
   /** \return tension at the first node of the Rope */
@@ -137,8 +137,8 @@ class Rope {
   Eigen::Ref<const siconos::algebra::SiconosVector3> supportReaction() const {
     return support_reaction_;
   };
-  const MechanicalProperties &mechanicalProperties() const { return mechanicalProp_; }
-  const Pylon &start_pylon() const noexcept { return start_pylon_; };
+  const MechanicalProperties& mechanicalProperties() const { return mechanicalProp_; }
+  const Pylon& start_pylon() const noexcept { return start_pylon_; };
 
   /** Print Rope params to screen */
   void display() const;
@@ -154,8 +154,8 @@ class Rope {
    \param[in] start coordinates of the first node in the rope
    \param[in] end coordinates of the last node in the rope
  */
-siconos::algebra::SiconosVector3 guess(const siconos::algebra::SiconosVector3 &start,
-                                       const siconos::algebra::SiconosVector3 &end);
+siconos::algebra::SiconosVector3 guess(const siconos::algebra::SiconosVector3& start,
+                                       const siconos::algebra::SiconosVector3& end);
 
 /** Computes initial lengths and slopes by solving admissibility conditions for the catenary
     See Ch. Bertrand Phd
@@ -169,8 +169,8 @@ siconos::algebra::SiconosVector3 guess(const siconos::algebra::SiconosVector3 &s
 
 */
 siconos::algebra::SiconosVector3 computeAdmissibilityConditions(
-    const MechanicalProperties &a_meca, const siconos::algebra::SiconosVector3 &start,
-    const siconos::algebra::SiconosVector3 &end, int max_iter, double tol);
+    const MechanicalProperties& a_meca, const siconos::algebra::SiconosVector3& start,
+    const siconos::algebra::SiconosVector3& end, int max_iter, double tol);
 
 /** Discretize the rope by applying catenary equation
 
@@ -189,12 +189,12 @@ siconos::algebra::SiconosVector3 computeAdmissibilityConditions(
   \param[in] a_reverse true to compute catenary starting from the last pylon
 
 */
-void computeCatenary(const MechanicalProperties &a_meca,
-                     const siconos::algebra::SiconosVector3 &end,
-                     const siconos::algebra::SiconosVector3 &cable_inc, int nb_nodes,
-                     siconos::algebra::SiconosVector &positions,
-                     siconos::algebra::SiconosVector &internal_forces,
-                     siconos::algebra::SiconosVector &tension, int q_offset = 0,
+void computeCatenary(const MechanicalProperties& a_meca,
+                     const siconos::algebra::SiconosVector3& end,
+                     const siconos::algebra::SiconosVector3& cable_inc, int nb_nodes,
+                     siconos::algebra::SiconosVector& positions,
+                     siconos::algebra::SiconosVector& internal_forces,
+                     siconos::algebra::SiconosVector& tension, int q_offset = 0,
                      bool a_reverse = false);
 
 }  // namespace siconos::fem::cable
@@ -203,11 +203,11 @@ void computeCatenary(const MechanicalProperties &a_meca,
 namespace nlohmann {
 template <>
 struct adl_serializer<siconos::fem::cable::Rope> {
-  static siconos::fem::cable::Rope from_json(const json &j) {
+  static siconos::fem::cable::Rope from_json(const json& j) {
     return siconos::fem::cable::Rope(j);
   }
 
-  static void to_json(ordered_json &j, const siconos::fem::cable::Rope &input) {
+  static void to_json(ordered_json& j, const siconos::fem::cable::Rope& input) {
     for (int i = 0; i < input.nodes_coords_.size(); ++i) {
       j["q"].push_back(input.nodes_coords_(i));
     }

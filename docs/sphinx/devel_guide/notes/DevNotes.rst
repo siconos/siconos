@@ -54,7 +54,7 @@ LinearDS - Linear Time Invariant Relations
 
       .. math::
 
-	 C_{\alpha}=\left[\begin{array}{ccc} 
+	 C_{\alpha}=\left[\begin{array}{ccc}
 	 C_{\alpha}^i & C_{\alpha}^j & ...\end{array}\right]
 
       | with :math:`i,j,...\in \mathcal{DS}_{\alpha}` which is the set of DS
@@ -63,12 +63,12 @@ LinearDS - Linear Time Invariant Relations
 
       .. math::
 
-	 \left[\begin{array}{c} 
+	 \left[\begin{array}{c}
 	 R_{\alpha}^i \\
 	 R_{\alpha}^j \\
-	 ...  
+	 ...
 	 \end{array}\right] = B_{\alpha}\lambda_{\alpha}
-	 =\left[\begin{array}{c} 
+	 =\left[\begin{array}{c}
 	 B_{\alpha}^i \\
 	 B_{\alpha}^j \\
 	 ...
@@ -111,10 +111,10 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{Walpha}
-	 W_{\alpha}=\left[\begin{array}{ccc} 
+	 W_{\alpha}=\left[\begin{array}{ccc}
 	 W_i &  0   & ... \\
 	 0   &  W_j & ...\\
-	 0  & ... & ... \\ 
+	 0  & ... & ... \\
 	 \end{array}\right]
 
       | the block-diagonal matrix of all the :math:`W` for the dynamical
@@ -132,35 +132,35 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	 Y_{k+1} =\left[\begin{array}{c} 
+	 Y_{k+1} =\left[\begin{array}{c}
 	 y_1 \\
 	 ...  \\
 	 y_m
 	 \end{array}\right]_{k+1}
-	 &=&\left[\begin{array}{ccc} 
+	 &=&\left[\begin{array}{ccc}
 	 C_1^1 & \ldots & C_1^n \\
 	 \vdots & \ldots & \vdots \\
-	 C_m^1 & \ldots & C_m^n 
-	 \end{array}\right]\left[\begin{array}{cccc} 
+	 C_m^1 & \ldots & C_m^n
+	 \end{array}\right]\left[\begin{array}{cccc}
 	 W_1 & 0 & \ldots &0 \\
 	 0  & W_2 & \ddots & \vdots \\
 	 \vdots &\ddots  & \ddots & \vdots \\
 	 &&0& W_n
 	 \end{array}\right]
-	 \left[\begin{array}{c} 
+	 \left[\begin{array}{c}
 	 x_1  \\
 	 \vdots \\
 	 \vdots \\
-	 x_n 
+	 x_n
 	 \end{array}\right]_k \\
-	 &+&\left[\begin{array}{cccc} 
+	 &+&\left[\begin{array}{cccc}
 	 D_1+h\sum_{j\in \mathcal{DS}_1}C_1^jW_jB_1^j & h\displaystyle{\sum_{j\in \mathcal{DS}_1\cap\mathcal{DS}_2}C_1^jW_jB_2^j} & \ldots &\\
 	 \vdots&\ddots& &\\
 	 & h\displaystyle{\sum_{j\in \mathcal{DS}_m}C_m^jW_jB_{m-1}^j}  & D_m+h\displaystyle{\sum_{j\in \mathcal{DS}_m\cap\mathcal{DS}_{m-1}}C_m^jW_jB_m^j} \\
-	 \end{array}\right]\left[\begin{array}{c} 
+	 \end{array}\right]\left[\begin{array}{c}
 	 \lambda_1  \\
 	 \vdots \\
-	 \lambda_m 
+	 \lambda_m
 	 \end{array}\right]_{k+1} \nonumber\end{aligned}
 
       To sum it up, the block-diagonal term of matrix :math:`M_{OSNSP}`, for
@@ -234,18 +234,18 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	 y_1 = \left[\begin{array}{ccc} 
+	 y_1 = \left[\begin{array}{ccc}
 	 C_1^1 & C_1^3 \end{array}\right]
 	 \left[\begin{array}{c}
 	 x_1 \\
-	 x_3 
+	 x_3
 	 \end{array}\right]
 	 + D_1\lambda_1 \\
-	 y_2 = \left[\begin{array}{ccc} 
+	 y_2 = \left[\begin{array}{ccc}
 	 C_2^2 & C_2^3 \end{array}\right]
 	 \left[\begin{array}{c}
 	 x_2 \\
-	 x_3 
+	 x_3
 	 \end{array}\right]
 	 + D_2\lambda_2 \end{aligned}
 
@@ -265,10 +265,10 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	 M_{OSNSP} &=& \left[\begin{array}{cc} 
+	 M_{OSNSP} &=& \left[\begin{array}{cc}
 	 D_1+hC_1^1W_1B_1^1+hC_1^3W_3B_1^3 & hC_1^3W_3B_2^3 \\
-	 hC_2^3W_3B_1^3 & D_2+hC_2^2W_2B_2^2+hC_2^3W_3B_2^3 
-	 \end{array}\right]\left[\begin{array}{c} 
+	 hC_2^3W_3B_1^3 & D_2+hC_2^2W_2B_2^2+hC_2^3W_3B_2^3
+	 \end{array}\right]\left[\begin{array}{c}
 	 \lambda_1  \\
 	 \lambda_2
 	 \end{array}\right]_{k+1} \end{aligned}
@@ -281,7 +281,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	 Y =\left[\begin{array}{c} 
+	 Y =\left[\begin{array}{c}
 	 y_1 \\
 	 ...  \\
 	 y_M
@@ -368,7 +368,7 @@ LinearDS - Linear Time Invariant Relations
 
       .. math::
 
-	 H_{\alpha}=\left[\begin{array}{ccc} 
+	 H_{\alpha}=\left[\begin{array}{ccc}
 	 H_{\alpha}^i & H_{\alpha}^j & ...\end{array}\right]
 
       | with :math:`i,j,...\in \mathcal{DS}_{\alpha}` which is the set of DS
@@ -377,12 +377,12 @@ LinearDS - Linear Time Invariant Relations
 
       .. math::
 
-	 \left[\begin{array}{c} 
+	 \left[\begin{array}{c}
 	 R_{\alpha}^i \\
 	 R_{\alpha}^j \\
-	 ...  
+	 ...
 	 \end{array}\right] = {}^tH_{\alpha}\lambda_{\alpha}
-	 =\left[\begin{array}{c} 
+	 =\left[\begin{array}{c}
 	 {}^tH_{\alpha}^i \\
 	 {}^tH_{\alpha}^j \\
 	 ...
@@ -676,10 +676,10 @@ LinearDS - Linear Time Invariant Relations
 	   x &=&\left[\begin{array}{c}q \\ \dot q \end{array}\right] \\
 	   f(x,t) &=&  \left[\begin{array}{c} \dot q \\ M^{-1}(F_{Ext}-F_{Int}-NNL) \end{array}\right] \\
 	   \\
-	   \nabla_x f(x,t) &=& 
-	   \left[\begin{array}{cc} 
+	   \nabla_x f(x,t) &=&
+	   \left[\begin{array}{cc}
 	       0_{nDof\times nDof} & I_{nDof\times nDof} \\
-	       \nabla_q(M^{-1})(F_{Ext}-F_{Int}-NNL) -M^{-1}\nabla_q(F_{Int}+NNL) &  -M^{-1}\nabla_{\dot q}(F_{Int}+NNL) 
+	       \nabla_q(M^{-1})(F_{Ext}-F_{Int}-NNL) -M^{-1}\nabla_q(F_{Int}+NNL) &  -M^{-1}\nabla_{\dot q}(F_{Int}+NNL)
 	     \end{array}\right] \\
 	   r &=& \left[\begin{array}{c} 0_{nDof} \\ p \end{array}\right] \\
 	   u(x,\dot x,t) &=& u_L(\dot q, q, t) \text{  (not yet implemented)} \\
@@ -803,7 +803,7 @@ LinearDS - Linear Time Invariant Relations
       -  any of the four Jacobian present :math:`\Rightarrow` allocate memory
 	 for block-matrix jacobianX (connectToDS function)
 
-      -  
+      -
 
       | check: end of constructor or in initialize?
       | computeF and JacobianF + corresponding set functions: virtual or not?
@@ -1008,7 +1008,7 @@ LinearDS - Linear Time Invariant Relations
 
       Each constructor must:
 
-      -  
+      -
 
       Moreau
       ~~~~~~
@@ -1035,7 +1035,7 @@ LinearDS - Linear Time Invariant Relations
 
       | **Always allocated in constructor:**
 
-      First Order Nonlinear Relation 
+      First Order Nonlinear Relation
       ===============================
 
       +-----------+----------------+
@@ -1283,7 +1283,7 @@ LinearDS - Linear Time Invariant Relations
       degree but is chosen by the OneStepIntegrator with respect to the type
       of systems.
 
-      How to define and compute the various levels and the number of indexSets 
+      How to define and compute the various levels and the number of indexSets
       -------------------------------------------------------------------------
 
       :math:`y` related variables
@@ -1481,7 +1481,7 @@ LinearDS - Linear Time Invariant Relations
 
       This case is implemented in Siconos with the relation FirstOrderType2R.
 
-      Linear case 
+      Linear case
       ''''''''''''
 
       Let us introduce a new notation,
@@ -1608,13 +1608,13 @@ LinearDS - Linear Time Invariant Relations
       What about :math:`r^0_{k+1}` ?
 
       The residu :math:`\mathcal R _{\free}` is also defined (useful for
-      implementation only):\ 
+      implementation only):\
 
       .. math::
 
 	 \mathcal R _{\free}(x) \stackrel{\Delta}{=}  M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k),
 
-      \ which yields\ 
+      \ which yields\
 
       .. math::
 
@@ -1713,7 +1713,7 @@ LinearDS - Linear Time Invariant Relations
 
       The previous derivation is valid with :math:` D^{\alpha}_{k+1} =0`.
 
-      Time–discretization of the linear case ([first-DS3]) 
+      Time–discretization of the linear case ([first-DS3])
       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       Let us now proceed with the time discretization of ([eq:toto1]) with
@@ -1727,7 +1727,7 @@ LinearDS - Linear Time Invariant Relations
 
 	 R_{\free} = M(x^{\alpha}_{k+1} - x_{k}) -h\theta A x^{\alpha}_{k+1} - h(1-\theta) A x_k -hb_{k+1}
 
-      \ 
+      \
 
       .. math::
 
@@ -1762,31 +1762,31 @@ LinearDS - Linear Time Invariant Relations
 
 	 y_p = y^{\alpha}_{k+1} -\mathcal R^{\alpha}_{yk+1} + C^{\alpha}_{k+1}(x_p -x^{\alpha}_{k+1}) -D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1}
 
-      \ 
+      \
 
       .. math::
 
 	 y_p = Cx_k + D \lambda _k  + C(\tilde x_{\free}) -D \lambda_k +Fz + e
 
-      \ 
+      \
 
       .. math::
 
 	 y_p = Cx_k   + C(\tilde x_{\free})  +Fz + e
 
-      \ 
+      \
 
       .. math::
 
 	 y_p = Cx_k   + C(\tilde x_{\free})  +Fz + e
 
-      \ 
+      \
 
       .. math::
 
 	 y_p = C(x_{\free})  +Fz + e
 
-      Newton’s linearization of  ([eq:toto1-ter]) 
+      Newton’s linearization of  ([eq:toto1-ter])
       --------------------------------------------
 
       In this section, we deal with only with the FirstOrderType2R case.
@@ -1828,7 +1828,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:full-NL7}
 	    \begin{cases}
 	      x^{0}_{k+1} = x_k \\ \\
-	      r^{0}_{k+\gamma} = (1-\gamma ) r_{k} + \gamma r^0_{k+1}  = r_k \\ \\     
+	      r^{0}_{k+\gamma} = (1-\gamma ) r_{k} + \gamma r^0_{k+1}  = r_k \\ \\
 	      \mathcal R_L( x^{\alpha+1}_{k+1},r^{\alpha+1}_{k+\gamma}) = \mathcal
 	      R(x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma})  + \left[ \nabla_{x} \mathcal
 	      R(x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma})\right] (x^{\alpha+1}_{k+1}-x^{\alpha}_{k+1} ) + \\[2mm]
@@ -1976,7 +1976,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:full-rrL}
 	   \begin{array}{l}
 	     \boxed{r^{\alpha+1}_{k+\gamma} = g(\lambda ^{\alpha}_{k+\gamma},t_{k+\gamma}) -B^{\alpha}_{k+\gamma}
-	       \lambda^{\alpha}_{k+\gamma} + B^{\alpha}_{k+\gamma} \lambda^{\alpha+1}_{k+\gamma}}       
+	       \lambda^{\alpha}_{k+\gamma} + B^{\alpha}_{k+\gamma} \lambda^{\alpha+1}_{k+\gamma}}
 	   \end{array}
 
       with,
@@ -2062,7 +2062,7 @@ LinearDS - Linear Time Invariant Relations
 	     y_p &=&  h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma}) + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1}\\
 		 &=&  C^{\alpha}_{k+1} x^{\alpha}_{k+\gamma} + D^{\alpha}_{k+1}\lambda^{\alpha}_{k+\gamma}  + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1} \\
 		 &=& C^{\alpha}_{k+1}  (x^{\alpha}_{k+\gamma} + \gamma x_p - \gamma x^{\alpha}_{k+1} ) \\
-		 &=& C^{\alpha}_{k+1}  ((1-\gamma) x_{k} + \gamma x_{free} ) \text {since } x_p =x_{free} 
+		 &=& C^{\alpha}_{k+1}  ((1-\gamma) x_{k} + \gamma x_{free} ) \text {since } x_p =x_{free}
 	 \end{array}
 
       Implementation details
@@ -2288,7 +2288,7 @@ LinearDS - Linear Time Invariant Relations
 	     \displaystyle \int_{(t_k,t_{k+1}]} M dv + \int_{t_k}^{t_{k+1}} (C v^+(t)
 	       + K q(t)) \,dt = \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}\,dt +
 		 \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
 	    \end{cases}\end{aligned}
 
       By definition of the differential measure :math:`dv`, we obtain
@@ -2312,7 +2312,7 @@ LinearDS - Linear Time Invariant Relations
 	      M\,(v(t_{k+1})-v(t_{k})) =   \displaystyle   \int_{t_k}^{t_{k+1}} (- C v^+(t)
 	       - K q(t) +  F_{\mathrm{ext}}(t))\,dt +
 		 \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
 	    \end{cases}\end{aligned}
 
       Choosing a numerical method boils down to choose a method of
@@ -2343,9 +2343,9 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	   \displaystyle \int_{t_k}^{t_{k+1}} C v + K q \,dt  &\approx& 
+	   \displaystyle \int_{t_k}^{t_{k+1}} C v + K q \,dt  &\approx&
 	   h \left[ \theta (C v_{k+1}+K q_{k+1}) + (1-\theta) (C v_{k}+K q_{k}) \right]   \nonumber \\
-	   \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t) \,dt &\approx& 
+	   \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t) \,dt &\approx&
 	   h\left[\theta  (F_{\mathrm{ext}})_{k+1}+(1-\theta)  (F_{\mathrm{ext}})_{k}  \right]  \nonumber \end{aligned}
 
       The displacement, assumed to be absolutely continuous, is approximated
@@ -2402,8 +2402,8 @@ LinearDS - Linear Time Invariant Relations
 
 	    \label{eq:2003}
 	    \begin{array}{ll}
-	    v_{\mathrm{free}}  & = v_{k} + \widehat{M}^{-1} \left[   - h  C v_{k} - h K q_{k} - h^2 \theta  K v_{k} \right. \\ \\ 
-	    & \left. +  h\left[ \theta  (F_{\mathrm{ext}})_{k+1})+(1-\theta)  (F_{\mathrm{ext}})_{k} \right] \right] 
+	    v_{\mathrm{free}}  & = v_{k} + \widehat{M}^{-1} \left[   - h  C v_{k} - h K q_{k} - h^2 \theta  K v_{k} \right. \\ \\
+	    & \left. +  h\left[ \theta  (F_{\mathrm{ext}})_{k+1})+(1-\theta)  (F_{\mathrm{ext}})_{k} \right] \right]
 	    \end{array}
 
 	 is the so-called “free” velocity, i.e., the velocity of the system
@@ -2471,7 +2471,7 @@ LinearDS - Linear Time Invariant Relations
 	   \begin{cases}
 	     \displaystyle \int_{(t_k,t_{k+1}]} M(q) dv + \int_{t_k}^{t_{k+1}} F(t, q(t), v^+(t)) \,dt = \displaystyle \int_{t_k}^{t_{k+1}} F_{\mathrm{ext}}(t)\,dt +
 		 \displaystyle \int_{(t_k,t_{k+1}]} dr \:, \\ \\
-	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt 
+	      q(t_{k+1}) = q(t_{k}) + \displaystyle \int_{t_k}^{t_{k+1}} v^+(t)\,dt
 	    \end{cases}\end{aligned}
 
       The first term is generally approximated by
@@ -2495,7 +2495,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \begin{aligned}
-	   \displaystyle \int_{t_k}^{t_{k+1}} F(t,q,v) \,dt  &\approx& 
+	   \displaystyle \int_{t_k}^{t_{k+1}} F(t,q,v) \,dt  &\approx&
 	   h  \tilde F_{k+\theta} \end{aligned}
 
       where :math:`\tilde F_{k+\theta}` is an approximation with the following
@@ -2620,7 +2620,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:NL8}
 	   \begin{array}{ll}
 	     \nabla_u  \left(M(q_{k+\gamma}(u) ) (u-v_{k})\right) &=   M(q_{k+\gamma}(u))  + \left[ \nabla_u M(q_{k+\gamma}(u) ) \right] (u-v_{k}) \\ \\
-						  &=    M(q_{k+\gamma}(u)) + \left[h \gamma\theta \nabla_{q} M(q_{k+\gamma}(u))\right]  (u-v_{k}) 
+						  &=    M(q_{k+\gamma}(u)) + \left[h \gamma\theta \nabla_{q} M(q_{k+\gamma}(u))\right]  (u-v_{k})
 	 \end{array}
 
       The notation :math:`\nabla_{u}M(q_{k+\gamma}(u))(u-v_{k})` is to be
@@ -2719,7 +2719,7 @@ LinearDS - Linear Time Invariant Relations
 	   \begin{array}{ll}
 	     \nabla_u  \tilde F_{k+\theta}(t,q,u) &= \theta \nabla_u  F(t,q(u),u) \\ \\
 	     &= \theta \nabla_q F(t_{k+1},q(u)   ,u) \nabla_{u} q(u) + \theta \nabla_{u} F(t,q(u),u)    \\ \\
-	     &= h \theta^2 \nabla_q F(t, q(u)   ,u) + \theta \nabla_{u} F(t,q(u),u) \\   
+	     &= h \theta^2 \nabla_q F(t, q(u)   ,u) + \theta \nabla_{u} F(t,q(u),u) \\
 	   \end{array}
 
       The standard tangent stiffness and damping matrices :math:`K_t` and
@@ -2740,7 +2740,7 @@ LinearDS - Linear Time Invariant Relations
 
 	 \label{eq:NL15}
 	   \begin{array}{ll}
-	     \nabla_u  \tilde F_{k+\theta}(t,q,u) &=  h \theta^2  K_t(t,q,u) + \theta C_t(t, q   ,u)  \\   
+	     \nabla_u  \tilde F_{k+\theta}(t,q,u) &=  h \theta^2  K_t(t,q,u) + \theta C_t(t, q   ,u)  \\
 	   \end{array}
 
       The complete Newton’s iteration can then be written as
@@ -2885,7 +2885,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:FullyLinear1}
 	   \begin{cases}
 	     M_1 \dot v_1  = F_{1,Ext}(t) + p_1   \\
-	     \dot q_1 = v_1 
+	     \dot q_1 = v_1
 	   \end{cases}
 
       and
@@ -2908,7 +2908,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:FullyLinear1-TS}
 	   \begin{cases}
 	     M_1 (v_{1,k+1}-v_{1,k})  = F_{1,Ext}(t_{k+1}) + p_{1,k+1}   \\
-	     q_{1,k+1} = q_{k}+ h  v_{1,k+\theta} 
+	     q_{1,k+1} = q_{k}+ h  v_{1,k+\theta}
 	   \end{cases}
 
       and Schatzman–Paoli’s sheme for ([eq:FullyLinear1])
@@ -3167,7 +3167,7 @@ LinearDS - Linear Time Invariant Relations
 	   \begin{array}[lcl]{lcl}
 	     \exp(\tilde \Omega) &=& \sum_{k=0}^{\infty} \frac {1}{k!} (\tilde \Omega)^k \\
 				 &=&  I_{3\times 3} + \sum_{k=1}^{\infty} \frac {(-1)^{k-1}}{(2k-1)!}  \theta ^{2k-1} \tilde \Omega + (\sum_{k=0}^{\infty} \frac {(-1)^{k-1}}{(2k)!} \theta)^{2k-2} \tilde \Omega^2\\[2mm]
-				 &=&  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2   
+				 &=&  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2
 	   \end{array}
 
       that is
@@ -3202,7 +3202,7 @@ LinearDS - Linear Time Invariant Relations
 	 q \coloneqq \begin{bmatrix}
 	     x_{\cg}\\
 	     p
-	   \end{bmatrix},\quad 
+	   \end{bmatrix},\quad
 	   v \coloneqq \begin{bmatrix}
 	      v_{\cg}\\
 	      \Omega
@@ -3213,12 +3213,12 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:TT}
-	   \dot q = 
+	   \dot q =
 	   \begin{bmatrix}
 	      \dot x_{\cg}\\
 	      \psi(p) \dot p
 	    \end{bmatrix}
-	    = 
+	    =
 	    \begin{bmatrix}
 	      I & 0 \\
 	      0 & \psi(p)
@@ -3236,7 +3236,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:Newton-Euler-compact}
-	 \boxed{ \left \{ 
+	 \boxed{ \left \{
 	  \begin{aligned}
 	   &\dot q=T(q)v, \\
 	   & M \dot v = F(t, q, v)
@@ -3250,7 +3250,7 @@ LinearDS - Linear Time Invariant Relations
 
 	 M:= \begin{pmatrix}
 	     m I_{3\times 3} & 0 \\
-	     0 & I 
+	     0 & I
 	   \end{pmatrix},
 
       and :math:`F(t, q, v)\in {\mbox{\rm $I\!\!R$}}^6` collects all the
@@ -3390,7 +3390,7 @@ LinearDS - Linear Time Invariant Relations
 	       p \glaw(q \glaw r) = (p\glaw q)\glaw r, \forall  p, q, r ∈ \mathcal G &\text{(associativity)}\\
 	       \exists I \in \mathcal G \text{ such that } I\glaw p = p \glaw I = p,  \forall p \in \mathcal G&\text{(identity element)}\ \\
 	       \forall p \in \mathcal G, \exists  p^{-1}  \in \mathcal G \text{ such that }  p^{-1}\glaw p = I&\text{(inverse) }\ \\
-	       \text{ The maps}  (p, r)  \rightarrow p\glaw r \text{ and }  p  \rightarrow p^{-1} \text{are smooth functions }&\text{(smoothness)}\                                                                                                
+	       \text{ The maps}  (p, r)  \rightarrow p\glaw r \text{ and }  p  \rightarrow p^{-1} \text{are smooth functions }&\text{(smoothness)}\
 	     \end{array}
 
       [Lie algebra :math:`\mathfrak g ` of a Lie group :math:`\mathcal G`] The
@@ -3603,7 +3603,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:149}
 	   \begin{array}{rcl}
 	     R_z(y)  :  \mathcal G \times  \mathcal G  & \rightarrow& \mathcal G \quad \text{ (right translation map )} \\
-	     y  &\mapsto&  y \glaw z 
+	     y  &\mapsto&  y \glaw z
 	   \end{array}
 
       If we identify the manifold :math:`\mathcal M` with the group
@@ -3930,7 +3930,7 @@ LinearDS - Linear Time Invariant Relations
       tangent space :math:`T_RSO(3)` is the set of tangent vectors at a point
       :math:`R`.
 
-      Left representation of the tangent space at :math:`R`, :math:`T_RSO(3)` 
+      Left representation of the tangent space at :math:`R`, :math:`T_RSO(3)`
       ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
       Let :math:`S(t)` be a smooth curve
@@ -4007,7 +4007,7 @@ LinearDS - Linear Time Invariant Relations
 
       Note that :math:`\tilde \Omega x = \Omega \times x`.
 
-       A special (right) action of Lie Group :math:`\mathcal G` on a manifold :math:`\mathcal M`. 
+       A special (right) action of Lie Group :math:`\mathcal G` on a manifold :math:`\mathcal M`.
       ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
       Let us come back to the representation of :math:`T_RSO(3)` given in . It
@@ -4273,7 +4273,7 @@ LinearDS - Linear Time Invariant Relations
 
 	 \label{eq:124}
 	    \begin{array}{lcl}
-	      \operatorname{dexp}_{\tilde\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2 
+	      \operatorname{dexp}_{\tilde\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2
 	   \end{array}
 
       Since :math:`\operatorname{dexp}_{\tilde\Omega}` is a linear mapping
@@ -4363,7 +4363,7 @@ LinearDS - Linear Time Invariant Relations
 				    &=& \widetilde{R \left. \operatorname{dexp}_{\tilde\Omega}(\tilde\Omega)\exp(t \tilde\Omega) \right|_{t=0}  x} \\
 				    &=& \widetilde{R \operatorname{dexp}_{\tilde\Omega}(\tilde\Omega) x} \\
 				    &=& \widetilde{R T(\Omega) \tilde\Omega  x} \\
-				    &=& \widetilde{-R T(\Omega) \tilde x \Omega } 
+				    &=& \widetilde{-R T(\Omega) \tilde x \Omega }
 	   \end{array}
 
       In that case, it is difficult to find a expression as in , but
@@ -4552,7 +4552,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:77}
-	   p \glaw q  = 
+	   p \glaw q  =
 	   \begin{bmatrix}
 	     q_0 & -q_1 & -q_2 & -q_3 \\
 	     q_1 & q_0 & q_3 & -q_2 \\
@@ -4590,7 +4590,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:131}
-	   p \glaw p^\star = 
+	   p \glaw p^\star =
 	   \begin{bmatrix}
 	       x &y  \\
 	       - \bar y  & \bar x
@@ -4666,7 +4666,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:83}
 	   \begin{array}{lcl}
 	     \dot p_{x'}(t) &=& \dot p(t) \glaw p_x \glaw p^{-1}(t) + p(t) \glaw p_x \glaw \dot p^{-1}(t) \\
-			   &=& \dot p(t) \glaw p^{-1}(t)  \glaw   p_{x'}(t)  +      p_{x'}(t) \glaw p(t)  \glaw \dot p^{-1}(t)    
+			   &=& \dot p(t) \glaw p^{-1}(t)  \glaw   p_{x'}(t)  +      p_{x'}(t) \glaw p(t)  \glaw \dot p^{-1}(t)
 	   \end{array}
 
       From :math:`p(t) \glaw p^{-1}(t) =e`, we get
@@ -4906,7 +4906,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:137}
 	   [\widehat{\Omega},\widehat{\Gamma}] = \widehat{\Omega \times \Gamma}
 
-       A special (right) action of Lie Group :math:`\mathcal G` on a manifold :math:`\mathcal M`. 
+       A special (right) action of Lie Group :math:`\mathcal G` on a manifold :math:`\mathcal M`.
       ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
       Let us come back to the representation of
@@ -5140,7 +5140,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:142}
 	   \begin{array}{lcl}
 	     D Id \cdot \widehat \Omega (p) = (\widehat \Omega^r f )(p) &=& \left. \frac{d}{dt}\vv{p\glaw \operatorname{expq}(t\widehat \Omega) \glaw p_x \glaw (p \glaw \operatorname{expq}(t\widehat \Omega))^\star}  \right|_{t=0}\\
-									& = & \vv{p\glaw \frac{d}{dt}\left. \operatorname{expq}(t\widehat \Omega) \right|_{t=0} \glaw p_x \glaw p^\star +  p \glaw p_x \glaw (p \glaw\frac{d}{dt}\left. \operatorname{expq}(t\widehat \Omega) \right|_{t=0})^\star}\\                                              
+									& = & \vv{p\glaw \frac{d}{dt}\left. \operatorname{expq}(t\widehat \Omega) \right|_{t=0} \glaw p_x \glaw p^\star +  p \glaw p_x \glaw (p \glaw\frac{d}{dt}\left. \operatorname{expq}(t\widehat \Omega) \right|_{t=0})^\star}\\
 	   \end{array}
 
       We have form the definition of the time derivative of the exponential
@@ -5160,7 +5160,7 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:146}
 	   \begin{array}{lcl}
 	     D Id \cdot \widehat \Omega (p) &=& \vv{p\glaw \operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega)\glaw p_x \glaw p^\star  + p \glaw p_x \glaw (\operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega))^* \glaw  p^\star } \\
-	   &=& \vv{p\glaw ( \operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega)\glaw p_x +   p_x \glaw (\operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega))^*) \glaw  p^\star } 
+	   &=& \vv{p\glaw ( \operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega)\glaw p_x +   p_x \glaw (\operatorname{dexpq}_{\widehat\Omega}(\widehat \Omega))^*) \glaw  p^\star }
 	   \end{array}
 
       Newton-Euler equation in quaternion form
@@ -5179,7 +5179,7 @@ LinearDS - Linear Time Invariant Relations
 	     &   -p_1 & -p_2 & -p_3 \\
 	     0_{4\times 3}  &  p_0 & -p_3 & p_2 \\
 	     & p_3 & p_0 & -p_1 \\
-	     & -p_2 & p_1 & p_0 
+	     & -p_2 & p_1 & p_0
 	   \end{bmatrix}
 
       todo :
@@ -6253,7 +6253,7 @@ LinearDS - Linear Time Invariant Relations
 
       =
 
-      | 
+      |
       |  int main(int argc, char\* argv[]) **{**
       |  **{**
 
@@ -6267,7 +6267,7 @@ LinearDS - Linear Time Invariant Relations
 
       =
 
-      | 
+      |
       |  *// ======== Creation of the model =============
        *// User-defined main parameters
       **
@@ -6425,7 +6425,7 @@ LinearDS - Linear Time Invariant Relations
 
       =
 
-      | 
+      |
       |  // — Get values to be plotted —
       |  DataPlot(k,0) = k\*t->getH();
       |  DataPlot(k,1) =
@@ -6478,7 +6478,7 @@ LinearDS - Linear Time Invariant Relations
       |  delete K;
       |  delete Mass;
 
-      | 
+      |
       |  **}**
 
       Simulation
@@ -6792,7 +6792,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:AC-L6}
-	    H(U,P) = 
+	    H(U,P) =
 	    \left[\begin{array}{cccc}
 		- I & 0 &  \widehat W_{\n\n} & \widehat W_{\n\t} \\ \\
 		0  & -I  &  \widehat W_{\t\n} & \widehat W_{\t\t} \\ \\
@@ -6832,7 +6832,7 @@ LinearDS - Linear Time Invariant Relations
 	    \label{eq:AC-T3}
 		\begin{array}{l}
 		 \partial_{U_{\n}} \varPhi_2(U,P) =  + \rho_{\n} \\ \\
-		 \partial_{P_{\n}} \varPhi_2(U,P) =  0 \\ \\ 
+		 \partial_{P_{\n}} \varPhi_2(U,P) =  0 \\ \\
 		\end{array}
 
       -  **If** :math:`P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k})  < 0 `, we get
@@ -6851,7 +6851,7 @@ LinearDS - Linear Time Invariant Relations
 	    \label{eq:AC-T5}
 		\begin{array}{l}
 		 \partial_{U_{\n}} \varPhi_2(U,P) =  0 \\ \\
-		 \partial_{P_{\n}} \varPhi_2(U,P) =  1 \\ \\ 
+		 \partial_{P_{\n}} \varPhi_2(U,P) =  1 \\ \\
 		\end{array}
 
       Computation of the gradients of :math:`\Phi_3`
@@ -6872,7 +6872,7 @@ LinearDS - Linear Time Invariant Relations
 
 	    \label{eq:AC-TT2}
 	      \begin{array}{l}
-	      \varPhi_3(U,P) =  + \rho_{\t} U_{\t} 
+	      \varPhi_3(U,P) =  + \rho_{\t} U_{\t}
 	    \end{array}
 
 	 and
@@ -6882,9 +6882,9 @@ LinearDS - Linear Time Invariant Relations
 	    \label{eq:AC-TT3}
 		\begin{array}{l}
 		 \partial_{U_{\n}} \varPhi_3(U,P) =  0 \\ \\
-		 \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\ 
+		 \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\
 		 \partial_{U_{\t}} \varPhi_3(U,P) =  + \rho_{\t} \\ \\
-		 \partial_{P_{\t}} \varPhi_3(U,P) =  0 \\ \\ 
+		 \partial_{P_{\t}} \varPhi_3(U,P) =  0 \\ \\
 		\end{array}
 
       -  **If**
@@ -6915,9 +6915,9 @@ LinearDS - Linear Time Invariant Relations
 	       \label{eq:AC-TT6}
 		  \begin{array}{l}
 		    \partial_{U_{\n}} \varPhi_3(U,P) =  0 \\ \\
-		    \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\ 
+		    \partial_{P_{\n}} \varPhi_3(U,P) =  0 \\ \\
 		    \partial_{U_{\t}} \varPhi_3(U,P) =  0 \\ \\
-		    \partial_{P_{\t}} \varPhi_3(U,P) =  I_2 \\ \\ 
+		    \partial_{P_{\t}} \varPhi_3(U,P) =  I_2 \\ \\
 		  \end{array}
 
 	 -  **If** :math:`P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) > 0`, we
@@ -6937,9 +6937,9 @@ LinearDS - Linear Time Invariant Relations
 	       \label{eq:AC-TT8}
 		  \begin{array}{l}
 		    \partial_{U_{\n}} \varPhi_3(U,P) =  \mu \rho_{\n}  {\displaystyle \frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }}\text{{\bf WARNING} case was not taken into account}\\ \\
-		    \partial_{P_{\n}} \varPhi_3(U,P) =  -\mu  {\displaystyle \frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }} \\ \\ 
+		    \partial_{P_{\n}} \varPhi_3(U,P) =  -\mu  {\displaystyle \frac{P_{\t} - \rho_{\t} U_{\t} }{ \| P_{\t} - \rho_{\t} U_{\t}\| }} \\ \\
 		    \partial_{U_{\t}} \varPhi_3(U,P) =  \mu\rho_{\t}(P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \Gamma(P_{\t} - \rho_{\t} U_{\t})  \\ \\
-		    \partial_{P_{\t}} \varPhi_3(U,P) =  I_2-\mu(P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \Gamma(P_{\t} - \rho_{\t} U_{\t})  \\ \\ 
+		    \partial_{P_{\t}} \varPhi_3(U,P) =  I_2-\mu(P_{\n} - \rho_{\n} (U_{\n} +e  U_{\n,k}) ) \Gamma(P_{\t} - \rho_{\t} U_{\t})  \\ \\
 		  \end{array}
 
       Rearranging the cases
@@ -6981,7 +6981,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:GAC-L3}
-	    H(v,U,P) = 
+	    H(v,U,P) =
 	    \left[\begin{array}{ccccc}
 		- \widehat M & 0 & 0 & H_{\n} & H_{\t} \\ \\
 		 H_{\n}^\top &  - I & 0 & 0 &0 \\ \\
@@ -6996,9 +6996,9 @@ LinearDS - Linear Time Invariant Relations
 
 	 \label{eq:equivalentJacobian}
 	   \begin{array}{lcl}
-	      \partial_{U} \Psi_2(v,U,P) &=& \partial_{U} \Phi_2(U,P) \\ 
-	      \partial_{P} \Psi_2(v,U,P) &=& \partial_{P} \Phi_2(U,P) \\     
-	      \partial_{U} \Psi_3(v,U,P) &=& \partial_{U} \Phi_3(U,P) \\ 
+	      \partial_{U} \Psi_2(v,U,P) &=& \partial_{U} \Phi_2(U,P) \\
+	      \partial_{P} \Psi_2(v,U,P) &=& \partial_{P} \Phi_2(U,P) \\
+	      \partial_{U} \Psi_3(v,U,P) &=& \partial_{U} \Phi_3(U,P) \\
 	      \partial_{P} \Psi_3(v,U,P) &=& \partial_{P} \Phi_3(U,P) \\
 	   \end{array}
 
@@ -7007,7 +7007,7 @@ LinearDS - Linear Time Invariant Relations
       .. math::
 
 	 \label{eq:GAC-L4}
-	    H(v,U,P) = 
+	    H(v,U,P) =
 	    \left[\begin{array}{ccccc}
 		- \widehat M & 0 & 0 & H_{\n} & H_{\t} \\ \\
 		 H_{\n}^\top &  - I & 0 & 0 &0 \\ \\
@@ -7045,13 +7045,13 @@ LinearDS - Linear Time Invariant Relations
 	 \label{eq:chainrule1}
 	   \begin{array}{lcl}
 	   \partial_v \widetilde \Psi_{2,3}(v,P) &=&  \partial_v \Psi_{2,3}(v,H^\top v +b,P)  \\ \\
-	   &=& H_{\n}^\top \partial_{U_\n} \Phi_{2,3}(H^\top v + b,P) + H_{\t}^\top \partial_{U_\t} \Phi_{2,3}(H^\top v + b,P)  
+	   &=& H_{\n}^\top \partial_{U_\n} \Phi_{2,3}(H^\top v + b,P) + H_{\t}^\top \partial_{U_\t} \Phi_{2,3}(H^\top v + b,P)
 	 \end{array}
 
       .. math::
 
 	 \label{eq:GAC-L6}
-	    H(v,P) = 
+	    H(v,P) =
 	    \left[\begin{array}{ccc}
 		- \widehat M &   H_{\n} & H_{\t} \\ \\
 		H_{\n}^\top \partial_{U_\n} \Phi_{2}(H^\top v + b,P) &   \partial_{P_{\n}} \Phi_2(H^\top v + b,P) & 0 \\ \\

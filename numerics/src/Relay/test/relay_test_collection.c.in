@@ -60,6 +60,6 @@ int main(void)
   number_of_tests += 1;  // for the free call to be complete
   free_test_collection(collection, number_of_tests);
   free(_data_collection);
-  
+
   return out;
 }

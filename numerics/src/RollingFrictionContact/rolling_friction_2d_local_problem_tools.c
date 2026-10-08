@@ -27,8 +27,8 @@
 #include "numerics_errors.h"
 
 void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* problem,
-                                          RollingFrictionContactProblem* localproblem,
-                                          double* reaction, int contact) {
+                                                 RollingFrictionContactProblem* localproblem,
+                                                 double* reaction, int contact) {
   double* qLocal = localproblem->q;
   int n = 3 * problem->numberOfContacts;
 
@@ -44,8 +44,8 @@ void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* 
 }
 
 void rolling_friction_2d_local_problem_fill_M(RollingFrictionContactProblem* problem,
-                                       RollingFrictionContactProblem* localproblem,
-                                       int contact) {
+                                              RollingFrictionContactProblem* localproblem,
+                                              int contact) {
   NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 }
 
@@ -71,7 +71,7 @@ RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
 }
 
 void rolling_friction_2d_local_problem_free(RollingFrictionContactProblem* localproblem,
-                                     RollingFrictionContactProblem* problem) {
+                                            RollingFrictionContactProblem* problem) {
   if (problem->M->storageType == NM_SPARSE_BLOCK) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/

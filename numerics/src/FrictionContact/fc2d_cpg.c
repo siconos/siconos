@@ -31,12 +31,12 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 
-void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-              SolverOptions *options) {
+void fc2d_cpg(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+              SolverOptions* options) {
   int nc = problem->numberOfContacts;
   assert(nc > 0);
-  double *vec = problem->M->matrix0;
-  double *mu = problem->mu;
+  double* vec = problem->M->matrix0;
+  double* mu = problem->mu;
 
   int n = 2 * nc, i, iter;
   assert(n > 0);
@@ -55,18 +55,18 @@ void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocit
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
-  r = (double *)malloc(n * sizeof(double));
-  p = (double *)malloc(n * sizeof(double));
-  v = (double *)malloc(n * sizeof(double));
-  w = (double *)malloc(n * sizeof(double));
-  Ap = (double *)malloc(n * sizeof(double));
-  xi = (double *)malloc(n * sizeof(double));
-  z = (double *)malloc(n * sizeof(double));
-  fric1 = (double *)malloc(n * sizeof(double));
+  r = (double*)malloc(n * sizeof(double));
+  p = (double*)malloc(n * sizeof(double));
+  v = (double*)malloc(n * sizeof(double));
+  w = (double*)malloc(n * sizeof(double));
+  Ap = (double*)malloc(n * sizeof(double));
+  xi = (double*)malloc(n * sizeof(double));
+  z = (double*)malloc(n * sizeof(double));
+  fric1 = (double*)malloc(n * sizeof(double));
 
-  fric = (double *)malloc(nc * sizeof(double));
-  stat = (int *)malloc(nc * sizeof(int));
-  statusi = (int *)malloc(nc * sizeof(int));
+  fric = (double*)malloc(nc * sizeof(double));
+  stat = (int*)malloc(nc * sizeof(int));
+  statusi = (int*)malloc(nc * sizeof(int));
 
   for (i = 0; i < n; i++) {
     reaction[i] = 0.0;
@@ -265,24 +265,24 @@ void fc2d_cpg(FrictionContactProblem *problem, double *reaction, double *velocit
  * - Elimination of giant switch statements in drivers
  */
 
-static void fc2d_cpg_set_default(SolverOptions *options) {
+static void fc2d_cpg_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int fc2d_cpg_init_wrap(void *problem, SolverOptions *options) {
+static int fc2d_cpg_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int fc2d_cpg_solve_wrap(void *problem, double *reaction, double *velocity,
-                               SolverOptions *options) {
+static int fc2d_cpg_solve_wrap(void* problem, double* reaction, double* velocity,
+                               SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc2d_cpg((FrictionContactProblem *)problem, reaction, velocity, &info, options);
+  fc2d_cpg((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_cpg_free_wrap(void *problem, SolverOptions *options) {
+static void fc2d_cpg_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

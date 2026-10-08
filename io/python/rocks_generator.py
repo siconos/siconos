@@ -21,10 +21,10 @@
 Tools to generate random convex blocks (mostly used in rockfall simulations)
 """
 
-import numpy as np
-import trimesh
 from dataclasses import dataclass
 
+import numpy as np
+import trimesh
 from siconos.mechanics.collision.convexhull import ConvexHull
 from siconos.mechanics.collision.tools import Contactor
 
@@ -151,7 +151,7 @@ def normalize_shape(vertices, y_aspect_ratio, z_aspect_ratio, dest_vol):
     # 4- Set volume
     # assume density:=1 for now, so inertia will be recomputed later as
     # it is proportionnal to density
-    base_inertia, start_volume = siconos_convex_hull.inertia([0.0, 0.0, 0.0])
+    _base_inertia, start_volume = siconos_convex_hull.inertia([0.0, 0.0, 0.0])
     vol_factor = dest_vol / start_volume
     coord_factor = vol_factor ** (1 / 3)
     vertices *= coord_factor  # homothetic transform -> now vol=dest_vol
@@ -221,7 +221,7 @@ def generate_random_blocks(io, drop_config, rock_config):
     prob = areas / areas.sum()
 
     # creation the set of blocks
-    for i in range(0, drop_config.number_of_rocks):
+    for i in range(drop_config.number_of_rocks):
         # print("n_rock", i)
         nameDs = "block" + str(i)
         nameShape = "block" + str(i) + "-shape"
@@ -267,7 +267,7 @@ def generate_random_blocks(io, drop_config, rock_config):
         vertices = np.array(vertices)[:] - cm[:]
         # ch = ConvexHull(vertices)
         # cm = ch.centroid()
-        inertia, area = ch.inertia(cm)
+        inertia, _area = ch.inertia(cm)
         mass_block = rock_config.density * rock_config.volume_max
 
         inertia = inertia * mass_block

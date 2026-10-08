@@ -39,7 +39,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* 
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
     return numerics_error("lcp_driver_SparseBlockMatrix",
-                   "forbidden type of storage for the matrix M of the LCP");
+                          "forbidden type of storage for the matrix M of the LCP");
 
   /*
     The options for the global "block" solver are defined in options->\n
@@ -116,7 +116,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 1)
     return numerics_error("lcp_driver_DenseMatrix",
-                   "forbidden type of storage for the matrix M of the LCP");
+                          "forbidden type of storage for the matrix M of the LCP");
 
   assert(options->isSet);
 

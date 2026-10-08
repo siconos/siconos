@@ -161,8 +161,10 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
             ok = False
 
 if ok:
-    print("OK: strain/stress tensors match analytical affine-field values "
-          "for all elements")
+    print(
+        "OK: strain/stress tensors match analytical affine-field values "
+        "for all elements"
+    )
     sys.exit(0)
 else:
     sys.exit(1)

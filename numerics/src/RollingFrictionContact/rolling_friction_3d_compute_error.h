@@ -42,9 +42,9 @@ extern "C" {
    \param[in,out] error value
    \return 0 if ok
 */
-int rolling_friction_3d_compute_error(RollingFrictionContactProblem *problem, double *z,
-                                      double *w, double tolerance, SolverOptions *options,
-                                      double norm, double *error);
+int rolling_friction_3d_compute_error(RollingFrictionContactProblem* problem, double* z,
+                                      double* w, double tolerance, SolverOptions* options,
+                                      double norm, double* error);
 
 /**
    Error computation (using the normal map residual) for one friction-contact 3D problem
@@ -56,8 +56,8 @@ int rolling_friction_3d_compute_error(RollingFrictionContactProblem *problem, do
    \param[in,out] error value
  */
 void rolling_friction_3d_unitary_compute_and_add_error(double r[5], double u[5], double mu,
-                                                       double mur, double *error,
-                                                       double *worktmp);
+                                                       double mur, double* error,
+                                                       double* worktmp);
 
 #if defined(__cplusplus)
 }

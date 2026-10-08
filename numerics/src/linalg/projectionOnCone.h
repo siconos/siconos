@@ -31,19 +31,19 @@ extern "C" {
 
 /**
    Projection on the second Order Cone in \f$ R^3 \f$
-   
+
    \f$ K \{r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected
    \param[in] mu the angle of the cone
    \return the type of projection
 */
-unsigned projectionOnCone(double *r, double mu);
+unsigned projectionOnCone(double* r, double mu);
 
 /**
    Compute an element of the the subdifferential of the
    projection on the second Order Cone in \f$ R^3 \f$
-   
+
    \f$ K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
 
    \param[out] H an element of the the subdifferential
@@ -51,7 +51,7 @@ unsigned projectionOnCone(double *r, double mu);
    \param[in] mu the angle of the cone
    \return the type of projection
 */
-unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
+unsigned subdifferentialProjectionOnCone(double* H, double* r, double mu);
 
 /**
     Projection on the second Order Cone in \f$ R^3 \f$
@@ -62,18 +62,18 @@ unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
     \param[in] mu the angle of the cone
     \return the type of projection
 */
-unsigned projectionOnDualCone(double *u, double mu);
+unsigned projectionOnDualCone(double* u, double mu);
 
 /**
    Projection on the second Order Cone in \f$ R^n \f$
-   
+
    \f$ K \{r, r_1 \geq 0, 0 \|[r_2,r_n]\| \geq mu r_1  \} \f$
 
    \param[in,out] r the vector to be projected
    \param[in] mu the angle of the cone
    \param[in] size dimension
 */
-void projectionOnSecondOrderCone(double *r, double mu, int size);
+void projectionOnSecondOrderCone(double* r, double mu, int size);
 
 #if defined(__cplusplus)
 }

@@ -42,7 +42,6 @@ thanks to  lcp solvers.
 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
-
 #include "numerics_errors.h"
 #endif
 /* int lcp_solver_pred(double *vec, double *q , int *n , method_lcp *pt , double *z , double *w
@@ -52,10 +51,10 @@ thanks to  lcp solvers.
 /*                     int *ipiv , int *sizesublcp , int *sizesublcpop , */
 /*                     double *subq , double *bufz , double *newz , double *workspace) */
 
-int lcp_solver_pred(n, method_lcp *pt, double *z, double *w, int firsttime, int *soltype,
-                    int *indic, int *indicop, double *submatlcp, double *submatlcpop,
-                    int *ipiv, int *sizesublcp, int *sizesublcpop, double *subq, double *bufz,
-                    double *newz, double *workspace) {
+int lcp_solver_pred(n, method_lcp* pt, double* z, double* w, int firsttime, int* soltype,
+                    int* indic, int* indicop, double* submatlcp, double* submatlcpop,
+                    int* ipiv, int* sizesublcp, int* sizesublcpop, double* subq, double* bufz,
+                    double* newz, double* workspace) {
   /* subq, bufz, newz, workspace: work vectors*/
 
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "PGS", lcpkey3[10] = "CPG";
@@ -108,7 +107,7 @@ int lcp_solver_pred(n, method_lcp *pt, double *z, double *w, int firsttime, int 
   }
 
   /* Solver name */
-  char *name = options->solverName;
+  char* name = options->solverName;
 
   if (verbose == 1)
     printf(
@@ -218,8 +217,8 @@ int lcp_solver_pred(n, method_lcp *pt, double *z, double *w, int firsttime, int 
   return info;
 }
 
-int extractLCP(NumericsMatrix *MGlobal, double *z, int *indic, int *indicop, double *submatlcp,
-               double *submatlcpop, int *ipiv, int *sizesublcp, int *sizesublcpop) {
+int extractLCP(NumericsMatrix* MGlobal, double* z, int* indic, int* indicop, double* submatlcp,
+               double* submatlcpop, int* ipiv, int* sizesublcp, int* sizesublcpop) {
   if (MGlobal == NULL || z == NULL)
     numerics_error("extractLCP", "Null input for one arg (problem, z, ...)");
 
@@ -229,7 +228,7 @@ int extractLCP(NumericsMatrix *MGlobal, double *z, int *indic, int *indicop, dou
   /* Extract data from problem */
   if (MGlobal->storageType == 1)
     numerics_error("extractLCP", "Not yet implemented for sparse storage");
-  double *M = MGlobal->matrix0;
+  double* M = MGlobal->matrix0;
   int sizelcp = MGlobal->size0;
   if (M == NULL) numerics_error("extractLCP", "Null input matrix M");
 
@@ -289,9 +288,9 @@ int extractLCP(NumericsMatrix *MGlobal, double *z, int *indic, int *indicop, dou
   return 0;
 }
 
-int predictLCP(int sizeLCP, double *q, double *z, double *w, double tol, int *indic,
-               int *indicop, double *submatlcp, double *submatlcpop, int *ipiv,
-               int *sizesublcp, int *sizesublcpop, double *subq, double *bufz, double *newz) {
+int predictLCP(int sizeLCP, double* q, double* z, double* w, double tol, int* indic,
+               int* indicop, double* submatlcp, double* submatlcpop, int* ipiv,
+               int* sizesublcp, int* sizesublcpop, double* subq, double* bufz, double* newz) {
   if (q == NULL || z == NULL || w == NULL)
     numerics_error("predictLCP", "Null input for one arg (problem, q,w ...)");
 

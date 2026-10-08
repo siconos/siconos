@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /**
  * \file CohesiveZoneModelNIFNSL.cpp
@@ -54,7 +54,7 @@ CohesiveZoneModelNIFNSL::CohesiveZoneModelNIFNSL(siconos::algebra::Index size)
 }
 
 CohesiveZoneModelNIFNSL::CohesiveZoneModelNIFNSL(double en, double et, double mu,
-                                                   siconos::algebra::Index size)
+                                                 siconos::algebra::Index size)
     : NewtonImpactFrictionNSL(en, et, mu, size) {
   // Create fallback law with the same parameters as the cohesive law.
   // This ensures consistent behavior after the interface breaks.
@@ -71,12 +71,13 @@ bool CohesiveZoneModelNIFNSL::isActiveAtLevel(Interaction& inter, unsigned int l
 void CohesiveZoneModelNIFNSL::display() const {
   // Display base class parameters (restitution, friction)
   NewtonImpactFrictionNSL::display();
-  
+
   // Display cohesive-specific header
   std::cout << "=== CohesiveZoneModelNIFNSL data display ==============================="
             << std::endl;
   std::cout << "(Abstract base class - concrete parameters in derived class)" << std::endl;
-  std::cout << "==================================================================" << std::endl;
+  std::cout << "=================================================================="
+            << std::endl;
 }
 
 }  // namespace siconos::modeling

@@ -1,5 +1,5 @@
-#!/bin/bash
-source ~/.bashrc
+#!/usr/bin/env bash
+#source "$HOME/.bashrc"
 micromamba config prepend channels conda-forge
 micromamba config prepend channels intel
 #micromamba config set channel_priority strict

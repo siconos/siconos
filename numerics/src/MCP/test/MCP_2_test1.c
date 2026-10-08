@@ -26,11 +26,11 @@
 #include "NumericsMatrix.h"               // for NM_create, NM_DENSE, Numeri...
 #include "NumericsVerbose.h"              // for numerics_set_verbose
 #include "SolverOptions.h"                // for solver_options_id_to_name
-static double *M;
-static double *q;
+static double* M;
+static double* q;
 
-void testF(void *env, int size, double *z, double *F);
-void testF(void *env, int size, double *z, double *F) {
+void testF(void* env, int size, double* z, double* F);
+void testF(void* env, int size, double* z, double* F) {
   /* printf("call to MCP function F(z) ...\n");   */
   /* for (int i =0 ; i <size; i++) */
   /* { */
@@ -51,8 +51,8 @@ void testF(void *env, int size, double *z, double *F) {
   /* printf("End call to MCP function F(z) ...\n");   */
 }
 
-void testNablaF(void *env, int size, double *z, NumericsMatrix *nablaF);
-void testNablaF(void *env, int size, double *z, NumericsMatrix *nablaF) {
+void testNablaF(void* env, int size, double* z, NumericsMatrix* nablaF);
+void testNablaF(void* env, int size, double* z, NumericsMatrix* nablaF) {
   /* printf("call to MCP function nablaF(z) ...\n"); */
 
   for (int i = 0; i < size; i++) {
@@ -62,10 +62,10 @@ void testNablaF(void *env, int size, double *z, NumericsMatrix *nablaF) {
   }
 }
 
-static MixedComplementarityProblem *create_mcp_1(void) {
+static MixedComplementarityProblem* create_mcp_1(void) {
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem *problem =
-      (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
+  MixedComplementarityProblem* problem =
+      (MixedComplementarityProblem*)malloc(sizeof(MixedComplementarityProblem));
 
   int n = 10;
 
@@ -76,8 +76,8 @@ static MixedComplementarityProblem *create_mcp_1(void) {
   problem->nabla_Fmcp = NM_create(NM_DENSE, n, n);
   problem->env = NULL;
 
-  M = (double *)calloc(n * n, sizeof(double));
-  q = (double *)calloc(n, sizeof(double));
+  M = (double*)calloc(n * n, sizeof(double));
+  q = (double*)calloc(n, sizeof(double));
 
   for (int i = 0; i < n; i++) {
     q[i] = -i + 7.;
@@ -89,7 +89,7 @@ static MixedComplementarityProblem *create_mcp_1(void) {
   return problem;
 }
 
-static void free_mcp_1(MixedComplementarityProblem *problem) {
+static void free_mcp_1(MixedComplementarityProblem* problem) {
   free(M);
   free(q);
   mixedComplementarityProblem_free(problem);
@@ -100,16 +100,16 @@ static int test_mcp_newton(int solverId) {
 
   int info = 1;
 
-  MixedComplementarityProblem *problem = create_mcp_1();
+  MixedComplementarityProblem* problem = create_mcp_1();
 
   /* Set solver options, FB solver */
-  SolverOptions *options = solver_options_create(solverId);
+  SolverOptions* options = solver_options_create(solverId);
 
   numerics_set_verbose(1);
 
   int size = problem->n1 + problem->n1;
-  double *z = (double *)malloc(size * sizeof(double));
-  double *w = (double *)malloc(size * sizeof(double));
+  double* z = (double*)malloc(size * sizeof(double));
+  double* w = (double*)malloc(size * sizeof(double));
 
   for (int i = 0; i < size; i++) {
     z[i] = 0.0;

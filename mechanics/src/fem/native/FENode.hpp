@@ -59,7 +59,7 @@ class FENode {
    */
   FENode(size_t num, std::shared_ptr<MeshVertex> v,
          const std::vector<siconos::algebra::Index>& dofIndex)
-      : num_(num), mVertex_(v), global_dof_index_(dofIndex){};
+      : num_(num), mVertex_(v), global_dof_index_(dofIndex) {};
 
   ~FENode() noexcept = default;
   auto num() { return num_; }

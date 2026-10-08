@@ -9,7 +9,7 @@ Basics
 At this step, you must have :
 
 * installed properly siconos as explained in :ref:`siconos_install_guide`
-* created a directory for your simulation, 
+* created a directory for your simulation,
 * written in this directory a 'driver' file, either in C++ or in python, as presented in one of the numerous examples of :ref:`siconos_examples`
 
 Then, simply use siconos script on you driver (driver.cpp or driver.py)::
@@ -20,7 +20,7 @@ Reminder: if *siconos_install_path* is not a standard path of your system, you m
 
     * append *siconos_install_path*/bin to PATH
 
-  
+
 Plugins mechanism
 -----------------
 

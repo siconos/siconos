@@ -3,8 +3,8 @@
 Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
 """
 
-from siconos.io.vview import VView, VExportOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from siconos.io.vview import VExportOptions, VView
 
 if __name__ == "__main__":
     # Parse command-line

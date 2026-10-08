@@ -37,9 +37,9 @@
 #include "NumericsVector.h"
 #endif
 
-void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *restrict u,
+void plasticity_2d_unitary_compute_and_add_error(double* restrict r, double* restrict u,
                                                  double eta, double theta,
-                                                 double *restrict error, double *worktmp) {
+                                                 double* restrict error, double* worktmp) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
@@ -54,9 +54,9 @@ void plasticity_2d_unitary_compute_and_add_error(double *restrict r, double *res
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
-int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w,
-                                double tolerance, SolverOptions *options, double norm,
-                                double *error) {
+int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error) {
   DEBUG_BEGIN("plasticity_2d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -67,15 +67,17 @@ int plasticity_2d_compute_error(PlasticityProblem *problem, double *z, double *w
   if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER) {
     *error = 0.0;
     DEBUG_END("plasticity_2d_compute_error(...)\n");
-    return numerics_error("plasticity_2d_compute_error", "Only Drucker-Prager model is currently supported");;
+    return numerics_error("plasticity_2d_compute_error",
+                          "Only Drucker-Prager model is currently supported");
+    ;
   }
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfCones;
   int n = nc * 3;
-  double *eta = problem->model.drucker_prager->eta;
-  double *theta = problem->model.drucker_prager->theta;
+  double* eta = problem->model.drucker_prager->eta;
+  double* theta = problem->model.drucker_prager->theta;
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q

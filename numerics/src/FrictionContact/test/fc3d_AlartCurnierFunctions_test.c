@@ -31,21 +31,21 @@ int main() {
   int info = 0;
   int r = -1;
 
-  FILE *file = fopen("./data/ACinputs.dat", "r");
+  FILE* file = fopen("./data/ACinputs.dat", "r");
   unsigned int dim = 0;
-  double *reactions;
-  double *velocities;
-  double *mus;
-  double *rhos;
+  double* reactions;
+  double* velocities;
+  double* mus;
+  double* rhos;
 
   r = fscanf(file, "%d\n", &dim);
   assert(r > 0);
   if (r <= 0) return (r);
 
-  reactions = (double *)malloc(3 * dim * sizeof(double));
-  velocities = (double *)malloc(3 * dim * sizeof(double));
-  mus = (double *)malloc(dim * sizeof(double));
-  rhos = (double *)malloc(3 * dim * sizeof(double));
+  reactions = (double*)malloc(3 * dim * sizeof(double));
+  velocities = (double*)malloc(3 * dim * sizeof(double));
+  mus = (double*)malloc(dim * sizeof(double));
+  rhos = (double*)malloc(3 * dim * sizeof(double));
 
   for (unsigned int i = 0; i < dim * 3; ++i) {
     r = fscanf(file, "%lf\n", &reactions[i]);
@@ -69,7 +69,7 @@ int main() {
 
   double F1[3], A1[9], B1[9], F2[3], A2[9], B2[9];
   for (unsigned int k = 0; k < dim; ++k) {
-    double *p;
+    double* p;
 
     p = F1;
     OP3(*p++ = NAN);

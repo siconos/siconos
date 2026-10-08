@@ -16,20 +16,20 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>  // for malloc
 #include <math.h>    // for fabs
+#include <stdlib.h>  // for malloc
 
-#include "SolverOptions.h"               // for SolverOptions, solver_option...
-#include "NumericsFwd.h"                 // for SolverOptions
-#include "../test-utils/plasticity_test_utils.h"       // for build_test_collection
-#include "test_utils.h"                  // for TestCase
-#include "Plasticity_options.h"          // for PLASTICITY_2D_NSGS, etc
-#include "plasticity_2d_solvers.h"       // for plasticity_2d_nsgs, plasticity_2d_nsgs_generic
+#include "../test-utils/plasticity_test_utils.h"  // for build_test_collection
+#include "NumericsFwd.h"                          // for SolverOptions
+#include "Plasticity_options.h"                   // for PLASTICITY_2D_NSGS, etc
 #include "SiconosBlas.h"
+#include "SolverOptions.h"          // for SolverOptions, solver_option...
+#include "plasticity_2d_solvers.h"  // for plasticity_2d_nsgs, plasticity_2d_nsgs_generic
+#include "test_utils.h"             // for TestCase
 
 TestCase* build_test_collection(int n_data, const char** data_collection,
                                 int* number_of_tests) {
-  int n_solvers = 2;  /* Legacy NSGS vs Generic NSGS */
+  int n_solvers = 2; /* Legacy NSGS vs Generic NSGS */
   *number_of_tests = n_data * n_solvers;
   TestCase* collection = malloc((*number_of_tests) * sizeof(TestCase));
 

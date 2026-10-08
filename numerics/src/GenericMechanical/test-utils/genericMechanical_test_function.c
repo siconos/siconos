@@ -51,18 +51,19 @@ int gmp_test_function(TestCase* current) {
 
   if (!info) {
     if (error > current->options->dparam[SICONOS_DPARAM_TOL]) {
-      printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error, info,
-             current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+      printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error,
+             info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
       info = 1;
     } else
       printf("test successful, residual = %g\t, number of iterations = %i \n", error,
              current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
   } else {
-    printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error, info,
-           current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test unsuccessful, residual = %g, info = %d, number of iterations = %d\n", error,
+           info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   }
-  printf("GMP TEST: number of GS iterations = %i\n", current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+  printf("GMP TEST: number of GS iterations = %i\n",
+         current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   genericMechanicalProblem_free(problem, GMP_FREE_MATRIX);
   free(reaction);
   free(velocity);

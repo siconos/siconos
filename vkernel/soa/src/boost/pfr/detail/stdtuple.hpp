@@ -12,42 +12,40 @@
 #ifdef BOOST_PFR_HAS_STD_MODULE
 import std;
 #else
-#include <utility>      // metaprogramming stuff
 #include <tuple>
+#include <utility>  // metaprogramming stuff
 #endif
 
 #include <boost/pfr/detail/sequence_tuple.hpp>
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 template <class T, std::size_t... I>
 constexpr auto make_stdtuple_from_tietuple(const T& t, std::index_sequence<I...>) {
-    (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
-    return std::make_tuple(
-        boost::pfr::detail::sequence_tuple::get<I>(t)...
-    );
+  (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
+  return std::make_tuple(boost::pfr::detail::sequence_tuple::get<I>(t)...);
 }
 
 template <class T, std::size_t... I>
-constexpr auto make_stdtiedtuple_from_tietuple(const T& t, std::index_sequence<I...>) noexcept {
-    (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
-    return std::tie(
-        boost::pfr::detail::sequence_tuple::get<I>(t)...
-    );
+constexpr auto make_stdtiedtuple_from_tietuple(const T& t,
+                                               std::index_sequence<I...>) noexcept {
+  (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
+  return std::tie(boost::pfr::detail::sequence_tuple::get<I>(t)...);
 }
 
 template <class T, std::size_t... I>
-constexpr auto make_conststdtiedtuple_from_tietuple(const T& t, std::index_sequence<I...>) noexcept {
-    (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
-    return std::tuple<
-        std::add_lvalue_reference_t<std::add_const_t<
-            std::remove_reference_t<decltype(boost::pfr::detail::sequence_tuple::get<I>(t))>
-        >>...
-    >(
-        boost::pfr::detail::sequence_tuple::get<I>(t)...
-    );
+constexpr auto make_conststdtiedtuple_from_tietuple(const T& t,
+                                                    std::index_sequence<I...>) noexcept {
+  (void)t;  // workaround for MSVC 14.1 `warning C4100: 't': unreferenced formal parameter`
+  return std::tuple<std::add_lvalue_reference_t<std::add_const_t<
+      std::remove_reference_t<decltype(boost::pfr::detail::sequence_tuple::get<I>(t))>>>...>(
+      boost::pfr::detail::sequence_tuple::get<I>(t)...);
 }
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_STDTUPLE_HPP
+#endif  // BOOST_PFR_DETAIL_STDTUPLE_HPP

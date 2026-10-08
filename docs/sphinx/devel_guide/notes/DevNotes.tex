@@ -96,7 +96,7 @@
     \hline
     author  & F. P\'erignon \\
     \hline
-    date    & May 16, 2006 \\ 
+    date    & May 16, 2006 \\
     \hline
     version & ? \\
     \hline
@@ -109,43 +109,43 @@
 \subsection{General notations}
 We consider $n$ dynamical systems of the form:
 \begin{equation}
-\dot x_i = A_i x_i + R_i 
+\dot x_i = A_i x_i + R_i
 \end{equation}
 Each system if of dimension $n_i$, and we denote $N = \displaystyle{\sum_{i=1}^{n} n_i}$. \\
 An interaction, $I_{\alpha}$ is composed with a non smooth law, $nslaw_{\alpha}$ and a relation:
 \begin{equation}
 y_{\alpha} = C_{\alpha}X_{\alpha} + D_{\alpha}\lambda_{\alpha}
 \end{equation}
-The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set: 
+The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set:
 $$ M = \sum_{\alpha=1}^{m} m_{\alpha}$$
 $m$ being the number of interactions in the Non Smooth Dynamical System.  \\
 $X_{\alpha}$ is a vector that represents the DS concerned by the interaction. Its dimension is noted $N_{\alpha}$, this for $n_{\alpha}$ systems in the interaction. \\
 $C_{\alpha}$ is a $m_{\alpha} \times N_{\alpha}$ row-blocks matrix and $D_{\alpha}$ a $m_{\alpha} \times m_{\alpha}$ square matrix. \\
 \begin{equation}
-C_{\alpha}=\left[\begin{array}{ccc} 
+C_{\alpha}=\left[\begin{array}{ccc}
 C_{\alpha}^i & C_{\alpha}^j & ...\end{array}\right]
 \end{equation}
 with $i,j,...\in \mathcal{DS}_{\alpha}$ which is the set of DS belonging to interaction $\alpha$.\\
-We also have the following relation: 
+We also have the following relation:
 \begin{equation}
-\left[\begin{array}{c} 
+\left[\begin{array}{c}
 R_{\alpha}^i \\
 R_{\alpha}^j \\
-...  
+...
 \end{array}\right] = B_{\alpha}\lambda_{\alpha}
-=\left[\begin{array}{c} 
+=\left[\begin{array}{c}
 B_{\alpha}^i \\
 B_{\alpha}^j \\
 ...
 \end{array}\right]\lambda_{\alpha}
 \end{equation}
-$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and $B_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\ 
-And so: 
+$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and $B_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\
+And so:
 \begin{equation}
 R_i = \sum_{\beta\in\mathcal{I}_i}R_{\beta}^i=\sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}
 \end{equation}
 with $\mathcal{I}_i$ the set of interactions in which dynamical system number $i$ is involved. \\
-Introducing the time discretization, we get: 
+Introducing the time discretization, we get:
 \begin{eqnarray}
 x_i^{k+1}-x_i^k = h A_i x_i^{k+1} + h R_i^{k+1}  \\
 \nonumber\\
@@ -153,57 +153,57 @@ y_{\alpha}^{k+1} = C_{\alpha}X_{\alpha}^{k+1} + D_{\alpha}\lambda_{\alpha}^{k+1}
 \nonumber\\
 R_i^{k+1} = \sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}^{k+1}
 \end{eqnarray}
-ie, with $W_i = (I-h A_i)^{-1}$: 
+ie, with $W_i = (I-h A_i)^{-1}$:
 \begin{eqnarray}
 x_i^{k+1}&=& W_i x_i^{k} + hW_i R_i^{k+1}  \\
 \nonumber\\
 y_{\alpha}^{k+1} &=& C_{\alpha}W_{\alpha} X_{\alpha}^{k} + C_{\alpha}hW_{\alpha}\sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}^{k+1} + D_{\alpha}\lambda_{\alpha}^{k+1} \\
 &=& C_{\alpha}W_{\alpha} X_{\alpha}^{k} + (C_{\alpha}hW_{\alpha}B_{\alpha} + D_{\alpha}) \lambda_{\alpha}^{k+1} + \sum_{\beta\neq\alpha}(\sum_{i\in\mathcal{DS}_{\alpha}\cap\in\mathcal{DS}_{\beta}} hC_{\alpha}^iW_i B^i_{\beta} \lambda_{\beta}^{k+1})
 \end{eqnarray}
-with 
+with
 \begin{equation}\label{Walpha}
-W_{\alpha}=\left[\begin{array}{ccc} 
+W_{\alpha}=\left[\begin{array}{ccc}
 W_i &  0   & ... \\
 0   &  W_j & ...\\
-0  & ... & ... \\ 
+0  & ... & ... \\
 \end{array}\right]
 \end{equation}
-the block-diagonal matrix of all the $W$ for the dynamical systems involved in interaction $\alpha$.\\  
+the block-diagonal matrix of all the $W$ for the dynamical systems involved in interaction $\alpha$.\\
 The global-assembled $Y$ vector, of dimension M, composed by $m$ $y_{\alpha}$ subvectors, is given by:
 \begin{eqnarray}
 Y_{k+1} = q_{OSNSP} + M_{OSNSP}\Lambda_{k+1}
 \end{eqnarray}
 or,
 \begin{eqnarray}
-Y_{k+1} =\left[\begin{array}{c} 
+Y_{k+1} =\left[\begin{array}{c}
 y_1 \\
 ...  \\
 y_m
 \end{array}\right]_{k+1}
-&=&\left[\begin{array}{ccc} 
+&=&\left[\begin{array}{ccc}
 C_1^1 & \ldots & C_1^n \\
 \vdots & \ldots & \vdots \\
-C_m^1 & \ldots & C_m^n 
-\end{array}\right]\left[\begin{array}{cccc} 
+C_m^1 & \ldots & C_m^n
+\end{array}\right]\left[\begin{array}{cccc}
 W_1 & 0 & \ldots &0 \\
 0  & W_2 & \ddots & \vdots \\
 \vdots &\ddots  & \ddots & \vdots \\
 &&0& W_n
 \end{array}\right]
-\left[\begin{array}{c} 
+\left[\begin{array}{c}
 x_1  \\
 \vdots \\
 \vdots \\
-x_n 
+x_n
 \end{array}\right]_k \\
-&+&\left[\begin{array}{cccc} 
+&+&\left[\begin{array}{cccc}
 D_1+h\sum_{j\in \mathcal{DS}_1}C_1^jW_jB_1^j & h\displaystyle{\sum_{j\in \mathcal{DS}_1\cap\mathcal{DS}_2}C_1^jW_jB_2^j} & \ldots &\\
 \vdots&\ddots& &\\
 & h\displaystyle{\sum_{j\in \mathcal{DS}_m}C_m^jW_jB_{m-1}^j}  & D_m+h\displaystyle{\sum_{j\in \mathcal{DS}_m\cap\mathcal{DS}_{m-1}}C_m^jW_jB_m^j} \\
-\end{array}\right]\left[\begin{array}{c} 
+\end{array}\right]\left[\begin{array}{c}
 \lambda_1  \\
 \vdots \\
-\lambda_m 
+\lambda_m
 \end{array}\right]_{k+1} \nonumber
 \end{eqnarray}
 To sum it up, the block-diagonal term of matrix $M_{OSNSP}$, for block-row $\alpha$ is:
@@ -211,17 +211,17 @@ To sum it up, the block-diagonal term of matrix $M_{OSNSP}$, for block-row $\alp
 D_{\alpha}+h\sum_{j\in \mathcal{DS}_{\alpha}}C_{\alpha}^jW_jB_{\alpha}^j
 \end{equation}
 This is an $m_{\alpha}\times m_{\alpha}$ square matrix.
-The extra-diagonal block term, in position ($\alpha,\beta$) is: 
+The extra-diagonal block term, in position ($\alpha,\beta$) is:
 \begin{equation}
 h\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}C_{\alpha}^jW_jB_{\beta}^j
 \end{equation}
 and is a $m_{\alpha}\times m_{\beta}$ matrix. This matrix differs from 0 when interactions $\alpha$ and $\beta$ are coupled, ie have common DS. \\
 
-Or, for the relation l of interaction $\alpha$, we get: 
+Or, for the relation l of interaction $\alpha$, we get:
 \begin{equation}
 D_{\alpha,l}+h\sum_{j\in \mathcal{DS}_{\alpha}}C_{\alpha,l}^jW_jB_{\alpha}^j
 \end{equation}
-for the diagonal, and 
+for the diagonal, and
 \begin{equation}
 h\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}C_{\alpha,l}^jW_jB_{\beta}^j
 \end{equation}
@@ -232,12 +232,12 @@ $D_{\alpha,l}$, row number $l$ of $D_{\alpha}$, the same for $C_{\alpha,l}$
 Finally, the linked-Interaction map provides, for each interaction (named ``current interaction''), the list of all the interactions (named ``linked interaction'') that have common dynamical system with the ``current interaction''.
 \subsection{A simple example}
 
-%We consider $n=5$ dynamical systems and $m=4$ interactions: 
+%We consider $n=5$ dynamical systems and $m=4$ interactions:
 %\begin{eqnarray*}
 %I_{\mu}& \rightarrow& DS_1, DS_3, m_{\mu} = 3 \\
 %I_{\theta}&\rightarrow& DS_3, DS_4, m_{\theta} = 1  \\
 %I_{\gamma}&\rightarrow& DS_2,  m_{\gamma} = 1 \\
-%I_{\zeta}&\rightarrow& DS_1, DS_5,  m_{\zeta} = 2 
+%I_{\zeta}&\rightarrow& DS_1, DS_5,  m_{\zeta} = 2
 %\end{eqnarray*}
 %The linked-interaction map is :
 %\begin{eqnarray*}
@@ -256,7 +256,7 @@ Finally, the linked-Interaction map provides, for each interaction (named ``curr
 %\mathcal{I}_4 &=& \{I_{\zeta}\}
 %\end{eqnarray*}
 
-We consider $n=3$ dynamical systems and $m=2$ interactions: 
+We consider $n=3$ dynamical systems and $m=2$ interactions:
 \begin{eqnarray*}
 I_{\mu}& \rightarrow& \mathcal{DS}_{\mu} = \{DS_1, DS_3\}, m_{\mu} = 3 \\
 I_{\theta}&\rightarrow& \mathcal{DS}_{\theta} = \{DS_2, DS_3\}, m_{\theta} = 1  \\
@@ -275,20 +275,20 @@ M &=& 4, N = \displaystyle{\sum_{i=1}^{3} n_i} \\
 \end{eqnarray*}
 
 \begin{eqnarray}
-y_1 = \left[\begin{array}{ccc} 
+y_1 = \left[\begin{array}{ccc}
 C_1^1 & C_1^3 \end{array}\right]
 \left[\begin{array}{c}
 x_1 \\
-x_3 
+x_3
 \end{array}\right]
 + D_1\lambda_1 \\
-y_2 = \left[\begin{array}{ccc} 
+y_2 = \left[\begin{array}{ccc}
 C_2^2 & C_2^3 \end{array}\right]
 \left[\begin{array}{c}
 x_2 \\
-x_3 
+x_3
 \end{array}\right]
-+ D_2\lambda_2 
++ D_2\lambda_2
 \end{eqnarray}
 %
 \begin{eqnarray}
@@ -304,32 +304,32 @@ B_1^3\lambda_1 + B_2^3\lambda_2
 \end{eqnarray}
 %
 \begin{eqnarray}
-M_{OSNSP} &=& \left[\begin{array}{cc} 
+M_{OSNSP} &=& \left[\begin{array}{cc}
 D_1+hC_1^1W_1B_1^1+hC_1^3W_3B_1^3 & hC_1^3W_3B_2^3 \\
-hC_2^3W_3B_1^3 & D_2+hC_2^2W_2B_2^2+hC_2^3W_3B_2^3 
-\end{array}\right]\left[\begin{array}{c} 
+hC_2^3W_3B_1^3 & D_2+hC_2^2W_2B_2^2+hC_2^3W_3B_2^3
+\end{array}\right]\left[\begin{array}{c}
 \lambda_1  \\
 \lambda_2
-\end{array}\right]_{k+1} 
+\end{array}\right]_{k+1}
 \end{eqnarray}
 
 \subsection{relative degree}
-Let us consider the global vector 
+Let us consider the global vector
 \begin{eqnarray}
-Y =\left[\begin{array}{c} 
+Y =\left[\begin{array}{c}
 y_1 \\
 ...  \\
 y_M
 \end{array}\right] = CX + D\Lambda
 \end{eqnarray}
-We denote by $r_j$ the relative degree of equation $j$, $j\in [1..M]$. 
+We denote by $r_j$ the relative degree of equation $j$, $j\in [1..M]$.
 We have:
 \begin{eqnarray}
-y_j = \displaystyle{\sum_{i=1}^n C_j^i x_i +D_{j,j}\lambda_j + \sum_{i\neq j, i=1}^m D_{j,i} \lambda_i } 
+y_j = \displaystyle{\sum_{i=1}^n C_j^i x_i +D_{j,j}\lambda_j + \sum_{i\neq j, i=1}^m D_{j,i} \lambda_i }
 \end{eqnarray}
 $D_{j,i}$ a scalar and $C_j^i$ a $1 \times n_i$ line-vector. \\
 If $D_{jj} \neq 0$, then $r_j=0$. Else, we should consider the first derivative of $y_j$. \\
-Before that, recall that: 
+Before that, recall that:
 \begin{eqnarray}
 R_i = \displaystyle{\sum_{k=1}^M B_k^i \lambda_j}
 \end{eqnarray}
@@ -341,27 +341,27 @@ Then:
 &=& \displaystyle{\sum_{i=1}^n C_j^i (A_i x_i + B_j^i \lambda_j + \sum_{k=1,k\neq j}^M B_k^i \lambda_k  ) + \ldots}
 \end{eqnarray}
 
-So, if $\displaystyle{\sum_{i=1}^n C_j^i B_j^i} \neq 0$ (note that this corresponds to the product between line $j$ of $C$ and column $j$ of $B$) 
+So, if $\displaystyle{\sum_{i=1}^n C_j^i B_j^i} \neq 0$ (note that this corresponds to the product between line $j$ of $C$ and column $j$ of $B$)
 then $r_j=1$ else we consider the next derivative, and so on.  \\
 In derivative $r$, the coefficient of $\lambda_j$ will be:
 \begin{eqnarray}
 coeff_j&=& \displaystyle{\sum_{i=1}^n C_j^i (A_i)^{r-1} B_j^i }
 \end{eqnarray}
-if $coeff_j\neq 0$ then $r_j = r$. 
+if $coeff_j\neq 0$ then $r_j = r$.
 
 %\subsection{Implementation}
 %\begin{itemize}
 %\item relative degree: function of $D,C,A$ off all interactions/relations, time invariant $\Rightarrow$ computed and saved in Topology.
 %\item linkedInteractionMap $\Rightarrow$ computed and saved in Topology
 %\item diagonal term: function of $D,C$ and $B$ of a specific interaction + function of $W$ of all DS concerned + time step. Time invariant.  \\
-%$\Rightarrow$ compute and save in OSNSP, during initialize. 
-%\item extra-diagonal terms: the same + depends of linkedInteractionMap $\Rightarrow$ compute and save in OSNSP, during initialize.  
+%$\Rightarrow$ compute and save in OSNSP, during initialize.
+%\item extra-diagonal terms: the same + depends of linkedInteractionMap $\Rightarrow$ compute and save in OSNSP, during initialize.
 %
 % ============= LAGRANGIAN =====================
 %
 \section{LagrangianDS - Lagrangian Linear  Relations}
 \subsection{General notations}
-We consider $n$ dynamical systems, lagrangian and non linear, of the form: 
+We consider $n$ dynamical systems, lagrangian and non linear, of the form:
 \begin{equation}
 M_i(q_i) \ddot q_i + N_i(\dot q_i, q_i) = F_{Int,i}(\dot q_i , q_i , t)+F_{Ext,i}(t) + p_i
 \end{equation}
@@ -370,36 +370,36 @@ An interaction, $I_{\alpha}$ is composed with a non smooth law, $nslaw_{\alpha}$
 \begin{equation}
 y_{\alpha} = H_{\alpha}Q_{\alpha} + b_{\alpha}
 \end{equation}
-The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set: 
+The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set:
 $$ M_y = \sum_{\alpha=1}^{m} m_{\alpha}$$
 $m$ being the number of interactions in the Non Smooth Dynamical System.  \\
 $Q_{\alpha}$ is a vector that represents the DS concerned by the interaction. Its dimension is noted $N_{\alpha}$, this for $n_{\alpha}$ systems in the interaction. \\
 $H_{\alpha}$ is a $m_{\alpha} \times N_{\alpha}$ row-blocks matrix and $b_{\alpha}$ a $m_{\alpha}$ vector. \\
 \begin{equation}
-H_{\alpha}=\left[\begin{array}{ccc} 
+H_{\alpha}=\left[\begin{array}{ccc}
 H_{\alpha}^i & H_{\alpha}^j & ...\end{array}\right]
 \end{equation}
 with $i,j,...\in \mathcal{DS}_{\alpha}$ which is the set of DS belonging to interaction $\alpha$.\\
-We also have the following relation: 
+We also have the following relation:
 \begin{equation}
-\left[\begin{array}{c} 
+\left[\begin{array}{c}
 R_{\alpha}^i \\
 R_{\alpha}^j \\
-...  
+...
 \end{array}\right] = {}^tH_{\alpha}\lambda_{\alpha}
-=\left[\begin{array}{c} 
+=\left[\begin{array}{c}
 {}^tH_{\alpha}^i \\
 {}^tH_{\alpha}^j \\
 ...
 \end{array}\right]\lambda_{\alpha}
 \end{equation}
-$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and ${}tH_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\ 
-And so: 
+$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and ${}tH_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\
+And so:
 \begin{equation}
 R_i = \sum_{\beta\in\mathcal{I}_i}R_{\beta}^i=\sum_{\beta\in\mathcal{I}_i}{}H^i_{\beta} \lambda_{\beta}
 \end{equation}
 with $\mathcal{I}_i$ the set of interactions in which dynamical system number $i$ is involved. \\
-Introducing the time dicretisation, we get: 
+Introducing the time dicretisation, we get:
 \begin{eqnarray}
 \dot q_i^{k+1} = \dot q_{free,i} + W_iR_i^{k+1}
 \nonumber\\
@@ -407,11 +407,11 @@ Introducing the time dicretisation, we get:
 \nonumber\\
 R_i^{k+1} = \sum_{\beta\in\mathcal{I}_i}H^i_{\beta} \lambda_{\beta}^{k+1}
 \end{eqnarray}
-ie, 
+ie,
 \begin{eqnarray}
   y_{\alpha}^{k+1} &=& H_{\alpha} Q_{\alpha}^{free} + H_{\alpha}W_{\alpha}{}^tH_{\alpha}\lambda_{\alpha}+\sum_{i\in \mathcal{DS}_{\alpha}}\sum_{\beta\in\mathcal{I}_i,\alpha\neq\beta}H_{\alpha}^iW_iH_{\beta}^j\lambda_{\beta}
 \end{eqnarray}
-with $W_{\alpha}$ given by \eqref{Walpha}. 
+with $W_{\alpha}$ given by \eqref{Walpha}.
 
 The global-assembled $Y$ vector, of dimension M, composed by $m$ $y_{\alpha}$ subvectors, is given by:
 \begin{eqnarray}
@@ -427,17 +427,17 @@ and for $M_{OSNSP}$, the block-diagonal term for block-row $\alpha$ is
 \sum_{j\in \mathcal{DS}_{\alpha}}H_{\alpha}^jW_j{}^tH_{\alpha}^j
 \end{equation}
 an $m_{\alpha}\times m_{\alpha}$ square matrix.
-The extra-diagonal block term, in position ($\alpha,\beta$) is: 
+The extra-diagonal block term, in position ($\alpha,\beta$) is:
 \begin{equation}
 \sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}H_{\alpha}^jW_j{}^tH_{\beta}^j
 \end{equation}
 and is a $m_{\alpha}\times m_{\beta}$ matrix. This matrix differs from 0 when interactions $\alpha$ and $\beta$ are coupled, ie have common DS. \\
 
-Or, for the relation l of interaction $\alpha$, we get: 
+Or, for the relation l of interaction $\alpha$, we get:
 \begin{equation}
 \sum_{j\in \mathcal{DS}_{\alpha}}H_{\alpha,l}^jW_j{}^tH_{\alpha}^j
 \end{equation}
-for the diagonal, and 
+for the diagonal, and
 \begin{equation}
 \sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}H_{\alpha,l}^jW_j{}^tH_{\beta}^j
 \end{equation}
@@ -445,7 +445,7 @@ for extra-diagonal terms. \\
 $H_{\alpha,l}$, row number $l$ of $H_{\alpha}$.
 
 
-WARNING: depending on linear and non linear case for the DS, there should be a factor h ahead W. See Bouncing Ball template. 
+WARNING: depending on linear and non linear case for the DS, there should be a factor h ahead W. See Bouncing Ball template.
 \section{Block matrix approach}
 The built of the OSNSProblem matrix could be computed using block
 matrix structure. This section describe these matrices. It is not
@@ -464,7 +464,7 @@ Some of $B^i_j$ doesn't exist.
 \subsection{Block matrix of interaction}
 \[ \boldsymbol{Y}= \boldsymbol{C}  \boldsymbol{X}+
 \boldsymbol{D} \boldsymbol{\lambda}\]
-with $ \boldsymbol{D}=diag(D_1..D_m)$ and 
+with $ \boldsymbol{D}=diag(D_1..D_m)$ and
 \[ \boldsymbol{C}=\left( \begin{array} {c}
     C^1_{1}..C^n_1\\.\\.\\C^1_{m}...C^n_{m} \end{array}\right)\]
 Some of $C^i_j$ doesn't exist.
@@ -479,7 +479,7 @@ block-product-matrices $\boldsymbol{C}\boldsymbol{W}\boldsymbol{B}$.
     \hline
     author  & F. P\'erignon \\
     \hline
-    date    & March 22, 2006 \\ 
+    date    & March 22, 2006 \\
     \hline
     version & Kernel 1.1.4 \\
     \hline
@@ -502,7 +502,7 @@ This is the top class for dynamical systems. All other systems classes derived f
 A general dynamical systems is described by the following set of $n$ equations, completed with initial conditions:
 \begin{eqnarray}
   \dot x &=& f(x,t) + T(x) u(x, \dot x, t) + r \\
-  x(t_0)&=&x_0 
+  x(t_0)&=&x_0
 \end{eqnarray}
 
 \begin{itemize}
@@ -519,15 +519,15 @@ Initial conditions are given by the member $x_0$, vector of size $n$. This corre
 simulation is starting, ie after a call to strategy->initialize(). \\
 
 There are plug-in functions in this class for $f$ (vectorField), $jacobianX$, $u$ and $T$. All
-of them can handle a vector of user-defined parameters. 
+of them can handle a vector of user-defined parameters.
 
 % LINEAR DS
 \section{First order linear dynamical systems $\rightarrow$ class \it{LinearDS}}
 
-Derived from DynamicalSystem, described by the set of $n$ equations and initial conditions: 
+Derived from DynamicalSystem, described by the set of $n$ equations and initial conditions:
 \begin{eqnarray}
   \dot x &=& A(t)x(t)+Tu(t)+b(t)+r \\
-  x(t_0)&=&x_0 
+  x(t_0)&=&x_0
 \end{eqnarray}
 With:
 \begin{itemize}
@@ -539,10 +539,10 @@ $A$ and $B$ have corresponding plug-in functions. \\
 
 Warning: time dependence for $A$ and $b$ is not available at the time in the simulation part for this kind of dynamical systems. \\
 
-Links with vectorField and its Jacobian are: 
+Links with vectorField and its Jacobian are:
 \begin{eqnarray}
   f(x,t) &=& A(t)x(t)+b(t) \\
-  jacobianX&=&\nabla_x f(x,t) = A(t) 
+  jacobianX&=&\nabla_x f(x,t) = A(t)
 \end{eqnarray}
 
 % LAGRANGIANDS
@@ -552,7 +552,7 @@ Lagrangian second order non linear systems are described by the following set of
 \begin{eqnarray}
  M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
  q(t_0) &=& q0 \\
- \dot q(t_0) &=& velocity0 
+ \dot q(t_0) &=& velocity0
 \end{eqnarray}
 With:
 \begin{itemize}
@@ -577,16 +577,16 @@ The following Jacobian are also member of this class:
 There are plug-in functions in this class for $F_{int}$, $F_{Ext}$, $M$, $NNL$ and the four Jacobian matrices. All
 of them can handle a vector of user-defined parameters. \\
 
-Links with first order dynamical system are: 
+Links with first order dynamical system are:
 \begin{eqnarray}
   n &= &2nDof \\
   x &=&\left[\begin{array}{c}q \\ \dot q \end{array}\right] \\
   f(x,t) &=&  \left[\begin{array}{c} \dot q \\ M^{-1}(F_{Ext}-F_{Int}-NNL) \end{array}\right] \\
   \\
-  \nabla_x f(x,t) &=& 
-  \left[\begin{array}{cc} 
+  \nabla_x f(x,t) &=&
+  \left[\begin{array}{cc}
       0_{nDof\times nDof} & I_{nDof\times nDof} \\
-      \nabla_q(M^{-1})(F_{Ext}-F_{Int}-NNL) -M^{-1}\nabla_q(F_{Int}+NNL) &  -M^{-1}\nabla_{\dot q}(F_{Int}+NNL) 
+      \nabla_q(M^{-1})(F_{Ext}-F_{Int}-NNL) -M^{-1}\nabla_q(F_{Int}+NNL) &  -M^{-1}\nabla_{\dot q}(F_{Int}+NNL)
     \end{array}\right] \\
   r &=& \left[\begin{array}{c} 0_{nDof} \\ p \end{array}\right] \\
   u(x,\dot x,t) &=& u_L(\dot q, q, t) \text{  (not yet implemented)} \\
@@ -606,14 +606,14 @@ M \ddot q + C \dot q + K q =  F_{Ext}(t) + p
 
 With:
 \begin{itemize}
-\item $C$: constant viscosity $nDof\times nDof$ matrix 
-\item $K$: constant rigidity $nDof\times nDof$ matrix 
+\item $C$: constant viscosity $nDof\times nDof$ matrix
+\item $K$: constant rigidity $nDof\times nDof$ matrix
 \end{itemize}
 
-And: 
+And:
 \begin{eqnarray}
 F_{Int} &=& C \dot q + K q \\
-NNL &=& 0_{nDof} 
+NNL &=& 0_{nDof}
 \end{eqnarray}
 
 
@@ -625,7 +625,7 @@ NNL &=& 0_{nDof}
     \hline
     author  & F.  P\'erignon \\
     \hline
-    date    & November 7, 2006 \\ 
+    date    & November 7, 2006 \\
     \hline
     version & Kernel 1.3.0 \\
     \hline
@@ -673,8 +673,8 @@ T,u \\
 \textbf{Always allocated in constructor:} \\
 x, x0, xFree, r, rhs, jacobianXF
 
-Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
-This for DS class and any of the derived ones. 
+Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it.
+This for DS class and any of the derived ones.
 
 \subsection{LagrangianDS}
 
@@ -686,13 +686,13 @@ fInt and its Jacobian, fExt, NNL and its Jacobian. \\
 \textbf{Always allocated in constructor:} \\
 mass, q, q0, qFree, velocity, velocity0, velocityFree, p. \\
 All other pointers to vectors/matrices are set to NULL by default. \\
-Memory vectors are required but allocated during call to initMemory function. 
+Memory vectors are required but allocated during call to initMemory function.
 
 Various rules:
 \begin{itemize}
 \item fInt (NNL) given as a plug-in $\Rightarrow$ check that JacobianQ/Velocity are present (matrices or plug-in)
 \item any of the four Jacobian present $\Rightarrow$ allocate memory for block-matrix jacobianX  (connectToDS function)
-\item 
+\item
 \end{itemize}
 
 check: end of constructor or in initialize? \\
@@ -709,12 +709,12 @@ computeF and JacobianF + corresponding set functions: virtual or not? \\
 
 \section{plug-in management}
 DynamicalSystem class has a member named parameterList which is a $map<string, SimpleVector*>$, ie a list of
-pointers to SimpleVector*, with a string as a key to identified them. 
-For example, $parametersList["mass"]$ is a SimpleVector*, which corresponds to the last argument given in 
+pointers to SimpleVector*, with a string as a key to identified them.
+For example, $parametersList["mass"]$ is a SimpleVector*, which corresponds to the last argument given in
 mass plug-in function. \\
 By default, each parameters vectors must be initialized with a SimpleVector of size 1, as soon as the plug-in is
-declared. Moreover, to each vector corresponds a flag in isAllocatedIn map, to check if the corresponding vector has been 
-allocated inside the class or not. \\ 
+declared. Moreover, to each vector corresponds a flag in isAllocatedIn map, to check if the corresponding vector has been
+allocated inside the class or not. \\
 For example, in DynamicalSystem, if $isPlugin["vectorField"]==true$, then, during call to constructor or set function,
 it is necessary to defined the corresponding parameter: \\
 $parametersList["vectorField"] = new SimpleVector(1)$ \\
@@ -727,7 +727,7 @@ $isAllocatedIn["parameter_for_vectorField"] = true$. \\
     \hline
     author  & F.  P\'erignon \\
     \hline
-    date    & November 7, 2006 \\ 
+    date    & November 7, 2006 \\
     \hline
     version & Kernel 1.3.0 \\
     \hline
@@ -743,7 +743,7 @@ See also documentation in Doc/User/Interaction.
 
 \section{Description}
 
-\begin{ndrfp} 
+\begin{ndrfp}
 review of interactions (for EventDriven implementation) 17th May 2006.
 \end{ndrfp}
 
@@ -755,10 +755,10 @@ Examples:
 \item NewtonImpact -> \varcpp{nsLawSize} = 1
 \item Friction 2D  -> \varcpp{nsLawSize} = 2
 \item Friction 3D  -> \varcpp{nsLawSize} = 3
-\item ... 
+\item ...
 \item \varcpp{nsLawSize} = n with n dim of matrix D in :
 $y=Cx+D\lambda$, D supposed to be a full-ranked matrix. \\
-Warning: this case is represented by only one relation of size n. 
+Warning: this case is represented by only one relation of size n.
 \ei
 \item \varcpp{numberOfRelations}: number of relations in the interaction, \varcpp{numberOfRelations} = $\Frac{\varcpp{interactionSize}}{\varcpp{nsLawSize}}$.
 \ei
@@ -770,7 +770,7 @@ Warning: this case is represented by only one relation of size n.
     \hline
     author  & F.  P\'erignon \\
     \hline
-    date    & November 7, 2006 \\ 
+    date    & November 7, 2006 \\
     \hline
     version & Kernel 1.3.0 \\
     \hline
@@ -783,28 +783,28 @@ Warning: this case is represented by only one relation of size n.
 
 \section{Description}
 
-Objects must be constructed in the following order: 
+Objects must be constructed in the following order:
 \bei
 \item DynamicalSystems
 \item NonSmoothLaw: depends on nothing
-\item Relation: no link with an interaction during construction, this will be done during initialization. 
+\item Relation: no link with an interaction during construction, this will be done during initialization.
 \item Interaction: default constructor is private and copy is forbidden. Two constructors: xml and from data. Required data are a DSSet, a NonSmoothLaw and
 a Relation (+ dim of the Interaction and a number). \\
-Interaction has an initialize function which allocates memory for y and lambda, links correctly the relation and initializes it .... This function is called at the 
+Interaction has an initialize function which allocates memory for y and lambda, links correctly the relation and initializes it .... This function is called at the
 end of the constructor. That may be better to call it in simulation->initialize? Pb: xml constructor needs memory allocation for y and lambda if they are
-provided in the input xml file. 
+provided in the input xml file.
 \item NonSmoothDynamicalSystem: default is private, copy fobidden. Two constructors: xml and from data. Required data are the DSSet and the InteractionsSet.
-The topology is declared and constructed (but empty) during constructor call of the nsds, but initialize in the Simulation, this because it can not be initialize until the nsds has been fully described (ie this to allow user to add DS, Inter ...) at any time in the model, but before simulation initialization). 
+The topology is declared and constructed (but empty) during constructor call of the nsds, but initialize in the Simulation, this because it can not be initialize until the nsds has been fully described (ie this to allow user to add DS, Inter ...) at any time in the model, but before simulation initialization).
 
 \ei
 
 \section{misc}
 
-\bei 
+\bei
 \item no need to keep a number for Interactions? Only used in xml for OSI, to know which Interactions it holds.
 \item pb: the number of saved derivatives for y and lambda in Interactions is set to 2. This must depends on the relative degree which is computes during
 Simulation initialize and thus too late. It is so not available when memory is allocated (Interaction construction). Problem-> to be reviewed.
-\ei 
+\ei
 
 
 \chapter{OneStepIntegrator and derived classes.}
@@ -813,7 +813,7 @@ Simulation initialize and thus too late. It is so not available when memory is a
     \hline
     author  & F.  P\'erignon \\
     \hline
-    date    & November 7, 2006 \\ 
+    date    & November 7, 2006 \\
     \hline
     version & Kernel 1.3.0 \\
     \hline
@@ -832,7 +832,7 @@ See also documentation in Doc/User/OneStepIntegrator for a description of variou
 OSI review for consistency between Lsodar and Moreau:
 \begin{itemize}
 \item add set of DynamicalSystem*
-\item add set of Interaction* 
+\item add set of Interaction*
 \item add link to strategy that owns the OSI
 \item remove td object in OSI -> future: replace it by a set of td (one per ds)
 \item add strat in constructors arg list
@@ -845,13 +845,13 @@ osi -> strat -> timeDiscretisation \\
 
 let a timeDiscretisation object in the OSI? set of td (one per ds)? \\
 create a class of object that corresponds to DS on the simulation side ? \\
-will contain the DS, its discretization, theta for Moreau ... ? \\ 
+will contain the DS, its discretization, theta for Moreau ... ? \\
 Allow setStrategyPtr operation? Warning: need reinitialisation. \\
 
 
 Required input by user: \\
 \begin{itemize}
-\item list of DS or list of Interactions ? 
+\item list of DS or list of Interactions ?
 \item pointer to strategy
 \item ...
 \end{itemize}
@@ -875,7 +875,7 @@ Strategy arg in each constructor.
 
 \textbf{Always allocated in constructor:} \\
 
-Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
+Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it.
 
 \subsection{Lsodar}
 
@@ -892,7 +892,7 @@ Warning: default constructor is always private or protected and apart from the o
     \hline
     author  & 0. Bonnefon \\
     \hline
-    date    & July, 1 2009 \\ 
+    date    & July, 1 2009 \\
     \hline
     version & Kernel 3.0.0 \\
     \hline
@@ -905,7 +905,7 @@ Warning: default constructor is always private or protected and apart from the o
     \hline
     author  & V. Acary \\
     \hline
-    date    & Septembre 16, 2011 \\ 
+    date    & Septembre 16, 2011 \\
     \hline
     version & Kernel 3.3.0 \\
     \hline

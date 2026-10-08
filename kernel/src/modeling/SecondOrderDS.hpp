@@ -151,7 +151,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param ndof number of degrees of freedom
    */
   SecondOrderDS(siconos::algebra::Index dimension, siconos::algebra::Index ndof)
-      : DynamicalSystem(dimension), ndof_(ndof){};
+      : DynamicalSystem(dimension), ndof_(ndof) {};
 
  public:
   /** destructor */

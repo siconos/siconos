@@ -36,7 +36,8 @@ velocities'
 */
 void siconos::modeling::NewtonEulerVelocityAngularVelocityR::initialize(Interaction& inter) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::siconos::modeling::NewtonEulerVelocityAngularVelocityR::initialize("
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::siconos::modeling::"
+      "NewtonEulerVelocityAngularVelocityR::initialize("
       "Interaction& inter)\n");
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
@@ -49,13 +50,16 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::initialize(Interact
 
   //  _isContact=1;
   DEBUG_END(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::siconos::modeling::NewtonEulerVelocityAngularVelocityR::initialize("
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::siconos::modeling::"
+      "NewtonEulerVelocityAngularVelocityR::initialize("
       "Interaction& inter)\n");
 }
 
 void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts()\n");
+  DEBUG_BEGIN(
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("
+      ")\n");
   DEBUG_PRINT("contact normal:\n");
   DEBUG_EXPR(siconos::algebra::print(nc_););
   DEBUG_PRINTF("nc_.norm() -1.0 = %e\n", nc_.norm() - 1.0);
@@ -65,7 +69,8 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   DEBUG_EXPR(siconos::algebra::print(q1););
 
   assert(nc_.norm() > 0.0 && std::abs(nc_.norm() - 1.0) < 1e-6 &&
-         "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts. Normal vector "
+         "siconos::modeling::NewtonEulerVelocityAngularVelocityR::"
+         "RFC3DcomputeJachqTFromContacts. Normal vector "
          "not consistent ");
 
   // 1 - Construction of the local contact frame from the normal vector
@@ -73,7 +78,8 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   bool res = siconos::geometry::orthoBaseFromVector(nc_, t1, t2);
   if (!res) {
     THROW_EXCEPTION(
-        "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts. Problem in "
+        "siconos::modeling::NewtonEulerVelocityAngularVelocityR::"
+        "RFC3DcomputeJachqTFromContacts. Problem in "
         "calling orthoBaseFromVector");
   }
   // 2 - Construction of the rotation matrix from the absolute frame to the local contact frame
@@ -112,14 +118,17 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
 
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
   DEBUG_END(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts(std::shared_ptr<"
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("
+      "std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1)\n");
 }
 
 void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts()\n");
+  DEBUG_BEGIN(
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("
+      ")\n");
   RFC3DcomputeJachqTFromContacts(q1);
   const auto v = q2.head<3>() - contactPoint1_.head<3>();
   NPG_buffer_ << 0.0, -v.z(), v.y(), v.z(), 0.0, -v.x(), -v.y(), v.x(), 0.0;
@@ -134,7 +143,8 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
 
   DEBUG_END(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts(std::shared_ptr<"
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("
+      "std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1, std::shared_ptr<siconos::algebra::SiconosVector> "
       "q2)\n");
 }
@@ -142,7 +152,8 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
 void siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(
     const Interaction& inter, const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(Interaction& inter,  "
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(Interaction&"
+      " inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
   if (q0.numberOfBlocks() > 1) {
     RFC3DcomputeJachqTFromContacts(*q0.vector(0), *q0.vector(1));
@@ -150,6 +161,7 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(
     RFC3DcomputeJachqTFromContacts(*q0.vector(0));
   }
   DEBUG_END(
-      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(Interaction& inter,  "
+      "siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(Interaction&"
+      " inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
 }

@@ -64,7 +64,7 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
   CHECK_NULL(error);
   CHECK_MATRIX(problem->M);
   CHECK_NULL(problem->q);
- 
+
   int nc = problem->numberOfContacts;
   int ncoh = problem->numberOfCohesivePoints;
 
@@ -96,10 +96,10 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
   /* Compute relative error with proper normalization */
   double norm_r = cblas_dnrm2(n, reaction, 1);
   double norm_u = cblas_dnrm2(n, velocity, 1);
-  
+
   /* DEBUG_PRINTF("norm_r = %2.4e\n", norm_r); */
   /* DEBUG_PRINTF("norm_u = %2.4e\n", norm_u); */
-    
+
   double relative_scaling = fmax(norm, fmax(norm_r, norm_u));
 
   if (fabs(relative_scaling) > DBL_EPSILON) {

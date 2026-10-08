@@ -5,7 +5,7 @@
 #  find_python_module(mpi4py REQUIRED)
 #  find_python_module(sphinx)
 #  find_python_module(mpi4py INCLUDE)
-# 
+#
 #  Warning : use ${Python_EXECUTABLE} as python interpreter
 #
 #  If INCLUDE options is provided, it means that the function
@@ -24,7 +24,7 @@ function(find_python_module module)
     ERROR_QUIET # Ignores quietly standard error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-  
+
   if(NOT ${module}_FIND_RESULT) # Return code == 0 means that things have gone well
     set(${module}_file ${${module}_FIND_OUTPUT} CACHE STRING "Python ${module} module file.")
   else()
@@ -46,15 +46,15 @@ function(find_python_module module)
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
   endif()
-  
+
   set(${module}_REQUIRED_VARS ${module}_file ${module}_PYTHONPATH)
-    
+
   if(${module}_file)
     # module directory
     get_filename_component(${module}_path ${${module}_file} DIRECTORY)
     # path to the module (i.e. what must be added to PYTHONPATH or sys.path)
     get_filename_component(${module}_PYTHONPATH ${${module}_path} DIRECTORY)
-    
+
     if(${module}_FIND_INCLUDES)
       find_file(${module}_INCLUDE_DIR include PATHS ${${module}_path} NO_DEFAULT_PATH)
       list(APPEND ${module}_REQUIRED_VARS ${module}_INCLUDE_DIR)
@@ -63,7 +63,7 @@ function(find_python_module module)
   find_package_handle_standard_args(${module}
     REQUIRED_VARS ${${module}_REQUIRED_VARS}
     VERSION_VAR ${module}_VERSION)
- 
+
   # if(${module}_FOUND)
   #   message("-- Found python package ${${module}_file}, version ${${module}_VERSION}")
   # endif()

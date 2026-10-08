@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file CohesiveFrictionContact.hpp
   \brief Cohesive Friction-Contact Non-Smooth Problem Solver
 
@@ -191,7 +191,8 @@ r_{v,n} \\
   - Collins-Craft, N. A., Bourrier, F., & Acary, V. (2022). On the formulation and
     implementation of extrinsic cohesive zone models with contact. Computer Methods
     in Applied Mechanics and Engineering, 400, 115545.
-  - Collins-Craft, N. A., & Acary, V. (2025). On the formulation and implementation of mixed mode I and mode II extrinsic cohesive zone models with contact and friction.
+  - Collins-Craft, N. A., & Acary, V. (2025). On the formulation and implementation of mixed
+mode I and mode II extrinsic cohesive zone models with contact and friction.
 
   \see FrictionContact for the base friction-contact solver
   \see CohesiveZoneModelNIFNSL for cohesive law interface
@@ -205,7 +206,7 @@ r_{v,n} \\
 #include "CohesiveFrictionContact_options.h"
 #include "FrictionContact.hpp"
 
-//struct FrictionContactProblem;
+// struct FrictionContactProblem;
 struct CohesiveFrictionContactProblem;
 struct SolverOptions;
 
@@ -248,7 +249,7 @@ class CohesiveFrictionContact : public FrictionContact {
   ACCEPT_SERIALIZATION(CohesiveFrictionContact);
   /** \endcond */
 
-  typedef int (*Driver)(CohesiveFrictionContactProblem *, double *, double *, SolverOptions *);
+  typedef int (*Driver)(CohesiveFrictionContactProblem*, double*, double*, SolverOptions*);
 
   /** Pointer to the Numerics driver function for cohesive friction-contact
    *
@@ -326,15 +327,14 @@ class CohesiveFrictionContact : public FrictionContact {
 
   bool _scaling_as_percussion = false;
 
-
-
  public:
   /** \brief Constructor with dimension and solver id
    *
    * \param dimPb dimension of the problem: 2 for 2D, 3 for 3D friction-contact
    * \param numericsSolverId id of the solver (e.g., SICONOS_COHESIVE_FRICTION_3D_NSGS)
    */
-  CohesiveFrictionContact(int dimPb = 3, int numericsSolverId = SICONOS_COHESIVE_FRICTION_3D_NSGS);
+  CohesiveFrictionContact(int dimPb = 3,
+                          int numericsSolverId = SICONOS_COHESIVE_FRICTION_3D_NSGS);
 
   /** \brief Constructor with pre-defined solver options
    *
@@ -381,9 +381,8 @@ class CohesiveFrictionContact : public FrictionContact {
    * \param vertex_inter vertex descriptor for the interaction in the graph
    * \param pos starting position in _q_cohesion vector (in blocks)
    */
-  void compute_q_cohesion_block(
-      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-      siconos::algebra::Index pos);
+  void compute_q_cohesion_block(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                                siconos::algebra::Index pos);
 
   /** \brief Assemble and update q vector with cohesive contribution
    *

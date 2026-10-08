@@ -8,7 +8,7 @@ Relations are used to link local variables of the Interaction and global variabl
 :cpp:class:`Relation` is an abstract class which provides a generic interface for all types of relations.
 Each relation has a type which correspond to the types of dynamical systems they fit with (FirstOrder or Lagrangian), a sub-type, (linear, non linear, scleronomous...).
 Usually, "type+subtype" corresponds more or less to the name of the derived class.
-Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation. 
+Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation.
 
 
 Available classes: :cpp:class:`FirstOrderR`, :cpp:class:`FirstOrderLinearR`, :cpp:class:`FirstOrderLinearTIR`, :cpp:class:`LagrangianR`, :cpp:class:`LagrangianRheonomousR`, :cpp:class:`LagrangianScleronomousR`, :cpp:class:`LagrangianCompliantR`, :cpp:class:`LagrangianLinearR`.
@@ -24,20 +24,20 @@ Non Linear
 Class :cpp:class:`FirstOrderR`
 
 .. math::
-   
+
    output &= y = h(X,t,\lambda,Z)\\
    input &= R = g(X,t,\lambda,Z)
 
-We denote: 
+We denote:
 
 .. math::
 
    \begin{array}{ccc}
    H_0(X,t,\lambda,Z)=\nabla_X h(X,t,\lambda,Z)&, &  H_1(X,t,\lambda,Z)=\nabla_{\lambda} h(X,t,\lambda,Z) \\
    \\
-   G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z) 
+   G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z)
    \end{array}
-   
+
 :math:`h`, :math:`g` (and their jacobian according to :math:`X` and :math:`\lambda`) are defined with some plug-in functions. \n
 See the doxygen documentation of the class :cpp:class:`FirstOrderR` to have a list of the set/get/compute functions.
 
@@ -49,7 +49,7 @@ Linear
 Class: :cpp:class:`FirstOrderLinearR`
 
 .. math::
-   
+
    y &= C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
    R &= B(t,Z) \lambda
 
@@ -61,7 +61,7 @@ Linear with Time Invariant Coefficients
 Class :cpp:class:`FirstOrderLinearTIR`
 
 .. math::
-  
+
    y &= CX + FZ + D\lambda + e \\
    R &= B \lambda
 
@@ -76,15 +76,15 @@ Class :cpp:class:`LagrangianScleronomousR`
 The constraints depend only on the state,
 
 .. math::
-   
+
    y &= h(Q,Z) \\
    \dot y &= G_0(Q,Z)\dot Q \\
-   P &= G_0^t(Q,Z)\lambda 
+   P &= G_0^t(Q,Z)\lambda
 
 with
- 
+
 .. math::
-    
+
     G_0(Q,Z) = \nabla_Q h(Q,Z)
 
 Rheonomous
@@ -92,19 +92,19 @@ Rheonomous
 
 Class :cpp:class:`LagrangianRheonomousR`
 
-The constraints depend on time and state, 
+The constraints depend on time and state,
 
 .. math::
-   
+
    y &= h(Q,t,Z)\\
    \dot y &= G_0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
-   P &= G_0^t(Q,t,Z)\lambda 
+   P &= G_0^t(Q,t,Z)\lambda
 
 with
- 
+
 .. math::
    G_0(Q,t,Z) = \nabla_Q h(Q,t,Z)  \\
-   hdot(Q,t,Z) = \frac{\partial h}{\partial t}(Q,t,Z) 
+   hdot(Q,t,Z) = \frac{\partial h}{\partial t}(Q,t,Z)
 
 Compliant
 """""""""
@@ -114,13 +114,13 @@ Class: :cpp:class:`LagrangianCompliantR`
 The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot\lambda(t)` makes sense.
 
 .. math::
-   
+
    y &= h(Q,\lambda(t),Z) \\
    \dot y &= G_0(Q,\lambda(t),Z)\dot Q + G_1(Q,\lambda(t),Z)\dot\lambda(t) \\
-   P &= G_0^t(Q,\lambda(t),Z)\lambda(t) 
+   P &= G_0^t(Q,\lambda(t),Z)\lambda(t)
 
 with
- 
+
 .. math::
 
    G_0(Q,\lambda(t),Z) = \nabla_q h(Q,\lambda(t),Z) \\
@@ -131,12 +131,12 @@ Linear and Time Invariant Coefficients
 
 Class: :cpp:class:`LagrangianLinearR`
 
-Lagrangian linear relations with time-invariant coefficients. 
+Lagrangian linear relations with time-invariant coefficients.
 
 .. math::
 
    y&= H Q + b + D\lambda +FZ \\
-   P &= H^t \lambda 
+   P &= H^t \lambda
 
 Relations plug-in functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

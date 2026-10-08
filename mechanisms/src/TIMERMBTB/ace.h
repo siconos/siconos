@@ -18,18 +18,12 @@
  *
  */
 
-//#define PRE_COMPUTE_ADAPTIVE
+// #define PRE_COMPUTE_ADAPTIVE
 
-
-#include <vector>
 #include <fstream>
-
-
-
-
+#include <vector>
 
 #include "acetime.h"
-
 
 #define ACE_TIMER_MAIN 0
 #define ACE_TIMER_GRAPHIC 1
@@ -53,16 +47,10 @@
 #define ACE_TIMER_CAD_OK 19
 #define ACE_TIMER_LAST 20
 
-
-
-
 extern aceTime ACE_times[];
 
-
-
-//TIME FUNCTION
+// TIME FUNCTION
 void ACE_INIT_TIME();
 void ACE_PRINT_TIME();
 
-
-#endif //ACE_H
+#endif  // ACE_H

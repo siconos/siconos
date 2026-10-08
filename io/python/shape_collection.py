@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -20,11 +19,12 @@
 """Class and tools to handle shapes in siconos.io.mechanics_run"""
 
 import os
-import numpy as np
-import h5py
-import siconos.mechanics.collision
-import siconos.io.tools
+import sys
 
+import h5py
+import numpy as np
+import siconos.io.tools
+import siconos.mechanics.collision
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
@@ -34,7 +34,6 @@ elif hasattr(h5py, "new_vlen"):
 
 
 class NativeShape:
-
     def setInsideMargin(self, m):
         self.insidemargin = m
 
@@ -93,10 +92,10 @@ def load_vtp_file(shape_ref):
         data = shape_ref[:][0]
         # fix compatibility with h5py version
         # to be removed in the future
-        tmpf[0].write(data.decode("utf-8"))
-        tmpf[0].flush()
+        tmpf.fid.write(data.decode("utf-8"))
+        tmpf.fid.flush()
         scale = shape_ref.attrs.get("scale", None)
-        mesh, dims = siconos.io.tools.load_siconos_mesh(tmpf[1], scale=scale)
+        mesh, dims = siconos.io.tools.load_siconos_mesh(tmpf.name, scale=scale)
         mesh.setInsideMargin(shape_ref.attrs.get("insideMargin", min(dims) * 0.02))
         mesh.setOutsideMargin(shape_ref.attrs.get("outsideMargin", 0))
     return mesh
@@ -165,8 +164,8 @@ class ShapeCollection:
 
     def __init__(self, io, collision_margin=None, backend="bullet"):
         self._io = io
-        self._shapes = dict()
-        self._tri = dict()
+        self._shapes = {}
+        self._tri = {}
         if collision_margin is None:
             collision_margin = 0.04
         self._collision_margin = collision_margin
@@ -226,7 +225,6 @@ class ShapeCollection:
     ):
 
         if new_instance or shape_name not in self._shapes:
-
             shape_ref = self.shape(shape_name)
 
             # load shape if it is an existing file
@@ -253,7 +251,7 @@ class ShapeCollection:
 
                     content = shape_ref[:][0].decode("utf-8")
                     with siconos.io.tools.tmpfile(
-                        contents=content, suffix=".{0}".format(shape_type)
+                        contents=content, suffix=f".{shape_type}"
                     ) as tmpf:
                         comp = siconos.io.occ_tools.occ_load_file(tmpf[1])
                     self._shapes[shape_name] = comp
@@ -323,14 +321,14 @@ class ShapeCollection:
             elif isinstance(self.url(shape_name), str) and os.path.exists(
                 self.url(shape_name)
             ):
-                self._tri[shape_name], self._shapes[shape_name] = loadMesh(
-                    self.url(shape_name), self._collision_margin
-                )
                 # Warning FP: can't find the function loadMesh anywhere?
                 # Where does it supposed to come from?
-
+                # --> comment next call
+                # self._tri[shape_name], self._shapes[shape_name] = loadMesh(
+                #     self.url(shape_name), self._collision_margin
+                # )
+                sys.exit(1)
             else:
-
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):
                     name = self.url(shape_name)

@@ -22,7 +22,7 @@
 #include "Interaction.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-//#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
   FirstOrderR::initialize(inter);
@@ -232,16 +232,16 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacobiangOver_lambda(
     computejacobiangOver_lambda_(state, time, lambda, *jacobiangOver_lambda_view_);
 }
 
-void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interaction& inter,
-                                                            siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderNonLinearR::computeOutput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
   if (computeh_) computeh_(*ds_vars[FirstOrderR::Xxx], time, lambda, y);
 }
 
-void siconos::modeling::FirstOrderNonLinearR::computeInput(double time, Interaction& inter,
-                                                           siconos::algebra::blocks::size_type level) {
+void siconos::modeling::FirstOrderNonLinearR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(level);
   if (computeg_)

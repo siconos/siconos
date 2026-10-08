@@ -4,29 +4,27 @@ Description: Viewer and exporter for Siconos mechanics-IO HDF5 files based on VT
 """
 
 # Lighter imports before command line parsing
-import sys
-import os
-import json
 import getopt
+import json
 import math
+import os
+import random
+import sys
 import traceback
 from math import pi
-from numpy.linalg import norm
-import numpy
-import random
 
-import vtk
-from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
-from vtk.numpy_interface import dataset_adapter as dsa
-
-from vtkmodules.vtkRenderingCore import vtkTextActor
 import h5py
-from siconos.io.tools import tmpfile as io_tmpfile
+import numpy
 import siconos.mechanics
-
+import vtk
+from numpy.linalg import norm
+from siconos.io.tools import tmpfile as io_tmpfile
+from vtk.numpy_interface import dataset_adapter as dsa
+from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
+from vtkmodules.vtkRenderingCore import vtkTextActor
 
 # Exports from this module
-__all__ = ["VView", "VViewOptions", "VExportOptions", "VViewConfig"]
+__all__ = ["VExportOptions", "VView", "VViewConfig", "VViewOptions"]
 
 if hasattr(math, "inf"):
     infinity = math.inf
@@ -37,32 +35,38 @@ else:
 def print_io_vview(*args, **kwargs):
     print("[io.vview]", *args, **kwargs)
 
+
 def msh_to_stl(msh_data):
     """Convert msh data to stl format using meshio"""
-    import meshio
     import tempfile
 
-    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmp_msh, \
-         tempfile.NamedTemporaryFile(suffix='.stl') as tmp_stl:
+    import meshio
 
+    with (
+        tempfile.NamedTemporaryFile(suffix=".msh", mode="w+") as tmp_msh,
+        tempfile.NamedTemporaryFile(suffix=".stl") as tmp_stl,
+    ):
         tmp_msh.write(msh_data)
         tmp_msh.flush()
 
         mesh = meshio.read(tmp_msh.name)
         mesh.write(tmp_stl.name)
 
-        with open(tmp_stl.name, 'r') as f:
+        with open(tmp_stl.name, "r") as f:
             stl_data = f.read()
 
     return stl_data
+
 
 # Persistent configuration
 class VViewConfig(dict):
     def __init__(
         self,
-        d={"background_color": [0.0, 0.0, 0.0], "window_size": [600, 600]},
+        d=None,
         filename=None,
     ):
+        if d is None:
+            d = {"background_color": [0.0, 0.0, 0.0], "window_size": [600, 600]}
         super(self.__class__, self).__init__(d)
         self.should_save_config = True
         if filename is not None:
@@ -80,10 +84,10 @@ class VViewConfig(dict):
                 for k in self:
                     print_io_vview("  ", k, ": ", self[k])
                 self.should_save_config = True
-            except IOError:
+            except OSError:
                 self.should_save_config = False
                 print_io_vview(
-                    "Warning: Error loading configuration `{}'".format(self.filename)
+                    f"Warning: Error loading configuration `{self.filename}'"
                 )
 
     def save_configuration(self, force=False):
@@ -93,11 +97,11 @@ class VViewConfig(dict):
             if not os.path.exists(os.path.join(os.environ["HOME"], ".config")):
                 os.mkdir(os.path.join(os.environ["HOME"], ".config"))
             json.dump(self, open(self.filename, "w"))
-        except IOError:
-            print("Error saving configuration `{}'".format(self.filename))
+        except OSError:
+            print(f"Error saving configuration `{self.filename}'")
 
 
-class VViewOptions(object):
+class VViewOptions:
     def __init__(self):
         self.min_time = None
         self.max_time = None
@@ -138,7 +142,7 @@ class VViewOptions(object):
     def usage(self, long=False):
         print(__doc__)
         print()
-        print("Usage: {0} [OPTION]... <HDF5>".format(os.path.split(sys.argv[0])[1]))
+        print(f"Usage: {os.path.split(sys.argv[0])[1]} [OPTION]... <HDF5>")
         print()
         if not long:
             print(
@@ -278,24 +282,24 @@ class VViewOptions(object):
                     "with-charts=",
                     "depth-2d=",
                     "verbose=",
-                    'cohesive-force'
+                    "cohesive-force",
                 ],
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
 
             elif o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
-                exit(0)
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
+                sys.exit(0)
 
             elif o == "--tmin":
                 self.min_time = float(a)
@@ -312,7 +316,7 @@ class VViewOptions(object):
             elif o == "--no-cf":
                 self.cf_disable = True
 
-            elif o == '--cohesive-force':
+            elif o == "--cohesive-force":
                 self.cf_cohesive = True
 
             elif o == "--imr":
@@ -403,7 +407,7 @@ class VViewOptions(object):
 
         else:
             self.usage()
-            exit(1)
+            sys.exit(1)
 
     def display(self):
         display_str = f"""[io.VViewOptions] Display vview options:
@@ -452,9 +456,7 @@ class VExportOptions(VViewOptions):
         print(__doc__)
         print()
         print(
-            "Usage:  {0} [--help] [--version] [--ascii] <HDF5>".format(
-                os.path.split(sys.argv[0])[1]
-            )
+            f"Usage:  {os.path.split(sys.argv[0])[1]} [--help] [--version] [--ascii] <HDF5>"
         )
         if long:
             print()
@@ -495,18 +497,18 @@ class VExportOptions(VViewOptions):
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
             if o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
-                exit(0)
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
+                sys.exit(0)
             if o == "--global-filter":
                 self.global_filter = True
             if o == "--start-step":
@@ -533,7 +535,7 @@ class VExportOptions(VViewOptions):
 
         else:
             self.usage()
-            exit(1)
+            sys.exit(1)
 
 
 class VRawDataExportOptions(VViewOptions):
@@ -553,7 +555,7 @@ class VRawDataExportOptions(VViewOptions):
     def usage(self, long=False):
         print(__doc__)
         print()
-        print("Usage:  {0} [--help]  <HDF5>".format(os.path.split(sys.argv[0])[1]))
+        print(f"Usage:  {os.path.split(sys.argv[0])[1]} [--help]  <HDF5>")
         if long:
             print()
             print(
@@ -596,18 +598,18 @@ class VRawDataExportOptions(VViewOptions):
             )
             self.configure(opts, args)
         except getopt.GetoptError as err:
-            sys.stderr.write("{0}\n".format(str(err)))
+            sys.stderr.write(f"{err!s}\n")
             self.usage()
-            exit(2)
+            sys.exit(2)
 
     def configure(self, opts, args):
         for o, a in opts:
             if o == "--help":
                 self.usage(long=True)
-                exit(0)
+                sys.exit(0)
             if o == "--version":
-                print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
-                exit(0)
+                print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
+                sys.exit(0)
             if o == "--start-step":
                 self.start_step = int(a)
             if o == "--end-step":
@@ -628,7 +630,7 @@ class VRawDataExportOptions(VViewOptions):
                 self.io_filename = args[0]
             else:
                 self.usage()
-                exit(1)
+                sys.exit(1)
 
 
 # Utilities
@@ -686,7 +688,6 @@ class Quaternion:
 
 
 class InputObserver:
-
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
@@ -748,12 +749,12 @@ class InputObserver:
         self.vview.renderer_window.Render()
 
     def set_opacity(self):
-        for instance, actors in self.vview.dynamic_actors.items():
+        for actors in self.vview.dynamic_actors.values():
             for actor, _, _ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
     def set_opacity_static(self):
-        for instance, actors in self.vview.static_actors.items():
+        for actors in self.vview.static_actors.values():
             for actor, _, _ in actors:
                 actor.GetProperty().SetOpacity(self._opacity_static)
 
@@ -779,7 +780,7 @@ class InputObserver:
         elif key == "p":
             self._image_counter += 1
             self.vview.image_maker.Update()
-            self.vview.writer.SetFileName("vview-{0}.png".format(self._image_counter))
+            self.vview.writer.SetFileName(f"vview-{self._image_counter}.png")
             self.vview.writer.Write()
 
         elif key == "Up":
@@ -1007,7 +1008,6 @@ def makeConvexSourceClass():
             return vtk.vtkProgrammableSource.GetOutputPort(self, 3)
 
     class ConvexSource(UnstructuredGridSource):
-
         def __init__(self, convex, points):
             self._convex = convex
             self._points = points
@@ -1028,7 +1028,6 @@ def makeConvexSourceClass():
 # only half the way, the reading part is ok but the output is only used
 # in vview and export from python members
 class IOReader(VTKPythonAlgorithmBase):
-
     def __init__(self, opts):
         VTKPythonAlgorithmBase.__init__(
             self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
@@ -1044,8 +1043,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self.polydata = vtk.vtkPolyData()
         self.stream_actor = None
         self.ctf = vtk.vtkColorTransferFunction()
-        self.fem_actors = dict()
-        self.fem_disp_arrays = dict()
+        self.fem_actors = {}
+        self.fem_disp_arrays = {}
         self.options = opts
 
     def InitGlyphs(self):
@@ -1130,7 +1129,6 @@ class IOReader(VTKPythonAlgorithmBase):
         self.stream_actor = vtk.vtkActor()
         self.stream_actor.SetMapper(self.stream_mapper)
 
-
     def RequestInformation(self, request, inInfo, outInfo):
 
         info = outInfo.GetInformationObject(0)
@@ -1197,7 +1195,9 @@ class IOReader(VTKPythonAlgorithmBase):
         self.vtk_velo_data.SetName("velocity")
 
         try:
-            radii_current = self._io.radii(self._index)  # shape: (n_disks, 2) -> [ds_id, radius]
+            radii_current = self._io.radii(
+                self._index
+            )  # shape: (n_disks, 2) -> [ds_id, radius]
             if radii_current is not None and len(radii_current) > 0:
                 radii_dict = {int(row[0]): row[1] for row in radii_current}
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
@@ -1211,17 +1211,22 @@ class IOReader(VTKPythonAlgorithmBase):
             pass
 
         if len(self._p0s_data) > 0:
-
             # Get p0 data for current time step (only for disks/fixed-dof systems)
-            p0s_current = self._io.p0s(self._index)  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
+            p0s_current = self._io.p0s(
+                self._index
+            )  # shape: (n_disks, 4) -> [ds_id, p0_x, p0_y, p0_z]
             if p0s_current is not None and len(p0s_current) > 0:
                 # Build dict: ds_id -> p0_norm
-                p0_dict = {int(row[0]): math.sqrt(row[1]**2 + row[2]**2 + row[3]**2) 
-                           for row in p0s_current}
+                p0_dict = {
+                    int(row[0]): math.sqrt(row[1] ** 2 + row[2] ** 2 + row[3] ** 2)
+                    for row in p0s_current
+                }
                 # Get ds_ids for current dynamic objects
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
                 # Map to p0_norm, default 0 for FEM objects
-                self.current_p0_norm = numpy.array([p0_dict.get(ds_id, 0.0) for ds_id in ds_ids])
+                self.current_p0_norm = numpy.array(
+                    [p0_dict.get(ds_id, 0.0) for ds_id in ds_ids]
+                )
             else:
                 self.current_p0_norm = numpy.zeros(len(self._id_t_m))
 
@@ -1271,7 +1276,7 @@ class IOReader(VTKPythonAlgorithmBase):
         # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(self.vtk_velo_data)
-        if hasattr(self, 'vtk_radii_data') and self.vtk_radii_data is not None:
+        if hasattr(self, "vtk_radii_data") and self.vtk_radii_data is not None:
             output.GetPointData().AddArray(self.vtk_radii_data)
             output.GetPointData().SetActiveScalars("radii")
         if self.vtk_p0_norm_data is not None:
@@ -1327,7 +1332,6 @@ class IOReader(VTKPythonAlgorithmBase):
                 data = self.cf_data
 
                 for mu in self._mu_coefs:
-
                     imu = numpy.where(abs(data[:, 1] - mu) < 1e-15)[0]
 
                     # dom_imu = None
@@ -1451,10 +1455,10 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self._icf_data = self._io.contact_forces_data()
 
-        if self._with_cohesive_forces :
-            print('display cohesive forces')
+        if self._with_cohesive_forces:
+            print("display cohesive forces")
             self._icf_data = self._io.contact_internal_variable_data()
-            #input()
+            # input()
         else:
             self._icf_data = self._io.contact_forces_data()
 
@@ -1497,7 +1501,9 @@ class IOReader(VTKPythonAlgorithmBase):
             for actor, contact_shape_indx, _ in actors:
                 # Get shape_name from contact_shape_indx
                 if isinstance(contact_shape_indx, tuple):
-                    shape_name = contact_shape_indx[1]  # ('Face', shape_name, index) or similar
+                    shape_name = contact_shape_indx[
+                        1
+                    ]  # ('Face', shape_name, index) or similar
                 else:
                     shape_name = contact_shape_indx
 
@@ -1531,7 +1537,6 @@ class IOReader(VTKPythonAlgorithmBase):
                 mapper.SetScalarRange(disp_array.GetRange())
                 mapper.Modified()
 
-
     def SetTime(self, time):
         self.GetOutputInformation(0).Set(
             vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP(), time
@@ -1553,32 +1558,32 @@ class IOReader(VTKPythonAlgorithmBase):
         )
         self._mu_coefs = numpy.unique(self._icf_data[:, 1], return_index=False)
 
-        self.cpa_at_time = dict()
-        self.cpa = dict()
+        self.cpa_at_time = {}
+        self.cpa = {}
 
-        self.cpb_at_time = dict()
-        self.cpb = dict()
+        self.cpb_at_time = {}
+        self.cpb = {}
 
-        self.cf_at_time = dict()
-        self.cf = dict()
+        self.cf_at_time = {}
+        self.cf = {}
 
-        self.cn_at_time = dict()
-        self.cn = dict()
+        self.cn_at_time = {}
+        self.cn = {}
 
-        self.ids_at_time = dict()
-        self.ids = dict()
+        self.ids_at_time = {}
+        self.ids = {}
 
-        self.dom_at_time = [dict(), None][self._idom_data is None]
-        self.dom = dict()
+        self.dom_at_time = [{}, None][self._idom_data is None]
+        self.dom = {}
 
-        self._all_objs_pos = dict()
-        self._all_objs_pos_vtk = dict()
+        self._all_objs_pos = {}
+        self._all_objs_pos_vtk = {}
 
-        self._points = dict()
-        self._contact_field = dict()
-        self._output = dict()
-        self._objs_points = dict()
-        self._objs_output = dict()
+        self._points = {}
+        self._contact_field = {}
+        self._output = {}
+        self._objs_points = {}
+        self._objs_output = {}
 
         for mu in self._mu_coefs:
             # the contact points
@@ -1608,7 +1613,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
 
 # Read file and open VTK interaction window
-class VView(object):
+class VView:
     def __init__(self, io, options, config=None):
         self.opts = options
         self.config = [config, VViewConfig()][config is None]
@@ -1617,53 +1622,53 @@ class VView(object):
         self.io = io
         self.refs = []
         self.refs_attrs = []
-        self.shape = dict()
-        self.pos = dict()
-        self.mass = dict()
-        self.inertia = dict()
+        self.shape = {}
+        self.pos = {}
+        self.mass = {}
+        self.inertia = {}
 
-        self.contact_posa = dict()
-        self.contact_posb = dict()
-        self.contact_pos_force = dict()
-        self.contact_pos_norm = dict()
+        self.contact_posa = {}
+        self.contact_posb = {}
+        self.contact_pos_force = {}
+        self.contact_pos_norm = {}
 
-        self.cone = dict()
-        self.cone_glyph = dict()
-        self.cmapper = dict()
-        self.cLUT = dict()
-        self.cactor = dict()
-        self.arrow = dict()
-        self.cylinder = dict()
-        self.sphere = dict()
-        self.arrow_glyph = dict()
-        self.gmapper = dict()
-        self.gactor = dict()
-        self.ctransform = dict()
-        self.cylinder_glyph = dict()
-        self.clmapper = dict()
-        self.sphere_glypha = dict()
-        self.sphere_glyphb = dict()
-        self.smappera = dict()
-        self.smapperb = dict()
-        self.sactora = dict()
-        self.sactorb = dict()
-        self.clactor = dict()
-        self.cell_connectors = dict()
-        self.times_of_birth = dict()
-        self.times_of_death = dict()
+        self.cone = {}
+        self.cone_glyph = {}
+        self.cmapper = {}
+        self.cLUT = {}
+        self.cactor = {}
+        self.arrow = {}
+        self.cylinder = {}
+        self.sphere = {}
+        self.arrow_glyph = {}
+        self.gmapper = {}
+        self.gactor = {}
+        self.ctransform = {}
+        self.cylinder_glyph = {}
+        self.clmapper = {}
+        self.sphere_glypha = {}
+        self.sphere_glyphb = {}
+        self.smappera = {}
+        self.smapperb = {}
+        self.sactora = {}
+        self.sactorb = {}
+        self.clactor = {}
+        self.cell_connectors = {}
+        self.times_of_birth = {}
+        self.times_of_death = {}
         self.min_time = self.opts.min_time
         self.max_time = self.opts.max_time
 
         self.with_fem = False
-        self.transforms = dict()
-        self.transformers = dict()
+        self.transforms = {}
+        self.transformers = {}
 
-        self.offsets = dict()
+        self.offsets = {}
 
         self.io_reader = IOReader(self.opts)
 
         if self.opts.cf_cohesive:
-            self.io_reader._with_cohesive_forces =True
+            self.io_reader._with_cohesive_forces = True
 
         self.io_reader.SetIO(io=self.io)
 
@@ -1797,7 +1802,6 @@ class VView(object):
         # If domain information is available, we turn on the color
         # table and turn on scalars
         if self.io_reader.dom_at_time is not None:
-
             # Random color map, up to 256 domains
             self.cLUT[mu] = vtk.vtkLookupTable()
             self.cLUT[mu].SetNumberOfColors(256)
@@ -1966,8 +1970,9 @@ class VView(object):
         ConvexSource = makeConvexSourceClass()
 
         if shape_type in ["msh"]:
-            import meshio
             import tempfile
+
+            import meshio
 
             # Keep original msh data for FEM visualization
             if h5py.version.version_tuple.major >= 3:
@@ -1975,7 +1980,7 @@ class VView(object):
             else:
                 shape_data = str(self.io.shapes()[shape_name][:][0])
 
-            with tempfile.NamedTemporaryFile(suffix='.msh', mode='w+') as tmpf:
+            with tempfile.NamedTemporaryFile(suffix=".msh", mode="w+") as tmpf:
                 tmpf.write(shape_data)
                 tmpf.flush()
                 mesh = meshio.read(tmpf.name)
@@ -2035,7 +2040,7 @@ class VView(object):
             if shape_type in ["msh"]:
                 shape_data = msh_to_stl(shape_data)
                 shape_type = "stl"
-                
+
             with io_tmpfile() as tmpf:
                 # fix compatibility with h5py version: to be removed in the future
                 tmpf[0].write(shape_data)
@@ -2095,7 +2100,7 @@ class VView(object):
             elif shape_type in ["stp", "step", "igs", "iges"]:
                 with io_tmpfile(
                     debug=True,
-                    suffix=".{0}".format(shape_type),
+                    suffix=f".{shape_type}",
                     contents=(self.io.shapes()[shape_name][:][0]).decode("utf-8"),
                 ) as tmpf:
                     shape = occ_load_file(tmpf[1])
@@ -2357,11 +2362,11 @@ class VView(object):
         for shape_name in self.io.shapes():
             self.init_shape(shape_name)
 
-        for shape_name in self.mappers.keys():
+        for shape_name in self.mappers:
             if shape_name not in self.unfrozen_mappers:
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
         if self.opts.with_edges:
-            for shape_name in self.mappers_edges.keys():
+            for shape_name in self.mappers_edges:
                 if shape_name not in self.unfrozen_mappers_edges:
                     self.unfrozen_mappers_edges[shape_name] = next(
                         self.mappers_edges[shape_name]
@@ -2377,9 +2382,7 @@ class VView(object):
 
         if "shape_name" not in contactor.attrs:
             print(
-                "Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(
-                    contactor_instance_name
-                )
+                f"Warning: old format: ctr.name must be ctr.shape_name for contact {contactor_instance_name}"
             )
             shape_attr_name = "name"
         else:
@@ -2409,9 +2412,10 @@ class VView(object):
         actor = None
         actor_edge = None
 
-        if (instance.attrs.get("mass", 0) > 0 or len(instance.attrs.get("material", [])) > 0) \
-           and not self.opts.view_as_glyphs:
-
+        if (
+            instance.attrs.get("mass", 0) > 0
+            or len(instance.attrs.get("material", [])) > 0
+        ) and not self.opts.view_as_glyphs:
             # objects that may move
             actor = vtk.vtkActor()
             if self.opts.with_edges:
@@ -2423,7 +2427,9 @@ class VView(object):
 
             if len(instance.attrs.get("material", [])) > 0:
                 self.with_fem = True
-                self.io_reader.fem_actors[instid] = [(actor, contact_shape_indx, collision_group)]
+                self.io_reader.fem_actors[instid] = [
+                    (actor, contact_shape_indx, collision_group)
+                ]
 
             actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
 
@@ -2443,8 +2449,8 @@ class VView(object):
                 actor_edge.GetProperty().SetRepresentationToWireframe()
 
         else:
-            assert (instance.attrs.get("mass", 0) <= 0)
-            assert (len(instance.attrs.get("material", [])) == 0)
+            assert instance.attrs.get("mass", 0) <= 0
+            assert len(instance.attrs.get("material", [])) == 0
 
             # objects that are not supposed to move
             actor = vtk.vtkActor()
@@ -2462,7 +2468,6 @@ class VView(object):
             )
 
         if actor is not None:
-
             if self.opts.with_random_color:
                 actor.GetProperty().SetColor(random_color())
                 if self.opts.with_edges:
@@ -2470,9 +2475,7 @@ class VView(object):
 
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
             if self.opts.with_edges:
-                actor_edge.SetMapper(
-                    self.unfrozen_mappers_edges[contact_shape_indx]
-                )
+                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
             self.renderer.AddActor(actor)
             if self.opts.with_edges:
@@ -2530,10 +2533,7 @@ class VView(object):
             # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
             # we propose to erase it.
             try:
-                if (
-                    self.io.shapes()[contact_shape_name].attrs["primitive"]
-                    == "Disk"
-                ):
+                if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
                     offset_orientation = [
                         math.cos(pi / 4.0),
                         math.sin(pi / 4.0),
@@ -2612,9 +2612,9 @@ class VView(object):
             pass
 
         if instid >= 0:
-            self.dynamic_actors[instid] = list()
+            self.dynamic_actors[instid] = []
         else:
-            self.static_actors[instid] = list()
+            self.static_actors[instid] = []
 
         for contactor_instance_name in instance:
             self.init_contactor(contactor_instance_name, instance, instid)
@@ -2655,7 +2655,6 @@ class VView(object):
             for transform, offset in zip(
                 self.transforms[instance], self.offsets[instance]
             ):
-
                 p = q.rotate(offset[0])
 
                 r = q * Quaternion(offset[1])
@@ -2754,14 +2753,17 @@ class VView(object):
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.dynamic_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all":
-                    actor.VisibilityOn()
-                elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
-                    actor.VisibilityOn()
-                elif (
-                    self.opts.visible_mode == "contactors"
-                    and group != -1
+                if (
+                    not has_avatar
+                    or self.opts.visible_mode == "all"
+                    or self.opts.visible_mode == "avatars"
+                    and group == -1
                     and has_avatar
+                    or (
+                        self.opts.visible_mode == "contactors"
+                        and group != -1
+                        and has_avatar
+                    )
                 ):
                     actor.VisibilityOn()
                 else:
@@ -2785,14 +2787,17 @@ class VView(object):
                     break
         if tob <= time and tod >= time:
             for actor, index, group in self.static_actors[instance]:
-                if not has_avatar or self.opts.visible_mode == "all":
-                    actor.VisibilityOn()
-                elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
-                    actor.VisibilityOn()
-                elif (
-                    self.opts.visible_mode == "contactors"
-                    and group != -1
+                if (
+                    not has_avatar
+                    or self.opts.visible_mode == "all"
+                    or self.opts.visible_mode == "avatars"
+                    and group == -1
                     and has_avatar
+                    or (
+                        self.opts.visible_mode == "contactors"
+                        and group != -1
+                        and has_avatar
+                    )
                 ):
                     actor.VisibilityOn()
                 else:
@@ -3261,7 +3266,7 @@ class VView(object):
             ntimes_proc = int(ntime / self.opts.nprocs)
             s = ""
             for i in range(self.opts.nprocs):
-                s += "{0}/{1} ".format(ntimes_proc * i, ntimes_proc * (i + 1))
+                s += f"{ntimes_proc * i}/{ntimes_proc * (i + 1)} "
             print("#!/bin/sh")
             print(
                 "parallel --verbose",
@@ -3355,11 +3360,7 @@ class VView(object):
                 self.set_instance_v(pos_data[:, 1])
 
                 big_data_writer.SetFileName(
-                    "{0}-{1}.{2}".format(
-                        os.path.splitext(os.path.basename(self.opts.io_filename))[0],
-                        k,
-                        big_data_writer.GetDefaultFileExtension(),
-                    )
+                    f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-{k}.{big_data_writer.GetDefaultFileExtension()}"
                 )
                 if self.opts.global_filter:
                     self.big_data_geometry_filter.Update()
@@ -3458,25 +3459,19 @@ class VView(object):
                     velocity_absolute_output_body[-1].extend(velo[:])
                     velocity_absolute_output_body[-1].append(bdy_id)
 
-        for bdy_id in position_output.keys():
+        for bdy_id in position_output:
             output = numpy.array(position_output[bdy_id])
-            filename_output = "{0}-position-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-position-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
-        for bdy_id in velocity_output.keys():
+        for bdy_id in velocity_output:
             output = numpy.array(velocity_output[bdy_id])
-            filename_output = "{0}-velocity-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-velocity-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
-        for bdy_id in velocity_absolute_output.keys():
+        for bdy_id in velocity_absolute_output:
             output = numpy.array(velocity_absolute_output[bdy_id])
-            filename_output = "{0}-velocity-absolute-body_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], bdy_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-velocity-absolute-body_{bdy_id}.dat"
             numpy.savetxt(filename_output, output)
 
         cf_output = {}
@@ -3508,11 +3503,9 @@ class VView(object):
                     cf_output_contact[-1].extend(cf_data[i, 2:nvalue])
                     cf_output_contact[-1].append(contact_id)
 
-        for contact_id in cf_output.keys():
+        for contact_id in cf_output:
             output = numpy.array(cf_output[contact_id])
-            filename_output = "{0}-cf-contact_{1}.dat".format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0], contact_id
-            )
+            filename_output = f"{os.path.splitext(os.path.basename(self.opts.io_filename))[0]}-cf-contact_{contact_id}.dat"
             numpy.savetxt(filename_output, output)
 
         sys.stdout.write("\n")
@@ -3520,7 +3513,6 @@ class VView(object):
     def initialize_vtk(self):
         self.print_verbose("initialize_vtk")
         if not self.opts.gen_para_script:
-
             self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
             add_compatiblity_methods(self.objects_collector)
             self.cf_collector = vtk.vtkMultiBlockDataGroupFilter()
@@ -3534,7 +3526,6 @@ class VView(object):
             )
 
             if self.opts.global_filter:
-
                 self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
                 add_compatiblity_methods(self.big_data_geometry_filter)
                 self.big_data_geometry_filter.SetInputConnection(
@@ -3567,15 +3558,15 @@ class VView(object):
             if len(times) == 0:
                 print("No dynamic data found!  Empty simulation.")
 
-            self.readers = dict()
-            self.datasets = dict()
-            self.mappers = dict()
-            self.mappers_edges = dict()
-            self.dynamic_actors = dict()
-            self.static_actors = dict()
+            self.readers = {}
+            self.datasets = {}
+            self.mappers = {}
+            self.mappers_edges = {}
+            self.dynamic_actors = {}
+            self.static_actors = {}
             self.vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
-            self.unfrozen_mappers = dict()
-            self.unfrozen_mappers_edges = dict()
+            self.unfrozen_mappers = {}
+            self.unfrozen_mappers_edges = {}
 
             self.build_set_functions()
 
@@ -3664,16 +3655,16 @@ if __name__ == "__main__":
     opts.parse()
 
 # Heavier imports after command line parsing
-from vtk.util import numpy_support
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from vtk.util import numpy_support
 
 have_occ = siconos.mechanics.have_occ
 if have_occ:
     from siconos.io.occ_tools import (
-        occ_topo_list,
-        occ_load_file,
-        topods_shape_reader,
         brep_reader,
+        occ_load_file,
+        occ_topo_list,
+        topods_shape_reader,
     )
 
 nan = numpy.nan

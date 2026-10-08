@@ -10,23 +10,19 @@ namespace siconos::collision {
 struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   using dof = some::indice_parameter<"dof">;
 
-  struct attributes {}; // empty
+  struct attributes {};  // empty
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    template <match::handle<model::lagrangian_ds> DS1,
-              match::handle<model::lagrangian_ds> DS2>
-    decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2)
-    {
+    template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
+    decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(self()->data(), storage::prop<"shape">(ds1))
-                     .radius();
-      auto& r2 = storage::make_handle(self()->data(), storage::prop<"shape">(ds2))
-                     .radius();
+      auto& r1 = storage::make_handle(self()->data(), storage::prop<"shape">(ds1)).radius();
+      auto& r2 = storage::make_handle(self()->data(), storage::prop<"shape">(ds2)).radius();
 
       auto dx = q2[0] - q1[0];
       auto dy = q2[1] - q1[1];
@@ -36,8 +32,7 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
 
     template <typename S, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::lagrangian_ds> DS2, typename M>
-    void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1, M& h_matrix2)
-    {
+    void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1, M& h_matrix2) {
       auto& data = self()->data();
 
       auto& q1 = storage::attr<"q">(ds1, step);

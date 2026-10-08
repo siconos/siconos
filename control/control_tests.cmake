@@ -17,5 +17,5 @@ if(WITH_TESTING)
     new_test(SOURCES ObserverTest.cpp ${SIMPLE_TEST_MAIN})
     new_test(SOURCES TwistingTest.cpp ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS compile_defs)
   endif()
-  
+
 endif()

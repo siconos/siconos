@@ -30,7 +30,7 @@
  * the Newton loop. */
 void siconos::fem::cable::CableCollisionManager::updateInteractions(
     std::shared_ptr<siconos::simulation::Simulation> simulation) {
-  auto &q = cable_ds_->q_read();
+  auto& q = cable_ds_->q_read();
   auto nb = q.size();
 
   unsigned int node_idx = 0;
@@ -45,7 +45,7 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
     pc1(1) = q(i + 1);
     pc1(2) = q(i + 2);
 
-    for (auto &s : supports_) {
+    for (auto& s : supports_) {
       if (s->isContact(pc1, tolAtContact_)) {
         // If the current point is in contact with the support then
         // we get it's projection (pc2) on the obstacle, the normal and the tangent.

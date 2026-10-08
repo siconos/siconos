@@ -51,6 +51,7 @@
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
+
 /*!
  * \file gfc3d_nonsmooth_Newton_AlartCurnier.c
  *
@@ -196,6 +197,7 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
                                     double* global_velocity, double* reaction,
                                     double* velocity, double* rho,
                                     double* residual) {
+
   assert(problem->H->size1 == problem->dimension * problem->numberOfContacts);
 
   const unsigned int num_contact_dofs = problem->H->size1;
@@ -220,6 +222,7 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
                             problem->mu, rho, residual + num_global_dofs + num_contact_dofs,
                             NULL, NULL);
 }
+
 
 /**
  * \brief Build the constant sparsity pattern of the global Jacobian \f$J\f$.
@@ -249,6 +252,7 @@ static CS_INT build_jacobian_pattern(CSparseMatrix* mass_matrix, CSparseMatrix* 
   assert(contact_matrix->nz >= 0);
   assert(contact_jac_A->nz >= 0);
   assert(contact_jac_B->nz >= 0);
+
 
   /* M and the contact Jacobians must be square. */
   assert(mass_matrix->m == mass_matrix->n);
@@ -329,6 +333,7 @@ static void update_jacobian_blocks(CSparseMatrix* mass_matrix, CSparseMatrix* co
   assert(contact_jac_A->nz >= 0);
   assert(contact_jac_B->nz >= 0);
 
+
   assert(mass_matrix->m == mass_matrix->n);
   assert(contact_jac_A->m == contact_jac_A->n);
   assert(contact_jac_B->m == contact_jac_B->n);
@@ -373,6 +378,7 @@ static void update_jacobian_blocks(CSparseMatrix* mass_matrix, CSparseMatrix* co
   }
 }
 
+
 /**
  * \brief Set up triplet sparse storage for a list of 3x3 diagonal blocks.
  *
@@ -393,6 +399,7 @@ static void setup_contact_jacobian_blocks(int num_contacts, double* block_values
   block_matrix->x = block_values;
   block_matrix->nz = 9 * num_contacts;
   block_matrix->nzmax = block_matrix->nz;
+
 
   for (int contact = 0; contact < num_contacts; ++contact) {
     for (int col = 0; col < 3; ++col) {
@@ -439,6 +446,7 @@ static void setup_contact_jacobian_blocks(int num_contacts, double* block_values
  * \param[in] max_ls_iterations maximum number of line-search iterations
  * \return 0 if an acceptable step is found, -1 otherwise
  */
+
 static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* problem,
                                              AlartCurnierFun3x3Ptr compute_ac_fun_3x3,
                                              double* current_solution, double* search_direction,
@@ -556,6 +564,7 @@ void gfc3d_sparseGlobalAlartCurnierInit(SolverOptions* options) {
  * \param[out] info solver status: 0 on success, nonzero otherwise
  * \param[in,out] options solver options and parameters
  */
+
 void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          double* reaction, double* velocity,
                                          double* globalVelocity, int* info,
@@ -672,11 +681,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     assert(options->dWork == NULL);
     assert(options->iWork == NULL);
 
+
     options->dWorkSize = compute_dwork_size(num_global_dofs, num_contact_dofs, system_size);
     options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
 
     options->iWorkSize = compute_iwork_size(num_contact_dofs);
     options->iWork = (int*)malloc(options->iWorkSize);
+
 
     options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 1;
   }
@@ -687,6 +698,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   if (!options->dWork || options->dWorkSize < required_dwork_size) {
     double* p = (double*)realloc(options->dWork, required_dwork_size * sizeof(double));
+
     if (!p) {
       numerics_error_log("gfc3d_nonsmooth_Newton_AlartCurnier", "bad alloc");
       *info = NUMERICS_ERR_MEMORY;
@@ -695,6 +707,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     options->dWork = p;
     options->dWorkSize = required_dwork_size;
   }
+
 
   if (!options->iWork || options->iWorkSize < required_iwork_size) {
     int* p = (int*)realloc(options->iWork, required_iwork_size);
@@ -728,6 +741,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   CS_INT* jac_A_cols = jac_B_rows + 3 * num_contact_dofs;
   CS_INT* jac_B_cols = jac_A_cols + 3 * num_contact_dofs;
 
+
   CSparseMatrix jac_A_sparse;
   CSparseMatrix jac_B_sparse;
   CSparseMatrix* jacobian_triplet;
@@ -750,8 +764,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                      2 * jac_A_sparse.n + jac_A_sparse.nzmax + jac_B_sparse.nzmax,
                  1, 1);
 
+
   NumericsSparseMatrix* nsm_jacobian = NSM_new();
   nsm_jacobian->triplet = jacobian_triplet;
+
 
   DEBUG_PRINTF("NM_triplet(problem->M)->n= %lli\t,NM_triplet(problem->M)->nzmax = %lli\n",
                (long long)NM_triplet(problem->M)->n, (long long)NM_triplet(problem->M)->nzmax);
@@ -771,6 +787,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
    * ====================================================================== */
   for (unsigned int i = 0; i < num_contact_dofs; ++i) {
     rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+
   }
 
   DEBUG_EXPR(for (unsigned int i = 0; i < num_contact_dofs; ++i)
@@ -820,9 +837,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   double* current_velocity = &(current_solution[num_global_dofs]);
   double* current_reaction = &(current_solution[num_global_dofs + num_contact_dofs]);
 
+
   memcpy(current_global_velocity, globalVelocity, num_global_dofs * sizeof(double));
   memcpy(current_velocity, velocity, num_contact_dofs * sizeof(double));
   memcpy(current_reaction, reaction, num_contact_dofs * sizeof(double));
+
 
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Start with tolerance = %g", tolerance);
 
@@ -849,6 +868,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
     /* Newton direction: newton_direction = -Psi(x_k). */
     cblas_dcopy(system_size, system_residual, 1, newton_direction, 1);
     cblas_dscal(system_size, -1., newton_direction, 1);
+
 
     /* Convert to compressed-column format and solve J(x_k) d = -Psi(x_k). */
     CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
@@ -995,11 +1015,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   free(nm_jacobian);
 }
 
+
 /**
  * \brief Set default solver options for GFC3D_NSN_AC.
  *
  * \param[in,out] options the solver options structure to initialize
  */
+
 void gfc3d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
@@ -1034,8 +1056,10 @@ static int gfc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
 static int gfc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* velocity,
                                    double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
+
   gfc3d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem*)problem, reaction, velocity,
                                       globalVelocity, &info, options);
+
   return info;
 }
 

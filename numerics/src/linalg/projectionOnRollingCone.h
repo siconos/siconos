@@ -44,7 +44,7 @@ extern "C" {
     \param[in] mu_r the angle of the cone in moment
     \return the type of projection
 */
-unsigned int projectionOnRollingCone(double *r, double mu, double mur);
+unsigned int projectionOnRollingCone(double* r, double mu, double mur);
 
 /**
    projectionOnRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
@@ -55,7 +55,7 @@ unsigned int projectionOnRollingCone(double *r, double mu, double mur);
    \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
-unsigned int projectionOn2DRollingCone(double *r, double mu, double mur);
+unsigned int projectionOn2DRollingCone(double* r, double mu, double mur);
 
 /**
    projectionOnDualRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
@@ -67,7 +67,7 @@ unsigned int projectionOn2DRollingCone(double *r, double mu, double mur);
    \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
-unsigned projectionOnDualRollingCone(double *u, double mu, double mur);
+unsigned projectionOnDualRollingCone(double* u, double mu, double mur);
 
 void display_status_rolling_cone(unsigned int status);
 
@@ -84,7 +84,7 @@ void display_status_rolling_cone(unsigned int status);
    \return the type of projection
 */
 
-unsigned subdifferentialProjectionOnRollingCone(double *H, double *r, double mu, double mur);
+unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu, double mur);
 
 #if defined(__cplusplus)
 }

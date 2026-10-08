@@ -15,27 +15,20 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) line()
-    {
-      return make_ref_handle(self()->data(), attr<"line">(*self()));
-    }
+    decltype(auto) line() { return make_ref_handle(self()->data(), attr<"line">(*self())); }
 
     decltype(auto) shape() { return self()->line(); }
 
-    decltype(auto) compute_h(auto step, auto& ds)
-    {
+    decltype(auto) compute_h(auto step, auto& ds) {
       auto& q = storage::attr<"q">(ds, step);
-      return line().distance(q) -
-             make_handle(self()->data(), prop<"shape">(ds)).radius();
+      return line().distance(q) - make_handle(self()->data(), prop<"shape">(ds)).radius();
     }
 
-    void compute_jachq(auto step, auto& ds, auto& h_matrix1)
-    {
+    void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
       auto& data = self()->data();
 
       auto& q = storage::attr<"q">(ds, step);
-      auto& r =
-          storage::make_handle(data, storage::prop<"shape">(ds)).radius();
+      auto& r = storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 
       auto& x = q(0);
       auto& y = q(1);

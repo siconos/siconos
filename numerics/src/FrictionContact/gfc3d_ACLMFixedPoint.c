@@ -37,17 +37,17 @@
 #include "solver_registry.h"
 
 /** pointer to function used to call internal solver for proximal point solver */
-typedef void (*internalSolverPtr)(ConvexQP *, double *, double *, double *, double *, int *,
-                                  SolverOptions *);
-void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
-                          double *restrict reaction, double *restrict velocity,
-                          double *restrict globalVelocity, int *restrict info,
-                          SolverOptions *restrict options) {
+typedef void (*internalSolverPtr)(ConvexQP*, double*, double*, double*, double*, int*,
+                                  SolverOptions*);
+void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem,
+                          double* restrict reaction, double* restrict velocity,
+                          double* restrict globalVelocity, int* restrict info,
+                          SolverOptions* restrict options) {
   /* verbose=1; */
 
   /* int and double parameters */
-  int *iparam = options->iparam;
-  double *dparam = options->dparam;
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
 
   /* Number of contacts */
   int nc = problem->numberOfContacts;
@@ -69,7 +69,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
     return;
   }
 
-  SolverOptions *internalsolver_options = options->internalSolvers[0];
+  SolverOptions* internalsolver_options = options->internalSolvers[0];
 
   if (verbose > 0) {
     solver_options_print(options);
@@ -81,12 +81,12 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
   int hasNotConverged = 1;
   internalSolverPtr internalsolver;
 
-  ConvexQP *cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
+  ConvexQP* cqp = (ConvexQP*)malloc(sizeof(ConvexQP));
   cqp->size = n;
   cqp->m = m;
   cqp->M = problem->M;
 
-  cqp->q = (double *)malloc(n * sizeof(double));
+  cqp->q = (double*)malloc(n * sizeof(double));
   for (int i = 0; i < n; i++) {
     cqp->q[i] = -problem->q[i];
   }
@@ -94,14 +94,14 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
 
   cqp->A = NM_transpose(problem->H);
   DEBUG_EXPR(NM_display(cqp->A));
-  cqp->b = (double *)malloc(m * sizeof(double));
+  cqp->b = (double*)malloc(m * sizeof(double));
   cqp->ProjectionOnC = &Projection_ConvexQP_GFC3D_DualCone;
   cqp->normConvexQP = norm_q;
   cqp->istheNormConvexQPset = 1;
-  double *w = (double *)malloc(n * sizeof(double));
+  double* w = (double*)malloc(n * sizeof(double));
 
-  GlobalFrictionContactProblem_as_ConvexQP *gfc3d_as_cqp =
-      (GlobalFrictionContactProblem_as_ConvexQP *)malloc(
+  GlobalFrictionContactProblem_as_ConvexQP* gfc3d_as_cqp =
+      (GlobalFrictionContactProblem_as_ConvexQP*)malloc(
           sizeof(GlobalFrictionContactProblem_as_ConvexQP));
   cqp->env = gfc3d_as_cqp;
   gfc3d_as_cqp->cqp = cqp;
@@ -166,7 +166,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem *restrict problem,
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 }
 
-void gfc3d_aclmfp_set_default(SolverOptions *options) {
+void gfc3d_aclmfp_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 2.0;
@@ -174,7 +174,7 @@ void gfc3d_aclmfp_set_default(SolverOptions *options) {
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
-    options->internalSolvers = calloc(1, sizeof(SolverOptions *));
+    options->internalSolvers = calloc(1, sizeof(SolverOptions*));
   } else {
     solver_options_delete(options->internalSolvers[0]);
   }
@@ -192,20 +192,20 @@ void gfc3d_aclmfp_set_default(SolverOptions *options) {
  * - Elimination of giant switch statements in drivers
  */
 
-static int gfc3d_aclmfp_init_wrap(void *problem, SolverOptions *options) {
+static int gfc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
   gfc3d_aclmfp_set_default(options);
   return NUMERICS_OK;
 }
 
-static int gfc3d_aclmfp_solve_wrap(void *problem, double *reaction, double *velocity,
-                                   double *globalVelocity, SolverOptions *options) {
+static int gfc3d_aclmfp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc3d_ACLMFixedPoint((GlobalFrictionContactProblem *)problem, reaction, velocity,
+  gfc3d_ACLMFixedPoint((GlobalFrictionContactProblem*)problem, reaction, velocity,
                        globalVelocity, &info, options);
   return info;
 }
 
-static void gfc3d_aclmfp_free_wrap(void *problem, SolverOptions *options) {
+static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

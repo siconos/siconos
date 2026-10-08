@@ -13,7 +13,3 @@ References
    related_projects
    z_siconos_bibtex
    license
-
-   
-
-   

@@ -32,13 +32,13 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 
-void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
-               SolverOptions *options) {
-  double *M = problem->M->matrix0;
-  double *q = problem->q;
+void relay_pgs(RelayProblem* problem, double* z, double* w, int* info,
+               SolverOptions* options) {
+  double* M = problem->M->matrix0;
+  double* q = problem->q;
   int n = problem->size;
-  double *a = problem->lb;
-  double *b = problem->ub;
+  double* a = problem->lb;
+  double* b = problem->ub;
 
   assert(M);
   assert(q);
@@ -51,7 +51,7 @@ void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
 
   int i;
   double zi;
-  double *diag = (double *)malloc(n * sizeof(double));
+  double* diag = (double*)malloc(n * sizeof(double));
 
   for (i = 0; i < n; ++i) {
     if (fabs(M[i * n + i]) < DBL_EPSILON) {
@@ -122,23 +122,23 @@ void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_PGS in the global solver registry.
  */
 
-static void relay_pgs_set_default(SolverOptions *options) {
+static void relay_pgs_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_pgs_init_wrap(void *problem, SolverOptions *options) {
+static int relay_pgs_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_pgs_solve_wrap(void *problem, double *z, double *w, SolverOptions *options) {
+static int relay_pgs_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
   int info = NUMERICS_OK;
-  relay_pgs((RelayProblem *)problem, z, w, &info, options);
+  relay_pgs((RelayProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_pgs_free_wrap(void *problem, SolverOptions *options) {
+static void relay_pgs_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

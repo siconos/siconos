@@ -31,27 +31,25 @@ struct io : item {
 
   using attributes = gather<
       attribute<"osi", some::item_ref<osi>>,
-      attribute<"disp_info", some::map<some::indice,
-                                       some::unbounded_vector<some::scalar>>>,
-      attribute<"p0_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<4>>>>,
-      attribute<"radii_info", some::unbounded_collection<some::vector<
-                                  some::scalar, some::indice_value<2>>>>,
-      attribute<"pos_info", some::unbounded_collection<some::vector<
-                                some::scalar, some::indice_value<4>>>>,
-      attribute<"vel_info", some::unbounded_collection<some::vector<
-                                some::scalar, some::indice_value<4>>>>,
-      attribute<"cp_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<25>>>>,
-      attribute<"co_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<4>>>>,
-      attribute<"work_info", some::unbounded_collection<some::vector<
-                                 some::scalar, some::indice_value<7>>>>>;
+      attribute<"disp_info", some::map<some::indice, some::unbounded_vector<some::scalar>>>,
+      attribute<"p0_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"radii_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<2>>>>,
+      attribute<"pos_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"vel_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"cp_info", some::unbounded_collection<
+                               some::vector<some::scalar, some::indice_value<25>>>>,
+      attribute<"co_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"work_info", some::unbounded_collection<
+                                 some::vector<some::scalar, some::indice_value<7>>>>>;
 
   using properties =
       // an attached global ident for contact shapes
-      gather<storage::attached<ContactShapes, symbol<"ident">,
-                               some::integer>...>;
+      gather<storage::attached<ContactShapes, symbol<"ident">, some::integer>...>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -59,8 +57,7 @@ struct io : item {
 
     decltype(auto) osi() { return storage::attr<"osi">(*self()); }
 
-    decltype(auto) p0s(auto step)
-    {
+    decltype(auto) p0s(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
@@ -79,23 +76,19 @@ struct io : item {
         if (involved) {
           /* contact */
           auto&& p0 = algebra::get_vector(p0_v, index);
-          attr<"p0_info">(*self()).push_back(
-              {(scalar)id, p0[0], p0[1], p0[2]});
-        }
-        else {
+          attr<"p0_info">(*self()).push_back({(scalar)id, p0[0], p0[1], p0[2]});
+        } else {
           /* without contact */
           attr<"p0_info">(*self()).push_back({(scalar)id, 0., 0., 0.});
         }
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"p0_info">(*self()).data()->data(),
-          attr<"p0_info">(*self()).size(),
+          attr<"p0_info">(*self()).data()->data(), attr<"p0_info">(*self()).size(),
           attr<"p0_info">(*self()).data()->size());
     }
 
-    decltype(auto) radii(auto step)
-    {
+    decltype(auto) radii(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
@@ -111,13 +104,11 @@ struct io : item {
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
-          attr<"radii_info">(*self()).data()->data(),
-          attr<"radii_info">(*self()).size(),
+          attr<"radii_info">(*self()).data()->data(), attr<"radii_info">(*self()).size(),
           attr<"radii_info">(*self()).data()->size());
     }
 
-    decltype(auto) displacements(auto step)
-    {
+    decltype(auto) displacements(auto step) {
       auto& data = self()->data();
       if constexpr (!match::empty_item<dsystem>) {
         auto& ids = storage::prop_values<dsystem, "id">(data, step);
@@ -133,8 +124,7 @@ struct io : item {
         return attr<"disp_info">(*self());
       }
     }
-    decltype(auto) positions(auto step)
-    {
+    decltype(auto) positions(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       //      using indice = typename env_t::indice;
@@ -150,13 +140,11 @@ struct io : item {
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"pos_info">(*self()).data()->data(),
-          attr<"pos_info">(*self()).size(),
+          attr<"pos_info">(*self()).data()->data(), attr<"pos_info">(*self()).size(),
           attr<"pos_info">(*self()).data()->size());
     }
 
-    decltype(auto) velocities(auto step)
-    {
+    decltype(auto) velocities(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       //      using indice = typename env_t::indice;
@@ -168,18 +156,15 @@ struct io : item {
       attr<"vel_info">(*self()).clear();
 
       for (auto [id, velo] : view::zip(ids, velos)) {
-        attr<"vel_info">(*self()).push_back(
-            {(scalar)id, velo[0], velo[1], velo[2]});
+        attr<"vel_info">(*self()).push_back({(scalar)id, velo[0], velo[1], velo[2]});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"vel_info">(*self()).data()->data(),
-          attr<"vel_info">(*self()).size(),
+          attr<"vel_info">(*self()).data()->data(), attr<"vel_info">(*self()).size(),
           attr<"vel_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_points(auto step)
-    {
+    decltype(auto) contact_points(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
@@ -189,32 +174,27 @@ struct io : item {
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
-      auto& relations =
-          storage::attr_values<interaction, "relation">(data, step);
+      auto& relations = storage::attr_values<interaction, "relation">(data, step);
 
       auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
       auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
 
-      auto& h_matrices1 =
-          storage::attr_values<interaction, "h_matrix1">(data, step);
+      auto& h_matrices1 = storage::attr_values<interaction, "h_matrix1">(data, step);
 
-      auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
+      auto& activations = storage::prop_values<interaction, "activation">(data, step);
 
       attr<"cp_info">(*self()).clear();
 
       indice k = 0;
-      for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2,
-                 activation] :
-           view::zip(relations, h_matrices1, nslaws, ys, ydots, lambdas, ds1s,
-                     ds2s, activations)) {
+      for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2, activation] :
+           view::zip(relations, h_matrices1, nslaws, ys, ydots, lambdas, ds1s, ds2s,
+                     activations)) {
         auto hds1 = storage::make_handle(data, ds1);
         auto hds2 = storage::make_handle(data, ds2);
 
-        using vect =
-            std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
-                                                 translation 2 +
-                                                 orientation 1 */
+        using vect = std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
+                                                          translation 2 +
+                                                          orientation 1 */
 
         if (activation) {
           // computation at the interaction level
@@ -234,34 +214,26 @@ struct io : item {
             scalar dc2c1 = collision::distance(c2, c1);
 
             cn = (c2 - c1) / dc2c1;
-            ca = c1 + storage::make_handle(data, storage::prop<"shape">(hds1))
-                              .radius() *
-                          cn;
-            cb = c2 - storage::make_handle(data, storage::prop<"shape">(hds2))
-                              .radius() *
-                          cn;
-          }
-          else {
+            ca = c1 + storage::make_handle(data, storage::prop<"shape">(hds1)).radius() * cn;
+            cb = c2 - storage::make_handle(data, storage::prop<"shape">(hds2)).radius() * cn;
+          } else {
             variant::visit(
                 data, relation,
                 mp::overload(
                     /* disk / segment */
-                    [&](storage::index<collision::diskfsegment_r, indice>
-                            rrel) {
+                    [&](storage::index<collision::diskfsegment_r, indice> rrel) {
                       auto hrel = storage::make_handle(data, rrel);
                       /* cb is the proj point on the segment, computed a
                        * second time!
                        */
                       auto segment = hrel.segment();
                       const scalar t =
-                          fmax(0, fmin(1, algebra::dot(c1 - segment.p1(),
-                                                       segment.dp2p1()) /
+                          fmax(0, fmin(1, algebra::dot(c1 - segment.p1(), segment.dp2p1()) /
                                               segment.length_sq()));
                       cb = segment.p1() + t * segment.dp2p1();
                       scalar dcbc1 = collision::distance(cb, c1);
                       cn = (cb - c1) / dcbc1;
-                      ca = c1 + cn * storage::make_handle(
-                                         data, storage::prop<"shape">(hds1))
+                      ca = c1 + cn * storage::make_handle(data, storage::prop<"shape">(hds1))
                                          .radius();
                     },
                     /* disk / fixed disk */
@@ -275,10 +247,9 @@ struct io : item {
                       scalar dc2c1 = collision::distance(c2, c1);
 
                       cn = (c2 - c1) / dc2c1;
-                      ca = c1 + storage::make_handle(
-                                    data, storage::prop<"shape">(hds1))
-                                        .radius() *
-                                    cn;
+                      ca = c1 +
+                           storage::make_handle(data, storage::prop<"shape">(hds1)).radius() *
+                               cn;
                       cb = c2 - radius2 * cn;
                     },
                     [&](auto) {
@@ -292,55 +263,50 @@ struct io : item {
           auto id_ds2 = storage::prop<"id">(hds2);
 
           /* disk / segment */
-          attr<"cp_info">(*self()).push_back(
-              {storage::make_handle(data, nslaw).mu(),
-               cb[0],
-               cb[1],
-               0. /* 2D */,
-               ca[0],
-               ca[1],
-               0. /* 2D */,
-               -cn[0],
-               -cn[1],
-               0. /* 2D */,
-               p0[0],
-               p0[1],
-               0. /* 2D */,
-               y[0],
-               y[1],
-               0. /* 2D */,
-               ydot[0],
-               ydot[1],
-               0. /* 2D */,
-               lambda[0],
-               lambda[1],
-               0. /* 2D */,
-               (scalar)k,
-               (scalar)id_ds1,
-               (scalar)id_ds2});
+          attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
+                                              cb[0],
+                                              cb[1],
+                                              0. /* 2D */,
+                                              ca[0],
+                                              ca[1],
+                                              0. /* 2D */,
+                                              -cn[0],
+                                              -cn[1],
+                                              0. /* 2D */,
+                                              p0[0],
+                                              p0[1],
+                                              0. /* 2D */,
+                                              y[0],
+                                              y[1],
+                                              0. /* 2D */,
+                                              ydot[0],
+                                              ydot[1],
+                                              0. /* 2D */,
+                                              lambda[0],
+                                              lambda[1],
+                                              0. /* 2D */,
+                                              (scalar)k,
+                                              (scalar)id_ds1,
+                                              (scalar)id_ds2});
           k++;
         }
       }
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 25>>(
-          attr<"cp_info">(*self()).data()->data(),
-          attr<"cp_info">(*self()).size(),
+          attr<"cp_info">(*self()).data()->data(), attr<"cp_info">(*self()).size(),
           attr<"cp_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_info(auto step)
-    {
+    decltype(auto) contact_info(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
       using integer = typename env_t::integer;
 
-      auto& relations =
-          storage::attr_values<interaction, "relation">(data, step);
+      auto& relations = storage::attr_values<interaction, "relation">(data, step);
       auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
       auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
+      auto& activations = storage::prop_values<interaction, "activation">(data, step);
 
       attr<"co_info">(*self()).clear();
 
@@ -355,41 +321,37 @@ struct io : item {
 
           indice inter_index = k++; /* index of interaction in indexset 1 */
           // a pair type of shape (unsigned int) + index
-          auto static_shape_info = variant::visit(
-              data, relation,
-              mp::overload(
-                  // relation1 with static shape : the concept is missing
-                  [&]<match::relation1 Relation>(Relation rrel) {
-                    // must provide shape method
-                    return storage::prop<"ident">(rrel.shape());
-                  },
-                  [&](auto) {
-                    // another kind of relation
-                    return (integer)0;
-                  }));
+          auto static_shape_info =
+              variant::visit(data, relation,
+                             mp::overload(
+                                 // relation1 with static shape : the concept is missing
+                                 [&]<match::relation1 Relation>(Relation rrel) {
+                                   // must provide shape method
+                                   return storage::prop<"ident">(rrel.shape());
+                                 },
+                                 [&](auto) {
+                                   // another kind of relation
+                                   return (integer)0;
+                                 }));
 
-          attr<"co_info">(*self()).push_back({(scalar)inter_index,
-                                              (scalar)id_ds1, (scalar)id_ds2,
-                                              (scalar)static_shape_info});
+          attr<"co_info">(*self()).push_back({(scalar)inter_index, (scalar)id_ds1,
+                                              (scalar)id_ds2, (scalar)static_shape_info});
         }
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"co_info">(*self()).data()->data(),
-          attr<"co_info">(*self()).size(),
+          attr<"co_info">(*self()).data()->data(), attr<"co_info">(*self()).size(),
           attr<"co_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_work(auto step, auto theta, auto tol)
-    {
+    decltype(auto) contact_work(auto step, auto theta, auto tol) {
       // fix: theta is omega in mechanics_run.py & MechanicsIO.hpp
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto& ydot_ks =
-          storage::attr_values<interaction, "ydot">(data, step - 1);
+      auto& ydot_ks = storage::attr_values<interaction, "ydot">(data, step - 1);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
@@ -429,8 +391,7 @@ struct io : item {
         scalar tangent_contact_work = vt_1_average * pt_1;
         scalar answer_2 = tangent_contact_work;
 
-        scalar vt_1_average_theta =
-            theta * vt_1_plus + (1. - theta) * vt_1_minus;
+        scalar vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
         scalar tangent_contact_work_theta = vt_1_average_theta * pt_1;
         scalar answer_4 = tangent_contact_work_theta;
 
@@ -458,28 +419,24 @@ struct io : item {
             // std::cout << "WARNING: the impulse is outside the Coulomb cone
             // " << std::endl;
             answer_5 = -3;  // outside the cone = -3
-          }
-          else if ((norm_pt - mu * pn < -tol)) {
+          } else if ((norm_pt - mu * pn < -tol)) {
             // std::cout << "the impulse is in the *interior* of  the Coulomb
             // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
             // norm_vt_plus << std::endl;
             if (norm_vt_plus > tol) {
               // std::cout << "WARNING: but the norm of vt is not zero  " <<
               // std::endl;
-              answer_5 =
-                  -2;  // sticking with a non zero slifing velocity = -2
+              answer_5 = -2;  // sticking with a non zero slifing velocity = -2
             }
             // ?? answer_5 = -2 is always overwritten
             answer_5 = 1;  // sticking = 1
-          }
-          else {
+          } else {
             // std::cout << "the impulse is on the *boundary* of the Coulomb
             // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
             // norm_vt_plus << std::endl;
             answer_5 = 2;  // sliding = 2
           }
-        }
-        else
+        } else
           answer_5 = -1;  // undetermined = -1
         if ((pn > tol) and (vn_minus > tol)) {
           // std::cout << "WARNING: we apply the impact law of positive
@@ -491,19 +448,16 @@ struct io : item {
           answer_6 = normal_contact_work;
         }
 
-        attr<"work_info">(*self()).push_back({answer_0, answer_1, answer_2,
-                                              answer_3, answer_4, answer_5,
-                                              answer_6});
+        attr<"work_info">(*self()).push_back(
+            {answer_0, answer_1, answer_2, answer_3, answer_4, answer_5, answer_6});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 7>>(
-          attr<"work_info">(*self()).data()->data(),
-          attr<"work_info">(*self()).size(),
+          attr<"work_info">(*self()).data()->data(), attr<"work_info">(*self()).size(),
           attr<"work_info">(*self()).data()->size());
     }
 
-    auto methods()
-    {
+    auto methods() {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
@@ -514,11 +468,9 @@ struct io : item {
           method("positions", &interface<Handle>::positions<indice>),
           method("displacements", &interface<Handle>::displacements<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),
-          method("contact_points",
-                 &interface<Handle>::contact_points<indice>),
+          method("contact_points", &interface<Handle>::contact_points<indice>),
           method("contact_info", &interface<Handle>::contact_info<indice>),
-          method("contact_work",
-                 &interface<Handle>::contact_work<indice, scalar, scalar>));
+          method("contact_work", &interface<Handle>::contact_work<indice, scalar, scalar>));
     }
   };
 };

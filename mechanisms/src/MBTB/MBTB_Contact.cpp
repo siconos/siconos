@@ -24,11 +24,9 @@
 #include "MBTB_ContactRelation.hpp"
 #include "MBTB_FC3DContactRelation.hpp"
 
-siconos::mechanisms::MBTB_Contact::MBTB_Contact(int id,
-                                                const std::string& ContactName,
-                                                int indexBody1, int indexBody2,
-                                                int indexCAD1, int indexCAD2,
-                                                bool withFriction)
+siconos::mechanisms::MBTB_Contact::MBTB_Contact(int id, const std::string& ContactName,
+                                                int indexBody1, int indexBody2, int indexCAD1,
+                                                int indexCAD2, bool withFriction)
     : _ContactName{ContactName},
       _id{id},
       _indexBody1{indexBody1},

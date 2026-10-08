@@ -28,16 +28,12 @@ using gather = mp::tuple<Args...>;
 
 template <std::size_t N>
 struct string_literal {
-  constexpr string_literal(const char (&str)[N])
-  {
-    std::copy_n(str, N, value);
-  }
+  constexpr string_literal(const char (&str)[N]) { std::copy_n(str, N, value); }
   char value[N];
 };
 
 template <typename T>
-constexpr auto make_string_literal(T&& t)
-{
+constexpr auto make_string_literal(T&& t) {
   return string_literal(std::forward<T>(t));
 };
 
@@ -59,14 +55,12 @@ template <string_literal Symbol>
 struct name : text<Symbol> {};
 
 template <size_t N>
-constexpr auto make_string_literal(const string_literal<N>& a)
-{
+constexpr auto make_string_literal(const string_literal<N>& a) {
   return a;
 }
 
 template <size_t N>
-consteval auto make_symbol(const string_literal<N>& a)
-{
+consteval auto make_symbol(const string_literal<N>& a) {
   symbol s = a;
   return s;
 };
@@ -79,8 +73,7 @@ template <typename T>
 concept scalar = std::is_scalar_v<T>;
 
 template <typename T>
-concept indice =
-    std::is_scalar_v<T> && requires(T i) { std::array<double, 1>{}[i]; };
+concept indice = std::is_scalar_v<T> && requires(T i) { std::array<double, 1>{}[i]; };
 
 template <typename T>
 concept symbol = std::derived_from<T, any_symbol>;
@@ -132,8 +125,7 @@ concept static_capacity = requires(T a) {
 };
 
 template <typename T, typename I>
-concept handle = std::derived_from<typename T::type, I> &&
-                 requires { typename T::handle_t; };
+concept handle = std::derived_from<typename T::type, I> && requires { typename T::handle_t; };
 
 template <typename T>
 concept wrap = item<T> && requires { typename T::wrap_t; };

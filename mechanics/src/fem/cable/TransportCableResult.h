@@ -35,10 +35,10 @@ class Point;
 /**  */
 class TransportCableResult {
  private:
-  TransportCableResult(const TransportCableResult &) = delete;
-  TransportCableResult(TransportCableResult &&) = delete;
-  TransportCableResult &operator=(const TransportCableResult &) = delete;
-  TransportCableResult &operator=(TransportCableResult &&) = delete;
+  TransportCableResult(const TransportCableResult&) = delete;
+  TransportCableResult(TransportCableResult&&) = delete;
+  TransportCableResult& operator=(const TransportCableResult&) = delete;
+  TransportCableResult& operator=(TransportCableResult&&) = delete;
 
  public:
   /** Default and only constructor */
@@ -50,10 +50,10 @@ class TransportCableResult {
   void prepareSupport();
   void prepareIneqConstraint(int nb_nodes);
 
-  int exportTC(const std::string &a_fileName, nlohmann::ordered_json &a_output,
-               const std::string &a_option = "all");
+  int exportTC(const std::string& a_fileName, nlohmann::ordered_json& a_output,
+               const std::string& a_option = "all");
 
-  int to_json(nlohmann::ordered_json &j, const std::string &a_option = "all");
+  int to_json(nlohmann::ordered_json& j, const std::string& a_option = "all");
 
   /** Vector of all supports: contacts with pylons and stations (pulleys)
   in both up and down ropeways */

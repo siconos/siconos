@@ -107,7 +107,8 @@ int gmp_working_memory_alloc(GenericMechanicalProblem* problem, SolverOptions* o
  *  \return 0 if error <= tolerance, 1 otherwise
  */
 int gmp_compute_error(const GenericMechanicalProblem* problem, const double* reaction,
-                      double* velocity, double tolerance, SolverOptions* options, double* error);
+                      double* velocity, double tolerance, SolverOptions* options,
+                      double* error);
 
 /** Return the size (number of doubles) needed for options->dWork.
  *

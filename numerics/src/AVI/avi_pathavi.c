@@ -16,13 +16,12 @@
  * limitations under the License.
  */
 
-#include "AVI_Solvers.h"       // for avi_pathavi
-#include "AVI_cst.h"           // for SICONOS_AVI_PATHAVI
-#include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
+#include "AVI_Solvers.h"  // for avi_pathavi
+#include "AVI_cst.h"      // for SICONOS_AVI_PATHAVI
+#include "NumericsFwd.h"  // for AffineVariationalInequalities, SolverO...
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "solver_registry.h"
-#include "numerics_errors.h"
-#include "numerics_errors.h"
 
 #ifdef HAVE_PATHVI
 
@@ -39,7 +38,7 @@
 #include "PATHVI_helpers.h"
 #include "SiconosSets.h"
 
-static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix *M) {
+static void pathvi_csc_transfert(struct csc_matrix* primjac, CSparseMatrix* M) {
   size_t n = primjac->n;
   size_t nnz = primjac->nnz;
 
@@ -61,9 +60,9 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix *M) {
   }
 }
 
-static int pathvi_evaluate_function(struct vi_desc *desc, double *primvar, double *primfunc) {
-  SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  AffineVariationalInequalities *AVI = (AffineVariationalInequalities *)env->problem;
+static int pathvi_evaluate_function(struct vi_desc* desc, double* primvar, double* primfunc) {
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
+  AffineVariationalInequalities* AVI = (AffineVariationalInequalities*)env->problem;
 
   memcpy(primfunc, AVI->q, AVI->size * sizeof(double));
   NM_gemv(1.0, AVI->M, primvar, 1., primfunc);
@@ -71,10 +70,10 @@ static int pathvi_evaluate_function(struct vi_desc *desc, double *primvar, doubl
   return 0;
 }
 
-static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, double *primfunc,
-                                    struct csc_matrix *primjac) {
-  SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  AffineVariationalInequalities *AVI = (AffineVariationalInequalities *)env->problem;
+static int pathvi_evaluate_jacobian(struct vi_desc* desc, double* primvar, double* primfunc,
+                                    struct csc_matrix* primjac) {
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
+  AffineVariationalInequalities* AVI = (AffineVariationalInequalities*)env->problem;
 
   size_t n = AVI->size;
 
@@ -85,19 +84,19 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
       break;
     }
     case NM_SPARSE: {
-      CSparseMatrix *M = NM_csc(AVI->M);
+      CSparseMatrix* M = NM_csc(AVI->M);
       CS_INT nnz = M->p[n];
 
       /* check dimenstions */
       if (M->n > primjac->max_n) {
         primjac->max_n = M->n;
-        primjac->j = (PATHVI_INDX_TYPE *)realloc(primjac->j, (M->n + 1) * sizeof(primjac->j));
+        primjac->j = (PATHVI_INDX_TYPE*)realloc(primjac->j, (M->n + 1) * sizeof(primjac->j));
       }
 
       if (nnz > primjac->max_nnz) {
         primjac->max_nnz = nnz;
-        primjac->i = (PATHVI_INDX_TYPE *)realloc(primjac->i, nnz * sizeof(primjac->i));
-        primjac->x = (double *)realloc(primjac->x, nnz * sizeof(double));
+        primjac->i = (PATHVI_INDX_TYPE*)realloc(primjac->i, nnz * sizeof(primjac->i));
+        primjac->x = (double*)realloc(primjac->x, nnz * sizeof(double));
       }
 
       /*  Update the size */
@@ -114,17 +113,17 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
   return 0;
 }
 
-static int pathavi_get_jacobian_nnz(struct vi_desc *desc, int *nnz) {
-  SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  *nnz = NM_nnz(((AffineVariationalInequalities *)env->problem)->M);
+static int pathavi_get_jacobian_nnz(struct vi_desc* desc, int* nnz) {
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
+  *nnz = NM_nnz(((AffineVariationalInequalities*)env->problem)->M);
   return 0;
 }
 
-static int pathavi_get_jacobian_structure(struct vi_desc *desc, struct csc_matrix *primjac) {
-  SN_generic_pathvi_env *env = (SN_generic_pathvi_env *)vi_desc_get_controller(desc);
-  NumericsMatrix *M = ((AffineVariationalInequalities *)env->problem)->M;
+static int pathavi_get_jacobian_structure(struct vi_desc* desc, struct csc_matrix* primjac) {
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
+  NumericsMatrix* M = ((AffineVariationalInequalities*)env->problem)->M;
 
-  CSparseMatrix *Mcsc = NM_csc(M);
+  CSparseMatrix* Mcsc = NM_csc(M);
 
   if ((primjac->struct_mask & CSC_STRUCT_FIXED) &&
       !(primjac->struct_mask & CSC_STRUCT_FILLED)) {
@@ -143,19 +142,19 @@ static int pathavi_get_jacobian_structure(struct vi_desc *desc, struct csc_matri
   return 0;
 }
 
-int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
-                SolverOptions *options) {
+int avi_pathavi(AffineVariationalInequalities* problem, double* z, double* w,
+                SolverOptions* options) {
   int info = 0;
   bool use_scheduler = false;
 
   int nb_cstr = 0;
   int nnz_H = 0;
-  double *lambda = NULL;
+  double* lambda = NULL;
 
   if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED) {
     nb_cstr = problem->poly.unif->A->size0;
     nnz_H = NM_nnz(problem->poly.unif->A);
-    lambda = (double *)calloc(nb_cstr, sizeof(double));
+    lambda = (double*)calloc(nb_cstr, sizeof(double));
   } else {
     numerics_error_nonfatal("avi_pathavi", "unsupported set type %d", problem->poly.set->id);
     return -1;
@@ -182,7 +181,7 @@ int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
 
   set_printv_operations(&printv_ops);
 
-  struct vi_desc *pathvi_obj =
+  struct vi_desc* pathvi_obj =
       vi_desc_create(nb_cstr, problem->size, NM_nnz(problem->M), nnz_H, &env, &vi_ops);
   pathvi_obj->nlflag = 0;
 
@@ -200,7 +199,7 @@ int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
 
   if (problem->poly.set) {
     if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED) {
-      polyhedron_unified *p = problem->poly.unif;
+      polyhedron_unified* p = problem->poly.unif;
       pathvi_csc_transfert(pathvi_obj->A, NM_csc(p->A));
 
       memcpy(pathvi_obj->b, p->b, env.m * sizeof(double));
@@ -250,12 +249,12 @@ int avi_pathavi(AffineVariationalInequalities *problem, double *z, double *w,
 
   // Solve the problem
   if (use_scheduler) {
-    struct vi_scheduler *sched = vi_scheduler_create(VI_SOLVER_PATHVI, pathvi_obj);
+    struct vi_scheduler* sched = vi_scheduler_create(VI_SOLVER_PATHVI, pathvi_obj);
     int sinfo = vi_scheduler_run(sched);
     info = vi_scheduler_get_status(sched);
     vi_scheduler_free(&sched);
   } else {
-    struct vi_solver *avi = vi_solver_create(VI_SOLVER_PATHVI, pathvi_obj);
+    struct vi_solver* avi = vi_solver_create(VI_SOLVER_PATHVI, pathvi_obj);
     int sinfo = avi->ops->solve(avi);
     info = avi->status;
     vi_solver_free(&avi);
@@ -292,7 +291,8 @@ static int avi_pathavi_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int avi_pathavi_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int avi_pathavi_solve_wrap(void* problem, double* z, double* w,
+                                  SolverOptions* options) {
   return avi_pathavi((AffineVariationalInequalities*)problem, z, w, options);
 }
 
@@ -301,14 +301,8 @@ static void avi_pathavi_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_AVI_PATHAVI,
-                "AVI_PATHAVI",
-                "PATHVI solver for AVI",
-                avi_pathavi_init_wrap,
-                avi_pathavi_solve_wrap,
-                avi_pathavi_free_wrap,
-                NULL,
-                avi_pathavi_set_default,
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(SICONOS_AVI_PATHAVI, "AVI_PATHAVI", "PATHVI solver for AVI",
+                avi_pathavi_init_wrap, avi_pathavi_solve_wrap, avi_pathavi_free_wrap, NULL,
+                avi_pathavi_set_default, 1000, /* default_max_iter */
+                1e-4,                          /* default_tol */
+                0 /* is_local_solver */)

@@ -13,9 +13,9 @@
 
 /* GAMS stuff */
 
-#include "LCP_Solvers.h"       // for lcp_gams
+#include "LCP_Solvers.h"  // for lcp_gams
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
 #include "lcp_cst.h"
-#include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOptions
 #include "numerics_verbose.h"
 
 #ifdef HAVE_GAMS_C_API
@@ -29,10 +29,11 @@
 #include "SolverOptions.h"
 #endif
 
-void lcp_gams(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-              SolverOptions *options) {
+void lcp_gams(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+              SolverOptions* options) {
 #ifndef HAVE_GAMS_C_API
-  *info = numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
+  *info = numerics_error("lcp_gams",
+                         "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
   return;
 #else
 
@@ -55,7 +56,7 @@ void lcp_gams(LinearComplementarityProblem *problem, double *z, double *w, int *
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/lcp.gms");
   const char defGAMSdir[] = GAMS_DIR;
 
-  SN_Gams_set_dirs((SN_GAMSparams *)options->solverParameters, defModel, defGAMSdir, model,
+  SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model,
                    sysdir, "/lcp.gms");
 
   /* Create objects */
@@ -81,7 +82,7 @@ void lcp_gams(LinearComplementarityProblem *problem, double *z, double *w, int *
 
   char gdxFileName[GMS_SSSIZE];
   char solFileName[GMS_SSSIZE];
-  const char *base_name = GAMSP_get_filename(options->solverParameters);
+  const char* base_name = GAMSP_get_filename(options->solverParameters);
   if (base_name) {
     strncpy(gdxFileName, base_name, sizeof(gdxFileName));
   } else {
@@ -158,8 +159,8 @@ static void lcp_gams_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_GAMS in the global solver registry.
  */
 
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 static int lcp_gams_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -178,13 +179,9 @@ static void lcp_gams_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_GAMS, "LCP_GAMS",
-                       "GAMS solver for LCP",
-                       lcp_gams_init_wrap,
-                       lcp_gams_solve_wrap,
-                       lcp_gams_free_wrap,
-                       NULL,  /* error function */
-                       lcp_gams_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_GAMS, "LCP_GAMS", "GAMS solver for LCP", lcp_gams_init_wrap,
+                lcp_gams_solve_wrap, lcp_gams_free_wrap, NULL, /* error function */
+                lcp_gams_set_default,                          /* set_default */
+                1000,                                          /* default_max_iter */
+                1e-6,                                          /* default_tol */
+                0);                                            /* is_local_solver */

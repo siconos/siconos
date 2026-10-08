@@ -26,24 +26,24 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"
 #include "numerics_verbose.h"
-#include "siconos_debug.h"                 // for DEBUG_PRINTF
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-             SolverOptions *options) {
+void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+             SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  NumericsMatrix *M = problem->M;
-  double *q = problem->q;
+  NumericsMatrix* M = problem->M;
+  double* q = problem->q;
 
   assert(M);
   assert(q);
@@ -72,7 +72,7 @@ void lcp_pgs(LinearComplementarityProblem *problem, double *z, double *w, int *i
   }
 
   /* Preparation of the diagonal of the inverse matrix */
-  double *diag = (double *)malloc(n * sizeof(double));
+  double* diag = (double*)malloc(n * sizeof(double));
   double diag_i = 0.0;
   for (i = 0; i < n; ++i) {
     diag_i = NM_get_value(M, i, i);
@@ -174,13 +174,10 @@ static void lcp_pgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PGS, "LCP_PGS",
-                "Projected Gauss-Seidel for LCP",
-                lcp_pgs_init_wrap,
-                lcp_pgs_solve_wrap,
-                lcp_pgs_free_wrap,
-                NULL,  /* error function */
-                lcp_pgs_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_PGS, "LCP_PGS", "Projected Gauss-Seidel for LCP",
+                lcp_pgs_init_wrap, lcp_pgs_solve_wrap, lcp_pgs_free_wrap,
+                NULL,                /* error function */
+                lcp_pgs_set_default, /* set_default */
+                1000,                /* default_max_iter */
+                1e-6,                /* default_tol */
+                0);                  /* is_local_solver */

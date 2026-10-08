@@ -123,7 +123,7 @@ void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabl
 static void mlcp_FB_wrapper(void* data_opaque, double* z, double* F, double* F_merit) {
   MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem*)data_opaque;
   int info = 0;
-  mlcp_FB(problem, z, F_merit, &info, NULL); 
+  mlcp_FB(problem, z, F_merit, &info, NULL);
 };
 
 void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double* z, double* w,

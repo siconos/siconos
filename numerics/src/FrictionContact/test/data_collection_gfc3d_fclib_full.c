@@ -20,10 +20,10 @@
 
 #include "test_utils.h"  // for data_collection
 
-const char **data_collection() {
+const char** data_collection() {
   int n_data_1 = 1027;
 
-  const char **data_collection_1 = (const char **)malloc(n_data_1 * sizeof(const char *));
+  const char** data_collection_1 = (const char**)malloc(n_data_1 * sizeof(const char*));
   int n_data = 0;
 
   int listprob[7] = {0, 0, 0, 0, 0, 0, 1};

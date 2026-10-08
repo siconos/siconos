@@ -9,8 +9,8 @@
 #include "fc3d_AlartCurnierJeanMoreauFGenerated.h"    // for fc3d_AlartCurni...
 #include "op3x3.h"                                    // for cpy3x3, cpy3, SET3
 
-void fc3d_AlartCurnierFunctionGenerated(double *reaction, double *velocity, double mu,
-                                        double *rho, double *f, double *A, double *B) {
+void fc3d_AlartCurnierFunctionGenerated(double* reaction, double* velocity, double mu,
+                                        double* rho, double* f, double* A, double* B) {
   double result[21];
 
   assert(reaction);
@@ -45,9 +45,9 @@ void fc3d_AlartCurnierFunctionGenerated(double *reaction, double *velocity, doub
   }
 }
 
-void fc3d_AlartCurnierJeanMoreauFunctionGenerated(double *reaction, double *velocity,
-                                                  double mu, double *rho, double *f, double *A,
-                                                  double *B) {
+void fc3d_AlartCurnierJeanMoreauFunctionGenerated(double* reaction, double* velocity,
+                                                  double mu, double* rho, double* f, double* A,
+                                                  double* B) {
   double result[21];
 
   assert(reaction);

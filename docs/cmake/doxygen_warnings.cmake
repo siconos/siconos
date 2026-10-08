@@ -2,17 +2,17 @@
 # Enable doxygen warnings (using a scan of headers of the current component)
 #
 # If WITH_COMPONENT_DOXYGEN_WARNINGS is ON,
-# during build (i.e. make component), 
+# during build (i.e. make component),
 # generates a list of warnings produced by doxygen
 # for each header of the current component
-# 
+#
 # Usage:
 #
 # make doxygen_warnings to generate warnings for all headers
-# 
+#
 # make doxygen_warnings_<component>_<path>_<header> for a single header
 # e.g. make doxygen_warnings_kernel_modeling_LagrangianR
-# 
+#
 # ===========================================================================
 
 

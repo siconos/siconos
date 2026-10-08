@@ -27,15 +27,15 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "NSSTools.h"          // for max
-#include "SiconosBlas.h"       // for cblas_dcopy
-#include "numerics_verbose.h"
+#include "NSSTools.h"     // for max
+#include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionO...
 #include "siconos_debug.h"     // for DEBUG_PRINTF
 
 void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim,
-                                          double mu, double *error, double *worktmp) {
+                                          double mu, double* error, double* worktmp) {
   double rho = 1.0;
   for (unsigned int i = 0; i < dim; ++i) {
     worktmp[i] = z[i] - rho * w[i];
@@ -57,8 +57,8 @@ void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int
     *error += worktmp[i] * worktmp[i];
   }
 }
-int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, double *z,
-                         double *w, double tolerance, SolverOptions *options, double *error) {
+int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, double* z,
+                         double* w, double tolerance, SolverOptions* options, double* error) {
   CHECK_NULL(problem);
   CHECK_NULL(z);
   CHECK_NULL(w);
@@ -67,7 +67,7 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, d
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->nc;
-  double *mu = problem->tau;
+  double* mu = problem->tau;
   int n = problem->n;
 
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
@@ -89,7 +89,7 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, d
   for (int i = 0; i < nc; i++) {
     dim_max = max(dim_max, problem->coneIndex[i + 1] - problem->coneIndex[i]);
   }
-  double *worktmp = (double *)calloc(dim_max, sizeof(double));
+  double* worktmp = (double*)calloc(dim_max, sizeof(double));
 
   for (ic = 0; ic < nc; ic++) {
     dim = problem->coneIndex[ic + 1] - problem->coneIndex[ic];
@@ -118,9 +118,9 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, d
     return 0;
 }
 
-int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem, double *z,
-                           double *w, double tolerance, SolverOptions *options,
-                           double *error) {
+int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double* z,
+                           double* w, double tolerance, SolverOptions* options,
+                           double* error) {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     return numerics_error("soclcp_compute_error", "null input for problem and/or z and/or w");
@@ -129,7 +129,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem,
   int incx = 1, incy = 1;
   int nc = problem->nc;
   int n = problem->n;
-  double *mu = problem->tau;
+  double* mu = problem->tau;
 
   double invmu = 0.0;
   cblas_dcopy(n, problem->q, incx, z, incy);  // z <-q
@@ -141,7 +141,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem,
   double rho = 1.0;
   for (int ic = 0; ic < nc; ic++) {
     int dim = problem->coneIndex[ic + 1] - problem->coneIndex[ic];
-    double *worktmp = (double *)malloc(dim * sizeof(double));
+    double* worktmp = (double*)malloc(dim * sizeof(double));
     int nic = problem->coneIndex[ic];
     for (int i = 0; i < dim; i++) {
       worktmp[i] = w[nic + i] - rho * z[nic + i];

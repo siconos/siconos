@@ -35,19 +35,19 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 
-void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
-               SolverOptions *options) {
+void fc2d_enum(FrictionContactProblem* problem, double* reaction, double* velocity, int* info,
+               SolverOptions* options) {
   int i;
   // conversion into LCP
-  LinearComplementarityProblem *lcp_problem =
-      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
+  LinearComplementarityProblem* lcp_problem =
+      (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
   fc2d_tolcp(problem, lcp_problem);
   /* frictionContact_display(problem); */
   /* linearComplementarity_display(lcp_problem); */
 
-  double *zlcp = (double *)calloc(lcp_problem->size, sizeof(double));
-  double *wlcp = (double *)calloc(lcp_problem->size, sizeof(double));
+  double* zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double* wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
   options->solverId = SICONOS_LCP_ENUM;
@@ -124,24 +124,24 @@ void fc2d_enum(FrictionContactProblem *problem, double *reaction, double *veloci
  * - Elimination of giant switch statements in drivers
  */
 
-static void fc2d_enum_set_default(SolverOptions *options) {
+static void fc2d_enum_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 100;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int fc2d_enum_init_wrap(void *problem, SolverOptions *options) {
+static int fc2d_enum_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int fc2d_enum_solve_wrap(void *problem, double *reaction, double *velocity,
-                                SolverOptions *options) {
+static int fc2d_enum_solve_wrap(void* problem, double* reaction, double* velocity,
+                                SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc2d_enum((FrictionContactProblem *)problem, reaction, velocity, &info, options);
+  fc2d_enum((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_enum_free_wrap(void *problem, SolverOptions *options) {
+static void fc2d_enum_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

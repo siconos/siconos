@@ -22,33 +22,33 @@
 #include "ConvexQP.h"                                  // for ConvexQP
 #include "ConvexQP_Solvers.h"                          // for convexQP_Proje...
 #include "LCP_Solvers.h"                               // for lcp_compute_error
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"              // for LinearCompleme...
 #include "LinearComplementarityProblem_as_ConvexQP.h"  // for LinearCompleme...
 #include "NumericsFwd.h"                               // for ConvexQP, Line...
 #include "SiconosBlas.h"                               // for cblas_dnrm2
 #include "SolverOptions.h"                             // for SolverOptions
+#include "lcp_cst.h"
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
-void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem *problem, double *z,
-                                    double *w, int *info, SolverOptions *options) {
+void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem* problem, double* z,
+                                    double* w, int* info, SolverOptions* options) {
   /* verbose=1; */
   /* Dimension of the problem */
   int n = problem->size;
 
-  ConvexQP *cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
+  ConvexQP* cqp = (ConvexQP*)malloc(sizeof(ConvexQP));
 
   cqp->M = problem->M;
   cqp->q = problem->q;
 
   cqp->ProjectionOnC = &Projection_ConvexQP_LCP;
 
-  LinearComplementarityProblem_as_ConvexQP *lcp_as_cqp =
-      (LinearComplementarityProblem_as_ConvexQP *)malloc(
+  LinearComplementarityProblem_as_ConvexQP* lcp_as_cqp =
+      (LinearComplementarityProblem_as_ConvexQP*)malloc(
           sizeof(LinearComplementarityProblem_as_ConvexQP));
   cqp->env = lcp_as_cqp;
   cqp->size = n;
@@ -92,7 +92,8 @@ static int lcp_ConvexQP_PG_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_ConvexQP_PG_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_ConvexQP_PG_solve_wrap(void* problem, double* z, double* w,
+                                      SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_ConvexQP_ProjectedGradient((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -104,12 +105,10 @@ static void lcp_ConvexQP_PG_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_LCP_CONVEXQP_PG, "LCP_ConvexQP_PG",
-                       "ConvexQP Projected Gradient solver for LCP",
-                       lcp_ConvexQP_PG_init_wrap,
-                       lcp_ConvexQP_PG_solve_wrap,
-                       lcp_ConvexQP_PG_free_wrap,
-                       NULL,  /* error function */
-                       lcp_ConvexQP_PG_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0      /* is_local_solver */)
+                "ConvexQP Projected Gradient solver for LCP", lcp_ConvexQP_PG_init_wrap,
+                lcp_ConvexQP_PG_solve_wrap, lcp_ConvexQP_PG_free_wrap,
+                NULL,                        /* error function */
+                lcp_ConvexQP_PG_set_default, /* set_default */
+                1000,                        /* default_max_iter */
+                1e-6,                        /* default_tol */
+                0 /* is_local_solver */)

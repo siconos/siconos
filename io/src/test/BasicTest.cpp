@@ -1,74 +1,53 @@
 #include "BasicTest.hpp"
-#include "Register.hpp"
-
-#include <boost/static_assert.hpp>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include <boost/static_assert.hpp>
 
+#include "Register.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BasicTest);
 
-
-class point
-{
-public:
+class point {
+ public:
   virtual void dummy() {};
   virtual ~point() {};
   int x;
   int y;
 };
 
-class colored_point : public point
-{
-public:
+class colored_point : public point {
+ public:
   virtual void dummy() {};
   virtual ~colored_point() {};
   std::string color;
 };
 
-struct label
-{
+struct label {
   std::string name;
   double value;
 };
 
-class line
-{
-private:
+class line {
+ private:
   point* _p1;
   point* _p2;
 
-  template<class Archive>
+  template <class Archive>
   friend void siconos_io(Archive&, line&, const unsigned int);
 
-public:
+ public:
   line() {};
-  line(point* a, point*b) : _p1(a), _p2(b) {};
+  line(point* a, point* b) : _p1(a), _p2(b) {};
 
-  const point& p1() const
-  {
-    return *_p1;
-  };
-  const point& p2() const
-  {
-    return *_p2;
-  };
+  const point& p1() const { return *_p1; };
+  const point& p2() const { return *_p2; };
 
-  void setp1Ptr(point* v)
-  {
-    _p1 = v;
-  };
-  void setp2Ptr(point* v)
-  {
-    _p2 = v;
-  };
+  void setp1Ptr(point* v) { _p1 = v; };
+  void setp2Ptr(point* v) { _p2 = v; };
 };
-
-
 
 BOOST_CLASS_EXPORT_GUID(point, "point")
 BOOST_CLASS_EXPORT_GUID(colored_point, "colored_point")
@@ -79,14 +58,10 @@ SICONOS_IO_REGISTER(label, (name)(value))
 
 SICONOS_IO_REGISTER(line, (_p1)(_p2));
 
-
-
-
 void BasicTest::setUp() {};
 void BasicTest::tearDown() {};
 
-void BasicTest::t0()
-{
+void BasicTest::t0() {
   point p0;
   p0.x = 3.;
   p0.y = 4.;
@@ -106,13 +81,10 @@ void BasicTest::t0()
 
   CPPUNIT_ASSERT((p0.x == p1.x));
   CPPUNIT_ASSERT((p0.y == p1.y));
-
 }
 
-
-void BasicTest::t1()
-{
-  label l0 = { "l0", 1.0 };
+void BasicTest::t1() {
+  label l0 = {"l0", 1.0};
   label l1;
 
   std::ofstream ofs("t1.xml");
@@ -130,12 +102,9 @@ void BasicTest::t1()
 
   CPPUNIT_ASSERT((l0.name == l1.name));
   CPPUNIT_ASSERT((l0.value == l1.value));
-
 }
 
-void BasicTest::t2()
-{
-
+void BasicTest::t2() {
   colored_point p0, p1;
   p0.color = "red";
   p0.x = 10;
@@ -157,25 +126,19 @@ void BasicTest::t2()
   CPPUNIT_ASSERT((p0.color == p1.color));
   CPPUNIT_ASSERT((p0.x == p1.x));
   CPPUNIT_ASSERT((p0.y == p1.y));
-
 }
 
+void BasicTest::t3() {
+  point* p;
 
-
-void BasicTest::t3()
-{
-
-  point *p;
-
-  point *pn;
+  point* pn;
 
   p = new colored_point();
   pn = new colored_point();
 
   p->x = 1.;
   p->y = 2.;
-  static_cast<colored_point *>(p)->color = "red";
-
+  static_cast<colored_point*>(p)->color = "red";
 
   std::ofstream ofs("t3.xml");
   CPPUNIT_ASSERT(ofs.good());
@@ -192,12 +155,9 @@ void BasicTest::t3()
     ia.register_type(static_cast<colored_point*>(nullptr));
     ia >> BOOST_SERIALIZATION_NVP(pn);
   }
-
 }
 
-void BasicTest::t4()
-{
-
+void BasicTest::t4() {
   colored_point p;
 
   colored_point p1, p2;
@@ -209,8 +169,6 @@ void BasicTest::t4()
 
   p1.color = "red";
   p2.color = "black";
-
-
 
   line l0(&p1, &p2);
   line l1(&p, &p);
@@ -237,22 +195,19 @@ void BasicTest::t4()
 
   CPPUNIT_ASSERT((static_cast<const colored_point*>(&l0.p2())->color ==
                   static_cast<const colored_point*>(&l1.p2())->color));
-
 }
 
-class A
-{
-public:
+class A {
+ public:
   virtual void get() = 0;
   virtual ~A() {};
 
   int labelA;
 };
 
-class B : public A
-{
-public:
-  void get() { };
+class B : public A {
+ public:
+  void get() {};
   int labelB;
   virtual ~B() {};
 };
@@ -260,13 +215,10 @@ public:
 SICONOS_IO_REGISTER(A, (labelA));
 SICONOS_IO_REGISTER_WITH_BASE(B, A, (labelB));
 
-void BasicTest::t5()
-{
-
+void BasicTest::t5() {
   B b, bl;
   b.labelA = 1;
   b.labelB = 2;
-
 
   std::ofstream ofs("t5.xml");
   CPPUNIT_ASSERT(ofs.good());
@@ -284,5 +236,4 @@ void BasicTest::t5()
 
   CPPUNIT_ASSERT((bl.labelA == b.labelA));
   CPPUNIT_ASSERT((bl.labelB == b.labelB));
-
 }

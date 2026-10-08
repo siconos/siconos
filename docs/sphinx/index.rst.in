@@ -10,7 +10,7 @@
 Siconos : nonsmooth numerical simulation |licence|
 ==================================================
 
-.. List in this toctree the items that must appear in the top bar or in the left menu 
+.. List in this toctree the items that must appear in the top bar or in the left menu
    (depending on the chosen theme) for all pages
 
 .. toctree::
@@ -53,12 +53,12 @@ Siconos : nonsmooth numerical simulation |licence|
 
 
 .. div:: sd-fs-5
- 
+
    Siconos is an open-source scientific software package for **modelling and simulation of nonsmooth dynamical systems** in C++ and Python.
 
    Our main applications are mechanical systems (rigid or solid) with unilateral contact and Coulomb friction
    and impact (nonsmooth mechanics, contact dynamics, multibody systems dynamics or granular materials).
-   Other constitutive models are being developed to model plasticity, damage, cohesive zones. 
+   Other constitutive models are being developed to model plasticity, damage, cohesive zones.
 
 
 
@@ -106,13 +106,13 @@ Siconos : nonsmooth numerical simulation |licence|
    Other applications are also targeted, as Siconos is designed to be a generic kernel simulator for non-smooth dynamical systems:
 
    - switched electrical circuits, such as electrical circuits with ideal and piecewise linear components,
-   - sliding mode control systems, and 
+   - sliding mode control systems, and
    - biology (gene regulatory network).
    - systems and control (hybrid systems, optimal control with state control with state constraints)
    - optimisation (complementarity systems and variational inequalities)
    - fluid mechanics
    - computer graphics.
-   
+
 
 
 .. grid:: 3
@@ -162,8 +162,8 @@ Siconos : nonsmooth numerical simulation |licence|
       :class-card: sd-shadow-sm sd-rounded-3
 
       Documentation for previous versions is available as tgz archives in the `package registry of Siconos. <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/packages>`_
-  
- 
+
+
 .. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License

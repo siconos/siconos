@@ -9,36 +9,36 @@ Below some examples on how to write internal links to siconos objects in sphinx 
 * Link to a siconos class or a struct:
 
   .. code-block:: rst
-		  
+
      Try to link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
-  **Result** : 
-      
+  **Result** :
+
   Try link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
 
-.. * Link to a file (programs listing): 
+.. * Link to a file (programs listing):
 
 ..   .. code-block:: rst
 
 ..      Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
-      
-..   **Result** : 
+
+..   **Result** :
 
 ..   Try to link to :ref:`pgm_kernel_src_modeling_DynamicalSystem.hpp`
 
-* Link to a file (documentation): 
+* Link to a file (documentation):
 
   .. code-block:: rst
 
      Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
-      
-  **Result** : 
+
+  **Result** :
 
   Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
 
 
-* Link to a class method : 
+* Link to a class method :
 
   .. code-block:: rst
 
@@ -49,7 +49,7 @@ Below some examples on how to write internal links to siconos objects in sphinx 
   Try to link to :cpp:func:`Simulation::nextStep`
 
 
-* Link to a function : 
+* Link to a function :
 
   .. code-block:: rst
 

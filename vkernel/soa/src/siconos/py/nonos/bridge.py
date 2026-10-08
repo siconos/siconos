@@ -6,10 +6,12 @@ import siconos.numerics as sn
 from math import pi
 import hashlib
 
+
 def array(l):
     return np.array(l, dtype=np.float64)
 
-class Stored():
+
+class Stored:
     _data = None
 
     @classmethod
@@ -23,9 +25,9 @@ class Stored():
     def handle(self):
         return self._handle
 
-class SpaceFilter(Stored):
 
-    _static_shape_counter = 1 # in cf_info 0 -> shape associated to some ds
+class SpaceFilter(Stored):
+    _static_shape_counter = 1  # in cf_info 0 -> shape associated to some ds
 
     def __init__(self, options):
         self._options = options
@@ -43,14 +45,20 @@ class SpaceFilter(Stored):
         segment = vkernel.disks.add_segment_shape(self.data())
         segment.set_p1_p2(array([x1, y1, 0, x2, y2, 0]), 0)
 
-        mp = int(max(3, sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)) / self._options.min_radius))
+        mp = int(
+            max(
+                3,
+                sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+                / self._options.min_radius,
+            )
+        )
 
-        segment.set_maxpoints(mp) # fix / size of smallest disk
+        segment.set_maxpoints(mp)  # fix / size of smallest disk
         segment.initialize(0)
 
         # ident is attached in io.hpp
         # it is negative for static shape
-        segment.set_ident(- self._static_shape_counter)
+        segment.set_ident(-self._static_shape_counter)
         self._static_shape_counter = self._static_shape_counter + 1
 
         diskfsegment = vkernel.disks.add_diskfsegment_r(self.data())
@@ -64,7 +72,7 @@ class SpaceFilter(Stored):
         mesh
 
     # Fixed line (to be removed)
-    def insertLine(self, a, b , c):
+    def insertLine(self, a, b, c):
         line = vkernel.disks.add_line_shape(self.data())
         line.set_a(a)
         line.set_b(b)
@@ -72,8 +80,8 @@ class SpaceFilter(Stored):
         line.set_maxpoints(10000)
         line.initialize()
 
-         # negative for static shape
-        line.set_ident(- self._static_shape_counter)
+        # negative for static shape
+        line.set_ident(-self._static_shape_counter)
         self._static_shape_counter = self._static_shape_counter + 1
 
         print("new line,  p0:", line.p0())
@@ -99,14 +107,15 @@ class SpaceFilter(Stored):
 
         mp = int(2 * pi * radius / self._options.min_radius)
 
-        translated_disk_shape = \
-            vkernel.disks.add_translated_disk_shape(self.data())
+        translated_disk_shape = vkernel.disks.add_translated_disk_shape(self.data())
         translated_disk_shape.set_translated(disk_shape)
-        translated_disk_shape.set_translation(array([translation[0],translation[1],0]))
+        translated_disk_shape.set_translation(
+            array([translation[0], translation[1], 0])
+        )
         translated_disk_shape.translated().set_maxpoints(mp)
 
         # negative for static shape
-        translated_disk_shape.set_ident(- self._static_shape_counter)
+        translated_disk_shape.set_ident(-self._static_shape_counter)
         self._static_shape_counter = self._static_shape_counter + 1
 
         diskfdisk = vkernel.disks.add_diskfdisk_r(self.data())
@@ -117,17 +126,17 @@ class SpaceFilter(Stored):
         return translated_disk_shape
 
     def insertNonSmoothLaw(self, nslaw, gid1, gid2):
-        self._handle.set_nslaw(nslaw.handle()) # one nslaw !
+        self._handle.set_nslaw(nslaw.handle())  # one nslaw !
         self._interman.insert_nonsmooth_law(nslaw.handle(), gid1, gid2)
 
     def updateInteractions(self, step):
         if not self._initialized:
             self._handle.make_points()
             self._ngbh.add_point_sets(step)
-            self._ngbh.set_active(0, 0, True)       # disk - disk
-            self._ngbh.set_active(0, 1, True)       # disk - mesh
-            self._ngbh.set_active(0, 2, True)       # disk - segment
-            self._ngbh.set_active(0, 3, True)       # disk - fixed disk
+            self._ngbh.set_active(0, 0, True)  # disk - disk
+            self._ngbh.set_active(0, 1, True)  # disk - mesh
+            self._ngbh.set_active(0, 2, True)  # disk - segment
+            self._ngbh.set_active(0, 3, True)  # disk - fixed disk
             self._ngbh.set_active(1, 1, False)
             self._ngbh.set_active(2, 2, False)
             self._ngbh.set_active(3, 3, False)
@@ -146,11 +155,11 @@ class SpaceFilter(Stored):
         self._ngbh.update(step)
 
         self._ngbh.search()
-        self._handle.update_index_set0(step);
+        self._handle.update_index_set0(step)
         self._ngbh.sort()
 
     def removeStaticBody(self, body):
-        self._ngbh.search() # needed after sort
+        self._ngbh.search()  # needed after sort
 
         # only segments are removable
         if type(body) == type([]):
@@ -164,15 +173,14 @@ class SpaceFilter(Stored):
 
 
 class NewtonImpactFrictionNSL(Stored):
-
     def __init__(self, e, not_used, mu, dimension):
         self._handle = vkernel.disks.add_nslaw(self.data())
         self._handle.set_e(e)
         self._handle.set_mu(mu)
-        #self._handle.set_dimension(dimension)
+        # self._handle.set_dimension(dimension)
+
 
 class Osi(Stored):
-
     def __init__(self, theta):
         self._handle = vkernel.disks.add_osi(self.data())
         self._handle.assembled_osi().set_theta(theta)
@@ -188,15 +196,14 @@ class Osi(Stored):
 
 
 class Topology(Stored):
-
     def __init__(self):
         self._handle = vkernel.disks.add_topology(self.data())
 
     def indexSetsSize(self):
         return 2
 
-class NonSmoothDynamicalSystem(Stored):
 
+class NonSmoothDynamicalSystem(Stored):
     def __init__(self, t0, T):
         self._t0 = t0
         self._T = T
@@ -213,19 +220,16 @@ class NonSmoothDynamicalSystem(Stored):
         return self._mapid[int(ds_id)]
 
 
-
 class TimeDiscretisation(Stored):
-
     def __init__(self, t0, h):
         self._t0 = t0
         self._h = h
-        self._handle = \
-            vkernel.disks.add_time_discretization(self.data())
+        self._handle = vkernel.disks.add_time_discretization(self.data())
         self.handle().set_t0(t0)
         self.handle().set_h(h)
 
-class Simulation(Stored):
 
+class Simulation(Stored):
     def __init__(self, nsds, timedisc):
         self._need_init = True
         self._nsds = nsds
@@ -237,7 +241,7 @@ class Simulation(Stored):
         # a time discretization is added during add_simulation: replace it
         self._handle.set_time_discretization(self._timedisc.handle())
 
-        self._timedisc.handle().set_tmax(self._nsds._T) # vkernel does not have nsds
+        self._timedisc.handle().set_tmax(self._nsds._T)  # vkernel does not have nsds
         self._timedisc.handle().set_h(h)
         self._timedisc.handle().set_t0(t0)
 
@@ -245,7 +249,7 @@ class Simulation(Stored):
         self.handle().one_step_integrator().assembled_osi().set_theta(0.50001)
 
     def insertIntegrator(self, osi):
-        pass # unimplemented
+        pass  # unimplemented
 
     def insertNonSmoothProblem(self, osnspb):
         self._osnspb = osnspb
@@ -254,38 +258,40 @@ class Simulation(Stored):
         self._interman = interman
 
     def setNewtonOptions(self, nopts):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setNewtonMaxIteration(self, maxiter):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setNewtonTolerance(self, newtontol):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setNewtonWarningOnNonConvergence(self, opt):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setSkipLastUpdateOutput(self, skipluo):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setSkipLastUpdateInput(self, skiplui):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setSkipResetLambdas(self, skipresetlbds):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setDisplayNewtonConvergence(self, dnc):
-        pass # unimplemented
+        pass  # unimplemented
 
     def setWarningNonsmoothSolver(self, opt):
-        pass #unimplemented
+        pass  # unimplemented
 
     def startingTime(self):
         return self.handle().time_discretization().t0()
 
     def nextTime(self):
-        return self.startingTime() + self.handle().current_step() *\
-            self.handle().time_discretization().h()
+        return (
+            self.startingTime()
+            + self.handle().current_step() * self.handle().time_discretization().h()
+        )
 
     def hasNextEvent(self):
         return self.handle().has_next_event()
@@ -297,17 +303,17 @@ class Simulation(Stored):
         return self.handle().compute_one_step()
 
     def clearNSDSChangeLog(self):
-        pass # unimplemented
+        pass  # unimplemented
 
     def nextStep(self):
-        pass # unimplemented
+        pass  # unimplemented
 
     def oneStepNSProblem(self, idx):
         return self._osnspb
 
+
 # Allow for enumerated bodies with associated disk shape.
 class BodyBase(Stored):
-
     __count = 0
     __shapes = {}
 
@@ -323,8 +329,8 @@ class BodyBase(Stored):
     def shapes(cls):
         return cls.__shapes
 
-class Body(BodyBase):
 
+class Body(BodyBase):
     def __init__(self):
         pass
 
@@ -338,16 +344,18 @@ class Body(BodyBase):
         body = vkernel.disks.add_fem(self.data())
         self._handle = body
         body.set_id(self._ident)
-        sign = hashlib.sha256(mesh_data.encode('utf-8')).hexdigest()
+        sign = hashlib.sha256(mesh_data.encode("utf-8")).hexdigest()
         if sign in self.shapes():
             mesh_shape = self.shapes()[sign]
         else:
             mesh_shape = vkernel.disks.add_mesh_shape(self.data())
-            print (contact_nodes_indices)
-            print (contact_nodes)
+            print(contact_nodes_indices)
+            print(contact_nodes)
             mesh_shape.set_nodes(contact_nodes)
             mesh_shape.segments().set_maxpoints(10)
-            mesh_shape.set_global_indices(np.array(contact_nodes_indices, dtype=np.uint64))
+            mesh_shape.set_global_indices(
+                np.array(contact_nodes_indices, dtype=np.uint64)
+            )
 
         body.set_shape(mesh_shape)
 
@@ -361,7 +369,7 @@ class Body(BodyBase):
         body.set_id(self._ident)
         body.set_q(array(position))
         body.set_velocity(array(velocity))
-        body.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
+        body.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
 
         disk_shape = None
         if radius in self.shapes():
@@ -372,7 +380,7 @@ class Body(BodyBase):
             self.shapes()[radius] = disk_shape
 
         body.set_shape(disk_shape)
-        body.set_fext(array([0,0,0])) # default
+        body.set_fext(array([0, 0, 0]))  # default
 
     def getMassValue(self):
         return self.handle().mass_matrix()[0]
@@ -404,16 +412,16 @@ class Body(BodyBase):
 
         # FIX: next step not necessary 1
         self.handle().set_velocity_at_step(array(vel), step)
-        self.handle().set_velocity_at_step(array([0., 0., 0.]), step+1)
+        self.handle().set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
 
     def resetToInitialState(self):
-        pass # compatibility
+        pass  # compatibility
 
     def swapInMemory(self):
-        pass # compatibility
+        pass  # compatibility
 
-class BodyWrap():
 
+class BodyWrap:
     def __init__(self, bdy):
 
         self._bdy = bdy
@@ -437,17 +445,17 @@ class BodyWrap():
 
         # FIX: next step not necessary 1
         self._bdy.set_velocity_at_step(array(vel), step)
-        self._bdy.set_velocity_at_step(array([0., 0., 0.]), step+1)
+        self._bdy.set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
 
     def resetToInitialState(self):
-        pass # compatibility
+        pass  # compatibility
 
     def swapInMemory(self):
-        pass # compatibility
+        pass  # compatibility
+
 
 # many bodies
 class Bodies(BodyBase):
-
     def __init__(self, radius, mass, positions, velocities):
 
         start = self.count()
@@ -459,7 +467,7 @@ class Bodies(BodyBase):
         bodies.multiple_set_id(self._ident)
         bodies.multiple_set_q(array(positions))
         bodies.multiple_set_velocity(array(velocities))
-        bodies.set_mass_matrix(array([mass, mass, mass*radius*radius/2]))
+        bodies.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
 
         disk_shape = None
         if radius in self.shapes():
@@ -470,7 +478,7 @@ class Bodies(BodyBase):
             self.shapes()[radius] = disk_shape
 
         bodies.set_shape(disk_shape)
-        bodies.set_fext(array([0,0,0])) # default
+        bodies.set_fext(array([0, 0, 0]))  # default
 
     def get(self):
         return [BodyWrap(bdy) for bdy in self.handle().get()]
@@ -500,13 +508,14 @@ class Bodies(BodyBase):
 
         # FIX: next step not necessary 1
         self.handle().set_velocity_at_step(array(vel), step)
-        self.handle().set_velocity_at_step(array([0., 0., 0.]), step+1)
+        self.handle().set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
 
     def resetToInitialState(self):
-        pass # compatibility
+        pass  # compatibility
 
     def swapInMemory(self):
-        pass # compatibility
+        pass  # compatibility
+
 
 class TraceParams(Stored):
     def __init__(self, tp_args):
@@ -525,10 +534,10 @@ class OSNSPB(Stored):
 
         if solvopts is not None:
             self._so.create(solvopts.solverId)
-            for i,v in enumerate(solvopts.iparam):
+            for i, v in enumerate(solvopts.iparam):
                 self._so.set_iparam(i, v)
 
-            for i,v in enumerate(solvopts.dparam):
+            for i, v in enumerate(solvopts.dparam):
                 self._so.set_dparam(i, v)
 
         else:
@@ -545,7 +554,8 @@ class OSNSPB(Stored):
         self.handle().set_problem(self._fc2d)
         self.handle().set_verbose(False)
         self.handle().set_trace(False)
-#        self._fc2d.instance().dimension = 2
+
+    #        self._fc2d.instance().dimension = 2
 
     def setMaxSize(self, maxs):
         self._maxSize = maxs
@@ -563,7 +573,7 @@ class OSNSPB(Stored):
         pass
 
     def getSizeOutput(self):
-        return 0 # unimplemented
+        return 0  # unimplemented
 
     def numericsSolverOptions(self):
         return self.handle().options()
@@ -574,18 +584,19 @@ SICONOS_TS_NONLINEAR = "SICONOS_TS_NONLINEAR"
 
 MoreauJeanOSI = Osi
 
-class Unimplemented():
 
+class Unimplemented:
     def __init__(self, *args):
         assert False
+
 
 MoreauJeanGOSI = Unimplemented
 TimeSteppingDirectProjection = Unimplemented
 
 FrictionContact = OSNSPB
 
-class MechanicsIO(Stored):
 
+class MechanicsIO(Stored):
     def __init__(self):
         self._handle = vkernel.disks.add_io(self.data())
         self._simul = None
@@ -595,40 +606,33 @@ class MechanicsIO(Stored):
         self._simulation = simul
 
     def p0s(self, nsds):
-        return self.handle().p0s(
-            self._simulation.handle().current_step())
+        return self.handle().p0s(self._simulation.handle().current_step())
 
     def radii(self, nsds):
-        return self.handle().radii(
-            self._simulation.handle().current_step())
+        return self.handle().radii(self._simulation.handle().current_step())
 
     def displacements(self, nsds):
-        return self.handle().displacements(
-            self._simulation.handle().current_step())
+        return self.handle().displacements(self._simulation.handle().current_step())
 
     def positions(self, nsds):
-        return self.handle().positions(
-            self._simulation.handle().current_step())
+        return self.handle().positions(self._simulation.handle().current_step())
 
     def velocities(self, nsds):
-        return self.handle().velocities(
-            self._simulation.handle().current_step())
+        return self.handle().velocities(self._simulation.handle().current_step())
 
     def contactPoints(self, nsds, output_contact_index_set):
-        return self.handle().contact_points(
-            self._simulation.handle().current_step())
+        return self.handle().contact_points(self._simulation.handle().current_step())
 
     def contactInfo(self, nsds, output_contact_index_set):
-        return self.handle().contact_info(
-            self._simulation.handle().current_step())
+        return self.handle().contact_info(self._simulation.handle().current_step())
 
-    def contactContactWork(self, nsds, output_contact_index_set, omega,
-                           tol=1e-8):
+    def contactContactWork(self, nsds, output_contact_index_set, omega, tol=1e-8):
         return self.handle().contact_work(
-            self._simulation.handle().current_step(), omega, tol)
+            self._simulation.handle().current_step(), omega, tol
+        )
 
-class SpaceFilterOptions():
 
+class SpaceFilterOptions:
     neighborhood_radius = 2.1
     min_radius = 0.5
 

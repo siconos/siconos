@@ -48,11 +48,11 @@ Gallery
    .. image:: /figures/mechanics/MultiBeads/BeadsColumn.*
       :height: 100px
       :class: gallery
-      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp
    .. image:: /figures/control/Two-linkManipulator/two-linkManipulatorResults2.*
       :height: 100px
       :class: gallery
-      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/control/TwoLinkManipulator/TwoLinkManipulator.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/control/TwoLinkManipulator/TwoLinkManipulator.cpp
    .. image:: /figures/electronics/PowerConverter/PRC_fig2.*
       :height: 100px
       :class: gallery
@@ -65,5 +65,3 @@ Gallery
       :height: 100px
       :class: gallery
       :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/main/examples/mechanics/SliderCrank/SliderCrankMoreauJeanOSI.cpp
-
-               

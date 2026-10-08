@@ -17,13 +17,13 @@
 #
 
 import siconos.numerics as sn
-from siconos.numerics import solver_ids
 from siconos.numerics import params as pnames
+from siconos.numerics import solver_ids
 
 
 def test_solver_options_create():
     sid = solver_ids.SICONOS_FRICTION_3D_NSGS
-    #sn.numerics_set_verbose(2)
+    # sn.numerics_set_verbose(2)
     so = sn.SolverOptions(sid)
     so.iparam[pnames.SICONOS_IPARAM_MAX_ITER] = 1000
     print("Iparams: ", so.iparam)

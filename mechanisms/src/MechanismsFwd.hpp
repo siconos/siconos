@@ -1,12 +1,10 @@
 #ifndef MechanismsFwd_hpp
 #define MechanismsFwd_hpp
-#include <SiconosPointers.hpp>
-
 #include <MechanicsFwd.hpp>
-#define MECHANISMS_CLASSES()\
-  REGISTER(MBTB_FC3DContactRelation)            \
+#include <SiconosPointers.hpp>
+#define MECHANISMS_CLASSES()         \
+  REGISTER(MBTB_FC3DContactRelation) \
   REGISTER(MBTB_ContactRelation)
-
 
 #include <SiconosVisitables.hpp>
 

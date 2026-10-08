@@ -21,8 +21,8 @@
 #ifndef RollingFrictionContact_H
 #define RollingFrictionContact_H
 
-#include "RollingFrictionContact_options.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
+#include "RollingFrictionContact_options.h"  // contains only enum. Ok.
 
 struct RollingFrictionContactProblem;
 struct SolverOptions;
@@ -72,8 +72,8 @@ class RollingFrictionContact : public LinearOSNS {
  protected:
   /** Pointer to function of the type used for drivers for RollingFrictionContact
    * problems in Numerics */
-  typedef int (*RollingDriver)(RollingFrictionContactProblem *, double *, double *,
-                               SolverOptions *);
+  typedef int (*RollingDriver)(RollingFrictionContactProblem*, double*, double*,
+                               SolverOptions*);
 
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
@@ -191,7 +191,7 @@ class RollingFrictionContact : public LinearOSNS {
   void display() const override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 };
 }  // namespace siconos::nonsmooth_formulations
 

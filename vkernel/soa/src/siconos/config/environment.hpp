@@ -1,8 +1,8 @@
 #pragma once
 
 #include <array>
-#include <boost/container/static_vector.hpp>  // c++26 std::inplace_vector
-#include <cstddef>                            // std::size_t
+#include <boost/container/small_vector.hpp>  // c++26 std::inplace_vector
+#include <cstddef>                           // std::size_t
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
@@ -12,18 +12,20 @@
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
 #include "siconos/algebra/numerics.hpp"
+#include "siconos/storage/dynamic_properties.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/storage.hpp"
 
 namespace siconos {
 
 template <typename Item>
 struct standard_environment {
-
   using boolean = uint8_t;  // not bool => cf CompactNSearch sort.
   using scalar = double;
   using indice = std::size_t;
   using integer = std::int64_t;
+  using string = std::string;
 
   template <typename K, typename V>
   using map = std::unordered_map<K, V>;
@@ -76,7 +78,17 @@ struct standard_environment {
   template <typename... Ts>
   using variant = std::variant<Ts...>;
 
+  template <typename K, typename V>
+  using sparse_set = storage::sparse_set<K, V>;
+
+  template <typename K>
+  using dynamic_properties = storage::dynamic_properties<K>;
+
   template <typename T>
-  using default_storage = boost::container::static_vector<T, 1>;
+  // std::inplace_vector semantics: one element inline, then heap. It must be
+  // small_vector and NOT static_vector: static_vector has a fixed capacity of
+  // N and throws boost::container::bad_alloc on the N+1-th push_back, so every
+  // column would only ever hold a single item.
+  using default_storage = boost::container::small_vector<T, 1>;
 };
 }  // namespace siconos
