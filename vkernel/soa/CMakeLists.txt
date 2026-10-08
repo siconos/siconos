@@ -133,10 +133,11 @@ if(NONOS_DATABASE)
   target_compile_definitions(_nonos PRIVATE NONOS_DATABASE)
 endif()
 
-if(ftime_trace)
-  # one trace per object file, next to it
-  target_compile_options(_nonos PRIVATE -ftime-trace)
-endif()
+# if(ftime_trace)
+#   target_compile_options(_nonos PRIVATE
+#     -ftime-trace=${CMAKE_CURRENT_BINARY_DIR}/time-trace-nonos.json
+#   )
+# endif()
 
 if(WITH_GPU)
   target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread cuNSearch pybind11::headers)
