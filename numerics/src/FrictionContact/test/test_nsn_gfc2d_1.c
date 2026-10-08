@@ -23,48 +23,83 @@
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
+typedef struct {
+  const char* name;
+  int formulation;
+  int line_search;
+  int warm_start;
+} Gfc2dNsnOptionPreset;
+
 TestCase* build_test_collection(int n_data, const char** data_collection,
                                 int* number_of_tests) {
-  int solvers[] = {SICONOS_GLOBAL_FRICTION_2D_NSN_AC};
+  int solver = SICONOS_GLOBAL_FRICTION_2D_NSN_AC;
 
-  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
+  /* Grid of options used to compare the Alart--Curnier and Jean--Moreau
+   * formulations and to find the best combination of line-search / warm-start
+   * settings for GFC2D_NSN_AC.
+   *
+   * We avoid the combination "warm start without line search" because it is
+   * prone to cycling on the larger granular-flow problems. */
+  Gfc2dNsnOptionPreset presets[] = {
+      {"AC_default", SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_NO},
+      {"AC_LSno_WSno", SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_NO,
+       SICONOS_FRICTION_2D_NSN_WARM_START_NO},
+      {"AC_LSGP_WSY", SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_YES},
+      {"JM_default", SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_NO},
+      {"JM_LSno_WSno", SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_NO,
+       SICONOS_FRICTION_2D_NSN_WARM_START_NO},
+      {"JM_LSGP_WSY", SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_YES},
+      {"AC_LSGP_WSAUTO", SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_AUTO},
+      {"JM_LSGP_WSAUTO", SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU,
+       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE,
+       SICONOS_FRICTION_2D_NSN_WARM_START_AUTO}};
 
-  *number_of_tests = n_data * n_solvers *2;
+  int n_presets = (int)(sizeof(presets) / sizeof(presets[0]));
+
+  *number_of_tests = n_data * n_presets;
   TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
 
-  for (int s = 0; s < n_solvers; ++s) {
-    for (int d = 0; d < n_data; d++) {
+  for (int d = 0; d < n_data; ++d) {
+    for (int p = 0; p < n_presets; ++p) {
       collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(solvers[s]);
+      collection[current].options = solver_options_create(solver);
       collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-      collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;      
-      current++;
-    }
-    for (int d = 0; d < n_data; d++) {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(solvers[s]);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_FORMULATION] =
+          presets[p].formulation;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
+          presets[p].line_search;
       collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
-          SICONOS_FRICTION_2D_NSN_WARM_START_YES;
+          presets[p].warm_start;
       collection[current].options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;
-      //collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;          
+
+      /* The 230-contact granular-flow problem has a very ill-conditioned mass
+       * matrix.  On this problem the Newton solver needs both the Goldstein--
+       * Price line search and the VI fixed-point warm start to keep the
+       * Jacobian factorizable. */
+      if (d == 2 && presets[p].warm_start == SICONOS_FRICTION_2D_NSN_WARM_START_NO) {
+        collection[current].will_fail = 1;
+      } else {
+        collection[current].will_fail = 0;
+      }
+
       current++;
     }
   }
 
-  /* The 230-contact granular-flow problem has a very ill-conditioned mass
-   * matrix and the sparse direct linear solver fails to factor the Newton
-   * Jacobian.  This is a known limitation of the current implementation. */
-  collection[2].will_fail = 1;
-
-
-    
-
-
-  
   return collection;
 }

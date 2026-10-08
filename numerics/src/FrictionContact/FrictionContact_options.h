@@ -330,6 +330,10 @@ enum SICONOS_FRICTION_2D_NSN_IPARAM {
   SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER = 21,
   /** Jacobian regularization strategy (see SICONOS_FRICTION_2D_NSN_REGULARIZATION) */
   SICONOS_FRICTION_2D_NSN_REGULARIZATION = 22,
+  /** Complementarity formulation for the 2D NSN solver
+   *  (see SICONOS_FRICTION_2D_NSN_FORMULATION_ENUM)
+   */
+  SICONOS_FRICTION_2D_NSN_FORMULATION = 23,
 };
 
 /** Warm-start strategy values for GFC2D_NSN_AC */
@@ -338,6 +342,8 @@ enum SICONOS_FRICTION_2D_NSN_WARM_START {
   SICONOS_FRICTION_2D_NSN_WARM_START_NO = 0,
   /** Run GFC2D_VI_FPP for a few iterations to build the initial guess */
   SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
+  /** Run GFC2D_VI_FPP only if the first Newton linear solve fails */
+  SICONOS_FRICTION_2D_NSN_WARM_START_AUTO = 2,
 };
 
 /** Jacobian regularization values for GFC2D_NSN_AC */
@@ -346,6 +352,14 @@ enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
   SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO = 0,
   /** Add regul * I to the Jacobian before each linear solve */
   SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES = 1,
+};
+
+/** Formulation variants for the GFC2D NSN solver */
+enum SICONOS_FRICTION_2D_NSN_FORMULATION {
+  /** Alart--Curnier radius mu * max(0, r_N - rho_N u_N) */
+  SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER = 0,
+  /** Jean--Moreau radius mu * r_N */
+  SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU = 1,
 };
 
 enum SICONOS_FC3D_NSN_LINEAR_SOLVER {

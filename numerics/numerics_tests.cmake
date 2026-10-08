@@ -303,6 +303,9 @@ if(WITH_TESTING)
   # Minimal sanity test for the 2D global nonsmooth Newton Alart-Curnier solver
   new_test(NAME test_nsn_gfc2d_single_particle SOURCES test_nsn_gfc2d_single_particle.c)
 
+  # Comparison of Alart--Curnier vs Jean--Moreau formulations for GFC2D_NSN_AC
+  new_test(NAME test_nsn_gfc2d_ac_vs_jm SOURCES test_nsn_gfc2d_ac_vs_jm.c)
+
   # Minimal sanity test for the 2D global VI fixed point projection solver
   new_test(NAME test_vi_fpp_gfc2d_single_particle SOURCES test_vi_fpp_gfc2d_single_particle.c)
 

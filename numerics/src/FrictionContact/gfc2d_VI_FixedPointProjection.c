@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include <math.h>    // for fabs
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
@@ -41,6 +42,91 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
+
+/**
+ * \brief Classify a single 2D contact into a discrete status.
+ *
+ * \return 0 = no-contact, 1 = stick, 2 = slip in the positive tangent
+ *         direction, 3 = slip in the negative tangent direction.
+ */
+static int gfc2d_contact_status_2d(double rN, double rT, double uT, double mu) {
+  const double tol = 1e-10;
+  const double radius = mu * rN;
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  if (fabs(rT) < radius - tol && fabs(uT) <= tol) {
+    return 1; /* stick */
+  }
+  if (uT > tol) {
+    return 2; /* slip+ */
+  }
+  if (uT < -tol) {
+    return 3; /* slip- */
+  }
+  /* Near the boundary: use the sign of the friction force. */
+  return (rT < 0.0) ? 2 : 3;
+}
+
+typedef struct {
+  GlobalFrictionContactProblem* problem;
+  int n_global;
+  int iteration;
+  int* previous_status;
+  int* current_status;
+} GFC2D_VIFPP_StatusEnv;
+
+/**
+ * \brief Per-iteration callback that prints the 2D contact status counts and
+ *        the percentage of contacts whose status did not change since the
+ *        previous VI-FPP iteration.
+ */
+static void gfc2d_vi_fpp_status_callback(void* env, size_t size, double* x, double* velocity,
+                                         double error, void* extra_data) {
+  (void)size;
+  (void)error;
+  (void)extra_data;
+
+  GFC2D_VIFPP_StatusEnv* status_env = (GFC2D_VIFPP_StatusEnv*)env;
+  GlobalFrictionContactProblem* problem = status_env->problem;
+  const int nc = problem->numberOfContacts;
+  const int n_global = status_env->n_global;
+  const double* reaction = &x[n_global];
+  const double* local_velocity = &velocity[n_global];
+
+  unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
+  unsigned int stabilized = 0;
+
+  for (int i = 0; i < nc; ++i) {
+    const int status =
+        gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1], local_velocity[2 * i + 1],
+                                problem->mu[i]);
+    status_env->current_status[i] = status;
+    if (status == 0)
+      no_contact++;
+    else if (status == 1)
+      stick++;
+    else if (status == 2)
+      slip_right++;
+    else
+      slip_left++;
+    if (status_env->previous_status[i] != -1 && status_env->previous_status[i] == status) {
+      stabilized++;
+    }
+    status_env->previous_status[i] = status;
+  }
+
+  const double stabilized_pct = (nc > 0) ? (100.0 * stabilized) / nc : 0.0;
+
+  if (verbose > 0) {
+    if (status_env->iteration == 1) {
+      printf("Contact status: no-c | stick | slip+ | slip- | stab%%\n");
+    }
+    printf("                %4u | %5u | %5u | %5u | %5.1f%%\n", no_contact, stick,
+           slip_right, slip_left, stabilized_pct);
+  }
+  status_env->iteration++;
+}
 
 void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double *reaction,
                                    double *velocity, double *globalVelocity, int *info,
@@ -87,7 +173,30 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NV_display(z, m + n););
   DEBUG_EXPR(NV_display(Fz, m + n););
 
+  /* Set up a per-iteration callback that prints 2D contact statuses.
+   * We preserve any user-defined callback that may already be installed. */
+  GFC2D_VIFPP_StatusEnv status_env;
+  status_env.problem = problem;
+  status_env.n_global = n;
+  status_env.iteration = 1;
+  status_env.previous_status = (int*)malloc(nc * sizeof(int));
+  status_env.current_status = (int*)malloc(nc * sizeof(int));
+  for (int i = 0; i < nc; ++i) {
+    status_env.previous_status[i] = -1;
+  }
+
+  Callback status_callback;
+  status_callback.env = &status_env;
+  status_callback.collectStatsIteration = gfc2d_vi_fpp_status_callback;
+
+  Callback* saved_callback = options->callback;
+  options->callback = &status_callback;
+
   variationalInequality_FixedPointProjection(vi, z, Fz, info, options);
+
+  options->callback = saved_callback;
+  free(status_env.previous_status);
+  free(status_env.current_status);
 
   memcpy(globalVelocity, z, n * sizeof(double));
   memcpy(reaction, &z[n], m * sizeof(double));
@@ -108,6 +217,22 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 
   if (verbose > 0) {
+    unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
+    for (int i = 0; i < nc; ++i) {
+      const int status = gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1],
+                                                 velocity[2 * i + 1], problem->mu[i]);
+      if (status == 0)
+        no_contact++;
+      else if (status == 1)
+        stick++;
+      else if (status == 2)
+        slip_right++;
+      else
+        slip_left++;
+    }
+    printf("---- GFC2D - VI_FPP - contact status: "
+           "no-contact=%u, stick=%u, slip+=%u, slip-=%u\n",
+           no_contact, stick, slip_right, slip_left);
     printf(
         "--------------- GFC2D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final "
         "Residual = %14.7e\n",

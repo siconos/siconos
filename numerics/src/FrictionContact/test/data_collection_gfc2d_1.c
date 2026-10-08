@@ -27,6 +27,9 @@ const char **data_collection() {
   data_collection_1[n_data++] = "./data/gfc2d_granularflowonwall_00000_00117.dat";
   data_collection_1[n_data++] = "./data/gfc2d_granularflowonwall_00069_00350.dat";
   data_collection_1[n_data++] = "./data/gfc2d_granularflowonwall_00230_00206.dat";
+  data_collection_1[n_data++] = "./data/GFC3D_Example0_2d.dat";
+  data_collection_1[n_data++] = "./data/GFC3D_Example1_2d.dat";
+  data_collection_1[n_data++] = "./data/GFC3D_OneContact_2d.dat";
   data_collection_1[n_data++] = "---";
   return data_collection_1;
 }
