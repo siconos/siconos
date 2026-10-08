@@ -51,7 +51,18 @@ struct one_step_integrator {
 
     using assembled_osi_t = moreau_jean_assembled;
 
-    using items = gather<topology, ct_osi_t, rt_ct_osi_t, rt_rt_osi_t, moreau_jean_assembled>;
+    // Only include non-empty element types in items
+    using filtered_element_types_t = decltype(mp::unpack(
+        mp::filter(all_elements_t{},
+                   [](const auto& h) constexpr {
+                     using t = typename std::decay_t<decltype(h)>::type;
+                     return mp::bool_c<!std::derived_from<t, empty_item>>;
+                   }),
+        []<typename... Elems>(Elems...) {
+          return mp::tuple<typename Elems::type...>{};
+        }));
+
+    using items = decltype(mp::concat(mp::tuple<topology, ct_osi_t, assembled_osi_t>{}, filtered_element_types_t{}));
 
     struct attributes {
       elements_t elements;

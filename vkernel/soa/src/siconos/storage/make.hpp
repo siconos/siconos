@@ -73,15 +73,7 @@ template <template <typename> typename EnvTemplate, match::item... Items>
 struct item_storage_info {
   using items = gather<Items...>;
 
-  using all_items_t = decltype(mp::fold_left(
-      mp::reverse(mp::concat_all(all_items(std::declval<Items>())...)), mp::make_tuple(),
-      []<typename Acc, typename Elem>(Acc acc, Elem elem) {
-        if constexpr (mp::contains(acc, elem)) {
-          return acc;
-        } else {
-          return mp::append(acc, elem);
-        }
-      }));
+  using all_items_t = decltype(mp::tuple_unique(mp::concat_all(all_items(std::declval<Items>())...)));
 
   using all_attributes_t =
       decltype(mp::flatten(mp::concat_all(all_attributes(std::declval<Items>())...)));
@@ -101,16 +93,17 @@ struct item_storage {
   };
 
   template <match::item Item>
-  struct unit_for_item {
+  struct unit_type_for;
+
+  template <match::item Item>
+  struct unit_type_for {
     using attributes_t = decltype(attributes(Item{}));
     using attached_storages_t = decltype(mp::filter(
         typename iinfo::all_properties_t{}, mp::is_a_model<[]<typename T>() {
           return match::attached_storage<T, Item> &&
                  !requires { typename T::dynamic_storage_t; };
         }>));
-
     using all_attrs_t = decltype(concat(attributes_t{}, attached_storages_t{}));
-
     using type = decltype(mp::unpack(all_attrs_t{}, []<typename... As>(As...) {
       return typename unit_storage<EnvTemplate<Item>, As...>::type{};
     }));
@@ -121,7 +114,7 @@ struct item_storage {
       with_info_t<iinfo,
                   decltype(mp::unpack(
                       typename iinfo::all_items_t{}, []<typename... AllItems>(AllItems...) {
-                        return mp::concat_all(typename unit_for_item<AllItems>::type{}...);
+                        return mp::concat_all(typename unit_type_for<AllItems>::type{}...);
                       }))>;
 };
 
@@ -207,7 +200,7 @@ struct make {
 
                   return typename traits::config<env_t>::template convert<
                       decltype(refine_recursively_attribute(base_storage,
-                                                            Attribute{}))>::type{};
+                                                          Attribute{}))>::type{};
                 }),
             // Item level: handle collection wrappers for items
             []<match::item Item, match::attribute Attr>(Item item, Attr attr, auto s) {
@@ -249,8 +242,10 @@ struct make {
         }));
   };
 
+  using database_t = decltype(internal_build());
+
   // The actual storage member variable
-  struct store_t : decltype(internal_build()) {
+  struct store_t : database_t {
     std::unordered_map<std::string, std::any> _dynamic_properties;
   };
 
@@ -259,4 +254,21 @@ struct make {
   // Accessor for the storage
   store_t& store() { return _store; }
 };
+
+template <typename Make1, typename Make2>
+struct make_merged {
+  using db1_t = typename Make1::database_t;
+  using db2_t = typename Make2::database_t;
+
+  using merged_db_t = decltype(mp::merge_databases(std::declval<db1_t>(), std::declval<db2_t>()));
+
+  struct store_t : merged_db_t {
+    std::unordered_map<std::string, std::any> _dynamic_properties;
+  };
+
+  store_t _store;
+
+  store_t& store() { return _store; }
+};
+
 }  // namespace siconos::storage

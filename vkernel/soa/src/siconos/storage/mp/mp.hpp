@@ -94,7 +94,15 @@ using hana::to_map;
 using hana::to_set;
 using hana::tuple;
 using hana::unique;
-using hana::unpack;
+template <typename... Ts, typename F>
+constexpr auto unpack(hana::tuple<Ts...>, F&& f) {
+  return f.template operator()<Ts...>(Ts{}...);
+}
+
+template <typename T, typename F>
+constexpr auto unpack(T&& t, F&& f) {
+  return hana::unpack(std::forward<T>(t), std::forward<F>(f));
+}
 static constexpr auto typeid_ = hana::typeid_;
 
 template <template <typename... Ts> typename F>
@@ -392,7 +400,14 @@ template <typename... Pairs>
 auto to_database(tuple<Pairs...>&& data) {
   return to_database_at(static_cast<tuple<Pairs...>&&>(data),
                         std::make_index_sequence<unique_keys<Pairs...>::count>{});
-};
+}
+
+// Merge two databases by concatenating their store tuples and re-deduplicating
+template <typename... Pairs1, typename... Pairs2>
+constexpr auto merge_databases(database<Pairs1...>&& db1, database<Pairs2...>&& db2) {
+  return to_database(hana::concat(static_cast<tuple<Pairs1...>&&>(db1.store),
+                                   static_cast<tuple<Pairs2...>&&>(db2.store)));
+}
 
 using hana::make_map;
 
