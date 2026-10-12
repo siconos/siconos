@@ -292,7 +292,7 @@ int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
     return 0;
   }
 
-  int norm = SICONOS_FRICTION_2D_SCALING_NO;
+  int norm = SICONOS_FRICTION_2D_SCALING_EUCLIDEAN;
   int scope = SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE;
   int reduction = SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX;
   double alpha = 1.0;
@@ -315,8 +315,8 @@ int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
   free(comp_work);
   free(comp_tmp);
 
-  /* Legacy relative scaling: when no scaling norm is requested, preserve the
-     historical FC2D error definition error / max(norm_r, norm_w, norm_q). */
+  /* Explicit no-scaling request: preserve the historical FC2D error
+     definition error / max(norm_r, norm_w, norm_q). */
   if (norm == SICONOS_FRICTION_2D_SCALING_NO) {
     double norm_r = cblas_dnrm2(n, z, 1);
     double norm_w = cblas_dnrm2(n, w, 1);

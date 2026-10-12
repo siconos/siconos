@@ -263,12 +263,11 @@ enum SICONOS_FRICTION_3D_IPARAM {
  *  (SICONOS_FRICTION_3D_SCALING_SCOPE) and a reduction
  *  (SICONOS_FRICTION_3D_SCALING_REDUCTION). */
 enum SICONOS_FRICTION_3D_SCALING {
-  /** Default/unset norm value.
-   *  In FC3D/GFC3D complementarity error computation this is interpreted
-   *  as SICONOS_FRICTION_3D_SCALING_EUCLIDEAN (zero-initialized options). */
-  SICONOS_FRICTION_3D_SCALING_NO = 0,
-  /** Euclidean norm */
-  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 2,
+  /** Default norm value.
+   *  Zero-initialized options use Euclidean scaling. */
+  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 0,
+  /** No scaling of the complementarity residual. */
+  SICONOS_FRICTION_3D_SCALING_NO = 1,
   /** Second-order cone (spectral) norm */
   SICONOS_FRICTION_3D_SCALING_CONE = 3,
   /** Friction-cone norm weighted by mu */
@@ -314,12 +313,12 @@ enum SICONOS_FRICTION_2D_IPARAM {
 
 /** Norm selection for the FC2D/GFC2D complementarity-error scaling. */
 enum SICONOS_FRICTION_2D_SCALING {
-  /** Default/unset norm value.
-   *  In FC2D/GFC2D complementarity error computation this is interpreted
-   *  as the legacy relative scaling when options are zero-initialized. */
-  SICONOS_FRICTION_2D_SCALING_NO = 0,
-  /** Euclidean norm */
-  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = 2,
+  /** Default norm value.
+   *  Zero-initialized options use Euclidean scaling. */
+  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = 0,
+  /** No scaling of the complementarity residual (legacy relative scaling
+   *  is applied in FC2D/GFC2D error computation). */
+  SICONOS_FRICTION_2D_SCALING_NO = 1,
   /** Second-order cone (spectral) norm */
   SICONOS_FRICTION_2D_SCALING_CONE = 3,
   /** Friction-cone norm weighted by mu */

@@ -318,10 +318,6 @@ int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
     reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
     alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
-  if (norm_id == SICONOS_FRICTION_3D_SCALING_NO) {
-    norm_id = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
-  }
-
   double* comp_work = (double*)malloc(nc * sizeof(double));
   double* comp_tmp = (double*)malloc(n * sizeof(double));
   if (comp_work == NULL || comp_tmp == NULL) {

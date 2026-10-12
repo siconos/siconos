@@ -60,7 +60,7 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   const int m = nc * dim;
   double* mu = problem->mu;
 
-  int norm = SICONOS_FRICTION_2D_SCALING_NO;
+  int norm = SICONOS_FRICTION_2D_SCALING_EUCLIDEAN;
   int scope = SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE;
   int reduction = SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX;
   double alpha = 1.0;
