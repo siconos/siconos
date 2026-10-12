@@ -164,7 +164,7 @@ static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOpt
   /* (*computeError)(problem, reaction , velocity, tolerance, */
   /*                 options, norm_q, &absolute_error); */
 
-  fc2d_compute_error(problem, reaction, velocity, tolerance, norm_q, &absolute_error);
+  fc2d_compute_error(problem, reaction, velocity, tolerance, options, &absolute_error);
 
   if (verbose > 0) {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {

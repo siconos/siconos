@@ -57,7 +57,6 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double* reaction, double*
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
-  double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
   // Conversion of result
   for (i = 0; i < nc; i++) {
     /* printf("Contact number = %i\n",i); */
@@ -84,7 +83,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double* reaction, double*
   /*        printf("\n"); */
   double error;
   *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
-                             norm_q, &error);
+                             options, &error);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 

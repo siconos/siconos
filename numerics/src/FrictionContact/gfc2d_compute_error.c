@@ -23,7 +23,8 @@
 #include <stdlib.h>  // for NULL, realloc
 
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "fc2d_compute_error.h" 
+#include "fc2d_compute_error.h"
+#include "FrictionContact_options.h"
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_daxpy
 #include "SolverOptions.h"                 // for SolverOptions
@@ -57,6 +58,19 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   const int nc = problem->numberOfContacts;
   const int dim = problem->dimension;
   const int m = nc * dim;
+  double* mu = problem->mu;
+
+  int norm = SICONOS_FRICTION_2D_SCALING_NO;
+  int scope = SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE;
+  int reduction = SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX;
+  double alpha = 1.0;
+  if (options != NULL) {
+    norm = options->iparam[SICONOS_FRICTION_2D_SCALING_NORM];
+    scope = options->iparam[SICONOS_FRICTION_2D_SCALING_SCOPE];
+    reduction = options->iparam[SICONOS_FRICTION_2D_SCALING_REDUCTION];
+    alpha = options->dparam[SICONOS_FRICTION_2D_SCALING_ALPHA];
+  }
+
   if (!options->dWork || options->dWorkSize < 2 * n) {
     double* p = (double*)realloc(options->dWork, 2 * n * sizeof(double));
     if (!p) {
@@ -100,14 +114,32 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
 
   double error_complementarity = 0.0;
-  double worktmp[2];
-  for (int ic = 0; ic < nc; ic++) {
-    fc2d_unitary_compute_and_add_error(&reaction[ic * dim], &velocity[ic * dim],
-                                       problem->mu[ic],
-                                       &error_complementarity, worktmp);
+  if (nc == 0) {
+    /* nothing to do */
+  } else if (norm == SICONOS_FRICTION_2D_SCALING_NO) {
+    /* Legacy path: accumulate the squared absolute residual contact by contact. */
+    double err_sq = 0.0;
+    double worktmp[2];
+    for (int ic = 0; ic < nc; ic++) {
+      fc2d_unitary_compute_and_add_error(&reaction[ic * dim], &velocity[ic * dim], mu[ic],
+                                         &err_sq, worktmp);
+    }
+    error_complementarity = sqrt(err_sq);
+  } else {
+    /* Scaled path: delegate to the vectorized 2D complementarity error. */
+    double* comp_work = (double*)malloc(nc * sizeof(double));
+    double* comp_tmp = (double*)malloc(m * sizeof(double));
+    if (comp_work == NULL || comp_tmp == NULL) {
+      free(comp_work);
+      free(comp_tmp);
+      return numerics_error("gfc2d_compute_error", "bad alloc");
+    }
+    error_complementarity = fc2d_compute_complementarity_error(nc, reaction, velocity, mu,
+                                                               norm, scope, reduction, alpha,
+                                                               comp_work, comp_tmp);
+    free(comp_work);
+    free(comp_tmp);
   }
-
-  error_complementarity = sqrt(error_complementarity);
 
   DEBUG_PRINTF("absolute error in cone  complementarity= %e\n", error_complementarity);
 

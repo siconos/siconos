@@ -328,6 +328,9 @@ if(WITH_TESTING)
   # Vectorized complementarity error vs scalar reference
   new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)
 
+  # Vectorized 2D complementarity error vs scalar reference
+  new_test(NAME test_compute_error_2d SOURCES test_compute_error_2d.c)
+
   # ---------------------------------------------------
   # --- Rolling friction contact problem formulation ---
   # ---------------------------------------------------

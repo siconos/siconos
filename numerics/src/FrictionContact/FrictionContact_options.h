@@ -295,6 +295,57 @@ enum SICONOS_FRICTION_3D_SCALING_REDUCTION {
   SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED = 2,
 };
 
+/* -------------------------------------------------------------------------- */
+/* 2D complementarity-error scaling options                                   */
+/* -------------------------------------------------------------------------- */
+
+/** Indices for FC2D/GFC2D integer parameters. */
+enum SICONOS_FRICTION_2D_IPARAM {
+  /** Norm used when computing the FC2D/GFC2D complementarity error
+   *  (see SICONOS_FRICTION_2D_SCALING) */
+  SICONOS_FRICTION_2D_SCALING_NORM = 24,
+  /** Scope over which the error scaling is computed:
+   *  per cone or over the whole vector (see SICONOS_FRICTION_2D_SCALING_SCOPE) */
+  SICONOS_FRICTION_2D_SCALING_SCOPE = 25,
+  /** Reduction used to combine the two vector norms in the scaling:
+   *  max, geometric mean, or sum (see SICONOS_FRICTION_2D_SCALING_REDUCTION) */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION = 26,
+};
+
+/** Norm selection for the FC2D/GFC2D complementarity-error scaling. */
+enum SICONOS_FRICTION_2D_SCALING {
+  /** Default/unset norm value.
+   *  In FC2D/GFC2D complementarity error computation this is interpreted
+   *  as the legacy relative scaling when options are zero-initialized. */
+  SICONOS_FRICTION_2D_SCALING_NO = 0,
+  /** Euclidean norm */
+  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = 2,
+  /** Second-order cone (spectral) norm */
+  SICONOS_FRICTION_2D_SCALING_CONE = 3,
+  /** Friction-cone norm weighted by mu */
+  SICONOS_FRICTION_2D_SCALING_CONE_MU = 5,
+  /** Weighted cone norm (parameter SICONOS_FRICTION_2D_SCALING_ALPHA) */
+  SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED = 6,
+};
+
+/** Scope of the FC2D/GFC2D complementarity-error scaling. */
+enum SICONOS_FRICTION_2D_SCALING_SCOPE {
+  /** Per-contact (per-cone) scaling. */
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE = 0,
+  /** Scaling computed over the whole stacked vector. */
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_VECTOR = 1,
+};
+
+/** Reduction used to combine the two single-vector norms in the FC2D/GFC2D scaling. */
+enum SICONOS_FRICTION_2D_SCALING_REDUCTION {
+  /** Safeguarded maximum (min of the two safeguarded norms). */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX = 0,
+  /** Safeguarded geometric mean. */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN = 1,
+  /** Safeguarded sum of the two norms. */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MIXED = 2,
+};
+
 /** Matrix rescaling strategies for friction contact problems */
 enum SICONOS_FRICTION_3D_RESCALING {
   /** No rescaling applied */
@@ -456,6 +507,8 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM {
 enum SICONOS_FRICTION_2D_NSN_DPARAM {
   /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
   SICONOS_FRICTION_2D_NSN_REGUL = 4,
+  /** Weight for SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED (default 1.0) */
+  SICONOS_FRICTION_2D_SCALING_ALPHA = 5,
 };
 
 enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY {
