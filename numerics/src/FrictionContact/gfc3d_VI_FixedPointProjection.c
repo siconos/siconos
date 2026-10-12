@@ -40,21 +40,16 @@
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
-#ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
-#endif
 
 /**
  * \brief Classify a single 3D contact into a discrete status.
  *
  * \return 0 = no-contact, 1 = stick, 2 = slip.
  */
-static int gfc3d_contact_status_3d(double rN, double rT1, double rT2, double uT1, double uT2,
-                                   double mu) {
+static int gfc3d_contact_status_3d(double rN, double rT_norm, double uT_norm, double mu) {
   const double tol = 1e-10;
   const double radius = mu * rN;
-  const double rT_norm = sqrt(rT1 * rT1 + rT2 * rT2);
-  const double uT_norm = sqrt(uT1 * uT1 + uT2 * uT2);
   if (rN <= tol) {
     return 0; /* no-contact */
   }
@@ -70,6 +65,8 @@ typedef struct {
   int iteration;
   int* previous_status;
   int* current_status;
+  double* rT_norm;
+  double* uT_norm;
 } GFC3D_VIFPP_StatusEnv;
 
 /**
@@ -93,10 +90,11 @@ static void gfc3d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
   unsigned int no_contact = 0, stick = 0, slip = 0;
   unsigned int stabilized = 0;
 
+  NV_cone_tangential_norms_3d(reaction, nc, status_env->rT_norm);
+  NV_cone_tangential_norms_3d(local_velocity, nc, status_env->uT_norm);
   for (int i = 0; i < nc; ++i) {
     const int status = gfc3d_contact_status_3d(
-        reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], local_velocity[3 * i + 1],
-        local_velocity[3 * i + 2], problem->mu[i]);
+        reaction[3 * i], status_env->rT_norm[i], status_env->uT_norm[i], problem->mu[i]);
     status_env->current_status[i] = status;
     if (status == 0)
       no_contact++;
@@ -177,6 +175,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
   status_env.iteration = 1;
   status_env.previous_status = (int*)malloc(nc * sizeof(int));
   status_env.current_status = (int*)malloc(nc * sizeof(int));
+  status_env.rT_norm = (double*)malloc(nc * sizeof(double));
+  status_env.uT_norm = (double*)malloc(nc * sizeof(double));
   for (int i = 0; i < nc; ++i) {
     status_env.previous_status[i] = -1;
   }
@@ -194,6 +194,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
   options->callback = saved_callback;
   free(status_env.previous_status);
   free(status_env.current_status);
+  free(status_env.rT_norm);
+  free(status_env.uT_norm);
 
   memcpy(globalVelocity, z, n * sizeof(double));
   memcpy(reaction, &z[n], m * sizeof(double));
@@ -234,10 +236,13 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
 
   if (verbose > 0) {
     unsigned int no_contact = 0, stick = 0, slip = 0;
+    double* rT_norm = (double*)malloc(nc * sizeof(double));
+    double* uT_norm = (double*)malloc(nc * sizeof(double));
+    NV_cone_tangential_norms_3d(reaction, nc, rT_norm);
+    NV_cone_tangential_norms_3d(velocity, nc, uT_norm);
     for (int i = 0; i < nc; ++i) {
       const int status = gfc3d_contact_status_3d(
-          reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], velocity[3 * i + 1],
-          velocity[3 * i + 2], problem->mu[i]);
+          reaction[3 * i], rT_norm[i], uT_norm[i], problem->mu[i]);
       if (status == 0)
         no_contact++;
       else if (status == 1)
@@ -245,6 +250,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
       else
         slip++;
     }
+    free(rT_norm);
+    free(uT_norm);
     printf("---- GFC3D - VI_FPP - contact status: "
            "no-contact=%u, stick=%u, slip=%u\n",
            no_contact, stick, slip);
@@ -272,6 +279,8 @@ void gfc3d_vi_fpp_set_default(SolverOptions* options) {
   /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper
    * initialization */
   variationalInequality_FixedPointProjection_set_default(options);
+
+  /* Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0). */
 }
 
 static int gfc3d_vi_fpp_init_wrap(void* problem, SolverOptions* options) {

@@ -55,7 +55,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   collection[0].will_fail = 2;  // (FC3D_NSN_AC, on ./data/RockPile_tob1.dat)  is unstable
   collection[1].will_fail =
       1;  // (FC3D_NSN_AC_TEST, on ./data/RockPile_tob1.dat)  is expected to fail.
-
+  collection[2].will_fail =
+      1;  // (FC3D_NSN_FB, on ./data/RockPile_tob1.dat)  is expected to fail with EUCLIDEAN scaling.
   // ===== KaplasTower-i1061-4.hdf5.dat =====
   d = 8;
   collection[current].filename = data_collection[d];

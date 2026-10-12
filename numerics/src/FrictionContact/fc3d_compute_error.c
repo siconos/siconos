@@ -22,8 +22,10 @@
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt, fabs
 #include <stddef.h>  // for NULL
+#include <stdlib.h>  // for malloc, free
 
 #include "FrictionContactProblem.h"  // IWYU pragma: keep - For FrictionContactProblem
+#include "FrictionContact_options.h"
 #include "NumericsMatrix.h"          // for NM_prod_mv_3x3, NM_gemv
 #include "SolverOptions.h"           // IWYU pragma: keep - for SolverOptions
 /* #define DEBUG_NOCOLOR */
@@ -31,8 +33,9 @@
 /* #define DEBUG_MESSAGES */
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"      // for projectionOnCone
+#include "projectionOnCone.h"      // for projectionOnCone, projectionOnConeVector
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
+#include "SOC_scaling.h"           // for SOC_scaling_*
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -53,6 +56,118 @@ void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], do
   worktmp[1] = r[1] - worktmp[1];
   worktmp[2] = r[2] - worktmp[2];
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+}
+
+void fc3d_compute_modified_local_velocity(int nc, const double* u, const double* mu,
+                                          double* u_modified, double* work) {
+  int alloc_work = 0;
+  if (work == NULL) {
+    work = (double*)malloc(nc * sizeof(double));
+    alloc_work = 1;
+  }
+
+  /* Tangential norms of the local velocity, all contacts at once.
+     A plain loop is faster than per-block BLAS calls for these short vectors. */
+  for (int i = 0; i < nc; ++i) {
+    const double t1 = u[3 * i + 1];
+    const double t2 = u[3 * i + 2];
+    work[i] = sqrt(t1 * t1 + t2 * t2);
+  }
+
+  for (int i = 0; i < nc; ++i) {
+    const int pos = 3 * i;
+    u_modified[pos] = u[pos] + mu[i] * work[i];
+    u_modified[pos + 1] = u[pos + 1];
+    u_modified[pos + 2] = u[pos + 2];
+  }
+
+  if (alloc_work) free(work);
+}
+
+/* Compute the per-contact scale for the given scaling option.
+   Safeguarding (max(1, σ)) is applied only for the safeguarded option;
+   the caller handles the generic lower bound with DBL_EPSILON. */
+static double fc3d_compute_contact_scale(const double r[3], const double u_mod[3], double mu,
+                                         int scaling, double alpha) {
+  double s = 1.0;
+  const double mu_vec[1] = {mu};
+
+  switch (scaling) {
+    case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
+      s = SOC_scaling_euclidean(r, u_mod, 1, 3);
+      break;
+
+    case SICONOS_FRICTION_3D_SCALING_CONE:
+      s = SOC_scaling_cone(r, u_mod, 1, 3);
+      break;
+
+    case SICONOS_FRICTION_3D_SCALING_CONE_MU:
+    case SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX:
+      s = SOC_scaling_cone_mu(r, u_mod, 1, mu_vec, 3);
+      break;
+
+    case SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED:
+      s = SOC_scaling_cone_weighted(r, u_mod, 1, 3, alpha);
+      break;
+
+    case SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM:
+      s = SOC_geom_scaling_cone_mu(r, u_mod, 1, mu_vec, 3);
+      break;
+
+    default:
+      s = 1.0;
+      break;
+  }
+
+  return (s > DBL_EPSILON) ? s : 1.0;
+}
+
+double fc3d_compute_complementarity_error(int nc, const double* r, const double* u,
+                                          const double* mu, int scaling, double alpha,
+                                          double norm_q, double* work, double* tmp) {
+  (void)norm_q; /* unused: kept for API compatibility */
+  const int m = 3 * nc;
+
+  /* Build the modified local velocity u_mod in tmp. */
+  fc3d_compute_modified_local_velocity(nc, u, mu, tmp, work);
+
+  /* tmp <- r - u_mod, then project to evaluate the unscaled natural map. */
+  for (int i = 0; i < m; ++i) {
+    tmp[i] = r[i] - tmp[i];
+  }
+  projectionOnConeVector(nc, tmp, mu, work);
+  /* tmp <- unscaled natural-map residual. */
+  for (int i = 0; i < m; ++i) {
+    tmp[i] = r[i] - tmp[i];
+  }
+
+  if (scaling == SICONOS_FRICTION_3D_SCALING_NO) {
+    /* Nothing to do: tmp already holds the absolute residual. */
+  } else {
+    /* All remaining scalings are applied per contact (per variable). */
+    for (int i = 0; i < nc; ++i) {
+      const int pos = 3 * i;
+
+      /* Reconstruct the modified local velocity for this contact. */
+      const double t1 = u[pos + 1];
+      const double t2 = u[pos + 2];
+      const double u_t = sqrt(t1 * t1 + t2 * t2);
+      double u_mod_i[3];
+      u_mod_i[0] = u[pos] + mu[i] * u_t;
+      u_mod_i[1] = u[pos + 1];
+      u_mod_i[2] = u[pos + 2];
+
+      double s = fc3d_compute_contact_scale(&r[pos], u_mod_i, mu[i], scaling, alpha);
+
+      
+      const double inv = 1.0 / s;
+      tmp[pos] *= inv;
+      tmp[pos + 1] *= inv;
+      tmp[pos + 2] *= inv;
+    }
+  }
+
+  return cblas_dnrm2(m, tmp, 1);
 }
 
 void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restrict u, double mu,
@@ -79,42 +194,42 @@ int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
   CHECK_NULL(problem->mu);
 
   /* Computes w = Mz + q */
-  int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 3;
   double* mu = problem->mu;
 
   /* Compute the current velocity */
-  cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
-  NM_prod_mv_3x3(n, n, problem->M, z, w);     // w = Mz +q
+  cblas_dcopy(n, problem->q, 1, w, 1);     // w <- q
+  NM_prod_mv_3x3(n, n, problem->M, z, w);  // w = Mz + q
 
   DEBUG_PRINTF("norm of the reaction %e\n", cblas_dnrm2(n, z, 1));
   DEBUG_PRINTF("norm of the velocity %e\n", cblas_dnrm2(n, w, 1));
   DEBUG_PRINTF("norm of q = %12.8e\n", norm);
-  /* DEBUG_EXPR(NV_display(problem->q,n);); */
-  /* DEBUG_EXPR(NV_display(w,n);); */
-  /* DEBUG_EXPR(NV_display(z,n);); */
+  (void)norm; /* unused: kept for API compatibility */
 
-  *error = 0.;
-  int ic, ic3;
-  double worktmp[3] = {0.0, 0.0, 0.0};
-  for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
-    /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
+  int scaling = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  double alpha = 1.0;
+  if (options != NULL) {
+    scaling = options->iparam[SICONOS_FRICTION_3D_ERROR_SCALING];
+    alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
-  *error = sqrt(*error);
-  DEBUG_PRINTF("absolute error in complementarity = %12.8e\n", *error);
+  if (scaling == SICONOS_FRICTION_3D_SCALING_NO) {
+    scaling = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  }
 
-  /* Compute relative error */
-  double norm_r = cblas_dnrm2(n, z, 1);
-  double norm_u = cblas_dnrm2(n, w, 1);
-  double relative_scaling = fmax(norm, fmax(norm_r, norm_u));
-  /* double relative_scaling = fmax(norm_r,norm_w); */
-  /* double relative_scaling = norm; */
+  double* comp_work = (double*)malloc(nc * sizeof(double));
+  double* comp_tmp = (double*)malloc(n * sizeof(double));
+  if (comp_work == NULL || comp_tmp == NULL) {
+    free(comp_work);
+    free(comp_tmp);
+    return numerics_error("fc3d_compute_error", "bad alloc");
+  }
+  *error = fc3d_compute_complementarity_error(nc, z, w, mu, scaling, alpha, norm,
+                                              comp_work, comp_tmp);
+  free(comp_work);
+  free(comp_tmp);
+  DEBUG_PRINTF("scaled error in complementarity = %12.8e\n", *error);
 
-  if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
-
-  DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
   DEBUG_END("fc3d_compute_error(...)\n");
   if (*error > tolerance) return 1;
 
@@ -163,6 +278,8 @@ int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, doub
 int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, double* w,
                                 double tolerance, SolverOptions* options, double norm,
                                 double* error) {
+  (void)norm; /* unused: kept for API compatibility */
+  (void)options; /* unused */
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     return numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");

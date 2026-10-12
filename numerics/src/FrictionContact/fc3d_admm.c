@@ -688,7 +688,19 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
     /* Linear system solver, W destroyed */
     // NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
-    NM_Cholesky_solve(W, reaction, 1);
+    int info_cholesly = NM_Cholesky_solve(W, reaction, 1);
+
+    if (info_cholesly) {
+      
+      NM_free(Atrans);
+      NM_free(A);
+      NM_free(M_s);
+      NM_free(W);
+      dparam[SICONOS_DPARAM_RESIDU] = error;
+      iparam[SICONOS_IPARAM_ITER_DONE] = iter;      
+      *info = NUMERICS_ERR_LINEAR_SOLVER;
+      return;
+      }
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction, m));
 

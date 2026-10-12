@@ -157,6 +157,33 @@ double NV_norm_inf(const double* const vec, const size_t vecSize);
  */
 double NV_norm_2(const double* const vec, const size_t vecSize);
 
+/** Compute the L-2 norm of each contiguous block of a vector.
+ *
+ *  \param vec the input vector of length block_size * n_blocks
+ *  \param block_size size of each block (e.g. 3 for a 3D cone)
+ *  \param n_blocks number of blocks (e.g. number of contacts)
+ *  \param out pre-allocated array of length n_blocks that receives the norms
+ */
+void NV_block_norm_2(const double* const vec, int block_size, int n_blocks, double* out);
+
+/** Compute the L-2 norm of each 3D cone (blocks of 3 components).
+ *
+ *  \param vec vector of length 3 * nc
+ *  \param nc number of cones / contacts
+ *  \param out pre-allocated array of length nc
+ */
+void NV_cone_norms_3d(const double* const vec, int nc, double* out);
+
+/** Compute the tangential (L-2) norm of each 3D cone.
+ *
+ *  For each contact i, out[i] = sqrt(vec[3*i+1]^2 + vec[3*i+2]^2).
+ *
+ *  \param vec vector of length 3 * nc
+ *  \param nc number of cones / contacts
+ *  \param out pre-allocated array of length nc
+ */
+void NV_cone_tangential_norms_3d(const double* const vec, int nc, double* out);
+
 /** Compute element by element square root
     \param vec is the vector
     \param vecSize is the size of the vector vec

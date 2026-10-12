@@ -154,6 +154,24 @@ double NV_norm_2(const double* const vec, const size_t vecSize) {
   return norm;
 }
 
+void NV_block_norm_2(const double* const vec, int block_size, int n_blocks, double* out) {
+  assert(block_size > 0);
+  assert(n_blocks >= 0);
+  for (int i = 0; i < n_blocks; ++i) {
+    out[i] = cblas_dnrm2(to_blasint(block_size), &vec[i * block_size], 1);
+  }
+}
+
+void NV_cone_norms_3d(const double* const vec, int nc, double* out) {
+  NV_block_norm_2(vec, 3, nc, out);
+}
+
+void NV_cone_tangential_norms_3d(const double* const vec, int nc, double* out) {
+  for (int i = 0; i < nc; ++i) {
+    out[i] = cblas_dnrm2(2, &vec[3 * i + 1], 1);
+  }
+}
+
 void NV_sqrt(const double* const vec, const size_t vecSize, double* out) {
   for (size_t i = 0; i < vecSize; ++i) out[i] = sqrt(vec[i]);
 }

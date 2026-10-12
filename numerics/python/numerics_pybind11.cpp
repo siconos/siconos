@@ -20,6 +20,7 @@
 #include <pybind11/pybind11.h>
 
 #include "NM_types.h"
+#include "NumericsVector.h"
 #include "NumericsVerbose.h"
 #include "SolverOptions.h"
 #include "numerics_errors.h"
@@ -117,6 +118,34 @@ PYBIND11_MODULE(_numerics, m) {
   m.def(
       "error_string", [](int code) { return numerics_error_string((::NumericsError)code); },
       "Get error message for error code", py::arg("error_code"));
+
+  m.def(
+      "cone_norms_3d",
+      [](py::array_t<double, py::array::c_style | py::array::forcecast> v) {
+        if (v.ndim() != 1) throw std::runtime_error("Input must be a 1-D array");
+        const int n = static_cast<int>(v.size());
+        if (n % 3 != 0)
+          throw std::runtime_error("Input size must be a multiple of 3 (3 components per cone)");
+        const int nc = n / 3;
+        py::array_t<double> out = py::array_t<double>(nc);
+        NV_cone_norms_3d(v.data(), nc, out.mutable_data());
+        return out;
+      },
+      "Compute the L2 norm of each 3-component cone.", py::arg("v"));
+
+  m.def(
+      "cone_tangential_norms_3d",
+      [](py::array_t<double, py::array::c_style | py::array::forcecast> v) {
+        if (v.ndim() != 1) throw std::runtime_error("Input must be a 1-D array");
+        const int n = static_cast<int>(v.size());
+        if (n % 3 != 0)
+          throw std::runtime_error("Input size must be a multiple of 3 (3 components per cone)");
+        const int nc = n / 3;
+        py::array_t<double> out = py::array_t<double>(nc);
+        NV_cone_tangential_norms_3d(v.data(), nc, out.mutable_data());
+        return out;
+      },
+      "Compute the tangential (L2) norm of each 3D cone.", py::arg("v"));
 
   py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
       .def(py::init([](int solver_id) {

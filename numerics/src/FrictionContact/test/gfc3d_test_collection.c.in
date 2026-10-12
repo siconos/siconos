@@ -53,8 +53,6 @@ int main (int argc, char *argv[])
   collection[2].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
   collection[8].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
   collection[14].will_fail = 1;  /* GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[20].will_fail = 1;  /* GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
   collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
 

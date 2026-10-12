@@ -606,14 +606,15 @@ int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
 /**
  * \brief Classify a single 3D contact into a discrete status.
  *
+ * The tangential norms are expected to be precomputed by the caller (e.g. with
+ * NV_cone_tangential_norms_3d) when the classification is performed over the
+ * whole contact list.
+ *
  * \return 0 = no-contact, 1 = stick, 2 = slip.
  */
-static int gfc3d_contact_status_3d(double rN, double rT1, double rT2, double uT1, double uT2,
-                                   double mu) {
+static int gfc3d_contact_status_3d(double rN, double rT_norm, double uT_norm, double mu) {
   const double tol = 1e-10;
   const double radius = mu * rN;
-  const double rT_norm = sqrt(rT1 * rT1 + rT2 * rT2);
-  const double uT_norm = sqrt(uT1 * uT1 + uT2 * uT2);
   if (rN <= tol) {
     return 0; /* no-contact */
   }
@@ -631,10 +632,14 @@ static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
   const unsigned int nc = (unsigned int)problem->numberOfContacts;
   unsigned int no_contact = 0, stick = 0, slip = 0;
 
+  double* rT_norm = (double*)malloc(nc * sizeof(double));
+  double* uT_norm = (double*)malloc(nc * sizeof(double));
+  NV_cone_tangential_norms_3d(reaction, nc, rT_norm);
+  NV_cone_tangential_norms_3d(velocity, nc, uT_norm);
+
   for (unsigned int i = 0; i < nc; ++i) {
-    const int status = gfc3d_contact_status_3d(
-        reaction[3 * i], reaction[3 * i + 1], reaction[3 * i + 2], velocity[3 * i + 1],
-        velocity[3 * i + 2], problem->mu[i]);
+    const int status =
+        gfc3d_contact_status_3d(reaction[3 * i], rT_norm[i], uT_norm[i], problem->mu[i]);
     if (status == 0)
       no_contact++;
     else if (status == 1)
@@ -642,6 +647,9 @@ static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
     else
       slip++;
   }
+
+  free(rT_norm);
+  free(uT_norm);
 
   numerics_printf_verbose(1,
                           "---- GFC3D - NSN_AC - contact status: "
@@ -738,6 +746,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   const double norm_q = cblas_dnrm2(num_global_dofs, problem->q, 1);
   const double norm_b = cblas_dnrm2(num_contact_dofs, problem->b, 1);
+
+  /* The error function now uses the scaling selected in options->iparam
+   * [SICONOS_FRICTION_3D_ERROR_SCALING]. */
 
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Problem information");
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - 1-norm of M = %g norm of q = %g ",
@@ -934,6 +945,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   /* Track contact statuses across Newton iterations to report how many
    * contacts have reached a stable status. */
   int* previous_contact_status = (int*)malloc(problem->numberOfContacts * sizeof(int));
+  double* rT_norm = (double*)malloc(problem->numberOfContacts * sizeof(double));
+  double* uT_norm = (double*)malloc(problem->numberOfContacts * sizeof(double));
 
   /* Automatic warm start: only run VI-FPP if the first Newton linear solve
    * fails.  Warm start is applied at most once. */
@@ -1159,14 +1172,12 @@ restart:
      * the previous Newton iteration). */
     unsigned int no_contact = 0, stick = 0, slip = 0;
     unsigned int stabilized = 0;
+    NV_cone_tangential_norms_3d(current_reaction, problem->numberOfContacts, rT_norm);
+    NV_cone_tangential_norms_3d(current_velocity, problem->numberOfContacts, uT_norm);
     for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
       const double rN = current_reaction[3 * contact];
-      const double rT1 = current_reaction[3 * contact + 1];
-      const double rT2 = current_reaction[3 * contact + 2];
-      const double uT1 = current_velocity[3 * contact + 1];
-      const double uT2 = current_velocity[3 * contact + 2];
       const int status =
-          gfc3d_contact_status_3d(rN, rT1, rT2, uT1, uT2, problem->mu[contact]);
+          gfc3d_contact_status_3d(rN, rT_norm[contact], uT_norm[contact], problem->mu[contact]);
       if (status == 0)
         no_contact++;
       else if (status == 1)
@@ -1238,6 +1249,8 @@ restart:
     NM_free(reg_eye);
   }
   free(previous_contact_status);
+  free(rT_norm);
+  free(uT_norm);
 }
 
 
@@ -1272,6 +1285,8 @@ void gfc3d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_REGULARIZATION] =
       SICONOS_FRICTION_3D_NSN_REGULARIZATION_NO;
   options->dparam[SICONOS_FRICTION_3D_NSN_REGUL] = 1e-6;
+
+  /* Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0). */
 }
 
 /* ===========================================================================

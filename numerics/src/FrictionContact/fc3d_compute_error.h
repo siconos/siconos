@@ -24,7 +24,8 @@
 
 */
 
-#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_SCALING
+#include "NumericsFwd.h"              // for FrictionContactProblem, SolverOptions
 
 #if defined(__cplusplus)
 extern "C" {
@@ -67,7 +68,7 @@ void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restric
     \param w vector
     \param options
     \param tolerance value for error computation
-    \param norm norm of a vector (problem->q) for relative error
+    \param norm unused (kept for API compatibility)
     \param[in,out] error value
     \return 0 if ok
  */
@@ -76,14 +77,18 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, doub
                                 double* error);
 
 /**
-    Error computation for a friction-contact 3D problem
+    Error computation for a friction-contact 3D problem with selectable scaling.
+
+    The scaling is read from options->iparam[SICONOS_FRICTION_3D_ERROR_SCALING]
+    (see SICONOS_FRICTION_3D_SCALING).  For SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED
+    the weight is read from options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA].
 
     \param problem the structure which defines the friction-contact problem
     \param z vector
     \param w vector
     \param tolerance value for error computation
     \param options
-    \param norm norm of a vector (problem->q) for relative error
+    \param norm unused (kept for API compatibility)
     \param[in,out] error value
     \return 0 if ok
 */
@@ -91,14 +96,45 @@ int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
                        SolverOptions* options, double norm, double* error);
 
 /**
-    Error computation (using the normal map residual) for one friction-contact 3D problem
+    Compute the modified local velocity for a stack of 3D friction cones.
 
-    \param r the reaction force
-    \param u the local velocity
-    \param mu coeficient of friction
-    \param worktmp work vector
-    \param[in,out] error value
+    For each contact i, the modified velocity is
+    \f$ \tilde u_i = ( u_{N,i} + \mu_i \|u_{T,i}\|, u_{T,i} ) \f$.
+    The tangential norm is computed with a vectorized loop over all contacts.
+
+    \param[in]  nc          number of contacts
+    \param[in]  u           local velocity vector of length 3*nc
+    \param[in]  mu          friction coefficients, array of length nc
+    \param[out] u_modified  modified local velocity vector of length 3*nc
+    \param[in,out] work     scratch array of length nc (may be NULL)
  */
+void fc3d_compute_modified_local_velocity(int nc, const double* u, const double* mu,
+                                          double* u_modified, double* work);
+
+/**
+    Vectorized computation of the (scaled) complementarity error for a stack of 3D
+    friction cones.
+
+    Computes the modified local velocity \f$ \tilde u \f$, evaluates the unscaled
+    natural map \f$ F(r, \tilde u) = r - P_K(r - \tilde u) \f$, and scales the
+    residual per contact according to \p scaling.
+    The function returns \f$ \|F_s\|_2 \f$.
+
+    \param[in] nc       number of contacts
+    \param[in] r        reaction vector of length 3*nc
+    \param[in] u        local velocity vector of length 3*nc
+    \param[in] mu       friction coefficients, array of length nc
+    \param[in] scaling  scaling choice (see SICONOS_FRICTION_3D_SCALING)
+    \param[in] alpha    weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED
+    \param[in] norm_q   unused (kept for API compatibility)
+    \param[in,out] work scratch array of length nc
+    \param[in,out] tmp  scratch array of length 3*nc
+    \return the scaled complementarity error (Euclidean norm)
+ */
+double fc3d_compute_complementarity_error(int nc, const double* r, const double* u,
+                                          const double* mu, int scaling, double alpha,
+                                          double norm_q, double* work, double* tmp);
+
 void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
                                         double* error, double worktmp[3]);
 

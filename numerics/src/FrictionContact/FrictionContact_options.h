@@ -244,6 +244,31 @@ enum SICONOS_FRICTION_3D_IPARAM {
   SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER = 5,
   /** Number of contacts in the problem */
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
+  /** Scaling used when computing the FC3D/GFC3D complementarity error
+   *  (see SICONOS_FRICTION_3D_SCALING)
+   */
+  SICONOS_FRICTION_3D_ERROR_SCALING = 24,
+};
+
+/** Scaling selection for FC3D/GFC3D complementarity error */
+enum SICONOS_FRICTION_3D_SCALING {
+  /** Default/unset scaling value.
+   *  In FC3D/GFC3D complementarity error computation this is interpreted
+   *  as SICONOS_FRICTION_3D_SCALING_EUCLIDEAN (zero-initialized options). */
+  SICONOS_FRICTION_3D_SCALING_NO = 0,
+  /** Per-variable Euclidean safeguarded scaling:
+   *  σ = min(max(1,‖r‖_2), max(1,‖u_mod‖_2)) */
+  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 2,
+  /** Per-variable cone-norm safeguarded scaling */
+  SICONOS_FRICTION_3D_SCALING_CONE = 3,
+  /** Per-variable friction-cone safeguarded scaling */
+  SICONOS_FRICTION_3D_SCALING_CONE_MU = 5,
+  /** Per-variable weighted cone safeguarded scaling */
+  SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED = 6,
+  /** Per-variable worst-case relative scaling */
+  SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX = 7,
+  /** Per-variable geometric-mean relative scaling */
+  SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM = 8,
 };
 
 /** Matrix rescaling strategies for friction contact problems */
@@ -371,6 +396,8 @@ enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
   SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES = 1,
 };
 
+
+
 /** Jacobian regularization values for GFC2D_NSN_AC */
 enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
   /** No Jacobian regularization */
@@ -397,6 +424,8 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM {
   SICONOS_FRICTION_3D_NSN_RHO = 3,
   /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
   SICONOS_FRICTION_3D_NSN_REGUL = 4,
+  /** Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0) */
+  SICONOS_FRICTION_3D_SCALING_ALPHA = 5,
 };
 
 /** Double parameters for global 2D NSN solver */

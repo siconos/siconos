@@ -43,6 +43,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].options = solver_options_create(topsolver);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
     collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;       
+ 
     current++;
   }
 
@@ -51,6 +53,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(topsolver);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000; 
     collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);

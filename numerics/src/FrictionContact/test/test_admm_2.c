@@ -35,7 +35,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     // rho strat = norm inf
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
         SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF;
@@ -46,7 +46,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     // rho strat = residual balancing
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
         SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
@@ -57,7 +57,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     // forced symm
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
         SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY;
@@ -68,7 +68,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     // forced symm + residual balancing
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
         SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;

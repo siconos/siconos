@@ -19,9 +19,10 @@
 
 #include "op3x3.h"   // for SET3, eig_3x3
                      //
+#include "SiconosBlas.h"
 #include <math.h>    // for sqrt
 #include <stdio.h>   // for fprintf, stderr
-#include <stdlib.h>  // for exit, EXIT_FAILURE
+#include <stdlib.h>  // for exit, EXIT_FAILURE, malloc, free
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -48,6 +49,84 @@ unsigned projectionOnCone(double* r, double mu) {
     return PROJCONE_BOUNDARY;
   }
 }
+void naturalMapOnCone(const double r[3], const double u[3], double rho, double mu, double F[3]) {
+  double w[3];
+  w[0] = r[0] - rho * u[0];
+  w[1] = r[1] - rho * u[1];
+  w[2] = r[2] - rho * u[2];
+
+  projectionOnCone(w, mu);
+
+  F[0] = r[0] - w[0];
+  F[1] = r[1] - w[1];
+  F[2] = r[2] - w[2];
+}
+
+void projectionOnConeVector(int nc, double* r, const double* mu, double* work) {
+  int alloc_work = 0;
+  if (work == NULL) {
+    work = (double*)malloc(nc * sizeof(double));
+    alloc_work = 1;
+  }
+
+  /* Tangential norms of all contacts at once.
+     A plain loop is faster here than per-contact BLAS dnrm2 calls because
+     the blocks are short (length 2) and contiguous in memory. */
+  for (int i = 0; i < nc; ++i) {
+    const double t1 = r[3 * i + 1];
+    const double t2 = r[3 * i + 2];
+    work[i] = sqrt(t1 * t1 + t2 * t2);
+  }
+
+  for (int i = 0; i < nc; ++i) {
+    const int pos = 3 * i;
+    const double rN = r[pos];
+    const double normT = work[i];
+    const double mui = mu[i];
+
+    if (mui * normT <= -rN) {
+      r[pos] = 0.0;
+      r[pos + 1] = 0.0;
+      r[pos + 2] = 0.0;
+    } else if (normT <= mui * rN) {
+      /* projection is identity, leave r unchanged */
+    } else {
+      const double mu2 = mui * mui;
+      const double rN_proj = (mui * normT + rN) / (mu2 + 1.0);
+      const double scale = mui * rN_proj / normT;
+      r[pos] = rN_proj;
+      r[pos + 1] = scale * r[pos + 1];
+      r[pos + 2] = scale * r[pos + 2];
+    }
+  }
+
+  if (alloc_work) free(work);
+}
+
+void naturalMapOnConeVector(int nc, const double* r, const double* u, double rho,
+                            const double* mu, double* F, double* work) {
+  const int n = 3 * nc;
+  int alloc_work = 0;
+  if (work == NULL) {
+    work = (double*)malloc(nc * sizeof(double));
+    alloc_work = 1;
+  }
+
+  /* F = r - rho * u (then used as the argument of the projection) */
+  cblas_dcopy(n, r, 1, F, 1);
+  cblas_daxpy(n, -rho, u, 1, F, 1);
+
+  /* Reuse the vectorized projection on w = r - rho*u */
+  projectionOnConeVector(nc, F, mu, work);
+
+  /* Natural map residual: r - projection(w) */
+  for (int i = 0; i < n; ++i) {
+    F[i] = r[i] - F[i];
+  }
+
+  if (alloc_work) free(work);
+}
+
 unsigned projectionOnDualCone(double* u, double mu) {
   double normT = sqrt(u[1] * u[1] + u[2] * u[2]);
   /* hypot of libm is sure but really slow */
